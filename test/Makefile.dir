@@ -1,0 +1,16 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+EXTRA_INCL += -I$(SRC_DIR)
+
+MY_TARGETS = $(A)test_stringref
+
+EXTRA_CLEAN += $(MY_TARGETS)
+
+include Makefile.sub
+
+all: $(MY_TARGETS)
+
+
+$(A)test_stringref: $(O)test_stringref.o
+	$(LINK)
+

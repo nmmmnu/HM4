@@ -1,0 +1,13 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+EXTRA_INCL += -I$(SRC_DIR)
+
+#EXTRA_CLEAN +=
+
+include Makefile.sub
+
+all:	\
+	$(O)pair.o $(O)pairblob.o	\
+	$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o
+
+
