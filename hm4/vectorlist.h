@@ -102,7 +102,7 @@ private:
 	/* preconditions
 	Key can not be zero length
 	*/
-	bool binarySearch_(const StringRef &key, size_type &result) const;
+	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
 };
 
 } // namespace

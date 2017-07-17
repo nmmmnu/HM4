@@ -2,7 +2,7 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 EXTRA_INCL += -I$(SRC_DIR)
 
-MY_TARGETS = $(A)test_pair $(A)test_list
+MY_TARGETS = $(A)test_pair $(A)test_list $(A)test_multi_iterator
 
 #$(A)test_duallist
 
@@ -23,3 +23,6 @@ $(A)test_list: $(O)test_list.o $(PAIR_OBJ)	\
 		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o
 	$(LINK)
 
+$(A)test_multi_iterator: $(O)test_multi_iterator.o $(PAIR_OBJ)	\
+		$(O)vectorlist.o
+	$(LINK)

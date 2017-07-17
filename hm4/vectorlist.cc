@@ -34,12 +34,12 @@ bool VectorList::clear(){
 	return true;
 }
 
-inline bool VectorList::binarySearch_(const StringRef &key, size_type &result) const{
+inline auto VectorList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	// precondition
 	assert(!key.empty());
 	// eo precondition
 
-	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{}, result);
+	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{});
 }
 
 const Pair &VectorList::operator[](const StringRef &key) const{
@@ -47,19 +47,18 @@ const Pair &VectorList::operator[](const StringRef &key) const{
 	assert(!key.empty());
 	// eo precondition
 
-	size_type result;
-	bool const found = binarySearch_(key, result);
+	const auto x = binarySearch_(key);
 
-	return found ? operator[]( result ) : Pair::zero();
+	return x.first ? operator[]( x.second ) : Pair::zero();
 }
 
 auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
 	if (key.empty())
 		return buffer_;
 
-	size_type result;
-	/* bool const found = */ binarySearch_(key, result);
-	return buffer_ + result;
+	const auto x = binarySearch_(key);
+
+	return buffer_ + x.second;
 }
 
 template <class UPAIR>
@@ -70,13 +69,12 @@ bool VectorList::insertT_(UPAIR&& newdata){
 	assert(!key.empty());
 	// eo precondition
 
-	size_type result;
-	bool const found = binarySearch_(key, result);
+	const auto x = binarySearch_(key);
 
-	if (found){
+	if (x.first){
 		// key exists, overwrite, do not shift
 
-		Pair & olddata = buffer_[ result ];
+		Pair & olddata = buffer_[ x.second ];
 
 		// check if the data in database is valid
 		if (! newdata.valid(olddata) ){
@@ -95,14 +93,13 @@ bool VectorList::insertT_(UPAIR&& newdata){
 	}
 
 	// key not exists, shift, then add
-	if ( ! shiftR_( result ) ){
+	if ( ! shiftR_( x.second ) )
 		return false;
-	}
 
 	dataSize_ += newdata.bytes();
 
 	// placement new with copy constructor
-	void *placement = & buffer_[ result ];
+	void *placement = & buffer_[ x.second ];
 	new(placement) Pair(std::forward<UPAIR>(newdata));
 
 	return true;
@@ -113,20 +110,19 @@ bool VectorList::erase(const StringRef &key){
 	assert(!key.empty());
 	// eo precondition
 
-	size_type result;
-	bool const found = binarySearch_(key, result);
+	const auto x = binarySearch_(key);
 
-	if (! found){
+	if (! x.first){
 		// the key does not exists in the vector.
 		return true;
 	}
 
 	// proceed with remove
-	Pair & data = buffer_[result];
+	Pair & data = buffer_[x.second];
 	dataSize_ -= data.bytes();
 	data.~Pair();
 
-	shiftL_(result);
+	shiftL_(x.second);
 
 	return true;
 }

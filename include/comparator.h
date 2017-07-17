@@ -27,7 +27,7 @@ inline int comp(int const a, int const b){
 
 inline int comp(long int const a, long int const b){
 	log__("long");
-	return sgn(a - b);
+	return sgn(a, b);
 }
 
 } // namespace

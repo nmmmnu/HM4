@@ -7,8 +7,6 @@
 
 #include <initializer_list>
 
-#include <type_traits>	// is_signed
-
 class StringRef{
 private:
 	constexpr static bool COMPARE_MICRO_OPTIMIZATIONS = true;
@@ -144,7 +142,7 @@ public:
 		return s == nullptr ? true : size == 0;
 	}
 
-	static std::string concatenate(std::initializer_list<StringRef> args);
+	static std::string concatenate(const std::initializer_list<StringRef> &args);
 
 private:
 	size_t		size_	= 0;
@@ -160,9 +158,10 @@ private:
 	constexpr static size_t strlen__(const char *s) noexcept;
 	constexpr static const char *strptr__(const char *s) noexcept;
 
+	static size_t concatenateSize_(const std::initializer_list<StringRef> &args);
 
 	template<typename T>
-	static int sgn__(const T &a) noexcept;
+	static int sgn__(const T &a, const T &b) noexcept;
 };
 
 inline std::ostream& operator << (std::ostream& os, const StringRef &sr){
@@ -206,15 +205,23 @@ inline int StringRef::compare(const char *s1, size_t const size1, const char *s2
 	return compare__(s1, size1, s2, size2);
 }
 
-inline std::string StringRef::concatenate(std::initializer_list<StringRef> args){
+
+inline size_t concatenateSize__(const std::initializer_list<StringRef> &args){
+	size_t size = 0;
+
+	for(const auto &sr : args)
+		size += sr.size();
+
+	return size;
+}
+
+inline std::string StringRef::concatenate(const std::initializer_list<StringRef> &args){
 	// super cheap concatenation
 
 	std::string s;
 
-	size_t reserve_size = 0;
-
-	for(const auto &sr : args)
-		reserve_size += sr.size();
+	// seems no need to save space for NULL terminator.
+	size_t const reserve_size = concatenateSize__(args);
 
 	s.reserve(reserve_size);
 
@@ -234,7 +241,7 @@ inline int StringRef::compare__(const char *s1, size_t const size1, const char *
 		return res; // most likely exit
 
 	// sgn helps convert size_t to int, without a branch
-	return sgn__( ssize_t(size1) - ssize_t(size2) );
+	return sgn__(size1, size2);
 }
 
 constexpr inline bool StringRef::equals__(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
@@ -271,9 +278,8 @@ constexpr inline const char *StringRef::strptr__(const char *s) noexcept{
 // ==================================
 
 template<typename T>
-int StringRef::sgn__(const T &a) noexcept{
-	static_assert(std::is_signed<T>::value, "T must be signed type");
-	return (T(0) < a) - (a < T(0));
+int StringRef::sgn__(const T &a, const T &b) noexcept{
+	return (a > b) - (a < b);
 }
 
 #endif

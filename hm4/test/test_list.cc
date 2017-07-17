@@ -250,10 +250,10 @@ void list_test(const char *name){
 #include "linklist.h"
 
 int main(int argc, char **argv){
-//	list_test<hm4::VectorList	>("VectorList"		);
+	list_test<hm4::VectorList	>("VectorList"		);
 	list_test<hm4::LinkList		>("LinkList"		);
-//	list_test<hm4::SkipList		>("SkipList"		);
-//	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
+	list_test<hm4::SkipList		>("SkipList"		);
+	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
 
 //	skiplist_lanes_test();
 

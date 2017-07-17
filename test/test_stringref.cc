@@ -20,6 +20,7 @@ const char *bla		= "bla";
 
 static void fn_fastEmptyChar();
 static void fn_compare();
+static void fn_concatenate();
 
 static void sr_constexpr();
 
@@ -34,6 +35,7 @@ static void sr_test();
 int main(){
 	fn_fastEmptyChar();
 	fn_compare();
+	fn_concatenate();
 
 	sr_constexpr();
 
@@ -47,7 +49,7 @@ int main(){
 // ==================================
 
 static void fn_fastEmptyChar(){
-	mytest.begin("fastEmptyChar");
+	mytest.begin("fastEmptyChar()");
 
 	const char *s = nullptr;
 
@@ -85,10 +87,25 @@ static void fn_compare(){
 		mytest("lower_bound",	StringRef::compare(
 						hello,		strlen(hello),
 						lb_hello,	strlen(lb_hello)
-					) == lb_correct
+					) == + lb_correct
 		);
+
+		mytest("upper_bound",	StringRef::compare(
+						lb_hello,	strlen(lb_hello),
+						hello,		strlen(hello)
+					) == - lb_correct
+		);
+
 	}
 
+}
+
+static void fn_concatenate(){
+	mytest.begin("concatenate()");
+
+	const std::string s = StringRef::concatenate( { "1", "2", "3", "4", "5", "hello" } );
+
+	mytest("concatenate",	s == "12345hello"		);
 }
 
 static void sr_constexpr(){

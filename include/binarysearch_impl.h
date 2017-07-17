@@ -1,11 +1,10 @@
 #include "comparator.h"
 
 template <class ARRAY, class SIZE, class KEY, class COMP>
-bool binarySearch(const ARRAY &list,
+std::pair<bool,SIZE> binarySearch(const ARRAY &list,
 				SIZE start, SIZE end,
 				const KEY &key,
 				const COMP &comp,
-				SIZE &result,
 				SIZE const minimum_distance){
 	/*
 	 * Lazy based from Linux kernel...
@@ -30,8 +29,7 @@ bool binarySearch(const ARRAY &list,
 		}else{
 			// found
 			// index = mid; return 0;
-			result = mid;
-			return true;
+			return { true, mid };
 		}
 
 	}
@@ -43,16 +41,14 @@ bool binarySearch(const ARRAY &list,
 		if (cmp == 0){
 			// found
 			// index = left; return 0;
-			result = start;
-			return true;
+			return { true, start };
 		}
 
 		if (cmp > 0)
 			break;
 	}
 
-	result = start;
-	return false;
+	return { false, start };
 }
 
 // ===================================
