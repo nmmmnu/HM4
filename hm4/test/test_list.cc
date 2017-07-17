@@ -61,9 +61,6 @@ void list_lowerBound(const LIST &list, const char *key, const char *value){
 	auto it = list.lowerBound(key);
 	auto et = list.end();
 
-//	if (it != et)
-//		it->print();
-
 	if (value){
 
 	iterator_advance(it, et, value);

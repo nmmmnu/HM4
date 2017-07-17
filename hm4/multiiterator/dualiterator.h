@@ -7,7 +7,7 @@ namespace hm4{
 namespace multiiterator{
 
 template <class TABLE1, class TABLE2>
-class DualIterator{
+class DualIterator : public multiiterator_impl::MultiIteratorTags_{
 public:
 	using value_type = const Pair;
 
@@ -16,14 +16,25 @@ private:
 	using IteratorPair2	= multiiterator_impl::IteratorPair_<TABLE2>;
 
 public:
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, bool endIt);
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const StringRef &key);
+	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const begin_iterator &tag) :
+					it1_(table1, tag),
+					it2_(table2, tag){}
+
+	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const end_iterator &tag) :
+					it1_(table1, tag),
+					it2_(table2, tag){}
+
+	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const StringRef &key) :
+					it1_(table1, key),
+					it2_(table2, key){}
 
 	DualIterator &operator++();
 
 	const Pair &operator*() const;
 
-	bool operator==(const DualIterator &other) const;
+	bool operator==(const DualIterator &other) const{
+		return it1_ == other.it1_ && it2_ == other.it2_;
+	}
 
 public:
 	bool operator!=(const DualIterator &other) const{

@@ -9,8 +9,16 @@ namespace multiiterator{
 
 namespace multiiterator_impl{
 
+	struct MultiIteratorTags_{
+		struct begin_iterator{};
+		struct end_iterator{};
+	};
+
+
+
+
 	template <class TABLE>
-	class IteratorPair_{
+	class IteratorPair_ : public MultiIteratorTags_{
 	private:
 		using Iterator		= typename TABLE::Iterator;
 
@@ -19,9 +27,15 @@ namespace multiiterator_impl{
 						cur(std::move(cur)),
 						end(std::move(end)){}
 
-		IteratorPair_(const TABLE &table, bool const endIt = false) :
+		IteratorPair_(const TABLE &table, const begin_iterator&) :
 						IteratorPair_(
-							endIt ? table.end() : table.begin(),
+							table.begin(),
+							table.end()
+						){}
+
+		IteratorPair_(const TABLE &table, const end_iterator&) :
+						IteratorPair_(
+							table.end(),
 							table.end()
 						){}
 

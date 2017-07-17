@@ -1,20 +1,19 @@
-//#include <algorithm>	// std::equal
-
 namespace hm4{
 namespace multiiterator{
 
 template <class TABLE>
 template <class CONTAINER, typename T>
 CollectionIterator<TABLE>::CollectionIterator(const CONTAINER &list, const T &iteratorParam, std::nullptr_t){
-	it_.reserve(list.size());
+	auto const size = list.size();
+	it_.reserve(size);
 
 	// CONTAINER is responsible for ordering the tables,
 	// in correct (probably reverse) order.
 	for(const auto &table : list)
-		it_.push_back({ table, iteratorParam });
+		it_.emplace_back(table, iteratorParam);
 
-	tmp_index_pp.reserve(list.size());
-	tmp_index_de.reserve(list.size());
+	tmp_index_pp.reserve(size);
+	tmp_index_de.reserve(size);
 }
 
 template <class TABLE>

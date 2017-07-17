@@ -28,7 +28,7 @@ public:
 	}
 
 	constexpr
-	size_type size(bool const = true) const noexcept{
+	size_type size(bool const = false) const noexcept{
 		return 0;
 	}
 

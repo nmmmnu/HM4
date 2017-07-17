@@ -11,7 +11,7 @@ MyTest mytest;
 
 
 template<class IT, class IT2>
-void iterator_test(const char *title, IT it1, const IT &end1, IT2 it2){
+void iterator_test(const char* title, IT it1, const IT &end1, IT2 it2){
 	mytest.begin(title);
 
 	while(it1 != end1){
@@ -37,18 +37,22 @@ void iterator_test(const char *title, IT it1, const IT &end1, IT2 it2){
 
 
 template<class LIST>
-void test_normal_iterator(){
+LIST createAndPopulate(){
 	LIST list;
 	list.insert( {"1 name",		"Niki"	} );
 	list.insert( {"2 age",		"22"	} );
 	list.insert( {"3 city",		"Sofia"	} );
 	list.insert( {"4 os",		"Linux"	} );
 
-	LIST clist;
-	clist.insert( {"1 name",	"Niki"	} );
-	clist.insert( {"2 age",		"22"	} );
-	clist.insert( {"3 city",	"Sofia"	} );
-	clist.insert( {"4 os",		"Linux"	} );
+	return list;
+}
+
+
+
+template<class LIST>
+void test_normal_iterator(){
+	const LIST list  = createAndPopulate<LIST>();
+	const LIST clist = createAndPopulate<LIST>();
 
 	iterator_test(
 			"Normal Iterator",
@@ -67,7 +71,6 @@ void test_normal_iterator(){
 
 			clist.lowerBound("2 age")
 	);
-
 }
 
 #include "multiiterator/dualiterator.h"
@@ -83,19 +86,15 @@ void test_dual_iterator(){
 	list2.insert( {"2 age",		"22"	} );
 	list2.insert( {"4 os",		"Linux"	} );
 
-	LIST clist;
-	clist.insert( {"1 name",	"Niki"	} );
-	clist.insert( {"2 age",		"22"	} );
-	clist.insert( {"3 city",	"Sofia"	} );
-	clist.insert( {"4 os",		"Linux"	} );
+	const LIST clist = createAndPopulate<LIST>();
 
 	using Iterator = hm4::multiiterator::DualIterator<LIST, LIST>;
 
 	iterator_test(
 			"Dual Iterator",
 
-			Iterator(list1, list2, false),
-			Iterator(list1, list2, true),
+			Iterator(list1, list2, typename Iterator::begin_iterator{}	),
+			Iterator(list1, list2, typename Iterator::end_iterator{}	),
 
 			clist.begin()
 	);
@@ -103,8 +102,8 @@ void test_dual_iterator(){
 	iterator_test(
 			"Dual Iterator Lower Bound",
 
-			Iterator(list1, list2, (const char *) "2 age"),
-			Iterator(list1, list2, true),
+			Iterator(list1, list2, StringRef{"2 age"}			),
+			Iterator(list1, list2, typename Iterator::end_iterator{}	),
 
 			clist.lowerBound("2 age")
 	);
@@ -112,15 +111,24 @@ void test_dual_iterator(){
 	LIST elist;
 
 	iterator_test(
-			"Dual Iterator Empty List",
+			"Dual Empty Iterator",
 
-			Iterator(elist, clist, false),
-			Iterator(elist, clist, true),
+			Iterator(elist, clist, typename Iterator::begin_iterator{}	),
+			Iterator(elist, clist, typename Iterator::end_iterator{}	),
 
 			clist.begin()
 	);
 
+	iterator_test(
+			"Dual Empty Iterator Lower Bound",
+
+			Iterator(elist, clist, StringRef{"2 age"}			),
+			Iterator(elist, clist, typename Iterator::end_iterator{}	),
+
+			clist.lowerBound("2 age")
+	);
 }
+
 
 #include "multiiterator/collectioniterator.h"
 
@@ -160,11 +168,7 @@ void test_collection_iterator(){
 	}
 
 
-	LIST clist;
-	clist.insert( {"1 name",	"Niki"	} );
-	clist.insert( {"2 age",		"22"	} );
-	clist.insert( {"3 city",	"Sofia"	} );
-	clist.insert( {"4 os",		"Linux"	} );
+	const LIST clist = createAndPopulate<LIST>();
 
 
 	using Iterator = hm4::multiiterator::CollectionIterator<LIST>;
@@ -172,8 +176,8 @@ void test_collection_iterator(){
 	iterator_test(
 			"Collection Iterator",
 
-			Iterator(container, false),
-			Iterator(container, true),
+			Iterator(container, typename Iterator::begin_iterator{}	),
+			Iterator(container, typename Iterator::end_iterator{}	),
 
 			clist.begin()
 	);
@@ -181,12 +185,13 @@ void test_collection_iterator(){
 	iterator_test(
 			"Collection Iterator Lower Bound",
 
-			Iterator(container, (const char *) "2 age"),
-			Iterator(container, true),
+			Iterator(container, StringRef{"2 age"}			),
+			Iterator(container, typename Iterator::end_iterator{}	),
 
 			clist.lowerBound("2 age")
 	);
 }
+
 
 #include "vectorlist.h"
 

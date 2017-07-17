@@ -31,7 +31,7 @@ public:
 	const Pair &operator[](const StringRef &key) const;
 	bool erase(const StringRef &key);
 
-	size_type size(bool const = true) const noexcept{
+	size_type size(bool const = false) const noexcept{
 		return dataCount_;
 	}
 

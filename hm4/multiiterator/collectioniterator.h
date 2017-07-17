@@ -10,7 +10,7 @@ namespace multiiterator{
 
 
 template <class TABLE>
-class CollectionIterator{
+class CollectionIterator : public multiiterator_impl::MultiIteratorTags_{
 private:
 	using IteratorPair	= multiiterator_impl::IteratorPair_<TABLE>;
 	using vector_type	= std::vector<IteratorPair>;
@@ -23,12 +23,16 @@ private:
 
 public:
 	template<class CONTAINER>
-	CollectionIterator(const CONTAINER &list, bool endIt = false) :
-					CollectionIterator(list, endIt, nullptr ){}
+	CollectionIterator(const CONTAINER &list, const begin_iterator &tag) :
+					CollectionIterator(list, tag, nullptr){}
+
+	template<class CONTAINER>
+	CollectionIterator(const CONTAINER &list, const end_iterator &tag) :
+					CollectionIterator(list, tag, nullptr){}
 
 	template<class CONTAINER>
 	CollectionIterator(const CONTAINER &list, const StringRef &key) :
-					CollectionIterator(list, key, nullptr ){}
+					CollectionIterator(list, key, nullptr){}
 
 	CollectionIterator &operator++();
 
