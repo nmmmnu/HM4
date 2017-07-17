@@ -86,7 +86,7 @@ const Pair &CollectionIterator<TABLE>::dereference_() const{
 
 		return *tmp_pair;
 	}else{
-		tmp_pair = cpair;
+		tmp_pair = nullptr; // cpair is nullptr
 
 		return Pair::zero();
 	}

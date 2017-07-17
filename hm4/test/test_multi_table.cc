@@ -119,11 +119,13 @@ void test_DualTable(const char *name){
 
 	size_t bytes = 0;
 
+	// to have older timestamp
+	bytes += list_insert(list2, {"3 city",	"DIRTY"	});
+
 	bytes += list_insert(list1, {"1 name",	"Niki"	});
 	bytes += list_insert(list1, {"3 city",	"Sofia"	});
 
 	bytes += list_insert(list2, {"2 age",	"22"	});
-	bytes += list_insert(list2, {"3 city",	"DIRTY"	});
 	bytes += list_insert(list2, {"4 os",	"Linux"	});
 
 	using MyMultiTable = hm4::multitable::DualTable<LIST, LIST>;

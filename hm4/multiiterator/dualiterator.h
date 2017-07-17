@@ -7,13 +7,13 @@ namespace hm4{
 namespace multiiterator{
 
 template <class TABLE1, class TABLE2>
-class DualIterator : public multiiterator_impl::MultiIteratorTags_{
+class DualIterator : public impl_::MultiIteratorTags_{
 public:
 	using value_type = const Pair;
 
 private:
-	using IteratorPair1	= multiiterator_impl::IteratorPair_<TABLE1>;
-	using IteratorPair2	= multiiterator_impl::IteratorPair_<TABLE2>;
+	using IteratorPair1	= impl_::IteratorPair_<TABLE1>;
+	using IteratorPair2	= impl_::IteratorPair_<TABLE2>;
 
 public:
 	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const begin_iterator &tag) :

@@ -7,15 +7,15 @@ namespace hm4{
 namespace multiiterator{
 
 
-namespace multiiterator_impl{
+namespace impl_{
+
 
 	struct MultiIteratorTags_{
 		struct begin_iterator{};
 		struct end_iterator{};
 	};
 
-
-
+	// ===================================
 
 	template <class TABLE>
 	class IteratorPair_ : public MultiIteratorTags_{
@@ -67,11 +67,12 @@ namespace multiiterator_impl{
 		Iterator end;
 	};
 
-} // namespace base
+} // namespace impl_
 
 
-} // namespace multitableiterator
+} // namespace multiiterator
 } // namespace
+
 
 #endif
 

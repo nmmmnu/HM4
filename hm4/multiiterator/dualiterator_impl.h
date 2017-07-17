@@ -31,7 +31,8 @@ const Pair &DualIterator<TABLE1, TABLE2>::operator*() const{
 		return  cmp < 0 ? pair1 : pair2;
 	}else{
 		// return newer
-		return pair1;
+		// return newer
+		return pair1.cmpTime(pair2) > 0 ? pair1 : pair2;
 	}
 }
 

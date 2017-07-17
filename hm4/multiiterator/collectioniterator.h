@@ -10,9 +10,9 @@ namespace multiiterator{
 
 
 template <class TABLE>
-class CollectionIterator : public multiiterator_impl::MultiIteratorTags_{
+class CollectionIterator : public impl_::MultiIteratorTags_{
 private:
-	using IteratorPair	= multiiterator_impl::IteratorPair_<TABLE>;
+	using IteratorPair	= impl_::IteratorPair_<TABLE>;
 	using vector_type	= std::vector<IteratorPair>;
 
 	using size_type		= typename vector_type::size_type;
