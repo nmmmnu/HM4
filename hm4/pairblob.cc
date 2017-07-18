@@ -70,11 +70,12 @@ bool PairBlob::valid(bool const tombstoneCheck) const noexcept{
 }
 
 void PairBlob::print() const noexcept{
-	static const char *format = "%-20s | %-20s | %-*s | %8u\n";
+	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
+	const char *format      = "%-20s | %-20s | %s | %8u\n";
 
 	printf(format,
 		getKey(), getVal(),
-		MyTime::STRING_SIZE, MyTime::toString(getCreated()),
+		MyTime::toString(getCreated(), time_format),
 		be32toh(expires)
 	);
 }

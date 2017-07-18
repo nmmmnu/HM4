@@ -58,10 +58,6 @@ namespace impl_{
 			return cur == other.cur && end == other.end;
 		}
 
-		bool operator!=(const IteratorPair_ &other) const{
-			return ! operator==(other);
-		}
-
 	public:
 		Iterator cur;
 		Iterator end;

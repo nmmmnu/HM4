@@ -15,9 +15,10 @@ UNAME		= $(shell uname -s)
 CF_DEPS		= -MMD -MP
 CF_INCL		= -Iinclude $(EXTRA_INCL)
 CF_OPTIM	= -O2
+#CF_OPTIM	= -O3 -DNDEBUG
 CF_WARN		= -Wall -Wpedantic -Wdeprecated -Wconversion
 
-CF_MISC		=
+CF_MISC		= -g
 
 CF_ALL		= -std=c++14	\
 			$(CF_DEPS)	\

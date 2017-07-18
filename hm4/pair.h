@@ -5,8 +5,6 @@
 
 #include "stringref.h"
 
-#include "mytime.h"
-
 #include <ostream>
 #include <memory>
 

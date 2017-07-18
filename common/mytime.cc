@@ -4,7 +4,7 @@
 
 #include <time.h>	// localtime, strftime
 
-char MyTime::buffer[STRING_SIZE];
+char MyTime::buffer[BUFFER_SIZE];
 
 
 uint32_t MyTime::now32() noexcept{
@@ -39,7 +39,7 @@ const char *MyTime::toString(uint64_t const date2, const char *format) noexcept{
 	if (tm == nullptr)
 		return nullptr;
 
-	strftime(buffer, STRING_SIZE, format, tm);
+	strftime(buffer, BUFFER_SIZE, format, tm);
 
 	return buffer;
 }

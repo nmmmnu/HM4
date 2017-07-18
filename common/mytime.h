@@ -6,22 +6,18 @@
 
 class MyTime{
 public:
-
-	// __builtin_strlen is constexpr in clang
-	constexpr static size_t STRING_SIZE			= __builtin_strlen("1980-01-01 00:00:00") + 1;
-
 	constexpr static const char *TIME_FORMAT_STANDARD	= "%Y-%m-%d %H:%M:%S";
 	constexpr static const char *TIME_FORMAT_NUMBER		= "%Y%m%d.%H%M%S";
 
 	constexpr static const char *DATE_FORMAT_STANDARD2	= "%Y-%m-%d";
 	constexpr static const char *DATE_FORMAT_NUMBER2	= "%Y%m%d";
 
-	constexpr static const char *FORMAT_DEFAULT		= TIME_FORMAT_STANDARD;
+	constexpr static const char *DATE_FORMAT_DEFAULT	= TIME_FORMAT_STANDARD;
 
 public:
-	static const char *toString(uint64_t date, const char *format = FORMAT_DEFAULT) noexcept;
+	static const char *toString(uint64_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept;
 
-	static const char *toString(const char *format = FORMAT_DEFAULT) noexcept{
+	static const char *toString(const char *format = DATE_FORMAT_DEFAULT) noexcept{
 		return toString(now(), format);
 	}
 
@@ -49,7 +45,10 @@ public:
 	}
 
 private:
-	static char buffer[STRING_SIZE];
+	// __builtin_strlen is constexpr in clang
+	constexpr static size_t BUFFER_SIZE			= __builtin_strlen("1980-01-01 00:00:00") + 1;
+
+	static char buffer[BUFFER_SIZE];
 
 };
 
