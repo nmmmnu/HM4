@@ -14,7 +14,9 @@
 
 namespace hm4{
 
+
 struct PairBlob;
+
 
 class Pair{
 public:
@@ -27,7 +29,14 @@ private:
 private:
 	using Blob = PairBlob;
 
+private:
+	struct observer_pair{};
+
+	Pair(const Blob *blob, const observer_pair&);
+
 public:
+	Pair(); /* = default */
+
 	/* preconditons
 	Key can not be zero length
 	Key must be less MAX_KEY_SIZE
@@ -35,9 +44,11 @@ public:
 	*/
 	Pair(const StringRef &key, const StringRef &val, uint32_t expires = 0, uint32_t created = 0);
 
-	Pair(); /* = default */
-
 	Pair(const Blob *blob);
+
+	static Pair observer(const Blob *blob){
+		return Pair( blob, observer_pair{} );
+	}
 
 	static Pair tombstone(const StringRef &key){
 		return Pair(key, StringRef{} );
@@ -111,7 +122,8 @@ public:
 	}
 
 private:
-	std::unique_ptr<Blob>	pimpl;
+	std::unique_ptr<const Blob>	pimpl;
+	bool				observer_ = false;
 
 private:
 	static const Pair	zero_;

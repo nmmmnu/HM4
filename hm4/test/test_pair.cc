@@ -12,16 +12,16 @@ MyTest mytest;
 
 
 
-static void pair_test_raw(const char *module		= "raw pair"	);
-static void pair_test_null(const char *module		= "null pair"	);
-static void pair_test(const char *module		= "pair"	);
-static void pair_test_expired(const char *module	= "expired pair", bool sl = false);
+static void pair_test_null();
+static void pair_test_raw();
+
+
+static void pair_test();
+static void pair_test_expired(bool slow = false);
 
 
 
 int main(int argc, char **argv){
-	mytest.begin("Pair");
-
 	pair_test_null();
 	pair_test_raw();
 	pair_test();
@@ -30,9 +30,41 @@ int main(int argc, char **argv){
 	return mytest.end();
 }
 
+// ===================================
+
+static void pair_test_null(){
+	mytest.begin("NULL Pair");
+
+	const Pair p;
+
+	mytest("null bool",		p == false			);
+	mytest("null isTombstone",	p.isTombstone()			);
+	mytest("null key",		p.getKey().empty()		);
+	mytest("null val",		p.getVal().empty()		);
+	mytest("null cmp",		p.cmp("bla") == 1		);
+}
+
+// ===================================
+
+static void pair_blob_test(const char *module, const PairBlob *pp, const StringRef &key, const StringRef &val){
+	const PairBlob &p = *pp;
+
+	mytest.begin(module);
+
+	mytest("valid",		p.valid()			);
+
+	mytest("key",		key == p.getKey()		);
+	mytest("val",		val == p.getVal()		);
+
+	mytest("cmp key",	p.cmp(key.data()) == 0		);
+	mytest("cmp",		p.cmp("~~~ non existent") < 0	);
+	mytest("cmp",		p.cmp("!!! non existent") > 0	);
+}
 
 
 static void pair_test_raw_do(const char *module, const Pair & p, const StringRef &key, const StringRef &val){
+	mytest.begin(module);
+
 	mytest("valid",		p.valid()			);
 
 	mytest("key",		key == p.getKey()		);
@@ -46,18 +78,7 @@ static void pair_test_raw_do(const char *module, const Pair & p, const StringRef
 	p2 = p;
 }
 
-static void pair_blob_test(const char *module, const PairBlob & p, const StringRef &key, const StringRef &val){
-	mytest("valid",		p.valid()			);
-
-	mytest("key",		key == p.getKey()		);
-	mytest("val",		val == p.getVal()		);
-
-	mytest("cmp key",	p.cmp(key.data()) == 0		);
-	mytest("cmp",		p.cmp("~~~ non existent") < 0	);
-	mytest("cmp",		p.cmp("!!! non existent") > 0	);
-}
-
-static void pair_test_raw(const char *module){
+static void pair_test_raw(){
 	const char *key = "name";
 	const char *val = "Peter";
 
@@ -71,28 +92,24 @@ static void pair_test_raw(const char *module){
 		'P', 'e', 't', 'e', 'r', '\0'	// val
 	};
 
-	auto pp = (const PairBlob *) raw_memory;
-	pair_blob_test("pair::blob", *pp, key, val);
+	pair_blob_test("pair::blob",
+				(const PairBlob *) raw_memory,
+					key, val);
 
-	const Pair p = (const PairBlob *) raw_memory;
-	pair_test_raw_do(module, p, key, val);
+	pair_test_raw_do("raw Pair",
+				(const PairBlob *) raw_memory,
+					key, val);
+
+	pair_test_raw_do("raw Pair (observer)",
+				Pair::observer( (const PairBlob *) raw_memory ),
+					key, val);
 }
 
+// ===================================
 
+static void pair_test(){
+	mytest.begin("Pair");
 
-static void pair_test_null(const char *module){
-	const Pair p;
-
-	mytest("null bool",	p == false			);
-	mytest("null isTombstone",	p.isTombstone()			);
-	mytest("null key",		p.getKey().empty()		);
-	mytest("null val",		p.getVal().empty()		);
-	mytest("null cmp",		p.cmp("bla") == 1		);
-}
-
-
-
-static void pair_test(const char *module){
 	const char *key = "abcdef";
 	const char *val = "1234567890";
 
@@ -147,14 +164,16 @@ static void pair_test(const char *module){
 	}
 }
 
+// ===================================
 
+static void pair_test_expired(bool const slow){
+	mytest.begin("Pair (expired)");
 
-static void pair_test_expired(const char *module, bool sl){
 	const Pair p1 = { "key", "val", 1 };
 
 	mytest("not expired",	p1.valid()			);
 
-	if (sl){
+	if (slow){
 		printf("sleep for 2 sec...\n");
 		sleep(2);
 		mytest("expired",		! p1.valid()			);

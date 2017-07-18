@@ -13,7 +13,6 @@ const Pair Pair::zero_ = {};
 // ==============================
 
 Pair::Pair() = default;
-Pair::~Pair() = default;
 Pair::Pair(Pair &&other) = default;
 Pair &Pair::operator=(Pair &&other) = default;
 
@@ -43,6 +42,24 @@ Pair &Pair::operator=(const Pair &other){
 	return *this;
 }
 
+Pair::Pair(const Blob *blob, const observer_pair&) :
+				pimpl(blob),
+				observer_(true){}
+
+#if 0
+// very dangerous :)
+Pair::Pair(const Pair &p, const observer_pair&) :
+				pimpl( p.pimpl.get() ),
+				observer_(true){}
+#endif
+
+// ==============================
+
+Pair::~Pair(){
+	if (observer_)
+		pimpl.release();
+}
+
 // ==============================
 
 StringRef Pair::getKey() const noexcept{
@@ -54,7 +71,7 @@ StringRef Pair::getKey() const noexcept{
 StringRef Pair::getVal() const noexcept{
 	return pimpl ?
 		StringRef{ pimpl->getVal(), pimpl->getValLen() } :
-		"";
+		StringRef();
 }
 
 uint64_t Pair::getCreated() const noexcept{
