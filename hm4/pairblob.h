@@ -100,7 +100,6 @@ public:
 	}
 
 	int cmp(const char *key) const noexcept{
-		// because of strlen nullptr, we do it in this way
 		return StringRef::fastEmptyChar(key) ?
 			CMP_NULLKEY :
 			StringRef::compare(getKey(), getKeyLen(), key, strlen(key) );
@@ -113,7 +112,6 @@ public:
 	}
 
 	bool equals(const char *key) const noexcept{
-		// because of strlen nullptr, we do it in this way
 		return StringRef::fastEmptyChar(key) ?
 			bool(CMP_NULLKEY) :
 			StringRef::equals(getKey(), getKeyLen(), key, strlen(key) );

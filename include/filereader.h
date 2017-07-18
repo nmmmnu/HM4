@@ -40,20 +40,18 @@ public:
 					options_(options){}
 
 	std::string getLine() {
-		std::string line;
-
-		while( getline(file_, line) ){
+		while( getline(file_, buffer_) ){
 			if (options_ & OPTION_TRIM)
-				trim__(line);
+				trim__(buffer_);
 
-			if ((options_ & OPTION_SKIP_EMPRY) && line.empty() )
+			if ((options_ & OPTION_SKIP_EMPRY) && buffer_.empty() )
 				continue;
 
-			return line;
+			return buffer_;
 		}
 
 		// return empty line...
-		return line;
+		return buffer_;
 	}
 
 	operator bool() const{
@@ -68,6 +66,8 @@ public:
 private:
 	std::ifstream	file_;
 	Options		options_;
+
+	std::string	buffer_;
 };
 
 #endif

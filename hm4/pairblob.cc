@@ -4,8 +4,6 @@
 
 #include <cstdio>
 
-#include <cassert>
-
 namespace hm4{
 
 std::unique_ptr<PairBlob> PairBlob::create(
@@ -14,12 +12,11 @@ std::unique_ptr<PairBlob> PairBlob::create(
 				uint32_t const expires, uint32_t const created){
 
 	// preconditions
-
-	assert(key != nullptr		);
-	assert(keylen > 0		);
-	assert(keylen < MAX_KEY_SIZE	);
-	assert(vallen < MAX_VAL_SIZE	);
-
+	if (	key == nullptr		||
+		keylen == 0		||
+		keylen > MAX_KEY_SIZE	||
+		vallen > MAX_VAL_SIZE	)
+		return {};
 	// eo preconditions
 
 	size_t const size = bytes(keylen, vallen);
