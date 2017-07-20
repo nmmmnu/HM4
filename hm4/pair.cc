@@ -18,7 +18,6 @@ Pair &Pair::operator=(Pair &&other) = default;
 
 // ==============================
 
-// preconditions will be enforced in PairBlob
 Pair::Pair(const StringRef &key, const StringRef &val, uint32_t const expires, uint32_t const created):
 	pimpl(
 		Blob::create(	key.data(), key.size(),
@@ -42,21 +41,21 @@ Pair &Pair::operator=(const Pair &other){
 	return *this;
 }
 
-Pair::Pair(const Blob *blob, const observer_pair&) :
+Pair::Pair(const Blob *blob, const observer_t&) :
 				pimpl(blob),
-				observer_(true){}
+				options_(Options::OBSERVER){}
 
 #if 0
 // very dangerous :)
-Pair::Pair(const Pair &p, const observer_pair&) :
+Pair::Pair(const Pair &p, const observer_t&) :
 				pimpl( p.pimpl.get() ),
-				observer_(true){}
+				options_(Options::OBSERVER){}
 #endif
 
 // ==============================
 
 Pair::~Pair(){
-	if (observer_)
+	if (options_ == Options::OBSERVER)
 		pimpl.release();
 }
 

@@ -44,6 +44,8 @@ int main(){
 	sr_std_string();
 
 	sr_test();
+
+	return mytest.end();
 }
 
 // ==================================

@@ -28,6 +28,7 @@ $(A)test_multi_table: $(O)test_multi_table.o $(PAIR_OBJ)	\
 	$(LINK)
 
 $(A)test_file: $(O)test_file.o $(PAIR_OBJ)			\
-		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o
+		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o	\
+		$(O)filemetablob.o
 	$(LINK)
 

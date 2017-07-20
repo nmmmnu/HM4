@@ -1,0 +1,10 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+#EXTRA_INCL += -I$(SRC_DIR)
+
+#EXTRA_CLEAN +=
+
+include Makefile.sub
+
+all: $(O)filemeta.o $(O)filemetablob.o
+

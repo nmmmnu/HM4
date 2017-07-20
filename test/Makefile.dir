@@ -1,8 +1,8 @@
 SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
-EXTRA_INCL += -I$(SRC_DIR)
+EXTRA_INCL += -I$(SRC_DIR)test_levelorderlookup
 
-MY_TARGETS = $(A)test_stringref $(A)test_blobref $(A)test_binarysearch
+MY_TARGETS = $(A)test_stringref $(A)test_trim $(A)test_blobref $(A)test_binarysearch $(A)test_levelorderlookup
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -14,9 +14,15 @@ all: $(MY_TARGETS)
 $(A)test_stringref: $(O)test_stringref.o
 	$(LINK)
 
+$(A)test_trim: $(O)test_trim.o
+	$(LINK)
+
 $(A)test_blobref: $(O)test_blobref.o
 	$(LINK)
 
 $(A)test_binarysearch: $(O)test_binarysearch.o
+	$(LINK)
+
+$(A)test_levelorderlookup: $(O)test_levelorderlookup.o
 	$(LINK)
 

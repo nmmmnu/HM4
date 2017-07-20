@@ -1,4 +1,4 @@
-HM3 - key/value NoSQL database that utilize LSM trees
+HM4 - key/value NoSQL database that utilize LSM trees
 =====================================================
 
 ---
@@ -55,8 +55,6 @@ VectorList performance was very good, but worse than SkipList.
 LinkedList performance was poor.
 
 Because of C++ classes all VectorList, LinkedList, SkipList are available.
-
-Hashtable is not avaliable because tests were made long ago in C version.
 
 ---
 ### DiskTables

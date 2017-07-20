@@ -24,28 +24,28 @@ public:
 private:
 	static constexpr int CMP_ZERO = +1;
 
+	enum class Options : uint8_t {
+		OK		= 0,
+		OBSERVER
+	};
+
 private:
 	using Blob = PairBlob;
 
 private:
-	struct observer_pair{};
+	struct observer_t{};
 
-	Pair(const Blob *blob, const observer_pair&);
+	Pair(const Blob *blob, const observer_t&);
 
 public:
 	Pair(); /* = default */
 
-	/* preconditons
-	Key can not be zero length
-	Key must be less MAX_KEY_SIZE
-	Value must be less MAX_VAL_SIZE
-	*/
 	Pair(const StringRef &key, const StringRef &val, uint32_t expires = 0, uint32_t created = 0);
 
 	Pair(const Blob *blob);
 
 	static Pair observer(const Blob *blob){
-		return Pair( blob, observer_pair{} );
+		return Pair( blob, observer_t{} );
 	}
 
 	static Pair tombstone(const StringRef &key){
@@ -121,7 +121,7 @@ public:
 
 private:
 	std::unique_ptr<const Blob>	pimpl;
-	bool				observer_ = false;
+	Options				options_ = Options::OK;
 
 private:
 	static const Pair	zero_;

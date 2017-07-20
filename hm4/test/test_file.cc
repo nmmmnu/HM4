@@ -1,6 +1,7 @@
 #include <cstdio>
 
 #include "filereader.h"
+#include "disk/filebuilder.h"
 
 #include "pair.h"
 
@@ -65,7 +66,7 @@ static void listIterate(const LIST &list, const StringRef &key, size_t count = 1
 }
 
 template <class LIST, class READER>
-static int listProcess(LIST &&list, READER &reader, const StringRef &key, bool const it){
+static int listSearchProcess(LIST &&list, READER &reader, const StringRef &key, bool const it){
 	printf("Load start...\n");
 	listLoad(list, reader);
 	printf("Load done...\n");
@@ -83,21 +84,46 @@ static int listProcess(LIST &&list, READER &reader, const StringRef &key, bool c
 	return 0;
 }
 
+template <class LIST, class READER>
+static int listWriteProcess(LIST &&list, READER &reader, const StringRef &filename2){
+	printf("Load start...\n");
+	listLoad(list, reader);
+	printf("Load done...\n");
+	getchar();
+
+	printf("Write start...\n");
+	hm4::disk::DiskFileBuilder::buildFromList(filename2, list, /* keep tombstones */ true);
+	printf("Write done...\n");
+	getchar();
+
+	return 0;
+}
+
 #include "vectorlist.h"
 #include "linklist.h"
 #include "skiplist.h"
 
-static int search(char const type, const StringRef &filename, const StringRef &key, bool const it){
-	FileReader reader{ filename };
+static int file_search(char const type, const StringRef &filename, const StringRef &key, bool const it){
+	FileReader<4096> reader{ filename };
 
 	switch(type){
 	default:
-	case 's':	return listProcess(hm4::SkipList{},	reader, key, it);
-	case 'v':	return listProcess(hm4::VectorList{},	reader, key, it);
-	case 'l':	return listProcess(hm4::LinkList{},	reader, key, it);
+	case 's':	return listSearchProcess(hm4::SkipList{},	reader, key, it);
+	case 'v':	return listSearchProcess(hm4::VectorList{},	reader, key, it);
+	case 'l':	return listSearchProcess(hm4::LinkList{},	reader, key, it);
 	}
 }
 
+static int file_write(char const type, const StringRef &filename, const StringRef &filename2){
+	FileReader<4096> reader{ filename };
+
+	switch(type){
+	default:
+	case 's':	return listWriteProcess(hm4::SkipList{},	reader, filename2);
+	case 'v':	return listWriteProcess(hm4::VectorList{},	reader, filename2);
+	case 'l':	return listWriteProcess(hm4::LinkList{},	reader, filename2);
+	}
+}
 
 
 int main(int argc, char **argv){
@@ -108,10 +134,12 @@ int main(int argc, char **argv){
 	const char *type	= argv[2];
 	const char *filename	= argv[3];
 	const char *key		= argv[4];
+	const char *filename2	= argv[4];
 
 	switch(op[0]){
-	case 's': return search( type[0], filename, key, false	);
-	case 'l': return search( type[0], filename, key, true	);
+	case 's': return file_search( type[0], filename, key, false	);
+	case 'l': return file_search( type[0], filename, key, true	);
+	case 'w': return file_write(  type[0], filename, filename2	);
 	}
 
 	return printUsage(argv[0]);

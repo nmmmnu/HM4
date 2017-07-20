@@ -48,12 +48,6 @@ public:
 	}
 
 public:
-	/* preconditons
-	Key can not be NULL
-	Key can not be zero length
-	Key must be less MAX_KEY_SIZE
-	Value must be less MAX_VAL_SIZE
-	*/
 	static std::unique_ptr<PairBlob> create(	const char *key, size_t keylen,
 							const char *val, size_t vallen,
 							uint32_t expires, uint32_t created);

@@ -1,4 +1,4 @@
 
 SUBDIRS = test common	\
-		hm4	hm4/test
+		hm4 hm4/test hm4/disk
 
