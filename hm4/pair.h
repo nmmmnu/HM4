@@ -21,13 +21,8 @@ public:
 	static constexpr uint16_t	MAX_KEY_SIZE	= PairConf::MAX_KEY_SIZE;
 	static constexpr uint32_t	MAX_VAL_SIZE	= PairConf::MAX_VAL_SIZE;
 
-private:
+public:
 	static constexpr int CMP_ZERO = +1;
-
-	enum class Options : uint8_t {
-		OK		= 0,
-		OBSERVER
-	};
 
 private:
 	using Blob = PairBlob;
@@ -55,10 +50,12 @@ public:
 	Pair(const Pair &other);
 	Pair &operator=(const Pair &other);
 
-	Pair(Pair &&other); /* = default */
-	Pair &operator=(Pair &&other); /* = default */
+	Pair(Pair &&other);
+	Pair &operator=(Pair &&other);
 
-	~Pair(); /* = default */
+	void swap(Pair &other);
+
+	~Pair();
 
 	operator bool() const noexcept{
 		return pimpl != nullptr;
@@ -104,14 +101,13 @@ public:
 
 	size_t bytes() const noexcept;
 
+	bool observer() const noexcept{
+		return observer_;
+	}
 public:
 	bool fwrite(std::ostream & os) const;
 
 	void print() const noexcept;
-
-	void swap(Pair &other){
-		std::swap(pimpl, other.pimpl);
-	}
 
 public:
 	constexpr
@@ -121,7 +117,7 @@ public:
 
 private:
 	std::unique_ptr<const Blob>	pimpl;
-	Options				options_ = Options::OK;
+	bool				observer_ = false;
 
 private:
 	static const Pair	zero_;

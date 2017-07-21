@@ -18,6 +18,9 @@ private:
 	FileMetaBlob	blob;
 
 public:
+	constexpr static size_t ALIGN = FileMetaBlob::ALIGN;
+
+public:
 	FileMeta(){
 		clear();
 	}
@@ -47,6 +50,10 @@ public:
 
 	bool sorted() const{
 		return be16toh(blob.options) & FileMetaBlob::OPTIONS_SORTED;
+	}
+
+	bool aligned() const{
+		return be16toh(blob.options) & FileMetaBlob::OPTIONS_ALIGNED;
 	}
 
 	uint64_t size() const{

@@ -119,7 +119,7 @@ public:
 
 	// ==============================
 
-	void print() const noexcept;
+	void print(bool observer) const noexcept;
 
 private:
 	constexpr

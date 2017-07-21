@@ -11,22 +11,26 @@ class DiskFileBuilder{
 public:
 	template <class LIST>
 	static bool buildFromList(const StringRef &filename,
-				const LIST &list, bool keepTombstones){
-		return build(filename, list.begin(), list.end(), keepTombstones);
+				const LIST &list,
+				bool keepTombstones, bool const aligned){
+		return build(filename, list.begin(), list.end(), keepTombstones, aligned);
 	}
 
 	template <class ITERATOR>
 	static bool build(const StringRef &filename,
 				const ITERATOR &begin, const ITERATOR &end,
-				bool keepTombstones);
+				bool keepTombstones, bool const aligned);
 
 private:
 	template <class ITERATOR>
 	static bool writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 				std::ofstream &file_meta, std::ofstream &file_index, std::ofstream &file_data,
-				bool keepTombstones);
+				bool keepTombstones, bool const aligned);
 
-
+private:
+	static size_t calcAlign__(size_t const value, size_t const align){
+		return align * ((value + align - 1) / align);
+	}
 };
 
 

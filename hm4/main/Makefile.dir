@@ -1,0 +1,19 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+EXTRA_INCL += -I$(SRC_DIR)
+
+MY_TARGETS = $(A)db_file
+
+EXTRA_CLEAN += $(MY_TARGETS)
+
+include Makefile.sub
+
+all: $(MY_TARGETS)
+
+
+PAIR_OBJ = $(O)pair.o $(O)pairblob.o $(O)mytime.o
+DISKTABLE_OBJ = $(O)disktable.o $(O)mmapfile.o $(O)filemeta.o
+
+
+$(A)db_file: $(O)db_file.o	$(PAIR_OBJ) $(DISKTABLE_OBJ)
+	$(LINK)

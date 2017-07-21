@@ -66,14 +66,15 @@ bool PairBlob::valid(bool const tombstoneCheck) const noexcept{
 	return true;
 }
 
-void PairBlob::print() const noexcept{
+void PairBlob::print(bool const observer) const noexcept{
 	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
-	const char *format      = "%-20s | %-20s | %s | %8u\n";
+	const char *format      = "%-32s | %-20s | %s | %8u | %c\n";
 
 	printf(format,
 		getKey(), getVal(),
 		MyTime::toString(getCreated(), time_format),
-		be32toh(expires)
+		be32toh(expires),
+		observer ? '+' : ' '
 	);
 }
 

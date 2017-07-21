@@ -6,5 +6,5 @@ EXTRA_INCL += -I$(SRC_DIR)
 
 include Makefile.sub
 
-all: $(O)mytime.o
+all: $(O)mytime.o $(O)mmapfile.o
 

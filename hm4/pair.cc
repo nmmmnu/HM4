@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstdio>		// printf for cygwin
 
+#define log__(...) /* nada */
+
 namespace hm4{
 
 // ==============================
@@ -13,8 +15,6 @@ const Pair Pair::zero_ = {};
 // ==============================
 
 Pair::Pair() = default;
-Pair::Pair(Pair &&other) = default;
-Pair &Pair::operator=(Pair &&other) = default;
 
 // ==============================
 
@@ -30,32 +30,58 @@ Pair::Pair(const Blob *blob) :
 		Blob::create(blob)
 	){}
 
+Pair::Pair(const Blob *blob, const observer_t&) :
+				pimpl(blob),
+				observer_(true){}
+
+// ==============================
+
 Pair::Pair(const Pair &other) :
-	Pair(other.pimpl.get()){}
+				Pair( other.pimpl.get() ){
+	log__("copy c-tor\n");
+}
 
 Pair &Pair::operator=(const Pair &other){
-	Pair pair = Pair(other);
+	log__("copy assign\n");
+
+	Pair pair = other;
 
 	swap(pair);
 
 	return *this;
 }
 
-Pair::Pair(const Blob *blob, const observer_t&) :
-				pimpl(blob),
-				options_(Options::OBSERVER){}
+Pair::Pair(Pair &&other) :
+				pimpl		(std::move(other.pimpl		)),
+				observer_	(std::move(other.observer_	)){
+	log__("move c-tor\n");
+}
 
-#if 0
-// very dangerous :)
-Pair::Pair(const Pair &p, const observer_t&) :
-				pimpl( p.pimpl.get() ),
-				options_(Options::OBSERVER){}
-#endif
+Pair &Pair::operator=(Pair &&other){
+	log__("move assign\n");
+
+	Pair pair = std::move(other);
+
+	swap(pair);
+
+	return *this;
+}
+
+// ==============================
+
+void Pair::swap(Pair &other){
+	log__("swap\n");
+
+	using std::swap;
+
+	swap(pimpl,	other.pimpl	);
+	swap(observer_,	other.observer_	);
+}
 
 // ==============================
 
 Pair::~Pair(){
-	if (options_ == Options::OBSERVER)
+	if (observer_)
 		pimpl.release();
 }
 
@@ -138,7 +164,7 @@ void Pair::print() const noexcept{
 		return;
 	}
 
-	pimpl->print();
+	pimpl->print(observer_);
 }
 
 bool Pair::fwrite(std::ostream & os) const{

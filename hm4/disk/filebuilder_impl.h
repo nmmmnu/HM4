@@ -1,5 +1,7 @@
 #include "filemetablob.h"
+
 #include "endian.h"
+#include <limits>
 
 namespace hm4{
 namespace disk{
@@ -8,13 +10,13 @@ namespace disk{
 template <class ITERATOR>
 bool DiskFileBuilder::build(const StringRef &filename,
 				const ITERATOR &begin, const ITERATOR &end,
-				bool const keepTombstones){
+				bool const keepTombstones, bool const aligned){
 
 	std::ofstream fileMeta(filenameMeta(filename),	std::ios::out | std::ios::binary);
 	std::ofstream fileIndx(filenameIndx(filename),	std::ios::out | std::ios::binary);
 	std::ofstream fileData(filenameData(filename),	std::ios::out | std::ios::binary);
 
-	return writeToFile__(begin, end, fileMeta, fileIndx, fileData, keepTombstones);
+	return writeToFile__(begin, end, fileMeta, fileIndx, fileData, keepTombstones, aligned);
 }
 
 
@@ -23,16 +25,17 @@ bool DiskFileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 				std::ofstream &file_meta,
 				std::ofstream &file_indx,
 				std::ofstream &file_data,
-				bool const keepTombstones){
+				bool const keepTombstones,
+				bool const aligned){
 
-	size_t	index		= 0;
+	uint64_t index		= 0;
 
 	uint64_t count		= 0;
 	uint64_t tombstones	= 0;
-	uint64_t createdMin	= begin->getCreated();
-	uint64_t createdMax	= createdMin;
+	uint64_t createdMin	= begin == end ? 0 : std::numeric_limits<uint64_t>::max();
+	uint64_t createdMax	= begin == end ? 0 : std::numeric_limits<uint64_t>::min();
 
-	for(ITERATOR it = begin; it != end; ++it){
+	for(auto it = begin; it != end; ++it){
 		const auto &pair = *it;
 
 		if (! pair )
@@ -54,22 +57,36 @@ bool DiskFileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 			createdMax = created;
 
 		// write the index
-		uint64_t const be_index = htobe64(index);
+		uint64_t const be_index = htobe64( file_data.tellp() );
 		file_indx.write( (const char *) & be_index, sizeof(uint64_t));
 
 		// write the data
 		pair.fwrite(file_data);
 
 		index += pair.bytes();
+
 		++count;
+
+		if (aligned){
+			size_t const gap = calcAlign__(index, FileMetaBlob::ALIGN) - index;
+
+			// this seems to be safer way
+			for(size_t i = 0; i < gap; ++i)
+				file_data.put( 0 );
+
+			index +=  gap;
+		}
 	}
 
 	// now we miraculasly have the datacount.
 
+	uint16_t const option_aligned = aligned ? FileMetaBlob::OPTIONS_ALIGNED : FileMetaBlob::OPTIONS_NONE;
+
 	// write table header
 	uint16_t const options =
 				FileMetaBlob::OPTIONS_NONE	|
-				FileMetaBlob::OPTIONS_SORTED
+				FileMetaBlob::OPTIONS_SORTED	|
+				option_aligned
 	;
 
 	using hm4::disk::FileMetaBlob;

@@ -20,12 +20,15 @@ static void pair_test();
 static void pair_test_expired(bool slow = false);
 
 
+static void pair_test_ctor();
+
 
 int main(int argc, char **argv){
 	pair_test_null();
 	pair_test_raw();
 	pair_test();
 	pair_test_expired();
+	pair_test_ctor();
 
 	return mytest.end();
 }
@@ -183,4 +186,38 @@ static void pair_test_expired(bool const slow){
 	mytest("expired",		! p2.valid()				);
 }
 
+// ===================================
 
+static void pair_test_ctor(){
+	mytest.begin("c-tor / d-tor");
+
+	static char raw_memory[] = {
+		0x50, 0x00, 0x00, 0x00,		// created, 2012-07-13 11:01:20
+		0x00, 0x00, 0x00, 0x00,		// milliseconds
+		0x00, 0x00, 0x00, 0x00,		// expires
+		0x00, 0x00, 0x00, 0x05,		// vallen
+		0x00, 0x04,			// keylen
+		'n', 'a', 'm', 'e', '\0',	// key
+		'P', 'e', 't', 'e', 'r', '\0'	// val
+	};
+
+	const
+	Pair o = Pair::observer( (const PairBlob *)  raw_memory);
+	Pair p;
+
+	mytest("c-tor",		o.observer()			);
+	mytest("c-tor",		! p.observer()			);
+
+	p = o;
+
+	mytest("copy assign",	! p.observer()			);
+
+	Pair s = Pair::observer( (const PairBlob *)  raw_memory);
+	p.swap(s);
+	mytest("swap",		! s.observer()			);
+	mytest("swap",		p.observer()			);
+
+	Pair m = Pair::observer( (const PairBlob *)  raw_memory);
+	p = std::move(m);
+	mytest("move assign",	p.observer()			);
+}

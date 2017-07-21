@@ -52,12 +52,10 @@ public:
 	const void *safeAccessMemory(const void *ptr, size_t const size) const noexcept{
 		const char *ptrc = (const char *) ptr;
 
-		if (empty() || size == 0 || ptrc == nullptr || ptrc < mem_)
+		if (empty() || size == 0 || ptrc < mem_ || ptrc >= mem_ + size_)
 			return nullptr;
 
-		/* long int */ auto const pos = ptrc - mem_;
-
-		return safeAccessMemory( (size_t) pos, size);
+		return ptr;
 	}
 
 public:

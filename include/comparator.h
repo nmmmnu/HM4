@@ -5,16 +5,12 @@
 
 #include <type_traits>
 
-#define log__(...)
-//#include "logger.h"
-
 
 namespace comparator{
 
 
 template <class T>
 int comp(const T &a, const T &b, std::false_type){
-	log__("all");
 	if (a < b)
 		return -1;
 
@@ -28,7 +24,6 @@ int comp(const T &a, const T &b, std::false_type){
 
 template <typename T>
 int comp(const T &a, const T &b, std::true_type){
-	log__("sgn");
 	return sgn(a, b);
 }
 
@@ -41,7 +36,6 @@ int comp(const T &a, const T &b){
 
 template <>
 int comp(int const &a, int const &b){
-	log__("int");
 	return a - b;
 }
 
