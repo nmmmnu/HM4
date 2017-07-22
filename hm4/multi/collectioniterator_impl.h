@@ -1,5 +1,5 @@
 namespace hm4{
-namespace multiiterator{
+namespace multi{
 
 template <class TABLE>
 template <class CONTAINER, typename T>
@@ -92,6 +92,6 @@ const Pair &CollectionIterator<TABLE>::dereference_() const{
 	}
 }
 
-} // namespace multitableiterator
+} // namespace multi
 } // namespace
 

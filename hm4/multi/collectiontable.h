@@ -3,13 +3,13 @@
 
 #include "ilist.h"
 
-#include "multiiterator/collectioniterator.h"
+#include "collectioniterator.h"
 
 #include <algorithm>    // std::count
 
 
 namespace hm4{
-namespace multitable{
+namespace multi{
 
 
 template <class CONTAINER>
@@ -17,7 +17,7 @@ class CollectionTable : public List<CollectionTable<CONTAINER> >{
 public:
 	using Table	= typename CONTAINER::value_type;
 
-	using Iterator	= multiiterator::CollectionIterator<Table>;
+	using Iterator	= CollectionIterator<Table>;
 
 	using size_type	= typename CollectionTable::size_type;
 
@@ -55,7 +55,7 @@ private:
 };
 
 
-} // multitable
+} // namespace multi
 } //namespace
 
 // ===================================

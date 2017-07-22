@@ -4,7 +4,7 @@
 #include "pair.h"
 
 namespace hm4{
-namespace multiiterator{
+namespace multi{
 
 
 namespace impl_{
@@ -66,7 +66,7 @@ namespace impl_{
 } // namespace impl_
 
 
-} // namespace multiiterator
+} // namespace multi
 } // namespace
 
 

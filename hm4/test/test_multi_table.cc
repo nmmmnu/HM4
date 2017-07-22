@@ -101,7 +101,7 @@ void table_test(const LIST &list, typename LIST::size_type const size, size_t co
 }
 
 
-#include "multitable/dualtable.h"
+#include "multi/dualtable.h"
 
 template <class LIST>
 size_t list_insert(LIST &list, Pair &&p){
@@ -128,7 +128,7 @@ void test_DualTable(const char *name){
 	bytes += list_insert(list2, {"2 age",	"22"	});
 	bytes += list_insert(list2, {"4 os",	"Linux"	});
 
-	using MyMultiTable = hm4::multitable::DualTable<LIST, LIST>;
+	using MyMultiTable = hm4::multi::DualTable<LIST, LIST>;
 
 	MyMultiTable table{ list1, list2 };
 
@@ -149,14 +149,14 @@ void test_DualTableEmpty(const char *name){
 	bytes += list_insert(list2, {"3 city",	"Sofia"	});
 	bytes += list_insert(list2, {"4 os",	"Linux"	});
 
-	using MyMultiTable = hm4::multitable::DualTable<LIST, LIST>;
+	using MyMultiTable = hm4::multi::DualTable<LIST, LIST>;
 
 	MyMultiTable table{ list1, list2 };
 
 	return table_test(table, 4, bytes);
 }
 
-#include "multitable/collectiontable.h"
+#include "multi/collectiontable.h"
 
 template <class LIST>
 void test_CollectionTable(const char *name){
@@ -204,7 +204,7 @@ void test_CollectionTable(const char *name){
 		container.push_back(LIST{});
 	}
 
-	using MyMultiTable = hm4::multitable::CollectionTable<MyContainer>;
+	using MyMultiTable = hm4::multi::CollectionTable<MyContainer>;
 
 	MyMultiTable table{ container };
 

@@ -3,17 +3,17 @@
 
 #include "ilist.h"
 
-#include "multiiterator/dualiterator.h"
+#include "dualiterator.h"
 
 
 namespace hm4{
-namespace multitable{
+namespace multi{
 
 
 template <class TABLE1, class TABLE2>
 class DualTable : public List<DualTable<TABLE1,TABLE2> >{
 public:
-	using Iterator = multiiterator::DualIterator<TABLE1, TABLE2>;
+	using Iterator = DualIterator<TABLE1, TABLE2>;
 
 	using size_type = typename DualTable::size_type;
 
@@ -82,7 +82,7 @@ private:
 };
 
 
-} // multitable
+} // multi
 } // namespace
 
 

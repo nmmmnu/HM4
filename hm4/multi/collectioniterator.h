@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace hm4{
-namespace multiiterator{
+namespace multi{
 
 
 template <class TABLE>
@@ -74,7 +74,7 @@ private:
 };
 
 
-} // namespace multitableiterator
+} // namespace multi
 } // namespace
 
 

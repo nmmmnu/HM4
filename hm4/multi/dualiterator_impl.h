@@ -1,5 +1,5 @@
 namespace hm4{
-namespace multiiterator{
+namespace multi{
 
 
 // faster solution with 1 comparison.
@@ -36,6 +36,6 @@ const Pair &DualIterator<TABLE1, TABLE2>::operator*() const{
 }
 
 
-} // namespace multitableiterator
+} // namespace multi
 } // namespace
 

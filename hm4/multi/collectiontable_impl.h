@@ -1,5 +1,5 @@
 namespace hm4{
-namespace multitable{
+namespace multi{
 
 
 template <class CONTAINER>
@@ -56,6 +56,6 @@ auto CollectionTable<CONTAINER>::sizeReal_() const -> size_type{
 }
 
 
-} // multitable
+} // namespace multi
 } // namespace
 

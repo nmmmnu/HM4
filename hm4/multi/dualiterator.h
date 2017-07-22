@@ -4,7 +4,7 @@
 #include "basemultiiterator_.h"
 
 namespace hm4{
-namespace multiiterator{
+namespace multi{
 
 template <class TABLE1, class TABLE2>
 class DualIterator : public impl_::MultiIteratorTags_{
@@ -50,7 +50,7 @@ private:
 	IteratorPair2	it2_;
 };
 
-} // namespace multiiterator
+} // namespace multi
 } // namespace
 
 
