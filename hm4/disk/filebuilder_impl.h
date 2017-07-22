@@ -65,17 +65,12 @@ bool DiskFileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 
 		index += pair.bytes();
 
-		++count;
-
 		if (aligned){
-			size_t const gap = calcAlign__(index, FileMetaBlob::ALIGN) - index;
-
-			// this seems to be safer way
-			for(size_t i = 0; i < gap; ++i)
-				file_data.put( 0 );
-
-			index +=  gap;
+			size_t const gap = pair.fwriteAlignGap(file_data);
+			index += gap;
 		}
+
+		++count;
 	}
 
 	// now we miraculasly have the datacount.

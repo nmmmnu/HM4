@@ -100,12 +100,14 @@ public:
 	}
 
 	size_t bytes() const noexcept;
+	size_t bytesAligned() const noexcept;
 
 	bool observer() const noexcept{
 		return observer_;
 	}
 public:
 	bool fwrite(std::ostream & os) const;
+	size_t fwriteAlignGap(std::ostream & os) const;
 
 	void print() const noexcept;
 

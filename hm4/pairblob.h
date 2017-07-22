@@ -117,6 +117,10 @@ public:
 		return sizeofBase__() + sizeofBuffer_();
 	}
 
+	size_t bytesAligned() const noexcept{
+		return calcAlign__(bytes(), PairConf::ALIGN);
+	}
+
 	// ==============================
 
 	void print(bool observer) const noexcept;
@@ -146,6 +150,13 @@ private:
 	// ==============================
 
 	static uint64_t getCreateTime__(uint32_t created) noexcept;
+
+	// ==============================
+
+	static size_t calcAlign__(size_t const value, uint16_t const align){
+		return align * ((value + align - 1) / align);
+	}
+
 } __attribute__((__packed__));
 
 static_assert(std::is_pod<PairBlob>::value, "PairBlob must be POD type");

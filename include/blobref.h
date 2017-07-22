@@ -76,10 +76,7 @@ public:
 	// ambiguous call guard for 0
 	template <class T>
 	const T *as(int const pos = 0, size_t const elements = 1) const noexcept{
-		return pos < 0 ?
-			nullptr
-		:
-			as<T>( (size_t) pos, elements );
+		return pos < 0 ? nullptr : as<T>( (size_t) pos, elements );
 	}
 
 private:

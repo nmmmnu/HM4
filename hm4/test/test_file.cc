@@ -92,7 +92,7 @@ static int listWriteProcess(LIST &&list, READER &reader, const StringRef &filena
 	getchar();
 
 	printf("Write start...\n");
-	hm4::disk::DiskFileBuilder::buildFromList(filename2, list, /* keep tombstones */ true, /*aligned */ false);
+	hm4::disk::DiskFileBuilder::buildFromList(filename2, list, /* keep tombstones */ true, /*aligned */ true);
 	printf("Write done...\n");
 	getchar();
 

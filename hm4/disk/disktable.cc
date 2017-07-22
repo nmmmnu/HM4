@@ -127,12 +127,11 @@ const PairBlob *DiskTable::getAtFD_(size_type const index) const{
 }
 
 const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
-	size_t size = previous->bytes();
+	size_t const size = metadata_.aligned() ? previous->bytesAligned() : previous->bytes();
 
-	if ( metadata_.aligned() )
-		size = calcAlign__(size, FileMeta::ALIGN);
-
-//	log__( "next", metadata_.aligned() ? "with align" : "");
+	if (metadata_.aligned()){
+	//	log__( "next", metadata_.aligned() ? "with align" : "");
+	}
 
 	const char *previousC = (const char *) previous;
 

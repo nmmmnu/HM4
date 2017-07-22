@@ -27,10 +27,6 @@ private:
 				std::ofstream &file_meta, std::ofstream &file_index, std::ofstream &file_data,
 				bool keepTombstones, bool const aligned);
 
-private:
-	static size_t calcAlign__(size_t const value, size_t const align){
-		return align * ((value + align - 1) / align);
-	}
 };
 
 

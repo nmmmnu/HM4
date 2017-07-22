@@ -18,9 +18,6 @@ private:
 	FileMetaBlob	blob;
 
 public:
-	constexpr static size_t ALIGN = FileMetaBlob::ALIGN;
-
-public:
 	FileMeta(){
 		clear();
 	}

@@ -20,9 +20,6 @@ struct FileMetaBlob{
 	uint64_t	createdMax;	// 8
 
 public:
-	constexpr static std::size_t	ALIGN		= sizeof(uint64_t);
-
-public:
 	static constexpr const char	*LOGO		= "ZUSE004";
 	static constexpr uint16_t	VERSION		= 4;
 

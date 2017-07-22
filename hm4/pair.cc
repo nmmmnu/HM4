@@ -171,10 +171,21 @@ bool Pair::fwrite(std::ostream & os) const{
 	if (pimpl == nullptr)
 		return false;
 
-	os.write((const char *) pimpl.get(), (std::streamsize) bytes() );
+	os.write((const char *) pimpl.get(), (std::streamsize) pimpl->bytes() );
 
 	return true;
 }
+
+size_t Pair::fwriteAlignGap(std::ostream & os) const{
+	size_t const gap = pimpl->bytesAligned() - pimpl->bytes();
+
+	// this seems to be safer way
+	for(size_t i = 0; i < gap; ++i)
+		os.put( 0 );
+
+	return gap;
+}
+
 
 } //namespace
 

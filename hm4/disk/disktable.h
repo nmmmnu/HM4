@@ -75,11 +75,6 @@ private:
 	static void closeFile__(MMAPFile &file, BlobRef &blob);
 
 private:
-	static size_t calcAlign__(size_t const value, size_t const align){
-		return align * ((value + align - 1) / align);
-	}
-
-private:
 	MMAPFile			mmapIndx_;
 	BlobRef				blobIndx_;
 
