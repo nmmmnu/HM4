@@ -38,7 +38,7 @@ public:
 	}
 
 public:
-	const Pair &operator[](const StringRef &key) const;
+	ObserverPair operator[](const StringRef &key) const;
 
 	size_type size(bool const estimated = false) const{
 		return estimated ? sizeEstimated_() : sizeReal_();

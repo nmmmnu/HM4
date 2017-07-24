@@ -34,7 +34,11 @@ int main(int argc, char **argv){
 	using DiskTable = hm4::disk::DiskTable;
 
 	DiskTable list;
-	list.open(filename);
+	if (list.open(filename) == false){
+		printf("Database file does not exists or is incorrect.\n");
+		return 2;
+	}
+
 	list.printHeader();
 
 	// =======================

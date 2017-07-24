@@ -117,8 +117,10 @@ public:
 		return sizeofBase__() + sizeofBuffer_();
 	}
 
-	size_t bytesAligned() const noexcept{
-		return calcAlign__(bytes(), PairConf::ALIGN);
+	size_t bytes(bool const aligned) const noexcept{
+		size_t const size = bytes();
+
+		return aligned ? calcAlign__(size, PairConf::ALIGN) : size;
 	}
 
 	// ==============================

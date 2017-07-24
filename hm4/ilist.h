@@ -63,13 +63,20 @@ public:
 	bool insert(Pair &&pair){
 		assert( pair );
 
-		return self()->insertT_(std::move(pair));
+		if (pair.isObserver()){
+			// Observer must be copied
+			return self()->insertT_( const_cast<const Pair &>(pair) );
+		}else{
+			// normal Pair can be forwarded
+			return self()->insertT_(std::move(pair));
+		}
 	}
 
 	template <class ...ARGS>
 	bool emplace(ARGS ...args){
-		Pair p{ std::forward<ARGS>(args)... };
-		return insert(std::move(p));
+		Pair pair{ std::forward<ARGS>(args)... };
+
+		return self()->insertT_(std::move(pair));
 	}
 
 private:

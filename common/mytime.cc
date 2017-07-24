@@ -29,7 +29,13 @@ uint64_t MyTime::now64() noexcept{
 }
 
 const char *MyTime::toString(uint64_t const date2, const char *format) noexcept{
-	time_t date = uncombine(date2);
+	uint32_t const date = uncombine(date2);
+
+	return toString(date, format);
+}
+
+const char *MyTime::toString(uint32_t const date2, const char *format) noexcept{
+	time_t const date = date2;
 
 	if (date == 0)
 		return nullptr;

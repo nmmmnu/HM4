@@ -15,6 +15,7 @@ public:
 	constexpr static const char *DATE_FORMAT_DEFAULT	= TIME_FORMAT_STANDARD;
 
 public:
+	static const char *toString(uint32_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept;
 	static const char *toString(uint64_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept;
 
 	static const char *toString(const char *format = DATE_FORMAT_DEFAULT) noexcept{

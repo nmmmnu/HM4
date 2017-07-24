@@ -15,8 +15,6 @@ class DiskTable : public List<DiskTable>{
 public:
 	class Iterator;
 
-	using ObserverPair = Pair;
-
 private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
 
@@ -37,7 +35,7 @@ public:
 	}
 
 	void printHeader() const{
-	//	metadata_.print();
+		metadata_.print();
 	}
 
 public:
@@ -90,7 +88,7 @@ class DiskTable::Iterator{
 private:
 	friend class DiskTable;
 	Iterator(const DiskTable &list, size_type pos,
-				bool sorted_, bool aligned);
+				bool sorted_);
 
 public:
 	Iterator &operator++(){
@@ -122,22 +120,24 @@ private:
 	const DiskTable	&list_;
 	size_type	pos_;
 	bool		sorted_;
-	bool		aligned_;
 
 private:
 	mutable size_type	tmp_pos		= 0;
 	mutable const PairBlob	*tmp_blob	= nullptr;
+
+	// We need to store the Pair,
+	// because operator -> need somewhere Pair to live
 	mutable ObserverPair	tmp_pair;
 };
 
 // ==============================
 
 inline auto DiskTable::begin() const -> Iterator{
-	return Iterator(*this,      0, metadata_.sorted(), metadata_.aligned());
+	return Iterator(*this,      0, metadata_.sorted());
 }
 
 inline auto DiskTable::end() const -> Iterator{
-	return Iterator(*this, size(), metadata_.sorted(), metadata_.aligned());
+	return Iterator(*this, size(), metadata_.sorted());
 }
 
 

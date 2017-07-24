@@ -2,9 +2,21 @@
 
 #include <cstring>
 
+#include <inttypes.h>	// PRIu64
+
+#include "mytime.h"
 
 namespace hm4{
 namespace disk{
+
+
+inline uint32_t betoh(uint32_t const a){
+	return be32toh(a);
+}
+
+inline uint64_t betoh(uint64_t const a){
+	return be64toh(a);
+}
 
 
 bool FileMeta::open(std::istream &file_meta){
@@ -30,6 +42,29 @@ inline bool FileMeta::openFail_(const StringRef &){
 	clear();
 
 	return false;
+}
+
+template<typename UINT>
+void FileMeta::printTime__(const char *descr, UINT const time){
+	printf("%-14s: %s\n",		descr,	time	? MyTime::toString(betoh(time)) : "n/a");
+}
+
+inline void FileMeta::printBool__(const char *descr, bool const b){
+	printf("%-14s: %s\n",		descr,	b	? "Yes" : "No");
+}
+
+void FileMeta::print() const{
+	printf("%-14s: %u\n",		"Version",	version()			);
+	printf("%-14s: %" PRIu64 "\n",	"Records",	size()				); // PRIu64
+	printf("%-14s: %" PRIu64 "\n",	"Tombstones",	be64toh(blob.tombstones)	); // PRIu64
+
+	printBool__("Sorted",	sorted()	);
+	printBool__("Aligned",	aligned()	);
+
+	printTime__("Created",	blob.created	);
+
+	printTime__("Created::MIN", blob.createdMin	);
+	printTime__("Created::MAX", blob.createdMax	);
 }
 
 

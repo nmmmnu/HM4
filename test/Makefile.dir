@@ -2,7 +2,7 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 EXTRA_INCL += -I$(SRC_DIR)test_levelorderlookup
 
-MY_TARGETS = $(A)test_stringref $(A)test_trim $(A)test_blobref $(A)test_binarysearch $(A)test_levelorderlookup $(A)test_glob
+MY_TARGETS = $(A)test_stringref $(A)test_trim $(A)test_blobref $(A)test_binarysearch $(A)test_levelorderlookup $(A)test_glob $(A)test_stringtokenizer
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -27,5 +27,8 @@ $(A)test_levelorderlookup: $(O)test_levelorderlookup.o
 	$(LINK)
 
 $(A)test_glob: $(O)test_glob.o $(O)myglob.o
+	$(LINK)
+
+$(A)test_stringtokenizer: $(O)test_stringtokenizer.o $(O)stringtokenizer.o
 	$(LINK)
 

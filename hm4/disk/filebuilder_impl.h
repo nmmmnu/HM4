@@ -1,5 +1,7 @@
 #include "filemetablob.h"
 
+#include <fstream>
+
 #include "endian.h"
 #include <limits>
 
@@ -8,7 +10,7 @@ namespace disk{
 
 
 template <class ITERATOR>
-bool DiskFileBuilder::build(const StringRef &filename,
+bool FileBuilder::build(const StringRef &filename,
 				const ITERATOR &begin, const ITERATOR &end,
 				bool const keepTombstones, bool const aligned){
 
@@ -21,19 +23,21 @@ bool DiskFileBuilder::build(const StringRef &filename,
 
 
 template <class ITERATOR>
-bool DiskFileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
+bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 				std::ofstream &file_meta,
 				std::ofstream &file_indx,
 				std::ofstream &file_data,
 				bool const keepTombstones,
 				bool const aligned){
 
+	constexpr uint64_t MAX = std::numeric_limits<uint64_t>::min();
+
 	uint64_t index		= 0;
 
 	uint64_t count		= 0;
 	uint64_t tombstones	= 0;
-	uint64_t createdMin	= begin == end ? 0 : std::numeric_limits<uint64_t>::max();
-	uint64_t createdMax	= begin == end ? 0 : std::numeric_limits<uint64_t>::min();
+	uint64_t createdMin	= 0;
+	uint64_t createdMax	= MAX;
 
 	for(auto it = begin; it != end; ++it){
 		const auto &pair = *it;
@@ -72,6 +76,9 @@ bool DiskFileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 
 		++count;
 	}
+
+	if (createdMax == MAX)
+		createdMax = 0;
 
 	// now we miraculasly have the datacount.
 

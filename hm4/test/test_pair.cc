@@ -81,11 +81,8 @@ static void pair_test_raw_do(const char *module, const Pair & p, const StringRef
 	p2 = p;
 }
 
-static void pair_test_raw(){
-	const char *key = "name";
-	const char *val = "Peter";
-
-	static char raw_memory[] = {
+static const PairBlob *raw_memory(){
+	static const char blob[] = {
 		0x50, 0x00, 0x00, 0x00,		// created, 2012-07-13 11:01:20
 		0x00, 0x00, 0x00, 0x00,		// milliseconds
 		0x00, 0x00, 0x00, 0x00,		// expires
@@ -95,16 +92,21 @@ static void pair_test_raw(){
 		'P', 'e', 't', 'e', 'r', '\0'	// val
 	};
 
-	pair_blob_test("pair::blob",
-				(const PairBlob *) raw_memory,
+	return reinterpret_cast<const PairBlob *>(blob);
+}
+
+static void pair_test_raw(){
+	const char *key = "name";
+	const char *val = "Peter";
+
+
+	pair_blob_test("pair::blob", raw_memory(),
 					key, val);
 
-	pair_test_raw_do("raw Pair",
-				(const PairBlob *) raw_memory,
+	pair_test_raw_do("raw Pair", raw_memory(),
 					key, val);
 
-	pair_test_raw_do("raw Pair (observer)",
-				Pair::observer( (const PairBlob *) raw_memory ),
+	pair_test_raw_do("raw Pair (observer)",	Pair::observer( raw_memory() ),
 					key, val);
 }
 
@@ -191,33 +193,24 @@ static void pair_test_expired(bool const slow){
 static void pair_test_ctor(){
 	mytest.begin("c-tor / d-tor");
 
-	static char raw_memory[] = {
-		0x50, 0x00, 0x00, 0x00,		// created, 2012-07-13 11:01:20
-		0x00, 0x00, 0x00, 0x00,		// milliseconds
-		0x00, 0x00, 0x00, 0x00,		// expires
-		0x00, 0x00, 0x00, 0x05,		// vallen
-		0x00, 0x04,			// keylen
-		'n', 'a', 'm', 'e', '\0',	// key
-		'P', 'e', 't', 'e', 'r', '\0'	// val
-	};
-
 	const
-	Pair o = Pair::observer( (const PairBlob *)  raw_memory);
+	Pair o = Pair::observer(raw_memory()			);
 	Pair p;
 
-	mytest("c-tor",		o.observer()			);
-	mytest("c-tor",		! p.observer()			);
+	mytest("c-tor",		o.isObserver()			);
+	mytest("c-tor",		! p.isObserver()		);
 
 	p = o;
 
-	mytest("copy assign",	! p.observer()			);
+	mytest("copy assign",	! p.isObserver()		);
 
-	Pair s = Pair::observer( (const PairBlob *)  raw_memory);
+	Pair s = Pair::observer(raw_memory()			);
 	p.swap(s);
-	mytest("swap",		! s.observer()			);
-	mytest("swap",		p.observer()			);
+	mytest("swap",		! s.isObserver()		);
+	mytest("swap",		p.isObserver()			);
 
-	Pair m = Pair::observer( (const PairBlob *)  raw_memory);
+	Pair m = Pair::observer(raw_memory()			);
 	p = std::move(m);
-	mytest("move assign",	p.observer()			);
+	mytest("move assign",	p.isObserver()			);
 }
+

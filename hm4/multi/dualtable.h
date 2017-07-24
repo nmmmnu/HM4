@@ -26,7 +26,7 @@ public:
 //	DualTable(DualTable &&other) = default;
 
 public:
-	const Pair &operator[](const StringRef &key) const{
+	ObserverPair operator[](const StringRef &key) const{
 		// precondition
 		assert(!key.empty());
 		// eo precondition
@@ -34,9 +34,9 @@ public:
 		const Pair &pair = table1_[key];
 
 		if (pair)
-			return pair;
+			return Pair::observer(pair);
 
-		return table2_[key];
+		return Pair::observer(table2_[key]);
 	}
 
 	size_type size(bool const estimated = false) const{

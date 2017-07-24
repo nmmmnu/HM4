@@ -7,10 +7,10 @@ namespace hm4{
 namespace disk{
 
 
-class DiskFileBuilder{
+class FileBuilder{
 public:
 	template <class LIST>
-	static bool buildFromList(const StringRef &filename,
+	static bool build(const StringRef &filename,
 				const LIST &list,
 				bool keepTombstones, bool const aligned){
 		return build(filename, list.begin(), list.end(), keepTombstones, aligned);

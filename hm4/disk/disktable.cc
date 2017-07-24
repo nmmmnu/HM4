@@ -57,7 +57,7 @@ inline auto DiskTable::search_(const StringRef &key) const -> std::pair<bool,siz
 
 // ==============================
 
-auto DiskTable::operator[](const StringRef &key) const -> ObserverPair{
+ObserverPair DiskTable::operator[](const StringRef &key) const{
 	// precondition
 	assert(!key.empty());
 	// eo precondition
@@ -70,12 +70,12 @@ auto DiskTable::operator[](const StringRef &key) const -> ObserverPair{
 auto DiskTable::lowerBound(const StringRef &key) const -> Iterator{
 	const auto x = search_(key);
 
-	return Iterator(*this, x.second, metadata_.sorted(), metadata_.aligned());
+	return Iterator(*this, x.second, metadata_.sorted());
 }
 
 // ==============================
 
-auto DiskTable::operator[](size_type const index) const -> ObserverPair{
+ObserverPair DiskTable::operator[](size_type const index) const{
 	// precondition
 	assert( index < size() );
 	// eo precondition
@@ -123,11 +123,12 @@ const PairBlob *DiskTable::getAtFD_(size_type const index) const{
 
 	const PairBlob *blob = blobData_.as<const PairBlob>(offset);
 
+	// check for overrun because PairBlob is dynamic size
 	return saveAccessFD_(blob);
 }
 
 const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
-	size_t const size = metadata_.aligned() ? previous->bytesAligned() : previous->bytes();
+	size_t const size = previous->bytes( metadata_.aligned() );
 
 	if (metadata_.aligned()){
 	//	log__( "next", metadata_.aligned() ? "with align" : "");
@@ -137,17 +138,17 @@ const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
 
 	const PairBlob *blob = blobData_.as<const PairBlob>(previousC + size);
 
+	// check for overrun because PairBlob is dynamic size
 	return saveAccessFD_(blob);
 }
 
 // ===================================
 
 DiskTable::Iterator::Iterator(const DiskTable &list, size_type const pos,
-							bool const sorted, bool const aligned) :
+							bool const sorted) :
 			list_(list),
 			pos_(pos),
-			sorted_(sorted),
-			aligned_(aligned){}
+			sorted_(sorted){}
 
 auto DiskTable::Iterator::operator*() const -> const ObserverPair &{
 	if (tmp_blob && pos_ == tmp_pos)

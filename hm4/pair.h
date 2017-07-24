@@ -43,6 +43,10 @@ public:
 		return Pair( blob, observer_t{} );
 	}
 
+	static Pair observer(const Pair &other){
+		return Pair( other.pimpl.get(), observer_t{} );
+	}
+
 	static Pair tombstone(const StringRef &key){
 		return Pair(key, StringRef{} );
 	}
@@ -100,11 +104,14 @@ public:
 	}
 
 	size_t bytes() const noexcept;
-	size_t bytesAligned() const noexcept;
 
-	bool observer() const noexcept{
+	size_t bytes(bool aligned) const noexcept;
+
+	bool isObserver() const noexcept{
 		return observer_;
 	}
+
+
 public:
 	bool fwrite(std::ostream & os) const;
 	size_t fwriteAlignGap(std::ostream & os) const;
@@ -124,6 +131,10 @@ private:
 private:
 	static const Pair	zero_;
 };
+
+// ==============================
+
+using ObserverPair = Pair;
 
 // ==============================
 

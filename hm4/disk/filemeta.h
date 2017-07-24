@@ -57,6 +57,15 @@ public:
 		return be64toh(blob.size);
 	}
 
+public:
+	void print() const;
+
+private:
+	template<typename UINT>
+	static void printTime__(const char *descr, UINT const time);
+
+	static void printBool__(const char *descr, bool const b);
+
 private:
 	bool openFail_(const StringRef &);
 };
