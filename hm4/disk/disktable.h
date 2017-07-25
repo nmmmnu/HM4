@@ -76,6 +76,7 @@ private:
 
 private:
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
+	std::pair<bool,size_type> btreeSearch_(const StringRef &key) const;
 
 	std::pair<bool,size_type> search_(const StringRef &key) const;
 
@@ -88,6 +89,12 @@ private:
 
 	MMAPFile			mmapData_;
 	BlobRef				blobData_;
+
+	MMAPFile			mmapTree_;
+	BlobRef				blobTree_;
+
+	MMAPFile			mmapKeys_;
+	BlobRef				blobKeys_;
 
 	FileMeta			metadata_;
 };

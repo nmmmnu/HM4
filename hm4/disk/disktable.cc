@@ -4,16 +4,19 @@
 
 #include "binarysearch.h"
 #include "myalign.h"
+#include "levelorderlookup.h"
 
 #include "disk/filenames.h"
+#include "disk/btreeindexnode.h"
 
-
-#include "logger.h"
+#define log__(...) /* nada */
+//#include "logger.h"
 
 
 namespace hm4{
 namespace disk{
 
+constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
 bool DiskTable::open(const std::string &filename){
 	metadata_.open(filenameMeta(filename));
@@ -24,12 +27,18 @@ bool DiskTable::open(const std::string &filename){
 	openFile__(mmapIndx_, blobIndx_, filenameIndx(filename)	);
 	openFile__(mmapData_, blobData_, filenameData(filename)	);
 
+	openFile__(mmapTree_, blobTree_, filenameBTreeIndx(filename)	);
+	openFile__(mmapKeys_, blobKeys_, filenameBTreeData(filename)	);
+
 	return true;
 }
 
 void DiskTable::close(){
 	closeFile__(mmapIndx_, blobIndx_);
 	closeFile__(mmapData_, blobData_);
+
+	closeFile__(mmapTree_, blobTree_);
+	closeFile__(mmapKeys_, blobKeys_);
 }
 
 // ==============================
@@ -46,12 +55,149 @@ inline void DiskTable::closeFile__(MMAPFile &file, BlobRef &blob){
 
 // ==============================
 
+auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+	using Node			= btree::Node;
+	using NodeData			= btree::NodeData;
+
+	using level_type		= btree::level_type;
+
+	level_type const VALUES		= btree::VALUES;
+	level_type const BRANCHES	= btree::BRANCHES;
+
+	size_t const nodesCount	= blobTree_.size() / sizeof(Node);
+
+	const Node *nodes = blobTree_.as<const Node>(0, nodesCount);
+
+	if (!nodes){
+		// go try with binary search
+		log__("Problem, switch to binary search (1)");
+		return binarySearch_(key);
+	}
+
+	std::pair<size_type, size_type> bs{ 0, size() };
+
+	size_t pos = 0;
+
+	log__("BTREE at ", pos);
+
+	while(pos < nodesCount){
+		const Node &node = nodes[pos];
+
+		// MODIFIED LEVEL ORDERED MINI-BINARY SEARCH INSIDE BTREE NODE
+		// OUTPUT PARAMETERS
+
+		level_type node_index;
+
+		// MODIFIED LEVEL ORDERED MINI-BINARY SEARCH INSIDE BTREE NODE
+		// CODE
+		{
+			const auto &ll = LL;
+
+			level_type node_pos = 0;
+
+			do{
+
+				// ACCESS ELEMENT
+				// ---
+				uint64_t const offset = be64toh(node.values[ node_pos ]);
+
+				 // can not happen:
+				//if (offset == Node::NIL)
+
+				const NodeData *nd = blobKeys_.as<const NodeData>((size_t) offset);
+
+				if (!nd){
+					// go try with binary search
+					log__("Problem, switch to binary search (2)");
+					return binarySearch_(key);
+				}
+
+				size_t    const keysize = be16toh(nd->keysize);
+				size_type const dataid  = be64toh(nd->dataid);
+
+				// key is just after the NodeData
+				const char *keyptr = blobKeys_.as<const char>((size_t) offset + sizeof(NodeData), keysize);
+
+				if (!keyptr){
+					// go try with binary search
+					log__("Problem, switch to binary search (3)");
+					return binarySearch_(key);
+				}
+
+				const StringRef keyx{ keyptr, keysize };
+				// ---
+				// EO ACCESS ELEMENT
+
+				log__("\tNode Value", node_pos, "[", ll[node_pos], "], Key:", keyx);
+
+				int const cmp = keyx.compare(key);
+
+				if (cmp < 0){
+					// this + 1 is because,
+					// we want if possible to go LEFT instead of RIGHT
+					// node_index will go out of bounds,
+					// this is indicator for RIGHT
+					node_index = ll[node_pos] + 1;
+
+					// go right
+					node_pos = 2 * node_pos + 1 + 1;
+
+					bs.first = dataid + 1;
+
+					log__("\t\tR:", node_pos, "BS:", bs.first, '-', bs.second);
+				}else if (cmp > 0){
+					node_index = ll[node_pos];
+
+					// go left
+					node_pos = 2 * node_pos + 1;
+
+					bs.second = dataid;
+
+					log__("\t\tL:", node_pos, "BS:", bs.first, '-', bs.second);
+				}else{
+					// found
+
+					log__("\t\tFound at ", node_pos);
+
+					return { true, dataid };
+				}
+			}while (node_pos < VALUES);
+		}
+		// EO MODIFIED LEVEL ORDERED MINI-BINARY SEARCH INSIDE BTREE NODE
+
+		if ( node_index == VALUES ){
+			// Go Right
+			pos = pos * BRANCHES + VALUES + 1;
+
+			log__("BTREE R:", pos);
+		}else{
+			// Go Left
+			pos = pos * BRANCHES + node_index + 1;
+
+			log__("BTREE L:", pos, ", node branch", node_index);
+		}
+	}
+
+
+	// leaf or similar
+	// fallback to binary search :)
+
+	log__("BTREE LEAF:", pos);
+	log__("Fallback to binary search", bs.first, '-', bs.second, ", width", bs.second - bs.first);
+
+	return binarySearch(*this, bs.first, bs.second, key, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
+}
+
 inline auto DiskTable::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
 }
 
 inline auto DiskTable::search_(const StringRef &key) const -> std::pair<bool,size_type>{
-	{
+	if (mmapTree_ && mmapKeys_){
+		log__("btree");
+		return btreeSearch_(key);
+	}else{
+		log__("binary");
 		return binarySearch_(key);
 	}
 }
@@ -181,4 +327,29 @@ auto DiskTable::Iterator::operator*() const -> const ObserverPair &{
 
 } // namespace disk
 } // namespace
+
+
+
+#if 0
+// BTree NIL
+
+if (offset == Node::NIL){
+	// special case go left
+	/*
+	 *   1   0   2
+	 * 1 2 n n n n n
+	 *
+	 *       n
+	 *   2       n
+	 * 1   n   n   n
+	 *
+	 */
+
+	node_pos = branch_type(2 * node_pos + 1);
+
+	log__("\t L: NIL");
+
+	continue;
+}
+#endif
 
