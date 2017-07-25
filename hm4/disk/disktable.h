@@ -34,7 +34,7 @@ public:
 		return metadata_;
 	}
 
-	void printHeader() const{
+	void printMetadata() const{
 		metadata_.print();
 	}
 
@@ -63,6 +63,8 @@ private:
 
 	const PairBlob *getAtFD_(size_type index) const;
 	const PairBlob *getNextFD_(const PairBlob *blob) const;
+
+	static size_t getSizeFD__(const PairBlob *blob, bool aligned);
 
 private:
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;

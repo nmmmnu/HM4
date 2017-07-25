@@ -9,7 +9,7 @@ Prior the test you need to generate data files:
 
 Then you can do tests such:
 
-./bin/db_merge - m.db TEST_DATA.BIN/*.db
+./bin/db_merge - TEST_DATA.BIN/all.db TEST_DATA.BIN/data.*.db
 
 ./bin/db_collection l TEST_DATA.BIN/'*'.db -
 ./bin/db_collection l TEST_DATA.BIN/'*'.db Bos

@@ -1,0 +1,157 @@
+#include "endian.h"
+
+#include <iostream>
+#include <stdexcept>
+
+namespace hm4{
+namespace disk{
+namespace btree{
+
+
+template <class LIST>
+bool BTreeIndexBuilder<LIST>::build(){
+	size_type const size = list_.size();
+
+	level_type total_levels = level_type(calcDepth__(size) - 1);
+
+	if (total_levels == 0){
+		std::cout << "List contains very few elements. Skipping BTree building." << '\n';
+		return true;
+	}
+
+	file_indx_.open(filenameBTreeIndx(filename_),	std::ios::out | std::ios::binary);
+	file_data_.open(filenameBTreeData(filename_),	std::ios::out | std::ios::binary);
+
+	std::cout
+		 << "Records          : "	<< size		<< '\n'
+		 << "Branching Factor : "	<< BRANCHES	<< '\n'
+		 << "Tree Depth       : "	<< total_levels	<< '\n'
+	;
+
+	current_ = 0;
+
+	for(level_type level = 0; level < total_levels; ++level){
+		std::cout << "Processing level " << level << "..." << '\n';
+
+		reorderLevel_(level);
+	}
+
+	return true;
+}
+
+
+template <class LIST>
+void BTreeIndexBuilder<LIST>::reorder_(size_type const begin, size_type const end,
+					level_type const target_level, level_type const current_level){
+	if (begin >= end)
+		return;
+
+	size_type const size = end - begin;
+	size_type const distance = size / BRANCHES;
+
+	if (current_level < target_level){
+		level_type const next_level = level_type(current_level + 1);
+
+		size_type b = begin;
+		for(level_type i = 0; i < VALUES; ++i){
+			size_type e = begin + distance * (i + 1);
+
+			reorder_(b, e, target_level, next_level );
+
+			b = e + 1;
+		}
+
+		// last right child
+		reorder_(b, end, target_level, next_level );
+
+	}else{ // current_level == target_level
+
+		if (size <= VALUES){
+			std::cout << "Node is half full. Something is incorrect." << '\n';
+			throw std::logic_error("Node is half full");
+		}
+
+		// NORMAL NODE WITH ALL ELEMENTS PRESENT
+
+		Node node;
+
+		for(level_type j = 0; j < VALUES; ++j){
+			level_type const i = LL[j];
+
+			node.values[j] = htobe64( current_ );
+
+			size_type const index = begin + distance * (i + 1);
+
+			push_back_key(index);
+		}
+
+		// push the node
+		file_indx_.write( (const char *) & node, sizeof node );
+	}
+}
+
+// ==============================
+
+template <class LIST>
+void BTreeIndexBuilder<LIST>::push_back_key(size_type const index){
+	// we need to have the pair,
+	// because key "live" inside it.
+	const auto &p = list_[index];
+	const StringRef &key = p.getKey();
+
+	{
+		NodeData nd;
+		nd.dataid  = htobe64(index);
+		nd.keysize = htobe16(key.size());
+
+		// push NodeData
+		file_data_.write( (const char *) &nd, sizeof nd );
+
+		// push the key
+		file_data_.write( key.data(), (std::streamsize) key.size() );
+
+		// push the align
+#if 0
+		size_t const sizeAligned = calcAlign__(key.size(), sizeof(uint64_t) );
+
+		size_t const gap = sizeAligned - key.size();
+
+		// this seems to be safer way
+		for(size_t i = 0; i < gap; ++i)
+			file_data_.put( 0 );
+#endif
+	}
+
+	current_ += sizeof(NodeData) + key.size();
+}
+
+// ==============================
+
+template <class LIST>
+auto BTreeIndexBuilder<LIST>::calcDepth__(size_type count) -> level_type{
+	// Biliana
+	// log 54 (123) = ln (123) / ln (54)
+	// but this is true for B+Tree only...
+
+	level_type result = 0;
+
+	while(count > 0){
+		++result; // tree is always 1 level.
+
+		if (count > VALUES){
+			// We substract VALUES,
+			// because BTree have data in non-leaf nodes.
+			count = (count - VALUES) / BRANCHES;
+		}else{
+			break;
+		}
+	}
+
+	return result;
+}
+
+
+} // namespace btree
+} // namespace disk
+} // namespace
+

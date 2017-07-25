@@ -6,6 +6,7 @@
 
 namespace hm4{
 
+
 std::unique_ptr<PairBlob> PairBlob::create(
 				const char *key, size_t const keylen,
 				const char *val, size_t const vallen,

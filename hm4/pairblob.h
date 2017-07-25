@@ -117,12 +117,6 @@ public:
 		return sizeofBase__() + sizeofBuffer_();
 	}
 
-	size_t bytes(bool const aligned) const noexcept{
-		size_t const size = bytes();
-
-		return aligned ? calcAlign__(size, PairConf::ALIGN) : size;
-	}
-
 	// ==============================
 
 	void print(bool observer) const noexcept;
@@ -152,12 +146,6 @@ private:
 	// ==============================
 
 	static uint64_t getCreateTime__(uint32_t created) noexcept;
-
-	// ==============================
-
-	static size_t calcAlign__(size_t const value, uint16_t const align){
-		return align * ((value + align - 1) / align);
-	}
 
 } __attribute__((__packed__));
 

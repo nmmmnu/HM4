@@ -3,6 +3,7 @@
 #include "pairblob.h"
 
 #include "binarysearch.h"
+#include "myalign.h"
 
 #include "disk/filenames.h"
 
@@ -127,12 +128,16 @@ const PairBlob *DiskTable::getAtFD_(size_type const index) const{
 	return saveAccessFD_(blob);
 }
 
-const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
-	size_t const size = previous->bytes( metadata_.aligned() );
+size_t DiskTable::getSizeFD__(const PairBlob *blob, bool const aligned){
+	constexpr MyAlign alc{ PairConf::ALIGN };
 
-	if (metadata_.aligned()){
-	//	log__( "next", metadata_.aligned() ? "with align" : "");
-	}
+	size_t const size = blob->bytes();
+
+	return ! aligned ? size : alc.calc(size);
+}
+
+const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
+	size_t size = getSizeFD__(previous, metadata_.aligned());
 
 	const char *previousC = (const char *) previous;
 

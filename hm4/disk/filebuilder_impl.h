@@ -5,6 +5,9 @@
 #include "endian.h"
 #include <limits>
 
+#include "myalign.h"
+#include "pair.h"
+
 namespace hm4{
 namespace disk{
 
@@ -30,14 +33,14 @@ bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 				bool const keepTombstones,
 				bool const aligned){
 
-	constexpr uint64_t MAX = std::numeric_limits<uint64_t>::min();
-
 	uint64_t index		= 0;
 
 	uint64_t count		= 0;
 	uint64_t tombstones	= 0;
-	uint64_t createdMin	= 0;
-	uint64_t createdMax	= MAX;
+
+	// set min / max
+	uint64_t createdMin	= std::numeric_limits<uint64_t>::max();
+	uint64_t createdMax	= std::numeric_limits<uint64_t>::min();
 
 	for(auto it = begin; it != end; ++it){
 		const auto &pair = *it;
@@ -67,18 +70,27 @@ bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 		// write the data
 		pair.fwrite(file_data);
 
-		index += pair.bytes();
+		size_t bytes = pair.bytes();
+
 
 		if (aligned){
-			size_t const gap = pair.fwriteAlignGap(file_data);
-			index += gap;
+			constexpr MyAlign alc{ PairConf::ALIGN };
+
+			bytes += alc.fwriteGap(file_data, pair.bytes());
 		}
+
+		index += bytes;
 
 		++count;
 	}
 
-	if (createdMax == MAX)
-		createdMax = 0;
+	// fix min / max -> 0
+
+	if (createdMin == std::numeric_limits<uint64_t>::max())
+		createdMin = 0;
+
+	if (createdMax == std::numeric_limits<uint64_t>::min())
+		createdMin = 0;
 
 	// now we miraculasly have the datacount.
 

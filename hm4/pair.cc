@@ -158,12 +158,6 @@ size_t Pair::bytes() const noexcept{
 		0;
 }
 
-size_t Pair::bytes(bool const aligned) const noexcept{
-	return pimpl ?
-		pimpl->bytes(aligned) :
-		0;
-}
-
 void Pair::print() const noexcept{
 	if (pimpl == nullptr){
 		printf("--- Pair is empty ---\n");
@@ -177,19 +171,11 @@ bool Pair::fwrite(std::ostream & os) const{
 	if (pimpl == nullptr)
 		return false;
 
-	os.write((const char *) pimpl.get(), (std::streamsize) pimpl->bytes() );
+	size_t const bytes = pimpl->bytes();
+
+	os.write((const char *) pimpl.get(), (std::streamsize) bytes );
 
 	return true;
-}
-
-size_t Pair::fwriteAlignGap(std::ostream & os) const{
-	size_t const gap = pimpl->bytes(true) - pimpl->bytes();
-
-	// this seems to be safer way
-	for(size_t i = 0; i < gap; ++i)
-		os.put( 0 );
-
-	return gap;
 }
 
 
