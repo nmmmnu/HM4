@@ -37,8 +37,8 @@ private:
 private:
 	void push_back_key(size_type index);
 
-	static size_t calcAlign__(size_t const value, uint16_t const align){
-		return align * ((value + align - 1) / align);
+	bool aligned_(){
+		return list_.aligned();
 	}
 
 private:

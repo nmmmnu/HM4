@@ -33,6 +33,9 @@ public:
 	void clear(){
 		// no need memset(), this is enought
 		blob.version = 0;
+
+		// this is nice safeguard
+		blob.size = 0;
 	}
 
 public:

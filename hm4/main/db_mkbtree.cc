@@ -38,6 +38,11 @@ int main(int argc, char **argv){
 	DiskTable list;
 	list.open(input_file);
 
+	if (list == false){
+		printf("List is invalid. Please check it and try again.\n");
+		return 3;
+	}
+
 	using BTreeIndexBuilder = hm4::disk::btree::BTreeIndexBuilder<DiskTable>;
 
 	BTreeIndexBuilder builder(output_file, list);

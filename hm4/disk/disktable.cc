@@ -71,7 +71,7 @@ ObserverPair DiskTable::operator[](const StringRef &key) const{
 auto DiskTable::lowerBound(const StringRef &key) const -> Iterator{
 	const auto x = search_(key);
 
-	return Iterator(*this, x.second, metadata_.sorted());
+	return Iterator(*this, x.second, sorted());
 }
 
 // ==============================
@@ -137,7 +137,7 @@ size_t DiskTable::getSizeFD__(const PairBlob *blob, bool const aligned){
 }
 
 const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
-	size_t size = getSizeFD__(previous, metadata_.aligned());
+	size_t size = getSizeFD__(previous, aligned());
 
 	const char *previousC = (const char *) previous;
 

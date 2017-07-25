@@ -53,6 +53,14 @@ public:
 		return mmapData_.size();
 	}
 
+	bool sorted() const{
+		return metadata_.sorted();
+	}
+
+	bool aligned() const{
+		return metadata_.aligned();
+	}
+
 public:
 	Iterator lowerBound(const StringRef &key) const;
 	Iterator begin() const;
@@ -135,11 +143,11 @@ private:
 // ==============================
 
 inline auto DiskTable::begin() const -> Iterator{
-	return Iterator(*this,      0, metadata_.sorted());
+	return Iterator(*this,      0, sorted());
 }
 
 inline auto DiskTable::end() const -> Iterator{
-	return Iterator(*this, size(), metadata_.sorted());
+	return Iterator(*this, size(), sorted());
 }
 
 

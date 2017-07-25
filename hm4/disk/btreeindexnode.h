@@ -25,6 +25,10 @@ constexpr LevelOrderLookup<NODE_LEVELS>	LL;
 struct NodeData{
 	uint64_t	dataid;			// 8
 	uint16_t	keysize;		// 2
+
+public:
+	constexpr static uint16_t ALIGN = sizeof(uint64_t);
+
 } __attribute__((__packed__));
 
 

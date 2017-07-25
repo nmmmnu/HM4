@@ -8,7 +8,7 @@ class MyAlign{
 public:
 	constexpr MyAlign() = default;
 
-	constexpr MyAlign(uint16_t align) : align_(align){}
+	constexpr MyAlign(uint16_t const align) : align_(align){}
 
 public:
 	constexpr uint16_t align() const{
@@ -24,12 +24,12 @@ public:
 	}
 
 public:
-	size_t fwriteGap(std::ostream &os, size_t const size) const{
+	size_t fwriteGap(std::ostream &os, size_t const size, char const fill = 0x00) const{
 		size_t const gap = padding(size);
 
 		// this seems to be safer way
 		for(size_t i = 0; i < gap; ++i)
-			os.put(0);
+			os.put(fill);
 
 		return gap;
 	}
@@ -40,7 +40,7 @@ private:
 	}
 
 private:
-	uint16_t align_ = sizeof(uint64_t);
+	uint16_t	align_ = sizeof(uint64_t);
 };
 
 #endif

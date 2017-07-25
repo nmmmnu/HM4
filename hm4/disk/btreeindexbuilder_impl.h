@@ -3,6 +3,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "myalign.h"
+
 namespace hm4{
 namespace disk{
 namespace btree{
@@ -99,30 +101,30 @@ void BTreeIndexBuilder<LIST>::push_back_key(size_type const index){
 	const auto &p = list_[index];
 	const StringRef &key = p.getKey();
 
-	{
-		NodeData nd;
-		nd.dataid  = htobe64(index);
-		nd.keysize = htobe16(key.size());
 
-		// push NodeData
-		file_data_.write( (const char *) &nd, sizeof nd );
+	NodeData nd;
+	nd.dataid  = htobe64(index);
+	nd.keysize = htobe16(key.size());
 
-		// push the key
-		file_data_.write( key.data(), (std::streamsize) key.size() );
+	// push NodeData
+	file_data_.write( (const char *) &nd, sizeof nd );
 
-		// push the align
-#if 0
-		size_t const sizeAligned = calcAlign__(key.size(), sizeof(uint64_t) );
+	// push the key
+	file_data_.write( key.data(), (std::streamsize) key.size() );
 
-		size_t const gap = sizeAligned - key.size();
+	// push NULL terminator to help recover the file
+	file_data_.put(0);
 
-		// this seems to be safer way
-		for(size_t i = 0; i < gap; ++i)
-			file_data_.put( 0 );
-#endif
+	size_t const data_size = sizeof(NodeData) + key.size() + 1;
+
+	current_ += data_size;
+
+	// push the align
+	if (aligned_()){
+		constexpr MyAlign alc{ NodeData::ALIGN };
+
+		current_ += alc.fwriteGap(file_data_, data_size);
 	}
-
-	current_ += sizeof(NodeData) + key.size();
 }
 
 // ==============================
