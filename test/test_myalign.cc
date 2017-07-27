@@ -37,7 +37,7 @@ bool fn_alc_test(const ALC &alc, size_t const size, size_t const expect1){
 
 template<uint16_t ALIGN>
 void fn_alc(){
-	constexpr MyAlign alc(ALIGN);
+	constexpr MyAlign<ALIGN> alc;
 
 	for(size_t i = 0; i < 10 * 1024; ++i){
 		size_t a = i;

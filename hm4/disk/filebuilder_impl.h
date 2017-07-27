@@ -64,7 +64,11 @@ bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 			createdMax = created;
 
 		// write the index
-		uint64_t const be_index = htobe64( file_data.tellp() );
+		// this is way slower.
+		// uint64_t const be_index = htobe64( file_data.tellp() );
+
+		uint64_t const be_index = htobe64(index);
+
 		file_indx.write( (const char *) & be_index, sizeof(uint64_t));
 
 		// write the data
@@ -74,7 +78,7 @@ bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 
 
 		if (aligned){
-			constexpr MyAlign alc{ PairConf::ALIGN };
+			constexpr MyAlign<PairConf::ALIGN> alc;
 
 			bytes += alc.fwriteGap(file_data, pair.bytes());
 		}

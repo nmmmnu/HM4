@@ -27,6 +27,9 @@ $(A)db_collection: $(O)db_collection.o	$(PAIR_OBJ) $(DISKTABLE_OBJ) $(O)director
 $(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKTABLE_OBJ) $(O)skiplist.o $(O)idgeneratordate.o $(O)stringtokenizer.o
 	$(LINK)
 
+$(A)zone_loader: $(O)zone_loader.o	$(PAIR_OBJ) $(DISKTABLE_OBJ) $(O)skiplist.o $(O)idgeneratordate.o $(O)stringtokenizer.o
+	$(LINK)
+
 $(A)db_mkbtree: $(O)db_mkbtree.o	$(PAIR_OBJ) $(DISKTABLE_OBJ)
 	$(LINK)
 

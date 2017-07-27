@@ -101,8 +101,30 @@ auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_
 				// ---
 				uint64_t const offset = be64toh(node.values[ node_pos ]);
 
-				 // can not happen:
-				//if (offset == Node::NIL)
+				#if 0
+				// BTree NIL - can not happen
+
+				if (offset == Node::NIL){
+					// special case go left
+					/*
+					 * input tree:
+					 *
+					 *       n
+					 *   2       n
+					 * 1   n   n   n
+					 *
+					 * output array:
+					 *
+					 * n 2 n 1 n n n
+					 */
+
+					node_pos = 2 * node_pos + 1;
+
+					log__("\t\tL:", node_pos, "NIL");
+
+					continue;
+				}
+				#endif
 
 				const NodeData *nd = blobKeys_.as<const NodeData>((size_t) offset);
 
@@ -275,7 +297,7 @@ const PairBlob *DiskTable::getAtFD_(size_type const index) const{
 }
 
 size_t DiskTable::getSizeFD__(const PairBlob *blob, bool const aligned){
-	constexpr MyAlign alc{ PairConf::ALIGN };
+	constexpr MyAlign<PairConf::ALIGN> alc;
 
 	size_t const size = blob->bytes();
 
@@ -315,11 +337,10 @@ auto DiskTable::Iterator::operator*() const -> const ObserverPair &{
 		blob = list_.getAtFD_(pos_);
 	}
 
-	Pair p = Pair::observer(blob);
-
 	tmp_pos		= pos_;
 	tmp_blob	= blob;
-	tmp_pair 	= std::move(p);
+
+	tmp_pair	= Pair::observer(blob);
 
 	return tmp_pair;
 }
@@ -328,28 +349,4 @@ auto DiskTable::Iterator::operator*() const -> const ObserverPair &{
 } // namespace disk
 } // namespace
 
-
-
-#if 0
-// BTree NIL
-
-if (offset == Node::NIL){
-	// special case go left
-	/*
-	 *   1   0   2
-	 * 1 2 n n n n n
-	 *
-	 *       n
-	 *   2       n
-	 * 1   n   n   n
-	 *
-	 */
-
-	node_pos = branch_type(2 * node_pos + 1);
-
-	log__("\t L: NIL");
-
-	continue;
-}
-#endif
 

@@ -143,6 +143,7 @@ public:
 	}
 
 	static std::string concatenate(const std::initializer_list<StringRef> &args);
+	static const std::string &concatenate(std::string &buffer, const std::initializer_list<StringRef> &args);
 
 private:
 	size_t		size_	= 0;
@@ -195,6 +196,8 @@ inline StringRef::StringRef(const std::string &s) :
 		data_(s.data()){}
 
 // ==================================
+// CHAR * HELPERS
+// ==================================
 
 inline int StringRef::compare(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
 	if (COMPARE_MICRO_OPTIMIZATIONS){
@@ -216,14 +219,28 @@ inline size_t concatenateSize__(const std::initializer_list<StringRef> &args){
 }
 
 inline std::string StringRef::concatenate(const std::initializer_list<StringRef> &args){
-	// super cheap concatenation
+	// super cheap concatenation,
+	// with single allocation
 
 	std::string s;
+
+	concatenate(s, args);
+
+	return s;
+}
+
+inline const std::string &StringRef::concatenate(std::string &s, const std::initializer_list<StringRef> &args){
+	// super cheap concatenation,
+	// sometimes without allocation
 
 	// seems no need to save space for NULL terminator.
 	size_t const reserve_size = concatenateSize__(args);
 
-	s.reserve(reserve_size);
+	s.clear();
+
+	// reserve() will shrink capacity
+	if (reserve_size > s.capacity())
+		s.reserve(reserve_size);
 
 	for(const auto &sr : args)
 		s.append(sr.data(), sr.size());
@@ -231,6 +248,8 @@ inline std::string StringRef::concatenate(const std::initializer_list<StringRef>
 	return s;
 }
 
+// ==================================
+// PRIVATE
 // ==================================
 
 inline int StringRef::compare__(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{

@@ -4,19 +4,24 @@
 #include <cstdint>
 #include <ostream>
 
+template<uint16_t ALIGN = sizeof(uint64_t)>
 class MyAlign{
-public:
-	constexpr MyAlign() = default;
+private:
+	constexpr static char FILL = 0x00;
 
-	constexpr MyAlign(uint16_t const align) : align_(align){}
+public:
+	constexpr MyAlign(){
+		for(uint16_t i = 0; i < ALIGN; ++i)
+			buffer_[i] = FILL;
+	}
 
 public:
 	constexpr uint16_t align() const{
-		return align_;
+		return ALIGN;
 	}
 
 	constexpr size_t calc(size_t const bytes) const{
-		return calc__(bytes, align_);
+		return calc__(bytes, ALIGN);
 	}
 
 	constexpr size_t padding(size_t const bytes) const{
@@ -24,12 +29,10 @@ public:
 	}
 
 public:
-	size_t fwriteGap(std::ostream &os, size_t const size, char const fill = 0x00) const{
+	size_t fwriteGap(std::ostream &os, size_t const size) const{
 		size_t const gap = padding(size);
 
-		// this seems to be safer way
-		for(size_t i = 0; i < gap; ++i)
-			os.put(fill);
+		os.write(buffer_, (std::streamsize) gap);
 
 		return gap;
 	}
@@ -40,7 +43,8 @@ private:
 	}
 
 private:
-	uint16_t	align_ = sizeof(uint64_t);
+	char	buffer_[ALIGN] = {};
+
 };
 
 #endif

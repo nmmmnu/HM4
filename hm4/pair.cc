@@ -30,7 +30,7 @@ Pair::Pair(const Blob *blob) :
 		Blob::create(blob)
 	){}
 
-Pair::Pair(const Blob *blob, const observer_t&) :
+Pair::Pair(const Blob *blob, const observer_t&) noexcept :
 				pimpl(blob),
 				observer_(true){}
 
@@ -60,16 +60,14 @@ Pair::Pair(Pair &&other) :
 Pair &Pair::operator=(Pair &&other){
 	log__("move assign\n");
 
-	Pair pair = std::move(other);
-
-	swap(pair);
+	swap(other);
 
 	return *this;
 }
 
 // ==============================
 
-void Pair::swap(Pair &other){
+void Pair::swap(Pair &other) noexcept{
 	log__("swap\n");
 
 	using std::swap;
@@ -159,8 +157,8 @@ size_t Pair::bytes() const noexcept{
 }
 
 void Pair::print() const noexcept{
-	if (pimpl == nullptr){
-		printf("--- Pair is empty ---\n");
+	if (! pimpl){
+		printf("--- Pair is empty %s ---\n", observer_ ? "observer" : "");
 		return;
 	}
 

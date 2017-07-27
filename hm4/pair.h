@@ -30,7 +30,7 @@ private:
 private:
 	struct observer_t{};
 
-	Pair(const Blob *blob, const observer_t&);
+	Pair(const Blob *blob, const observer_t&) noexcept;
 
 public:
 	Pair(); /* = default */
@@ -39,11 +39,11 @@ public:
 
 	Pair(const Blob *blob);
 
-	static Pair observer(const Blob *blob){
+	static Pair observer(const Blob *blob) noexcept{
 		return Pair( blob, observer_t{} );
 	}
 
-	static Pair observer(const Pair &other){
+	static Pair observer(const Pair &other) noexcept{
 		return Pair( other.pimpl.get(), observer_t{} );
 	}
 
@@ -57,7 +57,7 @@ public:
 	Pair(Pair &&other);
 	Pair &operator=(Pair &&other);
 
-	void swap(Pair &other);
+	void swap(Pair &other) noexcept;
 
 	~Pair();
 
@@ -108,7 +108,6 @@ public:
 	bool isObserver() const noexcept{
 		return observer_;
 	}
-
 
 public:
 	bool fwrite(std::ostream & os) const;

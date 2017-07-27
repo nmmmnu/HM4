@@ -23,11 +23,13 @@ static int printUsage(const char *cmd){
 #include "filereader.h"
 #include "stringtokenizer.h"
 
-constexpr size_t	MEMLIST_SIZE	= 10 * 1024 * 1024;
+constexpr size_t	MEMLIST_SIZE	= 512 * 1024 * 1024;
 constexpr size_t	PROCESS_STEP	= 1000 * 10;
 
+
 template <class LIST, class READER>
-int listLoad(LIST &list, READER &reader);
+static int listLoad(LIST &list, READER &reader);
+
 
 int main(int argc, char **argv){
 	if (argc <= 2){
@@ -60,21 +62,53 @@ int main(int argc, char **argv){
 }
 
 
-
 template <class LIST, class READER>
 int listLoad(LIST &list, READER &reader){
+	std::string buffer_key;
+	std::string buffer_value;
+
 	size_t i = 0;
 
 	while(reader){
 		std::string line = reader.getLine();
 
-		StringTokenizer tok{ line };
+		StringTokenizer tok{ line, ':' };
 
-		const StringRef &key = tok.getNext();
-		const StringRef &val = tok.getNext();
+		const auto &parts = tok.getAll();
 
-		if (! key.empty())
-			list.insert( { key, val } );
+		if (parts.size() != 3 && parts.size() != 4){
+			std::cout << "Problem with line " << line << '\n';
+			continue;
+		}
+
+		const StringRef &op	= { & parts[0][0], 1 };
+		const StringRef &date	= parts[1];
+		const StringRef &domain	= parts[2];
+
+		{
+			// add date key
+
+			const auto &key = StringRef::concatenate(buffer_key, { "t", ":", date, ":", domain });
+
+			list.insert( { key, "1" } );
+		}
+
+		{
+			// add domain / ns key
+
+			const auto &key = StringRef::concatenate(buffer_key, { "d", ":", domain, ":", date });
+
+			if (parts.size() == 4){
+				const auto &ns = parts[3];
+
+				const auto &val = StringRef::concatenate(buffer_value, { op, ":", ns });
+
+				list.insert( { key, val } );
+
+			}else{
+				list.insert( { key, "d" } );
+			}
+		}
 
 		++i;
 
@@ -91,4 +125,8 @@ int listLoad(LIST &list, READER &reader){
 
 	return 0;
 }
+
+
+
+
 
