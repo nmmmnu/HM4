@@ -1,8 +1,7 @@
-#ifndef _DISK_TABLE_H
-#define _DISK_TABLE_H
+#ifndef DISK_TABLE_H_
+#define DISK_TABLE_H_
 
-#include "mmapfile.h"
-#include "blobref.h"
+#include "mmapfileplus.h"
 
 #include "ilist.h"
 #include "filemeta.h"
@@ -15,11 +14,13 @@ class DiskTable : public List<DiskTable>{
 public:
 	class Iterator;
 
+	const static int DEFAULT_ADVICE;
+
 private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
 
 public:
-	DiskTable() : mmapData_(MMAPFile::RANDOM){}
+	DiskTable() = default;
 
 	DiskTable(DiskTable &&other) = default;
 
@@ -27,7 +28,7 @@ public:
 	// MMAPFile-s will be closed automatically
 	~DiskTable() = default;
 
-	bool open(const std::string &filename);
+	bool open(const std::string &filename, int advice = DEFAULT_ADVICE);
 	void close();
 
 	operator bool(){
@@ -50,7 +51,7 @@ public:
 	}
 
 	size_t bytes() const{
-		return mmapData_.size();
+		return mData_.size();
 	}
 
 	bool sorted() const{
@@ -80,23 +81,17 @@ private:
 
 	std::pair<bool,size_type> search_(const StringRef &key) const;
 
-	static void  openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename);
+	static void  openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename, int advice);
 	static void closeFile__(MMAPFile &file, BlobRef &blob);
 
 private:
-	MMAPFile			mmapIndx_;
-	BlobRef				blobIndx_;
+	MMAPFilePlus		mIndx_;
+	MMAPFilePlus		mData_;
 
-	MMAPFile			mmapData_;
-	BlobRef				blobData_;
+	MMAPFilePlus		mTree_;
+	MMAPFilePlus		mKeys_;
 
-	MMAPFile			mmapTree_;
-	BlobRef				blobTree_;
-
-	MMAPFile			mmapKeys_;
-	BlobRef				blobKeys_;
-
-	FileMeta			metadata_;
+	FileMeta		metadata_;
 };
 
 // ===================================

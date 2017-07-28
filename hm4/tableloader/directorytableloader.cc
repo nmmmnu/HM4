@@ -16,14 +16,8 @@ bool DirectoryTableLoader::refresh(){
 
 	container_.reserve(files.size());
 
-	// order in the iterator, does not matter
-	// but order in get, still very important
-	for (auto it = files.rbegin(); it != files.rend(); ++it){
-		const auto &filename = *it;
-
-		container_.emplace_back();
-                container_.back().open(filename);
-	}
+	for (auto it = files.rbegin(); it != files.rend(); ++it)
+		insert_(*it);
 
 	return true;
 }

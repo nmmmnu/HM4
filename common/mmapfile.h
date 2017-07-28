@@ -10,8 +10,7 @@ public:
 	const static int RANDOM		;
 
 public:
-	MMAPFile(int const madvise = NORMAL) :
-				madvise_(madvise){}
+	MMAPFile() = default;
 
 	MMAPFile(MMAPFile &&other);
 
@@ -19,7 +18,7 @@ public:
 		close();
 	}
 
-	bool open(const StringRef &filename);
+	bool open(const StringRef &filename, int advice = NORMAL);
 
 	void close();
 
@@ -36,16 +35,13 @@ public:
 	}
 
 private:
-	bool open_(const StringRef &filename, int mode, int prot);
+	bool open_(const StringRef &filename, int mode, int prot, int advice);
 
 private:
 	void	*mem_		= nullptr;
 	size_t	size_		= 0;
 
 	int	fd_;
-
-	int	madvise_;
-
 };
 
 #endif

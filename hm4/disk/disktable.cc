@@ -18,33 +18,39 @@ namespace disk{
 
 constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
-bool DiskTable::open(const std::string &filename){
+const int DiskTable::DEFAULT_ADVICE = MMAPFile::RANDOM;
+
+bool DiskTable::open(const std::string &filename, int advice){
 	metadata_.open(filenameMeta(filename));
 
 	if (metadata_ == false)
 		return false;
 
-	openFile__(mmapIndx_, blobIndx_, filenameIndx(filename)	);
-	openFile__(mmapData_, blobData_, filenameData(filename)	);
+	// avoid worst case
+	if (metadata_.sorted() == false && advice == MMAPFile::SEQUENTIAL)
+		advice = DEFAULT_ADVICE;
 
-	openFile__(mmapTree_, blobTree_, filenameBTreeIndx(filename)	);
-	openFile__(mmapKeys_, blobKeys_, filenameBTreeData(filename)	);
+	mIndx_.open(filenameIndx(filename)		);
+	mData_.open(filenameData(filename),	advice	);
+
+	mTree_.open(filenameBTreeIndx(filename)		);
+	mKeys_.open(filenameBTreeData(filename)		);
 
 	return true;
 }
 
 void DiskTable::close(){
-	closeFile__(mmapIndx_, blobIndx_);
-	closeFile__(mmapData_, blobData_);
+	mIndx_.close();
+	mData_.close();
 
-	closeFile__(mmapTree_, blobTree_);
-	closeFile__(mmapKeys_, blobKeys_);
+	mTree_.close();
+	mKeys_.close();
 }
 
 // ==============================
 
-inline void DiskTable::openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename){
-	file.open(filename);
+inline void DiskTable::openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename, int const advice){
+	file.open(filename, advice);
 	blob = { file.mem(), file.size() };
 }
 
@@ -64,9 +70,9 @@ auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_
 	level_type const VALUES		= btree::VALUES;
 	level_type const BRANCHES	= btree::BRANCHES;
 
-	size_t const nodesCount	= blobTree_.size() / sizeof(Node);
+	size_t const nodesCount	= mTree_.size() / sizeof(Node);
 
-	const Node *nodes = blobTree_.as<const Node>(0, nodesCount);
+	const Node *nodes = mTree_->as<const Node>(0, nodesCount);
 
 	if (!nodes){
 		// go try with binary search
@@ -126,7 +132,7 @@ auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_
 				}
 				#endif
 
-				const NodeData *nd = blobKeys_.as<const NodeData>((size_t) offset);
+				const NodeData *nd = mKeys_->as<const NodeData>((size_t) offset);
 
 				if (!nd){
 					// go try with binary search
@@ -138,7 +144,7 @@ auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_
 				size_type const dataid  = be64toh(nd->dataid);
 
 				// key is just after the NodeData
-				const char *keyptr = blobKeys_.as<const char>((size_t) offset + sizeof(NodeData), keysize);
+				const char *keyptr = mKeys_->as<const char>((size_t) offset + sizeof(NodeData), keysize);
 
 				if (!keyptr){
 					// go try with binary search
@@ -215,7 +221,7 @@ inline auto DiskTable::binarySearch_(const StringRef &key) const -> std::pair<bo
 }
 
 inline auto DiskTable::search_(const StringRef &key) const -> std::pair<bool,size_type>{
-	if (mmapTree_ && mmapKeys_){
+	if (mTree_ && mKeys_){
 		log__("btree");
 		return btreeSearch_(key);
 	}else{
@@ -272,7 +278,7 @@ const PairBlob *DiskTable::saveAccessFD_(const PairBlob *blob) const{
 		return nullptr;
 
 	// check for overrun because PairBlob is dynamic size
-	bool const access = blobData_.safeAccessMemory(blob, blob->bytes());
+	bool const access = mData_->safeAccessMemory(blob, blob->bytes());
 
 	if (access)
 		return blob;
@@ -281,7 +287,7 @@ const PairBlob *DiskTable::saveAccessFD_(const PairBlob *blob) const{
 }
 
 const PairBlob *DiskTable::getAtFD_(size_type const index) const{
-	const uint64_t *be_array = blobIndx_.as<const uint64_t>(0, size());
+	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, size());
 
 	if (!be_array)
 		return nullptr;
@@ -290,7 +296,7 @@ const PairBlob *DiskTable::getAtFD_(size_type const index) const{
 
 	size_t const offset = (size_t) be64toh(be_ptr);
 
-	const PairBlob *blob = blobData_.as<const PairBlob>(offset);
+	const PairBlob *blob = mData_->as<const PairBlob>(offset);
 
 	// check for overrun because PairBlob is dynamic size
 	return saveAccessFD_(blob);
@@ -309,7 +315,7 @@ const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
 
 	const char *previousC = (const char *) previous;
 
-	const PairBlob *blob = blobData_.as<const PairBlob>(previousC + size);
+	const PairBlob *blob = mData_->as<const PairBlob>(previousC + size);
 
 	// check for overrun because PairBlob is dynamic size
 	return saveAccessFD_(blob);

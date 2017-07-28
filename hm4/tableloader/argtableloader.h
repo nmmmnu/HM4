@@ -1,38 +1,26 @@
-#ifndef _FILE_LSM_CONTAINER_ARGV_H
-#define _FILE_LSM_CONTAINER_ARGV_H
+#ifndef ARG_TABLE_LOADER_H_
+#define ARG_TABLE_LOADER_H_
 
-#include <vector>
-
-#include "disk/disktable.h"
-
+#include "basetableloader.h"
 
 namespace hm4{
 namespace tableloader{
 
 
-class ArgTableLoader{
+class ArgTableLoader : public tableloader_impl_::BaseTableLoader{
 public:
-	using container_type	= std::vector<disk::DiskTable>;
-
-public:
-	ArgTableLoader(int const argc, const char **argv) :
+	ArgTableLoader(int const argc, const char **argv, int const advice = DiskTable::DEFAULT_ADVICE) :
+				BaseTableLoader(advice),
 				argc_(argc),
 				argv_(argv){
-		refresh_();
+		refresh();
 	}
 
-	const container_type &operator*() const{
-		return container_;
-	}
-
-private:
-	bool refresh_();
+	bool refresh();
 
 private:
 	int		argc_;
 	const char	**argv_;
-
-	container_type	container_;
 };
 
 

@@ -11,17 +11,16 @@ const int MMAPFile::RANDOM		= MADV_RANDOM		;
 MMAPFile::MMAPFile(MMAPFile &&other) :
 		mem_		( std::move(other.mem_		)),
 		size_		( std::move(other.size_		)),
-		fd_		( std::move(other.fd_		)),
-		madvise_	( std::move(other.madvise_	)){
+		fd_		( std::move(other.fd_		)){
 	other.mem_ = nullptr;
 	other.size_ = 0;
 }
 
-bool MMAPFile::open(const StringRef &filename){
-	return open_(filename, O_RDONLY, PROT_READ);
+bool MMAPFile::open(const StringRef &filename, int const advice){
+	return open_(filename, O_RDONLY, PROT_READ, advice);
 }
 
-bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot){
+bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, int const advice){
 	close();
 
 	int const fd = ::open(filename.data(), mode);
@@ -45,7 +44,7 @@ bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot){
 		return false;
 	}
 
-	madvise(mem, size, madvise_);
+	madvise(mem, size, advice);
 
 	fd_ = fd;
 	size_ = size;

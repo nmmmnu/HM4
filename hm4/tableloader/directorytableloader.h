@@ -1,34 +1,29 @@
-#ifndef _DIRECTORY_LSM_CONTAINER_H
-#define _DIRECTORY_LSM_CONTAINER_H
+#ifndef DIRECTORY_TABLE_LOADER_H_
+#define DIRECTORY_TABLE_LOADER_H_
 
-#include <string>
-#include <vector>
-
-#include "disk/disktable.h"
+#include "basetableloader.h"
 
 
 namespace hm4{
 namespace tableloader{
 
 
-class DirectoryTableLoader{
+class DirectoryTableLoader : public tableloader_impl_::BaseTableLoader{
 public:
-	using container_type	= std::vector<disk::DiskTable>;
+	using DiskTable		= disk::DiskTable;
+	using container_type	= std::vector<DiskTable>;
 
 public:
-	DirectoryTableLoader(const StringRef &path) : path_(path){
+	DirectoryTableLoader(const StringRef &path, int const advice = DiskTable::DEFAULT_ADVICE) :
+				BaseTableLoader(advice),
+				path_(path){
 		refresh();
-	}
-
-	const container_type &operator*() const{
-		return container_;
 	}
 
 	bool refresh();
 
 private:
 	std::string	path_;
-	container_type	container_;
 };
 
 

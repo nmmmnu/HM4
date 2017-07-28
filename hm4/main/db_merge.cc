@@ -35,6 +35,8 @@ int merge(const TABLE &table, const char *output_file, bool const keepTombstones
 #include "multi/dualtable.h"
 #include "multi/collectiontable.h"
 
+int const ADVICE = MMAPFile::SEQUENTIAL;
+
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)
 		return printUsage(argv[0]);
@@ -58,7 +60,7 @@ int main(int argc, char **argv){
 		using MyMergeTable = DiskTable;
 
 		MyMergeTable table;
-		table.open(filename);
+		table.open(filename, ADVICE);
 
 		printf("Merging (cleanup) single table...\n");
 		printf("\t%s\n", filename);
@@ -70,10 +72,10 @@ int main(int argc, char **argv){
 		const char *filename2 = path[1];
 
 		DiskTable table1;
-		table1.open(filename1);
+		table1.open(filename1, ADVICE);
 
 		DiskTable table2;
-		table2.open(filename2);
+		table2.open(filename2, ADVICE);
 
 		using MyMergeTable = hm4::multi::DualTable<DiskTable, DiskTable>;
 
@@ -89,7 +91,7 @@ int main(int argc, char **argv){
 	}else{
 		using ArgTableLoader = hm4::tableloader::ArgTableLoader;
 
-		ArgTableLoader al { pathc, path };
+		ArgTableLoader al { pathc, path, ADVICE };
 
 		using MyMergeTable = hm4::multi::CollectionTable<ArgTableLoader::container_type>;
 

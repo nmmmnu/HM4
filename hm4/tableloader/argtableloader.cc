@@ -4,20 +4,14 @@ namespace hm4{
 namespace tableloader{
 
 
-bool ArgTableLoader::refresh_(){
+bool ArgTableLoader::refresh(){
 	container_.clear();
-
-	if (argc_ < 0)
-		return true;
 
 	container_.reserve((container_type::size_type) argc_);
 
-	for(int i = 0; i < argc_; ++i){
-		const char *filename = argv_[i];
-
-		container_.emplace_back();
-		container_.back().open(filename);
-	}
+	// reverse for
+	for(int i = argc_; i --> 0;)
+		insert_(argv_[i]);
 
 	return true;
 }
