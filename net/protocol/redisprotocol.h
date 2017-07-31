@@ -12,6 +12,7 @@
 namespace net{
 namespace protocol{
 
+
 class RedisProtocol{
 private:
 	enum class Error : uint8_t;
@@ -117,7 +118,6 @@ void RedisProtocol::response_error(CONNECTION &buffer, const StringRef &msg){
 	buffer.push(msg);
 	buffer.push(ENDLN);
 }
-
 
 
 } // namespace protocol

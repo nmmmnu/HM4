@@ -53,5 +53,29 @@ private:
 
 };
 
+
+// ===========================
+
+
+class MyTimer{
+public:
+	bool expired(uint32_t const timeout) const noexcept{
+		return time_ + timeout < now_();
+	}
+
+	void restart() noexcept{
+		time_ = now_();
+	}
+
+private:
+	static uint32_t now_() noexcept{
+		return MyTime::now32();
+	}
+
+private:
+	uint32_t time_ = now_();
+
+};
+
 #endif
 
