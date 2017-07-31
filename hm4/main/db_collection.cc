@@ -1,6 +1,7 @@
 #include "db_file_impl.h"
 
 #include "multi/collectiontable.h"
+#include "tableloader/directorytableloader.h"
 
 #include <iostream>
 
@@ -19,13 +20,9 @@ static int printUsage(const char *cmd){
 	return 10;
 }
 
-#include "tableloader/directorytableloader.h"
-
 int main(int argc, char **argv){
-	if (argc <= 3){
-		printUsage(argv[0]);
-		return 1;
-	}
+	if (argc <= 3)
+		return printUsage(argv[0]);
 
 	// =======================
 

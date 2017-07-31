@@ -121,6 +121,13 @@ public:
 
 	void print(bool observer) const noexcept;
 
+	// ==============================
+
+	constexpr
+	static size_t maxBytes() noexcept{
+		return sizeofBase__() + sizeofBuffer__(MAX_KEY_SIZE, MAX_VAL_SIZE);
+	}
+
 private:
 	constexpr
 	static size_t sizeofBase__() noexcept{

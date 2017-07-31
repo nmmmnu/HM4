@@ -109,6 +109,8 @@ public:
 		return observer_;
 	}
 
+	static size_t maxBytes() noexcept;
+
 public:
 	bool fwrite(std::ostream & os) const;
 

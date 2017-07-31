@@ -1,0 +1,36 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+#EXTRA_INCL += -I$(SRC_DIR)
+
+include Makefile.sub
+
+all: $(O)pollselector.o
+
+# ===========================================================
+
+ifeq ($(UNAME), Linux)
+# add epoll support...
+all: $(O)epollselector.o
+
+EXTRA_CLEAN += $(O)epollselector.o
+endif
+
+# ===========================================================
+
+ifeq ($(UNAME), FreeBSD)
+# add kqueue support...
+all: $(O)kqueueselector.o
+
+EXTRA_CLEAN += $(O)kqueueselector.o
+endif
+
+# ===========================================================
+
+ifeq ($(UNAME), Darwin)
+# add kqueue support...
+all: $(O)kqueueselector.o
+
+EXTRA_CLEAN += $(O)kqueueselector.o
+endif
+
+# ===========================================================

@@ -2,17 +2,19 @@
 
 #include <unistd.h>	// access
 
-static int printUsage(const char *name){
-	const char *txt =
-		"\t%s %c output_file [file1] [file2] [fileN...]"
-		"- merge files, %-6s tombstones\n";
+#include <iostream>
 
-	printf("Usage:\n");
-	printf(txt, 	name, '-', "keep");
-	printf(txt, 	name, 't', "remove");
-	printf("\t\tFiles must be written with the extention.\n");
-	printf("\t\tExample 'file.db'\n");
-	printf("\t\tDo not forget you usually need two output files\n");
+static int printUsage(const char *cmd){
+	std::cout
+		<< "Usage:"	<< '\n'
+		<< "\t"		<< cmd	<< " - [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones"	<< '\n'
+		<< "\t"		<< cmd	<< " t [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones"	<< '\n'
+
+		<< "\t\tFile names must be written without extention"		<< '\n'
+		<< "\t\tExample 'file.db'"					<< '\n'
+		<< "\t\tDo not forget you usually need two output files"	<< '\n'
+
+		<< '\n';
 
 	return 10;
 }

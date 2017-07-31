@@ -4,11 +4,41 @@ EXTRA_INCL += -I$(SRC_DIR)
 
 include Makefile.sub
 
-MY_TARGETS = $(A)test_iobuffer $(A)test_redisprotocol
+MY_TARGETS = $(A)test_iobuffer $(A)test_redisprotocol	\
+			$(A)test_echo_poll $(A)test_redis_poll
 
 EXTRA_CLEAN +=	$(MY_TARGETS)
 
 all: $(MY_TARGETS)
+
+# ===========================================================
+
+ifeq ($(UNAME), Linux)
+# add epoll support...
+all: $(A)test_echo_epoll $(A)test_redis_epoll
+
+EXTRA_CLEAN += $(A)test_echo_epoll $(A)test_redis_epoll
+endif
+
+# ===========================================================
+
+ifeq ($(UNAME), Darwin)
+# add kqueue support...
+all: $(A)test_echo_kqueue $(A)test_redis_kqueue
+
+EXTRA_CLEAN += $(A)test_echo_kqueue $(A)test_redis_kqueue
+endif
+
+# ===========================================================
+
+ifeq ($(UNAME), FreeBSD)
+# add kqueue support...
+all: $(A)test_echo_kqueue $(A)test_redis_kqueue
+
+EXTRA_CLEAN += $(A)test_echo_kqueue $(A)test_redis_kqueue
+endif
+
+# ===========================================================
 
 
 
@@ -16,5 +46,27 @@ $(A)test_iobuffer: $(O)test_iobuffer.o
 	$(LINK)
 
 $(A)test_redisprotocol: $(O)test_redisprotocol.o $(O)redisprotocol.o
+	$(LINK)
+
+
+
+$(A)test_echo_poll: $(O)test_echo_poll.o	$(O)pollselector.o	$(O)echoworker.o	$(O)mytime.o $(O)sockets.o
+	$(LINK)
+
+$(A)test_echo_epoll: $(O)test_echo_epoll.o	$(O)epollselector.o	$(O)echoworker.o	$(O)mytime.o $(O)sockets.o
+	$(LINK)
+
+$(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o	$(O)echoworker.o	$(O)mytime.o $(O)sockets.o
+	$(LINK)
+
+
+
+$(A)test_redis_poll: $(O)test_redis_poll.o	$(O)pollselector.o	$(O)keyvalueworker.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
+	$(LINK)
+
+$(A)test_redis_epoll: $(O)test_redis_epoll.o	$(O)epollselector.o	$(O)keyvalueworker.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
+	$(LINK)
+
+$(A)test_redis_kqueue: $(O)test_redis_kqueue.o	$(O)kqueueselector.o	$(O)keyvalueworker.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
 	$(LINK)
 

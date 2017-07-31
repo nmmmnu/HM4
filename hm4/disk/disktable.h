@@ -46,7 +46,7 @@ public:
 
 	int cmpAt(size_type index, const StringRef &key) const;
 
-	size_type size() const{
+	size_type size(bool const = false) const{
 		return (size_type) metadata_.size();
 	}
 

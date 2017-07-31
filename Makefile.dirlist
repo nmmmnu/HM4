@@ -5,7 +5,9 @@ SUBDIRS = test common	\
 			hm4/idgenerator			\
 			hm4/test hm4/main		\
 		net					\
+			net/selector			\
 			net/protocol			\
-			net/test
-
+			net/worker			\
+			net/test			\
+		main
 

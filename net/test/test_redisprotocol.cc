@@ -1,44 +1,59 @@
 #include "protocol/redisprotocol.h"
 
-#include "mytest.h"
+#include <iostream>
 
-MyTest mytest;
+template <class PROTOCOL_STATUS>
+const char *test_status(const PROTOCOL_STATUS status){
+	using Status = PROTOCOL_STATUS;
 
-using RedisProtocol = net::protocol::RedisProtocol;
-using Status = RedisProtocol::Status;
+	switch(status){
+	case Status::OK			: return "OK"		;
+	case Status::BUFFER_NOT_READ	: return "MORE"		;
+	default:
+	case Status::ERROR		: return "ERROR"	;
+	}
+}
 
-static void test(RedisProtocol &p, const char *data, const std::initializer_list<StringRef> &v = {}){
+template <class PROTOCOL>
+void test(PROTOCOL &p, const char *data){
+	using Status = typename PROTOCOL::Status;
+
 	const Status status = p(data);
 
-	bool const ok = v.size();
+	std::cout	<< "Result status: " << test_status(status) << '\n'
+			<< '\n'
+	;
 
-	if (status == Status::OK && ok){
-		const auto &q = p.getParams();
+	if (status == Status::OK)
+		p.print();
 
-		bool const result = std::equal(q.begin(), q.end(), v.begin(), v.end() );
-
-		return mytest("", result);
-	}
-
-	if (status != Status::OK && ! ok)
-		return mytest("", true);
-
-	return mytest("", false);
+	std::cout	<< "---(eof)---" << '\n'
+			<< '\n'
+	;
 }
+
 
 int main(){
-	RedisProtocol p;
+	net::protocol::RedisProtocol p;
 
-	mytest.begin("Redis Protocol");
+	test(p, "*3\r\n$3\r\nSET\r\n$4\r\ncity\r\n$5\r\nSofia\r\n");
 
-	test(p, "*3\r\n$3\r\nSET\r\n$4\r\ncity\r\n$5\r\nSofia\r\n"	, { "SET", "city", "Sofia"	}	);
+	test(p, "*2\r\n$3\r\nGET\r\n$4\r\ncity\r\n");
 
-	test(p, "*2\r\n$3\r\nGET\r\n$4\r\ncity\r\n"			, { "GET", "city"		}	);
+	test(p, "*92\r\n$3\r\nGET\r\n$4\r\ncity\r\n");
+	test(p, "$2\r\n$3\r\nGET\r\n$4\r\ncity\r\n");
+	test(p, "*2\r\n*3\r\nGET\r\n$4\r\ncity\r\n");
 
-	test(p, "*92\r\n$3\r\nGET\r\n$4\r\ncity\r\n"	);
-	test(p, "$2\r\n$3\r\nGET\r\n$4\r\ncity\r\n"	);
-	test(p, "*2\r\n*3\r\nGET\r\n$4\r\ncity\r\n"	);
+#if 0
+	using Status = net::protocol::RedisProtocol::Status;
 
-	return mytest.end();
+	const char *data = "*3\r\n$3\r\nSET\r\n$4\r\ncity\r\n$5\r\nSofia\r\n";
+
+	for(int i = 0; i < 2500000; ++i){
+		const auto &status = p(data);
+
+		if (status == Status::BUFFER_NOT_READ)
+			std::cout << "problem" << '\n';
+	}
+#endif
 }
-

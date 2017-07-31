@@ -156,6 +156,10 @@ size_t Pair::bytes() const noexcept{
 		0;
 }
 
+size_t Pair::maxBytes() noexcept{
+	return PairBlob::maxBytes();
+}
+
 void Pair::print() const noexcept{
 	if (! pimpl){
 		printf("--- Pair is empty %s ---\n", observer_ ? "observer" : "");
