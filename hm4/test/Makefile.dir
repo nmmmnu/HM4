@@ -4,8 +4,6 @@ EXTRA_INCL += -I$(SRC_DIR)
 
 MY_TARGETS = $(A)test_pair $(A)test_list $(A)test_multi_table $(A)test_file $(A)test_idgenerator
 
-#$(A)test_duallist
-
 EXTRA_CLEAN += $(MY_TARGETS)
 
 include Makefile.sub

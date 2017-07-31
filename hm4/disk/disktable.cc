@@ -30,13 +30,13 @@ bool DiskTable::open(const std::string &filename, int advice){
 	if (metadata_.sorted() == false && advice == MMAPFile::SEQUENTIAL)
 		advice = DEFAULT_ADVICE;
 
-	mIndx_.open(filenameIndx(filename)		);
-	mData_.open(filenameData(filename),	advice	);
+	bool const b1 =	mIndx_.open(filenameIndx(filename));
+	bool const b2 =	mData_.open(filenameData(filename), advice);
 
-	mTree_.open(filenameBTreeIndx(filename)		);
-	mKeys_.open(filenameBTreeData(filename)		);
+	mTree_.open(filenameBTreeIndx(filename));
+	mKeys_.open(filenameBTreeData(filename));
 
-	return true;
+	return b1 && b2;
 }
 
 void DiskTable::close(){

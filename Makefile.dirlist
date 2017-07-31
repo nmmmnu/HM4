@@ -2,7 +2,10 @@
 SUBDIRS = test common	\
 		hm4					\
 			hm4/disk hm4/tableloader	\
+			hm4/idgenerator			\
 			hm4/test hm4/main		\
-			hm4/idgenerator
+		net					\
+			net/protocol			\
+			net/test
 
 

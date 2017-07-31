@@ -1,0 +1,8 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+#EXTRA_INCL += -I$(SRC_DIR)
+
+include Makefile.sub
+
+all: $(O)redisprotocol.o
+

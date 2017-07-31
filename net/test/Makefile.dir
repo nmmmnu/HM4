@@ -1,0 +1,20 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+EXTRA_INCL += -I$(SRC_DIR)
+
+include Makefile.sub
+
+MY_TARGETS = $(A)test_iobuffer $(A)test_redisprotocol
+
+EXTRA_CLEAN +=	$(MY_TARGETS)
+
+all: $(MY_TARGETS)
+
+
+
+$(A)test_iobuffer: $(O)test_iobuffer.o
+	$(LINK)
+
+$(A)test_redisprotocol: $(O)test_redisprotocol.o $(O)redisprotocol.o
+	$(LINK)
+
