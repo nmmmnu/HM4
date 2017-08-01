@@ -48,7 +48,7 @@ int main(int argc, char **argv){
 	// ----------------------------------
 
 	using MyDBAdapter = DBAdapter<MyCollectionTable, MyTableLoader>;
-	MyDBAdapter adapter(list, dl);
+	MyDBAdapter adapter(list, &dl);
 
 	// ----------------------------------
 

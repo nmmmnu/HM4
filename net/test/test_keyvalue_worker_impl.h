@@ -1,7 +1,11 @@
+#include <type_traits>
+
 #include "worker/keyvalueworker.h"
 #include "protocol/redisprotocol.h"
 
 struct KeyValueMockAdapter{
+	constexpr static std::true_type IS_MUTABLE{};
+
 	// Mock commands
 	std::string info() const{
 		return "Mock Adapter\n";
@@ -16,6 +20,13 @@ struct KeyValueMockAdapter{
 	}
 
 	bool refresh(){
+		return true;
+	}
+
+	void set(const StringRef &, const StringRef &, const StringRef & = {} ){
+	}
+
+	bool del(const StringRef &){
 		return true;
 	}
 
