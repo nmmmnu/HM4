@@ -4,7 +4,7 @@
 #include "protocol/redisprotocol.h"
 
 struct KeyValueMockAdapter{
-	constexpr static std::true_type IS_MUTABLE{};
+	constexpr static std::false_type IS_MUTABLE{};
 
 	// Mock commands
 	std::string info() const{
@@ -22,14 +22,14 @@ struct KeyValueMockAdapter{
 	bool refresh(){
 		return true;
 	}
-
+#if 0
 	void set(const StringRef &, const StringRef &, const StringRef & = {} ){
 	}
 
 	bool del(const StringRef &){
 		return true;
 	}
-
+#endif
 private:
 	std::vector<std::string> data_ = {
 		"key1", "value1",

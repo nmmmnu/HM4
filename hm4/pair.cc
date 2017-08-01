@@ -30,7 +30,7 @@ Pair::Pair(const Blob *blob) :
 		Blob::create(blob)
 	){}
 
-Pair::Pair(const Blob *blob, const observer_t&) noexcept :
+Pair::Pair(const Blob *blob, observer_type) noexcept :
 				pimpl(blob),
 				observer_(true){}
 

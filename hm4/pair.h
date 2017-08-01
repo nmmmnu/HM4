@@ -28,9 +28,9 @@ private:
 	using Blob = PairBlob;
 
 private:
-	struct observer_t{};
+	struct observer_type{};
 
-	Pair(const Blob *blob, const observer_t&) noexcept;
+	Pair(const Blob *blob, observer_type) noexcept;
 
 public:
 	Pair(); /* = default */
@@ -40,11 +40,11 @@ public:
 	Pair(const Blob *blob);
 
 	static Pair observer(const Blob *blob) noexcept{
-		return Pair( blob, observer_t{} );
+		return Pair( blob, observer_type{} );
 	}
 
 	static Pair observer(const Pair &other) noexcept{
-		return Pair( other.pimpl.get(), observer_t{} );
+		return Pair( other.pimpl.get(), observer_type{} );
 	}
 
 	static Pair tombstone(const StringRef &key){

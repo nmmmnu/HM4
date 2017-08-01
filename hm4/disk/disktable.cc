@@ -165,10 +165,10 @@ auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_
 					// we want if possible to go LEFT instead of RIGHT
 					// node_index will go out of bounds,
 					// this is indicator for RIGHT
-					node_index = ll[node_pos] + 1;
+					node_index = level_type(ll[node_pos] + 1);
 
 					// go right
-					node_pos = 2 * node_pos + 1 + 1;
+					node_pos = level_type(2 * node_pos + 1 + 1);
 
 					bs.first = dataid + 1;
 
@@ -177,7 +177,7 @@ auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_
 					node_index = ll[node_pos];
 
 					// go left
-					node_pos = 2 * node_pos + 1;
+					node_pos = level_type(2 * node_pos + 1);
 
 					bs.second = dataid;
 

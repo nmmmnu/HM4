@@ -37,8 +37,8 @@ struct SOCKET_UNIX{};
 
 // ===========================
 
-int socket_create(const SOCKET_TCP  &, const char *ip, uint16_t port, uint16_t backlog = 0, options_type options = SOCKET_DEFAULTOPT_TCP ) noexcept;
-int socket_create(const SOCKET_UNIX &, const char *path,              uint16_t backlog = 0, options_type options = SOCKET_DEFAULTOPT_UNIX) noexcept;
+int socket_create(SOCKET_TCP , const char *ip, uint16_t port, uint16_t backlog = 0, options_type options = SOCKET_DEFAULTOPT_TCP ) noexcept;
+int socket_create(SOCKET_UNIX, const char *path,              uint16_t backlog = 0, options_type options = SOCKET_DEFAULTOPT_UNIX) noexcept;
 
 bool socket_makeNonBlocking(int fd) noexcept;
 bool socket_makeReuseAddr(int fd) noexcept;

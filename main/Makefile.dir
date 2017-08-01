@@ -13,6 +13,6 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)pair.o $(O)pairblob.o $(O)mytime.o					\
 			$(O)disktable.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o	\
 												\
-			$(O)pollselector.o $(O)redisprotocol.o $(O)keyvalueworker.o $(O)sockets.o
+			$(O)pollselector.o $(O)redisprotocol.o $(O)keyvaluecommands.o $(O)sockets.o
 	$(LINK)
 

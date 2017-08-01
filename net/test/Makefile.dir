@@ -61,12 +61,12 @@ $(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o	$(O)echoworker
 
 
 
-$(A)test_redis_poll: $(O)test_redis_poll.o	$(O)pollselector.o	$(O)keyvalueworker.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
+$(A)test_redis_poll: $(O)test_redis_poll.o	$(O)pollselector.o	$(O)keyvaluecommands.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
 	$(LINK)
 
-$(A)test_redis_epoll: $(O)test_redis_epoll.o	$(O)epollselector.o	$(O)keyvalueworker.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
+$(A)test_redis_epoll: $(O)test_redis_epoll.o	$(O)epollselector.o	$(O)keyvaluecommands.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
 	$(LINK)
 
-$(A)test_redis_kqueue: $(O)test_redis_kqueue.o	$(O)kqueueselector.o	$(O)keyvalueworker.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
+$(A)test_redis_kqueue: $(O)test_redis_kqueue.o	$(O)kqueueselector.o	$(O)keyvaluecommands.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o
 	$(LINK)
 

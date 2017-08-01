@@ -94,27 +94,27 @@ ssize_t socket_write(int const fd, const void *buf, size_t const count, int cons
 
 // ===========================
 
-int socket_create(const SOCKET_TCP &, const char *ip, uint16_t const port, uint16_t const backlog, options_type const options) noexcept{
+int socket_create(SOCKET_TCP, const char *ip, uint16_t const port, uint16_t const backlog, options_type const options) noexcept{
 	int fd = socket(AF_INET , SOCK_STREAM , 0);
 
 	if(fd < 0)
 		return SOCKET_ERROR_CREATE;
 
 	if (options & SOCKET_REUSEADDR)
-	if (! socket_makeReuseAddr_(fd))
-		socket_error_(fd, SOCKET_ERROR_OPTIONS);
+		if (! socket_makeReuseAddr_(fd))
+			socket_error_(fd, SOCKET_ERROR_OPTIONS);
 
 	if (options & SOCKET_NONBLOCK)
-	if (! socket_makeNonBlocking(fd) )
-		socket_error_(fd, SOCKET_ERROR_NONBLOCK);
+		if (! socket_makeNonBlocking(fd) )
+			socket_error_(fd, SOCKET_ERROR_NONBLOCK);
 
 	if (options & SOCKET_TCPNODELAY)
-	if (! socket_makeTCPNoDelay(fd) )
-		socket_error_(fd, SOCKET_ERROR_NODELAY);
+		if (! socket_makeTCPNoDelay(fd) )
+			socket_error_(fd, SOCKET_ERROR_NODELAY);
 
 	if (options & SOCKET_KEEPALIVE)
-	if (! socket_makeKeepAlive(fd) )
-		socket_error_(fd, SOCKET_ERROR_KEEPALIVE);
+		if (! socket_makeKeepAlive(fd) )
+			socket_error_(fd, SOCKET_ERROR_KEEPALIVE);
 
 	struct sockaddr_in address;
 
@@ -125,7 +125,7 @@ int socket_create(const SOCKET_TCP &, const char *ip, uint16_t const port, uint1
 	return socket_server_(fd, address, backlog);
 }
 
-int socket_create(const SOCKET_UNIX &, const char *path, uint16_t const backlog, options_type const options) noexcept{
+int socket_create(SOCKET_UNIX, const char *path, uint16_t const backlog, options_type const options) noexcept{
 	if (sizeof sockaddr_un::sun_path < strlen(path))
 		return SOCKET_NAME_SIZE;
 
@@ -136,8 +136,8 @@ int socket_create(const SOCKET_UNIX &, const char *path, uint16_t const backlog,
 		return SOCKET_ERROR_CREATE;
 
 	if (options & SOCKET_NONBLOCK)
-	if (! socket_makeNonBlocking(fd) )
-		socket_error_(fd, SOCKET_ERROR_NONBLOCK);
+		if (! socket_makeNonBlocking(fd) )
+			socket_error_(fd, SOCKET_ERROR_NONBLOCK);
 
 	struct sockaddr_un address;
 	address.sun_family = AF_UNIX;
