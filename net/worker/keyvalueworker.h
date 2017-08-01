@@ -67,6 +67,11 @@ private:
 	template<class CONNECTION, class CONTAINER>
 	WorkerStatus sendResponseMulti_(CONNECTION &buffer, const CONTAINER &msg);
 
+	template<class CONNECTION>
+	WorkerStatus sendResponseBadRequest_(CONNECTION &buffer){
+		return sendResponseError_(buffer, "Bad request");
+	}
+
 private:
 	PROTOCOL	protocol_;
 	DB_ADAPTER	&db_;

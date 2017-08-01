@@ -58,14 +58,14 @@ WorkerStatus KeyValueWorker<PROTOCOL, DB_ADAPTER>::process_request_(CONNECTION &
 
 	if (cmp__(cmd, INFO)){
 		if (p.size() != 1)
-			return sendResponseError_(buffer, "Bad request");
+			return sendResponseBadRequest_(buffer);
 
 		return sendResponseString_(buffer, db_.info() );
 	}
 
 	if (cmp__(cmd, GET)){
 		if (p.size() != 2)
-			return sendResponseError_(buffer, "Bad request");
+			return sendResponseBadRequest_(buffer);
 
 		const auto &key = p[1];
 
@@ -74,7 +74,7 @@ WorkerStatus KeyValueWorker<PROTOCOL, DB_ADAPTER>::process_request_(CONNECTION &
 
 	if (cmp__(cmd, GETALL)){
 		if (p.size() != 2)
-			return sendResponseError_(buffer, "Bad request");
+			return sendResponseBadRequest_(buffer);
 
 		const auto &key = p[1];
 		(void) key;

@@ -112,7 +112,7 @@ auto RedisProtocol::readParam_(const StringRef &src, size_t &pos) -> std::pair<S
 		return statusPair_(Status::BUFFER_NOT_READ);
 
 	const size_t size = (size_t) readInt_(src, pos);
-	if (size <= 0 || size > MAX_PARAM_SIZE)
+	if (checkParamSize__(size))
 		return errPair_(Error::PARAM_SIZE);
 
 	{

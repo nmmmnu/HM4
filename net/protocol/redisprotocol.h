@@ -67,6 +67,10 @@ private:
 
 	static std::pair<Status, StringRef> readParam_(const StringRef &src, size_t &pos);
 
+	static bool checkParamSize__(size_t const size){
+		return size < 0 || size > MAX_PARAM_SIZE;
+	}
+
 private:
 	constexpr static char		STAR		= '*';
 	constexpr static char		DOLLAR		= '$';
