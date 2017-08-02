@@ -4,19 +4,15 @@
 #include <type_traits>
 
 #include <sstream>
-#include <iostream>
 
-#include "blackholelist.h"
 
 template<class LIST, class LOADER>
 class DBAdapter{
 public:
-	constexpr static std::true_type IS_MUTABLE{};
+	constexpr static std::false_type IS_MUTABLE{};
 
-private:
+public:
 	constexpr static size_t DEFAULT_MAX_RESULTS = 50;
-
-	using Pair = hm4::Pair;
 
 public:
 	DBAdapter(LIST &list, /* optional */ LOADER *loader, size_t const maxResults = DEFAULT_MAX_RESULTS) :
@@ -25,8 +21,7 @@ public:
 				maxResults_(maxResults){}
 
 	std::string get(const StringRef &key) const{
-		if (key.empty())
-			return {};
+		assert(! key.empty());
 
 		const auto &p = list_[key];
 
@@ -76,24 +71,6 @@ public:
 			return loader_->refresh();
 		else
 			return true;
-	}
-
-	void set(const StringRef &key, const StringRef &val, const StringRef & = {} ){
-		insert_( { key, val } );
-	}
-
-	bool del(const StringRef &key){
-		insert_( Pair::tombstone(key) );
-		return true;
-	}
-
-private:
-	void insert_(Pair &&p){
-		hm4::BlackHoleList xlist_;
-
-		// key will be checked as pair is created...
-		if (p)
-			xlist_.insert(std::move(p));
 	}
 
 private:

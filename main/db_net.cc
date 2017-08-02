@@ -6,7 +6,22 @@
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
 
+#if 0
+
 #include "dbadapter.h"
+
+template<class LIST, class LOADER>
+using SelectedDBAdapter = DBAdapter<LIST, LOADER>;
+
+#else
+#include "mutabledbadapter.h"
+
+template<class LIST, class LOADER>
+using SelectedDBAdapter = MutableDBAdapter<LIST, LOADER>;
+
+#endif
+
+#include <iostream>
 
 static int printUsage(const char *cmd){
 	std::cout
@@ -47,7 +62,7 @@ int main(int argc, char **argv){
 
 	// ----------------------------------
 
-	using MyDBAdapter = DBAdapter<MyCollectionTable, MyTableLoader>;
+	using MyDBAdapter = SelectedDBAdapter<MyCollectionTable, MyTableLoader>;
 	MyDBAdapter adapter(list, &dl);
 
 	// ----------------------------------
