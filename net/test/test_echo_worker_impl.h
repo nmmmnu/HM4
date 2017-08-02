@@ -1,10 +1,12 @@
 #include "worker/echoworker.h"
 
-using MyWorker		= net::worker::EchoWorker;
+struct MyWorkerFactory{
+	using Worker = net::worker::EchoWorker;
 
-MyWorker myWorkerFactory(){
-	return {};
-}
+	Worker operator()(){
+		return {};
+	}
+};
 
 #include "test_selector_impl.h"
 

@@ -7,18 +7,15 @@
 #include "asyncloop.h"
 
 #if 0
+	#include "dbadapter/dbadapter.h"
 
-#include "dbadapter.h"
-
-template<class LIST, class LOADER>
-using SelectedDBAdapter = DBAdapter<LIST, LOADER>;
-
+	template<class LIST, class LOADER>
+	using SelectedDBAdapter = DBAdapter<LIST, LOADER>;
 #else
-#include "mutabledbadapter.h"
+	#include "dbadapter/mutabledbadapter.h"
 
-template<class LIST, class LOADER>
-using SelectedDBAdapter = MutableDBAdapter<LIST, LOADER>;
-
+	template<class LIST, class LOADER>
+	using SelectedDBAdapter = MutableDBAdapter<LIST, LOADER>;
 #endif
 
 #include <iostream>

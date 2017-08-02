@@ -9,7 +9,11 @@ int main(){
 	int const fd2 = net::socket_create(net::SOCKET_TCP{},  "localhost.not.used.yet", 2002);
 	int const fd3 = net::socket_create(net::SOCKET_UNIX{}, "/tmp/echo");
 
-	net::AsyncLoop<MySelector, MyWorker> loop( MySelector{ 4 }, myWorkerFactory(), { fd1, fd2, fd3 } );
+	using MyWorker = MyWorkerFactory::Worker;
+
+	MyWorkerFactory wf;
+
+	net::AsyncLoop<MySelector, MyWorker> loop( MySelector{ 4 }, wf(), { fd1, fd2, fd3 } );
 
 	while(loop.process());
 }
