@@ -187,8 +187,11 @@ void list_test(LIST &list){
 	list_populate(list);
 
 	LIST mlist = std::move(list);
-	mytest("move c-tor 1",		mlist.bytes() == size		);
-	mytest("move c-tor 2",		list.empty()			);
+	mytest("move c-tor",		mlist.bytes() == size		);
+
+	// checking if list.empty() == true
+	// is wrong and should not be tested,
+	// because it could be done via copy c-tor or swap
 }
 
 #include "skiplist.h"
@@ -233,24 +236,44 @@ void list_test(hm4::BlackHoleList &list){
 
 
 template <class LIST>
-void list_test(const char *name){
+void list_test(const char *name, LIST &list){
 	mytest.begin(name);
-
-	LIST list;
 
 	return list_test(list);
 }
 
 
+template <class LIST>
+void list_test(const char *name){
+	LIST list;
+
+	return list_test(name, list);
+}
+
+#include "multi/duallist.h"
+
+using MyDualList = hm4::multi::DualList<hm4::SkipList, hm4::BlackHoleList, false>;
+
+template <>
+void list_test<MyDualList>(const char *name){
+	hm4::SkipList		memtable;
+	hm4::BlackHoleList	disktable;
+	MyDualList list{ memtable, disktable };
+
+	return list_test(name, list);
+}
 
 #include "vectorlist.h"
 #include "linklist.h"
 
 int main(int argc, char **argv){
+
 	list_test<hm4::VectorList	>("VectorList"		);
 	list_test<hm4::LinkList		>("LinkList"		);
 	list_test<hm4::SkipList		>("SkipList"		);
 	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
+
+	list_test<MyDualList		>("DualList"		);
 
 //	skiplist_lanes_test();
 

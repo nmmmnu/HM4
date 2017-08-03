@@ -44,7 +44,7 @@ public:
 
 public:
 	bool clear(){
-		return list_.removeAll();
+		return list_.clear();
 	}
 
 	ObserverPair operator[](const StringRef &key) const{
@@ -73,7 +73,7 @@ private:
 		if (list_.bytes() > maxSize_){
 			flush();
 			list_.clear();
-			notifyLoader_(loader_);
+			notifyLoader_();
 		}
 
 		return result;
@@ -94,16 +94,21 @@ public:
 	}
 
 private:
-	template<class T>
-	static bool notifyLoader_(T *loader){
-		if (loader)
-			return loader->refresh();
+	template<typename T>
+	struct loader_tag{};
 
-		return false;
+	template<typename T>
+	bool notifyLoader_(loader_tag<T>){
+		assert(loader_);
+		return loader_->refresh();
 	}
 
-	static bool notifyLoader_(std::nullptr_t *){
-		return false;
+	static bool notifyLoader_(loader_tag<nullptr_t>){
+		return true;
+	}
+
+	bool notifyLoader_(){
+		return notifyLoader_(loader_tag<TABLELOADER>{});
 	}
 
 private:

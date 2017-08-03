@@ -1,5 +1,5 @@
-#ifndef _DUAL_LIST_H
-#define _DUAL_LIST_H
+#ifndef DUAL_TABLE_H_
+#define DUAL_TABLE_H_
 
 #include "ilist.h"
 

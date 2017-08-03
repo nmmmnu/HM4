@@ -10,8 +10,6 @@ namespace hm4{
 
 class VectorList : public IMutableList<VectorList>{
 public:
-	using size_type = typename VectorList::size_type;
-
 	static constexpr size_t		ELEMENT_SIZE		= sizeof(Pair);
 	static constexpr size_type	DEFAULT_REALLOC_COUNT	= 16;
 
