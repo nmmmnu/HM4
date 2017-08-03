@@ -14,13 +14,22 @@ public:
 	using container_type	= std::vector<DiskTable>;
 
 public:
-	DirectoryTableLoader(const StringRef &path, int const advice = DiskTable::DEFAULT_ADVICE) :
+	DirectoryTableLoader() = default;
+
+	DirectoryTableLoader(std::string path, int const advice = DiskTable::DEFAULT_ADVICE) :
 				BaseTableLoader(advice),
-				path_(path){
-		refresh();
+				path_(std::move(path)){
+		refresh_();
 	}
 
-	bool refresh();
+	bool refresh(){
+		refresh_();
+
+		return true;
+	}
+
+private:
+	void refresh_();
 
 private:
 	std::string	path_;

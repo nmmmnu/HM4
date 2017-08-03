@@ -4,16 +4,15 @@ namespace multi{
 
 template <class CONTAINER>
 ObserverPair CollectionTable<CONTAINER>::operator[](const StringRef &key) const{
-	// precondition
+	assert(container_);
 	assert(!key.empty());
-	// eo precondition
 
 	// CONTAINER is responsible for ordering the tables,
 	// in correct (probably reverse) order.
 
 	// CONTAINER is responsible for providing goof const Pair &.
 
-	for(const auto &table : container_ ){
+	for(const auto &table : *container_ ){
 		if (const Pair &pair = table[key])
 			return Pair::observer(pair);
 	}
@@ -25,9 +24,11 @@ ObserverPair CollectionTable<CONTAINER>::operator[](const StringRef &key) const{
 
 template <class CONTAINER>
 size_t CollectionTable<CONTAINER>::bytes() const{
+	assert(container_);
+
 	size_t result = 0;
 
-	for(const auto &table : container_ )
+	for(const auto &table : *container_ )
 		result += table.bytes();
 
 	return result;
@@ -35,9 +36,11 @@ size_t CollectionTable<CONTAINER>::bytes() const{
 
 template <class CONTAINER>
 auto CollectionTable<CONTAINER>::sizeEstimated_() const -> size_type{
+	assert(container_);
+
 	size_type result = 0;
 
-	for(const auto &table : container_ )
+	for(const auto &table : *container_ )
 		result += table.size(true);
 
 	return result;
@@ -55,19 +58,6 @@ auto CollectionTable<CONTAINER>::sizeReal_() const -> size_type{
 	return result;
 }
 
-#if 0
-template <class CONTAINER>
-auto CollectionTable<CONTAINER>::sizeReal_() const -> size_type{
-	// Slooooow....
-	size_type count = 0;
-	for(const auto &p : *this){
-		(void) p;
-		++count;
-	}
-
-	return count;
-}
-#endif
 
 } // namespace multi
 } // namespace

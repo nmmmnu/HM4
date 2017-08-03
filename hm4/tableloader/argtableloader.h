@@ -9,6 +9,8 @@ namespace tableloader{
 
 class ArgTableLoader : public tableloader_impl_::BaseTableLoader{
 public:
+	ArgTableLoader() = default;
+
 	ArgTableLoader(int const argc, const char **argv, int const advice = DiskTable::DEFAULT_ADVICE) :
 				BaseTableLoader(advice),
 				argc_(argc),
@@ -19,7 +21,7 @@ public:
 	bool refresh();
 
 private:
-	int		argc_;
+	int		argc_	= 0;
 	const char	**argv_;
 };
 

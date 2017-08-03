@@ -11,7 +11,7 @@
 namespace hm4{
 
 
-class IList{
+class IListConf{
 public:
 	using size_type		= uint64_t;
 	using difference_type	= int64_t;
@@ -20,7 +20,7 @@ public:
 // ==============================
 
 template <class T>
-class List : public IList{
+class IList : public IListConf{
 protected:
 	constexpr
 	static size_type PRINT_COUNT = 10;
@@ -52,7 +52,7 @@ private:
 // ==============================
 
 template <class T>
-class IMutableList : public List<T>{
+class IMutableList : public IList<T>{
 public:
 	bool insert(const Pair &pair){
 		assert( pair );

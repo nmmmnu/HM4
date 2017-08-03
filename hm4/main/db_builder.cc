@@ -1,19 +1,6 @@
 #include <iostream>
 #include <iomanip>
 
-static int printUsage(const char *cmd){
-	std::cout
-		<< "Usage:"	<< '\n'
-		<< "\t"		<< cmd	<< " [file.txt] [lsm_path] - load file.txt, then create / add to lsm_path"		<< '\n'
-
-		<< "\t\tPath names must be written without extention"		<< '\n'
-		<< "\t\tExample 'directory/file.*.db'"				<< '\n'
-
-		<< '\n';
-
-	return 10;
-}
-
 #include "skiplist.h"
 #include "flushlist.h"
 
@@ -26,43 +13,56 @@ static int printUsage(const char *cmd){
 constexpr size_t	MEMLIST_SIZE	= 10 * 1024 * 1024;
 constexpr size_t	PROCESS_STEP	= 1000 * 10;
 
+
+static int printUsage(const char *cmd);
+
+
 template <class LIST, class READER>
-int listLoad(LIST &list, READER &reader);
+int listLoad(LIST &list, READER &reader, size_t process_step);
 
-int main(int argc, char **argv){
-	if (argc <= 2){
-		return printUsage(argv[0]);
-	}
 
-	const char *filename	= argv[1];
-	const char *path	= argv[2];
-
+struct MyListFactory{
 	using MemList		= hm4::SkipList;
 	using MyIDGenerator	= hm4::idgenerator::IDGeneratorDate;
 	using Flusher		= hm4::flusher::DiskFileFlusher<MyIDGenerator>;
 	using MyList		= hm4::FlushList<MemList,Flusher>;
 
+	MyList operator()(const char *path, size_t const memlist_size){
+		MyList mylist{
+			memlist,
+			Flusher{ MyIDGenerator{}, path, ".db" },
+			memlist_size
+		};
+
+		return mylist;
+	}
+
+private:
 	MemList memlist;
 
-	MyList mylist{
-		memlist,
-		Flusher{
-			MyIDGenerator{},
-			path,
-			".db"
-		},
-		MEMLIST_SIZE
-	};
+};
+
+
+int main(int argc, char **argv){
+	if (argc <= 2)
+		return printUsage(argv[0]);
+
+	const char *filename	= argv[1];
+	const char *path	= argv[2];
+
+	MyListFactory factory;
+
+	auto mylist = factory(path, MEMLIST_SIZE);
 
 	FileReader<1024> reader{ filename };
 
-	return listLoad(mylist, reader);
+	return listLoad(mylist, reader, PROCESS_STEP);
 }
 
 
 
 template <class LIST, class READER>
-int listLoad(LIST &list, READER &reader){
+int listLoad(LIST &list, READER &reader, size_t const process_step){
 	size_t i = 0;
 
 	while(reader){
@@ -78,7 +78,7 @@ int listLoad(LIST &list, READER &reader){
 
 		++i;
 
-		if (i % PROCESS_STEP == 0){
+		if (i % process_step == 0){
 			const auto &ll = list.getList();
 
 			std::cout
@@ -90,5 +90,20 @@ int listLoad(LIST &list, READER &reader){
 	}
 
 	return 0;
+}
+
+
+
+static int printUsage(const char *cmd){
+	std::cout
+		<< "Usage:"	<< '\n'
+		<< "\t"		<< cmd	<< " [file.txt] [lsm_path] - load file.txt, then create / add to lsm_path"		<< '\n'
+
+		<< "\t\tPath names must be written without extention"		<< '\n'
+		<< "\t\tExample 'directory/file.*.db'"				<< '\n'
+
+		<< '\n';
+
+	return 10;
 }
 

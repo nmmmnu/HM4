@@ -13,7 +13,7 @@ namespace multi{
 
 
 template <class CONTAINER>
-class CollectionTable : public List<CollectionTable<CONTAINER> >{
+class CollectionTable : public IList<CollectionTable<CONTAINER> >{
 public:
 	using Table	= typename CONTAINER::value_type;
 
@@ -22,19 +22,23 @@ public:
 	using size_type	= typename CollectionTable::size_type;
 
 public:
-	CollectionTable(const CONTAINER &container) : container_(container){}
+	CollectionTable() = default;
+	CollectionTable(const CONTAINER &container) : container_( & container){}
 
 public:
 	Iterator begin() const{
-		return Iterator(container_, typename Iterator::begin_iterator{}	);
+		assert(container_);
+		return Iterator(*container_, typename Iterator::begin_iterator{} );
 	}
 
 	Iterator end() const{
-		return Iterator(container_, typename Iterator::end_iterator{}	);
+		assert(container_);
+		return Iterator(*container_, typename Iterator::end_iterator{}	 );
 	}
 
 	Iterator lowerBound(const StringRef &key) const{
-		return Iterator(container_, key);
+		assert(container_);
+		return Iterator(*container_, key);
 	}
 
 public:
@@ -51,7 +55,7 @@ private:
 	size_type sizeReal_() const;
 
 private:
-	const CONTAINER	&container_;
+	const CONTAINER	*container_ = nullptr;
 };
 
 

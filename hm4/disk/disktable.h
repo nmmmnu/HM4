@@ -10,7 +10,7 @@ namespace hm4{
 namespace disk{
 
 
-class DiskTable : public List<DiskTable>{
+class DiskTable : public IList<DiskTable>{
 public:
 	class Iterator;
 

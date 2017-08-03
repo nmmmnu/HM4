@@ -6,7 +6,11 @@
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
 
-#if 0
+//#include "duallist.h"
+
+//#define MUTABLE_
+
+#ifndef MUTABLE_
 	#include "dbadapter/dbadapter.h"
 
 	template<class LIST, class LOADER>
@@ -54,8 +58,16 @@ int main(int argc, char **argv){
 	using MyTableLoader	= hm4::tableloader::DirectoryTableLoader;
 	using MyCollectionTable	= hm4::multi::CollectionTable<MyTableLoader::container_type>;
 
+	#ifndef MUTABLE_
+		using MyTable = MyCollectionTable;
+	#else
+		using MemList = hm4:SkipList;
+
+		using MyTable = hm4::DualList<MemList, MyCollectionTable>;
+	#endif
+
 	MyTableLoader		dl{ path };
-	MyCollectionTable	list(*dl);
+	MyTable			list(*dl);
 
 	// ----------------------------------
 
