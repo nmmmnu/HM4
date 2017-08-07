@@ -26,13 +26,8 @@ const Pair &DualIterator<TABLE1, TABLE2>::operator*() const{
 
 	int const cmp = pair1.cmp(pair2);
 
-	if (cmp != 0){
-		// return smaller
-		return  cmp < 0 ? pair1 : pair2;
-	}else{
-		// return newer
-		return pair1.cmpTime(pair2) > 0 ? pair1 : pair2;
-	}
+	// return smaller or first
+	return cmp <= 0 ? pair1 : pair2;
 }
 
 

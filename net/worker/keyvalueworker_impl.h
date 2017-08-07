@@ -60,7 +60,12 @@ public:
 	}
 
 private:
+	template<bool T>
+	struct mutable_tag{};
+
 	WorkerStatus executeCommand_(const Command cmd){
+		using mutable_tag_c = mutable_tag<DB_ADAPTER::IS_MUTABLE>;
+
 		switch(cmd){
 		case Command::EXIT	: return WorkerStatus::DISCONNECT;
 		case Command::SHUTDOWN	: return WorkerStatus::SHUTDOWN;
@@ -70,9 +75,9 @@ private:
 		case Command::GET	: return do_get();
 		case Command::GETALL	: return do_getall();
 
-		case Command::SET	: return do_set  (DB_ADAPTER::IS_MUTABLE);
-		case Command::SETEX	: return do_setex(DB_ADAPTER::IS_MUTABLE);
-		case Command::DEL	: return do_del  (DB_ADAPTER::IS_MUTABLE);
+		case Command::SET	: return do_set  (mutable_tag_c{});
+		case Command::SETEX	: return do_setex(mutable_tag_c{});
+		case Command::DEL	: return do_del  (mutable_tag_c{});
 
 		default			: return err_NotImplemented_();
 		}
@@ -144,7 +149,9 @@ private:
 	}
 
 private:
-	WorkerStatus do_set(std::true_type){
+	using mutable_tag_t = mutable_tag<true>;
+
+	WorkerStatus do_set(mutable_tag_t){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 3)
@@ -162,7 +169,7 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_setex(std::true_type){
+	WorkerStatus do_setex(mutable_tag_t){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 4)
@@ -181,7 +188,7 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_del(std::true_type){
+	WorkerStatus do_del(mutable_tag_t){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 2)
@@ -198,15 +205,17 @@ private:
 	}
 
 private:
-	WorkerStatus do_set(std::false_type){
+	using mutable_tag_f = mutable_tag<false>;
+
+	WorkerStatus do_set(mutable_tag_f){
 		return err_NotImplemented_();
 	}
 
-	WorkerStatus do_setex(std::false_type){
+	WorkerStatus do_setex(mutable_tag_f){
 		return err_NotImplemented_();
 	}
 
-	WorkerStatus do_del(std::false_type){
+	WorkerStatus do_del(mutable_tag_f){
 		return err_NotImplemented_();
 	}
 

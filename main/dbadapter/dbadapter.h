@@ -1,31 +1,33 @@
 #ifndef DBADAPTER_H_
 #define DBADAPTER_H_
 
-#include <type_traits>
-
 #include <sstream>
 
 
 template<class LIST, class LOADER>
 class DBAdapter{
 public:
-	constexpr static std::false_type IS_MUTABLE{};
+	constexpr static bool IS_MUTABLE = false;
 
 public:
 	constexpr static size_t DEFAULT_MAX_RESULTS = 50;
 
 public:
-	DBAdapter(LIST &list, /* optional */ LOADER *loader, size_t const maxResults = DEFAULT_MAX_RESULTS) :
+	DBAdapter(LIST &list, LOADER &loader, size_t const maxResults = DEFAULT_MAX_RESULTS) :
 				list_(list),
-				loader_(loader),
+				loader_(& loader),
+				maxResults_(maxResults){}
+
+	DBAdapter(LIST &list, size_t const maxResults = DEFAULT_MAX_RESULTS) :
+				list_(list),
 				maxResults_(maxResults){}
 
 	std::string get(const StringRef &key) const{
-		assert(! key.empty());
+		assert(!key.empty());
 
 		const auto &p = list_[key];
 
-		if (p.valid(/* tomb */ true))
+		if (p.isValid(/* tomb */ true))
 			return p.getVal();
 		else
 			return {};
@@ -44,7 +46,7 @@ public:
 		for(auto it = bit; it != eit; ++it){
 			result.push_back(it->getKey());
 
-			if (it->valid(/* tomb */ true))
+			if (it->isValid(/* tomb */ true))
 				result.push_back(it->getVal());
 			else
 				result.emplace_back();
@@ -67,15 +69,12 @@ public:
 	}
 
 	bool refresh(){
-		if (loader_)
-			return loader_->refresh();
-		else
-			return true;
+		return loader_ && loader_->refresh();
 	}
 
 private:
 	LIST	&list_;
-	LOADER	*loader_;
+	LOADER	*loader_ = nullptr;
 	size_t	maxResults_;
 };
 

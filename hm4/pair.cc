@@ -1,8 +1,10 @@
 #include "pair.h"
 #include "pairblob.h"
 
+#include "sgn.h"
+
 #include <cassert>
-#include <cstdio>		// printf for cygwin
+#include <cstdio>
 
 #define log__(...) /* nada */
 
@@ -30,7 +32,7 @@ Pair::Pair(const Blob *blob) :
 		Blob::create(blob)
 	){}
 
-Pair::Pair(const Blob *blob, observer_type) noexcept :
+Pair::Pair(const Blob *blob, observer_tag) noexcept :
 				pimpl(blob),
 				observer_(true){}
 
@@ -132,10 +134,7 @@ int Pair::cmpTime(const Pair &pair) const noexcept{
 	auto const c1 = getCreated();
 	auto const c2 = pair.getCreated();
 
-	if (c1 == c2)
-		return 0;
-
-	return c1 > c2 ? +1 : -1;
+	return sgn(c1, c2);
 }
 
 bool Pair::isTombstone() const noexcept{
@@ -144,10 +143,8 @@ bool Pair::isTombstone() const noexcept{
 		true;
 }
 
-bool Pair::valid(bool const tombstoneCheck) const noexcept{
-	return pimpl ?
-		pimpl->valid(tombstoneCheck) :
-		false;
+bool Pair::isValid(bool const tombstoneCheck) const noexcept{
+	return pimpl && pimpl->isValid(tombstoneCheck);
 }
 
 size_t Pair::bytes() const noexcept{
@@ -162,22 +159,16 @@ size_t Pair::maxBytes() noexcept{
 
 void Pair::print() const noexcept{
 	if (! pimpl){
-		printf("--- Pair is empty %s ---\n", observer_ ? "observer" : "");
+		printf("--- %sPair is empty ---\n", observer_ ? "Observer " : "");
 		return;
 	}
 
 	pimpl->print(observer_);
 }
 
-bool Pair::fwrite(std::ostream & os) const{
-	if (pimpl == nullptr)
-		return false;
-
-	size_t const bytes = pimpl->bytes();
-
-	os.write((const char *) pimpl.get(), (std::streamsize) bytes );
-
-	return true;
+void Pair::fwrite(std::ostream & os) const{
+	if (pimpl)
+		os.write((const char *) pimpl.get(), (std::streamsize) bytes() );
 }
 
 

@@ -27,19 +27,19 @@ struct MyListFactory{
 	using Flusher		= hm4::flusher::DiskFileFlusher<MyIDGenerator>;
 	using MyList		= hm4::FlushList<MemList,Flusher>;
 
-	MyList operator()(const char *path, size_t const memlist_size){
-		MyList mylist{
+	MyListFactory(const char *path, size_t const memlist_size) : mylist(
 			memlist,
 			Flusher{ MyIDGenerator{}, path, ".db" },
 			memlist_size
-		};
+		){}
 
+	MyList &operator()(){
 		return mylist;
 	}
 
 private:
-	MemList memlist;
-
+	MemList	memlist;
+	MyList	mylist;
 };
 
 
@@ -50,9 +50,9 @@ int main(int argc, char **argv){
 	const char *filename	= argv[1];
 	const char *path	= argv[2];
 
-	MyListFactory factory;
+	MyListFactory factory{ path, MEMLIST_SIZE };
 
-	auto mylist = factory(path, MEMLIST_SIZE);
+	auto &mylist = factory();
 
 	FileReader<1024> reader{ filename };
 

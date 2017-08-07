@@ -94,11 +94,9 @@ bool SkipList::clear(){
 
 template <class UPAIR>
 bool SkipList::insertT_(UPAIR&& newdata){
-	const StringRef &key = newdata.getKey();
+	assert(newdata);
 
-	// precondition
-	assert(!key.empty());
-	// eo precondition
+	const StringRef &key = newdata.getKey();
 
 	const auto nl = locate_(key);
 
@@ -108,7 +106,7 @@ bool SkipList::insertT_(UPAIR&& newdata){
 		const Pair & olddata = nl.node->data;
 
 		// check if the data in database is valid
-		if (! newdata.valid(olddata) ){
+		if (! newdata.isValid(olddata) ){
 			// newdata will be magically destroyed.
 			return false;
 		}

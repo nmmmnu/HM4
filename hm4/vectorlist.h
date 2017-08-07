@@ -48,10 +48,8 @@ public:
 	}
 
 	int cmpAt(size_type const index, const StringRef &key) const{
-		// precondition
 		assert( index < size() );
-		assert( ! key.empty() );
-		// eo precondition
+		assert(!key.empty() );
 
 		return operator[](index).cmp(key);
 	}

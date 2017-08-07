@@ -45,11 +45,9 @@ bool LinkList::clear(){
 
 template <class UPAIR>
 bool LinkList::insertT_(UPAIR&& newdata){
-	const StringRef &key = newdata.getKey();
+	assert(newdata);
 
-	// precondition
-	assert(!key.empty());
-	// eo precondition
+	const StringRef &key = newdata.getKey();
 
 	Node *prev = nullptr;
 	for(Node *node = head_; node; node = node->next){
@@ -62,7 +60,7 @@ bool LinkList::insertT_(UPAIR&& newdata){
 			// keep the node, overwrite the data
 
 			// check if the data in database is valid
-			if (! newdata.valid(olddata)){
+			if (! newdata.isValid(olddata)){
 				// newdata will be magically destroyed.
 				return false;
 			}

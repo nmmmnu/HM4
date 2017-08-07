@@ -101,17 +101,26 @@ public:
 
 	bool equals(const char *key, size_t const size) const noexcept{
 		return StringRef::fastEmptyChar(key, size) ?
-			bool(CMP_NULLKEY) :
+			false :
 			StringRef::equals(getKey(), getKeyLen(), key, size);
 	}
 
 	bool equals(const char *key) const noexcept{
 		return StringRef::fastEmptyChar(key) ?
-			bool(CMP_NULLKEY) :
+			false :
 			StringRef::equals(getKey(), getKeyLen(), key, strlen(key) );
 	}
 
-	bool valid(bool tombstoneCheck = false) const noexcept;
+	bool isValid(bool tombstoneCheck = false) const noexcept{
+		if ( tombstoneCheck && isTombstone() )
+			return false;
+
+		if ( isExpired_() )
+			return false;
+
+		// finally all OK
+		return true;
+	}
 
 	size_t bytes() const noexcept{
 		return sizeofBase__() + sizeofBuffer_();
@@ -129,6 +138,8 @@ public:
 	}
 
 private:
+	bool isExpired_() const noexcept;
+
 	constexpr
 	static size_t sizeofBase__() noexcept{
 		return offsetof(PairBlob, buffer);

@@ -63,11 +63,9 @@ auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
 
 template <class UPAIR>
 bool VectorList::insertT_(UPAIR&& newdata){
-	const StringRef &key = newdata.getKey();
+	assert(newdata);
 
-	// precondition
-	assert(!key.empty());
-	// eo precondition
+	const StringRef &key = newdata.getKey();
 
 	const auto x = binarySearch_(key);
 
@@ -77,7 +75,7 @@ bool VectorList::insertT_(UPAIR&& newdata){
 		Pair & olddata = buffer_[ x.second ];
 
 		// check if the data in database is valid
-		if (! newdata.valid(olddata) ){
+		if (! newdata.isValid(olddata) ){
 			// newdata will be magically destroyed.
 			return false;
 		}

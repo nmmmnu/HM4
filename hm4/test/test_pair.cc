@@ -54,7 +54,7 @@ static void pair_blob_test(const char *module, const PairBlob *pp, const StringR
 
 	mytest.begin(module);
 
-	mytest("valid",		p.valid()			);
+	mytest("valid",		p.isValid()			);
 
 	mytest("key",		key == p.getKey()		);
 	mytest("val",		val == p.getVal()		);
@@ -68,7 +68,7 @@ static void pair_blob_test(const char *module, const PairBlob *pp, const StringR
 static void pair_test_raw_do(const char *module, const Pair & p, const StringRef &key, const StringRef &val){
 	mytest.begin(module);
 
-	mytest("valid",		p.valid()			);
+	mytest("valid",		p.isValid()			);
 
 	mytest("key",		key == p.getKey()		);
 	mytest("val",		val == p.getVal()		);
@@ -141,8 +141,8 @@ static void pair_test(){
 	mytest("eq",			p.equals(key)			);
 	mytest("!eq",			! p.equals("something")		);
 
-	mytest("valid",			p.valid()			);
-	mytest("valid",			p.valid(t)			);
+	mytest("valid",			p.isValid()			);
+	mytest("valid",			p.isValid(t)			);
 
 	const Pair p2 = { "__smaller", "val"};
 
@@ -176,16 +176,16 @@ static void pair_test_expired(bool const slow){
 
 	const Pair p1 = { "key", "val", 1 };
 
-	mytest("not expired",	p1.valid()			);
+	mytest("not expired",	p1.isValid()			);
 
 	if (slow){
 		printf("sleep for 2 sec...\n");
 		sleep(2);
-		mytest("expired",		! p1.valid()			);
+		mytest("expired",		! p1.isValid()			);
 	}
 
 	const Pair p2 = { "key", "val", 1, 3600 * 24 /* 1970-01-02 */ };
-	mytest("expired",		! p2.valid()				);
+	mytest("expired",		! p2.isValid()				);
 }
 
 // ===================================

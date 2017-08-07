@@ -28,9 +28,9 @@ private:
 	using Blob = PairBlob;
 
 private:
-	struct observer_type{};
+	struct observer_tag{};
 
-	Pair(const Blob *blob, observer_type) noexcept;
+	Pair(const Blob *blob, observer_tag) noexcept;
 
 public:
 	Pair(); /* = default */
@@ -40,11 +40,11 @@ public:
 	Pair(const Blob *blob);
 
 	static Pair observer(const Blob *blob) noexcept{
-		return Pair( blob, observer_type{} );
+		return Pair( blob, observer_tag{} );
 	}
 
 	static Pair observer(const Pair &other) noexcept{
-		return Pair( other.pimpl.get(), observer_type{} );
+		return Pair( other.pimpl.get(), observer_tag{} );
 	}
 
 	static Pair tombstone(const StringRef &key){
@@ -62,7 +62,7 @@ public:
 	~Pair();
 
 	operator bool() const noexcept{
-		return pimpl != nullptr;
+		return static_cast<bool>(pimpl);
 	}
 
 public:
@@ -97,10 +97,10 @@ public:
 
 	bool isTombstone() const noexcept;
 
-	bool valid(bool tombstoneCheck = false) const noexcept;
+	bool isValid(bool tombstoneCheck = false) const noexcept;
 
-	bool valid(const Pair &, bool tombstoneCheck = false) const noexcept{
-		return valid(tombstoneCheck);
+	bool isValid(const Pair &, bool tombstoneCheck = false) const noexcept{
+		return isValid(tombstoneCheck);
 	}
 
 	size_t bytes() const noexcept;
@@ -112,7 +112,7 @@ public:
 	static size_t maxBytes() noexcept;
 
 public:
-	bool fwrite(std::ostream & os) const;
+	void fwrite(std::ostream & os) const;
 
 	void print() const noexcept;
 

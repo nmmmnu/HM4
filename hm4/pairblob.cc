@@ -55,16 +55,8 @@ std::unique_ptr<PairBlob> PairBlob::create(const PairBlob *src){
 
 // ==============================
 
-bool PairBlob::valid(bool const tombstoneCheck) const noexcept{
-	if ( tombstoneCheck && isTombstone() )
-		return false;
-
-	// now expires is 0 no matter of endianness
-	if (expires && MyTime::expired( getCreated(), be32toh(expires) ) )
-		return false;
-
-	// finally all OK
-	return true;
+bool PairBlob::isExpired_() const noexcept{
+	return expires &&  MyTime::expired( getCreated(), be32toh(expires) );
 }
 
 void PairBlob::print(bool const observer) const noexcept{
