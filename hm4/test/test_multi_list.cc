@@ -128,7 +128,7 @@ void test_DualList(const char *name){
 	bytes += list_insert(list2, {"2 age",	"22"	});
 	bytes += list_insert(list2, {"4 os",	"Linux"	});
 
-	using MyMultiTable = hm4::multi::DualList<const LIST, const LIST>;
+	using MyMultiTable = hm4::multi::DualList<const LIST>;
 
 	MyMultiTable table{ list1, list2 };
 
@@ -149,7 +149,7 @@ void test_DualListEmpty(const char *name){
 	bytes += list_insert(list2, {"3 city",	"Sofia"	});
 	bytes += list_insert(list2, {"4 os",	"Linux"	});
 
-	using MyMultiTable = hm4::multi::DualList<const LIST, const LIST>;
+	using MyMultiTable = hm4::multi::DualList<const LIST>;
 
 	MyMultiTable table{ list1, list2 };
 

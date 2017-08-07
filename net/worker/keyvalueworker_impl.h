@@ -149,9 +149,9 @@ private:
 	}
 
 private:
-	using mutable_tag_t = mutable_tag<true>;
+	using mutable_tag_true = mutable_tag<true>;
 
-	WorkerStatus do_set(mutable_tag_t){
+	WorkerStatus do_set(mutable_tag_true){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 3)
@@ -169,7 +169,7 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_setex(mutable_tag_t){
+	WorkerStatus do_setex(mutable_tag_true){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 4)
@@ -188,7 +188,7 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_del(mutable_tag_t){
+	WorkerStatus do_del(mutable_tag_true){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 2)
@@ -205,17 +205,17 @@ private:
 	}
 
 private:
-	using mutable_tag_f = mutable_tag<false>;
+	using mutable_tag_false = mutable_tag<false>;
 
-	WorkerStatus do_set(mutable_tag_f){
+	WorkerStatus do_set(mutable_tag_false){
 		return err_NotImplemented_();
 	}
 
-	WorkerStatus do_setex(mutable_tag_f){
+	WorkerStatus do_setex(mutable_tag_false){
 		return err_NotImplemented_();
 	}
 
-	WorkerStatus do_del(mutable_tag_f){
+	WorkerStatus do_del(mutable_tag_false){
 		return err_NotImplemented_();
 	}
 

@@ -36,8 +36,6 @@ size_t CollectionList<CONTAINER>::bytes() const{
 
 template <class CONTAINER>
 auto CollectionList<CONTAINER>::sizeEstimated_(bool const estimated) const -> size_type{
-	assert(container_);
-
 	size_type result = 0;
 
 	for(const auto &table : *container_ )

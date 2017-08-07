@@ -42,6 +42,7 @@ public:
 		return ! self()->size(true);
 	}
 
+public:
 	// Mutable Methods
 
 	bool insert(const Pair &pair){

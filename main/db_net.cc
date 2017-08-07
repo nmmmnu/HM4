@@ -6,13 +6,10 @@
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
 
-
-#include "dbadapter/imutabledbadapter.h"
-
 #include "multi/duallist.h"
 #include "skiplist.h"
-#include "dbadapter/mutabledbadapter.h"
 
+#include "listdbadapter.h"
 
 struct MyImmutableDBAdapterFactory;
 struct MyMutableDBAdapterFactory;
@@ -38,7 +35,7 @@ struct MyImmutableDBAdapterFactory{
 	using MyListLoader	= hm4::listloader::DirectoryListLoader;
 	using MyImmutableList	= hm4::multi::CollectionList<MyListLoader::container_type>;
 	using MyList		= MyImmutableList;
-	using MyDBAdapter	= ImutableDBAdapter<MyList, MyListLoader>;
+	using MyDBAdapter	= ListDBAdapter<const MyList, MyListLoader>;
 
 	MyImmutableDBAdapterFactory(const char *path) :
 					loader_(path),
@@ -60,7 +57,7 @@ struct MyMutableDBAdapterFactory{
 	using MyImmutableList	= hm4::multi::CollectionList<MyListLoader::container_type>;
 	using MyMutableList	= hm4::SkipList;
 	using MyList		= hm4::multi::DualList<MyMutableList, MyImmutableList, true>;
-	using MyDBAdapter	= MutableDBAdapter<MyList, MyListLoader>;
+	using MyDBAdapter	= ListDBAdapter</* non const */ MyList, MyListLoader>;
 
 	MyMutableDBAdapterFactory(const char *path) :
 					loader_(path),
@@ -73,10 +70,10 @@ struct MyMutableDBAdapterFactory{
 	}
 
 private:
-	MyListLoader					loader_;
-	MyImmutableList			imList_;
-	MyMutableList				muList_;
-	MyList				list_;
+	MyListLoader		loader_;
+	MyImmutableList		imList_;
+	MyMutableList		muList_;
+	MyList			list_;
 	MyDBAdapter		adapter_;
 };
 

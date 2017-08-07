@@ -252,7 +252,7 @@ void list_test(const char *name){
 
 #include "multi/duallist.h"
 
-using MyDualList = hm4::multi::DualList<hm4::SkipList, hm4::BlackHoleList, false>;
+using MyDualList = hm4::multi::DualList<hm4::SkipList, hm4::BlackHoleList>;
 
 template <>
 void list_test<MyDualList>(const char *name){

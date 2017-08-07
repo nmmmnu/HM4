@@ -45,6 +45,8 @@ public:
 	ObserverPair operator[](const StringRef &key) const;
 
 	size_type size(bool const estimated = false) const{
+		assert(container_);
+
 		return estimated ? sizeEstimated_(true) : sizeReal_();
 	}
 

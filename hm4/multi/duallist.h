@@ -43,6 +43,8 @@ public:
 	}
 
 	size_type size(bool const estimated = false) const{
+		assert(list1_ && list2_);
+
 		return estimated ? sizeEstimated_(true) : sizeReal_();
 	}
 
@@ -73,8 +75,6 @@ public:
 
 private:
 	size_type sizeEstimated_(bool const estimated) const{
-		assert(list1_ && list2_);
-
 		return list1_->size(estimated) + list2_->size(estimated);
 	}
 
