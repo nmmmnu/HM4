@@ -1,11 +1,11 @@
-#ifndef DBADAPTER_H_
-#define DBADAPTER_H_
+#ifndef IMUTABLE_DBADAPTER_H_
+#define IMUTABLE_DBADAPTER_H_
 
 #include <sstream>
 
 
 template<class LIST, class LOADER>
-class DBAdapter{
+class ImutableDBAdapter{
 public:
 	constexpr static bool IS_MUTABLE = false;
 
@@ -13,12 +13,12 @@ public:
 	constexpr static size_t DEFAULT_MAX_RESULTS = 50;
 
 public:
-	DBAdapter(LIST &list, LOADER &loader, size_t const maxResults = DEFAULT_MAX_RESULTS) :
+	ImutableDBAdapter(LIST &list, LOADER &loader, size_t const maxResults = DEFAULT_MAX_RESULTS) :
 				list_(list),
 				loader_(& loader),
 				maxResults_(maxResults){}
 
-	DBAdapter(LIST &list, size_t const maxResults = DEFAULT_MAX_RESULTS) :
+	ImutableDBAdapter(LIST &list, size_t const maxResults = DEFAULT_MAX_RESULTS) :
 				list_(list),
 				maxResults_(maxResults){}
 

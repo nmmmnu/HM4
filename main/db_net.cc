@@ -7,10 +7,15 @@
 #include "asyncloop.h"
 
 
-#include "dbadapter/dbadapter.h"
+#include "dbadapter/imutabledbadapter.h"
+
+#include "multi/duallist.h"
+#include "skiplist.h"
+#include "dbadapter/mutabledbadapter.h"
 
 
 struct MyImmutableDBAdapterFactory;
+struct MyMutableDBAdapterFactory;
 
 // ----------------------------------
 
@@ -25,19 +30,42 @@ const     size_t	MAX_PACKET_SIZE		= hm4::Pair::maxBytes() * 2;
 
 using MySelector	= net::selector::PollSelector;
 using MyProtocol	= net::protocol::RedisProtocol;
-using MyAdapterFactory	= MyImmutableDBAdapterFactory;
+using MyAdapterFactory	= MyMutableDBAdapterFactory;
 
 // ----------------------------------
 
 struct MyImmutableDBAdapterFactory{
 	using MyTableLoader	= hm4::tableloader::DirectoryTableLoader;
-	using MyCollectionTable	= hm4::multi::CollectionTable<MyTableLoader::container_type>;
-	using MyTable		= MyCollectionTable;
-	using MyDBAdapter	= DBAdapter<MyTable, MyTableLoader>;
+	using MyImmutableTable	= hm4::multi::CollectionTable<MyTableLoader::container_type>;
+	using MyTable		= MyImmutableTable;
+	using MyDBAdapter	= ImutableDBAdapter<MyTable, MyTableLoader>;
 
 	MyImmutableDBAdapterFactory(const char *path) :
 					loader_(path),
-					list_(*loader_),
+					imTable_(*loader_),
+					adapter_(imTable_, loader_){}
+
+	MyDBAdapter &operator()(){
+		return adapter_;
+	}
+
+private:
+	MyTableLoader				loader_;
+	MyImmutableTable		imTable_;
+	MyDBAdapter		adapter_;
+};
+
+struct MyMutableDBAdapterFactory{
+	using MyTableLoader	= hm4::tableloader::DirectoryTableLoader;
+	using MyImmutableTable	= hm4::multi::CollectionTable<MyTableLoader::container_type>;
+	using MyMutableList	= hm4::SkipList;
+	using MyList		= hm4::multi::DualList<MyMutableList, MyImmutableTable, true>;
+	using MyDBAdapter	= MutableDBAdapter<MyList, MyTableLoader>;
+
+	MyMutableDBAdapterFactory(const char *path) :
+					loader_(path),
+					imTable_(*loader_),
+					list_(muList_, imTable_),
 					adapter_(list_, loader_){}
 
 	MyDBAdapter &operator()(){
@@ -45,11 +73,12 @@ struct MyImmutableDBAdapterFactory{
 	}
 
 private:
-	MyTableLoader	loader_;
-	MyTable		list_;
-	MyDBAdapter	adapter_;
+	MyTableLoader					loader_;
+	MyImmutableTable			imTable_;
+	MyMutableList				muList_;
+	MyList				list_;
+	MyDBAdapter		adapter_;
 };
-
 
 static int printUsage(const char *cmd);
 

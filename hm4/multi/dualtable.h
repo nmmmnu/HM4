@@ -39,7 +39,7 @@ public:
 	}
 
 	size_type size(bool const estimated = false) const{
-		return estimated ? sizeEstimated_() : sizeReal_();
+		return estimated ? sizeEstimated_(estimated) : sizeReal_();
 	}
 
 	size_t bytes() const{
@@ -68,10 +68,10 @@ public:
 	}
 
 private:
-	size_type sizeEstimated_() const{
+	size_type sizeEstimated_(bool const estimated) const{
 		assert(table1_ && table2_);
 
-		return table1_->size(false) + table2_->size(false);
+		return table1_->size(estimated) + table2_->size(estimated);
 	}
 
 	size_type sizeReal_() const{

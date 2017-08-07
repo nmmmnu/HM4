@@ -76,7 +76,10 @@ public:
 	bool emplace(ARGS ...args){
 		Pair pair{ std::forward<ARGS>(args)... };
 
-		return self()->insertT_(std::move(pair));
+		if (pair)
+			return self()->insertT_(std::move(pair));
+		else
+			return false;
 	}
 
 private:

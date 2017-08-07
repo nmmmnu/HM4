@@ -12,6 +12,7 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)directorytableloader.o $(O)myglob.o					\
 			$(O)pair.o $(O)pairblob.o $(O)mytime.o					\
 			$(O)disktable.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o	\
+			$(O)skiplist.o								\
 												\
 			$(O)pollselector.o $(O)redisprotocol.o $(O)keyvaluecommands.o $(O)sockets.o
 	$(LINK)

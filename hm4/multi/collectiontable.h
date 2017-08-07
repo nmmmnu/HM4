@@ -45,13 +45,13 @@ public:
 	ObserverPair operator[](const StringRef &key) const;
 
 	size_type size(bool const estimated = false) const{
-		return estimated ? sizeEstimated_() : sizeReal_();
+		return estimated ? sizeEstimated_(estimated) : sizeReal_();
 	}
 
 	size_t bytes() const;
 
 private:
-	size_type sizeEstimated_() const;
+	size_type sizeEstimated_(bool estimated) const;
 	size_type sizeReal_() const;
 
 private:

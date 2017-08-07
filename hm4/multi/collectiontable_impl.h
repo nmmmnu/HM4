@@ -35,13 +35,13 @@ size_t CollectionTable<CONTAINER>::bytes() const{
 }
 
 template <class CONTAINER>
-auto CollectionTable<CONTAINER>::sizeEstimated_() const -> size_type{
+auto CollectionTable<CONTAINER>::sizeEstimated_(bool const estimated) const -> size_type{
 	assert(container_);
 
 	size_type result = 0;
 
 	for(const auto &table : *container_ )
-		result += table.size(true);
+		result += table.size(estimated);
 
 	return result;
 }
