@@ -7,7 +7,7 @@
 namespace hm4{
 
 
-class BlackHoleList : public IMutableList<BlackHoleList>{
+class BlackHoleList : public IList<BlackHoleList, true>{
 public:
 	using Iterator = const Pair *;
 
@@ -54,7 +54,7 @@ public:
 	}
 
 private:
-	friend class IMutableList<BlackHoleList>;
+	friend class IList<BlackHoleList, true>;
 
 	constexpr
 	bool insertT_(const Pair &) const {

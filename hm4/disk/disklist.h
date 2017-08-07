@@ -10,7 +10,7 @@ namespace hm4{
 namespace disk{
 
 
-class DiskList : public IImmutableList<DiskList>{
+class DiskList : public IList<DiskList, false>{
 public:
 	class Iterator;
 

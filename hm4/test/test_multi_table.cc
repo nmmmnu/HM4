@@ -101,7 +101,7 @@ void table_test(const LIST &list, typename LIST::size_type const size, size_t co
 }
 
 
-#include "multi/dualtable.h"
+#include "multi/duallist.h"
 
 template <class LIST>
 size_t list_insert(LIST &list, Pair &&p){
@@ -111,7 +111,7 @@ size_t list_insert(LIST &list, Pair &&p){
 }
 
 template <class LIST>
-void test_DualTable(const char *name){
+void test_DualList(const char *name){
 	mytest.begin(name);
 
 	LIST list1;
@@ -128,7 +128,7 @@ void test_DualTable(const char *name){
 	bytes += list_insert(list2, {"2 age",	"22"	});
 	bytes += list_insert(list2, {"4 os",	"Linux"	});
 
-	using MyMultiTable = hm4::multi::DualTable<LIST, LIST>;
+	using MyMultiTable = hm4::multi::DualList<const LIST, const LIST>;
 
 	MyMultiTable table{ list1, list2 };
 
@@ -136,7 +136,7 @@ void test_DualTable(const char *name){
 }
 
 template <class LIST>
-void test_DualTableEmpty(const char *name){
+void test_DualListEmpty(const char *name){
 	mytest.begin(name);
 
 	LIST list1;
@@ -149,7 +149,7 @@ void test_DualTableEmpty(const char *name){
 	bytes += list_insert(list2, {"3 city",	"Sofia"	});
 	bytes += list_insert(list2, {"4 os",	"Linux"	});
 
-	using MyMultiTable = hm4::multi::DualTable<LIST, LIST>;
+	using MyMultiTable = hm4::multi::DualList<const LIST, const LIST>;
 
 	MyMultiTable table{ list1, list2 };
 
@@ -217,8 +217,8 @@ void test_CollectionList(const char *name){
 using List = hm4::VectorList;
 
 int main(int argc, char **argv){
-	test_DualTable<hm4::VectorList		>("DualTable"		);
-	test_DualTableEmpty<hm4::VectorList	>("DualTable (Empty)"	);
+	test_DualList<hm4::VectorList		>("DualList"		);
+	test_DualListEmpty<hm4::VectorList	>("DualList (Empty)"	);
 	test_CollectionList<hm4::VectorList	>("CollectionList"	);
 
 	return mytest.end();

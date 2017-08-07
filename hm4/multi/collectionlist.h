@@ -13,7 +13,7 @@ namespace multi{
 
 
 template <class CONTAINER>
-class CollectionList : public IImmutableList<CollectionList<CONTAINER> >{
+class CollectionList : public IList<CollectionList<CONTAINER>, false >{
 public:
 	using List	= typename CONTAINER::value_type;
 
@@ -45,7 +45,7 @@ public:
 	ObserverPair operator[](const StringRef &key) const;
 
 	size_type size(bool const estimated = false) const{
-		return estimated ? sizeEstimated_(estimated) : sizeReal_();
+		return estimated ? sizeEstimated_(true) : sizeReal_();
 	}
 
 	size_t bytes() const;

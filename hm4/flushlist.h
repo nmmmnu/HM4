@@ -8,7 +8,7 @@ namespace hm4{
 
 
 template <class LIST, class FLUSH, class LIST_LOADER = std::nullptr_t>
-class FlushList : public IMutableList<FlushList<LIST, FLUSH> >{
+class FlushList : public IList<FlushList<LIST, FLUSH>, true>{
 public:
 	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
 
@@ -51,8 +51,8 @@ public:
 		return Pair::observer(list_[key]);
 	}
 
-	bool remove(const StringRef &key){
-		return list_.remove(key);
+	bool erase(const StringRef &key){
+		return list_.erase(key);
 	}
 
 	size_t bytes() const{
@@ -64,7 +64,7 @@ public:
 	}
 
 private:
-	friend class IMutableList<FlushList<LIST, FLUSH> >;
+	friend class IList<FlushList<LIST, FLUSH>, true>;
 
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){

@@ -6,7 +6,7 @@
 namespace hm4{
 
 
-class LinkList : public IMutableList<LinkList>{
+class LinkList : public IList<LinkList, true>{
 public:
 	class Iterator;
 
@@ -38,7 +38,7 @@ public:
 	Iterator end() const;
 
 private:
-	friend class IMutableList<LinkList>;
+	friend class IList<LinkList, true>;
 
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data);

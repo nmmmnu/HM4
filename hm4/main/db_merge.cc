@@ -41,7 +41,7 @@ int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepT
 
 #include "listloader/arglistloader.h"
 
-#include "multi/dualtable.h"
+#include "multi/duallist.h"
 #include "multi/collectionlist.h"
 
 struct MergeListFactory_1{
@@ -62,7 +62,7 @@ private:
 
 struct MergeListFactory_2{
 	using DiskList		= hm4::disk::DiskList;
-	using MyMergeList	= hm4::multi::DualTable<DiskList, DiskList>;
+	using MyMergeList	= hm4::multi::DualList<const DiskList>;
 
 	MergeListFactory_2(const char *filename1, const char *filename2, int const advice){
 		table1_.open(filename1, advice);

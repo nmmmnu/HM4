@@ -19,15 +19,17 @@ public:
 
 // ==============================
 
-template <class T>
-class IImmutableList : public IListConf{
+template <class T, bool MUTABLE>
+class IList : public IListConf{
 protected:
 	constexpr static size_type PRINT_COUNT	= 10;
 
 public:
-	constexpr static bool MUTABLE_TAG	= false;
+	constexpr static bool MUTABLE_TAG	= MUTABLE;
 
 public:
+	// Immutable Methods
+
 	void print(size_type count = PRINT_COUNT) const{
 		for(const Pair &p : *self() ){
 			p.print();
@@ -37,28 +39,11 @@ public:
 	}
 
 	bool empty() const{
-		return ! size(true);
+		return ! self()->size(true);
 	}
 
-public:
-	size_type size(bool const estimated = false) const{
-		return static_cast<size_type>( self()->size(estimated) );
-	}
+	// Mutable Methods
 
-private:
-	const T *self() const{
-		return static_cast<const T*>(this);
-	}
-};
-
-// ==============================
-
-template <class T>
-class IMutableList : public IImmutableList<T>{
-public:
-	constexpr static bool MUTABLE_TAG	= true;
-
-public:
 	bool insert(const Pair &pair){
 		assert( pair );
 
@@ -88,11 +73,14 @@ public:
 	}
 
 private:
+	const T *self() const{
+		return static_cast<const T*>(this);
+	}
+
 	T *self(){
 		return static_cast<T*>(this);
 	}
 };
-
 
 } // namespace
 
