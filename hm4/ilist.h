@@ -20,10 +20,12 @@ public:
 // ==============================
 
 template <class T>
-class IList : public IListConf{
+class IImmutableList : public IListConf{
 protected:
-	constexpr
-	static size_type PRINT_COUNT = 10;
+	constexpr static size_type PRINT_COUNT	= 10;
+
+public:
+	constexpr static bool MUTABLE_TAG	= false;
 
 public:
 	void print(size_type count = PRINT_COUNT) const{
@@ -52,7 +54,10 @@ private:
 // ==============================
 
 template <class T>
-class IMutableList : public IList<T>{
+class IMutableList : public IImmutableList<T>{
+public:
+	constexpr static bool MUTABLE_TAG	= true;
+
 public:
 	bool insert(const Pair &pair){
 		assert( pair );

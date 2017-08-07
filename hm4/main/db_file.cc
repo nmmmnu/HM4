@@ -1,6 +1,6 @@
 #include "db_file_impl.h"
 
-#include "disk/disktable.h"
+#include "disk/disklist.h"
 
 #include <iostream>
 
@@ -31,7 +31,7 @@ int main(int argc, char **argv){
 
 	// =======================
 
-	using DiskTable = hm4::disk::DiskTable;
+	using DiskTable = hm4::disk::DiskList;
 
 	DiskTable list;
 	if (list.open(filename) == false){

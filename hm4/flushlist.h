@@ -7,7 +7,7 @@
 namespace hm4{
 
 
-template <class LIST, class FLUSH, class TABLELOADER = std::nullptr_t>
+template <class LIST, class FLUSH, class LIST_LOADER = std::nullptr_t>
 class FlushList : public IMutableList<FlushList<LIST, FLUSH> >{
 public:
 	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
@@ -17,7 +17,7 @@ public:
 
 private:
 	template <class UFLUSH>
-	FlushList(LIST &list, UFLUSH &&flusher, TABLELOADER *loader, size_t const maxSize = MAX_SIZE) :
+	FlushList(LIST &list, UFLUSH &&flusher, LIST_LOADER *loader, size_t const maxSize = MAX_SIZE) :
 					list_(list),
 					flusher_(std::forward<UFLUSH>(flusher)),
 					loader_(loader),
@@ -25,7 +25,7 @@ private:
 
 public:
 	template <class UFLUSH>
-	FlushList(LIST &list, UFLUSH &&flusher, TABLELOADER &loader, size_t const maxSize = MAX_SIZE) :
+	FlushList(LIST &list, UFLUSH &&flusher, LIST_LOADER &loader, size_t const maxSize = MAX_SIZE) :
 					FlushList(list, std::forward<UFLUSH>(flusher), &loader, maxSize){}
 
 	template <class UFLUSH>
@@ -108,13 +108,13 @@ private:
 	}
 
 	bool notifyLoader_(){
-		return notifyLoader_(loader_tag<TABLELOADER>{});
+		return notifyLoader_(loader_tag<LIST_LOADER>{});
 	}
 
 private:
 	LIST		&list_;
 	FLUSH		flusher_;
-	TABLELOADER	*loader_;
+	LIST_LOADER	*loader_;
 	size_t		maxSize_;
 };
 

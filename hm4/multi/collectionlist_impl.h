@@ -3,7 +3,7 @@ namespace multi{
 
 
 template <class CONTAINER>
-ObserverPair CollectionTable<CONTAINER>::operator[](const StringRef &key) const{
+ObserverPair CollectionList<CONTAINER>::operator[](const StringRef &key) const{
 	assert(container_);
 	assert(!key.empty());
 
@@ -23,7 +23,7 @@ ObserverPair CollectionTable<CONTAINER>::operator[](const StringRef &key) const{
 // ===================================
 
 template <class CONTAINER>
-size_t CollectionTable<CONTAINER>::bytes() const{
+size_t CollectionList<CONTAINER>::bytes() const{
 	assert(container_);
 
 	size_t result = 0;
@@ -35,7 +35,7 @@ size_t CollectionTable<CONTAINER>::bytes() const{
 }
 
 template <class CONTAINER>
-auto CollectionTable<CONTAINER>::sizeEstimated_(bool const estimated) const -> size_type{
+auto CollectionList<CONTAINER>::sizeEstimated_(bool const estimated) const -> size_type{
 	assert(container_);
 
 	size_type result = 0;
@@ -47,7 +47,7 @@ auto CollectionTable<CONTAINER>::sizeEstimated_(bool const estimated) const -> s
 }
 
 template <class CONTAINER>
-auto CollectionTable<CONTAINER>::sizeReal_() const -> size_type{
+auto CollectionList<CONTAINER>::sizeReal_() const -> size_type{
 	// Slooooow....
 	size_type result = 0;
 

@@ -1,22 +1,26 @@
 #ifndef BASE_TABLE_LOADER_H_
 #define BASE_TABLE_LOADER_H_
 
-#include "disk/disktable.h"
+#include "disk/disklist.h"
 
 #include <vector>
 
 namespace hm4{
-namespace tableloader{
-namespace tableloader_impl_{
+namespace listloader{
+namespace listloader_impl_{
 
 
-class BaseTableLoader{
+class BaseListLoader{
 public:
-	using DiskTable		= disk::DiskTable;
-	using container_type	= std::vector<DiskTable>;
+	using DiskList		= disk::DiskList;
+	using container_type	= std::vector<DiskList>;
 
 protected:
-	BaseTableLoader(int const advice = DiskTable::DEFAULT_ADVICE) :
+	static int getDefautAdvice__(){
+		return DiskList::DEFAULT_ADVICE;
+	}
+
+	BaseListLoader(int const advice = getDefautAdvice__()) :
 				advice_(advice){}
 
 public:
@@ -39,8 +43,8 @@ private:
 };
 
 
-} // namespace tableloader_impl_
-} // namespace tableloader
+} // namespace listloader_impl_
+} // namespace listloader
 } // namespace
 
 

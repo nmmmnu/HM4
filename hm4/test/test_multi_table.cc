@@ -156,10 +156,10 @@ void test_DualTableEmpty(const char *name){
 	return table_test(table, 4, bytes);
 }
 
-#include "multi/collectiontable.h"
+#include "multi/collectionlist.h"
 
 template <class LIST>
-void test_CollectionTable(const char *name){
+void test_CollectionList(const char *name){
 	mytest.begin(name);
 
 	using MyContainer = std::vector<LIST>;
@@ -204,7 +204,7 @@ void test_CollectionTable(const char *name){
 		container.push_back(LIST{});
 	}
 
-	using MyMultiTable = hm4::multi::CollectionTable<MyContainer>;
+	using MyMultiTable = hm4::multi::CollectionList<MyContainer>;
 
 	MyMultiTable table{ container };
 
@@ -219,7 +219,7 @@ using List = hm4::VectorList;
 int main(int argc, char **argv){
 	test_DualTable<hm4::VectorList		>("DualTable"		);
 	test_DualTableEmpty<hm4::VectorList	>("DualTable (Empty)"	);
-	test_CollectionTable<hm4::VectorList	>("CollectionTable"	);
+	test_CollectionList<hm4::VectorList	>("CollectionList"	);
 
 	return mytest.end();
 }

@@ -1,5 +1,5 @@
-#ifndef _LSM_TABLE_H
-#define _LSM_TABLE_H
+#ifndef COLLECTION_LIST_H_
+#define COLLECTION_LIST_H_
 
 #include "ilist.h"
 
@@ -13,17 +13,17 @@ namespace multi{
 
 
 template <class CONTAINER>
-class CollectionTable : public IList<CollectionTable<CONTAINER> >{
+class CollectionList : public IImmutableList<CollectionList<CONTAINER> >{
 public:
-	using Table	= typename CONTAINER::value_type;
+	using List	= typename CONTAINER::value_type;
 
-	using Iterator	= CollectionIterator<Table>;
+	using Iterator	= CollectionIterator<List>;
 
-	using size_type	= typename CollectionTable::size_type;
+	using size_type	= typename CollectionList::size_type;
 
 public:
-	CollectionTable() = default;
-	CollectionTable(const CONTAINER &container) : container_( & container){}
+	CollectionList() = default;
+	CollectionList(const CONTAINER &container) : container_( & container){}
 
 public:
 	Iterator begin() const{
@@ -64,7 +64,7 @@ private:
 
 // ===================================
 
-#include "collectiontable_impl.h"
+#include "collectionlist_impl.h"
 
 #endif
 

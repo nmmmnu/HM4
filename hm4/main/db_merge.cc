@@ -39,62 +39,62 @@ int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepT
 }
 
 
-#include "tableloader/argtableloader.h"
+#include "listloader/arglistloader.h"
 
 #include "multi/dualtable.h"
-#include "multi/collectiontable.h"
+#include "multi/collectionlist.h"
 
-struct MergeTableFactory_1{
-	using DiskTable = hm4::disk::DiskTable;
-	using MyMergeTable = DiskTable;
+struct MergeListFactory_1{
+	using DiskList = hm4::disk::DiskList;
+	using MyMergeList = DiskList;
 
-	MergeTableFactory_1(const char *filename, int const advice){
+	MergeListFactory_1(const char *filename, int const advice){
 		table_.open(filename, advice);
 	}
 
-	const MyMergeTable &operator()() const{
+	const MyMergeList &operator()() const{
 		return table_;
 	}
 
 private:
-	MyMergeTable table_;
+	MyMergeList table_;
 };
 
-struct MergeTableFactory_2{
-	using DiskTable		= hm4::disk::DiskTable;
-	using MyMergeTable	= hm4::multi::DualTable<DiskTable, DiskTable>;
+struct MergeListFactory_2{
+	using DiskList		= hm4::disk::DiskList;
+	using MyMergeList	= hm4::multi::DualTable<DiskList, DiskList>;
 
-	MergeTableFactory_2(const char *filename1, const char *filename2, int const advice){
+	MergeListFactory_2(const char *filename1, const char *filename2, int const advice){
 		table1_.open(filename1, advice);
 		table2_.open(filename2, advice);
 	}
 
-	const MyMergeTable &operator()() const{
+	const MyMergeList &operator()() const{
 		return table_;
 	}
 
 private:
-	DiskTable	table1_;
-	DiskTable	table2_;
-	MyMergeTable	table_{ table2_, table1_ };
+	DiskList	table1_;
+	DiskList	table2_;
+	MyMergeList	table_{ table2_, table1_ };
 };
 
 
-struct MergeTableFactory_N{
-	using ArgTableLoader	= hm4::tableloader::ArgTableLoader;
-	using MyMergeTable	= hm4::multi::CollectionTable<ArgTableLoader::container_type>;
+struct MergeListFactory_N{
+	using ArgListLoader	= hm4::listloader::ArgListLoader;
+	using MyMergeList	= hm4::multi::CollectionList<ArgListLoader::container_type>;
 
-	MergeTableFactory_N(int const table_count, const char **path, int const advice) :
+	MergeListFactory_N(int const table_count, const char **path, int const advice) :
 					loader_( table_count, path, advice ),
 					table_( *loader_ ) {}
 
-	const MyMergeTable &operator()() const{
+	const MyMergeList &operator()() const{
 		return table_;
 	}
 
 private:
-	ArgTableLoader	loader_;
-	MyMergeTable	table_;
+	ArgListLoader	loader_;
+	MyMergeList	table_;
 };
 
 
@@ -126,7 +126,7 @@ int main(int argc, char **argv){
 				<< '\t' << path[0]			<< '\n'
 			;
 
-			MergeTableFactory_1 factory{ path[0], ADVICE };
+			MergeListFactory_1 factory{ path[0], ADVICE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}
@@ -139,7 +139,7 @@ int main(int argc, char **argv){
 				<< '\t' << path[1]			<< '\n'
 			;
 
-			MergeTableFactory_2 factory{ path[0], path[1], ADVICE };
+			MergeListFactory_2 factory{ path[0], path[1], ADVICE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 
@@ -151,7 +151,7 @@ int main(int argc, char **argv){
 				<< "Merging multiple tables..."		<< '\n'
 			;
 
-			MergeTableFactory_N factory{ table_count, path, ADVICE };
+			MergeListFactory_N factory{ table_count, path, ADVICE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}

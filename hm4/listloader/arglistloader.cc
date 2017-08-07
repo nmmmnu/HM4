@@ -1,10 +1,10 @@
-#include "argtableloader.h"
+#include "arglistloader.h"
 
 namespace hm4{
-namespace tableloader{
+namespace listloader{
 
 
-bool ArgTableLoader::refresh(){
+bool ArgListLoader::refresh(){
 	container_.clear();
 
 	container_.reserve((container_type::size_type) argc_);
@@ -17,6 +17,6 @@ bool ArgTableLoader::refresh(){
 }
 
 
-} // namespace tableloader
+} // namespace listloader
 } // namespace
 

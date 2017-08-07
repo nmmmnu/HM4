@@ -10,32 +10,32 @@ namespace hm4{
 namespace multi{
 
 
-template <class TABLE1, class TABLE2>
-class DualTable : public IList<DualTable<TABLE1,TABLE2> >{
+template <class LIST1, class LIST2>
+class DualTable : public IImmutableList<DualTable<LIST1,LIST2> >{
 public:
-	using Iterator = DualIterator<TABLE1, TABLE2>;
+	using Iterator = DualIterator<LIST1, LIST2>;
 
 	using size_type = typename DualTable::size_type;
 
 public:
 	DualTable() = default;
 
-	DualTable(const TABLE1 &table1, const TABLE2 &table2) :
-					table1_( & table1),
-					table2_( & table2){
+	DualTable(const LIST1 &list1, const LIST2 &list2) :
+					list1_( & list1),
+					list2_( & list2){
 	}
 
 public:
 	ObserverPair operator[](const StringRef &key) const{
-		assert(table1_ && table2_);
+		assert(list1_ && list2_);
 		assert(!key.empty());
 
-		const Pair &pair = (*table1_)[key];
+		const Pair &pair = (*list1_)[key];
 
 		if (pair)
 			return Pair::observer(pair);
 
-		return Pair::observer((*table2_)[key]);
+		return Pair::observer((*list2_)[key]);
 	}
 
 	size_type size(bool const estimated = false) const{
@@ -43,35 +43,35 @@ public:
 	}
 
 	size_t bytes() const{
-		assert(table1_ && table2_);
+		assert(list1_ && list2_);
 
-		return table1_->bytes() + table2_->bytes();
+		return list1_->bytes() + list2_->bytes();
 	}
 
 public:
 	Iterator begin() const{
-		assert(table1_ && table2_);
+		assert(list1_ && list2_);
 
-		return Iterator(*table1_, *table2_, typename Iterator::begin_iterator{} );
+		return Iterator(*list1_, *list2_, typename Iterator::begin_iterator{} );
 	}
 
 	Iterator end() const{
-		assert(table1_ && table2_);
+		assert(list1_ && list2_);
 
-		return Iterator(*table1_, *table2_, typename Iterator::end_iterator{} );
+		return Iterator(*list1_, *list2_, typename Iterator::end_iterator{} );
 	}
 
 	Iterator lowerBound(const StringRef &key) const{
-		assert(table1_ && table2_);
+		assert(list1_ && list2_);
 
-		return Iterator(*table1_, *table2_, key );
+		return Iterator(*list1_, *list2_, key );
 	}
 
 private:
 	size_type sizeEstimated_(bool const estimated) const{
-		assert(table1_ && table2_);
+		assert(list1_ && list2_);
 
-		return table1_->size(estimated) + table2_->size(estimated);
+		return list1_->size(estimated) + list2_->size(estimated);
 	}
 
 	size_type sizeReal_() const{
@@ -84,8 +84,8 @@ private:
 	}
 
 private:
-	const TABLE1	*table1_ = nullptr;
-	const TABLE2	*table2_ = nullptr;
+	const LIST1	*list1_ = nullptr;
+	const LIST2	*list2_ = nullptr;
 };
 
 

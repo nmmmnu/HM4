@@ -1,5 +1,5 @@
-#ifndef DISK_TABLE_H_
-#define DISK_TABLE_H_
+#ifndef DISK_LIST_H_
+#define DISK_LIST_H_
 
 #include "mmapfileplus.h"
 
@@ -10,7 +10,7 @@ namespace hm4{
 namespace disk{
 
 
-class DiskTable : public IList<DiskTable>{
+class DiskList : public IImmutableList<DiskList>{
 public:
 	class Iterator;
 
@@ -20,13 +20,13 @@ private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
 
 public:
-	DiskTable() = default;
+	DiskList() = default;
 
-	DiskTable(DiskTable &&other) = default;
+	DiskList(DiskList &&other) = default;
 
 	// no need d-tor,
 	// MMAPFile-s will be closed automatically
-	~DiskTable() = default;
+	~DiskList() = default;
 
 	bool open(const std::string &filename, int advice = DEFAULT_ADVICE);
 	void close();
@@ -96,10 +96,10 @@ private:
 
 // ===================================
 
-class DiskTable::Iterator{
+class DiskList::Iterator{
 private:
-	friend class DiskTable;
-	Iterator(const DiskTable &list, size_type pos,
+	friend class DiskList;
+	Iterator(const DiskList &list, size_type pos,
 				bool sorted_);
 
 public:
@@ -129,7 +129,7 @@ public:
 	}
 
 private:
-	const DiskTable	&list_;
+	const DiskList	&list_;
 	size_type	pos_;
 	bool		sorted_;
 
@@ -144,11 +144,11 @@ private:
 
 // ==============================
 
-inline auto DiskTable::begin() const -> Iterator{
+inline auto DiskList::begin() const -> Iterator{
 	return Iterator(*this,      0, sorted());
 }
 
-inline auto DiskTable::end() const -> Iterator{
+inline auto DiskList::end() const -> Iterator{
 	return Iterator(*this, size(), sorted());
 }
 

@@ -1,4 +1,4 @@
-#include "disktable.h"
+#include "disklist.h"
 
 #include "pairblob.h"
 
@@ -18,9 +18,9 @@ namespace disk{
 
 constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
-const int DiskTable::DEFAULT_ADVICE = MMAPFile::RANDOM;
+const int DiskList::DEFAULT_ADVICE = MMAPFile::RANDOM;
 
-bool DiskTable::open(const std::string &filename, int advice){
+bool DiskList::open(const std::string &filename, int advice){
 	metadata_.open(filenameMeta(filename));
 
 	if (metadata_ == false)
@@ -39,7 +39,7 @@ bool DiskTable::open(const std::string &filename, int advice){
 	return b1 && b2;
 }
 
-void DiskTable::close(){
+void DiskList::close(){
 	mIndx_.close();
 	mData_.close();
 
@@ -49,19 +49,19 @@ void DiskTable::close(){
 
 // ==============================
 
-inline void DiskTable::openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename, int const advice){
+inline void DiskList::openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename, int const advice){
 	file.open(filename, advice);
 	blob = { file.mem(), file.size() };
 }
 
-inline void DiskTable::closeFile__(MMAPFile &file, BlobRef &blob){
+inline void DiskList::closeFile__(MMAPFile &file, BlobRef &blob){
 	blob.reset();
 	file.close();
 }
 
 // ==============================
 
-auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+auto DiskList::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	using Node			= btree::Node;
 	using NodeData			= btree::NodeData;
 
@@ -216,11 +216,11 @@ auto DiskTable::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_
 	return binarySearch(*this, bs.first, bs.second, key, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
 }
 
-inline auto DiskTable::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+inline auto DiskList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
 }
 
-inline auto DiskTable::search_(const StringRef &key) const -> std::pair<bool,size_type>{
+inline auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size_type>{
 	if (mTree_ && mKeys_){
 		log__("btree");
 		return btreeSearch_(key);
@@ -232,7 +232,7 @@ inline auto DiskTable::search_(const StringRef &key) const -> std::pair<bool,siz
 
 // ==============================
 
-ObserverPair DiskTable::operator[](const StringRef &key) const{
+ObserverPair DiskList::operator[](const StringRef &key) const{
 	// precondition
 	assert(!key.empty());
 	// eo precondition
@@ -242,7 +242,7 @@ ObserverPair DiskTable::operator[](const StringRef &key) const{
 	return x.first ? operator[](x.second) : nullptr;
 }
 
-auto DiskTable::lowerBound(const StringRef &key) const -> Iterator{
+auto DiskList::lowerBound(const StringRef &key) const -> Iterator{
 	const auto x = search_(key);
 
 	return Iterator(*this, x.second, sorted());
@@ -250,7 +250,7 @@ auto DiskTable::lowerBound(const StringRef &key) const -> Iterator{
 
 // ==============================
 
-ObserverPair DiskTable::operator[](size_type const index) const{
+ObserverPair DiskList::operator[](size_type const index) const{
 	// precondition
 	assert( index < size() );
 	// eo precondition
@@ -260,7 +260,7 @@ ObserverPair DiskTable::operator[](size_type const index) const{
 	return Pair::observer(p);
 }
 
-int DiskTable::cmpAt(size_type const index, const StringRef &key) const{
+int DiskList::cmpAt(size_type const index, const StringRef &key) const{
 	// precondition
 	assert(!key.empty());
 	// eo precondition
@@ -273,7 +273,7 @@ int DiskTable::cmpAt(size_type const index, const StringRef &key) const{
 
 // ==============================
 
-const PairBlob *DiskTable::saveAccessFD_(const PairBlob *blob) const{
+const PairBlob *DiskList::saveAccessFD_(const PairBlob *blob) const{
 	if (!blob)
 		return nullptr;
 
@@ -286,7 +286,7 @@ const PairBlob *DiskTable::saveAccessFD_(const PairBlob *blob) const{
 	return nullptr;
 }
 
-const PairBlob *DiskTable::getAtFD_(size_type const index) const{
+const PairBlob *DiskList::getAtFD_(size_type const index) const{
 	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, size());
 
 	if (!be_array)
@@ -302,7 +302,7 @@ const PairBlob *DiskTable::getAtFD_(size_type const index) const{
 	return saveAccessFD_(blob);
 }
 
-size_t DiskTable::getSizeFD__(const PairBlob *blob, bool const aligned){
+size_t DiskList::getSizeFD__(const PairBlob *blob, bool const aligned){
 	constexpr MyAlign<PairConf::ALIGN> alc;
 
 	size_t const size = blob->bytes();
@@ -310,7 +310,7 @@ size_t DiskTable::getSizeFD__(const PairBlob *blob, bool const aligned){
 	return ! aligned ? size : alc.calc(size);
 }
 
-const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
+const PairBlob *DiskList::getNextFD_(const PairBlob *previous) const{
 	size_t size = getSizeFD__(previous, aligned());
 
 	const char *previousC = (const char *) previous;
@@ -323,13 +323,13 @@ const PairBlob *DiskTable::getNextFD_(const PairBlob *previous) const{
 
 // ===================================
 
-DiskTable::Iterator::Iterator(const DiskTable &list, size_type const pos,
+DiskList::Iterator::Iterator(const DiskList &list, size_type const pos,
 							bool const sorted) :
 			list_(list),
 			pos_(pos),
 			sorted_(sorted){}
 
-auto DiskTable::Iterator::operator*() const -> const ObserverPair &{
+auto DiskList::Iterator::operator*() const -> const ObserverPair &{
 	if (tmp_blob && pos_ == tmp_pos)
 		return tmp_pair;
 

@@ -1,7 +1,7 @@
 #include "db_file_impl.h"
 
-#include "multi/collectiontable.h"
-#include "tableloader/directorytableloader.h"
+#include "multi/collectionlist.h"
+#include "listloader/directorylistloader.h"
 
 #include <iostream>
 
@@ -32,11 +32,11 @@ int main(int argc, char **argv){
 
 	// =======================
 
-	using MyTableLoader	= hm4::tableloader::DirectoryTableLoader;
-	using MyCollectionTable	= hm4::multi::CollectionTable<MyTableLoader::container_type>;
+	using MyListLoader	= hm4::listloader::DirectoryListLoader;
+	using MyCollectionList	= hm4::multi::CollectionList<MyListLoader::container_type>;
 
-	MyTableLoader		dl{ path };
-	MyCollectionTable	list(*dl);
+	MyListLoader		dl{ path };
+	MyCollectionList	list(*dl);
 
 	// =======================
 

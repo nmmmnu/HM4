@@ -1,5 +1,5 @@
-#include "multi/collectiontable.h"
-#include "tableloader/directorytableloader.h"
+#include "multi/collectionlist.h"
+#include "listloader/directorylistloader.h"
 
 #include "selector/pollselector.h"
 #include "protocol/redisprotocol.h"
@@ -35,37 +35,37 @@ using MyAdapterFactory	= MyMutableDBAdapterFactory;
 // ----------------------------------
 
 struct MyImmutableDBAdapterFactory{
-	using MyTableLoader	= hm4::tableloader::DirectoryTableLoader;
-	using MyImmutableTable	= hm4::multi::CollectionTable<MyTableLoader::container_type>;
-	using MyTable		= MyImmutableTable;
-	using MyDBAdapter	= ImutableDBAdapter<MyTable, MyTableLoader>;
+	using MyListLoader	= hm4::listloader::DirectoryListLoader;
+	using MyImmutableList	= hm4::multi::CollectionList<MyListLoader::container_type>;
+	using MyList		= MyImmutableList;
+	using MyDBAdapter	= ImutableDBAdapter<MyList, MyListLoader>;
 
 	MyImmutableDBAdapterFactory(const char *path) :
 					loader_(path),
-					imTable_(*loader_),
-					adapter_(imTable_, loader_){}
+					imList_(*loader_),
+					adapter_(imList_, loader_){}
 
 	MyDBAdapter &operator()(){
 		return adapter_;
 	}
 
 private:
-	MyTableLoader				loader_;
-	MyImmutableTable		imTable_;
+	MyListLoader				loader_;
+	MyImmutableList		imList_;
 	MyDBAdapter		adapter_;
 };
 
 struct MyMutableDBAdapterFactory{
-	using MyTableLoader	= hm4::tableloader::DirectoryTableLoader;
-	using MyImmutableTable	= hm4::multi::CollectionTable<MyTableLoader::container_type>;
+	using MyListLoader	= hm4::listloader::DirectoryListLoader;
+	using MyImmutableList	= hm4::multi::CollectionList<MyListLoader::container_type>;
 	using MyMutableList	= hm4::SkipList;
-	using MyList		= hm4::multi::DualList<MyMutableList, MyImmutableTable, true>;
-	using MyDBAdapter	= MutableDBAdapter<MyList, MyTableLoader>;
+	using MyList		= hm4::multi::DualList<MyMutableList, MyImmutableList, true>;
+	using MyDBAdapter	= MutableDBAdapter<MyList, MyListLoader>;
 
 	MyMutableDBAdapterFactory(const char *path) :
 					loader_(path),
-					imTable_(*loader_),
-					list_(muList_, imTable_),
+					imList_(*loader_),
+					list_(muList_, imList_),
 					adapter_(list_, loader_){}
 
 	MyDBAdapter &operator()(){
@@ -73,8 +73,8 @@ struct MyMutableDBAdapterFactory{
 	}
 
 private:
-	MyTableLoader					loader_;
-	MyImmutableTable			imTable_;
+	MyListLoader					loader_;
+	MyImmutableList			imList_;
 	MyMutableList				muList_;
 	MyList				list_;
 	MyDBAdapter		adapter_;

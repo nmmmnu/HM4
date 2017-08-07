@@ -1,6 +1,6 @@
 #include "disk/btreeindexbuilder.h"
 
-#include "disk/disktable.h"
+#include "disk/disklist.h"
 
 #include <unistd.h>	// access
 
@@ -33,9 +33,9 @@ int main(int argc, char **argv){
 		return 2;
 	}
 #endif
-	using DiskTable = hm4::disk::DiskTable;
+	using DiskList = hm4::disk::DiskList;
 
-	DiskTable list;
+	DiskList list;
 	list.open(input_file);
 
 	if (list == false){
@@ -43,7 +43,7 @@ int main(int argc, char **argv){
 		return 3;
 	}
 
-	using BTreeIndexBuilder = hm4::disk::btree::BTreeIndexBuilder<DiskTable>;
+	using BTreeIndexBuilder = hm4::disk::btree::BTreeIndexBuilder<DiskList>;
 
 	BTreeIndexBuilder builder(output_file, list);
 

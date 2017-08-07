@@ -1,13 +1,13 @@
-#include "directorytableloader.h"
+#include "directorylistloader.h"
 
 #include "myglob.h"
 
 
 namespace hm4{
-namespace tableloader{
+namespace listloader{
 
 
-void DirectoryTableLoader::refresh_(){
+void DirectoryListLoader::refresh_(){
 	container_.clear();
 
 	if (path_.empty())
@@ -24,6 +24,6 @@ void DirectoryTableLoader::refresh_(){
 }
 
 
-} // namespace tableloader
+} // namespace listloader
 } // namespace
 

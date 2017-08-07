@@ -9,10 +9,10 @@ namespace hm4{
 namespace multi{
 
 
-template <class LIST, class TABLE, bool ERASE_WITH_TOMBSTONE>
-class DualList : public IMutableList<DualList<LIST,TABLE,ERASE_WITH_TOMBSTONE> >{
+template <class LIST, class IM_LIST, bool ERASE_WITH_TOMBSTONE>
+class DualList : public IMutableList<DualList<LIST,IM_LIST,ERASE_WITH_TOMBSTONE> >{
 private:
-	using MyDualTable	= DualTable<LIST,TABLE>;
+	using MyDualTable	= DualTable<LIST,IM_LIST>;
 
 public:
 	using Iterator		= typename MyDualTable::Iterator;
@@ -22,7 +22,7 @@ public:
 public:
 	DualList() = default;
 
-	DualList(LIST &list, const TABLE &table) :
+	DualList(LIST &list, const IM_LIST &table) :
 					dtable_(list, table),
 					list_( & list){
 	}
@@ -56,7 +56,7 @@ private:
 	}
 
 private:
-	friend class IMutableList<DualList<LIST,TABLE,ERASE_WITH_TOMBSTONE> >;
+	friend class IMutableList<DualList<LIST,IM_LIST,ERASE_WITH_TOMBSTONE> >;
 
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){
