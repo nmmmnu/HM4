@@ -263,6 +263,18 @@ void list_test<MyDualList>(const char *name){
 	return list_test(name, list);
 }
 
+#include "decoratorlist.h"
+
+using MyDecoratorList = hm4::DecoratorList<hm4::SkipList>;
+
+template <>
+void list_test<MyDecoratorList>(const char *name){
+	hm4::SkipList		memtable;
+	MyDecoratorList list{ memtable };
+
+	return list_test(name, list);
+}
+
 #include "vectorlist.h"
 #include "linklist.h"
 
@@ -272,6 +284,8 @@ int main(int argc, char **argv){
 	list_test<hm4::LinkList		>("LinkList"		);
 	list_test<hm4::SkipList		>("SkipList"		);
 	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
+
+	list_test<MyDecoratorList	>("DecoratorList"	);
 
 	list_test<MyDualList		>("DualList"		);
 

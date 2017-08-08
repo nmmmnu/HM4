@@ -12,13 +12,13 @@ class FlushList : public IList<FlushList<LIST, FLUSH>, true>{
 public:
 	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
 
-	using Iterator	= typename LIST::Iterator;
-	using size_type	= typename LIST::size_type;
+	using Iterator		= typename LIST::Iterator;
+	using size_type		= typename LIST::size_type;
 
 private:
 	template <class UFLUSH>
 	FlushList(LIST &list, UFLUSH &&flusher, LIST_LOADER *loader, size_t const maxSize = MAX_SIZE) :
-					list_(list),
+					list_(& list),
 					flusher_(std::forward<UFLUSH>(flusher)),
 					loader_(loader),
 					maxSize_(maxSize > MAX_SIZE ? maxSize : MAX_SIZE){}
@@ -32,35 +32,14 @@ public:
 	FlushList(LIST &list, UFLUSH &&flusher, size_t const maxSize = MAX_SIZE) :
 					FlushList(list, std::forward<UFLUSH>(flusher), nullptr, maxSize){}
 
-	FlushList(FlushList &&other) = default;
-
 	~FlushList(){
 		flush();
 	}
 
 	LIST &getList(){
-		return list_;
-	}
+		assert(list_);
 
-public:
-	bool clear(){
-		return list_.clear();
-	}
-
-	ObserverPair operator[](const StringRef &key) const{
-		return Pair::observer(list_[key]);
-	}
-
-	bool erase(const StringRef &key){
-		return list_.erase(key);
-	}
-
-	size_t bytes() const{
-		return list_.bytes();
-	}
-
-	size_type size() const{
-		return list_.size();
+		return *list_;
 	}
 
 private:
@@ -68,11 +47,13 @@ private:
 
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){
-		bool const result = list_.insert( std::forward<UPAIR>(data) );
+		assert(list_);
 
-		if (list_.bytes() > maxSize_){
+		bool const result = list_->insert( std::forward<UPAIR>(data) );
+
+		if (list_->bytes() > maxSize_){
 			flush();
-			list_.clear();
+			list_->clear();
 			notifyLoader_();
 		}
 
@@ -80,17 +61,10 @@ private:
 	}
 
 public:
-	Iterator begin() const{
-		return list_.begin();
-	}
-
-	Iterator end() const{
-		return list_.end();
-	}
-
-public:
 	bool flush(){
-		return flusher_ << list_;
+		assert(list_);
+
+		return flusher_ << *list_;
 	}
 
 private:
@@ -100,6 +74,7 @@ private:
 	template<typename T>
 	bool notifyLoader_(loader_tag<T>){
 		assert(loader_);
+
 		return loader_->refresh();
 	}
 
@@ -111,8 +86,57 @@ private:
 		return notifyLoader_(loader_tag<LIST_LOADER>{});
 	}
 
+public:
+	// Immutable Methods
+
+	ObserverPair operator[](const StringRef &key) const{
+		assert(list_);
+		assert(!key.empty());
+		return Pair::observer((*list_)[key]);
+	}
+
+	size_type size(bool const estimated = false) const{
+		assert(list_);
+		return list_->size(estimated);
+	}
+
+	size_t bytes() const{
+		assert(list_);
+		return list_->bytes();
+	}
+
+public:
+	Iterator begin() const{
+		assert(list_);
+		return list_->begin();
+	}
+
+	Iterator end() const{
+		assert(list_);
+		return list_->end();
+	}
+
+	Iterator lowerBound(const StringRef &key) const{
+		assert(list_);
+		return list_->lowerBound(key);
+	}
+
+public:
+	// Mutable Methods
+
+	bool clear(){
+		assert(list_);
+		return list_->clear();
+	}
+
+	bool erase(const StringRef &key){
+		assert(list_);
+		assert(!key.empty());
+		return list_->erase(key);
+	}
+
 private:
-	LIST		&list_;
+	LIST		*list_;
 	FLUSH		flusher_;
 	LIST_LOADER	*loader_;
 	size_t		maxSize_;
@@ -123,3 +147,4 @@ private:
 
 
 #endif
+
