@@ -1,27 +1,25 @@
 #ifndef _FLUSH_LIST_H
 #define _FLUSH_LIST_H
 
-#include "ilist.h"
+#include "decoratorlist.h"
 
 
 namespace hm4{
 
 
 template <class LIST, class FLUSH, class LIST_LOADER = std::nullptr_t>
-class FlushList : public IList<FlushList<LIST, FLUSH>, true>{
+class FlushList : public DecoratorList<LIST, FlushList<LIST, FLUSH, LIST_LOADER> >{
 public:
 	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
-
-	using Iterator		= typename LIST::Iterator;
-	using size_type		= typename LIST::size_type;
 
 private:
 	template <class UFLUSH>
 	FlushList(LIST &list, UFLUSH &&flusher, LIST_LOADER *loader, size_t const maxSize = MAX_SIZE) :
-					list_(& list),
-					flusher_(std::forward<UFLUSH>(flusher)),
-					loader_(loader),
-					maxSize_(maxSize > MAX_SIZE ? maxSize : MAX_SIZE){}
+					DecoratorList<LIST, FlushList<LIST, FLUSH, LIST_LOADER> >(list),
+						list_(& list),
+						flusher_(std::forward<UFLUSH>(flusher)),
+						loader_(loader),
+						maxSize_(maxSize > MAX_SIZE ? maxSize : MAX_SIZE){}
 
 public:
 	template <class UFLUSH>
@@ -36,14 +34,14 @@ public:
 		flush();
 	}
 
-	LIST &getList(){
+	LIST &getList___(){
 		assert(list_);
 
 		return *list_;
 	}
 
 private:
-	friend class IList<FlushList<LIST, FLUSH>, true>;
+	friend class IList<FlushList<LIST, FLUSH, LIST_LOADER>, true>;
 
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){
@@ -84,55 +82,6 @@ private:
 
 	bool notifyLoader_(){
 		return notifyLoader_(loader_tag<LIST_LOADER>{});
-	}
-
-public:
-	// Immutable Methods
-
-	ObserverPair operator[](const StringRef &key) const{
-		assert(list_);
-		assert(!key.empty());
-		return Pair::observer((*list_)[key]);
-	}
-
-	size_type size(bool const estimated = false) const{
-		assert(list_);
-		return list_->size(estimated);
-	}
-
-	size_t bytes() const{
-		assert(list_);
-		return list_->bytes();
-	}
-
-public:
-	Iterator begin() const{
-		assert(list_);
-		return list_->begin();
-	}
-
-	Iterator end() const{
-		assert(list_);
-		return list_->end();
-	}
-
-	Iterator lowerBound(const StringRef &key) const{
-		assert(list_);
-		return list_->lowerBound(key);
-	}
-
-public:
-	// Mutable Methods
-
-	bool clear(){
-		assert(list_);
-		return list_->clear();
-	}
-
-	bool erase(const StringRef &key){
-		assert(list_);
-		assert(!key.empty());
-		return list_->erase(key);
 	}
 
 private:

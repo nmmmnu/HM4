@@ -79,12 +79,10 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 		++i;
 
 		if (i % process_step == 0){
-			const auto &ll = list.getList();
-
 			std::cout
-				<< "Processed "	<< std::setw(10) << i		<< " records." << ' '
-				<< "In memory "	<< std::setw(10) << ll.size()	<< " records," << ' '
-						<< std::setw(10) << ll.bytes()	<< " bytes." << '\n'
+				<< "Processed "	<< std::setw(10) << i			<< " records." << ' '
+				<< "In memory "	<< std::setw(10) << list.size()		<< " records," << ' '
+						<< std::setw(10) << list.bytes()	<< " bytes." << '\n'
 			;
 		}
 	}

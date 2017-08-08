@@ -265,7 +265,7 @@ void list_test<MyDualList>(const char *name){
 
 #include "decoratorlist.h"
 
-using MyDecoratorList = hm4::DecoratorList<hm4::SkipList>;
+using MyDecoratorList = hm4::PureDecoratorList<hm4::SkipList>;
 
 template <>
 void list_test<MyDecoratorList>(const char *name){

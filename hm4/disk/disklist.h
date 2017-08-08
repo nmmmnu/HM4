@@ -26,7 +26,7 @@ public:
 
 	// no need d-tor,
 	// MMAPFile-s will be closed automatically
-	~DiskList() = default;
+	// ~DiskList() = default;
 
 	bool open(const std::string &filename, int advice = DEFAULT_ADVICE);
 	void close();

@@ -19,7 +19,7 @@ public:
 	using size_type		= typename DualList::size_type;
 
 public:
-	DualList() = default;
+//	DualList(std::nullptr_t){}
 
 	DualList(LIST1 &list1, const LIST2 &list2) :
 					list1_( & list1),

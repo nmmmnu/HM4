@@ -22,7 +22,8 @@ public:
 	using size_type	= typename CollectionList::size_type;
 
 public:
-	CollectionList() = default;
+//	CollectionList(std::nullptr_t){};
+
 	CollectionList(const CONTAINER &container) : container_( & container){}
 
 public:

@@ -8,15 +8,15 @@
 namespace hm4{
 
 
-template <class LIST>
-class DecoratorList : public IList<DecoratorList<LIST>, LIST::MUTABLE_TAG>{
+template <class LIST, class T>
+class DecoratorList : public IList<T, LIST::MUTABLE_TAG>{
 public:
 	using Iterator		= typename LIST::Iterator;
 
 	using size_type		= typename DecoratorList::size_type;
 
-public:
-	DecoratorList() = default;
+protected:
+//	DecoratorList(std::nullptr_t){}
 
 	DecoratorList(LIST &list) : list_( & list){}
 
@@ -71,7 +71,7 @@ public:
 	}
 
 private:
-	friend class IList<DecoratorList<LIST>, LIST::MUTABLE_TAG>;
+	friend class IList<T, LIST::MUTABLE_TAG>;
 
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){
@@ -82,6 +82,13 @@ private:
 
 private:
 	LIST	*list_ = nullptr;
+};
+
+
+template <class LIST>
+struct PureDecoratorList : public DecoratorList<LIST, PureDecoratorList<LIST> >{
+//	PureDecoratorList() = default;
+	PureDecoratorList(LIST &list) : DecoratorList<LIST, PureDecoratorList<LIST> >(list){}
 };
 
 

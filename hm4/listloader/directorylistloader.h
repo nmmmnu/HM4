@@ -13,7 +13,7 @@ public:
 	using container_type	= std::vector<DiskList>;
 
 public:
-	DirectoryListLoader() = default;
+//	DirectoryListLoader() = default;
 
 	DirectoryListLoader(std::string path, int const advice = getDefautAdvice__()) :
 				BaseListLoader(advice),
