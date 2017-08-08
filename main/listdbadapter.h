@@ -14,22 +14,20 @@ public:
 
 public:
 	ListDBAdapter(LIST &list, LOADER &loader, size_t const maxResults = DEFAULT_MAX_RESULTS) :
-				list_(& list),
+				list_(list),
 				loader_(& loader),
 				maxResults_(maxResults){}
 
 	ListDBAdapter(LIST &list, size_t const maxResults = DEFAULT_MAX_RESULTS) :
-				list_(& list),
-				maxResults_(maxResults){}
+				ListDBAdapter(list, nullptr, maxResults){}
 
 public:
 	// Immutable Methods
 
 	std::string get(const StringRef &key) const{
-		assert(list_);
 		assert(!key.empty());
 
-		const auto &p = (*list_)[key];
+		const auto &p = list_[key];
 
 		if (p.isValid(/* tomb */ true))
 			return p.getVal();
@@ -38,15 +36,13 @@ public:
 	}
 
 	std::vector<std::string> getall(const StringRef &key) const{
-		assert(list_);
-
 		std::vector<std::string> result;
 
 		// reserve x2 because of hgetall
 		result.reserve(maxResults_ * 2);
 
-		const auto bit = key.empty() ? list_->begin() : list_->lowerBound(key);
-		const auto eit = list_->end();
+		const auto bit = key.empty() ? list_.begin() : list_.lowerBound(key);
+		const auto eit = list_.end();
 
 		size_t c = 0;
 		for(auto it = bit; it != eit; ++it){
@@ -65,12 +61,10 @@ public:
 	}
 
 	std::string info() const{
-		assert(list_);
-
 		std::stringstream ss;
 
-		ss	<< "Keys (estimated): "	<< list_->size(true)	<< '\n'
-			<< "Size: "		<< list_->bytes()	<< '\n'
+		ss	<< "Keys (estimated): "	<< list_.size(true)	<< '\n'
+			<< "Size: "		<< list_.bytes()	<< '\n'
 		;
 
 		return ss.str();
@@ -84,21 +78,19 @@ public:
 	// Mutable Methods
 
 	void set(const StringRef &key, const StringRef &val, const StringRef & = {} ){
-		assert(list_);
 		assert(!key.empty());
 
-		list_->emplace( key, val );
+		list_.emplace( key, val );
 	}
 
 	bool del(const StringRef &key){
-		assert(list_);
 		assert(!key.empty());
 
-		return list_->erase(key);
+		return list_.erase(key);
 	}
 
 private:
-	LIST	*list_;
+	LIST	&list_;
 	LOADER	*loader_ = nullptr;
 	size_t	maxResults_;
 };

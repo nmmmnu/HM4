@@ -42,6 +42,20 @@ public:
 		return ! self()->size(true);
 	}
 
+protected:
+	size_type sizeViaIterator_() const{
+		// Slooooow....
+		size_type count = 0;
+
+		auto bit = self()->begin();
+		auto eit = self()->end();
+
+		for(auto it = bit; it != eit; ++it)
+			++count;
+
+		return count;
+	}
+
 public:
 	// Mutable Methods
 

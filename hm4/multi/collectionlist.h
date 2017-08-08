@@ -24,41 +24,35 @@ public:
 public:
 //	CollectionList(std::nullptr_t){};
 
-	CollectionList(const CONTAINER &container) : container_( & container){}
+	CollectionList(const CONTAINER &container) : container_(container){}
 
 public:
 	Iterator begin() const{
-		assert(container_);
-		return Iterator(*container_, typename Iterator::begin_iterator{} );
+		return Iterator(container_, typename Iterator::begin_iterator{} );
 	}
 
 	Iterator end() const{
-		assert(container_);
-		return Iterator(*container_, typename Iterator::end_iterator{}	 );
+		return Iterator(container_, typename Iterator::end_iterator{}	 );
 	}
 
 	Iterator lowerBound(const StringRef &key) const{
-		assert(container_);
-		return Iterator(*container_, key);
+		return Iterator(container_, key);
 	}
 
 public:
 	ObserverPair operator[](const StringRef &key) const;
 
 	size_type size(bool const estimated = false) const{
-		assert(container_);
-
-		return estimated ? sizeEstimated_(true) : sizeReal_();
+		return estimated ? sizeEstimated_(true) : this->sizeViaIterator_();
 	}
 
 	size_t bytes() const;
 
 private:
 	size_type sizeEstimated_(bool estimated) const;
-	size_type sizeReal_() const;
 
 private:
-	const CONTAINER	*container_ = nullptr;
+	const CONTAINER	&container_;
 };
 
 

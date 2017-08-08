@@ -9,8 +9,6 @@ namespace listloader{
 
 class ArgListLoader : public listloader_impl_::BaseListLoader{
 public:
-//	ArgListLoader() = default;
-
 	ArgListLoader(int const argc, const char **argv, int const advice = getDefautAdvice__()) :
 				BaseListLoader(advice),
 				argc_(argc),

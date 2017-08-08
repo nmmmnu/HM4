@@ -16,7 +16,7 @@ private:
 	template <class UFLUSH>
 	FlushList(LIST &list, UFLUSH &&flusher, LIST_LOADER *loader, size_t const maxSize = MAX_SIZE) :
 					DecoratorList<LIST, FlushList<LIST, FLUSH, LIST_LOADER> >(list),
-						list_(& list),
+						list_(list),
 						flusher_(std::forward<UFLUSH>(flusher)),
 						loader_(loader),
 						maxSize_(maxSize > MAX_SIZE ? maxSize : MAX_SIZE){}
@@ -35,9 +35,7 @@ public:
 	}
 
 	LIST &getList___(){
-		assert(list_);
-
-		return *list_;
+		return list_;
 	}
 
 private:
@@ -45,13 +43,11 @@ private:
 
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){
-		assert(list_);
+		bool const result = list_.insert( std::forward<UPAIR>(data) );
 
-		bool const result = list_->insert( std::forward<UPAIR>(data) );
-
-		if (list_->bytes() > maxSize_){
+		if (list_.bytes() > maxSize_){
 			flush();
-			list_->clear();
+			list_.clear();
 			notifyLoader_();
 		}
 
@@ -60,9 +56,7 @@ private:
 
 public:
 	bool flush(){
-		assert(list_);
-
-		return flusher_ << *list_;
+		return flusher_ << list_;
 	}
 
 private:
@@ -85,7 +79,7 @@ private:
 	}
 
 private:
-	LIST		*list_;
+	LIST		&list_;
 	FLUSH		flusher_;
 	LIST_LOADER	*loader_;
 	size_t		maxSize_;
