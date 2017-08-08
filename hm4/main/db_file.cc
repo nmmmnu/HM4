@@ -11,8 +11,8 @@ static int printUsage(const char *cmd){
 		<< "\t"		<< cmd	<< " l [file.db] -     - load file.db, then list using iterator"	<< '\n'
 		<< "\t"		<< cmd	<< " l [file.db] [key] - load file.db, then list using iterator"	<< '\n'
 
-		<< "\t\tPath names must be written without extention"		<< '\n'
-		<< "\t\tExample 'directory/file.db'"				<< '\n'
+		<< "\t\tPath names must be written like this:"	<< '\n'
+		<< "\t\tExample 'directory/file.db'"		<< '\n'
 
 		<< '\n';
 

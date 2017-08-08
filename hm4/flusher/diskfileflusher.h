@@ -3,6 +3,8 @@
 
 #include "disk/filebuilder.h"
 
+#include "stringreplace.h"
+
 // ==============================
 
 namespace hm4{
@@ -11,17 +13,18 @@ namespace flusher{
 
 template<class IDGENERATOR>
 class DiskFileFlusher{
+private:
+	constexpr static char DIR_WILDCARD = '*';
+
 public:
 	template<class UIDGENERATOR>
 	DiskFileFlusher(
 			UIDGENERATOR &&idGenerator,
 			const StringRef &path,
-			const StringRef &ext,
 			bool const keepTombstones = true
 		):
 				idGenerator_(std::forward<UIDGENERATOR>(idGenerator)),
 				path_(path),
-				ext_(ext),
 				keepTombstones_(keepTombstones){}
 
 public:
@@ -32,7 +35,10 @@ public:
 
 		std::cout << "Flushing data to disk..." << '\n';
 
-		const std::string &filename = StringRef::concatenate({ path_, idGenerator_(), ext_ });
+		//const std::string &filename = StringRef::concatenate({ path_, idGenerator_(), ext_ });
+
+		StringReplaceCopy str_replace;
+		const std::string &filename = str_replace(path_, DIR_WILDCARD, idGenerator_());
 
 		using FileBuilder = disk::FileBuilder;
 
@@ -45,7 +51,6 @@ public:
 private:
 	IDGENERATOR	idGenerator_;
 	std::string	path_;
-	std::string	ext_;
 	bool		keepTombstones_;
 };
 

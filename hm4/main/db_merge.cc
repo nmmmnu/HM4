@@ -10,8 +10,8 @@ static int printUsage(const char *cmd){
 		<< '\t'		<< cmd	<< " - [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones"	<< '\n'
 		<< '\t'		<< cmd	<< " t [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones"	<< '\n'
 
-		<< "\t\tFile names must be written without extention"		<< '\n'
-		<< "\t\tExample 'file.db'"					<< '\n'
+		<< "\t\tPath names must be written like this:"			<< '\n'
+		<< "\t\tExample 'directory/file.db'"				<< '\n'
 		<< "\t\tDo not forget you usually need two output files"	<< '\n'
 
 		<< '\n';

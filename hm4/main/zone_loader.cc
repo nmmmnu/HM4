@@ -4,10 +4,10 @@
 static int printUsage(const char *cmd){
 	std::cout
 		<< "Usage:"	<< '\n'
-		<< "\t"		<< cmd	<< " [file.txt] [lsm_path] - load file.txt, then create / add to lsm_path"		<< '\n'
+		<< "\t"		<< cmd	<< " [file.txt] [lsm_path] - load file.txt, then create / add to lsm_path"	<< '\n'
 
-		<< "\t\tPath names must be written without extention"		<< '\n'
-		<< "\t\tExample 'directory/file.*.db'"				<< '\n'
+		<< "\t\tPath names must be written like this:"	<< '\n'
+		<< "\t\tExample 'directory/file.*.db'"		<< '\n'
 
 		<< '\n';
 

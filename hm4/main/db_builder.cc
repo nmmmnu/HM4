@@ -29,7 +29,7 @@ struct MyListFactory{
 
 	MyListFactory(const char *path, size_t const memlist_size) : mylist(
 			memlist,
-			Flusher{ MyIDGenerator{}, path, ".db" },
+			Flusher{ MyIDGenerator{}, path },
 			memlist_size
 		){}
 
@@ -95,10 +95,11 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 static int printUsage(const char *cmd){
 	std::cout
 		<< "Usage:"	<< '\n'
-		<< "\t"		<< cmd	<< " [file.txt] [lsm_path] - load file.txt, then create / add to lsm_path"		<< '\n'
+		<< "\t"		<< cmd	<< " [file.txt] [lsm_path] - load file.txt, then create / add to lsm_path"	<< '\n'
 
-		<< "\t\tPath names must be written without extention"		<< '\n'
-		<< "\t\tExample 'directory/file.*.db'"				<< '\n'
+		<< "\t\tPath names must be written like this:"		<< '\n'
+		<< "\t\tExample 'directory/file.*.db'"			<< '\n'
+		<< "\t\tThe '*', will be replaced with ID's"		<< '\n'
 
 		<< '\n';
 

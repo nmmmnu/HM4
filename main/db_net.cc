@@ -56,7 +56,7 @@ struct MyMutableDBAdapterFactory{
 	using MyListLoader	= hm4::listloader::DirectoryListLoader;
 	using MyImmutableList	= hm4::multi::CollectionList<MyListLoader::container_type>;
 	using MyMutableList	= hm4::SkipList;
-	using MyList		= hm4::multi::DualList<MyMutableList, MyImmutableList, true>;
+	using MyList		= hm4::multi::DualList<MyMutableList, MyImmutableList, /* erase tombstones */ true>;
 	using MyDBAdapter	= ListDBAdapter</* non const */ MyList, MyListLoader>;
 
 	MyMutableDBAdapterFactory(const char *path) :
@@ -110,8 +110,8 @@ static int printUsage(const char *cmd){
 		<< "Usage:"	<< '\n'
 		<< "\t"		<< cmd	<< " [lsm_path] - start server"		<< '\n'
 
-		<< "\t\tPath names must be written without extention"		<< '\n'
-		<< "\t\tExample 'directory/file.*.db'"				<< '\n'
+		<< "\t\tPath names must be written like this:"	<< '\n'
+		<< "\t\tExample 'directory/file.*.db'"		<< '\n'
 
 		<< '\n';
 
