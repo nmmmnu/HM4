@@ -4,7 +4,7 @@
 #include <sstream>
 
 
-template<class LIST, class LOADER>
+template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
 public:
 	constexpr static size_t DEFAULT_MAX_RESULTS = 50;
@@ -13,9 +13,9 @@ public:
 	constexpr static bool IS_MUTABLE = ! std::is_const<LIST>::value;
 
 public:
-	ListDBAdapter(LIST &list, LOADER &loader, size_t const maxResults = DEFAULT_MAX_RESULTS) :
+	ListDBAdapter(LIST &list, COMMAND &cmd, size_t const maxResults = DEFAULT_MAX_RESULTS) :
 				list_(list),
-				loader_(& loader),
+				cmd_(& cmd),
 				maxResults_(maxResults){}
 
 	ListDBAdapter(LIST &list, size_t const maxResults = DEFAULT_MAX_RESULTS) :
@@ -71,7 +71,7 @@ public:
 	}
 
 	bool refresh(){
-		return loader_ && loader_->refresh();
+		return cmd_ && cmd_->command();
 	}
 
 public:
@@ -101,9 +101,9 @@ public:
 	}
 
 private:
-	LIST	&list_;
-	LOADER	*loader_ = nullptr;
-	size_t	maxResults_;
+	LIST		&list_;
+	COMMAND		*cmd_		= nullptr;
+	size_t		maxResults_;
 };
 
 

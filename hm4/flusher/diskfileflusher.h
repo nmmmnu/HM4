@@ -1,11 +1,10 @@
-#ifndef _DISK_FILE_FLUSH_H
-#define _DISK_FILE_FLUSH_H
+#ifndef DISK_FILE_FLUSH_H_
+#define DISK_FILE_FLUSH_H_
 
 #include "disk/filebuilder.h"
 
 #include "stringreplace.h"
 
-// ==============================
 
 namespace hm4{
 namespace flusher{
@@ -32,8 +31,6 @@ public:
 	bool operator << (const LIST &list) const{
 		if (list.empty())
 			return false;
-
-		std::cout << "Flushing data to disk..." << '\n';
 
 		//const std::string &filename = StringRef::concatenate({ path_, idGenerator_(), ext_ });
 

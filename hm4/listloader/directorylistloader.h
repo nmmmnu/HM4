@@ -25,6 +25,11 @@ public:
 		return true;
 	}
 
+	// Command pattern
+	int command(int = 0){
+		return refresh();
+	}
+
 private:
 	void refresh_();
 

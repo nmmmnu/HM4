@@ -8,6 +8,10 @@
 
 #include "multi/duallist.h"
 #include "skiplist.h"
+#include "flushlist.h"
+
+#include "idgenerator/idgeneratordate.h"
+#include "flusher/diskfileflusher.h"
 
 #include "listdbadapter.h"
 
@@ -23,58 +27,81 @@ constexpr size_t	MAX_CLIENTS		= 1024;
 constexpr uint32_t	CONNECTION_TIMEOUT	= 30;
 const     size_t	MAX_PACKET_SIZE		= hm4::Pair::maxBytes() * 2;
 
+constexpr size_t	MEMLIST_SIZE		= 512 * 1024;
+
 // ----------------------------------
 
 using MySelector	= net::selector::PollSelector;
 using MyProtocol	= net::protocol::RedisProtocol;
-using MyAdapterFactory	= MyMutableDBAdapterFactory;
+using MyAdapterFactory
+//			= MyImmutableDBAdapterFactory;
+			= MyMutableDBAdapterFactory;
 
 // ----------------------------------
 
 struct MyImmutableDBAdapterFactory{
-	using MyListLoader	= hm4::listloader::DirectoryListLoader;
-	using MyImmutableList	= hm4::multi::CollectionList<MyListLoader::container_type>;
-	using MyList		= MyImmutableList;
-	using MyDBAdapter	= ListDBAdapter<const MyList, MyListLoader>;
+	using ListLoader	= hm4::listloader::DirectoryListLoader;
+	using ImmutableList	= hm4::multi::CollectionList<ListLoader::container_type>;
 
-	MyImmutableDBAdapterFactory(const char *path) :
+	using CommandObject	= ListLoader;
+	using DBAdapter		= ListDBAdapter<const ImmutableList, CommandObject>;
+
+	using MyDBAdapter	= DBAdapter;
+
+	MyImmutableDBAdapterFactory(const char *path, size_t) :
 					loader_(path),
 					imList_(*loader_),
-					adapter_(imList_, loader_){}
+					adapter_(imList_, /* cmd */ loader_){}
 
 	MyDBAdapter &operator()(){
 		return adapter_;
 	}
 
 private:
-	MyListLoader				loader_;
-	MyImmutableList		imList_;
-	MyDBAdapter		adapter_;
+	ListLoader		loader_;
+	ImmutableList		imList_;
+	DBAdapter		adapter_;
 };
 
 struct MyMutableDBAdapterFactory{
-	using MyListLoader	= hm4::listloader::DirectoryListLoader;
-	using MyImmutableList	= hm4::multi::CollectionList<MyListLoader::container_type>;
-	using MyMutableList	= hm4::SkipList;
-	using MyList		= hm4::multi::DualList<MyMutableList, MyImmutableList, /* erase tombstones */ true>;
-	using MyDBAdapter	= ListDBAdapter</* non const */ MyList, MyListLoader>;
+	using ListLoader	= hm4::listloader::DirectoryListLoader;
+	using ImmutableList	= hm4::multi::CollectionList<ListLoader::container_type>;
 
-	MyMutableDBAdapterFactory(const char *path) :
+	using MemList		= hm4::SkipList;
+	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
+	using Flusher		= hm4::flusher::DiskFileFlusher<IDGenerator>;
+	using MutableFlushList	= hm4::FlushList<MemList,Flusher,ListLoader>;
+
+	using DList		= hm4::multi::DualList<MutableFlushList, ImmutableList, /* erase tombstones */ true>;
+
+	using CommandObject	= MutableFlushList;
+	using DBAdapter		= ListDBAdapter<DList, CommandObject>;
+
+	using MyDBAdapter	= DBAdapter;
+
+	MyMutableDBAdapterFactory(const char *path, size_t const memListSize) :
 					loader_(path),
 					imList_(*loader_),
-					list_(muList_, imList_),
-					adapter_(list_, loader_){}
+					muflList_(
+						memList_,
+						Flusher{ IDGenerator{}, path },
+						loader_,
+						memListSize
+					),
+					list_(muflList_, imList_),
+					adapter_(list_, /* cmd */ muflList_){}
 
 	MyDBAdapter &operator()(){
 		return adapter_;
 	}
 
 private:
-	MyListLoader		loader_;
-	MyImmutableList		imList_;
-	MyMutableList		muList_;
-	MyList			list_;
-	MyDBAdapter		adapter_;
+	ListLoader		loader_;
+	ImmutableList		imList_;
+	MemList			memList_;
+	MutableFlushList	muflList_;
+	DList			list_;
+	DBAdapter		adapter_;
 };
 
 static int printUsage(const char *cmd);
@@ -88,7 +115,7 @@ int main(int argc, char **argv){
 
 	// ----------------------------------
 
-	MyAdapterFactory adapter_f(path);
+	MyAdapterFactory adapter_f(path, MEMLIST_SIZE);
 
 	using MyDBAdapter	= MyAdapterFactory::MyDBAdapter;
 	using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;

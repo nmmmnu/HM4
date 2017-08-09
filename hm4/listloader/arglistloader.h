@@ -18,6 +18,11 @@ public:
 
 	bool refresh();
 
+	// Command pattern
+	int command(int = 0){
+		return refresh();
+	}
+
 private:
 	int		argc_	= 0;
 	const char	**argv_;

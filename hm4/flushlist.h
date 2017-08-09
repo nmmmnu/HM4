@@ -3,6 +3,7 @@
 
 #include "decoratorlist.h"
 
+#include "logger.h"
 
 namespace hm4{
 
@@ -35,10 +36,6 @@ public:
 		flush();
 	}
 
-	LIST &getList___(){
-		return list_;
-	}
-
 private:
 	friend class IList<FlushList<LIST, FLUSH, LIST_LOADER>, true>;
 
@@ -57,7 +54,13 @@ private:
 
 public:
 	bool flush(){
+		log__("Flushing data...");
 		return flusher_ << list_;
+	}
+
+	// Command pattern
+	int command(int = 0){
+		return flush();
 	}
 
 private:
@@ -66,9 +69,8 @@ private:
 
 	template<typename T>
 	bool notifyLoader_(loader_tag<T>){
-		assert(loader_);
-
-		return loader_->refresh();
+		log__("Reloading data...");
+		return loader_ && loader_->refresh();
 	}
 
 	static bool notifyLoader_(loader_tag<nullptr_t>){
