@@ -9,6 +9,7 @@ namespace hm4{
 
 template <class LIST, class FLUSH, class LIST_LOADER = std::nullptr_t>
 class FlushList : public DecoratorList<LIST, FlushList<LIST, FLUSH, LIST_LOADER> >{
+	static_assert(LIST::MUTABLE_TAG, "List must be mutable");
 public:
 	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
 

@@ -76,11 +76,22 @@ public:
 
 public:
 	// Mutable Methods
+	static uint32_t convertExp__(const StringRef &exp){
+		if (exp.empty())
+			return 0;
 
-	void set(const StringRef &key, const StringRef &val, const StringRef & = {} ){
+		uint32_t expires = 0;
+		std::istringstream ss(exp);
+		ss >> expires;
+		return expires;
+	}
+
+	void set(const StringRef &key, const StringRef &val, const StringRef &exp = {} ){
 		assert(!key.empty());
 
-		list_.emplace( key, val );
+		uint32_t const expires = convertExp__(exp);
+
+		list_.emplace( key, val, expires );
 	}
 
 	bool del(const StringRef &key){
