@@ -37,6 +37,8 @@ LL_ALL		= -lstdc++
 
 LINK		= $(MYCC) $(LD_ALL) -o $@ $^ $(LL_ALL)
 
+#LINK		+= -static
+
 # ======================================================
 
 A		= bin/

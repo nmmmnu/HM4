@@ -7,7 +7,7 @@
 
 static int printUsage(const char *name){
 	printf("Usage:\n");
-	printf("%s [file.db] [btree_file.db]\n", name);
+	printf("\t%s [file.db] [btree_file.db]\n", name);
 	printf("\t\tFiles must be written with the extention.\n");
 	printf("\t\tExample 'file.db'\n");
 	printf("\t\tDo not forget that usually btree_file must have same name as [file.db]\n");
