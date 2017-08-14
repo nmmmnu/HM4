@@ -4,10 +4,6 @@
 #include <fcntl.h>	// open
 #include <unistd.h>	// close, lseek
 
-const int MMAPFile::NORMAL		= MADV_NORMAL		;
-const int MMAPFile::SEQUENTIAL		= MADV_SEQUENTIAL	;
-const int MMAPFile::RANDOM		= MADV_RANDOM		;
-
 MMAPFile::MMAPFile(MMAPFile &&other) :
 		mem_		( std::move(other.mem_		)),
 		size_		( std::move(other.size_		)),
@@ -16,8 +12,8 @@ MMAPFile::MMAPFile(MMAPFile &&other) :
 	other.size_ = 0;
 }
 
-bool MMAPFile::open(const StringRef &filename, int const advice){
-	return open_(filename, O_RDONLY, PROT_READ, advice);
+bool MMAPFile::open(const StringRef &filename, const Advice advice){
+	return open_(filename, O_RDONLY, PROT_READ, convertAdv__(advice));
 }
 
 bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, int const advice){
@@ -51,6 +47,17 @@ bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, 
 	mem_ = mem;
 
 	return true;
+}
+
+int MMAPFile::convertAdv__(const Advice advice){
+	switch(advice){
+	default:
+	case Advice::NORMAL:		return MADV_NORMAL	;
+	case Advice::SEQUENTIAL:	return MADV_SEQUENTIAL	;
+	case Advice::RANDOM:		return MADV_RANDOM	;
+	}
+
+
 }
 
 void MMAPFile::close(){

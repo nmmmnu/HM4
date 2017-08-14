@@ -5,9 +5,11 @@
 
 class MMAPFile{
 public:
-	const static int NORMAL		;
-	const static int SEQUENTIAL	;
-	const static int RANDOM		;
+	enum class Advice : char{
+		NORMAL		,
+		SEQUENTIAL	,
+		RANDOM
+	};
 
 public:
 	MMAPFile() = default;
@@ -18,7 +20,7 @@ public:
 		close();
 	}
 
-	bool open(const StringRef &filename, int advice = NORMAL);
+	bool open(const StringRef &filename, Advice advice = Advice::NORMAL);
 
 	void close();
 
@@ -36,6 +38,8 @@ public:
 
 private:
 	bool open_(const StringRef &filename, int mode, int prot, int advice);
+
+	static int convertAdv__(Advice advice);
 
 private:
 	void	*mem_		= nullptr;

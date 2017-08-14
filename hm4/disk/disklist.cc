@@ -18,16 +18,14 @@ namespace disk{
 
 constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
-const int DiskList::DEFAULT_ADVICE = MMAPFile::RANDOM;
-
-bool DiskList::open(const std::string &filename, int advice){
+bool DiskList::open(const std::string &filename, MMAPFile::Advice advice){
 	metadata_.open(filenameMeta(filename));
 
 	if (metadata_ == false)
 		return false;
 
 	// avoid worst case
-	if (metadata_.sorted() == false && advice == MMAPFile::SEQUENTIAL)
+	if (metadata_.sorted() == false && advice == MMAPFile::Advice::SEQUENTIAL)
 		advice = DEFAULT_ADVICE;
 
 	bool const b1 =	mIndx_.open(filenameIndx(filename));
@@ -45,18 +43,6 @@ void DiskList::close(){
 
 	mTree_.close();
 	mKeys_.close();
-}
-
-// ==============================
-
-inline void DiskList::openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename, int const advice){
-	file.open(filename, advice);
-	blob = { file.mem(), file.size() };
-}
-
-inline void DiskList::closeFile__(MMAPFile &file, BlobRef &blob){
-	blob.reset();
-	file.close();
 }
 
 // ==============================

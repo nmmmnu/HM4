@@ -14,7 +14,7 @@ class DiskList : public IList<DiskList, false>{
 public:
 	class Iterator;
 
-	const static int DEFAULT_ADVICE;
+	static constexpr MMAPFile::Advice DEFAULT_ADVICE = MMAPFile::Advice::RANDOM;
 
 private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
@@ -28,7 +28,7 @@ public:
 	// MMAPFile-s will be closed automatically
 	// ~DiskList() = default;
 
-	bool open(const std::string &filename, int advice = DEFAULT_ADVICE);
+	bool open(const std::string &filename, MMAPFile::Advice advice = DEFAULT_ADVICE);
 	void close();
 
 	operator bool(){
@@ -80,9 +80,6 @@ private:
 	std::pair<bool,size_type> btreeSearch_(const StringRef &key) const;
 
 	std::pair<bool,size_type> search_(const StringRef &key) const;
-
-	static void  openFile__(MMAPFile &file, BlobRef &blob, const StringRef &filename, int advice);
-	static void closeFile__(MMAPFile &file, BlobRef &blob);
 
 private:
 	MMAPFilePlus		mIndx_;

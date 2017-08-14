@@ -48,7 +48,7 @@ struct MergeListFactory_1{
 	using DiskList = hm4::disk::DiskList;
 	using MyMergeList = DiskList;
 
-	MergeListFactory_1(const char *filename, int const advice){
+	MergeListFactory_1(const char *filename, const MMAPFile::Advice advice){
 		table_.open(filename, advice);
 	}
 
@@ -64,7 +64,7 @@ struct MergeListFactory_2{
 	using DiskList		= hm4::disk::DiskList;
 	using MyMergeList	= hm4::multi::DualList<const DiskList>;
 
-	MergeListFactory_2(const char *filename1, const char *filename2, int const advice){
+	MergeListFactory_2(const char *filename1, const char *filename2, const MMAPFile::Advice advice){
 		table1_.open(filename1, advice);
 		table2_.open(filename2, advice);
 	}
@@ -84,7 +84,7 @@ struct MergeListFactory_N{
 	using ArgListLoader	= hm4::listloader::ArgListLoader;
 	using MyMergeList	= hm4::multi::CollectionList<ArgListLoader::container_type>;
 
-	MergeListFactory_N(int const table_count, const char **path, int const advice) :
+	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice) :
 					loader_( table_count, path, advice ),
 					table_( *loader_ ) {}
 
@@ -99,7 +99,7 @@ private:
 
 
 
-int const ADVICE = MMAPFile::SEQUENTIAL;
+constexpr MMAPFile::Advice DEFAULT_ADVICE = MMAPFile::Advice::SEQUENTIAL;
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)
@@ -126,7 +126,7 @@ int main(int argc, char **argv){
 				<< '\t' << path[0]			<< '\n'
 			;
 
-			MergeListFactory_1 factory{ path[0], ADVICE };
+			MergeListFactory_1 factory{ path[0], DEFAULT_ADVICE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}
@@ -139,7 +139,7 @@ int main(int argc, char **argv){
 				<< '\t' << path[1]			<< '\n'
 			;
 
-			MergeListFactory_2 factory{ path[0], path[1], ADVICE };
+			MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 
@@ -151,7 +151,7 @@ int main(int argc, char **argv){
 				<< "Merging multiple tables..."		<< '\n'
 			;
 
-			MergeListFactory_N factory{ table_count, path, ADVICE };
+			MergeListFactory_N factory{ table_count, path, DEFAULT_ADVICE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}

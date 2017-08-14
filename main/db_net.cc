@@ -27,7 +27,7 @@ constexpr size_t	MAX_CLIENTS		= 1024;
 constexpr uint32_t	CONNECTION_TIMEOUT	= 30;
 const     size_t	MAX_PACKET_SIZE		= hm4::Pair::maxBytes() * 2;
 
-constexpr size_t	MEMLIST_SIZE		= 512 * 1024;
+constexpr size_t	MEMLIST_SIZE		= 512 * 1024 * 1024;
 
 // ----------------------------------
 
@@ -104,8 +104,19 @@ private:
 	DBAdapter		adapter_;
 };
 
+// ----------------------------------
+
+#include <signal.h>
+
+volatile bool signalOK = true;
+
+static void prepareSignals();
+
+// ----------------------------------
+
 static int printUsage(const char *cmd);
 
+// ----------------------------------
 
 int main(int argc, char **argv){
 	if (argc <= 1)
@@ -126,9 +137,25 @@ int main(int argc, char **argv){
 	MyLoop loop( MySelector{ MAX_CLIENTS }, MyWorker{ adapter_f() }, { fd1 },
 							CONNECTION_TIMEOUT, MAX_PACKET_SIZE);
 
-	while(loop.process());
+	prepareSignals();
+	while(loop.process() && signalOK);
 }
 
+// ----------------------------------
+
+extern "C"{
+	static void intHandler(int) {
+		signalOK = false;
+	}
+}
+
+static void prepareSignals(){
+	signal(SIGINT,  intHandler);	// Ctrl C
+	signal(SIGTERM, intHandler);	// kill -TERM / Shutdown
+	signal(SIGHUP,  intHandler);	// kill -HUP
+}
+
+// ----------------------------------
 
 #include <iostream>
 

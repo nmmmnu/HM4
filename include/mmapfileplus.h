@@ -12,7 +12,7 @@ public:
 	// MMAPFile-s will be closed automatically
 
 public:
-	bool open(const StringRef &filename, int advice = MMAPFile::NORMAL){
+	bool open(const StringRef &filename, const MMAPFile::Advice advice = MMAPFile::Advice::NORMAL){
 		file_.open(filename, advice);
 		blob_ = { file_.mem(), file_.size() };
 

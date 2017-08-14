@@ -15,12 +15,11 @@ public:
 	using DiskList		= disk::DiskList;
 	using container_type	= std::vector<DiskList>;
 
-protected:
-	static int getDefautAdvice__(){
-		return DiskList::DEFAULT_ADVICE;
-	}
+public:
+	static constexpr MMAPFile::Advice DEFAULT_ADVICE = DiskList::DEFAULT_ADVICE;
 
-	BaseListLoader(int const advice = getDefautAdvice__()) :
+protected:
+	BaseListLoader(const MMAPFile::Advice advice) :
 				advice_(advice){}
 
 public:
@@ -36,10 +35,10 @@ protected:
 	}
 
 protected:
-	container_type	container_;
+	container_type		container_;
 
 private:
-	int		advice_;
+	MMAPFile::Advice	advice_;
 };
 
 

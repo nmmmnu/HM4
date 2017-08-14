@@ -9,7 +9,7 @@ namespace listloader{
 
 class ArgListLoader : public listloader_impl_::BaseListLoader{
 public:
-	ArgListLoader(int const argc, const char **argv, int const advice = getDefautAdvice__()) :
+	ArgListLoader(int const argc, const char **argv, const MMAPFile::Advice advice = DEFAULT_ADVICE) :
 				BaseListLoader(advice),
 				argc_(argc),
 				argv_(argv){
