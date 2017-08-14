@@ -18,7 +18,7 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)skiplist.o				\
 			$(O)idgeneratordate.o			\
 								\
-								\
+			$(O)mysignal.o				\
 			$(O)pollselector.o $(O)redisprotocol.o $(O)keyvaluecommands.o $(O)sockets.o
 	$(LINK)
 

@@ -104,13 +104,6 @@ private:
 	DBAdapter		adapter_;
 };
 
-// ----------------------------------
-
-#include <signal.h>
-
-volatile bool signalOK = true;
-
-static void prepareSignals();
 
 // ----------------------------------
 
@@ -118,11 +111,15 @@ static int printUsage(const char *cmd);
 
 // ----------------------------------
 
+#include "mysignal.h"
+
 int main(int argc, char **argv){
 	if (argc <= 1)
 		return printUsage(argv[0]);
 
 	const auto path = argv[1];
+
+	prepareSignals();
 
 	// ----------------------------------
 
@@ -137,22 +134,7 @@ int main(int argc, char **argv){
 	MyLoop loop( MySelector{ MAX_CLIENTS }, MyWorker{ adapter_f() }, { fd1 },
 							CONNECTION_TIMEOUT, MAX_PACKET_SIZE);
 
-	prepareSignals();
-	while(loop.process() && signalOK);
-}
-
-// ----------------------------------
-
-extern "C"{
-	static void intHandler(int) {
-		signalOK = false;
-	}
-}
-
-static void prepareSignals(){
-	signal(SIGINT,  intHandler);	// Ctrl C
-	signal(SIGTERM, intHandler);	// kill -TERM / Shutdown
-	signal(SIGHUP,  intHandler);	// kill -HUP
+	while(loop.process() && mySignalOK);
 }
 
 // ----------------------------------
