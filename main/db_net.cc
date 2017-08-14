@@ -119,7 +119,7 @@ int main(int argc, char **argv){
 
 	const auto path = argv[1];
 
-	prepareSignals();
+	mySignalPrepare();
 
 	// ----------------------------------
 

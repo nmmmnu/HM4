@@ -4,8 +4,8 @@
 /* volatile */
 extern bool mySignalOK;
 
-void prepareSignals();
-void restoreSignals();
+void mySignalPrepare();
+void mySignalRestore();
 
 #endif
 

@@ -4,6 +4,19 @@
 
 bool mySignalOK = true;
 
+// ----------------------------------
+
+constexpr int SIGNALS_CATCH[] = {
+	SIGINT,		// Ctrl C
+	SIGHUP		// kill -TERM / Shutdown
+};
+
+constexpr int SIGNALS_IGNORE[] = {
+	SIGTERM		// kill -HUP
+};
+
+// ----------------------------------
+
 extern "C"{
 	static void intHandler(int const sig) {
 		signal(sig, SIG_IGN);
@@ -14,15 +27,23 @@ extern "C"{
 	}
 }
 
-void prepareSignals(){
-	signal(SIGINT,  intHandler);	// Ctrl C
-	signal(SIGTERM, intHandler);	// kill -TERM / Shutdown
-	signal(SIGHUP,  SIG_IGN);	// kill -HUP
+// ----------------------------------
+
+template<class CONTAINER, class FUNC>
+void signal_(const CONTAINER &signals, FUNC *func){
+	for(auto const sig : signals)
+		signal(sig,  func);
 }
 
-void restoreSignals(){
-	signal(SIGINT,  SIG_DFL);
-	signal(SIGTERM, SIG_DFL);
-	signal(SIGHUP,  SIG_DFL);
+// ----------------------------------
+
+void mySignalPrepare(){
+	signal_(SIGNALS_CATCH,  intHandler);
+	signal_(SIGNALS_IGNORE, SIG_IGN);
+}
+
+void mySignalRestore(){
+	signal_(SIGNALS_CATCH,  SIG_DFL);
+	signal_(SIGNALS_IGNORE, SIG_DFL);
 }
 
