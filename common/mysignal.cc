@@ -12,7 +12,9 @@ constexpr int SIGNALS_CATCH[] = {
 };
 
 constexpr int SIGNALS_IGNORE[] = {
-	SIGHUP		// kill -HUP
+	SIGHUP,		// kill -HUP
+	SIGUSR1,
+	SIGUSR2
 };
 
 // ----------------------------------

@@ -73,7 +73,7 @@ private:
 		return loader_ && loader_->refresh();
 	}
 
-	static bool notifyLoader_(loader_tag<nullptr_t>){
+	static bool notifyLoader_(loader_tag<std::nullptr_t>){
 		return true;
 	}
 
