@@ -1,4 +1,5 @@
-#include <cstdio>
+#include <iostream>
+#include <iomanip>
 
 #include "filereader.h"
 #include "disk/filebuilder.h"
@@ -11,17 +12,26 @@ using Pair = hm4::Pair;
 
 
 static int printUsage(const char *cmd){
-	printf("Usage:\n");
-	printf("\t%s s [class] [file.txt] [key]     - load file.txt, then search for the key\n", cmd);
-	printf("\t%s l [class] [file.txt] [key]     - load file.txt, then list using iterator\n", cmd);
-	printf("\t%s w [class] [file.txt] [file.db] - load file.txt, then save it under file.db\n", cmd);
-	printf("Classes are:\n");
-	printf("\t%c - %s\n", 'v', "VectorList"	);
-	printf("\t%c - %s\n", 'l', "LinkList"	);
-	printf("\t%c - %s\n", 's', "SkipList"	);
-	printf("\n");
+	std::cout
+		<< "Usage:"	<< '\n'
+		<< "\t"		<< cmd	<< " s [class] [file.txt] [key]     - load file.txt, then search for the key"		<< '\n'
+		<< "\t"		<< cmd	<< " l [class] [file.txt] [key]     - load file.txt, then list using iterator"		<< '\n'
+		<< "\t"		<< cmd	<< " w [class] [file.txt] [file.db] - load file.txt, then save it under file.db"	<< '\n'
 
-	return 1;
+		<< "\t\tPath names must be written like this:"		<< '\n'
+		<< "\t\tExample 'directory/file.*.db'"			<< '\n'
+		<< "\t\tThe '*', will be replaced with ID's"		<< '\n'
+
+		<< '\n'
+		
+		<< "Classes are:"		<< '\n'
+		<< '\t' << "v - VectorList"	<< '\n'
+		<< '\t' << "l - LinkList"	<< '\n'
+		<< '\t' << "s - SkipList"	<< '\n'
+		
+		<< '\n';
+
+	return 10;
 }
 
 
@@ -42,7 +52,10 @@ static void listLoad(LIST &list, READER &reader, bool const tombstones = true){
 		++i;
 
 		if (i % PROCESS_STEP == 0){
-			printf("Processed %10zu records, %10zu bytes...\n", i, list.bytes() );
+			std::cout << "Processed "	
+					<< std::setw(10) << i			<< " records,"	<< ' '
+					<< std::setw(10) << list.bytes()	<< " bytes."
+			;
 		}
 	}
 }

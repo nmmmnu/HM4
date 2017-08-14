@@ -21,9 +21,9 @@ public:
 				ptr_(ptr),
 				size_(size){}
 
-	constexpr
-	ArrayRef(const value_type *ptr, int const size) noexcept :
-				ArrayRef(ptr, size > 0 ? (size_t) size : 0){}
+//	constexpr
+//	ArrayRef(const value_type *ptr, int const size) noexcept :
+//				ArrayRef(ptr, size > 0 ? (size_t) size : 0){}
 
 	template<size_t N>
 	constexpr
