@@ -8,11 +8,11 @@ bool mySignalOK = true;
 
 constexpr int SIGNALS_CATCH[] = {
 	SIGINT,		// Ctrl C
-	SIGHUP		// kill -TERM / Shutdown
+	SIGTERM		// kill -TERM / Shutdown
 };
 
 constexpr int SIGNALS_IGNORE[] = {
-	SIGTERM		// kill -HUP
+	SIGHUP		// kill -HUP
 };
 
 // ----------------------------------
