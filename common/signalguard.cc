@@ -1,10 +1,8 @@
-#include "mysignal.h"
+#include "signalguard.h"
 
 #include <signal.h>
 
-bool mySignalOK = true;
-
-// ----------------------------------
+bool SignalGuard::ok__ = false;
 
 constexpr int SIGNALS_CATCH[] = {
 	SIGINT,		// Ctrl C
@@ -17,20 +15,6 @@ constexpr int SIGNALS_IGNORE[] = {
 	SIGUSR2
 };
 
-// ----------------------------------
-
-extern "C"{
-	static void intHandler(int const sig) {
-		signal(sig, SIG_IGN);
-
-		mySignalOK = false;
-
-		signal(sig, intHandler);
-	}
-}
-
-// ----------------------------------
-
 template<class CONTAINER, class FUNC>
 void signal_(const CONTAINER &signals, FUNC *func){
 	for(auto const sig : signals)
@@ -39,12 +23,12 @@ void signal_(const CONTAINER &signals, FUNC *func){
 
 // ----------------------------------
 
-void mySignalPrepare(){
-	signal_(SIGNALS_CATCH,  intHandler);
+void SignalGuard::setHandler__(){
+	signal_(SIGNALS_CATCH,  handler__);
 	signal_(SIGNALS_IGNORE, SIG_IGN);
 }
 
-void mySignalRestore(){
+void SignalGuard::restoreHandler__(){
 	signal_(SIGNALS_CATCH,  SIG_DFL);
 	signal_(SIGNALS_IGNORE, SIG_DFL);
 }

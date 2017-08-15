@@ -111,15 +111,13 @@ static int printUsage(const char *cmd);
 
 // ----------------------------------
 
-#include "mysignal.h"
+#include "signalguard.h"
 
 int main(int argc, char **argv){
 	if (argc <= 1)
 		return printUsage(argv[0]);
 
 	const auto path = argv[1];
-
-	mySignalPrepare();
 
 	// ----------------------------------
 
@@ -134,7 +132,9 @@ int main(int argc, char **argv){
 	MyLoop loop( MySelector{ MAX_CLIENTS }, MyWorker{ adapter_f() }, { fd1 },
 							CONNECTION_TIMEOUT, MAX_PACKET_SIZE);
 
-	while(loop.process() && mySignalOK);
+	SignalGuard guard;
+
+	while(loop.process() && guard);
 }
 
 // ----------------------------------
