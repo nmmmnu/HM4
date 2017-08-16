@@ -33,9 +33,6 @@ constexpr size_t	MEMLIST_SIZE		= 512 * 1024 * 1024;
 
 using MySelector	= net::selector::PollSelector;
 using MyProtocol	= net::protocol::RedisProtocol;
-using MyAdapterFactory
-//			= MyImmutableDBAdapterFactory;
-			= MyMutableDBAdapterFactory;
 
 // ----------------------------------
 
@@ -108,26 +105,46 @@ private:
 // ----------------------------------
 
 static int printUsage(const char *cmd);
+static int printError(const char *msg);
 
 // ----------------------------------
 
 #include "signalguard.h"
+#include "stou.h"
+
+template<class FACTORY>
+static int main2(int const fd1, FACTORY &&adapter_f);
 
 int main(int argc, char **argv){
-	if (argc <= 1)
+	if (argc <= 3)
 		return printUsage(argv[0]);
 
-	const auto path = argv[1];
+	const bool     immutable	= argv[1][0] == 'r';
+	const char     *path		= argv[2];
+	const uint16_t port		= stou<uint16_t>(argv[3]);
+
+	if (port == 0)
+		return printError("Can not create server socket on invalid port.");
 
 	// ----------------------------------
 
-	MyAdapterFactory adapter_f(path, MEMLIST_SIZE);
+	int const fd1 = net::socket_create(net::SOCKET_TCP{}, HOSTNAME, port);
 
-	using MyDBAdapter	= MyAdapterFactory::MyDBAdapter;
+	if (fd1 < 0)
+		return printError("Can not create server socket.");
+
+	if (immutable)
+		return main2(fd1, MyImmutableDBAdapterFactory{ path, MEMLIST_SIZE } );
+	else
+		return main2(fd1, MyMutableDBAdapterFactory{   path, MEMLIST_SIZE } );
+}
+
+template<class FACTORY>
+static int main2(int const fd1, FACTORY &&adapter_f){
+	using MyAdapterFactory	= FACTORY;
+	using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
 	using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
 	using MyLoop		= net::AsyncLoop<MySelector, MyWorker>;
-
-	int const fd1 = net::socket_create(net::SOCKET_TCP{}, HOSTNAME, PORT);
 
 	MyLoop loop( MySelector{ MAX_CLIENTS }, MyWorker{ adapter_f() }, { fd1 },
 							CONNECTION_TIMEOUT, MAX_PACKET_SIZE);
@@ -135,16 +152,24 @@ int main(int argc, char **argv){
 	SignalGuard guard;
 
 	while(loop.process() && guard);
+
+	return 0;
 }
 
 // ----------------------------------
 
 #include <iostream>
 
+static int printError(const char *msg){
+	std::cout << msg << '\n';
+	return 1;
+}
+
 static int printUsage(const char *cmd){
 	std::cout
 		<< "Usage:"	<< '\n'
-		<< "\t"		<< cmd	<< " [lsm_path] - start server"		<< '\n'
+		<< "\t"		<< cmd	<< " r [lsm_path] [port] - start immutable server"	<< '\n'
+		<< "\t"		<< cmd	<< " w [lsm_path] [port] - start mutable   server"	<< '\n'
 
 		<< "\t\tPath names must be written like this:"	<< '\n'
 		<< "\t\tExample 'directory/file.*.db'"		<< '\n'

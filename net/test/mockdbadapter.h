@@ -14,7 +14,7 @@ struct MockDBAdapter{
 		return "value";
 	}
 
-	const std::vector<std::string> &getall(const StringRef &) const{
+	const std::vector<std::string> &getall(const StringRef &, const StringRef & = {}) const{
 		return data_;
 	}
 

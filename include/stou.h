@@ -1,9 +1,8 @@
-#include <iostream>
+#ifndef S_TO_U_H_
+#define S_TO_U_H_
 
-#include <cstdlib>
 #include <limits>
 #include <cstdint>
-
 
 template<typename T>
 T stou(const char *s, int const base = 10){
@@ -27,14 +26,5 @@ unsigned long long stou(const char *s, int const base){
 	return strtoull(s, nullptr, base);
 }
 
-
-int main(){
-	std::cout << (int) stou<uint8_t>("-12") << '\n';
-	std::cout << (int) stou<uint8_t>("123") << '\n';
-	std::cout << (int) stou<uint8_t>("455") << '\n';
-	std::cout << stou<uint16_t>("123") << '\n';
-	std::cout << stou<uint32_t>("123") << '\n';
-	std::cout << stou<uint64_t>("123") << '\n';
-	std::cout << stou<uint64_t>("-12") << '\n';
-}
+#endif
 

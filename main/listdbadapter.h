@@ -7,19 +7,18 @@
 template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
 public:
-	constexpr static size_t DEFAULT_MAX_RESULTS = 50;
+	constexpr static uint16_t DEFAULT_MAX_RESULTS = 10;
 
 public:
 	constexpr static bool IS_MUTABLE = ! std::is_const<LIST>::value;
 
 public:
-	ListDBAdapter(LIST &list, COMMAND &cmd, size_t const maxResults = DEFAULT_MAX_RESULTS) :
+	ListDBAdapter(LIST &list, COMMAND &cmd) :
 				list_(list),
-				cmd_(& cmd),
-				maxResults_(maxResults){}
+				cmd_(& cmd){}
 
-	ListDBAdapter(LIST &list, size_t const maxResults = DEFAULT_MAX_RESULTS) :
-				ListDBAdapter(list, nullptr, maxResults){}
+	ListDBAdapter(LIST &list) :
+				ListDBAdapter(list, nullptr){}
 
 public:
 	// Immutable Methods
@@ -35,11 +34,13 @@ public:
 			return {};
 	}
 
-	std::vector<std::string> getall(const StringRef &key) const{
+	std::vector<std::string> getall(const StringRef &key, const StringRef &maxResultsStr = {}) const{
+		auto const maxResults = stou__<uint16_t>(maxResultsStr, DEFAULT_MAX_RESULTS);
+
 		std::vector<std::string> result;
 
 		// reserve x2 because of hgetall
-		result.reserve(maxResults_ * 2);
+		result.reserve(maxResults * 2);
 
 		const auto bit = key.empty() ? list_.begin() : list_.lowerBound(key);
 		const auto eit = list_.end();
@@ -53,7 +54,7 @@ public:
 			else
 				result.emplace_back();
 
-			if (++c >= maxResults_)
+			if (++c >= maxResults)
 				break;
 		}
 
@@ -63,8 +64,9 @@ public:
 	std::string info() const{
 		std::stringstream ss;
 
-		ss	<< "Keys (estimated): "	<< list_.size(true)	<< '\n'
-			<< "Size: "		<< list_.bytes()	<< '\n'
+		ss	<< "Keys (estimated): "	<< list_.size(true)		<< '\n'
+			<< "Size: "		<< list_.bytes()		<< '\n'
+			<< "Mutable: "		<< (IS_MUTABLE ? "Yes" : "No")	<< '\n'
 		;
 
 		return ss.str();
@@ -75,21 +77,10 @@ public:
 	}
 
 public:
-	// Mutable Methods
-	static uint32_t convertExp__(const StringRef &exp){
-		if (exp.empty())
-			return 0;
-
-		uint32_t expires = 0;
-		std::istringstream ss(exp);
-		ss >> expires;
-		return expires;
-	}
-
 	void set(const StringRef &key, const StringRef &val, const StringRef &exp = {} ){
 		assert(!key.empty());
 
-		uint32_t const expires = convertExp__(exp);
+		auto const expires = stou__<uint32_t>(exp);
 
 		list_.emplace( key, val, expires );
 	}
@@ -101,9 +92,23 @@ public:
 	}
 
 private:
+	// Mutable Methods
+	template <typename T>
+	static T stou__(const StringRef &str, T const def = 0){
+		static_assert(std::is_integral<T>::value, "T must be integral type");
+
+		if (str.empty())
+			return def;
+
+		T u = 0;
+		std::istringstream ss(str);
+		ss >> u;
+		return u;
+	}
+
+private:
 	LIST		&list_;
 	COMMAND		*cmd_		= nullptr;
-	size_t		maxResults_;
 };
 
 

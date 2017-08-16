@@ -44,7 +44,7 @@ public:
 		CmdPair{ "bgsave",	Command::REFRESH	}, CmdPair{ "BGSAVE",	Command::REFRESH	},
 
 		CmdPair{ "get",		Command::GET		}, CmdPair{ "GET",	Command::GET		},
-		CmdPair{ "hgetall",	Command::GETALL		}, CmdPair{ "HGETALL",	Command::GETALL	},
+		CmdPair{ "hgetall",	Command::GETALL		}, CmdPair{ "HGETALL",	Command::GETALL		},
 
 		CmdPair{ "set",		Command::SET		}, CmdPair{ "SET",	Command::SET		},
 		CmdPair{ "setex",	Command::SETEX		}, CmdPair{ "SETEX",	Command::SETEX		},

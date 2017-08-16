@@ -5,7 +5,7 @@
 
 #include <algorithm>
 #include <type_traits>
-
+#include <sstream>
 
 namespace net{
 namespace worker{
@@ -138,12 +138,18 @@ private:
 	WorkerStatus do_getall(){
 		const auto &p = protocol_.getParams();
 
-		if (p.size() != 2)
+		if (p.size() != 2 && p.size() != 3)
 			return err_BadRequest_();
 
 		const auto &key = p[1];
 
-		protocol_.response_strings(buffer_, db_.getall(key) );
+		if (p.size() == 2){
+			protocol_.response_strings(buffer_, db_.getall(key) );
+		}else{
+			const auto &count = p[2];
+
+			protocol_.response_strings(buffer_, db_.getall(key, count) );
+		}
 
 		return WorkerStatus::WRITE;
 	}
