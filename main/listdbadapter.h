@@ -1,8 +1,9 @@
 #ifndef LIST_DBADAPTER_H_
 #define LIST_DBADAPTER_H_
 
-#include <sstream>
+#include "stou_safe.h"
 
+#include <sstream>
 
 template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
@@ -35,7 +36,7 @@ public:
 	}
 
 	std::vector<std::string> getall(const StringRef &key, const StringRef &maxResultsStr = {}) const{
-		auto const maxResults = stou__<uint16_t>(maxResultsStr, DEFAULT_MAX_RESULTS);
+		auto const maxResults = stou<uint16_t>(maxResultsStr, DEFAULT_MAX_RESULTS);
 
 		std::vector<std::string> result;
 
@@ -77,10 +78,12 @@ public:
 	}
 
 public:
+	// Mutable Methods
+
 	void set(const StringRef &key, const StringRef &val, const StringRef &exp = {} ){
 		assert(!key.empty());
 
-		auto const expires = stou__<uint32_t>(exp);
+		auto const expires = stou<uint32_t>(exp);
 
 		list_.emplace( key, val, expires );
 	}
@@ -89,21 +92,6 @@ public:
 		assert(!key.empty());
 
 		return list_.erase(key);
-	}
-
-private:
-	// Mutable Methods
-	template <typename T>
-	static T stou__(const StringRef &str, T const def = 0){
-		static_assert(std::is_integral<T>::value, "T must be integral type");
-
-		if (str.empty())
-			return def;
-
-		T u = 0;
-		std::istringstream ss(str);
-		ss >> u;
-		return u;
 	}
 
 private:
