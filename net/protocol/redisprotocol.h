@@ -14,8 +14,14 @@ namespace protocol{
 
 
 class RedisProtocol{
-private:
-	enum class Error : uint8_t;
+public:
+	constexpr static char		STAR		= '*';
+	constexpr static char		DOLLAR		= '$';
+
+	constexpr static const char	*ENDLN		= "\r\n";
+
+public:
+	constexpr static size_t	MAX_PARAMS	= 4;	// setex name 100 hello
 
 public:
 	using Status = ProtocolStatus;
@@ -54,39 +60,6 @@ public:
 
 	template<class CONNECTION, class CONTAINER>
 	static void response_strings(CONNECTION &buffer, const CONTAINER &list);
-
-private:
-	static int readInt_(const StringRef &src, size_t &pos);
-	static Status readLn_(const StringRef &src, size_t &pos);
-
-	static std::pair<Status, StringRef> statusPair_(const Status status){
-		return { status, StringRef{} };
-	}
-
-	static std::pair<Status, StringRef> errPair_(const Error ){
-		return statusPair_(Status::ERROR);
-	}
-
-	static Status errStatus_(const Error ){
-		return Status::ERROR;
-	}
-
-	static std::pair<Status, StringRef> readParam_(const StringRef &src, size_t &pos);
-
-	static bool checkParamSize__(size_t const size){
-		return size < 0 || size > MAX_PARAM_SIZE;
-	}
-
-private:
-	constexpr static char		STAR		= '*';
-	constexpr static char		DOLLAR		= '$';
-
-	constexpr static const char	*ENDLN		= "\r\n";
-
-private:
-	constexpr static size_t	INT_BUFFER_SIZE	= 8;	// to be able to store MAX_PARAM_SIZE as string.
-	constexpr static size_t	MAX_PARAMS	= 4;	// setex name 100 hello
-	constexpr static size_t	MAX_PARAM_SIZE	= 16 * 1024;
 
 private:
 	StringVector	params_;
