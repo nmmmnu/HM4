@@ -5,7 +5,7 @@
 namespace net{
 namespace protocol{
 
-namespace impl_{
+namespace redisprotocol_impl_{
 
 	class RedisProtocolParser{
 	public:
@@ -181,7 +181,7 @@ auto RedisProtocol::operator()(const StringRef &src) -> Status{
 //	if (src.size() < 8)	// 4 bytes - "*1\r\n$1\r\n"
 //		return Status::BUFFER_NOT_READ;
 
-	using RedisProtocolParser = impl_::RedisProtocolParser;
+	using RedisProtocolParser = redisprotocol_impl_::RedisProtocolParser;
 
 	RedisProtocolParser parser(src, params_);
 
