@@ -1,13 +1,12 @@
 #include "db_net_immutablefactory.h"
 #include "db_net_mutablefactory.h"
 
+// ----------------------------------
+
 #include "selector/pollselector.h"
 #include "protocol/redisprotocol.h"
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
-
-#include "inifile.h"
-#include "db_net_options.h"
 
 // ----------------------------------
 
@@ -21,8 +20,14 @@ static int printError(const char *msg);
 
 // ----------------------------------
 
+size_t constexpr MB = 1024 * 1024;
+
+// ----------------------------------
+
 #include "signalguard.h"
 #include "stou.h"
+#include "inifile.h"
+#include "db_net_options.h"
 
 template<class FACTORY>
 static int main2(const MyOptions &opt, FACTORY &&adapter_f);
@@ -31,6 +36,10 @@ int main(int argc, char **argv){
 	MyOptions opt;
 
 	switch(argc){
+	case 1 + 1:
+		readINIFile(argv[1], opt);
+		break;
+
 	case 3 + 1:
 		opt.port	= stou<uint16_t>(argv[3]);
 		/* continue */
@@ -49,10 +58,12 @@ int main(int argc, char **argv){
 
 	// ----------------------------------
 
+	size_t const max_memlist_size = opt.max_memlist_size * MB;
+
 	if (opt.immutable)
-		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, opt.max_memlist_size } );
+		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, max_memlist_size } );
 	else
-		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, opt.max_memlist_size } );
+		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size } );
 }
 
 template<class FACTORY>
@@ -91,6 +102,8 @@ static int printError(const char *msg){
 static int printUsage(const char *cmd){
 	std::cout
 		<< "Usage:"	<< '\n'
+		<< "\t"		<< cmd	<< "[configuration file] - start server"			<< '\n'
+		<< "...or..."	<< '\n'
 		<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable server"	<< '\n'
 		<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable   server"	<< '\n'
 
