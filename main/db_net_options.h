@@ -37,7 +37,7 @@ public:
 		print__("immutable",		(int)opt.immutable,	"Start immutable server (1/0)"		);
 		print__("db_path",		opt.db_path,		"Path to database"			);
 
-		print__("host",			"0.0.0.0",		"TCP host to listen (not working)"	);
+		print__("host",			opt.host,		"TCP host to listen (not working)"	);
 		print__("port",			opt.port,		"TCP port to listen"			);
 		print__("timeout",		opt.timeout,		"Connection timeout in seconds"		);
 
@@ -73,10 +73,14 @@ private:
 		std::cout
 			<< '\t'
 			<< std::setw(20) << std::left << name
-			<< std::setw(10) << std::left << value
+			<< std::setw(6) << std::left << value
 			<< description
 			<< '\n'
 		;
+	}
+
+	static void print__(const char *name, nullptr_t, const char *description){
+		print__(name, "-", description);
 	}
 };
 
