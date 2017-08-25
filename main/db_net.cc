@@ -112,6 +112,14 @@ static int printUsage(const char *cmd){
 
 		<< '\n';
 
+	std::cout
+		<< "INI File Usage:"	<< '\n';
+
+	MyOptions::print();
+
+	std::cout
+		<< '\n';
+
 	return 10;
 }
 
