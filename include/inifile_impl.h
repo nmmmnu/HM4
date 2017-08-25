@@ -1,4 +1,5 @@
 #include <cassert>
+#include "stou_safe.h"
 
 namespace readinifile_impl_{
 
@@ -125,4 +126,5 @@ bool readINIFile(const StringRef &filename, PROCESSOR &processor){
 
 	return readINIFile(file, processor);
 }
+
 

@@ -2,9 +2,7 @@
 #include <iostream>
 #include <iomanip>
 
-
-#include "stringref.h"
-#include "stou_safe.h"
+#include "inifile.h"
 
 class MyOptions{
 public:
@@ -31,15 +29,17 @@ private:
 
 public:
 	void operator()(const StringRef &name, const StringRef &val){
-		do_(name, val, OPT_immutable,		immutable		);
-		do_(name, val, OPT_db_path,		db_path			);
+		const INIFileAssignHelper ini{ name, val };
 
-		do_(name, val, OPT_host,		host			);
-		do_(name, val, OPT_port,		port			);
-		do_(name, val, OPT_timeout,		timeout			);
+		ini.setOption(OPT_immutable,		immutable		);
+		ini.setOption(OPT_db_path,		db_path			);
 
-		do_(name, val, OPT_max_clients,		max_clients		);
-		do_(name, val, OPT_max_memlist_size,	max_memlist_size	);
+		ini.setOption(OPT_host,			host			);
+		ini.setOption(OPT_port,			port			);
+		ini.setOption(OPT_timeout,		timeout			);
+
+		ini.setOption(OPT_max_clients,		max_clients		);
+		ini.setOption(OPT_max_memlist_size,	max_memlist_size	);
 	}
 
 	static void print(){
@@ -58,29 +58,6 @@ public:
 
 private:
 	template<class T>
-	static void do_(const StringRef &name, const StringRef &value, const char *opt_name, T &opt_value){
-		if (name == opt_name)
-			assign_(value, opt_value);
-	}
-
-private:
-	template<class T>
-	static void assign_(const StringRef &value, T &opt_value){
-		static_assert(std::is_unsigned<T>::value, "T must be unsigned type");
-		auto const default_value = opt_value;
-		opt_value = stou<T>(value, default_value);
-	}
-
-	static void assign_(const StringRef &value, std::string &opt_value){
-		opt_value = value;
-	}
-
-	static void assign_(const StringRef &, nullptr_t){
-		/* nada */
-	}
-
-private:
-	template<class T>
 	static void print__(const char *name, const T &value, const char *description){
 		std::cout
 			<< '\t'
@@ -92,7 +69,7 @@ private:
 	}
 
 	static void print__(const char *name, uint8_t const value, const char *description){
-		print__(name, (int) value, description);
+		print__(name, int{ value }, description);
 	}
 
 	static void print__(const char *name, nullptr_t, const char *description){
