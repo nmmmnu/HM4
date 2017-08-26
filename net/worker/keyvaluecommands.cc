@@ -3,7 +3,7 @@
 namespace net{
 namespace worker{
 
-constexpr std::array<RedisCommands::CmdPair, RedisCommands::ARRAY_SIZE> RedisCommands::commands;
+constexpr RedisCommands::CommandsArray RedisCommands::commands;
 
 } // namespace worker
 } // namespace

@@ -52,7 +52,7 @@ private:
 
 		OptPair{ "host",		Option::host,			"TCP host to listen (not working)"	},
 		OptPair{ "port",		Option::port,			"TCP port to listen"			},
-		OptPair{ "timeout",		Option::timeout,		"Connection timeout in seconds"	},
+		OptPair{ "timeout",		Option::timeout,		"Connection timeout in seconds"		},
 
 		OptPair{ "max_clients",		Option::max_clients,		"Max Clients"				},
 		OptPair{ "max_memlist_size",	Option::max_memlist_size,	"Max size of memlist in MB"		}
@@ -82,10 +82,8 @@ public:
 	}
 
 	static void print(){
-		for(const auto &o : options){
-			// std::setw() is broken
-			print__(o.str.c_str(), o.descr);
-		}
+		for(const auto &o : options)
+			print__(o.str, o.descr);
 	}
 
 private:
@@ -107,7 +105,7 @@ private:
 	}
 
 private:
-	static void print__(const char *name, const char *description){
+	static void print__(const StringRef &name, const char *description){
 		std::cout
 			<< '\t'
 			<< std::setw(20) << std::left << name

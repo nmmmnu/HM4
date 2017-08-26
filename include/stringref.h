@@ -167,7 +167,9 @@ private:
 
 inline std::ostream& operator << (std::ostream& os, const StringRef &sr){
 	// cast because of clang
-	return os.write(sr.data(), static_cast<std::streamsize>( sr.size() ));
+	//return os.write(sr.data(), static_cast<std::streamsize>( sr.size() ));
+	// almost the same, but std::setw() works
+	return __ostream_insert(os, sr.data(), static_cast<std::streamsize>( sr.size() ));
 }
 
 // need for standard algoritms

@@ -35,7 +35,9 @@ public:
 public:
 	constexpr static size_t ARRAY_SIZE = 20;
 
-	constexpr static std::array<CmdPair, ARRAY_SIZE> commands{
+	using CommandsArray = std::array<CmdPair, ARRAY_SIZE>;
+
+	constexpr static CommandsArray commands{
 		CmdPair{ "exit",	Command::EXIT		}, CmdPair{ "EXIT",	Command::EXIT		},
 		CmdPair{ "shutdown",	Command::SHUTDOWN	}, CmdPair{ "SHUTDOWN",	Command::SHUTDOWN	},
 
