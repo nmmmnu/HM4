@@ -216,7 +216,7 @@ void test_CollectionList(const char *name){
 
 using List = hm4::VectorList;
 
-int main(int argc, char **argv){
+int main(){
 	test_DualList<hm4::VectorList		>("DualList"		);
 	test_DualListEmpty<hm4::VectorList	>("DualList (Empty)"	);
 	test_CollectionList<hm4::VectorList	>("CollectionList"	);

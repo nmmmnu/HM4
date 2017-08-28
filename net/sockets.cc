@@ -95,6 +95,8 @@ ssize_t socket_write(int const fd, const void *buf, size_t const count, int cons
 // ===========================
 
 int socket_create(SOCKET_TCP, const char *ip, uint16_t const port, uint16_t const backlog, options_type const options) noexcept{
+	(void) ip;
+
 	int fd = socket(AF_INET , SOCK_STREAM , 0);
 
 	if(fd < 0)

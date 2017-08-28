@@ -22,7 +22,7 @@ private:
 	static void restoreHandler__();
 
 private:
-	static void handler__(int const sig){
+	static void handler__(int const /* sig */){
 		ok__ = false;
 	}
 

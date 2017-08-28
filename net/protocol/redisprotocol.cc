@@ -161,7 +161,7 @@ namespace redisprotocol_impl_{
 
 	private:
 		static bool checkParamSize__(size_t const size){
-			return size < 0 || size > MAX_PARAM_SIZE;
+			return /* size < 0 || */ size > MAX_PARAM_SIZE;
 		}
 
 	private:

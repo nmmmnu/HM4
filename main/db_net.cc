@@ -42,7 +42,8 @@ int main(int argc, char **argv){
 
 	case 3 + 1:
 		opt.port	= stou<uint16_t>(argv[3]);
-		/* continue */
+		/* fallthrough */
+		__attribute__((fallthrough));
 
 	case 2 + 1:
 		opt.immutable	= argv[1][0] == 'r';

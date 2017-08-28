@@ -23,7 +23,7 @@ public:
 	}
 
 	constexpr
-	bool erase(const StringRef &key) const noexcept{
+	bool erase(const StringRef &) const noexcept{
 		return true;
 	}
 

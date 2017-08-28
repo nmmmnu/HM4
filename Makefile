@@ -17,7 +17,7 @@ CF_INCL		= -Iinclude $(EXTRA_INCL)
 CF_OPTIM	= -O2
 #CF_OPTIM	= -O3 -DNDEBUG
 #CF_OPTIM	+= -march=native
-CF_WARN		= -Wall -Wpedantic -Wdeprecated -Wconversion
+CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion
 
 CF_MISC		= -g
 

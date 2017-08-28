@@ -23,7 +23,7 @@ static void pair_test_expired(bool slow = false);
 static void pair_test_ctor();
 
 
-int main(int argc, char **argv){
+int main(){
 	pair_test_null();
 	pair_test_raw();
 	pair_test();

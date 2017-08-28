@@ -278,7 +278,7 @@ void list_test<MyDecoratorList>(const char *name){
 #include "vectorlist.h"
 #include "linklist.h"
 
-int main(int argc, char **argv){
+int main(){
 
 	list_test<hm4::VectorList	>("VectorList"		);
 	list_test<hm4::LinkList		>("LinkList"		);
