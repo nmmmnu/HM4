@@ -37,7 +37,8 @@ int main(int argc, char **argv){
 
 	switch(argc){
 	case 1 + 1:
-		readINIFile(argv[1], opt);
+		if (! readINIFile(argv[1], opt))
+			return printError("Can not open config file...");
 		break;
 
 	case 3 + 1:
@@ -55,7 +56,7 @@ int main(int argc, char **argv){
 	}
 
 	if (opt.port == 0)
-		return printError("Can not create server socket on invalid port.");
+		return printError("Can not create server socket on port zero...");
 
 	// ----------------------------------
 
@@ -79,7 +80,7 @@ static int main2(const MyOptions &opt, FACTORY &&adapter_factory){
 	int const fd = net::socket_create(net::SOCKET_TCP{}, opt.host, opt.port);
 
 	if (fd < 0)
-		return printError("Can not create server socket.");
+		return printError("Can not create server socket...");
 
 	MyLoop loop( MySelector{ opt.max_clients }, MyWorker{ adapter_factory() }, { fd },
 							opt.timeout, max_packet_size);
@@ -103,7 +104,7 @@ static int printError(const char *msg){
 static int printUsage(const char *cmd){
 	std::cout
 		<< "Usage:"	<< '\n'
-		<< "\t"		<< cmd	<< "[configuration file] - start server"			<< '\n'
+		<< "\t"		<< cmd	<< " [configuration file] - start server"			<< '\n'
 		<< "...or..."	<< '\n'
 		<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable server"	<< '\n'
 		<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable   server"	<< '\n'

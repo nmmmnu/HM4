@@ -34,6 +34,7 @@ private:
 	struct OptPair{
 		StringRef	str;
 		Option		opt;
+		const char	*def;
 		const char	*descr;
 
 		bool operator == (const StringRef &s) const{
@@ -47,15 +48,15 @@ private:
 	using OptionsArray = std::array<OptPair, ARRAY_SIZE>;
 
 	constexpr static OptionsArray options{
-		OptPair{ "immutable",		Option::immutable,		"Start immutable server (1/0)"		},
-		OptPair{ "db_path",		Option::db_path,  	    	"Path to database"			},
+		OptPair{ "immutable",		Option::immutable,		"1",	"Start immutable server (1/0)"		},
+		OptPair{ "db_path",		Option::db_path,  	    	"-",	"Path to database"			},
 
-		OptPair{ "host",		Option::host,			"TCP host to listen (not working)"	},
-		OptPair{ "port",		Option::port,			"TCP port to listen"			},
-		OptPair{ "timeout",		Option::timeout,		"Connection timeout in seconds"		},
+		OptPair{ "host",		Option::host,			"-",	"TCP host to listen (not working)"	},
+		OptPair{ "port",		Option::port,			"2000",	"TCP port to listen"			},
+		OptPair{ "timeout",		Option::timeout,		"30",	"Connection timeout in seconds"		},
 
-		OptPair{ "max_clients",		Option::max_clients,		"Max Clients"				},
-		OptPair{ "max_memlist_size",	Option::max_memlist_size,	"Max size of memlist in MB"		}
+		OptPair{ "max_clients",		Option::max_clients,		"512",	"Max Clients"				},
+		OptPair{ "max_memlist_size",	Option::max_memlist_size,	"100",	"Max size of memlist in MB"		}
 	};
 
 private:
@@ -83,7 +84,7 @@ public:
 
 	static void print(){
 		for(const auto &o : options)
-			print__(o.str, o.descr);
+			print__(o.str, o.def, o.descr);
 	}
 
 private:
@@ -105,10 +106,11 @@ private:
 	}
 
 private:
-	static void print__(const StringRef &name, const char *description){
+	static void print__(const StringRef &name, const char *def, const char *description){
 		std::cout
 			<< '\t'
 			<< std::setw(20) << std::left << name
+			<< std::setw(8) << std::left << def
 			<< description
 			<< '\n'
 		;
