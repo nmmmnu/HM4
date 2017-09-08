@@ -39,6 +39,7 @@ int main(int argc, char **argv){
 	case 1 + 1:
 		if (! readINIFile(argv[1], opt))
 			return printError("Can not open config file...");
+
 		break;
 
 	case 3 + 1:
@@ -62,10 +63,13 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_size = opt.max_memlist_size * MB;
 
-	if (opt.immutable)
+	if (opt.immutable){
+		std::cout << "Starting immutable server..."	<< '\n';
 		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, max_memlist_size } );
-	else
+	}else{
+		std::cout << "Starting mutable server..."	<< '\n';
 		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size } );
+	}
 }
 
 template<class FACTORY>

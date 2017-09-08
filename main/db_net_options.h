@@ -7,7 +7,7 @@
 
 class MyOptions{
 public:
-	uint8_t		immutable		= 1;
+	uint16_t	immutable		= 1;
 	std::string	db_path;
 
 	nullptr_t	host			= nullptr;
@@ -94,7 +94,7 @@ private:
 
 		auto const default_value = param;
 
-		param = stou<T>(value, default_value);
+		param = stou_safe<T>(value, default_value);
 	}
 
 	static void assign_(std::string &param, const StringRef &value){

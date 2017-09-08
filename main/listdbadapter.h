@@ -36,7 +36,7 @@ public:
 	}
 
 	std::vector<std::string> getall(const StringRef &key, const StringRef &maxResultsStr = {}) const{
-		auto const maxResults = stou<uint16_t>(maxResultsStr, DEFAULT_MAX_RESULTS);
+		auto const maxResults = stou_safe<uint16_t>(maxResultsStr, DEFAULT_MAX_RESULTS);
 
 		std::vector<std::string> result;
 
@@ -83,7 +83,7 @@ public:
 	void set(const StringRef &key, const StringRef &val, const StringRef &exp = {} ){
 		assert(!key.empty());
 
-		auto const expires = stou<uint32_t>(exp);
+		auto const expires = stou_safe<uint32_t>(exp);
 
 		list_.emplace( key, val, expires );
 	}
