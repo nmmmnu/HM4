@@ -138,17 +138,45 @@ private:
 	WorkerStatus do_getall(){
 		const auto &p = protocol_.getParams();
 
-		if (p.size() != 2 && p.size() != 3)
+		if (p.size() != 2 && p.size() != 3 && p.size() != 4)
 			return err_BadRequest_();
 
 		const auto &key = p[1];
 
-		if (p.size() == 2){
-			protocol_.response_strings(buffer_, db_.getall(key) );
-		}else{
-			const auto &count = p[2];
+		switch( p.size() ){
+		case 2:
+			// classic case:
+			// HGETALL u:
 
-			protocol_.response_strings(buffer_, db_.getall(key, count) );
+			{
+				protocol_.response_strings(buffer_, db_.getall(key) );
+				break;
+			}
+
+		case 3:
+			// count case
+			// HGETALL u: 100
+
+			{
+				const auto &count = p[2];
+
+				protocol_.response_strings(buffer_, db_.getall(key, count) );
+
+				break;
+			}
+
+		case 4:
+			// count + prefix case
+			// HGETALL u: 100 1
+
+			{
+				const auto &count  = p[2];
+				const auto &prefix = p[3];
+
+				protocol_.response_strings(buffer_, db_.getall(key, count, prefix) );
+
+				break;
+			}
 		}
 
 		return WorkerStatus::WRITE;

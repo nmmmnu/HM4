@@ -8,7 +8,8 @@
 template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
 public:
-	constexpr static uint16_t DEFAULT_MAX_RESULTS = 10;
+	constexpr static uint16_t DEFAULT_RESULTS = 10;
+	constexpr static uint16_t MAXIMUM_RESULTS = 1000;
 
 public:
 	constexpr static bool IS_MUTABLE = ! std::is_const<LIST>::value;
@@ -35,8 +36,9 @@ public:
 			return {};
 	}
 
-	std::vector<std::string> getall(const StringRef &key, const StringRef &maxResultsStr = {}) const{
-		auto const maxResults = stou_safe<uint16_t>(maxResultsStr, DEFAULT_MAX_RESULTS);
+	std::vector<std::string> getall(const StringRef &key, const StringRef &maxResultsStr = {}, const StringRef &prefixCheckStr = {}) const{
+		auto const maxResults  = convert__(maxResultsStr,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
+		auto const prefixCheck = convert__(prefixCheckStr, 0, 1);
 
 		std::vector<std::string> result;
 
@@ -48,7 +50,12 @@ public:
 
 		size_t c = 0;
 		for(auto it = bit; it != eit; ++it){
-			result.push_back(it->getKey());
+			const auto &resultKey = it->getKey();
+
+			if (prefixCheck && ! samePrefix__(key, resultKey))
+				break;
+
+			result.push_back(resultKey);
 
 			if (it->isValid(/* tomb */ true))
 				result.push_back(it->getVal());
@@ -92,6 +99,22 @@ public:
 		assert(!key.empty());
 
 		return list_.erase(key);
+	}
+
+private:
+	template <typename T>
+	static T convert__(const StringRef &s, T const def, T const max){
+		auto const result = stou_safe<T>(s, def);
+
+		return result < max ? result : max;
+	}
+
+	static bool samePrefix__(const StringRef &p, const StringRef &s){
+		if (p.size() > s.size())
+			return false;
+
+		return std::equal(p.begin(), p.end(), s.begin());
+
 	}
 
 private:

@@ -14,21 +14,14 @@ struct MockDBAdapter{
 		return "value";
 	}
 
-	const std::vector<std::string> &getall(const StringRef &, const StringRef & = {}) const{
+	const std::vector<std::string> &getall(const StringRef &, const StringRef & = {}, const StringRef & = {}) const{
 		return data_;
 	}
 
 	bool refresh(){
 		return true;
 	}
-#if 0
-	void set(const StringRef &, const StringRef &, const StringRef & = {} ){
-	}
 
-	bool del(const StringRef &){
-		return true;
-	}
-#endif
 private:
 	std::vector<std::string> data_ = {
 		"key1", "value1",
