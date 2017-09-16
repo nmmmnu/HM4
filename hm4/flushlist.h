@@ -33,7 +33,7 @@ public:
 					FlushList(list, std::forward<UFLUSH>(flusher), nullptr, maxSize){}
 
 	~FlushList(){
-		flush();
+		flush_();
 	}
 
 private:
@@ -45,8 +45,6 @@ private:
 
 		if (list_.bytes() > maxSize_){
 			flush();
-			list_.clear();
-			notifyLoader_();
 		}
 
 		return result;
@@ -54,13 +52,19 @@ private:
 
 public:
 	bool flush(){
-		log__("Flushing data...");
-		return flusher_ << list_;
+		bool const r = flush_();
+		list_.clear();
+		notifyLoader_();
+
+		return r;
 	}
 
 	// Command pattern
-	int command(int = 0){
-		return flush();
+	int command(bool const completeFlush){
+		if (completeFlush)
+			return flush();
+		else
+			return notifyLoader_();
 	}
 
 private:
@@ -80,6 +84,12 @@ private:
 	bool notifyLoader_(){
 		return notifyLoader_(loader_tag<LIST_LOADER>{});
 	}
+
+	bool flush_(){
+		log__("Flushing data...");
+		return flusher_ << list_;
+	}
+
 
 private:
 	LIST		&list_;

@@ -36,9 +36,8 @@ public:
 			return {};
 	}
 
-	std::vector<std::string> getall(const StringRef &key, const StringRef &maxResultsStr = {}, const StringRef &prefixCheckStr = {}) const{
-		auto const maxResults  = convert__(maxResultsStr,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
-		auto const prefixCheck = convert__(prefixCheckStr, 0, 1);
+	std::vector<std::string> getall(const StringRef &key, uint16_t const resultsCount, bool const prefixCheck) const{
+		auto const maxResults  = my_clamp__(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
 		std::vector<std::string> result;
 
@@ -80,8 +79,8 @@ public:
 		return ss.str();
 	}
 
-	bool refresh(){
-		return cmd_ && cmd_->command();
+	bool refresh(bool const completeRefresh){
+		return cmd_ && cmd_->command(completeRefresh);
 	}
 
 public:
@@ -102,11 +101,9 @@ public:
 	}
 
 private:
-	template <typename T>
-	static T convert__(const StringRef &s, T const def, T const max){
-		auto const result = stou_safe<T>(s, def);
-
-		return result < max ? result : max;
+	template<typename T>
+	static T my_clamp__(const T &val, const T &min, const T &max){
+		return val < min ? min : val > max ? max : val;
 	}
 
 	static bool samePrefix__(const StringRef &p, const StringRef &s){
@@ -114,7 +111,6 @@ private:
 			return false;
 
 		return std::equal(p.begin(), p.end(), s.begin());
-
 	}
 
 private:

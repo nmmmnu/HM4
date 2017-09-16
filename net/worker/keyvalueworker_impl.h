@@ -3,6 +3,8 @@
 
 #include "keyvaluecommands.h"
 
+#include "stou_safe.h"
+
 #include <algorithm>
 #include <type_traits>
 #include <sstream>
@@ -101,7 +103,13 @@ private:
 
 private:
 	WorkerStatus do_refresh(){
-		db_.refresh();
+		const auto &p = protocol_.getParams();
+
+		if (p.size() != 1 && p.size() != 2)
+			return err_BadRequest_();
+
+		bool const completeRefresh = p.size() == 1;
+		db_.refresh(completeRefresh);
 
 		protocol_.response_ok(buffer_);
 
@@ -149,7 +157,7 @@ private:
 			// HGETALL u:
 
 			{
-				protocol_.response_strings(buffer_, db_.getall(key) );
+				protocol_.response_strings(buffer_, db_.getall(key, 0, false) );
 				break;
 			}
 
@@ -158,10 +166,9 @@ private:
 			// HGETALL u: 100
 
 			{
-				const auto &count = p[2];
+				uint16_t const count = stou_safe<uint16_t>(p[2]);
 
-				protocol_.response_strings(buffer_, db_.getall(key, count) );
-
+				protocol_.response_strings(buffer_, db_.getall(key, count, false) );
 				break;
 			}
 
@@ -170,13 +177,12 @@ private:
 			// HGETALL u: 100 1
 
 			{
-				const auto &count  = p[2];
-				const auto &prefix = p[3];
+				uint16_t const count = stou_safe<uint16_t>(p[2]);
 
-				protocol_.response_strings(buffer_, db_.getall(key, count, prefix) );
-
+				protocol_.response_strings(buffer_, db_.getall(key, count, true) );
 				break;
 			}
+
 		}
 
 		return WorkerStatus::WRITE;

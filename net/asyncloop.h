@@ -79,7 +79,7 @@ private:
 
 private:
 	template<typename T>
-	static T my_clamp__(const T &val, const T &min){
+	static T my_max__(const T &val, const T &min){
 		// using std::max will result in link error,
 		// because it returns reference
 		return val > min ? val : min;

@@ -14,11 +14,11 @@ struct MockDBAdapter{
 		return "value";
 	}
 
-	const std::vector<std::string> &getall(const StringRef &, const StringRef & = {}, const StringRef & = {}) const{
+	const std::vector<std::string> &getall(const StringRef &, uint16_t, bool) const{
 		return data_;
 	}
 
-	bool refresh(){
+	bool refresh(bool){
 		return true;
 	}
 
@@ -30,7 +30,6 @@ private:
 		"key4", "value4"
 	};
 };
-
 
 #endif
 
