@@ -13,6 +13,7 @@ namespace disk{
 class DiskList : public IList<DiskList, false>{
 public:
 	class Iterator;
+	class BTreeSearchHelper;
 
 	static constexpr MMAPFile::Advice DEFAULT_ADVICE = MMAPFile::Advice::RANDOM;
 
