@@ -162,7 +162,7 @@ DiskList::Iterator::Iterator(const DiskList &list, size_type const pos,
 			pos_(pos),
 			sorted_(sorted){}
 
-auto DiskList::Iterator::operator*() const -> const ObserverPair &{
+const ObserverPair &DiskList::Iterator::operator*() const{
 	if (tmp_blob && pos_ == tmp_pos)
 		return tmp_pair;
 
@@ -185,9 +185,6 @@ auto DiskList::Iterator::operator*() const -> const ObserverPair &{
 }
 
 // ==============================
-// ==============================
-// ==============================
-
 
 class DiskList::BTreeSearchHelper{
 private:
@@ -201,33 +198,26 @@ private:
 	constexpr static level_type BRANCHES	= btree::BRANCHES;
 
 private:
-	enum class SubResultType : uint8_t{
-		ERROR,
-		RESULT_INDEX,
-		NODE_INDEX
+	class BTreeAccessError : std::exception{};
+
+	struct NodeResult{
+		bool		isResult;
+		level_type	node_index;
+		size_type	result_index;
+
+	public:
+		constexpr static NodeResult result(size_type const result_index){
+			return { true, {}, result_index };
+		}
+
+		constexpr static NodeResult node(level_type const node_index){
+			return { false, node_index, {} };
+		}
 	};
 
-	class SubResult{
-	private:
-		SubResult() = default;
-
-	public:
-		constexpr static SubResult error(){
-			return { SubResultType::ERROR };
-		}
-
-		constexpr static SubResult result(size_type const result_index){
-			return { SubResultType::RESULT_INDEX, {}, result_index };
-		}
-
-		constexpr static SubResult node(level_type const node_index){
-			return { SubResultType::NODE_INDEX, node_index, {} };
-		}
-
-	public:
-		SubResultType	type;
-		level_type	node_index	= 0;
-		size_type	result_index	= 0;
+	struct NodeValueResult{
+		StringRef	key;
+		size_type	dataid;
 	};
 
 private:
@@ -246,48 +236,49 @@ public:
 	BTreeSearchHelper(const DiskList &list, const StringRef &key) : list_(list), key_(key){}
 
 	std::pair<bool,size_type> operator()(){
+			try{
+				return btreeSearch_();
+			}catch(BTreeAccessError e){
+				log__("Problem, switch to binary search (1)");
+				return binarySearchFallback_();
+			}
+	}
+
+private:
+	std::pair<bool,size_type> binarySearchFallback_() const{
+		return list_.binarySearch_(key_);
+	}
+
+	std::pair<bool,size_type> btreeSearch_(){
 		size_t const nodesCount	= mTree_.size() / sizeof(Node);
 
 		const Node *nodes = mTree_->as<const Node>(0, nodesCount);
 
-		if (!nodes){
-			// go try with binary search
-			log__("Problem, switch to binary search (1)");
-			return binarySearchFallback_();
-		}
+		if (!nodes)
+			throw BTreeAccessError{};
 
 		size_t pos = 0;
 
 		log__("BTREE at ", pos);
 
 		while(pos < nodesCount){
-			const Node &node = nodes[pos];
+			const auto x = levelOrderBinarySearch_( nodes[pos] );
 
-			//    MODIFIED LEVEL ORDERED MINI-BINARY SEARCH INSIDE BTREE NODE
-			const SubResult x = subSearch(node);
-			// EO MODIFIED LEVEL ORDERED MINI-BINARY SEARCH INSIDE BTREE NODE
-
-			switch(x.type){
-			case SubResultType::ERROR:
-				return binarySearchFallback_();
-
-			case SubResultType::RESULT_INDEX:
+			if (x.isResult)
 				return { true, x.result_index };
 
-			case SubResultType::NODE_INDEX:
-				// Determine where to go next...
+			// Determine where to go next...
 
-				if ( x.node_index == VALUES ){
-					// Go Right
-					pos = pos * BRANCHES + VALUES + 1;
+			if ( x.node_index == VALUES ){
+				// Go Right
+				pos = pos * BRANCHES + VALUES + 1;
 
-					log__("BTREE R:", pos);
-				}else{
-					// Go Left
-					pos = pos * BRANCHES + x.node_index + 1;
+				log__("BTREE R:", pos);
+			}else{
+				// Go Left
+				pos = pos * BRANCHES + x.node_index + 1;
 
-					log__("BTREE L:", pos, ", node branch", x.node_index);
-				}
+				log__("BTREE L:", pos, ", node branch", x.node_index);
 			}
 		}
 
@@ -300,13 +291,7 @@ public:
 		return binarySearch(list_, start, end, key_, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
 	}
 
-
-private:
-	std::pair<bool,size_type> binarySearchFallback_() const{
-		return list_.binarySearch_(key_);
-	}
-
-	SubResult subSearch(const Node &node){
+	NodeResult levelOrderBinarySearch_(const Node &node){
 		const auto &ll = LL;
 
 		level_type node_pos = 0;
@@ -314,40 +299,11 @@ private:
 		level_type node_index;
 
 		do{
+			const auto x = accessNodeValue_( node.values[node_pos] );
 
-			// ACCESS ELEMENT
-			// ---
-			uint64_t const offset = be64toh(node.values[ node_pos ]);
+			log__("\tNode Value", node_pos, "[", ll[node_pos], "], Key:", x.key);
 
-			// BTree NIL case - can not happen
-
-			const NodeData *nd = mKeys_->as<const NodeData>((size_t) offset);
-
-			if (!nd){
-				// go try with binary search
-				log__("Problem, switch to binary search (2)");
-				return SubResult::error();
-			}
-
-			size_t    const keysize = be16toh(nd->keysize);
-			size_type const dataid  = be64toh(nd->dataid);
-
-			// key is just after the NodeData
-			const char *keyptr = mKeys_->as<const char>((size_t) offset + sizeof(NodeData), keysize);
-
-			if (!keyptr){
-				// go try with binary search
-				log__("Problem, switch to binary search (3)");
-				return SubResult::error();
-			}
-
-			const StringRef keyx{ keyptr, keysize };
-			// ---
-			// EO ACCESS ELEMENT
-
-			log__("\tNode Value", node_pos, "[", ll[node_pos], "], Key:", keyx);
-
-			int const cmp = keyx.compare(key_);
+			int const cmp = x.key.compare(key_);
 
 			if (cmp < 0){
 				// this + 1 is because,
@@ -359,7 +315,7 @@ private:
 				// go right
 				node_pos = level_type(2 * node_pos + 1 + 1);
 
-				start = dataid + 1;
+				start = x.dataid + 1;
 
 				log__("\t\tR:", node_pos, "BS:", start, '-', end);
 			}else if (cmp > 0){
@@ -368,7 +324,7 @@ private:
 				// go left
 				node_pos = level_type(2 * node_pos + 1);
 
-				end = dataid;
+				end = x.dataid;
 
 				log__("\t\tL:", node_pos, "BS:", start, '-', end);
 			}else{
@@ -376,17 +332,39 @@ private:
 
 				log__("\t\tFound at ", node_pos);
 
-				return SubResult::result(dataid);
+				return NodeResult::result(x.dataid);
 			}
 		}while (node_pos < VALUES);
 
-		return SubResult::node(node_index);
+		return NodeResult::node(node_index);
+	}
+
+	NodeValueResult accessNodeValue_(uint64_t const offsetBE) const{
+		uint64_t const offset = be64toh( offsetBE );
+
+		// BTree NIL case - can not happen
+
+		const NodeData *nd = mKeys_->as<const NodeData>((size_t) offset);
+
+		if (!nd)
+			throw BTreeAccessError{};
+
+		size_t    const keysize = be16toh(nd->keysize);
+		size_type const dataid  = be64toh(nd->dataid);
+
+		// key is just after the NodeData
+		const char *keyptr = mKeys_->as<const char>((size_t) offset + sizeof(NodeData), keysize);
+
+		if (!keyptr)
+			throw BTreeAccessError{};
+
+		return { { keyptr, keysize }, dataid };
 	}
 };
 
 // ==============================
 
-auto DiskList::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+inline auto DiskList::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	BTreeSearchHelper search(*this, key);
 	return search();
 }
