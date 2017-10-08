@@ -13,6 +13,7 @@
 #include "logger.h"
 
 
+
 namespace hm4{
 namespace disk{
 
@@ -200,19 +201,21 @@ private:
 private:
 	class BTreeAccessError : std::exception{};
 
+	template<bool T>
+	struct NodeResultTag{};
+
 	struct NodeResult{
-		bool		isResult;
-		level_type	node_index;
-		size_type	result_index;
+		bool			isResult;
+
+		// will not fail if level_type is same as size_type
+		union{
+			level_type	node_index;
+			size_type	result_index;
+		};
 
 	public:
-		constexpr static NodeResult result(size_type const result_index){
-			return { true, {}, result_index };
-		}
-
-		constexpr static NodeResult node(level_type const node_index){
-			return { false, node_index, {} };
-		}
+		constexpr NodeResult(NodeResultTag<true>,  size_type  const result_index) : isResult(true),  result_index(result_index){}
+		constexpr NodeResult(NodeResultTag<false>, level_type const node_index  ) : isResult(false), node_index(node_index){}
 	};
 
 	struct NodeValueResult{
@@ -238,7 +241,7 @@ public:
 	std::pair<bool,size_type> operator()(){
 			try{
 				return btreeSearch_();
-			}catch(BTreeAccessError e){
+			}catch(const BTreeAccessError &e){
 				log__("Problem, switch to binary search (1)");
 				return binarySearchFallback_();
 			}
@@ -332,11 +335,11 @@ private:
 
 				log__("\t\tFound at ", node_pos);
 
-				return NodeResult::result(x.dataid);
+				return { NodeResultTag<true>{}, x.dataid };
 			}
 		}while (node_pos < VALUES);
 
-		return NodeResult::node(node_index);
+		return { NodeResultTag<false>{}, node_index };
 	}
 
 	NodeValueResult accessNodeValue_(uint64_t const offsetBE) const{
