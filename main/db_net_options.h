@@ -10,7 +10,7 @@ public:
 	uint16_t	immutable		= 1;
 	std::string	db_path;
 
-	nullptr_t	host			= nullptr;
+	std::nullptr_t	host			= nullptr;
 	uint16_t	port			= 2000;
 	uint32_t	timeout			= 30;
 
@@ -47,7 +47,7 @@ private:
 
 	using OptionsArray = std::array<OptPair, ARRAY_SIZE>;
 
-	constexpr static OptionsArray options{
+	constexpr static OptionsArray options{{
 		OptPair{ "immutable",		Option::immutable,		"1",	"Start immutable server (1/0)"		},
 		OptPair{ "db_path",		Option::db_path,  	    	"-",	"Path to database"			},
 
@@ -57,7 +57,7 @@ private:
 
 		OptPair{ "max_clients",		Option::max_clients,		"512",	"Max Clients"				},
 		OptPair{ "max_memlist_size",	Option::max_memlist_size,	"100",	"Max size of memlist in MB"		}
-	};
+	}};
 
 private:
 	void assignOption_(const Option opt, const StringRef &value){
@@ -101,7 +101,7 @@ private:
 		param = value;
 	}
 
-	static void assign_(nullptr_t, const StringRef &){
+	static void assign_(std::nullptr_t, const StringRef &){
 		/* nada */
 	}
 

@@ -1,3 +1,5 @@
+MYCC		= clang++ -fsanitize=address
+MYCC		= clang++ -fsanitize=memory
 MYCC		= clang++
 MYCC		= g++
 

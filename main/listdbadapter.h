@@ -102,7 +102,7 @@ public:
 
 private:
 	template<typename T>
-	static T my_clamp__(const T &val, const T &min, const T &max){
+	constexpr static T my_clamp__(T const val, T const min, T const max){
 		return val < min ? min : val > max ? max : val;
 	}
 

@@ -79,7 +79,7 @@ private:
 
 private:
 	template<typename T>
-	static T my_max__(const T &val, const T &min){
+	constexpr static T my_max__(T const val, T const min){
 		// using std::max will result in link error,
 		// because it returns reference
 		return val > min ? val : min;

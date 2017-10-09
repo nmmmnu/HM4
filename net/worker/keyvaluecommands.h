@@ -37,7 +37,7 @@ public:
 
 	using CommandsArray = std::array<CmdPair, ARRAY_SIZE>;
 
-	constexpr static CommandsArray commands{
+	constexpr static CommandsArray commands{{
 		CmdPair{ "exit",	Command::EXIT		}, CmdPair{ "EXIT",	Command::EXIT		},
 		CmdPair{ "shutdown",	Command::SHUTDOWN	}, CmdPair{ "SHUTDOWN",	Command::SHUTDOWN	},
 
@@ -52,7 +52,7 @@ public:
 		CmdPair{ "setex",	Command::SETEX		}, CmdPair{ "SETEX",	Command::SETEX		},
 
 		CmdPair{ "del",		Command::DEL		}, CmdPair{ "DEL",	Command::DEL		}
-	};
+	}};
 };
 
 
