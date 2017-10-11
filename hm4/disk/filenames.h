@@ -15,7 +15,7 @@ namespace file_ext{
 } // namespace
 
 
-inline std::string filenameMeta(const StringRef &filename){
+inline std::string filenameMeta(std::string filename){
 	return filename;
 }
 

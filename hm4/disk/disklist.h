@@ -29,7 +29,7 @@ public:
 	// MMAPFile-s will be closed automatically
 	// ~DiskList() = default;
 
-	bool open(const std::string &filename, MMAPFile::Advice advice = DEFAULT_ADVICE);
+	bool open(const StringRef &filename, MMAPFile::Advice advice = DEFAULT_ADVICE);
 	void close();
 
 	operator bool(){

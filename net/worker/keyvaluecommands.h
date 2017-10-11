@@ -1,7 +1,4 @@
-#include "stringref.h"
-
-#include <cstdint>
-#include <array>
+#include "stringmap.h"
 
 namespace net{
 namespace worker{
@@ -9,6 +6,8 @@ namespace worker{
 struct RedisCommands{
 public:
 	enum class Command : uint8_t{
+		UNKNOWN		,
+
 		EXIT		,
 		SHUTDOWN	,
 
@@ -23,36 +22,30 @@ public:
 		DEL
 	};
 
-	struct CmdPair{
-		StringRef	str;
-		Command		cmd;
-
-		bool operator == (const StringRef &s) const{
-			return str == s;
-		}
-	};
 
 public:
-	constexpr static size_t ARRAY_SIZE = 20;
+	constexpr static size_t BUCKETS		= 133;
 
-	using CommandsArray = std::array<CmdPair, ARRAY_SIZE>;
+	using Map = StringMap<Command, BUCKETS, Command::UNKNOWN>;
 
-	constexpr static CommandsArray commands{{
-		CmdPair{ "exit",	Command::EXIT		}, CmdPair{ "EXIT",	Command::EXIT		},
-		CmdPair{ "shutdown",	Command::SHUTDOWN	}, CmdPair{ "SHUTDOWN",	Command::SHUTDOWN	},
+	constexpr static Map commands = {
+		{ "exit",	Command::EXIT		}, { "EXIT",	Command::EXIT		},
+		{ "shutdown",	Command::SHUTDOWN	}, { "SHUTDOWN", Command::SHUTDOWN	},
 
-		CmdPair{ "info",	Command::INFO		}, CmdPair{ "INFO",	Command::INFO		},
-		CmdPair{ "save",	Command::REFRESH	}, CmdPair{ "SAVE",	Command::REFRESH	},
-		CmdPair{ "bgsave",	Command::REFRESH	}, CmdPair{ "BGSAVE",	Command::REFRESH	},
+		{ "info",	Command::INFO		}, { "INFO",	Command::INFO		},
+		{ "save",	Command::REFRESH	}, { "SAVE",	Command::REFRESH	},
+		{ "bgsave",	Command::REFRESH	}, { "BGSAVE",	Command::REFRESH	},
 
-		CmdPair{ "get",		Command::GET		}, CmdPair{ "GET",	Command::GET		},
-		CmdPair{ "hgetall",	Command::GETALL		}, CmdPair{ "HGETALL",	Command::GETALL		},
+		{ "get",	Command::GET		}, { "GET",	Command::GET		},
+		{ "hgetall",	Command::GETALL		}, { "HGETALL",	Command::GETALL		},
 
-		CmdPair{ "set",		Command::SET		}, CmdPair{ "SET",	Command::SET		},
-		CmdPair{ "setex",	Command::SETEX		}, CmdPair{ "SETEX",	Command::SETEX		},
+		{ "set",	Command::SET		}, { "SET",	Command::SET		},
+		{ "setex",	Command::SETEX		}, { "SETEX",	Command::SETEX		},
 
-		CmdPair{ "del",		Command::DEL		}, CmdPair{ "DEL",	Command::DEL		}
-	}};
+		{ "del",	Command::DEL		}, { "DEL",	Command::DEL		}
+	};
+
+	static_assert( ! commands.collisions(), "Collision, change bucket number" );
 };
 
 

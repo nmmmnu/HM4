@@ -46,19 +46,19 @@ public:
 
 		// fetch command
 
-		const auto &cmd = protocol_.getParams().front();
+		const auto &str = protocol_.getParams().front();
 
 		const auto &commands = RedisCommands::commands;
 
-		const auto &it = std::find(commands.begin(), commands.end(), cmd);
+		const auto &cmd = commands[str];
 
 		// ERROR
 
-		if (it == commands.end())
+		if (commands.isZero(cmd))
 			return err_NotImplemented_();
 
 		// EXEC
-		return executeCommand_(it->cmd);
+		return executeCommand_(cmd);
 	}
 
 private:

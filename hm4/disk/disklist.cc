@@ -21,7 +21,7 @@ constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
 // ==============================
 
-bool DiskList::open(const std::string &filename, MMAPFile::Advice advice){
+bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
 	metadata_.open(filenameMeta(filename));
 
 	if (metadata_ == false)

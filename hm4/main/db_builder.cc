@@ -66,7 +66,7 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 	size_t i = 0;
 
 	while(reader){
-		std::string line = reader.getLine();
+		const std::string &line = reader.getLine();
 
 		StringTokenizer tok{ line };
 
