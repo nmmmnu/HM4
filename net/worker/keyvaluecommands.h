@@ -22,12 +22,12 @@ public:
 		DEL
 	};
 
-
-public:
+private:
 	constexpr static size_t BUCKETS		= 133;
 
 	using Map = StringMap<Command, BUCKETS, Command::UNKNOWN>;
 
+public:
 	constexpr static Map commands = {
 		{ "exit",	Command::EXIT		}, { "EXIT",	Command::EXIT		},
 		{ "shutdown",	Command::SHUTDOWN	}, { "SHUTDOWN", Command::SHUTDOWN	},
@@ -45,7 +45,7 @@ public:
 		{ "del",	Command::DEL		}, { "DEL",	Command::DEL		}
 	};
 
-	static_assert( ! commands.collisions(), "Collision, change bucket number" );
+	static_assert( commands, "Collision, change number of buckets to something else" );
 };
 
 

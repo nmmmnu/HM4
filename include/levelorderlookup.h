@@ -19,10 +19,10 @@ public:
 private:
 	constexpr static size_type SIZE = (1 << LEVELS) - 1;
 
-	using MyFactory = LevelOrderLookupFactory<level_type, LEVELS, size_type, SIZE>;
-
 public:
 	constexpr LevelOrderLookup() : value(){
+		using MyFactory = LevelOrderLookupFactory<level_type, LEVELS, size_type, SIZE>;
+
 		MyFactory::build(value);
 	}
 

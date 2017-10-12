@@ -5,10 +5,10 @@
 
 #include <initializer_list>
 
-template<typename T, uint32_t SIZE, T ZERO>
+template<typename T, uint32_t SIZE, T EMPTY>
 class StringMap{
 public:
-	using size_type = uint32_t;
+	using items_size_type = size_t;
 
 	struct Pair{
 		const char	*key;
@@ -16,15 +16,10 @@ public:
 	};
 
 	constexpr StringMap(const std::initializer_list<Pair>& list){
-		for (auto &x : values)
-			x = ZERO;
+		clear_();
 
 		for(const Pair &p : list)
 			push_(p.key, p.value);
-	}
-
-	constexpr bool collisions() const{
-		return collisions_;
 	}
 
 	constexpr const T &operator[](const StringRef &key) const{
@@ -33,23 +28,46 @@ public:
 		return values[bucket];
 	}
 
-	constexpr static bool isZero(const T &a){
-		return a == ZERO;
+	constexpr auto size(){
+		return size_;
+	}
+
+	constexpr operator bool() const{
+		size_t size = 0;
+
+		for (const auto &x : values)
+			if (x != EMPTY)
+				++size;
+
+		return size == size_;
+	}
+
+
+	// dangerous to be constexpr
+	static bool isEmpty(const T &a){
+		return a == EMPTY;
 	}
 
 private:
+	constexpr void clear_(){
+		return fill_(EMPTY);
+	}
+
+	constexpr void fill_(const T &value){
+		for (auto &x : values)
+			x = value;
+	}
+
 	constexpr void push_(const StringRef &key, const T &value){
 		auto const bucket = bucket__(key);
 
 		auto &element = values[bucket];
 
-		if (element != ZERO)
-			collisions_ = true;
-
 		element = value;
+		++size_;
 	}
 
-	constexpr static size_type bucket__(const StringRef &key){
+	constexpr static uint32_t bucket__(const StringRef &key){
 		return hash__(key) % SIZE;
 	}
 
@@ -66,8 +84,8 @@ private:
 	}
 
 private:
-	bool	collisions_	= false;
-	T	values[SIZE]	= {};
+	items_size_type	size_		= 0;
+	T		values[SIZE]	= {};
 };
 
 #endif

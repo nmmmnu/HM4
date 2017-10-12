@@ -54,7 +54,7 @@ public:
 
 		// ERROR
 
-		if (commands.isZero(cmd))
+		if (commands.isEmpty(cmd))
 			return err_NotImplemented_();
 
 		// EXEC
