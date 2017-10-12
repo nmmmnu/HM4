@@ -192,10 +192,6 @@ constexpr StringRef operator "" _sr(const char *name, size_t const size){
 	return StringRef{ name, size };
 }
 
-constexpr auto operator "" _srh(const char *name, size_t const size){
-	return StringRef{ name, size }.hash();
-}
-
 #endif
 
 // ==================================

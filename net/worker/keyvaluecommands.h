@@ -24,36 +24,36 @@ public:
 
 	constexpr static Command get(const StringRef &cmd){
 		switch(cmd.hash()){
-		case "exit"_srh		:
-		case "EXIT"_srh		: return Command::EXIT		;
+		case "exit"_sr.hash()		:
+		case "EXIT"_sr.hash()		: return Command::EXIT		;
 
-		case "shutdown"_srh	:
-		case "SHUTDOWN"_srh	: return Command::SHUTDOWN	;
+		case "shutdown"_sr.hash()	:
+		case "SHUTDOWN"_sr.hash()	: return Command::SHUTDOWN	;
 
-		case "info"_srh		:
-		case "INFO"_srh		: return Command::INFO		;
+		case "info"_sr.hash()		:
+		case "INFO"_sr.hash()		: return Command::INFO		;
 
-		case "save"_srh		:
-		case "SAVE"_srh		:
-		case "bgsave"_srh	:
-		case "BGSAVE"_srh	: return Command::REFRESH	;
+		case "save"_sr.hash()		:
+		case "SAVE"_sr.hash()		:
+		case "bgsave"_sr.hash()		:
+		case "BGSAVE"_sr.hash()		: return Command::REFRESH	;
 
-		case "get"_srh		:
-		case "GET"_srh		: return Command::GET		;
+		case "get"_sr.hash()		:
+		case "GET"_sr.hash()		: return Command::GET		;
 
-		case "hgetall"_srh	:
-		case "HGETALL"_srh	: return Command::GETALL	;
+		case "hgetall"_sr.hash()	:
+		case "HGETALL"_sr.hash()	: return Command::GETALL	;
 
-		case "set"_srh		:
-		case "SET"_srh		: return Command::SET		;
+		case "set"_sr.hash()		:
+		case "SET"_sr.hash()		: return Command::SET		;
 
-		case "setex"_srh	:
-		case "SETEX"_srh	: return Command::SETEX		;
+		case "setex"_sr.hash()			:
+		case "SETEX"_sr.hash()		: return Command::SETEX		;
 
-		case "del"_srh		:
-		case "DEL"_srh		: return Command::DEL		;
+		case "del"_sr.hash()		:
+		case "DEL"_sr.hash()		: return Command::DEL		;
 
-		default			: return Command::UNKNOWN	;
+		default				: return Command::UNKNOWN	;
 		}
 	}
 };

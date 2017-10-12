@@ -19,17 +19,17 @@ public:
 public:
 	void operator()(const StringRef &name, const StringRef &value){
 		switch( name.hash() ){
-		case "immutable"_srh		: return assign_(immutable,		value);
-		case "db_path"_srh		: return assign_(db_path,  	    	value);
+		case "immutable"_sr.hash()		: return assign_(immutable,		value);
+		case "db_path"_sr.hash()		: return assign_(db_path,  	    	value);
 
-		case "host"_srh			: return assign_(host,			value);
-		case "port"_srh			: return assign_(port,			value);
-		case "timeout"_srh		: return assign_(timeout,		value);
+		case "host"_sr.hash()			: return assign_(host,			value);
+		case "port"_sr.hash()			: return assign_(port,			value);
+		case "timeout"_sr.hash()		: return assign_(timeout,		value);
 
-		case "max_clients"_srh		: return assign_(max_clients,		value);
-		case "max_memlist_size"_srh	: return assign_(max_memlist_size,	value);
+		case "max_clients"_sr.hash()		: return assign_(max_clients,		value);
+		case "max_memlist_size"_sr.hash()	: return assign_(max_memlist_size,	value);
 
-		default				: return;
+		default					: return;
 		}
 	}
 
