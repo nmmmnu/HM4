@@ -184,6 +184,20 @@ inline bool operator <(const std::string &s, const StringRef &sr){
 	return sr.compare(s) >= 0;
 }
 
+// user defined literals
+
+#ifdef __cpp_user_defined_literals
+
+constexpr StringRef operator "" _sr(const char *name, size_t const size){
+	return StringRef{ name, size };
+}
+
+constexpr auto operator "" _srh(const char *name, size_t const size){
+	return StringRef{ name, size }.hash();
+}
+
+#endif
+
 // ==================================
 // ==================================
 // ==================================

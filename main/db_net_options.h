@@ -16,25 +16,20 @@ public:
 	uint32_t	max_clients		= 512;
 	size_t		max_memlist_size	= 100;
 
-private:
-	constexpr static auto h_(const StringRef &name){
-		return name.hash();
-	}
-
 public:
 	void operator()(const StringRef &name, const StringRef &value){
-		switch( h_(name) ){
-		case h_("immutable"		)	: return assign_(immutable,		value);
-		case h_("db_path"		)	: return assign_(db_path,  	    	value);
+		switch( name.hash() ){
+		case "immutable"_srh		: return assign_(immutable,		value);
+		case "db_path"_srh		: return assign_(db_path,  	    	value);
 
-		case h_("host"			)	: return assign_(host,			value);
-		case h_("port"			)	: return assign_(port,			value);
-		case h_("timeout"		)	: return assign_(timeout,		value);
+		case "host"_srh			: return assign_(host,			value);
+		case "port"_srh			: return assign_(port,			value);
+		case "timeout"_srh		: return assign_(timeout,		value);
 
-		case h_("max_clients"		)	: return assign_(max_clients,		value);
-		case h_("max_memlist_size"	)	: return assign_(max_memlist_size,	value);
+		case "max_clients"_srh		: return assign_(max_clients,		value);
+		case "max_memlist_size"_srh	: return assign_(max_memlist_size,	value);
 
-		default							: return;
+		default				: return;
 		}
 	}
 

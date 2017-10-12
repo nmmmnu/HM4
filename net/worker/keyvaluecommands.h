@@ -22,44 +22,38 @@ public:
 		DEL
 	};
 
-private:
-	constexpr static auto h_(const StringRef &name){
-		return name.hash();
-	}
-
-public:
 	constexpr static Command get(const StringRef &cmd){
 		switch(cmd.hash()){
-		case h_("exit"		)	:
-		case h_("EXIT"		)	: return Command::EXIT		;
+		case "exit"_srh		:
+		case "EXIT"_srh		: return Command::EXIT		;
 
-		case h_("shutdown"	)	:
-		case h_("SHUTDOWN"	)	: return Command::SHUTDOWN	;
+		case "shutdown"_srh	:
+		case "SHUTDOWN"_srh	: return Command::SHUTDOWN	;
 
-		case h_("info"		)	:
-		case h_("INFO"		)	: return Command::INFO		;
+		case "info"_srh		:
+		case "INFO"_srh		: return Command::INFO		;
 
-		case h_("save"		)	:
-		case h_("SAVE"		)	:
-		case h_("bgsave"	)	:
-		case h_("BGSAVE"	)	: return Command::REFRESH	;
+		case "save"_srh		:
+		case "SAVE"_srh		:
+		case "bgsave"_srh	:
+		case "BGSAVE"_srh	: return Command::REFRESH	;
 
-		case h_("get"		)	:
-		case h_("GET"		)	: return Command::GET		;
+		case "get"_srh		:
+		case "GET"_srh		: return Command::GET		;
 
-		case h_("hgetall"	)	:
-		case h_("HGETALL"	)	: return Command::GETALL	;
+		case "hgetall"_srh	:
+		case "HGETALL"_srh	: return Command::GETALL	;
 
-		case h_("set"		)	:
-		case h_("SET"		)	: return Command::SET		;
+		case "set"_srh		:
+		case "SET"_srh		: return Command::SET		;
 
-		case h_("setex"		)	:
-		case h_("SETEX"		)	: return Command::SETEX		;
+		case "setex"_srh	:
+		case "SETEX"_srh	: return Command::SETEX		;
 
-		case h_("del"		)	:
-		case h_("DEL"		)	: return Command::DEL		;
+		case "del"_srh		:
+		case "DEL"_srh		: return Command::DEL		;
 
-		default				: return Command::UNKNOWN	;
+		default			: return Command::UNKNOWN	;
 		}
 	}
 };
