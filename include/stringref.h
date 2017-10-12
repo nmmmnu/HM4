@@ -124,7 +124,24 @@ public:
 		return data();
 	}
 
-	constexpr uint32_t hash() const noexcept;
+public:
+	// HASH CHAR * HELPERS
+
+	constexpr static uint32_t hash(const char* data, size_t const size) noexcept;
+
+	constexpr static auto hash(const StringRef &data) noexcept{
+		return hash(data.data(), data.size() );
+	}
+	
+	constexpr static auto hash(const char* data) noexcept{
+		return hash(data, strlen__(data) );
+	}
+
+	// HASH
+
+	constexpr auto hash() const noexcept{
+		return hash(*this);
+	}
 
 public:
 	// CHAR * HELPERS
@@ -209,18 +226,15 @@ inline StringRef::StringRef(const std::string &s) :
 		size_(s.size()),
 		data_(s.data()){}
 
-
 // ==================================
+// HASH HELPERS
 // ==================================
-// ==================================
 
-constexpr inline uint32_t StringRef::hash() const noexcept{
-	constexpr uint32_t djb_start = 5381;
+constexpr uint32_t StringRef::hash(const char* data, size_t const size) noexcept{
+	uint32_t hash = 5381;
 
-	auto hash = djb_start;
-
-	for(const char &c : *this)
-		hash = ((hash << 5) + hash) + c;
+	for(const char *c = data; c < data + size; ++c)
+		hash = ((hash << 5) + hash) + *c;
 
 	return hash;
 }
