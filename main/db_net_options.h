@@ -17,54 +17,24 @@ public:
 	size_t		max_memlist_size	= 100;
 
 private:
-	enum class Option{
-		NONE			,
-
-		immutable		,
-		db_path   	    	,
-
-		host			,
-		port			,
-		timeout			,
-
-		max_clients		,
-		max_memlist_size
-	};
-
-	constexpr static size_t BUCKETS		= 38;
-
-	using OptionsMap = StringMap<Option, BUCKETS, Option::NONE>;
-
-	constexpr static OptionsMap map = {
-			{ "immutable",		Option::immutable		},
-                        { "db_path",		Option::db_path			},
-
-                        { "host",		Option::host			},
-                        { "port",		Option::port			},
-                        { "timeout",		Option::timeout			},
-
-                        { "max_clients",	Option::max_clients		},
-                        { "max_memlist_size",	Option::max_memlist_size	}
-	};
-
-	static_assert( map, "Collision, change number of buckets to something else" );
+	constexpr static auto h_(const StringRef &name){
+		return name.hash();
+	}
 
 public:
 	void operator()(const StringRef &name, const StringRef &value){
-		const auto opt = map[name];
+		switch( h_(name) ){
+		case h_("immutable"		)	: return assign_(immutable,		value);
+		case h_("db_path"		)	: return assign_(db_path,  	    	value);
 
-		switch(opt){
-		case Option::immutable		: return assign_(immutable,		value);
-		case Option::db_path		: return assign_(db_path,  	    	value);
+		case h_("host"			)	: return assign_(host,			value);
+		case h_("port"			)	: return assign_(port,			value);
+		case h_("timeout"		)	: return assign_(timeout,		value);
 
-		case Option::host		: return assign_(host,			value);
-		case Option::port		: return assign_(port,			value);
-		case Option::timeout		: return assign_(timeout,		value);
+		case h_("max_clients"		)	: return assign_(max_clients,		value);
+		case h_("max_memlist_size"	)	: return assign_(max_memlist_size,	value);
 
-		case Option::max_clients	: return assign_(max_clients,		value);
-		case Option::max_memlist_size	: return assign_(max_memlist_size,	value);
-
-		default				: return;
+		default							: return;
 		}
 	}
 
@@ -79,6 +49,7 @@ public:
 		print__("max_clients",		"512",	"Max Clients"				);
 		print__("max_memlist_size",	"100",	"Max size of memlist in MB"		);
 	}
+
 
 private:
 	template<class T>
@@ -109,6 +80,4 @@ private:
 		;
 	}
 };
-
-constexpr MyOptions::OptionsMap MyOptions::map;
 

@@ -68,19 +68,7 @@ private:
 	}
 
 	constexpr static uint32_t bucket__(const StringRef &key){
-		return hash__(key) % SIZE;
-	}
-
-private:
-	constexpr static uint32_t hash__(const StringRef &key){
-		constexpr uint32_t djb_start = 5381;
-
-		auto hash = djb_start;
-
-		for(const char &c : key)
-			hash = ((hash << 5) + hash) + c;
-
-		return hash;
+		return key.hash() % SIZE;
 	}
 
 private:

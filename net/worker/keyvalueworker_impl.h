@@ -48,14 +48,7 @@ public:
 
 		const auto &str = protocol_.getParams().front();
 
-		const auto &commands = RedisCommands::commands;
-
-		const auto &cmd = commands[str];
-
-		// ERROR
-
-		if (commands.isEmpty(cmd))
-			return err_NotImplemented_();
+		const auto &cmd = RedisCommands::get(str);
 
 		// EXEC
 		return executeCommand_(cmd);
@@ -74,6 +67,7 @@ private:
 
 		case Command::REFRESH	: return do_refresh();
 		case Command::INFO	: return do_info();
+
 		case Command::GET	: return do_get();
 		case Command::GETALL	: return do_getall();
 

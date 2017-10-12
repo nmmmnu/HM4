@@ -23,31 +23,46 @@ public:
 	};
 
 private:
-	constexpr static size_t BUCKETS		= 133;
-
-	using Map = StringMap<Command, BUCKETS, Command::UNKNOWN>;
+	constexpr static auto h_(const StringRef &name){
+		return name.hash();
+	}
 
 public:
-	constexpr static Map commands = {
-		{ "exit",	Command::EXIT		}, { "EXIT",	Command::EXIT		},
-		{ "shutdown",	Command::SHUTDOWN	}, { "SHUTDOWN", Command::SHUTDOWN	},
+	constexpr static Command get(const StringRef &cmd){
+		switch(cmd.hash()){
+		case h_("exit"		)	:
+		case h_("EXIT"		)	: return Command::EXIT		;
 
-		{ "info",	Command::INFO		}, { "INFO",	Command::INFO		},
-		{ "save",	Command::REFRESH	}, { "SAVE",	Command::REFRESH	},
-		{ "bgsave",	Command::REFRESH	}, { "BGSAVE",	Command::REFRESH	},
+		case h_("shutdown"	)	:
+		case h_("SHUTDOWN"	)	: return Command::SHUTDOWN	;
 
-		{ "get",	Command::GET		}, { "GET",	Command::GET		},
-		{ "hgetall",	Command::GETALL		}, { "HGETALL",	Command::GETALL		},
+		case h_("info"		)	:
+		case h_("INFO"		)	: return Command::INFO		;
 
-		{ "set",	Command::SET		}, { "SET",	Command::SET		},
-		{ "setex",	Command::SETEX		}, { "SETEX",	Command::SETEX		},
+		case h_("save"		)	:
+		case h_("SAVE"		)	:
+		case h_("bgsave"	)	:
+		case h_("BGSAVE"	)	: return Command::REFRESH	;
 
-		{ "del",	Command::DEL		}, { "DEL",	Command::DEL		}
-	};
+		case h_("get"		)	:
+		case h_("GET"		)	: return Command::GET		;
 
-	static_assert( commands, "Collision, change number of buckets to something else" );
+		case h_("hgetall"	)	:
+		case h_("HGETALL"	)	: return Command::GETALL	;
+
+		case h_("set"		)	:
+		case h_("SET"		)	: return Command::SET		;
+
+		case h_("setex"		)	:
+		case h_("SETEX"		)	: return Command::SETEX		;
+
+		case h_("del"		)	:
+		case h_("DEL"		)	: return Command::DEL		;
+
+		default				: return Command::UNKNOWN	;
+		}
+	}
 };
-
 
 } // namespace worker
 } // namespace

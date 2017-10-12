@@ -124,6 +124,8 @@ public:
 		return data();
 	}
 
+	constexpr uint32_t hash() const noexcept;
+
 public:
 	// CHAR * HELPERS
 
@@ -196,6 +198,22 @@ constexpr inline StringRef::StringRef(const char *data) :
 inline StringRef::StringRef(const std::string &s) :
 		size_(s.size()),
 		data_(s.data()){}
+
+
+// ==================================
+// ==================================
+// ==================================
+
+constexpr inline uint32_t StringRef::hash() const noexcept{
+	constexpr uint32_t djb_start = 5381;
+
+	auto hash = djb_start;
+
+	for(const char &c : *this)
+		hash = ((hash << 5) + hash) + c;
+
+	return hash;
+}
 
 // ==================================
 // CHAR * HELPERS
