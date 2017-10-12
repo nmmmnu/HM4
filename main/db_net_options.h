@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <array>
 #include <iostream>
 #include <iomanip>
 
@@ -19,6 +18,8 @@ public:
 
 private:
 	enum class Option{
+		NONE			,
+
 		immutable		,
 		db_path   	    	,
 
@@ -30,37 +31,28 @@ private:
 		max_memlist_size
 	};
 
-private:
-	struct OptPair{
-		StringRef	str;
-		Option		opt;
-		const char	*def;
-		const char	*descr;
+	constexpr static size_t BUCKETS		= 38;
 
-		bool operator == (const StringRef &s) const{
-			return str == s;
-		}
+	using OptionsMap = StringMap<Option, BUCKETS, Option::NONE>;
+
+	constexpr static OptionsMap map = {
+			{ "immutable",		Option::immutable		},
+                        { "db_path",		Option::db_path			},
+
+                        { "host",		Option::host			},
+                        { "port",		Option::port			},
+                        { "timeout",		Option::timeout			},
+
+                        { "max_clients",	Option::max_clients		},
+                        { "max_memlist_size",	Option::max_memlist_size	}
 	};
 
-private:
-	constexpr static size_t ARRAY_SIZE = 7;
+	static_assert( map, "Collision, change number of buckets to something else" );
 
-	using OptionsArray = std::array<OptPair, ARRAY_SIZE>;
+public:
+	void operator()(const StringRef &name, const StringRef &value){
+		const auto opt = map[name];
 
-	constexpr static OptionsArray options{{
-		OptPair{ "immutable",		Option::immutable,		"1",	"Start immutable server (1/0)"		},
-		OptPair{ "db_path",		Option::db_path,  	    	"-",	"Path to database"			},
-
-		OptPair{ "host",		Option::host,			"-",	"TCP host to listen (not working)"	},
-		OptPair{ "port",		Option::port,			"2000",	"TCP port to listen"			},
-		OptPair{ "timeout",		Option::timeout,		"30",	"Connection timeout in seconds"		},
-
-		OptPair{ "max_clients",		Option::max_clients,		"512",	"Max Clients"				},
-		OptPair{ "max_memlist_size",	Option::max_memlist_size,	"100",	"Max size of memlist in MB"		}
-	}};
-
-private:
-	void assignOption_(const Option opt, const StringRef &value){
 		switch(opt){
 		case Option::immutable		: return assign_(immutable,		value);
 		case Option::db_path		: return assign_(db_path,  	    	value);
@@ -71,20 +63,21 @@ private:
 
 		case Option::max_clients	: return assign_(max_clients,		value);
 		case Option::max_memlist_size	: return assign_(max_memlist_size,	value);
+
+		default				: return;
 		}
 	}
 
-public:
-	void operator()(const StringRef &name, const StringRef &value){
-		const auto &it = std::find(options.begin(), options.end(), name);
-
-		if (it != options.end())
-			return assignOption_(it->opt, value);
-	}
-
 	static void print(){
-		for(const auto &o : options)
-			print__(o.str, o.def, o.descr);
+		print__("immutable",		"1",	"Start immutable server (1/0)"		);
+		print__("db_path",		"-",	"Path to database"			);
+
+		print__("host",			"-",	"TCP host to listen (not working)"	);
+		print__("port",			"2000",	"TCP port to listen"			);
+		print__("timeout",		"30",	"Connection timeout in seconds"		);
+
+		print__("max_clients",		"512",	"Max Clients"				);
+		print__("max_memlist_size",	"100",	"Max size of memlist in MB"		);
 	}
 
 private:
@@ -110,11 +103,12 @@ private:
 		std::cout
 			<< '\t'
 			<< std::setw(20) << std::left << name
-			<< std::setw(8) << std::left << def
+			<< std::setw( 8) << std::left << def
 			<< description
 			<< '\n'
 		;
 	}
 };
 
-constexpr MyOptions::OptionsArray MyOptions::options;
+constexpr MyOptions::OptionsMap MyOptions::map;
+
