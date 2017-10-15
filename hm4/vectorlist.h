@@ -9,6 +9,8 @@ namespace hm4{
 
 
 class VectorList : public IList<VectorList, true>{
+	friend class IList;
+
 public:
 	static constexpr size_t		ELEMENT_SIZE		= sizeof(Pair);
 	static constexpr size_type	DEFAULT_REALLOC_COUNT	= 16;
@@ -68,8 +70,6 @@ public:
 	const Pair &operator[](const StringRef &key) const;
 
 private:
-	friend class IList<VectorList, true>;
-
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data);
 

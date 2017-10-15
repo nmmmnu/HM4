@@ -132,8 +132,11 @@ private:
 	bool		sorted_;
 
 private:
-	mutable size_type	tmp_pos		= 0;
-	mutable const PairBlob	*tmp_blob	= nullptr;
+	mutable
+	size_type	tmp_pos		= 0;
+
+	mutable
+	const PairBlob	*tmp_blob	= nullptr;
 
 	// We need to store the Pair,
 	// because operator -> need somewhere Pair to live

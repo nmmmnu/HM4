@@ -19,13 +19,13 @@ public:
 
 // ==============================
 
-template <class T, bool MUTABLE>
+template <class T, bool MU>
 class IList : public IListConf{
 protected:
 	constexpr static size_type PRINT_COUNT	= 10;
 
 public:
-	constexpr static bool MUTABLE_TAG	= MUTABLE;
+	constexpr static bool MUTABLE	= MU;
 
 public:
 	// Immutable Methods

@@ -45,7 +45,6 @@ public:
 		print__("max_memlist_size",	"100",	"Max size of memlist in MB"		);
 	}
 
-
 private:
 	template<class T>
 	static void assign_(T &param, const StringRef &value){

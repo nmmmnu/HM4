@@ -3,7 +3,7 @@
 
 
 struct MockDBAdapter{
-	constexpr static bool IS_MUTABLE = false;
+	constexpr static bool MUTABLE = false;
 
 	// Mock commands
 	std::string info() const{

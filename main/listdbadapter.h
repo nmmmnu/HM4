@@ -12,7 +12,7 @@ public:
 	constexpr static uint16_t MAXIMUM_RESULTS = 1000;
 
 public:
-	constexpr static bool IS_MUTABLE = ! std::is_const<LIST>::value;
+	constexpr static bool MUTABLE = ! std::is_const<LIST>::value;
 
 public:
 	ListDBAdapter(LIST &list, COMMAND &cmd) :
@@ -73,7 +73,7 @@ public:
 
 		ss	<< "Keys (estimated): "	<< list_.size(true)		<< '\n'
 			<< "Size: "		<< list_.bytes()		<< '\n'
-			<< "Mutable: "		<< (IS_MUTABLE ? "Yes" : "No")	<< '\n'
+			<< "Mutable: "		<< (MUTABLE ? "Yes" : "No")	<< '\n'
 		;
 
 		return ss.str();

@@ -6,13 +6,17 @@
 
 #include "dualiterator.h"
 
+#include <type_traits>
+
 
 namespace hm4{
 namespace multi{
 
 
 template <class LIST1, class LIST2=const LIST1, bool ERASE_WITH_TOMBSTONE=false>
-class DualList : public IList<DualList<LIST1, LIST2, ERASE_WITH_TOMBSTONE>, LIST1::MUTABLE_TAG>{
+class DualList : public IList<DualList<LIST1, LIST2, ERASE_WITH_TOMBSTONE>, LIST1::MUTABLE>{
+	friend class IList<DualList<LIST1, LIST2, ERASE_WITH_TOMBSTONE>, LIST1::MUTABLE>;
+
 public:
 	using Iterator		= DualIterator<LIST1, LIST2>;
 
@@ -78,24 +82,19 @@ public:
 	bool erase(const StringRef &key){
 		assert(!key.empty());
 
-		return erase_(key, erase_tag<ERASE_WITH_TOMBSTONE>{});
+		return erase_(key, std::integral_constant<bool, ERASE_WITH_TOMBSTONE>{});
 	}
 
 private:
-	template<bool T>
-	struct erase_tag{};
-
-	bool erase_(const StringRef &key, erase_tag<true>){
+	bool erase_(const StringRef &key, std::true_type){
 		return list1_.insert(Pair::tombstone(key));
 	}
 
-	bool erase_(const StringRef &key, erase_tag<false>){
+	bool erase_(const StringRef &key, std::false_type){
 		return list1_.erase(key);
 	}
 
 private:
-	friend class IList<DualList<LIST1, LIST2, ERASE_WITH_TOMBSTONE>, true>;
-
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){
 		return list1_.insert( std::forward<UPAIR>(data) );

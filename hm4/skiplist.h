@@ -10,6 +10,8 @@ namespace hm4{
 
 
 class SkipList : public IList<SkipList, true>{
+	friend class IList;
+
 public:
 	using height_type = uint8_t;
 
@@ -45,8 +47,6 @@ public:
 	Iterator end() const;
 
 private:
-	friend class IList<SkipList, true>;
-
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data);
 

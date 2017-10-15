@@ -1,7 +1,6 @@
 #include "vectorlist.h"
 
 #include "binarysearch.h"
-#include "arrayref.h"
 
 #define xfree(p)		free(p)
 #define xrealloc(p, size)	realloc(p, (size_t) size)
@@ -26,8 +25,9 @@ VectorList::VectorList(VectorList &&other):
 }
 
 bool VectorList::clear(){
-	for(auto &p : ArrayRef<Pair>{ buffer_, dataCount_ } )
-		p.~Pair();
+//	for(auto &p : ArrayRef<Pair>{ buffer_, dataCount_ } )
+	for(auto it = buffer_; it < buffer_ + dataCount_; ++it)
+		it->~Pair();
 
 	clear_(true);
 

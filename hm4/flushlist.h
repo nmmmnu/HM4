@@ -10,7 +10,10 @@ namespace hm4{
 
 template <class LIST, class FLUSH, class LIST_LOADER = std::nullptr_t>
 class FlushList : public DecoratorList<LIST, FlushList<LIST, FLUSH, LIST_LOADER> >{
-	static_assert(LIST::MUTABLE_TAG, "List must be mutable");
+	friend class IList<FlushList, LIST::MUTABLE>;
+
+	static_assert(LIST::MUTABLE, "List must be mutable");
+
 public:
 	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
 
@@ -37,8 +40,6 @@ public:
 	}
 
 private:
-	friend class IList<FlushList<LIST, FLUSH, LIST_LOADER>, true>;
-
 	template <class UPAIR>
 	bool insertT_(UPAIR &&data){
 		bool const result = list_.insert( std::forward<UPAIR>(data) );
@@ -69,27 +70,23 @@ public:
 
 private:
 	template<typename T>
-	struct loader_tag{};
-
-	template<typename T>
-	bool notifyLoader_(loader_tag<T>){
+	bool notifyLoader_(const T *){
 		log__("Reloading data...");
 		return loader_ && loader_->refresh();
 	}
 
-	static bool notifyLoader_(loader_tag<std::nullptr_t>){
+	static bool notifyLoader_(const std::nullptr_t *){
 		return true;
 	}
 
 	bool notifyLoader_(){
-		return notifyLoader_(loader_tag<LIST_LOADER>{});
+		return notifyLoader_(loader_);
 	}
 
 	bool flush_(){
 		log__("Flushing data...");
 		return flusher_ << list_;
 	}
-
 
 private:
 	LIST		&list_;
