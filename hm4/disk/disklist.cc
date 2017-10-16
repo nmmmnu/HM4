@@ -201,9 +201,6 @@ private:
 private:
 	class BTreeAccessError : std::exception{};
 
-	template<bool T>
-	struct NodeResultTag{};
-
 	struct NodeResult{
 		bool			isResult;
 
@@ -214,8 +211,8 @@ private:
 		};
 
 	public:
-		constexpr NodeResult(NodeResultTag<true>,  size_type  const result_index) : isResult(true),  result_index(result_index){}
-		constexpr NodeResult(NodeResultTag<false>, level_type const node_index  ) : isResult(false), node_index(node_index){}
+		constexpr NodeResult(std::true_type,  size_type  const result_index) : isResult(true),  result_index(result_index){}
+		constexpr NodeResult(std::false_type, level_type const node_index  ) : isResult(false), node_index(node_index){}
 	};
 
 	struct NodeValueResult{
@@ -239,12 +236,12 @@ public:
 	BTreeSearchHelper(const DiskList &list, const StringRef &key) : list_(list), key_(key){}
 
 	std::pair<bool,size_type> operator()(){
-			try{
-				return btreeSearch_();
-			}catch(const BTreeAccessError &e){
-				log__("Problem, switch to binary search (1)");
-				return binarySearchFallback_();
-			}
+		try{
+			return btreeSearch_();
+		}catch(const BTreeAccessError &e){
+			log__("Problem, switch to binary search (1)");
+			return binarySearchFallback_();
+		}
 	}
 
 private:
@@ -335,11 +332,11 @@ private:
 
 				log__("\t\tFound at ", node_pos);
 
-				return { NodeResultTag<true>{}, x.dataid };
+				return { std::true_type{}, x.dataid };
 			}
 		}while (node_pos < VALUES);
 
-		return { NodeResultTag<false>{}, node_index };
+		return { std::false_type{}, node_index };
 	}
 
 	NodeValueResult accessNodeValue_(uint64_t const offsetBE) const{
