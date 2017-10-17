@@ -25,7 +25,6 @@ VectorList::VectorList(VectorList &&other):
 }
 
 bool VectorList::clear(){
-//	for(auto &p : ArrayRef<Pair>{ buffer_, dataCount_ } )
 	for(auto it = buffer_; it < buffer_ + dataCount_; ++it)
 		it->~Pair();
 

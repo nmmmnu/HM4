@@ -37,7 +37,7 @@ public:
 	Iterator lowerBound(const StringRef &key) const;
 
 	Iterator begin() const;
-	Iterator end() const;
+	static constexpr Iterator end();
 
 private:
 	template <class UPAIR>
@@ -63,7 +63,7 @@ class LinkList::Iterator {
 protected:
 	friend class LinkList;
 
-	Iterator(const Node *node) : node_(node){}
+	constexpr Iterator(const Node *node) : node_(node){}
 
 public:
 	Iterator &operator++();
@@ -85,7 +85,7 @@ private:
 
 // ==============================
 
-inline LinkList::Iterator LinkList::lowerBound(const StringRef &key) const{
+inline auto LinkList::lowerBound(const StringRef &key) const -> Iterator{
 	if (key.empty())
 		return begin();
 
@@ -93,11 +93,11 @@ inline LinkList::Iterator LinkList::lowerBound(const StringRef &key) const{
 	return Iterator(node);
 }
 
-inline LinkList::Iterator LinkList::begin() const{
+inline auto LinkList::begin() const -> Iterator{
 	return Iterator(head_);
 }
 
-inline LinkList::Iterator LinkList::end() const{
+inline constexpr auto LinkList::end() -> Iterator{
 	return Iterator(nullptr);
 }
 

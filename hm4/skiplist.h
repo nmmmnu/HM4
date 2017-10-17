@@ -44,7 +44,7 @@ public:
 public:
 	Iterator lowerBound(const StringRef &key) const;
 	Iterator begin() const;
-	Iterator end() const;
+	static constexpr Iterator end();
 
 private:
 	template <class UPAIR>
@@ -88,7 +88,7 @@ private:
 class SkipList::Iterator{
 private:
 	friend class SkipList;
-	Iterator(const Node *node) : node_(node){}
+	constexpr Iterator(const Node *node) : node_(node){}
 
 public:
 	Iterator &operator++();
@@ -110,11 +110,11 @@ private:
 
 // ==============================
 
-inline SkipList::Iterator SkipList::begin() const{
+inline auto SkipList::begin() const -> Iterator{
 	return Iterator(heads_[0]);
 }
 
-inline SkipList::Iterator SkipList::end() const{
+inline constexpr auto SkipList::end() -> Iterator{
 	return Iterator(nullptr);
 }
 
