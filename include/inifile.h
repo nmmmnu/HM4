@@ -32,7 +32,7 @@ bool readINIFile(std::istream &file){
 // ===================================
 
 
-#include "inifile_impl.h"
+#include "inifile.h.cc"
 
 
 #endif

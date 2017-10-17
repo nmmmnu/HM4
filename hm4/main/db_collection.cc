@@ -1,4 +1,4 @@
-#include "db_file_impl.h"
+#include "db_file.h.cc"
 
 #include "multi/collectionlist.h"
 #include "listloader/directorylistloader.h"

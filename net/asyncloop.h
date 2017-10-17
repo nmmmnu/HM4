@@ -104,7 +104,7 @@ private:
 
 // ===========================
 
-#include "asyncloop_impl.h"
+#include "asyncloop.h.cc"
 
 #endif
 

@@ -26,6 +26,6 @@ private:
 
 // ==================================
 
-#include "keyvalueworker_impl.h"
+#include "keyvalueworker.h.cc"
 
 #endif

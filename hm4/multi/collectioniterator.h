@@ -22,12 +22,8 @@ private:
 	CollectionIterator(const CONTAINER &list, const T &iteratorParam, std::nullptr_t);
 
 public:
-	template<class CONTAINER>
-	CollectionIterator(const CONTAINER &list, const begin_iterator &tag) :
-					CollectionIterator(list, tag, nullptr){}
-
-	template<class CONTAINER>
-	CollectionIterator(const CONTAINER &list, const end_iterator &tag) :
+	template<class CONTAINER, bool B>
+	CollectionIterator(const CONTAINER &list, const base_iterator<B> &tag) :
 					CollectionIterator(list, tag, nullptr){}
 
 	template<class CONTAINER>
@@ -78,7 +74,7 @@ private:
 } // namespace
 
 
-#include "collectioniterator_impl.h"
+#include "collectioniterator.h.cc"
 
 
 #endif

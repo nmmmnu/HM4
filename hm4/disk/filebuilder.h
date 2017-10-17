@@ -34,7 +34,7 @@ private:
 } // namespace hm4
 
 
-#include "filebuilder_impl.h"
+#include "filebuilder.h.cc"
 
 #endif
 

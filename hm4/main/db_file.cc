@@ -1,4 +1,4 @@
-#include "db_file_impl.h"
+#include "db_file.h.cc"
 
 #include "disk/disklist.h"
 

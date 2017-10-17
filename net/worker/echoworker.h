@@ -39,6 +39,6 @@ private:
 
 // ==================================
 
-#include "echoworker_impl.h"
+#include "echoworker.h.cc"
 
 #endif

@@ -58,7 +58,7 @@ private:
 } // namespace
 
 
-#include "btreeindexbuilder_impl.h"
+#include "btreeindexbuilder.h.cc"
 
 #endif
 

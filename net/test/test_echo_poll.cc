@@ -2,5 +2,5 @@
 
 using MySelector	= net::selector::PollSelector;
 
-#include "test_echo_worker_impl.h"
+#include "test_echo_worker.h.cc"
 

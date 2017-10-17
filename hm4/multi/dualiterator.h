@@ -16,11 +16,8 @@ private:
 	using IteratorPair2	= impl_::IteratorPair_<TABLE2>;
 
 public:
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const begin_iterator &tag) :
-					it1_(table1, tag),
-					it2_(table2, tag){}
-
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const end_iterator &tag) :
+	template<bool B>
+	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const base_iterator<B> &tag) :
 					it1_(table1, tag),
 					it2_(table2, tag){}
 
@@ -54,7 +51,7 @@ private:
 } // namespace
 
 
-#include "dualiterator_impl.h"
+#include "dualiterator.h.cc"
 
 
 #endif

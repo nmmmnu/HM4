@@ -13,7 +13,7 @@ std::pair<bool,SIZE> binarySearch(const ARRAY &list,
 				const COMP &comp,
 				SIZE minimum_distance = 5);
 
-#include "binarysearch_impl.h"
+#include "binarysearch.h.cc"
 
 #endif
 

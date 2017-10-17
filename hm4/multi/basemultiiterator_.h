@@ -3,6 +3,8 @@
 
 #include "pair.h"
 
+#include <type_traits>
+
 namespace hm4{
 namespace multi{
 
@@ -11,8 +13,11 @@ namespace impl_{
 
 
 	struct MultiIteratorTags_{
-		struct begin_iterator{};
-		struct end_iterator{};
+		template<bool B>
+		using base_iterator  = std::integral_constant<bool, B>;
+
+		using begin_iterator = std::true_type;
+		using end_iterator   = std::false_type;
 	};
 
 	// ===================================
@@ -27,13 +32,13 @@ namespace impl_{
 						cur(std::move(cur)),
 						end(std::move(end)){}
 
-		IteratorPair_(const TABLE &table, const begin_iterator&) :
+		IteratorPair_(const TABLE &table, begin_iterator) :
 						IteratorPair_(
 							table.begin(),
 							table.end()
 						){}
 
-		IteratorPair_(const TABLE &table, const end_iterator&) :
+		IteratorPair_(const TABLE &table, end_iterator) :
 						IteratorPair_(
 							table.end(),
 							table.end()

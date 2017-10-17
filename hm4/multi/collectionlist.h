@@ -61,7 +61,7 @@ private:
 
 // ===================================
 
-#include "collectionlist_impl.h"
+#include "collectionlist.h.cc"
 
 #endif
 
