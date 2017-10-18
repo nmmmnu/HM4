@@ -48,7 +48,7 @@ public:
 
 	StringRef getLine() {
 		while( file_.getline(buffer_, BUFFER_SIZE) ){
-			size_t size = (size_t) file_.gcount() - 1;
+			size_t size = file_.gcount() - 1;
 
 			if ( applyOptions__(options_, buffer_, size) == false )
 				continue;

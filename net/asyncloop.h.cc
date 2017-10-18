@@ -2,6 +2,8 @@
 
 #include "stringref.h"
 
+#include "mynarrow.h"
+
 #include "worker/workerdefs.h"
 
 #include <unistd.h>	// read
@@ -118,7 +120,7 @@ void AsyncLoop<SELECTOR, WORKER>::handleRead_(int const fd){
 	if (size <= 0)
 		return handleSocketOps_(fd, size);
 
-	if (buffer.size() + (size_t) size > conf_maxPacketSize_)
+	if (buffer.size() + narrow<size_t>(size) > conf_maxPacketSize_)
 		return handleDisconnect_(fd, DisconnectStatus::ERROR);
 
 	buffer.push(size, inputBuffer_);

@@ -128,7 +128,7 @@ const PairBlob *DiskList::getAtFD_(size_type const index) const{
 
 	const uint64_t be_ptr = be_array[index];
 
-	size_t const offset = (size_t) be64toh(be_ptr);
+	size_t const offset = be64toh(be_ptr);
 
 	const PairBlob *blob = mData_->as<const PairBlob>(offset);
 
@@ -344,7 +344,7 @@ private:
 
 		// BTree NIL case - can not happen
 
-		const NodeData *nd = mKeys_->as<const NodeData>((size_t) offset);
+		const NodeData *nd = mKeys_->as<const NodeData>(offset);
 
 		if (!nd)
 			throw BTreeAccessError{};
@@ -353,7 +353,7 @@ private:
 		size_type const dataid  = be64toh(nd->dataid);
 
 		// key is just after the NodeData
-		const char *keyptr = mKeys_->as<const char>((size_t) offset + sizeof(NodeData), keysize);
+		const char *keyptr = mKeys_->as<const char>(offset + sizeof(NodeData), keysize);
 
 		if (!keyptr)
 			throw BTreeAccessError{};

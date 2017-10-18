@@ -2,8 +2,9 @@
 #define BLOB_REF_H_
 
 #include <cstddef>	// size_t
-
+#include <cassert>
 #include <type_traits>	// is_pod
+
 
 class BlobRef{
 public:
@@ -75,8 +76,9 @@ public:
 
 	// ambiguous call guard for 0
 	template <class T>
-	const T *as(int const pos = 0, size_t const elements = 1) const noexcept{
-		return pos < 0 ? nullptr : as<T>( (size_t) pos, elements );
+	const T *as(int const pos, size_t const elements = 1) const noexcept{
+		assert(pos == 0);
+		return pos < 0 ? nullptr : as<T>( static_cast<size_t>(pos), elements );
 	}
 
 private:

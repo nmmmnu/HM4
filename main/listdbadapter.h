@@ -80,7 +80,17 @@ public:
 	}
 
 	bool refresh(bool const completeRefresh){
+		return refresh_(completeRefresh, cmd_);
+	}
+
+private:
+	template<class T>
+	bool refresh_(bool const completeRefresh, const T &){
 		return cmd_ && cmd_->command(completeRefresh);
+	}
+
+	bool refresh_(bool const completeRefresh, std::nullptr_t){
+		return false;
 	}
 
 public:
@@ -103,7 +113,13 @@ public:
 private:
 	template<typename T>
 	constexpr static T my_clamp__(T const val, T const min, T const max){
-		return val < min ? min : val > max ? max : val;
+		if (val < min)
+			return min;
+
+		if (val > max)
+			return max;
+
+		return val;
 	}
 
 	static bool samePrefix__(const StringRef &p, const StringRef &s){

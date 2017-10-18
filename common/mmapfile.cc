@@ -26,7 +26,7 @@ bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, 
 
 	off_t size2 = lseek(fd, 0, SEEK_END);
 
-	size_t size = size2 <= 0 ? 0 : (size_t) size2;
+	size_t size = size2 <= 0 ? 0 : size2;
 
 	if (size == 0){
 		::close(fd);
@@ -84,7 +84,7 @@ bool MMAPFile::createFile(const StringRef &filename, size_t const size){
 	if (fd < 0)
 		return false;
 
-	int const result = ftruncate(fd, (off_t) size);
+	int const result = ftruncate(fd, size);
 
 	::close(fd);
 

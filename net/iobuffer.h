@@ -79,7 +79,7 @@ public:
 	}
 
 	// ==================================
-
+/*
 	bool push(ssize_t const len, const char *ptr){
 		return push((size_t) len, ptr);
 	}
@@ -87,7 +87,7 @@ public:
 	bool pop(ssize_t const len){
 		return pop((size_t) len);
 	}
-
+*/
 	// ==================================
 
 	void print() const{

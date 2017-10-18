@@ -45,7 +45,7 @@ namespace redisprotocol_impl_{
 				// at least one character for parameter count
 				return Status::BUFFER_NOT_READ;
 
-			size_t const paramsCount = (size_t) readInt_();
+			size_t const paramsCount = static_cast<size_t>(readInt_());
 
 			params.clear();
 
@@ -117,8 +117,8 @@ namespace redisprotocol_impl_{
 			if (pos + 1 > src.size())
 				return statusPair_(Status::BUFFER_NOT_READ);
 
-			const size_t size = (size_t) readInt_();
-			if (checkParamSize__(size))
+			const size_t size = static_cast<size_t>(readInt_());
+			if (/* size < 0 || */ size > MAX_PARAM_SIZE)
 				return errPair_(Error::PARAM_SIZE);
 
 			{
@@ -157,11 +157,6 @@ namespace redisprotocol_impl_{
 
 		constexpr static std::pair<Status, StringRef> statusPair_(const Status status){
 			return { status, StringRef{} };
-		}
-
-	private:
-		static bool checkParamSize__(size_t const size){
-			return /* size < 0 || */ size > MAX_PARAM_SIZE;
 		}
 
 	private:

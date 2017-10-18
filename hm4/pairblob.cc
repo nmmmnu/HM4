@@ -1,6 +1,7 @@
 #include "pairblob.h"
 
 #include "mytime.h"
+#include "mynarrow.h"
 
 #include <cstdio>
 
@@ -26,8 +27,8 @@ std::unique_ptr<PairBlob> PairBlob::create(
 
 	pair->created	= htobe64(getCreateTime__(created));
 	pair->expires	= htobe32(expires);
-	pair->vallen	= htobe32((uint32_t) vallen);
-	pair->keylen	= htobe16((uint16_t) keylen);
+	pair->vallen	= htobe32(narrow<uint32_t>(vallen));
+	pair->keylen	= htobe16(narrow<uint16_t>(keylen));
 
 	// memcpy so we can switch to blobs later...
 	memcpy(& pair->buffer[0],		key, keylen);
