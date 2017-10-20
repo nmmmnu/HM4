@@ -7,7 +7,6 @@ EXTRA_INCL += -I$(SRC_DIR)
 include Makefile.sub
 
 all:	\
-	$(O)pair.o $(O)pairblob.o	\
+	$(O)pair.o	\
 	$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o
-
 

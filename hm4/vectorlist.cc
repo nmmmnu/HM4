@@ -26,7 +26,7 @@ VectorList::VectorList(VectorList &&other):
 
 bool VectorList::clear(){
 	for(auto it = buffer_; it < buffer_ + dataCount_; ++it)
-		it->~Pair();
+		it->~OPair();
 
 	clear_(true);
 
@@ -34,21 +34,17 @@ bool VectorList::clear(){
 }
 
 inline auto VectorList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
-	// precondition
 	assert(!key.empty());
-	// eo precondition
 
 	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{});
 }
 
-const Pair &VectorList::operator[](const StringRef &key) const{
-	// precondition
+const Pair *VectorList::operator[](const StringRef &key) const{
 	assert(!key.empty());
-	// eo precondition
 
 	const auto x = binarySearch_(key);
 
-	return x.first ? operator[]( x.second ) : Pair::zero();
+	return x.first ? operator[]( x.second ) : nullptr;
 }
 
 auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
@@ -60,31 +56,30 @@ auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
 	return buffer_ + x.second;
 }
 
-template <class UPAIR>
-bool VectorList::insertT_(UPAIR&& newdata){
+bool VectorList::insert(OPair&& newdata){
 	assert(newdata);
 
-	const StringRef &key = newdata.getKey();
+	const StringRef &key = newdata->getKey();
 
 	const auto x = binarySearch_(key);
 
 	if (x.first){
 		// key exists, overwrite, do not shift
 
-		Pair & olddata = buffer_[ x.second ];
+		OPair &olddata = buffer_[ x.second ];
 
 		// check if the data in database is valid
-		if (! newdata.isValid(olddata) ){
+		if (! newdata->isValid(*olddata) ){
 			// newdata will be magically destroyed.
 			return false;
 		}
 
 		dataSize_ = dataSize_
-					- olddata.bytes()
-					+ newdata.bytes();
+					- olddata->bytes()
+					+ newdata->bytes();
 
 		// copy assignment
-		olddata = std::forward<UPAIR>(newdata);
+		olddata = std::move(newdata);
 
 		return true;
 	}
@@ -93,11 +88,11 @@ bool VectorList::insertT_(UPAIR&& newdata){
 	if ( ! shiftR_( x.second ) )
 		return false;
 
-	dataSize_ += newdata.bytes();
+	dataSize_ += newdata->bytes();
 
 	// placement new with copy constructor
 	void *placement = & buffer_[ x.second ];
-	new(placement) Pair(std::forward<UPAIR>(newdata));
+	new(placement) OPair(std::move(newdata));
 
 	return true;
 }
@@ -115,9 +110,9 @@ bool VectorList::erase(const StringRef &key){
 	}
 
 	// proceed with remove
-	Pair & data = buffer_[x.second];
-	dataSize_ -= data.bytes();
-	data.~Pair();
+	OPair &data = buffer_[x.second];
+	dataSize_ -= data->bytes();
+	data.~OPair();
 
 	shiftL_(x.second);
 
@@ -196,7 +191,7 @@ bool VectorList::resize_(int const delta){
 		return true;
 	}
 
-	Pair *new_buffer = (Pair *) xrealloc(buffer_, new_reservedCount * ELEMENT_SIZE);
+	OPair *new_buffer = (OPair *) xrealloc(buffer_, new_reservedCount * ELEMENT_SIZE);
 
 	if (new_buffer == nullptr)
 		return false;
@@ -216,11 +211,6 @@ auto VectorList::calcNewCount_(size_type const count) -> size_type{
 
 	return newsize * reallocCount_;
 }
-
-// ===================================
-
-template bool VectorList::insertT_(Pair &&newdata);
-template bool VectorList::insertT_(const Pair &newdata);
 
 } // namespace
 

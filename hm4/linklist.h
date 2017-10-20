@@ -7,8 +7,6 @@ namespace hm4{
 
 
 class LinkList : public IList<LinkList, true>{
-	friend class IList;
-
 public:
 	class Iterator;
 
@@ -22,8 +20,10 @@ public:
 public:
 	bool clear();
 
-	const Pair &operator[](const StringRef &key) const;
+	const Pair *operator[](const StringRef &key) const;
 	bool erase(const StringRef &key);
+
+	bool insert(OPair &&data);
 
 	size_type size(bool const = false) const{
 		return dataCount_;
@@ -38,10 +38,6 @@ public:
 
 	Iterator begin() const;
 	static constexpr Iterator end();
-
-private:
-	template <class UPAIR>
-	bool insertT_(UPAIR &&data);
 
 private:
 	struct Node;
@@ -68,9 +64,12 @@ protected:
 public:
 	Iterator &operator++();
 	const Pair &operator*() const;
-	bool operator==(const Iterator &other) const;
 
 public:
+	bool operator==(const Iterator &other) const{
+		return node_ == other.node_;
+	}
+
 	bool operator!=(const Iterator &other) const{
 		return ! operator==(other);
 	}

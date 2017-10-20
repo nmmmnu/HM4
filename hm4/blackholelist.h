@@ -8,8 +8,6 @@ namespace hm4{
 
 
 class BlackHoleList : public IList<BlackHoleList, true>{
-	friend class IList;
-
 public:
 	using Iterator = const Pair *;
 
@@ -20,12 +18,17 @@ public:
 	}
 
 	constexpr
-	const Pair &operator[](const StringRef &) const noexcept{
-		return Pair::zero();
+	const Pair *operator[](const StringRef &) const noexcept{
+		return nullptr;
 	}
 
 	constexpr
 	bool erase(const StringRef &) const noexcept{
+		return true;
+	}
+
+	constexpr
+	bool insert(const OPair &) const {
 		return true;
 	}
 
@@ -53,12 +56,6 @@ public:
 	constexpr
 	Iterator end() const{
 		return nullptr;
-	}
-
-private:
-	constexpr
-	bool insertT_(const Pair &) const {
-		return true;
 	}
 };
 

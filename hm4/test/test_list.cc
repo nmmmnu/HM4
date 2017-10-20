@@ -1,6 +1,7 @@
 #include "pair.h"
 
-using Pair	= hm4::Pair;
+using hm4::Pair;
+using hm4::OPair;
 
 #include "mytest.h"
 
@@ -11,8 +12,8 @@ MyTest mytest;
 
 
 template <class LIST>
-size_t list_insert(LIST &list, Pair &&p){
-	const size_t size = p.bytes();
+size_t list_insert(LIST &list, OPair &&p){
+	const size_t size = p->bytes();
 	list.insert(std::move(p));
 	return size;
 }
@@ -27,6 +28,8 @@ auto list_populate(LIST &list){
 	size += list_insert(list, {"1 name",	"Niki"	});
 	size += list_insert(list, {"4 os",	"Linux"	});
 	size += list_insert(list, {"2 age",	"22"	});
+
+	list.print();
 
 	return std::make_pair( (typename LIST::size_type) 4, size);
 }
@@ -104,14 +107,14 @@ void list_test(LIST &list){
 	mytest("sizeof",		list.bytes() == size		);
 
 
-	Pair p;
+	const Pair *p = nullptr;
 
 
 
 	// GET
 
 	p = list["3 city"];
-	mytest("get",			p.getVal() == "Sofia"		);
+	mytest("get",			p->getVal() == "Sofia"		);
 
 	p = list["nonexistent"];
 	mytest("get non existent",	! p				);
@@ -123,10 +126,11 @@ void list_test(LIST &list){
 	const char *key_over = "2 val";
 	const char *val_over = "overwritten";
 
-	list.insert( Pair(key_over, "original") );
-	list.insert( Pair(key_over, val_over) );
+	list.insert( { key_over, "original"	} );
+	list.insert( { key_over, val_over	} );
+
 	p = list[key_over];
-	mytest("overwrite",		p.getVal() == val_over		);
+	mytest("overwrite",		p->getVal() == val_over		);
 
 
 
@@ -148,14 +152,17 @@ void list_test(LIST &list){
 
 	p = list["3 city"];
 
-	mytest("remove",		p.getVal() == "Sofia"		);
+	mytest("remove",		p->getVal() == "Sofia"		);
 	mytest("remove count",		list.size() == 1		);
-	mytest("remove sizeof",		list.bytes() == p.bytes()	);
+	mytest("remove sizeof",		list.bytes() == p->bytes()	);
+
+list.print();
 
 	// overwrite sizeof test
-	const Pair sopair = { "3 city", "" };
+	OPair o_sopair = { "3 city", "" };
+	const Pair &sopair = *o_sopair;
 
-	list.insert(sopair);
+	list.insert(std::move(o_sopair));
 	mytest("overwrite count",	list.size() == 1		);
 	mytest("overwrite sizeof",	list.bytes() == sopair.bytes()	);
 
@@ -194,46 +201,6 @@ void list_test(LIST &list){
 	// because it could be done via copy c-tor or swap
 }
 
-#include "skiplist.h"
-
-static void skiplist_lanes_test() __attribute__((unused));
-
-static void skiplist_lanes_test(){
-	hm4::SkipList list;
-
-	list.emplace("name",		"Niki"		);
-	list.emplace("city",		"Sofia"		);
-	list.emplace("state",		"na"		);
-	list.emplace("zip",		"1000"		);
-	list.emplace("country",		"BG"		);
-	list.emplace("phone",		"+358 888 1000"	);
-	list.emplace("fax",		"+358 888 2000"	);
-	list.emplace("email",		"user@aol.com"	);
-	list.emplace("laptop",		"Dell"		);
-	list.emplace("os",		"Archlinux"	);
-	list.emplace("mouse",		"Logitech"	);
-
-	list.printLanes();
-}
-
-#include "blackholelist.h"
-
-template<>
-void list_test(hm4::BlackHoleList &list){
-	Pair p = nullptr;
-
-	list_populate(list);
-
-	mytest("count",			list.size() == 0			);
-	mytest("count estim",		list.size(true) == 0			);
-	mytest("empty",			list.empty()				);
-	mytest("sizeof",		list.bytes() == 0			);
-
-	mytest("put",			list.insert( { "key", "val" } )		);
-	mytest("get",			! list["key"]				);
-	mytest("remove",		list.erase("key")			);
-}
-
 
 template <class LIST>
 void list_test(const char *name, LIST &list){
@@ -250,6 +217,47 @@ void list_test(const char *name){
 	return list_test(name, list);
 }
 
+
+#include "skiplist.h"
+
+static void skiplist_lanes_test() __attribute__((unused));
+
+static void skiplist_lanes_test(){
+	hm4::SkipList list;
+
+	list.insert( { "name",		"Niki"		} );
+	list.insert( { "city",		"Sofia"		} );
+	list.insert( { "state",		"na"		} );
+	list.insert( { "zip",		"1000"		} );
+	list.insert( { "country",	"BG"		} );
+	list.insert( { "phone",		"+358 888 1000"	} );
+	list.insert( { "fax",		"+358 888 2000"	} );
+	list.insert( { "email",		"user@aol.com"	} );
+	list.insert( { "laptop",	"Dell"		} );
+	list.insert( { "os",		"Archlinux"	} );
+	list.insert( { "mouse",		"Logitech"	} );
+
+	list.printLanes();
+}
+
+
+#include "blackholelist.h"
+
+template<>
+void list_test(hm4::BlackHoleList &list){
+	list_populate(list);
+
+	mytest("count",			list.size() == 0			);
+	mytest("count estim",		list.size(true) == 0			);
+	mytest("empty",			list.empty()				);
+	mytest("sizeof",		list.bytes() == 0			);
+
+	mytest("put",			list.insert( { "key", "val" } )		);
+	mytest("get",			! list["key"]				);
+	mytest("remove",		list.erase("key")			);
+}
+
+
 #include "multi/duallist.h"
 
 using MyDualList = hm4::multi::DualList<hm4::SkipList, hm4::BlackHoleList>;
@@ -262,6 +270,7 @@ void list_test<MyDualList>(const char *name){
 
 	return list_test(name, list);
 }
+
 
 #include "decoratorlist.h"
 
@@ -279,7 +288,6 @@ void list_test<MyDecoratorList>(const char *name){
 #include "linklist.h"
 
 int main(){
-
 	list_test<hm4::VectorList	>("VectorList"		);
 	list_test<hm4::LinkList		>("LinkList"		);
 	list_test<hm4::SkipList		>("SkipList"		);

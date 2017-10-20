@@ -8,7 +8,7 @@ auto DualIterator<TABLE1, TABLE2>::operator++() -> DualIterator &{
 	const Pair &pair1 = *it1_;
 	const Pair &pair2 = *it2_;
 
-	const auto cmp = pair1.cmp(pair2);
+	const auto cmp = pair1.cmp(pair2.getKey());
 
 	if (cmp <= 0)
 		++it1_;
@@ -24,7 +24,7 @@ const Pair &DualIterator<TABLE1, TABLE2>::operator*() const{
 	const Pair &pair1 = *it1_;
 	const Pair &pair2 = *it2_;
 
-	int const cmp = pair1.cmp(pair2);
+	int const cmp = pair1.cmp(pair2.getKey());
 
 	// return smaller or first
 	return cmp <= 0 ? pair1 : pair2;

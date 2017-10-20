@@ -52,7 +52,7 @@ namespace impl_{
 
 	public:
 		const Pair &operator *() const{
-			return cur != end ? *cur : Pair::zero();
+			return cur != end ? *cur : *Pair::zero();
 		}
 
 		void operator ++(){

@@ -1,8 +1,7 @@
 #include "pair.h"
-#include "pairblob.h"
 
-using Pair	= hm4::Pair;
-using PairBlob	= hm4::PairBlob;
+using hm4::Pair;
+using hm4::OPair;
 
 #include "mytest.h"
 
@@ -12,19 +11,17 @@ MyTest mytest;
 
 
 
-static void pair_test_null();
+static void pair_test_tombstone();
 static void pair_test_raw();
-
-
-static void pair_test();
 static void pair_test_expired(bool slow = false);
+static void pair_test();
 
 
 static void pair_test_ctor();
 
 
 int main(){
-	pair_test_null();
+	pair_test_tombstone();
 	pair_test_raw();
 	pair_test();
 	pair_test_expired();
@@ -35,53 +32,22 @@ int main(){
 
 // ===================================
 
-static void pair_test_null(){
-	mytest.begin("NULL Pair");
+static void pair_test_tombstone(){
+	mytest.begin("Pair Tombstone");
 
-	const Pair p;
+	const char *key = "name";
 
-	mytest("null bool",		p == false			);
-	mytest("null isTombstone",	p.isTombstone()			);
-	mytest("null key",		p.getKey().empty()		);
-	mytest("null val",		p.getVal().empty()		);
-	mytest("null cmp",		p.cmp("bla") == 1		);
+	const auto p = OPair::tombstone(key);
+
+	mytest("tombstone bool",	p			);
+	mytest("tombstone isTombstone",	p->isTombstone()	);
+	mytest("tombstone key",		p->getKey() == key	);
+	mytest("tombstone val",		p->getVal().empty()	);
 }
 
 // ===================================
 
-static void pair_blob_test(const char *module, const PairBlob *pp, const StringRef &key, const StringRef &val){
-	const PairBlob &p = *pp;
-
-	mytest.begin(module);
-
-	mytest("valid",		p.isValid()			);
-
-	mytest("key",		key == p.getKey()		);
-	mytest("val",		val == p.getVal()		);
-
-	mytest("cmp key",	p.cmp(key.data()) == 0		);
-	mytest("cmp",		p.cmp("~~~ non existent") < 0	);
-	mytest("cmp",		p.cmp("!!! non existent") > 0	);
-}
-
-
-static void pair_test_raw_do(const char *module, const Pair & p, const StringRef &key, const StringRef &val){
-	mytest.begin(module);
-
-	mytest("valid",		p.isValid()			);
-
-	mytest("key",		key == p.getKey()		);
-	mytest("val",		val == p.getVal()		);
-
-	mytest("cmp key",	p.cmp(key) == 0			);
-	mytest("cmp",		p.cmp("~~~ non existent") < 0	);
-	mytest("cmp",		p.cmp("!!! non existent") > 0	);
-
-	Pair p2 = p;
-	p2 = p;
-}
-
-static const PairBlob *raw_memory(){
+static const Pair *raw_memory(){
 	static const char blob[] = {
 		0x50, 0x00, 0x00, 0x00,		// created, 2012-07-13 11:01:20
 		0x00, 0x00, 0x00, 0x00,		// milliseconds
@@ -92,22 +58,80 @@ static const PairBlob *raw_memory(){
 		'P', 'e', 't', 'e', 'r', '\0'	// val
 	};
 
-	return reinterpret_cast<const PairBlob *>(blob);
+	return reinterpret_cast<const Pair *>(blob);
 }
 
 static void pair_test_raw(){
+	mytest.begin("Pair Raw");
+
 	const char *key = "name";
 	const char *val = "Peter";
 
+	const Pair *p = raw_memory();
 
-	pair_blob_test("pair::blob", raw_memory(),
-					key, val);
+	mytest("valid",		p->isValid()			);
 
-	pair_test_raw_do("raw Pair", raw_memory(),
-					key, val);
+	mytest("key",		p->getKey() == key		);
+	mytest("val",		p->getVal() == val		);
 
-	pair_test_raw_do("raw Pair (observer)",	Pair::observer( raw_memory() ),
-					key, val);
+	mytest("cmp key",	p->cmp(key) == 0		);
+	mytest("cmp",		p->cmp("~~~ non existent") < 0	);
+	mytest("cmp",		p->cmp("!!! non existent") > 0	);
+}
+
+// ===================================
+
+static void pair_test_expired(bool const slow){
+	mytest.begin("Pair Expired");
+
+	const OPair p1 = { "key", "val", 1 };
+
+	mytest("not expired",	p1->isValid()				);
+
+	if (slow){
+		printf("sleep for 2 sec...\n");
+		sleep(2);
+		mytest("expired",	! p1->isValid()			);
+	}
+
+	const OPair p2 = { "key", "val", 1, 3600 * 24 /* 1970-01-02 */ };
+	mytest("expired",		! p2->isValid()			);
+}
+
+// ===================================
+
+static void pair_test_ctor(){
+	mytest.begin("c-tor / d-tor");
+
+	const OPair o1 = { "1", "one" };
+	const OPair o2 = { "2", "two" };
+	const OPair o3 = { "3", "tri" };
+
+	OPair p1 = *o1;
+	mytest("copy Pair",		p1->getKey() == "1"		);
+
+	OPair p2 = o2;
+	mytest("copy c-tor",		p2->getKey() == "2"		);
+
+	p1 = *o3;
+	mytest("assign Pair",		p1->getKey() == "3"		);
+
+	p1 = p2;
+	mytest("copy assign",		p1->getKey() == "2"		);
+
+	p1 = o1;
+	p2 = o2;
+
+	p1.swap(p2);
+	mytest("swap",			p1->getKey() == "2"		);
+	mytest("swap",			p2->getKey() == "1"		);
+
+	OPair p3 = std::move(p1);
+	mytest("move c-tor",		p3->getKey() == "2"		);
+
+	p3 = std::move(p2);
+	mytest("move assign",		p3->getKey() == "1"		);
+
 }
 
 // ===================================
@@ -118,99 +142,25 @@ static void pair_test(){
 	const char *key = "abcdef";
 	const char *val = "1234567890";
 
-	const Pair t = Pair::tombstone(key);
+	const OPair t = OPair::tombstone(key);
 
-	mytest("null bool tomb",	t == true			);
-	mytest("tombstone",		t.isTombstone()			);
-
-	const Pair p = { key, val };
+	const OPair p = { key, val };
 
 	mytest("null bool",		p == true			);
 
-	mytest("key",			p.getKey() == key		);
-	mytest("val",			p.getVal() == val		);
+	mytest("key",			p->getKey() == key		);
+	mytest("val",			p->getVal() == val		);
 
-	mytest("cmp",			p.cmp(key) == 0			);
-	mytest("cmp",			p.cmp("~~~ non existent") < 0	);
-	mytest("cmp",			p.cmp("!!! non existent") > 0	);
+	mytest("cmp",			p->cmp(key) == 0		);
+	mytest("cmp",			p->cmp("~~~ non existent") < 0	);
+	mytest("cmp",			p->cmp("!!! non existent") > 0	);
 
-	mytest("cmp",			p.cmp(t) == 0			);
+	mytest("cmp",			p->cmp(t->getKey()) == 0	);
 
-	mytest("cmp null",		p.cmp((char *) nullptr)		);
+	mytest("eq",			p->equals(key)			);
+	mytest("!eq",			! p->equals("something")	);
 
-	mytest("eq",			p.equals(key)			);
-	mytest("!eq",			! p.equals("something")		);
-
-	mytest("valid",			p.isValid()			);
-	mytest("valid",			p.isValid(t)			);
-
-	const Pair p2 = { "__smaller", "val"};
-
-	mytest("cmp pair",		p.cmp(p) == 0			);
-	mytest("cmp pair",		p2.cmp(p) < 0			);
-	mytest("cmp pair",		p.cmp(p2) > 0			);
-
-	mytest("eq pair",		p.equals(p)			);
-	mytest("eq pair",		! p.equals(p2)			);
-	mytest("!eq pair",		! p2.equals(p)			);
-
-	{
-		Pair m1 = { key, val };
-
-		const Pair m2 = std::move(m1);
-		mytest("move c-tor",		m2.getKey() == key		);
-
-		const Pair m3 = m2;
-		mytest("copy c-tor",		m2.getKey() == key		);
-		mytest("copy c-tor",		m3.getKey() == key		);
-
-		m1 = m2;
-		mytest("copy assign",		m1.getKey() == key		);
-	}
-}
-
-// ===================================
-
-static void pair_test_expired(bool const slow){
-	mytest.begin("Pair (expired)");
-
-	const Pair p1 = { "key", "val", 1 };
-
-	mytest("not expired",	p1.isValid()			);
-
-	if (slow){
-		printf("sleep for 2 sec...\n");
-		sleep(2);
-		mytest("expired",		! p1.isValid()			);
-	}
-
-	const Pair p2 = { "key", "val", 1, 3600 * 24 /* 1970-01-02 */ };
-	mytest("expired",		! p2.isValid()				);
-}
-
-// ===================================
-
-static void pair_test_ctor(){
-	mytest.begin("c-tor / d-tor");
-
-	const
-	Pair o = Pair::observer(raw_memory()			);
-	Pair p;
-
-	mytest("c-tor",		o.isObserver()			);
-	mytest("c-tor",		! p.isObserver()		);
-
-	p = o;
-
-	mytest("copy assign",	! p.isObserver()		);
-
-	Pair s = Pair::observer(raw_memory()			);
-	p.swap(s);
-	mytest("swap",		! s.isObserver()		);
-	mytest("swap",		p.isObserver()			);
-
-	Pair m = Pair::observer(raw_memory()			);
-	p = std::move(m);
-	mytest("move assign",	p.isObserver()			);
+	mytest("valid",			p->isValid()			);
+	mytest("valid",			p->isValid(t)			);
 }
 

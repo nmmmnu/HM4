@@ -1,133 +1,61 @@
 #include "pair.h"
-#include "pairblob.h"
 
+#include "mytime.h"
+#include "mynarrow.h"
 #include "sgn.h"
-
-#include <cassert>
-#include <cstdio>
-
-#define log__(...) /* nada */
 
 namespace hm4{
 
-// ==============================
 
-const Pair Pair::zero_ = {};
+constexpr char Pair::ZERO[];
 
-// ==============================
 
-Pair::Pair() = default;
+std::unique_ptr<Pair> Pair::create(
+				const char *key, size_t const keylen,
+				const char *val, size_t const vallen,
+				uint32_t const expires,
+				uint32_t const created){
 
-// ==============================
+	if (	key == nullptr		||
+		keylen == 0		||
+		keylen > MAX_KEY_SIZE	||
+		vallen > MAX_VAL_SIZE	)
+		return {};
 
-Pair::Pair(const StringRef &key, const StringRef &val, uint32_t const expires, uint32_t const created):
-	pimpl(
-		Blob::create(	key.data(), key.size(),
-				val.data(), val.size(),
-				expires, created)
-	){}
+	size_t const size = bytes_(keylen, vallen);
 
-Pair::Pair(const Blob *blob) :
-	pimpl(
-		Blob::create(blob)
-	){}
+	std::unique_ptr<Pair>  pair{ new(size) Pair };
 
-Pair::Pair(const Blob *blob, observer_tag) noexcept :
-				pimpl(blob),
-				observer_(true){}
+	pair->created	= htobe64(getCreateTime__(created));
+	pair->expires	= htobe32(expires);
+	pair->vallen	= htobe32(narrow<uint32_t>(vallen));
+	pair->keylen	= htobe16(narrow<uint16_t>(keylen));
 
-// ==============================
+	// memcpy so we can switch to blobs later...
+	memcpy(& pair->buffer[0],		key, keylen);
+	pair->buffer[keylen] = '\0';
 
-Pair::Pair(const Pair &other) :
-				Pair( other.pimpl.get() ){
-	log__("copy c-tor\n");
+	// this is safe with NULL pointer.
+	memcpy(& pair->buffer[keylen + 1],	val, vallen);
+	pair->buffer[keylen + 1 + vallen] = '\0';
+
+	return pair;
 }
 
-Pair &Pair::operator=(const Pair &other){
-	log__("copy assign\n");
+std::unique_ptr<Pair> Pair::create(const Pair *src){
+	if (src == nullptr)
+		return {};
 
-	Pair pair = other;
+	size_t const size = src->bytes();
 
-	swap(pair);
+	std::unique_ptr<Pair> pair{ new(size) Pair };
 
-	return *this;
-}
+	memcpy(pair.get(), src, size);
 
-Pair::Pair(Pair &&other) :
-				pimpl		(std::move(other.pimpl		)),
-				observer_	(std::move(other.observer_	)){
-	log__("move c-tor\n");
-}
-
-Pair &Pair::operator=(Pair &&other){
-	log__("move assign\n");
-
-	swap(other);
-
-	return *this;
+	return pair;
 }
 
 // ==============================
-
-void Pair::swap(Pair &other) noexcept{
-	log__("swap\n");
-
-	using std::swap;
-
-	swap(pimpl,	other.pimpl	);
-	swap(observer_,	other.observer_	);
-}
-
-// ==============================
-
-Pair::~Pair(){
-	if (observer_)
-		pimpl.release();
-}
-
-// ==============================
-
-StringRef Pair::getKey() const noexcept{
-	return pimpl ?
-		StringRef(pimpl->getKey(), pimpl->getKeyLen()) :
-		StringRef();
-}
-
-StringRef Pair::getVal() const noexcept{
-	return pimpl ?
-		StringRef{ pimpl->getVal(), pimpl->getValLen() } :
-		StringRef();
-}
-
-uint64_t Pair::getCreated() const noexcept{
-	return pimpl ?
-		pimpl->getCreated() :
-		0;
-}
-
-int Pair::cmp(const char *key, size_t const size) const noexcept{
-	return pimpl ?
-		pimpl->cmp(key, size) :
-		CMP_ZERO;
-}
-
-int Pair::cmp(const char *key) const noexcept{
-	return pimpl ?
-		pimpl->cmp(key) :
-		CMP_ZERO;
-}
-
-bool Pair::equals(const char *key, size_t size) const noexcept{
-	return pimpl ?
-		pimpl->equals(key, size) :
-		false;
-}
-
-bool Pair::equals(const char *key) const noexcept{
-	return pimpl ?
-		pimpl->equals(key) :
-		false;
-}
 
 int Pair::cmpTime(const Pair &pair) const noexcept{
 	// Compare time
@@ -137,40 +65,36 @@ int Pair::cmpTime(const Pair &pair) const noexcept{
 	return sgn(c1, c2);
 }
 
-bool Pair::isTombstone() const noexcept{
-	return pimpl ?
-		pimpl->isTombstone() :
-		true;
-}
-
-bool Pair::isValid(bool const tombstoneCheck) const noexcept{
-	return pimpl && pimpl->isValid(tombstoneCheck);
-}
-
-size_t Pair::bytes() const noexcept{
-	return pimpl ?
-		pimpl->bytes() :
-		0;
-}
-
-size_t Pair::maxBytes() noexcept{
-	return PairBlob::maxBytes();
-}
+// ==============================
 
 void Pair::print() const noexcept{
-	if (! pimpl){
-		printf("--- %sPair is empty ---\n", observer_ ? "Observer " : "");
-		return;
-	}
+	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
+	const char *format      = "%-32s | %-20s | %s | %8u | %c\n";
 
-	pimpl->print(observer_);
+	constexpr bool observer = true;
+
+	printf(format,
+		getKey_(), getVal_(),
+		MyTime::toString(getCreated(), time_format),
+		be32toh(expires),
+		observer ? '+' : ' '
+	);
 }
 
 void Pair::fwrite(std::ostream & os) const{
-	if (pimpl)
-		os.write((const char *) pimpl.get(), (std::streamsize) bytes() );
+	os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
+}
+
+// ==============================
+
+bool Pair::isExpired_() const noexcept{
+	return expires &&  MyTime::expired( getCreated(), be32toh(expires) );
+}
+
+uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
+	return created ? MyTime::combine(created) : MyTime::now();
 }
 
 
-} //namespace
+} // namespace
 

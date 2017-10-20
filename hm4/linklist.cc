@@ -6,12 +6,11 @@ namespace hm4{
 
 
 struct LinkList::Node{
-	Pair	data;
+	OPair	data;
 	Node	*next = nullptr;
 
 public:
-	template<class UPAIR>
-	Node(UPAIR &&data) : data(std::forward<UPAIR>(data)){}
+	Node(OPair &&data) : data(std::move(data)){}
 };
 
 
@@ -43,34 +42,33 @@ bool LinkList::clear(){
 	return true;
 }
 
-template <class UPAIR>
-bool LinkList::insertT_(UPAIR&& newdata){
+bool LinkList::insert(OPair&& newdata){
 	assert(newdata);
 
-	const StringRef &key = newdata.getKey();
+	const StringRef &key = newdata->getKey();
 
 	Node *prev = nullptr;
 	for(Node *node = head_; node; node = node->next){
-		Pair & olddata = node->data;
+		OPair & olddata = node->data;
 
-		int const cmp = olddata.cmp(key);
+		int const cmp = olddata->cmp(key);
 
 		if (cmp == 0){
 			// handle overwrite,
 			// keep the node, overwrite the data
 
 			// check if the data in database is valid
-			if (! newdata.isValid(olddata)){
+			if (! newdata->isValid(*olddata)){
 				// newdata will be magically destroyed.
 				return false;
 			}
 
 			dataSize_ = dataSize_
-					- olddata.bytes()
-					+ newdata.bytes();
+					- olddata->bytes()
+					+ newdata->bytes();
 
 			// copy assignment
-			olddata = std::forward<UPAIR>(newdata);
+			olddata = std::move(newdata);
 
 			return true;
 		}
@@ -81,9 +79,9 @@ bool LinkList::insertT_(UPAIR&& newdata){
 		prev = node;
 	}
 
-	size_t const size = newdata.bytes();
+	size_t const size = newdata->bytes();
 
-	Node *newnode = new(std::nothrow) Node(std::forward<UPAIR>(newdata));
+	Node *newnode = new(std::nothrow) Node(std::move(newdata));
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
 		return false;
@@ -105,24 +103,19 @@ bool LinkList::insertT_(UPAIR&& newdata){
 	return true;
 }
 
-template bool LinkList::insertT_(Pair &&newdata);
-template bool LinkList::insertT_(const Pair &newdata);
-
-const Pair &LinkList::operator[](const StringRef &key) const{
-	// precondition
+const Pair *LinkList::operator[](const StringRef &key) const{
 	assert(!key.empty());
-	// eo precondition
 
 	const Node *node = locate_(key, true);
 
-	return node ? node->data : Pair::zero();
+	return node ? node->data.get() : nullptr;
 }
 
 bool LinkList::erase(const StringRef &key){
 	Node *prev = nullptr;
 	for(Node *node = head_; node; node = node->next){
-		const Pair & data = node->data;
-		int const cmp = data.cmp(key);
+		const OPair & data = node->data;
+		int const cmp = data->cmp(key);
 
 		if (cmp == 0){
 			if (prev){
@@ -132,7 +125,7 @@ bool LinkList::erase(const StringRef &key){
 				head_ = node->next;
 			}
 
-			dataSize_ -= data.bytes();
+			dataSize_ -= data->bytes();
 			--dataCount_;
 
 			delete node;
@@ -162,16 +155,9 @@ const LinkList::Node *LinkList::locate_(const StringRef &key, bool const exact) 
 	// eo precondition
 
 	for(const Node *node = head_; node; node = node->next){
-		const Pair & data = node->data;
+		const OPair & data = node->data;
 
-		int const cmp = data.cmp(key);
-
-#if 0
-		auto a = key.c_str();
-		auto b = data.getKey().c_str();
-		auto c = StringRef::compare(data.getKey().data(), data.getKey().size(), key.data(), key.size());
-		printf("%-20s - %-20s - %3d - %3d\n", a, b, cmp, c);
-#endif
+		int const cmp = data->cmp(key);
 
 		if (cmp == 0)
 			return node;
@@ -184,7 +170,6 @@ const LinkList::Node *LinkList::locate_(const StringRef &key, bool const exact) 
 }
 
 
-
 // ==============================
 
 
@@ -195,15 +180,9 @@ LinkList::Iterator &LinkList::Iterator::operator++(){
 }
 
 const Pair &LinkList::Iterator::operator*() const{
-	// precondition
 	assert(node_);
-	// eo precondition
 
-	return node_->data;
-}
-
-bool LinkList::Iterator::operator==(const Iterator &other) const{
-	return node_ == other.node_;
+	return *(node_->data);
 }
 
 

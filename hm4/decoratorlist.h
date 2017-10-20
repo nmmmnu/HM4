@@ -10,8 +10,6 @@ namespace hm4{
 
 template <class LIST, class CRPT_USER>
 class DecoratorList : public IList<CRPT_USER, LIST::MUTABLE>{
-	friend class IList<CRPT_USER, LIST::MUTABLE>;
-
 public:
 	using Iterator		= typename LIST::Iterator;
 
@@ -24,9 +22,9 @@ protected:
 public:
 	// Immutable Methods
 
-	ObserverPair operator[](const StringRef &key) const{
+	const Pair *operator[](const StringRef &key) const{
 		assert(!key.empty());
-		return Pair::observer(list_[key]);
+		return list_[key];
 	}
 
 	size_type size(bool const estimated = false) const{
@@ -62,10 +60,8 @@ public:
 		return list_.erase(key);
 	}
 
-private:
-	template <class UPAIR>
-	bool insertT_(UPAIR &&data){
-		return list_.insert( std::forward<UPAIR>(data) );
+	bool insert(OPair &&data){
+		return list_.insert( std::move(data) );
 	}
 
 private:

@@ -15,7 +15,7 @@ public:
 	static constexpr size_t		ELEMENT_SIZE		= sizeof(Pair);
 	static constexpr size_type	DEFAULT_REALLOC_COUNT	= 16;
 
-	using Iterator = const Pair *;
+	class Iterator;
 
 public:
 	explicit
@@ -28,7 +28,7 @@ public:
 private:
 	size_type	reallocCount_;
 
-	Pair		*buffer_;
+	OPair		*buffer_;
 	size_type	reservedCount_;
 	size_type	dataCount_;
 	size_t		dataSize_;
@@ -36,25 +36,22 @@ private:
 public:
 	bool clear();
 
-	/* preconditions
-	Key can not be zero length
-	*/
 	bool erase(const StringRef &key);
 
-	const Pair &operator[](size_type const index) const{
-		// precondition
+	const Pair *operator[](size_type const index) const{
 		assert( index < size() );
-		// eo precondition
 
-		return buffer_[index];
+		return buffer_[index].get();
 	}
 
-	int cmpAt(size_type const index, const StringRef &key) const{
+	int cmpAt(size_type index, const StringRef &key) const{
 		assert( index < size() );
-		assert(!key.empty() );
+		assert(!key.empty());
 
-		return operator[](index).cmp(key);
+		return operator[](index)->cmp(key);
 	}
+
+	bool insert(OPair &&data);
 
 	size_type size(bool const = false) const{
 		return dataCount_;
@@ -64,25 +61,14 @@ public:
 		return dataSize_;
 	}
 
-	/* preconditions
-	Key can not be zero length
-	*/
-	const Pair &operator[](const StringRef &key) const;
-
-private:
-	template <class UPAIR>
-	bool insertT_(UPAIR &&data);
+	const Pair *operator[](const StringRef &key) const;
 
 public:
 	Iterator lowerBound(const StringRef &key) const noexcept;
 
-	Iterator begin() const noexcept{
-		return buffer_;
-	}
+	Iterator begin() const noexcept;
 
-	Iterator end() const noexcept{
-		return buffer_ + dataCount_;
-	}
+	Iterator end() const noexcept;
 
 private:
 	void clear_(bool alsoFree = false);
@@ -100,6 +86,52 @@ private:
 	*/
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
 };
+
+// ==============================
+
+class VectorList::Iterator{
+private:
+	friend class VectorList;
+
+	constexpr Iterator(const OPair *pos) : pos_(pos){}
+
+public:
+	Iterator &operator++(){
+		++pos_;
+		return *this;
+	}
+
+	const Pair &operator*() const{
+		return **pos_;
+	}
+
+public:
+	bool operator==(const Iterator &other) const{
+		return pos_ == other.pos_;
+	}
+
+	bool operator!=(const Iterator &other) const{
+		return ! operator==(other);
+	}
+
+	const Pair *operator ->() const{
+		return & operator*();
+	}
+
+private:
+	const OPair	*pos_;
+};
+
+// ==============================
+
+inline auto VectorList::begin() const noexcept -> Iterator{
+	return buffer_;
+}
+
+inline auto VectorList::end() const noexcept -> Iterator{
+	return buffer_ + dataCount_;
+}
+
 
 } // namespace
 

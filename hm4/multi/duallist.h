@@ -15,16 +15,12 @@ namespace multi{
 
 template <class LIST1, class LIST2=const LIST1, bool ERASE_WITH_TOMBSTONE=false>
 class DualList : public IList<DualList<LIST1, LIST2, ERASE_WITH_TOMBSTONE>, LIST1::MUTABLE>{
-	friend class IList<DualList<LIST1, LIST2, ERASE_WITH_TOMBSTONE>, LIST1::MUTABLE>;
-
 public:
 	using Iterator		= DualIterator<LIST1, LIST2>;
 
 	using size_type		= typename DualList::size_type;
 
 public:
-//	DualList(std::nullptr_t){}
-
 	DualList(LIST1 &list1, const LIST2 &list2) :
 					list1_(list1),
 					list2_(list2){
@@ -34,15 +30,15 @@ public:
 public:
 	// Immutable Methods
 
-	ObserverPair operator[](const StringRef &key) const{
+	const Pair *operator[](const StringRef &key) const{
 		assert(!key.empty());
 
-		const Pair &pair = list1_[key];
+		const Pair *pair = list1_[key];
 
 		if (pair)
-			return Pair::observer(pair);
+			return pair;
 
-		return Pair::observer(list2_[key]);
+		return list2_[key];
 	}
 
 	size_type size(bool const estimated = false) const{
@@ -85,19 +81,17 @@ public:
 		return erase_(key, std::integral_constant<bool, ERASE_WITH_TOMBSTONE>{});
 	}
 
+	bool insert(OPair &&data){
+		return list1_.insert( std::move(data) );
+	}
+
 private:
 	bool erase_(const StringRef &key, std::true_type){
-		return list1_.insert(Pair::tombstone(key));
+		return list1_.insert(OPair::tombstone(key));
 	}
 
 	bool erase_(const StringRef &key, std::false_type){
 		return list1_.erase(key);
-	}
-
-private:
-	template <class UPAIR>
-	bool insertT_(UPAIR &&data){
-		return list1_.insert( std::forward<UPAIR>(data) );
 	}
 
 private:

@@ -56,44 +56,9 @@ protected:
 		return count;
 	}
 
-public:
-	// Mutable Methods
-
-	bool insert(const Pair &pair){
-		assert( pair );
-
-		return self()->insertT_(pair);
-	}
-
-	bool insert(Pair &&pair){
-		assert( pair );
-
-		if (pair.isObserver()){
-			// Observer must be copied
-			return self()->insertT_( const_cast<const Pair &>(pair) );
-		}else{
-			// normal Pair can be forwarded
-			return self()->insertT_(std::move(pair));
-		}
-	}
-
-	template <class ...ARGS>
-	bool emplace(ARGS ...args){
-		Pair pair{ std::forward<ARGS>(args)... };
-
-		if (pair)
-			return self()->insertT_(std::move(pair));
-		else
-			return false;
-	}
-
 private:
 	const T *self() const{
 		return static_cast<const T*>(this);
-	}
-
-	T *self(){
-		return static_cast<T*>(this);
 	}
 };
 

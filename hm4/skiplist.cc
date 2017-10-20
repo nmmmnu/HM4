@@ -39,7 +39,7 @@ Uncommend DEBUG_PRINT_LANES for visualisation.
 */
 
 struct SkipList::Node{
-	Pair	data;
+	OPair	data;
 	Node	*next[1];	// system dependent, dynamic, at least 1
 
 public:
@@ -92,41 +92,40 @@ bool SkipList::clear(){
 	return true;
 }
 
-template <class UPAIR>
-bool SkipList::insertT_(UPAIR&& newdata){
+bool SkipList::insert(OPair&& newdata){
 	assert(newdata);
 
-	const StringRef &key = newdata.getKey();
+	const StringRef &key = newdata->getKey();
 
 	const auto nl = locate_(key);
 
 	if (nl.node){
 		// update in place. node MUST be not NULL...
 
-		const Pair & olddata = nl.node->data;
+		const OPair & olddata = nl.node->data;
 
 		// check if the data in database is valid
-		if (! newdata.isValid(olddata) ){
+		if (! newdata->isValid(*olddata) ){
 			// newdata will be magically destroyed.
 			return false;
 		}
 
 		dataSize_ = dataSize_
-			- olddata.bytes()
-			+ newdata.bytes();
+			- olddata->bytes()
+			+ newdata->bytes();
 
 		// copy assignment
-		const_cast<Pair &>(olddata) = std::forward<UPAIR>(newdata);
+		const_cast<OPair &>(olddata) = std::move(newdata);
 
 		return true;
 	}
 
 	// create new node
 
-	size_t const size = newdata.bytes();
+	size_t const size = newdata->bytes();
 	height_type const height = _getRandomHeight();
 
-	Node *newnode = new(height, true) Node(std::forward<UPAIR>(newdata));
+	Node *newnode = new(height, true) Node(std::move(newdata));
 
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
@@ -167,17 +166,12 @@ bool SkipList::insertT_(UPAIR&& newdata){
 	return true;
 }
 
-template bool SkipList::insertT_(Pair &&newdata);
-template bool SkipList::insertT_(const Pair &newdata);
-
-const Pair &SkipList::operator[](const StringRef &key) const{
-	// precondition
+const Pair *SkipList::operator[](const StringRef &key) const{
 	assert(!key.empty());
-	// eo precondition
 
 	const auto nl = locate_(key);
 
-	return nl.node ? nl.node->data : Pair::zero();
+	return nl.node ? nl.node->data.get() : nullptr;
 }
 
 SkipList::Iterator SkipList::lowerBound(const StringRef &key) const{
@@ -221,9 +215,9 @@ bool SkipList::erase(const StringRef &key){
 		}
 	}
 
-	const Pair & data = nl.node->data;
+	const OPair & data = nl.node->data;
 
-	dataSize_ -= data.bytes();
+	dataSize_ -= data->bytes();
 	dataCount_--;
 
 	delete nl.node;
@@ -244,8 +238,8 @@ void SkipList::printLane(height_type const lane) const{
 	uint64_t i = 0;
 	const Node *node;
 	for(node = heads_[lane]; node; node = node->next[lane]){
-		const Pair & data = node->data;
-		data.print();
+		const OPair & data = node->data;
+		data->print();
 
 		if (++i > 10)
 			break;
@@ -290,8 +284,8 @@ auto SkipList::locate_(const StringRef &key, bool const complete_evaluation) con
 		node = prev ? prev : heads_[height - 1];
 
 		while(node){
-			const Pair & data = node->data;
-			cmp = data.cmp(key);
+			const OPair & data = node->data;
+			cmp = data->cmp(key);
 
 			if (cmp >= 0)
 				break;
@@ -327,7 +321,6 @@ auto SkipList::_getRandomHeight() -> height_type{
 }
 
 
-
 // ==============================
 
 
@@ -337,15 +330,9 @@ SkipList::Iterator &SkipList::Iterator::operator++(){
 }
 
 const Pair &SkipList::Iterator::operator*() const{
-	// precondition
 	assert(node_);
-	// eo precondition
 
-	return node_->data;
-}
-
-bool SkipList::Iterator::operator==(const Iterator &other) const{
-	return node_ == other.node_;
+	return *(node_->data);
 }
 
 

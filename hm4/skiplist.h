@@ -10,8 +10,6 @@ namespace hm4{
 
 
 class SkipList : public IList<SkipList, true>{
-	friend class IList;
-
 public:
 	using height_type = uint8_t;
 
@@ -30,8 +28,10 @@ public:
 public:
 	bool clear();
 
-	const Pair &operator[](const StringRef &key) const;
+	const Pair *operator[](const StringRef &key) const;
 	bool erase(const StringRef &key);
+
+	bool insert(OPair &&data);
 
 	size_type size(bool const = false) const noexcept{
 		return dataCount_;
@@ -45,10 +45,6 @@ public:
 	Iterator lowerBound(const StringRef &key) const;
 	Iterator begin() const;
 	static constexpr Iterator end();
-
-private:
-	template <class UPAIR>
-	bool insertT_(UPAIR &&data);
 
 public:
 	void printLanes() const;
@@ -93,9 +89,12 @@ private:
 public:
 	Iterator &operator++();
 	const Pair &operator*() const;
-	bool operator==(const Iterator &other) const;
 
 public:
+	bool operator==(const Iterator &other) const{
+		return node_ == other.node_;
+	}
+
 	bool operator!=(const Iterator &other) const{
 		return ! operator==(other);
 	}
