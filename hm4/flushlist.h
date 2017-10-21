@@ -39,10 +39,8 @@ public:
 		flush_();
 	}
 
-private:
-	template <class UPAIR>
-	bool insertT_(UPAIR &&data){
-		bool const result = list_.insert( std::forward<UPAIR>(data) );
+	bool insert(OPair &&data){
+		bool const result = list_.insert( std::move(data) );
 
 		if (list_.bytes() > maxSize_){
 			flush();

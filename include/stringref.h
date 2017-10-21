@@ -22,7 +22,7 @@ public:
 
 	StringRef(const std::string &s);
 
-	StringRef(std::string &&){
+	explicit StringRef(std::string &&){
 		throw std::logic_error("std::string will decay and you do not want this");
 	}
 

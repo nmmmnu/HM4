@@ -163,6 +163,13 @@ static void sr_std_string(){
 
 	mytest("size",		s.size() == strlen(hello)		);
 	mytest("equal",		s == hello				);
+
+	try{
+		const StringRef x{ std::string("hello") };
+		mytest("decay",		false				);
+	}catch(const std::logic_error &e){
+		mytest("decay",		true				);
+	}
 }
 
 static void sr_test(){

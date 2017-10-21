@@ -10,8 +10,6 @@ namespace multi{
 
 
 namespace impl_{
-
-
 	struct MultiIteratorTags_{
 		template<bool B>
 		using base_iterator  = std::integral_constant<bool, B>;
