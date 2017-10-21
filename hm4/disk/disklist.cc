@@ -48,11 +48,11 @@ void DiskList::close(){
 
 // ==============================
 
-inline auto DiskList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+auto DiskList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
 }
 
-inline auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size_type>{
+auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size_type>{
 	if (mTree_ && mKeys_){
 		log__("btree");
 		return btreeSearch_(key);

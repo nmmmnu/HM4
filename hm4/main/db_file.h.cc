@@ -5,9 +5,9 @@ static int op_search(const LIST &list, const StringRef &key){
 	if (key.empty())
 		return 1;
 
-	const auto &pair = list[key];
+	auto pair = list[key];
 
-	pair.print();
+	pair->print();
 
 	return 0;
 }

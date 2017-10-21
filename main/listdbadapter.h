@@ -28,10 +28,10 @@ public:
 	std::string get(const StringRef &key) const{
 		assert(!key.empty());
 
-		const auto &p = list_[key];
+		const auto p = list_[key];
 
-		if (p.isValid(/* tomb */ true))
-			return p.getVal();
+		if (p && p->isValid(/* tomb */ true))
+			return p->getVal();
 		else
 			return {};
 	}
@@ -101,7 +101,7 @@ public:
 
 		auto const expires = stou_safe<uint32_t>(exp);
 
-		list_.emplace( key, val, expires );
+		list_.insert( { key, val, expires } );
 	}
 
 	bool del(const StringRef &key){

@@ -98,8 +98,8 @@ template <class LIST>
 void BTreeIndexBuilder<LIST>::push_back_key(size_type const index){
 	// we need to have the pair,
 	// because key "live" inside it.
-	const auto &p = list_[index];
-	const StringRef &key = p.getKey();
+	const auto p = list_[index];
+	const StringRef &key = p->getKey();
 
 
 	NodeData nd;

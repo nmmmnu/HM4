@@ -22,6 +22,10 @@ public:
 
 	StringRef(const std::string &s);
 
+	StringRef(std::string &&){
+		throw std::logic_error("std::string will decay and you do not want this");
+	}
+
 	// DATA MEMBERS
 
 	constexpr const char *data() const noexcept{
@@ -132,7 +136,7 @@ public:
 	constexpr static auto hash(const StringRef &data) noexcept{
 		return hash(data.data(), data.size() );
 	}
-	
+
 	constexpr static auto hash(const char* data) noexcept{
 		return hash(data, strlen__(data) );
 	}

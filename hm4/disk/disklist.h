@@ -19,6 +19,7 @@ public:
 
 private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
+	static constexpr int		CMP_ZERO			= 1;
 
 public:
 	DiskList() = default;
@@ -61,7 +62,7 @@ public:
 		const Pair *p = operator[](index);
 
 		// StringRef is not null terminated
-		return p ? p->cmp(key) : Pair::CMP_ZERO;
+		return p ? p->cmp(key) : CMP_ZERO;
 	}
 
 	size_type size(bool const = false) const{
