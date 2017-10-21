@@ -13,7 +13,7 @@ namespace multi{
 
 
 template <class CONTAINER>
-class CollectionList : public IList<CollectionList<CONTAINER>, false >{
+class CollectionList : public IList<CollectionList<CONTAINER>, false>{
 public:
 	using List	= typename CONTAINER::value_type;
 
@@ -22,8 +22,6 @@ public:
 	using size_type	= typename CollectionList::size_type;
 
 public:
-//	CollectionList(std::nullptr_t){};
-
 	CollectionList(const CONTAINER &container) : container_(container){}
 
 public:
@@ -40,7 +38,7 @@ public:
 	}
 
 public:
-	ObserverPair operator[](const StringRef &key) const;
+	const Pair *operator[](const StringRef &key) const;
 
 	size_type size(bool const estimated = false) const{
 		return estimated ? sizeEstimated_(true) : this->sizeViaIterator_();

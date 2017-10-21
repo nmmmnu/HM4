@@ -33,7 +33,11 @@ public:
 	CollectionIterator &operator++();
 
 	const Pair &operator*() const{
-		return tmp_pair ? *tmp_pair : dereference_();
+		return *dereference_();
+	}
+
+	const Pair *operator ->() const{
+		return dereference_();
 	}
 
 	bool operator==(const CollectionIterator &other) const{
@@ -45,12 +49,8 @@ public:
 		return ! operator==(other);
 	}
 
-	const Pair *operator ->() const{
-		return & operator*();
-	}
-
 private:
-	const Pair &dereference_() const;
+	const Pair *dereference_() const;
 
 private:
 	vector_type		it_;

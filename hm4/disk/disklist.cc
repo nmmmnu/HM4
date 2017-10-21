@@ -1,7 +1,5 @@
 #include "disklist.h"
 
-#include "pairblob.h"
-
 #include "binarysearch.h"
 #include "myalign.h"
 #include "levelorderlookup.h"
@@ -66,61 +64,17 @@ inline auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size
 
 // ==============================
 
-ObserverPair DiskList::operator[](const StringRef &key) const{
-	// precondition
-	assert(!key.empty());
-	// eo precondition
-
-	const auto x = search_(key);
-
-	return x.first ? operator[](x.second) : nullptr;
-}
-
-auto DiskList::lowerBound(const StringRef &key) const -> Iterator{
-	const auto x = search_(key);
-
-	return Iterator(*this, x.second, sorted());
-}
-
-// ==============================
-
-ObserverPair DiskList::operator[](size_type const index) const{
-	// precondition
-	assert( index < size() );
-	// eo precondition
-
-	const PairBlob *p = getAtFD_(index);
-
-	return Pair::observer(p);
-}
-
-int DiskList::cmpAt(size_type const index, const StringRef &key) const{
-	// precondition
-	assert(!key.empty());
-	// eo precondition
-
-	const PairBlob *p = getAtFD_(index);
-
-	// StringRef is not null terminated
-	return p ? p->cmp(key.data(), key.size()) : Pair::CMP_ZERO;
-}
-
-// ==============================
-
-const PairBlob *DiskList::saveAccessFD_(const PairBlob *blob) const{
+const Pair *DiskList::saveAccessFD_(const Pair *blob) const{
 	if (!blob)
 		return nullptr;
 
 	// check for overrun because PairBlob is dynamic size
 	bool const access = mData_->safeAccessMemory(blob, blob->bytes());
 
-	if (access)
-		return blob;
-
-	return nullptr;
+	return access ? blob : nullptr;
 }
 
-const PairBlob *DiskList::getAtFD_(size_type const index) const{
+const Pair *DiskList::getAtFD_(size_type const index) const{
 	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, size());
 
 	if (!be_array)
@@ -130,13 +84,13 @@ const PairBlob *DiskList::getAtFD_(size_type const index) const{
 
 	size_t const offset = be64toh(be_ptr);
 
-	const PairBlob *blob = mData_->as<const PairBlob>(offset);
+	const Pair *blob = mData_->as<const Pair>(offset);
 
 	// check for overrun because PairBlob is dynamic size
 	return saveAccessFD_(blob);
 }
 
-size_t DiskList::getSizeFD__(const PairBlob *blob, bool const aligned){
+size_t DiskList::getSizeFD__(const Pair *blob, bool const aligned){
 	constexpr MyAlign<PairConf::ALIGN> alc;
 
 	size_t const size = blob->bytes();
@@ -144,12 +98,12 @@ size_t DiskList::getSizeFD__(const PairBlob *blob, bool const aligned){
 	return ! aligned ? size : alc.calc(size);
 }
 
-const PairBlob *DiskList::getNextFD_(const PairBlob *previous) const{
+const Pair *DiskList::getNextFD_(const Pair *previous) const{
 	size_t size = getSizeFD__(previous, aligned());
 
 	const char *previousC = (const char *) previous;
 
-	const PairBlob *blob = mData_->as<const PairBlob>(previousC + size);
+	const Pair *blob = mData_->as<const Pair>(previousC + size);
 
 	// check for overrun because PairBlob is dynamic size
 	return saveAccessFD_(blob);
@@ -163,11 +117,11 @@ DiskList::Iterator::Iterator(const DiskList &list, size_type const pos,
 			pos_(pos),
 			sorted_(sorted){}
 
-const ObserverPair &DiskList::Iterator::operator*() const{
+const Pair &DiskList::Iterator::operator*() const{
 	if (tmp_blob && pos_ == tmp_pos)
-		return tmp_pair;
+		return *tmp_blob;
 
-	const PairBlob *blob;
+	const Pair *blob;
 
 	if (sorted_ && tmp_blob && pos_ == tmp_pos + 1){
 		// get data without seek, walk forward
@@ -180,9 +134,7 @@ const ObserverPair &DiskList::Iterator::operator*() const{
 	tmp_pos		= pos_;
 	tmp_blob	= blob;
 
-	tmp_pair	= Pair::observer(blob);
-
-	return tmp_pair;
+	return *tmp_blob;
 }
 
 // ==============================

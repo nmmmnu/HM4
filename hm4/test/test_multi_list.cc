@@ -1,6 +1,7 @@
 #include "pair.h"
 
-using Pair	= hm4::Pair;
+using hm4::Pair;
+using hm4::OPair;
 
 #include "mytest.h"
 
@@ -75,13 +76,13 @@ void table_test(const LIST &list, typename LIST::size_type const size, size_t co
 	mytest("sizeof",		list.bytes() == bytes		);
 
 
-	Pair p;
+	const Pair *p;
 
 
 	// GET
 
 	p = list["3 city"];
-	mytest("get",			p.getVal() == "Sofia"		);
+	mytest("get",			p->getVal() == "Sofia"		);
 
 	p = list["nonexistent"];
 	mytest("get non existent",	! p				);
@@ -104,8 +105,8 @@ void table_test(const LIST &list, typename LIST::size_type const size, size_t co
 #include "multi/duallist.h"
 
 template <class LIST>
-size_t list_insert(LIST &list, Pair &&p){
-	const size_t size = p.bytes();
+size_t list_insert(LIST &list, OPair &&p){
+	const size_t size = p->bytes();
 	list.insert(std::move(p));
 	return size;
 }

@@ -51,8 +51,8 @@ namespace impl_{
 						){}
 
 	public:
-		const Pair &operator *() const{
-			return cur != end ? *cur : *Pair::zero();
+		const Pair *dptr() const{
+			return cur != end ? & (*cur) : nullptr;
 		}
 
 		void operator ++(){

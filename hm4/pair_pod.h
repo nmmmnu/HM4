@@ -28,9 +28,6 @@ public:
 private:
 	static constexpr int		CMP_NULLKEY	= -1;
 
-public:
-	static constexpr int		CMP_ZERO	= +1;
-
 private:
 	Pair() noexcept = default;
 
@@ -63,6 +60,12 @@ public:
 							uint32_t created);
 
 	static std::unique_ptr<Pair> create(const Pair *src);
+
+public:
+	constexpr
+	bool empty() const noexcept{
+		return keylen;
+	}
 
 public:
 	StringRef getKey() const noexcept{

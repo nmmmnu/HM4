@@ -41,11 +41,28 @@ public:
 	}
 
 public:
-	ObserverPair operator[](const StringRef &key) const;
+	const Pair *operator[](const StringRef &key) const{
+		assert(!key.empty());
 
-	ObserverPair operator[](size_type const index) const;
+		const auto x = search_(key);
 
-	int cmpAt(size_type index, const StringRef &key) const;
+		return x.first ? operator[](x.second) : nullptr;
+	}
+
+	const Pair *operator[](size_type const index) const{
+		assert( index < size() );
+
+		return getAtFD_(index);
+	}
+
+	int cmpAt(size_type index, const StringRef &key) const{
+		assert(!key.empty());
+
+		const Pair *p = operator[](index);
+
+		// StringRef is not null terminated
+		return p ? p->cmp(key) : Pair::CMP_ZERO;
+	}
 
 	size_type size(bool const = false) const{
 		return (size_type) metadata_.size();
@@ -69,12 +86,12 @@ public:
 	Iterator end() const;
 
 private:
-	const PairBlob *saveAccessFD_(const PairBlob *blob) const;
+	const Pair *saveAccessFD_(const Pair *blob) const;
 
-	const PairBlob *getAtFD_(size_type index) const;
-	const PairBlob *getNextFD_(const PairBlob *blob) const;
+	const Pair *getAtFD_(size_type index) const;
+	const Pair *getNextFD_(const Pair *blob) const;
 
-	static size_t getSizeFD__(const PairBlob *blob, bool aligned);
+	static size_t getSizeFD__(const Pair *blob, bool aligned);
 
 private:
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
@@ -115,14 +132,14 @@ public:
 		return &list_ == &other.list_ && pos_ == other.pos_;
 	}
 
-	const ObserverPair &operator*() const;
+	const Pair &operator*() const;
 
 public:
 	bool operator!=(const Iterator &other) const{
 		return ! operator==(other);
 	}
 
-	const ObserverPair *operator ->() const{
+	const Pair *operator ->() const{
 		return & operator*();
 	}
 
@@ -136,11 +153,7 @@ private:
 	size_type	tmp_pos		= 0;
 
 	mutable
-	const PairBlob	*tmp_blob	= nullptr;
-
-	// We need to store the Pair,
-	// because operator -> need somewhere Pair to live
-	mutable ObserverPair	tmp_pair;
+	const Pair	*tmp_blob	= nullptr;
 };
 
 // ==============================
@@ -153,8 +166,15 @@ inline auto DiskList::end() const -> Iterator{
 	return Iterator(*this, size(), sorted());
 }
 
+inline auto DiskList::lowerBound(const StringRef &key) const -> Iterator{
+	const auto x = search_(key);
+
+	return Iterator(*this, x.second, sorted());
+}
+
 
 } // namespace disk
 } // namespace
 
 #endif
+

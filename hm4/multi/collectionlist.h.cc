@@ -3,7 +3,7 @@ namespace multi{
 
 
 template <class CONTAINER>
-ObserverPair CollectionList<CONTAINER>::operator[](const StringRef &key) const{
+const Pair *CollectionList<CONTAINER>::operator[](const StringRef &key) const{
 	assert(!key.empty());
 
 	// CONTAINER is responsible for ordering the tables,
@@ -12,11 +12,11 @@ ObserverPair CollectionList<CONTAINER>::operator[](const StringRef &key) const{
 	// CONTAINER is responsible for providing goof const Pair &.
 
 	for(const auto &table : container_ ){
-		if (const Pair &pair = table[key])
-			return Pair::observer(pair);
+		if (const Pair *pair = table[key])
+			return pair;
 	}
 
-	return Pair::zero();
+	return nullptr;
 }
 
 // ===================================

@@ -43,9 +43,9 @@ bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 	uint64_t createdMax	= std::numeric_limits<uint64_t>::min();
 
 	for(auto it = begin; it != end; ++it){
-		const auto &pair = *it;
+		const Pair &pair = *it;
 
-		if (! pair )
+		if (!pair.isValid())
 			continue;
 
 		if (pair.isTombstone()){

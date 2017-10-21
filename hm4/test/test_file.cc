@@ -23,12 +23,12 @@ static int printUsage(const char *cmd){
 		<< "\t\tThe '*', will be replaced with ID's"		<< '\n'
 
 		<< '\n'
-		
+
 		<< "Classes are:"		<< '\n'
 		<< '\t' << "v - VectorList"	<< '\n'
 		<< '\t' << "l - LinkList"	<< '\n'
 		<< '\t' << "s - SkipList"	<< '\n'
-		
+
 		<< '\n';
 
 	return 10;
@@ -47,14 +47,14 @@ static void listLoad(LIST &list, READER &reader, bool const tombstones = true){
 		const StringRef val = tombstones ? nullptr : key;
 
 		if (! key.empty())
-			list.insert( Pair{ key, val } );
+			list.insert( { key, val } );
 
 		++i;
 
 		if (i % PROCESS_STEP == 0){
-			std::cout << "Processed "	
+			std::cout << "Processed "
 					<< std::setw(10) << i			<< " records,"	<< ' '
-					<< std::setw(10) << list.bytes()	<< " bytes."
+					<< std::setw(10) << list.bytes()	<< " bytes."	<< '\n'
 			;
 		}
 	}
@@ -62,14 +62,14 @@ static void listLoad(LIST &list, READER &reader, bool const tombstones = true){
 
 template <class LIST>
 static void listSearch(const LIST &list, const StringRef &key){
-	const Pair pair = list[key];
+	const Pair *pair = list[key];
 
 	if (! pair){
 		printf("Key '%s' not found...\n", key.data());
 		return;
 	}
 
-	pair.print();
+	pair->print();
 }
 
 template <class LIST>
