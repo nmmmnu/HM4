@@ -98,9 +98,9 @@ bool SkipList::insert(OPair&& newdata){
 	const auto nl = locateMut_(key);
 
 	if (nl.node){
-		// update in place. node MUST be not NULL...
+		// update in place.
 
-		OPair & olddata = const_cast<Node *>(nl.node)->data;
+		OPair & olddata = nl.node->data;
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata) ){
@@ -134,14 +134,11 @@ bool SkipList::insert(OPair&& newdata){
 	// newnode->height = height
 
 	// place new node where it belongs
-
 	for(height_type i = 0; i < height; ++i){
-		if (nl.loc[i]){
+		if (Node *prev = nl.prev[i]){
 			// we are at the middle
-			const Node *node = nl.loc[i];
-
-			newnode->next[i] = node->next[i];
-			const_cast<Node *>(node)->next[i] = newnode;
+			newnode->next[i] = prev->next[i];
+			prev->next[i] = newnode;
 		}else{
 			newnode->next[i] = heads_[i];
 			heads_[i] = newnode;
@@ -181,12 +178,10 @@ bool SkipList::erase(const StringRef &key){
 		return true;
 
 	for(height_type i = 0; i < height_; ++i){
-		const Node *prev = nl.loc[i];
-
-		if (prev){
+		if (Node *prev = nl.prev[i]){
 			// check if lane go to this node...
 			if (prev->next[i] == nl.node)
-				const_cast<Node *>(prev)->next[i] = nl.node->next[i];
+				prev->next[i] = nl.node->next[i];
 		}else{
 			// must be first
 			if (heads_[i] == nl.node)
@@ -234,59 +229,62 @@ void SkipList::clear_(){
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }
 
-auto SkipList::locateMut_(const StringRef &key, bool const complete_evaluation) const -> NodeLocator{
+auto SkipList::locateMut_(const StringRef &key, bool const complete_evaluation) -> NodeLocator{
 	assert(!key.empty());
 
-	// it is extremly dangerous to have key == nullptr here.
-	// so we check it again
 	if (key.empty()){
+		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateMut_" };
 	}
 
-	NodeArrayC loc;
+	NodeLocator nl;
+
+	NodeArray &prev_loc = nl.prev;
 
 	// smart over-optimizations, such skip NULL lanes or
 	// start from the middle of the list did not pay off.
 
-	int cmp = 1;
-
-	const Node *node = nullptr;
-	const Node *prev = nullptr;
+	Node *prev = nullptr;
 
 	height_type height = height_;
 	while(height){
-		node = prev ? prev : heads_[height - 1];
+		Node *node = prev ? prev : heads_[height - 1];
 
 		for(; node; node = node->next[height - 1]){
 			const OPair & data = node->data;
-			cmp = data->cmp(key);
+			int const cmp = data->cmp(key);
 
-			if (cmp >= 0)
+			if (cmp == 0){
+				// found
+				nl.node =  node;
+
+				if (! complete_evaluation)
+					return nl;
+
+				break;
+			}
+
+			if (cmp > 0)
 				break;
 
 			prev = node;
 		}
 
-
-		if (cmp == 0 && complete_evaluation == false)
-			return { node, loc };
-
-		loc[height - 1] = prev;
+		prev_loc[height - 1] = prev;
 
 		--height;
 	}
 
-	return { cmp ? nullptr : node , loc };
+	return nl;
 }
 
 auto SkipList::locate_(const StringRef &key, bool const exact) const -> const Node *{
 	assert(!key.empty());
 
 	if (key.empty()){
-		throw std::logic_error{ "Key can not be nullptr in SkipList::locateMut_" };
+		// it is extremly dangerous to have key == nullptr here.
+		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
 	}
-
-	int cmp = 1;
 
 	const Node *node = nullptr;
 	const Node *prev = nullptr;
@@ -297,7 +295,7 @@ auto SkipList::locate_(const StringRef &key, bool const exact) const -> const No
 
 		for(; node; node = node->next[height - 1]){
 			const OPair & data = node->data;
-			cmp = data->cmp(key);
+			int const cmp = data->cmp(key);
 
 			if (cmp == 0){
 				// found
