@@ -42,8 +42,7 @@ struct SkipList::Node{
 	Node	*next[1];	// system dependent, dynamic, at least 1
 
 public:
-	template<class UPAIR>
-	Node(UPAIR &&data) : data(std::forward<UPAIR>(data)){}
+	Node(OPair &&data) : data(std::move(data)){}
 
 public:
 	static void *operator new(size_t size, height_type const height, bool const nothrow = false) {
@@ -51,8 +50,8 @@ public:
 
 		if (nothrow)
 			return ::operator new(size, std::nothrow);
-
-		return ::operator new(size);
+		else
+			return ::operator new(size);
 	}
 };
 
@@ -96,7 +95,7 @@ bool SkipList::insert(OPair&& newdata){
 
 	const StringRef &key = newdata->getKey();
 
-	const auto nl = locate_(key);
+	const auto nl = locateMut_(key);
 
 	if (nl.node){
 		// update in place. node MUST be not NULL...
@@ -168,32 +167,15 @@ bool SkipList::insert(OPair&& newdata){
 const Pair *SkipList::operator[](const StringRef &key) const{
 	assert(!key.empty());
 
-	const auto nl = locate_(key);
+	const Node *node = locate_(key);
 
-	return nl.node ? nl.node->data.get() : nullptr;
-}
-
-SkipList::Iterator SkipList::lowerBound(const StringRef &key) const{
-	if (key.empty())
-		return begin();
-
-	const auto nl = locate_(key);
-
-	if (nl.node)
-		return Iterator(nl.node);
-
-	const Node *prev = nl.loc[0];
-
-	if (prev)
-		return Iterator(prev->next[0]);
-	else
-		return Iterator(heads_[0]);
+	return node ? node->data.get() : nullptr;
 }
 
 bool SkipList::erase(const StringRef &key){
 	assert(!key.empty());
 
-	const auto nl = locate_(key, true);
+	const auto nl = locateMut_(key, true);
 
 	if (nl.node == nullptr)
 		return true;
@@ -252,13 +234,13 @@ void SkipList::clear_(){
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }
 
-auto SkipList::locate_(const StringRef &key, bool const complete_evaluation) const -> NodeLocator{
+auto SkipList::locateMut_(const StringRef &key, bool const complete_evaluation) const -> NodeLocator{
 	assert(!key.empty());
 
 	// it is extremly dangerous to have key == nullptr here.
 	// so we check it again
 	if (key.empty()){
-		throw std::logic_error{ "Key can not be nullptr in SkipList::_locate" };
+		throw std::logic_error{ "Key can not be nullptr in SkipList::locateMut_" };
 	}
 
 	NodeArrayC loc;
@@ -296,6 +278,44 @@ auto SkipList::locate_(const StringRef &key, bool const complete_evaluation) con
 
 	return { cmp ? nullptr : node , loc };
 }
+
+auto SkipList::locate_(const StringRef &key, bool const exact) const -> const Node *{
+	assert(!key.empty());
+
+	if (key.empty()){
+		throw std::logic_error{ "Key can not be nullptr in SkipList::locateMut_" };
+	}
+
+	int cmp = 1;
+
+	const Node *node = nullptr;
+	const Node *prev = nullptr;
+
+	height_type height = height_;
+	while(height){
+		node = prev ? prev : heads_[height - 1];
+
+		for(; node; node = node->next[height - 1]){
+			const OPair & data = node->data;
+			cmp = data->cmp(key);
+
+			if (cmp == 0){
+				// found
+				return node;
+			}
+
+			if (cmp > 0)
+				break;
+
+			prev = node;
+		}
+
+		--height;
+	}
+
+	return exact ? nullptr : node;
+}
+
 
 auto SkipList::getRandomHeight_() -> height_type{
 	// This gives slightly better performance,

@@ -69,7 +69,8 @@ private:
 private:
 	void clear_();
 
-	NodeLocator locate_(const StringRef &key, bool complete_evaluation = false) const;
+	NodeLocator locateMut_(const StringRef &key, bool complete_evaluation = false) const;
+	const Node *locate_(const StringRef &key, bool const exact = true) const;
 
 	height_type getRandomHeight_();
 
@@ -108,6 +109,14 @@ private:
 };
 
 // ==============================
+
+inline auto SkipList::lowerBound(const StringRef &key) const -> Iterator{
+	if (key.empty())
+		return begin();
+
+	const Node *node = locate_(key, false);
+	return Iterator(node);
+}
 
 inline auto SkipList::begin() const -> Iterator{
 	return Iterator(heads_[0]);
