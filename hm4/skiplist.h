@@ -71,7 +71,7 @@ private:
 
 	NodeLocator locate_(const StringRef &key, bool complete_evaluation = false) const;
 
-	height_type _getRandomHeight();
+	height_type getRandomHeight_();
 
 private:
 	class RandomGenerator;

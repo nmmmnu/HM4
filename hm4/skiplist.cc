@@ -6,7 +6,6 @@
 
 namespace hm4{
 
-
 class SkipList::RandomGenerator{
 public:
 	bool operator()(){
@@ -102,7 +101,7 @@ bool SkipList::insert(OPair&& newdata){
 	if (nl.node){
 		// update in place. node MUST be not NULL...
 
-		const OPair & olddata = nl.node->data;
+		OPair & olddata = const_cast<Node *>(nl.node)->data;
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata) ){
@@ -115,7 +114,7 @@ bool SkipList::insert(OPair&& newdata){
 			+ newdata->bytes();
 
 		// copy assignment
-		const_cast<OPair &>(olddata) = std::move(newdata);
+		olddata = std::move(newdata);
 
 		return true;
 	}
@@ -123,7 +122,7 @@ bool SkipList::insert(OPair&& newdata){
 	// create new node
 
 	size_t const size = newdata->bytes();
-	height_type const height = _getRandomHeight();
+	height_type const height = getRandomHeight_();
 
 	Node *newnode = new(height, true) Node(std::move(newdata));
 
@@ -192,9 +191,7 @@ SkipList::Iterator SkipList::lowerBound(const StringRef &key) const{
 }
 
 bool SkipList::erase(const StringRef &key){
-	// precondition
 	assert(!key.empty());
-	// eo precondition
 
 	const auto nl = locate_(key, true);
 
@@ -256,18 +253,13 @@ void SkipList::clear_(){
 }
 
 auto SkipList::locate_(const StringRef &key, bool const complete_evaluation) const -> NodeLocator{
-	// precondition
 	assert(!key.empty());
-	// eo precondition
 
-	#if NDEBUG
 	// it is extremly dangerous to have key == nullptr here.
 	// so we check it again
 	if (key.empty()){
-		std::logic_error exception("Key can not be nullptr in SkipList::_locate");
-		throw exception;
+		throw std::logic_error{ "Key can not be nullptr in SkipList::_locate" };
 	}
-	#endif
 
 	NodeArrayC loc;
 
@@ -283,7 +275,7 @@ auto SkipList::locate_(const StringRef &key, bool const complete_evaluation) con
 	while(height){
 		node = prev ? prev : heads_[height - 1];
 
-		while(node){
+		for(; node; node = node->next[height - 1]){
 			const OPair & data = node->data;
 			cmp = data->cmp(key);
 
@@ -291,11 +283,10 @@ auto SkipList::locate_(const StringRef &key, bool const complete_evaluation) con
 				break;
 
 			prev = node;
-			node = node->next[height - 1];
 		}
 
 
-		if (complete_evaluation == false && cmp == 0)
+		if (cmp == 0 && complete_evaluation == false)
 			return { node, loc };
 
 		loc[height - 1] = prev;
@@ -306,7 +297,7 @@ auto SkipList::locate_(const StringRef &key, bool const complete_evaluation) con
 	return { cmp ? nullptr : node , loc };
 }
 
-auto SkipList::_getRandomHeight() -> height_type{
+auto SkipList::getRandomHeight_() -> height_type{
 	// This gives slightly better performance,
 	// than divide by 3 or multply by 0.33
 

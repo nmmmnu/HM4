@@ -1,7 +1,5 @@
 #include "comparator.h"
 
-#include "logger.h"
-
 template <class ARRAY, class SIZE, class KEY, class COMP>
 std::pair<bool,SIZE> binarySearch(const ARRAY &list,
 				SIZE start, SIZE end,

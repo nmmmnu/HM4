@@ -29,8 +29,6 @@ auto list_populate(LIST &list){
 	size += list_insert(list, {"4 os",	"Linux"	});
 	size += list_insert(list, {"2 age",	"22"	});
 
-	list.print();
-
 	return std::make_pair( (typename LIST::size_type) 4, size);
 }
 
@@ -155,8 +153,6 @@ void list_test(LIST &list){
 	mytest("remove",		p->getVal() == "Sofia"		);
 	mytest("remove count",		list.size() == 1		);
 	mytest("remove sizeof",		list.bytes() == p->bytes()	);
-
-list.print();
 
 	// overwrite sizeof test
 	OPair o_sopair = { "3 city", "" };

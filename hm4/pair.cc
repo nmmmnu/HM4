@@ -6,10 +6,6 @@
 
 namespace hm4{
 
-
-constexpr char Pair::ZERO[];
-
-
 std::unique_ptr<Pair> Pair::create(
 				const char *key, size_t const keylen,
 				const char *val, size_t const vallen,
@@ -97,4 +93,24 @@ uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
 
 
 } // namespace
+
+
+
+#if 0
+	constexpr char Pair::ZERO[];
+
+	constexpr static char ZERO[] = {
+		0, 0, 0, 0,		// created
+		0, 0, 0, 0,		// milliseconds
+		0, 0, 0, 0,		// expires
+		0, 0, 0, 0,		// vallen
+		0, 0,			// keylen
+		'\0',			// key
+		'\0'			// val
+	};
+
+	constexpr static const Pair *zero_(){
+		return reinterpret_cast<const Pair *>(ZERO);
+	}
+#endif
 

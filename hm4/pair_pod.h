@@ -197,22 +197,6 @@ private:
 
 	static uint64_t getCreateTime__(uint32_t created) noexcept;
 
-private:
-	constexpr static char ZERO[] = {
-		0, 0, 0, 0,		// created
-		0, 0, 0, 0,		// milliseconds
-		0, 0, 0, 0,		// expires
-		0, 0, 0, 0,		// vallen
-		0, 0,			// keylen
-		'\0',			// key
-		'\0'			// val
-	};
-
-public:
-	constexpr static const Pair *zero(){
-		return reinterpret_cast<const Pair *>(ZERO);
-	}
-
 } __attribute__((__packed__));
 
 static_assert(std::is_pod<Pair>::value, "Pair must be POD type");
