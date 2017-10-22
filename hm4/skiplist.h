@@ -54,11 +54,6 @@ private:
 	struct		Node;
 	using		NodeArray	= std::array<Node *, MAX_HEIGHT>;
 
-	struct		NodeLocator{
-				Node		*node	= nullptr;
-				NodeArray	prev;
-			};
-
 	height_type	height_;
 	NodeArray	heads_;
 
@@ -68,7 +63,13 @@ private:
 private:
 	void clear_();
 
-	NodeLocator locateMut_(const StringRef &key, bool complete_evaluation = false);
+	struct NodeLocator{
+		Node		*node	= nullptr;
+		NodeArray	prev;
+	};
+
+	NodeLocator locateMutable_(const StringRef &key, bool complete_evaluation = false);
+
 	const Node *locate_(const StringRef &key, bool const exact = true) const;
 
 	height_type getRandomHeight_();

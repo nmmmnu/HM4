@@ -95,7 +95,7 @@ bool SkipList::insert(OPair&& newdata){
 
 	const StringRef &key = newdata->getKey();
 
-	const auto nl = locateMut_(key);
+	const auto nl = locateMutable_(key);
 
 	if (nl.node){
 		// update in place.
@@ -172,7 +172,7 @@ const Pair *SkipList::operator[](const StringRef &key) const{
 bool SkipList::erase(const StringRef &key){
 	assert(!key.empty());
 
-	const auto nl = locateMut_(key, true);
+	const auto nl = locateMutable_(key, true);
 
 	if (nl.node == nullptr)
 		return true;
@@ -229,17 +229,15 @@ void SkipList::clear_(){
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }
 
-auto SkipList::locateMut_(const StringRef &key, bool const complete_evaluation) -> NodeLocator{
+auto SkipList::locateMutable_(const StringRef &key, bool const complete_evaluation) -> NodeLocator{
 	assert(!key.empty());
 
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
-		throw std::logic_error{ "Key can not be nullptr in SkipList::locateMut_" };
+		throw std::logic_error{ "Key can not be nullptr in SkipList::locateMutable_" };
 	}
 
 	NodeLocator nl;
-
-	NodeArray &prev_loc = nl.prev;
 
 	// smart over-optimizations, such skip NULL lanes or
 	// start from the middle of the list did not pay off.
@@ -256,9 +254,13 @@ auto SkipList::locateMut_(const StringRef &key, bool const complete_evaluation) 
 
 			if (cmp == 0){
 				// found
+
+				// storing node here is redundant operation, however:
+				// * cmp is const.
+				// * one less branch
 				nl.node =  node;
 
-				if (! complete_evaluation)
+				if (complete_evaluation == false)
 					return nl;
 
 				break;
@@ -270,7 +272,7 @@ auto SkipList::locateMut_(const StringRef &key, bool const complete_evaluation) 
 			prev = node;
 		}
 
-		prev_loc[height - 1] = prev;
+		nl.prev[height - 1] = prev;
 
 		--height;
 	}
