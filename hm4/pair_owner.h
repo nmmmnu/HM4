@@ -17,7 +17,9 @@ public:
 				hkey(p ? p->getKey() : StringRef{}),
 				pp( Pair::create(p) ){}
 
-	OPair(const Pair &p) : OPair(&p){}
+	OPair(const Pair &p) :
+				hkey(p.getKey()),
+				pp( Pair::create(p) ){}
 
 	// ==============================
 
@@ -43,7 +45,8 @@ public:
 	void swap(OPair &other) noexcept{
 		using std::swap;
 
-		swap(pp, other.pp);
+		swap(hkey,	other.hkey	);
+		swap(pp,	other.pp	);
 	}
 
 	operator bool() const noexcept{
@@ -65,7 +68,7 @@ public:
 public:
 	int cmp(const StringRef &key) const noexcept{
 		if (key.empty())
-			return -1;
+			return Pair::CMP_NULLKEY;
 
 		int const r = hkey.compare(key);
 

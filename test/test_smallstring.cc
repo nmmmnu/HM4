@@ -33,11 +33,23 @@ int main(){
 static void ss_empty(){
 	mytest.begin("SmallString empty");
 
-	constexpr SmallString<1> sr;
+	SmallString<1> sr;
 
 	mytest("size",		sr.size() == 0				);
 	mytest("data",		strcmp(sr.data(), "") == 0		);
 	mytest("empty",		sr.empty()				);
+
+	for(size_t i = 0; i < sr.capacity(); ++i){
+		if ( sr[i] )
+			mytest("zerofill",	false	);
+	}
+
+	SmallString<1> srz = "X";
+
+	for(size_t i = 1; i < srz.capacity(); ++i){
+		if ( srz[i] )
+			mytest("zerofill",	false	);
+	}
 }
 
 template<size_t BYTES>

@@ -15,27 +15,37 @@ private:
 public:
 	// CONSTRUCTORS
 
-	constexpr SmallString() = default;
-
-	SmallString(const char *data, size_t size){
-		strcopy_(data, min__(size), nullptr);
+	SmallString() noexcept{
+		clear_();
 	}
 
-	SmallString(const char *data){
-		strcopy_(data, SIZE, nullptr);
+	SmallString(const char *data) noexcept{
+		if (data)
+			strncpy(data_, data, SIZE);
+		else
+			clear_();
 	}
 
-	SmallString(const StringRef &sr) : SmallString(sr.data(), sr.size()){}
+	SmallString(const char *data, size_t const size) noexcept{
+		if (data)
+			copy_(data, size);
+		else
+			clear_();
+	}
+
+	SmallString(const StringRef &sr) noexcept{
+		copy_(sr.data(), sr.size());
+	}
 
 private:
-	void strcopy_(const char *data, size_t const size){
-		assert(data);
-		strncpy(data_, data, size);
+	void copy_(const char *data, size_t const size) noexcept{
+		size_t const ms = min__(size);
+		strncpy(data_, data, ms);
+		memset(data_ + ms, 0, SIZE - ms);
 	}
 
-	void strcopy_(const char *data, size_t const size, std::nullptr_t){
-		if (data)
-			strcopy_(data, size);
+	void clear_() noexcept{
+		memset(data_, 0, SIZE);
 	}
 
 public:
@@ -70,6 +80,7 @@ public:
 	// ITERATORS
 
 	constexpr const char &operator [] (size_t const index) const noexcept{
+		assert(index < SIZE);
 		return data_[index];
 	}
 
@@ -83,6 +94,10 @@ public:
 
 	// COMPARES
 
+	int compare(const StringRef &sr) const noexcept{
+		return compare(sr.data(), sr.size());
+	}
+
 	int compare(const char *data, size_t const size) const noexcept{
 		return compare_(data, min__(size));
 	}
@@ -91,11 +106,11 @@ public:
 		return compare_(data, SIZE);
 	}
 
-	int compare(const StringRef &sr) const noexcept{
-		return compare(sr.data(), sr.size());
-	}
-
 	// EQUALS
+
+	bool equals(const StringRef &sr) const noexcept{
+		return equals(sr.data(), sr.size());
+	}
 
 	bool equals(const char *data, size_t size) const noexcept{
 		return equals_(data, min__(size));
@@ -103,10 +118,6 @@ public:
 
 	bool equals(const char *data) const noexcept{
 		return equals_(data, SIZE);
-	}
-
-	bool equals(const StringRef &sr) const noexcept{
-		return equals(sr.data(), sr.size());
 	}
 
 	// OPERATORS NOT INCLUDED
@@ -132,7 +143,7 @@ private:
 	}
 
 private:
-	char data_[SIZE] = { 0 };
+	char data_[SIZE];
 };
 
 // ==================================

@@ -25,7 +25,7 @@ public:
 	static constexpr uint16_t	MAX_KEY_SIZE	=      1024;	// MySQL is 1000
 	static constexpr uint32_t	MAX_VAL_SIZE	= 16 * 1024;
 
-private:
+public:
 	static constexpr int		CMP_NULLKEY	= -1;
 
 private:
@@ -60,6 +60,10 @@ public:
 							uint32_t created);
 
 	static std::unique_ptr<Pair> create(const Pair *src);
+
+	static std::unique_ptr<Pair> create(const Pair &src){
+		return create(& src);
+	}
 
 public:
 	constexpr
