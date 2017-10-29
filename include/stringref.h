@@ -1,5 +1,5 @@
-#ifndef MY_STRING_REF_H
-#define MY_STRING_REF_H
+#ifndef MY_STRING_REF_H_
+#define MY_STRING_REF_H_
 
 #include <cstring>
 #include <string>

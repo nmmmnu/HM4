@@ -9,12 +9,12 @@ MyTest mytest;
 // ==================================
 
 constexpr
-const char hello_c[]	= "hello";
+const char	hello_c[]	= "hello";
 constexpr
-const char	bla_c[]	= "bla";
+const char	bla_c[]		= "bla";
 
-const char *hello	= "hello";
-const char *bla		= "bla";
+const char	*hello		= "hello";
+const char	*bla		= "bla";
 
 // ==================================
 
