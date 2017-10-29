@@ -28,17 +28,17 @@ public:
 
 	SmallString(const char *data, size_t const size) noexcept{
 		if (data)
-			copy_(data, size);
+			copyNotNull_(data, size);
 		else
 			clear_();
 	}
 
 	SmallString(const StringRef &sr) noexcept{
-		copy_(sr.data(), sr.size());
+		copyNotNull_(sr.data(), sr.size());
 	}
 
 private:
-	void copy_(const char *data, size_t const size) noexcept{
+	void copyNotNull_(const char *data, size_t const size) noexcept{
 		if (size >= SIZE){
 			memcpy(data_, data, SIZE);
 		}else{
