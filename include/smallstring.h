@@ -1,8 +1,9 @@
 #ifndef MY_SMALL_STRING_H_
 #define MY_SMALL_STRING_H_
 
-#include <cstring>
-#include <ostream>
+#include <stringref.h>
+
+#include <cassert>
 
 template <size_t BYTES>
 class SmallString{
@@ -16,12 +17,25 @@ public:
 
 	constexpr SmallString() = default;
 
-	SmallString(const char *data, size_t size) : SmallString(data, min__(size), nullptr){}
-	SmallString(const char *data             ) : SmallString(data, SIZE,        nullptr){}
+	SmallString(const char *data, size_t size){
+		strcopy_(data, min__(size), nullptr);
+	}
+
+	SmallString(const char *data){
+		strcopy_(data, SIZE, nullptr);
+	}
+
+	SmallString(const StringRef &sr) : SmallString(sr.data(), sr.size()){}
 
 private:
-	SmallString(const char *data, size_t const size, std::nullptr_t){
+	void strcopy_(const char *data, size_t const size){
+		assert(data);
 		strncpy(data_, data, size);
+	}
+
+	void strcopy_(const char *data, size_t const size, std::nullptr_t){
+		if (data)
+			strcopy_(data, size);
 	}
 
 public:
@@ -55,7 +69,7 @@ public:
 
 	// ITERATORS
 
-	constexpr const char &operator [] (size_t index) const noexcept{
+	constexpr const char &operator [] (size_t const index) const noexcept{
 		return data_[index];
 	}
 
@@ -77,6 +91,10 @@ public:
 		return compare_(data, SIZE);
 	}
 
+	int compare(const StringRef &sr) const noexcept{
+		return compare(sr.data(), sr.size());
+	}
+
 	// EQUALS
 
 	bool equals(const char *data, size_t size) const noexcept{
@@ -87,6 +105,10 @@ public:
 		return equals_(data, SIZE);
 	}
 
+	bool equals(const StringRef &sr) const noexcept{
+		return equals(sr.data(), sr.size());
+	}
+
 	// OPERATORS NOT INCLUDED
 
 private:
@@ -94,19 +116,19 @@ private:
 
 	int compare_(const char *data, size_t const size) const noexcept{
 		// if data_ is less SIZE, it is null terminated
-		return strncmp(data_, data, min__(size));
+		return strncmp(data_, data, size);
 	}
 
 	bool equals_(const char *data, size_t const size) const noexcept{
 		// if data_ is less SIZE, it is null terminated
-		return strncmp(data_, data, min__(size)) == 0;
+		return strncmp(data_, data, size) == 0;
 	}
 
 private:
 	// HELPERS
 
 	constexpr static size_t min__(size_t const size) noexcept{
-		return size > SIZE ? SIZE : size;
+		return size < SIZE ? size : SIZE;
 	}
 
 private:

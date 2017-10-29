@@ -48,7 +48,9 @@ public:
 		assert( index < size() );
 		assert(!key.empty());
 
-		return operator[](index)->cmp(key);
+		const OPair &p = operator[](index);
+
+		return p.cmp(key);
 	}
 
 	bool insert(OPair &&data);
@@ -81,9 +83,6 @@ private:
 	size_type calcNewCount_(size_type size);
 
 private:
-	/* preconditions
-	Key can not be zero length
-	*/
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
 };
 

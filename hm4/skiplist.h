@@ -74,6 +74,10 @@ private:
 
 	height_type getRandomHeight_();
 
+	static int ocmp__(const OPair &p, const StringRef &key){
+		return p.cmp(key);
+	}
+
 private:
 	class RandomGenerator;
 

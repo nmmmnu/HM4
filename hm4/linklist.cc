@@ -51,7 +51,7 @@ bool LinkList::insert(OPair&& newdata){
 	for(Node *node = head_; node; node = node->next){
 		OPair & olddata = node->data;
 
-		int const cmp = olddata->cmp(key);
+		int const cmp = ocmp__(olddata, key);
 
 		if (cmp == 0){
 			// handle overwrite,
@@ -115,7 +115,7 @@ bool LinkList::erase(const StringRef &key){
 	Node *prev = nullptr;
 	for(Node *node = head_; node; node = node->next){
 		const OPair & data = node->data;
-		int const cmp = data->cmp(key);
+		int const cmp = ocmp__(data, key);
 
 		if (cmp == 0){
 			if (prev){
@@ -157,7 +157,7 @@ const LinkList::Node *LinkList::locate_(const StringRef &key, bool const exact) 
 	for(const Node *node = head_; node; node = node->next){
 		const OPair & data = node->data;
 
-		int const cmp = data->cmp(key);
+		int const cmp = ocmp__(data, key);
 
 		if (cmp == 0)
 			return node;

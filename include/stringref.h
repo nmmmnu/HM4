@@ -46,7 +46,7 @@ public:
 
 	// ITERATORS
 
-	constexpr const char &operator [] (size_t index) const noexcept{
+	constexpr const char &operator [] (size_t const index) const noexcept{
 		return data_[index];
 	}
 

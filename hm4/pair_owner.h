@@ -3,15 +3,21 @@
 
 #include "pair_pod.h"
 
+#include "smallstring.h"
+
 namespace hm4{
 
 class OPair{
 public:
 	OPair(const StringRef &key, const StringRef &val, uint32_t expires = 0, uint32_t created = 0) :
-						pp( Pair::create( key, val, expires, created) ){}
+				hkey(key),
+				pp( Pair::create(key, val, expires, created) ){}
 
-	OPair(const Pair *p) : pp( Pair::create( p) ){}
-	OPair(const Pair &p) : pp( Pair::create(&p) ){}
+	OPair(const Pair *p) :
+				hkey(p ? p->getKey() : StringRef{}),
+				pp( Pair::create(p) ){}
+
+	OPair(const Pair &p) : OPair(&p){}
 
 	// ==============================
 
@@ -56,7 +62,21 @@ public:
 		return pp.get();
 	}
 
+public:
+	int cmp(const StringRef &key) const noexcept{
+		if (key.empty())
+			return -1;
+
+		int const r = hkey.compare(key);
+
+		if (r || key.size() <= hkey.capacity())
+			return r;
+
+		return pp->cmp(key);
+	}
+
 private:
+	SmallString<1>			hkey;
 	std::unique_ptr<const Pair>	pp;
 };
 

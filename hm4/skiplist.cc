@@ -250,7 +250,7 @@ auto SkipList::locateMutable_(const StringRef &key, bool const complete_evaluati
 
 		for(; node; node = node->next[height - 1]){
 			const OPair & data = node->data;
-			int const cmp = data->cmp(key);
+			int const cmp = ocmp__(data, key);
 
 			if (cmp == 0){
 				// found
@@ -297,7 +297,7 @@ auto SkipList::locate_(const StringRef &key, bool const exact) const -> const No
 
 		for(; node; node = node->next[height - 1]){
 			const OPair & data = node->data;
-			int const cmp = data->cmp(key);
+			int const cmp = ocmp__(data, key);
 
 			if (cmp == 0){
 				// found
