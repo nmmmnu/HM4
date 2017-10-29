@@ -7,10 +7,10 @@
 
 template <size_t BYTES>
 class SmallString{
-	static_assert(BYTES >= 1 && BYTES <= 8, "BYTES must be between 1 and 8");
+	static_assert(BYTES >= 1 && BYTES <= 64, "BYTES must be between 1 and 64");
 
 private:
-	constexpr static size_t SIZE = 8 * BYTES;
+	constexpr static size_t SIZE = BYTES;
 
 public:
 	// CONSTRUCTORS
@@ -102,10 +102,12 @@ public:
 	}
 
 	int compare(const char *data, size_t const size) const noexcept{
+		assert(data);
 		return compare_(data, min__(size));
 	}
 
 	int compare(const char *data) const noexcept{
+		assert(data);
 		return compare_(data, SIZE);
 	}
 
@@ -116,10 +118,12 @@ public:
 	}
 
 	bool equals(const char *data, size_t size) const noexcept{
+		assert(data);
 		return equals_(data, min__(size));
 	}
 
 	bool equals(const char *data) const noexcept{
+		assert(data);
 		return equals_(data, SIZE);
 	}
 
@@ -158,6 +162,11 @@ inline std::ostream& operator << (std::ostream& os, const SmallString<BYTES> &sr
 	// almost the same, but std::setw() works
 	return __ostream_insert(os, sr.data(), static_cast<std::streamsize>( sr.size() ));
 }
+
+// ==================================
+
+using SmallString8  = SmallString<8>;
+using SmallString16 = SmallString<16>;
 
 #endif
 

@@ -79,7 +79,7 @@ public:
 	}
 
 private:
-	SmallString<1>			hkey;
+	SmallString8			hkey;
 	std::unique_ptr<const Pair>	pp;
 };
 

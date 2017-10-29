@@ -22,8 +22,8 @@ void ss_test();
 
 int main(){
 	ss_empty();
-	ss_test<1>();
-	ss_test<2>();
+	ss_test<8>();
+	ss_test<64>();
 
 	return mytest.end();
 }
@@ -41,13 +41,13 @@ void ss_zerofill(const SmallString<W> &sr, size_t const start){
 static void ss_empty(){
 	mytest.begin("SmallString empty");
 
-	SmallString<1> sr;
+	SmallString8 sr;
 
 	mytest("size",		sr.size() == 0				);
 	mytest("data",		strcmp(sr.data(), "") == 0		);
 	mytest("empty",		sr.empty()				);
 
-	using SS = SmallString<1>;
+	using SS = SmallString8;
 
 	ss_zerofill( SS{ nullptr  }, 0 );
 	ss_zerofill( SS{ ""       }, 0 );
@@ -61,7 +61,7 @@ template<size_t BYTES>
 void ss_test(){
 	mytest.begin("general");
 
-	const SmallString<BYTES> &sr = hello;
+	const SmallString8 &sr = hello;
 
 	auto const cap = sr.capacity();
 
