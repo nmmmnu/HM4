@@ -61,7 +61,7 @@ template<size_t BYTES>
 void ss_test(){
 	mytest.begin("general");
 
-	const SmallString8 &sr = hello;
+	const SmallString<BYTES> &sr = hello;
 
 	auto const cap = sr.capacity();
 
