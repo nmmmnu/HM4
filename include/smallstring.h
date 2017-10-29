@@ -39,9 +39,12 @@ public:
 
 private:
 	void copy_(const char *data, size_t const size) noexcept{
-		size_t const ms = min__(size);
-		strncpy(data_, data, ms);
-		memset(data_ + ms, 0, SIZE - ms);
+		if (size >= SIZE){
+			memcpy(data_, data, SIZE);
+		}else{
+			memcpy(data_, data, size);
+			memset(data_ + size, 0, SIZE - size);
+		}
 	}
 
 	void clear_() noexcept{

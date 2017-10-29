@@ -30,6 +30,14 @@ int main(){
 
 // ==================================
 
+template<size_t W>
+void ss_zerofill(const SmallString<W> &sr, size_t const start){
+	for(size_t i = start; i < sr.capacity(); ++i){
+		if ( sr[i] )
+			mytest("zerofill",	false	);
+	}
+}
+
 static void ss_empty(){
 	mytest.begin("SmallString empty");
 
@@ -39,17 +47,14 @@ static void ss_empty(){
 	mytest("data",		strcmp(sr.data(), "") == 0		);
 	mytest("empty",		sr.empty()				);
 
-	for(size_t i = 0; i < sr.capacity(); ++i){
-		if ( sr[i] )
-			mytest("zerofill",	false	);
-	}
+	using SS = SmallString<1>;
 
-	SmallString<1> srz = "X";
-
-	for(size_t i = 1; i < srz.capacity(); ++i){
-		if ( srz[i] )
-			mytest("zerofill",	false	);
-	}
+	ss_zerofill( SS{ nullptr  }, 0 );
+	ss_zerofill( SS{ ""       }, 0 );
+	ss_zerofill( SS{ "", 0    }, 0 );
+	ss_zerofill( SS{ "abc"    }, 3 );
+	ss_zerofill( SS{ "abc", 3 }, 3 );
+	ss_zerofill( SS{ "abc"_sr }, 3 );
 }
 
 template<size_t BYTES>
