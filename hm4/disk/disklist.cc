@@ -2,6 +2,7 @@
 
 #include "binarysearch.h"
 #include "myalign.h"
+#include "mynarrow.h"
 #include "levelorderlookup.h"
 
 #include "disk/filenames.h"
@@ -75,14 +76,14 @@ const Pair *DiskList::saveAccessFD_(const Pair *blob) const{
 }
 
 const Pair *DiskList::getAtFD_(size_type const index) const{
-	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, size());
+	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, narrow<size_t>(size()));
 
 	if (!be_array)
 		return nullptr;
 
 	const uint64_t be_ptr = be_array[index];
 
-	size_t const offset = be64toh(be_ptr);
+	size_t const offset = narrow<size_t>(be64toh(be_ptr));
 
 	const Pair *blob = mData_->as<const Pair>(offset);
 
@@ -296,7 +297,7 @@ private:
 
 		// BTree NIL case - can not happen
 
-		const NodeData *nd = mKeys_->as<const NodeData>(offset);
+		const NodeData *nd = mKeys_->as<const NodeData>(narrow<size_t>(offset));
 
 		if (!nd)
 			throw BTreeAccessError{};
@@ -305,7 +306,7 @@ private:
 		size_type const dataid  = be64toh(nd->dataid);
 
 		// key is just after the NodeData
-		const char *keyptr = mKeys_->as<const char>(offset + sizeof(NodeData), keysize);
+		const char *keyptr = mKeys_->as<const char>(narrow<size_t>(offset + sizeof(NodeData)), keysize);
 
 		if (!keyptr)
 			throw BTreeAccessError{};

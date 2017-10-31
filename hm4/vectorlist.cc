@@ -1,5 +1,6 @@
 #include "vectorlist.h"
 
+#include "mynarrow.h"
 #include "binarysearch.h"
 
 #define xfree(p)		free(p)
@@ -151,7 +152,7 @@ bool VectorList::shiftR_(size_type const index){
 	// LLVM static analyzer thinks this is an error,
 	// so I add this unused branch
 	if (buffer_){
-		size_t const size = dataCount_ - index - 1;
+		size_t const size = narrow<size_t>(dataCount_ - index - 1);
 
 		// this is the most slow operation of them all
 		xmemmove(
