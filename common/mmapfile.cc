@@ -34,7 +34,8 @@ bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, 
 	if (size2 < 0)
 		return openFail__(fd);
 
-	size_t size = size2 <= 0 ? 0 : (size_t)size2;
+	// size2 is checked already
+	size_t size = size2 <= 0 ? 0 : static_cast<size_t>(size2);
 
 	if (size == 0)
 		return openFail__(fd);

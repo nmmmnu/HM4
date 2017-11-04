@@ -79,16 +79,6 @@ public:
 	}
 
 	// ==================================
-/*
-	bool push(ssize_t const len, const char *ptr){
-		return push((size_t) len, ptr);
-	}
-
-	bool pop(ssize_t const len){
-		return pop((size_t) len);
-	}
-*/
-	// ==================================
 
 	void print() const{
 		printf("h: %3zu | s: %3zu | %.*s\n",
@@ -110,5 +100,17 @@ private:
 
 } // namespace
 
+#endif
+
+
+
+#if 0
+	bool push(ssize_t const len, const char *ptr){
+		return push(narrow<size_t>(len), ptr);
+	}
+
+	bool pop(ssize_t const len){
+		return pop(narrow<size_t>(len));
+	}
 #endif
 
