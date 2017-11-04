@@ -79,8 +79,8 @@ public:
 	}
 
 private:
-	SmallString8			hkey;
-	std::unique_ptr<const Pair>	pp;
+	SmallString<PairConf::HLINE_SIZE>		hkey;
+	std::unique_ptr<const Pair>		pp;
 };
 
 // ==============================

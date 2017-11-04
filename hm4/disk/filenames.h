@@ -9,6 +9,7 @@ namespace disk{
 namespace file_ext{
 	constexpr const char *DOT_INDX		= ".indx";
 	constexpr const char *DOT_DATA		= ".data";
+	constexpr const char *DOT_LINE		= ".line";
 
 	constexpr const char *DOT_BTREE_INDX	= ".tree";
 	constexpr const char *DOT_BTREE_DATA	= ".keys";
@@ -22,6 +23,10 @@ inline std::string filenameMeta(std::string filename){
 
 inline std::string filenameIndx(const StringRef &filename){
 	return StringRef::concatenate( { filename, file_ext::DOT_INDX } );
+}
+
+inline std::string filenameLine(const StringRef &filename){
+	return StringRef::concatenate( { filename, file_ext::DOT_LINE } );
 }
 
 inline std::string filenameData(const StringRef &filename){

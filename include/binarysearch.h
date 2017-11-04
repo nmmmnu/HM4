@@ -4,7 +4,6 @@
 #include <utility>	// std::pair
 
 struct BinarySearchCompStdandard;	// [] <=>
-struct BinarySearchCompList;		// cmpAt(index, key)
 
 template <class ARRAY, class SIZE, class KEY, class COMP>
 std::pair<bool,SIZE> binarySearch(const ARRAY &list,

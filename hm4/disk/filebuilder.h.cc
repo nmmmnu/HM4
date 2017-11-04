@@ -19,9 +19,10 @@ bool FileBuilder::build(const StringRef &filename,
 
 	std::ofstream fileMeta(filenameMeta(filename),	std::ios::out | std::ios::binary);
 	std::ofstream fileIndx(filenameIndx(filename),	std::ios::out | std::ios::binary);
+	std::ofstream fileLine(filenameLine(filename),	std::ios::out | std::ios::binary);
 	std::ofstream fileData(filenameData(filename),	std::ios::out | std::ios::binary);
 
-	return writeToFile__(begin, end, fileMeta, fileIndx, fileData, keepTombstones, aligned);
+	return writeToFile__(begin, end, fileMeta, fileIndx, fileLine, fileData, keepTombstones, aligned);
 }
 
 
@@ -29,6 +30,7 @@ template <class ITERATOR>
 bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 				std::ofstream &file_meta,
 				std::ofstream &file_indx,
+				std::ofstream &file_line,
 				std::ofstream &file_data,
 				bool const keepTombstones,
 				bool const aligned){
@@ -63,27 +65,49 @@ bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 		if (created > createdMax)
 			createdMax = created;
 
-		// write the index
-		// this is way slower.
-		// uint64_t const be_index = htobe64( file_data.tellp() );
+		/* write the index */
+		{
+			// this is way slower.
+			// uint64_t const be_index = htobe64( file_data.tellp() );
 
-		uint64_t const be_index = htobe64(index);
+			uint64_t const be_index = htobe64(index);
 
-		file_indx.write( (const char *) & be_index, sizeof(uint64_t));
-
-		// write the data
-		pair.fwrite(file_data);
-
-		size_t bytes = pair.bytes();
-
-
-		if (aligned){
-			constexpr MyAlign<PairConf::ALIGN> alc;
-
-			bytes += alc.fwriteGap(file_data, pair.bytes());
+			file_indx.write( (const char *) & be_index, sizeof(uint64_t));
 		}
 
-		index += bytes;
+		/* white cache line */
+		{
+			const auto &key = pair.getKey();
+
+			constexpr auto HLINE_SIZE = PairConf::HLINE_SIZE;
+
+			if (key.size() >= HLINE_SIZE){
+				file_line.write(key.data(), HLINE_SIZE);
+
+			}else{
+				file_line.write(key.data(), key.size());
+
+				constexpr MyAlign<HLINE_SIZE> alc;
+
+				alc.fwriteGap(file_line, key.size());
+			}
+		}
+
+		/* white the data */
+		{
+			pair.fwrite(file_data);
+
+			size_t bytes = pair.bytes();
+
+
+			if (aligned){
+				constexpr MyAlign<PairConf::ALIGN> alc;
+
+				bytes += alc.fwriteGap(file_data, pair.bytes());
+			}
+
+			index += bytes;
+		}
 
 		++count;
 	}

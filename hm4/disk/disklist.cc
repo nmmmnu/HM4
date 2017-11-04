@@ -8,6 +8,8 @@
 #include "disk/filenames.h"
 #include "disk/btreeindexnode.h"
 
+#include "smallstring.h"
+
 #define log__(...) /* nada */
 #include "logger.h"
 
@@ -31,6 +33,7 @@ bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
 		advice = DEFAULT_ADVICE;
 
 	bool const b1 =	mIndx_.open(filenameIndx(filename));
+	                mLine_.open(filenameLine(filename));
 	bool const b2 =	mData_.open(filenameData(filename), advice);
 
 	mTree_.open(filenameBTreeIndx(filename));
@@ -73,6 +76,19 @@ const Pair *DiskList::saveAccessFD_(const Pair *blob) const{
 	bool const access = mData_->safeAccessMemory(blob, blob->bytes());
 
 	return access ? blob : nullptr;
+}
+
+const char *DiskList::getLineFD_(size_type const index) const{
+	struct line_type{
+		char ptr[PairConf::HLINE_SIZE];
+	};
+
+	const line_type *line_array = mLine_->as<const line_type>(0, narrow<size_t>(size()));
+
+	if (!line_array)
+		return nullptr;
+
+	return line_array[index].ptr;
 }
 
 const Pair *DiskList::getAtFD_(size_type const index) const{

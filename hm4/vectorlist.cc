@@ -8,6 +8,7 @@
 
 #define xmemmove(d, s, size)	memmove(d, s, (size_t) size)
 
+
 namespace hm4{
 
 
@@ -34,10 +35,23 @@ bool VectorList::clear(){
 	return true;
 }
 
+namespace bs_impl_{
+
+	struct CompDirect{
+		template <class ARRAY, class SIZE, class KEY>
+		int operator()(const ARRAY &list, SIZE const index, const KEY &key) const{
+			return list.cmpAt(index, key);
+		}
+	};
+
+}
+
 inline auto VectorList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	assert(!key.empty());
 
-	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{});
+	using namespace bs_impl_;
+
+	return binarySearch(*this, size_type{0}, size(), key, CompDirect{});
 }
 
 const Pair *VectorList::operator[](const StringRef &key) const{
@@ -99,9 +113,7 @@ bool VectorList::insert(OPair&& newdata){
 }
 
 bool VectorList::erase(const StringRef &key){
-	// precondition
 	assert(!key.empty());
-	// eo precondition
 
 	const auto x = binarySearch_(key);
 
@@ -204,7 +216,7 @@ bool VectorList::resize_(int const delta){
 	return true;
 }
 
-auto VectorList::calcNewCount_(size_type const count) -> size_type{
+auto VectorList::calcNewCount_(size_type const count) const -> size_type{
 	size_type newsize = count / reallocCount_;
 
 	if (count % reallocCount_)

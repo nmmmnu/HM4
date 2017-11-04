@@ -7,14 +7,10 @@
 #include <type_traits>
 
 namespace narrow_impl_{
-	
-	template<class T, class U>
-	constexpr T narrow_(U const u, std::false_type){
-		static_assert(std::is_arithmetic<T>::value, "T must be arithmetic");
-		static_assert(std::is_arithmetic<U>::value, "U must be arithmetic");
 
-		if (std::is_same<T, U>::value)
-			return u;
+	template<typename T, typename U>
+	constexpr T narrow_(U const u, std::false_type){
+		static_assert(! std::is_same<T, U>::value,  "T and U must be different types");
 
 		T const t = static_cast<T>(u);
 
@@ -31,16 +27,30 @@ namespace narrow_impl_{
 
 		return t;
 	}
-	
-	template<class T>
-	constexpr T narrow_(T const t, std::true_type){
-		return t;
+
+	template<typename T, typename U>
+	constexpr T narrow_(U const u, std::true_type) noexcept{
+		return u;
 	}
+
+	// ========================
+
+	template<class T>
+	using std_void_t = void;
+
+	template <class T, class U, class = void>
+	struct can_hold : std::false_type{};
+
+	template <class T, class U>
+	struct can_hold<T, U, std_void_t<decltype( T{ std::declval<U>() } )> > : std::true_type{};
 }
 
 template<class T, class U>
 constexpr T narrow(U const u){
-	return narrow_impl_::narrow_<T>(u, std::is_same<T, U>{} );
+	static_assert(std::is_arithmetic<T>::value, "T must be arithmetic");
+	static_assert(std::is_arithmetic<U>::value, "U must be arithmetic");
+
+	return narrow_impl_::narrow_<T>(u, narrow_impl_::can_hold<T, U>{} );
 }
 
 #endif

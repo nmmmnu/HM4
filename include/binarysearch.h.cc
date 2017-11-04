@@ -56,10 +56,4 @@ struct BinarySearchCompStdandard{
 	}
 };
 
-struct BinarySearchCompList{
-	template <class ARRAY, class SIZE, class KEY>
-	int operator()(const ARRAY &list, SIZE const index, const KEY &key) const{
-		return list.cmpAt(index, key);
-	}
-};
 

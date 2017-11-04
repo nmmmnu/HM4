@@ -80,7 +80,7 @@ private:
 
 	bool resize_(int delta);
 
-	size_type calcNewCount_(size_type size);
+	size_type calcNewCount_(size_type size) const;
 
 private:
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;

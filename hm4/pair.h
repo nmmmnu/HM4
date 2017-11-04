@@ -5,7 +5,8 @@
 
 namespace hm4{
 	namespace PairConf{
-		constexpr uint16_t	ALIGN		= sizeof(uint64_t);
+		constexpr std::size_t	ALIGN		= sizeof(uint64_t);
+		constexpr std::size_t	HLINE_SIZE	= sizeof(uint64_t);
 	}
 }
 

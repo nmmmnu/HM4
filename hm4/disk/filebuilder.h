@@ -24,7 +24,7 @@ public:
 private:
 	template <class ITERATOR>
 	static bool writeToFile__(const ITERATOR &begin, const ITERATOR &end,
-				std::ofstream &file_meta, std::ofstream &file_index, std::ofstream &file_data,
+				std::ofstream &file_meta, std::ofstream &file_index, std::ofstream &file_line, std::ofstream &file_data,
 				bool keepTombstones, bool const aligned);
 
 };

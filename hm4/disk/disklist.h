@@ -56,13 +56,34 @@ public:
 		return getAtFD_(index);
 	}
 
-	int cmpAt(size_type index, const StringRef &key) const{
+	int cmpAtFallback(size_type const index, const StringRef &key) const{
 		assert(!key.empty());
 
 		const Pair *p = operator[](index);
 
 		// StringRef is not null terminated
 		return p ? p->cmp(key) : CMP_ZERO;
+	}
+
+	int cmpAt(size_type const index, const StringRef &key) const{
+		assert(!key.empty());
+
+		constexpr size_t HLINE_SIZE = PairConf::HLINE_SIZE;
+
+		const char *ss = getLineFD_(index);
+
+		if (ss){
+			size_t const size = strnlen(ss, HLINE_SIZE);
+
+			int const result = - key.compare(ss, size);
+
+		//	printf("%5zu | %3d | %3d | %-*s \n", size, result, cmpAtFallback(index, key), int(size), ss);
+
+			if (result || size < HLINE_SIZE)
+				return result;
+		}
+
+		return cmpAtFallback(index, key);
 	}
 
 	size_type size(bool const = false) const{
@@ -92,6 +113,8 @@ private:
 	const Pair *getAtFD_(size_type index) const;
 	const Pair *getNextFD_(const Pair *blob) const;
 
+	const char *getLineFD_(size_type index) const;
+
 	static size_t getSizeFD__(const Pair *blob, bool aligned);
 
 private:
@@ -102,6 +125,7 @@ private:
 
 private:
 	MMAPFilePlus		mIndx_;
+	MMAPFilePlus		mLine_;
 	MMAPFilePlus		mData_;
 
 	MMAPFilePlus		mTree_;
