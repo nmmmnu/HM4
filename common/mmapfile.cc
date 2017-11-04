@@ -16,6 +16,11 @@ bool MMAPFile::open(const StringRef &filename, const Advice advice){
 	return open_(filename, O_RDONLY, PROT_READ, convertAdv__(advice));
 }
 
+inline bool MMAPFile::openFail__(int const fd){
+	::close(fd);
+	return false;
+}
+
 bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, int const advice){
 	close();
 
@@ -26,19 +31,18 @@ bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, 
 
 	off_t size2 = lseek(fd, 0, SEEK_END);
 
-	size_t size = size2 <= 0 ? 0 : size2;
+	if (size2 < 0)
+		return openFail__(fd);
 
-	if (size == 0){
-		::close(fd);
-		return false;
-	}
+	size_t size = size2 <= 0 ? 0 : (size_t)size2;
+
+	if (size == 0)
+		return openFail__(fd);
 
 	/* const */ void *mem = mmap(nullptr, size, prot, MAP_SHARED, fd, /* offset */ 0);
 
-	if (mem == MAP_FAILED){
-		::close(fd);
-		return false;
-	}
+	if (mem == MAP_FAILED)
+		return openFail__(fd);
 
 	madvise(mem, size, advice);
 

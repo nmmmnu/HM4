@@ -8,6 +8,8 @@
 #include "myalign.h"
 #include "pair.h"
 
+#include "mynarrow.h"
+
 namespace hm4{
 namespace disk{
 
@@ -85,7 +87,7 @@ bool FileBuilder::writeToFile__(const ITERATOR &begin, const ITERATOR &end,
 				file_line.write(key.data(), HLINE_SIZE);
 
 			}else{
-				file_line.write(key.data(), key.size());
+				file_line.write(key.data(), narrow<std::streamsize>(key.size()));
 
 				constexpr MyAlign<HLINE_SIZE> alc;
 

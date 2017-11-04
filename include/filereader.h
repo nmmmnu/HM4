@@ -47,8 +47,8 @@ public:
 					options_(options){}
 
 	StringRef getLine() {
-		while( file_.getline(buffer_, BUFFER_SIZE) ){
-			size_t size = file_.gcount() - 1;
+		while( file_.getline(buffer_, BUFFER_SIZE) && file_.gcount() > 0 ){
+			size_t const size = size_t(file_.gcount() - 1);
 
 			if ( applyOptions__(options_, buffer_, size) == false )
 				continue;

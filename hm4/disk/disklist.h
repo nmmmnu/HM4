@@ -6,6 +6,10 @@
 #include "ilist.h"
 #include "filemeta.h"
 
+#include "mynarrow.h"
+
+#include <type_traits>
+
 namespace hm4{
 namespace disk{
 
@@ -42,6 +46,15 @@ public:
 	}
 
 public:
+	using cmp_direct_t = std::false_type;
+	using cmp_line_t   = std::true_type;
+
+	int cmpAt(size_type index, const StringRef &key, cmp_direct_t) const;
+	int cmpAt(size_type index, const StringRef &key, cmp_line_t  ) const;
+
+	int cmpAt(size_type index, const StringRef &key) const;
+
+public:
 	const Pair *operator[](const StringRef &key) const{
 		assert(!key.empty());
 
@@ -53,41 +66,11 @@ public:
 	const Pair *operator[](size_type const index) const{
 		assert( index < size() );
 
-		return getAtFD_(index);
-	}
-
-	int cmpAtFallback(size_type const index, const StringRef &key) const{
-		assert(!key.empty());
-
-		const Pair *p = operator[](index);
-
-		// StringRef is not null terminated
-		return p ? p->cmp(key) : CMP_ZERO;
-	}
-
-	int cmpAt(size_type const index, const StringRef &key) const{
-		assert(!key.empty());
-
-		constexpr size_t HLINE_SIZE = PairConf::HLINE_SIZE;
-
-		const char *ss = getLineFD_(index);
-
-		if (ss){
-			size_t const size = strnlen(ss, HLINE_SIZE);
-
-			int const result = - key.compare(ss, size);
-
-		//	printf("%5zu | %3d | %3d | %-*s \n", size, result, cmpAtFallback(index, key), int(size), ss);
-
-			if (result || size < HLINE_SIZE)
-				return result;
-		}
-
-		return cmpAtFallback(index, key);
+		return fdGetAt_(index);
 	}
 
 	size_type size(bool const = false) const{
-		return (size_type) metadata_.size();
+		return narrow<size_type>( metadata_.size() );
 	}
 
 	size_t bytes() const{
@@ -108,17 +91,23 @@ public:
 	Iterator end() const;
 
 private:
-	const Pair *saveAccessFD_(const Pair *blob) const;
+	const Pair *fdSaveAccess_(const Pair *blob) const;
 
-	const Pair *getAtFD_(size_type index) const;
-	const Pair *getNextFD_(const Pair *blob) const;
+	const char *fdLine_(size_type index) const;
 
-	const char *getLineFD_(size_type index) const;
-
-	static size_t getSizeFD__(const Pair *blob, bool aligned);
+	const Pair *fdGetAt_(size_type index) const;
+	const Pair *fdGetNext_(const Pair *blob) const;
 
 private:
-	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
+	static size_t alignedSize__(const Pair *blob, bool aligned);
+
+private:
+	std::pair<bool,size_type> binarySearch_(const StringRef &key, size_type start, size_type end) const;
+
+	std::pair<bool,size_type> binarySearch_(const StringRef &key) const{
+		return binarySearch_(key, 0, size());
+	}
+
 	std::pair<bool,size_type> btreeSearch_(const StringRef &key) const;
 
 	std::pair<bool,size_type> search_(const StringRef &key) const;

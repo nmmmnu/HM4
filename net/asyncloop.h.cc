@@ -1,13 +1,10 @@
 #include "sockets.h"
-
 #include "stringref.h"
-
 #include "mynarrow.h"
 
 #include "worker/workerdefs.h"
 
 #include <unistd.h>	// read
-
 #include <algorithm>	// find
 
 namespace net{
@@ -123,7 +120,7 @@ void AsyncLoop<SELECTOR, WORKER>::handleRead_(int const fd){
 	if (buffer.size() + narrow<size_t>(size) > conf_maxPacketSize_)
 		return handleDisconnect_(fd, DisconnectStatus::ERROR);
 
-	buffer.push(size, inputBuffer_);
+	buffer.push( (size_t) size, inputBuffer_);
 
 	buffer.restartTimer();
 
@@ -162,7 +159,7 @@ void AsyncLoop<SELECTOR, WORKER>::handleWrite_(int const fd){
 	if (size <= 0)
 		return handleSocketOps_(fd, size);
 
-	buffer.pop(size);
+	buffer.pop( (size_t) size);
 
 	buffer.restartTimer();
 

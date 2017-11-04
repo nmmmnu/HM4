@@ -89,7 +89,7 @@ private:
 		return cmd_ && cmd_->command(completeRefresh);
 	}
 
-	bool refresh_(bool const completeRefresh, std::nullptr_t){
+	bool refresh_(bool const /* completeRefresh */, std::nullptr_t){
 		return false;
 	}
 

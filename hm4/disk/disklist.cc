@@ -2,7 +2,6 @@
 
 #include "binarysearch.h"
 #include "myalign.h"
-#include "mynarrow.h"
 #include "levelorderlookup.h"
 
 #include "disk/filenames.h"
@@ -10,7 +9,7 @@
 
 #include "smallstring.h"
 
-#define log__(...) /* nada */
+//#define log__(...) /* nada */
 #include "logger.h"
 
 
@@ -20,7 +19,11 @@ namespace disk{
 
 constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
+
+
 // ==============================
+
+
 
 bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
 	metadata_.open(filenameMeta(filename));
@@ -50,10 +53,76 @@ void DiskList::close(){
 	mKeys_.close();
 }
 
+
+
 // ==============================
 
-auto DiskList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
-	return binarySearch(*this, size_type(0), size(), key, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
+
+
+int DiskList::cmpAt(size_type const index, const StringRef &key, cmp_direct_t) const{
+	assert(!key.empty());
+
+	const Pair *p = operator[](index);
+
+	return p ? p->cmp(key) : CMP_ZERO;
+}
+
+int DiskList::cmpAt(size_type const index, const StringRef &key, cmp_line_t) const{
+	assert(!key.empty());
+
+	constexpr size_t hline_size = PairConf::HLINE_SIZE;
+
+	const char *ss = fdLine_(index);
+
+	if (ss){
+		size_t const size = strnlen(ss, hline_size);
+
+		int const result = - key.compare(ss, size);
+
+		if (result || size < hline_size)
+			return result;
+	}
+
+	return cmpAt(index, key, cmp_direct_t{});
+}
+
+int DiskList::cmpAt(size_type index, const StringRef &key) const{
+	assert(!key.empty());
+
+	if (mLine_)
+		return cmpAt(index, key, cmp_line_t{}	);
+	else
+		return cmpAt(index, key, cmp_direct_t{}	);
+}
+
+
+
+// ==============================
+
+
+
+namespace bs_impl_{
+
+	template<typename METHOD>
+	struct Compare{
+		template <class ARRAY, class SIZE, class KEY>
+		int operator()(const ARRAY &list, SIZE const index, const KEY &key) const{
+			return list.cmpAt(index, key, METHOD{});
+		}
+	};
+
+}
+
+auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_type const end) const -> std::pair<bool,size_type>{
+	using namespace bs_impl_;
+
+	if (mLine_){
+		log__("binary using hot line");
+		return binarySearch(*this, start, end, key, Compare<cmp_line_t>{},   BIN_SEARCH_MINIMUM_DISTANCE);
+	}else{
+		log__("binary direct");
+		return binarySearch(*this, start, end, key, Compare<cmp_direct_t>{}, BIN_SEARCH_MINIMUM_DISTANCE);
+	}
 }
 
 auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size_type>{
@@ -66,9 +135,13 @@ auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size_type>{
 	}
 }
 
+
+
 // ==============================
 
-const Pair *DiskList::saveAccessFD_(const Pair *blob) const{
+
+
+const Pair *DiskList::fdSaveAccess_(const Pair *blob) const{
 	if (!blob)
 		return nullptr;
 
@@ -78,7 +151,7 @@ const Pair *DiskList::saveAccessFD_(const Pair *blob) const{
 	return access ? blob : nullptr;
 }
 
-const char *DiskList::getLineFD_(size_type const index) const{
+const char *DiskList::fdLine_(size_type const index) const{
 	struct line_type{
 		char ptr[PairConf::HLINE_SIZE];
 	};
@@ -91,7 +164,7 @@ const char *DiskList::getLineFD_(size_type const index) const{
 	return line_array[index].ptr;
 }
 
-const Pair *DiskList::getAtFD_(size_type const index) const{
+const Pair *DiskList::fdGetAt_(size_type const index) const{
 	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, narrow<size_t>(size()));
 
 	if (!be_array)
@@ -104,26 +177,26 @@ const Pair *DiskList::getAtFD_(size_type const index) const{
 	const Pair *blob = mData_->as<const Pair>(offset);
 
 	// check for overrun because PairBlob is dynamic size
-	return saveAccessFD_(blob);
+	return fdSaveAccess_(blob);
 }
 
-size_t DiskList::getSizeFD__(const Pair *blob, bool const aligned){
-	constexpr MyAlign<PairConf::ALIGN> alc;
-
-	size_t const size = blob->bytes();
-
-	return ! aligned ? size : alc.calc(size);
-}
-
-const Pair *DiskList::getNextFD_(const Pair *previous) const{
-	size_t size = getSizeFD__(previous, aligned());
+const Pair *DiskList::fdGetNext_(const Pair *previous) const{
+	size_t size = alignedSize__(previous, aligned());
 
 	const char *previousC = (const char *) previous;
 
 	const Pair *blob = mData_->as<const Pair>(previousC + size);
 
 	// check for overrun because PairBlob is dynamic size
-	return saveAccessFD_(blob);
+	return fdSaveAccess_(blob);
+}
+
+size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
+	constexpr MyAlign<PairConf::ALIGN> alc;
+
+	size_t const size = blob->bytes();
+
+	return ! aligned ? size : alc.calc(size);
 }
 
 // ===================================
@@ -143,9 +216,9 @@ const Pair &DiskList::Iterator::operator*() const{
 	if (sorted_ && tmp_blob && pos_ == tmp_pos + 1){
 		// get data without seek, walk forward
 		// this gives 50% performance
-		blob = list_.getNextFD_(tmp_blob);
+		blob = list_.fdGetNext_(tmp_blob);
 	}else{
-		blob = list_.getAtFD_(pos_);
+		blob = list_.fdGetAt_(pos_);
 	}
 
 	tmp_pos		= pos_;
@@ -154,7 +227,15 @@ const Pair &DiskList::Iterator::operator*() const{
 	return *tmp_blob;
 }
 
+
+
+
+
 // ==============================
+
+
+
+
 
 class DiskList::BTreeSearchHelper{
 private:
@@ -257,7 +338,7 @@ private:
 		log__("BTREE LEAF:", pos);
 		log__("Fallback to binary search", start, '-', end, ", width", end - start);
 
-		return binarySearch(list_, start, end, key_, BinarySearchCompList{}, BIN_SEARCH_MINIMUM_DISTANCE);
+		return list_.binarySearch_(key_, start, end);
 	}
 
 	NodeResult levelOrderBinarySearch_(const Node &node){
@@ -331,12 +412,22 @@ private:
 	}
 };
 
+
+
+
+
 // ==============================
+
+
+
+
 
 inline auto DiskList::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	BTreeSearchHelper search(*this, key);
 	return search();
 }
+
+
 
 } // namespace disk
 } // namespace

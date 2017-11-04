@@ -39,6 +39,8 @@ public:
 private:
 	bool open_(const StringRef &filename, int mode, int prot, int advice);
 
+	static bool openFail__(int const fd);
+
 	static int convertAdv__(Advice advice);
 
 private:
