@@ -107,8 +107,7 @@ public:
 	}
 
 	int compare(const char *data) const noexcept{
-		assert(data);
-		return compare_(data, SIZE);
+		return compare_(data, strnlen__(data));
 	}
 
 	// EQUALS
