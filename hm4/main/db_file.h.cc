@@ -7,7 +7,8 @@ static int op_search(const LIST &list, const StringRef &key){
 
 	auto pair = list[key];
 
-	pair->print();
+	if (pair)
+		pair->print();
 
 	return 0;
 }
