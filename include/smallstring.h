@@ -1,7 +1,7 @@
 #ifndef MY_SMALL_STRING_H_
 #define MY_SMALL_STRING_H_
 
-#include <stringref.h>
+#include "stringref.h"
 
 #include <cassert>
 
@@ -69,7 +69,7 @@ public:
 	}
 
 	size_t size() const noexcept{
-		return strnlen(data_, SIZE);
+		return strnlen__(data_);
 	}
 
 	size_t length() const noexcept{
@@ -128,18 +128,32 @@ public:
 	}
 
 	// OPERATORS NOT INCLUDED
+public:
+	// STATIC HELPER
+
+	static int compare(const char *smalldata, const char *data, size_t const size) noexcept{
+		auto const smallsize = strnlen__(smalldata);
+		auto const fixedsize = min__(size);
+
+		return StringRef::compare(smalldata, smallsize, data, fixedsize);
+	}
+
+	static int equals(const char *smalldata, const char *data, size_t const size) noexcept{
+		auto const smallsize = strnlen__(smalldata);
+		auto const fixedsize = min__(size);
+
+		return StringRef::equals(smalldata, smallsize, data, fixedsize);
+	}
 
 private:
 	// COMPARES / EQUALS HELPERS
 
 	int compare_(const char *data, size_t const size) const noexcept{
-		// if data_ is less SIZE, it is null terminated
-		return strncmp(data_, data, size);
+		return compare(data_, data, size);
 	}
 
 	bool equals_(const char *data, size_t const size) const noexcept{
-		// if data_ is less SIZE, it is null terminated
-		return strncmp(data_, data, size) == 0;
+		return equals(data_, data, size);
 	}
 
 private:
@@ -147,6 +161,10 @@ private:
 
 	constexpr static size_t min__(size_t const size) noexcept{
 		return size < SIZE ? size : SIZE;
+	}
+
+	static size_t strnlen__(const char *s) noexcept{
+		return strnlen(s, SIZE);
 	}
 
 private:

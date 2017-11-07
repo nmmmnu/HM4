@@ -7,8 +7,7 @@ namespace hm4{
 namespace disk{
 
 
-class FileBuilder{
-public:
+struct FileBuilder{
 	template <class LIST>
 	static bool build(const StringRef &filename,
 				const LIST &list,
@@ -19,12 +18,6 @@ public:
 	template <class ITERATOR>
 	static bool build(const StringRef &filename,
 				const ITERATOR &begin, const ITERATOR &end,
-				bool keepTombstones, bool const aligned);
-
-private:
-	template <class ITERATOR>
-	static bool writeToFile__(const ITERATOR &begin, const ITERATOR &end,
-				std::ofstream &file_meta, std::ofstream &file_index, std::ofstream &file_line, std::ofstream &file_data,
 				bool keepTombstones, bool const aligned);
 
 };

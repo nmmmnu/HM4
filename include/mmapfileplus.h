@@ -32,6 +32,11 @@ public:
 		return file_.size();
 	}
 
+	template<class T>
+	size_t sizeArray() const{
+		return size() / sizeof(T);
+	}
+
 	const BlobRef &operator*() const{
 		return blob_;
 	}

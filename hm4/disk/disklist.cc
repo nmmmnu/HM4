@@ -39,10 +39,13 @@ bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
 	                mLine_.open(filenameLine(filename));
 	bool const b2 =	mData_.open(filenameData(filename), advice);
 
+	// integrity check, size is safe to be used now.
+	bool const b3 =	mIndx_.sizeArray<uint64_t>() == size();
+
 	mTree_.open(filenameBTreeIndx(filename));
 	mKeys_.open(filenameBTreeData(filename));
 
-	return b1 && b2;
+	return b1 && b2 && b3;
 }
 
 void DiskList::close(){
@@ -53,13 +56,9 @@ void DiskList::close(){
 	mKeys_.close();
 }
 
-
-
 // ==============================
 
-
-
-int DiskList::cmpAt(size_type const index, const StringRef &key, cmp_direct_t) const{
+int DiskList::cmpAt(size_type const index, const StringRef &key) const{
 	assert(!key.empty());
 
 	const Pair *p = operator[](index);
@@ -67,33 +66,17 @@ int DiskList::cmpAt(size_type const index, const StringRef &key, cmp_direct_t) c
 	return p ? p->cmp(key) : CMP_ZERO;
 }
 
-int DiskList::cmpAt(size_type const index, const StringRef &key, cmp_line_t) const{
-	assert(!key.empty());
+// ==============================
 
-	constexpr size_t hline_size = PairConf::HLINE_SIZE;
 
-	const char *ss = fdLine_(index);
 
-	if (ss){
-		size_t const size = strnlen(ss, hline_size);
+struct SmallNode{
+public:
+	char		key[PairConf::HLINE_SIZE];
+	uint64_t	pos;
+};
 
-		int const result = - key.compare(ss, size);
-
-		if (result || size < hline_size)
-			return result;
-	}
-
-	return cmpAt(index, key, cmp_direct_t{});
-}
-
-int DiskList::cmpAt(size_type index, const StringRef &key) const{
-	assert(!key.empty());
-
-	if (mLine_)
-		return cmpAt(index, key, cmp_line_t{}	);
-	else
-		return cmpAt(index, key, cmp_direct_t{}	);
-}
+static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 
 
 
@@ -101,47 +84,90 @@ int DiskList::cmpAt(size_type index, const StringRef &key) const{
 
 
 
-namespace bs_impl_{
-
-	template<typename METHOD>
-	struct Compare{
-		template <class ARRAY, class SIZE, class KEY>
-		int operator()(const ARRAY &list, SIZE const index, const KEY &key) const{
-			return list.cmpAt(index, key, METHOD{});
-		}
+auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_type const end) const -> std::pair<bool,size_type>{
+	auto comp = [](const auto &list, auto const index, const auto &key){
+		return list.cmpAt(index, key);
 	};
 
+	return binarySearch(*this, start, end, key, comp);
 }
 
-auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_type const end) const -> std::pair<bool,size_type>{
-	using namespace bs_impl_;
+auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+	size_t const count =  mLine_.sizeArray<SmallNode>();
 
-	if (mLine_){
-		log__("binary using hot line");
-		return binarySearch(*this, start, end, key, Compare<cmp_line_t>{},   BIN_SEARCH_MINIMUM_DISTANCE);
-	}else{
-		log__("binary direct");
-		return binarySearch(*this, start, end, key, Compare<cmp_direct_t>{}, BIN_SEARCH_MINIMUM_DISTANCE);
+	if (count <= 1)
+		return binarySearch_(key);
+
+	const SmallNode *nodes = mLine_->as<const SmallNode>(0, count);
+
+	if (!nodes)
+		return binarySearch_(key);
+
+	auto comp = [](const auto &list, auto const index, const auto &key){
+		using SS = SmallString<PairConf::HLINE_SIZE>;
+
+		return SS::compare(list[index].key, key.data(), key.size());
+	};
+
+	// first try to locate the partition
+	const auto x = binarySearch(nodes, size_t{ 0 }, count, key, comp);
+
+	if (x.second >= count){
+		log__("Not found, in most right pos");
+
+		return { false, size() };
 	}
+
+	const SmallNode &result = nodes[x.second];
+
+	const auto pos = be64toh(result.pos);
+
+	if (x.first && key.size() <= PairConf::HLINE_SIZE){
+		log__("Found, direct hit at pos", pos);
+		return { true, pos };
+	}
+
+	if (x.first == false){
+		log__(
+			"Not found",
+			"pos", pos,
+			"key",	StringRef{ result.key, PairConf::HLINE_SIZE }
+		);
+
+		return { false, pos };
+	}
+
+	// binary inside the partition
+
+	size_type const start = pos;
+	size_type const end   = x.second == count - 1 ? size() : be64toh(nodes[x.second + 1].pos);
+
+	log__(
+		"Proceed with Binary Search", start, end,
+		"key",	StringRef{ result.key, PairConf::HLINE_SIZE }
+	);
+
+	return binarySearch_(key, start, end);
 }
 
 auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size_type>{
 	if (mTree_ && mKeys_){
 		log__("btree");
 		return btreeSearch_(key);
+
+	}else if (mLine_){
+		log__("hot line");
+		return hotLineSearch_(key);
+
 	}else{
 		log__("binary");
 		return binarySearch_(key);
 	}
 }
 
-
-
 // ==============================
 
-
-
-const Pair *DiskList::fdSaveAccess_(const Pair *blob) const{
+const Pair *DiskList::fdSafeAccess_(const Pair *blob) const{
 	if (!blob)
 		return nullptr;
 
@@ -151,33 +177,20 @@ const Pair *DiskList::fdSaveAccess_(const Pair *blob) const{
 	return access ? blob : nullptr;
 }
 
-const char *DiskList::fdLine_(size_type const index) const{
-	struct line_type{
-		char ptr[PairConf::HLINE_SIZE];
-	};
-
-	const line_type *line_array = mLine_->as<const line_type>(0, narrow<size_t>(size()));
-
-	if (!line_array)
-		return nullptr;
-
-	return line_array[index].ptr;
-}
-
 const Pair *DiskList::fdGetAt_(size_type const index) const{
 	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, narrow<size_t>(size()));
 
 	if (!be_array)
 		return nullptr;
 
-	const uint64_t be_ptr = be_array[index];
+	uint64_t const be_ptr = be_array[index];
 
 	size_t const offset = narrow<size_t>(be64toh(be_ptr));
 
 	const Pair *blob = mData_->as<const Pair>(offset);
 
 	// check for overrun because PairBlob is dynamic size
-	return fdSaveAccess_(blob);
+	return fdSafeAccess_(blob);
 }
 
 const Pair *DiskList::fdGetNext_(const Pair *previous) const{
@@ -188,7 +201,7 @@ const Pair *DiskList::fdGetNext_(const Pair *previous) const{
 	const Pair *blob = mData_->as<const Pair>(previousC + size);
 
 	// check for overrun because PairBlob is dynamic size
-	return fdSaveAccess_(blob);
+	return fdSafeAccess_(blob);
 }
 
 size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
@@ -459,5 +472,49 @@ if (offset == Node::NIL){
 
 	continue;
 }
+
+const char *DiskList::fdLine_(size_type const index) const{
+	struct line_type{
+		char ptr[PairConf::HLINE_SIZE];
+	};
+
+	const line_type *line_array = mLine_->as<const line_type>(0, narrow<size_t>(size()));
+
+	if (!line_array)
+		return nullptr;
+
+	return line_array[index].ptr;
+}
+
+int DiskList::cmpAt(size_type const index, const StringRef &key, cmp_line_t) const{
+	assert(!key.empty());
+
+	constexpr size_t hline_size = PairConf::HLINE_SIZE;
+
+	const char *ss = fdLine_(index);
+
+	if (ss){
+		size_t const size = strnlen(ss, hline_size);
+
+		int const result = - key.compare(ss, size);
+
+		if (result || size < hline_size)
+			return result;
+	}
+
+	return cmpAt(index, key, cmp_direct_t{});
+}
+
+
+int DiskList::cmpAt(size_type index, const StringRef &key) const{
+	assert(!key.empty());
+
+	if (mLine_)
+		return cmpAt(index, key, cmp_line_t{}	);
+	else
+		return cmpAt(index, key, cmp_direct_t{}	);
+}
+
 #endif
+
 

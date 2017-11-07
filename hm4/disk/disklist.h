@@ -46,12 +46,6 @@ public:
 	}
 
 public:
-	using cmp_direct_t = std::false_type;
-	using cmp_line_t   = std::true_type;
-
-	int cmpAt(size_type index, const StringRef &key, cmp_direct_t) const;
-	int cmpAt(size_type index, const StringRef &key, cmp_line_t  ) const;
-
 	int cmpAt(size_type index, const StringRef &key) const;
 
 public:
@@ -91,9 +85,7 @@ public:
 	Iterator end() const;
 
 private:
-	const Pair *fdSaveAccess_(const Pair *blob) const;
-
-	const char *fdLine_(size_type index) const;
+	const Pair *fdSafeAccess_(const Pair *blob) const;
 
 	const Pair *fdGetAt_(size_type index) const;
 	const Pair *fdGetNext_(const Pair *blob) const;
@@ -109,6 +101,8 @@ private:
 	}
 
 	std::pair<bool,size_type> btreeSearch_(const StringRef &key) const;
+
+	std::pair<bool,size_type> hotLineSearch_(const StringRef &key) const;
 
 	std::pair<bool,size_type> search_(const StringRef &key) const;
 

@@ -35,23 +35,14 @@ bool VectorList::clear(){
 	return true;
 }
 
-namespace bs_impl_{
-
-	struct CompDirect{
-		template <class ARRAY, class SIZE, class KEY>
-		int operator()(const ARRAY &list, SIZE const index, const KEY &key) const{
-			return list.cmpAt(index, key);
-		}
-	};
-
-}
-
 inline auto VectorList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	assert(!key.empty());
 
-	using namespace bs_impl_;
+	auto comp = [](const auto &list, auto const index, const auto &key){
+		return list.cmpAt(index, key);
+	};
 
-	return binarySearch(*this, size_type{0}, size(), key, CompDirect{});
+	return binarySearch(*this, size_type{0}, size(), key, comp);
 }
 
 const Pair *VectorList::operator[](const StringRef &key) const{
