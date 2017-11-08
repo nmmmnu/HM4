@@ -111,6 +111,8 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size
 
 	const auto pos = be64toh(result.pos);
 
+	// this not work for ==,
+	// because the key might actually missing from the table
 	if (x.first && key.size() < PairConf::HLINE_SIZE){
 		log__("Found, direct hit at pos", pos);
 		return { true, pos };
