@@ -46,7 +46,14 @@ public:
 	}
 
 public:
-	int cmpAt(size_type index, const StringRef &key) const;
+	int cmpAt(size_type index, const StringRef &key) const{
+		assert(!key.empty());
+
+		const Pair *p = operator[](index);
+
+		return p ? p->cmp(key) : CMP_ZERO;
+	}
+
 
 public:
 	const Pair *operator[](const StringRef &key) const{

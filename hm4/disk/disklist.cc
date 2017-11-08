@@ -58,23 +58,12 @@ void DiskList::close(){
 
 // ==============================
 
-int DiskList::cmpAt(size_type const index, const StringRef &key) const{
-	assert(!key.empty());
-
-	const Pair *p = operator[](index);
-
-	return p ? p->cmp(key) : CMP_ZERO;
-}
-
-// ==============================
-
 
 
 struct SmallNode{
-public:
 	char		key[PairConf::HLINE_SIZE];
 	uint64_t	pos;
-};
+} __attribute__((__packed__));
 
 static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 

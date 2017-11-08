@@ -7,20 +7,19 @@ namespace hm4{
 namespace disk{
 
 
-struct FileBuilder{
+namespace FileBuilder{
+	template <class ITERATOR>
+	static bool build(const StringRef &filename,
+				const ITERATOR &begin, const ITERATOR &end,
+				bool keepTombstones, bool const aligned);
+
 	template <class LIST>
 	static bool build(const StringRef &filename,
 				const LIST &list,
 				bool keepTombstones, bool const aligned){
 		return build(filename, list.begin(), list.end(), keepTombstones, aligned);
 	}
-
-	template <class ITERATOR>
-	static bool build(const StringRef &filename,
-				const ITERATOR &begin, const ITERATOR &end,
-				bool keepTombstones, bool const aligned);
-
-};
+}
 
 
 } // namespace

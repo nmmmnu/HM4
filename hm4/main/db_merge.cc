@@ -25,9 +25,9 @@ inline bool fileExists(const StringRef& name) {
 
 template <class TABLE>
 int mergeTable(const TABLE &table, const char *output_file, bool const keepTombstones){
-	hm4::disk::FileBuilder df;
+	using namespace hm4;
 
-	df.build(output_file, table, keepTombstones, /* aligned */ true);
+	disk::FileBuilder::build(output_file, table, keepTombstones, /* aligned */ true);
 
 	return 0;
 }
