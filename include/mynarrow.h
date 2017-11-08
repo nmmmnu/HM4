@@ -7,7 +7,7 @@
 #include <type_traits>
 #include "my_void_t.h"
 
-namespace narrow_impl_{
+namespace mynarrow_impl_{
 
 	template<typename T, typename U>
 	constexpr T narrow_(U const u, std::false_type){
@@ -48,7 +48,7 @@ constexpr T narrow(U const u){
 	static_assert(std::is_arithmetic<T>::value, "T must be arithmetic");
 	static_assert(std::is_arithmetic<U>::value, "U must be arithmetic");
 
-	return narrow_impl_::narrow_<T>(u, narrow_impl_::can_hold<T, U>{} );
+	return mynarrow_impl_::narrow_<T>(u, mynarrow_impl_::can_hold<T, U>{} );
 }
 
 #endif

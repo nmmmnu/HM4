@@ -1,7 +1,7 @@
 #include <cassert>
 #include "stou_safe.h"
 
-namespace readinifile_impl_{
+namespace inifile_impl_{
 
 	template<class PROCESSOR>
 	class INILineParser{
@@ -100,7 +100,7 @@ namespace readinifile_impl_{
 
 template<class PROCESSOR>
 bool readINIFile(std::istream &file, PROCESSOR &processor){
-	using MyINILineParser = readinifile_impl_::INILineParser<PROCESSOR>;
+	using MyINILineParser = inifile_impl_::INILineParser<PROCESSOR>;
 
 	std::string line;
 

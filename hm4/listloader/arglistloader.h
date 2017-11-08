@@ -7,7 +7,7 @@ namespace hm4{
 namespace listloader{
 
 
-class ArgListLoader : public listloader_impl_::BaseListLoader{
+class ArgListLoader : public baselistloader_impl_::BaseListLoader{
 public:
 	ArgListLoader(int const argc, const char **argv, const MMAPFile::Advice advice = DEFAULT_ADVICE) :
 				BaseListLoader(advice),

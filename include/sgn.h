@@ -8,7 +8,7 @@ constexpr int sgn(const T &a, const T &b) noexcept{
 
 template<typename T>
 constexpr int sgn(const T &a) noexcept{
-	return sgn(a, T(0));
+	return sgn(a, T{ 0 });
 }
 
 #endif

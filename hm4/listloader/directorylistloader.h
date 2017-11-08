@@ -8,7 +8,7 @@ namespace hm4{
 namespace listloader{
 
 
-class DirectoryListLoader : public listloader_impl_::BaseListLoader{
+class DirectoryListLoader : public baselistloader_impl_::BaseListLoader{
 public:
 	using container_type	= std::vector<DiskList>;
 

@@ -5,12 +5,13 @@
 
 namespace StringReplace{
 
-	namespace string_replace_impl_{
-		constexpr static size_t strlen_(const StringRef &s){
+	namespace stringreplace_impl_{
+
+		constexpr inline size_t strlen_(const StringRef &s){
 			return s.size();
 		}
 
-		constexpr static size_t strlen_(char const){
+		constexpr inline size_t strlen_(char const){
 			return 1;
 		}
 
@@ -32,13 +33,13 @@ namespace StringReplace{
 	}
 
 	std::string &replace(std::string &s, const StringRef &find, const StringRef &repl){
-		using namespace string_replace_impl_;
+		using namespace stringreplace_impl_;
 
 		return replace_(s, find, repl);
 	}
 
 	std::string &replace(std::string &s, char const find, const StringRef &repl){
-		using namespace string_replace_impl_;
+		using namespace stringreplace_impl_;
 
 		return replace_(s, find, repl);
 	}

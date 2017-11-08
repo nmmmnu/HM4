@@ -15,7 +15,7 @@ namespace disk{
 
 namespace FileBuilder{
 
-	namespace disk_impl_{
+	namespace filebuilder_impl_{
 
 		void writeU64(std::ofstream &file, uint64_t const data){
 			uint64_t const be_data = htobe64(data);
@@ -190,7 +190,7 @@ namespace FileBuilder{
 		std::ofstream fileLine(filenameLine(filename),	std::ios::out | std::ios::binary);
 		std::ofstream fileData(filenameData(filename),	std::ios::out | std::ios::binary);
 
-		using namespace disk_impl_;
+		using namespace filebuilder_impl_;
 
 		return writeToFile(begin, end, fileMeta, fileIndx, fileLine, fileData, keepTombstones, aligned);
 	}

@@ -165,7 +165,7 @@ namespace redisprotocol_impl_{
 		size_t		pos = 0;
 	};
 
-} // namespace impl_
+} // namespace redisprotocol_impl_
 
 
 // ==================================

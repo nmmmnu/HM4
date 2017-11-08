@@ -9,7 +9,7 @@ namespace hm4{
 namespace multi{
 
 
-namespace impl_{
+namespace basemultiiterator_impl_{
 	struct MultiIteratorTags_{
 		template<bool B>
 		using base_iterator  = std::integral_constant<bool, B>;
@@ -66,7 +66,7 @@ namespace impl_{
 		Iterator end;
 	};
 
-} // namespace impl_
+} // namespace basemultiiterator_impl_
 
 
 } // namespace multi
