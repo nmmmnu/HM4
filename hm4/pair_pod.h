@@ -5,6 +5,7 @@
 #include <memory>	// unique_ptr
 #include <ostream>
 #include "endian.h"
+#include "my_void_t.h"
 
 #include "stringref.h"
 
@@ -130,7 +131,7 @@ public:
 
 	// ==============================
 
-	void print() const noexcept;
+	void print_() const noexcept;
 	void fwrite(std::ostream & os) const;
 
 	// ==============================
@@ -204,6 +205,35 @@ private:
 } __attribute__((__packed__));
 
 static_assert(std::is_pod<Pair>::value, "Pair must be POD type");
+
+// ==============================
+
+inline void print(const Pair &pair){
+	pair.print_();
+}
+
+inline void print(std::nullptr_t){
+	printf("--- pair is empty ---\n");
+}
+
+// ==============================
+
+template<class T>
+void print(const T &pair, std::nullptr_t){
+	if (pair)
+		print(*pair);
+	else
+		print(nullptr);
+}
+
+inline void print(const Pair *pair){
+	return print(pair, nullptr);
+}
+
+template<class IT, class = my_void_t<decltype( *std::declval<IT> )> >
+void print(const IT &it){
+	print(*it);
+}
 
 } // namespace
 

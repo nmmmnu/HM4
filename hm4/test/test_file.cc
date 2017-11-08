@@ -7,7 +7,8 @@
 #include "pair.h"
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
-using Pair = hm4::Pair;
+using hm4::Pair;
+using hm4::print;
 
 
 
@@ -69,13 +70,13 @@ static void listSearch(const LIST &list, const StringRef &key){
 		return;
 	}
 
-	pair->print();
+	print(pair);
 }
 
 template <class LIST>
 static void listIterate(const LIST &list, const StringRef &key, size_t count = 10){
 	for(auto it = list.lowerBound(key); count && it != list.end(); ++it, --count)
-		it->print();
+		print(it);
 }
 
 template <class LIST, class READER>

@@ -79,7 +79,7 @@ public:
 	}
 
 private:
-	SmallString<PairConf::HLINE_SIZE>		hkey;
+	SmallString<PairConf::HLINE_SIZE>	hkey;
 	std::unique_ptr<const Pair>		pp;
 };
 
@@ -87,6 +87,10 @@ private:
 
 inline void swap(OPair &p1, OPair &p2) noexcept{
 	p1.swap(p2);
+}
+
+inline void print(const OPair &pair){
+	return print(pair, nullptr);
 }
 
 } // namespace

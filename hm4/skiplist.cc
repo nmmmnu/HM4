@@ -213,7 +213,7 @@ void SkipList::printLane(height_type const lane) const{
 	const Node *node;
 	for(node = heads_[lane]; node; node = node->next[lane]){
 		const OPair & data = node->data;
-		data->print();
+		print(data);
 
 		if (++i > 10)
 			break;

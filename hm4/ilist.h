@@ -32,7 +32,7 @@ public:
 
 	void print(size_type count = PRINT_COUNT) const{
 		for(const Pair &p : *self() ){
-			p.print();
+			hm4::print(p);
 			if (--count == 0)
 				return;
 		}
@@ -61,6 +61,7 @@ private:
 		return static_cast<const T*>(this);
 	}
 };
+
 
 } // namespace
 

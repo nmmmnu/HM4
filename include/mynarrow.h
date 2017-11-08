@@ -5,6 +5,7 @@
 #include <typeinfo>	// bad_cast
 #include <limits>	// numeric_limits
 #include <type_traits>
+#include "my_void_t.h"
 
 namespace narrow_impl_{
 
@@ -35,14 +36,11 @@ namespace narrow_impl_{
 
 	// ========================
 
-	template<class T>
-	using std_void_t = void;
-
 	template <class T, class U, class = void>
 	struct can_hold : std::false_type{};
 
 	template <class T, class U>
-	struct can_hold<T, U, std_void_t<decltype( T{ std::declval<U>() } )> > : std::true_type{};
+	struct can_hold<T, U, my_void_t<decltype( T{ std::declval<U>() } )> > : std::true_type{};
 }
 
 template<class T, class U>

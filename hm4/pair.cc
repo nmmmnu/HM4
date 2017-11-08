@@ -63,17 +63,14 @@ int Pair::cmpTime(const Pair &pair) const noexcept{
 
 // ==============================
 
-void Pair::print() const noexcept{
+void Pair::print_() const noexcept{
 	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
-	const char *format      = "%-32s | %-20s | %s | %8u | %c\n";
-
-	constexpr bool observer = true;
+	const char *format      = "%-32s | %-20s | %s | %8u\n";
 
 	printf(format,
 		getKey_(), getVal_(),
 		MyTime::toString(getCreated(), time_format),
-		be32toh(expires),
-		observer ? '+' : ' '
+		be32toh(expires)
 	);
 }
 
