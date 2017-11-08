@@ -3,57 +3,54 @@
 
 #include "stringref.h"
 
-class StringReplace{
-public:
-	std::string &operator()(std::string &s, const StringRef &find, const StringRef &replace) const{
-		return replace_(s, find, replace);
+namespace StringReplace{
+
+	namespace string_replace_impl_{
+		constexpr static size_t strlen_(const StringRef &s){
+			return s.size();
+		}
+
+		constexpr static size_t strlen_(char const){
+			return 1;
+		}
+
+		template<class STR>
+		std::string &replace_(std::string &s, const STR &find, const StringRef &replace){
+			auto const findsize = strlen_(find);
+
+			if (findsize == 0)
+				return s;
+
+			size_t const pos = s.find(find);
+
+			if (pos == std::string::npos)
+				return s;
+
+			return s.replace(pos, findsize, replace.data(), replace.size());
+		}
+
 	}
 
-	std::string &operator()(std::string &s, char const find, const StringRef &replace) const{
-		return replace_(s, find, replace);
+	std::string &replace(std::string &s, const StringRef &find, const StringRef &repl){
+		using namespace string_replace_impl_;
+
+		return replace_(s, find, repl);
 	}
 
-private:
-	template<class STR>
-	static std::string &replace_(std::string &s, const STR &find, const StringRef &replace){
-		auto const findsize = strlen_(find);
+	std::string &replace(std::string &s, char const find, const StringRef &repl){
+		using namespace string_replace_impl_;
 
-		if (findsize == 0)
-			return s;
-
-		size_t const pos = s.find(find);
-
-		if (pos == std::string::npos)
-			return s;
-
-		return s.replace(pos, findsize, replace.data(), replace.size());
+		return replace_(s, find, repl);
 	}
 
-private:
-	constexpr static size_t strlen_(const StringRef &s){
-		return s.size();
+	std::string replaceByCopy(std::string s, const StringRef &find, const StringRef &repl){
+		return replace(s, find, repl);
 	}
 
-	constexpr static size_t strlen_(char const){
-		return 1;
+	std::string replaceByCopy(std::string s, char const find, const StringRef &repl){
+		return replace(s, find, repl);
 	}
-};
-
-// ==============================
-
-class StringReplaceCopy{
-public:
-	std::string operator()(std::string s, const StringRef &find, const StringRef &replace) const{
-		return replace_(s, find, replace);
-	}
-
-	std::string operator()(std::string s, char const find, const StringRef &replace) const{
-		return replace_(s, find, replace);
-	}
-
-private:
-	StringReplace replace_;
-};
+} // namespace
 
 #endif
 

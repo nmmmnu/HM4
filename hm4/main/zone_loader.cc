@@ -50,8 +50,7 @@ int main(int argc, char **argv){
 		memlist,
 		Flusher{
 			MyIDGenerator{},
-			path,
-			".db"
+			path
 		},
 		MEMLIST_SIZE
 	};
@@ -123,8 +122,5 @@ int listLoad(LIST &list, READER &reader){
 
 	return 0;
 }
-
-
-
 
 

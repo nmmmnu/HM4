@@ -19,11 +19,11 @@ public:
 	template<class UIDGENERATOR>
 	DiskFileFlusher(
 			UIDGENERATOR &&idGenerator,
-			const StringRef &path,
+			std::string path,
 			bool const keepTombstones = true
 		):
 				idGenerator_(std::forward<UIDGENERATOR>(idGenerator)),
-				path_(path),
+				path_(std::move(path)),
 				keepTombstones_(keepTombstones){}
 
 public:
@@ -34,8 +34,7 @@ public:
 
 		//const std::string &filename = StringRef::concatenate({ path_, idGenerator_(), ext_ });
 
-		StringReplaceCopy str_replace;
-		const std::string &filename = str_replace(path_, DIR_WILDCARD, idGenerator_());
+		const std::string &filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_());
 
 		disk::FileBuilder::build(filename, list, keepTombstones_, /* aligned */ true);
 
