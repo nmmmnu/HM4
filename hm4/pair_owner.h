@@ -90,7 +90,7 @@ inline void swap(OPair &p1, OPair &p2) noexcept{
 }
 
 inline void print(const OPair &pair){
-	return print(pair, nullptr);
+	print(pair, nullptr);
 }
 
 } // namespace

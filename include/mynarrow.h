@@ -7,6 +7,7 @@
 #include <type_traits>
 #include "my_void_t.h"
 
+namespace {
 namespace mynarrow_impl_{
 
 	template<typename T, typename U>
@@ -41,7 +42,9 @@ namespace mynarrow_impl_{
 
 	template <class T, class U>
 	struct can_hold<T, U, my_void_t<decltype( T{ std::declval<U>() } )> > : std::true_type{};
-}
+} // namespace mynarrow_impl_
+} // namespace
+
 
 template<class T, class U>
 constexpr T narrow(U const u){

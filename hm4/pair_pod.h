@@ -212,26 +212,20 @@ inline void print(const Pair &pair){
 	pair.print_();
 }
 
-inline void print(std::nullptr_t){
-	printf("--- pair is empty ---\n");
-}
-
-// ==============================
-
 template<class T>
-void print(const T &pair, std::nullptr_t){
-	if (pair)
-		print(*pair);
+void print(const T &ptr, std::nullptr_t){
+	if (ptr)
+		print(*ptr);
 	else
-		print(nullptr);
+		printf("--- pair is empty ---\n");
 }
 
 inline void print(const Pair *pair){
-	return print(pair, nullptr);
+	print(pair, nullptr);
 }
 
-template<class IT, class = my_void_t<decltype( *std::declval<IT> )> >
-void print(const IT &it){
+template<class T, class = my_void_t<decltype( *std::declval<T> )> >
+void print(const T &it){
 	print(*it);
 }
 

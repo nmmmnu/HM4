@@ -15,6 +15,7 @@ namespace disk{
 
 namespace FileBuilder{
 
+	namespace {
 	namespace filebuilder_impl_{
 
 		void writeU64(std::ofstream &file, uint64_t const data){
@@ -176,8 +177,8 @@ namespace FileBuilder{
 			return true;
 		}
 
+	} // namespace filebuilder_impl_
 	} // namespace
-
 
 
 	template <class ITERATOR>

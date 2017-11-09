@@ -7,8 +7,9 @@
 
 namespace hm4{
 namespace listloader{
-namespace baselistloader_impl_{
 
+namespace {
+namespace baselistloader_impl_{
 
 class BaseListLoader{
 public:
@@ -43,6 +44,8 @@ private:
 
 
 } // namespace baselistloader_impl_
+} // namespace
+
 } // namespace listloader
 } // namespace
 
