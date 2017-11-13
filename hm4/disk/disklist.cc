@@ -25,6 +25,19 @@ constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
 
 
+struct SmallNode{
+	char		key[PairConf::HLINE_SIZE];
+	uint64_t	pos;
+} __attribute__((__packed__));
+
+static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
+
+
+
+// ==============================
+
+
+
 bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
 	metadata_.open(filenameMeta(filename));
 
@@ -35,37 +48,44 @@ bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
 	if (metadata_.sorted() == false && advice == MMAPFile::Advice::SEQUENTIAL)
 		advice = DEFAULT_ADVICE;
 
-	bool const b1 =	mIndx_.open(filenameIndx(filename));
-	                mLine_.open(filenameLine(filename));
-	bool const b2 =	mData_.open(filenameData(filename), advice);
+	{
+		bool const b1 =	mIndx_.open(filenameIndx(filename));
+		bool const b2 =	mData_.open(filenameData(filename), advice);
 
-	// integrity check, size is safe to be used now.
-	bool const b3 =	mIndx_.sizeArray<uint64_t>() == size();
+		// integrity check, size is safe to be used now.
+		bool const b3 =	mIndx_.sizeArray<uint64_t>() == size();
+
+		if ( b1 && b2 && b3 ){
+			// Ok...
+		}else
+			return false;
+	}
+
+	// ==============================
+
+	mLine_.open(filenameLine(filename));
+
+	if (mLine_.sizeArray<SmallNode>() <= 1){
+		mLine_.close();
+	}
+
+	// ==============================
 
 	mTree_.open(filenameBTreeIndx(filename));
 	mKeys_.open(filenameBTreeData(filename));
 
-	return b1 && b2 && b3;
+	return true;
 }
 
 void DiskList::close(){
 	mIndx_.close();
 	mData_.close();
 
+	mLine_.close();
+
 	mTree_.close();
 	mKeys_.close();
 }
-
-// ==============================
-
-
-
-struct SmallNode{
-	char		key[PairConf::HLINE_SIZE];
-	uint64_t	pos;
-} __attribute__((__packed__));
-
-static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 
 
 
@@ -83,9 +103,6 @@ auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_t
 
 auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
 	size_t const count =  mLine_.sizeArray<SmallNode>();
-
-	if (count <= 1)
-		return binarySearch_(key);
 
 	const SmallNode *nodes = mLine_->as<const SmallNode>(0, count);
 
@@ -110,6 +127,11 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size
 	const SmallNode &result = nodes[x.second];
 
 	const auto pos = be64toh(result.pos);
+
+	if ( pos >= size()){
+		log__("Hotline corruption detected. Advicing Hotline removal.");
+		return binarySearch_(key);
+	}
 
 	// this not work for ==,
 	// because the key might actually missing from the table
@@ -208,7 +230,7 @@ size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
 DiskList::Iterator::Iterator(const DiskList &list, size_type const pos,
 							bool const sorted) :
 			list_(list),
-			pos_(pos),
+			pos_(std::min(pos, list.size())),
 			sorted_(sorted){}
 
 const Pair &DiskList::Iterator::operator*() const{
