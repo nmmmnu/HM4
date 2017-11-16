@@ -44,12 +44,13 @@ int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepT
 #include "multi/duallist.h"
 #include "multi/collectionlist.h"
 
+using hm4::disk::DiskList;
+
 struct MergeListFactory_1{
-	using DiskList = hm4::disk::DiskList;
 	using MyMergeList = DiskList;
 
-	MergeListFactory_1(const char *filename, const MMAPFile::Advice advice){
-		table_.open(filename, advice);
+	MergeListFactory_1(const char *filename, MMAPFile::Advice const advice, DiskList::OpenMode const mode){
+		table_.open(filename, advice, mode);
 	}
 
 	const MyMergeList &operator()() const{
@@ -61,12 +62,11 @@ private:
 };
 
 struct MergeListFactory_2{
-	using DiskList		= hm4::disk::DiskList;
 	using MyMergeList	= hm4::multi::DualList<const DiskList>;
 
-	MergeListFactory_2(const char *filename1, const char *filename2, const MMAPFile::Advice advice){
-		table1_.open(filename1, advice);
-		table2_.open(filename2, advice);
+	MergeListFactory_2(const char *filename1, const char *filename2, const MMAPFile::Advice advice, DiskList::OpenMode const mode){
+		table1_.open(filename1, advice, mode);
+		table2_.open(filename2, advice, mode);
 	}
 
 	const MyMergeList &operator()() const{
@@ -84,8 +84,8 @@ struct MergeListFactory_N{
 	using ArgListLoader	= hm4::listloader::ArgListLoader;
 	using MyMergeList	= hm4::multi::CollectionList<ArgListLoader::container_type>;
 
-	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice) :
-					loader_( table_count, path, advice ),
+	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
+					loader_( table_count, path, advice, mode),
 					table_( *loader_ ) {}
 
 	const MyMergeList &operator()() const{
@@ -99,7 +99,8 @@ private:
 
 
 
-constexpr MMAPFile::Advice DEFAULT_ADVICE = MMAPFile::Advice::SEQUENTIAL;
+constexpr MMAPFile::Advice	DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
+constexpr DiskList::OpenMode	DEFAULT_MODE	= DiskList::OpenMode::MINIMAL;
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)
@@ -126,7 +127,7 @@ int main(int argc, char **argv){
 				<< '\t' << path[0]			<< '\n'
 			;
 
-			MergeListFactory_1 factory{ path[0], DEFAULT_ADVICE };
+			MergeListFactory_1 factory{ path[0], DEFAULT_ADVICE, DEFAULT_MODE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}
@@ -139,7 +140,7 @@ int main(int argc, char **argv){
 				<< '\t' << path[1]			<< '\n'
 			;
 
-			MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE };
+			MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 
@@ -151,7 +152,7 @@ int main(int argc, char **argv){
 				<< "Merging multiple tables..."		<< '\n'
 			;
 
-			MergeListFactory_N factory{ table_count, path, DEFAULT_ADVICE };
+			MergeListFactory_N factory{ table_count, path, DEFAULT_ADVICE, DEFAULT_MODE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}

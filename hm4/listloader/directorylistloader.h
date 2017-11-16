@@ -13,8 +13,8 @@ public:
 	using container_type	= std::vector<DiskList>;
 
 public:
-	DirectoryListLoader(std::string path, const MMAPFile::Advice advice = DEFAULT_ADVICE) :
-				BaseListLoader(advice),
+	DirectoryListLoader(std::string path, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
+				BaseListLoader(advice, mode),
 				path_(std::move(path)){
 		refresh_();
 	}

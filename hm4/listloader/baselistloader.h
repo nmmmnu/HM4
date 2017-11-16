@@ -17,11 +17,14 @@ public:
 	using container_type	= std::vector<DiskList>;
 
 public:
-	static constexpr MMAPFile::Advice DEFAULT_ADVICE = DiskList::DEFAULT_ADVICE;
+	static constexpr MMAPFile::Advice	DEFAULT_ADVICE	= DiskList::DEFAULT_ADVICE;
+	static constexpr DiskList::OpenMode	DEFAULT_MODE	= DiskList::OpenMode::MINIMAL;
+
 
 protected:
-	BaseListLoader(const MMAPFile::Advice advice) :
-				advice_(advice){}
+	BaseListLoader(MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
+				advice_(advice),
+				mode_(mode){}
 
 public:
 	const container_type &operator*() const{
@@ -32,7 +35,7 @@ public:
 protected:
 	void insert_(const StringRef &filename){
 		container_.emplace_back();
-                container_.back().open(filename, advice_);
+                container_.back().open(filename, advice_, mode_);
 	}
 
 protected:
@@ -40,6 +43,7 @@ protected:
 
 private:
 	MMAPFile::Advice	advice_;
+	DiskList::OpenMode	mode_;
 };
 
 

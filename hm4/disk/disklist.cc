@@ -37,8 +37,7 @@ static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 // ==============================
 
 
-
-bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
+bool DiskList::openMinimal_(const StringRef &filename, MMAPFile::Advice advice){
 	metadata_.open(filenameMeta(filename));
 
 	if (metadata_ == false)
@@ -48,24 +47,26 @@ bool DiskList::open(const StringRef &filename, MMAPFile::Advice advice){
 	if (metadata_.sorted() == false && advice == MMAPFile::Advice::SEQUENTIAL)
 		advice = DEFAULT_ADVICE;
 
-	{
-		bool const b1 =	mIndx_.open(filenameIndx(filename));
-		bool const b2 =	mData_.open(filenameData(filename), advice);
 
-		// integrity check, size is safe to be used now.
-		bool const b3 =	mIndx_.sizeArray<uint64_t>() == size();
+	bool const b1 =	mIndx_.open(filenameIndx(filename));
+	bool const b2 =	mData_.open(filenameData(filename), advice);
 
-		if ( b1 && b2 && b3 ){
-			// Ok...
-		}else
-			return false;
-	}
+	// integrity check, size is safe to be used now.
+	bool const b3 =	mIndx_.sizeArray<uint64_t>() == size();
+
+	return b1 && b2 && b3;
+}
+
+bool DiskList::openNormal_(const StringRef &filename, MMAPFile::Advice const advice){
+	if (openMinimal_(filename, advice) == false)
+		return false;
 
 	// ==============================
 
 	mLine_.open(filenameLine(filename));
 
 	if (mLine_.sizeArray<SmallNode>() <= 1){
+		log__("Hotline too small. Ignoring.");
 		mLine_.close();
 	}
 
@@ -120,7 +121,6 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size
 
 	if (x.second >= count){
 		log__("Not found, in most right pos");
-
 		return { false, size() };
 	}
 

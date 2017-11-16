@@ -24,24 +24,24 @@ public:
 		file_.close();
 	}
 
-	operator bool() const{
+	constexpr operator bool() const{
 		return file_;
 	}
 
-	size_t size() const{
+	constexpr size_t size() const{
 		return file_.size();
 	}
 
 	template<class T>
-	size_t sizeArray() const{
+	constexpr size_t sizeArray() const{
 		return size() / sizeof(T);
 	}
 
-	const BlobRef &operator*() const{
+	constexpr const BlobRef &operator*() const{
 		return blob_;
 	}
 
-	const BlobRef *operator->() const{
+	constexpr const BlobRef *operator->() const{
 		return &blob_;
 	}
 

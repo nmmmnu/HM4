@@ -19,7 +19,13 @@ public:
 	class Iterator;
 	class BTreeSearchHelper;
 
-	static constexpr MMAPFile::Advice DEFAULT_ADVICE = MMAPFile::Advice::RANDOM;
+	enum class OpenMode : char {
+		NORMAL,
+		MINIMAL
+	};
+
+	static constexpr MMAPFile::Advice	DEFAULT_ADVICE	= MMAPFile::Advice::RANDOM;
+	static constexpr OpenMode		DEFAULT_MODE	= OpenMode::NORMAL;
 
 private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
@@ -34,8 +40,15 @@ public:
 	// MMAPFile-s will be closed automatically
 	// ~DiskList() = default;
 
-	bool open(const StringRef &filename, MMAPFile::Advice advice = DEFAULT_ADVICE);
 	void close();
+
+	bool open(const StringRef &filename, MMAPFile::Advice const advice = DEFAULT_ADVICE, OpenMode const mode = DEFAULT_MODE){
+		switch(mode){
+		default:
+		case OpenMode::NORMAL	: return openNormal_ (filename, advice);
+		case OpenMode::MINIMAL	: return openMinimal_(filename, advice);
+		}
+	}
 
 	operator bool(){
 		return metadata_;
@@ -90,6 +103,10 @@ public:
 	Iterator lowerBound(const StringRef &key) const;
 	Iterator begin() const;
 	Iterator end() const;
+
+private:
+	bool openNormal_ (const StringRef &filename, MMAPFile::Advice advice);
+	bool openMinimal_(const StringRef &filename, MMAPFile::Advice advice);
 
 private:
 	const Pair *fdSafeAccess_(const Pair *blob) const;

@@ -24,15 +24,15 @@ public:
 
 	void close();
 
-	operator bool() const{
+	constexpr operator bool() const{
 		return mem_ != nullptr;
 	}
 
-	const void *mem() const{
+	constexpr const void *mem() const{
 		return mem_;
 	}
 
-	size_t size() const{
+	constexpr size_t size() const{
 		return size_;
 	}
 

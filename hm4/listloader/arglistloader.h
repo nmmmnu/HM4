@@ -9,8 +9,8 @@ namespace listloader{
 
 class ArgListLoader : public baselistloader_impl_::BaseListLoader{
 public:
-	ArgListLoader(int const argc, const char **argv, const MMAPFile::Advice advice = DEFAULT_ADVICE) :
-				BaseListLoader(advice),
+	ArgListLoader(int const argc, const char **argv, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
+				BaseListLoader(advice, mode),
 				argc_(argc),
 				argv_(argv){
 		refresh();
