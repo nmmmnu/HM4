@@ -5,6 +5,8 @@
 
 #include "smallstring.h"
 
+#include <type_traits>
+
 namespace hm4{
 
 class OPair{
@@ -82,6 +84,8 @@ private:
 	SmallString<PairConf::HLINE_SIZE>	hkey;
 	std::unique_ptr<const Pair>		pp;
 };
+
+//static_assert( std::is_trivially_copyable<OPair>::value, "OPair is not trivially copyable" );
 
 // ==============================
 

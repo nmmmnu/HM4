@@ -4,19 +4,19 @@
 #include <cstdint>
 #include <ostream>
 
-template<uint16_t ALIGN = sizeof(uint64_t)>
+template<size_t ALIGN = sizeof(uint64_t)>
 class MyAlign{
 private:
 	constexpr static char FILL = 0x00;
 
 public:
 	constexpr MyAlign(){
-		for(uint16_t i = 0; i < ALIGN; ++i)
+		for(size_t i = 0; i < ALIGN; ++i)
 			buffer_[i] = FILL;
 	}
 
 public:
-	constexpr uint16_t align() const{
+	constexpr size_t align() const{
 		return ALIGN;
 	}
 

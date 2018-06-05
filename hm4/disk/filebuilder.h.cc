@@ -24,18 +24,27 @@ namespace FileBuilder{
 			file.write( (const char *) & be_data, sizeof(uint64_t));
 		}
 
+		template<size_t HLINE_SIZE>
+		void writeStr(std::ofstream &file, const SmallString<HLINE_SIZE> &key){
+			file.write(key.data(), narrow<std::streamsize>(key.size()));
+
+			constexpr MyAlign<HLINE_SIZE> alc;
+
+			alc.fwriteGap(file, key.size());
+		}
+
 
 		// ==============================
 
 
-		class CacheLine{
+		class CacheLineBuilder{
 		private:
 			constexpr static auto HLINE_SIZE = PairConf::HLINE_SIZE;
 
 		public:
-			CacheLine(std::ofstream &file) : file_(file){}
+			CacheLineBuilder(std::ofstream &file) : file_(file){}
 
-			~CacheLine(){
+			~CacheLineBuilder(){
 				store_();
 			}
 
@@ -55,19 +64,8 @@ namespace FileBuilder{
 				if (key_.empty())
 					return;
 
-				file_.write(key_.data(), narrow<std::streamsize>(key_.size()));
-
-				constexpr MyAlign<HLINE_SIZE> alc;
-
-				alc.fwriteGap(file_, key_.size());
-
+				writeStr(file_, key_);
 				writeU64(file_, pos_);
-			}
-
-		private:
-			template<typename T>
-			static T min(T const a, T const b){
-				return a < b ? a : b;
 			}
 
 		private:
@@ -98,7 +96,7 @@ namespace FileBuilder{
 			uint64_t createdMin	= std::numeric_limits<uint64_t>::max();
 			uint64_t createdMax	= std::numeric_limits<uint64_t>::min();
 
-			CacheLine cacheLine(file_line);
+			CacheLineBuilder cacheLine(file_line);
 
 			for(auto it = begin; it != end; ++it){
 				const Pair &pair = *it;
@@ -186,10 +184,12 @@ namespace FileBuilder{
 					const ITERATOR &begin, const ITERATOR &end,
 					bool const keepTombstones, bool const aligned){
 
-		std::ofstream fileMeta(filenameMeta(filename),	std::ios::out | std::ios::binary);
-		std::ofstream fileIndx(filenameIndx(filename),	std::ios::out | std::ios::binary);
-		std::ofstream fileLine(filenameLine(filename),	std::ios::out | std::ios::binary);
-		std::ofstream fileData(filenameData(filename),	std::ios::out | std::ios::binary);
+		constexpr auto mode = std::ios::out | std::ios::binary;
+
+		std::ofstream fileMeta(filenameMeta(filename),	mode);
+		std::ofstream fileIndx(filenameIndx(filename),	mode);
+		std::ofstream fileLine(filenameLine(filename),	mode);
+		std::ofstream fileData(filenameData(filename),	mode);
 
 		using namespace filebuilder_impl_;
 

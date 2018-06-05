@@ -4,6 +4,7 @@
 #include "stringref.h"
 
 #include <cassert>
+#include <type_traits>
 
 template <size_t BYTES>
 class SmallString{
@@ -20,9 +21,13 @@ public:
 	}
 
 	SmallString(const char *data) noexcept{
-		if (data)
+		if (data){
+			// https://stackoverflow.com/questions/50198319/gcc-8-wstringop-truncation-what-is-the-good-practice
+			#pragma GCC diagnostic push
+			#pragma GCC diagnostic ignored "-Wstringop-truncation"
 			strncpy(data_, data, SIZE);
-		else
+			#pragma GCC diagnostic pop
+		}else
 			clear_();
 	}
 
@@ -169,6 +174,8 @@ private:
 private:
 	char data_[SIZE];
 };
+
+static_assert( std::is_trivially_copyable<SmallString<8> >::value, "SmallString is not trivially copyable" );
 
 // ==================================
 
