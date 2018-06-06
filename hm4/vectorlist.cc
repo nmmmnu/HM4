@@ -45,7 +45,7 @@ bool VectorList::insert(OPair&& newdata){
 	// key not exists, shift, then add
 
 	try{
-		const auto it = vector_.begin() + x.second;
+		const auto it = beginOffset__(vector_, x);
 		const auto newit = vector_.insert( it, std::move(newdata));
 		dataSize_ += newit->get()->bytes();
 	}catch(...){
@@ -64,7 +64,7 @@ bool VectorList::erase(const StringRef &key){
 		return true;
 	}
 
-	const auto it = vector_.begin() + x.second;
+	const auto it = beginOffset__(vector_, x);
 
 	dataSize_ -= it->get()->bytes();
 

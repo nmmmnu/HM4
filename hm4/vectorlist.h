@@ -3,6 +3,8 @@
 
 #include "ilist.h"
 
+#include "mynarrow.h"
+
 #include <cassert>
 #include <vector>
 
@@ -13,6 +15,7 @@ class VectorList : public IList<VectorList, true>{
 	friend class IList;
 
 	using OVector    = std::vector<OPair>;
+	using OVectorIt  = VectorList::OVector::const_iterator;
 
 public:
 	class Iterator;
@@ -78,6 +81,11 @@ public:
 	Iterator end() const noexcept;
 
 private:
+	static OVectorIt beginOffset__(const OVector &vector, const std::pair<bool,size_type> &x){
+		return vector.begin() + narrow<OVector::difference_type>(x.second);
+	}
+
+private:
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
 };
 
@@ -86,8 +94,6 @@ private:
 class VectorList::Iterator{
 private:
 	friend class VectorList;
-
-	using OVectorIt  = VectorList::OVector::const_iterator;
 
 	template<class UIT>
 	constexpr Iterator(UIT &&it) : it_(std::forward<UIT>(it)){}
@@ -135,7 +141,7 @@ inline auto VectorList::lowerBound(const StringRef &key) const noexcept -> Itera
 
 	const auto x = binarySearch_(key);
 
-	return vector_.begin() + x.second;
+	return beginOffset__(vector_, x);
 }
 
 } // namespace
