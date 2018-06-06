@@ -4,7 +4,6 @@
 #include "ilist.h"
 
 #include <cassert>
-#include <vector>
 
 namespace hm4{
 
@@ -12,37 +11,37 @@ namespace hm4{
 class VectorList : public IList<VectorList, true>{
 	friend class IList;
 
-	using OVector    = std::vector<OPair>;
-
 public:
+	static constexpr size_t		ELEMENT_SIZE		= sizeof(Pair);
+	static constexpr size_type	DEFAULT_REALLOC_COUNT	= 16;
+
 	class Iterator;
 
 public:
-	VectorList() = default;
-
-	VectorList(VectorList &&other) :
-				vector_		(std::move(other.vector_	)),
-				dataSize_	(std::move(other.dataSize_	)){
-		other.dataSize_ = 0;
+	explicit
+	VectorList(size_type reallocCount = DEFAULT_REALLOC_COUNT);
+	VectorList(VectorList &&other);
+	~VectorList(){
+		clear();
 	}
 
 private:
-	OVector		vector_;
-	size_t		dataSize_ = 0;
+	size_type	reallocCount_;
+
+	OPair		*buffer_;
+	size_type	reservedCount_;
+	size_type	dataCount_;
+	size_t		dataSize_;
 
 public:
-	bool clear(){
-		vector_.clear();
-		dataSize_ = 0;
-		return true;
-	}
+	bool clear();
 
 	bool erase(const StringRef &key);
 
 	const Pair *operator[](size_type const index) const{
 		assert( index < size() );
 
-		return vector_[index].get();
+		return buffer_[index].get();
 	}
 
 	int cmpAt(size_type index, const StringRef &key) const{
@@ -57,25 +56,31 @@ public:
 	bool insert(OPair &&data);
 
 	size_type size(bool const = false) const{
-		return vector_.size();
+		return dataCount_;
 	}
 
 	size_t bytes() const{
 		return dataSize_;
 	}
 
-	const Pair *operator[](const StringRef &key) const{
-		assert(!key.empty());
-
-		const auto x = binarySearch_(key);
-
-		return x.first ? operator[]( x.second ) : nullptr;
-	}
+	const Pair *operator[](const StringRef &key) const;
 
 public:
 	Iterator lowerBound(const StringRef &key) const noexcept;
+
 	Iterator begin() const noexcept;
+
 	Iterator end() const noexcept;
+
+private:
+	void clear_(bool alsoFree = false);
+
+	bool shiftL_(size_type index);
+	bool shiftR_(size_type index);
+
+	bool resize_(int delta);
+
+	size_type calcNewCount_(size_type size) const;
 
 private:
 	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
@@ -87,24 +92,21 @@ class VectorList::Iterator{
 private:
 	friend class VectorList;
 
-	using OVectorIt  = VectorList::OVector::const_iterator;
-
-	template<class UIT>
-	constexpr Iterator(UIT &&it) : it_(std::forward<UIT>(it)){}
+	constexpr Iterator(const OPair *pos) : pos_(pos){}
 
 public:
 	Iterator &operator++(){
-		++it_;
+		++pos_;
 		return *this;
 	}
 
 	const Pair &operator*() const{
-		return **it_;
+		return **pos_;
 	}
 
 public:
 	bool operator==(const Iterator &other) const{
-		return it_ == other.it_;
+		return pos_ == other.pos_;
 	}
 
 	bool operator!=(const Iterator &other) const{
@@ -116,27 +118,19 @@ public:
 	}
 
 private:
-	OVectorIt	it_;
+	const OPair	*pos_;
 };
 
 // ==============================
 
 inline auto VectorList::begin() const noexcept -> Iterator{
-	return vector_.begin();
+	return buffer_;
 }
 
 inline auto VectorList::end() const noexcept -> Iterator{
-	return vector_.end();
+	return buffer_ + dataCount_;
 }
 
-inline auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
-	if (key.empty())
-		return begin();
-
-	const auto x = binarySearch_(key);
-
-	return vector_.begin() + x.second;
-}
 
 } // namespace
 

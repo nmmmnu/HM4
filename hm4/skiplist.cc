@@ -55,11 +55,9 @@ public:
 	}
 };
 
-SkipList::SkipList(height_type const height){
-	if (height == 0 || height > MAX_HEIGHT)
-		height_ = DEFAULT_HEIGHT;
-	else
-		height_ = height;
+SkipList::SkipList(height_type const height) :
+		height_(height){
+	assert( height > 0 && height <= MAX_HEIGHT );
 
 	clear_();
 }
