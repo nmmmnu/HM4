@@ -5,7 +5,6 @@
 
 namespace StringReplace{
 
-	namespace {
 	namespace stringreplace_impl_{
 
 		constexpr inline size_t strlen_(const StringRef &s){
@@ -32,7 +31,6 @@ namespace StringReplace{
 		}
 
 	} // namespace stringreplace_impl_
-	} // namespace
 
 	std::string &replace(std::string &s, const StringRef &find, const StringRef &repl){
 		using namespace stringreplace_impl_;

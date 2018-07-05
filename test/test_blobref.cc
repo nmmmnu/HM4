@@ -3,10 +3,10 @@
 #include <cstdint>
 #include <cstring>
 
-#include "endian.h"
-
 #include <iostream>
 #include <iomanip>
+
+#include "myendian.h"
 
 #include "mytest.h"
 
@@ -23,9 +23,9 @@ void test_blobref(){
 
 	BlobRef br{ mem };
 
-	mytest("as()",		*br.as<uint16_t>(0x00) == htobe16(0x0001)	);
-	mytest("as()",		*br.as<uint16_t>(0x0E) == htobe16(0x0E0F)	);
-	mytest("as()",		*br.as<uint32_t>(0x10) == htobe32(0x10111213)	);
+	mytest("as()",		*br.as<uint16_t>(0x00) == htobe<uint16_t>(0x0001)	);
+	mytest("as()",		*br.as<uint16_t>(0x0E) == htobe<uint16_t>(0x0E0F)	);
+	mytest("as()",		*br.as<uint32_t>(0x10) == htobe<uint32_t>(0x10111213)	);
 
 	{
 	const char *s = br.as<char>('a', 5);
@@ -43,7 +43,7 @@ void test_blobref(){
 	}__attribute__((__packed__));
 
 	const TestStruct *st = br.as<TestStruct>(0x50);
-	mytest("struct",	st->i    == htobe16(0x5051)	);
+	mytest("struct",	st->i    == htobe<uint16_t>(0x5051)	);
 	mytest("struct",	st->c    == 0x52			);
 	mytest("struct",	st->s[0] == 0x53			);
 	mytest("struct",	st->s[1] == 0x54			);
@@ -60,8 +60,8 @@ void test_blobref(){
 
 	const uint64_t *u64 = br.as<uint64_t>(0, max);
 	mytest("end",		u64 != nullptr	);
-	mytest("end",		u64[      0] == htobe64(0x0001020304050607)	);
-	mytest("end",		u64[max - 1] == htobe64(0xf8f9fafbFCFDFEFF)	);
+	mytest("end",		u64[      0] == htobe<uint64_t>(0x0001020304050607)	);
+	mytest("end",		u64[max - 1] == htobe<uint64_t>(0xf8f9fafbFCFDFEFF)	);
 
 	// relative
 	const uint64_t *p = & u64[max - 2];

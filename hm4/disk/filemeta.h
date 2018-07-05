@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "endian.h"
+#include "myendian.h"
 
 #include "filemetablob.h"
 #include "stringref.h"

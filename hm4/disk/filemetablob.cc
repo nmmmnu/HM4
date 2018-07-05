@@ -1,6 +1,6 @@
 #include "filemetablob.h"
 
-#include "endian.h"
+#include "myendian.h"
 #include "mytime.h"
 
 
@@ -13,14 +13,14 @@ FileMetaBlob FileMetaBlob::create(uint16_t const options, uint64_t const count, 
 
 	strcpy(blob.logo, FileMetaBlob::LOGO);
 
-	blob.version	= htobe16(FileMetaBlob::VERSION	);
-	blob.options	= htobe16(options		);
-	blob.created	= htobe32(MyTime::now32()	);
+	blob.version	= htobe<uint16_t>(FileMetaBlob::VERSION	);
+	blob.options	= htobe<uint16_t>(options		);
+	blob.created	= htobe<uint32_t>(MyTime::now32()	);
 
-	blob.size	= htobe64(count			);
-	blob.tombstones	= htobe64(tombstones		);
-	blob.createdMin	= htobe64(createdMin		);
-	blob.createdMax	= htobe64(createdMax		);
+	blob.size	= htobe<uint64_t>(count			);
+	blob.tombstones	= htobe<uint64_t>(tombstones		);
+	blob.createdMin	= htobe<uint64_t>(createdMin		);
+	blob.createdMax	= htobe<uint64_t>(createdMax		);
 
 	return blob;
 }

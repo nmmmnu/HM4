@@ -25,10 +25,7 @@ void test(const char *name, const T key){
 
 	const auto p = binarySearch(v, size_t{ 0 }, v.size(), key, BinarySearchCompStdandard{});
 
-	bool   const found	= p.first;
-	size_t const result	= p.second;
-
-	mytest(name, found && v[result] == key	);
+	mytest(name, p.found && v[p.pos] == key	);
 }
 
 template<class T>

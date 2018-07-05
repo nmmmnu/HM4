@@ -2,6 +2,7 @@
 #define DISK_LIST_H_
 
 #include "mmapfileplus.h"
+#include "binarysearch.h"
 
 #include "ilist.h"
 #include "filemeta.h"
@@ -74,7 +75,7 @@ public:
 
 		const auto x = search_(key);
 
-		return x.first ? operator[](x.second) : nullptr;
+		return x.found ? operator[](x.pos) : nullptr;
 	}
 
 	const Pair *operator[](size_type const index) const{
@@ -118,17 +119,17 @@ private:
 	static size_t alignedSize__(const Pair *blob, bool aligned);
 
 private:
-	std::pair<bool,size_type> binarySearch_(const StringRef &key, size_type start, size_type end) const;
+	BinarySearchResult<size_type> binarySearch_(const StringRef &key, size_type start, size_type end) const;
 
-	std::pair<bool,size_type> binarySearch_(const StringRef &key) const{
+	BinarySearchResult<size_type> binarySearch_(const StringRef &key) const{
 		return binarySearch_(key, 0, size());
 	}
 
-	std::pair<bool,size_type> btreeSearch_(const StringRef &key) const;
+	BinarySearchResult<size_type> btreeSearch_(const StringRef &key) const;
 
-	std::pair<bool,size_type> hotLineSearch_(const StringRef &key) const;
+	BinarySearchResult<size_type> hotLineSearch_(const StringRef &key) const;
 
-	std::pair<bool,size_type> search_(const StringRef &key) const;
+	BinarySearchResult<size_type> search_(const StringRef &key) const;
 
 private:
 	MMAPFilePlus		mIndx_;
@@ -201,7 +202,7 @@ inline auto DiskList::end() const -> Iterator{
 inline auto DiskList::lowerBound(const StringRef &key) const -> Iterator{
 	const auto x = search_(key);
 
-	return Iterator(*this, x.second, sorted());
+	return Iterator(*this, x.pos, sorted());
 }
 
 

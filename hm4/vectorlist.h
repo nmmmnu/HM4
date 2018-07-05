@@ -4,6 +4,7 @@
 #include "ilist.h"
 
 #include "mynarrow.h"
+#include "binarysearch.h"
 
 #include <cassert>
 #include <vector>
@@ -72,7 +73,7 @@ public:
 
 		const auto x = binarySearch_(key);
 
-		return x.first ? operator[]( x.second ) : nullptr;
+		return x.found ? operator[]( x.pos ) : nullptr;
 	}
 
 public:
@@ -81,12 +82,12 @@ public:
 	Iterator end() const noexcept;
 
 private:
-	static OVectorIt beginOffset__(const OVector &vector, const std::pair<bool,size_type> &x){
-		return vector.begin() + narrow<OVector::difference_type>(x.second);
+	static OVectorIt beginOffset__(const OVector &vector, size_type const pos){
+		return vector.begin() + narrow<OVector::difference_type>(pos);
 	}
 
 private:
-	std::pair<bool,size_type> binarySearch_(const StringRef &key) const;
+	BinarySearchResult<size_type> binarySearch_(const StringRef &key) const;
 };
 
 // ==============================
@@ -141,7 +142,7 @@ inline auto VectorList::lowerBound(const StringRef &key) const noexcept -> Itera
 
 	const auto x = binarySearch_(key);
 
-	return beginOffset__(vector_, x);
+	return beginOffset__(vector_, x.pos);
 }
 
 } // namespace

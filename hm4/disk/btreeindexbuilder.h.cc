@@ -1,9 +1,9 @@
-#include "endian.h"
-
 #include <iostream>
 #include <stdexcept>
 
+#include "myendian.h"
 #include "myalign.h"
+#include "mynarrow.h"
 
 namespace hm4{
 namespace disk{
@@ -80,7 +80,7 @@ void BTreeIndexBuilder<LIST>::reorder_(size_type const begin, size_type const en
 		for(level_type j = 0; j < VALUES; ++j){
 			level_type const i = LL[j];
 
-			node.values[j] = htobe64( current_ );
+			node.values[j] = htobe<uint_fast64_t>( current_ );
 
 			size_type const index = begin + distance * (i + 1);
 
@@ -103,8 +103,8 @@ void BTreeIndexBuilder<LIST>::push_back_key(size_type const index){
 
 
 	NodeData nd;
-	nd.dataid  = htobe64(index);
-	nd.keysize = htobe16(key.size());
+	nd.dataid  = htobe<uint64_t>(index);
+	nd.keysize = htobe<uint16_t>(narrow<uint16_t>(key.size()));
 
 	// push NodeData
 	file_data_.write( (const char *) &nd, sizeof nd );

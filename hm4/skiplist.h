@@ -61,12 +61,9 @@ private:
 	size_t		dataSize_;
 
 private:
-	void clear_();
+	void zeroing_();
 
-	struct NodeLocator{
-		Node		*node	= nullptr;
-		NodeArray	prev;
-	};
+	struct NodeLocator;
 
 	NodeLocator locateMutable_(const StringRef &key, bool complete_evaluation = false);
 
@@ -118,16 +115,15 @@ inline auto SkipList::lowerBound(const StringRef &key) const -> Iterator{
 	if (key.empty())
 		return begin();
 
-	const Node *node = locate_(key, false);
-	return Iterator(node);
+	return locate_(key, false);
 }
 
 inline auto SkipList::begin() const -> Iterator{
-	return Iterator(heads_[0]);
+	return heads_[0];
 }
 
 inline constexpr auto SkipList::end() -> Iterator{
-	return Iterator(nullptr);
+	return nullptr;
 }
 
 

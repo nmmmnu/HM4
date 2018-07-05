@@ -34,19 +34,16 @@ int comp(const T &a, const T &b){
 	return comp(a, b, std::is_integral<T>{} );
 }
 
-template <>
-int comp(int const &a, int const &b){
+inline int comp(int const a, int const b){
 	return a - b;
 }
 
-template <>
-int comp(short int const &a, short int const &b){
-	return comp<int>(a, b);
+inline int comp(short int const a, short int const b){
+	return a - b;
 }
 
-template <>
-int comp(signed char const &a, signed char const &b){
-	return comp<int>(a, b);
+inline int comp(signed char const a, signed char const b){
+	return a - b;
 }
 
 

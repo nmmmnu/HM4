@@ -6,7 +6,6 @@
 #include "stringref.h"
 #include "trim.h"
 
-namespace {
 namespace filereader_impl_{
 
 	class BasicFileReader{
@@ -35,7 +34,6 @@ namespace filereader_impl_{
 	};
 
 } // namespace filereader_impl_
-} // namespace
 
 template<size_t BUFFER_SIZE>
 class FileReader : public filereader_impl_::BasicFileReader{

@@ -1,7 +1,6 @@
 #include <cassert>
 #include "stou_safe.h"
 
-namespace {
 namespace inifile_impl_{
 
 	template<class PROCESSOR>
@@ -94,7 +93,6 @@ namespace inifile_impl_{
 	};
 
 } // namespace inifile_impl_
-} // namespace
 
 
 // ===================================

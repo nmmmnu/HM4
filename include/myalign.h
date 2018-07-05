@@ -21,7 +21,7 @@ public:
 	}
 
 	constexpr size_t calc(size_t const bytes) const{
-		return calc__(bytes, ALIGN);
+		return ALIGN * ((bytes + ALIGN - 1) / ALIGN);
 	}
 
 	constexpr size_t padding(size_t const bytes) const{
@@ -35,11 +35,6 @@ public:
 		os.write(buffer_, (std::streamsize) gap);
 
 		return gap;
-	}
-
-private:
-	constexpr static size_t calc__(size_t const bytes, uint16_t const align){
-		return align * ((bytes + align - 1) / align);
 	}
 
 private:

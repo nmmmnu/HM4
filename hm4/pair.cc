@@ -1,8 +1,6 @@
 #include "pair.h"
 
 #include "mytime.h"
-#include "mynarrow.h"
-#include "sgn.h"
 
 namespace hm4{
 
@@ -22,10 +20,10 @@ std::unique_ptr<Pair> Pair::create(
 
 	std::unique_ptr<Pair>  pair{ new(size) Pair };
 
-	pair->created	= htobe64(getCreateTime__(created));
-	pair->expires	= htobe32(expires);
-	pair->vallen	= htobe32(narrow<uint32_t>(vallen));
-	pair->keylen	= htobe16(narrow<uint16_t>(keylen));
+	pair->created	= htobe<uint64_t>(getCreateTime__(created));
+	pair->expires	= htobe<uint32_t>(expires);
+	pair->vallen	= htobe<uint32_t>(narrow<uint32_t>(vallen));
+	pair->keylen	= htobe<uint16_t>(narrow<uint16_t>(keylen));
 
 	// memcpy so we can switch to blobs later...
 	memcpy(& pair->buffer[0],		key, keylen);
@@ -53,16 +51,6 @@ std::unique_ptr<Pair> Pair::create(const Pair *src){
 
 // ==============================
 
-int Pair::cmpTime(const Pair &pair) const noexcept{
-	// Compare time
-	auto const c1 = getCreated();
-	auto const c2 = pair.getCreated();
-
-	return sgn(c1, c2);
-}
-
-// ==============================
-
 void Pair::print_() const noexcept{
 	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
 	const char *format      = "%-32s | %-20s | %s | %8u\n";
@@ -72,10 +60,6 @@ void Pair::print_() const noexcept{
 		MyTime::toString(getCreated(), time_format),
 		be32toh(expires)
 	);
-}
-
-void Pair::fwrite(std::ostream & os) const{
-	os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
 }
 
 // ==============================

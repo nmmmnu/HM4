@@ -1,6 +1,5 @@
 #include "disklist.h"
 
-#include "binarysearch.h"
 #include "myalign.h"
 #include "levelorderlookup.h"
 
@@ -94,7 +93,7 @@ void DiskList::close(){
 
 
 
-auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_type const end) const -> std::pair<bool,size_type>{
+auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_type const end) const -> BinarySearchResult<size_type>{
 	auto comp = [](const auto &list, auto const index, const auto &key){
 		return list.cmpAt(index, key);
 	};
@@ -102,7 +101,7 @@ auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_t
 	return binarySearch(*this, start, end, key, comp);
 }
 
-auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+auto DiskList::hotLineSearch_(const StringRef &key) const -> BinarySearchResult<size_type>{
 	size_t const count =  mLine_.sizeArray<SmallNode>();
 
 	const SmallNode *nodes = mLine_->as<const SmallNode>(0, count);
@@ -119,12 +118,12 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size
 	// first try to locate the partition
 	const auto x = binarySearch(nodes, size_t{ 0 }, count, key, comp);
 
-	if (x.second >= count){
+	if (x.pos >= count){
 		log__("Not found, in most right pos");
 		return { false, size() };
 	}
 
-	const SmallNode &result = nodes[x.second];
+	const SmallNode &result = nodes[x.pos];
 
 	const auto pos = be64toh(result.pos);
 
@@ -135,12 +134,12 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size
 
 	// this not work for ==,
 	// because the key might actually missing from the table
-	if (x.first && key.size() < PairConf::HLINE_SIZE){
+	if (x.found && key.size() < PairConf::HLINE_SIZE){
 		log__("Found, direct hit at pos", pos);
 		return { true, pos };
 	}
 
-	if (x.first == false){
+	if (x.found == false){
 		log__(
 			"Not found",
 			"pos", pos,
@@ -153,7 +152,7 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size
 	// binary inside the partition
 
 	size_type const start = pos;
-	size_type const end   = x.second == count - 1 ? size() : be64toh(nodes[x.second + 1].pos);
+	size_type const end   = x.pos == count - 1 ? size() : be64toh(nodes[x.pos + 1].pos);
 
 	log__(
 		"Proceed with Binary Search", start, end,
@@ -163,7 +162,7 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> std::pair<bool,size
 	return binarySearch_(key, start, end);
 }
 
-auto DiskList::search_(const StringRef &key) const -> std::pair<bool,size_type>{
+auto DiskList::search_(const StringRef &key) const -> BinarySearchResult<size_type>{
 	if (mTree_ && mKeys_){
 		log__("btree");
 		return btreeSearch_(key);
@@ -311,7 +310,7 @@ private:
 public:
 	BTreeSearchHelper(const DiskList &list, const StringRef &key) : list_(list), key_(key){}
 
-	std::pair<bool,size_type> operator()(){
+	BinarySearchResult<size_type> operator()(){
 		try{
 			return btreeSearch_();
 		}catch(const BTreeAccessError &e){
@@ -321,11 +320,11 @@ public:
 	}
 
 private:
-	std::pair<bool,size_type> binarySearchFallback_() const{
+	BinarySearchResult<size_type> binarySearchFallback_() const{
 		return list_.binarySearch_(key_);
 	}
 
-	std::pair<bool,size_type> btreeSearch_(){
+	BinarySearchResult<size_type> btreeSearch_(){
 		size_t const nodesCount	= mTree_.size() / sizeof(Node);
 
 		const Node *nodes = mTree_->as<const Node>(0, nodesCount);
@@ -448,7 +447,7 @@ private:
 
 
 
-inline auto DiskList::btreeSearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+inline auto DiskList::btreeSearch_(const StringRef &key) const -> BinarySearchResult<size_type>{
 	BTreeSearchHelper search(*this, key);
 	return search();
 }

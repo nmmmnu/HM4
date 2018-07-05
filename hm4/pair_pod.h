@@ -4,8 +4,10 @@
 #include <cstddef>	// offsetof
 #include <memory>	// unique_ptr
 #include <ostream>
-#include "endian.h"
+#include "myendian.h"
 #include "my_void_t.h"
+#include "mynarrow.h"
+#include "comparator.h"
 
 #include "stringref.h"
 
@@ -100,7 +102,13 @@ public:
 	}
 
 public:
-	int cmpTime(const Pair &pair) const noexcept;
+	int cmpTime(const Pair &pair) const noexcept{
+		return comparator::comp(
+			getCreated(),
+			pair.getCreated()
+		);
+	}
+
 	int cmpTime(const Pair *pair) const noexcept{
 		return cmpTime(*pair);
 	}
@@ -132,7 +140,10 @@ public:
 	// ==============================
 
 	void print_() const noexcept;
-	void fwrite(std::ostream & os) const;
+
+	void fwrite(std::ostream & os) const{
+		os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
+	}
 
 	// ==============================
 

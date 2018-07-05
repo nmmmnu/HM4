@@ -2,12 +2,12 @@
 
 #include <fstream>
 
-#include "endian.h"
 #include <limits>
 
 #include "myalign.h"
 #include "pair.h"
 
+#include "myendian.h"
 #include "mynarrow.h"
 
 namespace hm4{
@@ -15,11 +15,10 @@ namespace disk{
 
 namespace FileBuilder{
 
-	namespace {
 	namespace filebuilder_impl_{
 
-		void writeU64(std::ofstream &file, uint64_t const data){
-			uint64_t const be_data = htobe64(data);
+		inline void writeU64(std::ofstream &file, uint64_t const data){
+			uint64_t const be_data = htobe(data);
 
 			file.write( (const char *) & be_data, sizeof(uint64_t));
 		}
@@ -176,7 +175,6 @@ namespace FileBuilder{
 		}
 
 	} // namespace filebuilder_impl_
-	} // namespace
 
 
 	template <class ITERATOR>

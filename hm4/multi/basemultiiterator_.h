@@ -8,7 +8,6 @@
 namespace hm4{
 namespace multi{
 
-namespace {
 namespace basemultiiterator_impl_{
 	struct MultiIteratorTags_{
 		template<bool B>
@@ -67,7 +66,6 @@ namespace basemultiiterator_impl_{
 	};
 
 } // namespace basemultiiterator_impl_
-} // namespace
 
 } // namespace multi
 } // namespace

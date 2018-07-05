@@ -19,6 +19,8 @@ private:
 
 SkipList::RandomGenerator SkipList::rand_;
 
+// ==============================
+
 /*
 We do ***NOT*** store next[] array size,
 ***NOR*** we store NULL after last next node.
@@ -42,24 +44,38 @@ struct SkipList::Node{
 	Node	*next[1];	// system dependent, dynamic, at least 1
 
 public:
+	// no need universal ref
 	Node(OPair &&data) : data(std::move(data)){}
 
-public:
-	static void *operator new(size_t size, height_type const height, bool const nothrow = false) {
-		size += (height - 1) * sizeof(Node *);
+private:
+	static size_t calcNewSize__(size_t const size, height_type const height){
+		return size + (height - 1) * sizeof(Node *);
+	}
 
-		if (nothrow)
-			return ::operator new(size, std::nothrow);
-		else
-			return ::operator new(size);
+public:
+	static void *operator new(size_t const size, height_type const height) {
+		return ::operator new(calcNewSize__(size, height));
+	}
+
+	static void *operator new(size_t const size, height_type const height, std::nothrow_t ) {
+		return ::operator new(calcNewSize__(size, height), std::nothrow);
 	}
 };
+
+// ==============================
+
+struct SkipList::NodeLocator{
+	Node		*node	= nullptr;
+	NodeArray	prev;
+};
+
+// ==============================
 
 SkipList::SkipList(height_type const height) :
 		height_(height){
 	assert( height > 0 && height <= MAX_HEIGHT );
 
-	clear_();
+	zeroing_();
 }
 
 SkipList::SkipList(SkipList &&other):
@@ -67,7 +83,7 @@ SkipList::SkipList(SkipList &&other):
 		heads_		(std::move(other.heads_		)),
 		dataCount_	(std::move(other.dataCount_	)),
 		dataSize_	(std::move(other.dataSize_	)){
-	other.clear_();
+	other.zeroing_();
 }
 
 SkipList::~SkipList(){
@@ -83,7 +99,7 @@ bool SkipList::clear(){
 		delete copy;
 	}
 
-	clear_();
+	zeroing_();
 
 	return true;
 }
@@ -121,7 +137,7 @@ bool SkipList::insert(OPair&& newdata){
 	size_t const size = newdata->bytes();
 	height_type const height = getRandomHeight_();
 
-	Node *newnode = new(height, true) Node(std::move(newdata));
+	Node *newnode = new(height, std::nothrow) Node(std::move(newdata));
 
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
@@ -220,7 +236,7 @@ void SkipList::printLane(height_type const lane) const{
 
 // ==============================
 
-void SkipList::clear_(){
+void SkipList::zeroing_(){
 	dataSize_ = 0;
 	dataCount_ = 0;
 

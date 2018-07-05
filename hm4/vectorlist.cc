@@ -1,10 +1,8 @@
 #include "vectorlist.h"
 
-#include "binarysearch.h"
-
 namespace hm4{
 
-auto VectorList::binarySearch_(const StringRef &key) const -> std::pair<bool,size_type>{
+auto VectorList::binarySearch_(const StringRef &key) const -> BinarySearchResult<size_type>{
 	assert(!key.empty());
 
 	auto comp = [](const auto &list, auto const index, const auto &key){
@@ -21,10 +19,10 @@ bool VectorList::insert(OPair&& newdata){
 
 	const auto x = binarySearch_(key);
 
-	if (x.first){
+	if (x.found){
 		// key exists, overwrite, do not shift
 
-		OPair &olddata = vector_[ x.second ];
+		OPair &olddata = vector_[ x.pos ];
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata) ){
@@ -45,7 +43,7 @@ bool VectorList::insert(OPair&& newdata){
 	// key not exists, shift, then add
 
 	try{
-		const auto it = beginOffset__(vector_, x);
+		const auto it = beginOffset__(vector_, x.pos);
 		const auto newit = vector_.insert( it, std::move(newdata));
 		dataSize_ += newit->get()->bytes();
 	}catch(...){
@@ -59,12 +57,12 @@ bool VectorList::erase(const StringRef &key){
 
 	const auto x = binarySearch_(key);
 
-	if (! x.first){
+	if (! x.found){
 		// the key does not exists in the vector.
 		return true;
 	}
 
-	const auto it = beginOffset__(vector_, x);
+	const auto it = beginOffset__(vector_, x.pos);
 
 	dataSize_ -= it->get()->bytes();
 
