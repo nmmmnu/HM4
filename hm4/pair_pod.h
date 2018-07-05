@@ -88,7 +88,7 @@ public:
 	}
 
 	uint64_t getCreated() const noexcept{
-		return be64toh(created);
+		return betoh<uint64_t>(created);
 	}
 
 public:
@@ -166,11 +166,11 @@ private:
 	}
 
 	size_t getKeyLen_() const noexcept{
-		return be16toh(keylen);
+		return betoh<uint16_t>(keylen);
 	}
 
 	size_t getValLen_() const noexcept{
-		return be32toh(vallen);
+		return betoh<uint32_t>(vallen);
 	}
 
 	int cmp_(const char *key, size_t const size) const noexcept{

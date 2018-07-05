@@ -45,19 +45,19 @@ public:
 
 public:
 	uint16_t version() const{
-		return be16toh(blob.version);
+		return betoh<uint16_t>(blob.version);
 	}
 
 	bool sorted() const{
-		return be16toh(blob.options) & FileMetaBlob::OPTIONS_SORTED;
+		return betoh<uint16_t>(blob.options) & FileMetaBlob::OPTIONS_SORTED;
 	}
 
 	bool aligned() const{
-		return be16toh(blob.options) & FileMetaBlob::OPTIONS_ALIGNED;
+		return betoh<uint16_t>(blob.options) & FileMetaBlob::OPTIONS_ALIGNED;
 	}
 
 	uint64_t size() const{
-		return be64toh(blob.size);
+		return betoh<uint64_t>(blob.size);
 	}
 
 public:

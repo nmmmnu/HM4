@@ -2,11 +2,12 @@
 #define PAIR_H
 
 #include <cstdint>
+#include <cstddef>
 
 namespace hm4{
 	namespace PairConf{
-		constexpr std::size_t	ALIGN		= sizeof(uint64_t);
-		constexpr std::size_t	HLINE_SIZE	= sizeof(uint64_t);
+		constexpr size_t	ALIGN		= sizeof(uint64_t);
+		constexpr size_t	HLINE_SIZE	= sizeof(uint64_t);
 	}
 }
 

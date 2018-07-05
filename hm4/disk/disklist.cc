@@ -125,7 +125,7 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> BinarySearchResult<
 
 	const SmallNode &result = nodes[x.pos];
 
-	const auto pos = be64toh(result.pos);
+	const auto pos = betoh<uint64_t>(result.pos);
 
 	if ( pos >= size()){
 		log__("Hotline corruption detected. Advicing Hotline removal.");
@@ -152,7 +152,7 @@ auto DiskList::hotLineSearch_(const StringRef &key) const -> BinarySearchResult<
 	// binary inside the partition
 
 	size_type const start = pos;
-	size_type const end   = x.pos == count - 1 ? size() : be64toh(nodes[x.pos + 1].pos);
+	size_type const end   = x.pos == count - 1 ? size() : betoh<uint64_t>(nodes[x.pos + 1].pos);
 
 	log__(
 		"Proceed with Binary Search", start, end,
@@ -197,7 +197,7 @@ const Pair *DiskList::fdGetAt_(size_type const index) const{
 
 	uint64_t const be_ptr = be_array[index];
 
-	size_t const offset = narrow<size_t>(be64toh(be_ptr));
+	size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
 
 	const Pair *blob = mData_->as<const Pair>(offset);
 
@@ -415,7 +415,7 @@ private:
 	}
 
 	NodeValueResult accessNodeValue_(uint64_t const offsetBE) const{
-		uint64_t const offset = be64toh( offsetBE );
+		uint64_t const offset = betoh<uint64_t>( offsetBE );
 
 		// BTree NIL case - can not happen
 
@@ -424,8 +424,8 @@ private:
 		if (!nd)
 			throw BTreeAccessError{};
 
-		size_t    const keysize = be16toh(nd->keysize);
-		size_type const dataid  = be64toh(nd->dataid);
+		size_t    const keysize = betoh<uint16_t>(nd->keysize);
+		size_type const dataid  = betoh<uint64_t>(nd->dataid);
 
 		// key is just after the NodeData
 		const char *keyptr = mKeys_->as<const char>(narrow<size_t>(offset + sizeof(NodeData)), keysize);

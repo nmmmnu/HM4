@@ -9,16 +9,6 @@
 namespace hm4{
 namespace disk{
 
-
-inline uint32_t betoh(uint32_t const a){
-	return be32toh(a);
-}
-
-inline uint64_t betoh(uint64_t const a){
-	return be64toh(a);
-}
-
-
 bool FileMeta::open(std::istream &file_meta){
 	file_meta.read( (char *) &blob, sizeof(FileMetaBlob));
 
@@ -54,9 +44,9 @@ inline void FileMeta::printBool__(const char *descr, bool const b){
 }
 
 void FileMeta::print() const{
-	printf("%-14s: %u\n",		"Version",	version()			);
-	printf("%-14s: %" PRIu64 "\n",	"Records",	size()				); // PRIu64
-	printf("%-14s: %" PRIu64 "\n",	"Tombstones",	be64toh(blob.tombstones)	); // PRIu64
+	printf("%-14s: %u\n",		"Version",	version()				);
+	printf("%-14s: %" PRIu64 "\n",	"Records",	size()					); // PRIu64
+	printf("%-14s: %" PRIu64 "\n",	"Tombstones",	betoh<uint64_t>(blob.tombstones)	); // PRIu64
 
 	printBool__("Sorted",	sorted()	);
 	printBool__("Aligned",	aligned()	);

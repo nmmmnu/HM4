@@ -58,14 +58,14 @@ void Pair::print_() const noexcept{
 	printf(format,
 		getKey_(), getVal_(),
 		MyTime::toString(getCreated(), time_format),
-		be32toh(expires)
+		betoh<uint32_t>(expires)
 	);
 }
 
 // ==============================
 
 bool Pair::isExpired_() const noexcept{
-	return expires &&  MyTime::expired( getCreated(), be32toh(expires) );
+	return expires &&  MyTime::expired( getCreated(), betoh<uint32_t>(expires) );
 }
 
 uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
