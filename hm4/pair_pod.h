@@ -176,13 +176,13 @@ private:
 	int cmp_(const char *key, size_t const size) const noexcept{
 		return StringRef::fastEmptyChar(key, size) ?
 			CMP_NULLKEY :
-			StringRef::compare(getKey_(), getKeyLen_(), key, size);
+			compare(getKey_(), getKeyLen_(), key, size);
 	}
 
 	bool equals_(const char *key, size_t const size) const noexcept{
 		return StringRef::fastEmptyChar(key, size) ?
 			false :
-			StringRef::equals(getKey_(), getKeyLen_(), key, size);
+			::equals(getKey_(), getKeyLen_(), key, size);
 	}
 
 private:

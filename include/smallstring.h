@@ -139,14 +139,14 @@ public:
 		auto const smallsize = strnlen__(smalldata);
 		auto const fixedsize = min__(size);
 
-		return StringRef::compare(smalldata, smallsize, data, fixedsize);
+		return ::compare(smalldata, smallsize, data, fixedsize);
 	}
 
 	static int equals(const char *smalldata, const char *data, size_t const size) noexcept{
 		auto const smallsize = strnlen__(smalldata);
 		auto const fixedsize = min__(size);
 
-		return StringRef::equals(smalldata, smallsize, data, fixedsize);
+		return ::equals(smalldata, smallsize, data, fixedsize);
 	}
 
 private:

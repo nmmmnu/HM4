@@ -69,32 +69,32 @@ static void fn_fastEmptyChar(){
 static void fn_compare(){
 	mytest.begin("compare()");
 
-	mytest("null",		! StringRef::compare(	"", 0,			"", 0)			);
+	mytest("null",		! compare(	"", 0,			"", 0)			);
 
-	mytest("<",		StringRef::compare(	"a", 1,			"b", 1) < 0		);
-	mytest(">",		StringRef::compare(	"b", 1,			"a", 1) > 0		);
+	mytest("<",		compare(	"a", 1,			"b", 1) < 0		);
+	mytest(">",		compare(	"b", 1,			"a", 1) > 0		);
 
-	mytest("eq",		! StringRef::compare(	hello, strlen(hello),	hello, strlen(hello))	);
+	mytest("eq",		! compare(	hello, strlen(hello),	hello, strlen(hello))	);
 
-	mytest("! eq",		StringRef::compare(	hello, 0,		hello, strlen(hello))	);
-	mytest("! eq",		StringRef::compare(	hello, 1,		hello, strlen(hello))	);
-	mytest("! eq",		StringRef::compare(	hello, strlen(hello),	hello, 0)		);
-	mytest("! eq",		StringRef::compare(	hello, strlen(hello),	hello, 1)		);
+	mytest("! eq",		compare(	hello, 0,		hello, strlen(hello))	);
+	mytest("! eq",		compare(	hello, 1,		hello, strlen(hello))	);
+	mytest("! eq",		compare(	hello, strlen(hello),	hello, 0)		);
+	mytest("! eq",		compare(	hello, strlen(hello),	hello, 1)		);
 
 
 	// lower_bound bug 2017-06-14
 	{
 		const char *lb_hello = "hello~";
 
-		int const lb_correct  = StringRef::compare("a", 1, "b", 1);
+		int const lb_correct  = compare("a", 1, "b", 1);
 
-		mytest("lower_bound",	StringRef::compare(
+		mytest("lower_bound",	compare(
 						hello,		strlen(hello),
 						lb_hello,	strlen(lb_hello)
 					) == + lb_correct
 		);
 
-		mytest("upper_bound",	StringRef::compare(
+		mytest("upper_bound",	compare(
 						lb_hello,	strlen(lb_hello),
 						hello,		strlen(hello)
 					) == - lb_correct
@@ -107,7 +107,7 @@ static void fn_compare(){
 static void fn_concatenate(){
 	mytest.begin("concatenate()");
 
-	const std::string s = StringRef::concatenate( { "1", "2", "3", "4", "5", "hello" } );
+	const std::string s = concatenate( "1", "2", "3", "4", "5", "hello" );
 
 	mytest("concatenate",	s == "12345hello"		);
 }

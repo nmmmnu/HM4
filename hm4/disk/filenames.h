@@ -16,32 +16,30 @@ namespace file_ext{
 } // namespace
 
 
-inline std::string filenameMeta(std::string filename){
+inline auto filenameMeta(std::string filename){
 	return filename;
 }
 
-
-inline std::string filenameIndx(const StringRef &filename){
-	return StringRef::concatenate( { filename, file_ext::DOT_INDX } );
+inline auto filenameIndx(const StringRef &filename){
+	return concatenate( filename, file_ext::DOT_INDX		);
 }
 
-inline std::string filenameLine(const StringRef &filename){
-	return StringRef::concatenate( { filename, file_ext::DOT_LINE } );
+inline auto filenameLine(const StringRef &filename){
+	return concatenate( filename, file_ext::DOT_LINE		);
 }
 
-inline std::string filenameData(const StringRef &filename){
-	return StringRef::concatenate( { filename, file_ext::DOT_DATA } );
+inline auto filenameData(const StringRef &filename){
+	return concatenate( filename, file_ext::DOT_DATA		);
 }
 
 
-inline std::string filenameBTreeIndx(const StringRef &filename){
-	return StringRef::concatenate( { filename, file_ext::DOT_BTREE_INDX } );
+inline auto filenameBTreeIndx(const StringRef &filename){
+	return concatenate( filename, file_ext::DOT_BTREE_INDX	);
 }
 
-inline std::string filenameBTreeData(const StringRef &filename){
-	return StringRef::concatenate( { filename, file_ext::DOT_BTREE_DATA } );
+inline auto filenameBTreeData(const StringRef &filename){
+	return concatenate( filename, file_ext::DOT_BTREE_DATA	);
 }
-
 
 } // namespace diskfile
 } // namespace
