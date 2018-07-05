@@ -5,6 +5,8 @@
 MyTest mytest;
 
 #include <sstream>
+#include <iostream>
+#include <iomanip>
 
 // ==================================
 
@@ -222,10 +224,29 @@ static void sr_test(){
 
 	mytest.begin("<iostream> integration");
 
-	std::stringstream ss;
+	{
+		std::stringstream ss;
 
-	ss <<  sr;
+		ss << sr;
 
-	mytest("<<",		sr == ss.str()				);
+		mytest("<<",		sr == ss.str()				);
+	}
+
+	{
+		std::stringstream ss;
+
+		ss << std::setfill('.') << std::left << std::setw(5) << StringRef{"x"};
+
+		mytest("<< L",		ss.str() == "x...."			);
+	}
+
+	{
+		std::stringstream ss;
+
+		ss << std::setfill('.') << std::right << std::setw(5) << StringRef{"x"};
+
+		mytest("<< R",		ss.str() == "....x"			);
+	}
+
 }
 

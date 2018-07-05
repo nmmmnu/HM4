@@ -7,6 +7,13 @@
 
 #include <initializer_list>
 
+
+namespace stringref_impl_{
+	constexpr size_t strlen_(const char *s) noexcept;
+
+	constexpr bool equals(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept;
+}
+
 class StringRef{
 private:
 	constexpr static bool COMPARE_MICRO_OPTIMIZATIONS = true;
@@ -65,7 +72,9 @@ public:
 	}
 
 	int compare(const char *data) const noexcept{
-		return compare(data, strlen__(data) );
+		using stringref_impl_::strlen_;
+
+		return compare(data, strlen_(data) );
 	}
 
 	int compare(const std::string &s) const noexcept{
@@ -83,7 +92,9 @@ public:
 	}
 
 	constexpr bool operator ==(const char *data) const noexcept{
-		return equals(data, strlen__(data) );
+		using stringref_impl_::strlen_;
+
+		return equals(data, strlen_(data) );
 	}
 
 	// constexpr - CentOS gcc / clang complains
@@ -138,7 +149,9 @@ public:
 	}
 
 	constexpr static auto hash(const char* data) noexcept{
-		return hash(data, strlen__(data) );
+		using stringref_impl_::strlen_;
+
+		return hash(data, strlen_(data) );
 	}
 
 	// HASH
@@ -154,7 +167,7 @@ public:
 
 	constexpr
 	static bool equals(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
-		return equals__(s1, size1, s2, size2);
+		return stringref_impl_::equals(s1, size1, s2, size2);
 	}
 
 	constexpr static bool fastEmptyChar(const char* s){
@@ -171,28 +184,106 @@ public:
 private:
 	size_t		size_	= 0;
 	const char	*data_	= "";
+};
 
-private:
-	static int compare__(const char *s1, size_t size1, const char *s2, size_t size2) noexcept;
-	constexpr
-	static bool equals__(const char *s1, size_t size1, const char *s2, size_t size2) noexcept;
-
-	static int memcmp__( const void *s1, const void *s2, size_t const n) noexcept;
-	constexpr static size_t strlen___(const char *s) noexcept;
-	constexpr static size_t strlen__(const char *s) noexcept;
-	constexpr static const char *strptr__(const char *s) noexcept;
-
-	static size_t concatenateSize_(const std::initializer_list<StringRef> &args);
+namespace stringref_impl_{
 
 	template<typename T>
-	static int sgn__(const T &a, const T &b) noexcept;
-};
+	int sgn(const T &a, const T &b) noexcept{
+		return (a > b) - (a < b);
+	}
+
+	// ==================================
+
+	constexpr const char *strptr(const char *s) noexcept{
+		return s ? s : "";
+	}
+
+	inline int memcmp_(const void *s1, const void *s2, size_t const n) noexcept{
+	//	return __builtin_memcmp(s1, s2, n);
+		return memcmp(s1, s2, n);
+	}
+
+	constexpr size_t strlen__x(const char *s) noexcept{
+		// __builtin_strlen is constexpr in clang
+		return __builtin_strlen(s);
+	}
+
+	constexpr size_t strlen_(const char *s) noexcept{
+		return s ? strlen__x(s) : 0;
+	}
+
+	// ==================================
+
+	inline int compare(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
+		// First idea was lazy based on LLVM::StringRef
+		// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
+
+		if ( int const res = memcmp_(s1, s2, std::min(size1, size2) ) )
+			return res; // most likely exit
+
+		// sgn helps convert size_t to int, without a branch
+		return sgn(size1, size2);
+	}
+
+	constexpr bool equals(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
+		// Here clang do constexpr as follows -
+		// it checks the sizes and short cut memcmp_().
+		// There is *NO* constexpr, if you supply same sized strings:
+		// StringRef::equals_("Hello", 5, "Bello", 5);
+
+		// Idea based on LLVM::StringRef
+		// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
+		return size1 == size2 && memcmp_(s1, s2, size1) == 0;
+	}
+
+	// ==================================
+
+	inline void os_fill(std::ostream& os, std::streamsize const count, char const c){
+		for(std::streamsize i = 0; i < count; ++i)
+			os.put(c);
+	}
+
+	// ==================================
+
+	inline size_t concatenateSize(const std::initializer_list<StringRef> &args){
+		size_t size = 0;
+
+		for(const auto &sr : args)
+			size += sr.size();
+
+		return size;
+	}
+
+} // stringref_impl_
 
 inline std::ostream& operator << (std::ostream& os, const StringRef &sr){
 	// cast because of clang
 	//return os.write(sr.data(), static_cast<std::streamsize>( sr.size() ));
+
 	// almost the same, but std::setw() works
-	return __ostream_insert(os, sr.data(), static_cast<std::streamsize>( sr.size() ));
+	//return __ostream_insert(os, sr.data(), static_cast<std::streamsize>( sr.size() ));
+
+	// following is based on gcc __ostream_insert() code:
+	// https://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.2/ostream__insert_8h-source.html
+
+	using stringref_impl_::os_fill;
+
+	std::streamsize const width		= os.width();
+	std::streamsize const size		= static_cast<std::streamsize>( sr.size() );
+	std::streamsize const fill_size		= width - size;
+
+	bool const left = (os.flags() & std::ios_base::adjustfield) == std::ios_base::left;
+
+	if (fill_size > 0 && left == false)
+		os_fill(os, fill_size, os.fill());
+
+	os.write(sr.data(), size);
+
+	if (fill_size > 0 && left == true)
+		os_fill(os, fill_size, os.fill());
+
+	return os;
 }
 
 // need for standard algoritms
@@ -221,10 +312,10 @@ constexpr StringRef operator "" _sr(const char *name, size_t const size){
 
 constexpr inline StringRef::StringRef(const char *data, size_t const size) :
 		size_(size),
-		data_(strptr__(data)){}
+		data_(stringref_impl_::strptr(data)){}
 
 constexpr inline StringRef::StringRef(const char *data) :
-		StringRef(data, strlen__(data)){}
+		StringRef(data, stringref_impl_::strlen_(data)){}
 
 inline StringRef::StringRef(const std::string &s) :
 		size_(s.size()),
@@ -253,18 +344,9 @@ inline int StringRef::compare(const char *s1, size_t const size1, const char *s2
 			return 0;
 	}
 
-	return compare__(s1, size1, s2, size2);
+	return stringref_impl_::compare(s1, size1, s2, size2);
 }
 
-
-inline size_t concatenateSize__(const std::initializer_list<StringRef> &args){
-	size_t size = 0;
-
-	for(const auto &sr : args)
-		size += sr.size();
-
-	return size;
-}
 
 inline std::string StringRef::concatenate(const std::initializer_list<StringRef> &args){
 	// super cheap concatenation,
@@ -282,7 +364,7 @@ inline const std::string &StringRef::concatenate(std::string &s, const std::init
 	// sometimes without allocation
 
 	// seems no need to save space for NULL terminator.
-	size_t const reserve_size = concatenateSize__(args);
+	size_t const reserve_size = stringref_impl_::concatenateSize(args);
 
 	s.clear();
 
@@ -294,59 +376,6 @@ inline const std::string &StringRef::concatenate(std::string &s, const std::init
 		s.append(sr.data(), sr.size());
 
 	return s;
-}
-
-// ==================================
-// PRIVATE
-// ==================================
-
-inline int StringRef::compare__(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
-	// First idea was lazy based on LLVM::StringRef
-	// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
-
-	if ( int const res = memcmp__(s1, s2, std::min(size1, size2) ) )
-		return res; // most likely exit
-
-	// sgn helps convert size_t to int, without a branch
-	return sgn__(size1, size2);
-}
-
-constexpr inline bool StringRef::equals__(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
-	// Here clang do constexpr as follows -
-	// it checks the sizes and short cut memcmp__().
-	// There is *NO* constexpr, if you supply same sized strings:
-	// StringRef::equals__("Hello", 5, "Bello", 5);
-
-	// Idea based on LLVM::StringRef
-	// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
-	return size1 == size2 && memcmp__(s1, s2, size1) == 0;
-}
-
-// ==================================
-
-inline int StringRef::memcmp__(const void *s1, const void *s2, size_t const n) noexcept{
-//	return __builtin_memcmp(s1, s2, n);
-	return memcmp(s1, s2, n);
-}
-
-constexpr inline size_t StringRef::strlen___(const char *s) noexcept{
-	// __builtin_strlen is constexpr in clang
-	return __builtin_strlen(s);
-}
-
-constexpr inline size_t StringRef::strlen__(const char *s) noexcept{
-	return s ? strlen___(s) : 0;
-}
-
-constexpr inline const char *StringRef::strptr__(const char *s) noexcept{
-	return s ? s : "";
-}
-
-// ==================================
-
-template<typename T>
-int StringRef::sgn__(const T &a, const T &b) noexcept{
-	return (a > b) - (a < b);
 }
 
 #endif

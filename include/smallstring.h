@@ -181,10 +181,9 @@ static_assert( std::is_trivially_copyable<SmallString<8> >::value, "SmallString 
 
 template <size_t BYTES>
 inline std::ostream& operator << (std::ostream& os, const SmallString<BYTES> &sr){
-	// cast because of clang
-	//return os.write(sr.data(), static_cast<std::streamsize>( sr.size() ));
-	// almost the same, but std::setw() works
-	return __ostream_insert(os, sr.data(), static_cast<std::streamsize>( sr.size() ));
+	os << StringRef{ sr.data(), sr.size() };
+
+	return os;
 }
 
 // ==================================
