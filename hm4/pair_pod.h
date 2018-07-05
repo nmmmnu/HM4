@@ -15,6 +15,18 @@
 
 namespace hm4{
 
+namespace pair_impl_{
+	constexpr bool fastEmptyChar(const char* s){
+		return s == nullptr ? true : s[0] == 0;
+	}
+
+	constexpr bool fastEmptyChar(const char* s, size_t const size){
+		return s == nullptr ? true : size == 0;
+	}
+} // pair_impl_
+
+
+
 struct Pair{
 	uint64_t	created;	// 8
 	uint32_t	expires;	// 4, 136 years, not that bad.
@@ -174,13 +186,13 @@ private:
 	}
 
 	int cmp_(const char *key, size_t const size) const noexcept{
-		return StringRef::fastEmptyChar(key, size) ?
+		return pair_impl_::fastEmptyChar(key, size) ?
 			CMP_NULLKEY :
 			compare(getKey_(), getKeyLen_(), key, size);
 	}
 
 	bool equals_(const char *key, size_t const size) const noexcept{
-		return StringRef::fastEmptyChar(key, size) ?
+		return pair_impl_::fastEmptyChar(key, size) ?
 			false :
 			::equals(getKey_(), getKeyLen_(), key, size);
 	}

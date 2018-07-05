@@ -163,21 +163,12 @@ public:
 		return hash(*this);
 	}
 
-public:
-	// CHAR * HELPERS
-
-	constexpr static bool fastEmptyChar(const char* s){
-		return s == nullptr ? true : s[0] == 0;
-	}
-
-	constexpr static bool fastEmptyChar(const char* s, size_t const size){
-		return s == nullptr ? true : size == 0;
-	}
-
 private:
 	size_t		size_	= 0;
 	const char	*data_	= "";
 };
+
+
 
 namespace stringref_impl_{
 
@@ -214,6 +205,8 @@ namespace stringref_impl_{
 	}
 
 } // stringref_impl_
+
+
 
 inline std::ostream& operator << (std::ostream& os, const StringRef &sr){
 	// cast because of clang

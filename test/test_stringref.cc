@@ -20,7 +20,7 @@ const char	*bla		= "bla";
 
 // ==================================
 
-static void fn_fastEmptyChar();
+//static void fn_fastEmptyChar();
 static void fn_compare();
 static void fn_concatenate();
 
@@ -35,7 +35,7 @@ static void sr_test();
 // ==================================
 
 int main(){
-	fn_fastEmptyChar();
+//	fn_fastEmptyChar();
 	fn_compare();
 	fn_concatenate();
 
@@ -52,6 +52,7 @@ int main(){
 
 // ==================================
 
+#if 0
 static void fn_fastEmptyChar(){
 	mytest.begin("fastEmptyChar()");
 
@@ -65,6 +66,7 @@ static void fn_fastEmptyChar(){
 	mytest("zero",		StringRef::fastEmptyChar(hello, 0)			);
 	mytest("null zero",	StringRef::fastEmptyChar(s, 0)				);
 }
+#endif
 
 static void fn_compare(){
 	mytest.begin("compare()");
