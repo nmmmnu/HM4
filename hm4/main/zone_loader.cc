@@ -87,7 +87,7 @@ int listLoad(LIST &list, READER &reader){
 		{
 			// add date key
 
-			const auto &key = StringRef::concatenate(buffer_key, { "t", ":", date, ":", domain });
+			const auto &key = concatenate(buffer_key, "t", ":", date, ":", domain);
 
 			list.insert( { key, "1" } );
 		}
@@ -95,12 +95,12 @@ int listLoad(LIST &list, READER &reader){
 		{
 			// add domain / ns key
 
-			const auto &key = StringRef::concatenate(buffer_key, { "d", ":", domain, ":", date });
+			const auto &key = concatenate(buffer_key, "d", ":", domain, ":", date);
 
 			if (parts.size() == 4){
 				const auto &ns = parts[3];
 
-				const auto &val = StringRef::concatenate(buffer_value, { op, ":", ns });
+				const auto &val = concatenate(buffer_value, op, ":", ns);
 
 				list.insert( { key, val } );
 

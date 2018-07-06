@@ -18,9 +18,6 @@ inline int compare(const char *s1, size_t const size1, const char *s2, size_t co
 constexpr bool equals(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept;
 
 class StringRef{
-private:
-
-
 public:
 	// CONSTRUCTORS
 
@@ -353,23 +350,27 @@ std::string concatenate(Args &&... args){
 	// super cheap concatenation,
 	// with single allocation
 
-	size_t const reserve_size = stringref_cat_impl_::catSize(std::forward<Args>(args)...);
+	using namespace stringref_cat_impl_;
+
+	size_t const reserve_size = catSize(std::forward<Args>(args)...);
 
 	std::string s;
 
 	s.reserve(reserve_size);
 
-	stringref_cat_impl_::cat(s, std::forward<Args>(args)...);
+	cat(s, std::forward<Args>(args)...);
 
 	return s;
 }
 
 template<typename... Args>
-void concatenate(std::string &s, Args &&... args){
+const std::string &concatenate(std::string &s, Args &&... args){
 	// super cheap concatenation,
 	// sometimes without allocation
 
-	size_t const reserve_size = stringref_cat_impl_::catSize(std::forward<Args>(args)...);
+	using namespace stringref_cat_impl_;
+
+	size_t const reserve_size = catSize(std::forward<Args>(args)...);
 
 	s.clear();
 
@@ -377,7 +378,9 @@ void concatenate(std::string &s, Args &&... args){
 	if (reserve_size > s.capacity())
 		s.reserve(reserve_size);
 
-	stringref_cat_impl_::cat(s, std::forward<Args>(args)...);
+	cat(s, std::forward<Args>(args)...);
+
+	return s;
 }
 
 #endif

@@ -8,41 +8,44 @@
 
 namespace comparator{
 
+namespace comparator_impl_{
 
-template <class T>
-int comp(const T &a, const T &b, std::false_type){
-	if (a < b)
-		return -1;
+	template <class T>
+	int comp(const T &a, const T &b, std::false_type){
+		if (a < b)
+			return -1;
 
-	if (a > b)
-		return +1;
+		if (a > b)
+			return +1;
 
-	return 0;
-}
+		return 0;
+	}
 
-// ===================================
+	template <typename T>
+	int comp(const T &a, const T &b, std::true_type){
+		return sgn(a, b);
+	}
 
-template <typename T>
-int comp(const T &a, const T &b, std::true_type){
-	return sgn(a, b);
 }
 
 // ===================================
 
 template <typename T>
 int comp(const T &a, const T &b){
+	using namespace comparator_impl_;
+
 	return comp(a, b, std::is_integral<T>{} );
 }
 
-inline int comp(int const a, int const b){
+constexpr int comp(int const a, int const b){
 	return a - b;
 }
 
-inline int comp(short int const a, short int const b){
+constexpr int comp(short int const a, short int const b){
 	return a - b;
 }
 
-inline int comp(signed char const a, signed char const b){
+constexpr int comp(signed char const a, signed char const b){
 	return a - b;
 }
 

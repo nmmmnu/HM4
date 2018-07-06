@@ -1,14 +1,21 @@
+#include <algorithm>
+
 #include <cassert>
+
 #include "stou_safe.h"
 
 namespace inifile_impl_{
+	template<typename T>
+	bool find(const T &data, char const c){
+		return std::find(std::begin(data), std::end(data), c) != std::end(data);
+	}
 
 	template<class PROCESSOR>
 	class INILineParser{
 	private:
-		constexpr static const char *SEPARATOR	= "=";
-		constexpr static const char *REM	= ";#";
-		constexpr static const char *SPACE	= " \t\r\n";
+		constexpr static StringRef SEPARATOR	= "="		;
+		constexpr static StringRef REM		= ";#"		;
+		constexpr static StringRef SPACE	= " \t\r\n"	;
 
 	public:
 		INILineParser(const std::string &line, PROCESSOR &proc) :
@@ -59,26 +66,19 @@ namespace inifile_impl_{
 		}
 
 	private:
-		static constexpr bool is_space__(char const c){
-			return	c == SPACE[0]	||
-				c == SPACE[1]	||
-				c == SPACE[2]	||
-				c == SPACE[3]
-			;
+		static bool is_space__(char const c){
+			return	find(SPACE, c);
 		}
 
-		static constexpr bool is_comment__(char const c){
-			return	c == REM[0]	||
-				c == REM[1]
-			;
+		static bool is_comment__(char const c){
+			return	find(REM, c);
 		}
 
-		static constexpr bool is_separator__(char const c){
-			return	c == SEPARATOR[0]
-			;
+		static bool is_separator__(char const c){
+			return	find(SEPARATOR, c);
 		}
 
-		static constexpr bool is_word__(char const c){
+		static bool is_word__(char const c){
 			return	c != 0			&&
 				! is_separator__(c)	&&
 				! is_comment__(c)
