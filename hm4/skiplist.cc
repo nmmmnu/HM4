@@ -71,6 +71,14 @@ struct SkipList::NodeLocator{
 
 // ==============================
 
+namespace{
+	int ocmp__(const OPair &p, const StringRef &key){
+		return p.cmp(key);
+	}
+}
+
+// ==============================
+
 SkipList::SkipList(height_type const height) :
 		height_(height){
 	assert( height > 0 && height <= MAX_HEIGHT );
@@ -243,7 +251,7 @@ void SkipList::zeroing_(){
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }
 
-auto SkipList::locateMutable_(const StringRef &key, bool const complete_evaluation) -> NodeLocator{
+auto SkipList::locateMutable_(const StringRef &key, bool const complete_evaluation) const -> NodeLocator{
 	assert(!key.empty());
 
 	if (key.empty()){
@@ -266,22 +274,24 @@ auto SkipList::locateMutable_(const StringRef &key, bool const complete_evaluati
 			const OPair & data = node->data;
 			int const cmp = ocmp__(data, key);
 
-			if (cmp == 0){
-				// found
+			if (cmp >= 0){
+				if (cmp == 0){
+					// found
 
-				// storing node here is redundant operation, however:
-				// * cmp is const.
-				// * one less branch
-				nl.node =  node;
+					// storing node here is redundant operation, however:
+					// * cmp is const.
+					// * one less branch
+					nl.node =  node;
 
-				if (complete_evaluation == false)
-					return nl;
+					if (complete_evaluation == false)
+						return nl;
 
+					break;
+				}
+
+				// not found
 				break;
 			}
-
-			if (cmp > 0)
-				break;
 
 			prev = node;
 		}
@@ -313,13 +323,15 @@ auto SkipList::locate_(const StringRef &key, bool const exact) const -> const No
 			const OPair & data = node->data;
 			int const cmp = ocmp__(data, key);
 
-			if (cmp == 0){
-				// found
-				return node;
-			}
+			if (cmp >= 0){
+				if (cmp == 0){
+					// found
+					return node;
+				}
 
-			if (cmp > 0)
+				// not found
 				break;
+			}
 
 			prev = node;
 		}

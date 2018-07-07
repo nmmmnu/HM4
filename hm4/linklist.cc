@@ -16,6 +16,13 @@ public:
 
 // ==============================
 
+namespace{
+	int ocmp__(const OPair &p, const StringRef &key){
+		return p.cmp(key);
+	}
+}
+
+// ==============================
 
 LinkList::LinkList(){
 	clear_();
@@ -29,7 +36,7 @@ LinkList::LinkList(LinkList &&other):
 }
 
 bool LinkList::clear(){
-	for(Node *node = head_; node; ){
+	for(const Node *node = head_; node; ){
 		const Node *copy = node;
 
 		node = node->next;
@@ -53,28 +60,30 @@ bool LinkList::insert(OPair&& newdata){
 
 		int const cmp = ocmp__(olddata, key);
 
-		if (cmp == 0){
-			// handle overwrite,
-			// keep the node, overwrite the data
+		if (cmp >= 0){
+			if (cmp == 0){
+				// handle overwrite,
+				// keep the node, overwrite the data
 
-			// check if the data in database is valid
-			if (! newdata->isValid(*olddata)){
-				// newdata will be magically destroyed.
-				return false;
+				// check if the data in database is valid
+				if (! newdata->isValid(*olddata)){
+					// newdata will be magically destroyed.
+					return false;
+				}
+
+				dataSize_ = dataSize_
+						- olddata->bytes()
+						+ newdata->bytes();
+
+				// copy assignment
+				olddata = std::move(newdata);
+
+				return true;
+			}else{
+				// not found
+				break;
 			}
-
-			dataSize_ = dataSize_
-					- olddata->bytes()
-					+ newdata->bytes();
-
-			// copy assignment
-			olddata = std::move(newdata);
-
-			return true;
 		}
-
-		if (cmp > 0)
-			break;
 
 		prev = node;
 	}
@@ -117,23 +126,25 @@ bool LinkList::erase(const StringRef &key){
 		const OPair & data = node->data;
 		int const cmp = ocmp__(data, key);
 
-		if (cmp == 0){
-			if (prev){
-				prev->next = node->next;
+		if (cmp >= 0){
+			if (cmp == 0){
+				if (prev){
+					prev->next = node->next;
+				}else{
+					// First node...
+					head_ = node->next;
+				}
+
+				dataSize_ -= data->bytes();
+				--dataCount_;
+
+				delete node;
+				return true;
 			}else{
-				// First node...
-				head_ = node->next;
+				// not found
+				break;
 			}
-
-			dataSize_ -= data->bytes();
-			--dataCount_;
-
-			delete node;
-			return true;
 		}
-
-		if (cmp > 0)
-			break;
 
 		prev = node;
 	}
@@ -159,11 +170,12 @@ const LinkList::Node *LinkList::locate_(const StringRef &key, bool const exact) 
 
 		int const cmp = ocmp__(data, key);
 
-		if (cmp == 0)
-			return node;
-
-		if (cmp > 0)
-			return exact ? nullptr : node;
+		if (cmp >= 0){
+			if (cmp == 0)
+				return node;
+			else
+				return exact ? nullptr : node;
+		}
 	}
 
 	return nullptr;

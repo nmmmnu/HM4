@@ -51,10 +51,6 @@ private:
 	void clear_();
 
 	const Node *locate_(const StringRef &key, bool exact) const;
-
-	static int ocmp__(const OPair &p, const StringRef &key){
-		return p.cmp(key);
-	}
 };
 
 // ==============================

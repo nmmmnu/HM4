@@ -65,15 +65,11 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locateMutable_(const StringRef &key, bool complete_evaluation = false);
+	NodeLocator locateMutable_(const StringRef &key, bool complete_evaluation = false) const;
 
 	const Node *locate_(const StringRef &key, bool const exact = true) const;
 
 	height_type getRandomHeight_();
-
-	static int ocmp__(const OPair &p, const StringRef &key){
-		return p.cmp(key);
-	}
 
 private:
 	class RandomGenerator;
