@@ -52,10 +52,13 @@ public:
 
 private:
 	struct		Node;
-	using		NodeArray	= std::array<Node *, MAX_HEIGHT>;
+
+	template<typename T>
+	using		HeightArray	= std::array<T,  MAX_HEIGHT>;
 
 	height_type	height_;
-	NodeArray	heads_;
+	HeightArray<Node *>
+			heads_;
 
 	size_type	dataCount_;
 	size_t		dataSize_;
@@ -65,9 +68,9 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locateMutable_(const StringRef &key, bool complete_evaluation = false) const;
+	NodeLocator locate_(const StringRef &key, bool shortcut_evaluation);
 
-	const Node *locate_(const StringRef &key, bool const exact = true) const;
+	const Node *locateNode_(const StringRef &key, bool const exact) const;
 
 	height_type getRandomHeight_();
 
@@ -111,7 +114,7 @@ inline auto SkipList::lowerBound(const StringRef &key) const -> Iterator{
 	if (key.empty())
 		return begin();
 
-	return locate_(key, false);
+	return locateNode_(key, false);
 }
 
 inline auto SkipList::begin() const -> Iterator{

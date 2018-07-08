@@ -235,16 +235,14 @@ inline void print(const Pair &pair){
 	pair.print_();
 }
 
-template<class T>
-void print(const T &ptr, std::nullptr_t){
-	if (ptr)
-		print(*ptr);
-	else
-		printf("--- pair is empty ---\n");
-}
-
-inline void print(const Pair *pair){
-	print(pair, nullptr);
+namespace pair_impl_{
+	template<class T>
+	void printDereference(const T &ptr){
+		if (ptr)
+			print(*ptr);
+		else
+			printf("--- pair is empty ---\n");
+	}
 }
 
 template<class T, class = my_void_t<decltype( *std::declval<T> )> >

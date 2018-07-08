@@ -13,14 +13,11 @@ public:
 	Node(OPair &&data) : data(std::move(data)){}
 };
 
+struct LinkList::NodeLocator{
+	Node **prev;
+	Node *node;
+};
 
-// ==============================
-
-namespace{
-	int ocmp__(const OPair &p, const StringRef &key){
-		return p.cmp(key);
-	}
-}
 
 // ==============================
 
@@ -54,38 +51,28 @@ bool LinkList::insert(OPair&& newdata){
 
 	const StringRef &key = newdata->getKey();
 
-	Node *prev = nullptr;
-	for(Node *node = head_; node; node = node->next){
-		OPair & olddata = node->data;
+	const auto loc = locate_(key);
 
-		int const cmp = ocmp__(olddata, key);
+	if (loc.node){
+		OPair &olddata = loc.node->data;
 
-		if (cmp >= 0){
-			if (cmp == 0){
-				// handle overwrite,
-				// keep the node, overwrite the data
+		// handle overwrite,
+		// keep the node, overwrite the data
 
-				// check if the data in database is valid
-				if (! newdata->isValid(*olddata)){
-					// newdata will be magically destroyed.
-					return false;
-				}
-
-				dataSize_ = dataSize_
-						- olddata->bytes()
-						+ newdata->bytes();
-
-				// copy assignment
-				olddata = std::move(newdata);
-
-				return true;
-			}else{
-				// not found
-				break;
-			}
+		// check if the data in database is valid
+		if (! newdata->isValid(*olddata)){
+			// newdata will be magically destroyed.
+			return false;
 		}
 
-		prev = node;
+		dataSize_ = dataSize_
+				- olddata->bytes()
+				+ newdata->bytes();
+
+		// copy assignment
+		olddata = std::move(newdata);
+
+		return true;
 	}
 
 	size_t const size = newdata->bytes();
@@ -96,15 +83,8 @@ bool LinkList::insert(OPair&& newdata){
 		return false;
 	}
 
-	// put new pair here...
-	if (prev){
-		// we are at the middle
-		newnode->next = prev->next;
-		prev->next = newnode;
-	}else{
-		newnode->next = head_;
-		head_ = newnode;
-	}
+	newnode->next = *loc.prev;
+	*loc.prev = newnode;
 
 	dataSize_ += size;
 	dataCount_++;
@@ -115,38 +95,23 @@ bool LinkList::insert(OPair&& newdata){
 const Pair *LinkList::operator[](const StringRef &key) const{
 	assert(!key.empty());
 
-	const Node *node = locate_(key, true);
+	const Node *node = locateNode_(key, true);
 
 	return node ? node->data.get() : nullptr;
 }
 
 bool LinkList::erase(const StringRef &key){
-	Node *prev = nullptr;
-	for(Node *node = head_; node; node = node->next){
-		const OPair & data = node->data;
-		int const cmp = ocmp__(data, key);
+	assert(!key.empty());
 
-		if (cmp >= 0){
-			if (cmp == 0){
-				if (prev){
-					prev->next = node->next;
-				}else{
-					// First node...
-					head_ = node->next;
-				}
+	const auto loc = locate_(key);
 
-				dataSize_ -= data->bytes();
-				--dataCount_;
+	if (loc.node){
+		*loc.prev = loc.node->next;
 
-				delete node;
-				return true;
-			}else{
-				// not found
-				break;
-			}
-		}
+		dataSize_ -= loc.node->data->bytes();
+		--dataCount_;
 
-		prev = node;
+		delete loc.node;
 	}
 
 	return true;
@@ -160,27 +125,49 @@ void LinkList::clear_(){
 	head_ = nullptr;
 }
 
-const LinkList::Node *LinkList::locate_(const StringRef &key, bool const exact) const{
-	// precondition
+auto LinkList::locate_(const StringRef &key) -> NodeLocator{
 	assert(!key.empty());
-	// eo precondition
+
+	Node **jtable = & head_;
+
+	for(Node *node = *jtable; node; node = node->next){
+		const OPair & data = node->data;
+
+		int const cmp = data.cmp(key);
+
+		if (cmp >= 0){
+			if (cmp == 0){
+				return { jtable, node };
+			}else{
+				return { jtable, nullptr };
+			}
+		}
+
+		jtable = & node->next;
+	}
+
+	return { jtable, nullptr };
+}
+
+auto LinkList::locateNode_(const StringRef &key, bool const exact) const -> const Node *{
+	assert(!key.empty());
 
 	for(const Node *node = head_; node; node = node->next){
 		const OPair & data = node->data;
 
-		int const cmp = ocmp__(data, key);
+		int const cmp = data.cmp(key);
 
 		if (cmp >= 0){
-			if (cmp == 0)
+			if (cmp == 0){
 				return node;
-			else
+			}else{
 				return exact ? nullptr : node;
+			}
 		}
 	}
 
 	return nullptr;
 }
-
 
 // ==============================
 
