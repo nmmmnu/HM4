@@ -7,12 +7,20 @@
 
 namespace myendian_impl_{
 	class is_be{
-		constexpr static uint32_t u4 = 1;
-		constexpr static uint8_t  u1  = (const uint8_t &) u4;
+	private:
+		constexpr static uint32_t u4 = 0x11223344;
+		constexpr static uint8_t  u1 = (const uint8_t  &) u4;
+
+	private:
+		constexpr static uint32_t t4 = (const uint32_t &) u4;
+		static_assert(t4 == 0x11223344 || t4 == 0x44332211, "I can handle only big and little endian");
+
 	public:
-		constexpr static bool value = u1 == 0;
+		constexpr static bool value = u1 == 0x11;
 
 		using type = std::integral_constant<bool, value>;
+
+	//	static_assert(value == false, "");
 	};
 
 

@@ -188,6 +188,8 @@ bool SkipList::erase(const StringRef &key){
 	for(height_type h = 0; h < height_; ++h){
 		if (*nl.prev[h] == nl.node)
 			*nl.prev[h] = nl.node->next[h];
+		else
+			break;
 	}
 
 	const OPair & data = nl.node->data;
