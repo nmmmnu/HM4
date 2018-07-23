@@ -15,13 +15,11 @@ public:
 
 public:
 	static constexpr height_type MAX_HEIGHT		= 64;
-	static constexpr height_type DEFAULT_HEIGHT	= 32;
 
 	class Iterator;
 
 public:
-	explicit
-	SkipList(height_type height = DEFAULT_HEIGHT);
+	SkipList();
 	SkipList(SkipList &&other);
 	~SkipList();
 
@@ -54,14 +52,12 @@ private:
 	struct		Node;
 
 	template<typename T>
-	using		HeightArray	= std::array<T,  MAX_HEIGHT>;
+	using HeightArray	= std::array<T,  MAX_HEIGHT>;
 
-	height_type	height_;
-	HeightArray<Node *>
-			heads_;
+	HeightArray<Node *>	heads_;
 
-	size_type	dataCount_;
-	size_t		dataSize_;
+	size_type		dataCount_;
+	size_t			dataSize_;
 
 private:
 	void zeroing_();
@@ -72,12 +68,7 @@ private:
 
 	const Node *locateNode_(const StringRef &key, bool const exact) const;
 
-	height_type getRandomHeight_();
-
-private:
-	class RandomGenerator;
-
-	static RandomGenerator rand_;
+	static height_type getRandomHeight_();
 };
 
 // ==============================
@@ -121,7 +112,7 @@ inline auto SkipList::begin() const -> Iterator{
 	return heads_[0];
 }
 
-inline constexpr auto SkipList::end() -> Iterator{
+constexpr auto SkipList::end() -> Iterator{
 	return nullptr;
 }
 

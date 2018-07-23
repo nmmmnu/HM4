@@ -6,18 +6,28 @@
 
 namespace hm4{
 
-class SkipList::RandomGenerator{
-public:
-	bool operator()(){
-		return distr_(gen_);
+namespace skiplist_impl_{
+	std::mt19937_64 rand64{ (uint32_t) time(nullptr) };
+
+	template<typename T>
+	constexpr T lsb(uint64_t const value, T const min, T const max){
+		constexpr uint64_t l = 1;
+
+		for(T i = min; i < max; ++i)
+			if(value & (l << i) )
+				return i;
+
+		return min;
 	}
+}
 
-private:
-	std::mt19937			gen_{ (uint32_t) time(nullptr) };
-	std::bernoulli_distribution	distr_{ 0.5 };
-};
+// ==============================
 
-SkipList::RandomGenerator SkipList::rand_;
+auto SkipList::getRandomHeight_() -> height_type{
+	uint64_t const r = skiplist_impl_::rand64();
+
+	return skiplist_impl_::lsb(r, 1, MAX_HEIGHT);
+}
 
 // ==============================
 
@@ -71,15 +81,11 @@ struct SkipList::NodeLocator{
 
 // ==============================
 
-SkipList::SkipList(height_type const height) :
-		height_(height){
-	assert( height > 0 && height <= MAX_HEIGHT );
-
+SkipList::SkipList(){
 	zeroing_();
 }
 
 SkipList::SkipList(SkipList &&other):
-		height_		(std::move(other.height_	)),
 		heads_		(std::move(other.heads_		)),
 		dataCount_	(std::move(other.dataCount_	)),
 		dataSize_	(std::move(other.dataSize_	)){
@@ -185,7 +191,7 @@ bool SkipList::erase(const StringRef &key){
 	if (nl.node == nullptr)
 		return true;
 
-	for(height_type h = 0; h < height_; ++h){
+	for(height_type h = 0; h < MAX_HEIGHT; ++h){
 		if (*nl.prev[h] == nl.node)
 			*nl.prev[h] = nl.node->next[h];
 		else
@@ -205,7 +211,7 @@ bool SkipList::erase(const StringRef &key){
 // ==============================
 
 void SkipList::printLanes() const{
-	for(height_type lane = height_; lane --> 0;){
+	for(height_type lane = MAX_HEIGHT; lane --> 0;){
 		printf("Lane # %5u :\n", lane);
 		printLane(lane);
 	}
@@ -240,7 +246,7 @@ auto SkipList::locate_(const StringRef &key, bool const shortcut_evaluation) -> 
 
 	Node **jtable = heads_.data();
 
-	for(height_type h = height_; h --> 0;){
+	for(height_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
 			const OPair & data = node->data;
 			int const cmp = data.cmp(key);
@@ -279,7 +285,7 @@ auto SkipList::locateNode_(const StringRef &key, bool const exact) const -> cons
 
 	const Node *node = nullptr;
 
-	for(height_type h = height_; h --> 0;){
+	for(height_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){
 			const OPair & data = node->data;
 			int const cmp = data.cmp(key);
@@ -298,21 +304,6 @@ auto SkipList::locateNode_(const StringRef &key, bool const exact) const -> cons
 	}
 
 	return exact ? nullptr : node;
-}
-
-
-auto SkipList::getRandomHeight_() -> height_type{
-	// This gives slightly better performance,
-	// than divide by 3 or multply by 0.33
-
-	// We execute rand() inside the loop,
-	// but performance is fast enought.
-
-	height_type h = 1;
-	while( h < height_ && rand_() )
-		h++;
-
-	return h;
 }
 
 
