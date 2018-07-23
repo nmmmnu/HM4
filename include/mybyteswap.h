@@ -56,16 +56,17 @@ constexpr uint64_t byteswap(uint64_t const a){
 
 
 
-namespace mybyteswap_test_{
-	template<typename T>
-	constexpr T byteswap_test(T const a, T const b){
-		return byteswap(a) == b;
-	}
+namespace mybyteswap_impl_{
+	namespace test_{
+		template<typename T>
+		constexpr T byteswap_test(T const a, T const b){
+			return byteswap(a) == b;
+		}
 
-	static_assert( byteswap_test<uint16_t>(0x1122			, 0x2211		), "byteswap<uint16_t> error" );
-	static_assert( byteswap_test<uint32_t>(0x11223344		, 0x44332211		), "byteswap<uint32_t> error" );
-	static_assert( byteswap_test<uint64_t>(0x1122334455667788	, 0x8877665544332211	), "byteswap<uint64_t> error" );
-
+		static_assert( byteswap_test<uint16_t>(0x1122			, 0x2211		), "byteswap<uint16_t> error" );
+		static_assert( byteswap_test<uint32_t>(0x11223344		, 0x44332211		), "byteswap<uint32_t> error" );
+		static_assert( byteswap_test<uint64_t>(0x1122334455667788	, 0x8877665544332211	), "byteswap<uint64_t> error" );
+	} // namespace test_
 } // namespace mybyteswap_impl_
 
 #endif

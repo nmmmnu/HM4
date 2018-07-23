@@ -246,9 +246,9 @@ auto SkipList::locate_(const StringRef &key, bool const shortcut_evaluation) -> 
 			int const cmp = data.cmp(key);
 
 			if (cmp >= 0){
-				if (cmp == 0){
+				if (cmp == 0 && (shortcut_evaluation || h == 0) ){
 					// found
-					nl.node =  node;
+					nl.node = node;
 
 					if (shortcut_evaluation){
 						// at this point, we do not really care,
@@ -267,51 +267,6 @@ auto SkipList::locate_(const StringRef &key, bool const shortcut_evaluation) -> 
 	}
 
 	return nl;
-
-#if 0
-
-	// smart over-optimizations, such skip NULL lanes or
-	// start from the middle of the list did not pay off.
-
-	Node *prev = nullptr;
-
-	height_type height = height_;
-	while(height){
-		Node *node = prev ? prev : heads_[height - 1];
-
-		for(; node; node = node->next[height - 1]){
-			const OPair & data = node->data;
-			int const cmp = ocmp__(data, key);
-
-			if (cmp >= 0){
-				if (cmp == 0){
-					// found
-
-					// storing node here is redundant operation, however:
-					// * cmp is const.
-					// * one less branch
-					nl.node =  node;
-
-					if (complete_evaluation == false)
-						return nl;
-
-					break;
-				}
-
-				// not found
-				break;
-			}
-
-			prev = node;
-		}
-
-		nl.prev[height - 1] = prev;
-
-		--height;
-	}
-
-	return nl;
-#endif
 }
 
 auto SkipList::locateNode_(const StringRef &key, bool const exact) const -> const Node *{
