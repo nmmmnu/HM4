@@ -9,12 +9,14 @@ namespace hm4{
 namespace skiplist_impl_{
 	std::mt19937_64 rand64{ (uint32_t) time(nullptr) };
 
+	// unbelievably this is 4x faster
+	// than DeBruijn-like algorithms,
+	// e.g. 0x03F6EAF2CD271461
+
 	template<typename T>
 	constexpr T lsb(uint64_t const value, T const min, T const max){
-		constexpr uint64_t l = 1;
-
 		for(T i = min; i < max; ++i)
-			if(value & (l << i) )
+			if(value & (1u << i) )
 				return i;
 
 		return min;
@@ -24,9 +26,11 @@ namespace skiplist_impl_{
 // ==============================
 
 auto SkipList::getRandomHeight_() -> height_type{
-	uint64_t const r = skiplist_impl_::rand64();
+	using namespace skiplist_impl_;
 
-	return skiplist_impl_::lsb(r, 1, MAX_HEIGHT);
+	uint64_t const rand = rand64();
+
+	return lsb<height_type>(rand, 1, MAX_HEIGHT);
 }
 
 // ==============================

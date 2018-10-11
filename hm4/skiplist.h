@@ -14,7 +14,7 @@ public:
 	using height_type = uint8_t;
 
 public:
-	static constexpr height_type MAX_HEIGHT		= 64;
+	static constexpr height_type MAX_HEIGHT = sizeof(uint64_t) * 8;
 
 	class Iterator;
 
