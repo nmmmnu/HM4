@@ -47,7 +47,7 @@ public:
 		case "set"_sr.hash()		:
 		case "SET"_sr.hash()		: return Command::SET		;
 
-		case "setex"_sr.hash()			:
+		case "setex"_sr.hash()		:
 		case "SETEX"_sr.hash()		: return Command::SETEX		;
 
 		case "del"_sr.hash()		:
