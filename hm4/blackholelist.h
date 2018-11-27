@@ -7,8 +7,11 @@
 namespace hm4{
 
 
-class BlackHoleList : public IList<BlackHoleList, true>{
+class BlackHoleList{
 public:
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
 	using Iterator = const Pair *;
 
 public:
@@ -18,22 +21,22 @@ public:
 	}
 
 	constexpr
-	const Pair *operator[](const StringRef &) const noexcept{
+	const Pair *operator[](StringRef const &) const noexcept{
 		return nullptr;
 	}
 
 	constexpr
-	bool erase(const StringRef &) const noexcept{
+	bool erase(StringRef const &) const noexcept{
 		return true;
 	}
 
 	constexpr
-	bool insert(const OPair &) const {
+	bool insert(OPair const &) const {
 		return true;
 	}
 
 	constexpr
-	size_type size(bool const = false) const noexcept{
+	size_type size() const noexcept{
 		return 0;
 	}
 
@@ -44,7 +47,7 @@ public:
 
 public:
 	constexpr
-	Iterator lowerBound(const StringRef &) const noexcept{
+	Iterator lowerBound(StringRef const &) const noexcept{
 		return nullptr;
 	}
 

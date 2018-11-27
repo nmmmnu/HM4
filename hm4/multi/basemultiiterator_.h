@@ -7,45 +7,36 @@
 
 namespace hm4{
 namespace multi{
-
-namespace basemultiiterator_impl_{
-	struct MultiIteratorTags_{
-		template<bool B>
-		using base_iterator  = std::integral_constant<bool, B>;
-
-		using begin_iterator = std::true_type;
-		using end_iterator   = std::false_type;
-	};
-
-	// ===================================
+namespace multiiterator_impl_{
 
 	template <class TABLE>
-	class IteratorPair_ : public MultiIteratorTags_{
+	class IteratorPair {
 	private:
 		using Iterator		= typename TABLE::Iterator;
 
 	public:
-		IteratorPair_(Iterator &&cur, Iterator &&end) :
-						cur(std::move(cur)),
-						end(std::move(end)){}
+		IteratorPair(Iterator &&cur, Iterator &&end) :
+				cur(std::move(cur)),
+				end(std::move(end)){}
 
-		IteratorPair_(const TABLE &table, begin_iterator) :
-						IteratorPair_(
-							table.begin(),
-							table.end()
-						){}
 
-		IteratorPair_(const TABLE &table, end_iterator) :
-						IteratorPair_(
-							table.end(),
-							table.end()
-						){}
+		IteratorPair(const TABLE &table, std::true_type) :
+				IteratorPair(
+					table.begin(),
+					table.end()
+				){}
 
-		IteratorPair_(const TABLE &table, const StringRef &key) :
-						IteratorPair_(
-							table.lowerBound(key),
-							table.end()
-						){}
+		IteratorPair(const TABLE &table, std::false_type) :
+				IteratorPair(
+					table.end(),
+					table.end()
+				){}
+
+		IteratorPair(const TABLE &table, StringRef const &key) :
+				IteratorPair(
+					table.lowerBound(key),
+					table.end()
+				){}
 
 	public:
 		const Pair *dptr() const{
@@ -56,7 +47,7 @@ namespace basemultiiterator_impl_{
 			++cur;
 		}
 
-		bool operator==(const IteratorPair_ &other) const{
+		bool operator==(IteratorPair const &other) const{
 			return cur == other.cur && end == other.end;
 		}
 
@@ -65,7 +56,7 @@ namespace basemultiiterator_impl_{
 		Iterator end;
 	};
 
-} // namespace basemultiiterator_impl_
+} // namespace multiiterator_impl_
 
 } // namespace multi
 } // namespace

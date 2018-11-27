@@ -25,12 +25,12 @@ namespace skiplist_impl_{
 
 // ==============================
 
-auto SkipList::getRandomHeight_() -> height_type{
+auto SkipList::getRandomHeight_() -> height_size_type{
 	using namespace skiplist_impl_;
 
 	uint64_t const rand = rand64();
 
-	return lsb<height_type>(rand, 1, MAX_HEIGHT);
+	return lsb<height_size_type>(rand, 1, MAX_HEIGHT);
 }
 
 // ==============================
@@ -62,16 +62,16 @@ public:
 	Node(OPair &&data) : data(std::move(data)){}
 
 private:
-	static size_t calcNewSize__(size_t const size, height_type const height){
+	static size_t calcNewSize__(size_t const size, height_size_type const height){
 		return size + (height - 1) * sizeof(Node *);
 	}
 
 public:
-	static void *operator new(size_t const size, height_type const height) {
+	static void *operator new(size_t const size, height_size_type const height) {
 		return ::operator new(calcNewSize__(size, height));
 	}
 
-	static void *operator new(size_t const size, height_type const height, std::nothrow_t ) {
+	static void *operator new(size_t const size, height_size_type const height, std::nothrow_t ) {
 		return ::operator new(calcNewSize__(size, height), std::nothrow);
 	}
 };
@@ -145,7 +145,7 @@ bool SkipList::insert(OPair&& newdata){
 	// create new node
 
 	size_t const size = newdata->bytes();
-	height_type const height = getRandomHeight_();
+	height_size_type const height = getRandomHeight_();
 
 	Node *newnode = new(height, std::nothrow) Node(std::move(newdata));
 
@@ -158,14 +158,14 @@ bool SkipList::insert(OPair&& newdata){
 	// newnode->height = height
 
 	// place new node where it belongs
-	for(height_type i = 0; i < height; ++i){
+	for(height_size_type i = 0; i < height; ++i){
 		newnode->next[i] = *nl.prev[i];
 		*nl.prev[i] = newnode;
 	}
 
 #ifdef DEBUG_PRINT_LANES
 	printf("%3u Lanes-> ", height);
-	for(height_type i = 0; i < height; ++i)
+	for(height_size_type i = 0; i < height; ++i)
 		printf("%p ", (void *) newnode->next[i]);
 	printf("\n");
 #endif
@@ -179,7 +179,7 @@ bool SkipList::insert(OPair&& newdata){
 	return true;
 }
 
-const Pair *SkipList::operator[](const StringRef &key) const{
+const Pair *SkipList::operator[](StringRef const &key) const{
 	assert(!key.empty());
 
 	const Node *node = locateNode_(key, true);
@@ -187,7 +187,7 @@ const Pair *SkipList::operator[](const StringRef &key) const{
 	return node ? node->data.get() : nullptr;
 }
 
-bool SkipList::erase(const StringRef &key){
+bool SkipList::erase(StringRef const &key){
 	assert(!key.empty());
 
 	const auto nl = locate_(key, false);
@@ -195,7 +195,7 @@ bool SkipList::erase(const StringRef &key){
 	if (nl.node == nullptr)
 		return true;
 
-	for(height_type h = 0; h < MAX_HEIGHT; ++h){
+	for(height_size_type h = 0; h < MAX_HEIGHT; ++h){
 		if (*nl.prev[h] == nl.node)
 			*nl.prev[h] = nl.node->next[h];
 		else
@@ -215,13 +215,13 @@ bool SkipList::erase(const StringRef &key){
 // ==============================
 
 void SkipList::printLanes() const{
-	for(height_type lane = MAX_HEIGHT; lane --> 0;){
+	for(height_size_type lane = MAX_HEIGHT; lane --> 0;){
 		printf("Lane # %5u :\n", lane);
 		printLane(lane);
 	}
 }
 
-void SkipList::printLane(height_type const lane) const{
+void SkipList::printLane(height_size_type const lane) const{
 	uint64_t i = 0;
 	for(const Node *node = heads_[lane]; node; node = node->next[lane]){
 		hm4::print(node->data);
@@ -240,7 +240,7 @@ void SkipList::zeroing_(){
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }
 
-auto SkipList::locate_(const StringRef &key, bool const shortcut_evaluation) -> NodeLocator{
+auto SkipList::locate_(StringRef const &key, bool const shortcut_evaluation) -> NodeLocator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
@@ -250,7 +250,7 @@ auto SkipList::locate_(const StringRef &key, bool const shortcut_evaluation) -> 
 
 	Node **jtable = heads_.data();
 
-	for(height_type h = MAX_HEIGHT; h --> 0;){
+	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
 			const OPair & data = node->data;
 			int const cmp = data.cmp(key);
@@ -279,7 +279,7 @@ auto SkipList::locate_(const StringRef &key, bool const shortcut_evaluation) -> 
 	return nl;
 }
 
-auto SkipList::locateNode_(const StringRef &key, bool const exact) const -> const Node *{
+auto SkipList::locateNode_(StringRef const &key, bool const exact) const -> const Node *{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateNode_" };
@@ -289,7 +289,7 @@ auto SkipList::locateNode_(const StringRef &key, bool const exact) const -> cons
 
 	const Node *node = nullptr;
 
-	for(height_type h = MAX_HEIGHT; h --> 0;){
+	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){
 			const OPair & data = node->data;
 			int const cmp = data.cmp(key);
@@ -314,7 +314,7 @@ auto SkipList::locateNode_(const StringRef &key, bool const exact) const -> cons
 // ==============================
 
 
-SkipList::Iterator &SkipList::Iterator::operator++(){
+auto SkipList::Iterator::operator++() -> Iterator &{
 	node_ = node_->next[0];
 	return *this;
 }

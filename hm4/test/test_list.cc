@@ -1,14 +1,16 @@
-#include "pair.h"
+#include "ilist.h"
 
 using hm4::Pair;
 using hm4::OPair;
+using hm4::size;
+using hm4::empty;
 
 #include "mytest.h"
 
 MyTest mytest;
 
-#include <utility>	// std::pair
-
+//#include <utility>	// std::pair
+#include <iterator>	// std::distance
 
 
 template <class LIST>
@@ -94,16 +96,16 @@ template <class LIST>
 void list_test(LIST &list){
 	// GENERAL
 
-	const auto a = list_populate(list);
+	auto const a = list_populate(list);
 
 	auto const count = a.first;
 	auto const size  = a.second;
 
-	mytest("count",			list.size() == count		);
-	mytest("count estim",		list.size(true) >= count	);
-	mytest("empty",			! list.empty()			);
+	mytest("size estimated",	list.size() >= count		);
+	mytest("size exact",		hm4::size(list) == count	);
+	mytest("size empty",		! empty(list)			);
+	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == static_cast<typename LIST::difference_type>(count)	);
 	mytest("sizeof",		list.bytes() == size		);
-
 
 	const Pair *p = nullptr;
 
@@ -169,7 +171,7 @@ void list_test(LIST &list){
 	list.erase("nonexistent");
 
 	mytest("remove count",		list.size() == 0		);
-	mytest("remove empty",		list.empty()			);
+	mytest("remove empty",		empty(list)			);
 
 
 
@@ -192,7 +194,7 @@ void list_test(LIST &list){
 	LIST mlist = std::move(list);
 	mytest("move c-tor",		mlist.bytes() == size		);
 
-	// checking if list.empty() == true
+	// checking if empty(list) == true
 	// is wrong and should not be tested,
 	// because it could be done via copy c-tor or swap
 }
@@ -212,7 +214,6 @@ void list_test(const char *name){
 
 	return list_test(name, list);
 }
-
 
 #include "skiplist.h"
 
@@ -236,22 +237,23 @@ static void skiplist_lanes_test(){
 	list.printLanes();
 }
 
-
 #include "blackholelist.h"
 
 template<>
 void list_test(hm4::BlackHoleList &list){
 	list_populate(list);
 
-	mytest("count",			list.size() == 0			);
-	mytest("count estim",		list.size(true) == 0			);
-	mytest("empty",			list.empty()				);
+	mytest("size estimated",	list.size() == 0			);
+	mytest("size exact",		size(list) == 0				);
+	mytest("size empty",		empty(list)				);
+	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0	);
 	mytest("sizeof",		list.bytes() == 0			);
 
 	mytest("put",			list.insert( { "key", "val" } )		);
 	mytest("get",			! list["key"]				);
 	mytest("remove",		list.erase("key")			);
 }
+
 
 
 #include "multi/duallist.h"
@@ -266,7 +268,7 @@ void list_test<MyDualList>(const char *name){
 
 	return list_test(name, list);
 }
-
+/*
 
 #include "decoratorlist.h"
 
@@ -279,7 +281,7 @@ void list_test<MyDecoratorList>(const char *name){
 
 	return list_test(name, list);
 }
-
+*/
 #include "vectorlist.h"
 #include "linklist.h"
 
@@ -288,10 +290,10 @@ int main(){
 	list_test<hm4::LinkList		>("LinkList"		);
 	list_test<hm4::SkipList		>("SkipList"		);
 	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
-
-	list_test<MyDecoratorList	>("DecoratorList"	);
-
 	list_test<MyDualList		>("DualList"		);
+
+//	list_test<MyDecoratorList	>("DecoratorList"	);
+
 
 //	skiplist_lanes_test();
 

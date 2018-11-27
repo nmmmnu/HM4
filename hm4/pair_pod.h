@@ -231,23 +231,8 @@ static_assert(std::is_pod<Pair>::value, "Pair must be POD type");
 
 // ==============================
 
-inline void print(const Pair &pair){
+inline void print(Pair const &pair){
 	pair.print_();
-}
-
-namespace pair_impl_{
-	template<class T>
-	void printDereference(const T &ptr){
-		if (ptr)
-			print(*ptr);
-		else
-			printf("--- pair is empty ---\n");
-	}
-}
-
-template<class T, class = my_void_t<decltype( *std::declval<T> )> >
-void print(const T &it){
-	print(*it);
 }
 
 } // namespace

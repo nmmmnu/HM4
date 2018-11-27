@@ -9,12 +9,15 @@
 namespace hm4{
 
 
-class SkipList : public IList<SkipList, true>{
+class SkipList{
 public:
-	using height_type = uint8_t;
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
+	using height_size_type = uint8_t;
 
 public:
-	static constexpr height_type MAX_HEIGHT = sizeof(uint64_t) * 8;
+	constexpr static height_size_type MAX_HEIGHT = sizeof(uint64_t) * 8;
 
 	class Iterator;
 
@@ -26,12 +29,12 @@ public:
 public:
 	bool clear();
 
-	const Pair *operator[](const StringRef &key) const;
-	bool erase(const StringRef &key);
+	const Pair *operator[](StringRef const &key) const;
+	bool erase(StringRef const &key);
 
 	bool insert(OPair &&data);
 
-	size_type size(bool const = false) const noexcept{
+	size_type size() const noexcept{
 		return dataCount_;
 	}
 
@@ -40,13 +43,13 @@ public:
 	}
 
 public:
-	Iterator lowerBound(const StringRef &key) const;
+	Iterator lowerBound(StringRef const &key) const;
 	Iterator begin() const;
 	static constexpr Iterator end();
 
 public:
 	void printLanes() const;
-	void printLane(height_type lane) const;
+	void printLane(height_size_type lane) const;
 
 private:
 	struct		Node;
@@ -64,11 +67,11 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(const StringRef &key, bool shortcut_evaluation);
+	NodeLocator locate_(StringRef const &key, bool shortcut_evaluation);
 
-	const Node *locateNode_(const StringRef &key, bool const exact) const;
+	const Node *locateNode_(StringRef const &key, bool const exact) const;
 
-	static height_type getRandomHeight_();
+	static height_size_type getRandomHeight_();
 };
 
 // ==============================
@@ -77,6 +80,17 @@ class SkipList::Iterator{
 private:
 	friend class SkipList;
 	constexpr Iterator(const Node *node) : node_(node){}
+
+public:
+	constexpr Iterator(Iterator const &other) = default;
+	constexpr Iterator(Iterator &&other) = default;
+
+public:
+	using difference_type = SkipList::difference_type;
+	using value_type = Pair;
+	using pointer = const value_type *;
+	using reference = value_type &;
+	using iterator_category = std::input_iterator_tag;
 
 public:
 	Iterator &operator++();

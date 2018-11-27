@@ -7,21 +7,50 @@ namespace hm4{
 namespace multi{
 
 template <class TABLE1, class TABLE2>
-class DualIterator : public basemultiiterator_impl_::MultiIteratorTags_{
+class DualIterator{
 public:
-	using value_type = const Pair;
+	DualIterator(DualIterator const &other) = default;
+	DualIterator(DualIterator &&other) = default;
 
 private:
-	using IteratorPair1	= basemultiiterator_impl_::IteratorPair_<TABLE1>;
-	using IteratorPair2	= basemultiiterator_impl_::IteratorPair_<TABLE2>;
+	template<class T>
+	using it_traits = std::iterator_traits<typename T::Iterator>;
+
+	static_assert(
+		std::is_same<
+			typename it_traits<TABLE1>::difference_type,
+			typename it_traits<TABLE2>::difference_type
+		>::value,
+	"TABLE1::Iterator::difference_type must be same as TABLE2::Iterator::difference_type");
+
+	template<class T>
+	using is_input_iterator =
+		std::is_base_of<
+			std::input_iterator_tag,
+			typename it_traits<T>::iterator_category
+		>
+	;
+
+	static_assert(is_input_iterator<TABLE1>::value, "TABLE1::Iterator is not input_iterator");
+	static_assert(is_input_iterator<TABLE2>::value, "TABLE2::Iterator is not input_iterator");
+
+public:
+	using difference_type = typename it_traits<TABLE1>::difference_type;
+	using value_type = Pair;
+	using pointer = const value_type *;
+	using reference = value_type &;
+	using iterator_category = std::input_iterator_tag;
+
+	template<bool B>
+	using bool_constant = std::integral_constant<bool, B>;
 
 public:
 	template<bool B>
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const base_iterator<B> &tag) :
+	DualIterator(const TABLE1 &table1, TABLE2 const &table2, bool_constant<B> tag) :
 					it1_(table1, tag),
 					it2_(table2, tag){}
 
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const StringRef &key) :
+	DualIterator(const TABLE1 &table1, TABLE2 const &table2, const StringRef &key) :
 					it1_(table1, key),
 					it2_(table2, key){}
 
@@ -43,8 +72,8 @@ public:
 	}
 
 private:
-	IteratorPair1	it1_;
-	IteratorPair2	it2_;
+	multiiterator_impl_::IteratorPair<TABLE1>	it1_;
+	multiiterator_impl_::IteratorPair<TABLE2>	it2_;
 };
 
 } // namespace multi

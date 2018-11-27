@@ -6,7 +6,8 @@
 
 #include "dualiterator.h"
 
-#include <type_traits>
+//#include <type_traits>
+#include <iterator>	// std::distance
 
 
 namespace hm4{
@@ -14,23 +15,22 @@ namespace multi{
 
 
 template <class LIST1, class LIST2=const LIST1, bool ERASE_WITH_TOMBSTONE=false>
-class DualList : public IList<DualList<LIST1, LIST2, ERASE_WITH_TOMBSTONE>, LIST1::MUTABLE>{
+class DualList{
 public:
 	using Iterator		= DualIterator<LIST1, LIST2>;
 
-	using size_type		= typename DualList::size_type;
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
 
 public:
 	DualList(LIST1 &list1, const LIST2 &list2) :
 					list1_(list1),
-					list2_(list2){
-	}
-
+					list2_(list2){}
 
 public:
 	// Immutable Methods
 
-	const Pair *operator[](const StringRef &key) const{
+	const Pair *operator[](StringRef const &key) const{
 		assert(!key.empty());
 
 		const Pair *pair = list1_[key];
@@ -41,8 +41,9 @@ public:
 		return list2_[key];
 	}
 
-	size_type size(bool const estimated = false) const{
-		return estimated ? sizeEstimated_(true) : this->sizeViaIterator_();
+	size_type size() const{
+		// estimated
+		return list1_.size() + list2_.size();
 	}
 
 	size_t bytes() const{
@@ -51,20 +52,15 @@ public:
 
 public:
 	Iterator begin() const{
-		return Iterator(list1_, list2_, typename Iterator::begin_iterator{} );
+		return Iterator(list1_, list2_, std::true_type{} );
 	}
 
 	Iterator end() const{
-		return Iterator(list1_, list2_, typename Iterator::end_iterator{} );
+		return Iterator(list1_, list2_, std::false_type{} );
 	}
 
 	Iterator lowerBound(const StringRef &key) const{
 		return Iterator(list1_, list2_, key );
-	}
-
-private:
-	size_type sizeEstimated_(bool const estimated) const{
-		return list1_.size(estimated) + list2_.size(estimated);
 	}
 
 public:
@@ -75,10 +71,12 @@ public:
 		return list1_.clear();
 	}
 
-	bool erase(const StringRef &key){
+	bool erase(StringRef const &key){
 		assert(!key.empty());
 
-		return erase_(key, std::integral_constant<bool, ERASE_WITH_TOMBSTONE>{});
+		using tombstone_tag = std::integral_constant<bool, ERASE_WITH_TOMBSTONE>;
+
+		return erase_(key, tombstone_tag{});
 	}
 
 	bool insert(OPair &&data){
@@ -86,11 +84,11 @@ public:
 	}
 
 private:
-	bool erase_(const StringRef &key, std::true_type){
+	bool erase_(StringRef const &key, std::true_type){
 		return list1_.insert(OPair::tombstone(key));
 	}
 
-	bool erase_(const StringRef &key, std::false_type){
+	bool erase_(StringRef const &key, std::false_type){
 		return list1_.erase(key);
 	}
 
@@ -101,6 +99,12 @@ private:
 
 
 } // multi
+
+template <class L1, class L2, bool E>
+auto size(multi::DualList<L1, L2, E> const &list){
+	return std::distance(std::begin(list), std::end(list));
+}
+
 } // namespace
 
 

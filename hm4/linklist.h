@@ -6,7 +6,11 @@
 namespace hm4{
 
 
-class LinkList : public IList<LinkList, true>{
+class LinkList{
+public:
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
 public:
 	class Iterator;
 
@@ -21,11 +25,11 @@ public:
 	bool clear();
 
 	const Pair *operator[](const StringRef &key) const;
-	bool erase(const StringRef &key);
+	bool erase(StringRef const &key);
 
 	bool insert(OPair &&data);
 
-	size_type size(bool const = false) const{
+	size_type size() const{
 		return dataCount_;
 	}
 
@@ -34,7 +38,7 @@ public:
 	}
 
 public:
-	Iterator lowerBound(const StringRef &key) const;
+	Iterator lowerBound(StringRef const &key) const;
 
 	Iterator begin() const;
 	static constexpr Iterator end();
@@ -52,8 +56,8 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(const StringRef &key);
-	const Node *locateNode_(const StringRef &key, bool exact) const;
+	NodeLocator locate_(StringRef const &key);
+	const Node *locateNode_(StringRef const &key, bool exact) const;
 };
 
 // ==============================
@@ -65,15 +69,26 @@ protected:
 	constexpr Iterator(const Node *node) : node_(node){}
 
 public:
+	constexpr Iterator(Iterator const &other) = default;
+	constexpr Iterator(Iterator &&other) = default;
+
+public:
+	using difference_type = LinkList::difference_type;
+	using value_type = Pair;
+	using pointer = const value_type *;
+	using reference = value_type &;
+	using iterator_category = std::input_iterator_tag;
+
+public:
 	Iterator &operator++();
 	const Pair &operator*() const;
 
 public:
-	bool operator==(const Iterator &other) const{
+	bool operator==(Iterator const &other) const{
 		return node_ == other.node_;
 	}
 
-	bool operator!=(const Iterator &other) const{
+	bool operator!=(Iterator const &other) const{
 		return ! operator==(other);
 	}
 
