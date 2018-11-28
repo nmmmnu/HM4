@@ -2,14 +2,34 @@
 
 namespace hm4{
 
-auto VectorList::binarySearch_(const StringRef &key) const -> BinarySearchResult<size_type>{
-	assert(!key.empty());
-
-	auto comp = [](const auto &list, auto const index, const auto &key){
-		return list.cmpAt(index, key);
+namespace{
+	int comp(OPair const &p, StringRef const &key){
+		return p.cmp(key);
 	};
 
-	return binarySearch(*this, size_type{0}, size(), key, comp);
+	template<class T>
+	auto binarySearch(T const &v, StringRef const &key){
+		return binarySearch(std::begin(v), std::end(v), key, comp);
+	}
+} // anonymous namespace
+
+
+const Pair *VectorList::operator[](StringRef const &key) const{
+	assert(!key.empty());
+
+	auto const x = binarySearch(vector_, key);
+
+	return x.found ? x.it->get() : nullptr;
+}
+
+
+auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
+	if (key.empty())
+		return begin();
+
+	auto const x = binarySearch(vector_, key);
+
+	return x.it;
 }
 
 bool VectorList::insert(OPair&& newdata){
@@ -17,12 +37,12 @@ bool VectorList::insert(OPair&& newdata){
 
 	const StringRef &key = newdata->getKey();
 
-	const auto x = binarySearch_(key);
+	auto const x = binarySearch(vector_, key);
 
 	if (x.found){
 		// key exists, overwrite, do not shift
 
-		OPair &olddata = vector_[ x.pos ];
+		OPair &olddata = vector_[ static_cast<size_type>(x.pos) ];
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata) ){
@@ -43,8 +63,7 @@ bool VectorList::insert(OPair&& newdata){
 	// key not exists, shift, then add
 
 	try{
-		const auto it = beginOffset__(vector_, x.pos);
-		const auto newit = vector_.insert( it, std::move(newdata));
+		auto const newit = vector_.insert(x.it, std::move(newdata));
 		dataSize_ += newit->get()->bytes();
 	}catch(...){
 	}
@@ -55,18 +74,16 @@ bool VectorList::insert(OPair&& newdata){
 bool VectorList::erase(const StringRef &key){
 	assert(!key.empty());
 
-	const auto x = binarySearch_(key);
+	auto const x = binarySearch(vector_, key);
 
 	if (! x.found){
 		// the key does not exists in the vector.
 		return true;
 	}
 
-	const auto it = beginOffset__(vector_, x.pos);
+	dataSize_ -= x.it->get()->bytes();
 
-	dataSize_ -= it->get()->bytes();
-
-	vector_.erase(it);
+	vector_.erase(x.it);
 
 	return true;
 }

@@ -26,12 +26,6 @@ public:
 public:
 	VectorList() = default;
 
-	VectorList(VectorList &&other) :
-				vector_		(std::move(other.vector_	)),
-				dataSize_	(std::move(other.dataSize_	)){
-		other.dataSize_ = 0;
-	}
-
 private:
 	OVector		vector_;
 	size_t		dataSize_ = 0;
@@ -51,15 +45,6 @@ public:
 		return vector_[index].get();
 	}
 
-	int cmpAt(size_type index, const StringRef &key) const{
-		assert( index < size() );
-		assert(!key.empty());
-
-		const OPair &p = operator[](index);
-
-		return p.cmp(key);
-	}
-
 	bool insert(OPair &&data);
 
 	size_type size() const{
@@ -74,26 +59,12 @@ public:
 		return dataSize_;
 	}
 
-	Pair const *operator[](StringRef const &key) const{
-		assert(!key.empty());
-
-		auto const x = binarySearch_(key);
-
-		return x.found ? operator[]( x.pos ) : nullptr;
-	}
+	const Pair *operator[](StringRef const &key) const;
 
 public:
 	Iterator lowerBound(StringRef const &key) const noexcept;
 	Iterator begin() const noexcept;
 	Iterator end() const noexcept;
-
-private:
-	static OVectorIt beginOffset__(OVector const &vector, size_type const pos){
-		return vector.begin() + narrow<OVector::difference_type>(pos);
-	}
-
-private:
-	BinarySearchResult<size_type> binarySearch_(StringRef const &key) const;
 };
 
 // ==============================
@@ -216,20 +187,11 @@ private:
 // ==============================
 
 inline auto VectorList::begin() const noexcept -> Iterator{
-	return vector_.begin();
+	return std::begin(vector_);
 }
 
 inline auto VectorList::end() const noexcept -> Iterator{
-	return vector_.end();
-}
-
-inline auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
-	if (key.empty())
-		return begin();
-
-	const auto x = binarySearch_(key);
-
-	return beginOffset__(vector_, x.pos);
+	return std::end(vector_);
 }
 
 } // namespace
