@@ -9,55 +9,54 @@ namespace hm4{
 
 class BlackHoleList{
 public:
-	using size_type		= config::size_type;
-	using difference_type	= config::difference_type;
+	using size_type	= config::size_type;
 
-	using Iterator = const Pair *;
+	using Iterator	= const Pair *;
 
 public:
-	constexpr
-	bool clear() const noexcept{
+	constexpr static
+	bool clear(){
 		return true;
 	}
 
 	constexpr
-	const Pair *operator[](StringRef const &) const noexcept{
+	const Pair *operator[](StringRef const &) const{
 		return nullptr;
 	}
 
-	constexpr
-	bool erase(StringRef const &) const noexcept{
+	constexpr static
+	bool erase(StringRef const &){
 		return true;
 	}
 
-	constexpr
-	bool insert(OPair const &) const {
+	constexpr static
+	bool insert(OPair const &){
 		return true;
 	}
 
-	constexpr
-	size_type size() const noexcept{
+	constexpr static
+	size_type size(){
 		return 0;
 	}
 
-	constexpr
-	size_t bytes() const noexcept{
+	constexpr static
+	size_t bytes(){
 		return 0;
 	}
 
 public:
-	constexpr
-	Iterator lowerBound(StringRef const &) const noexcept{
+	constexpr static
+	Iterator lowerBound(StringRef const &){
 		return nullptr;
 	}
 
-	constexpr
-	Iterator begin() const{
+	constexpr static
+	Iterator begin(){
 		return nullptr;
 	}
 
-	constexpr
-	Iterator end() const{
+	constexpr static
+	Iterator end(){
 		return nullptr;
 	}
 };

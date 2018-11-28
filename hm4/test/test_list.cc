@@ -99,13 +99,15 @@ void list_test(LIST &list){
 	auto const a = list_populate(list);
 
 	auto const count = a.first;
-	auto const size  = a.second;
+	auto const bytes = a.second;
 
 	mytest("size estimated",	list.size() >= count		);
-	mytest("size exact",		hm4::size(list) == count	);
+	mytest("size exact",		size(list) == count		);
 	mytest("size empty",		! empty(list)			);
-	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == static_cast<typename LIST::difference_type>(count)	);
-	mytest("sizeof",		list.bytes() == size		);
+	mytest("size std::distance",	static_cast<typename LIST::size_type>(
+						std::distance(std::begin(list), std::end(list))
+					) == count			);
+	mytest("sizeof",		list.bytes() == bytes		);
 
 	const Pair *p = nullptr;
 
@@ -192,7 +194,7 @@ void list_test(LIST &list){
 	list_populate(list);
 
 	LIST mlist = std::move(list);
-	mytest("move c-tor",		mlist.bytes() == size		);
+	mytest("move c-tor",		mlist.bytes() == bytes		);
 
 	// checking if empty(list) == true
 	// is wrong and should not be tested,
@@ -264,15 +266,16 @@ template <>
 void list_test<MyDualList>(const char *name){
 	hm4::SkipList		memtable;
 	hm4::BlackHoleList	disktable;
+
 	MyDualList list{ memtable, disktable };
 
 	return list_test(name, list);
 }
-/*
+
 
 #include "decoratorlist.h"
 
-using MyDecoratorList = hm4::PureDecoratorList<hm4::SkipList>;
+using MyDecoratorList = hm4::DecoratorList<hm4::SkipList>;
 
 template <>
 void list_test<MyDecoratorList>(const char *name){
@@ -281,7 +284,7 @@ void list_test<MyDecoratorList>(const char *name){
 
 	return list_test(name, list);
 }
-*/
+
 #include "vectorlist.h"
 #include "linklist.h"
 
@@ -291,8 +294,7 @@ int main(){
 	list_test<hm4::SkipList		>("SkipList"		);
 	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
 	list_test<MyDualList		>("DualList"		);
-
-//	list_test<MyDecoratorList	>("DecoratorList"	);
+	list_test<MyDecoratorList	>("DecoratorList"	);
 
 
 //	skiplist_lanes_test();

@@ -31,7 +31,7 @@ auto DualIterator<TABLE1, TABLE2>::operator++() -> DualIterator &{
 }
 
 template <class TABLE1, class TABLE2>
-const Pair &DualIterator<TABLE1, TABLE2>::operator*() const{
+auto DualIterator<TABLE1, TABLE2>::operator*() const -> const Pair &{
 	const Pair *pair1 = it1_.dptr();
 	const Pair *pair2 = it2_.dptr();
 

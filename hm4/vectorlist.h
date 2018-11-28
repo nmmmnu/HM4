@@ -101,8 +101,8 @@ private:
 class VectorList::Iterator{
 private:
 	friend class VectorList;
-	constexpr Iterator(OVectorIt const &it) : it_(it){}
-	constexpr Iterator(OVectorIt &&it) : it_(std::move(it)){}
+	constexpr Iterator(OVectorIt const &it) : ptr(it){}
+	constexpr Iterator(OVectorIt &&it) : ptr(std::move(it)){}
 
 public:
 	constexpr Iterator(Iterator const &other) = default;
@@ -110,58 +110,107 @@ public:
 
 public:
 	using difference_type = VectorList::difference_type;
-	using value_type = Pair;
-	using pointer = const value_type *;
+	using value_type = const Pair;
+	using pointer = value_type *;
 	using reference = value_type &;
 	using iterator_category = std::bidirectional_iterator_tag;
 
 public:
+	// increment / decrement
 	Iterator &operator++(){
-		++it_;
+		++ptr;
 		return *this;
 	}
 
 	Iterator &operator--(){
-		--it_;
+		--ptr;
 		return *this;
 	}
 
-public:
-	bool operator==(Iterator const &other) const{
-		return it_ == other.it_;
+	Iterator operator++(int){
+		auto tmp = ptr;
+		++ptr;
+		return { tmp };
 	}
 
-	bool operator!=(Iterator const &other) const{
-		return it_ != other.it_;
+	Iterator operator--(int){
+		auto tmp = ptr;
+		--ptr;
+		return { tmp };
+	}
+
+public:
+	// arithmetic
+	// https://www.boost.org/doc/libs/1_50_0/boost/container/vector.hpp
+
+	Iterator& operator +=(difference_type const off){
+		ptr += off;
+		return *this;
+	}
+
+	Iterator operator +(difference_type const off) const{
+		return { ptr + off };
+	}
+
+	Iterator& operator -=(difference_type const off){
+		ptr -= off;
+		return *this;
+	}
+
+	Iterator operator -(difference_type const off) const{
+		return { ptr - off };
+	}
+
+	friend Iterator operator +(difference_type const  off, Iterator const &it){
+		return it.ptr + off;
+	}
+
+	difference_type operator -(Iterator const &other) const{
+		return ptr - other.ptr;
+	}
+
+public:
+	// compare
+	bool operator ==(Iterator const &other) const{
+		return ptr == other.ptr;
+	}
+
+	bool operator !=(Iterator const &other) const{
+		return ptr != other.ptr;
 	}
 
 	bool operator > (Iterator const &other) const{
-		return operator>(other);
+		return ptr >  other.ptr;
 	}
 
-	bool operator >= (Iterator const &other) const{
-		return operator>=(other);
+	bool operator >=(Iterator const &other) const{
+		return ptr >= other.ptr;
 	}
 
 	bool operator < (Iterator const &other) const{
-		return operator<(other);
+		return ptr <  other.ptr;
 	}
 
-	bool operator <= (Iterator const &other) const{
-		return operator<=(other);
+	bool operator <=(Iterator const &other) const{
+		return ptr <= other.ptr;
 	}
 
 public:
-	const Pair &operator*() const{
-		return **it_;
+	// dereference
+	reference operator *() const{
+		return **ptr;
 	}
 
-	const Pair *operator ->() const{
+	pointer operator ->() const{
 		return & operator*();
 	}
 
+	reference operator [](difference_type const off) const{
+		return *ptr[off];
+	}
+
 private:
-	OVectorIt	it_;
+	OVectorIt	ptr;
 };
 
 // ==============================

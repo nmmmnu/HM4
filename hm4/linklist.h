@@ -74,14 +74,14 @@ public:
 
 public:
 	using difference_type = LinkList::difference_type;
-	using value_type = Pair;
-	using pointer = const value_type *;
+	using value_type = const Pair;
+	using pointer = value_type *;
 	using reference = value_type &;
-	using iterator_category = std::input_iterator_tag;
+	using iterator_category = std::forward_iterator_tag;
 
 public:
 	Iterator &operator++();
-	const Pair &operator*() const;
+	reference operator*() const;
 
 public:
 	bool operator==(Iterator const &other) const{
@@ -92,7 +92,7 @@ public:
 		return ! operator==(other);
 	}
 
-	const Pair *operator ->() const{
+	pointer operator ->() const{
 		return & operator*();
 	}
 

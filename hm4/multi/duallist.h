@@ -6,8 +6,7 @@
 
 #include "dualiterator.h"
 
-//#include <type_traits>
-#include <iterator>	// std::distance
+#include <type_traits>
 
 
 namespace hm4{
@@ -21,6 +20,8 @@ public:
 
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
+
+	using estimated_size	= std::true_type;
 
 public:
 	DualList(LIST1 &list1, const LIST2 &list2) :
@@ -52,15 +53,15 @@ public:
 
 public:
 	Iterator begin() const{
-		return Iterator(list1_, list2_, std::true_type{} );
+		return { list1_, list2_, std::true_type{} };
 	}
 
 	Iterator end() const{
-		return Iterator(list1_, list2_, std::false_type{} );
+		return { list1_, list2_, std::false_type{} };
 	}
 
 	Iterator lowerBound(const StringRef &key) const{
-		return Iterator(list1_, list2_, key );
+		return { list1_, list2_, key };
 	}
 
 public:
@@ -99,11 +100,6 @@ private:
 
 
 } // multi
-
-template <class L1, class L2, bool E>
-auto size(multi::DualList<L1, L2, E> const &list){
-	return std::distance(std::begin(list), std::end(list));
-}
 
 } // namespace
 
