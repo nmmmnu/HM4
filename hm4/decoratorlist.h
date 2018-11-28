@@ -11,7 +11,7 @@ namespace hm4{
 template <class LIST>
 class DecoratorList{
 public:
-	using Iterator		= typename LIST::Iterator;
+	using iterator		= typename LIST::iterator;
 
 	using size_type		= typename LIST::size_type;
 	using difference_type	= typename LIST::difference_type;
@@ -36,15 +36,15 @@ public:
 	}
 
 public:
-	Iterator begin() const{
+	iterator begin() const{
 		return list_.begin();
 	}
 
-	Iterator end() const{
+	iterator end() const{
 		return list_.end();
 	}
 
-	Iterator lowerBound(const StringRef &key) const{
+	iterator lowerBound(const StringRef &key) const{
 		return list_.lowerBound(key);
 	}
 

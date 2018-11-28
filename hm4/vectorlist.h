@@ -21,7 +21,7 @@ public:
 	using difference_type	= config::difference_type;
 
 public:
-	class Iterator;
+	class iterator;
 
 public:
 	VectorList() = default;
@@ -62,22 +62,22 @@ public:
 	const Pair *operator[](StringRef const &key) const;
 
 public:
-	Iterator lowerBound(StringRef const &key) const noexcept;
-	Iterator begin() const noexcept;
-	Iterator end() const noexcept;
+	iterator lowerBound(StringRef const &key) const noexcept;
+	iterator begin() const noexcept;
+	iterator end() const noexcept;
 };
 
 // ==============================
 
-class VectorList::Iterator{
+class VectorList::iterator{
 private:
 	friend class VectorList;
-	constexpr Iterator(OVectorIt const &it) : ptr(it){}
-	constexpr Iterator(OVectorIt &&it) : ptr(std::move(it)){}
+	constexpr iterator(OVectorIt const &it) : ptr(it){}
+	constexpr iterator(OVectorIt &&it) : ptr(std::move(it)){}
 
 public:
-	constexpr Iterator(Iterator const &other) = default;
-	constexpr Iterator(Iterator &&other) = default;
+	constexpr iterator(iterator const &other) = default;
+	constexpr iterator(iterator &&other) = default;
 
 public:
 	using difference_type = VectorList::difference_type;
@@ -88,23 +88,23 @@ public:
 
 public:
 	// increment / decrement
-	Iterator &operator++(){
+	iterator &operator++(){
 		++ptr;
 		return *this;
 	}
 
-	Iterator &operator--(){
+	iterator &operator--(){
 		--ptr;
 		return *this;
 	}
 
-	Iterator operator++(int){
+	iterator operator++(int){
 		auto tmp = ptr;
 		++ptr;
 		return { tmp };
 	}
 
-	Iterator operator--(int){
+	iterator operator--(int){
 		auto tmp = ptr;
 		--ptr;
 		return { tmp };
@@ -114,55 +114,55 @@ public:
 	// arithmetic
 	// https://www.boost.org/doc/libs/1_50_0/boost/container/vector.hpp
 
-	Iterator& operator +=(difference_type const off){
+	iterator& operator +=(difference_type const off){
 		ptr += off;
 		return *this;
 	}
 
-	Iterator operator +(difference_type const off) const{
+	iterator operator +(difference_type const off) const{
 		return { ptr + off };
 	}
 
-	Iterator& operator -=(difference_type const off){
+	iterator& operator -=(difference_type const off){
 		ptr -= off;
 		return *this;
 	}
 
-	Iterator operator -(difference_type const off) const{
+	iterator operator -(difference_type const off) const{
 		return { ptr - off };
 	}
 
-	friend Iterator operator +(difference_type const  off, Iterator const &it){
+	friend iterator operator +(difference_type const  off, iterator const &it){
 		return it.ptr + off;
 	}
 
-	difference_type operator -(Iterator const &other) const{
+	difference_type operator -(iterator const &other) const{
 		return ptr - other.ptr;
 	}
 
 public:
 	// compare
-	bool operator ==(Iterator const &other) const{
+	bool operator ==(iterator const &other) const{
 		return ptr == other.ptr;
 	}
 
-	bool operator !=(Iterator const &other) const{
+	bool operator !=(iterator const &other) const{
 		return ptr != other.ptr;
 	}
 
-	bool operator > (Iterator const &other) const{
+	bool operator > (iterator const &other) const{
 		return ptr >  other.ptr;
 	}
 
-	bool operator >=(Iterator const &other) const{
+	bool operator >=(iterator const &other) const{
 		return ptr >= other.ptr;
 	}
 
-	bool operator < (Iterator const &other) const{
+	bool operator < (iterator const &other) const{
 		return ptr <  other.ptr;
 	}
 
-	bool operator <=(Iterator const &other) const{
+	bool operator <=(iterator const &other) const{
 		return ptr <= other.ptr;
 	}
 
@@ -186,11 +186,11 @@ private:
 
 // ==============================
 
-inline auto VectorList::begin() const noexcept -> Iterator{
+inline auto VectorList::begin() const noexcept -> iterator{
 	return std::begin(vector_);
 }
 
-inline auto VectorList::end() const noexcept -> Iterator{
+inline auto VectorList::end() const noexcept -> iterator{
 	return std::end(vector_);
 }
 

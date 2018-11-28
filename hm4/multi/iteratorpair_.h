@@ -10,29 +10,43 @@ namespace multi{
 namespace multiiterator_impl_{
 
 	template <class TABLE>
-	class IteratorPair {
+	class IteratorPair{
 	private:
-		using Iterator		= typename TABLE::Iterator;
+		using iterator = typename TABLE::iterator;
+
+	private:
+		template<class T>
+		using it_traits = std::iterator_traits<typename T::iterator>;
+
+		template<class T>
+		constexpr static bool is_forward_iterator_v =
+			std::is_base_of<
+				std::forward_iterator_tag,
+				typename it_traits<T>::iterator_category
+			>::value
+		;
+
+		static_assert(is_forward_iterator_v<TABLE>, "TABLE::iterator is not forward_iterator");
 
 	public:
-		IteratorPair(Iterator &&cur, Iterator &&end) :
+		IteratorPair(iterator &&cur, iterator &&end) :
 				cur(std::move(cur)),
 				end(std::move(end)){}
 
 
-		IteratorPair(const TABLE &table, std::true_type) :
+		IteratorPair(TABLE const &table, std::true_type) :
 				IteratorPair(
 					table.begin(),
 					table.end()
 				){}
 
-		IteratorPair(const TABLE &table, std::false_type) :
+		IteratorPair(TABLE const &table, std::false_type) :
 				IteratorPair(
 					table.end(),
 					table.end()
 				){}
 
-		IteratorPair(const TABLE &table, StringRef const &key) :
+		IteratorPair(TABLE const &table, StringRef const &key) :
 				IteratorPair(
 					table.lowerBound(key),
 					table.end()
@@ -43,7 +57,7 @@ namespace multiiterator_impl_{
 			return cur != end ? & (*cur) : nullptr;
 		}
 
-		void operator ++(){
+		void operator++(){
 			++cur;
 		}
 
@@ -52,8 +66,8 @@ namespace multiiterator_impl_{
 		}
 
 	public:
-		Iterator cur;
-		Iterator end;
+		iterator cur;
+		iterator end;
 	};
 
 } // namespace multiiterator_impl_

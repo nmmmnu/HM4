@@ -12,7 +12,7 @@ public:
 	using difference_type	= config::difference_type;
 
 public:
-	class Iterator;
+	class iterator;
 
 public:
 	LinkList();
@@ -38,10 +38,10 @@ public:
 	}
 
 public:
-	Iterator lowerBound(StringRef const &key) const;
+	iterator lowerBound(StringRef const &key) const;
 
-	Iterator begin() const;
-	static constexpr Iterator end();
+	iterator begin() const;
+	static constexpr iterator end();
 
 private:
 	struct Node;
@@ -62,15 +62,15 @@ private:
 
 // ==============================
 
-class LinkList::Iterator {
+class LinkList::iterator {
 protected:
 	friend class LinkList;
 
-	constexpr Iterator(const Node *node) : node_(node){}
+	constexpr iterator(const Node *node) : node_(node){}
 
 public:
-	constexpr Iterator(Iterator const &other) = default;
-	constexpr Iterator(Iterator &&other) = default;
+	constexpr iterator(iterator const &other) = default;
+	constexpr iterator(iterator &&other) = default;
 
 public:
 	using difference_type = LinkList::difference_type;
@@ -80,15 +80,15 @@ public:
 	using iterator_category = std::forward_iterator_tag;
 
 public:
-	Iterator &operator++();
+	iterator &operator++();
 	reference operator*() const;
 
 public:
-	bool operator==(Iterator const &other) const{
+	bool operator==(iterator const &other) const{
 		return node_ == other.node_;
 	}
 
-	bool operator!=(Iterator const &other) const{
+	bool operator!=(iterator const &other) const{
 		return ! operator==(other);
 	}
 
@@ -102,18 +102,18 @@ private:
 
 // ==============================
 
-inline auto LinkList::lowerBound(const StringRef &key) const -> Iterator{
+inline auto LinkList::lowerBound(const StringRef &key) const -> iterator{
 	if (key.empty())
 		return begin();
 
 	return locateNode_(key, false);
 }
 
-inline auto LinkList::begin() const -> Iterator{
+inline auto LinkList::begin() const -> iterator{
 	return head_;
 }
 
-inline constexpr auto LinkList::end() -> Iterator{
+inline constexpr auto LinkList::end() -> iterator{
 	return nullptr;
 }
 

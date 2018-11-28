@@ -23,7 +23,7 @@ const Pair *VectorList::operator[](StringRef const &key) const{
 }
 
 
-auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
+auto VectorList::lowerBound(const StringRef &key) const noexcept -> iterator{
 	if (key.empty())
 		return begin();
 

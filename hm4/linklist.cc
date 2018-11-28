@@ -172,13 +172,13 @@ auto LinkList::locateNode_(StringRef const &key, bool const exact) const -> cons
 // ==============================
 
 
-auto LinkList::Iterator::operator++() -> Iterator &{
+auto LinkList::iterator::operator++() -> iterator &{
 	node_ = node_->next;
 
 	return *this;
 }
 
-const Pair &LinkList::Iterator::operator*() const{
+const Pair &LinkList::iterator::operator*() const{
 	assert(node_);
 
 	return *(node_->data);

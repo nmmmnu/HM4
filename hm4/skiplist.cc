@@ -314,12 +314,12 @@ auto SkipList::locateNode_(StringRef const &key, bool const exact) const -> cons
 // ==============================
 
 
-auto SkipList::Iterator::operator++() -> Iterator &{
+auto SkipList::iterator::operator++() -> iterator &{
 	node_ = node_->next[0];
 	return *this;
 }
 
-const Pair &SkipList::Iterator::operator*() const{
+const Pair &SkipList::iterator::operator*() const{
 	assert(node_);
 
 	return *(node_->data);

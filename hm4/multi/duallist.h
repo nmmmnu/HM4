@@ -16,7 +16,7 @@ namespace multi{
 template <class LIST1, class LIST2=const LIST1, bool ERASE_WITH_TOMBSTONE=false>
 class DualList{
 public:
-	using Iterator		= DualIterator<LIST1, LIST2>;
+	using iterator		= DualIterator<LIST1, LIST2>;
 
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
@@ -52,15 +52,15 @@ public:
 	}
 
 public:
-	Iterator begin() const{
+	iterator begin() const{
 		return { list1_, list2_, std::true_type{} };
 	}
 
-	Iterator end() const{
+	iterator end() const{
 		return { list1_, list2_, std::false_type{} };
 	}
 
-	Iterator lowerBound(const StringRef &key) const{
+	iterator lowerBound(const StringRef &key) const{
 		return { list1_, list2_, key };
 	}
 

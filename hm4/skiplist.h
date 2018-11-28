@@ -19,7 +19,7 @@ public:
 public:
 	constexpr static height_size_type MAX_HEIGHT = sizeof(uint64_t) * 8;
 
-	class Iterator;
+	class iterator;
 
 public:
 	SkipList();
@@ -43,16 +43,16 @@ public:
 	}
 
 public:
-	Iterator lowerBound(StringRef const &key) const;
-	Iterator begin() const;
-	static constexpr Iterator end();
+	iterator lowerBound(StringRef const &key) const;
+	iterator begin() const;
+	static constexpr iterator end();
 
 public:
 	void printLanes() const;
 	void printLane(height_size_type lane) const;
 
 private:
-	struct		Node;
+	struct 			Node;
 
 	template<typename T>
 	using HeightArray	= std::array<T,  MAX_HEIGHT>;
@@ -76,14 +76,14 @@ private:
 
 // ==============================
 
-class SkipList::Iterator{
+class SkipList::iterator{
 private:
 	friend class SkipList;
-	constexpr Iterator(const Node *node) : node_(node){}
+	constexpr iterator(const Node *node) : node_(node){}
 
 public:
-	constexpr Iterator(Iterator const &other) = default;
-	constexpr Iterator(Iterator &&other) = default;
+	constexpr iterator(iterator const &other) = default;
+	constexpr iterator(iterator &&other) = default;
 
 public:
 	using difference_type = SkipList::difference_type;
@@ -93,15 +93,15 @@ public:
 	using iterator_category = std::forward_iterator_tag;
 
 public:
-	Iterator &operator++();
+	iterator &operator++();
 	reference operator*() const;
 
 public:
-	bool operator==(const Iterator &other) const{
+	bool operator==(const iterator &other) const{
 		return node_ == other.node_;
 	}
 
-	bool operator!=(const Iterator &other) const{
+	bool operator!=(const iterator &other) const{
 		return ! operator==(other);
 	}
 
@@ -115,18 +115,18 @@ private:
 
 // ==============================
 
-inline auto SkipList::lowerBound(const StringRef &key) const -> Iterator{
+inline auto SkipList::lowerBound(const StringRef &key) const -> iterator{
 	if (key.empty())
 		return begin();
 
 	return locateNode_(key, false);
 }
 
-inline auto SkipList::begin() const -> Iterator{
+inline auto SkipList::begin() const -> iterator{
 	return heads_[0];
 }
 
-constexpr auto SkipList::end() -> Iterator{
+constexpr auto SkipList::end() -> iterator{
 	return nullptr;
 }
 

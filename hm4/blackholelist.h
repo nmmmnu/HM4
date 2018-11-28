@@ -11,7 +11,7 @@ class BlackHoleList{
 public:
 	using size_type	= config::size_type;
 
-	using Iterator	= const Pair *;
+	using iterator	= const Pair *;
 
 public:
 	constexpr static
@@ -46,17 +46,17 @@ public:
 
 public:
 	constexpr static
-	Iterator lowerBound(StringRef const &){
+	iterator lowerBound(StringRef const &){
 		return nullptr;
 	}
 
 	constexpr static
-	Iterator begin(){
+	iterator begin(){
 		return nullptr;
 	}
 
 	constexpr static
-	Iterator end(){
+	iterator end(){
 		return nullptr;
 	}
 };
