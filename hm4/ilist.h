@@ -1,5 +1,5 @@
-#ifndef _MY_LIST_H
-#define _MY_LIST_H
+#ifndef MY_LIST_H_
+#define MY_LIST_H_
 
 #include <cstdint>
 #include <iterator>	// std::distance
@@ -7,6 +7,7 @@
 #include "pair.h"
 
 #include "mynarrow.h"
+#include "my_type_traits.h"
 
 namespace hm4{
 
@@ -29,27 +30,25 @@ void print(LIST const &list, typename LIST::size_type count = config::LIST_PRINT
 	}
 }
 
+// ==============================
+
 namespace ilist_impl_{
 	template<class LIST, class = void>
 	struct size_estimated : std::false_type{};
 
 	template<class LIST>
-	struct size_estimated<LIST, my_void_t<
-					std::is_same<
-						std::true_type,
-						typename LIST::estimated_size
-					>
-				>
-	> : std::false_type{};
+	struct size_estimated<LIST, std::void_t<typename LIST::estimated_size> >: std::true_type{};
 } // namespace ilist_impl
 
+// ==============================
+
 template<class LIST>
-auto size(LIST const &list, std::false_type) -> typename LIST::size_type{
+auto size(LIST const &list, std::false_type){
 	return list.size();
 }
 
 template<class LIST>
-auto size(LIST const &list, std::true_type) -> typename LIST::size_type{
+auto size(LIST const &list, std::true_type){
 	return narrow<typename LIST::size_type>(
 		std::distance(std::begin(list), std::end(list))
 	);
@@ -62,10 +61,35 @@ auto size(LIST const &list){
 	return size(list, size_estimated{});
 }
 
+// ==============================
+
 template<class LIST>
 bool empty(LIST const &list){
 	return size(list, std::false_type{}) == 0;
 }
+
+// ==============================
+
+template<class List, class Argument>
+[[deprecated("Only std::true_type, std::false_type and StringRef are supported")]]
+auto getIterator(List const &, Argument);
+
+template<class List>
+auto getIterator(List const &list, std::true_type){
+	return std::begin(list);
+}
+
+template<class List>
+auto getIterator(List const &list, std::false_type){
+	return std::end(list);
+}
+
+template<class List>
+auto getIterator(List const &list, StringRef const &key, bool const exact){
+	return list.find(key, exact);
+}
+
+
 
 } // namespace
 

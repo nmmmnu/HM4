@@ -11,15 +11,15 @@ namespace idgenerator{
 
 class IDGeneratorTS{
 public:
-	IDGeneratorTS(bool const hex = true) : _hex(hex){};
+	IDGeneratorTS(bool const hex = true) : hex_(hex){};
 
 	std::string operator()() const;
 
 private:
-	void _format(std::ostream &buff, uint32_t value) const;
+	void format_(std::ostream &buff, uint32_t value) const;
 
 private:
-	bool _hex;
+	bool hex_;
 };
 
 

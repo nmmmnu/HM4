@@ -29,7 +29,6 @@ public:
 public:
 	bool clear();
 
-	const Pair *operator[](StringRef const &key) const;
 	bool erase(StringRef const &key);
 
 	bool insert(OPair &&data);
@@ -43,7 +42,7 @@ public:
 	}
 
 public:
-	iterator lowerBound(StringRef const &key) const;
+	iterator find(StringRef const &key, bool exact) const;
 	iterator begin() const;
 	static constexpr iterator end();
 
@@ -77,13 +76,8 @@ private:
 // ==============================
 
 class SkipList::iterator{
-private:
-	friend class SkipList;
-	constexpr iterator(const Node *node) : node_(node){}
-
 public:
-	constexpr iterator(iterator const &other) = default;
-	constexpr iterator(iterator &&other) = default;
+	constexpr iterator(const Node *node) : node_(node){}
 
 public:
 	using difference_type = SkipList::difference_type;
@@ -115,11 +109,8 @@ private:
 
 // ==============================
 
-inline auto SkipList::lowerBound(const StringRef &key) const -> iterator{
-	if (key.empty())
-		return begin();
-
-	return locateNode_(key, false);
+inline auto SkipList::find(const StringRef &key, bool const exact) const -> iterator{
+	return locateNode_(key, exact);
 }
 
 inline auto SkipList::begin() const -> iterator{

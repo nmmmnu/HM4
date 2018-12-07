@@ -59,10 +59,8 @@ public:
 		return dataSize_;
 	}
 
-	const Pair *operator[](StringRef const &key) const;
-
 public:
-	iterator lowerBound(StringRef const &key) const noexcept;
+	iterator find(StringRef const &key, bool exact) const noexcept;
 	iterator begin() const noexcept;
 	iterator end() const noexcept;
 };
@@ -70,40 +68,39 @@ public:
 // ==============================
 
 class VectorList::iterator{
-private:
-	friend class VectorList;
+public:
 	constexpr iterator(OVectorIt const &it) : ptr(it){}
 	constexpr iterator(OVectorIt &&it) : ptr(std::move(it)){}
 
 public:
-	constexpr iterator(iterator const &other) = default;
-	constexpr iterator(iterator &&other) = default;
-
-public:
-	using difference_type = VectorList::difference_type;
-	using value_type = const Pair;
-	using pointer = value_type *;
-	using reference = value_type &;
-	using iterator_category = std::bidirectional_iterator_tag;
+	using difference_type	= VectorList::difference_type;
+	using value_type	= const Pair;
+	using pointer		= value_type *;
+	using reference		= value_type &;
+	using iterator_category	= std::random_access_iterator_tag;
 
 public:
 	// increment / decrement
+	constexpr
 	iterator &operator++(){
 		++ptr;
 		return *this;
 	}
 
+	constexpr
 	iterator &operator--(){
 		--ptr;
 		return *this;
 	}
 
+	constexpr
 	iterator operator++(int){
 		auto tmp = ptr;
 		++ptr;
 		return { tmp };
 	}
 
+	constexpr
 	iterator operator--(int){
 		auto tmp = ptr;
 		--ptr;
@@ -114,20 +111,22 @@ public:
 	// arithmetic
 	// https://www.boost.org/doc/libs/1_50_0/boost/container/vector.hpp
 
-	iterator& operator +=(difference_type const off){
+	iterator& operator+=(difference_type const off){
 		ptr += off;
 		return *this;
 	}
 
+	constexpr
 	iterator operator +(difference_type const off) const{
 		return { ptr + off };
 	}
 
-	iterator& operator -=(difference_type const off){
+	iterator& operator-=(difference_type const off){
 		ptr -= off;
 		return *this;
 	}
 
+	constexpr
 	iterator operator -(difference_type const off) const{
 		return { ptr - off };
 	}
@@ -142,41 +141,41 @@ public:
 
 public:
 	// compare
-	bool operator ==(iterator const &other) const{
+	bool operator==(iterator const &other) const{
 		return ptr == other.ptr;
 	}
 
-	bool operator !=(iterator const &other) const{
+	bool operator!=(iterator const &other) const{
 		return ptr != other.ptr;
 	}
 
-	bool operator > (iterator const &other) const{
+	bool operator >(iterator const &other) const{
 		return ptr >  other.ptr;
 	}
 
-	bool operator >=(iterator const &other) const{
+	bool operator>=(iterator const &other) const{
 		return ptr >= other.ptr;
 	}
 
-	bool operator < (iterator const &other) const{
+	bool operator <(iterator const &other) const{
 		return ptr <  other.ptr;
 	}
 
-	bool operator <=(iterator const &other) const{
+	bool operator<=(iterator const &other) const{
 		return ptr <= other.ptr;
 	}
 
 public:
 	// dereference
-	reference operator *() const{
+	reference operator*() const{
 		return **ptr;
 	}
 
-	pointer operator ->() const{
+	pointer operator->() const{
 		return & operator*();
 	}
 
-	reference operator [](difference_type const off) const{
+	reference operator[](difference_type const off) const{
 		return *ptr[off];
 	}
 

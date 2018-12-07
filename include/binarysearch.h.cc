@@ -1,9 +1,62 @@
+template <
+		class Iterator,
+		class difference_type = typename std::iterator_traits<Iterator>::difference_type,
+		class T,
+		class Comp
+>
+auto linearSearch(
+		Iterator const begin, Iterator const end,
+		T const &key,
+		Comp const &comp
+) -> BinarySearchResult<Iterator>{
+	difference_type pos = 0;
+	auto it = begin;
+
+	for(;it != end; ++it, ++pos){
+		int const cmp = comp(*it, key);
+
+		if (cmp == 0){
+			// found
+			// index = pos
+			return { true, pos, it };
+		}
+
+		if (cmp > 0)
+			break;
+	}
+
+	return { false, pos, it };
+}
+
+
+
+
 
 template <
 		class Iterator,
+		class difference_type,
 		class T,
-		class Comp,
-		class difference_type
+		class Comp
+>
+auto binarySearch(
+		Iterator const begin, Iterator const end,
+		T const &key,
+		Comp const &comp,
+		difference_type,
+		std::input_iterator_tag
+) -> BinarySearchResult<Iterator>{
+	return linearSearch(begin, end, key, comp);
+}
+
+
+
+
+
+template <
+		class Iterator,
+		class difference_type,
+		class T,
+		class Comp
 >
 auto binarySearch(
 		Iterator const it_begin, Iterator const it_end,
@@ -16,7 +69,6 @@ auto binarySearch(
 	 * Lazy based from Linux kernel...
 	 * http://lxr.free-electrons.com/source/lib/bsearch.c
 	 */
-
 	difference_type start = 0;
 	difference_type end   = it_end - it_begin;
 
@@ -41,58 +93,6 @@ auto binarySearch(
 	}
 
 	// fallback to linear search...
-	difference_type i = start;
-	for(i = start; i < end; ++i){
-		int const cmp = comp(array[i], key);
-
-		if (cmp == 0){
-			// found
-			// index = i
-			return { true, i, array + i };
-		}
-
-		if (cmp > 0)
-			break;
-	}
-
-	return { false, i, array + i };
+	return linearSearch(array + start, array + end, key, comp);
 }
-
-
-
-
-template <
-		class Iterator,
-		class T,
-		class Comp,
-		class difference_type
->
-auto binarySearch(
-		Iterator const begin, Iterator const end,
-		T const &key,
-		Comp const &comp,
-		difference_type,
-		std::input_iterator_tag
-) -> BinarySearchResult<Iterator>{
-
-	difference_type pos = 0;
-	auto it = begin;
-
-	for(;it != end; ++it, ++pos){
-		int const cmp = comp(*it, key);
-
-		if (cmp == 0){
-			// found
-			// index = pos
-			return { true, pos, it };
-		}
-
-		if (cmp > 0)
-			break;
-	}
-
-	return { false, pos, it };
-}
-
-
 

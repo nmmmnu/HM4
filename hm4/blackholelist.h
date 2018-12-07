@@ -19,11 +19,6 @@ public:
 		return true;
 	}
 
-	constexpr
-	const Pair *operator[](StringRef const &) const{
-		return nullptr;
-	}
-
 	constexpr static
 	bool erase(StringRef const &){
 		return true;
@@ -46,7 +41,7 @@ public:
 
 public:
 	constexpr static
-	iterator lowerBound(StringRef const &){
+	iterator find(StringRef const &, bool){
 		return nullptr;
 	}
 

@@ -92,6 +92,7 @@ bool LinkList::insert(OPair&& newdata){
 	return true;
 }
 
+#if 0
 const Pair *LinkList::operator[](StringRef const &key) const{
 	assert(!key.empty());
 
@@ -99,6 +100,7 @@ const Pair *LinkList::operator[](StringRef const &key) const{
 
 	return node ? node->data.get() : nullptr;
 }
+#endif
 
 bool LinkList::erase(StringRef const &key){
 	assert(!key.empty());

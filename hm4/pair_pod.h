@@ -5,7 +5,7 @@
 #include <memory>	// unique_ptr
 #include <ostream>
 #include "myendian.h"
-#include "my_void_t.h"
+#include "my_type_traits.h"
 #include "mynarrow.h"
 #include "comparator.h"
 

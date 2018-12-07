@@ -13,7 +13,7 @@ namespace{
 	}
 } // anonymous namespace
 
-
+#if 0
 const Pair *VectorList::operator[](StringRef const &key) const{
 	assert(!key.empty());
 
@@ -21,15 +21,17 @@ const Pair *VectorList::operator[](StringRef const &key) const{
 
 	return x.found ? x.it->get() : nullptr;
 }
+#endif
 
-
-auto VectorList::lowerBound(const StringRef &key) const noexcept -> iterator{
-	if (key.empty())
-		return begin();
+auto VectorList::find(const StringRef &key, bool const exact) const noexcept -> iterator{
+	assert(!key.empty());
 
 	auto const x = binarySearch(vector_, key);
 
-	return x.it;
+	if (exact == false)
+		return x.it;
+	else
+		return x.found ? x.it : end();
 }
 
 bool VectorList::insert(OPair&& newdata){

@@ -24,7 +24,6 @@ public:
 public:
 	bool clear();
 
-	const Pair *operator[](const StringRef &key) const;
 	bool erase(StringRef const &key);
 
 	bool insert(OPair &&data);
@@ -38,7 +37,7 @@ public:
 	}
 
 public:
-	iterator lowerBound(StringRef const &key) const;
+	iterator find(StringRef const &key, bool exact) const;
 
 	iterator begin() const;
 	static constexpr iterator end();
@@ -63,14 +62,8 @@ private:
 // ==============================
 
 class LinkList::iterator {
-protected:
-	friend class LinkList;
-
-	constexpr iterator(const Node *node) : node_(node){}
-
 public:
-	constexpr iterator(iterator const &other) = default;
-	constexpr iterator(iterator &&other) = default;
+	constexpr iterator(const Node *node) : node_(node){}
 
 public:
 	using difference_type = LinkList::difference_type;
@@ -102,11 +95,8 @@ private:
 
 // ==============================
 
-inline auto LinkList::lowerBound(const StringRef &key) const -> iterator{
-	if (key.empty())
-		return begin();
-
-	return locateNode_(key, false);
+inline auto LinkList::find(const StringRef &key, bool const exact) const -> iterator{
+	return locateNode_(key, exact);
 }
 
 inline auto LinkList::begin() const -> iterator{

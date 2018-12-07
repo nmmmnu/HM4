@@ -22,11 +22,6 @@ public:
 public:
 	// Immutable Methods
 
-	const Pair *operator[](StringRef const &key) const{
-		assert(!key.empty());
-		return list_[key];
-	}
-
 	size_type size() const{
 		return list_.size();
 	}
@@ -44,8 +39,8 @@ public:
 		return list_.end();
 	}
 
-	iterator lowerBound(const StringRef &key) const{
-		return list_.lowerBound(key);
+	iterator find(const StringRef &key, bool const exact) const{
+		return list_.find(key, exact);
 	}
 
 public:

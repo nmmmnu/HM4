@@ -6,17 +6,17 @@
 
 #include "dualiterator.h"
 
-#include <type_traits>
-
-
 namespace hm4{
 namespace multi{
 
 
-template <class LIST1, class LIST2=const LIST1, bool ERASE_WITH_TOMBSTONE=false>
+template <class List1, class List2, bool ERASE_WITH_TOMBSTONE = false>
 class DualList{
 public:
-	using iterator		= DualIterator<LIST1, LIST2>;
+	using iterator		= DualIterator<
+					typename List1::iterator,
+					typename List2::iterator
+				>;
 
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
@@ -24,23 +24,12 @@ public:
 	using estimated_size	= std::true_type;
 
 public:
-	DualList(LIST1 &list1, const LIST2 &list2) :
+	DualList(List1 &list1, const List2 &list2) :
 					list1_(list1),
 					list2_(list2){}
 
 public:
 	// Immutable Methods
-
-	const Pair *operator[](StringRef const &key) const{
-		assert(!key.empty());
-
-		const Pair *pair = list1_[key];
-
-		if (pair)
-			return pair;
-
-		return list2_[key];
-	}
 
 	size_type size() const{
 		// estimated
@@ -60,8 +49,8 @@ public:
 		return { list1_, list2_, std::false_type{} };
 	}
 
-	iterator lowerBound(const StringRef &key) const{
-		return { list1_, list2_, key };
+	iterator find(StringRef const &key, bool const exact) const{
+		return { list1_, list2_, key, exact };
 	}
 
 public:
@@ -75,7 +64,7 @@ public:
 	bool erase(StringRef const &key){
 		assert(!key.empty());
 
-		using tombstone_tag = std::integral_constant<bool, ERASE_WITH_TOMBSTONE>;
+		using tombstone_tag = std::bool_constant<ERASE_WITH_TOMBSTONE>;
 
 		return erase_(key, tombstone_tag{});
 	}
@@ -94,8 +83,8 @@ private:
 	}
 
 private:
-	      LIST1	&list1_;
-	const LIST2	&list2_;
+	      List1	&list1_;
+	const List2	&list2_;
 };
 
 

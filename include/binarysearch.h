@@ -28,9 +28,9 @@ struct BinarySearchResult{
 
 template <
 		class Iterator,
+		class difference_type = typename std::iterator_traits<Iterator>::difference_type,
 		class T,
-		class Comp = decltype(binarySearchComp),
-		class difference_type = typename std::iterator_traits<Iterator>::difference_type
+		class Comp = decltype(binarySearchComp)
 >
 auto binarySearch(
 		Iterator const begin, Iterator const end,

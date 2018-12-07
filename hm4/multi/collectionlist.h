@@ -5,61 +5,92 @@
 
 #include "collectioniterator.h"
 
-#include <algorithm>    // std::count
-
+#include <numeric>	// std::accumulate
 
 namespace hm4{
 namespace multi{
 
 
-template <class CONTAINER>
-class CollectionList : public IList<CollectionList<CONTAINER>, false>{
+template <class StoreIterator>
+class CollectionList{
 public:
-	using List	= typename CONTAINER::value_type;
+	using List		= typename std::iterator_traits<StoreIterator>::value_type;
+	using StoreIteratorDT	= typename std::iterator_traits<StoreIterator>::difference_type;
 
-	using Iterator	= CollectionIterator<List>;
+	using size_type		= typename List::size_type;
+	using difference_type	= typename List::difference_type;
 
-	using size_type	= typename CollectionList::size_type;
+	using iterator		= CollectionIterator<typename List::iterator>;
 
-public:
-	CollectionList(const CONTAINER &container) : container_(container){}
-
-public:
-	Iterator begin() const{
-		return Iterator(container_, typename Iterator::begin_iterator{} );
-	}
-
-	Iterator end() const{
-		return Iterator(container_, typename Iterator::end_iterator{}	 );
-	}
-
-	Iterator lowerBound(const StringRef &key) const{
-		return Iterator(container_, key);
-	}
-
-public:
-	const Pair *operator[](const StringRef &key) const;
-
-	size_type size(bool const estimated = false) const{
-		return estimated ? sizeEstimated_(true) : this->sizeViaIterator_();
-	}
-
-	size_t bytes() const;
+	using estimated_size	= std::true_type;
 
 private:
-	size_type sizeEstimated_(bool estimated) const;
+	template<class T>
+	constexpr static bool is_forward_iterator_v =
+		std::is_base_of<
+			std::forward_iterator_tag,
+			typename std::iterator_traits<T>::iterator_category
+		>::value
+	;
+
+	static_assert(is_forward_iterator_v<StoreIterator>, "Iterator is not forward_iterator");
 
 private:
-	const CONTAINER	&container_;
+	StoreIterator		first_;
+	StoreIterator		last_;
+	StoreIteratorDT		size_;
+
+public:
+	CollectionList(StoreIterator first, StoreIterator last, StoreIteratorDT const size) :
+					first_	(std::move(first		)),
+					last_	(std::move(last			)),
+					size_	(size				){}
+
+	CollectionList(StoreIterator first, StoreIterator last) :
+					CollectionList( first, last, 0){}
+
+	template<class T>
+	CollectionList(T const &v) :
+					CollectionList(
+						std::begin(v),
+						std::end(v),
+						std::distance(std::begin(v), std::end(v))
+					){}
+
+public:
+	iterator begin() const{
+		return { first_, last_, size_, std::true_type{} };
+	}
+
+	iterator end() const{
+		return { first_, last_, size_, std::false_type{} };
+	}
+
+	iterator find(StringRef const &key, bool const exact) const{
+		return { first_, last_, size_, key, exact };
+	}
+
+public:
+	size_type size() const{
+		auto sum = [](size_t const result, List const &list){
+			return result + list.size();
+		};
+
+		return std::accumulate(first_, last_, size_t{ 0 }, sum);
+	}
+
+	size_t bytes() const{
+		auto sum = [](size_type const result, List const &list){
+			return result + list.bytes();
+		};
+
+		return std::accumulate(first_, last_, size_type{ 0 }, sum);
+	}
 };
 
 
 } // namespace multi
 } //namespace
-
-// ===================================
-
-#include "collectionlist.h.cc"
 
 #endif
 

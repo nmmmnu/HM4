@@ -1,12 +1,12 @@
 #ifndef _DUAL_MULTI_TABLE_ITERATOR_H
 #define _DUAL_MULTI_TABLE_ITERATOR_H
 
-#include "iteratorpair_.h"
+#include "iteratorpair.h"
 
 namespace hm4{
 namespace multi{
 
-template <class TABLE1, class TABLE2>
+template <class FirstIterator, class SecondIterator>
 class DualIterator{
 public:
 	DualIterator(DualIterator const &other) = default;
@@ -14,37 +14,42 @@ public:
 
 private:
 	template<class T>
-	using it_traits = std::iterator_traits<typename T::iterator>;
+	using it_traits_DT = typename std::iterator_traits<T>::difference_type;
 
-	template<class T>
-	using it_traits_DT = typename it_traits<T>::difference_type;
-
-public:
-	using difference_type = it_traits_DT<TABLE1>;
-	using value_type = const Pair;
-	using pointer = value_type *;
-	using reference = value_type &;
-	using iterator_category = std::forward_iterator_tag;
-
-	template<bool B>
-	using bool_constant = std::integral_constant<bool, B>;
+	using FirstIteratorPair  = typename multiiterator_impl_::IteratorPair<FirstIterator>;
+	using SecondIteratorPair = typename multiiterator_impl_::IteratorPair<SecondIterator>;
 
 public:
-	template<bool B>
-	DualIterator(const TABLE1 &table1, TABLE2 const &table2, bool_constant<B> const tag) :
-					it1_(table1, tag),
-					it2_(table2, tag){}
+	using difference_type	= it_traits_DT<FirstIterator>;
+	using value_type	= const Pair;
+	using pointer		= value_type *;
+	using reference		= value_type &;
+	using iterator_category	= std::forward_iterator_tag;
 
-	DualIterator(const TABLE1 &table1, TABLE2 const &table2, StringRef const &key) :
-					it1_(table1, key),
-					it2_(table2, key){}
+public:
+	DualIterator(FirstIteratorPair first, SecondIteratorPair second) :
+					first_(std::move(first)),
+					second_(std::move(second)),
+					pair_(dereference_()){}
 
-	DualIterator &operator ++();
+	template<class List1, class List2, class... Args>
+	DualIterator(List1 const &first, List2 const &second, Args&& ...args) :
+					DualIterator(
+						{ first,  std::forward<Args>(args)... },
+						{ second, std::forward<Args>(args)... }
+					){}
 
-	reference operator *() const;
+	DualIterator &operator++(){
+		return increment_();
+	}
+
+	reference operator *() const{
+		// normal iterator rules apply.
+		return *pair_;
+	}
 
 	bool operator==(DualIterator const &other) const{
-		return it1_ == other.it1_ && it2_ == other.it2_;
+		return first_ == other.first_ && second_ == other.second_;
 	}
 
 public:
@@ -57,17 +62,71 @@ public:
 	}
 
 private:
-	template<class T>
-	using IteratorPair = typename multiiterator_impl_::IteratorPair<T>;
+	const Pair *dereference_() const{
+		return multiiterator_impl_::comp(first_, second_) <= 0 ?
+			first_.ptr() :
+			second_.ptr()
+		;
+	}
 
-	IteratorPair<TABLE1>	it1_;
-	IteratorPair<TABLE2>	it2_;
+	template<class T>
+	DualIterator &incrementIterator_(T &it, const Pair *pair){
+		++it;
+		pair_ = pair;
+		return *this;
+	};
+
+	template<class T>
+	DualIterator &incrementIterator_(T &it){
+		++it;
+		pair_ = it.ptr();
+		return *this;
+	};
+
+	DualIterator & increment_(){
+		bool const f = first_;
+		bool const s = second_;
+
+		if (f == false && s == false)
+			return *this;
+
+		if (f && s == false)
+			return incrementIterator_(first_);
+
+		if (s && f == false)
+			return incrementIterator_(second_);
+
+		auto const cmp = first_->cmp(second_->getKey());
+
+		if (cmp < 0)
+			return incrementIterator_(first_, second_.ptr());
+
+		if (cmp > 0)
+			return incrementIterator_(second_, first_.ptr());
+
+		// both pairs are equal, increase both
+
+		++first_;
+		++second_;
+
+		// both iterators are new, could be false so...
+
+		pair_ = dereference_();
+
+		return *this;
+	}
+
+private:
+	FirstIteratorPair	first_;
+	SecondIteratorPair	second_;
+
+	const Pair		*pair_;
 
 private:
 	static_assert(
 		std::is_same<
-			it_traits_DT<TABLE1>,
-			it_traits_DT<TABLE2>
+			it_traits_DT<FirstIterator>,
+			it_traits_DT<SecondIterator>
 		>::value,
 		"TABLE1::Iterator::difference_type must be same as TABLE2::iterator::difference_type"
 	);
@@ -75,10 +134,6 @@ private:
 
 } // namespace multi
 } // namespace
-
-
-#include "dualiterator.h.cc"
-
 
 #endif
 
