@@ -60,7 +60,8 @@ public:
 	}
 
 public:
-	iterator find(StringRef const &key, bool exact) const noexcept;
+	iterator find(StringRef const &key, std::true_type) const noexcept;
+	iterator find(StringRef const &key, std::false_type) const noexcept;
 	iterator begin() const noexcept;
 	iterator end() const noexcept;
 };

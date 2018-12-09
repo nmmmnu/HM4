@@ -40,8 +40,9 @@ public:
 	}
 
 public:
+	template<bool B>
 	constexpr static
-	iterator find(StringRef const &, bool){
+	iterator find(StringRef const &, std::bool_constant<B>){
 		return nullptr;
 	}
 

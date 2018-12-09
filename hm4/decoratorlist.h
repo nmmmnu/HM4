@@ -39,7 +39,8 @@ public:
 		return list_.end();
 	}
 
-	iterator find(const StringRef &key, bool const exact) const{
+	template<bool B>
+	iterator find(const StringRef &key, std::bool_constant<B> const exact) const{
 		return list_.find(key, exact);
 	}
 

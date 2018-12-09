@@ -49,7 +49,8 @@ public:
 		return { list1_, list2_, std::false_type{} };
 	}
 
-	iterator find(StringRef const &key, bool const exact) const{
+	template <bool B>
+	iterator find(StringRef const &key, std::bool_constant<B> const exact) const{
 		return { list1_, list2_, key, exact };
 	}
 

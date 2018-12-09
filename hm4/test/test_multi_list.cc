@@ -34,8 +34,8 @@ bool iteratorDereference(Iterator const &it, Iterator const &et, const char *val
 	;
 }
 
-template <class List>
-bool getCheck(List const &list, const char *key, const char *value, bool const exact){
+template <class List, bool B>
+bool getCheck(List const &list, const char *key, const char *value, std::bool_constant<B> const exact){
 	auto const it = list.find(key, exact);
 	auto const et = list.end();
 
@@ -49,20 +49,20 @@ bool getCheck(List const &list, const char *key, const char *value, bool const e
 
 template <class List>
 void iterator_test_get(const List &list){
-	mytest("it", 			getCheck(list, "1",		"Niki",		false	));
-	mytest("it", 			getCheck(list, "1 name",	"Niki",		true	));
-	mytest("it", 			getCheck(list, "2",		"22",		false	));
-	mytest("it", 			getCheck(list, "2 age",		"22",		true	));
-	mytest("it", 			getCheck(list, "3",		"Sofia",	false	));
-	mytest("it", 			getCheck(list, "3 city",	"Sofia",	true	));
-	mytest("it", 			getCheck(list, "4",		"Linux",	false	));
-	mytest("it", 			getCheck(list, "4 os",		"Linux",	true	));
-	mytest("it", 			getCheck(list, "4 osX",		nullptr,	true	));
-	mytest("it", 			getCheck(list, "5",		nullptr,	true	));
-	mytest("it", 			getCheck(list, "6",		nullptr,	true	));
+	mytest("it", 			getCheck(list, "1",		"Niki",		std::false_type{}	));
+	mytest("it", 			getCheck(list, "1 name",	"Niki",		std::true_type{}	));
+	mytest("it", 			getCheck(list, "2",		"22",		std::false_type{}	));
+	mytest("it", 			getCheck(list, "2 age",		"22",		std::true_type{}	));
+	mytest("it", 			getCheck(list, "3",		"Sofia",	std::false_type{}	));
+	mytest("it", 			getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
+	mytest("it", 			getCheck(list, "4",		"Linux",	std::false_type{}	));
+	mytest("it", 			getCheck(list, "4 os",		"Linux",	std::true_type{}	));
+	mytest("it", 			getCheck(list, "4 osX",		nullptr,	std::true_type{}	));
+	mytest("it", 			getCheck(list, "5",		nullptr,	std::true_type{}	));
+	mytest("it", 			getCheck(list, "6",		nullptr,	std::true_type{}	));
 
 	// this is no longer supported
-	//mytest("it", 			getCheck(list, "",		"Niki",		false	));
+	//mytest("it", 			getCheck(list, "",		"Niki",		std::false_type{}	));
 }
 
 template <class List>
@@ -102,8 +102,8 @@ void list_test(const List &list, typename List::size_type const count, size_t co
 
 	// GET
 
-	mytest("get",			getCheck(list, "3 city",	"Sofia", true	));
-	mytest("get non existent",	getCheck(list, "nonexistent",	nullptr, true	));
+	mytest("get",			getCheck(list, "3 city",	"Sofia", std::true_type{}	));
+	mytest("get non existent",	getCheck(list, "nonexistent",	nullptr, std::true_type{}	));
 
 	//std::cout << list.bytes() << ' ' << bytes << '\n';
 

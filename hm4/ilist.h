@@ -70,10 +70,6 @@ bool empty(LIST const &list){
 
 // ==============================
 
-template<class List, class Argument>
-[[deprecated("Only std::true_type, std::false_type and StringRef are supported")]]
-auto getIterator(List const &, Argument);
-
 template<class List>
 auto getIterator(List const &list, std::true_type){
 	return std::begin(list);
@@ -84,8 +80,8 @@ auto getIterator(List const &list, std::false_type){
 	return std::end(list);
 }
 
-template<class List>
-auto getIterator(List const &list, StringRef const &key, bool const exact){
+template<class List, bool B>
+auto getIterator(List const &list, StringRef const &key, std::bool_constant<B> const exact){
 	return list.find(key, exact);
 }
 

@@ -38,36 +38,31 @@ private:
 private:
 	StoreIterator		first_;
 	StoreIterator		last_;
-	StoreIteratorDT		size_;
 
 public:
-	CollectionList(StoreIterator first, StoreIterator last, StoreIteratorDT const size) :
-					first_	(std::move(first		)),
-					last_	(std::move(last			)),
-					size_	(size				){}
-
 	CollectionList(StoreIterator first, StoreIterator last) :
-					CollectionList( first, last, 0){}
+					first_	(std::move(first	)),
+					last_	(std::move(last		)){}
 
 	template<class T>
 	CollectionList(T const &v) :
 					CollectionList(
 						std::begin(v),
-						std::end(v),
-						std::distance(std::begin(v), std::end(v))
+						std::end(v)
 					){}
 
 public:
 	iterator begin() const{
-		return { first_, last_, size_, std::true_type{} };
+		return { first_, last_, std::true_type{} };
 	}
 
 	iterator end() const{
-		return { first_, last_, size_, std::false_type{} };
+		return { first_, last_, std::false_type{} };
 	}
 
-	iterator find(StringRef const &key, bool const exact) const{
-		return { first_, last_, size_, key, exact };
+	template<bool B>
+	iterator find(StringRef const &key, std::bool_constant<B> const exact) const{
+		return { first_, last_, key, exact };
 	}
 
 public:

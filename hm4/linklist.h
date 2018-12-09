@@ -37,7 +37,8 @@ public:
 	}
 
 public:
-	iterator find(StringRef const &key, bool exact) const;
+	template<bool B>
+	iterator find(StringRef const &key, std::bool_constant<B> exact) const;
 
 	iterator begin() const;
 	static constexpr iterator end();
@@ -95,8 +96,9 @@ private:
 
 // ==============================
 
-inline auto LinkList::find(const StringRef &key, bool const exact) const -> iterator{
-	return locateNode_(key, exact);
+template<bool B>
+inline auto LinkList::find(const StringRef &key, std::bool_constant<B> const exact) const -> iterator{
+	return locateNode_(key, exact.value);
 }
 
 inline auto LinkList::begin() const -> iterator{

@@ -36,16 +36,12 @@ public:
 	template<class StoreIterator, typename ...Args>
 	CollectionIterator(
 			StoreIterator first, StoreIterator last,
-			typename std::iterator_traits<StoreIterator>::difference_type const size,
 			Args&& ...args
 	){
-		if (size > 0){
-			auto const usize = static_cast<typename ITPVector::size_type>(size);
-			itp_.reserve(usize);
-		}
+		reserve__(first, last, itp_);
 
-		for (auto it = first; it != last; ++it){
-			auto const &list = *it;
+		for (; first != last; ++first){
+			auto const &list = *first;
 
 			ITP itp{ list, std::forward<Args>(args)... };
 
@@ -58,12 +54,37 @@ public:
 
 	template<class StoreIterator>
 	constexpr CollectionIterator(
-			StoreIterator, StoreIterator,
-			typename std::iterator_traits<StoreIterator>::difference_type,
+			StoreIterator const &, StoreIterator const &,
 			std::false_type
 	){
 		// skip the work and creates end iterator directly
 		// printf("Here...\n");
+	}
+
+	template<class StoreIterator>
+	CollectionIterator(
+			StoreIterator first, StoreIterator last,
+			StringRef const &key,
+			std::true_type const exact
+	){
+		// skip the work and creates iterator with single element
+		// printf("Here...\n");
+
+		ITP smallest{ first->end(), first->end() };
+
+		for(; first != last; ++first){
+			auto const &list = *first;
+
+			ITP itp{ list, key, exact };
+
+			if (heap_comp(smallest, itp))
+				smallest = std::move(itp);
+		}
+
+		if (smallest){
+			itp_.reserve(1);
+			itp_.push_back(std::move(smallest));
+		}
 	}
 
 public:
@@ -119,6 +140,13 @@ private:
 				itp_.pop_back();
 			}
 		}
+	}
+
+	template<class StoreIterator>
+	static void reserve__(StoreIterator first, StoreIterator last, ITPVector &v){
+		auto const size = std::distance(first, last);
+		if (size > 0)
+			v.reserve( static_cast<typename ITPVector::size_type>(size) );
 	}
 
 private:

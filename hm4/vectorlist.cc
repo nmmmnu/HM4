@@ -13,25 +13,20 @@ namespace{
 	}
 } // anonymous namespace
 
-#if 0
-const Pair *VectorList::operator[](StringRef const &key) const{
+auto VectorList::find(const StringRef &key, std::true_type) const noexcept -> iterator{
 	assert(!key.empty());
 
 	auto const x = binarySearch(vector_, key);
 
-	return x.found ? x.it->get() : nullptr;
+	return x.found ? x.it : end();
 }
-#endif
 
-auto VectorList::find(const StringRef &key, bool const exact) const noexcept -> iterator{
+auto VectorList::find(const StringRef &key, std::false_type) const noexcept -> iterator{
 	assert(!key.empty());
 
 	auto const x = binarySearch(vector_, key);
 
-	if (exact == false)
-		return x.it;
-	else
-		return x.found ? x.it : end();
+	return x.it;
 }
 
 bool VectorList::insert(OPair&& newdata){
