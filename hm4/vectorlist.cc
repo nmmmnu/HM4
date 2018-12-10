@@ -8,7 +8,7 @@ namespace{
 	};
 
 	template<class T>
-	auto binarySearch(T const &v, StringRef const &key){
+	auto binarySearch(T &v, StringRef const &key){
 		return binarySearch(std::begin(v), std::end(v), key, comp);
 	}
 } // anonymous namespace
@@ -39,7 +39,7 @@ bool VectorList::insert(OPair&& newdata){
 	if (x.found){
 		// key exists, overwrite, do not shift
 
-		OPair &olddata = vector_[ static_cast<size_type>(x.pos) ];
+		OPair &olddata = *x.it;
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata) ){

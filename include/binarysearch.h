@@ -15,12 +15,10 @@ auto binarySearchComp = [](auto const a, auto const b){
 
 
 template<
-		class Iterator,
-		class difference_type = typename std::iterator_traits<Iterator>::difference_type
+		class Iterator
 >
 struct BinarySearchResult{
 	bool		found;
-	difference_type	pos;
 	Iterator	it;
 };
 
@@ -33,14 +31,14 @@ template <
 		class Comp = decltype(binarySearchComp)
 >
 auto binarySearch(
-		Iterator const begin, Iterator const end,
+		Iterator first, Iterator last,
 		T const &key,
 		Comp const &comp = binarySearchComp,
 		difference_type const minimum_distance = 5
 ) -> BinarySearchResult<Iterator>{
 	using tag = typename std::iterator_traits<Iterator>::iterator_category;
 
-	return binarySearch(begin, end, key, comp, minimum_distance, tag{});
+	return binarySearch(std::move(first), std::move(last), key, comp, minimum_distance, tag{});
 }
 
 

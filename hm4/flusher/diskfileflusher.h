@@ -29,7 +29,7 @@ public:
 public:
 	template<class LIST>
 	bool operator << (const LIST &list) const{
-		if (list.empty())
+		if (empty(list))
 			return false;
 
 		//const std::string &filename = StringRef::concatenate({ path_, idGenerator_(), ext_ });

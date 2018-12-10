@@ -2,12 +2,9 @@
 #define DISK_LIST_H_
 
 #include "mmapfileplus.h"
-#include "binarysearch.h"
 
 #include "ilist.h"
 #include "filemeta.h"
-
-#include "mynarrow.h"
 
 #include <type_traits>
 
@@ -15,11 +12,14 @@ namespace hm4{
 namespace disk{
 
 
-class DiskList : public IList<DiskList, false>{
+class DiskList{
 public:
-	class Iterator;
-	class BTreeSearchHelper;
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
 
+	class iterator;
+
+public:
 	enum class OpenMode : char {
 		NORMAL,
 		MINIMAL
@@ -30,7 +30,7 @@ public:
 
 private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
-	static constexpr int		CMP_ZERO			= 1;
+//	static constexpr int		CMP_ZERO			= 1;
 
 public:
 	DiskList() = default;
@@ -60,32 +60,14 @@ public:
 	}
 
 public:
-	int cmpAt(size_type index, const StringRef &key) const{
-		assert(!key.empty());
-
-		const Pair *p = operator[](index);
-
-		return p ? p->cmp(key) : CMP_ZERO;
-	}
-
-
-public:
-	const Pair *operator[](const StringRef &key) const{
-		assert(!key.empty());
-
-		const auto x = search_(key);
-
-		return x.found ? operator[](x.pos) : nullptr;
-	}
-
-	const Pair *operator[](size_type const index) const{
+	Pair const &operator[](size_type const index) const{
 		assert( index < size() );
 
-		return fdGetAt_(index);
+		return *fdGetAt_(index);
 	}
 
-	size_type size(bool const = false) const{
-		return narrow<size_type>( metadata_.size() );
+	size_type size() const{
+		return metadata_.size();
 	}
 
 	size_t bytes() const{
@@ -101,11 +83,16 @@ public:
 	}
 
 public:
-	Iterator lowerBound(const StringRef &key) const;
-	Iterator begin() const;
-	Iterator end() const;
+	iterator begin() const;
+	iterator end() const;
+
+	template<bool B>
+	iterator find(const StringRef &key, std::bool_constant<B>) const;
 
 private:
+	template<bool B>
+	iterator search_(const StringRef &key, std::bool_constant<B>) const;
+
 	bool openNormal_ (const StringRef &filename, MMAPFile::Advice advice);
 	bool openMinimal_(const StringRef &filename, MMAPFile::Advice advice);
 
@@ -119,17 +106,7 @@ private:
 	static size_t alignedSize__(const Pair *blob, bool aligned);
 
 private:
-	BinarySearchResult<size_type> binarySearch_(const StringRef &key, size_type start, size_type end) const;
-
-	BinarySearchResult<size_type> binarySearch_(const StringRef &key) const{
-		return binarySearch_(key, 0, size());
-	}
-
-	BinarySearchResult<size_type> btreeSearch_(const StringRef &key) const;
-
-	BinarySearchResult<size_type> hotLineSearch_(const StringRef &key) const;
-
-	BinarySearchResult<size_type> search_(const StringRef &key) const;
+	class BTreeSearchHelper;
 
 private:
 	MMAPFilePlus		mIndx_;
@@ -144,65 +121,147 @@ private:
 
 // ===================================
 
-class DiskList::Iterator{
+class DiskList::iterator{
+public:
+	using difference_type	= DiskList::difference_type;
+	using value_type	= const Pair;
+	using pointer		= value_type *;
+	using reference		= value_type &;
+	using iterator_category	= std::random_access_iterator_tag;
+
 private:
-	friend class DiskList;
-	Iterator(const DiskList &list, size_type pos,
-				bool sorted_);
+	using size_type		= DiskList::size_type;
+
+private:
+	iterator clone(difference_type const off) const{
+		return { list, off };
+	}
+
+	reference getAt(difference_type const off) const{
+		return list[ static_cast<size_type>(off) ];
+	}
 
 public:
-	Iterator &operator++(){
-		++pos_;
+	iterator(DiskList const &list, difference_type const ptr) :
+				list(list),
+				ptr(ptr){}
+
+	iterator(DiskList const &list, size_type const ptr) :
+				iterator(list, static_cast<difference_type>(ptr)){}
+
+public:
+	// increment / decrement
+	iterator &operator++(){
+		++ptr;
 		return *this;
 	}
 
-	Iterator &operator--(){
-		--pos_;
+	iterator &operator--(){
+		--ptr;
 		return *this;
 	}
 
-	bool operator==(const Iterator &other) const{
-		return &list_ == &other.list_ && pos_ == other.pos_;
+	iterator operator++(int){
+		auto tmp = ptr;
+		++ptr;
+		return clone(tmp);
 	}
 
-	const Pair &operator*() const;
+	iterator operator--(int){
+		auto tmp = ptr;
+		--ptr;
+		return clone(tmp);
+	}
 
 public:
-	bool operator!=(const Iterator &other) const{
-		return ! operator==(other);
+	// arithmetic
+	// https://www.boost.org/doc/libs/1_50_0/boost/container/vector.hpp
+
+	iterator& operator+=(difference_type const off){
+		ptr += off;
+		return *this;
 	}
 
-	const Pair *operator ->() const{
+	iterator operator +(difference_type const off) const{
+		return clone(ptr + off);
+	}
+
+	iterator& operator-=(difference_type const off){
+		ptr -= off;
+		return *this;
+	}
+
+	iterator operator -(difference_type const off) const{
+		return clone(ptr - off);
+	}
+
+	friend iterator operator +(difference_type const  off, iterator const &it){
+		return it.clone(it.ptr + off);
+	}
+
+	difference_type operator -(iterator const &other) const{
+		return ptr - other.ptr;
+	}
+
+public:
+	// compare
+	bool operator==(iterator const &other) const{
+		return ptr == other.ptr;
+	}
+
+	bool operator!=(iterator const &other) const{
+		return ptr != other.ptr;
+	}
+
+	bool operator >(iterator const &other) const{
+		return ptr >  other.ptr;
+	}
+
+	bool operator>=(iterator const &other) const{
+		return ptr >= other.ptr;
+	}
+
+	bool operator <(iterator const &other) const{
+		return ptr <  other.ptr;
+	}
+
+	bool operator<=(iterator const &other) const{
+		return ptr <= other.ptr;
+	}
+
+public:
+	// dereference
+
+	reference operator[](difference_type const off) const{
+		return getAt(ptr + off);
+	}
+
+	reference operator*() const{
+		return getAt(ptr);
+	}
+
+	pointer operator ->() const{
 		return & operator*();
 	}
 
 private:
-	const DiskList	&list_;
-	size_type	pos_;
-	bool		sorted_;
-
-private:
-	mutable
-	size_type	tmp_pos		= 0;
-
-	mutable
-	const Pair	*tmp_blob	= nullptr;
+	const DiskList	&list;
+	difference_type	ptr;
 };
 
 // ==============================
 
-inline auto DiskList::begin() const -> Iterator{
-	return Iterator(*this,      0, sorted());
+inline auto DiskList::begin() const -> iterator{
+	return { *this, difference_type{ 0 } };
 }
 
-inline auto DiskList::end() const -> Iterator{
-	return Iterator(*this, size(), sorted());
+inline auto DiskList::end() const -> iterator{
+	return { *this, size() };
 }
 
-inline auto DiskList::lowerBound(const StringRef &key) const -> Iterator{
-	const auto x = search_(key);
-
-	return Iterator(*this, x.pos, sorted());
+template<bool B>
+inline auto DiskList::find(const StringRef &key, std::bool_constant<B> const exact) const -> iterator{
+	return search_(key, exact);
 }
 
 

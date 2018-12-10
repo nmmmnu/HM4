@@ -39,10 +39,10 @@ public:
 
 	bool erase(const StringRef &key);
 
-	const Pair *operator[](size_type const index) const{
+	Pair const &operator[](size_type const index) const{
 		assert( index < size() );
 
-		return vector_[index].get();
+		return *vector_[index].get();
 	}
 
 	bool insert(OPair &&data);

@@ -5,27 +5,24 @@ template <
 		class Comp
 >
 auto linearSearch(
-		Iterator const begin, Iterator const end,
+		Iterator first, Iterator const &last,
 		T const &key,
 		Comp const &comp
 ) -> BinarySearchResult<Iterator>{
-	difference_type pos = 0;
-	auto it = begin;
-
-	for(;it != end; ++it, ++pos){
-		int const cmp = comp(*it, key);
+	for(; first != last; ++first){
+		int const cmp = comp(*first, key);
 
 		if (cmp == 0){
 			// found
 			// index = pos
-			return { true, pos, it };
+			return { true, first };
 		}
 
 		if (cmp > 0)
 			break;
 	}
 
-	return { false, pos, it };
+	return { false, first };
 }
 
 
@@ -39,13 +36,13 @@ template <
 		class Comp
 >
 auto binarySearch(
-		Iterator const begin, Iterator const end,
+		Iterator first, Iterator last,
 		T const &key,
 		Comp const &comp,
 		difference_type,
 		std::input_iterator_tag
-) -> BinarySearchResult<Iterator>{
-	return linearSearch(begin, end, key, comp);
+){
+	return linearSearch(std::move(first), std::move(last), key, comp);
 }
 
 
@@ -59,7 +56,7 @@ template <
 		class Comp
 >
 auto binarySearch(
-		Iterator const it_begin, Iterator const it_end,
+		Iterator const &first, Iterator const &last,
 		T const &key,
 		Comp const &comp,
 		difference_type const minimum_distance,
@@ -69,10 +66,10 @@ auto binarySearch(
 	 * Lazy based from Linux kernel...
 	 * http://lxr.free-electrons.com/source/lib/bsearch.c
 	 */
-	difference_type start = 0;
-	difference_type end   = it_end - it_begin;
+	auto start = difference_type{ 0 };
+	auto end   = last - first;
 
-	Iterator const &array = it_begin;
+	Iterator const &array = first;
 
 	while (start + minimum_distance < end){
 		difference_type const mid = static_cast<difference_type>( start + ((end - start) >> 1) );
@@ -88,7 +85,7 @@ auto binarySearch(
 		}else{
 			// found
 			// index = mid
-			return { true, mid, array + mid };
+			return { true, array + mid };
 		}
 	}
 

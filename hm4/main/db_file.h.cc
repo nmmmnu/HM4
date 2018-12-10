@@ -2,30 +2,31 @@
 
 #include "pair.h"
 
-template <class LIST>
-static int op_search(const LIST &list, const StringRef &key){
+template <class List>
+static int op_search(List const &list, StringRef const &key){
 	if (key.empty())
 		return 1;
 
-	auto pair = list[key];
+	auto it = list.find(key, std::true_type{});
 
-	print(pair);
+	if (it != std::end(list))
+		print(*it);
 
 	return 0;
 }
 
 // =====================================
 
-template <class LIST>
-static int op_iterate(const LIST &list, const StringRef &key, size_t const count = 10){
-	const auto bit = key == '-' ? list.begin() : list.lowerBound(key);
-	const auto eit = list.end();
-
+template <class List>
+static int op_iterate(List const &list, StringRef const &key, size_t const count = 10){
 	size_t c = 0;
-	for(auto it = bit; it != eit; ++it){
+
+	auto it = key == '-' ? std::begin(list) : list.find(key, std::false_type{});
+
+	for(; it != std::end(list); ++it){
 		using hm4::print;
 
-		print(it);
+		print(*it);
 
 		if (++c >= count)
 			break;

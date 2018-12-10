@@ -74,8 +74,12 @@ public:
 
 		int const r = hkey.compare(key);
 
-		if (r || key.size() <= hkey.capacity())
+
+		if (r || key.size() < PairConf::HLINE_SIZE){
+			// if key.size() == PairConf::HLINE_SIZE,
+			// this does not mean that key is found...
 			return r;
+		}
 
 		return pp->cmp(key);
 	}

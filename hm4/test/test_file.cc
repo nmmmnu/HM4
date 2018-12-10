@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <type_traits>
 
 #include "filereader.h"
 #include "disk/filebuilder.h"
@@ -61,22 +62,22 @@ static void listLoad(LIST &list, READER &reader, bool const tombstones = true){
 	}
 }
 
-template <class LIST>
-static void listSearch(const LIST &list, const StringRef &key){
-	const Pair *pair = list[key];
+template <class List>
+static void listSearch(const List &list, const StringRef &key){
+	auto const it = list.find(key, std::true_type{});
 
-	if (! pair){
+	if (it == std::end(list)){
 		printf("Key '%s' not found...\n", key.data());
 		return;
 	}
 
-	print(pair);
+	print(*it);
 }
 
 template <class LIST>
 static void listIterate(const LIST &list, const StringRef &key, size_t count = 10){
-	for(auto it = list.lowerBound(key); count && it != list.end(); ++it, --count)
-		print(it);
+	for(auto it = list.find(key, std::false_type{}); count && it != list.end(); ++it, --count)
+		print(*it);
 }
 
 template <class LIST, class READER>
