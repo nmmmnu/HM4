@@ -45,6 +45,7 @@ public:
 
 private:
 	Pair() noexcept = default;
+	Pair(const Pair &p) noexcept = delete;
 
 	static void *operator new(size_t, size_t const size){
 		return ::operator new(size);
@@ -151,7 +152,7 @@ public:
 
 	// ==============================
 
-	void print_() const noexcept;
+	void print() const noexcept;
 
 	void fwrite(std::ostream & os) const{
 		os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
@@ -232,7 +233,7 @@ static_assert(std::is_pod<Pair>::value, "Pair must be POD type");
 // ==============================
 
 inline void print(Pair const &pair){
-	pair.print_();
+	pair.print();
 }
 
 } // namespace

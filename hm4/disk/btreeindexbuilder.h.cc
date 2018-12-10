@@ -5,6 +5,7 @@
 #include "myalign.h"
 #include "mynarrow.h"
 
+
 namespace hm4{
 namespace disk{
 namespace btree{
@@ -98,9 +99,8 @@ template <class List>
 void BTreeIndexBuilder<List>::push_back_key(size_type const index){
 	// we need to have the pair,
 	// because key "live" inside it.
-	const auto p = list_[index];
-	const StringRef &key = p.getKey();
-
+	auto const &pair = list_[index];
+	StringRef const &key = pair.getKey();
 
 	NodeData nd;
 	nd.dataid  = htobe<uint64_t>(index);

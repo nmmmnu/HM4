@@ -8,6 +8,8 @@ namespace hm4{
 	namespace PairConf{
 		constexpr size_t	ALIGN		= sizeof(uint64_t);
 		constexpr size_t	HLINE_SIZE	= sizeof(uint64_t);
+
+		constexpr const char	*EMPTY_MESSAGE	= "---empty-pair---";
 	}
 }
 

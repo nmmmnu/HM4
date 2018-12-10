@@ -51,7 +51,7 @@ std::unique_ptr<Pair> Pair::create(const Pair *src){
 
 // ==============================
 
-void Pair::print_() const noexcept{
+void Pair::print() const noexcept{
 	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
 	const char *format      = "%-32s | %-20s | %s | %8u\n";
 

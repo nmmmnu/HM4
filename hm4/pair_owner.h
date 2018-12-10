@@ -96,7 +96,10 @@ inline void swap(OPair &p1, OPair &p2) noexcept{
 }
 
 inline void print(OPair const &pair){
-	print(*pair);
+	if (pair)
+		print(*pair);
+	else
+		printf("%s\n", PairConf::EMPTY_MESSAGE);
 }
 
 } // namespace
