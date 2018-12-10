@@ -7,7 +7,7 @@ template <
 auto linearSearch(
 		Iterator first, Iterator const &last,
 		T const &key,
-		Comp const &comp
+		Comp comp
 ) -> BinarySearchResult<Iterator>{
 	for(; first != last; ++first){
 		int const cmp = comp(*first, key);
@@ -36,13 +36,13 @@ template <
 		class Comp
 >
 auto binarySearch(
-		Iterator first, Iterator last,
+		Iterator first, Iterator const &last,
 		T const &key,
-		Comp const &comp,
+		Comp comp,
 		difference_type,
 		std::input_iterator_tag
 ){
-	return linearSearch(std::move(first), std::move(last), key, comp);
+	return linearSearch(std::move(first), last, key, comp);
 }
 
 
@@ -58,7 +58,7 @@ template <
 auto binarySearch(
 		Iterator const &first, Iterator const &last,
 		T const &key,
-		Comp const &comp,
+		Comp comp,
 		difference_type const minimum_distance,
 		std::random_access_iterator_tag
 ) -> BinarySearchResult<Iterator>{

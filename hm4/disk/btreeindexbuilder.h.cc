@@ -10,8 +10,8 @@ namespace disk{
 namespace btree{
 
 
-template <class LIST>
-bool BTreeIndexBuilder<LIST>::build(){
+template <class List>
+bool BTreeIndexBuilder<List>::build(){
 	size_type const size = list_.size();
 
 	level_type total_levels = level_type(calcDepth__(size) - 1);
@@ -42,8 +42,8 @@ bool BTreeIndexBuilder<LIST>::build(){
 }
 
 
-template <class LIST>
-void BTreeIndexBuilder<LIST>::reorder_(size_type const begin, size_type const end,
+template <class List>
+void BTreeIndexBuilder<List>::reorder_(size_type const begin, size_type const end,
 					level_type const target_level, level_type const current_level){
 	if (begin >= end)
 		return;
@@ -94,12 +94,12 @@ void BTreeIndexBuilder<LIST>::reorder_(size_type const begin, size_type const en
 
 // ==============================
 
-template <class LIST>
-void BTreeIndexBuilder<LIST>::push_back_key(size_type const index){
+template <class List>
+void BTreeIndexBuilder<List>::push_back_key(size_type const index){
 	// we need to have the pair,
 	// because key "live" inside it.
 	const auto p = list_[index];
-	const StringRef &key = p->getKey();
+	const StringRef &key = p.getKey();
 
 
 	NodeData nd;
@@ -129,8 +129,8 @@ void BTreeIndexBuilder<LIST>::push_back_key(size_type const index){
 
 // ==============================
 
-template <class LIST>
-auto BTreeIndexBuilder<LIST>::calcDepth__(size_type count) -> level_type{
+template <class List>
+auto BTreeIndexBuilder<List>::calcDepth__(size_type count) -> level_type{
 	// Biliana
 	// log 54 (123) = ln (123) / ln (54)
 	// but this is true for B+Tree only...

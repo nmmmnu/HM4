@@ -31,14 +31,14 @@ template <
 		class Comp = decltype(binarySearchComp)
 >
 auto binarySearch(
-		Iterator first, Iterator last,
+		Iterator first, Iterator const &last,
 		T const &key,
-		Comp const &comp = binarySearchComp,
+		Comp comp = binarySearchComp,
 		difference_type const minimum_distance = 5
 ) -> BinarySearchResult<Iterator>{
 	using tag = typename std::iterator_traits<Iterator>::iterator_category;
 
-	return binarySearch(std::move(first), std::move(last), key, comp, minimum_distance, tag{});
+	return binarySearch(std::move(first), last, key, comp, minimum_distance, tag{});
 }
 
 

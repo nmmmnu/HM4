@@ -100,12 +100,12 @@ private:
 	const Pair *fdSafeAccess_(const Pair *blob) const;
 
 	const Pair *fdGetAt_(size_type index) const;
+#if 0
 	const Pair *fdGetNext_(const Pair *blob) const;
-
-private:
 	static size_t alignedSize__(const Pair *blob, bool aligned);
+#endif
 
-private:
+public:
 	class BTreeSearchHelper;
 
 private:

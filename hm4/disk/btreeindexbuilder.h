@@ -12,13 +12,13 @@ namespace disk{
 namespace btree{
 
 
-template <class LIST>
+template <class List>
 class BTreeIndexBuilder{
 public:
-	using size_type = typename LIST::size_type;
+	using size_type = typename List::size_type;
 
 public:
-	BTreeIndexBuilder(std::string filename, const LIST &list) :
+	BTreeIndexBuilder(std::string filename, const List &list) :
 							list_(list),
 							filename_(std::move(filename)){}
 
@@ -42,7 +42,7 @@ private:
 	}
 
 private:
-	const LIST	&list_;
+	const List	&list_;
 
 	size_t		current_	= 0;
 

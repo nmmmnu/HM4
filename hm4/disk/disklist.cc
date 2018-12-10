@@ -18,7 +18,7 @@
 namespace hm4{
 namespace disk{
 
-//constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
+constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
 // ==============================
 
@@ -34,6 +34,18 @@ static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 namespace{
 	using iterator = DiskList::iterator;
 
+	// -----------------------------------
+
+	auto search_fix(BinarySearchResult<iterator> const result, DiskList const &list, std::true_type){
+		return result.found ? result.it : std::end(list);
+	}
+
+	auto search_fix(BinarySearchResult<iterator> const result, DiskList const &, std::false_type){
+		return result.it;
+	}
+
+	// -----------------------------------
+
 	int comp(Pair const &p, StringRef const &key){
 		return p.cmp(key);
 	};
@@ -46,7 +58,9 @@ namespace{
 		return searchBinary(key, std::begin(list), std::end(list));
 	}
 
+	// -----------------------------------
 
+	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<iterator>;
 
 	template<typename T>
 	auto dt(T const &a){
@@ -54,8 +68,6 @@ namespace{
 	}
 
 //	void dt(DiskList::difference_type){}
-
-
 
 	auto searchHotLine(StringRef const &key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<iterator>{
 		size_t const nodesCount = line.sizeArray<SmallNode>();
@@ -212,6 +224,7 @@ const Pair *DiskList::fdGetAt_(size_type const index) const{
 	return fdSafeAccess_(blob);
 }
 
+#if 0
 const Pair *DiskList::fdGetNext_(const Pair *previous) const{
 	size_t size = alignedSize__(previous, aligned());
 
@@ -230,28 +243,22 @@ size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
 
 	return ! aligned ? size : alc.calc(size);
 }
+#endif
 
 
 
 // ==============================
 
-namespace{
-	auto search_fix(BinarySearchResult<iterator> result, DiskList const &list, std::true_type){
-		return result.found ? result.it : std::end(list);
-	}
 
-	auto search_fix(BinarySearchResult<iterator> result, DiskList const &, std::false_type){
-		return result.it;
-	}
-} // anonymous namespace
 
 template<bool B>
 auto DiskList::search_(StringRef const &key, std::bool_constant<B> const exact) const -> iterator{
-//	if (mTree_ && mKeys_){
-//		log__("btree");
-//		return btreeSearch_(key);
+	if (mTree_ && mKeys_){
+		log__("btree");
+		auto const x = searchBTree(key, *this);
+		return search_fix(x, *this, exact);
 
-//	}else
+	}else
 	if (mLine_){
 		log__("hot line");
 		auto const x = searchHotLine(key, *this, mLine_);
@@ -268,23 +275,11 @@ auto DiskList::search_(StringRef const &key, std::bool_constant<B> const exact) 
 template auto DiskList::search_(StringRef const &key, std::true_type  ) const -> iterator;
 template auto DiskList::search_(StringRef const &key, std::false_type ) const -> iterator;
 
+
+
 // ==============================
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
 
 class DiskList::BTreeSearchHelper{
 private:
@@ -292,6 +287,8 @@ private:
 	using NodeData				= btree::NodeData;
 
 	using level_type			= btree::level_type;
+
+	using size_type				= DiskList::size_type;
 
 private:
 	constexpr static level_type VALUES	= btree::VALUES;
@@ -334,21 +331,17 @@ private:
 public:
 	BTreeSearchHelper(const DiskList &list, const StringRef &key) : list_(list), key_(key){}
 
-	BinarySearchResult<size_type> operator()(){
+	auto operator()(){
 		try{
 			return btreeSearch_();
 		}catch(const BTreeAccessError &e){
 			log__("Problem, switch to binary search (1)");
-			return binarySearchFallback_();
+			return searchBinary(key_, list_);
 		}
 	}
 
 private:
-	BinarySearchResult<size_type> binarySearchFallback_() const{
-		return list_.binarySearch_(key_);
-	}
-
-	BinarySearchResult<size_type> btreeSearch_(){
+	BinarySearchResult<iterator> btreeSearch_(){
 		size_t const nodesCount	= mTree_.size() / sizeof(Node);
 
 		const Node *nodes = mTree_->as<const Node>(0, nodesCount);
@@ -364,7 +357,7 @@ private:
 			const auto x = levelOrderBinarySearch_( nodes[pos] );
 
 			if (x.isResult)
-				return { true, x.result_index };
+				return { true, iterator{ list_, x.result_index } };
 
 			// Determine where to go next...
 
@@ -387,7 +380,7 @@ private:
 		log__("BTREE LEAF:", pos);
 		log__("Fallback to binary search", start, '-', end, ", width", end - start);
 
-		return list_.binarySearch_(key_, start, end);
+		return searchBinary(key_, iterator{ list_, start }, iterator{ list_, end } );
 	}
 
 	NodeResult levelOrderBinarySearch_(const Node &node){
@@ -463,13 +456,17 @@ private:
 
 
 
+// ==============================
 
 
-inline auto DiskList::btreeSearch_(const StringRef &key) const -> BinarySearchResult<iterator>{
-	BTreeSearchHelper search(*this, key);
-	return search();
-}
-*/
+
+namespace{
+	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<iterator>{
+		DiskList::BTreeSearchHelper helper{list, key};
+
+		return helper();
+	}
+} // anonymous namespace
 
 
 } // namespace disk
