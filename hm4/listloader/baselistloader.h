@@ -13,6 +13,7 @@ class BaseListLoader{
 public:
 	using DiskList		= disk::DiskList;
 	using container_type	= std::vector<DiskList>;
+	using iterator		= container_type::const_iterator;
 
 public:
 	static constexpr MMAPFile::Advice	DEFAULT_ADVICE	= DiskList::DEFAULT_ADVICE;
@@ -25,10 +26,13 @@ protected:
 				mode_(mode){}
 
 public:
-	const container_type &operator*() const{
-		return container_;
+	auto begin() const{
+		return std::begin(container_);
 	}
 
+	auto end() const{
+		return std::end(container_);
+	}
 
 protected:
 	void insert_(const StringRef &filename){

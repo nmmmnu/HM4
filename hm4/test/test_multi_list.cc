@@ -39,8 +39,13 @@ bool getCheck(List const &list, const char *key, const char *value, std::bool_co
 	auto const it = list.find(key, exact);
 	auto const et = list.end();
 
-	if (value)
-		return iteratorDereference(it, et, value);
+	return iteratorDereference(it, et, value);
+}
+
+template <class List>
+bool getCheck(List const &list, const char *key){
+	auto const it = list.find(key, std::true_type{});
+	auto const et = list.end();
 
 	return it == et;
 }
@@ -49,17 +54,20 @@ bool getCheck(List const &list, const char *key, const char *value, std::bool_co
 
 template <class List>
 void iterator_test_get(const List &list){
-	mytest("it", 			getCheck(list, "1",		"Niki",		std::false_type{}	));
-	mytest("it", 			getCheck(list, "1 name",	"Niki",		std::true_type{}	));
-	mytest("it", 			getCheck(list, "2",		"22",		std::false_type{}	));
-	mytest("it", 			getCheck(list, "2 age",		"22",		std::true_type{}	));
-	mytest("it", 			getCheck(list, "3",		"Sofia",	std::false_type{}	));
-	mytest("it", 			getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
-	mytest("it", 			getCheck(list, "4",		"Linux",	std::false_type{}	));
-	mytest("it", 			getCheck(list, "4 os",		"Linux",	std::true_type{}	));
-	mytest("it", 			getCheck(list, "4 osX",		nullptr,	std::true_type{}	));
-	mytest("it", 			getCheck(list, "5",		nullptr,	std::true_type{}	));
-	mytest("it", 			getCheck(list, "6",		nullptr,	std::true_type{}	));
+	constexpr std::false_type	N{};
+	constexpr std::true_type	Y{};
+
+	mytest("it", 			getCheck(list, "1",		"Niki",		N	));
+	mytest("it", 			getCheck(list, "1 name",	"Niki",		Y	));
+	mytest("it", 			getCheck(list, "2",		"22",		N	));
+	mytest("it", 			getCheck(list, "2 age",		"22",		Y	));
+	mytest("it", 			getCheck(list, "3",		"Sofia",	N	));
+	mytest("it", 			getCheck(list, "3 city",	"Sofia",	Y	));
+	mytest("it", 			getCheck(list, "4",		"Linux",	N	));
+	mytest("it", 			getCheck(list, "4 os",		"Linux",	Y	));
+	mytest("it", 			getCheck(list, "4 osX"					));
+	mytest("it", 			getCheck(list, "5"					));
+	mytest("it", 			getCheck(list, "6"					));
 
 	// this is no longer supported
 	//mytest("it", 			getCheck(list, "",		"Niki",		std::false_type{}	));
@@ -103,7 +111,7 @@ void list_test(const List &list, typename List::size_type const count, size_t co
 	// GET
 
 	mytest("get",			getCheck(list, "3 city",	"Sofia", std::true_type{}	));
-	mytest("get non existent",	getCheck(list, "nonexistent",	nullptr, std::true_type{}	));
+	mytest("get non existent",	getCheck(list, "nonexistent"					));
 
 	//std::cout << list.bytes() << ' ' << bytes << '\n';
 
@@ -242,7 +250,7 @@ void test_CollectionList(const char *name){
 
 	using MyMultiTable = hm4::multi::CollectionList<typename Vector::const_iterator>;
 
-	MyMultiTable table{ v };
+	MyMultiTable table{ std::begin(v), std::end(v) };
 
 	return list_test(table, 4, bytes);
 }
@@ -250,9 +258,9 @@ void test_CollectionList(const char *name){
 
 #include "vectorlist.h"
 
-using List = hm4::VectorList;
-
 int main(){
+	using List = hm4::VectorList;
+
 	test_DualListEmpty	<List>("DualList (Empty)"	);
 	test_DualList		<List>("DualList"		);
 	test_CollectionList	<List>("CollectionList"	);

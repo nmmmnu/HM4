@@ -120,11 +120,8 @@ void BTreeIndexBuilder<List>::push_back_key(size_type const index){
 	current_ += data_size;
 
 	// push the align
-	if (aligned_()){
-		constexpr MyAlign<NodeData::ALIGN> alc;
-
-		current_ += alc.fwriteGap(file_data_, data_size);
-	}
+	if (aligned_())
+		current_ += my_align::fwriteGap(file_data_, data_size, NodeData::ALIGN);
 }
 
 // ==============================

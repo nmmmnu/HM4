@@ -44,13 +44,6 @@ public:
 					first_	(std::move(first	)),
 					last_	(std::move(last		)){}
 
-	template<class T>
-	CollectionList(T const &v) :
-					CollectionList(
-						std::begin(v),
-						std::end(v)
-					){}
-
 public:
 	iterator begin() const{
 		return { first_, last_, std::true_type{} };

@@ -33,10 +33,10 @@ int main(int argc, char **argv){
 	// =======================
 
 	using MyListLoader	= hm4::listloader::DirectoryListLoader;
-	using MyCollectionList	= hm4::multi::CollectionList<MyListLoader::container_type>;
+	using MyCollectionList	= hm4::multi::CollectionList<MyListLoader::iterator>;
 
 	MyListLoader		dl{ path };
-	MyCollectionList	list(*dl);
+	MyCollectionList	list( std::begin(dl), std::end(dl) );
 
 	// =======================
 

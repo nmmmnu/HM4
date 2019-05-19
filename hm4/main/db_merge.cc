@@ -23,21 +23,12 @@ inline bool fileExists(const StringRef& name) {
 	return access(name.data(), F_OK) != -1;
 }
 
-template <class TABLE>
-int mergeTable(const TABLE &table, const char *output_file, bool const keepTombstones){
-	using namespace hm4;
-
-	disk::FileBuilder::build(output_file, table, keepTombstones, /* aligned */ true);
+template <class FACTORY>
+int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepTombstones){
+	hm4::disk::FileBuilder::build(output_file, f.begin(), f.end(), keepTombstones, /* aligned */ true);
 
 	return 0;
 }
-
-template <class FACTORY>
-int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepTombstones){
-	const auto &table = f();
-	return mergeTable(table, output_file, keepTombstones);
-}
-
 
 #include "listloader/arglistloader.h"
 
@@ -47,60 +38,69 @@ int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepT
 using hm4::disk::DiskList;
 
 struct MergeListFactory_1{
-	using MyMergeList = DiskList;
-
 	MergeListFactory_1(const char *filename, MMAPFile::Advice const advice, DiskList::OpenMode const mode){
 		table_.open(filename, advice, mode);
 	}
 
-	const MyMergeList &operator()() const{
-		return table_;
+	auto begin() const{
+		return std::begin(table_);
+	}
+
+	auto end() const{
+		return std::end(table_);
 	}
 
 private:
-	MyMergeList table_;
+	DiskList table_;
 };
 
 struct MergeListFactory_2{
-	using MyMergeList	= hm4::multi::DualList<const DiskList>;
-
 	MergeListFactory_2(const char *filename1, const char *filename2, const MMAPFile::Advice advice, DiskList::OpenMode const mode){
 		table1_.open(filename1, advice, mode);
 		table2_.open(filename2, advice, mode);
 	}
 
-	const MyMergeList &operator()() const{
-		return table_;
+	auto begin() const{
+		return std::begin(table_);
+	}
+
+	auto end() const{
+		return std::end(table_);
 	}
 
 private:
+	using MyDualList = hm4::multi::DualList<const DiskList, const DiskList>;
+
 	DiskList	table1_;
 	DiskList	table2_;
-	MyMergeList	table_{ table2_, table1_ };
+	MyDualList	table_{ table2_, table1_ };
 };
 
-
 struct MergeListFactory_N{
-	using ArgListLoader	= hm4::listloader::ArgListLoader;
-	using MyMergeList	= hm4::multi::CollectionList<ArgListLoader::container_type>;
-
 	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
 					loader_( table_count, path, advice, mode),
-					table_( *loader_ ) {}
+					table_( std::begin(loader_), std::end(loader_) ) {}
 
-	const MyMergeList &operator()() const{
-		return table_;
+	auto begin() const{
+		return std::begin(table_);
+	}
+
+	auto end() const{
+		return std::end(table_);
 	}
 
 private:
-	ArgListLoader	loader_;
-	MyMergeList	table_;
+	using ArgListLoader	= hm4::listloader::ArgListLoader;
+	using MyCollectionList	= hm4::multi::CollectionList<ArgListLoader::iterator>;
+
+	ArgListLoader		loader_;
+	MyCollectionList	table_;
 };
 
 
 
-constexpr MMAPFile::Advice	DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
-constexpr DiskList::OpenMode	DEFAULT_MODE	= DiskList::OpenMode::MINIMAL;
+constexpr auto	DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
+constexpr auto	DEFAULT_MODE	= DiskList::OpenMode::MINIMAL;
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)

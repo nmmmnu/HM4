@@ -134,16 +134,16 @@ private:
 
 private:
 	iterator clone(difference_type const off) const{
-		return { list, off };
+		return { *list, off };
 	}
 
 	reference getAt(difference_type const off) const{
-		return list[ static_cast<size_type>(off) ];
+		return (*list)[ static_cast<size_type>(off) ];
 	}
 
 public:
 	iterator(DiskList const &list, difference_type const ptr) :
-				list(list),
+				list(&list),
 				ptr(ptr){}
 
 	iterator(DiskList const &list, size_type const ptr) :
@@ -245,7 +245,7 @@ public:
 	}
 
 private:
-	const DiskList	&list;
+	const DiskList	*list;
 	difference_type	ptr;
 };
 

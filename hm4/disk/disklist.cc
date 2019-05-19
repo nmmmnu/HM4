@@ -1,6 +1,6 @@
 #include "disklist.h"
 
-#include "myalign.h"
+//#include "myalign.h"
 #include "levelorderlookup.h"
 
 #include "disk/filenames.h"
@@ -237,11 +237,9 @@ const Pair *DiskList::fdGetNext_(const Pair *previous) const{
 }
 
 size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
-	constexpr MyAlign<PairConf::ALIGN> alc;
-
 	size_t const size = blob->bytes();
 
-	return ! aligned ? size : alc.calc(size);
+	return ! aligned ? size : MyAlign<PairConf::ALIGN>::calc(size);
 }
 #endif
 

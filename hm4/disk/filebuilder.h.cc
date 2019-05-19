@@ -27,9 +27,7 @@ namespace FileBuilder{
 		void writeStr(std::ofstream &file, const SmallString<HLINE_SIZE> &key){
 			file.write(key.data(), narrow<std::streamsize>(key.size()));
 
-			constexpr MyAlign<HLINE_SIZE> alc;
-
-			alc.fwriteGap(file, key.size());
+			my_align::fwriteGap(file, key.size(), HLINE_SIZE);
 		}
 
 
@@ -132,11 +130,8 @@ namespace FileBuilder{
 
 					size_t bytes = pair.bytes();
 
-					if (aligned){
-						constexpr MyAlign<PairConf::ALIGN> alc;
-
-						bytes += alc.fwriteGap(file_data, pair.bytes());
-					}
+					if (aligned)
+						bytes += my_align::fwriteGap(file_data, pair.bytes(), PairConf::ALIGN);
 
 					index += bytes;
 				}
