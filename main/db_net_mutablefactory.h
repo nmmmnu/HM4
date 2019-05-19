@@ -12,7 +12,7 @@
 
 struct MyMutableDBAdapterFactory{
 	using ListLoader	= hm4::listloader::DirectoryListLoader;
-	using ImmutableList	= hm4::multi::CollectionList<ListLoader::container_type>;
+	using ImmutableList	= hm4::multi::ContainerCollectionList<ListLoader::container_type>;
 
 	using MemList		= hm4::SkipList;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
@@ -28,7 +28,7 @@ struct MyMutableDBAdapterFactory{
 
 	MyMutableDBAdapterFactory(const StringRef &path, size_t const memListSize) :
 					loader_(path),
-					imList_(*loader_),
+					imList_(loader_.container()),
 					muflList_(
 						memList_,
 						Flusher{ IDGenerator{}, path },

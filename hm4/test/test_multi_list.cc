@@ -200,8 +200,6 @@ void test_DualListEmpty(const char *name){
 
 template <class List>
 void test_CollectionList(const char *name){
-	mytest.begin(name);
-
 	using Vector = std::vector<List>;
 	Vector v;
 
@@ -248,13 +246,39 @@ void test_CollectionList(const char *name){
 		v.push_back(List{});
 	}
 
-	using MyMultiTable = hm4::multi::CollectionList<typename Vector::const_iterator>;
+	{
+		mytest.begin(name);
 
-	MyMultiTable table{ std::begin(v), std::end(v) };
+		using MyMultiTable = hm4::multi::CollectionList<typename Vector::const_iterator>;
 
-	return list_test(table, 4, bytes);
+		MyMultiTable table{ std::begin(v), std::end(v) };
+
+		list_test(table, 4, bytes);
+	}
+
+	{
+		mytest.begin(name);
+
+		using MyMultiTable = hm4::multi::ContainerCollectionList<Vector>;
+
+		MyMultiTable table{ v };
+
+		list_test(table, 4, bytes);
+	}
 }
 
+template <class List>
+void test_CollectionListNIL(const char *name){
+	mytest.begin(name);
+
+	using MyMultiTable = hm4::multi::CollectionList<List *>;
+
+	MyMultiTable table{ nullptr, nullptr };
+
+	mytest("get non existent",	getCheck(table, "nonexistent"	));
+}
+
+// ==============================
 
 #include "vectorlist.h"
 
@@ -263,7 +287,8 @@ int main(){
 
 	test_DualListEmpty	<List>("DualList (Empty)"	);
 	test_DualList		<List>("DualList"		);
-	test_CollectionList	<List>("CollectionList"	);
+	test_CollectionList	<List>("CollectionList"		);
+	test_CollectionListNIL	<List>("CollectionList (NIL)"	);
 
 	return mytest.end();
 }

@@ -5,6 +5,8 @@
 
 #include <sstream>
 
+#include <iostream>
+
 template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
 public:
@@ -28,9 +30,9 @@ public:
 	std::string get(const StringRef &key) const{
 		assert(!key.empty());
 
-		const auto p = list_[key];
+		const auto p = list_.find(key, std::true_type{} );
 
-		if (p && p->isValid(/* tomb */ true))
+		if (p != std::end(list_) && p->isValid(/* tomb */ true))
 			return p->getVal();
 		else
 			return {};
@@ -44,11 +46,10 @@ public:
 		// reserve x2 because of hgetall
 		result.reserve(maxResults * 2);
 
-		const auto bit = key.empty() ? list_.begin() : list_.lowerBound(key);
-		const auto eit = list_.end();
+		const auto bit = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 
 		size_t c = 0;
-		for(auto it = bit; it != eit; ++it){
+		for(auto it = bit; it != std::end(list_); ++it){
 			const auto &resultKey = it->getKey();
 
 			if (prefixCheck && ! samePrefix__(key, resultKey))
@@ -71,7 +72,7 @@ public:
 	std::string info() const{
 		std::stringstream ss;
 
-		ss	<< "Keys (estimated): "	<< list_.size(true)		<< '\n'
+		ss	<< "Keys (estimated): "	<< list_.size()			<< '\n'
 			<< "Size: "		<< list_.bytes()		<< '\n'
 			<< "Mutable: "		<< (MUTABLE ? "Yes" : "No")	<< '\n'
 		;

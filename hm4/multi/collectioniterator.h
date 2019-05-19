@@ -70,6 +70,11 @@ public:
 		// skip the work and creates iterator with single element
 		// printf("Here...\n");
 
+		if (first == last){
+			// not found. done.
+			return;
+		}
+
 		ITP smallest{ first->end(), first->end() };
 
 		for(; first != last; ++first){

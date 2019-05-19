@@ -10,9 +10,6 @@ namespace listloader{
 
 class DirectoryListLoader : public baselistloader_impl_::BaseListLoader{
 public:
-	using container_type	= std::vector<DiskList>;
-
-public:
 	DirectoryListLoader(std::string path, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
 				BaseListLoader(advice, mode),
 				path_(std::move(path)){

@@ -10,8 +10,10 @@ namespace listloader{
 namespace baselistloader_impl_{
 
 class BaseListLoader{
+protected:
+	using DiskList	= disk::DiskList;
+
 public:
-	using DiskList		= disk::DiskList;
 	using container_type	= std::vector<DiskList>;
 	using iterator		= container_type::const_iterator;
 
@@ -32,6 +34,10 @@ public:
 
 	auto end() const{
 		return std::end(container_);
+	}
+
+	const auto &container(){
+		return container_;
 	}
 
 protected:

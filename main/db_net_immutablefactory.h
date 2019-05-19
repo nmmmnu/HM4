@@ -4,7 +4,7 @@
 
 struct MyImmutableDBAdapterFactory{
 	using ListLoader	= hm4::listloader::DirectoryListLoader;
-	using ImmutableList	= hm4::multi::CollectionList<ListLoader::container_type>;
+	using ImmutableList	= hm4::multi::ContainerCollectionList<ListLoader::container_type>;
 
 	using CommandObject	= ListLoader;
 	using DBAdapter		= ListDBAdapter<const ImmutableList, CommandObject>;
@@ -13,7 +13,7 @@ struct MyImmutableDBAdapterFactory{
 
 	MyImmutableDBAdapterFactory(const StringRef &path, size_t) :
 					loader_(path),
-					imList_(*loader_),
+					imList_(loader_.container()),
 					adapter_(imList_, /* cmd */ loader_){}
 
 	MyDBAdapter &operator()(){
