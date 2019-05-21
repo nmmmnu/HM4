@@ -249,7 +249,7 @@ void test_CollectionList(const char *name){
 	{
 		mytest.begin(name);
 
-		using MyMultiTable = hm4::multi::CollectionList<typename Vector::const_iterator>;
+		using MyMultiTable = hm4::multi::CollectionListFromIterator<typename Vector::const_iterator>;
 
 		MyMultiTable table{ std::begin(v), std::end(v) };
 
@@ -259,7 +259,7 @@ void test_CollectionList(const char *name){
 	{
 		mytest.begin(name);
 
-		using MyMultiTable = hm4::multi::ContainerCollectionList<Vector>;
+		using MyMultiTable = hm4::multi::CollectionListFromContainer<Vector>;
 
 		MyMultiTable table{ v };
 
@@ -271,7 +271,7 @@ template <class List>
 void test_CollectionListNIL(const char *name){
 	mytest.begin(name);
 
-	using MyMultiTable = hm4::multi::CollectionList<List *>;
+	using MyMultiTable = hm4::multi::CollectionListFromIterator<List *>;
 
 	MyMultiTable table{ nullptr, nullptr };
 

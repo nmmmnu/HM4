@@ -86,13 +86,13 @@ public:
 
 
 template <class StoreIterator>
-class CollectionList : public icollectionlist_impl_::iCollectionList<StoreIterator, CollectionList<StoreIterator> >{
+class CollectionListFromIterator : public icollectionlist_impl_::iCollectionList<StoreIterator, CollectionListFromIterator<StoreIterator> >{
 private:
 	StoreIterator		firstIt_;
 	StoreIterator		lastIt_;
 
 public:
-	CollectionList(StoreIterator first, StoreIterator last) :
+	CollectionListFromIterator(StoreIterator first, StoreIterator last) :
 					firstIt_	(std::move(first	)),
 					lastIt_		(std::move(last		)){}
 
@@ -109,12 +109,12 @@ public:
 
 
 template <class StoreContainer>
-class ContainerCollectionList : public icollectionlist_impl_::iCollectionList<typename StoreContainer::const_iterator, ContainerCollectionList<StoreContainer> >{
+class CollectionListFromContainer : public icollectionlist_impl_::iCollectionList<typename StoreContainer::const_iterator, CollectionListFromContainer<StoreContainer> >{
 private:
 	const StoreContainer	*list_;
 
 public:
-	ContainerCollectionList(const StoreContainer &list) :
+	CollectionListFromContainer(const StoreContainer &list) :
 					list_	(&list){}
 
 public:

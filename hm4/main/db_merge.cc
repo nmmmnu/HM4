@@ -91,7 +91,7 @@ struct MergeListFactory_N{
 
 private:
 	using ArgListLoader	= hm4::listloader::ArgListLoader;
-	using MyCollectionList	= hm4::multi::CollectionList<ArgListLoader::iterator>;
+	using MyCollectionList	= hm4::multi::CollectionListFromIterator<ArgListLoader::iterator>;
 
 	ArgListLoader		loader_;
 	MyCollectionList	table_;

@@ -12,7 +12,7 @@
 
 struct MyMutableDBAdapterFactory{
 	using ListLoader	= hm4::listloader::DirectoryListLoader;
-	using ImmutableList	= hm4::multi::ContainerCollectionList<ListLoader::container_type>;
+	using ImmutableList	= hm4::multi::CollectionListFromContainer<ListLoader::container_type>;
 
 	using MemList		= hm4::SkipList;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
