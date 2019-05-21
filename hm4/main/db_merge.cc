@@ -7,8 +7,8 @@
 static int printUsage(const char *cmd){
 	std::cout
 		<< "Usage:"	<< '\n'
-		<< '\t'		<< cmd	<< " - [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones"	<< '\n'
-		<< '\t'		<< cmd	<< " t [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones"	<< '\n'
+		<< '\t'		<< cmd	<< " - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones"	<< '\n'
+		<< '\t'		<< cmd	<< " t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones"	<< '\n'
 
 		<< "\t\tPath names must be written like this:"			<< '\n'
 		<< "\t\tExample 'directory/file.db'"				<< '\n'
@@ -78,8 +78,8 @@ private:
 
 struct MergeListFactory_N{
 	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
-					loader_( table_count, path, advice, mode),
-					table_( std::begin(loader_), std::end(loader_) ) {}
+					loader_( container_, table_count, path, advice, mode),
+					table_( std::begin(container_), std::end(container_) ) {}
 
 	auto begin() const{
 		return std::begin(table_);
@@ -90,9 +90,11 @@ struct MergeListFactory_N{
 	}
 
 private:
-	using ArgListLoader	= hm4::listloader::ArgListLoader;
-	using MyCollectionList	= hm4::multi::CollectionListFromIterator<ArgListLoader::iterator>;
+	using Container		= std::vector<DiskList>;
+	using ArgListLoader	= hm4::listloader::ArgListLoader<Container>;
+	using MyCollectionList	= hm4::multi::CollectionListFromIterator<Container::const_iterator>;
 
+	Container		container_;
 	ArgListLoader		loader_;
 	MyCollectionList	table_;
 };

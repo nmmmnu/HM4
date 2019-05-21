@@ -10,9 +10,12 @@
 
 #include "listdbadapter.h"
 
+#include <vector>
+
 struct MyMutableDBAdapterFactory{
-	using ListLoader	= hm4::listloader::DirectoryListLoader;
-	using ImmutableList	= hm4::multi::CollectionListFromContainer<ListLoader::container_type>;
+	using Container		= std::vector<hm4::disk::DiskList>;
+	using ListLoader	= hm4::listloader::DirectoryListLoader<Container>;
+	using ImmutableList	= hm4::multi::CollectionListFromContainer<Container>;
 
 	using MemList		= hm4::SkipList;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
@@ -27,8 +30,8 @@ struct MyMutableDBAdapterFactory{
 	using MyDBAdapter	= DBAdapter;
 
 	MyMutableDBAdapterFactory(const StringRef &path, size_t const memListSize) :
-					loader_(path),
-					imList_(loader_.container()),
+					loader_(container_, path),
+					imList_(container_),
 					muflList_(
 						memList_,
 						Flusher{ IDGenerator{}, path },
@@ -43,6 +46,7 @@ struct MyMutableDBAdapterFactory{
 	}
 
 private:
+	Container		container_;
 	ListLoader		loader_;
 	ImmutableList		imList_;
 	MemList			memList_;

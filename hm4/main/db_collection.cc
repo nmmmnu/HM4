@@ -3,6 +3,7 @@
 #include "multi/collectionlist.h"
 #include "listloader/directorylistloader.h"
 
+#include <vector>
 #include <iostream>
 
 static int printUsage(const char *cmd){
@@ -32,11 +33,14 @@ int main(int argc, char **argv){
 
 	// =======================
 
-	using MyListLoader	= hm4::listloader::DirectoryListLoader;
-	using MyCollectionList	= hm4::multi::CollectionListFromIterator<MyListLoader::iterator>;
+	using hm4::disk::DiskList;
+	using Container		= std::vector<DiskList>;
+	using MyListLoader	= hm4::listloader::DirectoryListLoader<Container>;
+	using MyCollectionList	= hm4::multi::CollectionListFromIterator<Container::const_iterator>;
 
-	MyListLoader		dl{ path };
-	MyCollectionList	list( std::begin(dl), std::end(dl) );
+	Container		container;
+	MyListLoader		dl{ container, path };
+	MyCollectionList	list( std::begin(container), std::end(container) );
 
 	// =======================
 
