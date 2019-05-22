@@ -6,20 +6,24 @@
 #include <vector>
 #include <iostream>
 
-static int printUsage(const char *cmd){
-	std::cout
-		<< "Usage:"	<< '\n'
-		<< "\t"		<< cmd	<< " r [lsm_path] [key] - load lsm_path, then search for the key"	<< '\n'
-		<< "\t"		<< cmd	<< " l [lsm_path] -     - load lsm_path, then list using iterator"	<< '\n'
-		<< "\t"		<< cmd	<< " l [lsm_path] [key] - load lsm_path, then list using iterator"	<< '\n'
+namespace{
 
-		<< "\t\tPath names must be written like this:"	<< '\n'
-		<< "\t\tExample 'directory/file.*.db'"		<< '\n'
+	int printUsage(const char *cmd){
+		std::cout
+			<< "Usage:"	<< '\n'
+			<< "\t"		<< cmd	<< " r [lsm_path] [key] - load lsm_path, then search for the key"	<< '\n'
+			<< "\t"		<< cmd	<< " l [lsm_path] -     - load lsm_path, then list using iterator"	<< '\n'
+			<< "\t"		<< cmd	<< " l [lsm_path] [key] - load lsm_path, then list using iterator"	<< '\n'
 
-		<< '\n';
+			<< "\t\tPath names must be written like this:"	<< '\n'
+			<< "\t\tExample 'directory/file.*.db'"		<< '\n'
 
-	return 10;
-}
+			<< '\n';
+
+		return 10;
+	}
+
+} // namespace
 
 int main(int argc, char **argv){
 	if (argc <= 3)
@@ -39,7 +43,7 @@ int main(int argc, char **argv){
 	using MyCollectionList	= hm4::multi::CollectionListFromIterator<Container::const_iterator>;
 
 	Container		container;
-	MyListLoader		dl{ container, path };
+	MyListLoader		loader{ container, path };
 	MyCollectionList	list( std::begin(container), std::end(container) );
 
 	// =======================

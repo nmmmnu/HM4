@@ -1,9 +1,7 @@
-#include "stringref.h"
-
 #include "pair.h"
 
 template <class List>
-static int op_search(List const &list, StringRef const &key){
+int op_search(List const &list, StringRef const &key){
 	if (key.empty())
 		return 1;
 
@@ -15,10 +13,8 @@ static int op_search(List const &list, StringRef const &key){
 	return 0;
 }
 
-// =====================================
-
 template <class List>
-static int op_iterate(List const &list, StringRef const &key, size_t const count = 10){
+int op_iterate(List const &list, StringRef const &key, size_t const count = 10){
 	size_t c = 0;
 
 	auto it = key == '-' ? std::begin(list) : list.find(key, std::false_type{});

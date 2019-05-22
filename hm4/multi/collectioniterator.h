@@ -159,7 +159,7 @@ private:
 	static bool heap_comp(ITP const &a, ITP const &b){
 		// returns ​true if the first argument is less than the second
 		// however we negate this because we want min heap.
-		return multiiterator_impl_::comp(a, b) == 1;
+		return multiiterator_impl_::comp(a, b) > 0;
 	}
 
 	// heap functions

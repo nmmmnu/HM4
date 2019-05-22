@@ -15,18 +15,18 @@ public:
 	using DiskList = hm4::disk::DiskList;
 
 	ArgListLoader(Container &container, int const argc, const char **argv, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
-				inserter_(container, advice, mode),
+				container_(container, advice, mode),
 				argc_(argc),
 				argv_(argv){
 		refresh();
 	}
 
 	bool refresh(){
-		inserter_.clear();
-		inserter_.reserve(narrow<size_t>(argc_));
+		container_.clear();
+		container_.reserve(narrow<size_t>(argc_));
 
 		for(int i = argc_; i --> 0;)
-			inserter_(argv_[i]);
+			container_.push_back(argv_[i]);
 
 		return true;
 	}
@@ -37,10 +37,12 @@ public:
 	}
 
 private:
-	impl_::Inserter<Container>	inserter_;
+	using ContainerHelper = impl_::ContainerHelper<Container>;
 
-	int				argc_	= 0;
-	const char			**argv_;
+	ContainerHelper	container_;
+
+	int		argc_	= 0;
+	const char	**argv_;
 };
 
 

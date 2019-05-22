@@ -15,7 +15,7 @@ public:
 	using DiskList = hm4::disk::DiskList;
 
 	DirectoryListLoader(Container &container, std::string path, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
-				inserter_(container, advice, mode),
+				container_(container, advice, mode),
 				path_(std::move(path)){
 		refresh_();
 	}
@@ -33,7 +33,7 @@ public:
 
 private:
 	void refresh_(){
-		inserter_.clear();
+		container_.clear();
 
 		if (path_.empty())
 			return;
@@ -42,17 +42,26 @@ private:
 		if (files.open(path_) == false)
 			return;
 
-		inserter_.reserve(files.size());
+		container_.reserve(files.size());
 
-		for (auto it = files.rbegin(); it != files.rend(); ++it)
-			inserter_(*it);
+		for (auto it = std::make_reverse_iterator(files.end()); it != std::make_reverse_iterator(files.begin()); ++it)
+			if (files.isFile(*it)){
+				container_.push_back(*it);
 
+				if (DEBUG)
+					printf("Consider %s\n", *it);
+			}
 	}
 
 private:
-	impl_::Inserter<Container>	inserter_;
+	constexpr static bool DEBUG = false;
 
-	std::string			path_;
+private:
+	using ContainerHelper = impl_::ContainerHelper<Container>;
+
+	ContainerHelper	container_;
+
+	std::string	path_;
 };
 
 

@@ -11,12 +11,12 @@ namespace listloader{
 	namespace impl_{
 
 		template<class Container>
-		struct Inserter{
+		struct ContainerHelper{
 			using DiskList = hm4::disk::DiskList;
 
 			static_assert( std::is_same<typename Container::value_type, DiskList>::value, "Container values are not DiskList");
 
-			Inserter(Container &container, MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
+			ContainerHelper(Container &container, MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
 							container(container),
 							advice(advice),
 							mode(mode){}
@@ -29,7 +29,7 @@ namespace listloader{
 				container.reserve(size);
 			}
 
-			void operator()(const StringRef &filename){
+			void push_back(const StringRef &filename){
 				container.emplace_back();
 				container.back().open(filename, advice, mode);
 			}
