@@ -12,8 +12,11 @@
 namespace hm4{
 
 namespace config{
-	using size_type		= uint64_t;
-	using difference_type	= int64_t;
+	using size_type		= size_t;
+	using difference_type	= ptrdiff_t;
+
+	static_assert(sizeof(size_type      ) == 8, "You need 64bit system!");
+	static_assert(sizeof(difference_type) == 8, "You need 64bit system!");
 
 	constexpr size_type	LIST_PRINT_COUNT	= 10;
 }
