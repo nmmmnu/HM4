@@ -16,8 +16,8 @@ AsyncLoop<SELECTOR, WORKER>::AsyncLoop(SELECTOR &&selector, WORKER &&worker, con
 					worker_(std::move(worker)),
 					serverFD_(serverFD),
 
-					conf_connectionTimeout_(	my_max__(conf_connectionTimeout,	CONNECTION_TIMEOUT	)),
-					conf_maxPacketSize_(		my_max__(conf_maxPacketSize,		BUFFER_CAPACITY		)){
+					conf_connectionTimeout_(	max__(conf_connectionTimeout,	CONNECTION_TIMEOUT	)),
+					conf_maxPacketSize_(		max__(conf_maxPacketSize,	BUFFER_CAPACITY		)){
 	for(int const fd : serverFD_){
 		socket_makeNonBlocking(fd);
 		selector_.insertFD(fd);

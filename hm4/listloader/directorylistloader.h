@@ -4,6 +4,8 @@
 #include "myglob.h"
 #include "baselistloader.h"
 
+#include <algorithm>
+
 
 namespace hm4{
 namespace listloader{
@@ -44,13 +46,14 @@ private:
 
 		container_.reserve(files.size());
 
-		for (auto it = std::make_reverse_iterator(files.end()); it != std::make_reverse_iterator(files.begin()); ++it)
-			if (files.isFile(*it)){
-				container_.push_back(*it);
-
-				if (DEBUG)
-					printf("Consider %s\n", *it);
+		std::for_each(
+			std::make_reverse_iterator(std::end  (files)),
+			std::make_reverse_iterator(std::begin(files)),
+			[&](const char *file){
+				if (files.isFile(file))
+					container_.push_back(file);
 			}
+		);
 	}
 
 private:

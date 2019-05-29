@@ -5,13 +5,12 @@
 
 #include <glob.h>	// glob
 
-#include <vector>
-
 class MyGlob final{
 public:
-	using container_type = std::vector<StringRef>;
+	MyGlob(const StringRef &path){
+		open(path);
+	}
 
-public:
 	MyGlob() = default;
 
 	MyGlob(const MyGlob &other) = delete;
@@ -21,15 +20,19 @@ public:
 	MyGlob& operator=(MyGlob &&other) = default;
 
 	~MyGlob() noexcept{
-		if (isOpen_)
-			close();
+		close();
 	}
 
 public:
 	bool open(const StringRef &path) noexcept;
 	void close() noexcept;
 
+	bool isOpen() const noexcept{
+		return isOpen_;
+	}
+
 	static bool isFile(const char *filename) noexcept;
+
 public:
 	size_t size() const noexcept{
 		return globresults_.gl_pathc;
@@ -46,7 +49,6 @@ public:
 private:
 	bool		isOpen_		= false;
 	glob_t		globresults_;
-	container_type	data_;
 };
 
 #endif

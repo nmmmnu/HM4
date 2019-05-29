@@ -33,9 +33,8 @@ bool MyGlob::open(const StringRef &path) noexcept{
 }
 
 void MyGlob::close() noexcept{
-	assert(isOpen_);
-
-	data_.clear();
+	if (isOpen_ == false)
+		return;
 
 	globfree(& globresults_);
 

@@ -3,6 +3,7 @@
 #include <sys/types.h>	// types for kqueue
 #include <sys/event.h>	// kqueue
 #include <unistd.h>	// close, for closeKQueue_()
+#include <errno.h>	// errno
 #include <time.h>	// struct timespec
 
 namespace net{
@@ -76,8 +77,13 @@ WaitStatus KQueueSelector::wait(int const timeout){
 
 	statusCount_ = kevent(kqueueFD_, NULL, 0, statusData_.data(), (int) statusData_.size(), tsp);
 
-	if (statusCount_ < 0)
-		return WaitStatus::ERROR;
+	if (statusCount_ < 0){
+		switch(errno){
+		case EINTR	: return WaitStatus::OK;
+
+		default		: return WaitStatus::ERROR;
+		}
+	}
 
 	if (statusCount_ == 0)
 		return WaitStatus::NONE;

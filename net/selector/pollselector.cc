@@ -2,6 +2,7 @@
 
 #include <poll.h>	// poll
 #include <unistd.h>	// close, for closeStatusData_()
+#include <errno.h>	// errno
 
 namespace net{
 namespace selector{
@@ -44,8 +45,14 @@ WaitStatus PollSelector::wait(int const timeout){
 	// size cast is for FreeBSD and OSX warning
 	int const activity = poll(statusData_.data(), (nfds_t) statusData_.size(), timeout);
 
-	if (activity < 0)
-		return WaitStatus::ERROR;
+	if (activity < 0){
+		switch(errno){
+		case EAGAIN	:
+		case EINTR	: return WaitStatus::OK;
+
+		default		: return WaitStatus::ERROR;
+		}
+	}
 
 	if (activity == 0)
 		return WaitStatus::NONE;

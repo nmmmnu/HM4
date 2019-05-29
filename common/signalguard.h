@@ -1,33 +1,35 @@
 #ifndef MY_SIGNAL_H_
 #define MY_SIGNAL_H_
 
+#include <utility>
+
+enum class Signal : int{
+	NONE = 0	,
+
+	INT		,
+	TERM		,
+	HUP		,
+	USR1		,
+	USR2
+};
+
 class SignalGuard{
 public:
-	SignalGuard(){
-		ok__ = true;
-		setHandler__();
+	SignalGuard();
+
+	~SignalGuard();
+
+	Signal operator()() const{
+		return std::exchange(signal__, Signal::NONE);
 	}
 
-	~SignalGuard(){
-		restoreHandler__();
-		ok__ = false;
-	}
-
-	operator bool(){
-		return ok__;
-	}
-
-private:
-	static void setHandler__();
-	static void restoreHandler__();
-
-private:
-	static void handler__(int const /* sig */){
-		ok__ = false;
+public:
+	static void update(Signal const signal){
+		signal__ = signal;
 	}
 
 private:
-	static bool ok__;
+	static Signal signal__;
 };
 
 #endif

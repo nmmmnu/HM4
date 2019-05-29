@@ -2,6 +2,7 @@
 
 #include <sys/epoll.h>	// epoll
 #include <unistd.h>	// close, for closeEPoll_()
+#include <errno.h>	// errno
 
 namespace net{
 namespace selector{
@@ -65,8 +66,13 @@ WaitStatus EPollSelector::wait(int const timeout){
 
 	statusCount_ = epoll_wait(epollFD_, statusData_.data(), (int) statusData_.size(), timeout);
 
-	if (statusCount_ < 0)
-		return WaitStatus::ERROR;
+	if (statusCount_ < 0){
+		switch(errno){
+		case EINTR	: return WaitStatus::OK;
+
+		default		: return WaitStatus::ERROR;
+		}
+	}
 
 	if (statusCount_ == 0)
 		return WaitStatus::NONE;

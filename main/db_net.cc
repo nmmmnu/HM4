@@ -93,7 +93,16 @@ static int main2(const MyOptions &opt, FACTORY &&adapter_factory){
 
 	SignalGuard guard;
 
-	while(loop.process() && guard);
+	auto chk = [](Signal const x){
+		bool result =
+			x == Signal::INT	||
+			x == Signal::TERM
+		;
+
+		return ! result;
+	};
+
+	while( loop.process() && chk(guard()) );
 
 	return 0;
 }
