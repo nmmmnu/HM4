@@ -72,10 +72,10 @@ namespace multiiterator_impl_{
 
 
 	template <class Iterator1, class Iterator2>
-	int compNonEmpty(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b){
+	int compNonEmpty(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b, bool const fullTimeCompare){
 		int const cmp = a->cmp(b->getKey());
 
-		if (cmp != 0)
+		if (fullTimeCompare == false || cmp != 0)
 			return cmp;
 
 		// return bigger time or first
@@ -83,7 +83,7 @@ namespace multiiterator_impl_{
 	}
 
 	template <class Iterator1, class Iterator2>
-	int comp(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b){
+	int comp(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b, bool const fullTimeCompare = true){
 		if (a == false && b == false)
 			return 0;
 
@@ -93,7 +93,7 @@ namespace multiiterator_impl_{
 		if (b == false)
 			return -1;
 
-		return compNonEmpty(a, b);
+		return compNonEmpty(a, b, fullTimeCompare);
 	}
 } // namespace multiiterator_impl_
 

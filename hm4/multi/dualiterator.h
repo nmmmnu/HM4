@@ -3,6 +3,8 @@
 
 #include "iteratorpair.h"
 
+#include <iostream>
+
 namespace hm4{
 namespace multi{
 
@@ -30,7 +32,7 @@ public:
 	DualIterator(FirstIteratorPair first, SecondIteratorPair second) :
 					first_(std::move(first)),
 					second_(std::move(second)),
-					pair_(dereference_()){}
+					pair_(getDereference_()){}
 
 	template<class List1, class List2, class... Args>
 	DualIterator(List1 const &first, List2 const &second, Args&& ...args) :
@@ -40,11 +42,22 @@ public:
 					){}
 
 	DualIterator &operator++(){
-		return increment_();
+		constexpr bool fullTimeCompare = false;
+
+		int const cmp = multiiterator_impl_::comp(first_, second_, fullTimeCompare);
+
+		if (cmp <= 0 && first_)
+			++first_;
+
+		if (cmp >= 0 && second_)
+			++second_;
+
+		updateDereference_();
+
+		return *this;
 	}
 
 	reference operator *() const{
-		// normal iterator rules apply.
 		return *pair_;
 	}
 
@@ -62,65 +75,22 @@ public:
 	}
 
 private:
-	const Pair *dereference_() const{
-		return multiiterator_impl_::comp(first_, second_) <= 0 ?
+	const Pair *getDereference_() const{
+		return multiiterator_impl_::comp(first_, second_) < 0 ?
 			first_.ptr() :
 			second_.ptr()
 		;
 	}
 
-	template<class T>
-	DualIterator &incrementIterator_(T &it, const Pair *pair){
-		++it;
-		pair_ = pair;
-		return *this;
-	};
-
-	template<class T>
-	DualIterator &incrementIterator_(T &it){
-		++it;
-		pair_ = it.ptr();
-		return *this;
-	};
-
-	DualIterator & increment_(){
-		bool const f = first_;
-		bool const s = second_;
-
-		if (f == false && s == false)
-			return *this;
-
-		if (f && s == false)
-			return incrementIterator_(first_);
-
-		if (s && f == false)
-			return incrementIterator_(second_);
-
-		auto const cmp = first_->cmp(second_->getKey());
-
-		if (cmp < 0)
-			return incrementIterator_(first_, second_.ptr());
-
-		if (cmp > 0)
-			return incrementIterator_(second_, first_.ptr());
-
-		// both pairs are equal, increase both
-
-		++first_;
-		++second_;
-
-		// both iterators are new, could be false so...
-
-		pair_ = dereference_();
-
-		return *this;
+	void updateDereference_(){
+		pair_ = getDereference_();
 	}
 
 private:
 	FirstIteratorPair	first_;
 	SecondIteratorPair	second_;
 
-	const Pair		*pair_;
+	const Pair              *pair_;
 
 private:
 	static_assert(
