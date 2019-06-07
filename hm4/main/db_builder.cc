@@ -10,9 +10,10 @@
 #include "filereader.h"
 #include "stringtokenizer.h"
 
-constexpr size_t	MEMLIST_SIZE	= 10 * 1024 * 1024;
+constexpr size_t	MEMLIST_SIZE	= 1ULL * 2 * 1024 * 1024 * 1024;
 constexpr size_t	PROCESS_STEP	= 1000 * 10;
 
+constexpr char		DELIMITER	= '\t';
 
 static int printUsage(const char *cmd);
 
@@ -68,10 +69,12 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 	while(reader){
 		const std::string &line = reader.getLine();
 
-		StringTokenizer tok{ line };
+		StringTokenizer tok{ line, DELIMITER };
 
 		const StringRef &key = tok.getNext();
 		const StringRef &val = tok.getNext();
+
+		//std::cout << key << ':' << val << '\n';
 
 		if (! key.empty())
 			list.insert( { key, val } );

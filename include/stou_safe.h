@@ -21,5 +21,17 @@ T stou_safe(const StringRef &str, T const def = 0){
 	return u;
 }
 
+template <typename T>
+std::string utos_safe(T const n){
+	static_assert(std::is_integral<T>::value, "T must be integral type");
+
+	static_assert(! std::is_same<T,   signed char>::value, "T must not be char type");
+	static_assert(! std::is_same<T, unsigned char>::value, "T must not be char type");
+
+	std::stringstream ss;
+	ss << n;
+	return ss.str();
+}
+
 #endif
 

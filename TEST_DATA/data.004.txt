@@ -1,4 +1,4 @@
-Aachen
-Bonn
-Sofia
-Zagora
+Aachen	4
+Bonn	4
+Sofia	4
+Zagora	4

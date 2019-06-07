@@ -11,7 +11,7 @@ namespace hm4{
 template <class List, class Flusher, class ListLoader = std::nullptr_t>
 class FlushList : public DecoratorList<List>{
 public:
-	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
+	constexpr static size_t MAX_SIZE = 128 * 1024 * 1024;
 
 private:
 	template <class UFlusher>
@@ -78,7 +78,7 @@ private:
 	}
 
 	bool flush_(){
-		log__("Flushing data...");
+		log__("Flushing data...", "List size: ", list_.bytes(), "Max permited size: ", maxSize_);
 		return flusher_ << list_;
 	}
 

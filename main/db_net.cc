@@ -93,16 +93,22 @@ static int main2(const MyOptions &opt, FACTORY &&adapter_factory){
 
 	SignalGuard guard;
 
-	auto chk = [](Signal const x){
-		bool result =
-			x == Signal::INT	||
-			x == Signal::TERM
-		;
+	auto signal_processing = [&adapter_factory](Signal const signal){
+		switch(signal){
+		case Signal::HUP:
+			adapter_factory().refresh(true);
+			return true;
 
-		return ! result;
+		case Signal::INT:
+		case Signal::TERM:
+			return false;
+
+		default:
+			return true;
+		}
 	};
 
-	while( loop.process() && chk(guard()) );
+	while( loop.process() && signal_processing(guard()) );
 
 	return 0;
 }

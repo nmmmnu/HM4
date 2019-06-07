@@ -2,6 +2,7 @@
 #define LIST_DBADAPTER_H_
 
 #include "stou_safe.h"
+#include "stou.h"
 
 #include <sstream>
 
@@ -46,10 +47,10 @@ public:
 		// reserve x2 because of hgetall
 		result.reserve(maxResults * 2);
 
-		const auto bit = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
+		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 
 		size_t c = 0;
-		for(auto it = bit; it != std::end(list_); ++it){
+		for(; it != std::end(list_); ++it){
 			const auto &resultKey = it->getKey();
 
 			if (prefixCheck && ! samePrefix__(key, resultKey))
@@ -109,6 +110,23 @@ public:
 		assert(!key.empty());
 
 		return list_.erase(key);
+	}
+
+	std::string incr(const StringRef &key, int64_t const val){
+		assert(!key.empty());
+
+		const auto p = list_.find(key, std::true_type{} );
+
+		int64_t n = val;
+
+		if (p != std::end(list_) && p->isValid(/* tomb */ true))
+			n += stou_safe<int64_t>(p->getVal());
+
+		std::string s = utos_safe<int64_t>(n);
+
+		set(key, s);
+
+		return s;
 	}
 
 private:

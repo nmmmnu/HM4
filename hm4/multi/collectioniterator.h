@@ -41,9 +41,7 @@ public:
 		reserve__(first, last, itp_);
 
 		for (; first != last; ++first){
-			auto const &list = *first;
-
-			ITP itp{ list, std::forward<Args>(args)... };
+			ITP itp{ *first, std::forward<Args>(args)... };
 
 			if (itp)
 				itp_.push_back(std::move(itp));
@@ -75,12 +73,12 @@ public:
 			return;
 		}
 
-		ITP smallest{ first->end(), first->end() };
+		ITP smallest{ *first, key, exact };
+
+		++first;
 
 		for(; first != last; ++first){
-			auto const &list = *first;
-
-			ITP itp{ list, key, exact };
+			ITP itp{ *first, key, exact };
 
 			if (heap_comp(smallest, itp))
 				smallest = std::move(itp);
