@@ -143,6 +143,8 @@ namespace{
 
 
 bool DiskList::openMinimal_(StringRef const &filename, MMAPFile::Advice advice){
+	log__("Open disktable", filename);
+
 	metadata_.open(filenameMeta(filename));
 
 	if (metadata_ == false)
@@ -164,6 +166,8 @@ bool DiskList::openMinimal_(StringRef const &filename, MMAPFile::Advice advice){
 bool DiskList::openNormal_(StringRef const &filename, MMAPFile::Advice const advice){
 	if (openMinimal_(filename, advice) == false)
 		return false;
+
+	log__("Open additional files");
 
 	// ==============================
 
