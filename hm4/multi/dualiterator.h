@@ -52,6 +52,7 @@ public:
 		if (cmp >= 0 && second_)
 			++second_;
 
+		// don't over optimize this...
 		updateDereference_();
 
 		return *this;

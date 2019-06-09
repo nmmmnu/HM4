@@ -5,8 +5,7 @@
 
 namespace hm4{
 namespace listloader{
-	constexpr auto	DEFAULT_ADVICE	= hm4::disk::DiskList::DEFAULT_ADVICE;
-	constexpr auto	DEFAULT_MODE	= hm4::disk::DiskList::OpenMode::MINIMAL;
+	using DiskList = hm4::disk::DiskList;
 
 	namespace impl_{
 

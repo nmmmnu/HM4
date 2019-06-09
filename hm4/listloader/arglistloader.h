@@ -12,9 +12,7 @@ namespace listloader{
 template<class Container>
 class ArgListLoader{
 public:
-	using DiskList = hm4::disk::DiskList;
-
-	ArgListLoader(Container &container, int const argc, const char **argv, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
+	ArgListLoader(Container &container, int const argc, const char **argv, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
 				container_(container, advice, mode),
 				argc_(argc),
 				argv_(argv){

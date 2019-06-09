@@ -16,7 +16,7 @@ class DirectoryListLoader{
 public:
 	using DiskList = hm4::disk::DiskList;
 
-	DirectoryListLoader(Container &container, std::string path, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
+	DirectoryListLoader(Container &container, std::string path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
 				container_(container, advice, mode),
 				path_(std::move(path)){
 		refresh_();
