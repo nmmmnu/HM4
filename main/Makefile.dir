@@ -18,6 +18,8 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)skiplist.o				\
 			$(O)idgeneratordate.o			\
 								\
+			$(O)directorylistloader.o		\
+								\
 			$(O)signalguard.o			\
 			$(O)pollselector.o $(O)redisprotocol.o $(O)sockets.o
 	$(LINK)
