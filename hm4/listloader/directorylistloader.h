@@ -42,6 +42,10 @@ private:
 		if (path_.empty())
 			return;
 
+		// guard against missing '*'
+		if (path_.find('*') == std::string::npos)
+			return;
+
 		container_.clear();
 
 		MyGlob files;
