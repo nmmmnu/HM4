@@ -5,28 +5,23 @@
 #include <vector>
 
 struct MyImmutableDBAdapterFactory{
-	using Container		= std::vector<hm4::disk::DiskList>;
-	using ListLoader	= hm4::listloader::DirectoryListLoader<Container>;
-	using ImmutableList	= hm4::multi::CollectionListFromContainer<Container>;
+	using ListLoader	= hm4::listloader::DirectoryListLoader;
 
 	using CommandObject	= ListLoader;
-	using DBAdapter		= ListDBAdapter<const ImmutableList, CommandObject>;
+	using DBAdapter		= ListDBAdapter<ListLoader::List, CommandObject>;
 
 	using MyDBAdapter	= DBAdapter;
 
 	MyImmutableDBAdapterFactory(const StringRef &path, size_t) :
-					loader_(container_, path),
-					imList_(container_),
-					adapter_(imList_, /* cmd */ loader_){}
+					loader_(path),
+					adapter_(loader_.getList(), /* cmd */ loader_){}
 
-	MyDBAdapter &operator()(){
+	auto &operator()(){
 		return adapter_;
 	}
 
 private:
-	Container		container_;
 	ListLoader		loader_;
-	ImmutableList		imList_;
 	DBAdapter		adapter_;
 };
 

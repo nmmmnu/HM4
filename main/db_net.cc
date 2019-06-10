@@ -79,13 +79,13 @@ int main(int argc, char **argv){
 	switch(opt.immutable){
 	default:
 	case 0:
-		std::cout << "Starting mutable server..."	<< '\n';
+		std::clog << "Starting mutable server..."	<< '\n';
 		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size } );
 	case 1:
-		std::cout << "Starting immutable server..."	<< '\n';
+		std::clog << "Starting immutable server..."	<< '\n';
 		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, max_memlist_size } );
 	case 2:
-		std::cout << "Starting singlelist server..."	<< '\n';
+		std::clog << "Starting singlelist server..."	<< '\n';
 		return main2(opt, MySingleListDBAdapterFactory{ opt.db_path, max_memlist_size } );
 	}
 }

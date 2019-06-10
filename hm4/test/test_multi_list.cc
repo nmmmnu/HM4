@@ -249,33 +249,12 @@ void test_CollectionList(const char *name){
 	{
 		mytest.begin(name);
 
-		using MyMultiTable = hm4::multi::CollectionListFromIterator<typename Vector::const_iterator>;
-
-		MyMultiTable table{ std::begin(v), std::end(v) };
-
-		list_test(table, 4, bytes);
-	}
-
-	{
-		mytest.begin(name);
-
-		using MyMultiTable = hm4::multi::CollectionListFromContainer<Vector>;
+		using MyMultiTable = hm4::multi::CollectionList<Vector>;
 
 		MyMultiTable table{ v };
 
 		list_test(table, 4, bytes);
 	}
-}
-
-template <class List>
-void test_CollectionListNIL(const char *name){
-	mytest.begin(name);
-
-	using MyMultiTable = hm4::multi::CollectionListFromIterator<List *>;
-
-	MyMultiTable table{ nullptr, nullptr };
-
-	mytest("get non existent",	getCheck(table, "nonexistent"	));
 }
 
 // ==============================
@@ -288,7 +267,6 @@ int main(){
 	test_DualListEmpty	<List>("DualList (Empty)"	);
 	test_DualList		<List>("DualList"		);
 	test_CollectionList	<List>("CollectionList"		);
-	test_CollectionListNIL	<List>("CollectionList (NIL)"	);
 
 	return mytest.end();
 }

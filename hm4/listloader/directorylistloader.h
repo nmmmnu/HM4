@@ -6,18 +6,18 @@
 
 #include <algorithm>
 
-
 namespace hm4{
 namespace listloader{
 
 
-template<class Container>
 class DirectoryListLoader{
 public:
-	using DiskList = hm4::disk::DiskList;
+	using DiskList	= hm4::disk::DiskList;
+	using List 	= const impl_::ContainerHelper::CollectionList;
 
-	DirectoryListLoader(Container &container, std::string path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				container_(container, advice, mode),
+public:
+	DirectoryListLoader(std::string path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				container_(advice, mode),
 				path_(std::move(path)){
 		refresh_();
 	}
@@ -33,12 +33,16 @@ public:
 		return refresh();
 	}
 
+	/* const */ List &getList() const{
+		return container_.getList();
+	}
+
 private:
 	void refresh_(){
-		container_.clear();
-
 		if (path_.empty())
 			return;
+
+		container_.clear();
 
 		MyGlob files;
 		if (files.open(path_) == false)
@@ -57,20 +61,14 @@ private:
 	}
 
 private:
-	constexpr static bool DEBUG = false;
+	impl_::ContainerHelper	container_;
 
-private:
-	using ContainerHelper = impl_::ContainerHelper<Container>;
-
-	ContainerHelper	container_;
-
-	std::string	path_;
+	std::string		path_;
 };
 
 
 } // namespace listloader
 } // namespace
-
 
 #endif
 

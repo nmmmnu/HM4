@@ -5,7 +5,7 @@ struct MySingleListDBAdapterFactory{
 	using ListLoader	= hm4::listloader::SingleListLoader;
 
 	using CommandObject	= ListLoader;
-	using DBAdapter		= ListDBAdapter<const ListLoader::List, CommandObject>;
+	using DBAdapter		= ListDBAdapter<ListLoader::List, CommandObject>;
 
 	using MyDBAdapter	= DBAdapter;
 

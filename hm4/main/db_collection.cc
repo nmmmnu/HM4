@@ -37,20 +37,15 @@ int main(int argc, char **argv){
 
 	// =======================
 
-	using hm4::disk::DiskList;
-	using Container		= std::vector<DiskList>;
-	using MyListLoader	= hm4::listloader::DirectoryListLoader<Container>;
-	using MyCollectionList	= hm4::multi::CollectionListFromIterator<Container::const_iterator>;
+	using MyListLoader	= hm4::listloader::DirectoryListLoader;
 
-	Container		container;
-	MyListLoader		loader{ container, path };
-	MyCollectionList	list( std::begin(container), std::end(container) );
+	MyListLoader		loader{ path };
 
 	// =======================
 
 	switch(op[0]){
-	case 'r':	return op_search (list, key);
-	case 'l':	return op_iterate(list, key);
+	case 'r':	return op_search (loader.getList(), key);
+	case 'l':	return op_iterate(loader.getList(), key);
 	}
 
 	return printUsage(argv[0]);

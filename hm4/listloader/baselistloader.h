@@ -2,45 +2,53 @@
 #define BASE_TABLE_LOADER_H_
 
 #include "disk/disklist.h"
+#include "multi/collectionlist.h"
+
+#include <vector>
 
 namespace hm4{
 namespace listloader{
-	using DiskList = hm4::disk::DiskList;
-
 	namespace impl_{
 
-		template<class Container>
+
 		struct ContainerHelper{
-			using DiskList = hm4::disk::DiskList;
+			using DiskList		= hm4::disk::DiskList;
+			using Container		= std::vector<DiskList>;
+			using CollectionList	= hm4::multi::CollectionList<Container>;
 
-			static_assert( std::is_same<typename Container::value_type, DiskList>::value, "Container values are not DiskList");
-
-			ContainerHelper(Container &container, MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
-							container(container),
-							advice(advice),
-							mode(mode){}
+			ContainerHelper(MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
+							list_(container_),
+							advice_(advice),
+							mode_(mode){}
 
 			void clear(){
-				container.clear();
+				container_.clear();
 			}
 
 			void reserve(size_t const size){
-				container.reserve(size);
+				container_.reserve(size);
 			}
 
 			void push_back(const StringRef &filename){
-				container.emplace_back();
-				container.back().open(filename, advice, mode);
+				container_.emplace_back();
+				container_.back().open(filename, advice_, mode_);
+			}
+
+			const CollectionList &getList() const{
+				return list_;
 			}
 
 		private:
-			Container		&container;
-			MMAPFile::Advice	advice;
-			DiskList::OpenMode	mode;
+			Container		container_;
+
+			CollectionList		list_;
+
+			MMAPFile::Advice	advice_;
+			DiskList::OpenMode	mode_;
 		};
 
-	} // namespace impl_
 
+	} // namespace impl_
 } // namespace listloader
 } // namespace
 

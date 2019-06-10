@@ -9,7 +9,8 @@ namespace listloader{
 
 class SingleListLoader{
 public:
-	using List = DiskList;
+	using DiskList	= hm4::disk::DiskList;
+	using List	= const DiskList;
 
 public:
 	SingleListLoader(std::string filename, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
@@ -30,7 +31,7 @@ public:
 		return refresh();
 	}
 
-	const auto &getList() const{
+	/* const */ List &getList() const{
 		return list_;
 	}
 
@@ -41,7 +42,7 @@ private:
 	}
 
 private:
-	List			list_;
+	DiskList		list_;
 
 	std::string		filename_;
 	MMAPFile::Advice	advice_;
@@ -51,7 +52,6 @@ private:
 
 } // namespace listloader
 } // namespace
-
 
 #endif
 

@@ -9,13 +9,12 @@
 
 namespace hm4{
 namespace multi{
-namespace icollectionlist_impl_{
 
-template <class StoreIterator, class P>
-class iCollectionList{
+
+template <class StoreContainer>
+class CollectionList{
 public:
-	using List		= typename std::iterator_traits<StoreIterator>::value_type;
-	using StoreIteratorDT	= typename std::iterator_traits<StoreIterator>::difference_type;
+	using List		= typename StoreContainer::value_type;
 
 	using size_type		= typename List::size_type;
 	using difference_type	= typename List::difference_type;
@@ -24,42 +23,20 @@ public:
 
 	using estimated_size	= std::true_type;
 
-private:
-	template<class T>
-	constexpr static bool is_forward_iterator_v =
-		std::is_base_of<
-			std::forward_iterator_tag,
-			typename std::iterator_traits<T>::iterator_category
-		>::value
-	;
-
-	static_assert(is_forward_iterator_v<StoreIterator>, "Iterator is not forward_iterator");
-
-private:
-	const P *self() const{
-		return static_cast<const P*>(this);
-	}
-
-	StoreIterator first_() const{
-		return self()->first_();
-	}
-
-	StoreIterator last_() const{
-		return self()->last_();
-	}
-
 public:
+	CollectionList(const StoreContainer &list) : list_	(&list){}
+
 	iterator begin() const{
-		return { first_(), last_(), std::true_type{} };
+		return { std::begin(*list_), std::end(*list_), std::true_type{} };
 	}
 
 	iterator end() const{
-		return { first_(), last_(), std::false_type{} };
+		return { std::begin(*list_), std::end(*list_), std::false_type{} };
 	}
 
 	template<bool B>
 	iterator find(StringRef const &key, std::bool_constant<B> const exact) const{
-		return { first_(), last_(), key, exact };
+		return { std::begin(*list_), std::end(*list_), key, exact };
 	}
 
 public:
@@ -68,7 +45,7 @@ public:
 			return result + list.size();
 		};
 
-		return std::accumulate(first_(), last_(), size_t{ 0 }, sum);
+		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
 	}
 
 	size_t bytes() const{
@@ -76,56 +53,13 @@ public:
 			return result + list.bytes();
 		};
 
-		return std::accumulate(first_(), last_(), size_type{ 0 }, sum);
-	}
-};
-
-
-} // namespacecollectionlist_impl_
-
-
-
-template <class StoreIterator>
-class CollectionListFromIterator : public icollectionlist_impl_::iCollectionList<StoreIterator, CollectionListFromIterator<StoreIterator> >{
-private:
-	StoreIterator		firstIt_;
-	StoreIterator		lastIt_;
-
-public:
-	CollectionListFromIterator(StoreIterator first, StoreIterator last) :
-					firstIt_	(std::move(first	)),
-					lastIt_		(std::move(last		)){}
-
-public:
-	auto first_() const{
-		return firstIt_;
+		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);
 	}
 
-	auto last_() const{
-		return lastIt_;
-	}
-};
-
-
-
-template <class StoreContainer>
-class CollectionListFromContainer : public icollectionlist_impl_::iCollectionList<typename StoreContainer::const_iterator, CollectionListFromContainer<StoreContainer> >{
 private:
 	const StoreContainer	*list_;
-
-public:
-	CollectionListFromContainer(const StoreContainer &list) :
-					list_	(&list){}
-
-public:
-	auto first_() const{
-		return std::begin(*list_);
-	}
-
-	auto last_() const{
-		return std::end(*list_);
-	}
 };
+
 
 } // namespace multi
 } // namespace

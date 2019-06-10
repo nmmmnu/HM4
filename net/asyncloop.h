@@ -71,10 +71,12 @@ private:
 		if (! LOG_ENABLED)
 			return;
 
+		// printf suppose to be faster than std::cout
+
 		if (fd < 0)
-			printf("%-40s | clients: %5u |\n",         s, connectedClients_);
+			fprintf(stderr, "%-40s | clients: %5u |\n",         s, connectedClients_);
 		else
-			printf("%-40s | clients: %5u | fd: %5d\n", s, connectedClients_, fd);
+			fprintf(stderr, "%-40s | clients: %5u | fd: %5d\n", s, connectedClients_, fd);
 	}
 
 private:

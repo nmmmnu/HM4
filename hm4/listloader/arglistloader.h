@@ -9,11 +9,14 @@ namespace hm4{
 namespace listloader{
 
 
-template<class Container>
 class ArgListLoader{
 public:
-	ArgListLoader(Container &container, int const argc, const char **argv, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				container_(container, advice, mode),
+	using DiskList	= hm4::disk::DiskList;
+	using List 	= const impl_::ContainerHelper::CollectionList;
+
+public:
+	ArgListLoader(int const argc, const char **argv, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				container_(advice, mode),
 				argc_(argc),
 				argv_(argv){
 		refresh();
@@ -34,19 +37,20 @@ public:
 		return refresh();
 	}
 
+	/* const */ List &getList() const{
+		return container_.getList();
+	}
+
 private:
-	using ContainerHelper = impl_::ContainerHelper<Container>;
+	impl_::ContainerHelper	container_;
 
-	ContainerHelper	container_;
-
-	int		argc_	= 0;
-	const char	**argv_;
+	int			argc_	= 0;
+	const char		**argv_;
 };
 
 
 } // namespace listloader
 } // namespace
-
 
 #endif
 

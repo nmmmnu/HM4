@@ -78,25 +78,18 @@ private:
 
 struct MergeListFactory_N{
 	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
-					loader_( container_, table_count, path, advice, mode),
-					table_( std::begin(container_), std::end(container_) ) {}
+					loader_(table_count, path, advice, mode){}
 
 	auto begin() const{
-		return std::begin(table_);
+		return std::begin(loader_.getList());
 	}
 
 	auto end() const{
-		return std::end(table_);
+		return std::end(loader_.getList());
 	}
 
 private:
-	using Container		= std::vector<DiskList>;
-	using ArgListLoader	= hm4::listloader::ArgListLoader<Container>;
-	using MyCollectionList	= hm4::multi::CollectionListFromIterator<Container::const_iterator>;
-
-	Container		container_;
-	ArgListLoader		loader_;
-	MyCollectionList	table_;
+	hm4::listloader::ArgListLoader	loader_;
 };
 
 
