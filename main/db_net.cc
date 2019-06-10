@@ -1,5 +1,6 @@
 #include "db_net_immutablefactory.h"
 #include "db_net_mutablefactory.h"
+#include "db_net_singlelistfactory.h"
 
 // ----------------------------------
 
@@ -32,8 +33,18 @@ size_t constexpr MB = 1024 * 1024;
 template<class FACTORY>
 static int main2(const MyOptions &opt, FACTORY &&adapter_f);
 
+
 int main(int argc, char **argv){
 	MyOptions opt;
+
+	auto argImutable = [](const char *s) -> uint16_t{
+		switch(s[0]){
+		default:
+		case 'w': return 0;
+		case 'r': return 1;
+		case 's': return 2;
+		}
+	};
 
 	switch(argc){
 	case 1 + 1:
@@ -45,12 +56,12 @@ int main(int argc, char **argv){
 	case 3 + 1:
 		opt.port	= stou<uint16_t>(argv[3]);
 
-		opt.immutable	= argv[1][0] == 'r';
+		opt.immutable	= argImutable(argv[1]);
 		opt.db_path	= argv[2];
 		break;
 
 	case 2 + 1:
-		opt.immutable	= argv[1][0] == 'r';
+		opt.immutable	= argImutable(argv[1]);
 		opt.db_path	= argv[2];
 		break;
 
@@ -65,12 +76,17 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_size = opt.max_memlist_size * MB;
 
-	if (opt.immutable){
-		std::cout << "Starting immutable server..."	<< '\n';
-		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, max_memlist_size } );
-	}else{
+	switch(opt.immutable){
+	default:
+	case 0:
 		std::cout << "Starting mutable server..."	<< '\n';
 		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size } );
+	case 1:
+		std::cout << "Starting immutable server..."	<< '\n';
+		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, max_memlist_size } );
+	case 2:
+		std::cout << "Starting singlelist server..."	<< '\n';
+		return main2(opt, MySingleListDBAdapterFactory{ opt.db_path, max_memlist_size } );
 	}
 }
 
@@ -127,8 +143,9 @@ static int printUsage(const char *cmd){
 		<< "Usage:"	<< '\n'
 		<< "\t"		<< cmd	<< " [configuration file] - start server"			<< '\n'
 		<< "...or..."	<< '\n'
-		<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable server"	<< '\n'
-		<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable   server"	<< '\n'
+		<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable  server"	<< '\n'
+		<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable    server"	<< '\n'
+		<< "\t"		<< cmd	<< " s [lsm_path] [optional tcp port] - start singlelist server"	<< '\n'
 
 		<< "\t\tPath names must be written like this:"	<< '\n'
 		<< "\t\tExample 'directory/file.*.db'"		<< '\n'

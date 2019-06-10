@@ -1,5 +1,5 @@
-#ifndef ARG_TABLE_LOADER_H_
-#define ARG_TABLE_LOADER_H_
+#ifndef ARG_LIST_LOADER_H_
+#define ARG_LIST_LOADER_H_
 
 #include "baselistloader.h"
 

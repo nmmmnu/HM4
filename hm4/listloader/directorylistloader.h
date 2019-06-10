@@ -1,5 +1,5 @@
-#ifndef DIRECTORY_TABLE_LOADER_H_
-#define DIRECTORY_TABLE_LOADER_H_
+#ifndef DIRECTORY_LIST_LOADER_H_
+#define DIRECTORY_LIST_LOADER_H_
 
 #include "myglob.h"
 #include "baselistloader.h"
