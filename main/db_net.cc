@@ -4,14 +4,14 @@
 
 // ----------------------------------
 
-#include "selector/pollselector.h"
+#include "selector/epollselector.h"
 #include "protocol/redisprotocol.h"
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
 
 // ----------------------------------
 
-using MySelector	= net::selector::PollSelector;
+using MySelector	= net::selector::EPollSelector;
 using MyProtocol	= net::protocol::RedisProtocol;
 
 // ----------------------------------
@@ -21,8 +21,7 @@ size_t constexpr MB = 1024 * 1024;
 // ----------------------------------
 
 #include "signalguard.h"
-#include "stou.h"
-#include "inifile.h"
+#include "ston_safe.h"
 #include "db_net_options.h"
 
 #include <iostream>
@@ -77,7 +76,7 @@ namespace{
 			break;
 
 		case 3 + 1:
-			opt.port	= stou<uint16_t>(argv[3]);
+			opt.port	= ston_safe<uint16_t>(argv[3]);
 
 			opt.immutable	= argImutable(argv[1]);
 			opt.db_path	= argv[2];

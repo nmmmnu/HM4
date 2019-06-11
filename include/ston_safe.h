@@ -6,7 +6,7 @@
 #include <sstream>
 
 template <typename T>
-T stou_safe(const StringRef &str, T const def = 0){
+T ston_safe(const StringRef &str, T const def = 0){
 	static_assert(std::is_integral<T>::value, "T must be integral type");
 
 	static_assert(! std::is_same<T,   signed char>::value, "T must not be char type");
@@ -22,7 +22,7 @@ T stou_safe(const StringRef &str, T const def = 0){
 }
 
 template <typename T>
-std::string utos_safe(T const n){
+std::string ntos_safe(T const n){
 	static_assert(std::is_integral<T>::value, "T must be integral type");
 
 	static_assert(! std::is_same<T,   signed char>::value, "T must not be char type");

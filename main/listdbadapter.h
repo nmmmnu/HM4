@@ -1,8 +1,7 @@
 #ifndef LIST_DBADAPTER_H_
 #define LIST_DBADAPTER_H_
 
-#include "stou_safe.h"
-#include "stou.h"
+#include "ston_safe.h"
 
 #include <sstream>
 
@@ -39,7 +38,7 @@ public:
 			return {};
 	}
 
-	std::vector<std::string> getall(const StringRef &key, uint16_t const resultsCount, bool const prefixCheck) const{
+	std::vector<std::string> getall(const StringRef &key, uint16_t const resultsCount, const StringRef &prefix) const{
 		auto const maxResults  = my_clamp__(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
 		std::vector<std::string> result;
@@ -53,7 +52,7 @@ public:
 		for(; it != std::end(list_); ++it){
 			const auto &resultKey = it->getKey();
 
-			if (prefixCheck && ! samePrefix__(key, resultKey))
+			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey))
 				break;
 
 			result.push_back(resultKey);
@@ -101,7 +100,7 @@ public:
 	void set(const StringRef &key, const StringRef &val, const StringRef &exp = {} ){
 		assert(!key.empty());
 
-		auto const expires = stou_safe<uint32_t>(exp);
+		auto const expires = ston_safe<uint32_t>(exp);
 
 		list_.insert( { key, val, expires } );
 	}
@@ -120,9 +119,9 @@ public:
 		int64_t n = val;
 
 		if (p != std::end(list_) && p->isValid(/* tomb */ true))
-			n += stou_safe<int64_t>(p->getVal());
+			n += ston_safe<int64_t>(p->getVal());
 
-		std::string s = utos_safe<int64_t>(n);
+		std::string s = ntos_safe<int64_t>(n);
 
 		set(key, s);
 

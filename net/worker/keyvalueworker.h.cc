@@ -3,7 +3,7 @@
 
 #include "keyvaluecommands.h"
 
-#include "stou_safe.h"
+#include "ston_safe.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -164,7 +164,7 @@ private:
 		if (p.size() != 2 && p.size() != 3 && p.size() != 4)
 			return err_BadRequest_();
 
-		const auto &key = p[1];
+		const auto &key    = p[1];
 
 		switch( p.size() ){
 		case 2:
@@ -172,7 +172,7 @@ private:
 			// HGETALL u:
 
 			{
-				protocol_.response_strings(buffer_, db_.getall(key, 0, false) );
+				protocol_.response_strings(buffer_, db_.getall(key, 0, "") );
 				break;
 			}
 
@@ -181,9 +181,9 @@ private:
 			// HGETALL u: 100
 
 			{
-				uint16_t const count = stou_safe<uint16_t>(p[2]);
+				uint16_t const count = ston_safe<uint16_t>(p[2]);
 
-				protocol_.response_strings(buffer_, db_.getall(key, count, false) );
+				protocol_.response_strings(buffer_, db_.getall(key, count, "") );
 				break;
 			}
 
@@ -192,9 +192,10 @@ private:
 			// HGETALL u: 100 1
 
 			{
-				uint16_t const count = stou_safe<uint16_t>(p[2]);
+				uint16_t const count = ston_safe<uint16_t>(p[2]);
+				const auto &prefix = p[3];
 
-				protocol_.response_strings(buffer_, db_.getall(key, count, true) );
+				protocol_.response_strings(buffer_, db_.getall(key, count, prefix) );
 				break;
 			}
 
@@ -271,7 +272,7 @@ private:
 		int64_t val = 1;  // INCR
 
 		if (p.size() == 3)
-			val = stou_safe<int64_t>(p[2]);
+			val = ston_safe<int64_t>(p[2]);
 
 		if (val == 0)
 			return err_BadRequest_();
