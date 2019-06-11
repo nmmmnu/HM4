@@ -6,11 +6,6 @@
 namespace hm4{
 namespace listloader{
 
-namespace DirectoryListLoaderPath{
-	bool checkPathWildcard(StringRef   const &s);
-	bool checkPathWildcard(std::string const &s);
-}
-
 class DirectoryListLoader{
 public:
 	using DiskList	= hm4::disk::DiskList;
@@ -37,6 +32,9 @@ public:
 	/* const */ List &getList() const{
 		return container_.getList();
 	}
+
+public:
+	static bool checkIfLoaderNeed(StringRef const &s);
 
 private:
 	void refresh_();

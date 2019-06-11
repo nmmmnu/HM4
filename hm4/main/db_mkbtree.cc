@@ -2,22 +2,34 @@
 
 #include "disk/disklist.h"
 
+#include "version.h"
+
 #include <unistd.h>	// access
 
+#include <iostream>
 
-static int printUsage(const char *name){
-	printf("Usage:\n");
-	printf("\t%s [file.db] [btree_file.db]\n", name);
-	printf("\t\tFiles must be written with the extention.\n");
-	printf("\t\tExample 'file.db'\n");
-	printf("\t\tDo not forget that usually btree_file must have same name as [file.db]\n");
+namespace{
 
-	return 10;
-}
+	int printUsage(const char *cmd){
+		std::cout
+			<< "db_mkbtree version " << hm4::version::str 						<< '\n'
+			<< '\n'
 
-inline bool fileExists(const StringRef& name) {
-	return access(name.data(), F_OK) != -1;
-}
+			<< "Usage:"	<< '\n'
+			<< '\t'		<< cmd	<< "[file.db] [btree_file.db]"					<< '\n'
+
+			<< "\t\tDo not forget that usually [btree_file.db] must have same name as [file.db]"	<< '\n'
+
+			<< '\n';
+
+		return 10;
+	}
+
+	inline bool fileExists(const StringRef& name) {
+		return access(name.data(), F_OK) != -1;
+	}
+
+} // namespace
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1){
@@ -32,6 +44,8 @@ int main(int argc, char **argv){
 		printf("File %s exists. Please remove it and try again.\n", output_file);
 		return 2;
 	}
+#else
+	(void)fileExists;
 #endif
 	using DiskList = hm4::disk::DiskList;
 

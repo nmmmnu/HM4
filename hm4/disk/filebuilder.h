@@ -9,12 +9,12 @@ namespace disk{
 
 namespace FileBuilder{
 	template <class IT>
-	static bool build(StringRef const &filename,
+	bool build(StringRef const &filename,
 				IT first, IT last,
 				bool keepTombstones, bool aligned);
 
 	template <class List>
-	static bool build(StringRef const &filename,
+	bool build(StringRef const &filename,
 				List const &list,
 				bool const keepTombstones, bool const aligned){
 		return build(filename, std::begin(list), std::end(list), keepTombstones, aligned);

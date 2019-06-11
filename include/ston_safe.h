@@ -5,12 +5,20 @@
 
 #include <sstream>
 
+namespace impl_{
+	template <typename T>
+	void ston_safe_check(){
+		static_assert(std::is_integral<T>::value, "T must be integral type");
+
+		static_assert(! std::is_same<T,          char>::value, "T must not be char type");
+		static_assert(! std::is_same<T,   signed char>::value, "T must not be char type");
+		static_assert(! std::is_same<T, unsigned char>::value, "T must not be char type");
+	};
+} // namespace
+
 template <typename T>
 T ston_safe(const StringRef &str, T const def = 0){
-	static_assert(std::is_integral<T>::value, "T must be integral type");
-
-	static_assert(! std::is_same<T,   signed char>::value, "T must not be char type");
-	static_assert(! std::is_same<T, unsigned char>::value, "T must not be char type");
+	impl_::ston_safe_check<T>();
 
 	if (str.empty())
 		return def;
@@ -23,10 +31,7 @@ T ston_safe(const StringRef &str, T const def = 0){
 
 template <typename T>
 std::string ntos_safe(T const n){
-	static_assert(std::is_integral<T>::value, "T must be integral type");
-
-	static_assert(! std::is_same<T,   signed char>::value, "T must not be char type");
-	static_assert(! std::is_same<T, unsigned char>::value, "T must not be char type");
+	impl_::ston_safe_check<T>();
 
 	std::stringstream ss;
 	ss << n;

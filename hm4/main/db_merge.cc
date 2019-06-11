@@ -2,33 +2,42 @@
 
 #include <unistd.h>	// access
 
+#include "version.h"
+
 #include <iostream>
 
-static int printUsage(const char *cmd){
-	std::cout
-		<< "Usage:"	<< '\n'
-		<< '\t'		<< cmd	<< " - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones"	<< '\n'
-		<< '\t'		<< cmd	<< " t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones"	<< '\n'
+namespace{
 
-		<< "\t\tPath names must be written like this:"			<< '\n'
-		<< "\t\tExample 'directory/file.db'"				<< '\n'
-		<< "\t\tDo not forget you usually need two output files"	<< '\n'
+	int printUsage(const char *cmd){
+		std::cout
+			<< "db_merge version " << hm4::version::str 									<< '\n'
+			<< '\n'
 
-		<< '\n';
+			<< "Usage:"	<< '\n'
+			<< '\t'		<< cmd	<< " - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones"	<< '\n'
+			<< '\t'		<< cmd	<< " t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones"	<< '\n'
 
-	return 10;
-}
+			<< "\t\tDo not forget you usually need two input files"	<< '\n'
 
-inline bool fileExists(const StringRef& name) {
-	return access(name.data(), F_OK) != -1;
-}
+			<< '\n';
 
-template <class FACTORY>
-int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepTombstones){
-	hm4::disk::FileBuilder::build(output_file, f.begin(), f.end(), keepTombstones, /* aligned */ true);
+		return 10;
+	}
 
-	return 0;
-}
+	inline bool fileExists(const StringRef& name) {
+		return access(name.data(), F_OK) != -1;
+	}
+
+	template <class FACTORY>
+	int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepTombstones){
+		hm4::disk::FileBuilder::build(output_file, f.begin(), f.end(), keepTombstones, /* aligned */ true);
+
+		return 0;
+	}
+
+} // anonymous namespace
+
+
 
 #include "listloader/arglistloader.h"
 
@@ -54,6 +63,8 @@ private:
 	DiskList table_;
 };
 
+
+
 struct MergeListFactory_2{
 	MergeListFactory_2(const char *filename1, const char *filename2, const MMAPFile::Advice advice, DiskList::OpenMode const mode){
 		table1_.open(filename1, advice, mode);
@@ -75,6 +86,8 @@ private:
 	DiskList	table2_;
 	MyDualList	table_{ table2_, table1_ };
 };
+
+
 
 struct MergeListFactory_N{
 	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :

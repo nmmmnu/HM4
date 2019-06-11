@@ -1,20 +1,15 @@
 #include "directorylistloader.h"
 
 #include "myglob.h"
+#include "logger.h"
 
 #include <algorithm>
 
 namespace hm4{
 namespace listloader{
 
-namespace DirectoryListLoaderPath{
-	bool checkPathWildcard(StringRef const &s){
-		return std::find(std::begin(s), std::end(s), '*') != std::end(s);
-	}
-
-	bool checkPathWildcard(std::string const &s){
-		return s.find('*') != std::string::npos;
-	}
+bool DirectoryListLoader::checkIfLoaderNeed(StringRef const &s){
+	return std::find(std::begin(s), std::end(s), '*') != std::end(s);
 }
 
 void DirectoryListLoader::refresh_(){
@@ -22,8 +17,10 @@ void DirectoryListLoader::refresh_(){
 		return;
 
 	// guard against missing '*'
-	if (DirectoryListLoaderPath::checkPathWildcard(path_) == false)
+	if (checkIfLoaderNeed(path_) == false){
+		log__("Refusing to open path without wildcard", path_);
 		return;
+	}
 
 	container_.clear();
 

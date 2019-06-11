@@ -145,7 +145,7 @@ namespace FileBuilder{
 				createdMin = 0;
 
 			if (createdMax == std::numeric_limits<uint64_t>::min())
-				createdMin = 0;
+				createdMax = 0;
 
 			// now we miraculasly have the datacount.
 
