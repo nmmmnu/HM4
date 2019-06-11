@@ -62,8 +62,8 @@ namespace{
 		auto argImutable = [](const char *s) -> uint16_t{
 			switch(s[0]){
 			default:
-			case 'w': return 0;
 			case 'r': return 1;
+			case 'w': return 0;
 			}
 		};
 
@@ -151,7 +151,6 @@ namespace{
 			<< "...or..."	<< '\n'
 			<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable  server"	<< '\n'
 			<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable    server"	<< '\n'
-			<< "\t"		<< cmd	<< " s [lsm_path] [optional tcp port] - start singlelist server"	<< '\n'
 
 			<< "\t\tPath names must be written like this:"	<< '\n'
 			<< "\t\tExample 'directory/file.*.db'"		<< '\n'
