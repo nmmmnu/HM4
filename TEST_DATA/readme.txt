@@ -11,8 +11,8 @@ Then you can do tests such:
 
 bin/db_merge - TEST_DATA.BIN/all.db TEST_DATA.BIN/data.*.db
 
-bin/db_collection l TEST_DATA.BIN/'*'.db -
-bin/db_collection l TEST_DATA.BIN/'*'.db Bos
-bin/db_collection r TEST_DATA.BIN/'*'.db Boston
+bin/db_file l TEST_DATA.BIN/'*'.db -
+bin/db_file l TEST_DATA.BIN/'*'.db Bos
+bin/db_file r TEST_DATA.BIN/'*'.db Boston
 
 

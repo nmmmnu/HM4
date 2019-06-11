@@ -1,5 +1,14 @@
+/* if removed, will build only file based stuff - for debug only */
+#define BUILD_BOTH
+
+#ifdef BUILD_BOTH
+
 #include "multi/collectionlist.h"
 #include "listloader/directorylistloader.h"
+
+#endif
+
+#include "disk/disklist.h"
 
 #include "version.h"
 
@@ -75,9 +84,13 @@ int main(int argc, char **argv){
 
 	// =======================
 
+#ifdef BUILD_BOTH
+
 	using DirectoryListLoader = hm4::listloader::DirectoryListLoader;
 
-	if (DirectoryListLoader::checkIfLoaderNeed(filename)){
+	if (DirectoryListLoader::checkIfLoaderNeed(filename) == false){
+
+#endif
 		using hm4::disk::DiskList;
 
 		DiskList list;
@@ -89,6 +102,9 @@ int main(int argc, char **argv){
 		list.printMetadata();
 
 		return op_select(op[0], list, key);
+
+#ifdef BUILD_BOTH
+
 	}else{
 		using MyListLoader = DirectoryListLoader;
 
@@ -98,6 +114,8 @@ int main(int argc, char **argv){
 
 		return op_select(op[0], list, key);
 	}
+
+#endif
 
 	return printUsage(argv[0]);
 }
