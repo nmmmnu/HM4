@@ -3,11 +3,13 @@
 
 #include "baselistloader.h"
 
-#include <algorithm>
-
 namespace hm4{
 namespace listloader{
 
+namespace DirectoryListLoaderPath{
+	bool checkPathWildcard(StringRef   const &s);
+	bool checkPathWildcard(std::string const &s);
+}
 
 class DirectoryListLoader{
 public:

@@ -34,15 +34,15 @@ public:
 	}
 
 	static void print(){
-		print__("immutable",		"1",	"Start mutable = 0, immutable = 1, single = 2"	);
-		print__("db_path",		"-",	"Path to database"				);
+		print__("immutable",		"1",	"Start mutable = 0, immutable = 1"	);
+		print__("db_path",		"-",	"Path to database"			);
 
-		print__("host",			"-",	"TCP host to listen (not working)"		);
-		print__("port",			"2000",	"TCP port to listen"				);
-		print__("timeout",		"30",	"Connection timeout in seconds"			);
+		print__("host",			"-",	"TCP host to listen (not working)"	);
+		print__("port",			"2000",	"TCP port to listen"			);
+		print__("timeout",		"30",	"Connection timeout in seconds"		);
 
-		print__("max_clients",		"512",	"Max Clients"					);
-		print__("max_memlist_size",	"100",	"Max size of memlist in MB"			);
+		print__("max_clients",		"512",	"Max Clients"				);
+		print__("max_memlist_size",	"100",	"Max size of memlist in MB"		);
 	}
 
 private:
@@ -68,7 +68,9 @@ private:
 		std::cout
 			<< '\t'
 			<< std::setw(20) << std::left << name
+			<< std::setw( 0) << '=' << ' '
 			<< std::setw( 8) << std::left << def
+			<< std::setw( 0) << ';' << ' '
 			<< description
 			<< '\n'
 		;

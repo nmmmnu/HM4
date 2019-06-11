@@ -2,16 +2,27 @@
 
 #include "myglob.h"
 
+#include <algorithm>
+
 namespace hm4{
 namespace listloader{
 
+namespace DirectoryListLoaderPath{
+	bool checkPathWildcard(StringRef const &s){
+		return std::find(std::begin(s), std::end(s), '*') != std::end(s);
+	}
+
+	bool checkPathWildcard(std::string const &s){
+		return s.find('*') != std::string::npos;
+	}
+}
 
 void DirectoryListLoader::refresh_(){
 	if (path_.empty())
 		return;
 
 	// guard against missing '*'
-	if (path_.find('*') == std::string::npos)
+	if (DirectoryListLoaderPath::checkPathWildcard(path_) == false)
 		return;
 
 	container_.clear();

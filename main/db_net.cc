@@ -16,11 +16,6 @@ using MyProtocol	= net::protocol::RedisProtocol;
 
 // ----------------------------------
 
-static int printUsage(const char *cmd);
-static int printError(const char *msg);
-
-// ----------------------------------
-
 size_t constexpr MB = 1024 * 1024;
 
 // ----------------------------------
@@ -30,136 +25,150 @@ size_t constexpr MB = 1024 * 1024;
 #include "inifile.h"
 #include "db_net_options.h"
 
-template<class FACTORY>
-static int main2(const MyOptions &opt, FACTORY &&adapter_f);
+#include <iostream>
 
+namespace{
+	MyOptions prepareOptions(int argc, char **argv);
+
+	template<class FACTORY>
+	int main2(const MyOptions &opt, FACTORY &&adapter_f);
+
+	void printUsage(const char *cmd);
+	void printError(const char *msg);
+}
 
 int main(int argc, char **argv){
-	MyOptions opt;
-
-	auto argImutable = [](const char *s) -> uint16_t{
-		switch(s[0]){
-		default:
-		case 'w': return 0;
-		case 'r': return 1;
-		case 's': return 2;
-		}
-	};
-
-	switch(argc){
-	case 1 + 1:
-		if (! readINIFile(argv[1], opt))
-			return printError("Can not open config file...");
-
-		break;
-
-	case 3 + 1:
-		opt.port	= stou<uint16_t>(argv[3]);
-
-		opt.immutable	= argImutable(argv[1]);
-		opt.db_path	= argv[2];
-		break;
-
-	case 2 + 1:
-		opt.immutable	= argImutable(argv[1]);
-		opt.db_path	= argv[2];
-		break;
-
-	default:
-		return printUsage(argv[0]);
-	}
-
-	if (opt.port == 0)
-		return printError("Can not create server socket on port zero...");
-
-	// ----------------------------------
+	MyOptions const opt = prepareOptions(argc, argv);
 
 	size_t const max_memlist_size = opt.max_memlist_size * MB;
 
-	switch(opt.immutable){
-	default:
-	case 0:
+	using hm4::listloader::DirectoryListLoaderPath::checkPathWildcard;
+
+	if (opt.immutable == 0){
 		std::clog << "Starting mutable server..."	<< '\n';
 		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size } );
-	case 1:
+	}else if (checkPathWildcard(opt.db_path)){
 		std::clog << "Starting immutable server..."	<< '\n';
 		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, max_memlist_size } );
-	case 2:
+	}else{
 		std::clog << "Starting singlelist server..."	<< '\n';
 		return main2(opt, MySingleListDBAdapterFactory{ opt.db_path, max_memlist_size } );
 	}
 }
 
-template<class FACTORY>
-static int main2(const MyOptions &opt, FACTORY &&adapter_factory){
-	using MyAdapterFactory	= FACTORY;
-	using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
-	using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
-	using MyLoop		= net::AsyncLoop<MySelector, MyWorker>;
+namespace{
 
-	size_t const max_packet_size = hm4::Pair::maxBytes() * 2;
+	MyOptions prepareOptions(int argc, char **argv){
+		auto argImutable = [](const char *s) -> uint16_t{
+			switch(s[0]){
+			default:
+			case 'w': return 0;
+			case 'r': return 1;
+			}
+		};
 
-	int const fd = net::socket_create(net::SOCKET_TCP{}, opt.host, opt.port);
+		MyOptions opt;
 
-	if (fd < 0)
-		return printError("Can not create server socket...");
+		switch(argc){
+		case 1 + 1:
+			if (! readINIFile(argv[1], opt))
+				printError("Can not open config file...");
 
-	MyLoop loop( MySelector{ opt.max_clients }, MyWorker{ adapter_factory() }, { fd },
-							opt.timeout, max_packet_size);
+			break;
 
-	SignalGuard guard;
+		case 3 + 1:
+			opt.port	= stou<uint16_t>(argv[3]);
 
-	auto signal_processing = [&adapter_factory](Signal const signal){
-		switch(signal){
-		case Signal::HUP:
-			adapter_factory().refresh(true);
-			return true;
+			opt.immutable	= argImutable(argv[1]);
+			opt.db_path	= argv[2];
+			break;
 
-		case Signal::INT:
-		case Signal::TERM:
-			return false;
+		case 2 + 1:
+			opt.immutable	= argImutable(argv[1]);
+			opt.db_path	= argv[2];
+			break;
 
 		default:
-			return true;
+			printUsage(argv[0]);
 		}
-	};
 
-	while( loop.process() && signal_processing(guard()) );
+		if (opt.port == 0)
+			printError("Can not create server socket on port zero...");
 
-	return 0;
-}
+		return opt;
+	}
 
-// ----------------------------------
+	template<class FACTORY>
+	int main2(const MyOptions &opt, FACTORY &&adapter_factory){
+		using MyAdapterFactory	= FACTORY;
+		using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
+		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
+		using MyLoop		= net::AsyncLoop<MySelector, MyWorker>;
 
-#include <iostream>
+		size_t const max_packet_size = hm4::Pair::maxBytes() * 2;
 
-static int printError(const char *msg){
-	std::cout << msg << '\n';
-	return 1;
-}
+		int const fd = net::socket_create(net::SOCKET_TCP{}, opt.host, opt.port);
 
-static int printUsage(const char *cmd){
-	std::cout
-		<< "Usage:"	<< '\n'
-		<< "\t"		<< cmd	<< " [configuration file] - start server"			<< '\n'
-		<< "...or..."	<< '\n'
-		<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable  server"	<< '\n'
-		<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable    server"	<< '\n'
-		<< "\t"		<< cmd	<< " s [lsm_path] [optional tcp port] - start singlelist server"	<< '\n'
+		if (fd < 0)
+			printError("Can not create server socket...");
 
-		<< "\t\tPath names must be written like this:"	<< '\n'
-		<< "\t\tExample 'directory/file.*.db'"		<< '\n'
+		MyLoop loop( MySelector{ opt.max_clients }, MyWorker{ adapter_factory() }, { fd },
+								opt.timeout, max_packet_size);
 
-		<< '\n';
+		SignalGuard guard;
 
-	std::cout
-		<< "INI File Usage:"	<< '\n';
+		auto signal_processing = [&adapter_factory](Signal const signal){
+			switch(signal){
+			case Signal::HUP:
+				adapter_factory().refresh(true);
+				return true;
 
-	MyOptions::print();
+			case Signal::INT:
+			case Signal::TERM:
+				return false;
 
-	std::cout
-		<< '\n';
+			default:
+				return true;
+			}
+		};
 
-	return 10;
-}
+		while( loop.process() && signal_processing(guard()) );
+
+		return 0;
+	}
+
+	// ----------------------------------
+
+	void printError(const char *msg){
+		std::cout << msg << '\n';
+		exit(1);
+	}
+
+	void printUsage(const char *cmd){
+		std::cout
+			<< "Usage:"	<< '\n'
+			<< "\t"		<< cmd	<< " [configuration file] - start server"			<< '\n'
+			<< "...or..."	<< '\n'
+			<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable  server"	<< '\n'
+			<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable    server"	<< '\n'
+			<< "\t"		<< cmd	<< " s [lsm_path] [optional tcp port] - start singlelist server"	<< '\n'
+
+			<< "\t\tPath names must be written like this:"	<< '\n'
+			<< "\t\tExample 'directory/file.*.db'"		<< '\n'
+
+			<< '\n';
+
+		std::cout
+			<< "INI File Usage:"	<< '\n';
+
+		MyOptions::print();
+
+		std::cout
+			<< '\n';
+
+		exit(10);
+	}
+
+} // anonymous namespace
+
 
