@@ -1,33 +1,35 @@
-#ifndef ARG_LIST_LOADER_H_
-#define ARG_LIST_LOADER_H_
+#ifndef ITERATOR_LIST_LOADER_H_
+#define ITERATOR_LIST_LOADER_H_
 
 #include "baselistloader.h"
 
 #include "mynarrow.h"
 
+
+
 namespace hm4{
 namespace listloader{
 
 
-class ArgListLoader{
+class IteratorListLoader{
 public:
 	using DiskList	= hm4::disk::DiskList;
 	using List 	= const impl_::ContainerHelper::CollectionList;
 
 public:
-	ArgListLoader(int const argc, const char **argv, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+	IteratorListLoader(const char **first, const char **last, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
 				container_(advice, mode),
-				argc_(argc),
-				argv_(argv){
+				first_(first),
+				last_(last){
 		refresh();
 	}
 
 	bool refresh(){
 		container_.clear();
-		container_.reserve(narrow<size_t>(argc_));
+		container_.reserve(narrow<size_t>(std::distance(first_, last_)));
 
-		for(int i = argc_; i --> 0;)
-			container_.push_back(argv_[i]);
+		for(auto it = std::make_reverse_iterator(last_); it != std::make_reverse_iterator(first_); ++it)
+			container_.push_back(*it);
 
 		return true;
 	}
@@ -44,8 +46,8 @@ public:
 private:
 	impl_::ContainerHelper	container_;
 
-	int			argc_	= 0;
-	const char		**argv_;
+	const char **first_;
+	const char **last_;
 };
 
 

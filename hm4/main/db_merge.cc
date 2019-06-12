@@ -39,7 +39,7 @@ namespace{
 
 
 
-#include "listloader/arglistloader.h"
+#include "listloader/iteratorlistloader.h"
 
 #include "multi/duallist.h"
 #include "multi/collectionlist.h"
@@ -90,8 +90,8 @@ private:
 
 
 struct MergeListFactory_N{
-	MergeListFactory_N(int const table_count, const char **path, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
-					loader_(table_count, path, advice, mode){}
+	MergeListFactory_N(const char **first, const char **last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
+					loader_(first, last, advice, mode){}
 
 	auto begin() const{
 		return std::begin(loader_.getList());
@@ -102,7 +102,7 @@ struct MergeListFactory_N{
 	}
 
 private:
-	hm4::listloader::ArgListLoader	loader_;
+	hm4::listloader::IteratorListLoader	loader_;
 };
 
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv){
 				<< "Merging multiple tables..."		<< '\n'
 			;
 
-			MergeListFactory_N factory{ table_count, path, DEFAULT_ADVICE, DEFAULT_MODE };
+			MergeListFactory_N factory{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}
