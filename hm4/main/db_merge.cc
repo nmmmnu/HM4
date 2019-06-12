@@ -90,7 +90,9 @@ private:
 
 
 struct MergeListFactory_N{
-	MergeListFactory_N(const char **first, const char **last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
+	using It = const char **;
+
+	MergeListFactory_N(It first, It last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
 					loader_(first, last, advice, mode){}
 
 	auto begin() const{
@@ -102,7 +104,7 @@ struct MergeListFactory_N{
 	}
 
 private:
-	hm4::listloader::IteratorListLoader	loader_;
+	hm4::listloader::IteratorListLoader<It>	loader_;
 };
 
 

@@ -21,21 +21,28 @@ namespace listloader{
 							advice_(advice),
 							mode_(mode){}
 
-			void clear(){
-				container_.clear();
-			}
-
-			void reserve(size_t const size){
-				container_.reserve(size);
-			}
-
-			void push_back(const StringRef &filename){
-				container_.emplace_back();
-				container_.back().open(filename, advice_, mode_);
-			}
-
 			const CollectionList &getList() const{
 				return list_;
+			}
+
+			template<class IT>
+			void copy(IT first, IT last, size_t const size){
+				auto &c = container_;
+
+				c.clear();
+				c.reserve(size);
+
+				for(auto it = std::make_reverse_iterator(last); it != std::make_reverse_iterator(first); ++it){
+					auto filename = *it;
+
+					c.emplace_back();
+					c.back().open(filename, advice_, mode_);
+				}
+			}
+
+			template<class IT>
+			void copy(IT first, IT last){
+				return copy(first, last, narrow<size_t>(std::distance(first, last)));
 			}
 
 		private:
