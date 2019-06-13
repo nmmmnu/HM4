@@ -21,10 +21,10 @@ $(A)db_file: $(O)db_file.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)directorylistloader.
 $(A)db_merge: $(O)db_merge.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)baselistloader.o
 	$(LINK)
 
-$(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)skiplist.o $(O)idgeneratordate.o $(O)stringtokenizer.o
+$(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)skiplist.o $(O)idgeneratordate.o
 	$(LINK)
 
-$(A)zone_loader: $(O)zone_loader.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)skiplist.o $(O)idgeneratordate.o $(O)stringtokenizer.o
+$(A)zone_loader: $(O)zone_loader.o
 	$(LINK)
 
 $(A)db_mkbtree: $(O)db_mkbtree.o	$(PAIR_OBJ) $(DISKLIST_OBJ)

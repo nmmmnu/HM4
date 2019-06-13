@@ -18,7 +18,6 @@ namespace listloader{
 			using CollectionList	= hm4::multi::CollectionList<Container>;
 
 			ContainerHelper(MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
-							list_(container_),
 							advice_(advice),
 							mode_(mode){}
 
@@ -47,7 +46,7 @@ namespace listloader{
 		private:
 			Container		container_;
 
-			CollectionList		list_;
+			CollectionList		list_{ container_ };
 
 			MMAPFile::Advice	advice_;
 			DiskList::OpenMode	mode_;

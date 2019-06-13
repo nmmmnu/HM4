@@ -71,12 +71,15 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 	while(reader){
 		const std::string &line = reader.getLine();
 
-		StringTokenizer tok{ line, DELIMITER };
+		StringTokenizer const tok{ line, DELIMITER };
 
-		const StringRef &key = tok.getNext();
-		const StringRef &val = tok.getNext();
+		auto       it  = std::begin(tok);
+		auto const end = std::end(tok);
 
-		//std::cout << key << ':' << val << '\n';
+		const StringRef &key = getNextToken(it, end);
+		const StringRef &val = getNextToken(it, end);
+
+		// std::cout << key << ':' << val << '\n';
 
 		if (! key.empty())
 			list.insert( { key, val } );

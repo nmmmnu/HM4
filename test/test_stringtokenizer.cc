@@ -7,39 +7,26 @@ MyTest mytest;
 int main(){
 	mytest.begin("StringTokenizer");
 
-	const char *s1 = "hello world";
+	{
+		StringTokenizer const st{ "hello  world" };
 
-	StringTokenizer st1{ s1 };
+		std::vector<StringRef> const v{ std::begin(st), std::end(st) };
 
-	mytest("", st1.getNext() == "hello");
-	mytest("", st1.getNext() == "world");
-	mytest("", st1.getNext().empty());
-	mytest("", st1.getNext().empty());
-	mytest("", st1.getNext().empty());
+		mytest("", v.size() == 2);
+		mytest("", v[0] == "hello");
+		mytest("", v[1] == "world");
+	}
 
-	const auto v1 = st1.getAll();
+	{
+		StringTokenizer const st{ " hello world " };
 
-	mytest("", v1.size() == 2);
-	mytest("", v1[0] == "hello");
-	mytest("", v1[1] == "world");
+		std::vector<StringRef> const v{ std::begin(st), std::end(st) };
 
-	const char *s2 = " hello world ";
-
-	StringTokenizer st2{ s2 };
-
-	mytest("", st2.getNext().empty());
-	mytest("", st2.getNext() == "hello");
-	mytest("", st2.getNext() == "world");
-	mytest("", st2.getNext().empty());
-	mytest("", st2.getNext().empty());
-	mytest("", st2.getNext().empty());
-
-	const auto v2 = st2.getAll();
-
-	mytest("", v2.size() == 3);
-	mytest("", v2[0] == "");
-	mytest("", v2[1] == "hello");
-	mytest("", v2[2] == "world");
+		mytest("", v.size() == 3);
+		mytest("", v[0] == "");
+		mytest("", v[1] == "hello");
+		mytest("", v[2] == "world");
+	}
 
 	return mytest.end();
 }

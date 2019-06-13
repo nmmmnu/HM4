@@ -25,7 +25,7 @@ $(A)test_stringreplace: $(O)test_stringreplace.o
 $(A)test_trim: $(O)test_trim.o
 	$(LINK)
 
-$(A)test_stringtokenizer: $(O)test_stringtokenizer.o $(O)stringtokenizer.o
+$(A)test_stringtokenizer: $(O)test_stringtokenizer.o
 	$(LINK)
 
 $(A)test_blobref: $(O)test_blobref.o
