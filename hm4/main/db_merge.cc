@@ -30,7 +30,7 @@ namespace{
 
 	template <class FACTORY>
 	int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepTombstones){
-		hm4::disk::FileBuilder::build(output_file, f.begin(), f.end(), keepTombstones, /* aligned */ true);
+		hm4::disk::FileBuilder::build(output_file, std::begin(f.getList()), std::end(f.getList()), keepTombstones, /* aligned */ true);
 
 		return 0;
 	}
@@ -51,12 +51,8 @@ struct MergeListFactory_1{
 		table_.open(filename, advice, mode);
 	}
 
-	auto begin() const{
-		return std::begin(table_);
-	}
-
-	auto end() const{
-		return std::end(table_);
+	const auto &getList() const{
+		return table_;
 	}
 
 private:
@@ -71,12 +67,8 @@ struct MergeListFactory_2{
 		table2_.open(filename2, advice, mode);
 	}
 
-	auto begin() const{
-		return std::begin(table_);
-	}
-
-	auto end() const{
-		return std::end(table_);
+	const auto &getList() const{
+		return table_;
 	}
 
 private:
@@ -89,22 +81,17 @@ private:
 
 
 
+template<class IT>
 struct MergeListFactory_N{
-	using It = const char **;
-
-	MergeListFactory_N(It first, It last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
+	MergeListFactory_N(IT first, IT last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
 					loader_(first, last, advice, mode){}
 
-	auto begin() const{
-		return std::begin(loader_.getList());
-	}
-
-	auto end() const{
-		return std::end(loader_.getList());
+	const auto &getList() const{
+		return loader_.getList();
 	}
 
 private:
-	hm4::listloader::IteratorListLoader<It>	loader_;
+	hm4::listloader::IteratorListLoader<IT>	loader_;
 };
 
 
@@ -162,7 +149,7 @@ int main(int argc, char **argv){
 				<< "Merging multiple tables..."		<< '\n'
 			;
 
-			MergeListFactory_N factory{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE };
+			MergeListFactory_N<const char **> factory{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE };
 
 			return mergeFromFactory(factory, output, keepTombstones);
 		}

@@ -31,8 +31,6 @@ public:
 		return isOpen_;
 	}
 
-	static bool isFile(const char *filename) noexcept;
-
 public:
 	size_t size() const noexcept{
 		return globresults_.gl_pathc;

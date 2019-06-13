@@ -6,10 +6,11 @@
 
 #include <vector>
 
+
+
 namespace hm4{
 namespace listloader{
 	namespace impl_{
-
 
 		struct ContainerHelper{
 			using DiskList		= hm4::disk::DiskList;
@@ -21,29 +22,27 @@ namespace listloader{
 							advice_(advice),
 							mode_(mode){}
 
-			const CollectionList &getList() const{
+			const auto &getList() const{
 				return list_;
 			}
 
-			template<class IT>
-			void copy(IT first, IT last, size_t const size){
-				auto &c = container_;
-
-				c.clear();
-				c.reserve(size);
-
-				for(auto it = std::make_reverse_iterator(last); it != std::make_reverse_iterator(first); ++it){
-					auto filename = *it;
-
-					c.emplace_back();
-					c.back().open(filename, advice_, mode_);
-				}
+			void copy(std::nullptr_t, std::nullptr_t){
+				container_.clear();
 			}
 
 			template<class IT>
 			void copy(IT first, IT last){
-				return copy(first, last, narrow<size_t>(std::distance(first, last)));
+				size_t const size = narrow<typename Container::size_type>(std::distance(first, last));
+
+				container_.clear();
+				container_.reserve(size);
+
+				for(auto it = std::make_reverse_iterator(last); it != std::make_reverse_iterator(first); ++it)
+					push_back_(*it);
 			}
+
+		private:
+			void push_back_(const char *filename);
 
 		private:
 			Container		container_;
@@ -53,7 +52,6 @@ namespace listloader{
 			MMAPFile::Advice	advice_;
 			DiskList::OpenMode	mode_;
 		};
-
 
 	} // namespace impl_
 } // namespace listloader

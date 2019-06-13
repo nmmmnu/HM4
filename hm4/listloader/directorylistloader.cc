@@ -21,10 +21,10 @@ void DirectoryListLoader::refresh_(){
 	}
 
 	MyGlob files;
-	if (files.open(path_) == false)
-		return;
-
-	container_.copy(std::begin(files), std::end(files), files.size());
+	if (files.open(path_))
+		container_.copy(std::begin(files), std::end(files));
+	else
+		container_.copy(nullptr, nullptr);
 }
 
 

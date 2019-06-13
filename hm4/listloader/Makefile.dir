@@ -6,5 +6,5 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 include Makefile.sub
 
-all: $(O)directorylistloader.o
+all: $(O)directorylistloader.o $(O)baselistloader.o
 
