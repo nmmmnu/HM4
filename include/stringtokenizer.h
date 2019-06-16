@@ -96,11 +96,11 @@ private:
 
 
 
-StringTokenizer::StringTokenizerIterator StringTokenizer::begin() const{
+inline StringTokenizer::StringTokenizerIterator StringTokenizer::begin() const{
 	return { std::begin(line_), std::end(line_), delimiter_ };
 }
 
-StringTokenizer::StringTokenizerIterator StringTokenizer::end() const{
+inline StringTokenizer::StringTokenizerIterator StringTokenizer::end() const{
 	return { std::end(line_),   std::end(line_), delimiter_ };
 }
 
