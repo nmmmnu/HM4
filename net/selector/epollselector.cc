@@ -31,7 +31,7 @@ namespace{
 
 
 EPollSelector::EPollSelector(uint32_t const maxFD) : fds_(maxFD){
-	epollFD_ = epoll_create((int) fds_.size());
+	epollFD_ = epoll_create((int) maxFD);
 }
 
 EPollSelector::EPollSelector(EPollSelector &&other) :

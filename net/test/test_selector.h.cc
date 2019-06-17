@@ -13,7 +13,7 @@ int main(){
 
 	MyWorkerFactory wf;
 
-	net::AsyncLoop<MySelector, MyWorker> loop( MySelector{ 5 }, wf(), { fd1, fd2, fd3 } );
+	net::AsyncLoop<MySelector, MyWorker> loop( MySelector{ 4 }, wf(), { fd1, fd2, fd3 } );
 
 	while(loop.process());
 }
