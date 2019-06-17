@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include <poll.h>	// struct pollfd
+struct pollfd;
 
 namespace net{
 namespace selector{
@@ -13,6 +13,8 @@ namespace selector{
 
 class PollSelector{
 public:
+	class iterator;
+
 	PollSelector(uint32_t maxFD);
 	PollSelector(PollSelector &&other) /* = default */;
 	PollSelector &operator =(PollSelector &&other) /* = default */;
@@ -24,19 +26,30 @@ public:
 
 	WaitStatus wait(int timeout);
 
-	auto begin() const{
-		return std::begin(fds_);
-	}
-
-	auto end() const{
-		return std::end(fds_);
-	}
-
-	static FDResult getFDStatus(pollfd const &p);
+	iterator begin() const;
+	iterator end() const;
 
 private:
 	std::vector<pollfd>	fds_;
 };
+
+
+
+class PollSelector::iterator{
+public:
+	using hidden_t = pollfd;
+
+	iterator(const hidden_t *pos) : pos(pos){}
+
+	bool operator ==(iterator const &other) const;
+	bool operator !=(iterator const &other) const;
+	iterator &operator ++();
+	FDResult operator *() const;
+
+private:
+	const hidden_t *pos;
+};
+
 
 
 } // namespace selector

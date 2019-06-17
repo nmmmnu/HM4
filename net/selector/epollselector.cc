@@ -3,6 +3,8 @@
 #include <unistd.h>	// close, for closeEPoll_()
 #include <errno.h>	// errno
 
+#include <sys/epoll.h>
+
 namespace net{
 namespace selector{
 
@@ -87,40 +89,86 @@ WaitStatus EPollSelector::wait(int const timeout){
 
 
 bool EPollSelector::insertFD(int const fd, FDEvent const event){
+	if ( fdsConnected_ >= fds_.size() )
+		return false;
+
 	epoll_event ev = create_epoll_event(fd, event);
 
-	return epoll_ctl(epollFD_, EPOLL_CTL_ADD, fd, &ev) >= 0;
+	int const result = epoll_ctl(epollFD_, EPOLL_CTL_ADD, fd, &ev);
+
+	if (result != 0)
+		return false;
+
+	++fdsConnected_;
+	return true;
 }
 
 bool EPollSelector::updateFD(int const fd, FDEvent const event){
 	epoll_event ev = create_epoll_event(fd, event);
 
-	return epoll_ctl(epollFD_, EPOLL_CTL_MOD, fd, &ev) >= 0;
+	int const result = epoll_ctl(epollFD_, EPOLL_CTL_MOD, fd, &ev);
+
+	return result == 0;
 }
 
 bool EPollSelector::removeFD(int const fd){
-	return epoll_ctl(epollFD_, EPOLL_CTL_DEL, fd, nullptr) >= 0;
+	int const result = epoll_ctl(epollFD_, EPOLL_CTL_DEL, fd, nullptr);
+
+	if (result != 0)
+		return false;
+
+	--fdsConnected_;
+	return true;
+}
+
+
+namespace {
+	FDResult getFDStatus(epoll_event const &ev){
+		int const fd = ev.data.fd;
+
+		if (ev.events & EPOLLERR)
+			return { fd, FDStatus::ERROR };
+
+		if ((ev.events & EPOLLIN) || (ev.events & EPOLLHUP))
+			return { fd, FDStatus::READ };
+
+		if (ev.events & EPOLLOUT)
+			return { fd, FDStatus::WRITE };
+
+		// the function can not come here,
+		// but we will return FDStatus::NONE
+		return { fd, FDStatus::NONE };
+	}
 }
 
 
 
-FDResult EPollSelector::getFDStatus(epoll_event const &p){
-	int const fd = p.data.fd;
-
-	if (p.events & EPOLLERR)
-		return { fd, FDStatus::ERROR };
-
-	if ((p.events & EPOLLIN) || (p.events & EPOLLHUP))
-		return { fd, FDStatus::READ };
-
-	if (p.events & EPOLLOUT)
-		return { fd, FDStatus::WRITE };
-
-	// the function can not come here,
-	// but we will return FDStatus::NONE
-	return { fd, FDStatus::NONE };
+bool EPollSelector::iterator::operator ==(iterator const &other) const{
+	return pos == other.pos;
 }
 
+bool EPollSelector::iterator::operator !=(iterator const &other) const{
+	return pos != other.pos;
+}
+
+EPollSelector::iterator &EPollSelector::iterator::operator ++(){
+	++pos;
+	return *this;
+}
+
+FDResult EPollSelector::iterator::operator *() const{
+	return getFDStatus(*pos);
+}
+
+
+
+EPollSelector::iterator EPollSelector::begin() const{
+	return fds_.data();
+}
+
+EPollSelector::iterator EPollSelector::end() const{
+	return fds_.data() + fdsCount_;
+}
 
 
 

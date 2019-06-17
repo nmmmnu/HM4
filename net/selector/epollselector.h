@@ -7,14 +7,17 @@
 
 #include <vector>
 
-#include <sys/epoll.h>	// struct epoll_event
+struct epoll_event;
 
 namespace net{
 namespace selector{
 
 
+
 class EPollSelector{
 public:
+	class iterator;
+
 	EPollSelector(uint32_t maxFD);
 	EPollSelector(EPollSelector &&other) /* = default */;
 	EPollSelector &operator =(EPollSelector &&other) /* = default */;
@@ -28,21 +31,33 @@ public:
 
 	WaitStatus wait(int timeout);
 
-	auto begin() const{
-		return std::begin(fds_);
-	}
-
-	auto end() const{
-		return std::begin(fds_) + fdsCount_;
-	}
-
-	static FDResult getFDStatus(epoll_event const &p);
+	iterator begin() const;
+	iterator end() const;
 
 private:
 	int				epollFD_;
 	std::vector<epoll_event>	fds_;
 	int				fdsCount_	= 0;
+	uint32_t			fdsConnected_	= 0;
 };
+
+
+
+class EPollSelector::iterator{
+public:
+	using hidden_t = epoll_event;
+
+	iterator(const hidden_t *pos) : pos(pos){}
+
+	bool operator ==(iterator const &other) const;
+	bool operator !=(iterator const &other) const;
+	iterator &operator ++();
+	FDResult operator *() const;
+
+private:
+	const hidden_t *pos;
+};
+
 
 
 } // namespace selector

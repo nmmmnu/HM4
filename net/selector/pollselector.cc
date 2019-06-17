@@ -2,6 +2,7 @@
 
 #include <unistd.h>	// close, for closeStatusData_()
 #include <errno.h>	// errno
+#include <poll.h>	// poll
 
 #include <cassert>
 
@@ -116,23 +117,54 @@ bool PollSelector::removeFD(int const fd){
 }
 
 
+namespace{
+	FDResult getFDStatus(pollfd const &p){
+		int const fd = p.fd;
 
-FDResult PollSelector::getFDStatus(pollfd const &p){
-	int const fd = p.fd;
+		if (fd >= 0){
+			if (p.revents & POLLERR)
+				return { fd, FDStatus::ERROR };
 
-	if (fd >= 0){
-		if (p.revents & POLLERR)
-			return { fd, FDStatus::ERROR };
+			if (p.revents & POLLIN)
+				return { fd, FDStatus::READ };
 
-		if (p.revents & POLLIN)
-			return { fd, FDStatus::READ };
+			if (p.revents & POLLOUT)
+				return { fd, FDStatus::WRITE };
+		}
 
-		if (p.revents & POLLOUT)
-			return { fd, FDStatus::WRITE };
+		return { fd, FDStatus::NONE };
 	}
-
-	return { fd, FDStatus::NONE };
 }
+
+
+
+bool PollSelector::iterator::operator ==(iterator const &other) const{
+	return pos == other.pos;
+}
+
+bool PollSelector::iterator::operator !=(iterator const &other) const{
+	return pos != other.pos;
+}
+
+PollSelector::iterator &PollSelector::iterator::operator ++(){
+	++pos;
+	return *this;
+}
+
+FDResult PollSelector::iterator::operator *() const{
+	return getFDStatus(*pos);
+}
+
+
+
+PollSelector::iterator PollSelector::begin() const{
+	return fds_.data();
+}
+
+PollSelector::iterator PollSelector::end() const{
+	return fds_.data() + fds_.size();
+}
+
 
 
 } // namespace selector

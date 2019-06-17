@@ -56,9 +56,7 @@ bool AsyncLoop<SELECTOR, WORKER>::process(){
 		return true;
 	}
 
-	for(auto const &data : selector_){
-		const auto t = selector_.getFDStatus(data);
-
+	for(auto const &t : selector_){
 		switch(t.status){
 		case FDStatus::READ:
 			handleRead_( t.fd );
@@ -271,9 +269,7 @@ void AsyncLoop<SELECTOR, WORKER>::handleSocketOps_(int const fd, ssize_t const s
 
 template<class SELECTOR, class WORKER>
 bool AsyncLoop<SELECTOR, WORKER>::insertFD_(int const fd){
-	bool const result = selector_.insertFD(fd);
-
-	if (result == false)
+	if ( ! selector_.insertFD(fd) )
 		return false;
 
 	clients_[fd];
