@@ -1,8 +1,11 @@
 #include "pollselector.h"
 
-#include <poll.h>	// poll
 #include <unistd.h>	// close, for closeStatusData_()
 #include <errno.h>	// errno
+
+#include <cassert>
+
+#include <algorithm>	// for_each
 
 namespace net{
 namespace selector{
@@ -10,21 +13,35 @@ namespace selector{
 
 namespace{
 
-auto pollConvert(const FDEvent event) -> decltype(pollfd::events){
-	switch(event){
+	constexpr auto event2native(FDEvent const event) -> decltype(pollfd::events){
+		switch(event){
 		default:
 		case FDEvent::READ	: return POLLIN;
 		case FDEvent::WRITE	: return POLLOUT;
+		}
 	}
-}
+
+	template<class T>
+	void initFDS(T first, T last){
+		std::for_each(first, last, [](pollfd &item){
+			item.fd = -1;
+		});
+	}
+
+	template<class T>
+	void closeFDS(T first, T last){
+		std::for_each(first, last, [](pollfd &item){
+			if (item.fd >= 0)
+				::close(item.fd);
+		});
+	}
 
 }
 
-// ===========================
 
-PollSelector::PollSelector(uint32_t const maxFD) :
-				statusData_(maxFD){
-	initializeStatusData_();
+
+PollSelector::PollSelector(uint32_t const maxFD) : fds_(maxFD){
+	initFDS(std::begin(fds_), std::end(fds_));
 }
 
 PollSelector::PollSelector(PollSelector &&other) = default;
@@ -32,18 +49,14 @@ PollSelector::PollSelector(PollSelector &&other) = default;
 PollSelector &PollSelector::operator =(PollSelector &&other) = default;
 
 PollSelector::~PollSelector(){
-	closeStatusData_();
+	closeFDS(std::begin(fds_), std::end(fds_));
 }
 
-// ===========================
 
-uint32_t PollSelector::maxFD() const{
-	return (uint32_t) statusData_.size();
-}
 
 WaitStatus PollSelector::wait(int const timeout){
 	// size cast is for FreeBSD and OSX warning
-	int const activity = poll(statusData_.data(), (nfds_t) statusData_.size(), timeout);
+	int const activity = poll(fds_.data(), (nfds_t) fds_.size(), timeout);
 
 	if (activity < 0){
 		switch(errno){
@@ -60,82 +73,65 @@ WaitStatus PollSelector::wait(int const timeout){
 		return WaitStatus::OK;
 }
 
-FDResult PollSelector::getFDStatus(uint32_t const no) const{
-	const auto &p = statusData_[no];
-	int  const fd = p.fd;
-	auto const ev = p.revents;
 
-	if (ev & POLLERR)
-		return { fd, FDStatus::ERROR };
 
-	if (ev & POLLIN)
-		return { fd, FDStatus::READ };
+bool PollSelector::insertFD(int const fd, FDEvent const event){
+	auto it = std::find_if(std::begin(fds_), std::end(fds_), [](pollfd const &item){
+		return item.fd == -1;
+	});
 
-	if (ev & POLLOUT)
-		return { fd, FDStatus::WRITE };
-
-	return { fd, FDStatus::NONE };
-}
-
-bool PollSelector::insertFD(int const fd, const FDEvent event){
-	uint32_t pos = 0;
-	bool     pok = false;
-
-	for(uint32_t i = 0; i < statusData_.size(); ++i){
-		if (statusData_[i].fd == fd){
-			pos = i;
-			pok = true;
-			break;
-		}
-
-		if (pok == false && statusData_[i].fd < 0){
-			pos = i;
-			pok = true;
-		}
+	if (it != std::end(fds_)){
+		it->fd     = fd;
+		it->events = event2native(event);
+		return true;
 	}
 
-	if (! pok)
-		return false;
-
-	statusData_[pos].fd = fd;
-	statusData_[pos].events = pollConvert(event);
-
-	return true;
+	return false;
 }
 
-bool PollSelector::updateFD(int const fd, const FDEvent event){
-	// bit ugly.
-	for(auto &item : statusData_)
-		if (item.fd == fd){
-			item.events = pollConvert(event);
-			return true;
-		}
+bool PollSelector::updateFD(int const fd, FDEvent const event){
+	auto it = std::find_if(std::begin(fds_), std::end(fds_), [ fd ](pollfd const &item){
+		return item.fd == fd;
+	});
+
+	if (it != std::end(fds_)){
+		it->events = event2native(event);
+		return true;
+	}
 
 	return false;
 }
 
 bool PollSelector::removeFD(int const fd){
-	// bit ugly.
-	for(auto &item : statusData_)
-		if (item.fd == fd){
-			item.fd = -1;
-			return true;
-		}
+	auto it = std::find_if(std::begin(fds_), std::end(fds_), [ fd ](pollfd const &item){
+		return item.fd == fd;
+	});
+
+	if (it != std::end(fds_)){
+		it->fd = -1;
+		return true;
+	}
 
 	return false;
 }
 
-// ===========================
 
-void PollSelector::initializeStatusData_(){
-	for(auto &item : statusData_)
-		item.fd = -1;
-}
 
-void PollSelector::closeStatusData_(){
-	for(auto &item : statusData_)
-		if (item.fd >= 0)
-			::close(item.fd);
+FDResult PollSelector::getFDStatus(pollfd const &p){
+	int const fd = p.fd;
+
+	if (fd >= 0){
+		if (p.revents & POLLERR)
+			return { fd, FDStatus::ERROR };
+
+		if (p.revents & POLLIN)
+			return { fd, FDStatus::READ };
+
+		if (p.revents & POLLOUT)
+			return { fd, FDStatus::WRITE };
+	}
+
+	return { fd, FDStatus::NONE };
 }
 
 

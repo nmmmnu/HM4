@@ -7,7 +7,7 @@
 
 #include <vector>
 
-struct epoll_event;
+#include <sys/epoll.h>	// struct epoll_event
 
 namespace net{
 namespace selector{
@@ -15,14 +15,12 @@ namespace selector{
 
 class EPollSelector{
 public:
-	EPollSelector(uint32_t maxFD_);
+	EPollSelector(uint32_t maxFD);
 	EPollSelector(EPollSelector &&other) /* = default */;
 	EPollSelector &operator =(EPollSelector &&other) /* = default */;
 	~EPollSelector() /* = default */;
 
 	void swap(EPollSelector &other);
-
-	uint32_t maxFD() const;
 
 	bool insertFD(int fd, FDEvent event = FDEvent::READ);
 	bool updateFD(int fd, FDEvent event);
@@ -30,22 +28,20 @@ public:
 
 	WaitStatus wait(int timeout);
 
-	uint32_t getFDStatusCount() const{
-		return statusCount_ < 0 ? 0 : (uint32_t) statusCount_;
+	auto begin() const{
+		return std::begin(fds_);
 	}
 
-	FDResult getFDStatus(uint32_t no) const;
+	auto end() const{
+		return std::begin(fds_) + fdsCount_;
+	}
 
-private:
-	void initializeEPoll_();
-	void closeEPoll_();
-
-	bool mutateFD_(int fd, FDEvent event, int op);
+	static FDResult getFDStatus(epoll_event const &p);
 
 private:
 	int				epollFD_;
-	std::vector<epoll_event>	statusData_;
-	int				statusCount_	= 0;
+	std::vector<epoll_event>	fds_;
+	int				fdsCount_	= 0;
 };
 
 

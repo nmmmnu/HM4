@@ -6,14 +6,14 @@
 
 // ----------------------------------
 
-#include "selector/epollselector.h"
+#include "selector/pollselector.h"
 #include "protocol/redisprotocol.h"
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
 
 // ----------------------------------
 
-using MySelector	= net::selector::EPollSelector;
+using MySelector	= net::selector::PollSelector;
 using MyProtocol	= net::protocol::RedisProtocol;
 
 // ----------------------------------

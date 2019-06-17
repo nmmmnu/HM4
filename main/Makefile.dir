@@ -22,6 +22,6 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)myglob.o				\
 								\
 			$(O)signalguard.o			\
-			$(O)epollselector.o $(O)redisprotocol.o $(O)sockets.o
+			$(O)pollselector.o $(O)redisprotocol.o $(O)sockets.o
 	$(LINK)
 

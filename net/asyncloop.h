@@ -30,9 +30,6 @@ public:
 	AsyncLoop(SELECTOR &&selector, WORKER &&worker, const std::initializer_list<int> &serverFD,
 				uint32_t conf_connectionTimeout = 0,
 				size_t conf_maxPacketSize = 0);
-	~AsyncLoop();
-	AsyncLoop(AsyncLoop &&other) = default;
-	AsyncLoop &operator=(AsyncLoop &&other) = default;
 
 	bool process();
 
@@ -58,8 +55,6 @@ private:
 	bool handleWorker_(int fd, ClientBuffer &connection);
 
 	void handleSocketOps_(int fd, ssize_t size);
-
-	bool isServerFD_(int fd) const;
 
 private:
 	bool insertFD_(int fd);
