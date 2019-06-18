@@ -6,8 +6,16 @@
 
 #include <unistd.h>	// read
 #include <algorithm>	// find
+#include <iostream>
 
 namespace net{
+
+namespace impl_{
+	template<class T>
+	bool findFD(T const &c, int const fd){
+		return std::find(std::begin(c), std::end(c), fd) != std::end(c);
+	}
+}
 
 template<class SELECTOR, class WORKER>
 AsyncLoop<SELECTOR, WORKER>::AsyncLoop(SELECTOR &&selector, WORKER &&worker, const std::initializer_list<int> &serverFD,
@@ -22,14 +30,6 @@ AsyncLoop<SELECTOR, WORKER>::AsyncLoop(SELECTOR &&selector, WORKER &&worker, con
 		socket_makeNonBlocking(fd);
 		selector_.insertFD(fd);
 	}
-}
-
-
-template<class SELECTOR, class WORKER>
-AsyncLoop<SELECTOR, WORKER>::~AsyncLoop(){
-	// serverFD_ will be closed if we close epoll
-	for(int const fd : serverFD_)
-		selector_.removeFD(fd);
 }
 
 // ===========================
@@ -56,9 +56,7 @@ bool AsyncLoop<SELECTOR, WORKER>::process(){
 		return true;
 	}
 
-	for(uint32_t i = 0; i < selector_.getFDStatusCount(); ++i){
-		const auto &t = selector_.getFDStatus(i);
-
+	for(auto const &t : selector_){
 		switch(t.status){
 		case FDStatus::READ:
 			handleRead_( t.fd );
@@ -90,13 +88,8 @@ bool AsyncLoop<SELECTOR, WORKER>::process(){
 // ===========================
 
 template<class SELECTOR, class WORKER>
-bool AsyncLoop<SELECTOR, WORKER>::isServerFD_(int const fd) const{
-	return std::find(serverFD_.begin(), serverFD_.end(), fd) != serverFD_.end();
-}
-
-template<class SELECTOR, class WORKER>
 void AsyncLoop<SELECTOR, WORKER>::handleRead_(int const fd){
-	if ( isServerFD_(fd) ){
+	if ( impl_::findFD(serverFD_, fd) ){
 		while (handleConnect_(fd));
 		return;
 	}
@@ -130,7 +123,7 @@ void AsyncLoop<SELECTOR, WORKER>::handleRead_(int const fd){
 
 template<class SELECTOR, class WORKER>
 void AsyncLoop<SELECTOR, WORKER>::handleWrite_(int const fd){
-	if ( isServerFD_(fd) ){
+	if ( impl_::findFD(serverFD_, fd) ){
 		// WTF?!?
 		return;
 	}
@@ -276,16 +269,9 @@ void AsyncLoop<SELECTOR, WORKER>::handleSocketOps_(int const fd, ssize_t const s
 
 template<class SELECTOR, class WORKER>
 bool AsyncLoop<SELECTOR, WORKER>::insertFD_(int const fd){
-	// one for server fd
-	if (connectedClients_ + 1 >= selector_.maxFD() )
+	if ( ! selector_.insertFD(fd) )
 		return false;
 
-	bool const result = selector_.insertFD(fd);
-
-	if (result == false)
-		return false;
-
-	//clients_.insert(std::make_pair(fd, ClientBuffer{}));
 	clients_[fd];
 
 	++connectedClients_;

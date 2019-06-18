@@ -1,5 +1,5 @@
-#ifndef _NET_EPOLL_SELECTOR_H
-#define _NET_EPOLL_SELECTOR_H
+#ifndef NET_EPOLL_SELECTOR_H_
+#define NET_EPOLL_SELECTOR_H_
 
 #include "selectordefs.h"
 
@@ -13,16 +13,17 @@ namespace net{
 namespace selector{
 
 
+
 class EPollSelector{
 public:
-	EPollSelector(uint32_t maxFD_);
+	class iterator;
+
+	EPollSelector(uint32_t maxFD);
 	EPollSelector(EPollSelector &&other) /* = default */;
 	EPollSelector &operator =(EPollSelector &&other) /* = default */;
 	~EPollSelector() /* = default */;
 
 	void swap(EPollSelector &other);
-
-	uint32_t maxFD() const;
 
 	bool insertFD(int fd, FDEvent event = FDEvent::READ);
 	bool updateFD(int fd, FDEvent event);
@@ -30,23 +31,33 @@ public:
 
 	WaitStatus wait(int timeout);
 
-	uint32_t getFDStatusCount() const{
-		return statusCount_ < 0 ? 0 : (uint32_t) statusCount_;
-	}
-
-	FDResult getFDStatus(uint32_t no) const;
-
-private:
-	void initializeEPoll_();
-	void closeEPoll_();
-
-	bool mutateFD_(int fd, FDEvent event, int op);
+	iterator begin() const;
+	iterator end() const;
 
 private:
 	int				epollFD_;
-	std::vector<epoll_event>	statusData_;
-	int				statusCount_	= 0;
+	std::vector<epoll_event>	fds_;
+	int				fdsCount_	= 0;
+	uint32_t			fdsConnected_	= 0;
 };
+
+
+
+class EPollSelector::iterator{
+public:
+	using hidden_t = epoll_event;
+
+	iterator(const hidden_t *pos) : pos(pos){}
+
+	bool operator ==(iterator const &other) const;
+	bool operator !=(iterator const &other) const;
+	iterator &operator ++();
+	FDResult operator *() const;
+
+private:
+	const hidden_t *pos;
+};
+
 
 
 } // namespace selector

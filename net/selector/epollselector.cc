@@ -1,8 +1,9 @@
 #include "epollselector.h"
 
-#include <sys/epoll.h>	// epoll
 #include <unistd.h>	// close, for closeEPoll_()
 #include <errno.h>	// errno
+
+#include <sys/epoll.h>
 
 namespace net{
 namespace selector{
@@ -10,27 +11,35 @@ namespace selector{
 
 namespace{
 
-auto epollConvert(const FDEvent event) -> decltype(epoll_event::events){
-	switch(event){
+	constexpr auto event2native(const FDEvent event) -> decltype(epoll_event::events){
+		switch(event){
 		default:
 		case FDEvent::READ	: return EPOLLIN;
 		case FDEvent::WRITE	: return EPOLLOUT;
+		}
 	}
-}
+
+	epoll_event create_epoll_event(int const fd, FDEvent const event){
+		epoll_event ev;
+
+		ev.events = event2native(event);
+		ev.data.fd = fd;
+
+		return ev;
+	}
 
 }
 
-// ===========================
 
-EPollSelector::EPollSelector(uint32_t const maxFD) :
-				statusData_(maxFD){
-	initializeEPoll_();
+
+EPollSelector::EPollSelector(uint32_t const maxFD) : fds_(maxFD){
+	epollFD_ = epoll_create((int) maxFD);
 }
 
 EPollSelector::EPollSelector(EPollSelector &&other) :
 				epollFD_	(std::move(other.epollFD_	)),
-				statusData_	(std::move(other.statusData_	)),
-				statusCount_	(std::move(other.statusCount_	)){
+				fds_		(std::move(other.fds_		)),
+				fdsCount_	(std::move(other.fdsCount_	)){
 	other.epollFD_ = -1;
 }
 
@@ -45,28 +54,25 @@ void EPollSelector::swap(EPollSelector &other){
 	using std::swap;
 
 	swap(epollFD_		, other.epollFD_	);
-	swap(statusData_	, other.statusData_	);
-	swap(statusCount_	, other.statusCount_	);
+	swap(fds_		, other.fds_		);
+	swap(fdsCount_	, other.fdsCount_	);
 }
 
 
 EPollSelector::~EPollSelector(){
-	closeEPoll_();
+	if (epollFD_ >= 0)
+		::close(epollFD_);
 }
 
-// ===========================
 
-uint32_t EPollSelector::maxFD() const{
-	return (uint32_t) statusData_.size();
-}
 
 WaitStatus EPollSelector::wait(int const timeout){
 	if (epollFD_ < 0)
 		return WaitStatus::ERROR;
 
-	statusCount_ = epoll_wait(epollFD_, statusData_.data(), (int) statusData_.size(), timeout);
+	fdsCount_ = epoll_wait(epollFD_, fds_.data(), (int) fds_.size(), timeout);
 
-	if (statusCount_ < 0){
+	if (fdsCount_ < 0){
 		switch(errno){
 		case EINTR	: return WaitStatus::OK;
 
@@ -74,16 +80,50 @@ WaitStatus EPollSelector::wait(int const timeout){
 		}
 	}
 
-	if (statusCount_ == 0)
+	if (fdsCount_ == 0)
 		return WaitStatus::NONE;
 	else
 		return WaitStatus::OK;
 }
 
-FDResult EPollSelector::getFDStatus(uint32_t const no) const{
-	if (no < (uint32_t) statusCount_){
-		const epoll_event &ev = statusData_[no];
 
+
+bool EPollSelector::insertFD(int const fd, FDEvent const event){
+	if ( fdsConnected_ >= fds_.size() )
+		return false;
+
+	epoll_event ev = create_epoll_event(fd, event);
+
+	int const result = epoll_ctl(epollFD_, EPOLL_CTL_ADD, fd, &ev);
+
+	if (result != 0)
+		return false;
+
+	++fdsConnected_;
+	return true;
+}
+
+bool EPollSelector::updateFD(int const fd, FDEvent const event){
+	epoll_event ev = create_epoll_event(fd, event);
+
+	int const result = epoll_ctl(epollFD_, EPOLL_CTL_MOD, fd, &ev);
+
+	return result == 0;
+}
+
+bool EPollSelector::removeFD(int const fd){
+	int const result = epoll_ctl(epollFD_, EPOLL_CTL_DEL, fd, nullptr);
+
+	if (result != 0)
+		return false;
+
+	--fdsConnected_;
+	return true;
+}
+
+
+namespace {
+	FDResult getFDStatus(epoll_event const &ev){
 		int const fd = ev.data.fd;
 
 		if (ev.events & EPOLLERR)
@@ -94,44 +134,42 @@ FDResult EPollSelector::getFDStatus(uint32_t const no) const{
 
 		if (ev.events & EPOLLOUT)
 			return { fd, FDStatus::WRITE };
+
+		// the function can not come here,
+		// but we will return FDStatus::NONE
+		return { fd, FDStatus::NONE };
 	}
-
-	return FDStatus::STOP;
 }
 
-bool EPollSelector::insertFD(int const fd, FDEvent const event){
-	return mutateFD_(fd, event, EPOLL_CTL_ADD);
+
+
+bool EPollSelector::iterator::operator ==(iterator const &other) const{
+	return pos == other.pos;
 }
 
-bool EPollSelector::updateFD(int const fd, FDEvent const event){
-	return mutateFD_(fd, event, EPOLL_CTL_MOD);
+bool EPollSelector::iterator::operator !=(iterator const &other) const{
+	return pos != other.pos;
 }
 
-bool EPollSelector::mutateFD_(int const fd, FDEvent const event, int const op){
-	epoll_event ev;
-	ev.events = epollConvert(event);
-	ev.data.fd = fd;
-
-	int const result = epoll_ctl(epollFD_, op, fd, &ev);
-
-	return result >= 0;
+EPollSelector::iterator &EPollSelector::iterator::operator ++(){
+	++pos;
+	return *this;
 }
 
-bool EPollSelector::removeFD(int const fd){
-	int const result = epoll_ctl(epollFD_, EPOLL_CTL_DEL, fd, nullptr);
-
-	return result >= 0;
+FDResult EPollSelector::iterator::operator *() const{
+	return getFDStatus(*pos);
 }
 
-// ===========================
 
-void EPollSelector::initializeEPoll_(){
-	epollFD_ = epoll_create((int) statusData_.size());
+
+EPollSelector::iterator EPollSelector::begin() const{
+	return fds_.data();
 }
 
-void EPollSelector::closeEPoll_(){
-	::close(epollFD_);
+EPollSelector::iterator EPollSelector::end() const{
+	return fds_.data() + fdsCount_;
 }
+
 
 
 } // namespace selector

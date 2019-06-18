@@ -1,5 +1,5 @@
-#ifndef _NET_POLL_SELECTOR_H
-#define _NET_POLL_SELECTOR_H
+#ifndef NET_POLL_SELECTOR_H_
+#define NET_POLL_SELECTOR_H_
 
 #include "selectordefs.h"
 
@@ -13,12 +13,12 @@ namespace selector{
 
 class PollSelector{
 public:
-	PollSelector(uint32_t maxFD_);
+	class iterator;
+
+	PollSelector(uint32_t maxFD);
 	PollSelector(PollSelector &&other) /* = default */;
 	PollSelector &operator =(PollSelector &&other) /* = default */;
 	~PollSelector() /* = default */;
-
-	uint32_t maxFD() const;
 
 	bool insertFD(int fd, FDEvent event = FDEvent::READ);
 	bool updateFD(int fd, FDEvent event);
@@ -26,19 +26,30 @@ public:
 
 	WaitStatus wait(int timeout);
 
-	uint32_t getFDStatusCount() const{
-		return maxFD();
-	}
-
-	FDResult getFDStatus(uint32_t no) const;
+	iterator begin() const;
+	iterator end() const;
 
 private:
-	void initializeStatusData_();
-	void closeStatusData_();
-
-private:
-	std::vector<pollfd>	statusData_;
+	std::vector<pollfd>	fds_;
 };
+
+
+
+class PollSelector::iterator{
+public:
+	using hidden_t = pollfd;
+
+	iterator(const hidden_t *pos) : pos(pos){}
+
+	bool operator ==(iterator const &other) const;
+	bool operator !=(iterator const &other) const;
+	iterator &operator ++();
+	FDResult operator *() const;
+
+private:
+	const hidden_t *pos;
+};
+
 
 
 } // namespace selector

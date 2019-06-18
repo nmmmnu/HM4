@@ -12,7 +12,7 @@ namespace selector{
 
 namespace{
 
-auto kQueueConvert(const FDEvent event) -> decltype(EVFILT_READ){
+auto event2native(const FDEvent event) -> decltype(EVFILT_READ){
 	switch(event){
 		default:
 		case FDEvent::READ	: return EVFILT_READ;
@@ -25,14 +25,14 @@ auto kQueueConvert(const FDEvent event) -> decltype(EVFILT_READ){
 // ===========================
 
 KQueueSelector::KQueueSelector(uint32_t const maxFD) :
-				statusData_(maxFD){
-	initializeKQueue_();
+				fds_(maxFD){
+	kqueueFD_ = kqueue();
 }
 
 KQueueSelector::KQueueSelector(KQueueSelector &&other) :
 				kqueueFD_	(std::move(other.kqueueFD_	)),
-				statusData_	(std::move(other.statusData_	)),
-				statusCount_	(std::move(other.statusCount_	)){
+				fds_	(std::move(other.fds_	)),
+				fdsCount_	(std::move(other.fdsCount_	)){
 	other.kqueueFD_ = -1;
 }
 
@@ -46,21 +46,18 @@ KQueueSelector &KQueueSelector::operator =(KQueueSelector &&other){
 void KQueueSelector::swap(KQueueSelector &other){
 	using std::swap;
 
-	swap(kqueueFD_		, other.kqueueFD_	);
-	swap(statusData_	, other.statusData_	);
-	swap(statusCount_	, other.statusCount_	);
+	swap(kqueueFD_	, other.kqueueFD_	);
+	swap(fds_	, other.fds_		);
+	swap(fdsCount_	, other.fdsCount_	);
 }
 
 
 KQueueSelector::~KQueueSelector(){
-	closeKQueue_();
+	if (kqueueFD_ >= 0)
+		::close(kqueueFD_);
 }
 
 // ===========================
-
-uint32_t KQueueSelector::maxFD() const{
-	return (uint32_t) statusData_.size();
-}
 
 WaitStatus KQueueSelector::wait(int const timeout){
 	if (kqueueFD_ < 0)
@@ -75,9 +72,9 @@ WaitStatus KQueueSelector::wait(int const timeout){
 		tsp = &ts;
 	}
 
-	statusCount_ = kevent(kqueueFD_, NULL, 0, statusData_.data(), (int) statusData_.size(), tsp);
+	fdsCount_ = kevent(kqueueFD_, NULL, 0, fds_.data(), (int) fds_.size(), tsp);
 
-	if (statusCount_ < 0){
+	if (fdsCount_ < 0){
 		switch(errno){
 		case EINTR	: return WaitStatus::OK;
 
@@ -85,41 +82,29 @@ WaitStatus KQueueSelector::wait(int const timeout){
 		}
 	}
 
-	if (statusCount_ == 0)
+	if (fdsCount_ == 0)
 		return WaitStatus::NONE;
-
-	return WaitStatus::OK;
-}
-
-FDResult KQueueSelector::getFDStatus(uint32_t const no) const{
-	if (no < (uint32_t) statusCount_){
-		const struct kevent &ev = statusData_[no];
-
-		int const fd = (int) ev.ident;
-
-		if (ev.flags & EV_ERROR)
-			return { fd, FDStatus::ERROR };
-
-		if ((ev.filter == EVFILT_READ) || (ev.flags & EV_EOF))
-			return { fd, FDStatus::READ };
-
-		if (ev.filter == EVFILT_WRITE)
-			return { fd, FDStatus::WRITE };
-	}
-
-	return FDStatus::STOP;
+	else
+		return WaitStatus::OK;
 }
 
 bool KQueueSelector::insertFD(int const fd, FDEvent const event){
+	if ( fdsConnected_ >= fds_.size() )
+		return false;
+
 	struct kevent ev;
 
-	int const event2 = kQueueConvert(event);
+	int const event2 = event2native(event);
 
 	EV_SET(&ev, fd, event2, EV_ADD, 0, 0, nullptr);
 
 	int const result = kevent(kqueueFD_, &ev, 1, nullptr, 0, nullptr);
 
-	return result >= 0;
+	if (result < 0)
+		return false;
+
+	++fdsConnected_;
+	return true;
 }
 
 bool KQueueSelector::removeFD(int const fd){
@@ -131,18 +116,64 @@ bool KQueueSelector::removeFD(int const fd){
 	EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
 	int const result2 = kevent(kqueueFD_, &ev, 1, nullptr, 0, nullptr);
 
-	return result1 >= 0 && result2 >= 0;
+	if (result1 < 0 || result2 < 0)
+		return false;
+
+	--fdsConnected_;
+	return true;
+
 }
 
-// ===========================
 
-void KQueueSelector::initializeKQueue_(){
-	kqueueFD_ = kqueue();
+
+namespace{
+	FDResult getFDStatus(struct kevent const &ev){
+		int const fd = (int) ev.ident;
+
+		if (ev.flags & EV_ERROR)
+			return { fd, FDStatus::ERROR };
+
+		if ((ev.filter == EVFILT_READ) || (ev.flags & EV_EOF))
+			return { fd, FDStatus::READ };
+
+		if (ev.filter == EVFILT_WRITE)
+			return { fd, FDStatus::WRITE };
+
+		// the function can not come here,
+		// but we will return FDStatus::NONE
+		return { fd, FDStatus::NONE };
+	}
 }
 
-void KQueueSelector::closeKQueue_(){
-	::close(kqueueFD_);
+
+
+bool KQueueSelector::iterator::operator ==(iterator const &other) const{
+	return pos == other.pos;
 }
+
+bool KQueueSelector::iterator::operator !=(iterator const &other) const{
+	return pos != other.pos;
+}
+
+KQueueSelector::iterator & KQueueSelector::iterator::operator ++(){
+	++pos;
+	return *this;
+}
+
+FDResult KQueueSelector::iterator::operator *() const{
+	return getFDStatus(*pos);
+}
+
+
+
+KQueueSelector::iterator KQueueSelector::begin() const{
+	return fds_.data();
+}
+
+KQueueSelector::iterator KQueueSelector::end() const{
+	return fds_.data() + fds_.size();
+}
+
 
 
 } // namespace selector
