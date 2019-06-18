@@ -6,5 +6,5 @@ EXTRA_INCL += -I$(SRC_DIR)
 
 include Makefile.sub
 
-all: $(O)mytime.o $(O)myglob.o $(O)mmapfile.o $(O)stringtokenizer.o $(O)signalguard.o
+all: $(O)mytime.o $(O)myglob.o $(O)mmapfile.o $(O)signalguard.o
 

@@ -1,4 +1,4 @@
-#include "pair.h"
+#include "ilist.h"
 
 using hm4::Pair;
 using hm4::OPair;
@@ -7,116 +7,119 @@ using hm4::OPair;
 
 MyTest mytest;
 
-#include <utility>	// std::pair
+#include <iterator>	// std::distance
 
+// ==============================
 
+template <class List>
+size_t listInsert(List &list, const char *key, const char *value){
+	OPair p = { key, value };
 
-template <class LIST>
-size_t list_insert(LIST &list, OPair &&p){
-	const size_t size = p->bytes();
+	size_t const size = p->bytes();
 	list.insert(std::move(p));
 	return size;
 }
 
-template <class LIST>
-auto list_populate(LIST &list){
+template <class List>
+auto listPopulate(List &list){
 	list.clear();
 
-	size_t size = 0;
+	size_t size =
+		listInsert(list, "3 city",	"Sofia"	) +
+		listInsert(list, "1 name",	"Niki"	) +
+		listInsert(list, "4 os",	"Linux"	) +
+		listInsert(list, "2 age",	"22"	) +
+		0
+	;
 
-	size += list_insert(list, {"3 city",	"Sofia"	});
-	size += list_insert(list, {"1 name",	"Niki"	});
-	size += list_insert(list, {"4 os",	"Linux"	});
-	size += list_insert(list, {"2 age",	"22"	});
-
-	return std::make_pair( (typename LIST::size_type) 4, size);
+	return std::make_pair( (typename List::size_type) 4, size);
 }
 
-template <class IT>
-void iterator_deref(const IT &it, const IT &et, const char *value){
-	mytest("*it   deref",	it != et && (*it).getVal() == value	);
-	mytest(" it-> deref",	it != et &&   it->getVal() == value	);
+// ==============================
+
+template <class Iterator>
+bool iteratorDereference(Iterator const &it, Iterator const &et, const char *value){
+	return
+		it != et &&
+		  it->getVal() == value &&
+		(*it).getVal() == value
+	;
 }
 
-template <class IT>
-void iterator_advance(IT &it, const IT &et, const char *value){
-	iterator_deref(it, et, value);
-	++it;
+template <class List, bool B>
+bool getCheck(List const &list, const char *key, const char *value, std::bool_constant<B> const exact){
+	auto const it = list.find(key, exact);
+	auto const et = list.end();
+
+	if (value)
+		return iteratorDereference(it, et, value);
+
+	return it == et;
 }
 
-template <class LIST>
-void iterator_test(const LIST &list){
-	auto it = list.begin();
-	auto et = list.end();
+// ==============================
 
-	iterator_advance(it, et, "Niki"		);
-	iterator_advance(it, et, "22"		);
-	iterator_advance(it, et, "Sofia"	);
-	iterator_advance(it, et, "Linux"	);
+template <class List>
+void iterator_test_get(const List &list){
 
-	mytest("*it end()",	it == et				);
+	mytest("it", 			getCheck(list, "1",		"Niki",		std::false_type{}	));
+	mytest("it", 			getCheck(list, "1 name",	"Niki",		std::true_type{}	));
+	mytest("it", 			getCheck(list, "2",		"22",		std::false_type{}	));
+	mytest("it", 			getCheck(list, "2 age",		"22",		std::true_type{}	));
+	mytest("it", 			getCheck(list, "3",		"Sofia",	std::false_type{}	));
+	mytest("it", 			getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
+	mytest("it", 			getCheck(list, "4",		"Linux",	std::false_type{}	));
+	mytest("it", 			getCheck(list, "4 os",		"Linux",	std::true_type{}	));
+	mytest("it", 			getCheck(list, "4 osX",		nullptr,	std::true_type{}	));
+	mytest("it", 			getCheck(list, "5",		nullptr,	std::true_type{}	));
+	mytest("it", 			getCheck(list, "6",		nullptr,	std::true_type{}	));
+
+	// this is no longer supported
+	//mytest("it", 			getCheck(list, "",		"Niki",		std::false_type{}	));
 }
 
-template <class LIST>
-void list_lowerBound(const LIST &list, const char *key, const char *value){
-	auto it = list.lowerBound(key);
-	auto et = list.end();
+template <class List>
+void iterator_test(List const &list){
+	auto       it = std::begin(list);
+	auto const et = std::end(list);
 
-	if (value){
+	auto advance = [&it, &et](const char *value){
+		mytest("it deref", 	iteratorDereference(it, et, value)	);
+		++it;
+	};
 
-	iterator_advance(it, et, value);
+	advance("Niki"	);
+	advance("22"	);
+	advance("Sofia"	);
+	advance("Linux"	);
 
-	}else{
-
-	mytest("it == et",		it == et			);
-
-	}
+	mytest("*it end()",		it == et				);
 }
 
-template <class LIST>
-void iterator_get_test(const LIST &list){
-	list_lowerBound(list, "1",	"Niki"	);
-	list_lowerBound(list, "1 name",	"Niki"	);
-	list_lowerBound(list, "2",	"22"	);
-	list_lowerBound(list, "2 age",	"22"	);
-	list_lowerBound(list, "3",	"Sofia"	);
-	list_lowerBound(list, "3 city",	"Sofia"	);
-	list_lowerBound(list, "4",	"Linux"	);
-	list_lowerBound(list, "4 os",	"Linux"	);
-	list_lowerBound(list, "4 osX",	nullptr	);
-	list_lowerBound(list, "5",	nullptr	);
-	list_lowerBound(list, "6",	nullptr	);
+// ==============================
 
-	list_lowerBound(list, "",	"Niki"	);
-}
-
-template <class LIST>
-void list_test(LIST &list){
+template <class List>
+void list_test(List &list){
 	// GENERAL
 
-	const auto a = list_populate(list);
+	auto const a = listPopulate(list);
 
 	auto const count = a.first;
-	auto const size  = a.second;
+	auto const bytes = a.second;
 
-	mytest("count",			list.size() == count		);
-	mytest("count estim",		list.size(true) >= count	);
-	mytest("empty",			! list.empty()			);
-	mytest("sizeof",		list.bytes() == size		);
-
-
-	const Pair *p = nullptr;
-
+	mytest("size estimated",	list.size() >= count				);
+	mytest("size exact",		size(list) == count				);
+	mytest("size empty",		! empty(list)					);
+	mytest("size std::distance",	static_cast<typename List::size_type>(
+						std::distance(std::begin(list), std::end(list))
+					) == count					);
+	mytest("sizeof",		list.bytes() == bytes				);
 
 
 	// GET
 
-	p = list["3 city"];
-	mytest("get",			p->getVal() == "Sofia"		);
-
-	p = list["nonexistent"];
-	mytest("get non existent",	! p				);
-
+	mytest("get",			getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
+	mytest("get non existent",	getCheck(list, "nonexistent",	nullptr,	std::true_type{}	));
 
 
 	// OVERWRITE
@@ -127,14 +130,12 @@ void list_test(LIST &list){
 	list.insert( { key_over, "original"	} );
 	list.insert( { key_over, val_over	} );
 
-	p = list[key_over];
-	mytest("overwrite",		p->getVal() == val_over		);
-
+	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
 
 	// ERASE
 
-	list_populate(list);
+	listPopulate(list);
 
 	// remove non existent
 	list.erase("nonexistent");
@@ -148,19 +149,8 @@ void list_test(LIST &list){
 	// remove last
 	list.erase("4 os");
 
-	p = list["3 city"];
-
-	mytest("remove",		p->getVal() == "Sofia"		);
-	mytest("remove count",		list.size() == 1		);
-	mytest("remove sizeof",		list.bytes() == p->bytes()	);
-
-	// overwrite sizeof test
-	OPair o_sopair = { "3 city", "" };
-	const Pair &sopair = *o_sopair;
-
-	list.insert(std::move(o_sopair));
-	mytest("overwrite count",	list.size() == 1		);
-	mytest("overwrite sizeof",	list.bytes() == sopair.bytes()	);
+	mytest("overwrite",		getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
+	mytest("remove count",		list.size() == 1				);
 
 	// remove last element
 	list.erase("3 city");
@@ -168,53 +158,92 @@ void list_test(LIST &list){
 	// remove non existent from empty list
 	list.erase("nonexistent");
 
-	mytest("remove count",		list.size() == 0		);
-	mytest("remove empty",		list.empty()			);
-
+	mytest("remove count",		list.size() == 0				);
+	mytest("remove empty",		empty(list)					);
 
 
 	// ITERATOR
 
-	list_populate(list);
+	listPopulate(list);
 
 	iterator_test(list);
-	iterator_get_test(list);
+	iterator_test_get(list);
 
 	list.clear();
-	mytest("empty iterator",	list.begin() == list.end()	);
+	mytest("empty iterator",	std::begin(list) == std::end(list)		);
 
 
+	// MOVE C-TOR
 
-	// MOVE
+	listPopulate(list);
 
-	list_populate(list);
-
-	LIST mlist = std::move(list);
-	mytest("move c-tor",		mlist.bytes() == size		);
-
-	// checking if list.empty() == true
-	// is wrong and should not be tested,
-	// because it could be done via copy c-tor or swap
+	List const mlist = std::move(list);
+	mytest("move c-tor",		mlist.bytes() == bytes				);
 }
 
+#include "blackholelist.h"
 
-template <class LIST>
-void list_test(const char *name, LIST &list){
+template<>
+void list_test(hm4::BlackHoleList &list){
+	listPopulate(list);
+
+	mytest("size estimated",	list.size() == 0				);
+	mytest("size exact",		size(list) == 0					);
+	mytest("size empty",		empty(list)					);
+	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0	);
+	mytest("sizeof",		list.bytes() == 0				);
+
+	mytest("put",			list.insert( { "key", "val" } )			);
+	mytest("find",			list.find("key", std::true_type{}) == std::end(list)	);
+	mytest("remove",		list.erase("key")				);
+}
+
+// ==============================
+
+template <class List>
+void list_test(const char *name, List &list){
 	mytest.begin(name);
 
 	return list_test(list);
 }
 
+// ==============================
 
-template <class LIST>
+template <class List>
 void list_test(const char *name){
-	LIST list;
+	List list;
 
 	return list_test(name, list);
 }
 
-
+#include "multi/duallist.h"
 #include "skiplist.h"
+
+using MyDualList = hm4::multi::DualList<hm4::SkipList, hm4::BlackHoleList>;
+
+template <>
+void list_test<MyDualList>(const char *name){
+	hm4::SkipList		memtable;
+	hm4::BlackHoleList	disktable;
+
+	MyDualList list{ memtable, disktable };
+
+	return list_test(name, list);
+}
+
+#include "decoratorlist.h"
+
+using MyDecoratorList = hm4::DecoratorList<hm4::SkipList>;
+
+template <>
+void list_test<MyDecoratorList>(const char *name){
+	hm4::SkipList		memtable;
+	MyDecoratorList list{ memtable };
+
+	return list_test(name, list);
+}
+
+// ==============================
 
 static void skiplist_lanes_test() __attribute__((unused));
 
@@ -236,49 +265,7 @@ static void skiplist_lanes_test(){
 	list.printLanes();
 }
 
-
-#include "blackholelist.h"
-
-template<>
-void list_test(hm4::BlackHoleList &list){
-	list_populate(list);
-
-	mytest("count",			list.size() == 0			);
-	mytest("count estim",		list.size(true) == 0			);
-	mytest("empty",			list.empty()				);
-	mytest("sizeof",		list.bytes() == 0			);
-
-	mytest("put",			list.insert( { "key", "val" } )		);
-	mytest("get",			! list["key"]				);
-	mytest("remove",		list.erase("key")			);
-}
-
-
-#include "multi/duallist.h"
-
-using MyDualList = hm4::multi::DualList<hm4::SkipList, hm4::BlackHoleList>;
-
-template <>
-void list_test<MyDualList>(const char *name){
-	hm4::SkipList		memtable;
-	hm4::BlackHoleList	disktable;
-	MyDualList list{ memtable, disktable };
-
-	return list_test(name, list);
-}
-
-
-#include "decoratorlist.h"
-
-using MyDecoratorList = hm4::PureDecoratorList<hm4::SkipList>;
-
-template <>
-void list_test<MyDecoratorList>(const char *name){
-	hm4::SkipList		memtable;
-	MyDecoratorList list{ memtable };
-
-	return list_test(name, list);
-}
+// ==============================
 
 #include "vectorlist.h"
 #include "linklist.h"
@@ -288,10 +275,9 @@ int main(){
 	list_test<hm4::LinkList		>("LinkList"		);
 	list_test<hm4::SkipList		>("SkipList"		);
 	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
-
+	list_test<MyDualList		>("DualList"		);
 	list_test<MyDecoratorList	>("DecoratorList"	);
 
-	list_test<MyDualList		>("DualList"		);
 
 //	skiplist_lanes_test();
 

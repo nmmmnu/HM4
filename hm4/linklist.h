@@ -6,9 +6,13 @@
 namespace hm4{
 
 
-class LinkList : public IList<LinkList, true>{
+class LinkList{
 public:
-	class Iterator;
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
+public:
+	class iterator;
 
 public:
 	LinkList();
@@ -20,12 +24,11 @@ public:
 public:
 	bool clear();
 
-	const Pair *operator[](const StringRef &key) const;
-	bool erase(const StringRef &key);
+	bool erase(StringRef const &key);
 
 	bool insert(OPair &&data);
 
-	size_type size(bool const = false) const{
+	size_type size() const{
 		return dataCount_;
 	}
 
@@ -34,10 +37,11 @@ public:
 	}
 
 public:
-	Iterator lowerBound(const StringRef &key) const;
+	template<bool B>
+	iterator find(StringRef const &key, std::bool_constant<B> exact) const;
 
-	Iterator begin() const;
-	static constexpr Iterator end();
+	iterator begin() const;
+	static constexpr iterator end();
 
 private:
 	struct Node;
@@ -52,32 +56,37 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(const StringRef &key);
-	const Node *locateNode_(const StringRef &key, bool exact) const;
+	NodeLocator locate_(StringRef const &key);
+	const Node *locateNode_(StringRef const &key, bool exact) const;
 };
 
 // ==============================
 
-class LinkList::Iterator {
-protected:
-	friend class LinkList;
-
-	constexpr Iterator(const Node *node) : node_(node){}
+class LinkList::iterator {
+public:
+	constexpr iterator(const Node *node) : node_(node){}
 
 public:
-	Iterator &operator++();
-	const Pair &operator*() const;
+	using difference_type = LinkList::difference_type;
+	using value_type = const Pair;
+	using pointer = value_type *;
+	using reference = value_type &;
+	using iterator_category = std::forward_iterator_tag;
 
 public:
-	bool operator==(const Iterator &other) const{
+	iterator &operator++();
+	reference operator*() const;
+
+public:
+	bool operator==(iterator const &other) const{
 		return node_ == other.node_;
 	}
 
-	bool operator!=(const Iterator &other) const{
+	bool operator!=(iterator const &other) const{
 		return ! operator==(other);
 	}
 
-	const Pair *operator ->() const{
+	pointer operator ->() const{
 		return & operator*();
 	}
 
@@ -87,18 +96,16 @@ private:
 
 // ==============================
 
-inline auto LinkList::lowerBound(const StringRef &key) const -> Iterator{
-	if (key.empty())
-		return begin();
-
-	return locateNode_(key, false);
+template<bool B>
+inline auto LinkList::find(const StringRef &key, std::bool_constant<B> const exact) const -> iterator{
+	return locateNode_(key, exact.value);
 }
 
-inline auto LinkList::begin() const -> Iterator{
+inline auto LinkList::begin() const -> iterator{
 	return head_;
 }
 
-inline constexpr auto LinkList::end() -> Iterator{
+inline constexpr auto LinkList::end() -> iterator{
 	return nullptr;
 }
 

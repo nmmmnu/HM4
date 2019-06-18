@@ -1,4 +1,4 @@
-Sofia
-Plovdiv
-Elena
-Varna
+Sofia	1
+Plovdiv	1
+Elena	1
+Varna	1

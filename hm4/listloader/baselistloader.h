@@ -2,50 +2,57 @@
 #define BASE_TABLE_LOADER_H_
 
 #include "disk/disklist.h"
+#include "multi/collectionlist.h"
 
 #include <vector>
 
+
+
 namespace hm4{
 namespace listloader{
-namespace baselistloader_impl_{
+	namespace impl_{
 
-class BaseListLoader{
-public:
-	using DiskList		= disk::DiskList;
-	using container_type	= std::vector<DiskList>;
+		struct ContainerHelper{
+			using DiskList		= hm4::disk::DiskList;
+			using Container		= std::vector<DiskList>;
+			using CollectionList	= hm4::multi::CollectionList<Container>;
 
-public:
-	static constexpr MMAPFile::Advice	DEFAULT_ADVICE	= DiskList::DEFAULT_ADVICE;
-	static constexpr DiskList::OpenMode	DEFAULT_MODE	= DiskList::OpenMode::MINIMAL;
+			ContainerHelper(MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
+							advice_(advice),
+							mode_(mode){}
 
+			const auto &getList() const{
+				return list_;
+			}
 
-protected:
-	BaseListLoader(MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
-				advice_(advice),
-				mode_(mode){}
+			void copy(std::nullptr_t, std::nullptr_t){
+				container_.clear();
+			}
 
-public:
-	const container_type &operator*() const{
-		return container_;
-	}
+			template<class IT>
+			void copy(IT first, IT last){
+				size_t const size = narrow<typename Container::size_type>(std::distance(first, last));
 
+				container_.clear();
+				container_.reserve(size);
 
-protected:
-	void insert_(const StringRef &filename){
-		container_.emplace_back();
-                container_.back().open(filename, advice_, mode_);
-	}
+				for(auto it = std::make_reverse_iterator(last); it != std::make_reverse_iterator(first); ++it)
+					push_back_(*it);
+			}
 
-protected:
-	container_type		container_;
+		private:
+			void push_back_(const char *filename);
 
-private:
-	MMAPFile::Advice	advice_;
-	DiskList::OpenMode	mode_;
-};
+		private:
+			Container		container_;
 
+			CollectionList		list_{ container_ };
 
-} // namespace baselistloader_impl_
+			MMAPFile::Advice	advice_;
+			DiskList::OpenMode	mode_;
+		};
+
+	} // namespace impl_
 } // namespace listloader
 } // namespace
 

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "version.h"
+
 #include "skiplist.h"
 #include "flushlist.h"
 
@@ -10,9 +12,10 @@
 #include "filereader.h"
 #include "stringtokenizer.h"
 
-constexpr size_t	MEMLIST_SIZE	= 10 * 1024 * 1024;
+constexpr size_t	MEMLIST_SIZE	= 1ULL * 2 * 1024 * 1024 * 1024;
 constexpr size_t	PROCESS_STEP	= 1000 * 10;
 
+constexpr char		DELIMITER	= '\t';
 
 static int printUsage(const char *cmd);
 
@@ -68,10 +71,15 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 	while(reader){
 		const std::string &line = reader.getLine();
 
-		StringTokenizer tok{ line };
+		StringTokenizer const tok{ line, DELIMITER };
 
-		const StringRef &key = tok.getNext();
-		const StringRef &val = tok.getNext();
+		auto       it  = std::begin(tok);
+		auto const end = std::end(tok);
+
+		const StringRef &key = getNextToken(it, end);
+		const StringRef &val = getNextToken(it, end);
+
+		// std::cout << key << ':' << val << '\n';
 
 		if (! key.empty())
 			list.insert( { key, val } );
@@ -94,11 +102,13 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 
 static int printUsage(const char *cmd){
 	std::cout
+		<< "db_builder version " << hm4::version::str 								<< '\n'
+		<< '\n'
 		<< "Usage:"	<< '\n'
 		<< "\t"		<< cmd	<< " [file.txt] [lsm_path] - load file.txt, then create / add to lsm_path"	<< '\n'
 
-		<< "\t\tPath names must be written like this:"		<< '\n'
-		<< "\t\tExample 'directory/file.*.db'"			<< '\n'
+		<< "\t\tPath names must be written with quotes:"	<< '\n'
+		<< "\t\tExample directory/file.'*'.db"			<< '\n'
 		<< "\t\tThe '*', will be replaced with ID's"		<< '\n'
 
 		<< '\n';

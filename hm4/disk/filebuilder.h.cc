@@ -27,9 +27,7 @@ namespace FileBuilder{
 		void writeStr(std::ofstream &file, const SmallString<HLINE_SIZE> &key){
 			file.write(key.data(), narrow<std::streamsize>(key.size()));
 
-			constexpr MyAlign<HLINE_SIZE> alc;
-
-			alc.fwriteGap(file, key.size());
+			my_align::fwriteGap(file, key.size(), HLINE_SIZE);
 		}
 
 
@@ -47,7 +45,7 @@ namespace FileBuilder{
 				store_();
 			}
 
-			void operator()(const StringRef &current, uint64_t const pos){
+			void operator()(StringRef const &current, uint64_t const pos){
 				if (key_.equals(current))
 					return;
 
@@ -77,8 +75,8 @@ namespace FileBuilder{
 		// ==============================
 
 
-		template <class ITERATOR>
-		bool writeToFile(const ITERATOR &begin, const ITERATOR &end,
+		template <class IT>
+		bool writeToFile(IT first, IT last,
 						std::ofstream &file_meta,
 						std::ofstream &file_indx,
 						std::ofstream &file_line,
@@ -97,8 +95,8 @@ namespace FileBuilder{
 
 			CacheLineBuilder cacheLine(file_line);
 
-			for(auto it = begin; it != end; ++it){
-				const Pair &pair = *it;
+			for(; first != last; ++first){
+				const Pair &pair = *first;
 
 				if (!pair.isValid())
 					continue;
@@ -126,19 +124,14 @@ namespace FileBuilder{
 				// white cache line
 				cacheLine(pair.getKey(), count);
 
-
 				/* white the data */
 				{
 					pair.fwrite(file_data);
 
 					size_t bytes = pair.bytes();
 
-
-					if (aligned){
-						constexpr MyAlign<PairConf::ALIGN> alc;
-
-						bytes += alc.fwriteGap(file_data, pair.bytes());
-					}
+					if (aligned)
+						bytes += my_align::fwriteGap(file_data, pair.bytes(), PairConf::ALIGN);
 
 					index += bytes;
 				}
@@ -152,7 +145,7 @@ namespace FileBuilder{
 				createdMin = 0;
 
 			if (createdMax == std::numeric_limits<uint64_t>::min())
-				createdMin = 0;
+				createdMax = 0;
 
 			// now we miraculasly have the datacount.
 
@@ -177,9 +170,9 @@ namespace FileBuilder{
 	} // namespace filebuilder_impl_
 
 
-	template <class ITERATOR>
-	bool build(const StringRef &filename,
-					const ITERATOR &begin, const ITERATOR &end,
+	template <class IT>
+	bool build(StringRef const &filename,
+					IT first, const IT last,
 					bool const keepTombstones, bool const aligned){
 
 		constexpr auto mode = std::ios::out | std::ios::binary;
@@ -191,7 +184,7 @@ namespace FileBuilder{
 
 		using namespace filebuilder_impl_;
 
-		return writeToFile(begin, end, fileMeta, fileIndx, fileLine, fileData, keepTombstones, aligned);
+		return writeToFile(std::move(first), std::move(last), fileMeta, fileIndx, fileLine, fileData, keepTombstones, aligned);
 	}
 
 } // namespace

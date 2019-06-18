@@ -1,12 +1,14 @@
 #include "disklist.h"
 
-#include "myalign.h"
+//#include "myalign.h"
 #include "levelorderlookup.h"
 
 #include "disk/filenames.h"
 #include "disk/btreeindexnode.h"
 
 #include "smallstring.h"
+
+#include "binarysearch.h"
 
 //#define log__(...) /* nada */
 #include "logger.h"
@@ -18,11 +20,7 @@ namespace disk{
 
 constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
-
-
 // ==============================
-
-
 
 struct SmallNode{
 	char		key[PairConf::HLINE_SIZE];
@@ -31,12 +29,122 @@ struct SmallNode{
 
 static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 
+// ==============================
+
+namespace{
+	using iterator = DiskList::iterator;
+
+	// -----------------------------------
+
+	auto search_fix(BinarySearchResult<iterator> const result, DiskList const &list, std::true_type){
+		return result.found ? result.it : std::end(list);
+	}
+
+	auto search_fix(BinarySearchResult<iterator> const result, DiskList const &, std::false_type){
+		return result.it;
+	}
+
+	// -----------------------------------
+
+	int comp(Pair const &p, StringRef const &key){
+		return p.cmp(key);
+	};
+
+	auto searchBinary(StringRef const &key, iterator first, iterator last){
+		return binarySearch(first, last, key, comp);
+	}
+
+	auto searchBinary(StringRef const &key, DiskList const &list){
+		return searchBinary(key, std::begin(list), std::end(list));
+	}
+
+	// -----------------------------------
+
+	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<iterator>;
+
+	template<typename T>
+	auto dt(T const &a){
+		return static_cast<DiskList::difference_type>(a);
+	}
+
+//	void dt(DiskList::difference_type){}
+
+	auto searchHotLine(StringRef const &key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<iterator>{
+		size_t const nodesCount = line.sizeArray<SmallNode>();
+
+		const SmallNode *nodes = line->as<const SmallNode>(0, nodesCount);
+
+		if (!nodes)
+			return searchBinary(key, list);
+
+		auto comp = [](SmallNode const &node, StringRef const &key){
+			using SS = SmallString<PairConf::HLINE_SIZE>;
+
+			return SS::compare(node.key, key.data(), key.size());
+		};
+
+		// first try to locate the partition
+		auto const nodesEnd = nodes + nodesCount;
+		auto const x = binarySearch(nodes, nodesEnd, key, comp);
+
+		if (x.it == nodesEnd){
+			log__("Not found, in most right pos");
+
+			return { false, list.end() };
+		}
+
+		auto const listPos = dt( betoh<uint64_t>(x.it->pos) );
+
+		if ( listPos >= dt( list.size() ) ){
+			log__("Hotline corruption detected. Advice Hotline removal.");
+
+			return searchBinary(key, list);
+		}
+
+		if (x.found == false){
+			log__(
+				"Not found",
+				"pos", listPos,
+				"key",	StringRef{ x.it->key, PairConf::HLINE_SIZE }
+			);
+
+			return { false,  iterator{ list, listPos } };
+		}
+
+		// OK, is found in the hot line...
+
+		if (key.size() < PairConf::HLINE_SIZE){
+			// if key.size() == PairConf::HLINE_SIZE,
+			// this does not mean that key is found...
+
+			log__("Found, direct hit at pos", listPos);
+
+			return { true, iterator{ list, listPos } };
+		}
+
+		// binary inside the partition
+
+		auto listPosLast = x.it + 1 == nodesEnd ? dt(list.size()) : dt( betoh<uint64_t>( (x.it + 1)->pos) );
+
+		log__(
+			"Proceed with Binary Search", listPos, listPosLast,
+			"Hotline Key",	StringRef{ x.it->key, PairConf::HLINE_SIZE }
+		);
+
+		return searchBinary(key, list.begin() + listPos, list.begin() + listPosLast);
+	}
+
+} // anonymous namespace
+
 
 
 // ==============================
 
 
-bool DiskList::openMinimal_(const StringRef &filename, MMAPFile::Advice advice){
+
+bool DiskList::openMinimal_(StringRef const &filename, MMAPFile::Advice advice){
+	log__("Open disktable", filename);
+
 	metadata_.open(filenameMeta(filename));
 
 	if (metadata_ == false)
@@ -45,7 +153,6 @@ bool DiskList::openMinimal_(const StringRef &filename, MMAPFile::Advice advice){
 	// avoid worst case
 	if (metadata_.sorted() == false && advice == MMAPFile::Advice::SEQUENTIAL)
 		advice = DEFAULT_ADVICE;
-
 
 	bool const b1 =	mIndx_.open(filenameIndx(filename));
 	bool const b2 =	mData_.open(filenameData(filename), advice);
@@ -56,9 +163,11 @@ bool DiskList::openMinimal_(const StringRef &filename, MMAPFile::Advice advice){
 	return b1 && b2 && b3;
 }
 
-bool DiskList::openNormal_(const StringRef &filename, MMAPFile::Advice const advice){
+bool DiskList::openNormal_(StringRef const &filename, MMAPFile::Advice const advice){
 	if (openMinimal_(filename, advice) == false)
 		return false;
+
+	log__("Open additional files");
 
 	// ==============================
 
@@ -93,92 +202,6 @@ void DiskList::close(){
 
 
 
-auto DiskList::binarySearch_(const StringRef &key, size_type const start, size_type const end) const -> BinarySearchResult<size_type>{
-	auto comp = [](const auto &list, auto const index, const auto &key){
-		return list.cmpAt(index, key);
-	};
-
-	return binarySearch(*this, start, end, key, comp);
-}
-
-auto DiskList::hotLineSearch_(const StringRef &key) const -> BinarySearchResult<size_type>{
-	size_t const count =  mLine_.sizeArray<SmallNode>();
-
-	const SmallNode *nodes = mLine_->as<const SmallNode>(0, count);
-
-	if (!nodes)
-		return binarySearch_(key);
-
-	auto comp = [](const auto &list, auto const index, const auto &key){
-		using SS = SmallString<PairConf::HLINE_SIZE>;
-
-		return SS::compare(list[index].key, key.data(), key.size());
-	};
-
-	// first try to locate the partition
-	const auto x = binarySearch(nodes, size_t{ 0 }, count, key, comp);
-
-	if (x.pos >= count){
-		log__("Not found, in most right pos");
-		return { false, size() };
-	}
-
-	const SmallNode &result = nodes[x.pos];
-
-	const auto pos = betoh<uint64_t>(result.pos);
-
-	if ( pos >= size()){
-		log__("Hotline corruption detected. Advicing Hotline removal.");
-		return binarySearch_(key);
-	}
-
-	// this not work for ==,
-	// because the key might actually missing from the table
-	if (x.found && key.size() < PairConf::HLINE_SIZE){
-		log__("Found, direct hit at pos", pos);
-		return { true, pos };
-	}
-
-	if (x.found == false){
-		log__(
-			"Not found",
-			"pos", pos,
-			"key",	StringRef{ result.key, PairConf::HLINE_SIZE }
-		);
-
-		return { false, pos };
-	}
-
-	// binary inside the partition
-
-	size_type const start = pos;
-	size_type const end   = x.pos == count - 1 ? size() : betoh<uint64_t>(nodes[x.pos + 1].pos);
-
-	log__(
-		"Proceed with Binary Search", start, end,
-		"key",	StringRef{ result.key, PairConf::HLINE_SIZE }
-	);
-
-	return binarySearch_(key, start, end);
-}
-
-auto DiskList::search_(const StringRef &key) const -> BinarySearchResult<size_type>{
-	if (mTree_ && mKeys_){
-		log__("btree");
-		return btreeSearch_(key);
-
-	}else if (mLine_){
-		log__("hot line");
-		return hotLineSearch_(key);
-
-	}else{
-		log__("binary");
-		return binarySearch_(key);
-	}
-}
-
-// ==============================
-
 const Pair *DiskList::fdSafeAccess_(const Pair *blob) const{
 	if (!blob)
 		return nullptr;
@@ -205,6 +228,7 @@ const Pair *DiskList::fdGetAt_(size_type const index) const{
 	return fdSafeAccess_(blob);
 }
 
+#if 0
 const Pair *DiskList::fdGetNext_(const Pair *previous) const{
 	size_t size = alignedSize__(previous, aligned());
 
@@ -217,48 +241,45 @@ const Pair *DiskList::fdGetNext_(const Pair *previous) const{
 }
 
 size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
-	constexpr MyAlign<PairConf::ALIGN> alc;
-
 	size_t const size = blob->bytes();
 
-	return ! aligned ? size : alc.calc(size);
+	return ! aligned ? size : MyAlign<PairConf::ALIGN>::calc(size);
 }
-
-// ===================================
-
-DiskList::Iterator::Iterator(const DiskList &list, size_type const pos,
-							bool const sorted) :
-			list_(list),
-			pos_(std::min(pos, list.size())),
-			sorted_(sorted){}
-
-const Pair &DiskList::Iterator::operator*() const{
-	if (tmp_blob && pos_ == tmp_pos)
-		return *tmp_blob;
-
-	const Pair *blob;
-
-	if (sorted_ && tmp_blob && pos_ == tmp_pos + 1){
-		// get data without seek, walk forward
-		// this gives 50% performance
-		blob = list_.fdGetNext_(tmp_blob);
-	}else{
-		blob = list_.fdGetAt_(pos_);
-	}
-
-	tmp_pos		= pos_;
-	tmp_blob	= blob;
-
-	return *tmp_blob;
-}
-
-
+#endif
 
 
 
 // ==============================
 
 
+
+template<bool B>
+auto DiskList::search_(StringRef const &key, std::bool_constant<B> const exact) const -> iterator{
+	if (mTree_ && mKeys_){
+		log__("btree");
+		auto const x = searchBTree(key, *this);
+		return search_fix(x, *this, exact);
+
+	}else
+	if (mLine_){
+		log__("hot line");
+		auto const x = searchHotLine(key, *this, mLine_);
+		return search_fix(x, *this, exact);
+
+	}else
+	{
+		log__("binary");
+		auto const x = searchBinary(key, *this);
+		return search_fix(x, *this, exact );
+	}
+}
+
+template auto DiskList::search_(StringRef const &key, std::true_type  ) const -> iterator;
+template auto DiskList::search_(StringRef const &key, std::false_type ) const -> iterator;
+
+
+
+// ==============================
 
 
 
@@ -268,6 +289,8 @@ private:
 	using NodeData				= btree::NodeData;
 
 	using level_type			= btree::level_type;
+
+	using size_type				= DiskList::size_type;
 
 private:
 	constexpr static level_type VALUES	= btree::VALUES;
@@ -310,21 +333,17 @@ private:
 public:
 	BTreeSearchHelper(const DiskList &list, const StringRef &key) : list_(list), key_(key){}
 
-	BinarySearchResult<size_type> operator()(){
+	auto operator()(){
 		try{
 			return btreeSearch_();
 		}catch(const BTreeAccessError &e){
 			log__("Problem, switch to binary search (1)");
-			return binarySearchFallback_();
+			return searchBinary(key_, list_);
 		}
 	}
 
 private:
-	BinarySearchResult<size_type> binarySearchFallback_() const{
-		return list_.binarySearch_(key_);
-	}
-
-	BinarySearchResult<size_type> btreeSearch_(){
+	BinarySearchResult<iterator> btreeSearch_(){
 		size_t const nodesCount	= mTree_.size() / sizeof(Node);
 
 		const Node *nodes = mTree_->as<const Node>(0, nodesCount);
@@ -340,7 +359,7 @@ private:
 			const auto x = levelOrderBinarySearch_( nodes[pos] );
 
 			if (x.isResult)
-				return { true, x.result_index };
+				return { true, iterator{ list_, x.result_index } };
 
 			// Determine where to go next...
 
@@ -363,7 +382,7 @@ private:
 		log__("BTREE LEAF:", pos);
 		log__("Fallback to binary search", start, '-', end, ", width", end - start);
 
-		return list_.binarySearch_(key_, start, end);
+		return searchBinary(key_, iterator{ list_, start }, iterator{ list_, end } );
 	}
 
 	NodeResult levelOrderBinarySearch_(const Node &node){
@@ -439,94 +458,19 @@ private:
 
 
 
-
-
 // ==============================
 
 
 
+namespace{
+	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<iterator>{
+		DiskList::BTreeSearchHelper helper{list, key};
 
-
-inline auto DiskList::btreeSearch_(const StringRef &key) const -> BinarySearchResult<size_type>{
-	BTreeSearchHelper search(*this, key);
-	return search();
-}
-
+		return helper();
+	}
+} // anonymous namespace
 
 
 } // namespace disk
 } // namespace
-
-
-// ==============================
-
-
-#if 0
-// BTree NIL case
-
-if (offset == Node::NIL){
-	// special case go left
-	/*
-	 * input tree:
-	 *
-	 *       n
-	 *   2       n
-	 * 1   n   n   n
-	 *
-	 * output array:
-	 *
-	 * n 2 n 1 n n n
-	 */
-
-	node_pos = 2 * node_pos + 1;
-
-	log__("\t\tL:", node_pos, "NIL");
-
-	continue;
-}
-
-const char *DiskList::fdLine_(size_type const index) const{
-	struct line_type{
-		char ptr[PairConf::HLINE_SIZE];
-	};
-
-	const line_type *line_array = mLine_->as<const line_type>(0, narrow<size_t>(size()));
-
-	if (!line_array)
-		return nullptr;
-
-	return line_array[index].ptr;
-}
-
-int DiskList::cmpAt(size_type const index, const StringRef &key, cmp_line_t) const{
-	assert(!key.empty());
-
-	constexpr size_t hline_size = PairConf::HLINE_SIZE;
-
-	const char *ss = fdLine_(index);
-
-	if (ss){
-		size_t const size = strnlen(ss, hline_size);
-
-		int const result = - key.compare(ss, size);
-
-		if (result || size < hline_size)
-			return result;
-	}
-
-	return cmpAt(index, key, cmp_direct_t{});
-}
-
-
-int DiskList::cmpAt(size_type index, const StringRef &key) const{
-	assert(!key.empty());
-
-	if (mLine_)
-		return cmpAt(index, key, cmp_line_t{}	);
-	else
-		return cmpAt(index, key, cmp_direct_t{}	);
-}
-
-#endif
-
 

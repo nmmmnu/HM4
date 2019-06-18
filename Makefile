@@ -3,7 +3,7 @@ MYCC		= clang++ -fsanitize=memory
 MYCC		= clang++ -flto=thin
 MYCC		= clang++
 #MYCC		= g++ -fsanitize=address
-MYCC		= g++
+#MYCC		= g++
 
 # ======================================================
 

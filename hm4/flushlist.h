@@ -1,5 +1,5 @@
-#ifndef _FLUSH_LIST_H
-#define _FLUSH_LIST_H
+#ifndef _Flusher_List_H
+#define _Flusher_List_H
 
 #include "decoratorlist.h"
 
@@ -8,32 +8,28 @@
 namespace hm4{
 
 
-template <class LIST, class FLUSH, class LIST_LOADER = std::nullptr_t>
-class FlushList : public DecoratorList<LIST, FlushList<LIST, FLUSH, LIST_LOADER> >{
-	friend class IList<FlushList, LIST::MUTABLE>;
-
-	static_assert(LIST::MUTABLE, "List must be mutable");
-
+template <class List, class Flusher, class ListLoader = std::nullptr_t>
+class FlushList : public DecoratorList<List>{
 public:
-	constexpr static size_t MAX_SIZE = 1 * 1024 * 1024;
+	constexpr static size_t MAX_SIZE = 128 * 1024 * 1024;
 
 private:
-	template <class UFLUSH>
-	FlushList(LIST &list, UFLUSH &&flusher, LIST_LOADER *loader, size_t const maxSize = MAX_SIZE) :
-					DecoratorList<LIST, FlushList<LIST, FLUSH, LIST_LOADER> >(list),
+	template <class UFlusher>
+	FlushList(List &list, UFlusher &&flusher, ListLoader *loader, size_t const maxSize = MAX_SIZE) :
+					DecoratorList<List>(list),
 						list_(list),
-						flusher_(std::forward<UFLUSH>(flusher)),
+						flusher_(std::forward<UFlusher>(flusher)),
 						loader_(loader),
 						maxSize_(maxSize > MAX_SIZE ? maxSize : MAX_SIZE){}
 
 public:
-	template <class UFLUSH>
-	FlushList(LIST &list, UFLUSH &&flusher, LIST_LOADER &loader, size_t const maxSize = MAX_SIZE) :
-					FlushList(list, std::forward<UFLUSH>(flusher), &loader, maxSize){}
+	template <class UFlusher>
+	FlushList(List &list, UFlusher &&flusher, ListLoader &loader, size_t const maxSize = MAX_SIZE) :
+					FlushList(list, std::forward<UFlusher>(flusher), &loader, maxSize){}
 
-	template <class UFLUSH>
-	FlushList(LIST &list, UFLUSH &&flusher, size_t const maxSize = MAX_SIZE) :
-					FlushList(list, std::forward<UFLUSH>(flusher), nullptr, maxSize){}
+	template <class UFlusher>
+	FlushList(List &list, UFlusher &&flusher, size_t const maxSize = MAX_SIZE) :
+					FlushList(list, std::forward<UFlusher>(flusher), nullptr, maxSize){}
 
 	~FlushList(){
 		flush_();
@@ -82,14 +78,14 @@ private:
 	}
 
 	bool flush_(){
-		log__("Flushing data...");
+		log__("Flushing data...", "List size: ", list_.bytes(), "Max permited size: ", maxSize_);
 		return flusher_ << list_;
 	}
 
 private:
-	LIST		&list_;
-	FLUSH		flusher_;
-	LIST_LOADER	*loader_;
+	List		&list_;
+	Flusher		flusher_;
+	ListLoader	*loader_;
 	size_t		maxSize_;
 };
 

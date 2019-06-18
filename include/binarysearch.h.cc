@@ -1,19 +1,80 @@
-#include "comparator.h"
+template <
+		class Iterator,
+		class difference_type = typename std::iterator_traits<Iterator>::difference_type,
+		class T,
+		class Comp
+>
+auto linearSearch(
+		Iterator first, Iterator const &last,
+		T const &key,
+		Comp comp
+) -> BinarySearchResult<Iterator>{
+	for(; first != last; ++first){
+		int const cmp = comp(*first, key);
 
-template <class ARRAY, class SIZE, class KEY, class COMP>
-BinarySearchResult<SIZE> binarySearch(const ARRAY &list,
-				SIZE start, SIZE end,
-				const KEY &key,
-				const COMP &comp,
-				SIZE const minimum_distance){
+		if (cmp == 0){
+			// found
+			// index = pos
+			return { true, first };
+		}
+
+		if (cmp > 0)
+			break;
+	}
+
+	return { false, first };
+}
+
+
+
+
+
+template <
+		class Iterator,
+		class difference_type,
+		class T,
+		class Comp
+>
+auto binarySearch(
+		Iterator first, Iterator const &last,
+		T const &key,
+		Comp comp,
+		difference_type,
+		std::input_iterator_tag
+){
+	return linearSearch(std::move(first), last, key, comp);
+}
+
+
+
+
+
+template <
+		class Iterator,
+		class difference_type,
+		class T,
+		class Comp
+>
+auto binarySearch(
+		Iterator const &first, Iterator const &last,
+		T const &key,
+		Comp comp,
+		difference_type const minimum_distance,
+		std::random_access_iterator_tag
+) -> BinarySearchResult<Iterator>{
 	/*
 	 * Lazy based from Linux kernel...
 	 * http://lxr.free-electrons.com/source/lib/bsearch.c
 	 */
-	while (start + minimum_distance < end){
-		SIZE const mid = SIZE(start + ((end - start) >> 1));
+	auto start = difference_type{ 0 };
+	auto end   = last - first;
 
-		int const cmp = comp(list, mid, key);
+	Iterator const &array = first;
+
+	while (start + minimum_distance < end){
+		difference_type const mid = static_cast<difference_type>( start + ((end - start) >> 1) );
+
+		int const cmp = comp(array[mid], key);
 
 		if (cmp < 0){
 			// go right
@@ -24,36 +85,11 @@ BinarySearchResult<SIZE> binarySearch(const ARRAY &list,
 		}else{
 			// found
 			// index = mid
-			return { true, mid };
+			return { true, array + mid };
 		}
-
-		//log__(start, end, end - start);
 	}
 
 	// fallback to linear search...
-	for(; start < end; ++start){
-		int const cmp = comp(list, start, key);
-
-		if (cmp == 0){
-			// found
-			// index = left
-			return { true, start };
-		}
-
-		if (cmp > 0)
-			break;
-	}
-
-	return { false, start };
+	return linearSearch(array + start, array + end, key, comp);
 }
-
-// ===================================
-
-struct BinarySearchCompStdandard{
-	template <class ARRAY, class SIZE, class KEY>
-	int operator()(const ARRAY &list, SIZE const index, const KEY &key) const{
-		return comparator::comp(list[index], key);
-	}
-};
-
 

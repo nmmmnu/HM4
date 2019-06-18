@@ -10,16 +10,17 @@
 
 #include "listdbadapter.h"
 
+#include <vector>
+
 struct MyMutableDBAdapterFactory{
 	using ListLoader	= hm4::listloader::DirectoryListLoader;
-	using ImmutableList	= hm4::multi::CollectionList<ListLoader::container_type>;
 
 	using MemList		= hm4::SkipList;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
 	using Flusher		= hm4::flusher::DiskFileFlusher<IDGenerator>;
-	using MutableFlushList	= hm4::FlushList<MemList,Flusher,ListLoader>;
+	using MutableFlushList	= hm4::FlushList<MemList, Flusher, ListLoader>;
 
-	using DList		= hm4::multi::DualList<MutableFlushList, ImmutableList, /* erase tombstones */ true>;
+	using DList		= hm4::multi::DualList<MutableFlushList, ListLoader::List, /* erase tombstones */ true>;
 
 	using CommandObject	= MutableFlushList;
 	using DBAdapter		= ListDBAdapter<DList, CommandObject>;
@@ -28,23 +29,21 @@ struct MyMutableDBAdapterFactory{
 
 	MyMutableDBAdapterFactory(const StringRef &path, size_t const memListSize) :
 					loader_(path),
-					imList_(*loader_),
 					muflList_(
 						memList_,
 						Flusher{ IDGenerator{}, path },
 						loader_,
 						memListSize
 					),
-					list_(muflList_, imList_),
+					list_(muflList_, loader_.getList()),
 					adapter_(list_, /* cmd */ muflList_){}
 
-	MyDBAdapter &operator()(){
+	auto &operator()(){
 		return adapter_;
 	}
 
 private:
 	ListLoader		loader_;
-	ImmutableList		imList_;
 	MemList			memList_;
 	MutableFlushList	muflList_;
 	DList			list_;

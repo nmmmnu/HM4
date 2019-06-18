@@ -9,14 +9,17 @@
 namespace hm4{
 
 
-class SkipList : public IList<SkipList, true>{
+class SkipList{
 public:
-	using height_type = uint8_t;
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
+	using height_size_type = uint8_t;
 
 public:
-	static constexpr height_type MAX_HEIGHT		= 64;
+	constexpr static height_size_type MAX_HEIGHT = sizeof(uint64_t) * 8;
 
-	class Iterator;
+	class iterator;
 
 public:
 	SkipList();
@@ -26,12 +29,11 @@ public:
 public:
 	bool clear();
 
-	const Pair *operator[](const StringRef &key) const;
-	bool erase(const StringRef &key);
+	bool erase(StringRef const &key);
 
 	bool insert(OPair &&data);
 
-	size_type size(bool const = false) const noexcept{
+	size_type size() const noexcept{
 		return dataCount_;
 	}
 
@@ -40,16 +42,17 @@ public:
 	}
 
 public:
-	Iterator lowerBound(const StringRef &key) const;
-	Iterator begin() const;
-	static constexpr Iterator end();
+	template<bool B>
+	iterator find(StringRef const &key, std::bool_constant<B> exact) const;
+	iterator begin() const;
+	static constexpr iterator end();
 
 public:
 	void printLanes() const;
-	void printLane(height_type lane) const;
+	void printLane(height_size_type lane) const;
 
 private:
-	struct		Node;
+	struct 			Node;
 
 	template<typename T>
 	using HeightArray	= std::array<T,  MAX_HEIGHT>;
@@ -64,34 +67,40 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(const StringRef &key, bool shortcut_evaluation);
+	NodeLocator locate_(StringRef const &key, bool shortcut_evaluation);
 
-	const Node *locateNode_(const StringRef &key, bool const exact) const;
+	const Node *locateNode_(StringRef const &key, bool const exact) const;
 
-	static height_type getRandomHeight_();
+	static height_size_type getRandomHeight_();
 };
 
 // ==============================
 
-class SkipList::Iterator{
-private:
-	friend class SkipList;
-	constexpr Iterator(const Node *node) : node_(node){}
+class SkipList::iterator{
+public:
+	constexpr iterator(const Node *node) : node_(node){}
 
 public:
-	Iterator &operator++();
-	const Pair &operator*() const;
+	using difference_type = SkipList::difference_type;
+	using value_type = const Pair;
+	using pointer = value_type *;
+	using reference = value_type &;
+	using iterator_category = std::forward_iterator_tag;
 
 public:
-	bool operator==(const Iterator &other) const{
+	iterator &operator++();
+	reference operator*() const;
+
+public:
+	bool operator==(const iterator &other) const{
 		return node_ == other.node_;
 	}
 
-	bool operator!=(const Iterator &other) const{
+	bool operator!=(const iterator &other) const{
 		return ! operator==(other);
 	}
 
-	const Pair *operator ->() const{
+	pointer operator ->() const{
 		return & operator*();
 	}
 
@@ -101,18 +110,16 @@ private:
 
 // ==============================
 
-inline auto SkipList::lowerBound(const StringRef &key) const -> Iterator{
-	if (key.empty())
-		return begin();
-
-	return locateNode_(key, false);
+template<bool B>
+inline auto SkipList::find(const StringRef &key, std::bool_constant<B> const exact) const -> iterator{
+	return locateNode_(key, exact.value);
 }
 
-inline auto SkipList::begin() const -> Iterator{
+inline auto SkipList::begin() const -> iterator{
 	return heads_[0];
 }
 
-constexpr auto SkipList::end() -> Iterator{
+constexpr auto SkipList::end() -> iterator{
 	return nullptr;
 }
 

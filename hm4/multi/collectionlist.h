@@ -5,61 +5,64 @@
 
 #include "collectioniterator.h"
 
-#include <algorithm>    // std::count
-
+#include <numeric>	// std::accumulate
 
 namespace hm4{
 namespace multi{
 
 
-template <class CONTAINER>
-class CollectionList : public IList<CollectionList<CONTAINER>, false>{
+template <class StoreContainer>
+class CollectionList{
 public:
-	using List	= typename CONTAINER::value_type;
+	using List		= typename StoreContainer::value_type;
 
-	using Iterator	= CollectionIterator<List>;
+	using size_type		= typename List::size_type;
+	using difference_type	= typename List::difference_type;
 
-	using size_type	= typename CollectionList::size_type;
+	using iterator		= CollectionIterator<typename List::iterator>;
 
-public:
-	CollectionList(const CONTAINER &container) : container_(container){}
-
-public:
-	Iterator begin() const{
-		return Iterator(container_, typename Iterator::begin_iterator{} );
-	}
-
-	Iterator end() const{
-		return Iterator(container_, typename Iterator::end_iterator{}	 );
-	}
-
-	Iterator lowerBound(const StringRef &key) const{
-		return Iterator(container_, key);
-	}
+	using estimated_size	= std::true_type;
 
 public:
-	const Pair *operator[](const StringRef &key) const;
+	CollectionList(const StoreContainer &list) : list_	(&list){}
 
-	size_type size(bool const estimated = false) const{
-		return estimated ? sizeEstimated_(true) : this->sizeViaIterator_();
+	iterator begin() const{
+		return { std::begin(*list_), std::end(*list_), std::true_type{} };
 	}
 
-	size_t bytes() const;
+	iterator end() const{
+		return { std::begin(*list_), std::end(*list_), std::false_type{} };
+	}
+
+	template<bool B>
+	iterator find(StringRef const &key, std::bool_constant<B> const exact) const{
+		return { std::begin(*list_), std::end(*list_), key, exact };
+	}
+
+public:
+	size_type size() const{
+		auto sum = [](size_t const result, List const &list){
+			return result + list.size();
+		};
+
+		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
+	}
+
+	size_t bytes() const{
+		auto sum = [](size_type const result, List const &list){
+			return result + list.bytes();
+		};
+
+		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);
+	}
 
 private:
-	size_type sizeEstimated_(bool estimated) const;
-
-private:
-	const CONTAINER	&container_;
+	const StoreContainer	*list_;
 };
 
 
 } // namespace multi
-} //namespace
-
-// ===================================
-
-#include "collectionlist.h.cc"
+} // namespace
 
 #endif
 

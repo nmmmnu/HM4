@@ -12,11 +12,14 @@ PAIR_OBJ = $(O)pair.o $(O)mytime.o
 DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o
 
 $(A)db_net: $(O)db_net.o	\
-			$(O)directorylistloader.o $(O)myglob.o	\
 			$(PAIR_OBJ) $(DISKLIST_OBJ)		\
 								\
 			$(O)skiplist.o				\
 			$(O)idgeneratordate.o			\
+								\
+			$(O)directorylistloader.o 		\
+			$(O)baselistloader.o			\
+			$(O)myglob.o				\
 								\
 			$(O)signalguard.o			\
 			$(O)pollselector.o $(O)redisprotocol.o $(O)sockets.o

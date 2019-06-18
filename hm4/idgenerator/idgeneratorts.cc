@@ -9,8 +9,8 @@ namespace hm4{
 namespace idgenerator{
 
 
-void IDGeneratorTS::_format(std::ostream &buff, uint32_t value) const{
-	if (_hex){
+void IDGeneratorTS::format_(std::ostream &buff, uint32_t const value) const{
+	if (hex_){
 		buff	<< std::setfill('0') << std::setw(8) << std::hex;
 	}else{
 		buff	<< std::setfill('0') << std::setw(10);
@@ -24,11 +24,11 @@ std::string IDGeneratorTS::operator()() const{
 
 	auto now = MyTime::now();
 
-	_format(buff, MyTime::uncombine(now));
+	format_(buff, MyTime::uncombine(now));
 
-	buff << ".";
+	buff << '.';
 
-	_format(buff, MyTime::uncombine2(now));
+	format_(buff, MyTime::uncombine2(now));
 
 	return buff.str();
 }

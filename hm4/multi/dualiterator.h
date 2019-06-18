@@ -1,58 +1,110 @@
 #ifndef _DUAL_MULTI_TABLE_ITERATOR_H
 #define _DUAL_MULTI_TABLE_ITERATOR_H
 
-#include "basemultiiterator_.h"
+#include "iteratorpair.h"
+
+#include <iostream>
 
 namespace hm4{
 namespace multi{
 
-template <class TABLE1, class TABLE2>
-class DualIterator : public basemultiiterator_impl_::MultiIteratorTags_{
+template <class FirstIterator, class SecondIterator>
+class DualIterator{
 public:
-	using value_type = const Pair;
+	DualIterator(DualIterator const &other) = default;
+	DualIterator(DualIterator &&other) = default;
 
 private:
-	using IteratorPair1	= basemultiiterator_impl_::IteratorPair_<TABLE1>;
-	using IteratorPair2	= basemultiiterator_impl_::IteratorPair_<TABLE2>;
+	template<class T>
+	using it_traits_DT = typename std::iterator_traits<T>::difference_type;
+
+	using FirstIteratorPair  = typename multiiterator_impl_::IteratorPair<FirstIterator>;
+	using SecondIteratorPair = typename multiiterator_impl_::IteratorPair<SecondIterator>;
 
 public:
-	template<bool B>
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const base_iterator<B> &tag) :
-					it1_(table1, tag),
-					it2_(table2, tag){}
+	using difference_type	= it_traits_DT<FirstIterator>;
+	using value_type	= const Pair;
+	using pointer		= value_type *;
+	using reference		= value_type &;
+	using iterator_category	= std::forward_iterator_tag;
 
-	DualIterator(const TABLE1 &table1, const TABLE2 &table2, const StringRef &key) :
-					it1_(table1, key),
-					it2_(table2, key){}
+public:
+	DualIterator(FirstIteratorPair first, SecondIteratorPair second) :
+					first_(std::move(first)),
+					second_(std::move(second)),
+					pair_(getDereference_()){}
 
-	DualIterator &operator++();
+	template<class List1, class List2, class... Args>
+	DualIterator(List1 const &first, List2 const &second, Args&& ...args) :
+					DualIterator(
+						{ first,  std::forward<Args>(args)... },
+						{ second, std::forward<Args>(args)... }
+					){}
 
-	const Pair &operator*() const;
+	DualIterator &operator++(){
+		constexpr bool fullTimeCompare = false;
 
-	bool operator==(const DualIterator &other) const{
-		return it1_ == other.it1_ && it2_ == other.it2_;
+		int const cmp = multiiterator_impl_::comp(first_, second_, fullTimeCompare);
+
+		if (cmp <= 0 && first_)
+			++first_;
+
+		if (cmp >= 0 && second_)
+			++second_;
+
+		// don't over optimize this...
+		updateDereference_();
+
+		return *this;
+	}
+
+	reference operator *() const{
+		return *pair_;
+	}
+
+	bool operator==(DualIterator const &other) const{
+		return first_ == other.first_ && second_ == other.second_;
 	}
 
 public:
-	bool operator!=(const DualIterator &other) const{
+	bool operator!=(DualIterator const &other) const{
 		return ! operator==(other);
 	}
 
-	const Pair *operator ->() const{
+	pointer operator->() const{
 		return & operator*();
 	}
 
 private:
-	IteratorPair1	it1_;
-	IteratorPair2	it2_;
+	const Pair *getDereference_() const{
+		return multiiterator_impl_::comp(first_, second_) < 0 ?
+			first_.ptr() :
+			second_.ptr()
+		;
+	}
+
+	void updateDereference_(){
+		pair_ = getDereference_();
+	}
+
+private:
+	FirstIteratorPair	first_;
+	SecondIteratorPair	second_;
+
+	const Pair              *pair_;
+
+private:
+	static_assert(
+		std::is_same<
+			it_traits_DT<FirstIterator>,
+			it_traits_DT<SecondIterator>
+		>::value,
+		"TABLE1::Iterator::difference_type must be same as TABLE2::iterator::difference_type"
+	);
 };
 
 } // namespace multi
 } // namespace
-
-
-#include "dualiterator.h.cc"
-
 
 #endif
 

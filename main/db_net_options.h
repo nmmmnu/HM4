@@ -34,7 +34,7 @@ public:
 	}
 
 	static void print(){
-		print__("immutable",		"1",	"Start immutable server (1/0)"		);
+		print__("immutable",		"1",	"Start mutable = 0, immutable = 1"	);
 		print__("db_path",		"-",	"Path to database"			);
 
 		print__("host",			"-",	"TCP host to listen (not working)"	);
@@ -52,7 +52,7 @@ private:
 
 		auto const default_value = param;
 
-		param = stou_safe<T>(value, default_value);
+		param = ston_safe<T>(value, default_value);
 	}
 
 	static void assign_(std::string &param, const StringRef &value){
@@ -68,7 +68,9 @@ private:
 		std::cout
 			<< '\t'
 			<< std::setw(20) << std::left << name
+			<< std::setw( 0) << '=' << ' '
 			<< std::setw( 8) << std::left << def
+			<< std::setw( 0) << ';' << ' '
 			<< description
 			<< '\n'
 		;

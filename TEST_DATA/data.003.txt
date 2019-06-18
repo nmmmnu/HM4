@@ -1,5 +1,5 @@
-Bonn
-Berlin
-Duesseldorf
-Koeln
-Muenchen
+Bonn	3
+Berlin	3
+Duesseldorf	3
+Koeln	3
+Muenchen	3

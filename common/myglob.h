@@ -5,22 +5,19 @@
 
 #include <glob.h>	// glob
 
-#include <vector>
-
 class MyGlob final{
 public:
-	using container_type = std::vector<StringRef>;
+	MyGlob(const StringRef &path){
+		open(path);
+	}
 
-public:
 	MyGlob() = default;
 
 	MyGlob(const MyGlob &other) = delete;
 	MyGlob& operator=(MyGlob other) = delete;
 
-	MyGlob(MyGlob &&other);
-	MyGlob& operator=(MyGlob &&other);
-
-	void swap(MyGlob &other);
+	MyGlob(MyGlob &&other) = default;
+	MyGlob& operator=(MyGlob &&other) = default;
 
 	~MyGlob() noexcept{
 		close();
@@ -30,39 +27,26 @@ public:
 	bool open(const StringRef &path) noexcept;
 	void close() noexcept;
 
+	bool isOpen() const noexcept{
+		return isOpen_;
+	}
+
 public:
-	const StringRef &operator[](size_t const index) const{
-		return data_[index];
+	size_t size() const noexcept{
+		return globresults_.gl_pathc;
 	}
 
-	container_type::size_type size() const{
-		return data_.size();
+	auto begin() const noexcept{
+		return globresults_.gl_pathv;
 	}
 
-	container_type::const_iterator begin() const{
-		return data_.begin();
-	}
-
-	container_type::const_iterator end() const{
-		return data_.end();
-	}
-
-	container_type::const_reverse_iterator rbegin() const{
-		return data_.rbegin();
-	}
-
-	container_type::const_reverse_iterator rend() const{
-		return data_.rend();
+	auto end() const noexcept{
+		return globresults_.gl_pathv + globresults_.gl_pathc;
 	}
 
 private:
-	static bool open_(const char *path, glob_t &globresults) noexcept;
-	static bool checkFile_(const char *filename) noexcept;
-
-private:
-	glob_t		globresults_;
 	bool		isOpen_		= false;
-	container_type	data_;
+	glob_t		globresults_;
 };
 
 #endif

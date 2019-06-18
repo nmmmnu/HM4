@@ -12,23 +12,19 @@
 namespace hm4{
 
 
-class VectorList : public IList<VectorList, true>{
-	friend class IList;
-
-	using OVector    = std::vector<OPair>;
-	using OVectorIt  = VectorList::OVector::const_iterator;
+class VectorList{
+	using OVector	= std::vector<OPair>;
+	using OVectorIt	= OVector::const_iterator;
 
 public:
-	class Iterator;
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
+public:
+	class iterator;
 
 public:
 	VectorList() = default;
-
-	VectorList(VectorList &&other) :
-				vector_		(std::move(other.vector_	)),
-				dataSize_	(std::move(other.dataSize_	)){
-		other.dataSize_ = 0;
-	}
 
 private:
 	OVector		vector_;
@@ -43,106 +39,159 @@ public:
 
 	bool erase(const StringRef &key);
 
-	const Pair *operator[](size_type const index) const{
+	Pair const &operator[](size_type const index) const{
 		assert( index < size() );
 
-		return vector_[index].get();
-	}
-
-	int cmpAt(size_type index, const StringRef &key) const{
-		assert( index < size() );
-		assert(!key.empty());
-
-		const OPair &p = operator[](index);
-
-		return p.cmp(key);
+		return *vector_[index].get();
 	}
 
 	bool insert(OPair &&data);
 
-	size_type size(bool const = false) const{
+	size_type size() const{
 		return vector_.size();
+	}
+
+	size_type sizeEstimated() const{
+		return size();
 	}
 
 	size_t bytes() const{
 		return dataSize_;
 	}
 
-	const Pair *operator[](const StringRef &key) const{
-		assert(!key.empty());
-
-		const auto x = binarySearch_(key);
-
-		return x.found ? operator[]( x.pos ) : nullptr;
-	}
-
 public:
-	Iterator lowerBound(const StringRef &key) const noexcept;
-	Iterator begin() const noexcept;
-	Iterator end() const noexcept;
-
-private:
-	static OVectorIt beginOffset__(const OVector &vector, size_type const pos){
-		return vector.begin() + narrow<OVector::difference_type>(pos);
-	}
-
-private:
-	BinarySearchResult<size_type> binarySearch_(const StringRef &key) const;
+	iterator find(StringRef const &key, std::true_type) const noexcept;
+	iterator find(StringRef const &key, std::false_type) const noexcept;
+	iterator begin() const noexcept;
+	iterator end() const noexcept;
 };
 
 // ==============================
 
-class VectorList::Iterator{
-private:
-	friend class VectorList;
-
-	template<class UIT>
-	constexpr Iterator(UIT &&it) : it_(std::forward<UIT>(it)){}
+class VectorList::iterator{
+public:
+	constexpr iterator(OVectorIt const &it) : ptr(it){}
+	constexpr iterator(OVectorIt &&it) : ptr(std::move(it)){}
 
 public:
-	Iterator &operator++(){
-		++it_;
+	using difference_type	= VectorList::difference_type;
+	using value_type	= const Pair;
+	using pointer		= value_type *;
+	using reference		= value_type &;
+	using iterator_category	= std::random_access_iterator_tag;
+
+public:
+	// increment / decrement
+	constexpr
+	iterator &operator++(){
+		++ptr;
 		return *this;
 	}
 
-	const Pair &operator*() const{
-		return **it_;
+	constexpr
+	iterator &operator--(){
+		--ptr;
+		return *this;
+	}
+
+	constexpr
+	iterator operator++(int){
+		auto tmp = ptr;
+		++ptr;
+		return { tmp };
+	}
+
+	constexpr
+	iterator operator--(int){
+		auto tmp = ptr;
+		--ptr;
+		return { tmp };
 	}
 
 public:
-	bool operator==(const Iterator &other) const{
-		return it_ == other.it_;
+	// arithmetic
+	// https://www.boost.org/doc/libs/1_50_0/boost/container/vector.hpp
+
+	iterator& operator+=(difference_type const off){
+		ptr += off;
+		return *this;
 	}
 
-	bool operator!=(const Iterator &other) const{
-		return ! operator==(other);
+	constexpr
+	iterator operator +(difference_type const off) const{
+		return { ptr + off };
 	}
 
-	const Pair *operator ->() const{
+	iterator& operator-=(difference_type const off){
+		ptr -= off;
+		return *this;
+	}
+
+	constexpr
+	iterator operator -(difference_type const off) const{
+		return { ptr - off };
+	}
+
+	friend iterator operator +(difference_type const  off, iterator const &it){
+		return it.ptr + off;
+	}
+
+	difference_type operator -(iterator const &other) const{
+		return ptr - other.ptr;
+	}
+
+public:
+	// compare
+	bool operator==(iterator const &other) const{
+		return ptr == other.ptr;
+	}
+
+	bool operator!=(iterator const &other) const{
+		return ptr != other.ptr;
+	}
+
+	bool operator >(iterator const &other) const{
+		return ptr >  other.ptr;
+	}
+
+	bool operator>=(iterator const &other) const{
+		return ptr >= other.ptr;
+	}
+
+	bool operator <(iterator const &other) const{
+		return ptr <  other.ptr;
+	}
+
+	bool operator<=(iterator const &other) const{
+		return ptr <= other.ptr;
+	}
+
+public:
+	// dereference
+	reference operator*() const{
+		return **ptr;
+	}
+
+	pointer operator->() const{
 		return & operator*();
 	}
 
+	reference operator[](difference_type const off) const{
+		return *ptr[off];
+	}
+
 private:
-	OVectorIt	it_;
+	OVectorIt	ptr;
 };
 
 // ==============================
 
-inline auto VectorList::begin() const noexcept -> Iterator{
-	return vector_.begin();
+inline auto VectorList::begin() const noexcept -> iterator{
+	return std::begin(vector_);
 }
 
-inline auto VectorList::end() const noexcept -> Iterator{
-	return vector_.end();
-}
-
-inline auto VectorList::lowerBound(const StringRef &key) const noexcept -> Iterator{
-	if (key.empty())
-		return begin();
-
-	const auto x = binarySearch_(key);
-
-	return beginOffset__(vector_, x.pos);
+inline auto VectorList::end() const noexcept -> iterator{
+	return std::end(vector_);
 }
 
 } // namespace

@@ -8,27 +8,22 @@
 namespace hm4{
 
 
-template <class LIST, class CRPT_USER>
-class DecoratorList : public IList<CRPT_USER, LIST::MUTABLE>{
+template <class LIST>
+class DecoratorList{
 public:
-	using Iterator		= typename LIST::Iterator;
+	using iterator		= typename LIST::iterator;
 
-	using size_type		= typename DecoratorList::size_type;
+	using size_type		= typename LIST::size_type;
+	using difference_type	= typename LIST::difference_type;
 
-protected:
+public:
 	DecoratorList(LIST &list) : list_(list){}
-
 
 public:
 	// Immutable Methods
 
-	const Pair *operator[](const StringRef &key) const{
-		assert(!key.empty());
-		return list_[key];
-	}
-
-	size_type size(bool const estimated = false) const{
-		return list_.size(estimated);
+	size_type size() const{
+		return list_.size();
 	}
 
 	size_t bytes() const{
@@ -36,16 +31,17 @@ public:
 	}
 
 public:
-	Iterator begin() const{
+	iterator begin() const{
 		return list_.begin();
 	}
 
-	Iterator end() const{
+	iterator end() const{
 		return list_.end();
 	}
 
-	Iterator lowerBound(const StringRef &key) const{
-		return list_.lowerBound(key);
+	template<bool B>
+	iterator find(const StringRef &key, std::bool_constant<B> const exact) const{
+		return list_.find(key, exact);
 	}
 
 public:
@@ -55,7 +51,7 @@ public:
 		return list_.clear();
 	}
 
-	bool erase(const StringRef &key){
+	bool erase(StringRef const &key){
 		assert(!key.empty());
 		return list_.erase(key);
 	}
@@ -66,12 +62,6 @@ public:
 
 private:
 	LIST	&list_;
-};
-
-
-template <class LIST>
-struct PureDecoratorList : public DecoratorList<LIST, PureDecoratorList<LIST> >{
-	PureDecoratorList(LIST &list) : DecoratorList<LIST, PureDecoratorList<LIST> >(list){}
 };
 
 

@@ -7,54 +7,52 @@
 namespace hm4{
 
 
-class BlackHoleList : public IList<BlackHoleList, true>{
+class BlackHoleList{
 public:
-	using Iterator = const Pair *;
+	using size_type	= config::size_type;
+
+	using iterator	= const Pair *;
 
 public:
-	constexpr
-	bool clear() const noexcept{
+	constexpr static
+	bool clear(){
 		return true;
 	}
 
-	constexpr
-	const Pair *operator[](const StringRef &) const noexcept{
-		return nullptr;
-	}
-
-	constexpr
-	bool erase(const StringRef &) const noexcept{
+	constexpr static
+	bool erase(StringRef const &){
 		return true;
 	}
 
-	constexpr
-	bool insert(const OPair &) const {
+	constexpr static
+	bool insert(OPair const &){
 		return true;
 	}
 
-	constexpr
-	size_type size(bool const = false) const noexcept{
+	constexpr static
+	size_type size(){
 		return 0;
 	}
 
-	constexpr
-	size_t bytes() const noexcept{
+	constexpr static
+	size_t bytes(){
 		return 0;
 	}
 
 public:
-	constexpr
-	Iterator lowerBound(const StringRef &) const noexcept{
+	template<bool B>
+	constexpr static
+	iterator find(StringRef const &, std::bool_constant<B>){
 		return nullptr;
 	}
 
-	constexpr
-	Iterator begin() const{
+	constexpr static
+	iterator begin(){
 		return nullptr;
 	}
 
-	constexpr
-	Iterator end() const{
+	constexpr static
+	iterator end(){
 		return nullptr;
 	}
 };

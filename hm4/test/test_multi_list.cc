@@ -1,4 +1,9 @@
 #include "pair.h"
+#include "ilist.h"
+
+#include <unistd.h> 	// usleep
+
+#include <iostream>
 
 using hm4::Pair;
 using hm4::OPair;
@@ -7,220 +12,261 @@ using hm4::OPair;
 
 MyTest mytest;
 
-
-template <class IT>
-void iterator_deref(const IT &it, const IT &et, const char *value){
-	mytest("*it   deref",	it != et && (*it).getVal() == value	);
-	mytest(" it-> deref",	it != et &&   it->getVal() == value	);
+inline void sleep(){
+	usleep(100);
 }
 
-template <class IT>
-void iterator_advance(IT &it, const IT &et, const char *value){
-	iterator_deref(it, et, value);
-	++it;
-}
+template <class Iterator>
+bool iteratorDereference(Iterator const &it, Iterator const &et, const char *value){
+	if (false){
+		std::cout
+			<< (it != et ? "*" : "end")	<< ' '
+			<< value			<< '\n';
 
-template <class LIST>
-void iterator_test(const LIST &list){
-	auto it = list.begin();
-	auto et = list.end();
-
-	iterator_advance(it, et, "Niki"		);
-	iterator_advance(it, et, "22"		);
-	iterator_advance(it, et, "Sofia"	);
-	iterator_advance(it, et, "Linux"	);
-
-	mytest("*it end()",	it == et				);
-}
-
-template <class LIST>
-void list_lowerBound(const LIST &list, const char *key, const char *value){
-	auto it = list.lowerBound(key);
-	auto et = list.end();
-
-	if (value){
-
-	iterator_advance(it, et, value);
-
-	}else{
-
-	mytest("it == et",		it == et			);
-
+		if (it != et)
+			print(*it);
 	}
+
+	return
+		it != et &&
+		  it->getVal() == value &&
+		(*it).getVal() == value
+	;
 }
 
-template <class LIST>
-void iterator_get_test(const LIST &list){
-	list_lowerBound(list, "1",	"Niki"	);
-	list_lowerBound(list, "1 name",	"Niki"	);
-	list_lowerBound(list, "2",	"22"	);
-	list_lowerBound(list, "2 age",	"22"	);
-	list_lowerBound(list, "3",	"Sofia"	);
-	list_lowerBound(list, "3 city",	"Sofia"	);
-	list_lowerBound(list, "4",	"Linux"	);
-	list_lowerBound(list, "4 os",	"Linux"	);
-	list_lowerBound(list, "4 osX",	nullptr	);
-	list_lowerBound(list, "5",	nullptr	);
-	list_lowerBound(list, "6",	nullptr	);
+template <class List, bool B>
+bool getCheck(List const &list, const char *key, const char *value, std::bool_constant<B> const exact){
+	auto const it = list.find(key, exact);
+	auto const et = list.end();
 
-	list_lowerBound(list, "",	"Niki"	);
+	return iteratorDereference(it, et, value);
 }
 
-template <class LIST>
-void table_test(const LIST &list, typename LIST::size_type const size, size_t const bytes){
+template <class List>
+bool getCheck(List const &list, const char *key){
+	auto const it = list.find(key, std::true_type{});
+	auto const et = list.end();
+
+	return it == et;
+}
+
+// ==============================
+
+template <class List>
+void iterator_test_get(const List &list){
+	constexpr std::false_type	N{};
+	constexpr std::true_type	Y{};
+
+	mytest("it", 			getCheck(list, "1",		"Niki",		N	));
+	mytest("it", 			getCheck(list, "1 name",	"Niki",		Y	));
+	mytest("it", 			getCheck(list, "2",		"22",		N	));
+	mytest("it", 			getCheck(list, "2 age",		"22",		Y	));
+	mytest("it", 			getCheck(list, "3",		"Sofia",	N	));
+	mytest("it", 			getCheck(list, "3 city",	"Sofia",	Y	));
+	mytest("it", 			getCheck(list, "4",		"Linux",	N	));
+	mytest("it", 			getCheck(list, "4 os",		"Linux",	Y	));
+	mytest("it", 			getCheck(list, "4 osX"					));
+	mytest("it", 			getCheck(list, "5"					));
+	mytest("it", 			getCheck(list, "6"					));
+
+	// this is no longer supported
+	//mytest("it", 			getCheck(list, "",		"Niki",		std::false_type{}	));
+}
+
+template <class List>
+void iterator_test(List const &list){
+	auto       it = std::begin(list);
+	auto const et = std::end(list);
+
+	auto advance = [&it, &et](const char *value){
+		mytest("it deref", 	iteratorDereference(it, et, value)	);
+		++it;
+	};
+
+	advance("Niki"	);
+	advance("22"	);
+	advance("Sofia"	);
+	advance("Linux"	);
+
+	mytest("*it end()",		it == et				);
+}
+
+// ==============================
+
+template <class List>
+void list_test(const List &list, typename List::size_type const count, size_t const bytes){
+
 	// GENERAL
 
-	mytest("count",			list.size() == size		);
-	mytest("count estim",		list.size(true) >= size		);
-	mytest("empty",			! list.empty()			);
-	mytest("sizeof",		list.bytes() == bytes		);
+	mytest("size estimated",	list.size() >= count				);
+//	mytest("size exact",		size(list) == count				);
+	mytest("size empty",		! empty(list)					);
+//	mytest("size std::distance",	static_cast<typename List::size_type>(
+//						std::distance(std::begin(list), std::end(list))
+//					) == count					);
 
-
-	const Pair *p;
+	mytest("sizeof",		list.bytes() == bytes				);
 
 
 	// GET
 
-	p = list["3 city"];
-	mytest("get",			p->getVal() == "Sofia"		);
+	mytest("get",			getCheck(list, "3 city",	"Sofia", std::true_type{}	));
+	mytest("get non existent",	getCheck(list, "nonexistent"					));
 
-	p = list["nonexistent"];
-	mytest("get non existent",	! p				);
+	//std::cout << list.bytes() << ' ' << bytes << '\n';
 
 
 	// ITERATOR
 
 	iterator_test(list);
-	iterator_get_test(list);
+	iterator_test_get(list);
 
 
-	// MOVE
+	// MOVE C-TOR
 
-	const LIST mlist = std::move(list);
-	mytest("move c-tor 1",		mlist.bytes() == bytes		);
-	mytest("move c-tor 2",		! list.empty()			);
+	List const mlist = std::move(list);
+	mytest("move c-tor",		mlist.bytes() == bytes				);
+
 }
 
+// ==============================
 
 #include "multi/duallist.h"
 
-template <class LIST>
-size_t list_insert(LIST &list, OPair &&p){
-	const size_t size = p->bytes();
+template <class List>
+size_t listInsert(List &list, const char *key, const char *value){
+	OPair p = { key, value };
+
+	size_t const size = p->bytes();
 	list.insert(std::move(p));
 	return size;
 }
 
-template <class LIST>
+template <class List>
 void test_DualList(const char *name){
 	mytest.begin(name);
 
-	LIST list1;
-	LIST list2;
+	List list1;
+	List list2;
 
-	size_t bytes = 0;
+	size_t bytes =
+		// to have older timestamp
+		listInsert(list2, "3 city",	"DIRTY"	);
 
-	// to have older timestamp
-	bytes += list_insert(list2, {"3 city",	"DIRTY"	});
+	sleep();
 
-	bytes += list_insert(list1, {"1 name",	"Niki"	});
-	bytes += list_insert(list1, {"3 city",	"Sofia"	});
+	bytes +=
+		listInsert(list1, "1 name",	"Niki"	) +
+		listInsert(list1, "3 city",	"Sofia"	) +
+		listInsert(list2, "2 age",	"22"	) +
+		listInsert(list2, "4 os",	"Linux"	) +
+	0;
 
-	bytes += list_insert(list2, {"2 age",	"22"	});
-	bytes += list_insert(list2, {"4 os",	"Linux"	});
+	using MyMultiList = hm4::multi::DualList<const List, const List>;
 
-	using MyMultiTable = hm4::multi::DualList<const LIST>;
+	MyMultiList list{ list1, list2 };
 
-	MyMultiTable table{ list1, list2 };
-
-	return table_test(table, 4, bytes);
+	return list_test(list, 4, bytes);
 }
 
-template <class LIST>
+template <class List>
 void test_DualListEmpty(const char *name){
+	List list1;
+	List list2;
+
+	size_t bytes =
+		listInsert(list2, "1 name",	"Niki"	) +
+		listInsert(list2, "2 age",	"22"	) +
+		listInsert(list2, "3 city",	"Sofia"	) +
+		listInsert(list2, "4 os",	"Linux"	) +
+	0;
+
+	using MyMultiList = hm4::multi::DualList<List const, List const>;
+
 	mytest.begin(name);
 
-	LIST list1;
-	LIST list2;
+	MyMultiList list01{ list1, list2 };
 
-	size_t bytes = 0;
+	list_test(list01, 4, bytes);
 
-	bytes += list_insert(list2, {"1 name",	"Niki"	});
-	bytes += list_insert(list2, {"2 age",	"22"	});
-	bytes += list_insert(list2, {"3 city",	"Sofia"	});
-	bytes += list_insert(list2, {"4 os",	"Linux"	});
+	mytest.begin(name);
 
-	using MyMultiTable = hm4::multi::DualList<const LIST>;
+	MyMultiList list10{ list1, list2 };
 
-	MyMultiTable table{ list1, list2 };
-
-	return table_test(table, 4, bytes);
+	list_test(list10, 4, bytes);
 }
 
 #include "multi/collectionlist.h"
 
-template <class LIST>
+template <class List>
 void test_CollectionList(const char *name){
-	mytest.begin(name);
-
-	using MyContainer = std::vector<LIST>;
-	MyContainer container;
+	using Vector = std::vector<List>;
+	Vector v;
 
 	size_t bytes = 0;
 
 	{
-		LIST l;
+		List l;
 		l.insert( {"1 name",		"DIRTY"	} );
 		l.insert( {"2 age",		"DIRTY"	} );
 
 		bytes += l.bytes();
 
-		container.push_back(LIST{});
-		container.push_back(std::move(l));
-		container.push_back(LIST{});
+		v.push_back(List{});
+		v.push_back(std::move(l));
+		v.push_back(List{});
 	}
 
+	sleep();
+
 	{
-		LIST l;
+		List l;
 		l.insert( {"1 name",		"Niki"	} );
 		l.insert( {"2 age",		"DIRTY"	} );
 
 		bytes += l.bytes();
 
-		container.push_back(LIST{});
-		container.push_back(std::move(l));
-		container.push_back(LIST{});
+		v.push_back(List{});
+		v.push_back(std::move(l));
+		v.push_back(List{});
 	}
 
+	sleep();
+
 	{
-		LIST l;
+		List l;
 		l.insert( {"2 age",		"22"	} );
 		l.insert( {"3 city",		"Sofia"	} );
 		l.insert( {"4 os",		"Linux"	} );
 
 		bytes += l.bytes();
 
-		container.push_back(LIST{});
-		container.push_back(std::move(l));
-		container.push_back(LIST{});
+		v.push_back(List{});
+		v.push_back(std::move(l));
+		v.push_back(List{});
 	}
 
-	using MyMultiTable = hm4::multi::CollectionList<MyContainer>;
+	{
+		mytest.begin(name);
 
-	MyMultiTable table{ container };
+		using MyMultiTable = hm4::multi::CollectionList<Vector>;
 
-	return table_test(table, 4, bytes);
+		MyMultiTable table{ v };
+
+		list_test(table, 4, bytes);
+	}
 }
 
+// ==============================
 
 #include "vectorlist.h"
 
-using List = hm4::VectorList;
-
 int main(){
-	test_DualList<hm4::VectorList		>("DualList"		);
-	test_DualListEmpty<hm4::VectorList	>("DualList (Empty)"	);
-	test_CollectionList<hm4::VectorList	>("CollectionList"	);
+	using List = hm4::VectorList;
+
+	test_DualListEmpty	<List>("DualList (Empty)"	);
+	test_DualList		<List>("DualList"		);
+	test_CollectionList	<List>("CollectionList"		);
 
 	return mytest.end();
 }

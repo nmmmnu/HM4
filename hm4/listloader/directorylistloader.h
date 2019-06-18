@@ -1,20 +1,19 @@
-#ifndef DIRECTORY_TABLE_LOADER_H_
-#define DIRECTORY_TABLE_LOADER_H_
+#ifndef DIRECTORY_LIST_LOADER_H_
+#define DIRECTORY_LIST_LOADER_H_
 
 #include "baselistloader.h"
-
 
 namespace hm4{
 namespace listloader{
 
-
-class DirectoryListLoader : public baselistloader_impl_::BaseListLoader{
+class DirectoryListLoader{
 public:
-	using container_type	= std::vector<DiskList>;
+	using DiskList	= hm4::disk::DiskList;
+	using List 	= const impl_::ContainerHelper::CollectionList;
 
 public:
-	DirectoryListLoader(std::string path, MMAPFile::Advice const advice = DEFAULT_ADVICE, DiskList::OpenMode const mode = DEFAULT_MODE) :
-				BaseListLoader(advice, mode),
+	DirectoryListLoader(std::string path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				container_(advice, mode),
 				path_(std::move(path)){
 		refresh_();
 	}
@@ -30,17 +29,25 @@ public:
 		return refresh();
 	}
 
+	/* const */ List &getList() const{
+		return container_.getList();
+	}
+
+public:
+	static bool checkIfLoaderNeed(StringRef const &s);
+
 private:
 	void refresh_();
 
 private:
-	std::string	path_;
+	impl_::ContainerHelper	container_;
+
+	std::string		path_;
 };
 
 
 } // namespace listloader
 } // namespace
-
 
 #endif
 

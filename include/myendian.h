@@ -1,7 +1,8 @@
 #ifndef MY_ENDIAN_H_
 #define MY_ENDIAN_H_
 
-#include <type_traits>
+//#include <type_traits>
+#include "my_type_traits.h"
 
 #include "mybyteswap.h"
 
@@ -17,7 +18,7 @@ namespace myendian_impl_{
 	public:
 		constexpr static bool value = mem == 0x0011;
 
-		using type = std::integral_constant<bool, value>;
+		using type = std::bool_constant<value>;
 
 	//	static_assert(value == false, "");
 	};

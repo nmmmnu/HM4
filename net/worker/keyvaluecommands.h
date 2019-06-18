@@ -19,7 +19,9 @@ public:
 
 		SET		,
 		SETEX		,
-		DEL
+		DEL		,
+
+		INCR
 	};
 
 	constexpr static Command get(const StringRef &cmd){
@@ -47,11 +49,16 @@ public:
 		case "set"_sr.hash()		:
 		case "SET"_sr.hash()		: return Command::SET		;
 
-		case "setex"_sr.hash()			:
+		case "setex"_sr.hash()		:
 		case "SETEX"_sr.hash()		: return Command::SETEX		;
 
 		case "del"_sr.hash()		:
 		case "DEL"_sr.hash()		: return Command::DEL		;
+
+		case "incr"_sr.hash()		:
+		case "INCR"_sr.hash()		:
+		case "incrby"_sr.hash()		:
+		case "INCRBY"_sr.hash()		: return Command::INCR		;
 
 		default				: return Command::UNKNOWN	;
 		}

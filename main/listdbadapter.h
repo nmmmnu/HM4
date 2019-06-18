@@ -1,9 +1,11 @@
 #ifndef LIST_DBADAPTER_H_
 #define LIST_DBADAPTER_H_
 
-#include "stou_safe.h"
+#include "ston_safe.h"
 
 #include <sstream>
+
+#include <iostream>
 
 template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
@@ -28,15 +30,15 @@ public:
 	std::string get(const StringRef &key) const{
 		assert(!key.empty());
 
-		const auto p = list_[key];
+		const auto p = list_.find(key, std::true_type{} );
 
-		if (p && p->isValid(/* tomb */ true))
+		if (p != std::end(list_) && p->isValid(/* tomb */ true))
 			return p->getVal();
 		else
 			return {};
 	}
 
-	std::vector<std::string> getall(const StringRef &key, uint16_t const resultsCount, bool const prefixCheck) const{
+	std::vector<std::string> getall(const StringRef &key, uint16_t const resultsCount, const StringRef &prefix) const{
 		auto const maxResults  = my_clamp__(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
 		std::vector<std::string> result;
@@ -44,14 +46,13 @@ public:
 		// reserve x2 because of hgetall
 		result.reserve(maxResults * 2);
 
-		const auto bit = key.empty() ? list_.begin() : list_.lowerBound(key);
-		const auto eit = list_.end();
+		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 
 		size_t c = 0;
-		for(auto it = bit; it != eit; ++it){
+		for(; it != std::end(list_); ++it){
 			const auto &resultKey = it->getKey();
 
-			if (prefixCheck && ! samePrefix__(key, resultKey))
+			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey))
 				break;
 
 			result.push_back(resultKey);
@@ -71,7 +72,7 @@ public:
 	std::string info() const{
 		std::stringstream ss;
 
-		ss	<< "Keys (estimated): "	<< list_.size(true)		<< '\n'
+		ss	<< "Keys (estimated): "	<< list_.size()			<< '\n'
 			<< "Size: "		<< list_.bytes()		<< '\n'
 			<< "Mutable: "		<< (MUTABLE ? "Yes" : "No")	<< '\n'
 		;
@@ -99,7 +100,7 @@ public:
 	void set(const StringRef &key, const StringRef &val, const StringRef &exp = {} ){
 		assert(!key.empty());
 
-		auto const expires = stou_safe<uint32_t>(exp);
+		auto const expires = ston_safe<uint32_t>(exp);
 
 		list_.insert( { key, val, expires } );
 	}
@@ -108,6 +109,23 @@ public:
 		assert(!key.empty());
 
 		return list_.erase(key);
+	}
+
+	std::string incr(const StringRef &key, int64_t const val){
+		assert(!key.empty());
+
+		const auto p = list_.find(key, std::true_type{} );
+
+		int64_t n = val;
+
+		if (p != std::end(list_) && p->isValid(/* tomb */ true))
+			n += ston_safe<int64_t>(p->getVal());
+
+		std::string s = ntos_safe<int64_t>(n);
+
+		set(key, s);
+
+		return s;
 	}
 
 private:

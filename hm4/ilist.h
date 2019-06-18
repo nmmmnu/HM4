@@ -1,66 +1,93 @@
-#ifndef _MY_LIST_H
-#define _MY_LIST_H
+#ifndef MY_LIST_H_
+#define MY_LIST_H_
 
 #include <cstdint>
-
-#include <cassert>
+#include <iterator>	// std::distance
 
 #include "pair.h"
 
+#include "mynarrow.h"
+#include "my_type_traits.h"
 
 namespace hm4{
 
+namespace config{
+	using size_type		= size_t;
+	using difference_type	= ptrdiff_t;
 
-class IListConf{
-public:
-	using size_type		= uint64_t;
-	using difference_type	= int64_t;
-};
+	static_assert(sizeof(size_type      ) == 8, "You need 64bit system!");
+	static_assert(sizeof(difference_type) == 8, "You need 64bit system!");
+
+	constexpr size_type	LIST_PRINT_COUNT	= 10;
+}
 
 // ==============================
 
-template <class T, bool MU>
-class IList : public IListConf{
-protected:
-	constexpr static size_type PRINT_COUNT	= 10;
+template<class LIST>
+void print(LIST const &list, typename LIST::size_type count = config::LIST_PRINT_COUNT){
+	for(auto const &p : list){
+		print(p);
 
-public:
-	constexpr static bool MUTABLE	= MU;
-
-public:
-	// Immutable Methods
-
-	void print(size_type count = PRINT_COUNT) const{
-		for(const Pair &p : *self() ){
-			hm4::print(p);
-			if (--count == 0)
-				return;
-		}
+		if (--count == 0)
+			return;
 	}
+}
 
-	bool empty() const{
-		return ! self()->size(true);
-	}
+// ==============================
 
-protected:
-	size_type sizeViaIterator_() const{
-		// Slooooow....
-		size_type count = 0;
+namespace ilist_impl_{
+	template<class LIST, class = void>
+	struct size_estimated : std::false_type{};
 
-		auto bit = self()->begin();
-		auto eit = self()->end();
+	template<class LIST>
+	struct size_estimated<LIST, std::void_t<typename LIST::estimated_size> >: std::true_type{};
+} // namespace ilist_impl
 
-		for(auto it = bit; it != eit; ++it)
-			++count;
+// ==============================
 
-		return count;
-	}
+template<class LIST>
+auto size(LIST const &list, std::false_type){
+	return list.size();
+}
 
-private:
-	const T *self() const{
-		return static_cast<const T*>(this);
-	}
-};
+template<class LIST>
+auto size(LIST const &list, std::true_type){
+	return narrow<typename LIST::size_type>(
+		std::distance(std::begin(list), std::end(list))
+	);
+}
+
+template<class LIST>
+auto size(LIST const &list){
+	using size_estimated = ilist_impl_::size_estimated<LIST>;
+
+	return size(list, size_estimated{});
+}
+
+// ==============================
+
+template<class LIST>
+bool empty(LIST const &list){
+	return size(list, std::false_type{}) == 0;
+}
+
+// ==============================
+
+template<class List>
+auto getIterator(List const &list, std::true_type){
+	return std::begin(list);
+}
+
+template<class List>
+auto getIterator(List const &list, std::false_type){
+	return std::end(list);
+}
+
+template<class List, bool B>
+auto getIterator(List const &list, StringRef const &key, std::bool_constant<B> const exact){
+	return list.find(key, exact);
+}
+
 
 
 } // namespace

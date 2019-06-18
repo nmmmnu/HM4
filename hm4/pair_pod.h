@@ -5,7 +5,7 @@
 #include <memory>	// unique_ptr
 #include <ostream>
 #include "myendian.h"
-#include "my_void_t.h"
+#include "my_type_traits.h"
 #include "mynarrow.h"
 #include "comparator.h"
 
@@ -45,6 +45,7 @@ public:
 
 private:
 	Pair() noexcept = default;
+	Pair(const Pair &p) noexcept = delete;
 
 	static void *operator new(size_t, size_t const size){
 		return ::operator new(size);
@@ -151,7 +152,7 @@ public:
 
 	// ==============================
 
-	void print_() const noexcept;
+	void print() const noexcept;
 
 	void fwrite(std::ostream & os) const{
 		os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
@@ -231,23 +232,8 @@ static_assert(std::is_pod<Pair>::value, "Pair must be POD type");
 
 // ==============================
 
-inline void print(const Pair &pair){
-	pair.print_();
-}
-
-namespace pair_impl_{
-	template<class T>
-	void printDereference(const T &ptr){
-		if (ptr)
-			print(*ptr);
-		else
-			printf("--- pair is empty ---\n");
-	}
-}
-
-template<class T, class = my_void_t<decltype( *std::declval<T> )> >
-void print(const T &it){
-	print(*it);
+inline void print(Pair const &pair){
+	pair.print();
 }
 
 } // namespace

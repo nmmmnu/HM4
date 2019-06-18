@@ -8,16 +8,16 @@ namespace disk{
 
 
 namespace FileBuilder{
-	template <class ITERATOR>
-	static bool build(const StringRef &filename,
-				const ITERATOR &begin, const ITERATOR &end,
-				bool keepTombstones, bool const aligned);
+	template <class IT>
+	bool build(StringRef const &filename,
+				IT first, IT last,
+				bool keepTombstones, bool aligned);
 
-	template <class LIST>
-	static bool build(const StringRef &filename,
-				const LIST &list,
-				bool keepTombstones, bool const aligned){
-		return build(filename, list.begin(), list.end(), keepTombstones, aligned);
+	template <class List>
+	bool build(StringRef const &filename,
+				List const &list,
+				bool const keepTombstones, bool const aligned){
+		return build(filename, std::begin(list), std::end(list), keepTombstones, aligned);
 	}
 }
 

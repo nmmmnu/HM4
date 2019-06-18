@@ -92,15 +92,17 @@ bool LinkList::insert(OPair&& newdata){
 	return true;
 }
 
-const Pair *LinkList::operator[](const StringRef &key) const{
+#if 0
+const Pair *LinkList::operator[](StringRef const &key) const{
 	assert(!key.empty());
 
 	const Node *node = locateNode_(key, true);
 
 	return node ? node->data.get() : nullptr;
 }
+#endif
 
-bool LinkList::erase(const StringRef &key){
+bool LinkList::erase(StringRef const &key){
 	assert(!key.empty());
 
 	const auto loc = locate_(key);
@@ -125,7 +127,7 @@ void LinkList::clear_(){
 	head_ = nullptr;
 }
 
-auto LinkList::locate_(const StringRef &key) -> NodeLocator{
+auto LinkList::locate_(StringRef const &key) -> NodeLocator{
 	assert(!key.empty());
 
 	Node **jtable = & head_;
@@ -149,7 +151,7 @@ auto LinkList::locate_(const StringRef &key) -> NodeLocator{
 	return { jtable, nullptr };
 }
 
-auto LinkList::locateNode_(const StringRef &key, bool const exact) const -> const Node *{
+auto LinkList::locateNode_(StringRef const &key, bool const exact) const -> const Node *{
 	assert(!key.empty());
 
 	for(const Node *node = head_; node; node = node->next){
@@ -172,13 +174,13 @@ auto LinkList::locateNode_(const StringRef &key, bool const exact) const -> cons
 // ==============================
 
 
-LinkList::Iterator &LinkList::Iterator::operator++(){
+auto LinkList::iterator::operator++() -> iterator &{
 	node_ = node_->next;
 
 	return *this;
 }
 
-const Pair &LinkList::Iterator::operator*() const{
+const Pair &LinkList::iterator::operator*() const{
 	assert(node_);
 
 	return *(node_->data);

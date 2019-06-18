@@ -74,8 +74,12 @@ public:
 
 		int const r = hkey.compare(key);
 
-		if (r || key.size() <= hkey.capacity())
+
+		if (r || key.size() < PairConf::HLINE_SIZE){
+			// if key.size() == PairConf::HLINE_SIZE,
+			// this does not mean that key is found...
 			return r;
+		}
 
 		return pp->cmp(key);
 	}
@@ -85,16 +89,17 @@ private:
 	std::unique_ptr<const Pair>		pp;
 };
 
-//static_assert( std::is_trivially_copyable<OPair>::value, "OPair is not trivially copyable" );
-
 // ==============================
 
 inline void swap(OPair &p1, OPair &p2) noexcept{
 	p1.swap(p2);
 }
 
-inline void print(const OPair &pair){
-	print(*pair);
+inline void print(OPair const &pair){
+	if (pair)
+		print(*pair);
+	else
+		printf("%s\n", PairConf::EMPTY_MESSAGE);
 }
 
 } // namespace
