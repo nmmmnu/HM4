@@ -143,35 +143,30 @@ namespace {
 
 
 
-bool EPollSelector::iterator::operator ==(iterator const &other) const{
-	return pos == other.pos;
-}
+} // namespace selector
+} // namespace
 
-bool EPollSelector::iterator::operator !=(iterator const &other) const{
-	return pos != other.pos;
-}
 
-EPollSelector::iterator &EPollSelector::iterator::operator ++(){
-	++pos;
-	return *this;
-}
+#include "hidden_pointer_iterator.h.cc"
 
-FDResult EPollSelector::iterator::operator *() const{
+
+using namespace net::selector;
+
+
+template<>
+FDResult hidden_pointer_iterator<epoll_event, FDResult>::operator *() const{
 	return getFDStatus(*pos);
 }
 
+template bool hidden_pointer_iterator<epoll_event, FDResult>::operator ==(hidden_pointer_iterator const &other) const;
+template auto hidden_pointer_iterator<epoll_event, FDResult>::operator ++() -> hidden_pointer_iterator &;
 
 
-EPollSelector::iterator EPollSelector::begin() const{
+auto EPollSelector::begin() const -> iterator{
 	return fds_.data();
 }
 
-EPollSelector::iterator EPollSelector::end() const{
+auto EPollSelector::end() const -> iterator{
 	return fds_.data() + fdsCount_;
 }
-
-
-
-} // namespace selector
-} // namespace
 

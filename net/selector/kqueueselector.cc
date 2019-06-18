@@ -12,13 +12,13 @@ namespace selector{
 
 namespace{
 
-auto event2native(const FDEvent event) -> decltype(EVFILT_READ){
-	switch(event){
-		default:
-		case FDEvent::READ	: return EVFILT_READ;
-		case FDEvent::WRITE	: return EVFILT_WRITE;
+	auto event2native(const FDEvent event) -> decltype(EVFILT_READ){
+		switch(event){
+			default:
+			case FDEvent::READ	: return EVFILT_READ;
+			case FDEvent::WRITE	: return EVFILT_WRITE;
+		}
 	}
-}
 
 }
 
@@ -146,36 +146,31 @@ namespace{
 }
 
 
+} // namespace selector
+} // namespace
 
-bool KQueueSelector::iterator::operator ==(iterator const &other) const{
-	return pos == other.pos;
-}
 
-bool KQueueSelector::iterator::operator !=(iterator const &other) const{
-	return pos != other.pos;
-}
+#include "hidden_pointer_iterator.h.cc"
 
-KQueueSelector::iterator & KQueueSelector::iterator::operator ++(){
-	++pos;
-	return *this;
-}
 
-FDResult KQueueSelector::iterator::operator *() const{
+using namespace net::selector;
+
+
+template<>
+FDResult hidden_pointer_iterator<kevent, FDResult>::operator *() const{
 	return getFDStatus(*pos);
 }
 
+template bool hidden_pointer_iterator<kevent, FDResult>::operator ==(hidden_pointer_iterator const &other) const;
+template auto hidden_pointer_iterator<kevent, FDResult>::operator ++() -> hidden_pointer_iterator &;
 
 
-KQueueSelector::iterator KQueueSelector::begin() const{
+
+auto KQueueSelector::begin() const -> iterator{
 	return fds_.data();
 }
 
-KQueueSelector::iterator KQueueSelector::end() const{
+auto KQueueSelector::end() const -> iterator{
 	return fds_.data() + fds_.size();
 }
-
-
-
-} // namespace selector
-} // namespace
 

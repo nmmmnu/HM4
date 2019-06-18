@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "hidden_pointer_iterator.h"
+
 struct kevent;
 
 namespace net{
@@ -13,7 +15,7 @@ namespace selector{
 
 class KQueueSelector{
 public:
-	class iterator;
+	using iterator = hidden_pointer_iterator<kevent, FDResult>;
 
 	KQueueSelector(uint32_t maxFD_);
 	KQueueSelector(KQueueSelector &&other) /* = default */;
@@ -41,23 +43,6 @@ private:
 	std::vector<struct kevent>	fds_;
 	int				fdsCount_	= 0;
 	uint32_t			fdsConnected_	= 0;
-};
-
-
-
-class KQueueSelector::iterator{
-public:
-	using hidden_t = struct kevent;
-
-	iterator(const hidden_t *pos) : pos(pos){}
-
-	bool operator ==(iterator const &other) const;
-	bool operator !=(iterator const &other) const;
-	iterator &operator ++();
-	FDResult operator *() const;
-
-private:
-	const hidden_t *pos;
 };
 
 

@@ -5,15 +5,16 @@
 
 #include <vector>
 
+#include "hidden_pointer_iterator.h"
+
 struct pollfd;
 
 namespace net{
 namespace selector{
 
-
 class PollSelector{
 public:
-	class iterator;
+	using iterator = hidden_pointer_iterator<pollfd, FDResult>;
 
 	PollSelector(uint32_t maxFD);
 	PollSelector(PollSelector &&other) /* = default */;
@@ -31,23 +32,6 @@ public:
 
 private:
 	std::vector<pollfd>	fds_;
-};
-
-
-
-class PollSelector::iterator{
-public:
-	using hidden_t = pollfd;
-
-	iterator(const hidden_t *pos) : pos(pos){}
-
-	bool operator ==(iterator const &other) const;
-	bool operator !=(iterator const &other) const;
-	iterator &operator ++();
-	FDResult operator *() const;
-
-private:
-	const hidden_t *pos;
 };
 
 

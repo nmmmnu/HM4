@@ -8,6 +8,7 @@
 
 #include <algorithm>	// for_each
 
+
 namespace net{
 namespace selector{
 
@@ -137,36 +138,33 @@ namespace{
 }
 
 
+} // namespace selector
+} // namespace
 
-bool PollSelector::iterator::operator ==(iterator const &other) const{
-	return pos == other.pos;
-}
 
-bool PollSelector::iterator::operator !=(iterator const &other) const{
-	return pos != other.pos;
-}
+#include "hidden_pointer_iterator.h.cc"
 
-PollSelector::iterator &PollSelector::iterator::operator ++(){
-	++pos;
-	return *this;
-}
 
-FDResult PollSelector::iterator::operator *() const{
+using namespace net::selector;
+
+
+template<>
+FDResult hidden_pointer_iterator<pollfd, FDResult>::operator *() const{
 	return getFDStatus(*pos);
 }
 
+template bool hidden_pointer_iterator<pollfd, FDResult>::operator ==(hidden_pointer_iterator const &other) const;
+template auto hidden_pointer_iterator<pollfd, FDResult>::operator ++() -> hidden_pointer_iterator &;
 
 
-PollSelector::iterator PollSelector::begin() const{
+auto PollSelector::begin() const -> iterator{
 	return fds_.data();
 }
 
-PollSelector::iterator PollSelector::end() const{
+auto PollSelector::end() const -> iterator{
 	return fds_.data() + fds_.size();
 }
 
 
 
-} // namespace selector
-} // namespace
 
