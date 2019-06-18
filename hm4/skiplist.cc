@@ -26,7 +26,7 @@ namespace skiplist_impl_{
 auto SkipList::getRandomHeight_() -> height_type{
 	uint64_t const r = skiplist_impl_::rand64();
 
-	return skiplist_impl_::lsb(r, 1, MAX_HEIGHT);
+	return skiplist_impl_::lsb<height_type>(r, 1, MAX_HEIGHT);
 }
 
 // ==============================
