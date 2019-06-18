@@ -12,7 +12,7 @@ namespace selector{
 
 namespace{
 
-auto kQueueConvert(const FDEvent event) -> decltype(EVFILT_READ){
+auto event2native(const FDEvent event) -> decltype(EVFILT_READ){
 	switch(event){
 		default:
 		case FDEvent::READ	: return EVFILT_READ;
@@ -89,15 +89,22 @@ WaitStatus KQueueSelector::wait(int const timeout){
 }
 
 bool KQueueSelector::insertFD(int const fd, FDEvent const event){
+	if ( fdsConnected_ >= fds_.size() )
+		return false;
+
 	struct kevent ev;
 
-	int const event2 = kQueueConvert(event);
+	int const event2 = event2native(event);
 
 	EV_SET(&ev, fd, event2, EV_ADD, 0, 0, nullptr);
 
 	int const result = kevent(kqueueFD_, &ev, 1, nullptr, 0, nullptr);
 
-	return result >= 0;
+	if (result < 0)
+		return false;
+
+	++fdsConnected_;
+	return true;
 }
 
 bool KQueueSelector::removeFD(int const fd){
@@ -109,7 +116,12 @@ bool KQueueSelector::removeFD(int const fd){
 	EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
 	int const result2 = kevent(kqueueFD_, &ev, 1, nullptr, 0, nullptr);
 
-	return result1 >= 0 && result2 >= 0;
+	if (result1 < 0 || result2 < 0)
+		return false;
+
+	--fdsConnected_;
+	return true;
+
 }
 
 

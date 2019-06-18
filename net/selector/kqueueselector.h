@@ -40,6 +40,7 @@ private:
 	int				kqueueFD_;
 	std::vector<struct kevent>	fds_;
 	int				fdsCount_	= 0;
+	uint32_t			fdsConnected_	= 0;
 };
 
 

@@ -1,5 +1,5 @@
-#ifndef _NET_POLL_SELECTOR_H
-#define _NET_POLL_SELECTOR_H
+#ifndef NET_POLL_SELECTOR_H_
+#define NET_POLL_SELECTOR_H_
 
 #include "selectordefs.h"
 
