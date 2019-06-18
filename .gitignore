@@ -22,5 +22,7 @@ TEST_DATA.*
 
 callgrind.out.*
 
+*.swp
+
 bin
 obj
