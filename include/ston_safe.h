@@ -13,7 +13,7 @@ namespace impl_{
 		static_assert(! std::is_same<T,          char>::value, "T must not be char type");
 		static_assert(! std::is_same<T,   signed char>::value, "T must not be char type");
 		static_assert(! std::is_same<T, unsigned char>::value, "T must not be char type");
-	};
+	}
 } // namespace
 
 template <typename T>

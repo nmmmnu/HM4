@@ -48,7 +48,7 @@ namespace{
 
 	int comp(Pair const &p, StringRef const &key){
 		return p.cmp(key);
-	};
+	}
 
 	auto searchBinary(StringRef const &key, iterator first, iterator last){
 		return binarySearch(first, last, key, comp);

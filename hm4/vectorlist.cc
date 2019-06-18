@@ -5,7 +5,7 @@ namespace hm4{
 namespace{
 	int comp(OPair const &p, StringRef const &key){
 		return p.cmp(key);
-	};
+	}
 
 	template<class T>
 	auto binarySearch(T &v, StringRef const &key){

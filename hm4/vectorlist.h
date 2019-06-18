@@ -82,26 +82,22 @@ public:
 
 public:
 	// increment / decrement
-	constexpr
 	iterator &operator++(){
 		++ptr;
 		return *this;
 	}
 
-	constexpr
 	iterator &operator--(){
 		--ptr;
 		return *this;
 	}
 
-	constexpr
 	iterator operator++(int){
 		auto tmp = ptr;
 		++ptr;
 		return { tmp };
 	}
 
-	constexpr
 	iterator operator--(int){
 		auto tmp = ptr;
 		--ptr;
@@ -117,7 +113,6 @@ public:
 		return *this;
 	}
 
-	constexpr
 	iterator operator +(difference_type const off) const{
 		return { ptr + off };
 	}
@@ -127,7 +122,6 @@ public:
 		return *this;
 	}
 
-	constexpr
 	iterator operator -(difference_type const off) const{
 		return { ptr - off };
 	}
