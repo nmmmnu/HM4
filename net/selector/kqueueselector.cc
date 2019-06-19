@@ -8,14 +8,13 @@
 
 using namespace net::selector;
 
-KQueueSelector::KQueueSelector(uint32_t const maxFD) :
-				fds_(maxFD){
+KQueueSelector::KQueueSelector(uint32_t const maxFD) : fds_(maxFD){
 	kqueueFD_ = kqueue();
 }
 
 KQueueSelector::KQueueSelector(KQueueSelector &&other) :
 				kqueueFD_	(std::move(other.kqueueFD_	)),
-				fds_	(std::move(other.fds_	)),
+				fds_		(std::move(other.fds_		)),
 				fdsCount_	(std::move(other.fdsCount_	)){
 	other.kqueueFD_ = -1;
 }
@@ -72,16 +71,21 @@ WaitStatus KQueueSelector::wait(int const timeout){
 		return WaitStatus::OK;
 }
 
+
+
 namespace{
-	template<typename EV>
-	bool k_op(int const kfd, int const fd, EV const op1, EV const op2){
+	template<typename EVFILT, typename EV>
+	auto k_op_apply(int const kfd, int const fd, EVFILT const filter, EV const op){
 		struct kevent ev;
 
-		EV_SET(&ev, fd, EVFILT_READ,   op1, 0, 0, nullptr);
-		int const result1 = kevent(kfd, &ev, 1, nullptr, 0, nullptr);
+		EV_SET(&ev, fd, filter, op, 0, 0, nullptr);
+		return kevent(kfd, &ev, 1, nullptr, 0, nullptr);
+	}
 
-		EV_SET(&ev, fd, EVFILT_WRITE,  op2, 0, 0, nullptr);
-		int const result2 = kevent(kfd, &ev, 1, nullptr, 0, nullptr);
+	template<typename EV>
+	bool k_op(int const kfd, int const fd, EV const op1, EV const op2){
+		int const result1 = k_op_apply(kfd, fd, EVFILT_READ,  op1);
+		int const result2 = k_op_apply(kfd, fd, EVFILT_WRITE, op1);
 
 		return result1 >=0 && result2 >= 0;
 	}
@@ -106,12 +110,14 @@ namespace{
 
 	bool k_update(int const kfd, int const fd, FDEvent const event){
 		return k_op(
-				kfd, fd, 
+				kfd, fd,
 				makeEV<FDEvent::READ>(event),
 				makeEV<FDEvent::WRITE>(event)
 		);
 	}
 }
+
+
 
 bool KQueueSelector::insertFD(int const fd, FDEvent const event){
 	if ( fdsConnected_ >= fds_.size() )
@@ -137,6 +143,7 @@ bool KQueueSelector::removeFD(int const fd){
 
 	return result;
 }
+
 
 
 namespace{
