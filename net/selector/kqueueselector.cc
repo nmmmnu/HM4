@@ -6,9 +6,7 @@
 #include <errno.h>	// errno
 #include <time.h>	// struct timespec
 
-namespace net{
-namespace selector{
-
+using namespace net::selector;
 
 namespace{
 
@@ -146,23 +144,22 @@ namespace{
 }
 
 
-} // namespace selector
-} // namespace
 
+namespace hpi{
+	using hidden_t = epoll_event;
 
-#include "hidden_pointer_iterator.h.cc"
+	bool eq(const hidden_t *a, const hidden_t *b){
+		return a == b;
+	}
 
+	void inc(const hidden_t * &a){
+		++a;
+	}
 
-using namespace net::selector;
-
-
-template<>
-FDResult hidden_pointer_iterator<kevent, FDResult>::operator *() const{
-	return getFDStatus(*pos);
+	FDResult conv(const hidden_t *a){
+		return getFDStatus(*a);
+	}
 }
-
-template bool hidden_pointer_iterator<kevent, FDResult>::operator ==(hidden_pointer_iterator const &other) const;
-template auto hidden_pointer_iterator<kevent, FDResult>::operator ++() -> hidden_pointer_iterator &;
 
 
 

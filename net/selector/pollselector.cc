@@ -8,10 +8,7 @@
 
 #include <algorithm>	// for_each
 
-
-namespace net{
-namespace selector{
-
+using namespace net::selector;
 
 namespace{
 
@@ -56,7 +53,7 @@ PollSelector::~PollSelector(){
 
 
 
-WaitStatus PollSelector::wait(int const timeout){
+auto PollSelector::wait(int const timeout) -> WaitStatus{
 	// size cast is for FreeBSD and OSX warning
 	int const activity = poll(fds_.data(), (nfds_t) fds_.size(), timeout);
 
@@ -138,24 +135,21 @@ namespace{
 }
 
 
-} // namespace selector
-} // namespace
+namespace hpi{
+	using hidden_t = pollfd;
 
+	bool eq(const hidden_t *a, const hidden_t *b){
+		return a == b;
+	}
 
-#include "hidden_pointer_iterator.h.cc"
+	void inc(const hidden_t * &a){
+		++a;
+	}
 
-
-using namespace net::selector;
-
-
-template<>
-FDResult hidden_pointer_iterator<pollfd, FDResult>::operator *() const{
-	return getFDStatus(*pos);
+	FDResult conv(const hidden_t *a){
+		return getFDStatus(*a);
+	}
 }
-
-template bool hidden_pointer_iterator<pollfd, FDResult>::operator ==(hidden_pointer_iterator const &other) const;
-template auto hidden_pointer_iterator<pollfd, FDResult>::operator ++() -> hidden_pointer_iterator &;
-
 
 auto PollSelector::begin() const -> iterator{
 	return fds_.data();

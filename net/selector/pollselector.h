@@ -5,9 +5,18 @@
 
 #include <vector>
 
-#include "hidden_pointer_iterator.h"
-
 struct pollfd;
+
+namespace hpi{
+	using hidden_t = pollfd;
+	using net::selector::FDResult;
+
+	bool eq(const hidden_t *a, const hidden_t *b)	__attribute__((const))	;
+	void inc(const hidden_t * &a)						;
+	FDResult conv(const hidden_t *a)		__attribute__((const))	;
+}
+
+#include "hidden_pointer_iterator.h"
 
 namespace net{
 namespace selector{

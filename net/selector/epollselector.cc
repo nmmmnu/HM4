@@ -5,9 +5,7 @@
 
 #include <sys/epoll.h>
 
-namespace net{
-namespace selector{
-
+using namespace net::selector;
 
 namespace{
 
@@ -142,24 +140,21 @@ namespace {
 }
 
 
+namespace hpi{
+	using hidden_t = epoll_event;
 
-} // namespace selector
-} // namespace
+	bool eq(const hidden_t *a, const hidden_t *b){
+		return a == b;
+	}
 
+	void inc(const hidden_t * &a){
+		++a;
+	}
 
-#include "hidden_pointer_iterator.h.cc"
-
-
-using namespace net::selector;
-
-
-template<>
-FDResult hidden_pointer_iterator<epoll_event, FDResult>::operator *() const{
-	return getFDStatus(*pos);
+	FDResult conv(const hidden_t *a){
+		return getFDStatus(*a);
+	}
 }
-
-template bool hidden_pointer_iterator<epoll_event, FDResult>::operator ==(hidden_pointer_iterator const &other) const;
-template auto hidden_pointer_iterator<epoll_event, FDResult>::operator ++() -> hidden_pointer_iterator &;
 
 
 auto EPollSelector::begin() const -> iterator{
