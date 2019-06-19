@@ -32,12 +32,7 @@ public:
 	void swap(KQueueSelector &other);
 
 	bool insertFD(int fd, FDEvent event = FDEvent::READ);
-
-	bool updateFD(int const fd, FDEvent const event){
-		removeFD(fd);
-		return insertFD(fd, event);
-	}
-
+	bool updateFD(int fd, FDEvent event);
 	bool removeFD(int fd);
 
 	WaitStatus wait(int timeout);

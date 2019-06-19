@@ -8,20 +8,6 @@
 
 using namespace net::selector;
 
-namespace{
-
-	auto event2native(const FDEvent event) -> decltype(EVFILT_READ){
-		switch(event){
-			default:
-			case FDEvent::READ	: return EVFILT_READ;
-			case FDEvent::WRITE	: return EVFILT_WRITE;
-		}
-	}
-
-}
-
-// ===========================
-
 KQueueSelector::KQueueSelector(uint32_t const maxFD) :
 				fds_(maxFD){
 	kqueueFD_ = kqueue();
@@ -86,42 +72,71 @@ WaitStatus KQueueSelector::wait(int const timeout){
 		return WaitStatus::OK;
 }
 
+namespace{
+	template<typename EV>
+	bool k_op(int const kfd, int const fd, EV const op1, EV const op2){
+		struct kevent ev;
+
+		EV_SET(&ev, fd, EVFILT_READ,   op1, 0, 0, nullptr);
+		int const result1 = kevent(kfd, &ev, 1, nullptr, 0, nullptr);
+
+		EV_SET(&ev, fd, EVFILT_WRITE,  op2, 0, 0, nullptr);
+		int const result2 = kevent(kfd, &ev, 1, nullptr, 0, nullptr);
+
+		return result1 >=0 && result2 >= 0;
+	}
+
+	template<typename EV>
+	bool k_op(int const kfd, int const fd, EV const op){
+		return k_op(kfd, fd, op, op);
+	}
+
+	bool k_add(int const kfd, int const fd){
+		return k_op(kfd, fd, EV_ADD);
+	}
+
+	bool k_rem(int const kfd, int const fd){
+		return k_op(kfd, fd, EV_DELETE);
+	}
+
+	template<FDEvent E>
+	auto makeEV(FDEvent const event){
+		return E == event ? EV_ENABLE : EV_DISABLE;
+	}
+
+	bool k_update(int const kfd, int const fd, FDEvent const event){
+		return k_op(
+				kfd, fd, 
+				makeEV<FDEvent::READ>(event),
+				makeEV<FDEvent::WRITE>(event)
+		);
+	}
+}
+
 bool KQueueSelector::insertFD(int const fd, FDEvent const event){
 	if ( fdsConnected_ >= fds_.size() )
 		return false;
 
-	struct kevent ev;
+	bool const result = k_add(kqueueFD_, fd);
 
-	int const event2 = event2native(event);
+	if (result)
+		++fdsConnected_;
 
-	EV_SET(&ev, fd, event2, EV_ADD, 0, 0, nullptr);
+	return k_update(kqueueFD_, fd, event);
+}
 
-	int const result = kevent(kqueueFD_, &ev, 1, nullptr, 0, nullptr);
-
-	if (result < 0)
-		return false;
-
-	++fdsConnected_;
-	return true;
+bool KQueueSelector::updateFD(int const fd, FDEvent const event){
+	return k_update(kqueueFD_, fd, event);
 }
 
 bool KQueueSelector::removeFD(int const fd){
-	struct kevent ev;
+	bool const result = k_rem(kqueueFD_, fd);
 
-	EV_SET(&ev, fd, EVFILT_READ,  EV_DELETE, 0, 0, nullptr);
-	int const result1 = kevent(kqueueFD_, &ev, 1, nullptr, 0, nullptr);
+	if (result)
+		--fdsConnected_;
 
-	EV_SET(&ev, fd, EVFILT_WRITE, EV_DELETE, 0, 0, nullptr);
-	int const result2 = kevent(kqueueFD_, &ev, 1, nullptr, 0, nullptr);
-
-	if (result1 < 0 || result2 < 0)
-		return false;
-
-	--fdsConnected_;
-	return true;
-
+	return result;
 }
-
 
 
 namespace{
@@ -131,7 +146,7 @@ namespace{
 		if (ev.flags & EV_ERROR)
 			return { fd, FDStatus::ERROR };
 
-		if ((ev.filter == EVFILT_READ) || (ev.flags & EV_EOF))
+		if (ev.filter == EVFILT_READ) // ) || (ev.flags & EV_EOF)
 			return { fd, FDStatus::READ };
 
 		if (ev.filter == EVFILT_WRITE)

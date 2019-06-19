@@ -139,24 +139,19 @@ void AsyncLoop<SELECTOR, WORKER>::handleWrite_(int const fd){
 
 	// -------------------------------------
 
-	auto available = buffer.size();
+	if (buffer.size() > 0){
+		// available == 0 - this might happen on MacOS with kqueue()
 
-	if (available <= 0){
-		// this must never happen, disconnect.
-		return handleDisconnect_(fd, DisconnectStatus::PROBLEM_BUFFER_WRITE);
+		ssize_t const size = ::write(fd, buffer.data(), buffer.size());
+
+		if (size <= 0)
+			return handleSocketOps_(fd, size);
+
+		// size is checked already
+		buffer.pop( static_cast<size_t>(size) );
+
+		buffer.restartTimer();
 	}
-
-	ssize_t const size = ::write(fd, buffer.data(), available);
-
-	// -------------------------------------
-
-	if (size <= 0)
-		return handleSocketOps_(fd, size);
-
-	// size is checked already
-	buffer.pop( static_cast<size_t>(size) );
-
-	buffer.restartTimer();
 
 	if (buffer.size() == 0){
 		// process with read
