@@ -19,13 +19,17 @@ namespace impl_{
 
 template<class SELECTOR, class WORKER>
 AsyncLoop<SELECTOR, WORKER>::AsyncLoop(SELECTOR &&selector, WORKER &&worker, const std::initializer_list<int> &serverFD,
-			uint32_t const conf_connectionTimeout, size_t const conf_maxPacketSize) :
+			uint32_t const conf_maxClients		,
+			uint32_t const conf_connectionTimeout	,
+			size_t   const conf_maxPacketSize
+		) :
 					selector_(std::move(selector)),
 					worker_(std::move(worker)),
 					serverFD_(serverFD),
 
-					conf_connectionTimeout_(	max__(conf_connectionTimeout,	CONNECTION_TIMEOUT	)),
-					conf_maxPacketSize_(		max__(conf_maxPacketSize,	BUFFER_CAPACITY		)){
+					conf_maxClients		(	max__(conf_maxClients,		MIN_CLIENTS		)),
+					conf_connectionTimeout_	(	max__(conf_connectionTimeout,	CONNECTION_TIMEOUT	)),
+					conf_maxPacketSize_	(	max__(conf_maxPacketSize,	BUFFER_CAPACITY		)){
 	for(int const fd : serverFD_){
 		socket_makeNonBlocking(fd);
 		selector_.insertFD(fd);
@@ -207,7 +211,7 @@ bool AsyncLoop<SELECTOR, WORKER>::handleConnect_(int const fd){
 	if (newFD < 0)
 		return false;
 
-	if ( insertFD_(newFD) ){
+	if ( clients_.size() < conf_maxClients && insertFD_(newFD) ){
 		// socket_makeNonBlocking(newFD);
 
 		log_("Connect", newFD);
@@ -269,8 +273,6 @@ bool AsyncLoop<SELECTOR, WORKER>::insertFD_(int const fd){
 
 	clients_[fd];
 
-	++connectedClients_;
-
 	return true;
 }
 
@@ -279,8 +281,6 @@ void AsyncLoop<SELECTOR, WORKER>::removeFD_(int const fd){
 	selector_.removeFD(fd);
 
 	clients_.erase(fd);
-
-	--connectedClients_;
 }
 
 template<class SELECTOR, class WORKER>

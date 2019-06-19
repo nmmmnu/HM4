@@ -8,5 +8,4 @@ struct MyWorkerFactory{
 	}
 };
 
-#include "test_selector.h.cc"
 

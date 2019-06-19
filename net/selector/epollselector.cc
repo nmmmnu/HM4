@@ -30,8 +30,8 @@ namespace{
 
 
 
-EPollSelector::EPollSelector(uint32_t const maxFD) : fds_(maxFD){
-	epollFD_ = epoll_create((int) maxFD);
+EPollSelector::EPollSelector(size_t const server_limit) : fds_(server_limit){
+	epollFD_ = epoll_create( /* epoll_ignores_this_argument */ 1 );
 }
 
 EPollSelector::EPollSelector(EPollSelector &&other) :
@@ -40,7 +40,6 @@ EPollSelector::EPollSelector(EPollSelector &&other) :
 				fdsCount_	(std::move(other.fdsCount_	)){
 	other.epollFD_ = -1;
 }
-
 
 EPollSelector &EPollSelector::operator =(EPollSelector &&other){
 	swap(other);
@@ -51,11 +50,10 @@ EPollSelector &EPollSelector::operator =(EPollSelector &&other){
 void EPollSelector::swap(EPollSelector &other){
 	using std::swap;
 
-	swap(epollFD_		, other.epollFD_	);
-	swap(fds_		, other.fds_		);
+	swap(epollFD_	, other.epollFD_	);
+	swap(fds_	, other.fds_		);
 	swap(fdsCount_	, other.fdsCount_	);
 }
-
 
 EPollSelector::~EPollSelector(){
 	if (epollFD_ >= 0)
@@ -87,18 +85,11 @@ WaitStatus EPollSelector::wait(int const timeout){
 
 
 bool EPollSelector::insertFD(int const fd, FDEvent const event){
-	if ( fdsConnected_ >= fds_.size() )
-		return false;
-
 	epoll_event ev = create_epoll_event(fd, event);
 
 	int const result = epoll_ctl(epollFD_, EPOLL_CTL_ADD, fd, &ev);
 
-	if (result != 0)
-		return false;
-
-	++fdsConnected_;
-	return true;
+	return result == 0;
 }
 
 bool EPollSelector::updateFD(int const fd, FDEvent const event){
@@ -112,11 +103,7 @@ bool EPollSelector::updateFD(int const fd, FDEvent const event){
 bool EPollSelector::removeFD(int const fd){
 	int const result = epoll_ctl(epollFD_, EPOLL_CTL_DEL, fd, nullptr);
 
-	if (result != 0)
-		return false;
-
-	--fdsConnected_;
-	return true;
+	return result == 0;
 }
 
 

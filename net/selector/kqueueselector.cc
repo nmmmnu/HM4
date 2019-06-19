@@ -8,7 +8,7 @@
 
 using namespace net::selector;
 
-KQueueSelector::KQueueSelector(uint32_t const maxFD) : fds_(maxFD){
+KQueueSelector::KQueueSelector(size_t server_limit = DEFAULT_SERVER_LIMIT) : fds_(server_limit){
 	kqueueFD_ = kqueue();
 }
 
@@ -120,13 +120,7 @@ namespace{
 
 
 bool KQueueSelector::insertFD(int const fd, FDEvent const event){
-	if ( fdsConnected_ >= fds_.size() )
-		return false;
-
 	bool const result = k_add(kqueueFD_, fd);
-
-	if (result)
-		++fdsConnected_;
 
 	return k_update(kqueueFD_, fd, event);
 }
@@ -137,9 +131,6 @@ bool KQueueSelector::updateFD(int const fd, FDEvent const event){
 
 bool KQueueSelector::removeFD(int const fd){
 	bool const result = k_rem(kqueueFD_, fd);
-
-	if (result)
-		--fdsConnected_;
 
 	return result;
 }

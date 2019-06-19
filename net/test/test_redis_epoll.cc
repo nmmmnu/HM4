@@ -2,5 +2,6 @@
 
 using MySelector	= net::selector::EPollSelector;
 
-#include "test_keyvalue_worker.h.cc"
+#include "worker_keyvalue.h.cc"
+#include "asyncloop_main.h.cc"
 

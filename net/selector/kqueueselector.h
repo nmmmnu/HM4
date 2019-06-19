@@ -22,6 +22,8 @@ class KQueueSelector{
 	};
 
 public:
+	constexpr static size_t DEFAULT_SERVER_LIMIT = 64;
+
 	using iterator = hidden_pointer_iterator<HPI>;
 
 	KQueueSelector(uint32_t maxFD_);
@@ -44,7 +46,6 @@ private:
 	int				kqueueFD_;
 	std::vector<struct kevent>	fds_;
 	int				fdsCount_	= 0;
-	uint32_t			fdsConnected_	= 0;
 };
 
 

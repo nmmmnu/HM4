@@ -115,8 +115,12 @@ namespace{
 		if (fd < 0)
 			printError("Can not create server socket...");
 
-		MyLoop loop( MySelector{ opt.max_clients }, MyWorker{ adapter_factory() }, { fd },
-								opt.timeout, max_packet_size);
+		MyLoop loop{
+				/* selector */	MySelector	{ opt.max_clients },
+				/* worker */	MyWorker	{ adapter_factory() },
+				/* server fd */	{ fd },
+				opt.max_clients, opt.timeout, max_packet_size
+		};
 
 		SignalGuard guard;
 

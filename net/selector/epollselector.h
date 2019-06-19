@@ -22,9 +22,11 @@ class EPollSelector{
 	};
 
 public:
+	constexpr static size_t DEFAULT_SERVER_LIMIT = 64;
+
 	using iterator = hidden_pointer_iterator<HPI>;
 
-	EPollSelector(uint32_t maxFD);
+	EPollSelector(size_t server_limit = DEFAULT_SERVER_LIMIT);
 	EPollSelector(EPollSelector &&other) /* = default */;
 	EPollSelector &operator =(EPollSelector &&other) /* = default */;
 	~EPollSelector() /* = default */;
@@ -41,10 +43,9 @@ public:
 	iterator end() const;
 
 private:
-	int				epollFD_;
-	std::vector<epoll_event>	fds_;
-	int				fdsCount_	= 0;
-	uint32_t			fdsConnected_	= 0;
+	int					epollFD_;
+	std::vector<epoll_event>		fds_;
+	int					fdsCount_	= 0;
 };
 
 

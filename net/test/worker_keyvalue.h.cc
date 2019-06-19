@@ -18,5 +18,4 @@ private:
 	MockDBAdapter adapter;
 };
 
-#include "test_selector.h.cc"
 

@@ -14,8 +14,10 @@ public:
 	constexpr static bool		LOG_ENABLED		= true;
 
 public:
-	constexpr static int		WAIT_TIMEOUT		= 5;
+	constexpr static uint32_t	MIN_CLIENTS		= 4;
+	constexpr static uint32_t	MAX_CLIENTS		= 32;
 	constexpr static uint32_t	CONNECTION_TIMEOUT	= 20;
+	constexpr static int		WAIT_TIMEOUT		= 5;
 
 	constexpr static size_t		BUFFER_CAPACITY 	= 1024 * 4;
 
@@ -28,10 +30,16 @@ private:
 
 public:
 	AsyncLoop(SELECTOR &&selector, WORKER &&worker, const std::initializer_list<int> &serverFD,
-				uint32_t conf_connectionTimeout = 0,
-				size_t conf_maxPacketSize = 0);
+				uint32_t conf_maxClients	= MAX_CLIENTS,
+				uint32_t conf_connectionTimeout	= 0,
+				size_t   conf_maxPacketSize	= 0
+	);
 
 	bool process();
+
+	auto connectedClients() const{
+		return clients_.size();
+	}
 
 private:
 	enum class DisconnectStatus{
@@ -69,9 +77,9 @@ private:
 		// printf suppose to be faster than std::cout
 
 		if (fd < 0)
-			fprintf(stderr, "%-40s | clients: %5u |\n",         s, connectedClients_);
+			fprintf(stderr, "%-40s | clients: %5zu |\n",         s, connectedClients());
 		else
-			fprintf(stderr, "%-40s | clients: %5u | fd: %5d\n", s, connectedClients_, fd);
+			fprintf(stderr, "%-40s | clients: %5zu | fd: %5d\n", s, connectedClients(), fd);
 	}
 
 private:
@@ -87,9 +95,9 @@ private:
 	WORKER			worker_;
 	std::vector<int>	serverFD_;
 	ClientBufferContainer	clients_;
-	uint32_t		connectedClients_ = 0;
 	bool			keepProcessing_ = true;
 
+	uint32_t		conf_maxClients;
 	uint32_t		conf_connectionTimeout_;
 	size_t			conf_maxPacketSize_;
 
