@@ -145,20 +145,16 @@ namespace{
 
 
 
-namespace hpi{
-	using hidden_t = epoll_event;
+bool KQueueSelector::HPI::eq(const value_type *a, const value_type *b){
+	return a == b;
+}
 
-	bool eq(const hidden_t *a, const hidden_t *b){
-		return a == b;
-	}
+void KQueueSelector::HPI::inc(const value_type * &a){
+	++a;
+}
 
-	void inc(const hidden_t * &a){
-		++a;
-	}
-
-	FDResult conv(const hidden_t *a){
-		return getFDStatus(*a);
-	}
+FDResult KQueueSelector::HPI::conv(const value_type *a){
+	return getFDStatus(*a);
 }
 
 

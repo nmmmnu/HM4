@@ -2,28 +2,27 @@
 #define NET_EPOLL_SELECTOR_H_
 
 #include "selectordefs.h"
+#include "hidden_pointer_iterator.h"
 
 #include <vector>
 
 struct epoll_event;
 
-namespace hpi{
-	using hidden_t = epoll_event;
-	using net::selector::FDResult;
-
-	bool eq(const hidden_t *a, const hidden_t *b)	__attribute__((const))	;
-	void inc(const hidden_t * &a)						;
-	FDResult conv(const hidden_t *a)		__attribute__((const))	;
-}
-
-#include "hidden_pointer_iterator.h"
-
 namespace net{
 namespace selector{
 
 class EPollSelector{
+	struct HPI{
+		using value_type	= epoll_event;
+		using convert_type	= FDResult;
+
+		static bool eq(const value_type *a, const value_type *b)	__attribute__((const));
+		static void inc(const value_type * &a);
+		static convert_type conv(const value_type *a)			__attribute__((const));
+	};
+
 public:
-	using iterator = hidden_pointer_iterator<epoll_event, FDResult>;
+	using iterator = hidden_pointer_iterator<HPI>;
 
 	EPollSelector(uint32_t maxFD);
 	EPollSelector(EPollSelector &&other) /* = default */;

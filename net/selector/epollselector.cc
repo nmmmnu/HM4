@@ -140,21 +140,19 @@ namespace {
 }
 
 
-namespace hpi{
-	using hidden_t = epoll_event;
 
-	bool eq(const hidden_t *a, const hidden_t *b){
-		return a == b;
-	}
-
-	void inc(const hidden_t * &a){
-		++a;
-	}
-
-	FDResult conv(const hidden_t *a){
-		return getFDStatus(*a);
-	}
+bool EPollSelector::HPI::eq(const value_type *a, const value_type *b){
+	return a == b;
 }
+
+void EPollSelector::HPI::inc(const value_type * &a){
+	++a;
+}
+
+FDResult EPollSelector::HPI::conv(const value_type *a){
+	return getFDStatus(*a);
+}
+
 
 
 auto EPollSelector::begin() const -> iterator{
