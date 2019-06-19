@@ -120,9 +120,7 @@ namespace{
 
 
 bool KQueueSelector::insertFD(int const fd, FDEvent const event){
-	bool const result = k_add(kqueueFD_, fd);
-
-	return k_update(kqueueFD_, fd, event);
+	return k_add(kqueueFD_, fd) && k_update(kqueueFD_, fd, event);
 }
 
 bool KQueueSelector::updateFD(int const fd, FDEvent const event){
@@ -130,9 +128,7 @@ bool KQueueSelector::updateFD(int const fd, FDEvent const event){
 }
 
 bool KQueueSelector::removeFD(int const fd){
-	bool const result = k_rem(kqueueFD_, fd);
-
-	return result;
+	return k_rem(kqueueFD_, fd);
 }
 
 

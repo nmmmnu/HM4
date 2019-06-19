@@ -21,27 +21,24 @@ namespace{
 	}
 
 	template<class T>
-	void initFDS(T first, T last){
-		std::for_each(first, last, [](pollfd &item){
-			item.fd = -1;
-		});
-	}
-
-	template<class T>
 	void closeFDS(T first, T last){
-		std::for_each(first, last, [](pollfd &item){
+		std::for_each(first, last, [](pollfd const &item){
 			if (item.fd >= 0)
 				::close(item.fd);
 		});
 	}
 
+	pollfd createEmptyItem(){
+		pollfd item;
+		item.fd = -1;
+		return item;
+	}
+
 }
 
 
 
-PollSelector::PollSelector(uint32_t const maxFD) : fds_(maxFD){
-	initFDS(std::begin(fds_), std::end(fds_));
-}
+PollSelector::PollSelector(uint32_t const maxFD) : fds_(maxFD, createEmptyItem()){}
 
 PollSelector::PollSelector(PollSelector &&other) = default;
 
@@ -80,8 +77,9 @@ bool PollSelector::insertFD(int const fd, FDEvent const event){
 	});
 
 	if (it != std::end(fds_)){
-		it->fd     = fd;
-		it->events = event2native(event);
+		it->fd      = fd;
+		it->events  = event2native(event);
+		it->revents = 0;
 		return true;
 	}
 
@@ -95,6 +93,7 @@ bool PollSelector::updateFD(int const fd, FDEvent const event){
 
 	if (it != std::end(fds_)){
 		it->events = event2native(event);
+		it->revents = 0;
 		return true;
 	}
 
@@ -113,6 +112,7 @@ bool PollSelector::removeFD(int const fd){
 
 	return false;
 }
+
 
 
 namespace{
@@ -157,7 +157,5 @@ auto PollSelector::begin() const -> iterator{
 auto PollSelector::end() const -> iterator{
 	return fds_.data() + fds_.size();
 }
-
-
 
 
