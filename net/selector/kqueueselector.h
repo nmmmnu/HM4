@@ -22,7 +22,7 @@ class KQueueSelector{
 	};
 
 public:
-	using iterator = hidden_pointer_iterator<kevent, FDResult>;
+	using iterator = hidden_pointer_iterator<HPI>;
 
 	KQueueSelector(uint32_t maxFD_);
 	KQueueSelector(KQueueSelector &&other) /* = default */;
