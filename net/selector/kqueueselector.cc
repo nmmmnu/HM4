@@ -8,7 +8,7 @@
 
 using namespace net::selector;
 
-KQueueSelector::KQueueSelector(size_t server_limit = DEFAULT_SERVER_LIMIT) : fds_(server_limit){
+KQueueSelector::KQueueSelector(size_t const server_limit) : fds_(server_limit){
 	kqueueFD_ = kqueue();
 }
 
@@ -85,7 +85,7 @@ namespace{
 	template<typename EV>
 	bool k_op(int const kfd, int const fd, EV const op1, EV const op2){
 		int const result1 = k_op_apply(kfd, fd, EVFILT_READ,  op1);
-		int const result2 = k_op_apply(kfd, fd, EVFILT_WRITE, op1);
+		int const result2 = k_op_apply(kfd, fd, EVFILT_WRITE, op2);
 
 		return result1 >=0 && result2 >= 0;
 	}

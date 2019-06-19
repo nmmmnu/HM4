@@ -26,7 +26,7 @@ public:
 
 	using iterator = hidden_pointer_iterator<HPI>;
 
-	KQueueSelector(uint32_t maxFD_);
+	KQueueSelector(size_t server_limit = DEFAULT_SERVER_LIMIT);
 	KQueueSelector(KQueueSelector &&other) /* = default */;
 	KQueueSelector &operator =(KQueueSelector &&other) /* = default */;
 	~KQueueSelector() /* = default */;
