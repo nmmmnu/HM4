@@ -75,12 +75,12 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 	while(reader){
 		const std::string &line = reader.getLine();
 
-		StringTokenizer const tok{ line, DELIMITER };
+		StringTokenizer const st{ line, DELIMITER };
 
-		auto it  = std::begin(tok);
+		auto tok = getForwardTokenizer(st);
 
-		const StringRef &key = getNextToken(it, std::end(tok));
-		const StringRef &val = getNextToken(it, std::end(tok));
+		const StringRef &key = tok();
+		const StringRef &val = tok();
 
 	//	std::cout << key << ':' << val << '\n';
 

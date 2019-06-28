@@ -12,7 +12,9 @@ private:
 
 public:
 	class iterator;
-	using iteratorRev = std::reverse_iterator<iterator>;
+
+	class ForwardTokenizer;
+	class ReverseTokenizer;
 
 	constexpr
 	StringTokenizer(const StringRef &line, char const delimiter = DEFAULT_DELIMITER) :
@@ -127,44 +129,32 @@ inline auto StringTokenizer::end() const -> iterator{
 
 
 
-inline StringRef getNextToken(StringTokenizer::iterator &it, StringTokenizer::iterator const &end){
-	if (it == end)
-		return "";
+inline auto getForwardTokenizer(StringTokenizer const &st){
+	return [ current = std::begin(st), sentinel = std::end(st) ]() mutable -> StringRef{
+		if (current == sentinel)
+			return "";
 
-	StringRef s = *it;
+		StringRef s = *current;
 
-	++it;
+		++current;
 
-	return s;
+		return s;
+	};
 }
 
+inline auto getReverseTokenizer(StringTokenizer const &st){
+	return [ current = std::end(st), sentinel = std::begin(st) ]() mutable -> StringRef{
+		if (current == sentinel)
+			return "";
 
+		--current;
 
-inline StringRef getPrevToken(StringTokenizer::iterator &it, StringTokenizer::iterator const &begin){
-	if (it == begin)
-		return "";
+		StringRef s = *current;
 
-	--it;
-
-	StringRef s = *it;
-
-	return s;
+		return s;
+	};
 }
 
-
-
-#if 0
-
-#include <utility>
-
-inline auto getPair(StringTokenizer::iterator &it, StringTokenizer::iterator const &end){
-	StringRef k = getNext(it, end);
-	StringRef v = getNext(it, end);
-
-	return std::make_pair(k, v);
-}
-
-#endif
 
 
 #endif
