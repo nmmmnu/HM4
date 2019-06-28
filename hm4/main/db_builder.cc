@@ -12,10 +12,14 @@
 #include "filereader.h"
 #include "stringtokenizer.h"
 
-constexpr size_t	MEMLIST_SIZE	= 1ULL * 2 * 1024 * 1024 * 1024;
-constexpr size_t	PROCESS_STEP	= 1000 * 10;
+constexpr size_t	MEMLIST_SIZE		= 1ULL * 2 * 1024 * 1024 * 1024;
+constexpr size_t	PROCESS_STEP		= 1000 * 10;
 
-constexpr char		DELIMITER	= '\t';
+constexpr size_t	READER_BUFFER_SIZE	= 16 * 1024;
+
+constexpr char		DELIMITER		= '\t';
+
+using MyReader		= FileReader<READER_BUFFER_SIZE>;
 
 static int printUsage(const char *cmd);
 
@@ -57,7 +61,7 @@ int main(int argc, char **argv){
 
 	auto &mylist = factory();
 
-	FileReader<1024> reader{ filename };
+	MyReader reader{ filename };
 
 	return listLoad(mylist, reader, PROCESS_STEP);
 }
@@ -73,13 +77,12 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 
 		StringTokenizer const tok{ line, DELIMITER };
 
-		auto       it  = std::begin(tok);
-		auto const end = std::end(tok);
+		auto it  = std::begin(tok);
 
-		const StringRef &key = getNextToken(it, end);
-		const StringRef &val = getNextToken(it, end);
+		const StringRef &key = getNextToken(it, std::end(tok));
+		const StringRef &val = getNextToken(it, std::end(tok));
 
-		// std::cout << key << ':' << val << '\n';
+	//	std::cout << key << ':' << val << '\n';
 
 		if (! key.empty())
 			list.insert( { key, val } );
@@ -87,7 +90,7 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 		++i;
 
 		if (i % process_step == 0){
-			std::cout
+			std::clog
 				<< "Processed "	<< std::setw(10) << i			<< " records." << ' '
 				<< "In memory "	<< std::setw(10) << list.size()		<< " records," << ' '
 						<< std::setw(10) << list.bytes()	<< " bytes." << '\n'
@@ -110,6 +113,10 @@ static int printUsage(const char *cmd){
 		<< "\t\tPath names must be written with quotes:"	<< '\n'
 		<< "\t\tExample directory/file.'*'.db"			<< '\n'
 		<< "\t\tThe '*', will be replaced with ID's"		<< '\n'
+		<< '\n'
+		<< "Settings:"						<< '\n'
+		<< "\tReader: "	<< MyReader::name()			<< '\n'
+		<< "\tBuffer: "	<< READER_BUFFER_SIZE			<< '\n'
 
 		<< '\n';
 

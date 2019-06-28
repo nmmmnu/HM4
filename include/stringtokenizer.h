@@ -3,26 +3,24 @@
 
 #include "stringref.h"
 
-#include <vector>
-
-#include <type_traits>
-
-
+#include <cstdio>
+#include <iostream>
 
 class StringTokenizer{
 private:
 	static constexpr char DEFAULT_DELIMITER = ' ';
 
 public:
-	class StringTokenizerIterator;
+	class iterator;
+	using iteratorRev = std::reverse_iterator<iterator>;
 
 	constexpr
 	StringTokenizer(const StringRef &line, char const delimiter = DEFAULT_DELIMITER) :
 						line_(line),
 						delimiter_(delimiter){}
 
-	StringTokenizerIterator begin() const;
-	StringTokenizerIterator end() const;
+	iterator begin() const;
+	iterator end() const;
 
 private:
 	StringRef	line_;
@@ -31,64 +29,87 @@ private:
 
 
 
-class StringTokenizer::StringTokenizerIterator{
+class StringTokenizer::iterator{
 public:
-	using difference_type = ptrdiff_t;
-	using value_type = StringRef;
-	using pointer = value_type *;
-	using reference = value_type &;
-	using iterator_category = std::forward_iterator_tag;
+	using difference_type	= ptrdiff_t;
+	using value_type	= const StringRef;
+	using pointer		= value_type *;
+	using reference		= value_type &;
+	using iterator_category	= std::bidirectional_iterator_tag;
 
 public:
-	StringTokenizerIterator(const char *pos, const char *last, char const delimiter):
-							pos_(pos),
+	iterator(const char *current, const char *first, const char *last, char const delimiter):
+							current_(current),
+							first_(first),
 							last_(last),
 							delimiter_(delimiter){}
 
-	StringRef operator *() const{
-		auto const size = skipData_() - pos_;
-		return { pos_, size_t(size) };
+	StringRef operator *(){
+		auto size = skipData_(current_) - current_;
+
+		return { current_, size_t(size) };
 	}
 
-	bool operator ==(StringTokenizerIterator const &other) const{
+	bool operator ==(iterator const &other) const{
 		return
-			pos_		== other.pos_		&&
+			current_	== other.current_	&&
+			first_		== other.first_		&&
 			last_		== other.last_		&&
 			delimiter_	== other.delimiter_
 		;
 	}
 
-	bool operator !=(StringTokenizerIterator const &other) const{
+	bool operator !=(iterator const &other) const{
 		return ! (*this == other);
 	}
 
-	StringTokenizerIterator &operator ++(){
-		pos_ = skipDataAndDelimiter_();
+	iterator &operator ++(){
+		current_ = skipData_(current_);
+		current_ = skipDelimiter_(current_);
+
+		return *this;
+	}
+
+	iterator &operator --(){
+		current_ = skipDelimiterRev_(current_);
+		current_ = skipDataRev_(current_);
 
 		return *this;
 	}
 
 private:
-	const char *skipData_() const{
-		const char *it = pos_;
-
+	const char *skipData_(const char *it) const{
 		while(it != last_ && *it != delimiter_)
 			++it;
 
 		return it;
 	}
 
-	const char *skipDataAndDelimiter_() const{
-		const char *it = skipData_();
-
-		while(it != last_ && *it == delimiter_)
+	const char *skipDelimiter_(const char *it) const{
+		if (it != last_ && *it == delimiter_)
 			++it;
 
 		return it;
 	}
 
 private:
-	const char *pos_;
+	const char *skipDataRev_(const char *it) const{
+		while(it != first_ && *(it - 1) != delimiter_)
+			--it;
+
+		return it;
+	}
+
+	const char *skipDelimiterRev_(const char *it) const{
+		if (it != first_ && *(it - 1) == delimiter_)
+			--it;
+
+		return it;
+	}
+
+private:
+	const char *current_;
+	const char *first_;
 	const char *last_;
 
 	char delimiter_;
@@ -96,23 +117,21 @@ private:
 
 
 
-inline StringTokenizer::StringTokenizerIterator StringTokenizer::begin() const{
-	return { std::begin(line_), std::end(line_), delimiter_ };
+inline auto StringTokenizer::begin() const -> iterator{
+	return { std::begin(line_), std::begin(line_), std::end(line_), delimiter_ };
 }
 
-inline StringTokenizer::StringTokenizerIterator StringTokenizer::end() const{
-	return { std::end(line_),   std::end(line_), delimiter_ };
+inline auto StringTokenizer::end() const -> iterator{
+	return { std::end(line_),  std::begin(line_), std::end(line_), delimiter_ };
 }
 
 
 
-inline StringRef getNextToken(StringTokenizer::StringTokenizerIterator &it, StringTokenizer::StringTokenizerIterator const &end){
-	StringRef s;
-
+inline StringRef getNextToken(StringTokenizer::iterator &it, StringTokenizer::iterator const &end){
 	if (it == end)
-		return s;
+		return "";
 
-	s = *it;
+	StringRef s = *it;
 
 	++it;
 
@@ -120,11 +139,25 @@ inline StringRef getNextToken(StringTokenizer::StringTokenizerIterator &it, Stri
 }
 
 
+
+inline StringRef getPrevToken(StringTokenizer::iterator &it, StringTokenizer::iterator const &begin){
+	if (it == begin)
+		return "";
+
+	--it;
+
+	StringRef s = *it;
+
+	return s;
+}
+
+
+
 #if 0
 
 #include <utility>
 
-inline auto getPair(StringTokenizer::StringTokenizerIterator &it, StringTokenizer::StringTokenizerIterator const &end){
+inline auto getPair(StringTokenizer::iterator &it, StringTokenizer::iterator const &end){
 	StringRef k = getNext(it, end);
 	StringRef v = getNext(it, end);
 
