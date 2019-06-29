@@ -13,9 +13,6 @@ private:
 public:
 	class iterator;
 
-	class ForwardTokenizer;
-	class ReverseTokenizer;
-
 	constexpr
 	StringTokenizer(const StringRef &line, char const delimiter = DEFAULT_DELIMITER) :
 						line_(line),
