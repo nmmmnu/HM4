@@ -1,6 +1,5 @@
 #include "disklist.h"
 
-//#include "myalign.h"
 #include "levelorderlookup.h"
 
 #include "disk/filenames.h"
@@ -9,6 +8,8 @@
 #include "smallstring.h"
 
 #include "binarysearch.h"
+
+#include "myalign.h"
 
 //#define log__(...) /* nada */
 #include "logger.h"
@@ -202,6 +203,23 @@ void DiskList::close(){
 
 
 
+auto DiskList::calcSearchMode_() const -> SearchMode{
+	if (mTree_ && mKeys_)
+		return SearchMode::BTREE;
+
+	if (mLine_)
+		return SearchMode::HOTLINE;
+
+	else
+		return SearchMode::BINARY;
+}
+
+
+
+// ==============================
+
+
+
 const Pair *DiskList::fdSafeAccess_(const Pair *blob) const{
 	if (!blob)
 		return nullptr;
@@ -228,13 +246,12 @@ const Pair *DiskList::fdGetAt_(size_type const index) const{
 	return fdSafeAccess_(blob);
 }
 
-#if 0
-const Pair *DiskList::fdGetNext_(const Pair *previous) const{
-	size_t size = alignedSize__(previous, aligned());
+const Pair *DiskList::fdGetNext_(const Pair *current) const{
+	size_t size = alignedSize__(current, aligned());
 
-	const char *previousC = (const char *) previous;
+	const char *currentC = (const char *) current;
 
-	const Pair *blob = mData_->as<const Pair>(previousC + size);
+	const Pair *blob = mData_->as<const Pair>(currentC + size);
 
 	// check for overrun because PairBlob is dynamic size
 	return fdSafeAccess_(blob);
@@ -243,9 +260,8 @@ const Pair *DiskList::fdGetNext_(const Pair *previous) const{
 size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
 	size_t const size = blob->bytes();
 
-	return ! aligned ? size : MyAlign<PairConf::ALIGN>::calc(size);
+	return ! aligned ? size : my_align::calc(size, PairConf::ALIGN);
 }
-#endif
 
 
 
@@ -254,28 +270,31 @@ size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
 
 
 template<bool B>
-auto DiskList::search_(StringRef const &key, std::bool_constant<B> const exact) const -> iterator{
-	if (mTree_ && mKeys_){
-		log__("btree");
-		auto const x = searchBTree(key, *this);
-		return search_fix(x, *this, exact);
+auto DiskList::find(StringRef const &key, std::bool_constant<B> const exact) const -> iterator{
+	// made this way to hide BinarySearchResult<iterator> type
+	switch(searchMode_){
+	case SearchMode::BTREE: {
+			log__("btree");
+			auto const x = searchBTree(key, *this);
+			return search_fix(x, *this, exact);
+		}
 
-	}else
-	if (mLine_){
-		log__("hot line");
-		auto const x = searchHotLine(key, *this, mLine_);
-		return search_fix(x, *this, exact);
+	case SearchMode::HOTLINE: {
+			log__("hotline");
+			auto const x = searchHotLine(key, *this, mLine_);
+			return search_fix(x, *this, exact);
+		}
 
-	}else
-	{
-		log__("binary");
-		auto const x = searchBinary(key, *this);
-		return search_fix(x, *this, exact );
+	case SearchMode::BINARY: {
+			log__("binary");
+			auto const x = searchBinary(key, *this);
+			return search_fix(x, *this, exact );
+		}
 	}
 }
 
-template auto DiskList::search_(StringRef const &key, std::true_type  ) const -> iterator;
-template auto DiskList::search_(StringRef const &key, std::false_type ) const -> iterator;
+template auto DiskList::find(StringRef const &key, std::true_type  ) const -> iterator;
+template auto DiskList::find(StringRef const &key, std::false_type ) const -> iterator;
 
 
 

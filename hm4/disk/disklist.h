@@ -12,6 +12,7 @@ namespace hm4{
 namespace disk{
 
 
+
 class DiskList{
 public:
 	using size_type		= config::size_type;
@@ -23,6 +24,12 @@ public:
 	enum class OpenMode : char {
 		NORMAL,
 		MINIMAL
+	};
+
+	enum class SearchMode : char {
+		BINARY,
+		HOTLINE,
+		BTREE
 	};
 
 	static constexpr MMAPFile::Advice	DEFAULT_ADVICE	= MMAPFile::Advice::RANDOM;
@@ -49,6 +56,8 @@ public:
 		case OpenMode::NORMAL	: return openNormal_ (filename, advice);
 		case OpenMode::MINIMAL	: return openMinimal_(filename, advice);
 		}
+
+		searchMode_ = calcSearchMode_();
 	}
 
 	operator bool(){
@@ -90,20 +99,17 @@ public:
 	iterator find(const StringRef &key, std::bool_constant<B>) const;
 
 private:
-	template<bool B>
-	iterator search_(const StringRef &key, std::bool_constant<B>) const;
-
 	bool openNormal_ (const StringRef &filename, MMAPFile::Advice advice);
 	bool openMinimal_(const StringRef &filename, MMAPFile::Advice advice);
+
+	SearchMode calcSearchMode_() const;
 
 private:
 	const Pair *fdSafeAccess_(const Pair *blob) const;
 
 	const Pair *fdGetAt_(size_type index) const;
-#if 0
 	const Pair *fdGetNext_(const Pair *blob) const;
 	static size_t alignedSize__(const Pair *blob, bool aligned);
-#endif
 
 public:
 	class BTreeSearchHelper;
@@ -117,9 +123,15 @@ private:
 	MMAPFilePlus		mKeys_;
 
 	FileMeta		metadata_;
+
+	SearchMode		searchMode_	= SearchMode::BINARY;
 };
 
+
+
 // ===================================
+
+
 
 class DiskList::iterator{
 public:
@@ -249,7 +261,11 @@ private:
 	difference_type	ptr;
 };
 
+
+
 // ==============================
+
+
 
 inline auto DiskList::begin() const -> iterator{
 	return { *this, difference_type{ 0 } };
@@ -259,10 +275,6 @@ inline auto DiskList::end() const -> iterator{
 	return { *this, size() };
 }
 
-template<bool B>
-inline auto DiskList::find(const StringRef &key, std::bool_constant<B> const exact) const -> iterator{
-	return search_(key, exact);
-}
 
 
 } // namespace disk
