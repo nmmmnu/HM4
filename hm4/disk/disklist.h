@@ -138,7 +138,17 @@ private:
 
 
 
+} // namespace disk
+} // namespace
+
+
+
 #include "disklist.iterator.cc.h"
+
+
+
+namespace hm4{
+namespace disk{
 
 
 

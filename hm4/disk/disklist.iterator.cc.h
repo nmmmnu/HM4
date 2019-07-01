@@ -1,3 +1,9 @@
+//#include "logger.h"
+
+namespace hm4{
+namespace disk{
+
+
 
 class DiskList::forward_iterator {
 public:
@@ -21,17 +27,20 @@ public:
 	iterator &operator++(){
 		++ptr;
 
-		if (sorted && pair)
+		if (pair)
 			pair = list->fdGetNext_(pair);
 
 		return *this;
 	}
 
 	reference operator*() const{
-		if (sorted)
+		if (pair){
+			// log__("FW ", (void *) pair);
 			return *pair;
-		else
+		}else{
+			// log__("RA ", ptr);
 			return (*list)[ sc__(ptr) ];
+		}
 	}
 
 public:
@@ -67,8 +76,6 @@ private:
 	difference_type	ptr;
 
 	const Pair	*pair	= initPair_();
-
-	bool		sorted	= list->sorted();
 };
 
 
@@ -207,4 +214,9 @@ private:
 	const DiskList	*list;
 	difference_type	ptr;
 };
+
+
+
+} // namespace disk
+} // namespace
 
