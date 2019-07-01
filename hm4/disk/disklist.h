@@ -18,7 +18,10 @@ public:
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
-	class iterator;
+	class random_access_iterator;
+	class forward_iterator;
+
+	using iterator = forward_iterator;
 
 public:
 	enum class OpenMode : char {
@@ -92,11 +95,17 @@ public:
 	}
 
 public:
-	iterator begin() const;
-	iterator end() const;
+	random_access_iterator ra_begin() const;
+	random_access_iterator ra_end() const;
 
 	template<bool B>
-	iterator find(const StringRef &key, std::bool_constant<B>) const;
+	random_access_iterator ra_find(const StringRef &key, std::bool_constant<B>) const;
+
+	forward_iterator begin() const;
+	forward_iterator end() const;
+
+	template<bool B>
+	forward_iterator find(const StringRef &key, std::bool_constant<B>) const;
 
 private:
 	bool openNormal_ (const StringRef &filename, MMAPFile::Advice advice);
@@ -129,153 +138,30 @@ private:
 
 
 
-// ===================================
+#include "disklist.iterator.cc.h"
 
 
 
-class DiskList::iterator{
-public:
-	using difference_type	= DiskList::difference_type;
-	using value_type	= const Pair;
-	using pointer		= value_type *;
-	using reference		= value_type &;
-	using iterator_category	= std::random_access_iterator_tag;
-
-private:
-	using size_type		= DiskList::size_type;
-
-private:
-	iterator clone(difference_type const off) const{
-		return { *list, off };
-	}
-
-	reference getAt(difference_type const off) const{
-		return (*list)[ static_cast<size_type>(off) ];
-	}
-
-public:
-	iterator(DiskList const &list, difference_type const ptr) :
-				list(&list),
-				ptr(ptr){}
-
-	iterator(DiskList const &list, size_type const ptr) :
-				iterator(list, static_cast<difference_type>(ptr)){}
-
-public:
-	// increment / decrement
-	iterator &operator++(){
-		++ptr;
-		return *this;
-	}
-
-	iterator &operator--(){
-		--ptr;
-		return *this;
-	}
-
-	iterator operator++(int){
-		auto tmp = ptr;
-		++ptr;
-		return clone(tmp);
-	}
-
-	iterator operator--(int){
-		auto tmp = ptr;
-		--ptr;
-		return clone(tmp);
-	}
-
-public:
-	// arithmetic
-	// https://www.boost.org/doc/libs/1_50_0/boost/container/vector.hpp
-
-	iterator& operator+=(difference_type const off){
-		ptr += off;
-		return *this;
-	}
-
-	iterator operator +(difference_type const off) const{
-		return clone(ptr + off);
-	}
-
-	iterator& operator-=(difference_type const off){
-		ptr -= off;
-		return *this;
-	}
-
-	iterator operator -(difference_type const off) const{
-		return clone(ptr - off);
-	}
-
-	friend iterator operator +(difference_type const  off, iterator const &it){
-		return it.clone(it.ptr + off);
-	}
-
-	difference_type operator -(iterator const &other) const{
-		return ptr - other.ptr;
-	}
-
-public:
-	// compare
-	bool operator==(iterator const &other) const{
-		return ptr == other.ptr;
-	}
-
-	bool operator!=(iterator const &other) const{
-		return ptr != other.ptr;
-	}
-
-	bool operator >(iterator const &other) const{
-		return ptr >  other.ptr;
-	}
-
-	bool operator>=(iterator const &other) const{
-		return ptr >= other.ptr;
-	}
-
-	bool operator <(iterator const &other) const{
-		return ptr <  other.ptr;
-	}
-
-	bool operator<=(iterator const &other) const{
-		return ptr <= other.ptr;
-	}
-
-public:
-	// dereference
-
-	reference operator[](difference_type const off) const{
-		return getAt(ptr + off);
-	}
-
-	reference operator*() const{
-		return getAt(ptr);
-	}
-
-	pointer operator ->() const{
-		return & operator*();
-	}
-
-private:
-	const DiskList	*list;
-	difference_type	ptr;
-};
-
-
-
-// ==============================
-
-
-
-inline auto DiskList::begin() const -> iterator{
+inline auto DiskList::ra_begin() const -> random_access_iterator{
 	return { *this, difference_type{ 0 } };
 }
 
-inline auto DiskList::end() const -> iterator{
+inline auto DiskList::ra_end() const -> random_access_iterator{
 	return { *this, size() };
 }
 
+inline auto DiskList::begin() const -> forward_iterator{
+	return { *this, difference_type{ 0 } };
+}
 
+inline auto DiskList::end() const -> forward_iterator{
+	return { *this, size() };
+}
+
+template<bool B>
+auto DiskList::find(StringRef const &key, std::bool_constant<B> const exact) const -> forward_iterator{
+	return static_cast<forward_iterator>( ra_find(key, exact) );
+}
 
 } // namespace disk
 } // namespace

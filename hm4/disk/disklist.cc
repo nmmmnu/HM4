@@ -33,15 +33,11 @@ static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 // ==============================
 
 namespace{
-	using iterator = DiskList::iterator;
-
-	// -----------------------------------
-
-	auto search_fix(BinarySearchResult<iterator> const result, DiskList const &list, std::true_type){
-		return result.found ? result.it : std::end(list);
+	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &list, std::true_type){
+		return result.found ? result.it : list.ra_end();
 	}
 
-	auto search_fix(BinarySearchResult<iterator> const result, DiskList const &, std::false_type){
+	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &, std::false_type){
 		return result.it;
 	}
 
@@ -51,32 +47,28 @@ namespace{
 		return p.cmp(key);
 	}
 
-	auto searchBinary(StringRef const &key, iterator first, iterator last){
+	auto searchBinary(StringRef const &key, DiskList::random_access_iterator first, DiskList::random_access_iterator last){
 		return binarySearch(first, last, key, comp);
-	}
-
-	auto searchBinary(StringRef const &key, DiskList const &list){
-		return searchBinary(key, std::begin(list), std::end(list));
 	}
 
 	// -----------------------------------
 
-	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<iterator>;
+	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;
 
 	template<typename T>
 	auto dt(T const &a){
 		return static_cast<DiskList::difference_type>(a);
 	}
 
-//	void dt(DiskList::difference_type){}
 
-	auto searchHotLine(StringRef const &key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<iterator>{
+
+	auto searchHotLine(StringRef const &key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<DiskList::random_access_iterator>{
 		size_t const nodesCount = line.sizeArray<SmallNode>();
 
 		const SmallNode *nodes = line->as<const SmallNode>(0, nodesCount);
 
 		if (!nodes)
-			return searchBinary(key, list);
+			return searchBinary(key, list.ra_begin(), list.ra_end());
 
 		auto comp = [](SmallNode const &node, StringRef const &key){
 			using SS = SmallString<PairConf::HLINE_SIZE>;
@@ -91,7 +83,7 @@ namespace{
 		if (x.it == nodesEnd){
 			log__("Not found, in most right pos");
 
-			return { false, list.end() };
+			return { false, list.ra_end() };
 		}
 
 		auto const listPos = dt( betoh<uint64_t>(x.it->pos) );
@@ -99,7 +91,7 @@ namespace{
 		if ( listPos >= dt( list.size() ) ){
 			log__("Hotline corruption detected. Advice Hotline removal.");
 
-			return searchBinary(key, list);
+			return searchBinary(key, list.ra_begin(), list.ra_end());
 		}
 
 		if (x.found == false){
@@ -109,7 +101,7 @@ namespace{
 				"key",	StringRef{ x.it->key, PairConf::HLINE_SIZE }
 			);
 
-			return { false,  iterator{ list, listPos } };
+			return { false,  DiskList::random_access_iterator{ list, listPos } };
 		}
 
 		// OK, is found in the hot line...
@@ -120,7 +112,7 @@ namespace{
 
 			log__("Found, direct hit at pos", listPos);
 
-			return { true, iterator{ list, listPos } };
+			return { true, DiskList::random_access_iterator{ list, listPos } };
 		}
 
 		// binary inside the partition
@@ -132,7 +124,7 @@ namespace{
 			"Hotline Key",	StringRef{ x.it->key, PairConf::HLINE_SIZE }
 		);
 
-		return searchBinary(key, list.begin() + listPos, list.begin() + listPosLast);
+		return searchBinary(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);
 	}
 
 } // anonymous namespace
@@ -270,31 +262,31 @@ size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
 
 
 template<bool B>
-auto DiskList::find(StringRef const &key, std::bool_constant<B> const exact) const -> iterator{
+auto DiskList::ra_find(StringRef const &key, std::bool_constant<B> const exact) const -> random_access_iterator{
 	// made this way to hide BinarySearchResult<iterator> type
 	switch(searchMode_){
 	case SearchMode::BTREE: {
 			log__("btree");
 			auto const x = searchBTree(key, *this);
-			return search_fix(x, *this, exact);
+			return find_fix(x, *this, exact);
 		}
 
 	case SearchMode::HOTLINE: {
 			log__("hotline");
 			auto const x = searchHotLine(key, *this, mLine_);
-			return search_fix(x, *this, exact);
+			return find_fix(x, *this, exact);
 		}
 
 	case SearchMode::BINARY: {
 			log__("binary");
-			auto const x = searchBinary(key, *this);
-			return search_fix(x, *this, exact );
+			auto const x = searchBinary(key, ra_begin(), ra_end());
+			return find_fix(x, *this, exact );
 		}
 	}
 }
 
-template auto DiskList::find(StringRef const &key, std::true_type  ) const -> iterator;
-template auto DiskList::find(StringRef const &key, std::false_type ) const -> iterator;
+template auto DiskList::ra_find(StringRef const &key, std::true_type  ) const -> random_access_iterator;
+template auto DiskList::ra_find(StringRef const &key, std::false_type ) const -> random_access_iterator;
 
 
 
@@ -357,12 +349,12 @@ public:
 			return btreeSearch_();
 		}catch(const BTreeAccessError &e){
 			log__("Problem, switch to binary search (1)");
-			return searchBinary(key_, list_);
+			return searchBinary(key_, list_.ra_begin(), list_.ra_end());
 		}
 	}
 
 private:
-	BinarySearchResult<iterator> btreeSearch_(){
+	auto btreeSearch_() -> BinarySearchResult<DiskList::random_access_iterator>{
 		size_t const nodesCount	= mTree_.size() / sizeof(Node);
 
 		const Node *nodes = mTree_->as<const Node>(0, nodesCount);
@@ -378,7 +370,7 @@ private:
 			const auto x = levelOrderBinarySearch_( nodes[pos] );
 
 			if (x.isResult)
-				return { true, iterator{ list_, x.result_index } };
+				return { true, DiskList::random_access_iterator{ list_, x.result_index } };
 
 			// Determine where to go next...
 
@@ -401,7 +393,7 @@ private:
 		log__("BTREE LEAF:", pos);
 		log__("Fallback to binary search", start, '-', end, ", width", end - start);
 
-		return searchBinary(key_, iterator{ list_, start }, iterator{ list_, end } );
+		return searchBinary(key_, DiskList::random_access_iterator{ list_, start }, DiskList::random_access_iterator{ list_, end } );
 	}
 
 	NodeResult levelOrderBinarySearch_(const Node &node){
@@ -482,7 +474,7 @@ private:
 
 
 namespace{
-	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<iterator>{
+	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>{
 		DiskList::BTreeSearchHelper helper{list, key};
 
 		return helper();
