@@ -1,6 +1,7 @@
 #include "filemetablob.h"
 
 #include <fstream>
+#include <algorithm>
 
 #include <limits>
 
@@ -75,6 +76,33 @@ namespace FileBuilder{
 		// ==============================
 
 
+		template<class T>
+		struct MinMax{
+			void operator()(T const &val){
+				if (val < min)
+					min = val;
+
+				if (val > max)
+					max = val;
+			}
+
+			T const &getMin(T const &def = 0){
+				return min == std::numeric_limits<T>::max() ? def : min;
+			}
+
+			T const &getMax(T const &def = 0){
+				return max == std::numeric_limits<T>::min() ? def : max;
+			}
+
+		private:
+			T min	= std::numeric_limits<T>::max();
+			T max	= std::numeric_limits<T>::min();
+		};
+
+
+		// ==============================
+
+
 		template <class IT>
 		bool writeToFile(IT first, IT last,
 						std::ofstream &file_meta,
@@ -84,37 +112,26 @@ namespace FileBuilder{
 						bool const keepTombstones,
 						bool const aligned){
 
-			uint64_t index		= 0;
-
 			uint64_t count		= 0;
 			uint64_t tombstones	= 0;
 
 			// set min / max
-			uint64_t createdMin	= std::numeric_limits<uint64_t>::max();
-			uint64_t createdMax	= std::numeric_limits<uint64_t>::min();
+			MinMax<uint64_t> createdMM;
 
 			CacheLineBuilder cacheLine(file_line);
 
-			for(; first != last; ++first){
-				const Pair &pair = *first;
-
+			std::for_each(first, last, [&, index = uint64_t{0}](const Pair &pair) mutable{
 				if (!pair.isValid())
-					continue;
+					return;
 
 				if (pair.isTombstone()){
 					if (keepTombstones == false)
-						continue;
+						return;
 
 					++tombstones;
 				}
 
-				uint64_t const created = pair.getCreated();
-
-				if (created < createdMin)
-					createdMin = created;
-
-				if (created > createdMax)
-					createdMax = created;
+				createdMM( pair.getCreated() );
 
 				// ==============================
 
@@ -133,15 +150,7 @@ namespace FileBuilder{
 					index += my_align::fwriteGap(file_data, pair.bytes(), PairConf::ALIGN);
 
 				++count;
-			}
-
-			// fix min / max -> 0
-
-			if (createdMin == std::numeric_limits<uint64_t>::max())
-				createdMin = 0;
-
-			if (createdMax == std::numeric_limits<uint64_t>::min())
-				createdMax = 0;
+			});
 
 			// now we miraculasly have the datacount.
 
@@ -156,7 +165,7 @@ namespace FileBuilder{
 
 			using hm4::disk::FileMetaBlob;
 
-			const FileMetaBlob blob = FileMetaBlob::create( options, count, tombstones, createdMin, createdMax );
+			const FileMetaBlob blob = FileMetaBlob::create( options, count, tombstones, createdMM.getMin(), createdMM.getMax() );
 
 			file_meta.write( (const char *) & blob, sizeof(FileMetaBlob));
 
@@ -168,7 +177,7 @@ namespace FileBuilder{
 
 	template <class IT>
 	bool build(StringRef const &filename,
-					IT first, const IT last,
+					IT first, IT last,
 					bool const keepTombstones, bool const aligned){
 
 		constexpr auto mode = std::ios::out | std::ios::binary;
@@ -180,7 +189,7 @@ namespace FileBuilder{
 
 		using namespace filebuilder_impl_;
 
-		return writeToFile(std::move(first), std::move(last), fileMeta, fileIndx, fileLine, fileData, keepTombstones, aligned);
+		return writeToFile(first, last, fileMeta, fileIndx, fileLine, fileData, keepTombstones, aligned);
 	}
 
 } // namespace
