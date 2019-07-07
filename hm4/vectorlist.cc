@@ -47,9 +47,7 @@ bool VectorList::insert(OPair&& newdata){
 			return false;
 		}
 
-		dataSize_ = dataSize_
-					- olddata->bytes()
-					+ newdata->bytes();
+		lc_.upd(olddata->bytes(), newdata->bytes());
 
 		// copy assignment
 		olddata = std::move(newdata);
@@ -61,7 +59,7 @@ bool VectorList::insert(OPair&& newdata){
 
 	try{
 		auto const newit = vector_.insert(x.it, std::move(newdata));
-		dataSize_ += newit->get()->bytes();
+		lc_.inc(newit->get()->bytes());
 	}catch(...){
 	}
 
@@ -78,7 +76,7 @@ bool VectorList::erase(const StringRef &key){
 		return true;
 	}
 
-	dataSize_ -= x.it->get()->bytes();
+	lc_.dec(x.it->get()->bytes());
 
 	vector_.erase(x.it);
 

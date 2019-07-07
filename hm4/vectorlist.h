@@ -2,12 +2,13 @@
 #define _VECTORLIST_H
 
 #include "ilist.h"
+#include "listcounter.h"
 
 #include "mynarrow.h"
 #include "binarysearch.h"
 
-#include <cassert>
 #include <vector>
+
 
 namespace hm4{
 
@@ -28,35 +29,29 @@ public:
 
 private:
 	OVector		vector_;
-	size_t		dataSize_ = 0;
+	ListCounter	lc_;
 
 public:
 	bool clear(){
 		vector_.clear();
-		dataSize_ = 0;
+		lc_.clr();
 		return true;
 	}
 
 	bool erase(const StringRef &key);
 
 	Pair const &operator[](size_type const index) const{
-		assert( index < size() );
-
 		return *vector_[index].get();
 	}
 
 	bool insert(OPair &&data);
 
-	size_type size() const{
-		return vector_.size();
+	auto size() const{
+		return lc_.size();
 	}
 
-	size_type sizeEstimated() const{
-		return size();
-	}
-
-	size_t bytes() const{
-		return dataSize_;
+	auto bytes() const{
+		return lc_.bytes();
 	}
 
 public:

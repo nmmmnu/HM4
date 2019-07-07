@@ -90,9 +90,8 @@ SkipList::SkipList(){
 }
 
 SkipList::SkipList(SkipList &&other):
-		heads_		(std::move(other.heads_		)),
-		dataCount_	(std::move(other.dataCount_	)),
-		dataSize_	(std::move(other.dataSize_	)){
+		heads_	(std::move(other.heads_	)),
+		lc_	(std::move(other.lc_	)){
 	other.zeroing_();
 }
 
@@ -132,9 +131,7 @@ bool SkipList::insert(OPair&& newdata){
 			return false;
 		}
 
-		dataSize_ = dataSize_
-			- olddata->bytes()
-			+ newdata->bytes();
+		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// copy assignment
 		olddata = std::move(newdata);
@@ -173,8 +170,7 @@ bool SkipList::insert(OPair&& newdata){
 	/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
 	// newnode->next[i] = NULL;
 
-	dataSize_ += size;
-	++dataCount_;
+	lc_.inc(size);
 
 	return true;
 }
@@ -206,8 +202,7 @@ bool SkipList::erase(StringRef const &key){
 
 	const OPair & data = nl.node->data;
 
-	dataSize_ -= data->bytes();
-	dataCount_--;
+	lc_.dec( data->bytes() );
 
 	delete nl.node;
 
@@ -236,8 +231,7 @@ void SkipList::printLane(height_size_type const lane) const{
 // ==============================
 
 void SkipList::zeroing_(){
-	dataSize_ = 0;
-	dataCount_ = 0;
+	lc_.clr();
 
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }

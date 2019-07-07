@@ -2,6 +2,7 @@
 #define _SKIP_LIST_LIST_H
 
 #include "ilist.h"
+#include "listcounter.h"
 
 #include <array>
 
@@ -33,12 +34,12 @@ public:
 
 	bool insert(OPair &&data);
 
-	size_type size() const noexcept{
-		return dataCount_;
+	auto size() const{
+		return lc_.size();
 	}
 
-	size_t bytes() const noexcept{
-		return dataSize_;
+	auto bytes() const{
+		return lc_.bytes();
 	}
 
 public:
@@ -59,8 +60,7 @@ private:
 
 	HeightArray<Node *>	heads_;
 
-	size_type		dataCount_;
-	size_t			dataSize_;
+	ListCounter		lc_;
 
 private:
 	void zeroing_();

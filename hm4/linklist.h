@@ -3,6 +3,9 @@
 
 #include "ilist.h"
 
+#include "listcounter.h"
+
+
 namespace hm4{
 
 
@@ -28,12 +31,12 @@ public:
 
 	bool insert(OPair &&data);
 
-	size_type size() const{
-		return dataCount_;
+	auto size() const{
+		return lc_.size();
 	}
 
-	size_t bytes() const{
-		return dataSize_;
+	auto bytes() const{
+		return lc_.bytes();
 	}
 
 public:
@@ -48,8 +51,7 @@ private:
 
 	Node		*head_;
 
-	size_type	dataCount_;
-	size_t		dataSize_;
+	ListCounter	lc_;
 
 private:
 	void clear_();

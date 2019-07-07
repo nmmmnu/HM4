@@ -26,9 +26,8 @@ LinkList::LinkList(){
 }
 
 LinkList::LinkList(LinkList &&other):
-		head_		(std::move(other.head_		)),
-		dataCount_	(std::move(other.dataCount_	)),
-		dataSize_	(std::move(other.dataSize_	)){
+		head_		(std::move(other.head_	)),
+		lc_		(std::move(other.lc_	)){
 	other.clear_();
 }
 
@@ -65,9 +64,7 @@ bool LinkList::insert(OPair&& newdata){
 			return false;
 		}
 
-		dataSize_ = dataSize_
-				- olddata->bytes()
-				+ newdata->bytes();
+		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// copy assignment
 		olddata = std::move(newdata);
@@ -86,8 +83,7 @@ bool LinkList::insert(OPair&& newdata){
 	newnode->next = *loc.prev;
 	*loc.prev = newnode;
 
-	dataSize_ += size;
-	dataCount_++;
+	lc_.inc(size);
 
 	return true;
 }
@@ -110,8 +106,7 @@ bool LinkList::erase(StringRef const &key){
 	if (loc.node){
 		*loc.prev = loc.node->next;
 
-		dataSize_ -= loc.node->data->bytes();
-		--dataCount_;
+		lc_.dec( loc.node->data->bytes() );
 
 		delete loc.node;
 	}
@@ -122,8 +117,8 @@ bool LinkList::erase(StringRef const &key){
 // ==============================
 
 void LinkList::clear_(){
-	dataCount_ = 0;
-	dataSize_ = 0;
+	lc_.clr();
+
 	head_ = nullptr;
 }
 

@@ -125,16 +125,12 @@ namespace FileBuilder{
 				cacheLine(pair.getKey(), count);
 
 				/* white the data */
-				{
-					pair.fwrite(file_data);
+				pair.fwrite(file_data);
 
-					size_t bytes = pair.bytes();
+				index += pair.bytes();
 
-					if (aligned)
-						bytes += my_align::fwriteGap(file_data, pair.bytes(), PairConf::ALIGN);
-
-					index += bytes;
-				}
+				if (aligned)
+					index += my_align::fwriteGap(file_data, pair.bytes(), PairConf::ALIGN);
 
 				++count;
 			}
