@@ -114,18 +114,7 @@ namespace FileBuilder{
 			}
 
 			void push_back(Pair const &pair){
-				{
-					auto const created = pair.getCreated();
-
-					if (created < minCreated)
-						minCreated = created;
-
-					if (created > maxCreated)
-						maxCreated = created;
-
-					if (pair.isTombstone())
-						++tombstones;
-				}
+				collectStats(pair);
 
 				// write the index
 				writeU64(file_indx, index);
@@ -145,6 +134,19 @@ namespace FileBuilder{
 			}
 
 		private:
+			void collectStats(Pair const &pair){
+				auto const created = pair.getCreated();
+
+				if (created < minCreated)
+					minCreated = created;
+
+				if (created > maxCreated)
+					maxCreated = created;
+
+				if (pair.isTombstone())
+					++tombstones;
+			}
+
 			uint64_t const &getMinCreated_(uint64_t const &def = 0) const{
 				return minCreated == std::numeric_limits<uint64_t>::max() ? def : minCreated;
 			}
