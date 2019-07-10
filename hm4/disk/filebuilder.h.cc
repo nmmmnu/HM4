@@ -114,7 +114,7 @@ namespace FileBuilder{
 			}
 
 			void push_back(Pair const &pair){
-				collectStats(pair);
+				collectStats_(pair);
 
 				// write the index
 				writeU64(file_indx, index);
@@ -134,7 +134,7 @@ namespace FileBuilder{
 			}
 
 		private:
-			void collectStats(Pair const &pair){
+			void collectStats_(Pair const &pair){
 				auto const created = pair.getCreated();
 
 				if (created < minCreated)
@@ -186,10 +186,14 @@ namespace FileBuilder{
 		Builder builder(filename, aligned);
 
 		std::copy_if(first, last, std::back_inserter(builder), [keepTombstones](Pair const &pair){
+			// invalid pairs must be kept as tombstones
+			if (keepTombstones)
+				return true;
+
 			if (!pair.isValid())
 				return false;
 
-			if (keepTombstones == false && pair.isTombstone())
+			if (pair.isTombstone())
 				return false;
 
 			return true;
