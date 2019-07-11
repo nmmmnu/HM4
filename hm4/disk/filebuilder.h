@@ -11,9 +11,13 @@ namespace hm4{
 namespace disk{
 namespace FileBuilder{
 
+	template <class IT>
+	bool build(StringRef const &filename, IT first, IT last,
+					bool const keepTombstones, bool const aligned);
+
+	// ==============================
+
 	namespace filebuilder_impl_{
-
-
 
 		class CacheLineBuilder{
 		private:
@@ -83,7 +87,7 @@ namespace FileBuilder{
 
 	} // namespace
 
-
+	// ==============================
 
 	template <class IT>
 	bool build(StringRef const &filename, IT first, IT last,
@@ -109,8 +113,6 @@ namespace FileBuilder{
 
 		return true;
 	}
-
-
 
 } // namespace
 } // namespace
