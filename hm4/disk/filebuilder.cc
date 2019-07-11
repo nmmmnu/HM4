@@ -1,0 +1,134 @@
+#include "filebuilder.h"
+
+#include "disk/filenames.h"
+
+#include "filemetablob.h"
+
+#include "myalign.h"
+#include "myendian.h"
+
+namespace hm4{
+namespace disk{
+
+namespace FileBuilder{
+
+	namespace filebuilder_impl_{
+
+		inline void writeU64(std::ofstream &file, uint64_t const data){
+			uint64_t const be_data = htobe(data);
+
+			file.write( (const char *) & be_data, sizeof(uint64_t));
+		}
+
+		template<size_t HLINE_SIZE>
+		void writeStr(std::ofstream &file, const SmallString<HLINE_SIZE> &key){
+			file.write(key.data(), narrow<std::streamsize>(key.size()));
+
+			my_align::fwriteGap(file, key.size(), HLINE_SIZE);
+		}
+
+
+
+		// ==============================
+
+
+
+		void CacheLineBuilder::operator()(StringRef const &current, uint64_t const pos){
+			if (key_.equals(current))
+				return;
+
+			store_();
+
+			// introduce new key
+			key_ = current;
+			pos_ = pos;
+		}
+
+		void CacheLineBuilder::store_(){
+			if (key_.empty())
+				return;
+
+			writeStr(file_, key_);
+			writeU64(file_, pos_);
+		}
+
+
+
+		// ==============================
+
+
+
+		Builder::Builder(StringRef const &filename, bool const aligned) :
+								file_meta(filenameMeta(filename), mode),
+								file_indx(filenameIndx(filename), mode),
+								file_line(filenameLine(filename), mode),
+								file_data(filenameData(filename), mode),
+								aligned(aligned){}
+
+		Builder::~Builder(){
+			// write the header
+
+			uint16_t const option_aligned = aligned ? FileMetaBlob::OPTIONS_ALIGNED : FileMetaBlob::OPTIONS_NONE;
+
+			// write table header
+			uint16_t const options =
+						FileMetaBlob::OPTIONS_NONE	|
+						FileMetaBlob::OPTIONS_SORTED	|
+						option_aligned
+			;
+
+			using hm4::disk::FileMetaBlob;
+
+			const FileMetaBlob blob = FileMetaBlob::create(
+				options,
+				count,
+				tombstones,
+				getMinCreated_(),
+				getMaxCreated_()
+			);
+
+			file_meta.write( (const char *) & blob, sizeof(FileMetaBlob));
+		}
+
+		void Builder::push_back(Pair const &pair){
+			collectStats_(pair);
+
+			// write the index
+			writeU64(file_indx, index);
+
+			// white cache line
+			cacheLine(pair.getKey(), count);
+
+			// white the data
+			pair.fwrite(file_data);
+
+			index += pair.bytes();
+
+			if (aligned)
+				index += my_align::fwriteGap(file_data, pair.bytes(), PairConf::ALIGN);
+
+			++count;
+		}
+
+		void Builder::collectStats_(Pair const &pair){
+			auto const created = pair.getCreated();
+
+			if (created < minCreated)
+				minCreated = created;
+
+			if (created > maxCreated)
+				maxCreated = created;
+
+			if (pair.isTombstone())
+				++tombstones;
+		}
+
+	} // namespace filebuilder_impl_
+
+
+
+} // namespace
+
+} // namespace
+} // namespace hm4
+

@@ -36,7 +36,7 @@ public:
 
 		const std::string &filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_());
 
-		disk::FileBuilder::build(filename, list, keepTombstones_, /* aligned */ true);
+		disk::FileBuilder::build(filename, std::begin(list), std::end(list), keepTombstones_, /* aligned */ true);
 
 		return true;
 	}

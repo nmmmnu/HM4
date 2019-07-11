@@ -9,7 +9,7 @@ include Makefile.sub
 all: $(A)db_net
 
 PAIR_OBJ = $(O)pair.o $(O)mytime.o
-DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o
+DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o $(O)filebuilder.o
 
 $(A)db_net: $(O)db_net.o	\
 			$(PAIR_OBJ) $(DISKLIST_OBJ)		\
