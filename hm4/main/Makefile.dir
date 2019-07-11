@@ -12,16 +12,16 @@ all: $(MY_TARGETS)
 
 
 PAIR_OBJ = $(O)pair.o $(O)mytime.o
-DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o $(O)filebuilder.o
+DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o
 
 
 $(A)db_file: $(O)db_file.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)directorylistloader.o $(O)baselistloader.o $(O)myglob.o
 	$(LINK)
 
-$(A)db_merge: $(O)db_merge.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)baselistloader.o
+$(A)db_merge: $(O)db_merge.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)baselistloader.o
 	$(LINK)
 
-$(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)skiplist.o $(O)idgeneratordate.o
+$(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)skiplist.o $(O)idgeneratordate.o
 	$(LINK)
 
 $(A)zone_loader: $(O)zone_loader.o

@@ -22,9 +22,7 @@ namespace FileBuilder{
 		public:
 			CacheLineBuilder(std::ofstream &file) : file_(file){}
 
-			~CacheLineBuilder(){
-				store_();
-			}
+			~CacheLineBuilder();
 
 			void operator()(StringRef const &current, uint64_t const pos);
 
@@ -42,8 +40,6 @@ namespace FileBuilder{
 		struct Builder{
 			using value_type = Pair const;
 
-			constexpr static auto mode = std::ios::out | std::ios::binary;
-
 			Builder(StringRef const &filename, bool const aligned);
 
 			~Builder();
@@ -54,14 +50,15 @@ namespace FileBuilder{
 			void collectStats_(Pair const &pair);
 
 			uint64_t getMinCreated_() const{
-				return getMinMaxCreated__(minCreated, std::numeric_limits<uint64_t>::max());
+				return getMM__<std::numeric_limits<uint64_t>::max()>(minCreated);
 			}
 
 			uint64_t getMaxCreated_() const{
-				return getMinMaxCreated__(maxCreated, std::numeric_limits<uint64_t>::min());
+				return getMM__<std::numeric_limits<uint64_t>::min()>(maxCreated);
 			}
 
-			static uint64_t getMinMaxCreated__(uint64_t val, uint64_t limit, uint64_t fallback = 0){
+			template<uint64_t limit>
+			static uint64_t getMM__(uint64_t const val, uint64_t const fallback = 0){
 				return val == limit ? fallback : val;
 			}
 

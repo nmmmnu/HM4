@@ -33,6 +33,10 @@ namespace FileBuilder{
 
 
 
+		CacheLineBuilder::~CacheLineBuilder(){
+			store_();
+		}
+
 		void CacheLineBuilder::operator()(StringRef const &current, uint64_t const pos){
 			if (key_.equals(current))
 				return;
@@ -58,11 +62,13 @@ namespace FileBuilder{
 
 
 
+		constexpr static auto MODE = std::ios::out | std::ios::binary;
+
 		Builder::Builder(StringRef const &filename, bool const aligned) :
-								file_meta(filenameMeta(filename), mode),
-								file_indx(filenameIndx(filename), mode),
-								file_line(filenameLine(filename), mode),
-								file_data(filenameData(filename), mode),
+								file_meta(filenameMeta(filename), MODE),
+								file_indx(filenameIndx(filename), MODE),
+								file_line(filenameLine(filename), MODE),
+								file_data(filenameData(filename), MODE),
 								aligned(aligned){}
 
 		Builder::~Builder(){
