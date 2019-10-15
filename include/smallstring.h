@@ -142,7 +142,7 @@ public:
 		return ::compare(smalldata, smallsize, data, fixedsize);
 	}
 
-	static int equals(const char *smalldata, const char *data, size_t const size) noexcept{
+	static bool equals(const char *smalldata, const char *data, size_t const size) noexcept{
 		auto const smallsize = strnlen__(smalldata);
 		auto const fixedsize = min__(size);
 
@@ -180,10 +180,33 @@ static_assert( std::is_trivially_copyable<SmallString<8> >::value, "SmallString 
 // ==================================
 
 template <size_t BYTES>
-inline std::ostream& operator << (std::ostream& os, const SmallString<BYTES> &sr){
-	os << StringRef{ sr.data(), sr.size() };
+inline std::ostream& operator << (std::ostream& os, const SmallString<BYTES> &ss){
+	os << StringRef{ ss.data(), ss.size() };
 
 	return os;
+}
+
+template <size_t BYTES>
+inline int compareFull(const StringRef &s, const SmallString<BYTES> &ss, const StringRef &ls) noexcept{
+	int const r = ss.compare(s);
+
+	if (r || s.size() < BYTES){
+		// if s.size() == BYTES,
+		// this does not mean that strings are equal,
+		// because ls might be longer
+		return r;
+	}
+
+	// comparing substring seems to be more expencive
+	return ls.compare(s);
+}
+
+template <size_t BYTES>
+inline bool equalsFull(const StringRef &s, const SmallString<BYTES> &ss, const StringRef &ls) noexcept{
+	(void) s;
+	(void) ss;
+	(void) ls;
+	assert(false); // todo
 }
 
 // ==================================

@@ -26,16 +26,10 @@ namespace FileBuilder{
 		public:
 			CacheLineBuilder(std::ofstream &file) : file_(file){}
 
-			~CacheLineBuilder();
-
 			void operator()(StringRef const &current, uint64_t const pos);
 
 		private:
-			void store_();
-
-		private:
 			SmallString<HLINE_SIZE>	key_;
-			uint64_t		pos_	= 0;
 			std::ofstream		&file_;
 		};
 
@@ -52,19 +46,6 @@ namespace FileBuilder{
 
 		private:
 			void collectStats_(Pair const &pair);
-
-			uint64_t getMinCreated_() const{
-				return getMM__<std::numeric_limits<uint64_t>::max()>(minCreated);
-			}
-
-			uint64_t getMaxCreated_() const{
-				return getMM__<std::numeric_limits<uint64_t>::min()>(maxCreated);
-			}
-
-			template<uint64_t limit>
-			static uint64_t getMM__(uint64_t const val, uint64_t const fallback = 0){
-				return val == limit ? fallback : val;
-			}
 
 		private:
 			std::ofstream	file_meta,
@@ -97,19 +78,24 @@ namespace FileBuilder{
 
 		Builder builder(filename, aligned);
 
-		std::copy_if(first, last, std::back_inserter(builder), [keepTombstones](Pair const &pair){
+		if (keepTombstones){
+
 			// invalid pairs must be kept as tombstones
-			if (keepTombstones)
+			std::copy(first, last, std::back_inserter(builder));
+
+		}else{
+
+			std::copy_if(first, last, std::back_inserter(builder), [](Pair const &pair){
+				if (!pair.isValid())
+					return false;
+
+				if (pair.isTombstone())
+					return false;
+
 				return true;
+			});
 
-			if (!pair.isValid())
-				return false;
-
-			if (pair.isTombstone())
-				return false;
-
-			return true;
-		});
+		}
 
 		return true;
 	}

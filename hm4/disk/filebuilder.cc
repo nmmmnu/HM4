@@ -11,10 +11,8 @@ namespace hm4{
 namespace disk{
 
 namespace FileBuilder{
-
-	namespace filebuilder_impl_{
-
-		inline void writeU64(std::ofstream &file, uint64_t const data){
+	namespace{
+		void writeU64(std::ofstream &file, uint64_t const data){
 			uint64_t const be_data = htobe(data);
 
 			file.write( (const char *) & be_data, sizeof(uint64_t));
@@ -27,33 +25,34 @@ namespace FileBuilder{
 			my_align::fwriteGap(file, key.size(), HLINE_SIZE);
 		}
 
-
-
-		// ==============================
-
-
-
-		CacheLineBuilder::~CacheLineBuilder(){
-			store_();
+		template<typename T>
+		T fixMinMax(T const val, T const limit, T const fallback = 0){
+			return val == limit ? fallback : val;
 		}
 
-		void CacheLineBuilder::operator()(StringRef const &current, uint64_t const pos){
-			if (key_.equals(current))
-				return;
-
-			store_();
-
-			// introduce new key
-			key_ = current;
-			pos_ = pos;
+		template<typename T>
+		T fixMin(T const val){
+			return fixMinMax(val, std::numeric_limits<T>::max());
 		}
 
-		void CacheLineBuilder::store_(){
-			if (key_.empty())
+		template<typename T>
+		T fixMax(T const val){
+			return fixMinMax(val, std::numeric_limits<T>::min());
+		}
+	}
+
+
+	namespace filebuilder_impl_{
+
+		void CacheLineBuilder::operator()(StringRef const &key, uint64_t const pos){
+			if (key_.equals(key))
 				return;
+
+			// store new key
+			key_ = key;
 
 			writeStr(file_, key_);
-			writeU64(file_, pos_);
+			writeU64(file_, pos);
 		}
 
 
@@ -89,8 +88,8 @@ namespace FileBuilder{
 				options,
 				count,
 				tombstones,
-				getMinCreated_(),
-				getMaxCreated_()
+				fixMin(minCreated),
+				fixMax(maxCreated)
 			);
 
 			file_meta.write( (const char *) & blob, sizeof(FileMetaBlob));
