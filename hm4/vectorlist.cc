@@ -18,17 +18,17 @@ namespace{
 auto VectorList::find(std::string_view const key, std::true_type) const noexcept -> iterator{
 	assert(!key.empty());
 
-	auto const x = binarySearch(vector_, key);
+	const auto &[found, it] = binarySearch(vector_, key);
 
-	return x.found ? x.it : end();
+	return found ? it : end();
 }
 
 auto VectorList::find(std::string_view const key, std::false_type) const noexcept -> iterator{
 	assert(!key.empty());
 
-	auto const x = binarySearch(vector_, key);
+	const auto &[found, it] = binarySearch(vector_, key);
 
-	return x.it;
+	return it;
 }
 
 bool VectorList::insert(OPair&& newdata){
@@ -36,12 +36,12 @@ bool VectorList::insert(OPair&& newdata){
 
 	std::string_view const key = newdata->getKey();
 
-	auto const x = binarySearch(vector_, key);
+	const auto &[found, it] = binarySearch(vector_, key);
 
-	if (x.found){
+	if (found){
 		// key exists, overwrite, do not shift
 
-		OPair &olddata = *x.it;
+		OPair &olddata = *it;
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata) ){
@@ -60,7 +60,7 @@ bool VectorList::insert(OPair&& newdata){
 	// key not exists, shift, then add
 
 	try{
-		auto const newit = vector_.insert(x.it, std::move(newdata));
+		auto const newit = vector_.insert(it, std::move(newdata));
 		lc_.inc(newit->get()->bytes());
 	}catch(...){
 	}
@@ -71,16 +71,16 @@ bool VectorList::insert(OPair&& newdata){
 bool VectorList::erase(std::string_view const key){
 	assert(!key.empty());
 
-	auto const x = binarySearch(vector_, key);
+	const auto &[found, it] = binarySearch(vector_, key);
 
-	if (! x.found){
+	if (! found){
 		// the key does not exists in the vector.
 		return true;
 	}
 
-	lc_.dec(x.it->get()->bytes());
+	lc_.dec(it->get()->bytes());
 
-	vector_.erase(x.it);
+	vector_.erase(it);
 
 	return true;
 }

@@ -81,15 +81,15 @@ namespace{
 
 		// first try to locate the partition
 		auto const nodesEnd = nodes + nodesCount;
-		auto const x = binarySearch(nodes, nodesEnd, key, comp);
+		const auto &[found, it] = binarySearch(nodes, nodesEnd, key, comp);
 
-		if (x.it == nodesEnd){
+		if (it == nodesEnd){
 			log__("Not found, in most right pos");
 
 			return { false, list.ra_end() };
 		}
 
-		auto const listPos = dt( betoh<uint64_t>(x.it->pos) );
+		auto const listPos = dt( betoh<uint64_t>(it->pos) );
 
 		if ( listPos >= dt( list.size() ) ){
 			log__("Hotline corruption detected. Advice Hotline removal.");
@@ -97,11 +97,11 @@ namespace{
 			return searchBinary(key, list.ra_begin(), list.ra_end());
 		}
 
-		if (x.found == false){
+		if (found == false){
 			log__(
 				"Not found",
 				"pos", listPos,
-				"key",	toSS(x.it->key)
+				"key",	toSS(it->key)
 			);
 
 			return { false,  DiskList::random_access_iterator{ list, listPos } };
@@ -120,11 +120,11 @@ namespace{
 
 		// binary inside the partition
 
-		auto listPosLast = x.it + 1 == nodesEnd ? dt(list.size()) : dt( betoh<uint64_t>( (x.it + 1)->pos) );
+		auto listPosLast = it + 1 == nodesEnd ? dt(list.size()) : dt( betoh<uint64_t>( (it + 1)->pos) );
 
 		log__(
 			"Proceed with Binary Search", listPos, listPosLast,
-			"Hotline Key",	toSS(x.it->key)
+			"Hotline Key",	toSS(it->key)
 		);
 
 		return searchBinary(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);

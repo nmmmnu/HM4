@@ -284,10 +284,7 @@ void AsyncLoop<SELECTOR, WORKER>::removeFD_(int const fd){
 
 template<class SELECTOR, class WORKER>
 void AsyncLoop<SELECTOR, WORKER>::expireFD_(){
-	for(const auto &p : clients_){
-		int const fd = p.first;
-		auto &c = p.second;
-
+	for(const auto &[fd, c] : clients_){
 		if (c.expired(conf_connectionTimeout_)){
 			handleDisconnect_(fd, DisconnectStatus::TIMEOUT);
 			// iterator is invalid now...

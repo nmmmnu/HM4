@@ -58,12 +58,12 @@ public:
 		}
 
 		for(size_t i = 0; i < paramsCount; ++i){
-			const auto p = readParam_();
+			const auto & [status, data] = readParam_();
 
-			if ( p.first == Status::OK )
-				params.push_back(p.second);
+			if ( status == Status::OK )
+				params.push_back(data);
 			else
-				return p.first;
+				return status;
 		}
 
 		return Status::OK;

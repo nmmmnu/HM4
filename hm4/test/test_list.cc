@@ -102,10 +102,7 @@ template <class List>
 void list_test(List &list){
 	// GENERAL
 
-	auto const a = listPopulate(list);
-
-	auto const count = a.first;
-	auto const bytes = a.second;
+	const auto&[ count, bytes ] = listPopulate(list);
 
 	mytest("size estimated",	list.size() >= count				);
 	mytest("size exact",		size(list) == count				);

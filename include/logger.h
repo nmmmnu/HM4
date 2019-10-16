@@ -8,14 +8,11 @@
 	#endif
 
 
-	inline void log__(){
-		std::clog << '\n';
-	}
+	template<typename... Args>
+	void log__(Args... args){
+		((std::clog << args << ' '), ...);
 
-	template<typename T, typename... ARGS>
-	void log__(T first, ARGS... args){
-		std::clog << first << " ";
-		log__(args...);
+		std::clog << '\n';
 	}
 
 #endif
