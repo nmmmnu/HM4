@@ -7,7 +7,6 @@
 #include "pair.h"
 
 #include "mynarrow.h"
-#include "my_type_traits.h"
 
 namespace hm4{
 

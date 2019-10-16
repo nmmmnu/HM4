@@ -7,7 +7,6 @@
 #include <string_view>
 
 #include "myendian.h"
-#include "my_type_traits.h"
 #include "mynarrow.h"
 #include "mystring.h"
 #include "comparator.h"

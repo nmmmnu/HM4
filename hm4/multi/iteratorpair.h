@@ -4,7 +4,6 @@
 #include "pair.h"
 
 #include <type_traits>
-#include "my_type_traits.h"
 
 namespace hm4{
 namespace multi{

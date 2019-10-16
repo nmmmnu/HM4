@@ -1,8 +1,7 @@
 #ifndef MY_ENDIAN_H_
 #define MY_ENDIAN_H_
 
-//#include <type_traits>
-#include "my_type_traits.h"
+#include <type_traits>
 
 #include "mybyteswap.h"
 

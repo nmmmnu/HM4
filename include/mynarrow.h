@@ -5,7 +5,6 @@
 #include <typeinfo>	// bad_cast
 #include <limits>	// numeric_limits
 #include <type_traits>
-#include "my_type_traits.h"
 
 namespace mynarrow_impl_{
 
