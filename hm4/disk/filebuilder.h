@@ -12,7 +12,7 @@ namespace disk{
 namespace FileBuilder{
 
 	template <class IT>
-	bool build(StringRef const &filename, IT first, IT last,
+	bool build(std::string_view const filename, IT first, IT last,
 					bool const keepTombstones, bool const aligned);
 
 	// ==============================
@@ -26,7 +26,7 @@ namespace FileBuilder{
 		public:
 			CacheLineBuilder(std::ofstream &file) : file_(file){}
 
-			void operator()(StringRef const &current, uint64_t const pos);
+			void operator()(std::string_view const current, uint64_t const pos);
 
 		private:
 			SmallString<HLINE_SIZE>	key_;
@@ -38,7 +38,7 @@ namespace FileBuilder{
 		struct Builder{
 			using value_type = Pair const;
 
-			Builder(StringRef const &filename, bool const aligned);
+			Builder(std::string_view const filename, bool const aligned);
 
 			~Builder();
 
@@ -71,7 +71,7 @@ namespace FileBuilder{
 	// ==============================
 
 	template <class IT>
-	bool build(StringRef const &filename, IT first, IT last,
+	bool build(std::string_view const filename, IT first, IT last,
 					bool const keepTombstones, bool const aligned){
 
 		using namespace filebuilder_impl_;

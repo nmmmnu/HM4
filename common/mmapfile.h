@@ -1,7 +1,7 @@
 #ifndef _MMAP_FILE_H
 #define _MMAP_FILE_H
 
-#include "stringref.h"
+#include <string_view>
 
 class MMAPFile{
 public:
@@ -20,7 +20,7 @@ public:
 		close();
 	}
 
-	bool open(const StringRef &filename, Advice advice = Advice::NORMAL);
+	bool open(std::string_view filename, Advice advice = Advice::NORMAL);
 
 	void close();
 
@@ -37,7 +37,7 @@ public:
 	}
 
 private:
-	bool open_(const StringRef &filename, int mode, int prot, int advice);
+	bool open_(std::string_view filename, int mode, int prot, int advice);
 
 	static bool openFail__(int const fd);
 

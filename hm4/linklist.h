@@ -27,7 +27,7 @@ public:
 public:
 	bool clear();
 
-	bool erase(StringRef const &key);
+	bool erase(std::string_view const key);
 
 	bool insert(OPair &&data);
 
@@ -41,7 +41,7 @@ public:
 
 public:
 	template<bool B>
-	iterator find(StringRef const &key, std::bool_constant<B> exact) const;
+	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
 
 	iterator begin() const;
 	static constexpr iterator end();
@@ -58,8 +58,8 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(StringRef const &key);
-	const Node *locateNode_(StringRef const &key, bool exact) const;
+	NodeLocator locate_(std::string_view const key);
+	const Node *locateNode_(std::string_view const key, bool exact) const;
 };
 
 // ==============================
@@ -99,7 +99,7 @@ private:
 // ==============================
 
 template<bool B>
-inline auto LinkList::find(const StringRef &key, std::bool_constant<B> const exact) const -> iterator{
+inline auto LinkList::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
 	return locateNode_(key, exact.value);
 }
 

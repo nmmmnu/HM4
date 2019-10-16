@@ -4,12 +4,13 @@
 #include <cstddef>	// offsetof
 #include <memory>	// unique_ptr
 #include <ostream>
+#include <string_view>
+
 #include "myendian.h"
 #include "my_type_traits.h"
 #include "mynarrow.h"
+#include "mystring.h"
 #include "comparator.h"
-
-#include "stringref.h"
 
 #define log__(...) /* nada */
 
@@ -63,8 +64,8 @@ public:
 
 
 public:
-	static std::unique_ptr<Pair> create(		const StringRef &key,
-							const StringRef &val,
+	static std::unique_ptr<Pair> create(		std::string_view key,
+							std::string_view val,
 							uint32_t expires,
 							uint32_t created){
 		return 	create( key.data(), key.size(), val.data(), val.size(), expires, created );
@@ -88,11 +89,11 @@ public:
 	}
 
 public:
-	StringRef getKey() const noexcept{
+	std::string_view  getKey() const noexcept{
 		return { getKey_(), getKeyLen_() };
 	}
 
-	StringRef getVal() const noexcept{
+	std::string_view  getVal() const noexcept{
 		return { getVal_(), getValLen_() };
 	}
 
@@ -105,12 +106,12 @@ public:
 	}
 
 public:
-	int cmp(const StringRef &key) const noexcept{
+	int cmp(std::string_view const key) const noexcept{
 		return cmp_(key.data(), key.size());
 	}
 
 public:
-	bool equals(const StringRef &key) const noexcept{
+	bool equals(std::string_view const key) const noexcept{
 		return equals_(key.data(), key.size());
 	}
 
@@ -228,7 +229,7 @@ private:
 
 } __attribute__((__packed__));
 
-static_assert(std::is_pod<Pair>::value, "Pair must be POD type");
+static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
 
 // ==============================
 

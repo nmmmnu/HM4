@@ -40,7 +40,7 @@ public:
 	}
 
 	template<bool B>
-	iterator find(const StringRef &key, std::bool_constant<B> const exact) const{
+	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
 		return list_.find(key, exact);
 	}
 
@@ -51,7 +51,7 @@ public:
 		return list_.clear();
 	}
 
-	bool erase(StringRef const &key){
+	bool erase(std::string_view const key){
 		assert(!key.empty());
 		return list_.erase(key);
 	}

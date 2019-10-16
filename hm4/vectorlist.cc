@@ -1,19 +1,21 @@
 #include "vectorlist.h"
 
+#include "binarysearch.h"
+
 namespace hm4{
 
 namespace{
-	int comp(OPair const &p, StringRef const &key){
+	int comp(OPair const &p, std::string_view const key){
 		return p.cmp(key);
 	}
 
 	template<class T>
-	auto binarySearch(T &v, StringRef const &key){
-		return binarySearch(std::begin(v), std::end(v), key, comp);
+	auto binarySearch(T &v, std::string_view const key){
+		return ::binarySearch(std::begin(v), std::end(v), key, comp);
 	}
 } // anonymous namespace
 
-auto VectorList::find(const StringRef &key, std::true_type) const noexcept -> iterator{
+auto VectorList::find(std::string_view const key, std::true_type) const noexcept -> iterator{
 	assert(!key.empty());
 
 	auto const x = binarySearch(vector_, key);
@@ -21,7 +23,7 @@ auto VectorList::find(const StringRef &key, std::true_type) const noexcept -> it
 	return x.found ? x.it : end();
 }
 
-auto VectorList::find(const StringRef &key, std::false_type) const noexcept -> iterator{
+auto VectorList::find(std::string_view const key, std::false_type) const noexcept -> iterator{
 	assert(!key.empty());
 
 	auto const x = binarySearch(vector_, key);
@@ -32,7 +34,7 @@ auto VectorList::find(const StringRef &key, std::false_type) const noexcept -> i
 bool VectorList::insert(OPair&& newdata){
 	assert(newdata);
 
-	const StringRef &key = newdata->getKey();
+	std::string_view const key = newdata->getKey();
 
 	auto const x = binarySearch(vector_, key);
 
@@ -66,7 +68,7 @@ bool VectorList::insert(OPair&& newdata){
 	return true;
 }
 
-bool VectorList::erase(const StringRef &key){
+bool VectorList::erase(std::string_view const key){
 	assert(!key.empty());
 
 	auto const x = binarySearch(vector_, key);

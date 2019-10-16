@@ -1,22 +1,23 @@
 #ifndef MY_STR_REPLACE_H_
 #define MY_STR_REPLACE_H_
 
-#include "stringref.h"
+#include <string>
+#include <string_view>
 
 namespace StringReplace{
 
 	namespace stringreplace_impl_{
 
-		constexpr inline size_t strlen_(const StringRef &s){
+		constexpr inline size_t strlen_(std::string_view const s){
 			return s.size();
 		}
 
-		constexpr inline size_t strlen_(char const){
+		constexpr inline size_t strlen_(char){
 			return 1;
 		}
 
 		template<class STR>
-		std::string &replace_(std::string &s, const STR &find, const StringRef &replace){
+		std::string &replace_(std::string &s, const STR &find, std::string_view const replace){
 			auto const findsize = strlen_(find);
 
 			if (findsize == 0)
@@ -32,23 +33,23 @@ namespace StringReplace{
 
 	} // namespace stringreplace_impl_
 
-	std::string &replace(std::string &s, const StringRef &find, const StringRef &repl){
+	std::string &replace(std::string &s, std::string_view const find, std::string_view const repl){
 		using namespace stringreplace_impl_;
 
 		return replace_(s, find, repl);
 	}
 
-	std::string &replace(std::string &s, char const find, const StringRef &repl){
+	std::string &replace(std::string &s, char find, std::string_view const repl){
 		using namespace stringreplace_impl_;
 
 		return replace_(s, find, repl);
 	}
 
-	std::string replaceByCopy(std::string s, const StringRef &find, const StringRef &repl){
+	std::string replaceByCopy(std::string s, std::string_view const find, std::string_view const repl){
 		return replace(s, find, repl);
 	}
 
-	std::string replaceByCopy(std::string s, char const find, const StringRef &repl){
+	std::string replaceByCopy(std::string s, char find, std::string_view const repl){
 		return replace(s, find, repl);
 	}
 } // namespace

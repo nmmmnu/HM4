@@ -84,7 +84,7 @@ auto getIterator(List const &list, std::false_type){
 }
 
 template<class List, bool B>
-auto getIterator(List const &list, StringRef const &key, std::bool_constant<B> const exact){
+auto getIterator(List const &list, std::string_view const key, std::bool_constant<B> const exact){
 	return list.find(key, exact);
 }
 

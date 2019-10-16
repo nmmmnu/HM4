@@ -2,8 +2,6 @@
 
 #include "my_typename.h"
 
-#include "stringref.h"
-
 #include <iostream>
 #include <cassert>
 

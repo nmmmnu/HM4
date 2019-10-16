@@ -50,13 +50,13 @@ $(A)test_redisprotocol: $(O)test_redisprotocol.o $(O)redisprotocol.o
 
 
 
-$(A)test_echo_poll: $(O)test_echo_poll.o	$(O)pollselector.o	$(O)echoworker.o	$(O)mytime.o $(O)sockets.o
+$(A)test_echo_poll: $(O)test_echo_poll.o	$(O)pollselector.o				$(O)mytime.o $(O)sockets.o
 	$(LINK)
 
-$(A)test_echo_epoll: $(O)test_echo_epoll.o	$(O)epollselector.o	$(O)echoworker.o	$(O)mytime.o $(O)sockets.o
+$(A)test_echo_epoll: $(O)test_echo_epoll.o	$(O)epollselector.o				$(O)mytime.o $(O)sockets.o
 	$(LINK)
 
-$(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o	$(O)echoworker.o	$(O)mytime.o $(O)sockets.o
+$(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o				$(O)mytime.o $(O)sockets.o
 	$(LINK)
 
 

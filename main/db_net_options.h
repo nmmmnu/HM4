@@ -3,6 +3,7 @@
 #include <iomanip>
 
 #include "inifile.h"
+#include "mystring.h"
 
 class MyOptions{
 public:
@@ -17,17 +18,17 @@ public:
 	size_t		max_memlist_size	= 100;
 
 public:
-	void operator()(const StringRef &name, const StringRef &value){
-		switch( name.hash() ){
-		case "immutable"_sr.hash()		: return assign_(immutable,		value);
-		case "db_path"_sr.hash()		: return assign_(db_path,  	    	value);
+	void operator()(std::string_view const name, std::string_view const value){
+		switch( hash(name) ){
+		case hash("immutable"		)	: return assign_(immutable,		value);
+		case hash("db_path"		)	: return assign_(db_path,  	    	value);
 
-		case "host"_sr.hash()			: return assign_(host,			value);
-		case "port"_sr.hash()			: return assign_(port,			value);
-		case "timeout"_sr.hash()		: return assign_(timeout,		value);
+		case hash("host"		)	: return assign_(host,			value);
+		case hash("port"		)	: return assign_(port,			value);
+		case hash("timeout"		)	: return assign_(timeout,		value);
 
-		case "max_clients"_sr.hash()		: return assign_(max_clients,		value);
-		case "max_memlist_size"_sr.hash()	: return assign_(max_memlist_size,	value);
+		case hash("max_clients"		)	: return assign_(max_clients,		value);
+		case hash("max_memlist_size"	)	: return assign_(max_memlist_size,	value);
 
 		default					: return;
 		}
@@ -47,7 +48,7 @@ public:
 
 private:
 	template<class T>
-	static void assign_(T &param, const StringRef &value){
+	static void assign_(T &param, std::string_view const value){
 		static_assert(std::is_unsigned<T>::value, "T must be unsigned type");
 
 		auto const default_value = param;
@@ -55,16 +56,16 @@ private:
 		param = ston_safe<T>(value, default_value);
 	}
 
-	static void assign_(std::string &param, const StringRef &value){
+	static void assign_(std::string &param, std::string_view const value){
 		param = value;
 	}
 
-	static void assign_(std::nullptr_t, const StringRef &){
+	static void assign_(std::nullptr_t, std::string_view){
 		/* nada */
 	}
 
 private:
-	static void print__(const StringRef &name, const char *def, const char *description){
+	static void print__(std::string_view const name, const char *def, const char *description){
 		std::cout
 			<< '\t'
 			<< std::setw(20) << std::left << name

@@ -13,21 +13,21 @@ namespace inifile_impl_{
 	template<class PROCESSOR>
 	class INILineParser{
 	private:
-		constexpr static StringRef SEPARATOR	= "="		;
-		constexpr static StringRef REM		= ";#"		;
-		constexpr static StringRef SPACE	= " \t\r\n"	;
+		constexpr static std::string_view SEPARATOR	= "="		;
+		constexpr static std::string_view REM		= ";#"		;
+		constexpr static std::string_view SPACE		= " \t\r\n"	;
 
 	public:
 		INILineParser(const std::string &line, PROCESSOR &proc) :
 						line(line), proc(proc){}
 
 		bool operator()(){
-			const StringRef key = readWord_();
+			const std::string_view key = readWord_();
 
 			if (!readSeparator_())
 				return false;
 
-			const StringRef val = readWord_();
+			const std::string_view val = readWord_();
 
 			if (key.empty() || val.empty())
 				return false;
@@ -44,7 +44,7 @@ namespace inifile_impl_{
 				++pos;
 		}
 
-		StringRef readWord_(){
+		std::string_view readWord_(){
 			readWhitespace_();
 
 			size_t const start = pos;
@@ -115,11 +115,11 @@ bool readINIFile(std::istream &file, PROCESSOR &processor){
 
 
 template<class PROCESSOR>
-bool readINIFile(const StringRef &filename, PROCESSOR &processor){
+bool readINIFile(std::string_view const filename, PROCESSOR &processor){
 	assert(!filename.empty());
 
 	std::ifstream file;
-	file.open(filename);
+	file.open(filename.data());
 
 	if (!file)
 		return false;

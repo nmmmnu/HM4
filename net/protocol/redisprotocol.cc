@@ -32,7 +32,7 @@ private:
 	constexpr static size_t	INT_BUFFER_SIZE	= 8;	// to be able to store MAX_PARAM_SIZE as string.
 
 public:
-	RedisProtocolParser(const StringRef &src, StringVector	&params) : src(src), params(params){}
+	RedisProtocolParser(std::string_view const src, StringVector &params) : src(src), params(params){}
 
 	Status operator()(){
 		if (src[pos] != STAR)
@@ -104,7 +104,7 @@ private:
 	}
 
 
-	std::pair<Status, StringRef> readParam_(){
+	std::pair<Status, std::string_view> readParam_(){
 		if (pos + 1 > src.size())
 			return statusPair_(Status::BUFFER_NOT_READ);
 
@@ -142,7 +142,7 @@ private:
 				return statusPair_(stat);
 		}
 
-		return { Status::OK, StringRef( & src[pos_save], size) };
+		return { Status::OK, std::string_view( & src[pos_save], size) };
 	}
 
 private:
@@ -150,25 +150,25 @@ private:
 		return Status::ERROR;
 	}
 
-	constexpr static std::pair<Status, StringRef> errPair_(Error ){
+	constexpr static std::pair<Status, std::string_view> errPair_(Error ){
 		return statusPair_(Status::ERROR);
 	}
 
-	constexpr static std::pair<Status, StringRef> statusPair_(const Status status){
-		return { status, StringRef{} };
+	constexpr static std::pair<Status, std::string_view> statusPair_(const Status status){
+		return { status, std::string_view{} };
 	}
 
 private:
-	StringRef	src;
-	StringVector	&params;
-	size_t		pos = 0;
+	std::string_view	src;
+	StringVector		&params;
+	size_t			pos = 0;
 };
 
 
 // ==================================
 
 
-auto RedisProtocol::operator()(const StringRef &src) -> Status{
+auto RedisProtocol::operator()(std::string_view const src) -> Status{
 	// this doing more harm than relps.
 //	if (src.size() < 8)	// 4 bytes - "*1\r\n$1\r\n"
 //		return Status::BUFFER_NOT_READ;

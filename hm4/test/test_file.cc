@@ -41,10 +41,9 @@ namespace{
 		typename LIST::size_type i = 0;
 
 		while( reader ){
-			std::string line = reader.getLine();
+			std::string_view const key = std::string{ reader.getLine() };
 
-			const StringRef key = line;
-			const StringRef val = tombstones ? nullptr : key;
+			std::string_view const val = tombstones ? "" : key;
 
 			if (! key.empty())
 				list.insert( { key, val } );
@@ -61,7 +60,7 @@ namespace{
 	}
 
 	template <class List>
-	void listSearch(const List &list, const StringRef &key){
+	void listSearch(const List &list, std::string_view const key){
 		auto const it = list.find(key, std::true_type{});
 
 		if (it == std::end(list)){
@@ -73,13 +72,13 @@ namespace{
 	}
 
 	template <class LIST>
-	void listIterate(const LIST &list, const StringRef &key, size_t count = 10){
+	void listIterate(const LIST &list, std::string_view const key, size_t count = 10){
 		for(auto it = list.find(key, std::false_type{}); count && it != list.end(); ++it, --count)
 			print(*it);
 	}
 
 	template <class LIST, class READER>
-	int listSearchProcess(LIST &&list, READER &reader, const StringRef &key, bool const it){
+	int listSearchProcess(LIST &&list, READER &reader, std::string_view const key, bool const it){
 		printf("Load start...\n");
 		listLoad(list, reader);
 		printf("Load done...\n");
@@ -105,7 +104,7 @@ namespace{
 
 namespace {
 
-	int file_search(char const type, const StringRef &filename, const StringRef &key, bool const it){
+	int file_search(char const type, std::string_view const filename, std::string_view const key, bool const it){
 		FileReader<4096> reader{ filename };
 
 		switch(type){

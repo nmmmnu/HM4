@@ -31,7 +31,7 @@ namespace{
 	}
 
 	template <class List>
-	int op_search(List const &list, StringRef const &key){
+	int op_search(List const &list, std::string_view const key){
 		if (key.empty())
 			return 1;
 
@@ -44,10 +44,10 @@ namespace{
 	}
 
 	template <class List>
-	int op_iterate(List const &list, StringRef const &key, size_t const count = 10){
+	int op_iterate(List const &list, std::string_view const key, size_t const count = 10){
 		size_t c = 0;
 
-		auto it = key == '-' ? std::begin(list) : list.find(key, std::false_type{});
+		auto it = key == "-" ? std::begin(list) : list.find(key, std::false_type{});
 
 		for(; it != std::end(list); ++it){
 			using hm4::print;
@@ -62,7 +62,7 @@ namespace{
 	}
 
 	template <class List>
-	int op_select(char const op, List const &list, StringRef const &key){
+	int op_select(char const op, List const &list, std::string_view const key){
 		switch(op){
 		default:
 		case 'r':	return op_search (list, key);

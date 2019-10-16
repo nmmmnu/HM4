@@ -100,7 +100,7 @@ void BTreeIndexBuilder<List>::push_back_key(size_type const index){
 	// we need to have the pair,
 	// because key "live" inside it.
 	auto const &pair = list_[index];
-	StringRef const &key = pair.getKey();
+	std::string_view const key = pair.getKey();
 
 	NodeData nd;
 	nd.dataid  = htobe<uint64_t>(index);

@@ -28,7 +28,7 @@ bool FileMeta::open(std::istream &file_meta){
 	return true;
 }
 
-inline bool FileMeta::openFail_(const StringRef &){
+inline bool FileMeta::openFail_(std::string_view){
 	clear();
 
 	return false;

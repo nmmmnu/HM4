@@ -20,7 +20,7 @@ public:
 	}
 
 	constexpr static
-	bool erase(StringRef const &){
+	bool erase(std::string_view const ){
 		return true;
 	}
 
@@ -42,7 +42,7 @@ public:
 public:
 	template<bool B>
 	constexpr static
-	iterator find(StringRef const &, std::bool_constant<B>){
+	iterator find(std::string_view, std::bool_constant<B>){
 		return nullptr;
 	}
 

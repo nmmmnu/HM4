@@ -1,13 +1,13 @@
 #ifndef _MYGLOB_H
 #define _MYGLOB_H
 
-#include "stringref.h"
+#include <string_view>
 
 #include <glob.h>	// glob
 
 class MyGlob final{
 public:
-	MyGlob(const StringRef &path){
+	MyGlob(std::string_view path){
 		open(path);
 	}
 
@@ -24,7 +24,7 @@ public:
 	}
 
 public:
-	bool open(const StringRef &path) noexcept;
+	bool open(std::string_view path) noexcept;
 	void close() noexcept;
 
 	bool isOpen() const noexcept{

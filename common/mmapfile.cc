@@ -12,7 +12,7 @@ MMAPFile::MMAPFile(MMAPFile &&other) :
 	other.size_ = 0;
 }
 
-bool MMAPFile::open(const StringRef &filename, const Advice advice){
+bool MMAPFile::open(std::string_view filename, const Advice advice){
 	return open_(filename, O_RDONLY, PROT_READ, convertAdv__(advice));
 }
 
@@ -21,7 +21,7 @@ inline bool MMAPFile::openFail__(int const fd){
 	return false;
 }
 
-bool MMAPFile::open_(const StringRef &filename, int const mode, int const prot, int const advice){
+bool MMAPFile::open_(std::string_view filename, int const mode, int const prot, int const advice){
 	close();
 
 	int const fd = ::open(filename.data(), mode);

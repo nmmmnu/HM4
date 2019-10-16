@@ -54,7 +54,7 @@ static void ss_empty(){
 	ss_zerofill( SS{ "", 0    }, 0 );
 	ss_zerofill( SS{ "abc"    }, 3 );
 	ss_zerofill( SS{ "abc", 3 }, 3 );
-	ss_zerofill( SS{ "abc"_sr }, 3 );
+//	ss_zerofill( SS{ "abc"sv  }, 3 );
 }
 
 template<size_t BYTES>

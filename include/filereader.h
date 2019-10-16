@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "stringref.h"
+#include <string_view>
 #include "trim.h"
 
 namespace filereader_impl_{
@@ -41,11 +41,11 @@ private:
 	constexpr static const char	*NAME		= "File Reader using standard streams";
 
 public:
-	FileReader(const StringRef &filename, Options const options = DEFAULT_OPTIONS) :
-					file_(filename),
+	FileReader(std::string_view const filename, Options const options = DEFAULT_OPTIONS) :
+					file_(filename.data()),
 					options_(options){}
 
-	StringRef getLine() {
+	std::string_view getLine() {
 		while( file_.getline(buffer_, BUFFER_SIZE) ){
 			// if we are here, this must be true
 			//assert( file_.gcount() > 0 );

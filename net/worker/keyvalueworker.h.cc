@@ -32,7 +32,7 @@ public:
 		if (buffer_.size() == 0)
 			return WorkerStatus::PASS;
 
-		const Status status = protocol_( StringRef{ buffer_.data(), buffer_.size() } );
+		const Status status = protocol_( std::string_view{ buffer_.data(), buffer_.size() } );
 
 		if (status == Status::BUFFER_NOT_READ)
 			return WorkerStatus::PASS;

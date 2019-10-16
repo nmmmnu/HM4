@@ -35,7 +35,7 @@ public:
 	}
 
 	template<bool B>
-	iterator find(StringRef const &key, std::bool_constant<B> const exact) const{
+	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
 		return { std::begin(*list_), std::end(*list_), key, exact };
 	}
 

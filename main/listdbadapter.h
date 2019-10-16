@@ -27,18 +27,18 @@ public:
 public:
 	// Immutable Methods
 
-	std::string get(const StringRef &key) const{
+	std::string get(std::string_view const key) const{
 		assert(!key.empty());
 
 		const auto p = list_.find(key, std::true_type{} );
 
 		if (p != std::end(list_) && p->isValid(/* tomb */ true))
-			return p->getVal();
+			return std::string{ p->getVal() };
 		else
 			return {};
 	}
 
-	std::vector<std::string> getall(const StringRef &key, uint16_t const resultsCount, const StringRef &prefix) const{
+	std::vector<std::string> getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
 		auto const maxResults  = my_clamp__(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
 		std::vector<std::string> result;
@@ -55,10 +55,10 @@ public:
 			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey))
 				break;
 
-			result.push_back(resultKey);
+			result.emplace_back(resultKey);
 
 			if (it->isValid(/* tomb */ true))
-				result.push_back(it->getVal());
+				result.emplace_back(it->getVal());
 			else
 				result.emplace_back();
 
@@ -97,7 +97,7 @@ private:
 public:
 	// Mutable Methods
 
-	void set(const StringRef &key, const StringRef &val, const StringRef &exp = {} ){
+	void set(std::string_view const key, std::string_view const val, std::string_view const exp = {} ){
 		assert(!key.empty());
 
 		auto const expires = ston_safe<uint32_t>(exp);
@@ -105,13 +105,13 @@ public:
 		list_.insert( { key, val, expires } );
 	}
 
-	bool del(const StringRef &key){
+	bool del(std::string_view const key){
 		assert(!key.empty());
 
 		return list_.erase(key);
 	}
 
-	std::string incr(const StringRef &key, int64_t const val){
+	std::string incr(std::string_view const key, int64_t const val){
 		assert(!key.empty());
 
 		const auto p = list_.find(key, std::true_type{} );
@@ -140,7 +140,7 @@ private:
 		return val;
 	}
 
-	static bool samePrefix__(const StringRef &p, const StringRef &s){
+	static bool samePrefix__(std::string_view const p, std::string_view const s){
 		if (p.size() > s.size())
 			return false;
 

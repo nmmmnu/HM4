@@ -11,12 +11,12 @@ namespace hm4{
 
 class OPair{
 public:
-	OPair(const StringRef &key, const StringRef &val, uint32_t expires = 0, uint32_t created = 0) :
+	OPair(std::string_view const key, std::string_view const val, uint32_t expires = 0, uint32_t created = 0) :
 				hkey(key),
 				pp( Pair::create(key, val, expires, created) ){}
 
 	OPair(const Pair *p) :
-				hkey(p ? p->getKey() : StringRef{}),
+				hkey(p ? p->getKey() : ""),
 				pp( Pair::create(p) ){}
 
 	OPair(const Pair &p) :
@@ -40,8 +40,10 @@ public:
 
 	// ==============================
 
-	static OPair tombstone(const StringRef &key){
-		return OPair(key, ""_sr );
+	static OPair tombstone(std::string_view const key){
+		using namespace std::literals;
+
+		return OPair(key, ""sv );
 	}
 
 	void swap(OPair &other) noexcept{
@@ -68,7 +70,7 @@ public:
 	}
 
 public:
-	int cmp(const StringRef &key) const noexcept{
+	int cmp(std::string_view const key) const noexcept{
 		if (key.empty())
 			return Pair::CMP_NULLKEY;
 

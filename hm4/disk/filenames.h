@@ -1,7 +1,7 @@
 #ifndef DISK_FILENAMES_H_
 #define DISK_FILENAMES_H_
 
-#include "stringref.h"
+#include "mystring.h"
 
 namespace hm4{
 namespace disk{
@@ -16,28 +16,28 @@ namespace file_ext{
 } // namespace
 
 
-inline auto filenameMeta(std::string filename){
-	return filename;
+inline auto filenameMeta(std::string_view const filename){
+	return std::string{ filename };
 }
 
-inline auto filenameIndx(const StringRef &filename){
+inline auto filenameIndx(std::string_view const filename){
 	return concatenate( filename, file_ext::DOT_INDX		);
 }
 
-inline auto filenameLine(const StringRef &filename){
+inline auto filenameLine(std::string_view const filename){
 	return concatenate( filename, file_ext::DOT_LINE		);
 }
 
-inline auto filenameData(const StringRef &filename){
+inline auto filenameData(std::string_view const filename){
 	return concatenate( filename, file_ext::DOT_DATA		);
 }
 
 
-inline auto filenameBTreeIndx(const StringRef &filename){
+inline auto filenameBTreeIndx(std::string_view const filename){
 	return concatenate( filename, file_ext::DOT_BTREE_INDX	);
 }
 
-inline auto filenameBTreeData(const StringRef &filename){
+inline auto filenameBTreeData(std::string_view const filename){
 	return concatenate( filename, file_ext::DOT_BTREE_DATA	);
 }
 

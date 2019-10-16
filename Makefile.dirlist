@@ -8,7 +8,6 @@ SUBDIRS = test common	\
 		net					\
 			net/selector			\
 			net/protocol			\
-			net/worker			\
 			net/test			\
 		main
 

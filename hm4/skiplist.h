@@ -30,7 +30,7 @@ public:
 public:
 	bool clear();
 
-	bool erase(StringRef const &key);
+	bool erase(std::string_view const key);
 
 	bool insert(OPair &&data);
 
@@ -44,7 +44,7 @@ public:
 
 public:
 	template<bool B>
-	iterator find(StringRef const &key, std::bool_constant<B> exact) const;
+	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
 	iterator begin() const;
 	static constexpr iterator end();
 
@@ -67,9 +67,9 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(StringRef const &key, bool shortcut_evaluation);
+	NodeLocator locate_(std::string_view const key, bool shortcut_evaluation);
 
-	const Node *locateNode_(StringRef const &key, bool const exact) const;
+	const Node *locateNode_(std::string_view const key, bool const exact) const;
 
 	static height_size_type getRandomHeight_();
 };
@@ -111,7 +111,7 @@ private:
 // ==============================
 
 template<bool B>
-inline auto SkipList::find(const StringRef &key, std::bool_constant<B> const exact) const -> iterator{
+inline auto SkipList::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
 	return locateNode_(key, exact.value);
 }
 

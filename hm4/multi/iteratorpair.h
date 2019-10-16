@@ -36,7 +36,7 @@ namespace multiiterator_impl_{
 				IteratorPair(getIterator(list, tag), std::end(list)){}
 
 		template<class List, bool B>
-		IteratorPair(List const &list, StringRef const &key, std::bool_constant<B> const exact) :
+		IteratorPair(List const &list, std::string_view const key, std::bool_constant<B> const exact) :
 				IteratorPair(getIterator(list, key, exact), std::end(list)){}
 
 	public:

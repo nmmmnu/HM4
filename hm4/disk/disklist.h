@@ -53,7 +53,7 @@ public:
 
 	void close();
 
-	bool open(const StringRef &filename, MMAPFile::Advice const advice = DEFAULT_ADVICE, OpenMode const mode = DEFAULT_MODE){
+	bool open(std::string_view const filename, MMAPFile::Advice const advice = DEFAULT_ADVICE, OpenMode const mode = DEFAULT_MODE){
 		switch(mode){
 		default:
 		case OpenMode::NORMAL	: return openNormal_ (filename, advice);
@@ -99,17 +99,17 @@ public:
 	random_access_iterator ra_end() const;
 
 	template<bool B>
-	random_access_iterator ra_find(const StringRef &key, std::bool_constant<B>) const;
+	random_access_iterator ra_find(std::string_view const key, std::bool_constant<B>) const;
 
 	forward_iterator begin() const;
 	forward_iterator end() const;
 
 	template<bool B>
-	forward_iterator find(const StringRef &key, std::bool_constant<B>) const;
+	forward_iterator find(std::string_view key, std::bool_constant<B>) const;
 
 private:
-	bool openNormal_ (const StringRef &filename, MMAPFile::Advice advice);
-	bool openMinimal_(const StringRef &filename, MMAPFile::Advice advice);
+	bool openNormal_ (std::string_view filename, MMAPFile::Advice advice);
+	bool openMinimal_(std::string_view filename, MMAPFile::Advice advice);
 
 	SearchMode calcSearchMode_() const;
 
@@ -169,7 +169,7 @@ inline auto DiskList::end() const -> forward_iterator{
 }
 
 template<bool B>
-auto DiskList::find(StringRef const &key, std::bool_constant<B> const exact) const -> forward_iterator{
+auto DiskList::find(std::string_view const key, std::bool_constant<B> const exact) const -> forward_iterator{
 	return static_cast<forward_iterator>( ra_find(key, exact) );
 }
 

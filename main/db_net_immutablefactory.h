@@ -12,8 +12,8 @@ struct MyImmutableDBAdapterFactory{
 
 	using MyDBAdapter	= DBAdapter;
 
-	MyImmutableDBAdapterFactory(const StringRef &path, size_t) :
-					loader_(path),
+	MyImmutableDBAdapterFactory(std::string path, size_t) :
+					loader_(std::move(path)),
 					adapter_(loader_.getList(), /* cmd */ loader_){}
 
 	auto &operator()(){

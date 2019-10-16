@@ -62,7 +62,7 @@ public:
 	template<class StoreIterator>
 	CollectionIterator(
 			StoreIterator first, StoreIterator last,
-			StringRef const &key,
+			std::string_view const key,
 			std::true_type const exact
 	){
 		// skip the work and creates iterator with single element

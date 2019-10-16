@@ -1,4 +1,4 @@
-#include "stringref.h"
+#include "mystring.h"
 
 namespace net{
 namespace worker{
@@ -24,41 +24,47 @@ public:
 		INCR
 	};
 
-	constexpr static Command get(const StringRef &cmd){
-		switch(cmd.hash()){
-		case "exit"_sr.hash()		:
-		case "EXIT"_sr.hash()		: return Command::EXIT		;
+	constexpr static auto h(std::string_view const s){
+		return hash(s);
+	}
 
-		case "shutdown"_sr.hash()	:
-		case "SHUTDOWN"_sr.hash()	: return Command::SHUTDOWN	;
+	constexpr static Command get(std::string_view const cmd){
+		// using namespace std::literals;
 
-		case "info"_sr.hash()		:
-		case "INFO"_sr.hash()		: return Command::INFO		;
+		switch(hash(cmd)){
+		case h("exit"		)	:
+		case h("EXIT"		)	: return Command::EXIT		;
 
-		case "save"_sr.hash()		:
-		case "SAVE"_sr.hash()		:
-		case "bgsave"_sr.hash()		:
-		case "BGSAVE"_sr.hash()		: return Command::REFRESH	;
+		case h("shutdown"	)	:
+		case h("SHUTDOWN"	)	: return Command::SHUTDOWN	;
 
-		case "get"_sr.hash()		:
-		case "GET"_sr.hash()		: return Command::GET		;
+		case h("info"		)	:
+		case h("INFO"		)	: return Command::INFO		;
 
-		case "hgetall"_sr.hash()	:
-		case "HGETALL"_sr.hash()	: return Command::GETALL	;
+		case h("save"		)	:
+		case h("SAVE"		)	:
+		case h("bgsave"		)	:
+		case h("BGSAVE"		)	: return Command::REFRESH	;
 
-		case "set"_sr.hash()		:
-		case "SET"_sr.hash()		: return Command::SET		;
+		case h("get"		)	:
+		case h("GET"		)	: return Command::GET		;
 
-		case "setex"_sr.hash()		:
-		case "SETEX"_sr.hash()		: return Command::SETEX		;
+		case h("hgetall"	)	:
+		case h("HGETALL"	)	: return Command::GETALL	;
 
-		case "del"_sr.hash()		:
-		case "DEL"_sr.hash()		: return Command::DEL		;
+		case h("set"		)	:
+		case h("SET"		)	: return Command::SET		;
 
-		case "incr"_sr.hash()		:
-		case "INCR"_sr.hash()		:
-		case "incrby"_sr.hash()		:
-		case "INCRBY"_sr.hash()		: return Command::INCR		;
+		case h("setex"		)	:
+		case h("SETEX"		)	: return Command::SETEX		;
+
+		case h("del"		)	:
+		case h("DEL"		)	: return Command::DEL		;
+
+		case h("incr"		)	:
+		case h("INCR"		)	:
+		case h("incrby"		)	:
+		case h("INCRBY"		)	: return Command::INCR		;
 
 		default				: return Command::UNKNOWN	;
 		}

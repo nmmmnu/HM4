@@ -116,7 +116,7 @@ bool SkipList::clear(){
 bool SkipList::insert(OPair&& newdata){
 	assert(newdata);
 
-	const StringRef &key = newdata->getKey();
+	std::string_view const key = newdata->getKey();
 
 	const auto nl = locate_(key, true);
 
@@ -176,7 +176,7 @@ bool SkipList::insert(OPair&& newdata){
 }
 
 #if 0
-const Pair *SkipList::operator[](StringRef const &key) const{
+const Pair *SkipList::operator[](std::string_view const key) const{
 	assert(!key.empty());
 
 	const Node *node = locateNode_(key, true);
@@ -185,7 +185,7 @@ const Pair *SkipList::operator[](StringRef const &key) const{
 }
 #endif
 
-bool SkipList::erase(StringRef const &key){
+bool SkipList::erase(std::string_view const key){
 	assert(!key.empty());
 
 	const auto nl = locate_(key, false);
@@ -236,7 +236,7 @@ void SkipList::zeroing_(){
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }
 
-auto SkipList::locate_(StringRef const &key, bool const shortcut_evaluation) -> NodeLocator{
+auto SkipList::locate_(std::string_view const key, bool const shortcut_evaluation) -> NodeLocator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
@@ -275,7 +275,7 @@ auto SkipList::locate_(StringRef const &key, bool const shortcut_evaluation) -> 
 	return nl;
 }
 
-auto SkipList::locateNode_(StringRef const &key, bool const exact) const -> const Node *{
+auto SkipList::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateNode_" };

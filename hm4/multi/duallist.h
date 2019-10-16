@@ -50,7 +50,7 @@ public:
 	}
 
 	template <bool B>
-	iterator find(StringRef const &key, std::bool_constant<B> const exact) const{
+	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
 		return { list1_, list2_, key, exact };
 	}
 
@@ -62,7 +62,7 @@ public:
 		return list1_.clear();
 	}
 
-	bool erase(StringRef const &key){
+	bool erase(std::string_view const key){
 		assert(!key.empty());
 
 		using tombstone_tag = std::bool_constant<ERASE_WITH_TOMBSTONE>;
@@ -75,11 +75,11 @@ public:
 	}
 
 private:
-	bool erase_(StringRef const &key, std::true_type){
+	bool erase_(std::string_view const key, std::true_type){
 		return list1_.insert(OPair::tombstone(key));
 	}
 
-	bool erase_(StringRef const &key, std::false_type){
+	bool erase_(std::string_view const key, std::false_type){
 		return list1_.erase(key);
 	}
 

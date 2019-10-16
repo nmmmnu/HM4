@@ -2,11 +2,11 @@
 #define DISK_FILE_META_H_
 
 #include <fstream>
+#include <string_view>
 
 #include "myendian.h"
 
 #include "filemetablob.h"
-#include "stringref.h"
 
 
 namespace hm4{
@@ -22,8 +22,8 @@ public:
 		clear();
 	}
 
-	bool open(const StringRef &filename){
-		std::ifstream file_meta(filename, std::ios::in | std::ios::binary);
+	bool open(std::string_view const filename){
+		std::ifstream file_meta(filename.data(), std::ios::in | std::ios::binary);
 
 		return open(file_meta);
 	}
@@ -70,7 +70,7 @@ private:
 	static void printBool__(const char *descr, bool const b);
 
 private:
-	bool openFail_(const StringRef &);
+	bool openFail_(std::string_view);
 };
 
 

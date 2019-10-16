@@ -10,11 +10,11 @@ struct MockDBAdapter{
 		return "Mock Adapter\n";
 	}
 
-	std::string get(const StringRef &) const{
+	std::string get(std::string_view) const{
 		return "value";
 	}
 
-	const std::vector<std::string> &getall(const StringRef &, uint16_t, const StringRef &) const{
+	const std::vector<std::string> &getall(std::string_view, uint16_t, std::string_view) const{
 		return data_;
 	}
 

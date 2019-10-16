@@ -5,7 +5,6 @@
 #include "listcounter.h"
 
 #include "mynarrow.h"
-#include "binarysearch.h"
 
 #include <vector>
 
@@ -38,7 +37,7 @@ public:
 		return true;
 	}
 
-	bool erase(const StringRef &key);
+	bool erase(std::string_view constkey);
 
 	Pair const &operator[](size_type const index) const{
 		return *vector_[index].get();
@@ -55,8 +54,8 @@ public:
 	}
 
 public:
-	iterator find(StringRef const &key, std::true_type) const noexcept;
-	iterator find(StringRef const &key, std::false_type) const noexcept;
+	iterator find(std::string_view const key, std::true_type) const noexcept;
+	iterator find(std::string_view const key, std::false_type) const noexcept;
 	iterator begin() const noexcept;
 	iterator end() const noexcept;
 };

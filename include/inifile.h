@@ -3,20 +3,20 @@
 
 #include <fstream>
 
-#include "stringref.h"
+#include <string_view>
 
 template<class PROCESSOR>
 bool readINIFile(std::istream &file, PROCESSOR &processor);
 
 template<class PROCESSOR>
-bool readINIFile(const StringRef &filename, PROCESSOR &processor);
+bool readINIFile(std::string_view const filename, PROCESSOR &processor);
 
 
 // ===================================
 
 
 template<class PROCESSOR>
-bool readINIFile(const StringRef &filename){
+bool readINIFile(std::string_view const filename){
 	PROCESSOR processor;
 	return readINIFile(filename, processor);
 }

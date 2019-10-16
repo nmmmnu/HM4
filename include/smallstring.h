@@ -1,10 +1,11 @@
 #ifndef MY_SMALL_STRING_H_
 #define MY_SMALL_STRING_H_
 
-#include "stringref.h"
-
+#include <string_view>
 #include <cassert>
 #include <type_traits>
+
+#include "mystring.h"
 
 template <size_t BYTES>
 class SmallString{
@@ -38,7 +39,7 @@ public:
 			clear_();
 	}
 
-	SmallString(const StringRef &sr) noexcept{
+	SmallString(std::string_view sr) noexcept{
 		copyNotNull_(sr.data(), sr.size());
 	}
 
@@ -102,7 +103,7 @@ public:
 
 	// COMPARES
 
-	int compare(const StringRef &sr) const noexcept{
+	int compare(std::string_view const sr) const noexcept{
 		return compare(sr.data(), sr.size());
 	}
 
@@ -117,7 +118,7 @@ public:
 
 	// EQUALS
 
-	bool equals(const StringRef &sr) const noexcept{
+	bool equals(std::string_view const sr) const noexcept{
 		return equals(sr.data(), sr.size());
 	}
 
@@ -181,13 +182,13 @@ static_assert( std::is_trivially_copyable<SmallString<8> >::value, "SmallString 
 
 template <size_t BYTES>
 inline std::ostream& operator << (std::ostream& os, const SmallString<BYTES> &ss){
-	os << StringRef{ ss.data(), ss.size() };
+	os << std::string_view{ ss.data(), ss.size() };
 
 	return os;
 }
 
 template <size_t BYTES>
-inline int compareFull(const StringRef &s, const SmallString<BYTES> &ss, const StringRef &ls) noexcept{
+inline int compareFull(std::string_view const s, const SmallString<BYTES> &ss, std::string_view const ls) noexcept{
 	int const r = ss.compare(s);
 
 	if (r || s.size() < BYTES){
@@ -202,7 +203,7 @@ inline int compareFull(const StringRef &s, const SmallString<BYTES> &ss, const S
 }
 
 template <size_t BYTES>
-inline bool equalsFull(const StringRef &s, const SmallString<BYTES> &ss, const StringRef &ls) noexcept{
+inline bool equalsFull(std::string_view const s, SmallString<BYTES> const &ss, std::string_view const ls) noexcept{
 	(void) s;
 	(void) ss;
 	(void) ls;

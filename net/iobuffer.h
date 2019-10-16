@@ -1,7 +1,8 @@
 #ifndef _IO_BUFFER_H
 #define _IO_BUFFER_H
 
-#include "stringref.h"
+#include <string>
+#include <string_view>
 
 #include <cstdio>
 #include <cassert>
@@ -42,12 +43,12 @@ public:
 	}
 
 	bool push(const char *p){
-		return push(StringRef{ p });
+		return push(std::string_view{ p });
 	}
 
-	bool push(const StringRef &sr){
-		if (sr.size())
-			return push_(sr.size(), sr.data());
+	bool push(std::string_view const sv){
+		if (sv.size())
+			return push_(sv.size(), sv.data());
 
 		return false;
 	}

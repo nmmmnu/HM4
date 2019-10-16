@@ -6,7 +6,7 @@
 namespace hm4{
 namespace listloader{
 
-bool DirectoryListLoader::checkIfLoaderNeed(StringRef const &s){
+bool DirectoryListLoader::checkIfLoaderNeed(std::string_view const s){
 	return std::find(std::begin(s), std::end(s), '*') != std::end(s);
 }
 

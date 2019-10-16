@@ -3,7 +3,9 @@
 
 #include "workerdefs.h"
 
-#include "stringref.h"
+#include "mystring.h"
+
+#include <string_view>
 
 namespace net{
 namespace worker{
@@ -14,12 +16,12 @@ public:
 	WorkerStatus operator()(CONNECTION &buffer);
 
 private:
-	static constexpr StringRef cmd_hello	= "hello\r\n";
-	static constexpr StringRef cmd_help	= "help\r\n";
-	static constexpr StringRef cmd_exit	= "exit\r\n";
-	static constexpr StringRef cmd_shutdown	= "shutdown\r\n";
+	inline static constexpr std::string_view cmd_hello	= "hello\r\n";
+	inline static constexpr std::string_view cmd_help	= "help\r\n";
+	inline static constexpr std::string_view cmd_exit	= "exit\r\n";
+	inline static constexpr std::string_view cmd_shutdown	= "shutdown\r\n";
 
-	static constexpr StringRef msg_help	=
+	inline static constexpr std::string_view msg_help	=
 				"Usage:\r\n"
 				"   hello    - greeting\r\n"
 				"   help     - this message\r\n"
@@ -29,8 +31,8 @@ private:
 
 private:
 	template<class CONNECTION>
-	static bool cmp_(const CONNECTION &b, const StringRef &cmd){
-		return cmd.compare(b.data(), b.size()) == 0;
+	static bool cmp_(const CONNECTION &b, std::string_view const cmd){
+		return equals(b.data(), b.size(), cmd.data(), cmd.size());
 	}
 };
 

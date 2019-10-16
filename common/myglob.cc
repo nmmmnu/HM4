@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-bool MyGlob::open(const StringRef &path) noexcept{
+bool MyGlob::open(std::string_view const path) noexcept{
 	assert(isOpen_ == false);
 
 	int const result = glob(path.data(), 0, nullptr, & globresults_);

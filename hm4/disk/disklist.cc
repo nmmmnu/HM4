@@ -43,17 +43,17 @@ namespace{
 
 	// -----------------------------------
 
-	int comp(Pair const &p, StringRef const &key){
+	int comp(Pair const &p, std::string_view const key){
 		return p.cmp(key);
 	}
 
-	auto searchBinary(StringRef const &key, DiskList::random_access_iterator first, DiskList::random_access_iterator last){
+	auto searchBinary(std::string_view const key, DiskList::random_access_iterator first, DiskList::random_access_iterator last){
 		return binarySearch(first, last, key, comp);
 	}
 
 	// -----------------------------------
 
-	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;
+	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;
 
 	template<typename T>
 	auto dt(T const &a){
@@ -61,8 +61,11 @@ namespace{
 	}
 
 
+	inline auto toSS(const char *s){
+		return std::string_view{ s, PairConf::HLINE_SIZE };
+	}
 
-	auto searchHotLine(StringRef const &key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<DiskList::random_access_iterator>{
+	auto searchHotLine(std::string_view const key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<DiskList::random_access_iterator>{
 		size_t const nodesCount = line.sizeArray<SmallNode>();
 
 		const SmallNode *nodes = line->as<const SmallNode>(0, nodesCount);
@@ -70,7 +73,7 @@ namespace{
 		if (!nodes)
 			return searchBinary(key, list.ra_begin(), list.ra_end());
 
-		auto comp = [](SmallNode const &node, StringRef const &key){
+		auto comp = [](SmallNode const &node, std::string_view const key){
 			using SS = SmallString<PairConf::HLINE_SIZE>;
 
 			return SS::compare(node.key, key.data(), key.size());
@@ -98,7 +101,7 @@ namespace{
 			log__(
 				"Not found",
 				"pos", listPos,
-				"key",	StringRef{ x.it->key, PairConf::HLINE_SIZE }
+				"key",	toSS(x.it->key)
 			);
 
 			return { false,  DiskList::random_access_iterator{ list, listPos } };
@@ -121,7 +124,7 @@ namespace{
 
 		log__(
 			"Proceed with Binary Search", listPos, listPosLast,
-			"Hotline Key",	StringRef{ x.it->key, PairConf::HLINE_SIZE }
+			"Hotline Key",	toSS(x.it->key)
 		);
 
 		return searchBinary(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);
@@ -135,7 +138,7 @@ namespace{
 
 
 
-bool DiskList::openMinimal_(StringRef const &filename, MMAPFile::Advice advice){
+bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice advice){
 	log__("Open disktable", filename);
 
 	metadata_.open(filenameMeta(filename));
@@ -156,7 +159,7 @@ bool DiskList::openMinimal_(StringRef const &filename, MMAPFile::Advice advice){
 	return b1 && b2 && b3;
 }
 
-bool DiskList::openNormal_(StringRef const &filename, MMAPFile::Advice const advice){
+bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice const advice){
 	if (openMinimal_(filename, advice) == false)
 		return false;
 
@@ -262,7 +265,7 @@ size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
 
 
 template<bool B>
-auto DiskList::ra_find(StringRef const &key, std::bool_constant<B> const exact) const -> random_access_iterator{
+auto DiskList::ra_find(std::string_view const key, std::bool_constant<B> const exact) const -> random_access_iterator{
 	// made this way to hide BinarySearchResult<iterator> type
 	switch(searchMode_){
 	case SearchMode::BTREE: {
@@ -285,8 +288,8 @@ auto DiskList::ra_find(StringRef const &key, std::bool_constant<B> const exact) 
 	}
 }
 
-template auto DiskList::ra_find(StringRef const &key, std::true_type  ) const -> random_access_iterator;
-template auto DiskList::ra_find(StringRef const &key, std::false_type ) const -> random_access_iterator;
+template auto DiskList::ra_find(std::string_view const key, std::true_type  ) const -> random_access_iterator;
+template auto DiskList::ra_find(std::string_view const key, std::false_type ) const -> random_access_iterator;
 
 
 
@@ -325,14 +328,14 @@ private:
 	};
 
 	struct NodeValueResult{
-		StringRef	key;
-		size_type	dataid;
+		std::string_view	key;
+		size_type		dataid;
 	};
 
 private:
 	const DiskList		&list_;
 
-	const StringRef		&key_;
+	const std::string_view	&key_;
 
 	const MMAPFilePlus	&mTree_		= list_.mTree_;
 	const MMAPFilePlus	&mKeys_		= list_.mKeys_;
@@ -342,7 +345,7 @@ private:
 	size_type		end		= list_.size();
 
 public:
-	BTreeSearchHelper(const DiskList &list, const StringRef &key) : list_(list), key_(key){}
+	BTreeSearchHelper(const DiskList &list, std::string_view const &key) : list_(list), key_(key){}
 
 	auto operator()(){
 		try{
@@ -474,7 +477,7 @@ private:
 
 
 namespace{
-	auto searchBTree(StringRef const &key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>{
+	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>{
 		DiskList::BTreeSearchHelper helper{list, key};
 
 		return helper();

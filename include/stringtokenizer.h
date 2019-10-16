@@ -1,7 +1,7 @@
 #ifndef STRING_TOKENIZER_H
 #define STRING_TOKENIZER_H
 
-#include "stringref.h"
+#include <string_view>
 
 #include <cstdio>
 #include <iostream>
@@ -14,7 +14,7 @@ public:
 	class iterator;
 
 	constexpr
-	StringTokenizer(const StringRef &line, char const delimiter = DEFAULT_DELIMITER) :
+	StringTokenizer(std::string_view const line, char delimiter = DEFAULT_DELIMITER) :
 						line_(line),
 						delimiter_(delimiter){}
 
@@ -22,8 +22,8 @@ public:
 	iterator end() const;
 
 private:
-	StringRef	line_;
-	char		delimiter_;
+	std::string_view line_;
+	char delimiter_;
 };
 
 
@@ -31,7 +31,7 @@ private:
 class StringTokenizer::iterator{
 public:
 	using difference_type	= ptrdiff_t;
-	using value_type	= const StringRef;
+	using value_type	= std::string_view const;
 	using pointer		= value_type *;
 	using reference		= value_type &;
 	using iterator_category	= std::bidirectional_iterator_tag;
@@ -43,7 +43,7 @@ public:
 							last_(last),
 							delimiter_(delimiter){}
 
-	StringRef operator *(){
+	std::string_view operator *(){
 		auto size = skipData_(current_) - current_;
 
 		return { current_, size_t(size) };
@@ -127,11 +127,11 @@ inline auto StringTokenizer::end() const -> iterator{
 
 
 inline auto getForwardTokenizer(StringTokenizer const &st){
-	return [ current = std::begin(st), sentinel = std::end(st) ]() mutable -> StringRef{
+	return [ current = std::begin(st), sentinel = std::end(st) ]() mutable -> std::string_view{
 		if (current == sentinel)
-			return "";
+			return {};
 
-		StringRef s = *current;
+		std::string_view s = *current;
 
 		++current;
 
@@ -140,13 +140,13 @@ inline auto getForwardTokenizer(StringTokenizer const &st){
 }
 
 inline auto getReverseTokenizer(StringTokenizer const &st){
-	return [ current = std::end(st), sentinel = std::begin(st) ]() mutable -> StringRef{
+	return [ current = std::end(st), sentinel = std::begin(st) ]() mutable -> std::string_view{
 		if (current == sentinel)
-			return "";
+			return {};
 
 		--current;
 
-		StringRef s = *current;
+		std::string_view s = *current;
 
 		return s;
 	};

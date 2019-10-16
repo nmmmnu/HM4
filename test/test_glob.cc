@@ -25,7 +25,7 @@ int main(int argc, char **argv){
 
 	const MyGlob gl = globCreate(path);
 
-	for(const StringRef &s : gl)
+	for(auto &s : gl)
 		std::cout << s << '\n';
 }
 

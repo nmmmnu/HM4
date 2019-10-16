@@ -1,8 +1,8 @@
 #ifndef S_TO_U_SAFE_H_
 #define S_TO_U_SAFE_H_
 
-#include "stringref.h"
-
+#include <string>
+#include <string_view>
 #include <sstream>
 
 namespace impl_{
@@ -17,14 +17,14 @@ namespace impl_{
 } // namespace
 
 template <typename T>
-T ston_safe(const StringRef &str, T const def = 0){
+T ston_safe(std::string_view  const str, T const def = 0){
 	impl_::ston_safe_check<T>();
 
 	if (str.empty())
 		return def;
 
 	T u = 0;
-	std::istringstream ss(str);
+	std::istringstream ss(str.data());
 	ss >> u;
 	return u;
 }

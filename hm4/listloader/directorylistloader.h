@@ -34,7 +34,7 @@ public:
 	}
 
 public:
-	static bool checkIfLoaderNeed(StringRef const &s);
+	static bool checkIfLoaderNeed(std::string_view const s);
 
 private:
 	void refresh_();

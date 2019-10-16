@@ -27,8 +27,8 @@ struct MyMutableDBAdapterFactory{
 
 	using MyDBAdapter	= DBAdapter;
 
-	MyMutableDBAdapterFactory(const StringRef &path, size_t const memListSize) :
-					loader_(path),
+	MyMutableDBAdapterFactory(std::string path, size_t const memListSize) :
+					loader_(std::move(path)),
 					muflList_(
 						memList_,
 						Flusher{ IDGenerator{}, path },

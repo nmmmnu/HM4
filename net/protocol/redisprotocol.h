@@ -1,10 +1,10 @@
 #ifndef _REDIS_PROTOCOL_H
 #define _REDIS_PROTOCOL_H
 
-#include "stringref.h"
-
 #include "protocoldefs.h"
 
+#include <string>
+#include <string_view>
 #include <vector>
 #include <utility>	// std::pair
 
@@ -26,7 +26,7 @@ public:
 public:
 	using Status = ProtocolStatus;
 
-	using StringVector = std::vector<StringRef>;
+	using StringVector = std::vector<std::string_view>;
 
 public:
 	RedisProtocol(){
@@ -34,7 +34,7 @@ public:
 	}
 
 public:
-	Status operator()(const StringRef &src);
+	Status operator()(std::string_view const src);
 
 	const StringVector &getParams() const{
 		return params_;
@@ -50,13 +50,13 @@ public:
 	static void response_ok(CONNECTION &buffer);
 
 	template<class CONNECTION>
-	static void response_error(CONNECTION &buffer, const StringRef &msg);
+	static void response_error(CONNECTION &buffer, std::string_view msg);
 
 	template<class CONNECTION>
 	static void response_bool(CONNECTION &buffer, bool b);
 
 	template<class CONNECTION>
-	static void response_string(CONNECTION &buffer, const StringRef &msg);
+	static void response_string(CONNECTION &buffer, std::string_view msg);
 
 	template<class CONNECTION, class CONTAINER>
 	static void response_strings(CONNECTION &buffer, const CONTAINER &list);
@@ -82,7 +82,7 @@ void RedisProtocol::response_ok(CONNECTION &buffer){
 }
 
 template<class CONNECTION>
-void RedisProtocol::response_error(CONNECTION &buffer, const StringRef &msg){
+void RedisProtocol::response_error(CONNECTION &buffer, std::string_view const msg){
 	buffer.push("-ERR ");
 	buffer.push(msg);
 	buffer.push(ENDLN);
@@ -95,7 +95,7 @@ void RedisProtocol::response_bool(CONNECTION &buffer, bool const b){
 }
 
 template<class CONNECTION>
-void RedisProtocol::response_string(CONNECTION &buffer, const StringRef &msg){
+void RedisProtocol::response_string(CONNECTION &buffer, std::string_view const msg){
 	buffer.push(DOLLAR);
 	buffer.push(std::to_string(msg.size()));
 	buffer.push(ENDLN);
