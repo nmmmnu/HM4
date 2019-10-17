@@ -11,15 +11,17 @@ namespace disk{
 namespace btree{
 
 
-using level_type	= uint16_t;
+
+using level_type	= uint8_t;
+
 
 
 constexpr level_type	NODE_LEVELS	= 7;
-constexpr level_type	BRANCHES	= 1 << NODE_LEVELS;
-constexpr level_type	VALUES		= BRANCHES - 1;
 
+constexpr auto LL = LevelOrderLookupFactory<level_type, btree::NODE_LEVELS>::build();
 
-constexpr LevelOrderLookup<NODE_LEVELS>	LL;
+constexpr level_type	VALUES		= LL.size();
+
 
 
 struct NodeData{
@@ -27,9 +29,11 @@ struct NodeData{
 	uint16_t	keysize;		// 2
 
 public:
-	constexpr static uint16_t ALIGN = sizeof(uint64_t);
+	constexpr static size_t ALIGN = sizeof(uint64_t);
 
 } __attribute__((__packed__));
+
+
 
 
 struct Node{
@@ -38,6 +42,7 @@ struct Node{
 public:
 	constexpr static uint64_t NIL		= std::numeric_limits<uint64_t>::max();
 } __attribute__((__packed__));
+
 
 
 } // namespace btree

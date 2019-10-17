@@ -51,17 +51,8 @@ public:
 	// MMAPFile-s will be closed automatically
 	// ~DiskList() = default;
 
+	bool open(std::string_view filename, MMAPFile::Advice advice = DEFAULT_ADVICE, OpenMode mode = DEFAULT_MODE);
 	void close();
-
-	bool open(std::string_view const filename, MMAPFile::Advice const advice = DEFAULT_ADVICE, OpenMode const mode = DEFAULT_MODE){
-		switch(mode){
-		default:
-		case OpenMode::NORMAL	: return openNormal_ (filename, advice);
-		case OpenMode::MINIMAL	: return openMinimal_(filename, advice);
-		}
-
-		searchMode_ = calcSearchMode_();
-	}
 
 	operator bool(){
 		return metadata_;
@@ -110,6 +101,8 @@ public:
 private:
 	bool openNormal_ (std::string_view filename, MMAPFile::Advice advice);
 	bool openMinimal_(std::string_view filename, MMAPFile::Advice advice);
+
+	bool open_(std::string_view filename, MMAPFile::Advice advice, OpenMode mode);
 
 	SearchMode calcSearchMode_() const;
 

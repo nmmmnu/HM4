@@ -1,7 +1,5 @@
 #include "disklist.h"
 
-#include "levelorderlookup.h"
-
 #include "disk/filenames.h"
 #include "disk/btreeindexnode.h"
 
@@ -18,8 +16,6 @@
 
 namespace hm4{
 namespace disk{
-
-constexpr LevelOrderLookup<btree::NODE_LEVELS> LL;
 
 // ==============================
 
@@ -61,6 +57,7 @@ namespace{
 	}
 
 
+	[[maybe_unused]]
 	inline auto toSS(const char *s){
 		return std::string_view{ s, PairConf::HLINE_SIZE };
 	}
@@ -130,6 +127,12 @@ namespace{
 		return searchBinary(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);
 	}
 
+	[[maybe_unused]]
+	inline void log__file__(std::string_view filename, bool const mmap){
+		if constexpr (0)
+			log__("- ", filename, mmap ? "Success" : "Error");
+	}
+
 } // anonymous namespace
 
 
@@ -156,6 +159,9 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice ad
 	// integrity check, size is safe to be used now.
 	bool const b3 =	mIndx_.sizeArray<uint64_t>() == size();
 
+	log__file__(filenameIndx(filename), mIndx_);
+	log__file__(filenameData(filename), mData_);
+
 	return b1 && b2 && b3;
 }
 
@@ -179,7 +185,27 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 	mTree_.open(filenameBTreeIndx(filename));
 	mKeys_.open(filenameBTreeData(filename));
 
+	log__file__(filenameLine(filename), mLine_);
+
+	log__file__(filenameBTreeIndx(filename), mTree_);
+	log__file__(filenameBTreeData(filename), mKeys_);
+
 	return true;
+}
+
+bool DiskList::open_(std::string_view const filename, MMAPFile::Advice const advice, OpenMode const mode){
+	// this can not be converted to lambda easily...
+	switch(mode){
+	default:
+	case OpenMode::NORMAL	: return openNormal_ (filename, advice);
+	case OpenMode::MINIMAL	: return openMinimal_(filename, advice);
+	}
+}
+
+bool DiskList::open(std::string_view const filename, MMAPFile::Advice const advice, OpenMode const mode){
+	bool const result = open_(filename, advice, mode);
+	searchMode_ = calcSearchMode_();
+	return result;
 }
 
 void DiskList::close(){
@@ -308,7 +334,6 @@ private:
 
 private:
 	constexpr static level_type VALUES	= btree::VALUES;
-	constexpr static level_type BRANCHES	= btree::BRANCHES;
 
 private:
 	class BTreeAccessError : std::exception{};
@@ -377,14 +402,16 @@ private:
 
 			// Determine where to go next...
 
+			level_type const branches = VALUES + 1;
+
 			if ( x.node_index == VALUES ){
 				// Go Right
-				pos = pos * BRANCHES + VALUES + 1;
+				pos = pos * branches + branches;
 
 				log__("BTREE R:", pos);
 			}else{
 				// Go Left
-				pos = pos * BRANCHES + x.node_index + 1;
+				pos = pos * branches + x.node_index + 1;
 
 				log__("BTREE L:", pos, ", node branch", x.node_index);
 			}
@@ -400,7 +427,7 @@ private:
 	}
 
 	NodeResult levelOrderBinarySearch_(const Node &node){
-		const auto &ll = LL;
+		const auto &ll = btree::LL;
 
 		level_type node_pos = 0;
 

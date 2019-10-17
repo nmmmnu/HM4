@@ -26,9 +26,9 @@ bool BTreeIndexBuilder<List>::build(){
 	file_data_.open(filenameBTreeData(filename_),	std::ios::out | std::ios::binary);
 
 	std::cout
-		 << "Records          : "	<< size		<< '\n'
-		 << "Branching Factor : "	<< BRANCHES	<< '\n'
-		 << "Tree Depth       : "	<< total_levels	<< '\n'
+		 << "Records          : "	<< size			<< '\n'
+		 << "Branching Factor : "	<< (int) VALUES		<< '\n'
+		 << "Tree Depth       : "	<< (int) total_levels	<< '\n'
 	;
 
 	current_ = 0;
@@ -50,7 +50,7 @@ void BTreeIndexBuilder<List>::reorder_(size_type const begin, size_type const en
 		return;
 
 	size_type const size = end - begin;
-	size_type const distance = size / BRANCHES;
+	size_type const distance = size / (VALUES + 1);
 
 	if (current_level < target_level){
 		level_type const next_level = level_type(current_level + 1);
@@ -140,7 +140,7 @@ auto BTreeIndexBuilder<List>::calcDepth__(size_type count) -> level_type{
 		if (count > VALUES){
 			// We substract VALUES,
 			// because BTree have data in non-leaf nodes.
-			count = (count - VALUES) / BRANCHES;
+			count = (count - VALUES) / (VALUES + 1);
 		}else{
 			break;
 		}
