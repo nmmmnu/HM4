@@ -97,7 +97,7 @@ void RedisProtocol::response_bool(CONNECTION &buffer, bool const b){
 
 template<class CONNECTION>
 void RedisProtocol::response_string(CONNECTION &buffer, std::string_view const msg){
-	std::array<char, 32> mybuffer;
+	to_string_buffer_t mybuffer;
 
 	buffer.push(DOLLAR);
 	buffer.push(to_string(msg.size(), mybuffer));
@@ -109,7 +109,7 @@ void RedisProtocol::response_string(CONNECTION &buffer, std::string_view const m
 
 template<class CONNECTION, class CONTAINER>
 void RedisProtocol::response_strings(CONNECTION &buffer, const CONTAINER &list){
-	std::array<char, 32> mybuffer;
+	to_string_buffer_t mybuffer;
 
 	buffer.push(STAR);
 	buffer.push(to_string(list.size(), mybuffer));

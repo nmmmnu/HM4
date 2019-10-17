@@ -68,7 +68,7 @@ public:
 	}
 
 	std::string info() const{
-		std::array<char, 32> buffer[2];
+		to_string_buffer_t buffer[2];
 
 		return concatenate(
 			"Keys (estimated): "	, to_string(list_.size(),  buffer[0]),	"\n",
