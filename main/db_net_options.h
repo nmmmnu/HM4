@@ -53,7 +53,7 @@ private:
 
 		auto const default_value = param;
 
-		param = ston_safe<T>(value, default_value);
+		param = from_string<T>(value, default_value);
 	}
 
 	static void assign_(std::string &param, std::string_view const value){

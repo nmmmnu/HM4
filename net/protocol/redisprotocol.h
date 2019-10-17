@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>	// std::pair
 
+#include "mystring.h"
 
 namespace net{
 namespace protocol{
@@ -96,8 +97,10 @@ void RedisProtocol::response_bool(CONNECTION &buffer, bool const b){
 
 template<class CONNECTION>
 void RedisProtocol::response_string(CONNECTION &buffer, std::string_view const msg){
+	std::array<char, 32> mybuffer;
+
 	buffer.push(DOLLAR);
-	buffer.push(std::to_string(msg.size()));
+	buffer.push(to_string(msg.size(), mybuffer));
 	buffer.push(ENDLN);
 
 	buffer.push(msg);
@@ -106,8 +109,10 @@ void RedisProtocol::response_string(CONNECTION &buffer, std::string_view const m
 
 template<class CONNECTION, class CONTAINER>
 void RedisProtocol::response_strings(CONNECTION &buffer, const CONTAINER &list){
+	std::array<char, 32> mybuffer;
+
 	buffer.push(STAR);
-	buffer.push(std::to_string(list.size()));
+	buffer.push(to_string(list.size(), mybuffer));
 	buffer.push(ENDLN);
 
 	for(const auto &msg : list)

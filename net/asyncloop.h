@@ -85,9 +85,9 @@ private:
 private:
 	template<typename T>
 	constexpr static T max__(T const a, T const b){
-		// using std::max will result in link error,
+		// using std::max directly will result in link error,
 		// because it returns reference
-		return a > b ? a : b;
+		return std::max(a, b);
 	}
 
 private:

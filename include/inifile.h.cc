@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "ston_safe.h"
+#include "mystring.h"
 
 namespace inifile_impl_{
 	template<typename T>

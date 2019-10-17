@@ -1,9 +1,7 @@
 #ifndef LIST_DBADAPTER_H_
 #define LIST_DBADAPTER_H_
 
-#include "ston_safe.h"
-
-#include <sstream>
+#include "mystring.h"
 
 #include <iostream>
 
@@ -70,14 +68,13 @@ public:
 	}
 
 	std::string info() const{
-		std::stringstream ss;
+		std::array<char, 32> buffer[2];
 
-		ss	<< "Keys (estimated): "	<< list_.size()			<< '\n'
-			<< "Size: "		<< list_.bytes()		<< '\n'
-			<< "Mutable: "		<< (MUTABLE ? "Yes" : "No")	<< '\n'
-		;
-
-		return ss.str();
+		return concatenate(
+			"Keys (estimated): "	, to_string(list_.size(),  buffer[0]),	"\n",
+			"Size: "		, to_string(list_.bytes(), buffer[1]),	"\n",
+			"Mutable: "		, MUTABLE ? "Yes" : "No",		"\n"
+		);
 	}
 
 	bool refresh(bool const completeRefresh){
@@ -100,7 +97,7 @@ public:
 	void set(std::string_view const key, std::string_view const val, std::string_view const exp = {} ){
 		assert(!key.empty());
 
-		auto const expires = ston_safe<uint32_t>(exp);
+		auto const expires = from_string<uint32_t>(exp);
 
 		list_.insert( { key, val, expires } );
 	}
@@ -119,9 +116,9 @@ public:
 		int64_t n = val;
 
 		if (p != std::end(list_) && p->isValid(/* tomb */ true))
-			n += ston_safe<int64_t>(p->getVal());
+			n += from_string<int64_t>(p->getVal());
 
-		std::string s = ntos_safe<int64_t>(n);
+		std::string const s = to_string(n);
 
 		set(key, s);
 

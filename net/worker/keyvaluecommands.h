@@ -24,7 +24,7 @@ public:
 		INCR
 	};
 
-	constexpr static auto h(std::string_view const s){
+	constexpr static auto h(const char *s){
 		return hash(s);
 	}
 

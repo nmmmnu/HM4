@@ -23,7 +23,7 @@ size_t constexpr MB = 1024 * 1024;
 // ----------------------------------
 
 #include "signalguard.h"
-#include "ston_safe.h"
+#include "mystring.h"
 #include "db_net_options.h"
 
 #include <iostream>
@@ -80,7 +80,7 @@ namespace{
 			break;
 
 		case 3 + 1:
-			opt.port	= ston_safe<uint16_t>(argv[3]);
+			opt.port	= from_string<uint16_t>(argv[3]);
 
 			opt.immutable	= argImutable(argv[1]);
 			opt.db_path	= argv[2];

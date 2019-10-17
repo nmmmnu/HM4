@@ -1,6 +1,8 @@
 #ifndef MOCK_DB_ADAPTER_H_
 #define MOCK_DB_ADAPTER_H_
 
+#include <array>
+#include <string_view>
 
 struct MockDBAdapter{
 	constexpr static bool MUTABLE = false;
@@ -14,7 +16,7 @@ struct MockDBAdapter{
 		return "value";
 	}
 
-	const std::vector<std::string> &getall(std::string_view, uint16_t, std::string_view) const{
+	const auto &getall(std::string_view, uint16_t, std::string_view) const{
 		return data_;
 	}
 
@@ -23,7 +25,7 @@ struct MockDBAdapter{
 	}
 
 private:
-	std::vector<std::string> data_ = {
+	std::array<const char *, 4 * 2> data_ = {
 		"key1", "value1",
 		"key2", "value2",
 		"key3", "value3",

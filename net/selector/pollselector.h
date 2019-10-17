@@ -39,7 +39,7 @@ public:
 	iterator end() const;
 
 private:
-	std::vector<pollfd>	fds_;
+	std::vector<struct pollfd>	fds_;
 };
 
 

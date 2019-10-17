@@ -5,6 +5,8 @@
 #include <cstring>
 #include <string>
 #include <string_view>
+#include <charconv>	// to_chars
+#include <array>	// buffer for to_chars
 
 inline int compare(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
 	auto sgn = [](auto a, auto b){
@@ -78,8 +80,48 @@ constexpr uint32_t hash(const char* data, size_t const size) noexcept{
 	return hash;
 }
 
-constexpr static auto hash(std::string_view const data) noexcept{
+constexpr auto hash(std::string_view const data) noexcept{
 	return hash(data.data(), data.size() );
+}
+
+
+
+template<typename T, size_t Size>
+std::string_view to_string(T const value, std::array<char, Size> &buffer){
+	static_assert(std::is_integral_v<T>, "T must be integral");
+
+	auto [p, ec] = std::to_chars(std::begin(buffer), std::end(buffer), value);
+
+	if (ec != std::errc())
+		return "0";
+
+	auto c = [](auto a){
+		return static_cast<std::string_view::size_type>(a);
+	};
+
+	return std::string_view{ buffer.data(), c(p - buffer.data()) };
+}
+
+template<typename T>
+std::string to_string(T const value){
+	std::array<char, 32> buffer;
+	return std::string{ to_string(value, buffer) };
+}
+
+
+
+template<typename T>
+T from_string(std::string_view const s, T const default_value = T{0}){
+	static_assert(std::is_integral_v<T>, "T must be integral");
+
+	T value;
+
+	auto [p, ec] = std::from_chars(std::begin(s), std::end(s), value);
+
+	if (ec != std::errc())
+		return default_value;
+
+	return value;
 }
 
 

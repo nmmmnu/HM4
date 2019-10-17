@@ -3,7 +3,7 @@
 
 #include "keyvaluecommands.h"
 
-#include "ston_safe.h"
+#include "mystring.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -181,7 +181,7 @@ private:
 			// HGETALL u: 100
 
 			{
-				uint16_t const count = ston_safe<uint16_t>(p[2]);
+				uint16_t const count = from_string<uint16_t>(p[2]);
 
 				protocol_.response_strings(buffer_, db_.getall(key, count, "") );
 				break;
@@ -192,7 +192,7 @@ private:
 			// HGETALL u: 100 1
 
 			{
-				uint16_t const count = ston_safe<uint16_t>(p[2]);
+				uint16_t const count = from_string<uint16_t>(p[2]);
 				const auto &prefix = p[3];
 
 				protocol_.response_strings(buffer_, db_.getall(key, count, prefix) );
@@ -272,7 +272,7 @@ private:
 		int64_t val = 1;  // INCR
 
 		if (p.size() == 3)
-			val = ston_safe<int64_t>(p[2]);
+			val = from_string<int64_t>(p[2]);
 
 		if (val == 0)
 			return err_BadRequest_();
