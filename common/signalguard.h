@@ -3,14 +3,16 @@
 
 #include <utility>
 
-enum class Signal : int{
-	NONE = 0	,
+// man signal for x86 / ARM
 
-	INT		,
-	TERM		,
-	HUP		,
-	USR1		,
-	USR2
+enum class Signal : int{
+	NONE	=  0,
+
+	HUP	=  1,
+	INT	=  2,
+	TERM	= 15,
+	USR1	= 10,
+	USR2	= 12
 };
 
 class SignalGuard{

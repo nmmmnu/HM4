@@ -16,9 +16,9 @@ class EPollSelector{
 		using value_type	= epoll_event;
 		using convert_type	= FDResult;
 
-		static bool eq(const value_type *a, const value_type *b)	__attribute__((const));
+		static bool eq(const value_type *a, const value_type *b);
 		static void inc(const value_type * &a);
-		static convert_type conv(const value_type *a)			__attribute__((pure));
+		static convert_type conv(const value_type *a);
 	};
 
 public:
@@ -27,9 +27,9 @@ public:
 	using iterator = hidden_pointer_iterator<HPI>;
 
 	EPollSelector(size_t server_limit = DEFAULT_SERVER_LIMIT);
-	EPollSelector(EPollSelector &&other) /* = default */;
-	EPollSelector &operator =(EPollSelector &&other) /* = default */;
-	~EPollSelector() /* = default */;
+	EPollSelector(EPollSelector &&other);
+	EPollSelector &operator =(EPollSelector &&other);
+	~EPollSelector();
 
 	void swap(EPollSelector &other);
 

@@ -70,7 +70,7 @@ WaitStatus EPollSelector::wait(int const timeout){
 
 	if (fdsCount_ < 0){
 		switch(errno){
-		case EINTR	: return WaitStatus::OK;
+		case EINTR	: return WaitStatus::NONE;
 
 		default		: return WaitStatus::ERROR;
 		}

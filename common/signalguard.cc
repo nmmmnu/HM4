@@ -2,14 +2,12 @@
 
 #include <signal.h>
 
-#include <cstdio>
-
 namespace {
 	constexpr int signals[] = {
-		SIGINT,		// Ctrl C
-		SIGTERM,	// kill -TERM / Shutdown
-		SIGHUP,
-		SIGUSR1,
+		SIGINT	,	// Ctrl C
+		SIGTERM	,	// kill -TERM / Shutdown
+		SIGHUP	,
+		SIGUSR1	,
 		SIGUSR2
 	};
 
@@ -31,6 +29,7 @@ namespace {
 		}
 	}
 
+	[[maybe_unused]]
 	const char *toString(int const signal){
 		switch(signal){
 		default		: return "NONE"	;
@@ -44,7 +43,7 @@ namespace {
 	}
 
 	void handler(int const signal){
-		(void) toString;
+	//	printf("Cought signal %s\n", toString(signal));
 
 		auto const t = translate(signal);
 		SignalGuard::update(t);
