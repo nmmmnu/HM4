@@ -6,6 +6,7 @@
 
 // ----------------------------------
 
+#include "selector/pollselector.h"
 #include "selector/epollselector.h"
 #include "protocol/redisprotocol.h"
 #include "worker/keyvalueworker.h"

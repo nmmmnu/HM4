@@ -4,6 +4,9 @@
 #include "mystring.h"
 
 #include <iostream>
+#include <algorithm>
+
+#include "fixedvector.h"
 
 template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
@@ -36,13 +39,19 @@ public:
 			return {};
 	}
 
-	std::vector<std::string> getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
-		auto const maxResults  = my_clamp__(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
+	auto getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
+		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
-		std::vector<std::string> result;
+		#if 0
+		std::vector<std::string_view> result;
 
 		// reserve x2 because of hgetall
 		result.reserve(maxResults * 2);
+		#else
+
+		FixedVector<std::string_view, MAXIMUM_RESULTS> result;
+
+		#endif
 
 		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 
@@ -126,17 +135,6 @@ public:
 	}
 
 private:
-	template<typename T>
-	constexpr static T my_clamp__(T const val, T const min, T const max){
-		if (val < min)
-			return min;
-
-		if (val > max)
-			return max;
-
-		return val;
-	}
-
 	static bool samePrefix__(std::string_view const p, std::string_view const s){
 		if (p.size() > s.size())
 			return false;

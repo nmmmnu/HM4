@@ -12,7 +12,7 @@ struct MockDBAdapter{
 		return "Mock Adapter\n";
 	}
 
-	std::string get(std::string_view) const{
+	std::string_view get(std::string_view) const{
 		return "value";
 	}
 
@@ -25,7 +25,7 @@ struct MockDBAdapter{
 	}
 
 private:
-	std::array<const char *, 4 * 2> data_ = {
+	constexpr static std::array<std::string_view, 4 * 2> data_ = {
 		"key1", "value1",
 		"key2", "value2",
 		"key3", "value3",

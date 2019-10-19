@@ -80,8 +80,7 @@ bool LinkList::insert(OPair&& newdata){
 		return false;
 	}
 
-	newnode->next = *loc.prev;
-	*loc.prev = newnode;
+	newnode->next = std::exchange(*loc.prev, newnode);
 
 	lc_.inc(size);
 

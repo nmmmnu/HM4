@@ -16,9 +16,9 @@ class EPollSelector{
 		using value_type	= epoll_event;
 		using convert_type	= FDResult;
 
-		static bool eq(const value_type *a, const value_type *b);
+		static bool eq(const value_type *a, const value_type *b)	__attribute__((const));
 		static void inc(const value_type * &a);
-		static convert_type conv(const value_type *a);
+		static convert_type conv(const value_type *a)			__attribute__((pure));
 	};
 
 public:

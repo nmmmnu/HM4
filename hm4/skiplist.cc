@@ -1,12 +1,13 @@
 #include "skiplist.h"
 
 #include <stdexcept>
-#include <algorithm>	// fill
+#include <algorithm>
 #include <random>	// mt19937, bernoulli_distribution
+#include <limits>
 
 namespace hm4{
 
-namespace skiplist_impl_{
+namespace{
 	std::mt19937_64 rand64{ (uint32_t) time(nullptr) };
 
 	// unbelievably this is 4x faster
@@ -14,23 +15,26 @@ namespace skiplist_impl_{
 	// e.g. 0x03F6EAF2CD271461
 
 	template<typename T>
-	constexpr T lsb(uint64_t const value, T const min, T const max){
-		for(T i = min; i < max; ++i)
-			if(value & (1u << i) )
-				return i;
+	constexpr T modifiedLSB(uint64_t x){
+		T result = 1;
 
-		return min;
+		while(x & 1u){
+			++result;
+			x = x >> 1;
+		}
+
+		return result;
 	}
 }
 
 // ==============================
 
 auto SkipList::getRandomHeight_() -> height_size_type{
-	using namespace skiplist_impl_;
+	height_size_type const x = modifiedLSB<height_size_type>(rand64());
 
-	uint64_t const rand = rand64();
-
-	return lsb<height_size_type>(rand, 1, MAX_HEIGHT);
+	// keeping this because of clang
+	// don't optimize, it is branchless
+	return std::clamp<height_size_type>(x, 1, MAX_HEIGHT);
 }
 
 // ==============================
@@ -155,10 +159,8 @@ bool SkipList::insert(OPair&& newdata){
 	// newnode->height = height
 
 	// place new node where it belongs
-	for(height_size_type i = 0; i < height; ++i){
-		newnode->next[i] = *nl.prev[i];
-		*nl.prev[i] = newnode;
-	}
+	for(height_size_type i = 0; i < height; ++i)
+		newnode->next[i] = std::exchange(*nl.prev[i], newnode);
 
 #ifdef DEBUG_PRINT_LANES
 	printf("%3u Lanes-> ", height);

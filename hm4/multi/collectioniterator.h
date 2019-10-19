@@ -162,15 +162,15 @@ private:
 
 	// heap functions
 	static auto make_heap(ITPVector &v){
-		return std::make_heap(std::begin(v), std::end(v), & CollectionIterator::heap_comp);
+		return std::make_heap(std::begin(v), std::end(v), & heap_comp);
 	}
 
 	static auto push_heap(ITPVector &v){
-		return std::push_heap(std::begin(v), std::end(v), & CollectionIterator::heap_comp);
+		return std::push_heap(std::begin(v), std::end(v), & heap_comp);
 	}
 
 	static auto pop_heap(ITPVector &v){
-		return std::pop_heap(std::begin(v), std::end(v), & CollectionIterator::heap_comp);
+		return std::pop_heap (std::begin(v), std::end(v), & heap_comp);
 	}
 };
 

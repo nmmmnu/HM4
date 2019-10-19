@@ -306,6 +306,7 @@ auto DiskList::ra_find(std::string_view const key, std::bool_constant<B> const e
 			return find_fix(x, *this, exact);
 		}
 
+	default:
 	case SearchMode::BINARY: {
 			log__("binary");
 			auto const x = searchBinary(key, ra_begin(), ra_end());

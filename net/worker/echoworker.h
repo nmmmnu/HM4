@@ -16,12 +16,12 @@ public:
 	WorkerStatus operator()(CONNECTION &buffer);
 
 private:
-	inline static constexpr std::string_view cmd_hello	= "hello\r\n";
-	inline static constexpr std::string_view cmd_help	= "help\r\n";
-	inline static constexpr std::string_view cmd_exit	= "exit\r\n";
-	inline static constexpr std::string_view cmd_shutdown	= "shutdown\r\n";
+	constexpr static std::string_view cmd_hello	= "hello"	"\r\n";
+	constexpr static std::string_view cmd_help	= "help"	"\r\n";
+	constexpr static std::string_view cmd_exit	= "exit"	"\r\n";
+	constexpr static std::string_view cmd_shutdown	= "shutdown"	"\r\n";
 
-	inline static constexpr std::string_view msg_help	=
+	constexpr static std::string_view msg_help	=
 				"Usage:\r\n"
 				"   hello    - greeting\r\n"
 				"   help     - this message\r\n"
