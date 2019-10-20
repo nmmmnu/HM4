@@ -1,18 +1,14 @@
 #ifndef MY_SIGNAL_H_
 #define MY_SIGNAL_H_
 
-#include <utility>
-
-// man signal for x86 / ARM
-
 enum class Signal : int{
 	NONE	=  0,
 
-	HUP	=  1,
-	INT	=  2,
-	TERM	= 15,
-	USR1	= 10,
-	USR2	= 12
+	HUP,
+	INT,
+	TERM,
+	USR1,
+	USR2
 };
 
 class SignalGuard{
@@ -21,17 +17,11 @@ public:
 
 	~SignalGuard();
 
-	Signal operator()() const{
-		return std::exchange(signal__, Signal::NONE);
-	}
-
-public:
-	static void update(Signal const signal){
-		signal__ = signal;
-	}
+	Signal operator()() const;
 
 private:
-	static Signal signal__;
+	// array of pointers to functions
+	void (*old[5])(int);
 };
 
 #endif
