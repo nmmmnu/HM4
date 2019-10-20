@@ -14,8 +14,9 @@ int g_signal__ = ZERO;
 
 
 namespace {
-	template<class Handler>
-	void set_signal(int const signal, Handler *func){
+	using Handler = SignalGuard::Handler;
+
+	void set_signal(int const signal, Handler func){
 		struct sigaction action;
 
 		action.sa_handler = func;
@@ -32,8 +33,7 @@ namespace {
 		return action.sa_handler;
 	}
 
-	template<class Handler>
-	auto getset_signal(int const signal, Handler *func){
+	auto getset_signal(int const signal, Handler func){
 		auto x = get_signal(signal);
 		set_signal(signal, func);
 		return x;
@@ -51,18 +51,6 @@ namespace {
 		SIGUSR2
 	};
 
-	template<class Signals, class Handlers, class Handler>
-	void setup_signal(const Signals &signals, Handlers &old_signals, Handler *func){
-		for(size_t i = 0; i < std::size(signals); ++i)
-			old_signals[i] = getset_signal(signals[i], func);
-	}
-
-	template<class Signals, class Handlers>
-	void restore_signal(const Signals &signals, const Handlers &old_signals){
-		for(size_t i = 0; i < std::size(signals); ++i)
-			set_signal(signals[i], old_signals[i]);
-	}
-
 	auto translate(int const signal){
 		switch(signal){
 		default		: return Signal::NONE	;
@@ -75,21 +63,6 @@ namespace {
 		}
 	}
 
-	[[maybe_unused]]
-	constexpr const char *toString(Signal const signal){
-		constexpr const char *str[] = {
-			"NONE"	,
-
-			"INT"	,
-			"TERM"	,
-			"HUP"	,
-			"USR1"	,
-			"USR2"
-		};
-
-		return str[static_cast<int>(signal)];
-	}
-
 	void handler(int const signal){
 		g_signal__ = signal;
 	}
@@ -100,16 +73,33 @@ namespace {
 
 SignalGuard::SignalGuard(){
 	g_signal__ = ZERO;
-	setup_signal(signals, old, handler);
+
+	for(size_t i = 0; i < std::size(signals); ++i)
+		old[i] = getset_signal(signals[i], handler);
 }
 
 SignalGuard::~SignalGuard(){
-	restore_signal(signals, old);
+	for(size_t i = 0; i < std::size(signals); ++i)
+		set_signal(signals[i], old[i]);
 }
 
 Signal SignalGuard::operator()() const{
 	return translate(
 		std::exchange(g_signal__, ZERO)
 	);
+}
+
+const char *SignalGuard::toString(Signal const signal) const{
+	constexpr const char *str[] = {
+		"NONE"	,
+
+		"INT"	,
+		"TERM"	,
+		"HUP"	,
+		"USR1"	,
+		"USR2"
+	};
+
+	return str[static_cast<int>(signal)];
 }
 

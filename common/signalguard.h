@@ -13,15 +13,18 @@ enum class Signal : int{
 
 class SignalGuard{
 public:
+	using Handler = void (*)(int);
+
 	SignalGuard();
 
 	~SignalGuard();
 
 	Signal operator()() const;
 
+	const char *toString(Signal const signal) const;
+
 private:
-	// array of pointers to functions
-	void (*old[5])(int);
+	Handler old[5];
 };
 
 #endif
