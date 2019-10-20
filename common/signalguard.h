@@ -13,7 +13,7 @@ enum class Signal : int{
 
 class SignalGuard{
 public:
-	using Handler = void (*)(int);
+	using Handler = void(int);
 
 	SignalGuard();
 
@@ -21,10 +21,10 @@ public:
 
 	Signal operator()() const;
 
-	const char *toString(Signal const signal) const;
+	static const char *toString(Signal const signal);
 
 private:
-	Handler old[5];
+	Handler *old[5];
 };
 
 #endif

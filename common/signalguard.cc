@@ -16,7 +16,7 @@ int g_signal__ = ZERO;
 namespace {
 	using Handler = SignalGuard::Handler;
 
-	void set_signal(int const signal, Handler func){
+	void set_signal(int const signal, Handler *func){
 		struct sigaction action;
 
 		action.sa_handler = func;
@@ -33,7 +33,7 @@ namespace {
 		return action.sa_handler;
 	}
 
-	auto getset_signal(int const signal, Handler func){
+	auto getset_signal(int const signal, Handler *func){
 		auto x = get_signal(signal);
 		set_signal(signal, func);
 		return x;
@@ -64,6 +64,8 @@ namespace {
 	}
 
 	void handler(int const signal){
+		// printf("Cought signal %d\n", signal);
+
 		g_signal__ = signal;
 	}
 
@@ -89,7 +91,7 @@ Signal SignalGuard::operator()() const{
 	);
 }
 
-const char *SignalGuard::toString(Signal const signal) const{
+const char *SignalGuard::toString(Signal const signal){
 	constexpr const char *str[] = {
 		"NONE"	,
 
