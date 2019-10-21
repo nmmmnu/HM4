@@ -7,7 +7,7 @@
 
 
 
-constexpr int ZERO = static_cast<int>(Signal::NONE);
+constexpr int ZERO = 0;
 
 int g_signal__ = ZERO;
 
@@ -45,7 +45,7 @@ namespace {
 namespace {
 	constexpr int signals[5] = {
 		SIGINT	,	// Ctrl C
-		SIGTERM	,	// kill -TERM / Shutdown
+		SIGTERM	,
 		SIGHUP	,
 		SIGUSR1	,
 		SIGUSR2
