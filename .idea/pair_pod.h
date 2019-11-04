@@ -1,8 +1,6 @@
 #ifndef PAIR_POD_H
 #define PAIR_POD_H
 
-#include <cstddef>	// offsetof
-#include <memory>	// unique_ptr
 #include <ostream>
 #include <string_view>
 
@@ -32,54 +30,71 @@ struct Pair{
 	uint32_t	expires;	// 4, 136 years, not that bad.
 	uint32_t	vallen;		// 4
 	uint16_t	keylen;		// 2
-	char		buffer[1];	// dynamic
-
-	// ==============================
-
-public:
-	static constexpr uint16_t	MAX_KEY_SIZE	=      1024;	// MySQL is 1000
-	static constexpr uint32_t	MAX_VAL_SIZE	= 16 * 1024;
+	char		buffer[2];	// dynamic, these are the two \0 terminators.
 
 public:
 	static constexpr int		CMP_NULLKEY	= -1;
 
 private:
 	Pair() noexcept = default;
-	Pair(const Pair &p) noexcept = delete;
-
-	static void *operator new(size_t, size_t const size){
-		return ::operator new(size);
-	}
-
-	static void *operator new(size_t, size_t const size, const std::nothrow_t) noexcept{
-		return ::operator new(size, std::nothrow);
-	}
 
 public:
-	// fixing C++14 error
-	static void operator delete(void* memory) noexcept{
-		::operator delete(memory);
+	template<class Allocator>
+	static Pair *create(
+			Allocator &allocator,
+			std::string_view const key,
+			std::string_view const val,
+			uint32_t expires = 0, uint32_t created = 0){
+
+		if (	key.size() == 0				||
+			key.size() > PairConf::MAX_KEY_SIZE	||
+			val.size() > PairConf::MAX_VAL_SIZE	)
+			return nullptr;
+
+		Pair *pair = allocator. template allocate<Pair>(Pair::bytes(key.size(), val.size()));
+
+		if (!pair)
+			return nullptr;
+
+		return copy_(pair, key, val, expires, created);
 	}
 
+	template<class Allocator>
+	static Pair *tombstone(
+			Allocator &allocator,
+			std::string_view const key){
 
-public:
-	static std::unique_ptr<Pair> create(		std::string_view key,
-							std::string_view val,
-							uint32_t expires,
-							uint32_t created){
-		return 	create( key.data(), key.size(), val.data(), val.size(), expires, created );
+		using namespace std::literals;
+		return create(allocator, key, ""sv);
 	}
 
-	static std::unique_ptr<Pair> create(		const char *key, size_t keylen,
-							const char *val, size_t vallen,
-							uint32_t expires,
-							uint32_t created);
+	template<class Allocator>
+	static Pair *clone(Allocator &allocator, const Pair *src){
+		Pair *pair = allocator. template allocate<Pair>(src->bytes());
 
-	static std::unique_ptr<Pair> create(const Pair *src);
+		if (!pair)
+			return nullptr;
 
-	static std::unique_ptr<Pair> create(const Pair &src){
-		return create(& src);
+		memcpy(pair, src, src->bytes());
+
+		return pair;
 	}
+
+	template<class Allocator>
+	static Pair *clone(Allocator &allocator, const Pair &src){
+		return clone(allocator, & src);
+	}
+
+	template<class Allocator>
+	static void destroy(Allocator &allocator, Pair *pair){
+		return allocator.deallocate(pair);
+	}
+
+private:
+	static Pair *copy_(Pair *pair,
+			std::string_view key,
+			std::string_view val,
+			uint32_t expires, uint32_t created);
 
 public:
 	constexpr
@@ -147,7 +162,7 @@ public:
 	}
 
 	size_t bytes() const noexcept{
-		return sizeofBase__() + sizeofBuffer_();
+		return bytes(getKeyLen_(), getValLen_());
 	}
 
 	// ==============================
@@ -161,8 +176,13 @@ public:
 	// ==============================
 
 	constexpr
+	static size_t bytes(size_t const keyLen, size_t const valLen) noexcept{
+		return sizeof(Pair) + keyLen + valLen;
+	}
+
+	constexpr
 	static size_t maxBytes() noexcept{
-		return sizeofBase__() + sizeofBuffer__(MAX_KEY_SIZE, MAX_VAL_SIZE);
+		return bytes(PairConf::MAX_KEY_SIZE, PairConf::MAX_VAL_SIZE);
 	}
 
 private:
@@ -171,10 +191,6 @@ private:
 	}
 
 	const char *getVal_() const noexcept{
-		// vallen is 0 no matter of endianness
-		if (vallen == 0)
-			return nullptr;
-
 		return & buffer[ getKeyLen_() + 1 ];
 	}
 
@@ -199,29 +215,6 @@ private:
 	}
 
 private:
-	constexpr
-	static size_t sizeofBase__() noexcept{
-		return offsetof(Pair, buffer);
-	}
-
-	constexpr
-	static size_t sizeofBuffer__(size_t const keyLen, size_t const valLen) noexcept{
-		return keyLen + 1 + valLen + 1;
-	}
-
-	constexpr
-	static size_t bytes_(size_t const keyLen, size_t const valLen) noexcept{
-		return sizeofBase__() + sizeofBuffer__(keyLen, valLen);
-	}
-
-	// ==============================
-
-	size_t sizeofBuffer_() const noexcept{
-		return sizeofBuffer__(getKeyLen_(), getValLen_());
-	}
-
-	// ==============================
-
 	bool isExpired_() const noexcept;
 
 	static uint64_t getCreateTime__(uint32_t created) noexcept;

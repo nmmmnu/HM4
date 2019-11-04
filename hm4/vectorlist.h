@@ -37,7 +37,7 @@ public:
 		return true;
 	}
 
-	bool erase(std::string_view constkey);
+	bool erase(std::string_view key);
 
 	Pair const &operator[](size_type const index) const{
 		return *vector_[index].get();
@@ -54,8 +54,8 @@ public:
 	}
 
 public:
-	iterator find(std::string_view const key, std::true_type) const noexcept;
-	iterator find(std::string_view const key, std::false_type) const noexcept;
+	iterator find(std::string_view key, std::true_type) const noexcept;
+	iterator find(std::string_view key, std::false_type) const noexcept;
 	iterator begin() const noexcept;
 	iterator end() const noexcept;
 };
