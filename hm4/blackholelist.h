@@ -20,12 +20,15 @@ public:
 	}
 
 	constexpr static
-	bool erase(std::string_view const ){
+	bool erase(std::string_view ){
 		return true;
 	}
 
 	constexpr static
-	bool insert(OPair const &){
+	bool insert(
+			std::string_view, std::string_view,
+			uint32_t = 0, uint32_t = 0
+		){
 		return true;
 	}
 

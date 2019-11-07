@@ -59,7 +59,7 @@ public:
 		}
 
 		// return empty line...
-		return {};
+		return "";
 	}
 
 	operator bool() const{

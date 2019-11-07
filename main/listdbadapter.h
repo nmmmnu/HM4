@@ -108,7 +108,7 @@ public:
 
 		auto const expires = from_string<uint32_t>(exp);
 
-		list_.insert( { key, val, expires } );
+		list_.insert(key, val, expires);
 	}
 
 	bool del(std::string_view const key){

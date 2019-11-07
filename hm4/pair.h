@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <ostream>
+#include <memory>
 #include <string_view>
 
 #include "myendian.h"
@@ -17,10 +18,13 @@
 
 namespace hm4{
 	namespace PairConf{
-		constexpr size_t	ALIGN		= sizeof(uint64_t);
+		constexpr size_t	ALIGN		= sizeof(void *);
+		constexpr size_t	HLINE_SIZE	= sizeof(void *);
 
 		constexpr uint16_t	MAX_KEY_SIZE	=      1024;	// MySQL is 1000
 		constexpr uint32_t	MAX_VAL_SIZE	= 16 * 1024;
+
+		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
 
 
@@ -33,7 +37,10 @@ namespace hm4{
 		char		buffer[2];	// dynamic, these are the two \0 terminators.
 
 	public:
-		static constexpr int		CMP_NULLKEY	= -1;
+		static constexpr int			CMP_NULLKEY	= -1;
+
+		inline
+		static constexpr std::string_view	TOMBSTONE	= "";
 
 	public:
 		Pair() = delete;
@@ -43,100 +50,145 @@ namespace hm4{
 		Pair &operator=(Pair &&) = delete;
 
 	public:
-		template<class Allocator>
-		[[nodiscard]]
-		static Pair *createPtr(
-				Allocator &allocator,
-				std::string_view const key,
-				std::string_view const val,
-				uint32_t expires = 0, uint32_t created = 0){
-
-			if (	key.size() == 0				||
-				key.size() > PairConf::MAX_KEY_SIZE	||
-				val.size() > PairConf::MAX_VAL_SIZE	)
-				return nullptr;
-
-			Pair *pair = allocator. template allocate<Pair>(Pair::bytes(key.size(), val.size()));
-
-			if (!pair)
-				return nullptr;
-
-			return copy_(pair, key, val, expires, created);
+		constexpr static bool check(
+					std::string_view const key
+				) noexcept{
+			return key.size() > 0 && key.size() <= PairConf::MAX_KEY_SIZE;
 		}
 
-		template<class Allocator>
-		[[nodiscard]]
-		static Pair *tombstonePrt(
-				Allocator &allocator,
-				std::string_view const key){
-
-			using namespace std::literals;
-			return createPtr(allocator, key, ""sv);
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		static Pair *clonePtr(Allocator &allocator, const Pair *src){
-			if (!src)
-				return nullptr;
-
-			Pair *pair = allocator. template allocate<Pair>(src->bytes());
-
-			if (!pair)
-				return nullptr;
-
-			memcpy(pair, src, src->bytes());
-
-			return pair;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		static Pair *clonePtr(Allocator &allocator, const Pair &src){
-			return clonePtr(allocator, & src);
-		}
-
-		template<class Allocator>
-		static void destroyPtr(Allocator &allocator, Pair *pair){
-			return allocator.deallocate(pair);
+		constexpr static bool check(
+					std::string_view const key,
+					std::string_view const val
+				) noexcept{
+			return check(key) && val.size() <= PairConf::MAX_VAL_SIZE;
 		}
 
 	public:
-		template<class Allocator>
-		static /* std::unique_ptr */ auto create(
-				Allocator &allocator,
+		struct ptr {
+			template<class Allocator>
+			[[nodiscard]]
+			static Pair *create(
+					Allocator &allocator,
+					std::string_view const key,
+					std::string_view const val,
+					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
+
+				if ( ! check(key, val) )
+					return nullptr;
+
+				Pair *pair = static_cast<Pair *>(
+						allocator.allocate( Pair::bytes(key.size(), val.size()) )
+				);
+
+				if (!pair)
+					return nullptr;
+
+				return copy_(pair, key, val, expires, created);
+			}
+
+			template<class Allocator>
+			[[nodiscard]]
+			static Pair *clone(Allocator &allocator, const Pair *src) noexcept{
+				if (!src)
+					return nullptr;
+
+				Pair *pair = static_cast<Pair *>(
+						allocator.allocate(src->bytes())
+				);
+
+				if (!pair)
+					return nullptr;
+
+				memcpy(pair, src, src->bytes());
+
+				return pair;
+			}
+
+			template<class Allocator>
+			static void destroy(Allocator &allocator, Pair *pair) noexcept{
+				return allocator.deallocate(pair);
+			}
+		};
+
+	private:
+		struct unique_ptr_allocator{
+			static void *allocate(std::size_t const size) noexcept{
+				return ::operator new(size, std::nothrow);
+			}
+		};
+
+	public:
+		struct up{
+		private:
+			template<class Allocator, typename T>
+			static auto wrap__(Allocator &allocator, T *p) noexcept{
+				auto deleter = [&allocator](void *p){
+					allocator.deallocate(p);
+				};
+
+				return std::unique_ptr<T, decltype(deleter)>{
+					p,
+					deleter
+				};
+			};
+
+			template<typename T>
+			static auto wrap__(unique_ptr_allocator &, T *p) noexcept{
+				return std::unique_ptr<T>{ p };
+			};
+
+		public:
+			template<class Allocator>
+			static auto create(
+					Allocator &allocator,
+					std::string_view const key,
+					std::string_view const val,
+					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
+
+				return wrap__(
+					allocator,
+					ptr::create(allocator, key, val, expires, created)
+				);
+			}
+
+			template<class Allocator>
+			static auto clone(Allocator &allocator, const Pair *src) noexcept{
+				return wrap__(
+					allocator,
+					ptr::clone(allocator, src)
+				);
+			}
+
+			template<class Allocator>
+			static auto clone(Allocator &allocator, const Pair &src) noexcept{
+				return clone(allocator, & src);
+			}
+		};
+
+	public:
+		static auto create(
 				std::string_view const key,
 				std::string_view const val,
-				uint32_t expires = 0, uint32_t created = 0){
+				uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
-			return allocator.getUP(
-				createPtr(allocator, key, val, expires, created)
-			);
+			unique_ptr_allocator allocator;
+			return up::create(allocator, key, val, expires, created);
 		}
 
-		template<class Allocator>
-		static /* std::unique_ptr */ auto tombstone(
-				Allocator &allocator,
-				std::string_view const key){
-
-			return allocator.getUP( tombstonePrt(allocator, key) );
+		static auto clone(const Pair *src) noexcept{
+			unique_ptr_allocator allocator;
+			return up::clone(allocator, src);
 		}
 
-		template<class Allocator>
-		static /* std::unique_ptr */ auto clone(Allocator &allocator, const Pair *src){
-			return allocator.getUP( clonePtr(allocator, src) );
-		}
-
-		template<class Allocator>
-		static /* std::unique_ptr */ auto clone(Allocator &allocator, const Pair &src){
-			return allocator.getUP( clonePtr(allocator, src) );
+		static auto clone(const Pair &src) noexcept{
+			return clone(& src);
 		}
 
 	private:
 		static Pair *copy_(Pair *pair,
 				std::string_view key,
 				std::string_view val,
-				uint32_t expires, uint32_t created);
+				uint32_t expires, uint32_t created) noexcept;
 
 	public:
 		constexpr
@@ -227,6 +279,11 @@ namespace hm4{
 		}
 
 		constexpr
+		static size_t bytes(std::string_view const key, std::string_view const val) noexcept{
+			return bytes(key.size(), val.size());
+		}
+
+		constexpr
 		static size_t maxBytes() noexcept{
 			return bytes(PairConf::MAX_KEY_SIZE, PairConf::MAX_VAL_SIZE);
 		}
@@ -259,8 +316,17 @@ namespace hm4{
 
 
 
+	using OPair = std::unique_ptr<Pair>;
+
 	inline void print(Pair const &pair){
 		pair.print();
+	}
+
+	inline void print(OPair const &pair){
+		if (pair)
+			pair->print();
+		else
+			printf("%s\n", PairConf::EMPTY_MESSAGE);
 	}
 
 } // namespace

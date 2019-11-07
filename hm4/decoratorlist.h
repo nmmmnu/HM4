@@ -4,6 +4,7 @@
 
 #include "ilist.h"
 
+#include <cassert>
 
 namespace hm4{
 
@@ -17,51 +18,54 @@ public:
 	using difference_type	= typename LIST::difference_type;
 
 public:
-	DecoratorList(LIST &list) : list_(list){}
+	DecoratorList(LIST &list) : list_(& list){}
 
 public:
 	// Immutable Methods
 
 	size_type size() const{
-		return list_.size();
+		return list_->size();
 	}
 
 	size_t bytes() const{
-		return list_.bytes();
+		return list_->bytes();
 	}
 
 public:
 	iterator begin() const{
-		return list_.begin();
+		return list_->begin();
 	}
 
 	iterator end() const{
-		return list_.end();
+		return list_->end();
 	}
 
 	template<bool B>
 	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
-		return list_.find(key, exact);
+		return list_->find(key, exact);
 	}
 
 public:
 	// Mutable Methods
 
 	bool clear(){
-		return list_.clear();
+		return list_->clear();
 	}
 
 	bool erase(std::string_view const key){
-		assert(!key.empty());
-		return list_.erase(key);
+		assert(Pair::check(key));
+		return list_->erase(key);
 	}
 
-	bool insert(OPair &&data){
-		return list_.insert( std::move(data) );
+	bool insert(	std::string_view const key, std::string_view const val,
+			uint32_t const expires = 0, uint32_t const created = 0
+			){
+
+		return list_->insert(key, val, expires, created);
 	}
 
 private:
-	LIST	&list_;
+	LIST	*list_;
 };
 
 

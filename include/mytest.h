@@ -15,7 +15,7 @@ public:
 public:
 	void operator()(const char *test, bool const result){
 		if (show || result == false)
-			printf(" - Testing %-20s %s\n", test, result ? "OK" : "Fail");
+			printf(" - Testing %-25s %s\n", test, result ? "OK" : "Fail");
 
 		if (stop && result == false)
 			exit(1);

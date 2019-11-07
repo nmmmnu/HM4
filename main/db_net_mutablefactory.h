@@ -12,6 +12,12 @@
 
 #include <vector>
 
+using Allocator_s = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+
+using Allocator = Allocator_s;
+
+Allocator allocator;
+
 struct MyMutableDBAdapterFactory{
 	using ListLoader	= hm4::listloader::DirectoryListLoader;
 
@@ -44,7 +50,7 @@ struct MyMutableDBAdapterFactory{
 
 private:
 	ListLoader		loader_;
-	MemList			memList_;
+	MemList			memList_{ allocator };
 	MutableFlushList	muflList_;
 	DList			list_;
 	DBAdapter		adapter_;

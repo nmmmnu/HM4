@@ -1,4 +1,4 @@
-#include "pair.h"
+#include "opair.h"
 
 #include "mytest.h"
 
@@ -6,7 +6,17 @@ MyTest mytest;
 
 #include <unistd.h>	// sleep
 
+#include "cppallocator.h"
+#include "mallocallocator.h"
+#include "arenaallocator.h"
 
+using A1 = MyAllocator::CPPAllocatorDel;
+using A2 = MyAllocator::MallocAllocatorDel;
+using A3 = MyAllocator::ArenaAllocatorDel<4096>;
+
+using Allocator = A3;
+
+Allocator allocator;
 
 using hm4::Pair;
 using hm4::OPair;
@@ -30,7 +40,7 @@ int main(){
 	pair_test_expired();
 	pair_test_ctor();
 
-	//printf("Size: %zu bytes\n", sizeof(OPair));
+	printf("Size: %zu bytes\n", sizeof(OPair));
 
 	return mytest.end();
 }
@@ -44,7 +54,7 @@ namespace{
 
 		std::string_view const key = "name";
 
-		const OPair p = Pair::create(key, Pair::TOMBSTONE);
+		OPair p = { allocator, key, "" };
 
 		mytest("tombstone isTombstone",	p->isTombstone()	);
 		mytest("tombstone key",		p->getKey() == key	);
@@ -86,7 +96,7 @@ namespace{
 	void pair_test_expired(bool const slow){
 		mytest.begin("Pair Expired");
 
-		const OPair p1 = Pair::create( "key", "val", 1 );
+		OPair p1 = { allocator, "key", "val", 1 };
 
 		mytest("not expired",	p1->isValid()				);
 
@@ -96,16 +106,16 @@ namespace{
 			mytest("expired",	! p1->isValid()			);
 		}
 
-		const OPair p2 = Pair::create( "key", "val", 1, 3600 * 24 /* 1970-01-02 */ );
+		OPair p2 = { allocator, "key", "val", 1, 3600 * 24 /* 1970-01-02 */ };
 		mytest("expired",		! p2->isValid()			);
 	}
 
 	void pair_test_ctor(){
 		mytest.begin("c-tor / d-tor");
 
-		const OPair a = Pair::create( "1", "one" );
+		OPair a = { allocator, "1", "one" };
 
-		const OPair b = Pair::clone( *a );
+		OPair b = { allocator, *a };
 		mytest("copy Pair",		b->getKey() == "1"		);
 	}
 
@@ -115,9 +125,9 @@ namespace{
 		std::string_view const key = "abcdef";
 		std::string_view const val = "1234567890";
 
-		const OPair t = Pair::create(key, Pair::TOMBSTONE);
+		OPair t = { allocator, key, "" };
 
-		const OPair p = Pair::create( key, val );
+		OPair p = { allocator, key, val };
 
 		mytest("key",			p->getKey() == key		);
 		mytest("val",			p->getVal() == val		);

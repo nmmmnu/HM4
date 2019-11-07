@@ -9,15 +9,25 @@ MyTest mytest;
 
 #include <iterator>	// std::distance
 
+#include "pmallocator.h"
+#include "trackingallocator.h"
+#include "stdallocator.h"
+
+using Allocator_1 = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_2 = MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+
+using Allocator = Allocator_1;
+
+Allocator allocator;
+
 // ==============================
 
 template <class List>
 size_t listInsert(List &list, const char *key, const char *value){
-	OPair p = { key, value };
+	list.insert(key, value);
 
-	size_t const size = p->bytes();
-	list.insert(std::move(p));
-	return size;
+	// collect size...
+	return Pair::bytes(key, value);
 }
 
 template <class List>
@@ -32,7 +42,10 @@ auto listPopulate(List &list){
 		0
 	;
 
-	return std::make_pair( (typename List::size_type) 4, size);
+	return std::pair{
+		(typename List::size_type) 4,
+		size
+	};
 }
 
 // ==============================
@@ -103,6 +116,9 @@ void list_test(List &list){
 	// GENERAL
 
 	const auto&[ count, bytes ] = listPopulate(list);
+	listPopulate(list);
+	listPopulate(list);
+	listPopulate(list);
 
 	mytest("size estimated",	list.size() >= count				);
 	mytest("size exact",		size(list) == count				);
@@ -124,8 +140,8 @@ void list_test(List &list){
 	const char *key_over = "2 val";
 	const char *val_over = "overwritten";
 
-	list.insert( { key_over, "original"	} );
-	list.insert( { key_over, val_over	} );
+	list.insert(key_over, "original"	);
+	list.insert(key_over, val_over		);
 
 	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
@@ -184,18 +200,17 @@ template<>
 void list_test(hm4::BlackHoleList &list){
 	listPopulate(list);
 
-	mytest("size estimated",	list.size() == 0				);
-	mytest("size exact",		size(list) == 0					);
-	mytest("size empty",		empty(list)					);
+	mytest("size estimated",	list.size() == 0					);
+	mytest("size exact",		size(list) == 0						);
+	mytest("size empty",		empty(list)						);
 	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0	);
-	mytest("sizeof",		list.bytes() == 0				);
+	mytest("sizeof",		list.bytes() == 0					);
 
-	mytest("put",			list.insert( { "key", "val" } )			);
-	mytest("find",			list.find("key", std::true_type{}) == std::end(list)	);
-	mytest("remove",		list.erase("key")				);
+	mytest("put",			list.insert("key", "val")				);
+	mytest("find",			list.find("key", std::false_type{}) == std::end(list)	);
+	mytest("find",			list.find("key", std::true_type{} ) == std::end(list)	);
+	mytest("remove",		list.erase("key")					);
 }
-
-// ==============================
 
 template <class List>
 void list_test(const char *name, List &list){
@@ -204,23 +219,22 @@ void list_test(const char *name, List &list){
 	return list_test(list);
 }
 
-// ==============================
 
-template <class List>
-void list_test(const char *name){
-	List list;
+template <class List, class ...Args>
+void list_test(const char *name, Args &&...args){
+	List list{ std::forward<Args>(args)... };
 
 	return list_test(name, list);
 }
 
 #include "multi/duallist.h"
-#include "skiplist.h"
+#include "vectorlist.h"
 
-using MyDualList = hm4::multi::DualList<hm4::SkipList, hm4::BlackHoleList>;
+using MyDualList = hm4::multi::DualList<hm4::VectorList, hm4::BlackHoleList, false>;
 
 template <>
 void list_test<MyDualList>(const char *name){
-	hm4::SkipList		memtable;
+	hm4::VectorList		memtable{ allocator };
 	hm4::BlackHoleList	disktable;
 
 	MyDualList list{ memtable, disktable };
@@ -230,51 +244,49 @@ void list_test<MyDualList>(const char *name){
 
 #include "decoratorlist.h"
 
-using MyDecoratorList = hm4::DecoratorList<hm4::SkipList>;
+using MyDecoratorList = hm4::DecoratorList<hm4::VectorList>;
 
 template <>
 void list_test<MyDecoratorList>(const char *name){
-	hm4::SkipList		memtable;
+	hm4::VectorList		memtable{ allocator };
 	MyDecoratorList list{ memtable };
 
 	return list_test(name, list);
 }
 
-// ==============================
+#include "skiplist.h"
 
-static void skiplist_lanes_test() __attribute__((unused));
-
+[[maybe_unused]]
 static void skiplist_lanes_test(){
-	hm4::SkipList list;
+	hm4::SkipList list{ allocator };
 
-	list.insert( { "name",		"Niki"		} );
-	list.insert( { "city",		"Sofia"		} );
-	list.insert( { "state",		"na"		} );
-	list.insert( { "zip",		"1000"		} );
-	list.insert( { "country",	"BG"		} );
-	list.insert( { "phone",		"+358 888 1000"	} );
-	list.insert( { "fax",		"+358 888 2000"	} );
-	list.insert( { "email",		"user@aol.com"	} );
-	list.insert( { "laptop",	"Dell"		} );
-	list.insert( { "os",		"Archlinux"	} );
-	list.insert( { "mouse",		"Logitech"	} );
+	list.insert("name",	"Niki"		);
+	list.insert("city",	"Sofia"		);
+	list.insert("state",	"na"		);
+	list.insert("zip",	"1000"		);
+	list.insert("country",	"BG"		);
+	list.insert("phone",	"+358 888 1000"	);
+	list.insert("fax",	"+358 888 2000"	);
+	list.insert("email",	"user@aol.com"	);
+	list.insert("laptop",	"Dell"		);
+	list.insert("os",	"Archlinux"	);
+	list.insert("mouse",	"Logitech"	);
 
 	list.printLanes();
 }
 
 // ==============================
 
-#include "vectorlist.h"
 #include "linklist.h"
 
 int main(){
-	list_test<hm4::VectorList	>("VectorList"		);
-	list_test<hm4::LinkList		>("LinkList"		);
-	list_test<hm4::SkipList		>("SkipList"		);
-	list_test<hm4::BlackHoleList	>("BlackHoleList"	);
-	list_test<MyDualList		>("DualList"		);
-	list_test<MyDecoratorList	>("DecoratorList"	);
+	list_test<hm4::BlackHoleList	>("BlackHoleList"			);
+	list_test<hm4::VectorList	>("VectorList"		, allocator	);
+	list_test<MyDualList		>("DualList"				);
+	list_test<MyDecoratorList	>("DecoratorList"			);
 
+	list_test<hm4::LinkList		>("LinkList"		, allocator	);
+	list_test<hm4::SkipList		>("SkipList"		, allocator	);
 
 //	skiplist_lanes_test();
 

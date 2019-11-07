@@ -6,11 +6,8 @@ namespace hm4{
 
 
 struct LinkList::Node{
-	OPair	data;
+	Pair	*data;
 	Node	*next = nullptr;
-
-public:
-	Node(OPair &&data) : data(std::move(data)){}
 };
 
 struct LinkList::NodeLocator{
@@ -18,26 +15,39 @@ struct LinkList::NodeLocator{
 	Node *node;
 };
 
-
 // ==============================
 
-LinkList::LinkList(){
+LinkList::LinkList(Allocator &allocator) : allocator_(& allocator){
 	clear_();
 }
 
 LinkList::LinkList(LinkList &&other):
-		head_		(std::move(other.head_	)),
-		lc_		(std::move(other.lc_	)){
+			head_		(std::move(other.head_		)),
+			lc_		(std::move(other.lc_		)),
+			allocator_	(std::move(other.allocator_	)){
 	other.clear_();
 }
 
+void LinkList::deallocate_(Node *node){
+	allocator_->deallocate(node->data);
+	allocator_->deallocate(node);
+}
+
+void LinkList::clear_(){
+	lc_.clr();
+
+	head_ = nullptr;
+}
+
 bool LinkList::clear(){
-	for(const Node *node = head_; node; ){
-		const Node *copy = node;
+	if (allocator_->need_deallocate() ){
+		for(Node *node = head_; node; ){
+			Node *copy = node;
 
-		node = node->next;
+			node = node->next;
 
-		delete copy;
+			deallocate_(copy);
+		}
 	}
 
 	clear_();
@@ -45,18 +55,21 @@ bool LinkList::clear(){
 	return true;
 }
 
-bool LinkList::insert(OPair&& newdata){
-	assert(newdata);
+bool LinkList::insert(
+		std::string_view const key, std::string_view const val,
+		uint32_t const expires, uint32_t const created){
 
-	std::string_view const key = newdata->getKey();
+	auto newdata = Pair::up::create(*allocator_, key, val, expires, created);
+
+	if (!newdata)
+		return false;
 
 	const auto loc = locate_(key);
 
 	if (loc.node){
-		OPair &olddata = loc.node->data;
+		// update in place.
 
-		// handle overwrite,
-		// keep the node, overwrite the data
+		Pair *olddata = loc.node->data;
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata)){
@@ -66,19 +79,26 @@ bool LinkList::insert(OPair&& newdata){
 
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
-		// copy assignment
-		olddata = std::move(newdata);
+		// assign new pair
+		loc.node->data = newdata.release();
+
+		// deallocate old pair
+		allocator_->deallocate(olddata);
 
 		return true;
 	}
 
+	// create new node
+
 	size_t const size = newdata->bytes();
 
-	Node *newnode = new(std::nothrow) Node(std::move(newdata));
+	Node *newnode = static_cast<Node *>(allocator_->allocate(sizeof(Node)));
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
 		return false;
 	}
+
+	newnode->data = newdata.release();
 
 	newnode->next = std::exchange(*loc.prev, newnode);
 
@@ -87,27 +107,17 @@ bool LinkList::insert(OPair&& newdata){
 	return true;
 }
 
-#if 0
-const Pair *LinkList::operator[](std::string_view const key) const{
-	assert(!key.empty());
-
-	const Node *node = locateNode_(key, true);
-
-	return node ? node->data.get() : nullptr;
-}
-#endif
-
 bool LinkList::erase(std::string_view const key){
-	assert(!key.empty());
+	assert(Pair::check(key));
 
-	const auto loc = locate_(key);
+	auto loc = locate_(key);
 
 	if (loc.node){
 		*loc.prev = loc.node->next;
 
 		lc_.dec( loc.node->data->bytes() );
 
-		delete loc.node;
+		deallocate_(loc.node);
 	}
 
 	return true;
@@ -115,21 +125,15 @@ bool LinkList::erase(std::string_view const key){
 
 // ==============================
 
-void LinkList::clear_(){
-	lc_.clr();
-
-	head_ = nullptr;
-}
-
 auto LinkList::locate_(std::string_view const key) -> NodeLocator{
 	assert(!key.empty());
 
 	Node **jtable = & head_;
 
 	for(Node *node = *jtable; node; node = node->next){
-		const OPair & data = node->data;
+		const Pair *data = node->data;
 
-		int const cmp = data.cmp(key);
+		int const cmp = data->cmp(key);
 
 		if (cmp >= 0){
 			if (cmp == 0){
@@ -149,9 +153,9 @@ auto LinkList::locateNode_(std::string_view const key, bool const exact) const -
 	assert(!key.empty());
 
 	for(const Node *node = head_; node; node = node->next){
-		const OPair & data = node->data;
+		const Pair *data = node->data;
 
-		int const cmp = data.cmp(key);
+		int const cmp = data->cmp(key);
 
 		if (cmp >= 0){
 			if (cmp == 0){

@@ -4,11 +4,19 @@
 
 #include "filereader.h"
 
-#include "pair.h"
+#include "pmallocator.h"
+#include "stdallocator.h"
+#include "arenaallocator.h"
+
+constexpr size_t ARENA_SIZE = 1ULL * 1024 * 1024 * 1024;
+
+using Allocator_s = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_a = MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
+
+Allocator_s allocator_s;
+Allocator_a allocator_a{ ARENA_SIZE };
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
-using hm4::Pair;
-using hm4::print;
 
 namespace{
 
@@ -17,17 +25,15 @@ namespace{
 			<< "Usage:"	<< '\n'
 			<< "\t"		<< cmd	<< " s [class] [file.txt] [key]     - load file.txt, then search for the key"		<< '\n'
 			<< "\t"		<< cmd	<< " l [class] [file.txt] [key]     - load file.txt, then list using iterator"		<< '\n'
-
-			<< "\t\tPath names must be written like this:"		<< '\n'
-			<< "\t\tExample 'directory/file.*.db'"			<< '\n'
-			<< "\t\tThe '*', will be replaced with ID's"		<< '\n'
-
 			<< '\n'
 
-			<< "Classes are:"		<< '\n'
-			<< '\t' << "v - VectorList"	<< '\n'
-			<< '\t' << "l - LinkList"	<< '\n'
-			<< '\t' << "s - SkipList"	<< '\n'
+			<< "Classes are:"			<< '\n'
+			<< '\t' << "v - VectorList"		<< '\n'
+			<< '\t' << "l - LinkList"		<< '\n'
+			<< '\t' << "s - SkipList"		<< '\n'
+			<< '\t' << "V - VectorList (arena)"	<< '\n'
+			<< '\t' << "L - LinkList   (arena)"	<< '\n'
+			<< '\t' << "S - SkipList   (arena)"	<< '\n'
 
 			<< '\n';
 
@@ -41,12 +47,12 @@ namespace{
 		typename LIST::size_type i = 0;
 
 		while( reader ){
-			std::string_view const key = std::string{ reader.getLine() };
+			std::string_view const key = reader.getLine();
 
 			std::string_view const val = tombstones ? "" : key;
 
 			if (! key.empty())
-				list.insert( { key, val } );
+				list.insert(key, val);
 
 			++i;
 
@@ -109,9 +115,13 @@ namespace {
 
 		switch(type){
 		default:
-		case 's':	return listSearchProcess(hm4::SkipList{},	reader, key, it);
-		case 'v':	return listSearchProcess(hm4::VectorList{},	reader, key, it);
-		case 'l':	return listSearchProcess(hm4::LinkList{},	reader, key, it);
+		case 's':	return listSearchProcess(hm4::SkipList	 { allocator_s }, reader, key, it);
+		case 'v':	return listSearchProcess(hm4::VectorList { allocator_s }, reader, key, it);
+		case 'l':	return listSearchProcess(hm4::LinkList	 { allocator_s }, reader, key, it);
+
+		case 'S':	return listSearchProcess(hm4::SkipList	 { allocator_a }, reader, key, it);
+		case 'V':	return listSearchProcess(hm4::VectorList { allocator_a }, reader, key, it);
+		case 'L':	return listSearchProcess(hm4::LinkList	 { allocator_a }, reader, key, it);
 		}
 	}
 

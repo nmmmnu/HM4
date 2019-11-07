@@ -8,13 +8,15 @@
 
 #include <vector>
 
+#include "pmallocator.h"
 
 namespace hm4{
 
 
 class VectorList{
-	using OVector	= std::vector<OPair>;
+	using OVector	= std::vector<Pair *>;
 	using OVectorIt	= OVector::const_iterator;
+	using Allocator	= MyAllocator::PMAllocator;
 
 public:
 	using size_type		= config::size_type;
@@ -24,26 +26,29 @@ public:
 	class iterator;
 
 public:
-	VectorList() = default;
+	VectorList(Allocator &allocator) : allocator_(& allocator){}
+
+	VectorList(VectorList &&other) = default;
+	~VectorList(){
+		clear();
+	}
 
 private:
 	OVector		vector_;
 	ListCounter	lc_;
+	Allocator	*allocator_;
 
 public:
-	bool clear(){
-		vector_.clear();
-		lc_.clr();
-		return true;
-	}
+	bool clear();
 
 	bool erase(std::string_view key);
 
 	Pair const &operator[](size_type const index) const{
-		return *vector_[index].get();
+		return *vector_[index];
 	}
 
-	bool insert(OPair &&data);
+	bool insert(	std::string_view key, std::string_view val,
+			uint32_t expires = 0, uint32_t created = 0);
 
 	auto size() const{
 		return lc_.size();

@@ -1,17 +1,17 @@
-#ifndef MY_MALLOC_ALLOCATOR
-#define MY_MALLOC_ALLOCATOR
+#ifndef MY_CPP_ALLOCATOR
+#define MY_CPP_ALLOCATOR
 
-#include <cstdlib>
+#include  <cstddef>
 
 namespace MyAllocator{
 
-	struct MallocAllocator{
+	struct STDAllocator{
 		static void *allocate(std::size_t const size) noexcept{
-			return malloc(size);
+			return ::operator new(size, std::nothrow);
 		}
 
 		static void deallocate(void *p) noexcept{
-			return free(p);
+			return ::operator delete(p);
 		}
 
 		constexpr static bool need_deallocate() noexcept{

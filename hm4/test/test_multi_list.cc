@@ -16,6 +16,21 @@ inline void sleep(){
 	usleep(100);
 }
 
+
+
+#include "pmallocator.h"
+#include "trackingallocator.h"
+#include "stdallocator.h"
+
+using Allocator_1 = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_2 = MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+
+using Allocator = Allocator_1;
+
+Allocator allocator;
+
+
+
 template <class Iterator>
 bool iteratorDereference(Iterator const &it, Iterator const &et, const char *value){
 	if (false){
@@ -135,19 +150,14 @@ void list_test(const List &list, typename List::size_type const count, size_t co
 
 template <class List>
 size_t listInsert(List &list, const char *key, const char *value){
-	OPair p = { key, value };
-
-	size_t const size = p->bytes();
-	list.insert(std::move(p));
+	size_t const size = Pair::bytes(key, value);
+	list.insert(key, value);
 	return size;
 }
 
 template <class List>
-void test_DualList(const char *name){
+void test_DualList(const char *name, List &&list1, List &&list2){
 	mytest.begin(name);
-
-	List list1;
-	List list2;
 
 	size_t bytes =
 		// to have older timestamp
@@ -162,7 +172,7 @@ void test_DualList(const char *name){
 		listInsert(list2, "4 os",	"Linux"	) +
 	0;
 
-	using MyMultiList = hm4::multi::DualList<const List, const List>;
+	using MyMultiList = hm4::multi::DualList<const List, const List, false>;
 
 	MyMultiList list{ list1, list2 };
 
@@ -170,10 +180,7 @@ void test_DualList(const char *name){
 }
 
 template <class List>
-void test_DualListEmpty(const char *name){
-	List list1;
-	List list2;
-
+void test_DualListEmpty(const char *name, List &&list1, List &&list2){
 	size_t bytes =
 		listInsert(list2, "1 name",	"Niki"	) +
 		listInsert(list2, "2 age",	"22"	) +
@@ -181,7 +188,7 @@ void test_DualListEmpty(const char *name){
 		listInsert(list2, "4 os",	"Linux"	) +
 	0;
 
-	using MyMultiList = hm4::multi::DualList<List const, List const>;
+	using MyMultiList = hm4::multi::DualList<List const, List const, false>;
 
 	mytest.begin(name);
 
@@ -203,47 +210,51 @@ void test_CollectionList(const char *name){
 	using Vector = std::vector<List>;
 	Vector v;
 
+	auto f = [](){
+		return List{ allocator };
+	};
+
 	size_t bytes = 0;
 
 	{
-		List l;
-		l.insert( {"1 name",		"DIRTY"	} );
-		l.insert( {"2 age",		"DIRTY"	} );
+		List l = f();
+		l.insert("1 name",		"DIRTY"	);
+		l.insert("2 age",		"DIRTY"	);
 
 		bytes += l.bytes();
 
-		v.push_back(List{});
+		v.push_back(f());
 		v.push_back(std::move(l));
-		v.push_back(List{});
+		v.push_back(f());
 	}
 
 	sleep();
 
 	{
-		List l;
-		l.insert( {"1 name",		"Niki"	} );
-		l.insert( {"2 age",		"DIRTY"	} );
+		List l = f();
+		l.insert("1 name",		"Niki"	);
+		l.insert("2 age",		"DIRTY"	);
 
 		bytes += l.bytes();
 
-		v.push_back(List{});
+		v.push_back(f());
 		v.push_back(std::move(l));
-		v.push_back(List{});
+		v.push_back(f());
 	}
 
 	sleep();
 
 	{
-		List l;
-		l.insert( {"2 age",		"22"	} );
-		l.insert( {"3 city",		"Sofia"	} );
-		l.insert( {"4 os",		"Linux"	} );
+		List l = f();
+		l.insert("2 age",		"22"	);
+		l.insert("3 city",		"Sofia"	);
+		l.insert("4 os",		"Linux"	);
 
 		bytes += l.bytes();
 
-		v.push_back(List{});
+		v.push_back(f());
 		v.push_back(std::move(l));
-		v.push_back(List{});
+		v.push_back(f());
 	}
 
 	{
@@ -264,9 +275,9 @@ void test_CollectionList(const char *name){
 int main(){
 	using List = hm4::VectorList;
 
-	test_DualListEmpty	<List>("DualList (Empty)"	);
-	test_DualList		<List>("DualList"		);
-	test_CollectionList	<List>("CollectionList"		);
+	test_DualListEmpty	<List>("DualList (Empty)"	, List{ allocator }, List{ allocator }	);
+	test_DualList		<List>("DualList"		, List{ allocator }, List{ allocator }	);
+	test_CollectionList	<List>("CollectionList"							);
 
 	return mytest.end();
 }

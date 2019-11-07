@@ -1,16 +1,16 @@
 #ifndef DUAL_LIST_H_
 #define DUAL_LIST_H_
 
-
 #include "ilist.h"
 
 #include "dualiterator.h"
+#include <cassert>
 
 namespace hm4{
 namespace multi{
 
 
-template <class List1, class List2, bool ERASE_WITH_TOMBSTONE = false>
+template <class List1, class List2, bool EraseWithTombstone>
 class DualList{
 public:
 	using iterator		= DualIterator<
@@ -25,33 +25,33 @@ public:
 
 public:
 	DualList(List1 &list1, const List2 &list2) :
-					list1_(list1),
-					list2_(list2){}
+					list1_(&list1),
+					list2_(&list2){}
 
 public:
 	// Immutable Methods
 
 	size_type size() const{
 		// estimated
-		return list1_.size() + list2_.size();
+		return list1_->size() + list2_->size();
 	}
 
 	size_t bytes() const{
-		return list1_.bytes() + list2_.bytes();
+		return list1_->bytes() + list2_->bytes();
 	}
 
 public:
 	iterator begin() const{
-		return { list1_, list2_, std::true_type{} };
+		return { *list1_, *list2_, std::true_type{} };
 	}
 
 	iterator end() const{
-		return { list1_, list2_, std::false_type{} };
+		return { *list1_, *list2_, std::false_type{} };
 	}
 
 	template <bool B>
 	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
-		return { list1_, list2_, key, exact };
+		return { *list1_, *list2_, key, exact };
 	}
 
 public:
@@ -59,33 +59,29 @@ public:
 
 	// wrong, but for compatibility
 	bool clear(){
-		return list1_.clear();
+		return list1_->clear();
 	}
 
 	bool erase(std::string_view const key){
-		assert(!key.empty());
+		assert(Pair::check(key));
 
-		using tombstone_tag = std::bool_constant<ERASE_WITH_TOMBSTONE>;
-
-		return erase_(key, tombstone_tag{});
+		if constexpr (EraseWithTombstone){
+			return list1_->insert(key, Pair::TOMBSTONE);
+		}else{
+			return list1_->erase(key);
+		}
 	}
 
-	bool insert(OPair &&data){
-		return list1_.insert( std::move(data) );
-	}
+	bool insert(	std::string_view const key, std::string_view const val,
+			uint32_t const expires = 0, uint32_t const created = 0
+			){
 
-private:
-	bool erase_(std::string_view const key, std::true_type){
-		return list1_.insert(OPair::tombstone(key));
-	}
-
-	bool erase_(std::string_view const key, std::false_type){
-		return list1_.erase(key);
+		return list1_->insert(key, val, expires, created);
 	}
 
 private:
-	      List1	&list1_;
-	const List2	&list2_;
+	      List1	*list1_;
+	const List2	*list2_;
 };
 
 

@@ -8,16 +8,13 @@
 namespace hm4{
 
 
-template <class List, class Flusher, class ListLoader = std::nullptr_t>
+template <class List, class Flusher, class ListLoader = std::nullptr_t, size_t MAX_SIZE = 128 * 1024 * 1024>
 class FlushList : public DecoratorList<List>{
-public:
-	constexpr static size_t MAX_SIZE = 128 * 1024 * 1024;
-
 private:
 	template <class UFlusher>
 	FlushList(List &list, UFlusher &&flusher, ListLoader *loader, size_t const maxSize = MAX_SIZE) :
 					DecoratorList<List>(list),
-						list_(list),
+						list_(&list),
 						flusher_(std::forward<UFlusher>(flusher)),
 						loader_(loader),
 						maxSize_(maxSize > MAX_SIZE ? maxSize : MAX_SIZE){}
@@ -35,10 +32,12 @@ public:
 		flush_();
 	}
 
-	bool insert(OPair &&data){
-		bool const result = list_.insert( std::move(data) );
+	bool insert(	std::string_view const key, std::string_view const val,
+			uint32_t const expires = 0, uint32_t const created = 0){
 
-		if (list_.bytes() > maxSize_){
+		bool const result = list_->insert(key, val, expires, created );
+
+		if (list_->bytes() > maxSize_){
 			flush();
 		}
 
@@ -48,7 +47,7 @@ public:
 public:
 	bool flush(){
 		bool const r = flush_();
-		list_.clear();
+		list_->clear();
 		notifyLoader_();
 
 		return r;
@@ -78,12 +77,12 @@ private:
 	}
 
 	bool flush_(){
-		log__("Flushing data...", "List size: ", list_.bytes(), "Max permited size: ", maxSize_);
-		return flusher_ << list_;
+		log__("Flushing data...", "List size: ", list_->bytes(), "Max permited size: ", maxSize_);
+		return flusher_ << *list_;
 	}
 
 private:
-	List		&list_;
+	List		*list_;
 	Flusher		flusher_;
 	ListLoader	*loader_;
 	size_t		maxSize_;

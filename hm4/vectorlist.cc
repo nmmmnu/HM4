@@ -2,11 +2,14 @@
 
 #include "binarysearch.h"
 
+#include <algorithm>
+#include <cassert>
+
 namespace hm4{
 
 namespace{
-	int comp(OPair const &p, std::string_view const key){
-		return p.cmp(key);
+	int comp(const Pair *p, std::string_view const key){
+		return p->cmp(key);
 	}
 
 	template<class T>
@@ -16,7 +19,7 @@ namespace{
 } // anonymous namespace
 
 auto VectorList::find(std::string_view const key, std::true_type) const noexcept -> iterator{
-	assert(!key.empty());
+	assert(Pair::check(key));
 
 	const auto &[found, it] = binarySearch(vector_, key);
 
@@ -31,17 +34,21 @@ auto VectorList::find(std::string_view const key, std::false_type) const noexcep
 	return it;
 }
 
-bool VectorList::insert(OPair&& newdata){
-	assert(newdata);
+bool VectorList::insert(
+		std::string_view const key, std::string_view const val,
+		uint32_t const expires, uint32_t const created){
 
-	std::string_view const key = newdata->getKey();
+	auto newdata = Pair::up::create(*allocator_, key, val, expires, created);
+
+	if (!newdata)
+		return false;
 
 	const auto &[found, it] = binarySearch(vector_, key);
 
 	if (found){
 		// key exists, overwrite, do not shift
 
-		OPair &olddata = *it;
+		Pair *olddata = *it;
 
 		// check if the data in database is valid
 		if (! newdata->isValid(*olddata) ){
@@ -51,8 +58,11 @@ bool VectorList::insert(OPair&& newdata){
 
 		lc_.upd(olddata->bytes(), newdata->bytes());
 
-		// copy assignment
-		olddata = std::move(newdata);
+		// assign new pair
+		*it = newdata.release();
+
+		// deallocate old pair
+		allocator_->deallocate(olddata);
 
 		return true;
 	}
@@ -60,16 +70,19 @@ bool VectorList::insert(OPair&& newdata){
 	// key not exists, shift, then add
 
 	try{
-		auto const newit = vector_.insert(it, std::move(newdata));
-		lc_.inc(newit->get()->bytes());
+		vector_.insert(it, newdata.get());
+		lc_.inc(newdata->bytes());
 	}catch(...){
+		return false;
 	}
+
+	newdata.release();
 
 	return true;
 }
 
 bool VectorList::erase(std::string_view const key){
-	assert(!key.empty());
+	assert(Pair::check(key));
 
 	const auto &[found, it] = binarySearch(vector_, key);
 
@@ -78,10 +91,24 @@ bool VectorList::erase(std::string_view const key){
 		return true;
 	}
 
-	lc_.dec(it->get()->bytes());
+	lc_.dec((*it)->bytes());
+
+	allocator_->deallocate(*it);
 
 	vector_.erase(it);
 
+	return true;
+}
+
+bool VectorList::clear(){
+	if (allocator_->need_deallocate()){
+		std::for_each(std::begin(vector_), std::end(vector_), [this](void *p){
+			allocator_->deallocate(p);
+		});
+	}
+
+	vector_.clear();
+	lc_.clr();
 	return true;
 }
 

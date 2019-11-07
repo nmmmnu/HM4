@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "pair.h"
+#include "smallstring.h"
 
 namespace hm4{
 namespace disk{

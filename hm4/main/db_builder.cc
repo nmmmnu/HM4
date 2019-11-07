@@ -12,6 +12,17 @@
 #include "filereader.h"
 #include "stringtokenizer.h"
 
+#include "pmallocator.h"
+#include "stdallocator.h"
+
+
+using Allocator_s = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+
+using Allocator = Allocator_s;
+
+Allocator allocator;
+
+
 constexpr size_t	MEMLIST_SIZE		= 1ULL * 2 * 1024 * 1024 * 1024;
 constexpr size_t	PROCESS_STEP		= 1000 * 10;
 
@@ -45,7 +56,7 @@ struct MyListFactory{
 	}
 
 private:
-	MemList	memlist;
+	MemList	memlist{ allocator };
 	MyList	mylist;
 };
 
@@ -86,7 +97,7 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 	//	std::cout << key << ':' << val << '\n';
 
 		if (! key.empty())
-			list.insert( { key, val } );
+			list.insert(key, val);
 
 		++i;
 

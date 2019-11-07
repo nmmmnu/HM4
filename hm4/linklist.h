@@ -5,11 +5,14 @@
 
 #include "listcounter.h"
 
+#include "pmallocator.h"
 
 namespace hm4{
 
 
 class LinkList{
+	using Allocator	= MyAllocator::PMAllocator;
+
 public:
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
@@ -18,7 +21,7 @@ public:
 	class iterator;
 
 public:
-	LinkList();
+	LinkList(Allocator &allocator);
 	LinkList(LinkList &&other);
 	~LinkList(){
 		clear();
@@ -29,7 +32,8 @@ public:
 
 	bool erase(std::string_view const key);
 
-	bool insert(OPair &&data);
+	bool insert(	std::string_view key, std::string_view val,
+			uint32_t expires = 0, uint32_t created = 0);
 
 	auto size() const{
 		return lc_.size();
@@ -53,7 +57,11 @@ private:
 
 	ListCounter	lc_;
 
+	Allocator	*allocator_;
+
 private:
+	void deallocate_(Node *node);
+
 	void clear_();
 
 	struct NodeLocator;

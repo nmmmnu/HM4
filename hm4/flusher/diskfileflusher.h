@@ -5,7 +5,6 @@
 
 #include "stringreplace.h"
 
-
 namespace hm4{
 namespace flusher{
 
@@ -28,7 +27,7 @@ public:
 
 public:
 	template<class LIST>
-	bool operator << (const LIST &list) const{
+	bool operator << (LIST const &list) const{
 		if (empty(list))
 			return false;
 
