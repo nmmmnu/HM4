@@ -30,9 +30,11 @@ Pair *Pair::copy_(Pair *pair,
 void Pair::print() const noexcept{
 	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
 	const char *format      = "%-32s | %-20s | %s | %8u\n";
+	const char *fnull	= "(null)";
 
 	printf(format,
-		getKey_(), getVal_(),
+		getKey_(),
+		vallen ? getVal_() : fnull,
 		MyTime::toString(getCreated(), time_format),
 		betoh<uint32_t>(expires)
 	);
