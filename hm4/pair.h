@@ -2,7 +2,8 @@
 #define PAIR_H
 
 #include <cstdint>
-#include <cstddef>
+#include <cstring>
+
 #include <ostream>
 #include <memory>
 #include <string_view>
@@ -11,8 +12,6 @@
 #include "mynarrow.h"
 #include "mystring.h"
 #include "comparator.h"
-
-#define log__(...) /* nada */
 
 
 

@@ -1,10 +1,10 @@
 #include "skiplist.h"
 
 #include <stdexcept>
-#include <algorithm>
 #include <random>	// mt19937, bernoulli_distribution
-#include <limits>
 #include <cassert>
+
+#include "hpair.h"
 
 namespace hm4{
 
@@ -58,12 +58,25 @@ Uncommend DEBUG_PRINT_LANES for visualisation.
 #define DEBUG_PRINT_LANES
 */
 
+using HKey = uint64_t;
+using SS   = StringHash<HKey>;
+
 struct SkipList::Node{
+	HKey	hkey;
 	Pair	*data;
 	Node	*next[1];	// system dependent, dynamic, at least 1
 
 	static size_t calcSize(height_size_type const height){
 		return sizeof(Node) + (height - 1) * sizeof(Node *);
+	}
+
+	int cmp(HKey const hkey, std::string_view const key) const{
+		auto [ ok, result ] = SS::compare(this->hkey, hkey);
+
+		if (ok)
+			return result;
+
+		return data->cmp(key);
 	}
 };
 
@@ -240,10 +253,11 @@ auto SkipList::locate_(std::string_view const key, bool const shortcut_evaluatio
 
 	Node **jtable = heads_.data();
 
+	auto hkey = SS::create(key);
+
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
-			const Pair *data = node->data;
-			int const cmp = data->cmp(key);
+			int const cmp = node->cmp(hkey, key);
 
 			if (cmp >= 0){
 				if (cmp == 0 && (shortcut_evaluation || h == 0) ){
@@ -279,10 +293,11 @@ auto SkipList::locateNode_(std::string_view const key, bool const exact) const -
 
 	const Node *node = nullptr;
 
+	auto hkey = SS::create(key);
+
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){
-			const Pair *data = node->data;
-			int const cmp = data->cmp(key);
+			int const cmp = node->cmp(hkey, key);
 
 			if (cmp >= 0){
 				if (cmp == 0){

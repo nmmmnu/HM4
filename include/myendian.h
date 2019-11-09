@@ -18,8 +18,6 @@ namespace myendian_impl_{
 		constexpr static bool value = mem == 0x0011;
 
 		using type = std::bool_constant<value>;
-
-	//	static_assert(value == false, "");
 	};
 
 	template<typename T>

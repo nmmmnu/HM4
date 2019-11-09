@@ -2,12 +2,26 @@
 
 #include <cassert>
 
+#include "hpair.h"
+
 namespace hm4{
 
+using HKey = uint64_t;
+using SS   = StringHash<HKey>;
 
 struct LinkList::Node{
+	HKey	hkey;
 	Pair	*data;
 	Node	*next = nullptr;
+
+	int cmp(HKey const hkey, std::string_view const key) const{
+		auto [ ok, result ] = SS::compare(this->hkey, hkey);
+
+		if (ok)
+			return result;
+
+		return data->cmp(key);
+	}
 };
 
 struct LinkList::NodeLocator{
@@ -80,6 +94,7 @@ bool LinkList::insert(
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// assign new pair
+		loc.node->hkey = SS::create(key);
 		loc.node->data = newdata.release();
 
 		// deallocate old pair
@@ -98,6 +113,7 @@ bool LinkList::insert(
 		return false;
 	}
 
+	newnode->hkey = SS::create(key);
 	newnode->data = newdata.release();
 
 	newnode->next = std::exchange(*loc.prev, newnode);
@@ -130,10 +146,10 @@ auto LinkList::locate_(std::string_view const key) -> NodeLocator{
 
 	Node **jtable = & head_;
 
-	for(Node *node = *jtable; node; node = node->next){
-		const Pair *data = node->data;
+	auto hkey = SS::create(key);
 
-		int const cmp = data->cmp(key);
+	for(Node *node = *jtable; node; node = node->next){
+		int const cmp = node->cmp(hkey, key);
 
 		if (cmp >= 0){
 			if (cmp == 0){
@@ -152,10 +168,10 @@ auto LinkList::locate_(std::string_view const key) -> NodeLocator{
 auto LinkList::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
 	assert(!key.empty());
 
-	for(const Node *node = head_; node; node = node->next){
-		const Pair *data = node->data;
+	auto hkey = SS::create(key);
 
-		int const cmp = data->cmp(key);
+	for(const Node *node = head_; node; node = node->next){
+		int const cmp = node->cmp(hkey, key);
 
 		if (cmp >= 0){
 			if (cmp == 0){
