@@ -19,7 +19,8 @@ namespace{
 } // anonymous namespace
 
 auto VectorList::find(std::string_view const key, std::true_type) const noexcept -> iterator{
-	assert(Pair::check(key));
+	// better Pair::check(key), but might fail because of the caller.
+	assert(!key.empty());
 
 	const auto &[found, it] = binarySearch(vector_, key);
 
@@ -82,7 +83,8 @@ bool VectorList::insert(
 }
 
 bool VectorList::erase(std::string_view const key){
-	assert(Pair::check(key));
+	// better Pair::check(key), but might fail because of the caller.
+	assert(!key.empty());
 
 	const auto &[found, it] = binarySearch(vector_, key);
 

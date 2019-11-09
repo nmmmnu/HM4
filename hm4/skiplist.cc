@@ -73,10 +73,9 @@ struct SkipList::Node{
 	int cmp(HKey const hkey, std::string_view const key) const{
 		auto [ ok, result ] = SS::compare(this->hkey, hkey);
 
-		if (ok)
-			return result;
+	//	printf("cmp> %16lX | %16lX | %2d\n", hkey, this->hkey, result);
 
-		return data->cmp(key);
+		return ok ? result : data->cmp(key);
 	}
 };
 
@@ -152,6 +151,7 @@ bool SkipList::insert(
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// assign new pair
+		nl.node->hkey = SS::create(key);
 		nl.node->data = newdata.release();
 
 		// deallocate old pair
@@ -173,6 +173,7 @@ bool SkipList::insert(
 		return false;
 	}
 
+	newnode->hkey = SS::create(key);
 	newnode->data = newdata.release();
 
 	/* exchange pointers */
@@ -201,7 +202,8 @@ bool SkipList::insert(
 }
 
 bool SkipList::erase(std::string_view const key){
-	assert(Pair::check(key));
+	// better Pair::check(key), but might fail because of the caller.
+	assert(!key.empty());
 
 	const auto nl = locate_(key, false);
 
@@ -257,21 +259,26 @@ auto SkipList::locate_(std::string_view const key, bool const shortcut_evaluatio
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
-			int const cmp = node->cmp(hkey, key);
+			// this allows comparisson with single ">", instead of more complicated 3-way.
+			if (node->hkey >= hkey){
+				int const cmp = node->cmp(hkey, key);
 
-			if (cmp >= 0){
-				if (cmp == 0 && (shortcut_evaluation || h == 0) ){
-					// found
-					nl.node = node;
+				if (cmp >= 0){
+					if (cmp == 0 && (shortcut_evaluation || h == 0) ){
+						// found
+						nl.node = node;
 
-					if (shortcut_evaluation){
-						// at this point, we do not really care,
-						// if nl.prev is setup correctly.
-						return nl;
+						if (shortcut_evaluation){
+							// at this point, we do not really care,
+							// if nl.prev is setup correctly.
+							return nl;
+						}
 					}
+
+					break;
 				}
 
-				break;
+				// in rare corner case, it might go here.
 			}
 
 			jtable = node->next;
@@ -297,15 +304,20 @@ auto SkipList::locateNode_(std::string_view const key, bool const exact) const -
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){
-			int const cmp = node->cmp(hkey, key);
+			// this allows comparisson with single ">", instead of more complicated 3-way.
+			if (node->hkey >= hkey){
+				int const cmp = node->cmp(hkey, key);
 
-			if (cmp >= 0){
-				if (cmp == 0){
-					// found
-					return node;
+				if (cmp >= 0){
+					if (cmp == 0){
+						// found
+						return node;
+					}
+
+					break;
 				}
 
-				break;
+				// in rare corner case, it might go here.
 			}
 
 			jtable = node->next;

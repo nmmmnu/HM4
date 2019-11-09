@@ -53,7 +53,9 @@ public:
 	}
 
 	bool erase(std::string_view const key){
-		assert(Pair::check(key));
+		// better Pair::check(key), but might fail because of the caller.
+		assert(!key.empty());
+
 		return list_->erase(key);
 	}
 

@@ -17,10 +17,7 @@ struct LinkList::Node{
 	int cmp(HKey const hkey, std::string_view const key) const{
 		auto [ ok, result ] = SS::compare(this->hkey, hkey);
 
-		if (ok)
-			return result;
-
-		return data->cmp(key);
+		return ok ? result : data->cmp(key);
 	}
 };
 
@@ -124,7 +121,8 @@ bool LinkList::insert(
 }
 
 bool LinkList::erase(std::string_view const key){
-	assert(Pair::check(key));
+	// better Pair::check(key), but might fail because of the caller.
+	assert(!key.empty());
 
 	auto loc = locate_(key);
 
@@ -142,6 +140,7 @@ bool LinkList::erase(std::string_view const key){
 // ==============================
 
 auto LinkList::locate_(std::string_view const key) -> NodeLocator{
+	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
 	Node **jtable = & head_;
@@ -149,14 +148,18 @@ auto LinkList::locate_(std::string_view const key) -> NodeLocator{
 	auto hkey = SS::create(key);
 
 	for(Node *node = *jtable; node; node = node->next){
-		int const cmp = node->cmp(hkey, key);
+		// this allows comparisson with single ">", instead of more complicated 3-way.
+		if (node->hkey >= hkey){
+			int const cmp = node->cmp(hkey, key);
 
-		if (cmp >= 0){
-			if (cmp == 0){
-				return { jtable, node };
-			}else{
-				return { jtable, nullptr };
+			if (cmp >= 0){
+				if (cmp == 0)
+					return { jtable, node };
+				else
+					return { jtable, nullptr };
 			}
+
+			// in rare corner case, it might go here.
 		}
 
 		jtable = & node->next;
@@ -171,14 +174,18 @@ auto LinkList::locateNode_(std::string_view const key, bool const exact) const -
 	auto hkey = SS::create(key);
 
 	for(const Node *node = head_; node; node = node->next){
-		int const cmp = node->cmp(hkey, key);
+		// this allows comparisson with single ">", instead of more complicated 3-way.
+		if (node->hkey >= hkey){
+			int const cmp = node->cmp(hkey, key);
 
-		if (cmp >= 0){
-			if (cmp == 0){
-				return node;
-			}else{
-				return exact ? nullptr : node;
+			if (cmp >= 0){
+				if (cmp == 0)
+					return node;
+				else
+					return exact ? nullptr : node;
 			}
+
+			// in rare corner case, it might go here.
 		}
 	}
 
