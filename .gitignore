@@ -21,6 +21,7 @@ data
 TEST_DATA.*
 
 callgrind.out.*
+cachegrind.out.*
 
 *.swp
 
