@@ -11,7 +11,7 @@ Pair *Pair::copy_(Pair *pair,
 
 	pair->created	= htobe<uint64_t>(getCreateTime__(created));
 	pair->expires	= htobe<uint32_t>(expires);
-	pair->vallen	= htobe<uint32_t>(narrow<uint32_t>(val.size()));
+	pair->vallen	= htobe<uint16_t>(narrow<uint16_t>(val.size()));
 	pair->keylen	= htobe<uint16_t>(narrow<uint16_t>(key.size()));
 
 	// memcpy so we can switch to blobs later...

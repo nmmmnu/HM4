@@ -58,20 +58,17 @@ Uncommend DEBUG_PRINT_LANES for visualisation.
 #define DEBUG_PRINT_LANES
 */
 
-using HKey	= HPair::HKey;
-using SS	= HPair::SS;
-
 struct SkipList::Node{
-	HKey	hkey;
-	Pair	*data;
-	Node	*next[1];	// system dependent, dynamic, at least 1
+	HPair::HKey	hkey;
+	Pair		*data;
+	Node		*next[1];	// system dependent, dynamic, at least 1
 
 	static size_t calcSize(height_size_type const height){
 		return sizeof(Node) + (height - 1) * sizeof(Node *);
 	}
 
-	int cmp(HKey const hkey, std::string_view const key) const{
-		auto [ ok, result ] = SS::compare(this->hkey, hkey);
+	int cmp(HPair::HKey const hkey, std::string_view const key) const{
+		auto [ ok, result ] = HPair::SS::compare(this->hkey, hkey);
 
 	//	printf("cmp> %16lX | %16lX | %2d\n", hkey, this->hkey, result);
 
@@ -111,7 +108,7 @@ void SkipList::zeroing_(){
 }
 
 bool SkipList::clear(){
-	if (allocator_->need_deallocate() ){
+	if (allocator_->reset() == false){
 		for(Node *node = heads_[0]; node; ){
 			Node *copy = node;
 
@@ -151,7 +148,7 @@ bool SkipList::insert(
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// assign new pair
-		nl.node->hkey = SS::create(key);
+		nl.node->hkey = HPair::SS::create(key);
 		nl.node->data = newdata.release();
 
 		// deallocate old pair
@@ -173,7 +170,7 @@ bool SkipList::insert(
 		return false;
 	}
 
-	newnode->hkey = SS::create(key);
+	newnode->hkey = HPair::SS::create(key);
 	newnode->data = newdata.release();
 
 	/* exchange pointers */
@@ -255,7 +252,7 @@ auto SkipList::locate_(std::string_view const key, bool const shortcut_evaluatio
 
 	Node **jtable = heads_.data();
 
-	auto hkey = SS::create(key);
+	auto hkey = HPair::SS::create(key);
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
@@ -300,7 +297,7 @@ auto SkipList::locateNode_(std::string_view const key, bool const exact) const -
 
 	const Node *node = nullptr;
 
-	auto hkey = SS::create(key);
+	auto hkey = HPair::SS::create(key);
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){

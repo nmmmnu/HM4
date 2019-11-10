@@ -17,6 +17,10 @@ namespace MyAllocator{
 		constexpr static bool need_deallocate() noexcept{
 			return true;
 		}
+
+		constexpr static bool reset() noexcept{
+			return false;
+		}
 	};
 
 } // namespace MyAllocator

@@ -21,7 +21,7 @@ struct FileMetaBlob{
 
 public:
 	static constexpr const char	*LOGO		= "ZUSE004";
-	static constexpr uint16_t	VERSION		= 4;
+	static constexpr uint16_t	VERSION		= 5;
 
 	static constexpr uint16_t	OPTIONS_NONE	= 0;
 	static constexpr uint16_t	OPTIONS_SORTED	= 1 << 0;

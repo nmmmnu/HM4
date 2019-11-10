@@ -6,16 +6,13 @@
 
 namespace hm4{
 
-using HKey	= HPair::HKey;
-using SS	= HPair::SS;
-
 struct LinkList::Node{
-	HKey	hkey;
-	Pair	*data;
-	Node	*next = nullptr;
+	HPair::HKey	hkey;
+	Pair		*data;
+	Node		*next = nullptr;
 
-	int cmp(HKey const hkey, std::string_view const key) const{
-		auto [ ok, result ] = SS::compare(this->hkey, hkey);
+	int cmp(HPair::HKey const hkey, std::string_view const key) const{
+		auto [ ok, result ] = HPair::SS::compare(this->hkey, hkey);
 
 		return ok ? result : data->cmp(key);
 	}
@@ -51,7 +48,7 @@ void LinkList::clear_(){
 }
 
 bool LinkList::clear(){
-	if (allocator_->need_deallocate() ){
+	if (allocator_->reset() == false){
 		for(Node *node = head_; node; ){
 			Node *copy = node;
 
@@ -91,7 +88,7 @@ bool LinkList::insert(
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// assign new pair
-		loc.node->hkey = SS::create(key);
+		loc.node->hkey = HPair::SS::create(key);
 		loc.node->data = newdata.release();
 
 		// deallocate old pair
@@ -110,7 +107,7 @@ bool LinkList::insert(
 		return false;
 	}
 
-	newnode->hkey = SS::create(key);
+	newnode->hkey = HPair::SS::create(key);
 	newnode->data = newdata.release();
 
 	newnode->next = std::exchange(*loc.prev, newnode);
@@ -145,7 +142,7 @@ auto LinkList::locate_(std::string_view const key) -> NodeLocator{
 
 	Node **jtable = & head_;
 
-	auto hkey = SS::create(key);
+	auto hkey = HPair::SS::create(key);
 
 	for(Node *node = *jtable; node; node = node->next){
 		// this allows comparisson with single ">", instead of more complicated 3-way.
@@ -171,7 +168,7 @@ auto LinkList::locate_(std::string_view const key) -> NodeLocator{
 auto LinkList::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
 	assert(!key.empty());
 
-	auto hkey = SS::create(key);
+	auto hkey = HPair::SS::create(key);
 
 	for(const Node *node = head_; node; node = node->next){
 		// this allows comparisson with single ">", instead of more complicated 3-way.

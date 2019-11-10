@@ -3,10 +3,10 @@
 
 namespace hm4{
 	struct version{
-		static constexpr const char *str = "1.0.1";
+		static constexpr const char *str = "1.1.0";
 
 		static constexpr int major	= 1;
-		static constexpr int minor	= 0;
+		static constexpr int minor	= 1;
 		static constexpr int revision	= 0;
 	};
 }

@@ -14,14 +14,11 @@
 #include "comparator.h"
 
 
-
 namespace hm4{
 	namespace PairConf{
-		using HLINE_INT = uint64_t;
-
 		constexpr size_t	ALIGN		= sizeof(void *);
 		constexpr uint16_t	MAX_KEY_SIZE	=      1024;	// MySQL is 1000
-		constexpr uint32_t	MAX_VAL_SIZE	= 16 * 1024;
+		constexpr uint16_t	MAX_VAL_SIZE	= 16 * 1024;
 
 		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
@@ -31,8 +28,8 @@ namespace hm4{
 	struct Pair{
 		uint64_t	created;	// 8
 		uint32_t	expires;	// 4, 136 years, not that bad.
-		uint32_t	vallen;		// 4
 		uint16_t	keylen;		// 2
+		uint16_t	vallen;		// 2
 		char		buffer[2];	// dynamic, these are the two \0 terminators.
 
 	public:
@@ -301,7 +298,7 @@ namespace hm4{
 		}
 
 		size_t getValLen_() const noexcept{
-			return betoh<uint32_t>(vallen);
+			return betoh<uint16_t>(vallen);
 		}
 
 	private:

@@ -6,12 +6,16 @@
 
 #include "pmallocator.h"
 #include "stdallocator.h"
+#include "trackingallocator.h"
 #include "arenaallocator.h"
 
 constexpr size_t ARENA_SIZE = 1ULL * 1024 * 1024 * 1024;
 
-using Allocator_s = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-using Allocator_a = MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
+using Allocator_s0 = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_s1 = MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+using Allocator_s  = Allocator_s0;
+using Allocator_a  = MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
+
 
 Allocator_s allocator_s;
 Allocator_a allocator_a{ ARENA_SIZE };

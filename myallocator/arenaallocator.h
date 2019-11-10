@@ -11,8 +11,9 @@ namespace MyAllocator{
 						maxsize(maxsize),
 						data( allocate__(maxsize) ){}
 
-		void reset() noexcept{
+		bool reset() noexcept{
 			pos = 0;
+			return true;
 		}
 
 		bool free(std::size_t const size) const noexcept{

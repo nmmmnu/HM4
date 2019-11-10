@@ -51,6 +51,10 @@ namespace MyAllocator{
 			return a.need_deallocate();
 		}
 
+		bool reset() noexcept{
+			return a.reset();
+		}
+
 	private:
 		Allocator a;
 		std::size_t allocated		= 0;

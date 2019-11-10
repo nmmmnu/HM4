@@ -1,4 +1,5 @@
 #include "disklist.h"
+#include "hpair.h"
 
 #include "disk/filenames.h"
 #include "disk/btreeindexnode.h"
@@ -17,15 +18,8 @@
 namespace hm4{
 namespace disk{
 
-// ==============================
-
-using HLINE_INT = PairConf::HLINE_INT;
-
-using SS = StringHash<HLINE_INT>;
-
-
 struct SmallNode{
-	HLINE_INT	key;
+	HPair::HKey	key;
 	uint64_t	pos;
 } __attribute__((__packed__));
 
@@ -35,11 +29,11 @@ static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 
 namespace{
 	[[maybe_unused]]
-	auto toSS(HLINE_INT const &i){
+	auto toSS(HPair::HKey const &i){
 		// must be const ref to preserve the address...
 		const char *s = reinterpret_cast<const char *>(& i);
 
-		return std::string_view{ s, sizeof(HLINE_INT) };
+		return std::string_view{ s, sizeof(HPair::HKey) };
 	}
 
 	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &list, std::true_type){
@@ -78,10 +72,10 @@ namespace{
 		if (!nodes)
 			return searchBinary(key, list.ra_begin(), list.ra_end());
 
-		HLINE_INT hkey = SS::create(key);
+		HPair::HKey const hkey = HPair::SS::create(key);
 
-		auto comp = [](SmallNode const &node, HLINE_INT const hkey){
-			const auto [ok, result] = SS::compare(
+		auto comp = [](SmallNode const &node, HPair::HKey const hkey){
+			const auto [ok, result] = HPair::SS::compare(
 					betoh(node.key), // value is in big endian
 					hkey
 			);
@@ -119,8 +113,8 @@ namespace{
 
 		// OK, is found in the hot line...
 
-		if (key.size() < sizeof(HLINE_INT)){
-			// if key.size() == HLINE_INT,
+		if (key.size() < sizeof(HPair::HKey)){
+			// if key.size() == HPair::HKey,
 			// this does not mean that key is found...
 
 			log__("Found, direct hit at pos", listPos);

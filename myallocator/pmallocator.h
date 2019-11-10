@@ -14,6 +14,10 @@ namespace MyAllocator{
 			return deallocate_(p);
 		}
 
+		bool reset() noexcept{
+			return reset_();
+		}
+
 		bool need_deallocate() const noexcept{
 			return need_deallocate_();
 		}
@@ -23,6 +27,7 @@ namespace MyAllocator{
 	private:
 		virtual void *allocate_(std::size_t) = 0;
 		virtual void deallocate_(void *p) = 0;
+		virtual bool reset_() = 0;
 		virtual bool need_deallocate_() const = 0;
 	};
 
@@ -45,6 +50,10 @@ namespace MyAllocator{
 
 		inline bool need_deallocate_() const override final{
 			return allocator.need_deallocate();
+		}
+
+		inline bool reset_() override final{
+			return allocator.reset();
 		}
 
 	private:
