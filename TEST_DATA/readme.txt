@@ -14,5 +14,5 @@ bin/db_merge - TEST_DATA.BIN/all.db TEST_DATA.BIN/data.*.db
 bin/db_file l TEST_DATA.BIN/data.'*'.db -
 bin/db_file l TEST_DATA.BIN/data.'*'.db Bos
 bin/db_file r TEST_DATA.BIN/data.'*'.db Boston
-
+bin/db_file r TEST_DATA.BIN/data.'*'.db Muenchen
 

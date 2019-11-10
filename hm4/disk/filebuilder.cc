@@ -9,22 +9,9 @@
 
 namespace hm4{
 namespace disk{
-
 namespace FileBuilder{
+
 	namespace{
-		void writeU64(std::ofstream &file, uint64_t const data){
-			uint64_t const be_data = htobe(data);
-
-			file.write( (const char *) & be_data, sizeof(uint64_t));
-		}
-
-		template<size_t HLINE_SIZE>
-		void writeStr(std::ofstream &file, const SmallString<HLINE_SIZE> &key){
-			file.write(key.data(), narrow<std::streamsize>(key.size()));
-
-			my_align::fwriteGap(file, key.size(), HLINE_SIZE);
-		}
-
 		template<typename T>
 		T fixMinMax(T const val, T const limit, T const fallback = 0){
 			return val == limit ? fallback : val;
@@ -39,19 +26,30 @@ namespace FileBuilder{
 		T fixMax(T const val){
 			return fixMinMax(val, std::numeric_limits<T>::min());
 		}
+
+		void writeU64(std::ofstream &file, uint64_t const data){
+			uint64_t const be_data = htobe(data);
+
+			file.write( (const char *) & be_data, sizeof(uint64_t));
+		}
+
+		void writeStr(std::ofstream &file, HPair::HKey const data){
+			file.write( (const char *) & data, sizeof(HPair::HKey));
+		}
 	}
 
 
 	namespace filebuilder_impl_{
 
 		void CacheLineBuilder::operator()(std::string_view const key, uint64_t const pos){
-			if (key_.equals(key))
+			auto hkey = HPair::SS::createBE(key);
+			if (hkey_ == hkey)
 				return;
 
 			// store new key
-			key_ = key;
+			hkey_ = hkey;
 
-			writeStr(file_, key_);
+			writeStr(file_, hkey_);
 			writeU64(file_, pos);
 		}
 
@@ -130,10 +128,7 @@ namespace FileBuilder{
 
 	} // namespace filebuilder_impl_
 
-
-
-} // namespace
-
-} // namespace
+} // namespace FileBuilder
+} // namespace disk
 } // namespace hm4
 

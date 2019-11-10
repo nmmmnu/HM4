@@ -2,7 +2,9 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 EXTRA_INCL += -I$(SRC_DIR)test_levelorderlookup
 
-MY_TARGETS = $(A)test_smallstring $(A)test_stringhash $(A)test_stringreplace $(A)test_trim $(A)test_stringtokenizer	\
+# $(A)test_smallstring
+
+MY_TARGETS = $(A)test_stringhash $(A)test_stringreplace $(A)test_trim $(A)test_stringtokenizer	\
 		$(A)test_blobref $(A)test_binarysearch $(A)test_levelorderlookup		\
 		$(A)test_glob  $(A)test_myalign $(A)test_mynarrow $(A)test_signalguard
 
@@ -12,8 +14,8 @@ include Makefile.sub
 
 all: $(MY_TARGETS)
 
-$(A)test_smallstring: $(O)test_smallstring.o
-	$(LINK)
+#$(A)test_smallstring: $(O)test_smallstring.o
+#	$(LINK)
 
 $(A)test_stringhash: $(O)test_stringhash.o
 	$(LINK)

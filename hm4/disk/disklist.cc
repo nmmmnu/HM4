@@ -3,7 +3,7 @@
 #include "disk/filenames.h"
 #include "disk/btreeindexnode.h"
 
-#include "smallstring.h"
+#include "stringhash.h"
 
 #include "binarysearch.h"
 
@@ -19,8 +19,13 @@ namespace disk{
 
 // ==============================
 
+using HLINE_INT = PairConf::HLINE_INT;
+
+using SS = StringHash<HLINE_INT>;
+
+
 struct SmallNode{
-	char		key[PairConf::HLINE_SIZE];
+	HLINE_INT	key;
 	uint64_t	pos;
 } __attribute__((__packed__));
 
@@ -29,6 +34,14 @@ static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 // ==============================
 
 namespace{
+	[[maybe_unused]]
+	auto toSS(HLINE_INT const &i){
+		// must be const ref to preserve the address...
+		const char *s = reinterpret_cast<const char *>(& i);
+
+		return std::string_view{ s, sizeof(HLINE_INT) };
+	}
+
 	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &list, std::true_type){
 		return result.found ? result.it : list.ra_end();
 	}
@@ -57,11 +70,6 @@ namespace{
 	}
 
 
-	[[maybe_unused]]
-	inline auto toSS(const char *s){
-		return std::string_view{ s, PairConf::HLINE_SIZE };
-	}
-
 	auto searchHotLine(std::string_view const key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<DiskList::random_access_iterator>{
 		size_t const nodesCount = line.sizeArray<SmallNode>();
 
@@ -70,15 +78,20 @@ namespace{
 		if (!nodes)
 			return searchBinary(key, list.ra_begin(), list.ra_end());
 
-		auto comp = [](SmallNode const &node, std::string_view const key){
-			using SS = SmallString<PairConf::HLINE_SIZE>;
+		HLINE_INT hkey = SS::create(key);
 
-			return SS::compare(node.key, key.data(), key.size());
+		auto comp = [](SmallNode const &node, HLINE_INT const hkey){
+			const auto [ok, result] = SS::compare(
+					betoh(node.key), // value is in big endian
+					hkey
+			);
+
+			return result;
 		};
 
 		// first try to locate the partition
 		auto const nodesEnd = nodes + nodesCount;
-		const auto &[found, it] = binarySearch(nodes, nodesEnd, key, comp);
+		const auto &[found, it] = binarySearch(nodes, nodesEnd, hkey, comp);
 
 		if (it == nodesEnd){
 			log__("Not found, in most right pos");
@@ -106,8 +119,8 @@ namespace{
 
 		// OK, is found in the hot line...
 
-		if (key.size() < PairConf::HLINE_SIZE){
-			// if key.size() == PairConf::HLINE_SIZE,
+		if (key.size() < sizeof(HLINE_INT)){
+			// if key.size() == HLINE_INT,
 			// this does not mean that key is found...
 
 			log__("Found, direct hit at pos", listPos);

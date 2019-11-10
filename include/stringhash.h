@@ -16,25 +16,29 @@ class StringHash{
 
 	constexpr static auto MASK = htobe( T{ 0xFF } << (sizeof(T) - 1) * 8 );
 
-	static void copy__(char *dest, const char *src, size_t size, std::true_type) noexcept{
+	static void cpy__(char *dest, const char *src, size_t size, std::true_type) noexcept{
 		memcpy(dest, src, size);
 	}
 
-	static void copy__(char *dest, const char *src, size_t, std::false_type) noexcept{
+	static void cpy__(char *dest, const char *src, size_t, std::false_type) noexcept{
 		strncpy(dest, src, SIZE);
 	}
 
-	template<bool B>
-	static T create__(const char *src, size_t size = 0) noexcept{
+	template<bool CPY>
+	static T createBE__(const char *src, size_t size = 0) noexcept{
 		union{
 			char	s[SIZE];
 			T	u = 0;
 		};
 
-		copy__(s, src, size, std::bool_constant<B>{});
+		cpy__(s, src, size, std::bool_constant<CPY>{});
 
-		// string is in Big Endian.
-		return betoh(u);
+		return u;
+	}
+
+	template<bool CPY>
+	static T create__(const char *src, size_t size = 0) noexcept{
+		return betoh( createBE__<CPY>(src, size) );
 	}
 
 	static int compare__(T const a, T const b) noexcept{
@@ -59,6 +63,18 @@ public:
 
 	static T create(std::string_view const s) noexcept{
 		return create(s.data(), s.size());
+	}
+
+	static T createBE(const char *src) noexcept{
+		return createBE__<false>(src);
+	}
+
+	static T createBE(const char *src, size_t const size) noexcept{
+		return createBE__<true>(src, std::min(SIZE, size));
+	}
+
+	static T createBE(std::string_view const s) noexcept{
+		return createBE(s.data(), s.size());
 	}
 
 	static std::pair<bool, int> compare(T const a, T const b) noexcept{

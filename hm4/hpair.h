@@ -8,10 +8,10 @@
 namespace hm4{
 
 	class HPair{
-		using uint	= uint64_t;
-		using SS	= StringHash<uint>;
-
 	public:
+		using HKey	= PairConf::HLINE_INT;
+		using SS	= StringHash<HKey>;
+
 		HPair(Pair *p) noexcept :	hkey	(SS::create(p->getKey())	),
 						p	(p				){}
 
@@ -29,7 +29,7 @@ namespace hm4{
 		}
 
 	public:
-		int cmp(uint hkey, std::string_view const key) const noexcept{
+		int cmp(HKey hkey, std::string_view const key) const noexcept{
 			if (key.empty())
 				return Pair::CMP_NULLKEY;
 
@@ -42,7 +42,7 @@ namespace hm4{
 		}
 
 	private:
-		uint	hkey;
+		HKey	hkey;
 		Pair	*p;
 	};
 

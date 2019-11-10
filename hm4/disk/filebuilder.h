@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <limits>
 
-#include "pair.h"
-#include "smallstring.h"
+#include "hpair.h"
+#include "stringhash.h"
 
 namespace hm4{
 namespace disk{
@@ -21,17 +21,14 @@ namespace FileBuilder{
 	namespace filebuilder_impl_{
 
 		class CacheLineBuilder{
-		private:
-			constexpr static auto HLINE_SIZE = PairConf::HLINE_SIZE;
-
 		public:
 			CacheLineBuilder(std::ofstream &file) : file_(file){}
 
 			void operator()(std::string_view const current, uint64_t const pos);
 
 		private:
-			SmallString<HLINE_SIZE>	key_;
-			std::ofstream		&file_;
+			HPair::HKey	hkey_ = 0;
+			std::ofstream	&file_;
 		};
 
 		// ==============================

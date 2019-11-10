@@ -17,9 +17,9 @@
 
 namespace hm4{
 	namespace PairConf{
-		constexpr size_t	ALIGN		= sizeof(void *);
-		constexpr size_t	HLINE_SIZE	= sizeof(void *);
+		using HLINE_INT = uint64_t;
 
+		constexpr size_t	ALIGN		= sizeof(void *);
 		constexpr uint16_t	MAX_KEY_SIZE	=      1024;	// MySQL is 1000
 		constexpr uint32_t	MAX_VAL_SIZE	= 16 * 1024;
 

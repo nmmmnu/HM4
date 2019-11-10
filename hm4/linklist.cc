@@ -6,8 +6,8 @@
 
 namespace hm4{
 
-using HKey = uint64_t;
-using SS   = StringHash<HKey>;
+using HKey	= HPair::HKey;
+using SS	= HPair::SS;
 
 struct LinkList::Node{
 	HKey	hkey;

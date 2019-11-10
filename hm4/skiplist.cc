@@ -58,8 +58,8 @@ Uncommend DEBUG_PRINT_LANES for visualisation.
 #define DEBUG_PRINT_LANES
 */
 
-using HKey = uint64_t;
-using SS   = StringHash<HKey>;
+using HKey	= HPair::HKey;
+using SS	= HPair::SS;
 
 struct SkipList::Node{
 	HKey	hkey;
