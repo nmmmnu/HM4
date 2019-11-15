@@ -30,6 +30,8 @@ public:
 	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher) :
 					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
+
+
 	~FlushList(){
 		flush();
 	}

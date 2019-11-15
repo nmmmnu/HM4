@@ -106,12 +106,22 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 		++i;
 
 		if (i % process_step == 0){
-			std::clog
-				<< "Processed "	<< std::setw(10) << i					<< " records."	<< ' '
-				<< "In memory "	<< std::setw(10) << list.size()				<< " records,"	<< ' '
-						<< std::setw(10) << list.bytes()			<< " bytes."	<< ' '
-				<< "Allocator "	<< std::setw(10) << list.getAllocator().getUsedMemory()	<< " bytes."	<< '\n'
-			;
+			auto used = list.getAllocator().getUsedMemory();
+
+			if (used != std::numeric_limits<decltype(used)>::max()){
+				std::clog
+					<< "Processed "	<< std::setw(10) << i			<< " records."	<< ' '
+					<< "In memory "	<< std::setw(10) << list.size()		<< " records,"	<< ' '
+							<< std::setw(10) << list.bytes()	<< " bytes."	<< ' '
+					<< "Allocator "	<< std::setw(10) << used		<< " bytes."	<< '\n'
+				;
+			}else{
+				std::clog
+					<< "Processed "	<< std::setw(10) << i			<< " records."	<< ' '
+					<< "In memory "	<< std::setw(10) << list.size()		<< " records,"	<< ' '
+							<< std::setw(10) << list.bytes()	<< " bytes."	<< '\n'
+				;
+			}
 		}
 	}
 
