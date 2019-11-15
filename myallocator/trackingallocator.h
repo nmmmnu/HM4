@@ -55,6 +55,14 @@ namespace MyAllocator{
 			return a.reset();
 		}
 
+		std::size_t getFreeMemory() const noexcept{
+			return a.getFreeMemory();
+		}
+
+		std::size_t getUsedMemory() const noexcept{
+			return allocated;
+		}
+
 	private:
 		Allocator a;
 		std::size_t allocated		= 0;

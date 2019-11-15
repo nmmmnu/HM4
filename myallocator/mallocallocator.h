@@ -2,6 +2,7 @@
 #define MY_MALLOC_ALLOCATOR
 
 #include <cstdlib>
+#include <limits>
 
 namespace MyAllocator{
 
@@ -20,6 +21,14 @@ namespace MyAllocator{
 
 		constexpr static bool reset() noexcept{
 			return false;
+		}
+
+		constexpr static std::size_t getFreeMemory() noexcept{
+			return std::numeric_limits<std::size_t>::max();
+		}
+
+		constexpr static std::size_t getUsedMemory() noexcept{
+			return std::numeric_limits<std::size_t>::max();
 		}
 	};
 

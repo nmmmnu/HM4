@@ -103,7 +103,7 @@ bool VectorList::erase(std::string_view const key){
 }
 
 bool VectorList::clear(){
-	if (allocator_->need_deallocate()){
+	if (allocator_->reset() == false){
 		std::for_each(std::begin(vector_), std::end(vector_), [this](void *p){
 			allocator_->deallocate(p);
 		});

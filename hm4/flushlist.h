@@ -10,30 +10,28 @@
 namespace hm4{
 
 
-template <class List, class Flusher, class ListLoader = std::nullptr_t>
+template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
 class FlushList : public DecoratorList<List>{
 private:
-	constexpr static size_t MAX_SIZE = 128 * 1024 * 1024 * 1ULL;
-
-	template <class UFlusher>
-	FlushList(List &list, UFlusher &&flusher, ListLoader *loader, size_t const maxSize) :
+	template <class UPredicate, class UFlusher>
+	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
 					DecoratorList<List>(list),
 						list_		(&list					),
+						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
-						loader_		(loader					),
-						maxSize_	(std::min(maxSize, MAX_SIZE)		){}
+						loader_		(loader					){}
 
 public:
-	template <class UFlusher>
-	FlushList(List &list, UFlusher &&flusher, ListLoader &loader, size_t const maxSize = MAX_SIZE) :
-					FlushList(list, std::forward<UFlusher>(flusher), &loader, maxSize){}
+	template <class UPredicate, class UFlusher>
+	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
+					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
 
-	template <class UFlusher>
-	FlushList(List &list, UFlusher &&flusher, size_t const maxSize = MAX_SIZE) :
-					FlushList(list, std::forward<UFlusher>(flusher), nullptr, maxSize){}
+	template <class UPredicate, class UFlusher>
+	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher) :
+					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~FlushList(){
-		flush_();
+		flush();
 	}
 
 	bool insert(	std::string_view const key, std::string_view const val,
@@ -41,16 +39,17 @@ public:
 
 		bool const result = list_->insert(key, val, expires, created );
 
-		if (list_->bytes() > maxSize_){
+		if (predicate_(*list_))
 			flush();
-		}
 
 		return result;
 	}
 
-public:
 	bool flush(){
-		bool const r = flush_();
+		log__("Flushing data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
+
+		bool const r = flusher_(*list_);
+
 		list_->clear();
 		notifyLoader_();
 
@@ -80,16 +79,11 @@ private:
 		return notifyLoader_(tag);
 	}
 
-	bool flush_(){
-		log__("Flushing data...", "List size: ", list_->bytes(), "Max permited size: ", maxSize_);
-		return flusher_ << *list_;
-	}
-
 private:
 	List		*list_;
+	Predicate	predicate_;
 	Flusher		flusher_;
 	ListLoader	*loader_;
-	size_t		maxSize_;
 };
 
 

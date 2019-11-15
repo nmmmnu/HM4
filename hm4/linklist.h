@@ -43,6 +43,10 @@ public:
 		return lc_.bytes();
 	}
 
+	Allocator const &getAllocator() const{
+		return *allocator_;
+	}
+
 public:
 	template<bool B>
 	iterator find(std::string_view const key, std::bool_constant<B> exact) const;

@@ -11,17 +11,6 @@ namespace MyAllocator{
 						maxsize(maxsize),
 						data( allocate__(maxsize) ){}
 
-		bool reset() noexcept{
-			pos = 0;
-			return true;
-		}
-
-		bool free(std::size_t const size) const noexcept{
-			return pos + size < maxsize;
-		}
-
-
-
 		template<std::size_t Align = sizeof(void *)>
 		void *allocate(std::size_t const size) noexcept{
 			pos = align(pos, Align);
@@ -42,6 +31,19 @@ namespace MyAllocator{
 
 		constexpr static bool need_deallocate() noexcept{
 			return false;
+		}
+
+		bool reset() noexcept{
+			pos = 0;
+			return true;
+		}
+
+		std::size_t getFreeMemory() const noexcept{
+			return maxsize - pos;
+		}
+
+		std::size_t getUsedMemory() const noexcept{
+			return pos;
 		}
 
 	private:

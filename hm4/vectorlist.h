@@ -58,6 +58,10 @@ public:
 		return lc_.bytes();
 	}
 
+	Allocator const &getAllocator() const{
+		return *allocator_;
+	}
+
 public:
 	iterator find(std::string_view key, std::true_type) const noexcept;
 	iterator find(std::string_view key, std::false_type) const noexcept;

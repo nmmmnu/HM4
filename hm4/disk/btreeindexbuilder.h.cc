@@ -27,14 +27,14 @@ bool BTreeIndexBuilder<List>::build(){
 
 	std::cout
 		 << "Records          : "	<< size			<< '\n'
-		 << "Branching Factor : "	<< (int) VALUES		<< '\n'
-		 << "Tree Depth       : "	<< (int) total_levels	<< '\n'
+		 << "Branching Factor : "	<< int{VALUES}		<< '\n'
+		 << "Tree Depth       : "	<< int{total_levels}	<< '\n'
 	;
 
 	current_ = 0;
 
 	for(level_type level = 0; level < total_levels; ++level){
-		std::cout << "Processing level " << level << "..." << '\n';
+		std::cout << "Processing level " << int{level} << "..." << '\n';
 
 		reorderLevel_(level);
 	}

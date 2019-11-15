@@ -3,27 +3,30 @@
 
 #include "version.h"
 
-#include "skiplist.h"
-#include "flushlist.h"
-
+#include "unsortedlist.h"
 #include "idgenerator/idgeneratordate.h"
-#include "flusher/diskfileflusher.h"
+#include "flusher/diskfilepredicate.h"
+#include "flusher/diskfileflush.h"
+#include "flushlist.h"
 
 #include "filereader.h"
 #include "stringtokenizer.h"
 
 #include "pmallocator.h"
 #include "stdallocator.h"
+#include "arenaallocator.h"
 
 
 using Allocator_s = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_a = MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
 
-using Allocator = Allocator_s;
+using Allocator = Allocator_a;
 
-Allocator allocator;
+constexpr size_t	CHUNK_SIZE		= 1ULL * 2 * 1024 * 1024 * 1024;
 
+Allocator allocator{ CHUNK_SIZE };
 
-constexpr size_t	MEMLIST_SIZE		= 1ULL * 2 * 1024 * 1024 * 1024;
+constexpr size_t	MEMLIST_SIZE		= CHUNK_SIZE;
 constexpr size_t	PROCESS_STEP		= 1000 * 10;
 
 constexpr size_t	READER_BUFFER_SIZE	= 16 * 1024;
@@ -40,15 +43,16 @@ int listLoad(LIST &list, READER &reader, size_t process_step);
 
 
 struct MyListFactory{
-	using MemList		= hm4::SkipList;
-	using MyIDGenerator	= hm4::idgenerator::IDGeneratorDate;
-	using Flusher		= hm4::flusher::DiskFileFlusher<MyIDGenerator>;
-	using MyList		= hm4::FlushList<MemList,Flusher>;
+	using MemList		= hm4::UnsortedList;
+	using Predicate		= hm4::flusher::DiskFilePredicate;
+	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
+	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
+	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
 
 	MyListFactory(const char *path, size_t const memlist_size) : mylist(
 			memlist,
-			Flusher{ MyIDGenerator{}, path },
-			memlist_size
+			Predicate{ memlist_size },
+			Flush{ IDGenerator{}, path }
 		){}
 
 	MyList &operator()(){
@@ -103,9 +107,10 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 
 		if (i % process_step == 0){
 			std::clog
-				<< "Processed "	<< std::setw(10) << i			<< " records." << ' '
-				<< "In memory "	<< std::setw(10) << list.size()		<< " records," << ' '
-						<< std::setw(10) << list.bytes()	<< " bytes." << '\n'
+				<< "Processed "	<< std::setw(10) << i					<< " records."	<< ' '
+				<< "In memory "	<< std::setw(10) << list.size()				<< " records,"	<< ' '
+						<< std::setw(10) << list.bytes()			<< " bytes."	<< ' '
+				<< "Allocator "	<< std::setw(10) << list.getAllocator().getUsedMemory()	<< " bytes."	<< '\n'
 			;
 		}
 	}

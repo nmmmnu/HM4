@@ -31,6 +31,10 @@ public:
 		return list_->bytes();
 	}
 
+	auto const &getAllocator() const{
+		return list_->getAllocator();
+	}
+
 public:
 	iterator begin() const{
 		return list_->begin();

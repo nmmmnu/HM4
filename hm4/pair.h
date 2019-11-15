@@ -216,6 +216,10 @@ namespace hm4{
 				::compare(getKey_(), getKeyLen_(), key.data(), key.size());
 		}
 
+		int cmp(Pair const &pair) const noexcept{
+			return cmp(pair.getKey());
+		}
+
 	public:
 		bool equals(std::string_view const key) const noexcept{
 			return std::empty(key) ?
@@ -223,16 +227,16 @@ namespace hm4{
 				::equals(getKey_(), getKeyLen_(), key.data(), key.size());
 		}
 
+		int equals(Pair const &pair) const noexcept{
+			return equals(pair.getKey());
+		}
+
 	public:
-		int cmpTime(const Pair &pair) const noexcept{
+		int cmpTime(Pair const &pair) const noexcept{
 			return comparator::comp(
 				getCreated(),
 				pair.getCreated()
 			);
-		}
-
-		int cmpTime(const Pair *pair) const noexcept{
-			return cmpTime(*pair);
 		}
 
 	public:
