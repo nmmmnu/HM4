@@ -50,7 +50,7 @@ public:
 	bool flush(){
 		log__("Flushing data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 
-		bool const r = flusher_(*list_);
+		bool const r = flusher_(std::begin(*list_), std::end(*list_));
 
 		list_->clear();
 		notifyLoader_();

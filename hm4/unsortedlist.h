@@ -44,10 +44,9 @@ public:
 		};
 
 		auto equals = [](const Pair *p1, const Pair *p2){
-			if (! p1->equals(*p2))
-				return false;
-
-			return p1->cmpTime(*p2) < 0;
+			// this checks just the key,
+			// but this is OK for current implementation
+			return p1->equals(*p2);
 		};
 
 		std::sort(std::begin(vector_), std::end(vector_), less);
@@ -114,7 +113,7 @@ public:
 	}
 
 public:
-	iterator begin() const noexcept;
+	iterator begin() noexcept;
 	iterator end() const noexcept;
 };
 
@@ -160,7 +159,9 @@ private:
 
 // ==============================
 
-inline auto UnsortedList::begin() const noexcept -> iterator{
+inline auto UnsortedList::begin() noexcept -> iterator{
+	sort();
+
 	return std::cbegin(vector_);
 }
 

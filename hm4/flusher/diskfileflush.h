@@ -5,10 +5,6 @@
 
 #include "stringreplace.h"
 
-#include "unsortedlist.h"
-
-#include "logger.h"
-
 namespace hm4{
 namespace flusher{
 
@@ -28,34 +24,17 @@ public:
 				path_(std::move(path)),
 				keepTombstones_(keepTombstones){}
 
-private:
-	template<class List>
-	bool process_(List const &list) const{
+public:
+	template<class It>
+	bool operator()(It first, It last) const{
+		if (first == last)
+			return false;
+
 		std::string const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_());
 
-		disk::FileBuilder::build(filename, std::begin(list), std::end(list), keepTombstones_, /* aligned */ true);
+		disk::FileBuilder::build(filename, first, last, keepTombstones_, /* aligned */ true);
 
 		return true;
-	}
-
-public:
-	template<class List>
-	bool operator()(List const &list) const{
-		if (empty(list))
-			return false;
-
-		return process_(list);
-	}
-
-	bool operator()(UnsortedList &list) const{
-		if (empty(list))
-			return false;
-
-		log__("Sorting data...");
-
-		list.sort();
-
-		return process_(list);
 	}
 
 private:
