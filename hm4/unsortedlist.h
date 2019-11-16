@@ -39,16 +39,6 @@ public:
 		if (needSort_ == false)
 			return;
 
-		auto less = [](const Pair *p1, const Pair *p2){
-			return p1->cmp(*p2) < 0;
-		};
-
-		auto equals = [](const Pair *p1, const Pair *p2){
-			// this checks just the key,
-			// but this is OK for current implementation
-			return p1->equals(*p2);
-		};
-
 		std::sort(std::begin(vector_), std::end(vector_), less);
 
 		vector_.erase(

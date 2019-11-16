@@ -314,13 +314,21 @@ namespace hm4{
 
 	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
 
+	inline bool less(const Pair *p1, const Pair *p2){
+		return p1->cmp(*p2) < 0;
+	};
 
-
-	using OPair = std::unique_ptr<Pair>;
+	inline bool equals(const Pair *p1, const Pair *p2){
+		return p1->equals(*p2);
+	};
 
 	inline void print(Pair const &pair){
 		pair.print();
 	}
+
+
+
+	using OPair = std::unique_ptr<Pair>;
 
 	inline void print(OPair const &pair){
 		if (pair)
