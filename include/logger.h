@@ -9,13 +9,15 @@
 	#include <iostream>
 
 	namespace log_impl_{
+		// MacOS have included "math.h" and log() is ambigous here.
+
 		template<typename T>
-		void log(T const &t){
+		void logx(T const &t){
 			std::clog << t << " ";
 		}
 
-		inline void log(uint8_t const t){
-			return log<uint16_t>(t);
+		inline void logx(uint8_t const t){
+			return logx<uint16_t>(t);
 		}
 	}
 
@@ -23,7 +25,7 @@
 	void log__(ARGS... args){
 		using namespace log_impl_;
 
-		(log(args), ...);
+		(logx(args), ...);
 
 		std::clog << '\n';
 	}
