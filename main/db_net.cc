@@ -21,6 +21,9 @@
 using MySelector	= net::selector::EPollSelector;
 using MyProtocol	= net::protocol::RedisProtocol;
 
+using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
+using MySTDAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+
 // ----------------------------------
 
 constexpr size_t MB = 1024 * 1024;
@@ -56,14 +59,14 @@ int main(int argc, char **argv){
 	if (opt.immutable == 0 && max_memlist_arena){
 		std::clog << "Starting mutable server with ArenaAllocator of " << opt.max_memlist_arena << " MB..."	<< '\n';
 
-		MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator> arenaAllocator{ max_memlist_arena };
+		MyArenaAllocator arenaAllocator{ max_memlist_arena };
 
 		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size, arenaAllocator } );
 
 	} else if (opt.immutable == 0){
 		std::clog << "Starting mutable server with STDAllocator..."	<< '\n';
 
-		MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator> stdAllocator;
+		MySTDAllocator stdAllocator;
 
 		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size, stdAllocator } );
 
