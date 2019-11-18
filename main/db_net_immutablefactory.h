@@ -12,7 +12,7 @@ struct MyImmutableDBAdapterFactory{
 
 	using MyDBAdapter	= DBAdapter;
 
-	MyImmutableDBAdapterFactory(std::string path, size_t) :
+	MyImmutableDBAdapterFactory(std::string path) :
 					loader_(std::move(path)),
 					adapter_(loader_.getList(), /* cmd */ loader_){}
 

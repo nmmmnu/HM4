@@ -9,7 +9,7 @@ struct MySingleListDBAdapterFactory{
 
 	using MyDBAdapter	= DBAdapter;
 
-	MySingleListDBAdapterFactory(std::string path, size_t) :
+	MySingleListDBAdapterFactory(std::string path) :
 					loader_(std::move(path)),
 					adapter_(loader_.getList(), /* cmd */ loader_){}
 

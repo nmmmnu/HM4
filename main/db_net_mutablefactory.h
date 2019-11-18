@@ -11,14 +11,6 @@
 
 #include "listdbadapter.h"
 
-#include <vector>
-
-using Allocator_s = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-
-using Allocator = Allocator_s;
-
-Allocator allocator;
-
 struct MyMutableDBAdapterFactory{
 	using ListLoader	= hm4::listloader::DirectoryListLoader;
 
@@ -35,14 +27,15 @@ struct MyMutableDBAdapterFactory{
 
 	using MyDBAdapter	= DBAdapter;
 
-	MyMutableDBAdapterFactory(std::string const &path, size_t const memListSize) :
+	MyMutableDBAdapterFactory(std::string const &path, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
 					loader_(path),
-					muflList_(
+					memList_(allocator),
+					muflList_{
 						memList_,
 						Predicate{ memListSize },
 						Flush{ IDGenerator{}, path },
 						loader_
-					),
+					},
 					list_(muflList_, loader_.getList()),
 					adapter_(list_, /* cmd */ muflList_){}
 
@@ -51,10 +44,10 @@ struct MyMutableDBAdapterFactory{
 	}
 
 private:
-	ListLoader		loader_;
-	MemList			memList_{ allocator };
-	MutableFlushList	muflList_;
-	DList			list_;
-	DBAdapter		adapter_;
+	ListLoader		loader_		;
+	MemList			memList_	;
+	MutableFlushList	muflList_	;
+	DList			list_		;
+	DBAdapter		adapter_	;
 };
 

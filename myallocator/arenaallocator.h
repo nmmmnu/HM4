@@ -7,13 +7,16 @@
 namespace MyAllocator{
 
 	struct ArenaAllocator{
+		// create the allocator in non working state.
+		ArenaAllocator() = default;
+
 		ArenaAllocator(std::size_t const maxsize) :
 						maxsize(maxsize),
 						data( allocate__(maxsize) ){}
 
 		template<std::size_t Align = sizeof(void *)>
 		void *allocate(std::size_t const size) noexcept{
-			pos = align(pos, Align);
+			pos = align_(pos, Align);
 
 			if (pos + size > maxsize)
 				return nullptr;
@@ -48,7 +51,7 @@ namespace MyAllocator{
 
 	private:
 		// http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator
-		constexpr static std::size_t align(std::size_t n, std::size_t align = sizeof(void *)) {
+		constexpr static std::size_t align_(std::size_t n, std::size_t align = sizeof(void *)) {
 			return (n + align - 1) & ~(align - 1);
 		}
 
@@ -59,8 +62,8 @@ namespace MyAllocator{
 		}
 
 	private:
-		std::size_t			pos = 0;
-		std::size_t			maxsize;
+		std::size_t			pos	= 0;
+		std::size_t			maxsize	= 0;
 		std::unique_ptr<std::byte>	data;
 	};
 

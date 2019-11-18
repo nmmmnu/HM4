@@ -2,6 +2,10 @@
 #include "db_net_mutablefactory.h"
 #include "db_net_singlelistfactory.h"
 
+#include "pmallocator.h"
+#include "stdallocator.h"
+#include "arenaallocator.h"
+
 #include "version.h"
 
 // ----------------------------------
@@ -19,7 +23,9 @@ using MyProtocol	= net::protocol::RedisProtocol;
 
 // ----------------------------------
 
-size_t constexpr MB = 1024 * 1024;
+constexpr size_t MB = 1024 * 1024;
+
+constexpr size_t MIN_ARENA_SIZE = 128;
 
 // ----------------------------------
 
@@ -42,21 +48,32 @@ namespace{
 int main(int argc, char **argv){
 	MyOptions const opt = prepareOptions(argc, argv);
 
-	size_t const max_memlist_size = opt.max_memlist_size * MB;
+	size_t const max_memlist_size  = opt.max_memlist_size  * MB;
+	size_t const max_memlist_arena = opt.max_memlist_arena < MIN_ARENA_SIZE ? 0 : opt.max_memlist_arena * MB;
 
 	using hm4::listloader::DirectoryListLoader;
 
-	if (opt.immutable == 0){
-		std::clog << "Starting mutable server..."	<< '\n';
-		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size } );
+	if (opt.immutable == 0 && max_memlist_arena){
+		std::clog << "Starting mutable server with ArenaAllocator of " << opt.max_memlist_arena << " MB..."	<< '\n';
+
+		MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator> arenaAllocator{ max_memlist_arena };
+
+		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size, arenaAllocator } );
+
+	} else if (opt.immutable == 0){
+		std::clog << "Starting mutable server with STDAllocator..."	<< '\n';
+
+		MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator> stdAllocator;
+
+		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size, stdAllocator } );
 
 	}else if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path)){
 		std::clog << "Starting immutable server..."	<< '\n';
-		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path, max_memlist_size } );
+		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path } );
 
 	}else{
 		std::clog << "Starting singlelist server..."	<< '\n';
-		return main2(opt, MySingleListDBAdapterFactory{ opt.db_path, max_memlist_size } );
+		return main2(opt, MySingleListDBAdapterFactory{ opt.db_path } );
 	}
 }
 

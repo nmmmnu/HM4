@@ -7,8 +7,6 @@
 #include <array>
 
 #include "pmallocator.h"
-#include "stdallocator.h"
-#include "arenaallocator.h"
 
 namespace hm4{
 

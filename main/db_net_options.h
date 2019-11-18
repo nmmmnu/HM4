@@ -15,7 +15,8 @@ public:
 	uint32_t	timeout			= 30;
 
 	uint32_t	max_clients		= 512;
-	size_t		max_memlist_size	= 100;
+	size_t		max_memlist_size	= 128;
+	size_t		max_memlist_arena	= 0;
 
 public:
 	void operator()(std::string_view const name, std::string_view const value){
@@ -29,21 +30,23 @@ public:
 
 		case hash("max_clients"		)	: return assign_(max_clients,		value);
 		case hash("max_memlist_size"	)	: return assign_(max_memlist_size,	value);
+		case hash("max_memlist_arena"	)	: return assign_(max_memlist_arena,	value);
 
 		default					: return;
 		}
 	}
 
 	static void print(){
-		print__("immutable",		"1",	"Start mutable = 0, immutable = 1"	);
-		print__("db_path",		"-",	"Path to database"			);
+		print__("immutable",		"1",	"Start mutable = 0, immutable = 1"		);
+		print__("db_path",		"-",	"Path to database"				);
 
-		print__("host",			"-",	"TCP host to listen (not working)"	);
-		print__("port",			"2000",	"TCP port to listen"			);
-		print__("timeout",		"30",	"Connection timeout in seconds"		);
+		print__("host",			"-",	"TCP host to listen (not working)"		);
+		print__("port",			"2000",	"TCP port to listen"				);
+		print__("timeout",		"30",	"Connection timeout in seconds"			);
 
-		print__("max_clients",		"512",	"Max Clients"				);
-		print__("max_memlist_size",	"100",	"Max size of memlist in MB"		);
+		print__("max_clients",		"512",	"Max Clients"					);
+		print__("max_memlist_size",	"128",	"Max size of memlist in MB"			);
+		print__("max_memlist_arena",	"0",	"Max size of memlist AllocatorArena in MB"	);
 	}
 
 private:
