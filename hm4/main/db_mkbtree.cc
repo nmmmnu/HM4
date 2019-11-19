@@ -6,21 +6,21 @@
 
 #include <unistd.h>	// access
 
-#include <iostream>
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
 
 namespace{
 
 	int printUsage(const char *cmd){
-		std::cout
-			<< "db_mkbtree version " << hm4::version::str 						<< '\n'
-			<< '\n'
-
-			<< "Usage:"	<< '\n'
-			<< '\t'		<< cmd	<< "[file.db] [btree_file.db]"					<< '\n'
-
-			<< "\t\tDo not forget that usually [btree_file.db] must have same name as [file.db]"	<< '\n'
-
-			<< '\n';
+		fmt::print(	"db_mkbtree version {0} \n"
+				"\n"
+				"Usage:\n"
+				"\t{1} - output.db [file.db] [btree_file.db]\n"
+				"\t\tDo not forget that usually [btree_file.db] must have same name as [file.db]\n"
+				"\n",
+				hm4::version::str,
+				cmd
+		);
 
 		return 10;
 	}
@@ -41,7 +41,7 @@ int main(int argc, char **argv){
 	const char *output_file	= argv[2];
 #if 0
 	if (fileExists(output_file)){
-		printf("File %s exists. Please remove it and try again.\n", output_file);
+		fmt::print("File {} exists. Please remove it and try again.\n", output);
 		return 2;
 	}
 #else
@@ -53,7 +53,7 @@ int main(int argc, char **argv){
 	list.open(input_file);
 
 	if (list == false){
-		printf("List is invalid. Please check it and try again.\n");
+		fmt::print("List is invalid. Please check it and try again.\n");
 		return 3;
 	}
 

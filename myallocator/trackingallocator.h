@@ -2,7 +2,8 @@
 #define MY_TRACKING_ALLOCATOR
 
 #include  <cstddef>
-#include  <cstdio>
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
 
 namespace MyAllocator{
 
@@ -26,24 +27,25 @@ namespace MyAllocator{
 			if (!printSummary)
 				return;
 
-			const char *mask = "%s Total %-16s %8zu\n";
-			printf(mask, TAG, "Allocated Size",	allocated			);
-			printf(mask, TAG, "Allocations",	allocations			);
-			printf(mask, TAG, "Dellocations",	deallocations			);
-			printf(mask, TAG, "Lost",		allocations - deallocations	);
+			const char *mask = "{} Total {:16} {:8}\n";
+
+			fmt::print(mask, TAG, "Allocated Size",	allocated			);
+			fmt::print(mask, TAG, "Allocations",	allocations			);
+			fmt::print(mask, TAG, "Dellocations",	deallocations			);
+			fmt::print(mask, TAG, "Lost",		allocations - deallocations	);
 		}
 
 		void *allocate(std::size_t const size) noexcept{
 			allocated += size;
 			++allocations;
 			void *p = a.allocate(size);
-			printf("%s Allocate %8zu -> %p\n", TAG, size, p);
+			fmt::print("{} Allocate {:8} -> {}\n", TAG, size, p);
 			return p;
 		}
 
 		void deallocate(void *p) noexcept{
 			++deallocations;
-			printf("%s Deallocate %p\n", TAG, p);
+			fmt::print("{} Deallocate {}\n", TAG, p);
 			return a.deallocate(p);
 		}
 

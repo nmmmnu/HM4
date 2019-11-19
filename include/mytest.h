@@ -1,7 +1,9 @@
 #ifndef _MY_TEST_H
 #define _MY_TEST_H
 
-#include <cstdio>
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
+
 #include <cstdlib>	// exit
 
 class MyTest{
@@ -15,7 +17,7 @@ public:
 public:
 	void operator()(const char *test, bool const result){
 		if (show || result == false)
-			printf(" - Testing %-25s %s\n", test, result ? "OK" : "Fail");
+			fmt::print(" - Testing {:25} {}\n", test, result ? "OK" : "Fail");
 
 		if (stop && result == false)
 			exit(1);
@@ -23,11 +25,11 @@ public:
 
 public:
 	void begin(const char *title){
-		printf("\nTesting %s...\n", title);
+		fmt::print("\nTesting {}...\n", title);
 	}
 
 	int end(){
-		printf("\nAll tests passed. You are awesome!!!\n");
+		fmt::print("\nAll tests passed. You are awesome!!!\n");
 
 		return 0;
 	}

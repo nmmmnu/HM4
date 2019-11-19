@@ -4,22 +4,22 @@
 
 #include "version.h"
 
-#include <iostream>
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
 
 namespace{
 
 	int printUsage(const char *cmd){
-		std::cout
-			<< "db_merge version " << hm4::version::str 									<< '\n'
-			<< '\n'
-
-			<< "Usage:"	<< '\n'
-			<< '\t'		<< cmd	<< " - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones"	<< '\n'
-			<< '\t'		<< cmd	<< " t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones"	<< '\n'
-
-			<< "\t\tDo not forget you usually need two input files"	<< '\n'
-
-			<< '\n';
+		fmt::print(	"db_merge version {0} \n"
+				"\n"
+				"Usage:\n"
+				"\t{1} - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones\n"
+				"\t{1} t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones\n"
+				"\t\tDo not forget you usually need two input files\n"
+				"\n",
+				hm4::version::str,
+				cmd
+		);
 
 		return 10;
 	}
@@ -106,7 +106,7 @@ int main(int argc, char **argv){
 	const char *output	= argv[2];
 
 	if (fileExists(output)){
-		printf("File %s exists. Please remove it and try again.\n", output);
+		fmt::print("File {} exists. Please remove it and try again.\n", output);
 		return 2;
 	}
 
@@ -119,10 +119,10 @@ int main(int argc, char **argv){
 	switch(table_count){
 	case 1:
 		{
-			std::cout
-				<< "Merging (cleanup) single table..."	<< '\n'
-				<< '\t' << path[0]			<< '\n'
-			;
+			fmt::print(	"Merging (cleanup) single table...\n"
+					"\t{}\n",
+					path[0]
+			);
 
 			MergeListFactory_1 factory{ path[0], DEFAULT_ADVICE, DEFAULT_MODE };
 
@@ -131,11 +131,11 @@ int main(int argc, char **argv){
 
 	case 2:
 		{
-			std::cout
-				<< "Merging two tables..."		<< '\n'
-				<< '\t' << path[0]			<< '\n'
-				<< '\t' << path[1]			<< '\n'
-			;
+			fmt::print(	"Merging two tables...\n"
+					"\t{}\n"
+					"\t{}\n",
+					path[0], path[1]
+			);
 
 			MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE };
 
@@ -145,9 +145,7 @@ int main(int argc, char **argv){
 
 	default:
 		{
-			std::cout
-				<< "Merging multiple tables..."		<< '\n'
-			;
+			fmt::print(	"Merging multiple tables...\n");
 
 			MergeListFactory_N<const char **> factory{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE };
 

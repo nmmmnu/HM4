@@ -91,7 +91,7 @@ namespace{
 		mytest("not expired",	p1->isValid()				);
 
 		if (slow){
-			printf("sleep for 2 sec...\n");
+			puts("sleep for 2 sec...\n");
 			sleep(2);
 			mytest("expired",	! p1->isValid()			);
 		}

@@ -2,6 +2,9 @@
 #include <iomanip>
 #include <type_traits>
 
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
+
 #include "filereader.h"
 
 #include "pmallocator.h"
@@ -25,21 +28,23 @@ constexpr unsigned int PROCESS_STEP = 1000 * 10;
 namespace{
 
 	int printUsage(const char *cmd){
-		std::cout
-			<< "Usage:"	<< '\n'
-			<< "\t"		<< cmd	<< " s [class] [file.txt] [key]     - load file.txt, then search for the key"		<< '\n'
-			<< "\t"		<< cmd	<< " l [class] [file.txt] [key]     - load file.txt, then list using iterator"		<< '\n'
-			<< '\n'
+		fmt::print(	"Usage:\n"
+				"\t{1}  s [class] [file.txt] [key] - load file.txt, then search for the key\n"
+				"\t{1}  l [class] [file.txt] [key] - load file.txt, then list using iterator\n"
+				"\n"
+				"Classes are:\n",
+				0,
+				cmd
+		);
 
-			<< "Classes are:"			<< '\n'
-			<< '\t' << "v - VectorList"		<< '\n'
-			<< '\t' << "l - LinkList"		<< '\n'
-			<< '\t' << "s - SkipList"		<< '\n'
-			<< '\t' << "V - VectorList (arena)"	<< '\n'
-			<< '\t' << "L - LinkList   (arena)"	<< '\n'
-			<< '\t' << "S - SkipList   (arena)"	<< '\n'
+		const char *format = "\t{} - {:10} {}\n";
 
-			<< '\n';
+		fmt::print(format, 'v', "VectorList"	, "std"		);
+		fmt::print(format, 'l', "LinkList"	, "std"		);
+		fmt::print(format, 's', "SkipList"	, "std"		);
+		fmt::print(format, 'V', "VectorList"	, "arena"	);
+		fmt::print(format, 'L', "LinkList"	, "arena"	);
+		fmt::print(format, 'S', "SkipList"	, "arena"	);
 
 		return 10;
 	}
@@ -61,10 +66,11 @@ namespace{
 			++i;
 
 			if (i % PROCESS_STEP == 0){
-				std::cout << "Processed "
-						<< std::setw(10) << i			<< " records,"	<< ' '
-						<< std::setw(10) << list.bytes()	<< " bytes."	<< '\n'
-				;
+				fmt::print(
+					"Processed {:10} records, {:10} bytes.\n",
+					i,
+					list.bytes()
+				);
 			}
 		}
 	}
@@ -74,7 +80,7 @@ namespace{
 		auto const it = list.find(key, std::true_type{});
 
 		if (it == std::end(list)){
-			printf("Key '%s' not found...\n", key.data());
+			fmt::print("Key '{}' not found...\n", key);
 			return;
 		}
 
@@ -89,18 +95,18 @@ namespace{
 
 	template <class LIST, class READER>
 	int listSearchProcess(LIST &&list, READER &reader, std::string_view const key, bool const it){
-		printf("Load start...\n");
+		puts("Load start...\n");
 		listLoad(list, reader);
-		printf("Load done...\n");
+		puts("Load done...\n");
 		getchar();
 
-		printf("Search start...\n");
+		puts("Search start...\n");
 		if (it){
 			listIterate(list, key);
 		}else{
 			listSearch(list, key);
 		}
-		printf("Search done...\n");
+		puts("Search done...\n");
 		getchar();
 
 		return 0;

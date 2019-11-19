@@ -2,9 +2,11 @@
 
 #include <cstring>
 
-#include <inttypes.h>	// PRIu64
-
 #include "mytime.h"
+
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
+
 
 namespace hm4{
 namespace disk{
@@ -34,27 +36,19 @@ inline bool FileMeta::openFail_(std::string_view){
 	return false;
 }
 
-template<typename UINT>
-void FileMeta::printTime__(const char *descr, UINT const time){
-	printf("%-14s: %s\n",		descr,	time	? MyTime::toString(betoh(time)) : "n/a");
-}
-
-inline void FileMeta::printBool__(const char *descr, bool const b){
-	printf("%-14s: %s\n",		descr,	b	? "Yes" : "No");
-}
-
 void FileMeta::print() const{
-	printf("%-14s: %u\n",		"Version",	version()				);
-	printf("%-14s: %" PRIu64 "\n",	"Records",	size()					); // PRIu64
-	printf("%-14s: %" PRIu64 "\n",	"Tombstones",	betoh<uint64_t>(blob.tombstones)	); // PRIu64
+	const char *format = "{:<14}: {}\n";
 
-	printBool__("Sorted",	sorted()	);
-	printBool__("Aligned",	aligned()	);
+	fmt::print(format,	"Version",	version()		);
+	fmt::print(format,	"Records",	size()			);
+	fmt::print(format,	"Tombstones",	betoh(blob.tombstones)	);
 
-	printTime__("Created",	blob.created	);
+	fmt::print(format,	"Sorted",	sorted()  ? "Y" : "N"	);
+	fmt::print(format,	"Aligned",	aligned() ? "Y" : "N"	);
 
-	printTime__("Created::MIN", blob.createdMin	);
-	printTime__("Created::MAX", blob.createdMax	);
+	fmt::print(format,	"Created",	blob.created    ? MyTime::toString(betoh(blob.created)   ) : "n/a" 	);
+	fmt::print(format,	"Created::MIN",	blob.createdMin ? MyTime::toString(betoh(blob.createdMin)) : "n/a" 	);
+	fmt::print(format,	"Created::MAX",	blob.createdMax ? MyTime::toString(betoh(blob.createdMax)) : "n/a" 	);
 }
 
 
