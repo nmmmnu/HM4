@@ -7,9 +7,6 @@
 namespace MyAllocator{
 
 	struct ArenaAllocator{
-		// create the allocator in non working state.
-		ArenaAllocator() = default;
-
 		ArenaAllocator(std::size_t const maxsize) :
 						maxsize(maxsize),
 						data( allocate__(maxsize) ){}
@@ -63,7 +60,7 @@ namespace MyAllocator{
 
 	private:
 		std::size_t			pos	= 0;
-		std::size_t			maxsize	= 0;
+		std::size_t			maxsize;
 		std::unique_ptr<std::byte>	data;
 	};
 

@@ -126,12 +126,12 @@ namespace hm4{
 					p,
 					deleter
 				};
-			};
+			}
 
 			template<typename T>
 			static auto wrap__(unique_ptr_allocator &, T *p) noexcept{
 				return std::unique_ptr<T>{ p };
-			};
+			}
 
 		public:
 			template<class Allocator>
@@ -316,11 +316,11 @@ namespace hm4{
 
 	inline bool less(const Pair *p1, const Pair *p2){
 		return p1->cmp(*p2) < 0;
-	};
+	}
 
 	inline bool equals(const Pair *p1, const Pair *p2){
 		return p1->equals(*p2);
-	};
+	}
 
 	inline void print(Pair const &pair){
 		pair.print();
