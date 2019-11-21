@@ -86,7 +86,7 @@ constexpr auto hash(std::string_view const data) noexcept{
 
 
 
-using to_string_buffer_t = std::array<char, 32>;
+using to_string_buffer_t = std::array<char, 64>;
 
 template<typename T>
 std::string_view to_string(T const value, to_string_buffer_t &buffer){

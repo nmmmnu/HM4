@@ -49,7 +49,7 @@ public:
 		result.reserve(maxResults * 2);
 		#else
 
-		FixedVector<std::string_view, MAXIMUM_RESULTS> result;
+		FixedVector<std::string_view, 2 * MAXIMUM_RESULTS> result;
 
 		#endif
 
