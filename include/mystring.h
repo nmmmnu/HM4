@@ -99,6 +99,8 @@ using to_string_buffer_t = std::array<char, 64>;
 
 	template<typename T>
 	std::string to_string(T const value){
+		static_assert(std::is_integral_v<T>, "T must be integral");
+
 		std::stringstream ss;
 		ss << value;
 		return ss.str();
@@ -106,6 +108,8 @@ using to_string_buffer_t = std::array<char, 64>;
 
 	template<typename T>
 	std::string_view to_string(T const value, to_string_buffer_t &buffer){
+		static_assert(std::is_integral_v<T>, "T must be integral");
+
 		std::string const s = to_string(value);
 
 		auto const size = std::min(s.size(), buffer.size());
@@ -118,6 +122,8 @@ using to_string_buffer_t = std::array<char, 64>;
 
 	template<typename T>
 	T from_string(std::string_view const s, T const default_value = T{0}){
+		static_assert(std::is_integral_v<T>, "T must be integral");
+
 		if (s.empty())
 			return default_value;
 
@@ -162,6 +168,8 @@ using to_string_buffer_t = std::array<char, 64>;
 
 	template<typename T>
 	std::string to_string(T const value){
+		static_assert(std::is_integral_v<T>, "T must be integral");
+
 		to_string_buffer_t buffer;
 		return std::string{ to_string(value, buffer) };
 	}
