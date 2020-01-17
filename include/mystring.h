@@ -9,6 +9,7 @@
 
 #ifdef NOT_HAVE_CHARCONV
 #include <sstream>
+#include <algorithm>	// copy_n
 #else
 #include <charconv>	// to_chars
 #endif
@@ -93,7 +94,6 @@ constexpr auto hash(std::string_view const data) noexcept{
 
 using to_string_buffer_t = std::array<char, 64>;
 
-
 #ifdef NOT_HAVE_CHARCONV
 	// Based on ston_safe.h
 
@@ -107,10 +107,13 @@ using to_string_buffer_t = std::array<char, 64>;
 	template<typename T>
 	std::string_view to_string(T const value, to_string_buffer_t &buffer){
 		std::string const s = to_string(value);
-		// copy...
-		std::copy(std::begin(s), std::end(s), std::begin(buffer));
 
-		return std::string_view{ buffer.data(), s.size() };
+		auto const size = std::min(s.size(), buffer.size());
+
+		// copy...
+		std::copy_n(std::begin(s), size, std::begin(buffer));
+
+		return std::string_view{ buffer.data(), size };
 	}
 
 	template<typename T>
