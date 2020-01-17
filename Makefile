@@ -52,6 +52,7 @@ ifeq ($(UNAME), FreeBSD)
 # fix compilation for FreeBSD
 EXTRA_INCL	+= -Iinclude.freebsd/
 CF_MISC		+= -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1
+CF_MISC		+= -DNOT_HAVE_CHARCONV
 LL_ALL		+= -lm
 endif
 
@@ -60,6 +61,7 @@ endif
 ifeq ($(UNAME), Darwin)
 # fix endian mess for OSX
 EXTRA_INCL	+= -Iinclude.darwin/
+CF_MISC		+= -DNOT_HAVE_CHARCONV
 endif
 
 # ======================================================

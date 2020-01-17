@@ -78,10 +78,11 @@ public:
 
 		try{
 			vector_.push_back(newdata.get());
-			lc_.inc(newdata->bytes());
 		}catch(...){
 			return false;
 		}
+
+		lc_.inc(newdata->bytes());
 
 		newdata.release();
 
