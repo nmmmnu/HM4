@@ -20,7 +20,7 @@ CF_OPTIM	= -O2
 #CF_OPTIM	+= -march=native
 CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wno-unknown-warning-option
 
-CF_MISC		= -g
+#CF_MISC	= -DNOT_HAVE_CHARCONV
 
 CF_ALL		= -std=c++17	\
 			$(CF_DEPS)	\

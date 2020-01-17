@@ -98,12 +98,16 @@ using to_string_buffer_t = std::array<char, 64>;
 	// Based on ston_safe.h
 
 	template<typename T>
-	std::string_view to_string(T const value, to_string_buffer_t &buffer){
+	std::string to_string(T const value){
 		std::stringstream ss;
 		ss << value;
-		// nice, copy
-		std::string s = ss.str();
-		// nice, double copy
+		return ss.str();
+	}
+
+	template<typename T>
+	std::string_view to_string(T const value, to_string_buffer_t &buffer){
+		std::string const s = to_string(value);
+		// copy...
 		std::copy(std::begin(s), std::end(s), std::begin(buffer));
 
 		return std::string_view{ buffer.data(), s.size() };
@@ -153,15 +157,13 @@ using to_string_buffer_t = std::array<char, 64>;
 		return value;
 	}
 
+	template<typename T>
+	std::string to_string(T const value){
+		to_string_buffer_t buffer;
+		return std::string{ to_string(value, buffer) };
+	}
+
 #endif
-
-
-
-template<typename T>
-std::string to_string(T const value){
-	to_string_buffer_t buffer;
-	return std::string{ to_string(value, buffer) };
-}
 
 
 
