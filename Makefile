@@ -47,21 +47,44 @@ O		= obj/
 
 # ======================================================
 
-ifeq ($(UNAME), FreeBSD)
+ifeq ($(UNAME), Linux)
+
+# add epoll support...
+
+CF_MISC		+= -DSELECTOR_EPOOL
+LL_SELECTOR	 = $(O)epollselector.o
+
+else ifeq ($(UNAME), FreeBSD)
+
 # add correct endian for FreeBSD
 # fix compilation for FreeBSD
 EXTRA_INCL	+= -Iinclude.freebsd/
 CF_MISC		+= -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1
 CF_MISC		+= -DNOT_HAVE_CHARCONV
 LL_ALL		+= -lm
-endif
 
-# ======================================================
+# add kqueue support...
 
-ifeq ($(UNAME), Darwin)
-# fix endian mess for OSX
+CF_MISC		+= -DSELECTOR_EPOOL
+LL_SELECTOR	 = $(O)kqueueselector.o
+
+else ifeq ($(UNAME), Darwin)
+
 EXTRA_INCL	+= -Iinclude.darwin/
 CF_MISC		+= -DNOT_HAVE_CHARCONV
+
+# add kqueue support...
+
+CF_MISC		+= -DSELECTOR_EPOOL
+LL_SELECTOR	 = $(O)kqueueselector.o
+
+else
+
+# add poll support...
+
+CF_MISC		+= -DSELECTOR_POOL
+LL_SELECTOR	 = $(O)pollselector.o
+
 endif
 
 # ======================================================

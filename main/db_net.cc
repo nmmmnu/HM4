@@ -10,15 +10,28 @@
 
 // ----------------------------------
 
-#include "selector/pollselector.h"
-#include "selector/epollselector.h"
 #include "protocol/redisprotocol.h"
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
 
 // ----------------------------------
 
-using MySelector	= net::selector::EPollSelector;
+#if defined SELECTOR_EPOOL
+	#include "selector/epollselector.h"
+
+	using MySelector	= net::selector::EPollSelector;
+#elif defined SELECTOR_KQUEUE
+	#include "selector/kqueueselector.h"
+
+	using MySelector	= net::selector::KQueueSelector;
+#elif defined SELECTOR_POOL
+	#include "selector/pollselector.h"
+
+	using MySelector	= net::selector::PollSelector;
+#else
+	#error "No net::selector selected!"
+#endif
+
 using MyProtocol	= net::protocol::RedisProtocol;
 
 using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
