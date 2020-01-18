@@ -24,6 +24,8 @@ class PollSelector{
 public:
 	using iterator = hidden_pointer_iterator<HPI>;
 
+	static inline constexpr std::string_view NAME = "poll";
+
 	PollSelector(uint32_t maxFD);
 	PollSelector(PollSelector &&other) /* = default */;
 	PollSelector &operator =(PollSelector &&other) /* = default */;

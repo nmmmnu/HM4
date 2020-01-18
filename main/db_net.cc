@@ -189,6 +189,9 @@ namespace{
 		std::cout
 			<< "db_net version " << hm4::version::str 							<< '\n'
 					<< '\n'
+			<< "Options:"	<< '\n'
+			<< "\t"		<< "API: "	<< MySelector::NAME						<< '\n'
+					<< '\n'
 			<< "Usage:"	<< '\n'
 			<< "\t"		<< cmd	<< " [configuration file] - start server"				<< '\n'
 			<< "...or..."	<< '\n'

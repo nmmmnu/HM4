@@ -49,12 +49,18 @@ O		= obj/
 
 ifeq ($(UNAME), Linux)
 
+##### LINUX #####
+
+#CF_MISC	+= -DNOT_HAVE_CHARCONV
+
 # add epoll support...
 
 CF_MISC		+= -DSELECTOR_EPOOL
 LL_SELECTOR	 = $(O)epollselector.o
 
 else ifeq ($(UNAME), FreeBSD)
+
+##### FreeBSD #####
 
 # add correct endian for FreeBSD
 # fix compilation for FreeBSD
@@ -69,6 +75,8 @@ CF_MISC		+= -DSELECTOR_KQUEUE
 LL_SELECTOR	 = $(O)kqueueselector.o
 
 else ifeq ($(UNAME), Darwin)
+
+##### MAC OS #####
 
 EXTRA_INCL	+= -Iinclude.darwin/
 CF_MISC		+= -DNOT_HAVE_CHARCONV

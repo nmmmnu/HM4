@@ -26,6 +26,8 @@ public:
 
 	using iterator = hidden_pointer_iterator<HPI>;
 
+	static inline constexpr std::string_view NAME = "epoll";
+
 	EPollSelector(size_t server_limit = DEFAULT_SERVER_LIMIT);
 	EPollSelector(EPollSelector &&other);
 	EPollSelector &operator =(EPollSelector &&other);
