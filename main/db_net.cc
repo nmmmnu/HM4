@@ -186,11 +186,18 @@ namespace{
 	}
 
 	void printUsage(const char *cmd){
+		#ifdef NOT_HAVE_CHARCONV
+		const char *convert = "sstream";
+		#else
+		const char *convert = "charconv";
+		#endif
+
 		std::cout
 			<< "db_net version " << hm4::version::str 							<< '\n'
 					<< '\n'
-			<< "Options:"	<< '\n'
-			<< "\t"		<< "API: "	<< MySelector::NAME						<< '\n'
+			<< "Build:"	<< '\n'
+			<< "\t"		<< "Selector"	<< '\t'	<< MySelector::NAME					<< '\n'
+			<< "\t"		<< "Convertion"	<< '\t'	<< convert						<< '\n'
 					<< '\n'
 			<< "Usage:"	<< '\n'
 			<< "\t"		<< cmd	<< " [configuration file] - start server"				<< '\n'
