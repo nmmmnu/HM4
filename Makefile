@@ -65,7 +65,7 @@ LL_ALL		+= -lm
 
 # add kqueue support...
 
-CF_MISC		+= -DSELECTOR_EPOOL
+CF_MISC		+= -DSELECTOR_KQUEUE
 LL_SELECTOR	 = $(O)kqueueselector.o
 
 else ifeq ($(UNAME), Darwin)
@@ -75,7 +75,7 @@ CF_MISC		+= -DNOT_HAVE_CHARCONV
 
 # add kqueue support...
 
-CF_MISC		+= -DSELECTOR_EPOOL
+CF_MISC		+= -DSELECTOR_KQUEUE
 LL_SELECTOR	 = $(O)kqueueselector.o
 
 else
