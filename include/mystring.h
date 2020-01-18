@@ -94,17 +94,27 @@ constexpr auto hash(std::string_view const data) noexcept{
 
 using to_string_buffer_t = std::array<char, 64>;
 
-using std::to_string;
+
 
 #ifdef NOT_HAVE_CHARCONV
 	// Based on ston_safe.h
+
+	/*
+	template<typename T>
+	std::string to_string(T const value){
+		static_assert(std::is_integral_v<T>, "T must be integral");
+
+		std::stringstream ss;
+		ss << value;
+		return ss.str();
+	}
+	*/
 
 	template<typename T>
 	std::string_view to_string(T const value, to_string_buffer_t &buffer){
 		static_assert(std::is_integral_v<T>, "T must be integral");
 
-		std::string const s = to_string(value);
-
+		auto const s    = std::to_string(value);
 		auto const size = std::min(s.size(), buffer.size());
 
 		// copy...

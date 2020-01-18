@@ -127,7 +127,7 @@ public:
 		if (p != std::end(list_) && p->isValid(/* tomb */ true))
 			n += from_string<int64_t>(p->getVal());
 
-		std::string const s = to_string(n);
+		std::string const s = std::to_string(n);
 
 		set(key, s);
 
