@@ -84,7 +84,9 @@ namespace MyAllocator{
 
 	template<class Allocator>
 	struct PMChainAllocator : PMAllocator{
-		PMChainAllocator(Allocator &allocator) : allocator(allocator){}
+		PMChainAllocator(Allocator &allocator) : PMChainAllocator( &allocator){}
+
+		PMChainAllocator(Allocator *allocator) : allocator(allocator){}
 
 	private:
 		inline void *allocate_(std::size_t const size) override final{

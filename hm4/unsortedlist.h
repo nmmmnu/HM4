@@ -39,8 +39,14 @@ public:
 		if (needSort_ == false)
 			return;
 
-		std::sort(std::begin(vector_), std::end(vector_), less);
+		auto comp = [](const Pair *p1, const Pair *p2){
+			// return bigger time or first
+			return p1->cmpWithTime(*p2, std::false_type{}) < 0;
+		};
 
+		std::sort(std::begin(vector_), std::end(vector_), comp);
+
+		// this keep first occurance
 		vector_.erase(
 			std::unique(std::begin(vector_), std::end(vector_), equals),
 			std::end(vector_)

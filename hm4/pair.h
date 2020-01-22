@@ -239,6 +239,21 @@ namespace hm4{
 			);
 		}
 
+		template<bool B>
+		int cmpWithTime(Pair const &pair, std::bool_constant<B>) const noexcept{
+			if (int const result = cmp(pair); result)
+				return result;
+
+			if (B)
+				return + cmpTime(pair);
+			else
+				return - cmpTime(pair);
+		}
+
+		int cmpWithTime(Pair const &pair) const noexcept{
+			return cmpWithTime(pair, std::true_type{});
+		}
+
 	public:
 		bool isValid(bool const tombstoneCheck = false) const noexcept{
 			if ( tombstoneCheck && isTombstone() )
@@ -314,7 +329,8 @@ namespace hm4{
 
 	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
 
-	inline bool less(const Pair *p1, const Pair *p2){
+	// not used
+	inline bool less____(const Pair *p1, const Pair *p2){
 		return p1->cmp(*p2) < 0;
 	}
 

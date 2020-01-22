@@ -1,0 +1,9 @@
+key	1
+key	3
+key	22
+key	100
+z0	0
+z2	0
+z3	0
+z4	0
+key	last

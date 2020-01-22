@@ -17,6 +17,8 @@
 #include "stdallocator.h"
 #include "arenaallocator.h"
 
+#include "logger.h"
+
 using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
 using MySTDAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
 
@@ -100,8 +102,10 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 		std::string_view const key = tok();
 		std::string_view const val = tok();
 
-		if (! key.empty())
-			list.insert(key, val);
+		if (! key.empty()){
+			if (! list.insert(key, val) )
+				log__("Error insert", key);
+		}
 
 		++i;
 
