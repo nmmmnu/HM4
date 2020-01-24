@@ -52,7 +52,7 @@ bool VectorList::insert(
 		Pair *olddata = *it;
 
 		// check if the data in database is valid
-		if (! newdata->isValid(*olddata) ){
+		if (! newdata->isValidForReplace(*olddata) ){
 			// newdata will be magically destroyed.
 			return false;
 		}

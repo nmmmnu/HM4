@@ -16,7 +16,7 @@ using hm4::OPair;
 namespace{
 	void pair_test_tombstone();
 	void pair_test_raw();
-	void pair_test_expired(bool slow = false);
+	void pair_test_expired();
 	void pair_test();
 	void pair_test_ctor();
 }
@@ -83,18 +83,16 @@ namespace{
 		mytest("cmp",		p->cmp("!!! non existent") > 0	);
 	}
 
-	void pair_test_expired(bool const slow){
+	void pair_test_expired(){
 		mytest.begin("Pair Expired");
 
 		const OPair p1 = Pair::create( "key", "val", 1 );
 
 		mytest("not expired",	p1->isValid()				);
 
-		if (slow){
-			puts("sleep for 2 sec...\n");
-			sleep(2);
-			mytest("expired",	! p1->isValid()			);
-		}
+		puts("sleep for 2 sec...\n");
+		sleep(2);
+		mytest("expired",	! p1->isValid()				);
 
 		const OPair p2 = Pair::create( "key", "val", 1, 3600 * 24 /* 1970-01-02 */ );
 		mytest("expired",		! p2->isValid()			);
@@ -115,7 +113,7 @@ namespace{
 		std::string_view const key = "abcdef";
 		std::string_view const val = "1234567890";
 
-		const OPair t = Pair::create(key, Pair::TOMBSTONE);
+		const OPair t = Pair::create(key, Pair::TOMBSTONE, 0, 3600 * 24 /* 1970-01-02 */ );
 
 		const OPair p = Pair::create( key, val );
 
@@ -132,7 +130,13 @@ namespace{
 		mytest("!eq",			! p->equals("something")	);
 
 		mytest("valid",			p->isValid()			);
-		mytest("valid",			p->isValid(*t)			);
+		mytest("valid",			p->isValidForReplace(*t)	);
+
+		mytest("valid",			t->isValid()			);
+		mytest("valid",			t->isValid(std::false_type{})	);
+		mytest("valid",			! t->isValid(std::true_type{})	);
+
+		mytest("valid",			! t->isValidForReplace(*p)	);
 	}
 
 } // anonymous namespace

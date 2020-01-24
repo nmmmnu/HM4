@@ -80,7 +80,7 @@ bool LinkList::insert(
 		Pair *olddata = loc.node->data;
 
 		// check if the data in database is valid
-		if (! newdata->isValid(*olddata)){
+		if (! newdata->isValidForReplace(*olddata) ){
 			// newdata will be magically destroyed.
 			return false;
 		}

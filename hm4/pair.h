@@ -23,6 +23,18 @@ namespace hm4{
 		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
 
+	namespace impl_{
+		template<typename T>
+		constexpr auto neg(T const &a, std::true_type){
+			return +a;
+		}
+
+		template<typename T>
+		constexpr auto neg(T const &a, std::false_type){
+			return -a;
+		}
+	}
+
 
 
 	struct Pair{
@@ -240,14 +252,11 @@ namespace hm4{
 		}
 
 		template<bool B>
-		int cmpWithTime(Pair const &pair, std::bool_constant<B>) const noexcept{
+		int cmpWithTime(Pair const &pair, std::bool_constant<B> tag) const noexcept{
 			if (int const result = cmp(pair); result)
 				return result;
 
-			if (B)
-				return + cmpTime(pair);
-			else
-				return - cmpTime(pair);
+			return impl_::neg(cmpTime(pair), tag);
 		}
 
 		int cmpWithTime(Pair const &pair) const noexcept{
@@ -255,10 +264,8 @@ namespace hm4{
 		}
 
 	public:
-		bool isValid(bool const tombstoneCheck = false) const noexcept{
-			if ( tombstoneCheck && isTombstone() )
-				return false;
-
+		bool isValid(std::false_type) const noexcept{
+			// check if expired.
 			if ( isExpired_() )
 				return false;
 
@@ -266,13 +273,37 @@ namespace hm4{
 			return true;
 		}
 
-		bool isValid(const Pair &, bool const tombstoneCheck = false) const noexcept{
-			return isValid(tombstoneCheck);
+		bool isValid(std::true_type) const noexcept{
+			// check if is tombstone
+			if ( isTombstone() )
+				return false;
+
+			// chaining
+			return isValid(std::false_type{});
 		}
 
-		bool isValid(const Pair *pair, bool const tombstoneCheck = false) const noexcept{
-			return isValid(*pair, tombstoneCheck);
+		template<bool B>
+		bool isValidForReplace(const Pair &other, std::bool_constant<B> tag) const noexcept{
+			// if other is created after this,
+			// then obviously this is not valid
+			if (other.getCreated() > getCreated())
+				return false;
+
+			// chaining
+			return isValid(tag);
 		}
+
+		// ==============================
+
+		bool isValid() const noexcept{
+			return isValid(std::false_type{});
+		}
+
+		bool isValidForReplace(const Pair &other) const noexcept{
+			return isValidForReplace(other, std::false_type{});
+		}
+
+		// ==============================
 
 		size_t bytes() const noexcept{
 			return bytes(getKeyLen_(), getValLen_());

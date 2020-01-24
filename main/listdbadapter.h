@@ -33,7 +33,7 @@ public:
 
 		const auto p = list_.find(key, std::true_type{} );
 
-		if (p != std::end(list_) && p->isValid(/* tomb */ true))
+		if (p != std::end(list_) && p->isValid(std::true_type{}))
 			return std::string{ p->getVal() };
 		else
 			return {};
@@ -64,7 +64,7 @@ public:
 
 			result.emplace_back(resultKey);
 
-			if (it->isValid(/* tomb */ true))
+			if (it->isValid(std::true_type{}))
 				result.emplace_back(it->getVal());
 			else
 				result.emplace_back();
@@ -124,7 +124,7 @@ public:
 
 		int64_t n = val;
 
-		if (p != std::end(list_) && p->isValid(/* tomb */ true))
+		if (p != std::end(list_) && p->isValid(std::true_type{}))
 			n += from_string<int64_t>(p->getVal());
 
 		std::string const s = std::to_string(n);
