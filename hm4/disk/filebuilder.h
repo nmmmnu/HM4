@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <limits>
 
+#include "disk/filenames.h"
+
 #include "hpair.h"
 #include "stringhash.h"
 
@@ -12,59 +14,103 @@ namespace hm4{
 namespace disk{
 namespace FileBuilder{
 
-	template <class IT>
-	bool build(std::string_view const filename, IT first, IT last,
-					bool const keepTombstones, bool const aligned);
+	namespace FileBuilderConf{
+		constexpr auto MODE = std::ios::out | std::ios::binary;
+	}
 
-	// ==============================
 
-	namespace filebuilder_impl_{
 
-		class CacheLineBuilder{
-		public:
-			CacheLineBuilder(std::ofstream &file) : file_(file){}
+	class FileDataBuilder{
+	public:
+		FileDataBuilder(std::string_view const filename, bool const aligned) :
+							file_data(filenameData(filename), FileBuilderConf::MODE),
+							aligned(aligned){}
 
-			void operator()(std::string_view const current, uint64_t const pos);
+		void operator()(Pair const &pair);
 
-		private:
-			HPair::HKey	hkey_ = 0;
-			std::ofstream	&file_;
-		};
+	private:
+		std::ofstream	file_data;
 
-		// ==============================
+		bool		aligned;
+	};
 
-		struct Builder{
-			using value_type = Pair const;
 
-			Builder(std::string_view const filename, bool const aligned);
 
-			~Builder();
+	class FileIndxBuilder{
+	public:
+		FileIndxBuilder(std::string_view const filename, bool const aligned) :
+							file_indx(filenameIndx(filename), FileBuilderConf::MODE),
+							file_line(filenameLine(filename), FileBuilderConf::MODE),
+							aligned(aligned){}
 
-			void push_back(Pair const &pair);
+		void operator()(Pair const &pair);
 
-		private:
-			void collectStats_(Pair const &pair);
+	private:
+		void writeLine_(std::string_view const key);
 
-		private:
-			std::ofstream	file_meta,
-					file_indx,
-					file_line,
-					file_data;
+	private:
+		std::ofstream	file_indx;
+		std::ofstream	file_line;
 
-			bool		aligned;
+		bool		aligned;
 
-			CacheLineBuilder cacheLine{ file_line };
+		uint64_t	index		= 0;
 
-			uint64_t	index		= 0;
+		HPair::HKey	hkey_ = 0;
+	};
 
-			uint64_t	minCreated	= std::numeric_limits<uint64_t>::max();
-			uint64_t	maxCreated	= std::numeric_limits<uint64_t>::min();
 
-			uint64_t	count		= 0;
-			uint64_t	tombstones	= 0;
-		};
 
-	} // namespace
+	class FileMetaBuilder{
+	public:
+		FileMetaBuilder(std::string_view const filename, bool const aligned) :
+							file_meta(filenameMeta(filename), FileBuilderConf::MODE),
+							aligned(aligned){}
+
+		~FileMetaBuilder();
+
+		void operator()(Pair const &pair);
+
+	private:
+		std::ofstream	file_meta;
+
+		bool		aligned;
+
+		uint64_t	minCreated	= std::numeric_limits<uint64_t>::max();
+		uint64_t	maxCreated	= std::numeric_limits<uint64_t>::min();
+
+		uint64_t	count		= 0;
+		uint64_t	tombstones	= 0;
+	};
+
+
+
+	class FileBuilder{
+	public:
+		using value_type = Pair const;
+
+		FileBuilder(std::string_view const filename, bool const aligned):
+					meta(filename, aligned),
+					indx(filename, aligned),
+					data(filename, aligned){}
+
+		void operator()(Pair const &pair){
+			push_back(pair);
+		}
+
+		void push_back(Pair const &pair){
+			meta(pair);
+			indx(pair);
+			data(pair);
+		}
+
+	private:
+		FileMetaBuilder meta;
+		FileIndxBuilder indx;
+		FileDataBuilder data;
+	};
+
+
 
 	// ==============================
 
@@ -72,9 +118,7 @@ namespace FileBuilder{
 	bool build(std::string_view const filename, IT first, IT last,
 					bool const keepTombstones, bool const aligned){
 
-		using namespace filebuilder_impl_;
-
-		Builder builder(filename, aligned);
+		FileBuilder builder(filename, aligned);
 
 		if (keepTombstones){
 
