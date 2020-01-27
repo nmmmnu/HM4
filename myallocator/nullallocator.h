@@ -1,25 +1,27 @@
-#ifndef MY_CPP_ALLOCATOR
-#define MY_CPP_ALLOCATOR
+#ifndef MY_NULL_ALLOCATOR
+#define MY_NULL_ALLOCATOR
 
-#include  <cstddef>
+#include <cstddef>
+#include <limits>
 
 namespace MyAllocator{
 
-	struct STDAllocator{
-		static void *allocate(std::size_t const size) noexcept{
-			return ::operator new(size, std::nothrow);
+	struct NULLAllocator{
+		constexpr
+		static void *allocate(std::size_t) noexcept{
+			return nullptr;
 		}
 
-		static void deallocate(void *p) noexcept{
-			return ::operator delete(p);
+		constexpr
+		static void deallocate(void *) noexcept{
 		}
 
 		constexpr static bool need_deallocate() noexcept{
-			return true;
+			return false;
 		}
 
 		constexpr static bool reset() noexcept{
-			return false;
+			return true;
 		}
 
 		constexpr static std::size_t getFreeMemory() noexcept{
@@ -32,7 +34,13 @@ namespace MyAllocator{
 
 		template<typename T>
 		static auto wrapInSmartPtr(T *p) noexcept{
-			return std::unique_ptr<T>{ p };
+			auto deleter = [](){
+			};
+
+			return std::unique_ptr<T, decltype(deleter)>{
+				p,
+				deleter
+			};
 		}
 	};
 

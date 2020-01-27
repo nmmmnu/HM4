@@ -48,7 +48,12 @@ public:
 	}
 
 	bool insert(	std::string_view key, std::string_view val,
-			uint32_t expires = 0, uint32_t created = 0);
+			uint32_t expires = 0, uint32_t created = 0){
+
+		return insert(Pair::smart_ptr::create(*allocator_, key, val, expires, created));
+	}
+
+	bool insert(typename Pair::smart_ptr::type<Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();
@@ -58,7 +63,7 @@ public:
 		return lc_.bytes();
 	}
 
-	Allocator const &getAllocator() const{
+	Allocator &getAllocator() const{
 		return *allocator_;
 	}
 

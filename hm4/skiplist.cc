@@ -123,14 +123,11 @@ bool SkipList::clear(){
 	return true;
 }
 
-bool SkipList::insert(
-		std::string_view const key, std::string_view const val,
-		uint32_t const expires, uint32_t const created){
-
-	auto newdata = Pair::up::create(*allocator_, key, val, expires, created);
-
+bool SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 	if (!newdata)
 		return false;
+
+	auto const &key = newdata->getKey();
 
 	const auto nl = locate_(key, true);
 

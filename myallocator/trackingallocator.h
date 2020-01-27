@@ -65,6 +65,18 @@ namespace MyAllocator{
 			return allocated;
 		}
 
+		template<typename T>
+		auto wrapInSmartPtr(T *p) noexcept{
+			auto deleter = [this](void *p){
+				deallocate(p);
+			};
+
+			return std::unique_ptr<T, decltype(deleter)>{
+				p,
+				deleter
+			};
+		}
+
 	private:
 		Allocator a;
 		std::size_t allocated		= 0;

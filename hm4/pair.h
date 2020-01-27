@@ -13,6 +13,7 @@
 #include "mystring.h"
 #include "comparator.h"
 
+#include "stdallocator.h"
 
 namespace hm4{
 	namespace PairConf{
@@ -118,33 +119,8 @@ namespace hm4{
 			}
 		};
 
-	private:
-		struct unique_ptr_allocator{
-			static void *allocate(std::size_t const size) noexcept{
-				return ::operator new(size, std::nothrow);
-			}
-		};
-
 	public:
-		struct up{
-		private:
-			template<class Allocator, typename T>
-			static auto wrap__(Allocator &allocator, T *p) noexcept{
-				auto deleter = [&allocator](void *p){
-					allocator.deallocate(p);
-				};
-
-				return std::unique_ptr<T, decltype(deleter)>{
-					p,
-					deleter
-				};
-			}
-
-			template<typename T>
-			static auto wrap__(unique_ptr_allocator &, T *p) noexcept{
-				return std::unique_ptr<T>{ p };
-			}
-
+		struct smart_ptr{
 		public:
 			template<class Allocator>
 			static auto create(
@@ -153,16 +129,14 @@ namespace hm4{
 					std::string_view const val,
 					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
-				return wrap__(
-					allocator,
+				return allocator.wrapInSmartPtr(
 					ptr::create(allocator, key, val, expires, created)
 				);
 			}
 
 			template<class Allocator>
 			static auto clone(Allocator &allocator, const Pair *src) noexcept{
-				return wrap__(
-					allocator,
+				return allocator.wrapInSmartPtr(
 					ptr::clone(allocator, src)
 				);
 			}
@@ -171,6 +145,9 @@ namespace hm4{
 			static auto clone(Allocator &allocator, const Pair &src) noexcept{
 				return clone(allocator, & src);
 			}
+
+			template<class Allocator>
+			using type = decltype( clone(std::declval<Allocator &>(), nullptr) );
 		};
 
 	public:
@@ -179,13 +156,13 @@ namespace hm4{
 				std::string_view const val,
 				uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
-			unique_ptr_allocator allocator;
-			return up::create(allocator, key, val, expires, created);
+			MyAllocator::STDAllocator allocator;
+			return smart_ptr::create(allocator, key, val, expires, created);
 		}
 
 		static auto clone(const Pair *src) noexcept{
-			unique_ptr_allocator allocator;
-			return up::clone(allocator, src);
+			MyAllocator::STDAllocator allocator;
+			return smart_ptr::clone(allocator, src);
 		}
 
 		static auto clone(const Pair &src) noexcept{
@@ -283,7 +260,7 @@ namespace hm4{
 		}
 
 		template<bool B>
-		bool isValidForReplace(const Pair &other, std::bool_constant<B> tag) const noexcept{
+		bool isValidForReplace(Pair const &other, std::bool_constant<B> tag) const noexcept{
 			// if other is created after this,
 			// then obviously this is not valid
 			if (other.getCreated() > getCreated())

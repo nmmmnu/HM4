@@ -35,14 +35,11 @@ auto VectorList::find(std::string_view const key, std::false_type) const noexcep
 	return it;
 }
 
-bool VectorList::insert(
-		std::string_view const key, std::string_view const val,
-		uint32_t const expires, uint32_t const created){
-
-	auto newdata = Pair::up::create(*allocator_, key, val, expires, created);
-
+bool VectorList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 	if (!newdata)
 		return false;
+
+	auto const &key = newdata->getKey();
 
 	const auto &[found, it] = binarySearch(vector_, key);
 

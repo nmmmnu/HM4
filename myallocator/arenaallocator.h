@@ -46,6 +46,17 @@ namespace MyAllocator{
 			return pos;
 		}
 
+		template<typename T>
+		static auto wrapInSmartPtr(T *p) noexcept{
+			auto deleter = [](){
+			};
+
+			return std::unique_ptr<T, decltype(deleter)>{
+				p,
+				deleter
+			};
+		}
+
 	private:
 		// http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator
 		constexpr static std::size_t align_(std::size_t n, std::size_t align = sizeof(void *)) {
