@@ -49,28 +49,44 @@ namespace FileBuilder{
 	void FileIndxBuilder::operator()(Pair const &pair){
 		writeU64(file_indx, index);
 
-		writeLine_(pair.getKey());
-
 		if (aligned)
 			index += my_align::calc(pair.bytes(), PairConf::ALIGN);
 		else
 			index += pair.bytes();
 	}
 
-	void FileIndxBuilder::writeLine_(std::string_view const key){
-		auto hkey = HPair::SS::createBE(key);
 
-		if (hkey_ == hkey)
-			return;
 
-		// store new key
-		hkey_ = hkey;
+	void FileLineBuilder::operator()(Pair const &pair){
+		auto hkey = HPair::SS::createBE(pair.getKey());
 
-		writeStr(file_line, hkey_);
-		writeU64(file_line, index);
+		if (hkey_ != hkey){
+			// store new key
+			hkey_ = hkey;
+
+			writeStr(file_line, hkey_);
+			writeU64(file_line, pos);
+		}
+
+		++pos;
 	}
 
 
+
+	void FileMetaBuilder::operator()(Pair const &pair){
+		auto const created = pair.getCreated();
+
+		if (created < minCreated)
+			minCreated = created;
+
+		if (created > maxCreated)
+			maxCreated = created;
+
+		if (pair.isTombstone())
+			++tombstones;
+
+		++count;
+	}
 
 	FileMetaBuilder::~FileMetaBuilder(){
 		// write the header
@@ -94,21 +110,6 @@ namespace FileBuilder{
 		);
 
 		file_meta.write( (const char *) & blob, sizeof(FileMetaBlob));
-	}
-
-	void FileMetaBuilder::operator()(Pair const &pair){
-		auto const created = pair.getCreated();
-
-		if (created < minCreated)
-			minCreated = created;
-
-		if (created > maxCreated)
-			maxCreated = created;
-
-		if (pair.isTombstone())
-			++tombstones;
-
-		++count;
 	}
 
 

@@ -7,12 +7,12 @@ namespace hm4{
 namespace disk{
 
 namespace file_ext{
-	constexpr const char *DOT_INDX		= ".indx";
-	constexpr const char *DOT_DATA		= ".data";
-	constexpr const char *DOT_LINE		= ".line";
+	constexpr std::string_view DOT_INDX		= ".indx";
+	constexpr std::string_view DOT_DATA		= ".data";
+	constexpr std::string_view DOT_LINE		= ".line";
 
-	constexpr const char *DOT_BTREE_INDX	= ".tree";
-	constexpr const char *DOT_BTREE_DATA	= ".keys";
+	constexpr std::string_view DOT_BTREE_INDX	= ".tree";
+	constexpr std::string_view DOT_BTREE_DATA	= ".keys";
 } // namespace
 
 
@@ -21,15 +21,15 @@ inline auto filenameMeta(std::string_view const filename){
 }
 
 inline auto filenameIndx(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_INDX		);
+	return concatenate( filename, file_ext::DOT_INDX	);
 }
 
 inline auto filenameLine(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_LINE		);
+	return concatenate( filename, file_ext::DOT_LINE	);
 }
 
 inline auto filenameData(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_DATA		);
+	return concatenate( filename, file_ext::DOT_DATA	);
 }
 
 

@@ -14,7 +14,7 @@ namespace hm4{
 namespace disk{
 namespace FileBuilder{
 
-	namespace FileBuilderConf{
+	namespace config{
 		constexpr auto MODE = std::ios::out | std::ios::binary;
 	}
 
@@ -23,7 +23,7 @@ namespace FileBuilder{
 	class FileDataBuilder{
 	public:
 		FileDataBuilder(std::string_view const filename, bool const aligned) :
-							file_data(filenameData(filename), FileBuilderConf::MODE),
+							file_data(filenameData(filename), config::MODE),
 							aligned(aligned){}
 
 		void operator()(Pair const &pair);
@@ -39,22 +39,32 @@ namespace FileBuilder{
 	class FileIndxBuilder{
 	public:
 		FileIndxBuilder(std::string_view const filename, bool const aligned) :
-							file_indx(filenameIndx(filename), FileBuilderConf::MODE),
-							file_line(filenameLine(filename), FileBuilderConf::MODE),
+							file_indx(filenameIndx(filename), config::MODE),
 							aligned(aligned){}
 
 		void operator()(Pair const &pair);
 
 	private:
-		void writeLine_(std::string_view const key);
-
-	private:
 		std::ofstream	file_indx;
-		std::ofstream	file_line;
 
 		bool		aligned;
 
 		uint64_t	index		= 0;
+	};
+
+
+
+	class FileLineBuilder{
+	public:
+		FileLineBuilder(std::string_view const filename) :
+							file_line(filenameLine(filename), config::MODE){}
+
+		void operator()(Pair const &pair);
+
+	private:
+		std::ofstream	file_line;
+
+		uint64_t	pos		= 0;
 
 		HPair::HKey	hkey_ = 0;
 	};
@@ -64,7 +74,7 @@ namespace FileBuilder{
 	class FileMetaBuilder{
 	public:
 		FileMetaBuilder(std::string_view const filename, bool const aligned) :
-							file_meta(filenameMeta(filename), FileBuilderConf::MODE),
+							file_meta(filenameMeta(filename), config::MODE),
 							aligned(aligned){}
 
 		~FileMetaBuilder();
@@ -92,6 +102,7 @@ namespace FileBuilder{
 		FileBuilder(std::string_view const filename, bool const aligned):
 					meta(filename, aligned),
 					indx(filename, aligned),
+					line(filename         ),
 					data(filename, aligned){}
 
 		void operator()(Pair const &pair){
@@ -101,12 +112,14 @@ namespace FileBuilder{
 		void push_back(Pair const &pair){
 			meta(pair);
 			indx(pair);
+			line(pair);
 			data(pair);
 		}
 
 	private:
 		FileMetaBuilder meta;
 		FileIndxBuilder indx;
+		FileLineBuilder line;
 		FileDataBuilder data;
 	};
 
