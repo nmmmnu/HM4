@@ -1,5 +1,3 @@
-#include <iostream>
-#include <iomanip>
 #include <algorithm>
 
 #include "version.h"
@@ -19,6 +17,11 @@
 
 #include "logger.h"
 
+#include "base64.h"
+
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
+
 using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
 using MySTDAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
 
@@ -26,19 +29,25 @@ constexpr size_t	MB			= 1024 * 1024;
 
 constexpr size_t	MIN_ARENA_SIZE		= 128;
 
-constexpr size_t	PROCESS_STEP		= 1000 * 10;
-
-constexpr size_t	READER_BUFFER_SIZE	= 16 * 1024;
+constexpr size_t	PROCESS_STEP		= 10'000;
 
 constexpr char		DELIMITER		= '\t';
 
-using MyReader		= FileReader<READER_BUFFER_SIZE>;
+using MyReader		= FileReader;
+
+using MyReaderBuffer	= std::array<char, 16 * 1024>;
+
+MyReaderBuffer	reader_buffer, base64_buffer;
+
+
 
 static int printUsage(const char *cmd);
 
 
-template <class LIST, class READER>
-int listLoad(LIST &list, READER &reader, size_t process_step);
+
+template <class LIST, class READER, bool B>
+int listLoad(LIST &list, READER &reader, size_t const process_step, std::bool_constant<B> tag);
+
 
 
 struct MyListFactory{
@@ -74,21 +83,38 @@ int main(int argc, char **argv){
 	const char *path	= argv[2];
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
+	bool const blob = argc >= 5 && argv[4][0] == 'b';
+
 	MyArenaAllocator allocator{ max_memlist_arena * MB };
 
 	MyListFactory factory{ path, allocator };
 
 	auto &mylist = factory();
 
-	MyReader reader{ filename };
+	MyReader reader{ filename, reader_buffer.data(), reader_buffer.size() };
 
-	return listLoad(mylist, reader, PROCESS_STEP);
+	if (blob == false)
+		return listLoad(mylist, reader, PROCESS_STEP, std::false_type{});
+	else
+		return listLoad(mylist, reader, PROCESS_STEP, std::true_type{});
 }
 
 
 
-template <class LIST, class READER>
-int listLoad(LIST &list, READER &reader, size_t const process_step){
+template <class LIST>
+auto listInsert(LIST &list, std::string_view const key, std::string_view const val, std::false_type){
+	return list.insert(key, val);
+}
+
+template <class LIST>
+auto listInsert(LIST &list, std::string_view const key, std::string_view const val, std::true_type){
+	return list.insert(key, base64_decode(val, base64_buffer.data()));
+}
+
+#include <iomanip>
+
+template <class LIST, class READER, bool B>
+int listLoad(LIST &list, READER &reader, size_t const process_step, std::bool_constant<B> tag){
 	size_t i = 0;
 
 	while(reader){
@@ -103,28 +129,31 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 		std::string_view const val = tok();
 
 		if (! key.empty()){
-			if (! list.insert(key, val) )
+			if (! listInsert(list, key, val, tag) )
 				log__("Error insert", key);
 		}
 
 		++i;
 
 		if (i % process_step == 0){
-			auto used = list.getAllocator().getUsedMemory();
+			auto const used = list.getAllocator().getUsedMemory();
 
 			if (used != std::numeric_limits<decltype(used)>::max()){
-				std::clog
-					<< "Processed "	<< std::setw(10) << i			<< " records."	<< ' '
-					<< "In memory "	<< std::setw(10) << list.size()		<< " records,"	<< ' '
-							<< std::setw(10) << list.bytes()	<< " bytes."	<< ' '
-					<< "Allocator "	<< std::setw(10) << used		<< " bytes."	<< '\n'
-				;
+				fmt::print(stderr,
+					"Processed {:15} records. "
+					"In memory {:15} records, {:15} bytes. "
+					"Allocator {:15} bytes.\n",
+					i,
+					list.size(), list.bytes(),
+					used
+				);
 			}else{
-				std::clog
-					<< "Processed "	<< std::setw(10) << i			<< " records."	<< ' '
-					<< "In memory "	<< std::setw(10) << list.size()		<< " records,"	<< ' '
-							<< std::setw(10) << list.bytes()	<< " bytes."	<< '\n'
-				;
+				fmt::print(stderr,
+					"Processed {:15} records. "
+					"In memory {:15} records, {:15} bytes.\n",
+					i,
+					list.size(), list.bytes()
+				);
 			}
 		}
 	}
@@ -135,22 +164,24 @@ int listLoad(LIST &list, READER &reader, size_t const process_step){
 
 
 static int printUsage(const char *cmd){
-	std::cout
-		<<	"db_builder version "	<< hm4::version::str					<< "\n"
-													<< "\n"
-		<<	"Usage:"									<< "\n"
-		<<	"\t"	<<	cmd	<<	" [file.txt] [lsm_path] [memlist arena in MB] - load file.txt, then create / add to lsm_path"	<< "\n"
-													<< "\n"
-		<<	"\t"	<<	"\t"	<<	"Path names must be written with quotes:"	<< "\n"
-		<<	"\t"	<<	"\t"	<<	"Example directory/file.'*'.db"			<< "\n"
-		<<	"\t"	<<	"\t"	<<	"The '*', will be replaced with ID's"		<< "\n"
-													<< "\n"
-		<<	"Settings:"									<< "\n"
-		<<	"\t"	<<	"Reader: "	<<	MyReader::name()			<< "\n"
-		<<	"\t"	<<	"Buffer: "	<<	READER_BUFFER_SIZE			<< "\n"
-													<< "\n"
-	;
+	fmt::print(	"db_builder version {0}\n"
+			"\n"
+			"Usage:\n"
+			"\t{1} [file.txt] [lsm_path] [memlist arena in MB] [b = import as base64 blobs] - load file.txt, then create / add to lsm_path\n"
+			"\t\tPath names must be written with quotes:\n"
+			"\t\tExample directory/file.'*'.db\n"
+			"\t\tThe '*', will be replaced with ID's\n"
+			"\n"
+			"\tReader: {2}\n"
+			"\tBuffer: {3}\n"
+			"\n",
+			hm4::version::str,
+			cmd,
+			MyReader::name(),
+			reader_buffer.size()
+	);
 
 	return 10;
 }
+
 

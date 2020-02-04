@@ -6,7 +6,8 @@ EXTRA_INCL += -I$(SRC_DIR)test_levelorderlookup
 
 MY_TARGETS = $(A)test_stringhash $(A)test_stringreplace $(A)test_trim $(A)test_stringtokenizer	\
 		$(A)test_blobref $(A)test_binarysearch $(A)test_levelorderlookup		\
-		$(A)test_glob  $(A)test_myalign $(A)test_mynarrow $(A)test_signalguard
+		$(A)test_glob  $(A)test_myalign $(A)test_mynarrow $(A)test_signalguard		\
+		$(A)test_base64
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -48,5 +49,8 @@ $(A)test_mynarrow: $(O)test_mynarrow.o
 	$(LINK)
 
 $(A)test_signalguard: $(O)test_signalguard.o $(O)signalguard.o
+	$(LINK)
+
+$(A)test_base64: $(O)test_base64.o $(O)base64.o
 	$(LINK)
 

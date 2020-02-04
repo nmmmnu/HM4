@@ -15,7 +15,7 @@ namespace{
 		fmt::print(	"db_mkbtree version {0} \n"
 				"\n"
 				"Usage:\n"
-				"\t{1} - output.db [file.db] [btree_file.db]\n"
+				"\t{1} [file.db] [btree_file.db]\n"
 				"\t\tDo not forget that usually [btree_file.db] must have same name as [file.db]\n"
 				"\n",
 				hm4::version::str,

@@ -35,18 +35,19 @@ namespace filereader_impl_{
 
 } // namespace filereader_impl_
 
-template<size_t BUFFER_SIZE>
 class FileReader : public filereader_impl_::BasicFileReader{
 private:
 	constexpr static const char	*NAME		= "File Reader using standard streams";
 
 public:
-	FileReader(std::string_view const filename, Options const options = DEFAULT_OPTIONS) :
+	FileReader(std::string_view const filename, char *buffer, size_t const buffer_size, Options const options = DEFAULT_OPTIONS) :
 					file_(filename.data()),
+					buffer_(buffer),
+					buffer_size_(buffer_size),
 					options_(options){}
 
 	std::string_view getLine() {
-		while( file_.getline(buffer_, BUFFER_SIZE) ){
+		while( file_.getline(buffer_, static_cast<std::streamsize>(buffer_size_)) ){
 			// if we are here, this must be true
 			//assert( file_.gcount() > 0 );
 
@@ -73,9 +74,11 @@ public:
 
 private:
 	std::ifstream	file_;
-	Options		options_;
 
-	char		buffer_[BUFFER_SIZE];
+	char		*buffer_;
+	size_t		buffer_size_;
+
+	Options		options_;
 };
 
 #endif

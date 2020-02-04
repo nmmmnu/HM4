@@ -28,13 +28,13 @@ public:
 public:
 	// Immutable Methods
 
-	std::string get(std::string_view const key) const{
+	std::string_view get(std::string_view const key) const{
 		assert(!key.empty());
 
 		const auto p = list_.find(key, std::true_type{} );
 
 		if (p != std::end(list_) && p->isValid(std::true_type{}))
-			return std::string{ p->getVal() };
+			return p->getVal();
 		else
 			return {};
 	}

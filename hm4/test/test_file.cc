@@ -121,7 +121,10 @@ namespace{
 namespace {
 
 	int file_search(char const type, std::string_view const filename, std::string_view const key, bool const it){
-		FileReader<4096> reader{ filename };
+		const size_t buffer_size = 4096;
+
+		char buffer[buffer_size];
+		FileReader reader{ filename, buffer, buffer_size };
 
 		switch(type){
 		default:

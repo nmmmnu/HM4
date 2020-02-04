@@ -21,7 +21,7 @@ $(A)db_file: $(O)db_file.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)directorylistloader.
 $(A)db_merge: $(O)db_merge.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)baselistloader.o
 	$(LINK)
 
-$(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)skiplist.o $(O)idgeneratordate.o
+$(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)skiplist.o $(O)idgeneratordate.o $(O)base64.o
 	$(LINK)
 
 $(A)zone_loader: $(O)zone_loader.o
