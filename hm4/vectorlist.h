@@ -47,13 +47,10 @@ public:
 		return *vector_[index];
 	}
 
-	bool insert(	std::string_view key, std::string_view val,
-			uint32_t expires = 0, uint32_t created = 0){
+	iterator insert(	std::string_view key, std::string_view val,
+			uint32_t expires = 0, uint32_t created = 0);
 
-		return insert(Pair::smart_ptr::create(*allocator_, key, val, expires, created));
-	}
-
-	bool insert(typename Pair::smart_ptr::type<Allocator> &&newdata);
+	iterator insert(typename Pair::smart_ptr::type<Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();
@@ -195,6 +192,13 @@ inline auto VectorList::begin() const noexcept -> iterator{
 inline auto VectorList::end() const noexcept -> iterator{
 	return std::end(vector_);
 }
+
+inline auto VectorList::insert(
+		std::string_view key, std::string_view val,
+		uint32_t expires, uint32_t created) -> iterator{
+	return insert(Pair::smart_ptr::create(*allocator_, key, val, expires, created));
+}
+
 
 } // namespace
 

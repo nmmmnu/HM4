@@ -123,9 +123,9 @@ bool SkipList::clear(){
 	return true;
 }
 
-bool SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+auto SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
 	if (!newdata)
-		return false;
+		return this->end();
 
 	auto const &key = newdata->getKey();
 
@@ -139,7 +139,7 @@ bool SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 		// check if the data in database is valid
 		if (! newdata->isValidForReplace(*olddata) ){
 			// newdata will be magically destroyed.
-			return false;
+			return this->end();
 		}
 
 		lc_.upd( olddata->bytes(), newdata->bytes() );
@@ -151,7 +151,7 @@ bool SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 		// deallocate old pair
 		allocator_->deallocate(olddata);
 
-		return true;
+		return { nl.node };
 	}
 
 	// create new node
@@ -164,7 +164,7 @@ bool SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
-		return false;
+		return this->end();
 	}
 
 	newnode->hkey = HPair::SS::create(key);
@@ -192,7 +192,7 @@ bool SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 
 	lc_.inc(size);
 
-	return true;
+	return { newnode };
 }
 
 bool SkipList::erase(std::string_view const key){

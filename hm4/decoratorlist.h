@@ -63,7 +63,7 @@ public:
 		return list_->erase(key);
 	}
 
-	bool insert(	std::string_view const key, std::string_view const val,
+	auto insert(	std::string_view const key, std::string_view const val,
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 

@@ -18,6 +18,7 @@ private:
 	template<class T>
 	using it_traits_DT = typename std::iterator_traits<T>::difference_type;
 
+public:
 	using FirstIteratorPair  = typename multiiterator_impl_::IteratorPair<FirstIterator>;
 	using SecondIteratorPair = typename multiiterator_impl_::IteratorPair<SecondIterator>;
 

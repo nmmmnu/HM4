@@ -74,30 +74,10 @@ public:
 		return true;
 	}
 
-	bool insert(	std::string_view key, std::string_view val,
-			uint32_t expires = 0, uint32_t created = 0){
+	iterator insert(	std::string_view key, std::string_view val,
+			uint32_t expires = 0, uint32_t created = 0);
 
-		return insert(Pair::smart_ptr::create(*allocator_, key, val, expires, created));
-	}
-
-	bool insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
-		if (!newdata)
-			return false;
-
-		try{
-			vector_.push_back(newdata.get());
-		}catch(...){
-			return false;
-		}
-
-		lc_.inc(newdata->bytes());
-
-		newdata.release();
-
-		needSort_ = true;
-
-		return true;
-	}
+	iterator insert(typename Pair::smart_ptr::type<Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();
@@ -107,7 +87,7 @@ public:
 		return lc_.bytes();
 	}
 
-	Allocator &getAllocator() const{
+	auto &getAllocator() const{
 		return *allocator_;
 	}
 
@@ -167,6 +147,34 @@ inline auto UnsortedList::begin() noexcept -> iterator{
 inline auto UnsortedList::end() const noexcept -> iterator{
 	return std::end(vector_);
 }
+
+inline auto UnsortedList::insert(
+		std::string_view key, std::string_view val,
+		uint32_t expires, uint32_t created) -> iterator{
+	return insert(Pair::smart_ptr::create(*allocator_, key, val, expires, created));
+}
+
+inline auto UnsortedList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
+	if (!newdata)
+		return this->end();
+
+	try{
+		vector_.push_back(newdata.get());
+
+		lc_.inc(newdata->bytes());
+
+		newdata.release();
+
+		needSort_ = true;
+
+		return { std::prev(std::end(vector_)) };
+	}catch(...){
+		// newdata will be deallocated...
+		return this->end();
+	}
+}
+
+
 
 } // namespace
 

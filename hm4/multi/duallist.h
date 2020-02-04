@@ -66,17 +66,25 @@ public:
 		assert(Pair::check(key));
 
 		if constexpr (EraseWithTombstone){
-			return list1_->insert(key, Pair::TOMBSTONE);
+			return list1_->insert(key, Pair::TOMBSTONE) != std::end(*list1_);
 		}else{
 			return list1_->erase(key);
 		}
 	}
 
-	bool insert(	std::string_view const key, std::string_view const val,
+	iterator insert(	std::string_view const key, std::string_view const val,
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
-
-		return list1_->insert(key, val, expires, created);
+		return {
+			typename iterator::FirstIteratorPair{
+				list1_->insert(key, val, expires, created),
+				std::end(*list1_)
+			},
+			typename iterator::SecondIteratorPair{
+				std::end(*list2_),
+				std::end(*list2_)
+			}
+		};
 	}
 
 private:

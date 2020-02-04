@@ -36,10 +36,10 @@ public:
 		flush();
 	}
 
-	bool insert(	std::string_view const key, std::string_view const val,
+	auto insert(	std::string_view const key, std::string_view const val,
 			uint32_t const expires = 0, uint32_t const created = 0){
 
-		bool const result = list_->insert(key, val, expires, created );
+		auto result = list_->insert(key, val, expires, created );
 
 		if (predicate_(*list_))
 			flush();

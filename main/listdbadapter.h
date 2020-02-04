@@ -31,10 +31,10 @@ public:
 	std::string_view get(std::string_view const key) const{
 		assert(!key.empty());
 
-		const auto p = list_.find(key, std::true_type{} );
+		const auto it = list_.find(key, std::true_type{} );
 
-		if (p != std::end(list_) && p->isValid(std::true_type{}))
-			return p->getVal();
+		if (it != std::end(list_) && it->isValid(std::true_type{}))
+			return it->getVal();
 		else
 			return {};
 	}
@@ -117,7 +117,7 @@ public:
 		return list_.erase(key);
 	}
 
-	std::string incr(std::string_view const key, int64_t const val){
+	std::string_view incr(std::string_view const key, int64_t const val){
 		assert(!key.empty());
 
 		const auto p = list_.find(key, std::true_type{} );
@@ -127,11 +127,16 @@ public:
 		if (p != std::end(list_) && p->isValid(std::true_type{}))
 			n += from_string<int64_t>(p->getVal());
 
-		std::string const s = std::to_string(n);
+		to_string_buffer_t buffer;
 
-		set(key, s);
+		std::string_view const val_n = to_string(n, buffer);
 
-		return s;
+		auto it = list_.insert(key, val_n);
+
+		if (it != std::end(list_) && it->isValid(std::true_type{}))
+			return it->getVal();
+		else
+			return {};
 	}
 
 private:

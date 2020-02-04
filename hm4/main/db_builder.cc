@@ -129,7 +129,7 @@ int listLoad(LIST &list, READER &reader, size_t const process_step, std::bool_co
 		std::string_view const val = tok();
 
 		if (! key.empty()){
-			if (! listInsert(list, key, val, tag) )
+			if ( listInsert(list, key, val, tag) == std::end(list) )
 				log__("Error insert", key);
 		}
 

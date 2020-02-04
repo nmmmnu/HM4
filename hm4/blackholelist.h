@@ -25,11 +25,11 @@ public:
 	}
 
 	constexpr static
-	bool insert(
+	iterator insert(
 			std::string_view, std::string_view,
 			uint32_t = 0, uint32_t = 0
 		){
-		return true;
+		return nullptr;
 	}
 
 	constexpr static

@@ -24,10 +24,16 @@ Allocator allocator;
 
 template <class List>
 size_t listInsert(List &list, const char *key, const char *value){
-	list.insert(key, value);
+	auto it = list.insert(key, value);
+
+	// collect size, but via iterator...
+	if (it != std::end(list))
+		return it->bytes();
+	else
+		return 0;
 
 	// collect size...
-	return Pair::bytes(key, value);
+	// return Pair::bytes(key, value);
 }
 
 template <class List>
@@ -206,7 +212,7 @@ void list_test(hm4::BlackHoleList &list){
 	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0	);
 	mytest("sizeof",		list.bytes() == 0					);
 
-	mytest("put",			list.insert("key", "val")				);
+	mytest("put",			list.insert("key", "val") == std::end(list)		);
 	mytest("find",			list.find("key", std::false_type{}) == std::end(list)	);
 	mytest("find",			list.find("key", std::true_type{} ) == std::end(list)	);
 	mytest("remove",		list.erase("key")					);

@@ -35,9 +35,9 @@ auto VectorList::find(std::string_view const key, std::false_type) const noexcep
 	return it;
 }
 
-bool VectorList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+auto VectorList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
 	if (!newdata)
-		return false;
+		return this->end();
 
 	auto const &key = newdata->getKey();
 
@@ -51,7 +51,7 @@ bool VectorList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 		// check if the data in database is valid
 		if (! newdata->isValidForReplace(*olddata) ){
 			// newdata will be magically destroyed.
-			return false;
+			return this->end();
 		}
 
 		lc_.upd(olddata->bytes(), newdata->bytes());
@@ -62,21 +62,23 @@ bool VectorList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 		// deallocate old pair
 		allocator_->deallocate(olddata);
 
-		return true;
+		return { it };
 	}
 
 	// key not exists, shift, then add
 
 	try{
-		vector_.insert(it, newdata.get());
+		auto it2 = vector_.insert(it, newdata.get());
+
 		lc_.inc(newdata->bytes());
+
+		newdata.release();
+
+		return { it2 };
 	}catch(...){
-		return false;
+		// newdata will be deallocated...
+		return this->end();
 	}
-
-	newdata.release();
-
-	return true;
 }
 
 bool VectorList::erase(std::string_view const key){
