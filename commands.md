@@ -79,6 +79,7 @@ Set [key] -> [value] with expiration of [seconds] seconds on the server.
 ### INCR / INCRBY
 
 ``incr [key] [increase value = 1]``
+
 ``incrby [key] [increase value = 1]``
 
 Increase numerical value of the [key] with  [increase value]. It uses __int64_t__ as a number type.
@@ -105,6 +106,7 @@ Returns server information.
 ### SAVE / BGSAVE
 
 ``save [complete = 0]``
+
 ``bgsave [complete = 0]``
 
 Flush memtable on the disk and reloads the disktables.
