@@ -31,12 +31,7 @@ public:
 	std::string_view get(std::string_view const key) const{
 		assert(!key.empty());
 
-		const auto it = list_.find(key, std::true_type{} );
-
-		if (it != std::end(list_) && it->isValid(std::true_type{}))
-			return it->getVal();
-		else
-			return {};
+		return getVal_( list_.find(key, std::true_type{} ) );
 	}
 
 	auto getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
@@ -131,15 +126,17 @@ public:
 
 		std::string_view const val_n = to_string(n, buffer);
 
-		auto it = list_.insert(key, val_n);
+		return getVal_( list_.insert(key, val_n) );
+	}
 
+private:
+	std::string_view getVal_(typename LIST::iterator const &it) const{
 		if (it != std::end(list_) && it->isValid(std::true_type{}))
 			return it->getVal();
 		else
 			return {};
 	}
 
-private:
 	static bool samePrefix__(std::string_view const p, std::string_view const s){
 		if (p.size() > s.size())
 			return false;
