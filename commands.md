@@ -23,6 +23,7 @@ HM4 - command reference
 Gets [key] from the server. Exact match.
 
 > This command is 100% Redis compatible.
+> Blobs as values are supported, if your client support them.
 
 ---
 ### HGETALL
@@ -38,6 +39,8 @@ if the [number] is over 1000, then 100 keys are returned.
 Gets [number] keys after [key] from the server, but returns only keys that matching the prefix.
 if the [number] is under 10, then 10 keys are returned.
 if the [number] is over 1000, then 100 keys are returned.
+
+> Blobs as values are supported, if your client support them.
 
 __Example__:
 
@@ -59,6 +62,7 @@ You can get this user's information with following command:
 Set [key] -> [value] on the server.
 
 > This command is 100% Redis compatible.
+> Blobs as values are supported, if your client support them.
 
 ---
 ### SETEX
@@ -68,6 +72,7 @@ Set [key] -> [value] on the server.
 Set [key] -> [value] with expiration of [seconds] seconds on the server.
 
 > This command is 100% Redis compatible.
+> Blobs as values are supported, if your client support them.
 > This command helps HM4 to be used as session handler for PHP servers.
 
 ---

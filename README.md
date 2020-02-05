@@ -16,7 +16,7 @@ Goals of the project are.
 -   Speed
 -   Consistent
 -   High quality code
--   [Commands]
+-   Supported [commands]
 
 ---
 ### Architecture
@@ -77,9 +77,11 @@ This means that for production you will definitely need 64bit OS.
 ### LSM tree notes.
 
 Here is what Wikipedia say about:
+
 [Log structured merge tree]
 
 However there is 1976's research by Dennis G. Severance and Guy M. Lohman on the similar topic here:
+
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]
 
 When database works, many disktables will be created.
@@ -96,4 +98,4 @@ However this will complicate the things and probably only basic two table merge 
 
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]: http://www-users.cs.umn.edu/~he/diff/p256-severance.pdf
-[Commands]: commands.md
+[commands]: commands.md
