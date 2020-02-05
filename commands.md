@@ -31,14 +31,18 @@ Gets [key] from the server. Exact match.
 ``hgetall [key] [number = 10]``
 
 Gets [number] keys after [key] from the server.
+
 if the [number] is under 10, then 10 keys are returned.
-if the [number] is over 1000, then 100 keys are returned.
+
+if the [number] is over 1000, then 1000 keys are returned.
 
 ``hgetall [key] [number] [prefix]``
 
 Gets [number] keys after [key] from the server, but returns only keys that matching the prefix.
+
 if the [number] is under 10, then 10 keys are returned.
-if the [number] is over 1000, then 100 keys are returned.
+
+if the [number] is over 1000, then 1000 keys are returned.
 
 > Blobs as values are supported, if your client support them.
 
@@ -109,9 +113,16 @@ Returns server information.
 
 ``bgsave [complete = 0]``
 
-Flush memtable on the disk and reloads the disktables.
+On __mutable servers__ - flushes memtable on the disk and reloads the disktables.
 
-When [complete] is present it __suppose__ to bypass memtable flush, but current implementation is not 100% clear and might change in near future.
+If [complete] is present, it __suppose__ to bypass memtable flush, but current implementation is not 100% clear and might change in near future.
+
+Save is always foreground, e.g. you have to wait, but usually is very fast.
+
+On __immutable servers__ - reloads the disktables.
+
+[complete] options is ignored.
+
 
 > This command is 100% Redis compatible, assuming you do not use [complete] option.
 
