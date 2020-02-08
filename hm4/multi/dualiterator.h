@@ -32,8 +32,9 @@ public:
 public:
 	DualIterator(FirstIteratorPair first, SecondIteratorPair second) :
 					first_(std::move(first)),
-					second_(std::move(second)),
-					pair_(getDereference_()){}
+					second_(std::move(second)){
+		updateDereference_();
+	}
 
 	template<class List1, class List2, class... Args>
 	DualIterator(List1 const &first, List2 const &second, Args&& ...args) :
@@ -43,12 +44,10 @@ public:
 					){}
 
 	DualIterator &operator++(){
-		int const cmp = multiiterator_impl_::comp(first_, second_, std::false_type{});
-
-		if (cmp <= 0 && first_)
+		if (firstHit_)
 			++first_;
 
-		if (cmp >= 0 && second_)
+		if (secondHit_)
 			++second_;
 
 		// don't over optimize this...
@@ -75,20 +74,57 @@ public:
 	}
 
 private:
-	const Pair *getDereference_() const{
-		return multiiterator_impl_::comp(first_, second_, std::true_type{}) < 0 ?
-			first_.ptr() :
-			second_.ptr()
-		;
-	}
-
 	void updateDereference_(){
-		pair_ = getDereference_();
+		constexpr bool X = true;
+		constexpr bool _ = false;
+
+		auto SP = [this](bool f, bool s, const Pair *p){
+			firstHit_  = f;
+			secondHit_ = s;
+			pair_      = p;
+		};
+
+		auto S = [&SP](bool f, bool s, auto const &ip){
+			SP(f, s, & *ip);
+		};
+
+
+
+		bool const firstBool  = first_;
+		bool const secondBool = second_;
+
+		if (firstBool && secondBool){
+			int const r = first_->cmp(*second_);
+
+			if (r < 0)
+				return S(X,_, first_);
+
+			if (r > 0)
+				return S(_,X, second_);
+
+			int const rt = - first_->cmpTime(*second_);
+
+			if (rt <= 0)
+				return S(X,X, first_);
+			else
+				return S(X,X, second_);
+		}
+
+		if (firstBool && ! secondBool)
+			return S(X,_, first_);
+
+		if (! firstBool && secondBool)
+			return S(_,X, second_);
+
+		return SP(_,_, nullptr);
 	}
 
 private:
 	FirstIteratorPair	first_;
 	SecondIteratorPair	second_;
+
+	bool			firstHit_;
+	bool			secondHit_;
 
 	const Pair              *pair_;
 

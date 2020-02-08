@@ -15,7 +15,7 @@ UNAME		= $(shell uname -s)
 
 CF_DEPS		= -MMD -MP
 CF_INCL		= -Iinclude $(EXTRA_INCL)
-CF_OPTIM	= -O2
+CF_OPTIM	= -O2 -g
 #CF_OPTIM	= -O3 -DNDEBUG
 #CF_OPTIM	+= -march=native
 CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wno-unknown-warning-option

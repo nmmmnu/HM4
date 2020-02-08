@@ -133,13 +133,9 @@ private:
 			if (ip == false)
 				itp_.pop_back();
 
-			++c2;
-
 			return;
 		}
 		#endif
-
-		++c1;
 
 		const Pair *p = nullptr;
 
