@@ -124,37 +124,13 @@ public:
 
 private:
 	void increment_(){
-		#if 0
-		// this does not pay off.
-		if (itp_.size() == 1){
-			auto &ip = itp_.front();
-			++ip;
-
-			if (ip == false)
-				itp_.pop_back();
-
-			return;
-		}
-		#endif
-
-		const Pair *p = nullptr;
-
 		while(!itp_.empty()){
-			// ip is guearanteed to be valid
-
-			if (p && p->cmp(itp_.front()->getKey()) != 0){
-				// pair keys not match
-				return;
-			}
-
 			pop_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
 
 			auto &ip = itp_.back();
 
-			if (p == nullptr){
-				// first pass
-				p = ip.ptr();
-			}
+			// ip is guearanteed to be valid
+			auto key = ip->getKey();
 
 			++ip;
 
@@ -162,6 +138,14 @@ private:
 				std::push_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
 			}else{
 				itp_.pop_back();
+
+				if (itp_.empty())
+					return;
+			}
+
+			if ( key != itp_.front()->getKey() ){
+				// pair keys not match
+				return;
 			}
 		}
 	}

@@ -110,10 +110,10 @@ private:
 				return S(X,X, second_);
 		}
 
-		if (firstBool && ! secondBool)
+		if (firstBool)
 			return S(X,_, first_);
 
-		if (! firstBool && secondBool)
+		if (secondBool)
 			return S(_,X, second_);
 
 		return SP(_,_, nullptr);
