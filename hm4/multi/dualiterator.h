@@ -43,9 +43,7 @@ public:
 					){}
 
 	DualIterator &operator++(){
-		constexpr bool fullTimeCompare = false;
-
-		int const cmp = multiiterator_impl_::comp(first_, second_, fullTimeCompare);
+		int const cmp = multiiterator_impl_::comp(first_, second_, std::false_type{});
 
 		if (cmp <= 0 && first_)
 			++first_;
@@ -78,7 +76,7 @@ public:
 
 private:
 	const Pair *getDereference_() const{
-		return multiiterator_impl_::comp(first_, second_) < 0 ?
+		return multiiterator_impl_::comp(first_, second_, std::true_type{}) < 0 ?
 			first_.ptr() :
 			second_.ptr()
 		;

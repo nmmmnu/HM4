@@ -8,6 +8,8 @@
 
 #include "fixedvector.h"
 
+#include "version.h"
+
 template<class LIST, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
 public:
@@ -75,9 +77,10 @@ public:
 		to_string_buffer_t buffer[2];
 
 		return concatenate(
-			"Keys (estimated): "	, to_string(list_.size(),  buffer[0]),	"\n",
-			"Size: "		, to_string(list_.bytes(), buffer[1]),	"\n",
-			"Mutable: "		, MUTABLE ? "Yes" : "No",		"\n"
+			"Version		: ", hm4::version::str,				"\n",
+			"Keys (estimated)	: ", to_string(list_.size(),  buffer[0]),	"\n",
+			"Size			: ", to_string(list_.bytes(), buffer[1]),	"\n",
+			"Mutable		: ", MUTABLE ? "Yes" : "No",			"\n"
 		);
 	}
 

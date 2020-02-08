@@ -38,7 +38,7 @@ public:
 			StoreIterator first, StoreIterator last,
 			Args&& ...args
 	){
-		reserve__(first, last, itp_);
+		itp_.reserve( static_cast<typename ITPVector::size_type>( std::distance(first, last) ) );
 
 		for (; first != last; ++first){
 			ITP itp{ *first, std::forward<Args>(args)... };
@@ -47,12 +47,12 @@ public:
 				itp_.push_back(std::move(itp));
 		}
 
-		make_heap(itp_);
+		make_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
 	}
 
 	template<class StoreIterator>
 	constexpr CollectionIterator(
-			StoreIterator const &, StoreIterator const &,
+			StoreIterator, StoreIterator,
 			std::false_type
 	){
 		// skip the work and creates end iterator directly
@@ -63,30 +63,38 @@ public:
 	CollectionIterator(
 			StoreIterator first, StoreIterator last,
 			std::string_view const key,
-			std::true_type const exact
+			std::true_type
 	){
 		// skip the work and creates iterator with single element
-		// printf("Here...\n");
+
+		// this is std::min_element, but it uses projection,
+		// so it can not use the algorithm,
+		// from the other side, result needed is the projection,
+		// so it can not be written as a template...
 
 		if (first == last){
 			// not found. done.
 			return;
 		}
 
-		ITP smallest{ *first, key, exact };
+		auto proj = [key](auto const &table){
+			return ITP{ table, key, std::true_type{} };
+		};
+
+		auto min_element = proj(*first);
 
 		++first;
 
 		for(; first != last; ++first){
-			ITP itp{ *first, key, exact };
+			auto element = proj(*first);
 
-			if (heap_comp(smallest, itp))
-				smallest = std::move(itp);
+			if (heap_comp(min_element, element))
+				min_element = std::move(element);
 		}
 
-		if (smallest){
+		if (min_element){
 			itp_.reserve(1);
-			itp_.push_back(std::move(smallest));
+			itp_.push_back(std::move(min_element));
 		}
 	}
 
@@ -116,6 +124,23 @@ public:
 
 private:
 	void increment_(){
+		#if 0
+		// this does not pay off.
+		if (itp_.size() == 1){
+			auto &ip = itp_.front();
+			++ip;
+
+			if (ip == false)
+				itp_.pop_back();
+
+			++c2;
+
+			return;
+		}
+		#endif
+
+		++c1;
+
 		const Pair *p = nullptr;
 
 		while(!itp_.empty()){
@@ -126,7 +151,7 @@ private:
 				return;
 			}
 
-			pop_heap(itp_);
+			pop_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
 
 			auto &ip = itp_.back();
 
@@ -138,39 +163,18 @@ private:
 			++ip;
 
 			if (ip){
-				push_heap(itp_);
+				std::push_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
 			}else{
 				itp_.pop_back();
 			}
 		}
 	}
 
-	template<class StoreIterator>
-	static void reserve__(StoreIterator first, StoreIterator last, ITPVector &v){
-		auto const size = std::distance(first, last);
-		if (size > 0)
-			v.reserve( static_cast<typename ITPVector::size_type>(size) );
-	}
-
-private:
 	// heap compare
 	static bool heap_comp(ITP const &a, ITP const &b){
 		// returns ​true if the first argument is less than the second
 		// however we negate this because we want min heap.
-		return multiiterator_impl_::comp(a, b) > 0;
-	}
-
-	// heap functions
-	static auto make_heap(ITPVector &v){
-		return std::make_heap(std::begin(v), std::end(v), & heap_comp);
-	}
-
-	static auto push_heap(ITPVector &v){
-		return std::push_heap(std::begin(v), std::end(v), & heap_comp);
-	}
-
-	static auto pop_heap(ITPVector &v){
-		return std::pop_heap (std::begin(v), std::end(v), & heap_comp);
+		return comp(a, b, std::true_type{}) > 0;
 	}
 };
 

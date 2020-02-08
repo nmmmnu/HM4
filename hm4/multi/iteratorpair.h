@@ -71,16 +71,18 @@ namespace multiiterator_impl_{
 
 
 	template <class Iterator1, class Iterator2>
-	int compNonEmpty(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b, bool const fullTimeCompare){
-		if (fullTimeCompare == false)
-			return a->cmp(*b);
+	int compNonEmpty(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b, std::false_type /* compare_time_tag */){
+		return a->cmp(*b);
+	}
 
+	template <class Iterator1, class Iterator2>
+	int compNonEmpty(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b, std::true_type  /* compare_time_tag */){
 		// return bigger time or first
 		return a->cmpWithTime(*b, std::false_type{});
 	}
 
-	template <class Iterator1, class Iterator2>
-	int comp(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b, bool const fullTimeCompare = true){
+	template <class Iterator1, class Iterator2, bool B>
+	int comp(IteratorPair<Iterator1> const &a, IteratorPair<Iterator2> const &b, std::bool_constant<B> compare_time_tag){
 		if (a == false && b == false)
 			return 0;
 
@@ -90,7 +92,7 @@ namespace multiiterator_impl_{
 		if (b == false)
 			return -1;
 
-		return compNonEmpty(a, b, fullTimeCompare);
+		return compNonEmpty(a, b, compare_time_tag);
 	}
 } // namespace multiiterator_impl_
 
