@@ -211,47 +211,22 @@ private:
 	WorkerStatus do_count(){
 		const auto &p = protocol_.getParams();
 
-		if (p.size() != 2 && p.size() != 3 && p.size() != 4)
+		if (p.size() != 4)
 			return err_BadRequest_();
 
 		const auto &key    = p[1];
 
-		switch( p.size() ){
-		case 2:
-			// classic case, not really useful:
-			// COUNT u:
 
-			{
-				protocol_.response_string(buffer_, db_.count(key, 0, "") );
-				break;
-			}
+		// count + prefix case
+		// COUNT u: 100 u:
 
-		case 3:
-			// count case, not really useful:
-			// COUNT u: 100
+		uint16_t const count = from_string<uint16_t>(p[2]);
+		const auto &prefix = p[3];
 
-			{
-				uint16_t const count = from_string<uint16_t>(p[2]);
+		protocol_.response_strings(buffer_, db_.count(key, count, prefix) );
 
-				protocol_.response_string(buffer_, db_.count(key, count, "") );
-				break;
-			}
-
-		case 4:
-			// count + prefix case
-			// COUNT u: 100 u:
-
-			{
-				uint16_t const count = from_string<uint16_t>(p[2]);
-				const auto &prefix = p[3];
-
-				protocol_.response_string(buffer_, db_.count(key, count, prefix) );
-				break;
-			}
-
-		}
-
-		return WorkerStatus::WRITE;	}
+		return WorkerStatus::WRITE;
+	}
 
 private:
 	WorkerStatus do_set(){

@@ -73,23 +73,35 @@ public:
 		return result;
 	}
 
-	uint16_t count(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
+	auto count(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
 		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
 		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 
-		uint16_t c = 0;
+		uint16_t count   = 0;
+		uint16_t countOK = 0;
+
+		std::string_view resultKey;
+
 		for(; it != std::end(list_); ++it){
-			auto const &resultKey = it->getKey();
+			resultKey = it->getKey();
 
-			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey))
+			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey)){
+				resultKey = {};
 				break;
+			}
 
-			if (++c >= maxResults)
+			if (it->isValid(std::true_type{}))
+				++countOK;
+
+			if (++count >= maxResults)
 				break;
 		}
 
-		return c;
+		return std::array<std::string, 2>{
+			std::to_string(countOK),
+			{ resultKey.data(), resultKey.size() }
+		};
 	}
 
 	std::string info() const{

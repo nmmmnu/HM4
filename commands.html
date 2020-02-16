@@ -1,0 +1,304 @@
+<html>
+<head>
+	<title>HM4 - command reference</title>
+	<style><!--
+	pre {
+		border: dashed 1px black;
+		padding: 10px;
+	}
+
+	blockquote {
+		border-left: solid 10px #aaa;
+		padding: 10px;
+	}
+
+	hr {
+		background: black;
+		border: 0px;
+		height: 3px;
+
+		margin-top: 30px;
+		margin-bottom: 30px;
+	}
+
+	--></style>
+</head>
+<body>
+
+<h1>HM4 - command reference</h1>
+<hr />
+
+<h2>List of commands</h2>
+
+<ul>
+	<li>GET</li>
+	<li>HGETALL</li>
+	<li>COUNT</li>
+	<li>SET</li>
+	<li>SETEX</li>
+	<li>INCR / INCRBY</li>
+	<li>DEL</li>
+	<li>INFO</li>
+	<li>SAVE / BGSAVE</li>
+	<li>EXIT</li>
+	<li>SHUTDOWN</li>
+</ul>
+<hr />
+
+
+
+<h2>GET</h2>
+
+<pre>get [key]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Gets [key] from the server. Exact match.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	value of the key or empty string
+</p>
+
+<blockquote>
+	This command is 100% Redis compatible.<br />
+	Blobs as values are supported, if your client support them.
+</blockquote>
+<hr />
+
+
+
+<h2>HGETALL</h2>
+
+<h3>Option 1 - standard Redis way:</h3>
+
+<pre>hgetall [key] [number = 10]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Gets [number] keys after [key] from the server.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	array of key and values
+</p>
+
+<blockquote>
+	The [number] is clamp between 10 and 1000.<br />
+	This command allows iterating all keys in the database.<br />
+	Blobs as values are supported, if your client support them.
+</blockquote>
+
+<h3>Option 2 - usage with prefix:</h3>
+
+<pre>hgetall [key] [number] [prefix]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Gets [number] keys after [key] from the server, but returns only keys <u>that matching the prefix</u>.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	array of key and values
+</p>
+
+<blockquote>
+	The [number] is clamp between 10 and 1000.<br />
+	Blobs as values are supported, if your client support them.
+</blockquote>
+
+<p>
+	<b>Example:</b><br />
+	Suppose we have user database with keys like this:
+</p>
+
+<pre>
+u:123:email   -> office@domain.com
+u:123:country -> US
+u:123:city    -> Boston
+</pre>
+
+<p>You can get this user's information records with following command:</p>
+
+<pre>hgetall u:123: 1000 u:123:</pre>
+
+<hr />
+
+
+
+<h2>COUNT</h2>
+
+<pre>count [key] [number] [prefix]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Counts [number] keys after [key] from the server, but returns only keys <u>that matching the prefix</u>.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	Array responce with two elements:
+</p>
+
+<ul>
+	<li>count of valid elements</li>
+	<li>last key, if there is second page</li>
+</ul>
+
+<blockquote>
+	The [number] is clamp between 10 and 1000.<br />
+	This command is available after 1.2.4
+</blockquote>
+
+<p>
+	<b>Example:</b><br />
+	Suppose we have user database with keys like this:
+</p>
+
+<pre>
+u:123:email   -> office@domain.com
+u:123:country -> US
+u:123:city    -> Boston
+</pre>
+
+<p>You can get this user's number of records with following command:</p>
+
+<pre>count u:123: 1000 u:123:</pre>
+
+<hr />
+
+
+
+<h2>SET</h2>
+
+<pre>set [key] [value]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Set [key] -> [value] on the server.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	-
+</p>
+
+<blockquote>
+	This command is 100% Redis compatible.<br />
+	Blobs as values are supported, if your client support them.
+</blockquote>
+<hr />
+
+
+
+<h2>SETEX</h2>
+
+<pre>setex [key] [seconds] [value]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Set [key] -> [value] with expiration of [seconds] seconds on the server.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	-
+</p>
+
+<blockquote>
+	This command is 100% Redis compatible.<br />
+	Blobs as values are supported, if your client support them.<br />
+	This command helps HM4 to be used as session handler for PHP servers.
+</blockquote>
+<hr />
+
+
+
+<h2>INCR / INCRBY</h2>
+
+<pre>incr   [key] [increase value = 1]</pre>
+<pre>incrby [key] [increase value = 1]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Increase numerical value of the [key] with  [increase value]. It uses <b>int64_t</b> as a number type.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	New increased value.
+</p>
+
+<blockquote>
+	This command is 100% Redis compatible, assuming you are using it in correct Redis way.
+</blockquote>
+<hr />
+
+
+
+<h2>DEL</h2>
+
+<pre>del [key]</pre>
+
+<p>
+	<b>Description:</b><br />
+	Removes [key] from the server.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	-
+</p>
+
+<blockquote>
+	This command is 100% Redis compatible.
+</blockquote>
+<hr />
+
+
+
+<h2>INFO</h2>
+
+<pre>info</pre>
+
+<p>
+	<b>Description:</b><br />
+	Returns server information.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	Array responce with information
+</p>
+<hr />
+
+
+
+<h2>SHUTDOWN</h2>
+
+<pre>shutdown</pre>
+
+<p>
+	<b>Description:</b><br />
+	Shutdowns the server.
+</p>
+
+<p>
+	<b>Return value:</b><br />
+	-
+</p>
+
+<blockquote>
+	This command is 100% Redis compatible,<br />
+	but SAVE / NOSAVE is not supported yet.
+</blockquote>
+<hr />
+
+
+
+</body>
+</html>
+

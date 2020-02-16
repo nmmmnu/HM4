@@ -12,16 +12,19 @@ struct MockDBAdapter{
 		return "Mock Adapter\n";
 	}
 
+	constexpr
 	std::string_view get(std::string_view) const{
 		return "value";
 	}
 
+	constexpr
 	const auto &getall(std::string_view, uint16_t, std::string_view) const{
-		return data_;
+		return dataKeys_;
 	}
 
-	uint16_t count(std::string_view, uint16_t, std::string_view) const{
-		return 4;
+	constexpr
+	std::array<std::string_view, 2> count(std::string_view, uint16_t, std::string_view) const{
+		return { "0", "" };
 	}
 
 	bool refresh(bool){
@@ -29,7 +32,7 @@ struct MockDBAdapter{
 	}
 
 private:
-	constexpr static std::array<std::string_view, 4 * 2> data_ = {
+	constexpr static std::array<std::string_view, 4 * 2> dataKeys_ = {
 		"key1", "value1",
 		"key2", "value2",
 		"key3", "value3",
