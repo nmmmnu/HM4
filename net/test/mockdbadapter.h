@@ -20,6 +20,10 @@ struct MockDBAdapter{
 		return data_;
 	}
 
+	uint16_t count(std::string_view, uint16_t, std::string_view) const{
+		return 4;
+	}
+
 	bool refresh(bool){
 		return true;
 	}

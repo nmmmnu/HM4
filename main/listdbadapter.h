@@ -54,7 +54,7 @@ public:
 
 		size_t c = 0;
 		for(; it != std::end(list_); ++it){
-			const auto &resultKey = it->getKey();
+			auto const &resultKey = it->getKey();
 
 			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey))
 				break;
@@ -73,14 +73,33 @@ public:
 		return result;
 	}
 
+	uint16_t count(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
+		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
+
+		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
+
+		uint16_t c = 0;
+		for(; it != std::end(list_); ++it){
+			auto const &resultKey = it->getKey();
+
+			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey))
+				break;
+
+			if (++c >= maxResults)
+				break;
+		}
+
+		return c;
+	}
+
 	std::string info() const{
 		to_string_buffer_t buffer[2];
 
 		return concatenate(
-			"Version		: ", hm4::version::str,				"\n",
-			"Keys (estimated)	: ", to_string(list_.size(),  buffer[0]),	"\n",
-			"Size			: ", to_string(list_.bytes(), buffer[1]),	"\n",
-			"Mutable		: ", MUTABLE ? "Yes" : "No",			"\n"
+			"Version          : ", hm4::version::str,			"\n",
+			"Keys (estimated) : ", to_string(list_.size(),  buffer[0]),	"\n",
+			"Size             : ", to_string(list_.bytes(), buffer[1]),	"\n",
+			"Mutable          : ", MUTABLE ? "Yes" : "No",			"\n"
 		);
 	}
 

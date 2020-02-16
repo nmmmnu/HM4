@@ -62,6 +62,13 @@ public:
 	template<class CONNECTION, class CONTAINER>
 	static void response_strings(CONNECTION &buffer, const CONTAINER &list);
 
+public:
+	template<class CONNECTION>
+	static void response_string(CONNECTION &buffer, uint64_t const msg){
+		// if we change uint64_t to template, std::string will come here.
+		return response_string(buffer, std::to_string(msg));
+	}
+
 private:
 	StringVector	params_;
 };

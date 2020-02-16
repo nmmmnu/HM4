@@ -21,7 +21,9 @@ public:
 		SETEX		,
 		DEL		,
 
-		INCR
+		INCR		,
+
+		COUNT
 	};
 
 	constexpr static auto h(const char *s){
@@ -65,6 +67,9 @@ public:
 		case h("INCR"		)	:
 		case h("incrby"		)	:
 		case h("INCRBY"		)	: return Command::INCR		;
+
+		case h("count"		)	:
+		case h("COUNT"		)	: return Command::COUNT		;
 
 		default				: return Command::UNKNOWN	;
 		}

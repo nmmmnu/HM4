@@ -32,18 +32,18 @@ Gets [key] from the server. Exact match.
 
 Gets [number] keys after [key] from the server.
 
-if the [number] is under 10, then 10 keys are returned.
+The [number] is clamp between 10 and 1000.
 
-if the [number] is over 1000, then 1000 keys are returned.
+> This command is not very useful and exists for iterating all keys in the database.
+> Blobs as values are supported, if your client support them.
 
 ``hgetall [key] [number] [prefix]``
 
 Gets [number] keys after [key] from the server, but returns only keys that matching the prefix.
 
-if the [number] is under 10, then 10 keys are returned.
+The [number] is clamp between 10 and 1000.
 
-if the [number] is over 1000, then 1000 keys are returned.
-
+> This command is useful.
 > Blobs as values are supported, if your client support them.
 
 __Example__:
@@ -54,9 +54,43 @@ Suppose we have keys like this:
 - u:123:country -> US
 - u:123:city -> Boston
 
-You can get this user's information with following command:
+You can get this user's information records with following command:
 
 ``hgetall u:123: 1000 u:123:``
+
+---
+### COUNT
+
+``count [key] [number = 10]``
+
+Counts [number] keys after [key] from the server.
+
+The [number] is clamp between 10 and 1000.
+
+> This command is not useful and exists for compatibility with HGETALL command.
+> This command is available after 1.2.4
+
+
+``count [key] [number] [prefix]``
+
+Counts [number] keys after [key] from the server, but counts only keys that matching the prefix.
+
+The [number] is clamp between 10 and 1000.
+
+> This command is useful.
+> This command is available after 1.2.4
+
+__Example__:
+
+Suppose we have keys like this:
+
+- u:123:email -> office@domain.com
+- u:123:country -> US
+- u:123:city -> Boston
+
+You can count this user's information records with following command:
+
+``count u:123: 1000 u:123:``
 
 ---
 ### SET

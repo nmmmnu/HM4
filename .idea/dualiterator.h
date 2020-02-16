@@ -3,6 +3,9 @@
 
 #include "iteratorpair.h"
 
+#include <variant>
+#include <array>
+
 namespace hm4{
 namespace multi{
 
@@ -17,8 +20,14 @@ private:
 	using it_traits_DT = typename std::iterator_traits<T>::difference_type;
 
 public:
-	using FirstIteratorPair  = typename multiiterator_impl_::IteratorPair<FirstIterator>;
-	using SecondIteratorPair = typename multiiterator_impl_::IteratorPair<SecondIterator>;
+	using FirstIteratorPair		= typename multiiterator_impl_::IteratorPair<FirstIterator>;
+	using SecondIteratorPair	= typename multiiterator_impl_::IteratorPair<SecondIterator>;
+
+	using MyVariant			= std::variant<
+						FirstIteratorPair,
+						SecondIteratorPair
+					>;
+	using MyContainer		= std::array<MyVariant, 2>;
 
 public:
 	using difference_type	= it_traits_DT<FirstIterator>;
@@ -28,9 +37,13 @@ public:
 	using iterator_category	= std::forward_iterator_tag;
 
 public:
-	DualIterator(FirstIteratorPair first, SecondIteratorPair second) :
-					first_(std::move(first)),
-					second_(std::move(second)){
+	DualIterator(FirstIteratorPair first, SecondIteratorPair second){
+		if (first)
+			itp_[itpSize_++] = std::move(first);
+
+		if (second)
+			itp_[itpSize_++] = std::move(second);
+
 		updateDereference_();
 	}
 
@@ -42,11 +55,23 @@ public:
 					){}
 
 	DualIterator &operator++(){
-		if (firstHit_)
-			++first_;
+		auto incPair = [](auto const &itp){
+			const Pair *p;
 
-		if (secondHit_)
-			++second_;
+			std::visit([&p](auto const &it){ ++it; p = *it; }, itp);
+
+			return p;
+		};
+
+		if (itpSize_ == 0)
+			return;
+
+		MyContainer::size_type index = 0;
+
+		const Pair *p = incPair(itp_[index]);
+
+		if (!p
+
 
 		// don't over optimize this...
 		updateDereference_();
@@ -55,11 +80,19 @@ public:
 	}
 
 	reference operator *() const{
-		return *pair_;
+		auto getPair = [](auto const &itp){
+			const Pair *p;
+
+			std::visit([&p](auto const &it){ p = *it; }, itp);
+
+			return p;
+		};
+
+		return getPair(*itp_.front());
 	}
 
 	bool operator==(DualIterator const &other) const{
-		return first_ == other.first_ && second_ == other.second_;
+		return itpSize_ == 0 && other.itpSize_ == 0;
 	}
 
 public:
@@ -73,58 +106,46 @@ public:
 
 private:
 	void updateDereference_(){
-		constexpr bool X = true;
-		constexpr bool _ = false;
+		if (itpSize_ < 2)
+			return;
 
-		auto SP = [this](bool f, bool s, const Pair *p){
-			firstHit_  = f;
-			secondHit_ = s;
-			pair_      = p;
+		auto getPair = [](auto const &itp){
+			const Pair *p;
+
+			std::visit([&p](auto const &it){ p = *it; }, itp);
+
+			return p;
 		};
 
-		auto S = [&SP](bool f, bool s, auto const &ip){
-			SP(f, s, & *ip);
-		};
+		const Pair *p0 = getPair(itp_[0]);
+		const Pair *p1 = getPair(itp_[1]);
 
+		int const r = p0->cmp(*p1);
 
-
-		bool const firstBool  = first_;
-		bool const secondBool = second_;
-
-		if (firstBool && secondBool){
-			int const r = first_->cmp(*second_);
-
-			if (r < 0)
-				return S(X,_, first_);
-
-			if (r > 0)
-				return S(_,X, second_);
-
-			int const rt = - first_->cmpTime(*second_);
-
-			if (rt <= 0)
-				return S(X,X, first_);
-			else
-				return S(X,X, second_);
+		if (r < 0){
+			/* no swap */
+			return;
 		}
 
-		if (firstBool)
-			return S(X,_, first_);
+		if (r > 0){
+			std::swap(itp_[0], itp_[1]);
+			return;
+		}
 
-		if (secondBool)
-			return S(_,X, second_);
+		int const rt = - p0->cmpTime(*p1);
 
-		return SP(_,_, nullptr);
+		if (rt <= 0){
+			/* no swap */
+			return;
+		}else{
+			std::swap(itp_[0], itp_[1]);
+			return;
+		}
 	}
 
 private:
-	FirstIteratorPair	first_;
-	SecondIteratorPair	second_;
-
-	bool			firstHit_;
-	bool			secondHit_;
-
-	const Pair              *pair_;
+	MyContainer		itp_;
+	MyContainer::size_type	itpSize_ = 0;
 
 private:
 	static_assert(

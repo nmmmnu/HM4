@@ -51,7 +51,7 @@ public:
 	}
 
 	template<class StoreIterator>
-	constexpr CollectionIterator(
+	CollectionIterator(
 			StoreIterator, StoreIterator,
 			std::false_type
 	){
@@ -130,7 +130,7 @@ private:
 			auto &ip = itp_.back();
 
 			// ip is guearanteed to be valid
-			auto key = ip->getKey();
+			auto const &key = ip->getKey();
 
 			++ip;
 
