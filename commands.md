@@ -6,6 +6,7 @@ HM4 - command reference
 
 -   GET
 -   HGETALL
+-   COUNT
 -   SET
 -   SETEX
 -   INCR / INCRBY
@@ -35,6 +36,7 @@ Gets [number] keys after [key] from the server.
 The [number] is clamp between 10 and 1000.
 
 > This command is not very useful and exists for iterating all keys in the database.
+
 > Blobs as values are supported, if your client support them.
 
 ``hgetall [key] [number] [prefix]``
@@ -43,7 +45,8 @@ Gets [number] keys after [key] from the server, but returns only keys that match
 
 The [number] is clamp between 10 and 1000.
 
-> This command is useful.
+> This command is useful, see example
+
 > Blobs as values are supported, if your client support them.
 
 __Example__:
@@ -68,6 +71,7 @@ Counts [number] keys after [key] from the server.
 The [number] is clamp between 10 and 1000.
 
 > This command is not useful and exists for compatibility with HGETALL command.
+
 > This command is available after 1.2.4
 
 
@@ -77,7 +81,8 @@ Counts [number] keys after [key] from the server, but counts only keys that matc
 
 The [number] is clamp between 10 and 1000.
 
-> This command is useful.
+> This command is useful, see example
+
 > This command is available after 1.2.4
 
 __Example__:
