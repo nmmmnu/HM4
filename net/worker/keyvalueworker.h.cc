@@ -216,7 +216,6 @@ private:
 
 		const auto &key    = p[1];
 
-
 		// count + prefix case
 		// COUNT u: 100 u:
 

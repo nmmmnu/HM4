@@ -17,7 +17,7 @@ public:
 	constexpr static uint16_t MAXIMUM_RESULTS = 1000;
 
 public:
-	constexpr static bool MUTABLE = ! std::is_const<LIST>::value;
+	constexpr static bool MUTABLE = ! std::is_const_v<LIST>;
 
 public:
 	ListDBAdapter(LIST &list, COMMAND &cmd) :
@@ -39,16 +39,13 @@ public:
 	auto getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
 		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
-		#if 0
-		std::vector<std::string_view> result;
+	//	using MyVector = std::vector<std::string_view>;
+		using MyVector = FixedVector<std::string_view, 2 * MAXIMUM_RESULTS>;
+
+		MyVector result;
 
 		// reserve x2 because of hgetall
 		result.reserve(maxResults * 2);
-		#else
-
-		FixedVector<std::string_view, 2 * MAXIMUM_RESULTS> result;
-
-		#endif
 
 		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 
@@ -116,16 +113,17 @@ public:
 	}
 
 	bool refresh(bool const completeRefresh){
-		return refresh_(completeRefresh, cmd_);
+		return refresh__(completeRefresh, cmd_);
 	}
 
 private:
 	template<class T>
-	bool refresh_(bool const completeRefresh, const T &){
-		return cmd_ && cmd_->command(completeRefresh);
+	static bool refresh__(bool const completeRefresh, T *cmd){
+		return cmd && cmd->command(completeRefresh);
 	}
 
-	bool refresh_(bool const /* completeRefresh */, std::nullptr_t){
+	constexpr
+	static bool refresh__(bool const /* completeRefresh */, std::nullptr_t *){
 		return false;
 	}
 
@@ -175,14 +173,13 @@ private:
 		if (p.size() > s.size())
 			return false;
 
-		return std::equal(p.begin(), p.end(), s.begin());
+		return std::equal(std::begin(p), std::end(p), std::begin(s));
 	}
 
 private:
 	LIST		&list_;
 	COMMAND		*cmd_		= nullptr;
 };
-
 
 #endif
 
