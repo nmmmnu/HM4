@@ -68,11 +68,7 @@ struct SkipList::Node{
 	}
 
 	int cmp(HPair::HKey const hkey, std::string_view const key) const{
-		auto [ ok, result ] = HPair::SS::compare(this->hkey, hkey);
-
-	//	printf("cmp> %16lX | %16lX | %2d\n", hkey, this->hkey, result);
-
-		return ok ? result : data->cmp(key);
+		return HPair::cmp(this->hkey, *this->data, hkey, key);
 	}
 };
 

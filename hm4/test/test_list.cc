@@ -42,7 +42,8 @@ auto listPopulate(List &list){
 
 	size_t size =
 		listInsert(list, "3 city",	"Sofia"	) +
-		listInsert(list, "1 name",	"Niki"	) +
+		// this tests HPair::HKey as well:
+		listInsert(list, "1 firstname",	"Niki"	) +
 		listInsert(list, "4 os",	"Linux"	) +
 		listInsert(list, "2 age",	"22"	) +
 		0
@@ -82,7 +83,7 @@ template <class List>
 void iterator_test_get(const List &list){
 
 	mytest("it", 			getCheck(list, "1",		"Niki",		std::false_type{}	));
-	mytest("it", 			getCheck(list, "1 name",	"Niki",		std::true_type{}	));
+	mytest("it", 			getCheck(list, "1 firstname",	"Niki",		std::true_type{}	));
 	mytest("it", 			getCheck(list, "2",		"22",		std::false_type{}	));
 	mytest("it", 			getCheck(list, "2 age",		"22",		std::true_type{}	));
 	mytest("it", 			getCheck(list, "3",		"Sofia",	std::false_type{}	));
@@ -163,7 +164,7 @@ void list_test(List &list){
 	list.erase("2 age");
 
 	// remove first
-	list.erase("1 name");
+	list.erase("1 firstname");
 
 	// remove last
 	list.erase("4 os");

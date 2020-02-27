@@ -28,14 +28,6 @@ static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 // ==============================
 
 namespace{
-	[[maybe_unused]]
-	auto toSS(HPair::HKey const &i){
-		// must be const ref to preserve the address...
-		const char *s = reinterpret_cast<const char *>(& i);
-
-		return std::string_view{ s, sizeof(HPair::HKey) };
-	}
-
 	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &list, std::true_type){
 		return result.found ? result.it : list.ra_end();
 	}
@@ -46,12 +38,14 @@ namespace{
 
 	// -----------------------------------
 
+	template<size_t start>
 	int comp(Pair const &p, std::string_view const key){
-		return p.cmp(key);
+		return p.cmpX<start>(key);
 	}
 
+	template<size_t start = 0>
 	auto searchBinary(std::string_view const key, DiskList::random_access_iterator first, DiskList::random_access_iterator last){
-		return binarySearch(first, last, key, comp);
+		return binarySearch(first, last, key, comp<start>);
 	}
 
 	// -----------------------------------
@@ -105,7 +99,7 @@ namespace{
 			log__(
 				"Not found",
 				"pos", listPos,
-				"key",	toSS(it->key)
+				"key", HPair::toStringView(it->key)
 			);
 
 			return { false,  DiskList::random_access_iterator{ list, listPos } };
@@ -113,7 +107,7 @@ namespace{
 
 		// OK, is found in the hot line...
 
-		if (key.size() < sizeof(HPair::HKey)){
+		if (key.size() < HPair::N){
 			// if key.size() == HPair::HKey,
 			// this does not mean that key is found...
 
@@ -128,10 +122,14 @@ namespace{
 
 		log__(
 			"Proceed with Binary Search", listPos, listPosLast,
-			"Hotline Key",	toSS(it->key)
+			"Hotline Key",	HPair::toStringView(it->key)
 		);
 
-		return searchBinary(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);
+		// at this point, we know ALL keys are with same prefix and
+		// their size is at least HPair::N
+		// this means , we can skip comparing first HPair::N characters
+
+		return searchBinary<HPair::N>(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);
 	}
 
 	[[maybe_unused]]

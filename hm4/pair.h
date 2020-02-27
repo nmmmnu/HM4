@@ -202,11 +202,24 @@ namespace hm4{
 		int cmp(std::string_view const key) const noexcept{
 			return std::empty(key) ?
 				CMP_NULLKEY :
-				::compare(getKey_(), getKeyLen_(), key.data(), key.size());
+				cmpX<0>(key);
 		}
 
 		int cmp(Pair const &pair) const noexcept{
 			return cmp(pair.getKey());
+		}
+
+		template<size_t start>
+		int cmpX(std::string_view const key) const noexcept{
+		//	assert(key.size() >= start);
+		//	assert(getKeyLen_() >= start);
+
+			return ::compare(getKey_() + start, getKeyLen_() - start, key.data() + start, key.size() - start);
+		}
+
+		template<>
+		int cmpX<0>(std::string_view const key) const noexcept{
+			return ::compare(getKey_(), getKeyLen_(), key.data(), key.size());
 		}
 
 	public:

@@ -12,9 +12,7 @@ struct LinkList::Node{
 	Node		*next = nullptr;
 
 	int cmp(HPair::HKey const hkey, std::string_view const key) const{
-		auto [ ok, result ] = HPair::SS::compare(this->hkey, hkey);
-
-		return ok ? result : data->cmp(key);
+		return HPair::cmp(this->hkey, *this->data, hkey, key);
 	}
 };
 
