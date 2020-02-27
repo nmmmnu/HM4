@@ -127,13 +127,13 @@ namespace{
 
 		// at this point, we know ALL keys are with same prefix and
 		// their size is at least HPair::N
-		// this means , we can skip comparing first HPair::N characters
+		// this means, we can skip comparing first HPair::N characters
 
 		return searchBinary<HPair::N>(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);
 	}
 
 	[[maybe_unused]]
-	inline void log__file__(std::string_view filename, bool const mmap){
+	void log__file__(std::string_view filename, bool const mmap){
 		if constexpr (0)
 			log__("- ", filename, mmap ? "Success" : "Error");
 	}
