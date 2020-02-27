@@ -13,7 +13,6 @@ namespace hm4{
 
 		constexpr auto N	= sizeof(HKey);
 
-
 		inline int cmp(HKey const src_hkey, Pair const &src_pair, HKey const hkey, std::string_view const key){
 			auto [ ok, result ] = SS::compare(src_hkey, hkey);
 
