@@ -226,11 +226,23 @@ namespace hm4{
 		bool equals(std::string_view const key) const noexcept{
 			return std::empty(key) ?
 				false :
-				::equals(getKey_(), getKeyLen_(), key.data(), key.size());
+				equalsX<0>(key);
 		}
 
 		int equals(Pair const &pair) const noexcept{
 			return equals(pair.getKey());
+		}
+
+		template<size_t start>
+		bool equalsX(std::string_view const key) const noexcept{
+		//	assert(key.size() >= start);
+		//	assert(getKeyLen_() >= start);
+			return ::equals(getKey_() + start, getKeyLen_() - start, key.data() + start, key.size() - start);
+		}
+
+		template<>
+		bool equalsX<0>(std::string_view const key) const noexcept{
+			return ::equals(getKey_(), getKeyLen_(), key.data(), key.size());
 		}
 
 	public:

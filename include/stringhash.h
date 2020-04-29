@@ -78,8 +78,7 @@ public:
 	}
 
 	static std::pair<bool, int> compare(T const a, T const b) noexcept{
-		int x = compare__(a, b);
-		if (x)
+		if (int const x = compare__(a, b); x)
 			return { true, x };
 
 		return sizeCheck__(a, b, 0);

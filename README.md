@@ -98,4 +98,4 @@ However this will complicate the things and probably only basic two table merge 
 
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]: http://www-users.cs.umn.edu/~he/diff/p256-severance.pdf
-[commands]: https://htmlpreview.github.io/?https://github.com/https://github.com/nmmmnu/HM4/blob/master/commands.html
+[commands]: https://htmlpreview.github.io/?https://raw.githubusercontent.com/nmmmnu/HM4/master/commands.html

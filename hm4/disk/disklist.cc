@@ -43,20 +43,25 @@ namespace{
 		return p.cmpX<start>(key);
 	}
 
-	template<size_t start = 0>
-	auto searchBinary(std::string_view const key, DiskList::random_access_iterator first, DiskList::random_access_iterator last){
+	template<size_t start>
+	auto searchBinaryIt_(std::string_view const key, DiskList::random_access_iterator first, DiskList::random_access_iterator last){
 		return binarySearch(first, last, key, comp<start>);
 	}
+
+	template<size_t start = 0>
+	auto searchBinary(std::string_view const key, DiskList const &list, DiskList::size_type const first, DiskList::size_type const last){
+		return searchBinaryIt_<start>(key, { list, first }, { list, last });
+	}
+
+	template<size_t start = 0>
+	auto searchBinary(std::string_view const key, DiskList const &list){
+		return searchBinaryIt_<start>(key, list.ra_begin(), list.ra_end());
+	}
+
 
 	// -----------------------------------
 
 	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;
-
-	template<typename T>
-	auto dt(T const &a){
-		return static_cast<DiskList::difference_type>(a);
-	}
-
 
 	auto searchHotLine(std::string_view const key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<DiskList::random_access_iterator>{
 		size_t const nodesCount = line.sizeArray<SmallNode>();
@@ -64,7 +69,7 @@ namespace{
 		const SmallNode *nodes = line->as<const SmallNode>(0, nodesCount);
 
 		if (!nodes)
-			return searchBinary(key, list.ra_begin(), list.ra_end());
+			return searchBinary(key, list);
 
 		HPair::HKey const hkey = HPair::SS::create(key);
 
@@ -87,12 +92,12 @@ namespace{
 			return { false, list.ra_end() };
 		}
 
-		auto const listPos = dt( betoh<uint64_t>(it->pos) );
+		auto const listPos = betoh<uint64_t>(it->pos);
 
-		if ( listPos >= dt( list.size() ) ){
+		if ( listPos >= list.size() ){
 			log__("Hotline corruption detected. Advice Hotline removal.");
 
-			return searchBinary(key, list.ra_begin(), list.ra_end());
+			return searchBinary(key, list);
 		}
 
 		if (found == false){
@@ -102,10 +107,12 @@ namespace{
 				"key", HPair::toStringView(it->key)
 			);
 
-			return { false,  DiskList::random_access_iterator{ list, listPos } };
+			return { false,  { list, listPos } };
 		}
 
 		// OK, is found in the hot line...
+
+		// if size of the key is less, then it is found as direct hit.
 
 		if (key.size() < HPair::N){
 			// if key.size() == HPair::HKey,
@@ -113,23 +120,33 @@ namespace{
 
 			log__("Found, direct hit at pos", listPos);
 
-			return { true, DiskList::random_access_iterator{ list, listPos } };
+			return { true, { list, listPos } };
+		}
+
+		if (key.size() == HPair::N){
+			// key could be there
+
+			bool const found = list[listPos].equalsX<HPair::N>(key);
+
+			log__("Probing value at pos", listPos, found ? "Found" : "Not Found");
+
+			return { found, { list, listPos } };
 		}
 
 		// binary inside the partition
-
-		auto listPosLast = it + 1 == nodesEnd ? dt(list.size()) : dt( betoh<uint64_t>( (it + 1)->pos) );
-
-		log__(
-			"Proceed with Binary Search", listPos, listPosLast,
-			"Hotline Key",	HPair::toStringView(it->key)
-		);
 
 		// at this point, we know ALL keys are with same prefix and
 		// their size is at least HPair::N
 		// this means, we can skip comparing first HPair::N characters
 
-		return searchBinary<HPair::N>(key, list.ra_begin() + listPos, list.ra_begin() + listPosLast);
+		auto listPosLast = it + 1 == nodesEnd ? list.size() : betoh<uint64_t>( (it + 1)->pos);
+
+		log__(
+			"Proceed with Binary Search with same prefix", listPos, listPosLast,
+			"Hotline Key prefix", HPair::toStringView(it->key)
+		);
+
+		return searchBinary<HPair::N>(key, list, listPos, listPosLast);
 	}
 
 	[[maybe_unused]]
@@ -314,7 +331,7 @@ auto DiskList::ra_find(std::string_view const key, std::bool_constant<B> const e
 	default:
 	case SearchMode::BINARY: {
 			log__("binary");
-			auto const x = searchBinary(key, ra_begin(), ra_end());
+			auto const x = searchBinary(key, *this);
 			return find_fix(x, *this, exact );
 		}
 	}
@@ -383,7 +400,7 @@ public:
 			return btreeSearch_();
 		}catch(const BTreeAccessError &e){
 			log__("Problem, switch to binary search (1)");
-			return searchBinary(key_, list_.ra_begin(), list_.ra_end());
+			return searchBinary(key_, list_);
 		}
 	}
 
@@ -429,7 +446,7 @@ private:
 		log__("BTREE LEAF:", pos);
 		log__("Fallback to binary search", start, '-', end, ", width", end - start);
 
-		return searchBinary(key_, DiskList::random_access_iterator{ list_, start }, DiskList::random_access_iterator{ list_, end } );
+		return searchBinary(key_, list_, start, end);
 	}
 
 	NodeResult levelOrderBinarySearch_(const Node &node){
