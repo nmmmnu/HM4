@@ -11,6 +11,14 @@
 namespace hm4{
 namespace disk{
 
+namespace fd_impl_{
+	using config::size_type;
+
+	const Pair *fdGetFirst	(MMAPFilePlus const &mData);
+	const Pair *fdGetAt	(MMAPFilePlus const &mData, MMAPFilePlus const &mIndx, size_type index);
+	const Pair *fdGetNext	(MMAPFilePlus const &mData, const Pair *blob, bool aligned);
+}
+
 
 
 class DiskList{
@@ -93,6 +101,10 @@ public:
 	template<bool B>
 	random_access_iterator ra_find(std::string_view const key, std::bool_constant<B>) const;
 
+private:
+	forward_iterator make_forward_iterator_(const Pair *pair) const;
+
+public:
 	forward_iterator beginFromFirst() const;
 
 	forward_iterator begin() const;
@@ -111,21 +123,13 @@ private:
 	SearchMode calcSearchMode_() const;
 
 private:
-	const Pair *fdSafeAccess_(const Pair *blob) const;
-
-	const Pair *fdGetAtZero_() const{
-		return metadata_.sorted() ? fdGetFirstPair_() : fdGetAt_(0);
+	const Pair *fdGetAt_(size_type const index) const{
+		return fd_impl_::fdGetAt(mData_, mIndx_, index);
 	}
 
-	const Pair *fdGetAtSafeBound_(size_type const index) const{
-		return index < size() ? fdGetAt_(index) : nullptr;
+	const Pair *fdGetFirst_() const{
+		return fd_impl_::fdGetFirst(mData_);
 	}
-
-	const Pair *fdGetFirstPair_() const;
-
-	const Pair *fdGetAt_(size_type index) const;
-	const Pair *fdGetNext_(const Pair *blob) const;
-	static size_t alignedSize__(const Pair *blob, bool aligned);
 
 public:
 	class BTreeSearchHelper;
@@ -167,12 +171,18 @@ inline auto DiskList::ra_end() const -> random_access_iterator{
 	return { *this, size() };
 }
 
+inline auto DiskList::make_forward_iterator_(const Pair *pair) const -> forward_iterator{
+	return forward_iterator(mData_, pair, aligned());
+}
+
 inline auto DiskList::beginFromFirst() const -> forward_iterator{
-	return { *this, fdGetFirstPair_() };
+	return make_forward_iterator_(fdGetFirst_());
 }
 
 inline auto DiskList::begin() const -> forward_iterator{
-	return { *this, fdGetAtZero_() };
+	auto p = metadata_.sorted() ? fdGetFirst_() : fdGetAt_(0);
+
+	return make_forward_iterator_(p);
 }
 
 inline auto DiskList::end() const -> forward_iterator{

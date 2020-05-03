@@ -8,9 +8,10 @@ namespace disk{
 class DiskList::forward_iterator {
 public:
 	// begin or specific position
-	forward_iterator(DiskList const &list, const Pair *pair) :
-				list(&list),
-				pair(pair){}
+	forward_iterator(MMAPFilePlus const &mmap, const Pair *pair, bool const aligned) :
+				mmap	(&mmap		),
+				pair	(pair		),
+				aligned	(aligned	){}
 
 	// end
 	forward_iterator() = default;
@@ -27,7 +28,7 @@ public:
 public:
 	iterator &operator++(){
 		if (pair)
-			pair = list->fdGetNext_(pair);
+			pair = fd_impl_::fdGetNext(*mmap, pair, aligned);
 
 		return *this;
 	}
@@ -50,8 +51,9 @@ public:
 	}
 
 private:
-	const DiskList	*list	= nullptr;
-	const Pair	*pair	= nullptr;
+	const MMAPFilePlus	*mmap	= nullptr;
+	const Pair		*pair	= nullptr;
+	bool			aligned	= false;
 };
 
 
@@ -67,7 +69,12 @@ public:
 
 	explicit
 	operator forward_iterator(){
-		return { *list, list->fdGetAtSafeBound_( static_cast<size_type>(ptr) ) };
+		auto p = static_cast<size_type>(ptr);
+
+		if (p >= list->size())
+			return {};
+		else
+			return list->make_forward_iterator_(list->fdGetAt_(p));
 	}
 
 	using iterator = random_access_iterator;

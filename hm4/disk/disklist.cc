@@ -271,56 +271,59 @@ auto DiskList::calcSearchMode_() const -> SearchMode{
 
 
 
-const Pair *DiskList::fdSafeAccess_(const Pair *blob) const{
-	if (!blob)
-		return nullptr;
+namespace fd_impl_{
+	size_t alignedSize__(const Pair *blob, bool const aligned){
+		size_t const size = blob->bytes();
 
-	// check for overrun because PairBlob is dynamic size
-	bool const access = mData_->safeAccessMemory(blob, blob->bytes());
+		return ! aligned ? size : my_align::calc(size, PairConf::ALIGN);
+	}
 
-	return access ? blob : nullptr;
-}
+	const Pair *fdSafeAccess(MMAPFilePlus const &mData, const Pair *blob){
+		if (!blob)
+			return nullptr;
 
-const Pair *DiskList::fdGetAt_(size_type const index) const{
-	const uint64_t *be_array = mIndx_->as<const uint64_t>(0, narrow<size_t>(size()));
+		// check for overrun because PairBlob is dynamic size
+		bool const access = mData->safeAccessMemory(blob, blob->bytes());
 
-	if (!be_array)
-		return nullptr;
+		return access ? blob : nullptr;
+	}
 
-	uint64_t const be_ptr = be_array[index];
+	const Pair *fdGetFirst(MMAPFilePlus const &mData){
+		size_t const offset = 0;
 
-	size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
+		const Pair *blob = mData->as<const Pair>(offset);
 
-	const Pair *blob = mData_->as<const Pair>(offset);
+		// check for overrun because PairBlob is dynamic size
+		return fdSafeAccess(mData, blob);
+	}
 
-	// check for overrun because PairBlob is dynamic size
-	return fdSafeAccess_(blob);
-}
+	const Pair *fdGetAt(MMAPFilePlus const &mData, MMAPFilePlus const &mIndx, size_type const index){
+		const uint64_t *be_array = mIndx->as<const uint64_t>(0);
 
-const Pair *DiskList::fdGetFirstPair_() const{
-	size_t const offset = 0;
+		if (!be_array)
+			return nullptr;
 
-	const Pair *blob = mData_->as<const Pair>(offset);
+		uint64_t const be_ptr = be_array[index];
 
-	// check for overrun because PairBlob is dynamic size
-	return fdSafeAccess_(blob);
-}
+		size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
 
-const Pair *DiskList::fdGetNext_(const Pair *current) const{
-	size_t size = alignedSize__(current, aligned());
+		const Pair *blob = mData->as<const Pair>(offset);
 
-	const char *currentC = (const char *) current;
+		// check for overrun because PairBlob is dynamic size
+		return fdSafeAccess(mData, blob);
+	}
 
-	const Pair *blob = mData_->as<const Pair>(currentC + size);
+	const Pair *fdGetNext(MMAPFilePlus const &mData, const Pair *current, bool const aligned){
+		size_t size = alignedSize__(current, aligned);
 
-	// check for overrun because PairBlob is dynamic size
-	return fdSafeAccess_(blob);
-}
+		const char *currentC = (const char *) current;
 
-size_t DiskList::alignedSize__(const Pair *blob, bool const aligned){
-	size_t const size = blob->bytes();
+		const Pair *blob = mData->as<const Pair>(currentC + size);
 
-	return ! aligned ? size : my_align::calc(size, PairConf::ALIGN);
+		// check for overrun because PairBlob is dynamic size
+		return fdSafeAccess(mData, blob);
+	}
+
 }
 
 
