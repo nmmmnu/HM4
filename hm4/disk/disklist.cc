@@ -278,27 +278,27 @@ namespace fd_impl_{
 		return ! aligned ? size : my_align::calc(size, PairConf::ALIGN);
 	}
 
-	const Pair *fdSafeAccess(MMAPFilePlus const &mData, const Pair *blob){
+	const Pair *fdSafeAccess(BlobRef const &mData, const Pair *blob){
 		if (!blob)
 			return nullptr;
 
 		// check for overrun because PairBlob is dynamic size
-		bool const access = mData->safeAccessMemory(blob, blob->bytes());
+		bool const access = mData.safeAccessMemory(blob, blob->bytes());
 
 		return access ? blob : nullptr;
 	}
 
-	const Pair *fdGetFirst(MMAPFilePlus const &mData){
+	const Pair *fdGetFirst(BlobRef const &mData){
 		size_t const offset = 0;
 
-		const Pair *blob = mData->as<const Pair>(offset);
+		const Pair *blob = mData.as<const Pair>(offset);
 
 		// check for overrun because PairBlob is dynamic size
 		return fdSafeAccess(mData, blob);
 	}
 
-	const Pair *fdGetAt(MMAPFilePlus const &mData, MMAPFilePlus const &mIndx, size_type const index){
-		const uint64_t *be_array = mIndx->as<const uint64_t>(0);
+	const Pair *fdGetAt(BlobRef const &mData, BlobRef const &mIndx, size_type const index){
+		const uint64_t *be_array = mIndx.as<const uint64_t>(0);
 
 		if (!be_array)
 			return nullptr;
@@ -307,23 +307,22 @@ namespace fd_impl_{
 
 		size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
 
-		const Pair *blob = mData->as<const Pair>(offset);
+		const Pair *blob = mData.as<const Pair>(offset);
 
 		// check for overrun because PairBlob is dynamic size
 		return fdSafeAccess(mData, blob);
 	}
 
-	const Pair *fdGetNext(MMAPFilePlus const &mData, const Pair *current, bool const aligned){
+	const Pair *fdGetNext(BlobRef const &mData, const Pair *current, bool const aligned){
 		size_t size = alignedSize__(current, aligned);
 
 		const char *currentC = (const char *) current;
 
-		const Pair *blob = mData->as<const Pair>(currentC + size);
+		const Pair *blob = mData.as<const Pair>(currentC + size);
 
 		// check for overrun because PairBlob is dynamic size
 		return fdSafeAccess(mData, blob);
 	}
-
 }
 
 

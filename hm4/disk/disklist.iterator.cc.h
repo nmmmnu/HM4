@@ -8,13 +8,13 @@ namespace disk{
 class DiskList::forward_iterator {
 public:
 	// begin or specific position
-	forward_iterator(MMAPFilePlus const &mmap, const Pair *pair, bool const aligned) :
-				mmap	(&mmap		),
+	forward_iterator(BlobRef const &blob, const Pair *pair, bool const aligned) :
+				blob	(&blob		),
 				pair	(pair		),
 				aligned	(aligned	){}
 
 	// end
-	forward_iterator() = default;
+	constexpr forward_iterator() = default;
 
 	using iterator = forward_iterator;
 
@@ -28,7 +28,7 @@ public:
 public:
 	iterator &operator++(){
 		if (pair)
-			pair = fd_impl_::fdGetNext(*mmap, pair, aligned);
+			pair = fd_impl_::fdGetNext(*blob, pair, aligned);
 
 		return *this;
 	}
@@ -51,9 +51,9 @@ public:
 	}
 
 private:
-	const MMAPFilePlus	*mmap	= nullptr;
-	const Pair		*pair	= nullptr;
-	bool			aligned	= false;
+	const BlobRef	*blob	= nullptr;
+	const Pair	*pair	= nullptr;
+	bool		aligned	= false;
 };
 
 

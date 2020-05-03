@@ -14,9 +14,9 @@ namespace disk{
 namespace fd_impl_{
 	using config::size_type;
 
-	const Pair *fdGetFirst	(MMAPFilePlus const &mData);
-	const Pair *fdGetAt	(MMAPFilePlus const &mData, MMAPFilePlus const &mIndx, size_type index);
-	const Pair *fdGetNext	(MMAPFilePlus const &mData, const Pair *blob, bool aligned);
+	const Pair *fdGetFirst	(BlobRef const &mData);
+	const Pair *fdGetAt	(BlobRef const &mData, BlobRef const &mIndx, size_type index);
+	const Pair *fdGetNext	(BlobRef const &mData, const Pair *blob, bool aligned);
 }
 
 
@@ -108,7 +108,7 @@ public:
 	forward_iterator beginFromFirst() const;
 
 	forward_iterator begin() const;
-	forward_iterator end() const;
+	constexpr forward_iterator end() const;
 
 	template<bool B>
 	forward_iterator find(std::string_view key, std::bool_constant<B>) const;
@@ -124,11 +124,11 @@ private:
 
 private:
 	const Pair *fdGetAt_(size_type const index) const{
-		return fd_impl_::fdGetAt(mData_, mIndx_, index);
+		return fd_impl_::fdGetAt(*mData_, *mIndx_, index);
 	}
 
 	const Pair *fdGetFirst_() const{
-		return fd_impl_::fdGetFirst(mData_);
+		return fd_impl_::fdGetFirst(*mData_);
 	}
 
 public:
@@ -172,7 +172,7 @@ inline auto DiskList::ra_end() const -> random_access_iterator{
 }
 
 inline auto DiskList::make_forward_iterator_(const Pair *pair) const -> forward_iterator{
-	return forward_iterator(mData_, pair, aligned());
+	return forward_iterator(*mData_, pair, aligned());
 }
 
 inline auto DiskList::beginFromFirst() const -> forward_iterator{
@@ -185,7 +185,7 @@ inline auto DiskList::begin() const -> forward_iterator{
 	return make_forward_iterator_(p);
 }
 
-inline auto DiskList::end() const -> forward_iterator{
+constexpr inline auto DiskList::end() const -> forward_iterator{
 	return {};
 }
 
