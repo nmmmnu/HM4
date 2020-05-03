@@ -72,6 +72,18 @@ bool empty(LIST const &list){
 
 // ==============================
 
+template<class LIST>
+auto insert( LIST &list,
+		std::string_view key, std::string_view val,
+		uint32_t const expires = 0, uint32_t const created = 0){
+
+	return list.insert(
+			Pair::smart_ptr::create(list.getAllocator(), key, val, expires, created)
+	);
+}
+
+// ==============================
+
 template<class List>
 auto getIterator(List const &list, std::true_type){
 	return std::begin(list);

@@ -2,16 +2,29 @@
 #define _BLACK_HOLE_LIST_LIST_H
 
 #include "ilist.h"
-
+#include "pmallocator.h"
 
 namespace hm4{
 
 
 class BlackHoleList{
 public:
-	using size_type	= config::size_type;
+	using Allocator		= MyAllocator::PMAllocator;
 
-	using iterator	= const Pair *;
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
+	using iterator		= const Pair *;
+
+private:
+	Allocator	*allocator_ = nullptr;
+
+public:
+	constexpr BlackHoleList(Allocator &allocator) : allocator_(& allocator){}
+
+	constexpr Allocator &getAllocator() const{
+		return *allocator_;
+	}
 
 public:
 	constexpr static
@@ -29,6 +42,11 @@ public:
 			std::string_view, std::string_view,
 			uint32_t = 0, uint32_t = 0
 		){
+		return nullptr;
+	}
+
+	constexpr static
+	iterator insert(typename Pair::smart_ptr::type<Allocator> &&){
 		return nullptr;
 	}
 

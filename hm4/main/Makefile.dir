@@ -2,7 +2,7 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 EXTRA_INCL += -I$(SRC_DIR)
 
-MY_TARGETS = $(A)db_file $(A)db_merge $(A)db_builder $(A)db_mkbtree
+MY_TARGETS = $(A)db_file $(A)db_merge $(A)db_builder $(A)db_logger $(A)db_mkbtree
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -22,6 +22,9 @@ $(A)db_merge: $(O)db_merge.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)
 	$(LINK)
 
 $(A)db_builder: $(O)db_builder.o	$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)skiplist.o $(O)idgeneratordate.o $(O)base64.o
+	$(LINK)
+
+$(A)db_logger: $(O)db_logger.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o                                      $(O)base64.o
 	$(LINK)
 
 $(A)zone_loader: $(O)zone_loader.o

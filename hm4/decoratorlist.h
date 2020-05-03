@@ -13,6 +13,7 @@ template <class LIST>
 class DecoratorList{
 public:
 	using iterator		= typename LIST::iterator;
+	using Allocator		= typename LIST::Allocator;
 
 	using size_type		= typename LIST::size_type;
 	using difference_type	= typename LIST::difference_type;
@@ -31,7 +32,7 @@ public:
 		return list_->bytes();
 	}
 
-	auto const &getAllocator() const{
+	auto &getAllocator() const{
 		return list_->getAllocator();
 	}
 
@@ -67,7 +68,11 @@ public:
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 
-		return list_->insert(key, val, expires, created);
+		return hm4::insert(*this, key, val, expires, created);
+	}
+
+	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+		return list_->insert(std::move(newdata));
 	}
 
 private:

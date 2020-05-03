@@ -242,7 +242,7 @@ using MyDualList = hm4::multi::DualList<hm4::VectorList, hm4::BlackHoleList, fal
 template <>
 void list_test<MyDualList>(const char *name){
 	hm4::VectorList		memtable{ allocator };
-	hm4::BlackHoleList	disktable;
+	hm4::BlackHoleList	disktable{ allocator };
 
 	MyDualList list{ memtable, disktable };
 
@@ -256,7 +256,7 @@ using MyDecoratorList = hm4::DecoratorList<hm4::VectorList>;
 template <>
 void list_test<MyDecoratorList>(const char *name){
 	hm4::VectorList		memtable{ allocator };
-	MyDecoratorList list{ memtable };
+	MyDecoratorList		list{ memtable };
 
 	return list_test(name, list);
 }
@@ -287,7 +287,7 @@ static void skiplist_lanes_test(){
 #include "linklist.h"
 
 int main(){
-	list_test<hm4::BlackHoleList	>("BlackHoleList"			);
+	list_test<hm4::BlackHoleList	>("BlackHoleList"	, allocator	);
 	list_test<hm4::VectorList	>("VectorList"		, allocator	);
 	list_test<MyDualList		>("DualList"				);
 	list_test<MyDecoratorList	>("DecoratorList"			);

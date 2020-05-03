@@ -17,9 +17,9 @@ namespace hm4{
 class UnsortedList{
 	using OVector	= std::vector<Pair *>;
 	using OVectorIt	= OVector::const_iterator;
-	using Allocator	= MyAllocator::PMAllocator;
 
 public:
+	using Allocator		= MyAllocator::PMAllocator;
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
@@ -151,7 +151,8 @@ inline auto UnsortedList::end() const noexcept -> iterator{
 inline auto UnsortedList::insert(
 		std::string_view key, std::string_view val,
 		uint32_t expires, uint32_t created) -> iterator{
-	return insert(Pair::smart_ptr::create(*allocator_, key, val, expires, created));
+
+	return hm4::insert(*this, key, val, expires, created);
 }
 
 inline auto UnsortedList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{

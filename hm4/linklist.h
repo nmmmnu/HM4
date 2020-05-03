@@ -11,9 +11,9 @@ namespace hm4{
 
 
 class LinkList{
-	using Allocator	= MyAllocator::PMAllocator;
-
 public:
+	using Allocator		= MyAllocator::PMAllocator;
+
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
@@ -128,7 +128,8 @@ inline constexpr auto LinkList::end() -> iterator{
 inline auto LinkList::insert(
 		std::string_view key, std::string_view val,
 		uint32_t expires, uint32_t created) -> iterator{
-	return insert(Pair::smart_ptr::create(*allocator_, key, val, expires, created));
+
+	return hm4::insert(*this, key, val, expires, created);
 }
 
 

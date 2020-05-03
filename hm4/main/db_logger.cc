@@ -1,19 +1,13 @@
-#include <algorithm>
-
 #include "version.h"
 
-#include "unsortedlist.h"
-#include "idgenerator/idgeneratordate.h"
-#include "flusher/diskfilepredicate.h"
-#include "flusher/diskfileflush.h"
-#include "flushlist.h"
+#include "blackholelist.h"
+#include "binlogger/diskfilebinlogger.h"
+#include "binloglist.h"
 
 #include "filereader.h"
 #include "stringtokenizer.h"
 
-#include "pmallocator.h"
 #include "stdallocator.h"
-#include "arenaallocator.h"
 
 #include "logger.h"
 
@@ -22,12 +16,7 @@
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
 
-using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
 using MySTDAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-
-constexpr size_t	MB			= 1024 * 1024;
-
-constexpr size_t	MIN_ARENA_SIZE		= 128;
 
 constexpr size_t	PROCESS_STEP		= 10'000;
 
@@ -51,18 +40,14 @@ int listLoad(LIST &list, READER &reader, size_t const process_step, std::bool_co
 
 
 struct MyListFactory{
-	using MemList		= hm4::UnsortedList;
-	using Predicate		= hm4::flusher::DiskFilePredicate;
-	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
-	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
+	using MemList	= hm4::BlackHoleList;
+	using BinLogger	= hm4::binlogger::DiskFileBinLogger;
+	using MyList	= hm4::BinLogList<MemList,BinLogger>;
 
-	MyListFactory(std::string_view path, MyAllocator::PMAllocator &allocator) :
-				memlist{ allocator },
+	MyListFactory(std::string_view const filename, bool const aligned) :
 				mylist{
 					memlist,
-					Predicate{},
-					Flush{ IDGenerator{}, std::string(path) }
+					BinLogger{ filename, aligned }
 				}{}
 
 	MyList &operator()(){
@@ -70,24 +55,24 @@ struct MyListFactory{
 	}
 
 private:
-	MemList	memlist;
-	MyList	mylist;
+	MySTDAllocator	allocator;
+	MemList		memlist{ allocator };
+	MyList		mylist;
 };
 
 
 int main(int argc, char **argv){
-	if (argc <= 3)
+	if (argc <= 2)
 		return printUsage(argv[0]);
 
 	const char *filename	= argv[1];
 	const char *path	= argv[2];
-	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	bool const blob = argc >= 5 && argv[4][0] == 'b';
+	bool const blob = argc >= 4 && argv[3][0] == 'b';
 
-	MyArenaAllocator allocator{ max_memlist_arena * MB };
+	bool const aligned = true;
 
-	MyListFactory factory{ path, allocator };
+	MyListFactory factory{ path, aligned };
 
 	auto &mylist = factory();
 
@@ -126,33 +111,16 @@ int listLoad(LIST &list, READER &reader, size_t const process_step, std::bool_co
 		std::string_view const key = tok();
 		std::string_view const val = tok();
 
-		if (! key.empty()){
-			if ( listInsert(list, key, val, tag) == std::end(list) )
-				log__("Error insert", key);
-		}
+		if (! key.empty())
+			listInsert(list, key, val, tag);
 
 		++i;
 
 		if (i % process_step == 0){
-			auto const used = list.getAllocator().getUsedMemory();
-
-			if (used != std::numeric_limits<decltype(used)>::max()){
-				fmt::print(stderr,
-					"Processed {:15} records. "
-					"In memory {:15} records, {:15} bytes. "
-					"Allocator {:15} bytes.\n",
-					i,
-					list.size(), list.bytes(),
-					used
-				);
-			}else{
-				fmt::print(stderr,
-					"Processed {:15} records. "
-					"In memory {:15} records, {:15} bytes.\n",
-					i,
-					list.size(), list.bytes()
-				);
-			}
+			fmt::print(stderr,
+				"Processed {:15} records.\n",
+				i
+			);
 		}
 	}
 
@@ -162,13 +130,10 @@ int listLoad(LIST &list, READER &reader, size_t const process_step, std::bool_co
 
 
 static int printUsage(const char *cmd){
-	fmt::print(	"db_builder version {0}\n"
+	fmt::print(	"db_logger version {0}\n"
 			"\n"
 			"Usage:\n"
-			"\t{1} [file.txt] [lsm_path] [memlist arena in MB] [b = import as base64 blobs] - load file.txt, then create / add to lsm_path\n"
-			"\t\tPath names must be written with quotes:\n"
-			"\t\tExample directory/file.'*'.db\n"
-			"\t\tThe '*', will be replaced with ID's\n"
+			"\t{1} [file.txt] [binlog_filename] [b = import as base64 blobs] - load file.txt, then create binlog_file\n"
 			"\n"
 			"\tReader: {2}\n"
 			"\tBuffer: {3}\n"

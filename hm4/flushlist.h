@@ -1,5 +1,5 @@
-#ifndef _Flusher_List_H
-#define _Flusher_List_H
+#ifndef FLUSH_LIST_H_
+#define FLUSH_LIST_H_
 
 #include "decoratorlist.h"
 
@@ -22,6 +22,8 @@ private:
 						loader_		(loader					){}
 
 public:
+	using Allocator = typename DecoratorList<List>::Allocator;
+
 	template <class UPredicate, class UFlusher>
 	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
 					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
@@ -30,16 +32,19 @@ public:
 	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher) :
 					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
-
-
 	~FlushList(){
 		flush();
 	}
 
 	auto insert(	std::string_view const key, std::string_view const val,
-			uint32_t const expires = 0, uint32_t const created = 0){
+			uint32_t const expires = 0, uint32_t const created = 0
+			){
 
-		auto result = list_->insert(key, val, expires, created );
+		return hm4::insert(*this, key, val, expires, created);
+	}
+
+	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+		auto result = list_->insert(std::move(newdata));
 
 		if (predicate_(*list_))
 			flush();
