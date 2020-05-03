@@ -25,8 +25,9 @@ public:
 
 public:
 	enum class OpenMode : char {
-		NORMAL,
-		MINIMAL
+		NORMAL		,
+		MINIMAL		,
+		DATA_ONLY
 	};
 
 	enum class SearchMode : char {
@@ -92,6 +93,8 @@ public:
 	template<bool B>
 	random_access_iterator ra_find(std::string_view const key, std::bool_constant<B>) const;
 
+	forward_iterator beginFromFirst() const;
+
 	forward_iterator begin() const;
 	forward_iterator end() const;
 
@@ -99,8 +102,9 @@ public:
 	forward_iterator find(std::string_view key, std::bool_constant<B>) const;
 
 private:
-	bool openNormal_ (std::string_view filename, MMAPFile::Advice advice);
-	bool openMinimal_(std::string_view filename, MMAPFile::Advice advice);
+	bool openNormal_  (std::string_view filename, MMAPFile::Advice advice);
+	bool openMinimal_ (std::string_view filename, MMAPFile::Advice advice);
+	bool openDataOnly_(std::string_view filename);
 
 	bool open_(std::string_view filename, MMAPFile::Advice advice, OpenMode mode);
 
@@ -108,6 +112,16 @@ private:
 
 private:
 	const Pair *fdSafeAccess_(const Pair *blob) const;
+
+	const Pair *fdGetAtZero_() const{
+		return metadata_.sorted() ? fdGetFirstPair_() : fdGetAt_(0);
+	}
+
+	const Pair *fdGetAtSafeBound_(size_type const index) const{
+		return index < size() ? fdGetAt_(index) : nullptr;
+	}
+
+	const Pair *fdGetFirstPair_() const;
 
 	const Pair *fdGetAt_(size_type index) const;
 	const Pair *fdGetNext_(const Pair *blob) const;
@@ -117,16 +131,16 @@ public:
 	class BTreeSearchHelper;
 
 private:
-	MMAPFilePlus		mIndx_;
-	MMAPFilePlus		mLine_;
-	MMAPFilePlus		mData_;
+	MMAPFilePlus	mIndx_;
+	MMAPFilePlus	mLine_;
+	MMAPFilePlus	mData_;
 
-	MMAPFilePlus		mTree_;
-	MMAPFilePlus		mKeys_;
+	MMAPFilePlus	mTree_;
+	MMAPFilePlus	mKeys_;
 
-	FileMeta		metadata_;
+	FileMeta	metadata_;
 
-	SearchMode		searchMode_	= SearchMode::BINARY;
+	SearchMode	searchMode_	= SearchMode::BINARY;
 };
 
 
@@ -153,17 +167,21 @@ inline auto DiskList::ra_end() const -> random_access_iterator{
 	return { *this, size() };
 }
 
+inline auto DiskList::beginFromFirst() const -> forward_iterator{
+	return { *this, fdGetFirstPair_() };
+}
+
 inline auto DiskList::begin() const -> forward_iterator{
-	return { *this, difference_type{ 0 } };
+	return { *this, fdGetAtZero_() };
 }
 
 inline auto DiskList::end() const -> forward_iterator{
-	return { *this, size() };
+	return {};
 }
 
 template<bool B>
 auto DiskList::find(std::string_view const key, std::bool_constant<B> const exact) const -> forward_iterator{
-	return static_cast<forward_iterator>( ra_find(key, exact) );
+	return { ra_find(key, exact) };
 }
 
 } // namespace disk

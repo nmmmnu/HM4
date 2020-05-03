@@ -1,4 +1,4 @@
-//#include "logger.h"
+#include "logger.h"
 
 namespace hm4{
 namespace disk{
@@ -7,12 +7,13 @@ namespace disk{
 
 class DiskList::forward_iterator {
 public:
-	forward_iterator(DiskList const &list, difference_type const ptr) :
+	// begin or specific position
+	forward_iterator(DiskList const &list, const Pair *pair) :
 				list(&list),
-				ptr(ptr){}
+				pair(pair){}
 
-	forward_iterator(DiskList const &list, size_type const ptr) :
-				forward_iterator(list, static_cast<difference_type>(ptr)){}
+	// end
+	forward_iterator() = default;
 
 	using iterator = forward_iterator;
 
@@ -25,8 +26,6 @@ public:
 
 public:
 	iterator &operator++(){
-		++ptr;
-
 		if (pair)
 			pair = list->fdGetNext_(pair);
 
@@ -34,18 +33,12 @@ public:
 	}
 
 	reference operator*() const{
-		if (pair){
-			// log__("FW ", (void *) pair);
-			return *pair;
-		}else{
-			// log__("RA ", ptr);
-			return (*list)[ sc__(ptr) ];
-		}
+		return *pair;
 	}
 
 public:
 	bool operator==(iterator const &other) const{
-		return ptr == other.ptr;
+		return pair == other.pair;
 	}
 
 	bool operator!=(iterator const &other) const{
@@ -57,25 +50,8 @@ public:
 	}
 
 private:
-	static size_type sc__(difference_type const a){
-		return static_cast<size_type>(a);
-	}
-
-	const Pair *initPair_() const{
-		if (list->sorted() == false)
-			return nullptr;
-
-		if (list->size() <= sc__(ptr))
-			return nullptr;
-
-		return list->fdGetAt_( sc__(ptr) );
-	}
-
-private:
-	const DiskList	*list;
-	difference_type	ptr;
-
-	const Pair	*pair	= initPair_();
+	const DiskList	*list	= nullptr;
+	const Pair	*pair	= nullptr;
 };
 
 
@@ -91,7 +67,7 @@ public:
 
 	explicit
 	operator forward_iterator(){
-		return { *list, ptr };
+		return { *list, list->fdGetAtSafeBound_( static_cast<size_type>(ptr) ) };
 	}
 
 	using iterator = random_access_iterator;

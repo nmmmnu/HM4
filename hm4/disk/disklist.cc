@@ -162,6 +162,13 @@ namespace{
 // ==============================
 
 
+bool DiskList::openDataOnly_(std::string_view const filename){
+	MMAPFile::Advice const advice = MMAPFile::Advice::SEQUENTIAL;
+
+	log__("Open disktable for repair", filename);
+
+	return mData_.open(filenameData(filename), advice);
+}
 
 bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice advice){
 	log__("Open disktable", filename);
@@ -219,8 +226,9 @@ bool DiskList::open_(std::string_view const filename, MMAPFile::Advice const adv
 	// this can not be converted to lambda easily...
 	switch(mode){
 	default:
-	case OpenMode::NORMAL	: return openNormal_ (filename, advice);
-	case OpenMode::MINIMAL	: return openMinimal_(filename, advice);
+	case OpenMode::NORMAL		: return openNormal_  (filename, advice);
+	case OpenMode::MINIMAL		: return openMinimal_ (filename, advice);
+	case OpenMode::DATA_ONLY	: return openDataOnly_(filename);
 	}
 }
 
@@ -282,6 +290,15 @@ const Pair *DiskList::fdGetAt_(size_type const index) const{
 	uint64_t const be_ptr = be_array[index];
 
 	size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
+
+	const Pair *blob = mData_->as<const Pair>(offset);
+
+	// check for overrun because PairBlob is dynamic size
+	return fdSafeAccess_(blob);
+}
+
+const Pair *DiskList::fdGetFirstPair_() const{
+	size_t const offset = 0;
 
 	const Pair *blob = mData_->as<const Pair>(offset);
 
