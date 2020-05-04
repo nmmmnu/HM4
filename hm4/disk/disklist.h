@@ -15,8 +15,9 @@ namespace fd_impl_{
 	using config::size_type;
 
 	const Pair *fdGetFirst	(BlobRef const &mData);
-	const Pair *fdGetAt	(BlobRef const &mData, BlobRef const &mIndx, size_type index);
 	const Pair *fdGetNext	(BlobRef const &mData, const Pair *blob, bool aligned);
+
+	const Pair *fdGetAt	(BlobRef const &mData, BlobRef const &mIndx, size_type index);
 }
 
 
@@ -84,10 +85,6 @@ public:
 
 	size_t bytes() const{
 		return mData_.size();
-	}
-
-	bool sorted() const{
-		return metadata_.sorted();
 	}
 
 	bool aligned() const{
@@ -180,9 +177,7 @@ inline auto DiskList::beginFromFirst() const -> forward_iterator{
 }
 
 inline auto DiskList::begin() const -> forward_iterator{
-	auto p = metadata_.sorted() ? fdGetFirst_() : fdGetAt_(0);
-
-	return make_forward_iterator_(p);
+	return make_forward_iterator_( fdGetFirst_() );
 }
 
 constexpr inline auto DiskList::end() const -> forward_iterator{

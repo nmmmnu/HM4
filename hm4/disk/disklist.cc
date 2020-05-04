@@ -179,8 +179,10 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice ad
 		return false;
 
 	// avoid worst case
-	if (metadata_.sorted() == false && advice == MMAPFile::Advice::SEQUENTIAL)
-		advice = DEFAULT_ADVICE;
+	if (metadata_.sorted() == false){
+		log__("Non sorted files are no longer supported. Please replay the file as binlog.");
+		return false;
+	}
 
 	bool const b1 =	mIndx_.open(filenameIndx(filename));
 	bool const b2 =	mData_.open(filenameData(filename), advice);
@@ -297,6 +299,17 @@ namespace fd_impl_{
 		return fdSafeAccess(mData, blob);
 	}
 
+	const Pair *fdGetNext(BlobRef const &mData, const Pair *current, bool const aligned){
+		size_t size = alignedSize__(current, aligned);
+
+		const char *currentC = (const char *) current;
+
+		const Pair *blob = mData.as<const Pair>(currentC + size);
+
+		// check for overrun because PairBlob is dynamic size
+		return fdSafeAccess(mData, blob);
+	}
+
 	const Pair *fdGetAt(BlobRef const &mData, BlobRef const &mIndx, size_type const index){
 		const uint64_t *be_array = mIndx.as<const uint64_t>(0);
 
@@ -308,17 +321,6 @@ namespace fd_impl_{
 		size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
 
 		const Pair *blob = mData.as<const Pair>(offset);
-
-		// check for overrun because PairBlob is dynamic size
-		return fdSafeAccess(mData, blob);
-	}
-
-	const Pair *fdGetNext(BlobRef const &mData, const Pair *current, bool const aligned){
-		size_t size = alignedSize__(current, aligned);
-
-		const char *currentC = (const char *) current;
-
-		const Pair *blob = mData.as<const Pair>(currentC + size);
 
 		// check for overrun because PairBlob is dynamic size
 		return fdSafeAccess(mData, blob);
