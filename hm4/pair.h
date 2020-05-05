@@ -178,7 +178,7 @@ namespace hm4{
 	public:
 		constexpr
 		bool empty() const noexcept{
-			return keylen;
+			return ! keylen;
 		}
 
 	public:

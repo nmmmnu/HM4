@@ -35,8 +35,7 @@ public:
 public:
 	enum class OpenMode : char {
 		NORMAL		,
-		MINIMAL		,
-		DATA_ONLY
+		MINIMAL
 	};
 
 	enum class SearchMode : char {
@@ -62,6 +61,9 @@ public:
 	// ~DiskList() = default;
 
 	bool open(std::string_view filename, MMAPFile::Advice advice = DEFAULT_ADVICE, OpenMode mode = DEFAULT_MODE);
+
+	bool openDataOnly(std::string_view filename, bool aligned);
+
 	void close();
 
 	operator bool(){
@@ -88,7 +90,7 @@ public:
 	}
 
 	bool aligned() const{
-		return metadata_.aligned();
+		return aligned_;
 	}
 
 public:
@@ -102,8 +104,6 @@ private:
 	forward_iterator make_forward_iterator_(const Pair *pair) const;
 
 public:
-	forward_iterator beginFromFirst() const;
-
 	forward_iterator begin() const;
 	constexpr forward_iterator end() const;
 
@@ -113,7 +113,6 @@ public:
 private:
 	bool openNormal_  (std::string_view filename, MMAPFile::Advice advice);
 	bool openMinimal_ (std::string_view filename, MMAPFile::Advice advice);
-	bool openDataOnly_(std::string_view filename);
 
 	bool open_(std::string_view filename, MMAPFile::Advice advice, OpenMode mode);
 
@@ -142,6 +141,8 @@ private:
 	FileMeta	metadata_;
 
 	SearchMode	searchMode_	= SearchMode::BINARY;
+
+	bool		aligned_	= true;
 };
 
 
@@ -172,10 +173,6 @@ inline auto DiskList::make_forward_iterator_(const Pair *pair) const -> forward_
 	return forward_iterator(*mData_, pair, aligned());
 }
 
-inline auto DiskList::beginFromFirst() const -> forward_iterator{
-	return make_forward_iterator_(fdGetFirst_());
-}
-
 inline auto DiskList::begin() const -> forward_iterator{
 	return make_forward_iterator_( fdGetFirst_() );
 }
@@ -188,6 +185,8 @@ template<bool B>
 auto DiskList::find(std::string_view const key, std::bool_constant<B> const exact) const -> forward_iterator{
 	return { ra_find(key, exact) };
 }
+
+
 
 } // namespace disk
 } // namespace

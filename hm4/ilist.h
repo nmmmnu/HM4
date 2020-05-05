@@ -78,7 +78,15 @@ auto insert( LIST &list,
 		uint32_t const expires = 0, uint32_t const created = 0){
 
 	return list.insert(
-			Pair::smart_ptr::create(list.getAllocator(), key, val, expires, created)
+		Pair::smart_ptr::create(list.getAllocator(), key, val, expires, created)
+	);
+}
+
+template<class LIST>
+auto insert(LIST &list, Pair const &src){
+
+	return list.insert(
+		Pair::smart_ptr::clone(list.getAllocator(), src)
 	);
 }
 

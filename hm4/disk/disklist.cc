@@ -162,10 +162,12 @@ namespace{
 // ==============================
 
 
-bool DiskList::openDataOnly_(std::string_view const filename){
+bool DiskList::openDataOnly(std::string_view const filename, bool const aligned){
 	MMAPFile::Advice const advice = MMAPFile::Advice::SEQUENTIAL;
 
 	log__("Open disktable for repair", filename);
+
+	aligned_ = aligned;
 
 	return mData_.open(filenameData(filename), advice);
 }
@@ -178,7 +180,7 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice ad
 	if (metadata_ == false)
 		return false;
 
-	// avoid worst case
+	// Non sorted files are no longer supported
 	if (metadata_.sorted() == false){
 		log__("Non sorted files are no longer supported. Please replay the file as binlog.");
 		return false;
@@ -192,6 +194,8 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice ad
 
 	log__file__(filenameIndx(filename), mIndx_);
 	log__file__(filenameData(filename), mData_);
+
+	aligned_ = metadata_.aligned();
 
 	return b1 && b2 && b3;
 }
@@ -228,9 +232,8 @@ bool DiskList::open_(std::string_view const filename, MMAPFile::Advice const adv
 	// this can not be converted to lambda easily...
 	switch(mode){
 	default:
-	case OpenMode::NORMAL		: return openNormal_  (filename, advice);
-	case OpenMode::MINIMAL		: return openMinimal_ (filename, advice);
-	case OpenMode::DATA_ONLY	: return openDataOnly_(filename);
+	case OpenMode::NORMAL		: return openNormal_  (filename, advice	);
+	case OpenMode::MINIMAL		: return openMinimal_ (filename, advice	);
 	}
 }
 
