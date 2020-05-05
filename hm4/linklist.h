@@ -35,6 +35,8 @@ public:
 	iterator insert(	std::string_view key, std::string_view val,
 			uint32_t expires = 0, uint32_t created = 0);
 
+	iterator insert(Pair const &src);
+
 	iterator insert(typename Pair::smart_ptr::type<Allocator> &&newdata);
 
 	auto size() const{
@@ -130,6 +132,10 @@ inline auto LinkList::insert(
 		uint32_t expires, uint32_t created) -> iterator{
 
 	return hm4::insert(*this, key, val, expires, created);
+}
+
+inline auto LinkList::insert(Pair const &src) -> iterator{
+	return hm4::insert(*this, src);
 }
 
 

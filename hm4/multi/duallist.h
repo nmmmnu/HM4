@@ -75,15 +75,19 @@ public:
 	iterator insert(	std::string_view const key, std::string_view const val,
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
+
+		return insert_( hm4::insert(*list1_, key, val, expires, created) );
+	}
+
+	iterator insert(Pair const &src){
+		return insert_( hm4::insert(*list1_, src) );
+	}
+
+private:
+	iterator insert_(typename List1::iterator &&it){
 		return {
-			typename iterator::FirstIteratorPair{
-				list1_->insert(key, val, expires, created),
-				std::end(*list1_)
-			},
-			typename iterator::SecondIteratorPair{
-				std::end(*list2_),
-				std::end(*list2_)
-			}
+			{	std::move(it),		std::end(*list1_)	},
+			{	std::end(*list2_),	std::end(*list2_)	}
 		};
 	}
 

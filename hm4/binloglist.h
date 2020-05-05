@@ -26,6 +26,10 @@ public:
 		return hm4::insert(*this, key, val, expires, created);
 	}
 
+	auto insert(Pair const &src){
+		return hm4::insert(*this, src);
+	}
+
 	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 		binlogger_(*newdata);
 

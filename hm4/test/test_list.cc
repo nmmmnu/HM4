@@ -152,6 +152,14 @@ void list_test(List &list){
 
 	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
+	// INSERT BY CLONING PAIR
+
+	{
+		OPair const p = Pair::create("clone_pair", "123");
+		list.insert(*p);
+	}
+
+	mytest("clone",			getCheck(list, "clone_pair",	"123",		std::true_type{}	));
 
 	// ERASE
 

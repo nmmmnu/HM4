@@ -30,10 +30,6 @@ constexpr size_t	PROCESS_STEP		= 10'000;
 
 
 
-using hm4::Pair;
-
-
-
 static int printUsage(const char *cmd);
 
 
@@ -104,9 +100,9 @@ template <class LIST, class INPUT_LIST>
 int listReplay(LIST &list, INPUT_LIST const &inputList, size_t const process_step){
 	size_t i = 0;
 
-	for(Pair const &pair : inputList){
+	for(auto const &pair : inputList){
 		if (!pair.empty())
-			insert(list, pair);
+			list.insert(pair);
 
 		++i;
 
