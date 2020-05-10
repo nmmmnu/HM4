@@ -33,7 +33,7 @@ public:
 					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~FlushList(){
-		flush();
+		save();
 	}
 
 	auto insert(	std::string_view const key, std::string_view const val,
@@ -56,10 +56,16 @@ public:
 		return result;
 	}
 
-	bool flush(){
+	bool save() const{
 		log__("Flushing data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 
-		bool const r = flusher_(std::begin(*list_), std::end(*list_));
+		return flusher_(std::begin(*list_), std::end(*list_));
+	}
+
+	bool flush(){
+		bool const r = save();
+
+		log__("Reloading data...");
 
 		list_->clear();
 		notifyLoader_();
