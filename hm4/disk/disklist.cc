@@ -162,29 +162,57 @@ namespace{
 // ==============================
 
 
-bool DiskList::openDataOnly(std::string_view const filename, bool const aligned){
+bool DiskList::openDataOnly_(std::string_view const filename){
 	MMAPFile::Advice const advice = MMAPFile::Advice::SEQUENTIAL;
-
-	log__("Open disktable for repair", filename);
-
-	aligned_ = aligned;
 
 	return mData_.open(filenameData(filename), advice);
 }
 
-bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice advice){
+bool DiskList::openDataOnly(std::string_view const filename, bool const aligned){
+	log__("Open disktable for repair", filename);
+
+	aligned_ = aligned;
+
+	return openDataOnly_(filename);
+}
+
+
+
+namespace{
+	bool checkMetadata(FileMeta const &metadata_){
+		if (metadata_ == false)
+			return false;
+
+		// Non sorted files are no longer supported
+		if (metadata_.sorted() == false){
+			log__("Non sorted files are no longer supported. Please replay the file as binlog.");
+			return false;
+		}
+
+		return true;
+	}
+}
+
+
+
+bool DiskList::openForward_(std::string_view const filename){
+	log__("Open disktable forward only", filename);
+
+	metadata_.open(filenameMeta(filename));
+
+	if (checkMetadata(metadata_) == false)
+		return false;
+
+	return openDataOnly_(filename);
+}
+
+bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice const advice){
 	log__("Open disktable", filename);
 
 	metadata_.open(filenameMeta(filename));
 
-	if (metadata_ == false)
+	if (checkMetadata(metadata_) == false)
 		return false;
-
-	// Non sorted files are no longer supported
-	if (metadata_.sorted() == false){
-		log__("Non sorted files are no longer supported. Please replay the file as binlog.");
-		return false;
-	}
 
 	bool const b1 =	mIndx_.open(filenameIndx(filename));
 	bool const b2 =	mData_.open(filenameData(filename), advice);
@@ -232,8 +260,9 @@ bool DiskList::open_(std::string_view const filename, MMAPFile::Advice const adv
 	// this can not be converted to lambda easily...
 	switch(mode){
 	default:
-	case OpenMode::NORMAL		: return openNormal_  (filename, advice	);
-	case OpenMode::MINIMAL		: return openMinimal_ (filename, advice	);
+	case OpenMode::NORMAL	: return openNormal_  (filename, advice	);
+	case OpenMode::MINIMAL	: return openMinimal_ (filename, advice	);
+	case OpenMode::FORWARD	: return openForward_ (filename		);
 	}
 }
 

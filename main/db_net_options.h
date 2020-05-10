@@ -1,14 +1,30 @@
 #include <cstdint>
-#include <iostream>
-#include <iomanip>
+
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
 
 #include "inifile.h"
 #include "mystring.h"
+
+namespace impl_{
+	template <typename Def>
+	void put(std::string_view const name, Def const &def, std::string_view const description){
+		fmt::print("\t{0:20} = {1:>8} ; {2}\n", name, def, description);
+	}
+
+	inline void put(std::string_view const name, std::string_view const description){
+		put(name, "-", description);
+	}
+}
+
+
 
 class MyOptions{
 public:
 	uint16_t	immutable		= 1;
 	std::string	db_path;
+
+	std::string	binlog_path;
 
 	std::nullptr_t	host			= nullptr;
 	uint16_t	port			= 2000;
@@ -23,6 +39,7 @@ public:
 		switch( hash(name) ){
 		case hash("immutable"		)	: return assign_(immutable,		value);
 		case hash("db_path"		)	: return assign_(db_path,  	    	value);
+		case hash("binlog_path"		)	: return assign_(binlog_path,  	    	value);
 
 		case hash("host"		)	: return assign_(host,			value);
 		case hash("port"		)	: return assign_(port,			value);
@@ -37,16 +54,23 @@ public:
 	}
 
 	static void print(){
-		print__("immutable",		"1",	"Start mutable = 0, immutable = 1"		);
-		print__("db_path",		"-",	"Path to database"				);
+		MyOptions{}.printOptions();
+	}
 
-		print__("host",			"-",	"TCP host to listen (not working)"		);
-		print__("port",			"2000",	"TCP port to listen"				);
-		print__("timeout",		"30",	"Connection timeout in seconds"			);
+	void printOptions() const{
+		using impl_::put;
 
-		print__("max_clients",		"512",	"Max Clients"					);
-		print__("max_memlist_size",	"128",	"Max size of memlist in MB"			);
-		print__("max_memlist_arena",	"0",	"Max size of memlist AllocatorArena in MB"	);
+		put("immutable",		immutable,		"Start mutable = 0, immutable = 1"		);
+		put("db_path",						"Path to database"				);
+		put("binlog_path",					"Path to binlog, empty for none"		);
+
+		put("host",						"TCP host to listen (not working)"		);
+		put("port",			port,			"TCP port to listen"				);
+		put("timeout",			timeout,		"Connection timeout in seconds"			);
+
+		put("max_clients",		max_clients,		"Max Clients"					);
+		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB"			);
+		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"	);
 	}
 
 private:
@@ -65,19 +89,6 @@ private:
 
 	static void assign_(std::nullptr_t, std::string_view){
 		/* nada */
-	}
-
-private:
-	static void print__(std::string_view const name, const char *def, const char *description){
-		std::cout
-			<< '\t'
-			<< std::setw(20) << std::left << name
-			<< std::setw( 0) << '=' << ' '
-			<< std::setw( 8) << std::left << def
-			<< std::setw( 0) << ';' << ' '
-			<< description
-			<< '\n'
-		;
 	}
 };
 

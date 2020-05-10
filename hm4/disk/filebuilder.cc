@@ -2,9 +2,6 @@
 
 #include "filemetablob.h"
 
-#include "myalign.h"
-#include "myendian.h"
-
 namespace hm4{
 namespace disk{
 namespace FileBuilder{
@@ -39,9 +36,7 @@ namespace FileBuilder{
 
 
 	void FileDataBuilder::operator()(Pair const &pair){
-		pair.fwrite(file_data);
-		if (aligned)
-			my_align::fwriteGap(file_data, pair.bytes(), PairConf::ALIGN);
+		pair.fwrite(file_data, aligned);
 	}
 
 

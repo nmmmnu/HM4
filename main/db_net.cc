@@ -1,6 +1,10 @@
-#include "db_net_immutablefactory.h"
-#include "db_net_mutablefactory.h"
-#include "db_net_singlelistfactory.h"
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
+
+#include "factory/singlelist.h"
+#include "factory/immutable.h"
+#include "factory/mutable.h"
+#include "factory/mutablebinlog.h"
 
 #include "pmallocator.h"
 #include "stdallocator.h"
@@ -69,27 +73,41 @@ int main(int argc, char **argv){
 
 	using hm4::listloader::DirectoryListLoader;
 
-	if (opt.immutable == 0 && max_memlist_arena){
+	if (opt.immutable == 0 && opt.binlog_path.size() && max_memlist_arena){
+		std::clog << "Starting mutable binlog server with ArenaAllocator of " << opt.max_memlist_arena << " MB..."	<< '\n';
+
+		MyArenaAllocator arenaAllocator{ max_memlist_arena };
+
+		return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, max_memlist_size, arenaAllocator } );
+
+	} else if (opt.immutable == 0 && opt.binlog_path.size()){
+		std::clog << "Starting mutable binlog server with STDAllocator..."	<< '\n';
+
+		MySTDAllocator stdAllocator;
+
+		return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, max_memlist_size, stdAllocator } );
+
+	}else if (opt.immutable == 0 && max_memlist_arena){
 		std::clog << "Starting mutable server with ArenaAllocator of " << opt.max_memlist_arena << " MB..."	<< '\n';
 
 		MyArenaAllocator arenaAllocator{ max_memlist_arena };
 
-		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size, arenaAllocator } );
+		return main2(opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, arenaAllocator } );
 
 	} else if (opt.immutable == 0){
 		std::clog << "Starting mutable server with STDAllocator..."	<< '\n';
 
 		MySTDAllocator stdAllocator;
 
-		return main2(opt, MyMutableDBAdapterFactory{   opt.db_path, max_memlist_size, stdAllocator } );
+		return main2(opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, stdAllocator } );
 
 	}else if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path)){
 		std::clog << "Starting immutable server..."	<< '\n';
-		return main2(opt, MyImmutableDBAdapterFactory{ opt.db_path } );
+		return main2(opt, DBAdapterFactory::Immutable{ opt.db_path } );
 
 	}else{
 		std::clog << "Starting singlelist server..."	<< '\n';
-		return main2(opt, MySingleListDBAdapterFactory{ opt.db_path } );
+		return main2(opt, DBAdapterFactory::SingleList{ opt.db_path } );
 	}
 }
 
@@ -181,7 +199,7 @@ namespace{
 	// ----------------------------------
 
 	void printError(const char *msg){
-		std::cout << msg << '\n';
+		fmt::print("{}\n", msg);
 		exit(1);
 	}
 
@@ -192,32 +210,36 @@ namespace{
 		const char *convert = "charconv";
 		#endif
 
-		std::cout
-			<< "db_net version " << hm4::version::str 							<< '\n'
-					<< '\n'
-			<< "Build:"	<< '\n'
-			<< "\t"		<< "Selector"	<< '\t'	<< MySelector::NAME					<< '\n'
-			<< "\t"		<< "Convertion"	<< '\t'	<< convert						<< '\n'
-					<< '\n'
-			<< "Usage:"	<< '\n'
-			<< "\t"		<< cmd	<< " [configuration file] - start server"				<< '\n'
-			<< "...or..."	<< '\n'
-			<< "\t"		<< cmd	<< " r [lsm_path] [optional tcp port] - start immutable  server"	<< '\n'
-			<< "\t"		<< cmd	<< " w [lsm_path] [optional tcp port] - start mutable    server"	<< '\n'
+		fmt::print(
+			"db_net version {version}\n"
+			"\n"
+			"Build:\n"
+			"\tSelector"	"\t{selector}\n"
+			"\tConvertion"	"\t{convert}\n"
+			"\n"
+			"Usage:\n"
+			"\t{cmd} [configuration file] - start server\n"
+			"\t...or...\n"
+			"\t{cmd} r [lsm_path] [optional tcp port] - start immutable  server\n"
+			"\t{cmd} w [lsm_path] [optional tcp port] - start mutable    server\n"
+			"\n"
+			"\t\tPath names must be written with quotes:\n"
+			"\t\tExample directory/file.'*'.db\n"
+			"\t\tThe '*', will be replaced with ID's\n"
+			"\n"
+			,
 
-			<< "\t\tPath names must be written with quotes:"	<< '\n'
-			<< "\t\tExample directory/file.'*'.db"			<< '\n'
-			<< "\t\tThe '*', will be replaced with ID's"		<< '\n'
+			fmt::arg("version",	hm4::version::str	),
+			fmt::arg("selector",	MySelector::NAME	),
+			fmt::arg("convert",	convert			),
+			fmt::arg("cmd",		cmd			)
+		);
 
-			<< '\n';
-
-		std::cout
-			<< "INI File Usage:"	<< '\n';
+		fmt::print("INI File Usage:\n");
 
 		MyOptions::print();
 
-		std::cout
-			<< '\n';
+		fmt::print("\n");
 
 		exit(10);
 	}

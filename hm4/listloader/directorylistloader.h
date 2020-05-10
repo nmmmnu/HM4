@@ -12,9 +12,10 @@ public:
 	using List 	= const impl_::ContainerHelper::CollectionList;
 
 public:
-	DirectoryListLoader(std::string path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+	template<typename UString>
+	DirectoryListLoader(UString &&path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
 				container_(advice, mode),
-				path_(std::move(path)){
+				path_(std::forward<UString>(path)){
 		refresh_();
 	}
 

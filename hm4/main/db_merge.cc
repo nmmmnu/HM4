@@ -30,7 +30,7 @@ namespace{
 
 	template <class FACTORY>
 	int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepTombstones){
-		hm4::disk::FileBuilder::build(output_file, std::begin(f.getList()), std::end(f.getList()), keepTombstones, /* aligned */ true);
+		hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()), keepTombstones, /* aligned */ true);
 
 		return 0;
 	}
@@ -51,7 +51,7 @@ struct MergeListFactory_1{
 		table_.open(filename, advice, mode);
 	}
 
-	const auto &getList() const{
+	const auto &operator()() const{
 		return table_;
 	}
 
@@ -67,7 +67,7 @@ struct MergeListFactory_2{
 		table2_.open(filename2, advice, mode);
 	}
 
-	const auto &getList() const{
+	const auto &operator()() const{
 		return table_;
 	}
 
@@ -86,7 +86,7 @@ struct MergeListFactory_N{
 	MergeListFactory_N(IT first, IT last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
 					loader_(first, last, advice, mode){}
 
-	const auto &getList() const{
+	const auto &operator()() const{
 		return loader_.getList();
 	}
 
@@ -97,7 +97,7 @@ private:
 
 
 constexpr auto	DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
-constexpr auto	DEFAULT_MODE	= DiskList::OpenMode::MINIMAL;
+constexpr auto	DEFAULT_MODE	= DiskList::OpenMode::FORWARD;
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)

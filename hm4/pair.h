@@ -10,6 +10,7 @@
 
 #include "myendian.h"
 #include "mynarrow.h"
+#include "myalign.h"
 #include "mystring.h"
 #include "comparator.h"
 
@@ -315,8 +316,11 @@ namespace hm4{
 
 		void print() const noexcept;
 
-		void fwrite(std::ostream & os) const{
+		void fwrite(std::ostream & os, bool const aligned) const{
 			os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
+
+			if (aligned)
+				my_align::fwriteGap(os, bytes(), PairConf::ALIGN);
 		}
 
 		// ==============================

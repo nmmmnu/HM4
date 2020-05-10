@@ -13,8 +13,9 @@ public:
 	using List	= const DiskList;
 
 public:
-	SingleListLoader(std::string filename, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				filename_(std::move(filename)),
+	template<typename UString>
+	SingleListLoader(UString &&filename, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				filename_(std::forward<UString>(filename)),
 				advice_(advice),
 				mode_(mode){
 		open_();

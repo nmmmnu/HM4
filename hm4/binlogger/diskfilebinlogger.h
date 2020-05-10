@@ -8,9 +8,14 @@ namespace binlogger{
 
 
 class DiskFileBinLogger{
+private:
+	using FileDataBuilder = disk::FileBuilder::FileDataBuilder;
+
 public:
-	DiskFileBinLogger(std::string_view const filename, bool const aligned):
-				dataBuilder_(filename, aligned){}
+	template<typename UString>
+	DiskFileBinLogger(UString &&filename, bool const aligned):
+				filename_	(std::forward<UString>(filename)	),
+				aligned_	(aligned				){}
 
 public:
 	void operator()(Pair const &pair){
@@ -18,12 +23,14 @@ public:
 	}
 
 	bool clear(){
-		// implement reset somehow
+		dataBuilder_ = { filename_, aligned_ };
 		return true;
 	}
 
 private:
-	disk::FileBuilder::FileDataBuilder dataBuilder_;
+	std::string	filename_;
+	bool		aligned_;
+	FileDataBuilder	dataBuilder_{ filename_, aligned_ };
 };
 
 

@@ -35,7 +35,8 @@ public:
 public:
 	enum class OpenMode : char {
 		NORMAL		,
-		MINIMAL
+		MINIMAL		,
+		FORWARD
 	};
 
 	enum class SearchMode : char {
@@ -113,6 +114,9 @@ public:
 private:
 	bool openNormal_  (std::string_view filename, MMAPFile::Advice advice);
 	bool openMinimal_ (std::string_view filename, MMAPFile::Advice advice);
+	bool openForward_ (std::string_view filename);
+
+	bool openDataOnly_(std::string_view filename);
 
 	bool open_(std::string_view filename, MMAPFile::Advice advice, OpenMode mode);
 
