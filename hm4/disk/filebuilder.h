@@ -15,7 +15,7 @@ namespace disk{
 namespace FileBuilder{
 
 	namespace config{
-		constexpr auto MODE = std::ios::out | std::ios::binary;
+		constexpr std::ios::openmode MODE = std::ios::out | std::ios::binary | std::ios::trunc;
 	}
 
 
@@ -27,6 +27,10 @@ namespace FileBuilder{
 							aligned(aligned){}
 
 		void operator()(Pair const &pair);
+
+		void close(){
+			file_data.close();
+		}
 
 	private:
 		std::ofstream	file_data;
@@ -66,7 +70,7 @@ namespace FileBuilder{
 
 		uint64_t	pos		= 0;
 
-		HPair::HKey	hkey_ = 0;
+		HPair::HKey	hkey_		= 0;
 	};
 
 

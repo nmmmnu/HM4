@@ -199,7 +199,7 @@ namespace{
 	// ----------------------------------
 
 	void printError(const char *msg){
-		fmt::print("{}\n", msg);
+		fmt::print(stderr, "{}\n", msg);
 		exit(1);
 	}
 

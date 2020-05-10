@@ -23,6 +23,8 @@ public:
 	}
 
 	bool clear(){
+		dataBuilder_.close();
+		// file is sync to disk.
 		dataBuilder_ = { filename_, aligned_ };
 		return true;
 	}
