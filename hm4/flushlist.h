@@ -65,8 +65,6 @@ public:
 	bool flush(){
 		bool const r = save();
 
-		log__("Reloading data...");
-
 		list_->clear();
 		notifyLoader_();
 
