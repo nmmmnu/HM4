@@ -1,5 +1,5 @@
-#ifndef LIST_DBADAPTER_H_
-#define LIST_DBADAPTER_H_
+#ifndef List_DB_ADAPTER_H_
+#define List_DB_ADAPTER_H_
 
 #include "mystring.h"
 
@@ -10,21 +10,112 @@
 
 #include "version.h"
 
-template<class LIST, class COMMAND=std::nullptr_t>
+namespace accumulator_impl_{
+	inline bool samePrefix(std::string_view const p, std::string_view const s){
+		if (p.size() > s.size())
+			return false;
+
+		return std::equal(std::begin(p), std::end(p), std::begin(s));
+	}
+
+	template<class Accumulator, class List, typename... Args>
+	auto accumulate_(List const &list, std::string_view const key, uint16_t const maxResults, std::string_view const prefix, Args&&... args){
+		auto it = key.empty() ? std::begin(list) : list.find(key, std::false_type{} );
+
+		uint16_t count = 0;
+
+		Accumulator accumulator(std::forward<Args>(args)...);
+
+		for(; it != std::end(list); ++it){
+			auto const &key = it->getKey();
+
+			if (++count > maxResults)
+				return accumulator.result(key);
+
+			if (prefix.empty() == false && ! samePrefix(prefix, key))
+				return accumulator.result();
+
+			if (it->isValid(std::true_type{}))
+				accumulator(*it);
+		}
+
+		return accumulator.result();
+	}
+
+	template<class Accumulator, class List, typename... Args>
+	auto accumulatePair_(List const &list, std::string_view const key, uint16_t const maxResults, std::string_view const prefix, Args&&... args){
+		auto const [ data, lastKey ] = accumulate_<Accumulator>(list, key, maxResults, prefix, std::forward<Args>(args)...);
+
+		return std::array<std::string, 2>{
+			std::to_string(data),
+			{ lastKey.data(), lastKey.size() }
+		};
+	}
+
+	// Accumulator implementations
+
+	template<class Vector>
+	struct AccumulatorVector{
+		Vector &data;
+
+		AccumulatorVector(Vector &data) : data(data){}
+
+		void operator()(hm4::Pair const &pair){
+			data.emplace_back(pair.getKey());
+
+			if (pair.isValid(std::true_type{}))
+				data.emplace_back(pair.getVal());
+			else
+				data.emplace_back();
+		}
+
+		constexpr static void result(std::string_view = ""){
+		}
+	};
+
+	template<class T>
+	struct AccumulatorCount{
+		T data = 0;
+
+		void operator()(hm4::Pair const &){
+			++data;
+		}
+
+		auto result(std::string_view key = "") const{
+			return std::make_pair(data, key);
+		}
+	};
+
+	template<class T>
+	struct AccumulatorSum{
+		T data = 0;
+
+		void operator()(hm4::Pair const &pair){
+			data += from_string<T>(pair.getVal());
+		}
+
+		auto result(std::string_view key = "") const{
+			return std::make_pair(data, key);
+		}
+	};
+
+} // accumulator_impl_
+
+template<class List, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
 public:
 	constexpr static uint16_t DEFAULT_RESULTS = 10;
 	constexpr static uint16_t MAXIMUM_RESULTS = 1000;
 
 public:
-	constexpr static bool MUTABLE = ! std::is_const_v<LIST>;
+	constexpr static bool MUTABLE = ! std::is_const_v<List>;
 
 public:
-	ListDBAdapter(LIST &list, COMMAND &cmd) :
+	ListDBAdapter(List &list, COMMAND &cmd) :
 				list_(list),
 				cmd_(& cmd){}
 
-	ListDBAdapter(LIST &list) :
+	ListDBAdapter(List &list) :
 				ListDBAdapter(list, nullptr){}
 
 public:
@@ -37,35 +128,21 @@ public:
 	}
 
 	auto getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
-		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
-
 	//	using MyVector = std::vector<std::string_view>;
 		using MyVector = FixedVector<std::string_view, 2 * MAXIMUM_RESULTS>;
+
+		auto const maxResults = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
 		MyVector result;
 
 		// reserve x2 because of hgetall
 		result.reserve(maxResults * 2);
 
-		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
+		using namespace accumulator_impl_;
 
-		size_t c = 0;
-		for(; it != std::end(list_); ++it){
-			auto const &resultKey = it->getKey();
+		using Accumulator = AccumulatorVector<MyVector>;
 
-			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey))
-				break;
-
-			result.emplace_back(resultKey);
-
-			if (it->isValid(std::true_type{}))
-				result.emplace_back(it->getVal());
-			else
-				result.emplace_back();
-
-			if (++c >= maxResults)
-				break;
-		}
+		accumulate_<Accumulator>(list_, key, maxResults, prefix, result);
 
 		return result;
 	}
@@ -73,32 +150,21 @@ public:
 	auto count(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
 		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
-		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
+		using namespace accumulator_impl_;
 
-		uint16_t count   = 0;
-		uint16_t countOK = 0;
+		using Accumulator = AccumulatorCount<uint16_t>;
 
-		std::string_view resultKey;
+		return accumulatePair_<Accumulator>(list_, key, maxResults, prefix);
+	}
 
-		for(; it != std::end(list_); ++it){
-			resultKey = it->getKey();
+	auto sum(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
+		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
 
-			if (prefix.empty() == false && ! samePrefix__(prefix, resultKey)){
-				resultKey = {};
-				break;
-			}
+		using namespace accumulator_impl_;
 
-			if (it->isValid(std::true_type{}))
-				++countOK;
+		using Accumulator = AccumulatorSum<int64_t>;
 
-			if (++count >= maxResults)
-				break;
-		}
-
-		return std::array<std::string, 2>{
-			std::to_string(countOK),
-			{ resultKey.data(), resultKey.size() }
-		};
+		return accumulatePair_<Accumulator>(list_, key, maxResults, prefix);
 	}
 
 	std::string info() const{
@@ -162,22 +228,15 @@ public:
 	}
 
 private:
-	std::string_view getVal_(typename LIST::iterator const &it) const{
+	std::string_view getVal_(typename List::iterator const &it) const{
 		if (it != std::end(list_) && it->isValid(std::true_type{}))
 			return it->getVal();
 		else
 			return {};
 	}
 
-	static bool samePrefix__(std::string_view const p, std::string_view const s){
-		if (p.size() > s.size())
-			return false;
-
-		return std::equal(std::begin(p), std::end(p), std::begin(s));
-	}
-
 private:
-	LIST		&list_;
+	List		&list_;
 	COMMAND		*cmd_		= nullptr;
 };
 
