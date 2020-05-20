@@ -23,7 +23,8 @@ public:
 
 		INCR		,
 
-		COUNT
+		COUNT		,
+		SUM
 	};
 
 	constexpr static auto h(const char *s){
@@ -70,6 +71,9 @@ public:
 
 		case h("count"		)	:
 		case h("COUNT"		)	: return Command::COUNT		;
+
+		case h("sum"		)	:
+		case h("SUM"		)	: return Command::SUM		;
 
 		default				: return Command::UNKNOWN	;
 		}

@@ -75,6 +75,8 @@ private:
 
 		case Command::COUNT	: return do_count();
 
+		case Command::SUM	: return do_sum();
+
 		default			: return err_NotImplemented_();
 		}
 	}
@@ -223,6 +225,25 @@ private:
 		const auto &prefix = p[3];
 
 		protocol_.response_strings(buffer_, db_.count(key, count, prefix) );
+
+		return WorkerStatus::WRITE;
+	}
+
+	WorkerStatus do_sum(){
+		const auto &p = protocol_.getParams();
+
+		if (p.size() != 4)
+			return err_BadRequest_();
+
+		const auto &key    = p[1];
+
+		// count + prefix case
+		// COUNT u: 100 u:
+
+		uint16_t const count = from_string<uint16_t>(p[2]);
+		const auto &prefix = p[3];
+
+		protocol_.response_strings(buffer_, db_.sum(key, count, prefix) );
 
 		return WorkerStatus::WRITE;
 	}

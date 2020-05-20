@@ -34,6 +34,11 @@ struct MockDBAdapter{
 	}
 
 	constexpr
+	static auto sum(std::string_view, uint16_t, std::string_view){
+		return std::array<std::string_view, 2>{ "0", "" };
+	}
+
+	constexpr
 	static bool refresh(bool){
 		return true;
 	}
