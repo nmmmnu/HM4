@@ -72,9 +72,9 @@ private:
 
 		case Command::GET	: return do_get();
 		case Command::GETALL	: return do_getall();
+		case Command::GETX	: return do_getx();
 
 		case Command::COUNT	: return do_count();
-
 		case Command::SUM	: return do_sum();
 
 		default			: return err_NotImplemented_();
@@ -92,8 +92,10 @@ private:
 
 		case Command::GET	: return do_get();
 		case Command::GETALL	: return do_getall();
+		case Command::GETX	: return do_getx();
 
 		case Command::COUNT	: return do_count();
+		case Command::SUM	: return do_sum();
 
 		case Command::SET	: return do_set();
 		case Command::SETEX	: return do_setex();
@@ -210,6 +212,21 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
+	WorkerStatus do_getx(){
+		const auto &p = protocol_.getParams();
+
+		if (p.size() != 4)
+			return err_BadRequest_();
+
+		const auto &key    = p[1];
+		uint16_t const count = from_string<uint16_t>(p[2]);
+		const auto &prefix = p[3];
+
+		protocol_.response_strings(buffer_, db_.getx(key, count, prefix) );
+
+		return WorkerStatus::WRITE;
+	}
+
 	WorkerStatus do_count(){
 		const auto &p = protocol_.getParams();
 
@@ -217,10 +234,6 @@ private:
 			return err_BadRequest_();
 
 		const auto &key    = p[1];
-
-		// count + prefix case
-		// COUNT u: 100 u:
-
 		uint16_t const count = from_string<uint16_t>(p[2]);
 		const auto &prefix = p[3];
 
@@ -236,10 +249,6 @@ private:
 			return err_BadRequest_();
 
 		const auto &key    = p[1];
-
-		// count + prefix case
-		// COUNT u: 100 u:
-
 		uint16_t const count = from_string<uint16_t>(p[2]);
 		const auto &prefix = p[3];
 

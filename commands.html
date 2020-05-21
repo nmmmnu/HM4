@@ -7,384 +7,479 @@
 		padding: 10px;
 	}
 
-	hr {
-		background: black;
-		border: 0px;
-		height: 3px;
+	a {
+		font-weight: bold;
+		color: #007;
+	}
 
-		margin-top: 30px;
-		margin-bottom: 30px;
+	div.cmd {
+		padding-bottom: 10px;
+
+		margin-top:     30px;
+		margin-bottom:  30px;
+	}
+
+	div.cmd h2 {
+		border-top:    solid 1px black;
+		border-bottom: solid 1px black;
+
+		background-color: #aaa;
+		padding: 10px;
+	}
+
+	div.cmd i {
+		background-color: #aaa;
+		padding: 2px;
+		font-style: normal;
+	}
+
+	div.cmd table.db {
+		border: solid 1px #777;
+		border-collapse: collapse;
+
+		margin-top:    10px;
+		margin-bottom: 10px;
+	}
+
+	div.cmd table {
+		border: solid 3px black;
+		border-collapse: collapse;
+	}
+
+	div.cmd table td {
+		padding: 10px;
 	}
 
 	--></style>
 </head>
 <body>
+<a target="#top"></a>
 
 <h1>HM4 - command reference</h1>
-<hr />
 
 <h2>List of commands</h2>
 
 <ul>
-	<li>GET</li>
-	<li>HGETALL</li>
-	<li>COUNT</li>
-	<li>SET</li>
-	<li>SETEX</li>
-	<li>INCR / INCRBY</li>
-	<li>DEL</li>
-	<li>INFO</li>
-	<li>SAVE / BGSAVE</li>
-	<li>EXIT</li>
-	<li>SHUTDOWN</li>
+	<li><a href="#GET	">GET		</a></li>
+	<li><a href="#HGETALL	">HGETALL	</a></li>
+	<li><a href="#GETX	">GETX		</a></li>
+	<li><a href="#COUNT	">COUNT		</a></li>
+	<li><a href="#SUM	">SUM		</a></li>
+	<li><a href="#SET	">SET		</a></li>
+	<li><a href="#SETEX	">SETEX		</a></li>
+	<li><a href="#INCR	">INCR / INCRBY	</a></li>
+	<li><a href="#DEL	">DEL		</a></li>
+	<li><a href="#INFO	">INFO		</a></li>
+	<li><a href="#SAVE	">SAVE / BGSAVE	</a></li>
+	<li><a href="#EXIT	">EXIT		</a></li>
+	<li><a href="#SHUTDOWN	">SHUTDOWN	</a></li>
 </ul>
 
-<hr />
 
 
+<div class="cmd" id="GET">
+	<h2>GET key</h2>
 
-<h2>GET</h2>
+	<h3>Description:</h3>
 
-<pre>get [key]</pre>
+		Get value of the <i>key</i>. Exact match.
 
-<p>
-	<b>Description:</b><br />
-	Gets [key] from the server. Exact match.
-</p>
+	<h3>Return value:</h3>
 
-<p>
-	<b>Return value:</b><br />
-	Value of the key or empty string
-</p>
+		Value of the key or empty string.
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible.<br />
-	Blobs as values are supported, if your client support them.
-</p>
+	<h3>Info:</h3>
 
-<hr />
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)	</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
+		</table>
 
 
+</div>
 
-<h2>HGETALL</h2>
+<a href="#top">top</a>
 
-<h3>Option 1 - standard Redis way:</h3>
+<div class="cmd" id="HGETALL">
+	<h2>HGETALL key [number=10]</h2>
 
-<pre>hgetall [key] [number = 10]</pre>
+	<h3>Description:</h3>
 
-<p>
-	<b>Description:</b><br />
-	Gets [number] keys after [key] from the server.
-</p>
+		Gets <i>number</i> of key-value pairs after <i>key</i>.
+		Returns valid pairs and tombstones.
 
-<p>
-	<b>Return value:</b><br />
-	array of key and values
-</p>
+	<h3>Return value:</h3>
 
-<p>
-	<b>Notes:</b><br />
-	The [number] is clamp between 10 and 1000.<br />
-	This command allows iterating all keys in the database.<br />
-	Blobs as values are supported, if your client support them.
-</p>
+		array of keys and values
 
+	<h3>Info:</h3>
 
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
+		</table>
+</div>
 
-<h3>Option 2 - usage with prefix:</h3>
+<a href="#top">top</a>
 
-<pre>hgetall [key] [number] [prefix]</pre>
+<div class="cmd" id="HGETALL">
+	<h2>HGETALL key number prefix</h2>
 
-<p>
-	<b>Description:</b><br />
-	Gets [number] keys after [key] from the server, but returns only keys <u>that matching the prefix</u>.
-</p>
+	<h3>Description:</h3>
 
-<p>
-	<b>Return value:</b><br />
-	array of key and values
-</p>
+		Gets <i>number</i> of key-value pairs after <i>key</i>.
+		Returns valid pairs and tombstones, but only if they are matching the <u>prefix</u>.
 
-<p>
-	<b>Notes:</b><br />
-	The [number] is clamp between 10 and 1000.<br />
-	Blobs as values are supported, if your client support them.
-</p>
+	<h3>Return value:</h3>
 
-<p>
-	<b>Example:</b><br />
-	Suppose we have user database with keys like this:
-</p>
+		array of key and values
 
-<pre>
-u:123:email   -> office@domain.com
-u:123:country -> US
-u:123:city    -> Boston
-</pre>
+	<h3>Return value:</h3>
 
-<p>You can get this user's information records with following command:</p>
+		array of keys and values
 
-<pre>hgetall u:123: 1000 u:123:</pre>
+	<h3>Info:</h3>
 
-<hr />
+		<table border="1">
+			<tr><td>Available since		</td><td>1.1.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Redis compatible	</td><td>NO		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
+		</table>
 
+	<h3>Example:</h3>
 
+		Suppose we have this user database:
 
-<h2>COUNT</h2>
+		<table border="1" class="db">
+			<tr><td>u:123:email		</td><td>office@domain.com		</td></tr>
+			<tr><td>u:123:country		</td><td>US				</td></tr>
+			<tr><td>u:123:city		</td><td>Boston				</td></tr>
+		</table>
 
-<pre>count [key] [number] [prefix]</pre>
+		You can get this user's information records with following command:<br />
+		<br />
+		<i>hgetall u:123: 1000 u:123:</i>
+</div>
 
-<p>
-	<b>Description:</b><br />
-	Counts [number] keys after [key] from the server, but returns only keys <u>that matching the prefix</u>.
-</p>
+<a href="#top">top</a>
 
-<p>
-	<b>Return value:</b><br />
-	Array responce with two elements:
-</p>
+<div class="cmd" id="GETX">
+	<h2>GETX key number prefix</h2>
 
-<ul>
-	<li>count of valid elements</li>
-	<li>last key, if there is second page</li>
-</ul>
+	<h3>Description:</h3>
 
-<p>
-	<b>Notes:</b><br />
-	The [number] is clamp between 10 and 1000.<br />
-	This command is available after 1.2.4
-</p>
+		Gets <i>number</i> of key-value pairs after <i>key</i>.
+		Returns ONLY valid pairs, but only if they are matching the <u>prefix</u>.
 
-<p>
-	<b>Example:</b><br />
-	Suppose we have user database with keys like this:
-</p>
+	<h3>Return value:</h3>
 
-<pre>
-u:123:email   -> office@domain.com
-u:123:country -> US
-u:123:city    -> Boston
-</pre>
+	<ul>
+		<li>array of key and values</li>
+		<li>last key, if there is second page</li>
+	</ul>
 
-<p>You can get this user's number of records with following command:</p>
+	<h3>Info:</h3>
 
-<pre>count u:123: 1000 u:123:</pre>
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.5		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Redis compatible	</td><td>NO		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
+		</table>
 
-<hr />
+	<h3>Example:</h3>
 
+		Suppose we have this user database:
 
+		<table border="1" class="db">
+			<tr><td>u:123:email		</td><td>office@domain.com		</td></tr>
+			<tr><td>u:123:country		</td><td>US				</td></tr>
+			<tr><td>u:123:city		</td><td>Boston				</td></tr>
+		</table>
 
-<h2>SET</h2>
+		You can get this user's information records with following command:<br />
+		<br />
+		<i>getx u:123: 1000 u:123:</i>
 
-<pre>set [key] [value]</pre>
+</div>
 
-<p>
-	<b>Description:</b><br />
-	Set [key] -> [value] on the server.
-</p>
+<a href="#top">top</a>
 
-<p>
-	<b>Return value:</b><br />
-	-
-</p>
+<div class="cmd" id="COUNT">
+	<h2>COUNT key number prefix</h2>
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible.<br />
-	Blobs as values are supported, if your client support them.
-</p>
 
-<hr />
+	<h3>Description:</h3>
 
+	Aggregate using COUNT <i>number</i> key-value pairs after <i>key</i>
+	Aggregate ONLY valid pairs, but only if they are matching the <u>prefix</u>.
 
+	<h3>Return value:</h3>
 
-<h2>SETEX</h2>
+	<ul>
+		<li>count of valid elements</li>
+		<li>last key, if there is second page</li>
+	</ul>
 
-<pre>setex [key] [seconds] [value]</pre>
+	<h3>Info:</h3>
 
-<p>
-	<b>Description:</b><br />
-	Set [key] -> [value] with expiration of [seconds] seconds on the server.
-</p>
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.4		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Redis compatible	</td><td>NO		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
 
-<p>
-	<b>Return value:</b><br />
-	-
-</p>
+	<h3>Example:</h3>
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible.<br />
-	Blobs as values are supported, if your client support them.<br />
-	This command helps HM4 to be used as session handler for PHP servers.
-</p>
+		Suppose we have this user database:
 
-<hr />
+		<table border="1" class="db">
+			<tr><td>u:123:email		</td><td>office@domain.com		</td></tr>
+			<tr><td>u:123:country		</td><td>US				</td></tr>
+			<tr><td>u:123:city		</td><td>Boston				</td></tr>
+		</table>
 
+		You can get the count user's information records with following command:<br />
+		<br />
+		<i>count u:123: 1000 u:123:</i>
+</div>
 
+<a href="#top">top</a>
 
-<h2>INCR / INCRBY</h2>
+<div class="cmd" id="SUM">
+	<h2>SUM key number prefix</h2>
 
-<pre>incr   [key] [increase value = 1]</pre>
-<pre>incrby [key] [increase value = 1]</pre>
+	<pre>sum [key] [number] [prefix]</pre>
 
-<p>
-	<b>Description:</b><br />
-	Increase numerical value of the [key] with  [increase value]. It uses <b>int64_t</b> as a number type.
-</p>
+	<h3>Description:</h3>
 
-<p>
-	<b>Return value:</b><br />
-	New increased value.
-</p>
+	Aggregate using SUM <i>number</i> key-value pairs after <i>key</i>
+	Aggregate ONLY valid pairs, but only if they are matching the <u>prefix</u>.
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible, assuming you are using it in correct Redis way.
-</p>
+	<h3>Return value:</h3>
 
-<hr />
+	<ul>
+		<li>sum of valid elements</li>
+		<li>last key, if there is second page</li>
+	</ul>
 
 
+	<h3>Info:</h3>
 
-<h2>DEL</h2>
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.4		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Redis compatible	</td><td>NO		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
 
-<pre>del [key]</pre>
+	<h3>Example:</h3>
 
-<p>
-	<b>Description:</b><br />
-	Removes [key] from the server.
-</p>
+		Suppose we have this sales database:
 
-<p>
-	<b>Return value:</b><br />
-	-
-</p>
+		<table border="1" class="db">
+			<tr><td>sales:2020-01-01</td><td>12</td></tr>
+			<tr><td>sales:2020-01-02</td><td>21</td></tr>
+			<tr><td>sales:2020-01-03</td><td>35</td></tr>
+		</table>
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible.
-</p>
+		You can get this sum of sales for Jan.2020 with following command:<br />
+		<br />
+		<i>sum sales:2020-01- 1000 sales:2020-01-</i>
 
-<hr />
+</div>
 
+<a href="#top">top</a>
 
+<div class="cmd" id="SET">
+	<h2>SET key value</h2>
 
-<h2>INFO</h2>
+	<h3>Description:</h3>
 
-<pre>info</pre>
+		Set <i>key</i> -> <i>value</i> pair.
 
-<p>
-	<b>Description:</b><br />
-	Returns server information.
-</p>
+	<h3>Info:</h3>
 
-<p>
-	<b>Return value:</b><br />
-	String with information
-</p>
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(1)		</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
 
-<hr />
+</div>
 
+<a href="#top">top</a>
 
+<div class="cmd" id="SETEX">
+	<h2>SETEX key seconds value</h2>
 
-<h2>SAVE / BGSAVE</h2>
+	<h3>Description:</h3>
 
-<h3>On <b>mutable servers</b>:</h3>
+		Set <i>key</i> -> <i>value</i> pair with expiration of <i>seconds</i> seconds.<br />
+		This command allows HM4 to be used as session handler for PHP servers.
 
-<pre>  save [complete = 0]</pre>
-<pre>bgsave [complete = 0]</pre>
+	<h3>Info:</h3>
 
-<p>
-	<b>Description:</b><br />
-	Flushes memtable on the disk and reloads the disktables.<br />
-	If [complete] is present, it suppose to bypass memtable flush, but current implementation is not 100% clear and might change in near future.
-</p>
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(1)		</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
+</div>
 
-<p>
-	<b>Return value:</b><br />
-	-
-</p>
+<a href="#top">top</a>
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible, assuming you are using it in correct Redis way.<br />
-	Save is always foreground, e.g. you have to wait, but usually is very fast.
-</p>
+<div class="cmd" id="INCR">
+	<h2>INCR / INCRBY key [increase value=1]</h2>
 
-<h3>On <b>immutable servers</b>:</h3>
+	<h3>Description:</h3>
 
-<pre>  save [complete = 0]</pre>
-<pre>bgsave [complete = 0]</pre>
+		Increase numerical value of the <i>key</i> with  <i>increase value</i>.<br />
+		It uses <b>int64_t</b> as a number type.
 
-<p>
-	<b>Description:</b><br />
-	Reloads the disktables.<br />
-	[complete] options is ignored.
-</p>
+	<h3>Return value:</h3>
 
-<p>
-	<b>Return value:</b><br />
-	-
-</p>
+		New increased value.
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible, assuming you are using it in correct Redis way.<br />
-	Save is always foreground, e.g. you have to wait, but usually is very fast.
-</p>
+	<h3>Info:</h3>
 
-<hr />
+		<table border="1">
+			<tr><td>Available since		</td><td>1.1.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)	</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
+</div>
 
+<a href="#top">top</a>
 
+<div class="cmd" id="DEL">
+	<h2>DEL</h2>
 
-<h2>EXIT</h2>
+	<h3>Description:</h3>
+		Removes [key] from the server.
 
-<pre>exit</pre>
+	<h3>Return value:</h3>
 
-<p>
-	<b>Description:</b><br />
-	Disconnect from the server.
-</p>
+		New increased value.
 
-<p>
-	<b>Return value:</b><br />
-	-
-</p>
+	<h3>Info:</h3>
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible.
-</p>
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(1)		</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
 
-<hr />
+</div>
 
+<a href="#top">top</a>
 
+<div class="cmd" id="INFO">
+	<h2>INFO</h2>
 
-<h2>SHUTDOWN</h2>
+	<h3>Description:</h3>
 
-<pre>shutdown</pre>
+		Returns server information.
 
-<p>
-	<b>Description:</b><br />
-	Shutdowns the server.
-</p>
+	<h3>Return value:</h3>
 
-<p>
-	<b>Return value:</b><br />
-	-
-</p>
+		String with information.
 
-<p>
-	<b>Notes:</b><br />
-	This command is 100% Redis compatible,<br />
-	but SAVE / NOSAVE is not supported yet.
-</p>
+	<h3>Info:</h3>
 
-<hr />
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>N/A		</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
 
+</div>
 
+<a href="#top">top</a>
+
+<div class="cmd" id="SAVE">
+	<h2>SAVE / BGSAVE [complete = 0]</h2>
+
+	<h3>Description:</h3>
+
+		<h4>On Mutable servers:</h4>
+
+			Flushes memtable on the disk and reloads the disktables.<br />
+			If <i>complete</i> is present, it suppose to bypass memtable flush,
+			but current implementation is not 100% clear and might change in near future.
+
+		<h4>On Mutable servers:</h4>
+			Reloads the disktable(s).<br />
+			<i>complete</i> options is ignored.
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>N/A		</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
+
+</div>
+
+<a href="#top">top</a>
+
+<div class="cmd" id="EXIT">
+	<h2>EXIT</h2>
+
+	<h3>Description:</h3>
+
+		Disconnect from the server.
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>N/A		</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
+
+</div>
+
+<a href="#top">top</a>
+
+<div class="cmd" id="SHUTDOWN">
+	<h2>SHUTDOWN</h2>
+
+	<h3>Description:</h3>
+
+		Shutdowns the server.<br />
+		SAVE / NOSAVE is not supported yet.
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.0.0		</td></tr>
+			<tr><td>Time complexity		</td><td>N/A		</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
+
+</div>
+
+<a href="#top">top</a>
 
 </body>
 </html>

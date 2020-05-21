@@ -11,6 +11,14 @@
 #include "version.h"
 
 namespace accumulator_impl_{
+	#if 0
+	template<size_t>
+	using GetXVector = std::vector<std::string_view>;
+	#else
+	template<size_t SIZE>
+	using GetXVector = FixedVector<std::string_view, SIZE>;
+	#endif
+
 	inline bool samePrefix(std::string_view const p, std::string_view const s){
 		if (p.size() > s.size())
 			return false;
@@ -73,6 +81,25 @@ namespace accumulator_impl_{
 		}
 	};
 
+	template<class Vector>
+	struct AccumulatorVectorNew{
+		Vector &data;
+
+		AccumulatorVectorNew(Vector &data) : data(data){}
+
+		void operator()(hm4::Pair const &pair){
+			if (pair.isValid(std::true_type{})){
+				data.emplace_back(pair.getKey());
+				data.emplace_back(pair.getVal());
+			}
+		}
+
+		void result(std::string_view key = ""){
+			// emplace even empty
+			data.emplace_back(key);
+		}
+	};
+
 	template<class T>
 	struct AccumulatorCount{
 		T data = 0;
@@ -128,19 +155,35 @@ public:
 	}
 
 	auto getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
-	//	using MyVector = std::vector<std::string_view>;
-		using MyVector = FixedVector<std::string_view, 2 * MAXIMUM_RESULTS>;
-
 		auto const maxResults = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
-
-		MyVector result;
-
-		// reserve x2 because of hgetall
-		result.reserve(maxResults * 2);
 
 		using namespace accumulator_impl_;
 
+		using MyVector = GetXVector<2 * MAXIMUM_RESULTS>;
+
+		MyVector result;
+
+		result.reserve(maxResults * 2);
+
 		using Accumulator = AccumulatorVector<MyVector>;
+
+		accumulate_<Accumulator>(list_, key, maxResults, prefix, result);
+
+		return result;
+	}
+
+	auto getx(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
+		auto const maxResults = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
+
+		using namespace accumulator_impl_;
+
+		using MyVector = GetXVector<2 * MAXIMUM_RESULTS + 1>;
+
+		MyVector result;
+
+		result.reserve(maxResults * 2 + 1);
+
+		using Accumulator = AccumulatorVectorNew<MyVector>;
 
 		accumulate_<Accumulator>(list_, key, maxResults, prefix, result);
 

@@ -17,6 +17,7 @@ void DirectoryListLoader::refresh_(){
 	// guard against missing '*'
 	if (checkIfLoaderNeed(path_) == false){
 		log__("Refusing to open path without wildcard", path_);
+		exit(1);
 		return;
 	}
 

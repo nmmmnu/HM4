@@ -16,6 +16,7 @@ public:
 
 		GET		,
 		GETALL		,
+		GETX		,
 
 		SET		,
 		SETEX		,
@@ -54,6 +55,9 @@ public:
 
 		case h("hgetall"	)	:
 		case h("HGETALL"	)	: return Command::GETALL	;
+
+		case h("getx"		)	:
+		case h("GETX"		)	: return Command::GETX		;
 
 		case h("set"		)	:
 		case h("SET"		)	: return Command::SET		;
