@@ -3,51 +3,53 @@
 	<title>HM4 - command reference</title>
 	<style><!--
 	pre {
-		border: dashed 1px black;
-		padding: 10px;
+		border:		dashed 1px black;
+		padding:	10px;
 	}
 
 	a {
-		font-weight: bold;
-		color: #007;
+		font-weight:	bold;
+		text-decoration: none;
+		color:		#007;
 	}
 
 	div.cmd {
-		padding-bottom: 10px;
-
-		margin-top:     30px;
-		margin-bottom:  30px;
+		margin-top:	30px;
+		margin-bottom:	30px;
 	}
 
 	div.cmd h2 {
-		border-top:    solid 1px black;
-		border-bottom: solid 1px black;
+		border-top:	solid 1px black;
+		border-bottom:	solid 1px black;
 
 		background-color: #aaa;
-		padding: 10px;
+		padding:	10px;
 	}
 
 	div.cmd i {
-		background-color: #aaa;
-		padding: 2px;
-		font-style: normal;
+		background-color: #ddd;
+		padding-left:	10px;
+		padding-right:	10px;
+		font-style:	normal;
+		font-weight:	bold;
+		border:		dotted 1px black;
 	}
 
 	div.cmd table.db {
-		border: solid 1px #777;
+		border:		solid 1px #777;
 		border-collapse: collapse;
 
-		margin-top:    10px;
-		margin-bottom: 10px;
+		margin-top:	10px;
+		margin-bottom:	10px;
 	}
 
 	div.cmd table {
-		border: solid 3px black;
+		border:		solid 3px black;
 		border-collapse: collapse;
 	}
 
 	div.cmd table td {
-		padding: 10px;
+		padding:	10px;
 	}
 
 	--></style>
@@ -118,7 +120,7 @@
 
 		<table border="1">
 			<tr><td>Available since		</td><td>1.0.0		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
 			<tr><td>Redis compatible	</td><td>YES		</td></tr>
 			<tr><td>Blobs as values		</td><td>YES		</td></tr>
 		</table>
@@ -131,8 +133,8 @@
 
 	<h3>Description:</h3>
 
-		Gets <i>number</i> of key-value pairs after <i>key</i>.
-		Returns valid pairs and tombstones, but only if they are matching the <u>prefix</u>.
+		Gets <i>number</i> of key-value pairs after <i>key</i>.<br />
+		Returns valid pairs and tombstones, but only if they are matching the <i>prefix</i>.
 
 	<h3>Return value:</h3>
 
@@ -146,7 +148,7 @@
 
 		<table border="1">
 			<tr><td>Available since		</td><td>1.1.0		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
 			<tr><td>Redis compatible	</td><td>NO		</td></tr>
 			<tr><td>Blobs as values		</td><td>YES		</td></tr>
 		</table>
@@ -162,8 +164,8 @@
 		</table>
 
 		You can get this user's information records with following command:<br />
-		<br />
-		<i>hgetall u:123: 1000 u:123:</i>
+
+		<pre>hgetall u:123: 1000 u:123:</pre>
 </div>
 
 <a href="#top">top</a>
@@ -173,8 +175,8 @@
 
 	<h3>Description:</h3>
 
-		Gets <i>number</i> of key-value pairs after <i>key</i>.
-		Returns ONLY valid pairs, but only if they are matching the <u>prefix</u>.
+		Gets <i>number</i> of key-value pairs after <i>key</i>.<br />
+		Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.
 
 	<h3>Return value:</h3>
 
@@ -187,7 +189,7 @@
 
 		<table border="1">
 			<tr><td>Available since		</td><td>1.2.5		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
 			<tr><td>Redis compatible	</td><td>NO		</td></tr>
 			<tr><td>Blobs as values		</td><td>YES		</td></tr>
 		</table>
@@ -203,8 +205,8 @@
 		</table>
 
 		You can get this user's information records with following command:<br />
-		<br />
-		<i>getx u:123: 1000 u:123:</i>
+
+		<pre>getx u:123: 1000 u:123:</pre>
 
 </div>
 
@@ -216,8 +218,8 @@
 
 	<h3>Description:</h3>
 
-	Aggregate using COUNT <i>number</i> key-value pairs after <i>key</i>
-	Aggregate ONLY valid pairs, but only if they are matching the <u>prefix</u>.
+	Aggregate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />
+	Aggregate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
 
 	<h3>Return value:</h3>
 
@@ -230,7 +232,7 @@
 
 		<table border="1">
 			<tr><td>Available since		</td><td>1.2.4		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
 			<tr><td>Redis compatible	</td><td>NO		</td></tr>
 			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
 		</table>
@@ -246,8 +248,8 @@
 		</table>
 
 		You can get the count user's information records with following command:<br />
-		<br />
-		<i>count u:123: 1000 u:123:</i>
+
+		<pre>count u:123: 1000 u:123:</pre>
 </div>
 
 <a href="#top">top</a>
@@ -255,12 +257,10 @@
 <div class="cmd" id="SUM">
 	<h2>SUM key number prefix</h2>
 
-	<pre>sum [key] [number] [prefix]</pre>
-
 	<h3>Description:</h3>
 
-	Aggregate using SUM <i>number</i> key-value pairs after <i>key</i>
-	Aggregate ONLY valid pairs, but only if they are matching the <u>prefix</u>.
+	Aggregate using SUM <i>number</i> key-value pairs after <i>key</i><br />
+	Aggregate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
 
 	<h3>Return value:</h3>
 
@@ -274,7 +274,7 @@
 
 		<table border="1">
 			<tr><td>Available since		</td><td>1.2.4		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)+line	</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
 			<tr><td>Redis compatible	</td><td>NO		</td></tr>
 			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
 		</table>
@@ -290,8 +290,8 @@
 		</table>
 
 		You can get this sum of sales for Jan.2020 with following command:<br />
-		<br />
-		<i>sum sales:2020-01- 1000 sales:2020-01-</i>
+
+		<pre>sum sales:2020-01- 1000 sales:2020-01-</pre>
 
 </div>
 
@@ -355,7 +355,7 @@
 
 		<table border="1">
 			<tr><td>Available since		</td><td>1.1.0		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)	</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
 			<tr><td>Redis compatible	</td><td>YES		</td></tr>
 			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
 			<tr><td>Mutable			</td><td>YES		</td></tr>

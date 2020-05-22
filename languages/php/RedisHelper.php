@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Services;
+namespace AppBundle\AppBundle\Helper;
 
 class RedisHelper{
 	private $redis;

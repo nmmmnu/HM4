@@ -10,7 +10,7 @@ We also worked with Redis, but problem there is data must fit in memory.
 Goals of the project are.
 
 -   Key/Value store
--   Redis / Memcached protocol
+-   Redis protocol
 -   Async network I/O
 -   Data not need to fit in memory
 -   Speed
@@ -21,20 +21,40 @@ Goals of the project are.
 ---
 ### Architecture
 
-Architecture is derived from Apache Cassandra. There is memtable and several disk files.
+Architecture is derived from Apache Cassandra.
 
-Writes will be done in Memtable.
-Reading will be done first in memtable and if data will not be found there, system will try read each disktable until find the key.
+HM4 works with **sorted** list of key-value pairs.
+
+There are memtable and several disktables (files on the disk).
+
+Writes are sent to the memtable.
+
+Reading are sent to Memtable and ALL of the Disktables. Then system finds most recent pair.
+
+*This operation is not as slow as it seems :)*
+
 This is called "LSM tree" or much simpler - "Differential files".
 
 Writes should be always fast. Reads should be fast if there are not too many disktables.
 
+As of 1.2.3 additionally there is optional binlog.
+In case of power loss or system crash, memtable can re recovered from binlog
+
 ---
 ### Memtable
 
-Memtable is stored in memory in skiplist. Skiplist is very fast O(Log N) structure, very similar to binary tree.
+Memtable is stored in memory in SkipList. SkipList is very fast O(Log N) structure, very similar to binary tree.
 
 It is much faster than a vector O(Amortized Log N), but slower than hashtable O(Amortized 1).
+
+---
+### Memtable with VectorList
+
+VectorList performance was very good, but worse than SkipList.
+
+However if you just want to load data, is much faster to use SkipList and sort just before store it on the disk.
+
+VectorList also have much low memory consumption, so you can fit 30-40% more data in same memory.
 
 ---
 ### Testing memtable with other structures
@@ -60,18 +80,19 @@ Because of C++ classes all VectorList, LinkedList, SkipList are available.
 ---
 ### DiskTables
 
-Periodicaly, the memtable is flushed on the disk in disktable.
-Disktable file have similar order - vector/array like structure with sorted elements.
+Periodicaly, the memtable is flushed on the disk in DiskTable.
+DiskTable file have similar order - vector/array like structure with sorted elements.
 
-Disktables are immutable. This means very good OS cache and easy backup.
-Downside is that deletes must be implemented by markers called tombstones (same key, NULL value).
+DiskTable(s) are immutable. This means very good OS cache and easy backup.
+Downside is that deletes must be implemented by markers called tombstones (same key, empty value).
 
-Disktables header and control data are 64bit integers (uint64_t) stored as BigEndian.
-Simple 1 byte XOR check checksum is included for each pair.
+DiskTable's header and all control data are 64bit integers (uint64_t) stored as BigEndian.
 
-Disktables ment to be load using MMAP().
-Effors are made things to works on 32bit OS-es, but soon or later these will run out of address space.
-This means that for production you will definitely need 64bit OS.
+HM4 is reading DiskTable using MMAP().
+
+Effors were made HM4 to work on 32bit OS, but soon or later these runs out of address space, so we abandoned the idea.
+
+HM4 "officially" needs 64bit OS.
 
 ---
 ### LSM tree notes.
@@ -84,15 +105,30 @@ However there is 1976's research by Dennis G. Severance and Guy M. Lohman on the
 
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]
 
-When database works, many disktables will be created.
-This will slow down the reads very much.
+---
+### LSM compaction.
+
+When database works, many disktables are created and this will slow down the reads very much.
+
 By this reason disktables must be merged.
 
 Because disktables are read only, merge can be implemented as separate user space process.
-For read only databases you may choose not to start it at all.
 
-Unlike Apache Cassandra, there are a way to compact several tables into single file.
-However this will complicate the things and probably only basic two table merge will be implemented.
+Unlike Cassandra, it is your responcibility to run the process yourself.
+
+Unlike Apache Cassandra, there are a safe way to compact several tables into single file.
+
+---
+### List of software.
+
+- db_net	- server
+- db_builder	- create DiskTable(s) from tab delimited file
+- db_logger	- create bin-log from tab delimited file - similar to **db_builder**, but not very usable
+- db_replay	- create DiskTable(s) from binlog
+- db_mkbtree	- create btree to existing DiskTable for much faster access
+- db_file	- reads DiskTable or LSM
+- db_merge	- merge DiskTable(s)
+
 
 
 
