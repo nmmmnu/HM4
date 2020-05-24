@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <limits>
 
 #include "fixedvector.h"
 
@@ -27,7 +28,7 @@ namespace accumulator_impl_{
 	}
 
 	template<class Accumulator, class List, typename... Args>
-	auto accumulate_(List const &list, std::string_view const key, uint16_t const maxResults, std::string_view const prefix, Args&&... args){
+	auto accumulateValue(List const &list, std::string_view const key, uint16_t const maxResults, std::string_view const prefix, Args&&... args){
 		auto it = key.empty() ? std::begin(list) : list.find(key, std::false_type{} );
 
 		uint16_t count = 0;
@@ -51,8 +52,8 @@ namespace accumulator_impl_{
 	}
 
 	template<class Accumulator, class List, typename... Args>
-	auto accumulatePair_(List const &list, std::string_view const key, uint16_t const maxResults, std::string_view const prefix, Args&&... args){
-		auto const [ data, lastKey ] = accumulate_<Accumulator>(list, key, maxResults, prefix, std::forward<Args>(args)...);
+	auto accumulatePair(List const &list, std::string_view const key, uint16_t const maxResults, std::string_view const prefix, Args&&... args){
+		auto const [ data, lastKey ] = accumulateValue<Accumulator>(list, key, maxResults, prefix, std::forward<Args>(args)...);
 
 		return std::array<std::string, 2>{
 			std::to_string(data),
@@ -126,13 +127,46 @@ namespace accumulator_impl_{
 		}
 	};
 
+	template<class T>
+	struct AccumulatorMin{
+		T data = std::numeric_limits<T>::max();
+
+		void operator()(hm4::Pair const &pair){
+			auto x = from_string<T>(pair.getVal());
+
+			if (x < data)
+				data = x;
+		}
+
+		auto result(std::string_view key = "") const{
+			return std::make_pair(data, key);
+		}
+	};
+
+	template<class T>
+	struct AccumulatorMax{
+		T data = std::numeric_limits<T>::min();
+
+		void operator()(hm4::Pair const &pair){
+			auto x = from_string<T>(pair.getVal());
+
+			if (x > data)
+				data = x;
+		}
+
+		auto result(std::string_view key = "") const{
+			return std::make_pair(data, key);
+		}
+	};
+
 } // accumulator_impl_
 
 template<class List, class COMMAND=std::nullptr_t>
 class ListDBAdapter{
 public:
-	constexpr static uint16_t DEFAULT_RESULTS = 10;
-	constexpr static uint16_t MAXIMUM_RESULTS = 1000;
+	constexpr static uint16_t DEFAULT_RESULTS		= 10;
+	constexpr static uint16_t MAXIMUM_RESULTS		= 1000;
+	constexpr static uint16_t MAXIMUM_RESULTS_ACCUMULATE	= 10000;
 
 public:
 	constexpr static bool MUTABLE = ! std::is_const_v<List>;
@@ -141,9 +175,6 @@ public:
 	ListDBAdapter(List &list, COMMAND &cmd) :
 				list_(list),
 				cmd_(& cmd){}
-
-	ListDBAdapter(List &list) :
-				ListDBAdapter(list, nullptr){}
 
 public:
 	// Immutable Methods
@@ -154,62 +185,86 @@ public:
 		return getVal_( list_.find(key, std::true_type{} ) );
 	}
 
-	auto getall(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
-		auto const maxResults = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
-
+	auto getall(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
 		using namespace accumulator_impl_;
 
 		using MyVector = GetXVector<2 * MAXIMUM_RESULTS>;
 
 		MyVector result;
 
+		auto const maxResults = clampResultsArray__(resultCount);
+
 		result.reserve(maxResults * 2);
 
 		using Accumulator = AccumulatorVector<MyVector>;
 
-		accumulate_<Accumulator>(list_, key, maxResults, prefix, result);
+		accumulateValue<Accumulator>(list_, key, maxResults, prefix, result);
 
 		return result;
 	}
 
-	auto getx(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
-		auto const maxResults = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
-
+	auto getx(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
 		using namespace accumulator_impl_;
 
 		using MyVector = GetXVector<2 * MAXIMUM_RESULTS + 1>;
 
 		MyVector result;
 
+		auto const maxResults = clampResultsArray__(resultCount);
+
 		result.reserve(maxResults * 2 + 1);
 
 		using Accumulator = AccumulatorVectorNew<MyVector>;
 
-		accumulate_<Accumulator>(list_, key, maxResults, prefix, result);
+		accumulateValue<Accumulator>(list_, key, maxResults, prefix, result);
 
 		return result;
 	}
 
-	auto count(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
-		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
+private:
+	template<class Accumulator>
+	auto accumulate_(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
+		auto const maxResults = clampResultsAccumulate__(resultCount);
 
 		using namespace accumulator_impl_;
 
-		using Accumulator = AccumulatorCount<uint16_t>;
-
-		return accumulatePair_<Accumulator>(list_, key, maxResults, prefix);
+		return accumulatePair<Accumulator>(list_, key, maxResults, prefix);
 	}
 
-	auto sum(std::string_view const key, uint16_t const resultsCount, std::string_view const prefix) const{
-		auto const maxResults  = std::clamp(resultsCount,  DEFAULT_RESULTS, MAXIMUM_RESULTS);
+public:
+	auto count(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
+		using namespace accumulator_impl_;
 
+		using Accumulator = AccumulatorCount<int64_t>;
+
+		return accumulate_<Accumulator>(key, resultCount, prefix);
+	}
+
+	auto sum(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
 		using namespace accumulator_impl_;
 
 		using Accumulator = AccumulatorSum<int64_t>;
 
-		return accumulatePair_<Accumulator>(list_, key, maxResults, prefix);
+		return accumulate_<Accumulator>(key, resultCount, prefix);
 	}
 
+	auto min(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
+		using namespace accumulator_impl_;
+
+		using Accumulator = AccumulatorMin<int64_t>;
+
+		return accumulate_<Accumulator>(key, resultCount, prefix);
+	}
+
+	auto max(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
+		using namespace accumulator_impl_;
+
+		using Accumulator = AccumulatorMax<int64_t>;
+
+		return accumulate_<Accumulator>(key, resultCount, prefix);
+	}
+
+public:
 	std::string info() const{
 		to_string_buffer_t buffer[2];
 
@@ -226,6 +281,18 @@ public:
 	}
 
 private:
+	static auto clampResultsImpl__(uint16_t const count, uint16_t const max){
+		return std::clamp(count,  DEFAULT_RESULTS, max);
+	}
+
+	static auto clampResultsArray__(uint16_t const count){
+		return clampResultsImpl__(count, MAXIMUM_RESULTS);
+	}
+
+	static auto clampResultsAccumulate__(uint16_t const count){
+		return clampResultsImpl__(count, MAXIMUM_RESULTS_ACCUMULATE);
+	}
+
 	template<class T>
 	static bool refresh__(bool const completeRefresh, T *cmd){
 		return cmd && cmd->command(completeRefresh);
@@ -280,7 +347,7 @@ private:
 
 private:
 	List		&list_;
-	COMMAND		*cmd_		= nullptr;
+	COMMAND		*cmd_	= nullptr;
 };
 
 #endif

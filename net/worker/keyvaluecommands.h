@@ -25,7 +25,9 @@ public:
 		INCR		,
 
 		COUNT		,
-		SUM
+		SUM		,
+		MIN		,
+		MAX
 	};
 
 	constexpr static auto h(const char *s){
@@ -78,6 +80,12 @@ public:
 
 		case h("sum"		)	:
 		case h("SUM"		)	: return Command::SUM		;
+
+		case h("min"		)	:
+		case h("MIN"		)	: return Command::MIN		;
+
+		case h("max"		)	:
+		case h("MAX"		)	: return Command::MAX		;
 
 		default				: return Command::UNKNOWN	;
 		}

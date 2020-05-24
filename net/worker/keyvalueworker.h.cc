@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <type_traits>
-#include <sstream>
 
 namespace net{
 namespace worker{
@@ -76,6 +75,8 @@ private:
 
 		case Command::COUNT	: return do_count();
 		case Command::SUM	: return do_sum();
+		case Command::MIN	: return do_min();
+		case Command::MAX	: return do_max();
 
 		default			: return err_NotImplemented_();
 		}
@@ -212,7 +213,8 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_getx(){
+	template<typename F>
+	WorkerStatus do_aggregate_(F method){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 4)
@@ -222,39 +224,29 @@ private:
 		uint16_t const count = from_string<uint16_t>(p[2]);
 		const auto &prefix = p[3];
 
-		protocol_.response_strings(buffer_, db_.getx(key, count, prefix) );
+		protocol_.response_strings(buffer_, (db_.*method)(key, count, prefix) );
 
 		return WorkerStatus::WRITE;
+	}
+
+	WorkerStatus do_getx(){
+		return do_aggregate_(&DB_ADAPTER::getx);
 	}
 
 	WorkerStatus do_count(){
-		const auto &p = protocol_.getParams();
-
-		if (p.size() != 4)
-			return err_BadRequest_();
-
-		const auto &key    = p[1];
-		uint16_t const count = from_string<uint16_t>(p[2]);
-		const auto &prefix = p[3];
-
-		protocol_.response_strings(buffer_, db_.count(key, count, prefix) );
-
-		return WorkerStatus::WRITE;
+		return do_aggregate_(&DB_ADAPTER::count);
 	}
 
 	WorkerStatus do_sum(){
-		const auto &p = protocol_.getParams();
+		return do_aggregate_(&DB_ADAPTER::sum);
+	}
 
-		if (p.size() != 4)
-			return err_BadRequest_();
+	WorkerStatus do_min(){
+		return do_aggregate_(&DB_ADAPTER::min);
+	}
 
-		const auto &key    = p[1];
-		uint16_t const count = from_string<uint16_t>(p[2]);
-		const auto &prefix = p[3];
-
-		protocol_.response_strings(buffer_, db_.sum(key, count, prefix) );
-
-		return WorkerStatus::WRITE;
+	WorkerStatus do_max(){
+		return do_aggregate_(&DB_ADAPTER::max);
 	}
 
 private:

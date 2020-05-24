@@ -29,7 +29,7 @@ struct MockDBAdapter{
 	}
 
 	constexpr
-	static auto getx(std::string_view, uint16_t, std::string_view){
+	auto getx(std::string_view, uint16_t, std::string_view){
 		return std::array<std::string_view, 4 * 2 + 1>{
 			"key1", "value1",
 			"key2", "value2",
@@ -40,12 +40,22 @@ struct MockDBAdapter{
 	}
 
 	constexpr
-	static auto count(std::string_view, uint16_t, std::string_view){
+	auto count(std::string_view, uint16_t, std::string_view){
 		return std::array<std::string_view, 2>{ "0", "" };
 	}
 
 	constexpr
-	static auto sum(std::string_view, uint16_t, std::string_view){
+	auto sum(std::string_view, uint16_t, std::string_view){
+		return std::array<std::string_view, 2>{ "0", "" };
+	}
+
+	constexpr
+	auto min(std::string_view, uint16_t, std::string_view){
+		return std::array<std::string_view, 2>{ "0", "" };
+	}
+
+	constexpr
+	auto max(std::string_view, uint16_t, std::string_view){
 		return std::array<std::string_view, 2>{ "0", "" };
 	}
 
