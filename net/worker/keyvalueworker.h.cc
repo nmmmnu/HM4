@@ -4,6 +4,7 @@
 #include "keyvaluecommands.h"
 
 #include "mystring.h"
+#include "myclassinvoke.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -214,7 +215,7 @@ private:
 	}
 
 	template<typename F>
-	WorkerStatus do_aggregate_(F method){
+	WorkerStatus do_accumulate_(F func){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 4)
@@ -224,29 +225,29 @@ private:
 		uint16_t const count = from_string<uint16_t>(p[2]);
 		const auto &prefix = p[3];
 
-		protocol_.response_strings(buffer_, (db_.*method)(key, count, prefix) );
+		protocol_.response_strings(buffer_, class_invoke(db_, func, key, count, prefix) );
 
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_getx(){
-		return do_aggregate_(&DB_ADAPTER::getx);
+	auto do_getx(){
+		return do_accumulate_(&DB_ADAPTER::getx);
 	}
 
-	WorkerStatus do_count(){
-		return do_aggregate_(&DB_ADAPTER::count);
+	auto do_count(){
+		return do_accumulate_(&DB_ADAPTER::count);
 	}
 
-	WorkerStatus do_sum(){
-		return do_aggregate_(&DB_ADAPTER::sum);
+	auto do_sum(){
+		return do_accumulate_(&DB_ADAPTER::sum);
 	}
 
-	WorkerStatus do_min(){
-		return do_aggregate_(&DB_ADAPTER::min);
+	auto do_min(){
+		return do_accumulate_(&DB_ADAPTER::min);
 	}
 
-	WorkerStatus do_max(){
-		return do_aggregate_(&DB_ADAPTER::max);
+	auto do_max(){
+		return do_accumulate_(&DB_ADAPTER::max);
 	}
 
 private:
