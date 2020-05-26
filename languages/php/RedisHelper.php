@@ -1,9 +1,29 @@
 <?php
+/*
+ * Redis Helper for PHP
+ *
+ * Version	: 1.2.5
+ * Date		: 2020-05-26
+ *
+ * It allows:
+ * - Isolate $redis->rawCommand / $redis->executeRaw from underline redis class.
+ * - Fix / Tansform results in key => value way.
+ * - Accumulate count / sum / min / max into single command.
+ * - Make PHP code more readable
+ *
+ * Currently supported Redis classes:
+ * - PHP Redis		https://github.com/phpredis/phpredis
+ * - Predis		https://github.com/nrk/predis
+ * - TinyRedisClient	https://github.com/ptrofimov/tinyredisclient
+ *
+ */
 
 namespace AppBundle\AppBundle\Helper;
 
 class RedisHelper{
 	private $redis;
+
+	const MAX_ACCUMULATE = 10000;
 
 	function __construct($redis){
 		$this->redis = $redis;
@@ -46,7 +66,7 @@ class RedisHelper{
 		}
 	}
 
-	function getx($key, $page, $prefix = false){
+	function getx($key, $page, $prefix = NULL){
 		if (! $prefix)
 			$prefix = $key;
 
@@ -55,27 +75,39 @@ class RedisHelper{
 		return [ self::transformData($data, 1), end($data) ];
 	}
 
-	function count($prefix, $page = 10){
-		return $this->accumulate_("count", $prefix, $page);
+	function count($prefix, $iterations){
+		return $this->accumulate_("count", $prefix, $iterations);
 	}
 
-	function sum($prefix, $page = 10){
-		return $this->accumulate_("sum",   $prefix, $page);
+	function sum($prefix, $iterations){
+		return $this->accumulate_("sum",   $prefix, $iterations);
 	}
 
-	private function accumulate_($func, $prefix, $page){
+	function min($prefix, $iterations){
+		return $this->accumulate_("min",   $prefix, $iterations);
+	}
+
+	function max($prefix, $iterations){
+		return $this->accumulate_("max",   $prefix, $iterations);
+	}
+
+	private function accumulate_($func, $prefix, $iterations){
+		$i = 0;
+
 		$key = $prefix;
 
 		$acc = 0;
 
 		while($key){
-			$data = $this->rawCommand($func, $key, $page, $prefix);
-
+			$data = $this->rawCommand($func, $key, self::MAX_ACCUMULATE, $prefix);
 			$acc += $data[0];
 			$key  = $data[1];
+
+			if ($iterations && ++$i >= $iterations)
+				break;
 		}
 
-		return $acc;
+		return [ $acc, $key ];
 	}
 }
 

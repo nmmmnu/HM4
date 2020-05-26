@@ -4,7 +4,7 @@
 #include "keyvaluecommands.h"
 
 #include "mystring.h"
-#include "myclassinvoke.h"
+#include "myinvokeclassmember.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -71,7 +71,6 @@ private:
 		case Command::INFO	: return do_info();
 
 		case Command::GET	: return do_get();
-		case Command::GETALL	: return do_getall();
 		case Command::GETX	: return do_getx();
 
 		case Command::COUNT	: return do_count();
@@ -86,44 +85,32 @@ private:
 	WorkerStatus executeCommand_(const Command cmd, std::true_type){
 		switch(cmd){
 
-		case Command::EXIT	: return WorkerStatus::DISCONNECT;
-		case Command::SHUTDOWN	: return WorkerStatus::SHUTDOWN;
-
-		case Command::REFRESH	: return do_refresh();
-		case Command::INFO	: return do_info();
-
-		case Command::GET	: return do_get();
-		case Command::GETALL	: return do_getall();
-		case Command::GETX	: return do_getx();
-
-		case Command::COUNT	: return do_count();
-		case Command::SUM	: return do_sum();
-
 		case Command::SET	: return do_set();
 		case Command::SETEX	: return do_setex();
 		case Command::DEL	: return do_del();
 
 		case Command::INCR	: return do_incr();
 
-		default			: return err_NotImplemented_();
+		default			: return executeCommand_(cmd, std::false_type{});
 		}
-
 	}
 
 private:
-	WorkerStatus err_BadRequest_(){
-		protocol_.response_error(buffer_, "Bad request");
+	WorkerStatus err_String_(std::string_view const error){
+		protocol_.response_error(buffer_, error);
 		return WorkerStatus::WRITE;
+	}
+
+	WorkerStatus err_BadRequest_(){
+		return err_String_("Bad request");
 	}
 
 	WorkerStatus err_NotImplemented_(){
-		protocol_.response_error(buffer_, "Not Implemented");
-		return WorkerStatus::WRITE;
+		return err_String_("Not Implemented");
 	}
 
 	WorkerStatus err_InternalError_(){
-		protocol_.response_error(buffer_, "Internal Error");
-		return WorkerStatus::WRITE;
+		return err_String_("Internal Error");
 	}
 
 private:
@@ -168,52 +155,6 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_getall(){
-		const auto &p = protocol_.getParams();
-
-		if (p.size() != 2 && p.size() != 3 && p.size() != 4)
-			return err_BadRequest_();
-
-		const auto &key    = p[1];
-
-		switch( p.size() ){
-		case 2:
-			// classic case:
-			// HGETALL u:
-
-			{
-				protocol_.response_strings(buffer_, db_.getall(key, 0, "") );
-				break;
-			}
-
-		case 3:
-			// count case
-			// HGETALL u: 100
-
-			{
-				uint16_t const count = from_string<uint16_t>(p[2]);
-
-				protocol_.response_strings(buffer_, db_.getall(key, count, "") );
-				break;
-			}
-
-		case 4:
-			// count + prefix case
-			// HGETALL u: 100 u:
-
-			{
-				uint16_t const count = from_string<uint16_t>(p[2]);
-				const auto &prefix = p[3];
-
-				protocol_.response_strings(buffer_, db_.getall(key, count, prefix) );
-				break;
-			}
-
-		}
-
-		return WorkerStatus::WRITE;
-	}
-
 	template<typename F>
 	WorkerStatus do_accumulate_(F func){
 		const auto &p = protocol_.getParams();
@@ -225,7 +166,7 @@ private:
 		uint16_t const count = from_string<uint16_t>(p[2]);
 		const auto &prefix = p[3];
 
-		protocol_.response_strings(buffer_, class_invoke(db_, func, key, count, prefix) );
+		protocol_.response_strings(buffer_, invoke_class_member(db_, func, key, count, prefix) );
 
 		return WorkerStatus::WRITE;
 	}
@@ -276,8 +217,9 @@ private:
 			return err_BadRequest_();
 
 		const auto &key = p[1];
-		const auto &exp = p[2];
 		const auto &val = p[3];
+
+		uint32_t exp = from_string<uint32_t>(p[2]);
 
 		if (key.empty())
 			return err_BadRequest_();

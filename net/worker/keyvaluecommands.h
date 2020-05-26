@@ -15,19 +15,18 @@ public:
 		REFRESH		,
 
 		GET		,
-		GETALL		,
 		GETX		,
+
+		COUNT		,
+		SUM		,
+		MIN		,
+		MAX		,
 
 		SET		,
 		SETEX		,
 		DEL		,
 
-		INCR		,
-
-		COUNT		,
-		SUM		,
-		MIN		,
-		MAX
+		INCR
 	};
 
 	constexpr static auto h(const char *s){
@@ -55,11 +54,20 @@ public:
 		case h("get"		)	:
 		case h("GET"		)	: return Command::GET		;
 
-		case h("hgetall"	)	:
-		case h("HGETALL"	)	: return Command::GETALL	;
-
 		case h("getx"		)	:
 		case h("GETX"		)	: return Command::GETX		;
+
+		case h("count"		)	:
+		case h("COUNT"		)	: return Command::COUNT		;
+
+		case h("sum"		)	:
+		case h("SUM"		)	: return Command::SUM		;
+
+		case h("min"		)	:
+		case h("MIN"		)	: return Command::MIN		;
+
+		case h("max"		)	:
+		case h("MAX"		)	: return Command::MAX		;
 
 		case h("set"		)	:
 		case h("SET"		)	: return Command::SET		;
@@ -74,18 +82,6 @@ public:
 		case h("INCR"		)	:
 		case h("incrby"		)	:
 		case h("INCRBY"		)	: return Command::INCR		;
-
-		case h("count"		)	:
-		case h("COUNT"		)	: return Command::COUNT		;
-
-		case h("sum"		)	:
-		case h("SUM"		)	: return Command::SUM		;
-
-		case h("min"		)	:
-		case h("MIN"		)	: return Command::MIN		;
-
-		case h("max"		)	:
-		case h("MAX"		)	: return Command::MAX		;
 
 		default				: return Command::UNKNOWN	;
 		}

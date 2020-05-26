@@ -19,16 +19,6 @@ struct MockDBAdapter{
 	}
 
 	constexpr
-	static auto getall(std::string_view, uint16_t, std::string_view){
-		return std::array<std::string_view, 4 * 2>{
-			"key1", "value1",
-			"key2", "value2",
-			"key3", "value3",
-			"key4", "value4"
-		};
-	}
-
-	constexpr
 	auto getx(std::string_view, uint16_t, std::string_view) const{
 		return std::array<std::string_view, 4 * 2 + 1>{
 			"key1", "value1",

@@ -3,7 +3,6 @@
 
 #include "mystring.h"
 
-#include <iostream>
 #include <algorithm>
 #include <limits>
 
@@ -62,25 +61,6 @@ namespace accumulator_impl_{
 	}
 
 	// Accumulator implementations
-
-	template<class Vector>
-	struct AccumulatorVector{
-		Vector &data;
-
-		AccumulatorVector(Vector &data) : data(data){}
-
-		void operator()(hm4::Pair const &pair){
-			data.emplace_back(pair.getKey());
-
-			if (pair.isValid(std::true_type{}))
-				data.emplace_back(pair.getVal());
-			else
-				data.emplace_back();
-		}
-
-		constexpr static void result(std::string_view = ""){
-		}
-	};
 
 	template<class Vector>
 	struct AccumulatorVectorNew{
@@ -183,24 +163,6 @@ public:
 		assert(!key.empty());
 
 		return getVal_( list_.find(key, std::true_type{} ) );
-	}
-
-	auto getall(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
-		using namespace accumulator_impl_;
-
-		using MyVector = GetXVector<2 * MAXIMUM_RESULTS>;
-
-		MyVector result;
-
-		auto const maxResults = clampResultsArray__(resultCount);
-
-		result.reserve(maxResults * 2);
-
-		using Accumulator = AccumulatorVector<MyVector>;
-
-		accumulateValue<Accumulator>(list_, key, maxResults, prefix, result);
-
-		return result;
 	}
 
 	auto getx(std::string_view const key, uint16_t const resultCount, std::string_view const prefix) const{
@@ -306,10 +268,8 @@ private:
 public:
 	// Mutable Methods
 
-	void set(std::string_view const key, std::string_view const val, std::string_view const exp = {} ){
+	void set(std::string_view const key, std::string_view const val, uint32_t expires = 0){
 		assert(!key.empty());
-
-		auto const expires = from_string<uint32_t>(exp);
 
 		list_.insert(key, val, expires);
 	}

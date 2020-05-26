@@ -63,7 +63,6 @@
 
 <ul>
 	<li><a href="#GET	">GET		</a></li>
-	<li><a href="#HGETALL	">HGETALL	</a></li>
 	<li><a href="#GETX	">GETX		</a></li>
 	<li><a href="#COUNT	">COUNT		</a></li>
 	<li><a href="#SUM	">SUM		</a></li>
@@ -109,63 +108,9 @@
 
 	<h3>Description:</h3>
 
-		Gets <i>number</i> of key-value pairs after <i>key</i>.
-		Returns valid pairs and tombstones.
+		As of 1.2.5, HGETALL is not supported.<br />
+		Use <a href="#GETX">GETX</a> instead.
 
-	<h3>Return value:</h3>
-
-		array of keys and values
-
-	<h3>Info:</h3>
-
-		<table border="1">
-			<tr><td>Available since		</td><td>1.0.0		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
-			<tr><td>Redis compatible	</td><td>YES		</td></tr>
-			<tr><td>Blobs as values		</td><td>YES		</td></tr>
-		</table>
-</div>
-
-<a href="#top">top</a>
-
-<div class="cmd" id="HGETALL">
-	<h2>HGETALL key number prefix</h2>
-
-	<h3>Description:</h3>
-
-		Gets <i>number</i> of key-value pairs after <i>key</i>.<br />
-		Returns valid pairs and tombstones, but only if they are matching the <i>prefix</i>.
-
-	<h3>Return value:</h3>
-
-		array of key and values
-
-	<h3>Return value:</h3>
-
-		array of keys and values
-
-	<h3>Info:</h3>
-
-		<table border="1">
-			<tr><td>Available since		</td><td>1.1.0		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
-			<tr><td>Redis compatible	</td><td>NO		</td></tr>
-			<tr><td>Blobs as values		</td><td>YES		</td></tr>
-		</table>
-
-	<h3>Example:</h3>
-
-		Suppose we have this user database:
-
-		<table border="1" class="db">
-			<tr><td>u:123:email		</td><td>office@domain.com		</td></tr>
-			<tr><td>u:123:country		</td><td>US				</td></tr>
-			<tr><td>u:123:city		</td><td>Boston				</td></tr>
-		</table>
-
-		You can get this user's information records with following command:<br />
-
-		<pre>hgetall u:123: 1000 u:123:</pre>
 </div>
 
 <a href="#top">top</a>

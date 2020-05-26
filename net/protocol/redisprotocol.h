@@ -5,10 +5,11 @@
 
 #include <string>
 #include <string_view>
-#include <vector>
 #include <utility>	// std::pair
 
 #include "mystring.h"
+
+#include "fixedvector.h"
 
 namespace net{
 namespace protocol{
@@ -23,11 +24,16 @@ public:
 
 public:
 	constexpr static size_t	MAX_PARAMS	= 4;	// setex name 100 hello
+							// getx  name 100 prefix
 
 public:
 	using Status = ProtocolStatus;
 
+	#if 0
 	using StringVector = std::vector<std::string_view>;
+	#else
+	using StringVector = FixedVector<std::string_view, MAX_PARAMS>;
+	#endif
 
 public:
 	RedisProtocol(){
