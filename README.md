@@ -128,6 +128,7 @@ Unlike Apache Cassandra, there are a safe way to compact several tables into sin
 - db_mkbtree	- create btree to existing DiskTable for much faster access
 - db_file	- reads DiskTable or LSM
 - db_merge	- merge DiskTable(s)
+- db_preload	- preload DiskTable into system cache, by reading 1024 samples from the DiskTable
 
 
 

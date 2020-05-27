@@ -1,6 +1,9 @@
 <html>
 <head>
 	<title>HM4 - command reference</title>
+
+	<!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css.map" crossorigin="anonymous" / --da>
+
 	<style><!--
 	pre {
 		border:		dashed 1px black;
@@ -66,6 +69,8 @@
 	<li><a href="#GETX	">GETX		</a></li>
 	<li><a href="#COUNT	">COUNT		</a></li>
 	<li><a href="#SUM	">SUM		</a></li>
+	<li><a href="#MIN	">MIN		</a></li>
+	<li><a href="#MAX	">MAX		</a></li>
 	<li><a href="#SET	">SET		</a></li>
 	<li><a href="#SETEX	">SETEX		</a></li>
 	<li><a href="#INCR	">INCR / INCRBY	</a></li>
@@ -121,7 +126,8 @@
 	<h3>Description:</h3>
 
 		Gets <i>number</i> of key-value pairs after <i>key</i>.<br />
-		Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.
+		Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />
+		Returns up to 1'000 elements.
 
 	<h3>Return value:</h3>
 
@@ -163,8 +169,9 @@
 
 	<h3>Description:</h3>
 
-	Aggregate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />
-	Aggregate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
+	Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />
+	Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />
+	Accumulate up to 10'000 elements.
 
 	<h3>Return value:</h3>
 
@@ -204,8 +211,9 @@
 
 	<h3>Description:</h3>
 
-	Aggregate using SUM <i>number</i> key-value pairs after <i>key</i><br />
-	Aggregate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
+	Accumulate using SUM <i>number</i> key-value pairs after <i>key</i><br />
+	Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />
+	Accumulate up to 10'000 elements.
 
 	<h3>Return value:</h3>
 
@@ -237,6 +245,84 @@
 		You can get this sum of sales for Jan.2020 with following command:<br />
 
 		<pre>sum sales:2020-01- 1000 sales:2020-01-</pre>
+
+</div>
+
+<a href="#top">top</a>
+
+<div class="cmd" id="MIN">
+	<h2>MIN key number prefix</h2>
+
+	<h3>Description:</h3>
+
+	Accumulate using MIN <i>number</i> key-value pairs after <i>key</i><br />
+	Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />
+	Accumulate up to 10'000 elements.
+
+	<h3>Return value:</h3>
+
+	<ul>
+		<li>min value of valid elements</li>
+		<li>last key, if there is second page</li>
+	</ul>
+
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.5		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
+			<tr><td>Redis compatible	</td><td>NO		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
+
+	<h3>Example:</h3>
+
+		Suppose we have this sales database:
+
+		<table border="1" class="db">
+			<tr><td>sales:2020-01-01</td><td>12</td></tr>
+			<tr><td>sales:2020-01-02</td><td>21</td></tr>
+			<tr><td>sales:2020-01-03</td><td>35</td></tr>
+		</table>
+
+		You can get max sales made in a single day for Jan.2020 with following command:<br />
+
+		<pre>min sales:2020-01- 1000 sales:2020-01-</pre>
+
+</div>
+
+<a href="#top">top</a>
+
+<div class="cmd" id="MAX">
+	<h2>MIN key number prefix</h2>
+
+	<h3>Description:</h3>
+
+	Accumulate using MAX <i>number</i> key-value pairs after <i>key</i><br />
+	Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />
+	Accumulate up to 10'000 elements.
+
+	<h3>Return value:</h3>
+
+	<ul>
+		<li>max value of valid elements</li>
+		<li>last key, if there is second page</li>
+	</ul>
+
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.5		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n)++	</td></tr>
+			<tr><td>Redis compatible	</td><td>NO		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
+
+	<h3>Example:</h3>
+
+		see the example for <a href="#min">MIN</a>.
 
 </div>
 

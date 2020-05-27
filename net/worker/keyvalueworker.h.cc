@@ -6,7 +6,6 @@
 #include "mystring.h"
 #include "myinvokeclassmember.h"
 
-#include <algorithm>
 #include <type_traits>
 
 namespace net{
@@ -121,6 +120,7 @@ private:
 			return err_BadRequest_();
 
 		bool const completeRefresh = p.size() == 1;
+
 		db_.refresh(completeRefresh);
 
 		protocol_.response_ok(buffer_);
@@ -205,6 +205,7 @@ private:
 			return err_BadRequest_();
 
 		db_.set(key, val);
+
 		protocol_.response_ok(buffer_);
 
 		return WorkerStatus::WRITE;
@@ -225,6 +226,7 @@ private:
 			return err_BadRequest_();
 
 		db_.set(key, val, exp);
+
 		protocol_.response_ok(buffer_);
 
 		return WorkerStatus::WRITE;
