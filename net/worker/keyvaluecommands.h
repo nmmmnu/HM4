@@ -1,3 +1,6 @@
+#ifndef KEY_VALUE_COMMANDS_H_
+#define KEY_VALUE_COMMANDS_H_
+
 #include "mystring.h"
 
 namespace net{
@@ -12,7 +15,8 @@ public:
 		SHUTDOWN	,
 
 		INFO		,
-		REFRESH		,
+		SAVE		,
+		RELOAD		,
 
 		GET		,
 		GETX		,
@@ -49,7 +53,10 @@ public:
 		case h("save"		)	:
 		case h("SAVE"		)	:
 		case h("bgsave"		)	:
-		case h("BGSAVE"		)	: return Command::REFRESH	;
+		case h("BGSAVE"		)	: return Command::SAVE		;
+
+		case h("reload"		)	:
+		case h("RELOAD"		)	: return Command::RELOAD	;
 
 		case h("get"		)	:
 		case h("GET"		)	: return Command::GET		;
@@ -90,4 +97,6 @@ public:
 
 } // namespace worker
 } // namespace
+
+#endif
 

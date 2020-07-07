@@ -28,7 +28,7 @@ public:
 	}
 
 	// Command pattern
-	int command(int = 0){
+	bool command(){
 		return refresh();
 	}
 

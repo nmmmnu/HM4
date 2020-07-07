@@ -16,6 +16,8 @@ namespace DBAdapterFactory{
 	struct Mutable{
 		using ListLoader	= hm4::listloader::DirectoryListLoader;
 
+		using CommandReloadObject	= ListLoader;
+
 		using MemList		= hm4::SkipList;
 		using Predicate		= hm4::flusher::DiskFilePredicate;
 		using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
@@ -24,8 +26,13 @@ namespace DBAdapterFactory{
 
 		using DList		= hm4::multi::DualList<MutableFlushList, ListLoader::List, /* erase tombstones */ true>;
 
-		using CommandObject	= MutableFlushList;
-		using DBAdapter		= ListDBAdapter<DList, CommandObject>;
+		using CommandSaveObject	= MutableFlushList;
+
+		using DBAdapter		= ListDBAdapter<
+						DList,
+						CommandSaveObject,
+						CommandReloadObject
+					>;
 
 		using MyDBAdapter	= DBAdapter;
 
@@ -43,7 +50,11 @@ namespace DBAdapterFactory{
 							muFlushList_,
 							loader_.getList()
 						},
-						adapter_{ list_, /* cmd */ muFlushList_ }{}
+						adapter_{
+							list_,
+							/* cmd Save   */ muFlushList_,
+							/* cmd Reload */ loader_
+						}{}
 
 		auto &operator()(){
 			return adapter_;

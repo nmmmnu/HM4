@@ -66,8 +66,9 @@ private:
 		case Command::EXIT	: return WorkerStatus::DISCONNECT;
 		case Command::SHUTDOWN	: return WorkerStatus::SHUTDOWN;
 
-		case Command::REFRESH	: return do_refresh();
 		case Command::INFO	: return do_info();
+		case Command::SAVE	: return do_save();
+		case Command::RELOAD	: return do_reload();
 
 		case Command::GET	: return do_get();
 		case Command::GETX	: return do_getx();
@@ -113,21 +114,6 @@ private:
 	}
 
 private:
-	WorkerStatus do_refresh(){
-		const auto &p = protocol_.getParams();
-
-		if (p.size() != 1 && p.size() != 2)
-			return err_BadRequest_();
-
-		bool const completeRefresh = p.size() == 1;
-
-		db_.refresh(completeRefresh);
-
-		protocol_.response_ok(buffer_);
-
-		return WorkerStatus::WRITE;
-	}
-
 	WorkerStatus do_info(){
 		const auto &p = protocol_.getParams();
 
@@ -137,6 +123,28 @@ private:
 		protocol_.response_string(buffer_, db_.info());
 
 		return WorkerStatus::WRITE;
+	}
+
+	template<typename F>
+	WorkerStatus do_save_(F func){
+		const auto &p = protocol_.getParams();
+
+		if (p.size() != 1)
+			return err_BadRequest_();
+
+		invoke_class_member(db_, func);
+
+		protocol_.response_ok(buffer_);
+
+		return WorkerStatus::WRITE;
+	}
+
+	WorkerStatus do_save(){
+		return do_save_(&DB_ADAPTER::save);
+	}
+
+	WorkerStatus do_reload(){
+		return do_save_(&DB_ADAPTER::reload);
 	}
 
 	WorkerStatus do_get(){

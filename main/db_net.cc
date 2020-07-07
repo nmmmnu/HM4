@@ -187,7 +187,7 @@ namespace{
 		auto signal_processing = [&adapter_factory](Signal const signal){
 			switch(signal){
 			case Signal::HUP:
-				adapter_factory().refresh(true);
+				adapter_factory().save();
 				return true;
 
 			case Signal::INT:

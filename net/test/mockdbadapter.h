@@ -55,7 +55,12 @@ struct MockDBAdapter{
 	}
 
 	constexpr
-	static bool refresh(bool){
+	static bool save(){
+		return true;
+	}
+
+	constexpr
+	static bool reload(){
 		return true;
 	}
 };

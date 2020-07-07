@@ -19,8 +19,9 @@
 namespace hm4{
 	namespace PairConf{
 		constexpr size_t	ALIGN		= sizeof(void *);
-		constexpr uint16_t	MAX_KEY_SIZE	=      1024;	// MySQL is 1000
-		constexpr uint16_t	MAX_VAL_SIZE	= 16 * 1024;
+		constexpr uint16_t	MAX_KEY_MASK	= 0b0'0000'0011'1111'1111;	// 1023, MySQL is 1000
+		constexpr uint16_t	MAX_KEY_SIZE	= MAX_KEY_MASK;			// 1023, MySQL is 1000
+		constexpr uint16_t	MAX_VAL_SIZE	= 0xFFFF;
 
 		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
@@ -42,7 +43,7 @@ namespace hm4{
 	struct Pair{
 		uint64_t	created;	// 8
 		uint32_t	expires;	// 4, 136 years, not that bad.
-		uint16_t	keylen;		// 2
+		uint16_t	keylen;		// 2, 6 bits are  reserved for future versions
 		uint16_t	vallen;		// 2
 		char		buffer[2];	// dynamic, these are the two \0 terminators.
 
@@ -179,15 +180,15 @@ namespace hm4{
 	public:
 		constexpr
 		bool empty() const noexcept{
-			return ! keylen;
+			return getKeyLen_() > 0;
 		}
 
 	public:
-		std::string_view  getKey() const noexcept{
+		std::string_view getKey() const noexcept{
 			return { getKey_(), getKeyLen_() };
 		}
 
-		std::string_view  getVal() const noexcept{
+		std::string_view getVal() const noexcept{
 			return { getVal_(), getValLen_() };
 		}
 
@@ -350,7 +351,7 @@ namespace hm4{
 		}
 
 		size_t getKeyLen_() const noexcept{
-			return betoh<uint16_t>(keylen);
+			return betoh<uint16_t>(keylen) & PairConf::MAX_KEY_MASK;
 		}
 
 		size_t getValLen_() const noexcept{

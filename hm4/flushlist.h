@@ -72,26 +72,18 @@ public:
 	}
 
 	// Command pattern
-	int command(bool const completeFlush){
-		if (completeFlush)
-			return flush();
-		else
-			return notifyLoader_();
+	bool command(){
+		return flush();
 	}
 
 private:
-	bool notifyLoader_(std::false_type){
-		log__("Reloading data...");
-		return loader_ && loader_->refresh();
-	}
-
-	static bool notifyLoader_(std::true_type){
-		return true;
-	}
-
 	bool notifyLoader_(){
-		constexpr auto tag = std::is_same<ListLoader, std::nullptr_t>{};
-		return notifyLoader_(tag);
+		if constexpr(std::is_same_v<ListLoader, std::nullptr_t>){
+			return true;
+		}else{
+			log__("Reloading data...");
+			return loader_ && loader_->refresh();
+		}
 	}
 
 private:

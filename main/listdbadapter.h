@@ -141,7 +141,7 @@ namespace accumulator_impl_{
 
 } // accumulator_impl_
 
-template<class List, class COMMAND=std::nullptr_t>
+template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 class ListDBAdapter{
 public:
 	constexpr static uint16_t DEFAULT_RESULTS		= 10;
@@ -151,10 +151,19 @@ public:
 public:
 	constexpr static bool MUTABLE = ! std::is_const_v<List>;
 
+	enum class AdapterCommand : int{
+		SAVE	= 1,
+		RELOAD	= 2
+	};
+
 public:
-	ListDBAdapter(List &list, COMMAND &cmd) :
+	ListDBAdapter(List &list, CommandSave &cmdSave, CommandReload &cmdReload) :
 				list_(list),
-				cmd_(& cmd){}
+				cmdSave_	(& cmdSave	),
+				cmdReload_	(& cmdReload	){}
+
+//	ListDBAdapter(List &list, CommandSave &cmdSave) :
+//				ListDBAdapter(list, cmdSave, cmdSave){}
 
 public:
 	// Immutable Methods
@@ -238,11 +247,23 @@ public:
 		);
 	}
 
-	bool refresh(bool const completeRefresh){
-		return refresh__(completeRefresh, cmd_);
+	auto save(){
+		return invokeCommand__(cmdSave_);
+	}
+
+	auto reload(){
+		return invokeCommand__(cmdReload_);
 	}
 
 private:
+	template<class Command>
+	static bool invokeCommand__(Command *cmd){
+		if constexpr(std::is_same_v<Command,std::nullptr_t>)
+			return false;
+		else
+			return cmd && cmd->command();
+	}
+
 	static auto clampResultsImpl__(uint16_t const count, uint16_t const max){
 		return std::clamp(count,  DEFAULT_RESULTS, max);
 	}
@@ -253,16 +274,6 @@ private:
 
 	static auto clampResultsAccumulate__(uint16_t const count){
 		return clampResultsImpl__(count, MAXIMUM_RESULTS_ACCUMULATE);
-	}
-
-	template<class T>
-	static bool refresh__(bool const completeRefresh, T *cmd){
-		return cmd && cmd->command(completeRefresh);
-	}
-
-	constexpr
-	static bool refresh__(bool const /* completeRefresh */, std::nullptr_t *){
-		return false;
 	}
 
 public:
@@ -307,7 +318,8 @@ private:
 
 private:
 	List		&list_;
-	COMMAND		*cmd_	= nullptr;
+	CommandSave	*cmdSave_	= nullptr;
+	CommandReload	*cmdReload_	= nullptr;
 };
 
 #endif

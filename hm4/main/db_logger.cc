@@ -86,14 +86,12 @@ int main(int argc, char **argv){
 
 
 
-template <class LIST>
-auto listInsert(LIST &list, std::string_view const key, std::string_view const val, std::false_type){
-	return list.insert(key, val);
-}
-
-template <class LIST>
-auto listInsert(LIST &list, std::string_view const key, std::string_view const val, std::true_type){
-	return list.insert(key, base64_decode(val, base64_buffer.data()));
+template <class LIST, bool B>
+auto listInsert(LIST &list, std::string_view const key, std::string_view const val, std::bool_constant<B>){
+	if constexpr(B)
+		return list.insert(key, base64_decode(val, base64_buffer.data()));
+	else
+		return list.insert(key, val);
 }
 
 template <class LIST, class READER, bool B>

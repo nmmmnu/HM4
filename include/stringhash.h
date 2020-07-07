@@ -16,29 +16,24 @@ class StringHash{
 
 	constexpr static auto MASK = htobe( T{ 0xFF } << (sizeof(T) - 1) * 8 );
 
-	static void cpy__(char *dest, const char *src, size_t size, std::true_type) noexcept{
-		memcpy(dest, src, size);
-	}
-
-	static void cpy__(char *dest, const char *src, size_t, std::false_type) noexcept{
-		strncpy(dest, src, SIZE);
-	}
-
-	template<bool CPY>
+	template<bool KnownSize>
 	static T createBE__(const char *src, size_t size = 0) noexcept{
 		union{
 			char	s[SIZE];
 			T	u = 0;
 		};
 
-		cpy__(s, src, size, std::bool_constant<CPY>{});
+		if constexpr(KnownSize)
+			memcpy(s, src, size);
+		else
+			strncpy(s, src, SIZE);
 
 		return u;
 	}
 
-	template<bool CPY>
+	template<bool KnownSize>
 	static T create__(const char *src, size_t size = 0) noexcept{
-		return betoh( createBE__<CPY>(src, size) );
+		return betoh( createBE__<KnownSize>(src, size) );
 	}
 
 	static int compare__(T const a, T const b) noexcept{

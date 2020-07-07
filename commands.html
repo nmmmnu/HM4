@@ -77,6 +77,7 @@
 	<li><a href="#DEL	">DEL		</a></li>
 	<li><a href="#INFO	">INFO		</a></li>
 	<li><a href="#SAVE	">SAVE / BGSAVE	</a></li>
+	<li><a href="#RELOAD	">RELOAD	</a></li>
 	<li><a href="#EXIT	">EXIT		</a></li>
 	<li><a href="#SHUTDOWN	">SHUTDOWN	</a></li>
 </ul>
@@ -444,19 +445,14 @@
 <a href="#top">top</a>
 
 <div class="cmd" id="SAVE">
-	<h2>SAVE / BGSAVE [complete = 0]</h2>
+	<h2>SAVE / BGSAVE</h2>
 
 	<h3>Description:</h3>
 
-		<h4>On Mutable servers:</h4>
-
-			Flushes memtable on the disk and reloads the disktables.<br />
-			If <i>complete</i> is present, it suppose to bypass memtable flush,
-			but current implementation is not 100% clear and might change in near future.
-
-		<h4>On Mutable servers:</h4>
-			Reloads the disktable(s).<br />
-			<i>complete</i> options is ignored.
+		<ol>
+			<li>Flushes memtable to the disk (this is no-op on immutable servers)</li>
+			<li>Reloads the disktable(s) from the disk</li>
+		</ol>
 
 	<h3>Info:</h3>
 
@@ -467,6 +463,41 @@
 			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
 		</table>
 
+</div>
+
+<a href="#top">top</a>
+
+<div class="cmd" id="RELOAD">
+	<h2>RELOAD</h2>
+
+	<h3>Description:</h3>
+
+		Reloads the disktable(s) from the disk
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.7		</td></tr>
+			<tr><td>Time complexity		</td><td>N/A		</td></tr>
+			<tr><td>Redis compatible	</td><td>NO		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+		</table>
+
+	<h3>Example:</h3>
+
+		Suppose we have a production server that works with several disk tables.<br />
+		We can merge those tables into single table, without stopping the server.<br />
+		Once merge is done, we can move new (merged) table in server data directory.<br />
+		Then we can move away old tables (that are already merged).<br />
+		Then we need to issue RELOAD command to the server, so it reloads the tables from the disk.<br />
+		<br />
+		This works on mutable, immutable and singlelist servers.<br />
+		<br />
+		On immutable and singlelist servers this is handy way to reload the data without service interruption.<br />
+		Suppose the data preparation is very time consuming.<br />
+		You can prepare the new data on different server and finally, when ready move the data to the production server.<br />
+		<br />
+		On immutable and singlelist servers you can achieve same using SAVE / BGSAVE, but intention is not as clear as if you use RELOAD command.
 </div>
 
 <a href="#top">top</a>
