@@ -6,6 +6,8 @@
 namespace hm4{
 namespace multi{
 
+
+
 template <class FirstIterator, class SecondIterator>
 class DualIterator{
 public:
@@ -17,8 +19,11 @@ private:
 	using it_traits_DT = typename std::iterator_traits<T>::difference_type;
 
 public:
-	using FirstIteratorPair  = typename multiiterator_impl_::IteratorPair<FirstIterator>;
-	using SecondIteratorPair = typename multiiterator_impl_::IteratorPair<SecondIterator>;
+	using FirstIteratorPair		= typename multiiterator_impl_::IteratorPair<FirstIterator>;
+	using SecondIteratorPair	= typename multiiterator_impl_::IteratorPair<SecondIterator>;
+
+	using IteratorTuple		= std::pair<FirstIteratorPair, SecondIteratorPair>;
+	using HitTuple			= std::array<bool, 2>;
 
 public:
 	using difference_type	= it_traits_DT<FirstIterator>;
@@ -29,8 +34,10 @@ public:
 
 public:
 	DualIterator(FirstIteratorPair first, SecondIteratorPair second) :
-					first_(std::move(first)),
-					second_(std::move(second)){
+					tt_(
+						std::move(first),
+						std::move(second)
+					){
 		updateDereference_();
 	}
 
@@ -42,11 +49,11 @@ public:
 					){}
 
 	DualIterator &operator++(){
-		if (firstHit_)
-			++first_;
+		if (hit_[0])
+			++tt<0>();
 
-		if (secondHit_)
-			++second_;
+		if (hit_[1])
+			++tt<1>();;
 
 		// don't over optimize this...
 		updateDereference_();
@@ -59,7 +66,7 @@ public:
 	}
 
 	bool operator==(DualIterator const &other) const{
-		return first_ == other.first_ && second_ == other.second_;
+		return tt_ == other.tt_;
 	}
 
 public:
@@ -72,14 +79,23 @@ public:
 	}
 
 private:
+	template<size_t index>
+	auto &tt(){
+		return std::get<index>(tt_);
+	}
+
+//	template<size_t index>
+//	auto &tt() const{
+//		return std::get<index>(tt_);
+//	}
+
 	void updateDereference_(){
 		constexpr bool X = true;
 		constexpr bool _ = false;
 
 		auto SP = [this](bool f, bool s, const Pair *p){
-			firstHit_  = f;
-			secondHit_ = s;
-			pair_      = p;
+			hit_ = { f, s };
+			pair_   = p;
 		};
 
 		auto S = [&SP](bool f, bool s, auto const &ip){
@@ -88,43 +104,39 @@ private:
 
 
 
-		bool const firstBool  = first_;
-		bool const secondBool = second_;
+		bool const bl[2] = { tt<0>(), tt<1>() };
 
-		if (firstBool && secondBool){
-			int const r = first_->cmp(*second_);
+		if (bl[0] && bl[1]){
+			int const r = tt<0>()->cmp(*tt<1>());
 
 			if (r < 0)
-				return S(X,_, first_);
+				return S(X,_, tt<0>());
 
 			if (r > 0)
-				return S(_,X, second_);
+				return S(_,X, tt<1>());
 
-			int const rt = - first_->cmpTime(*second_);
+			int const rt = - tt<0>()->cmpTime(*tt<1>());
 
 			if (rt <= 0)
-				return S(X,X, first_);
+				return S(X,X, tt<0>());
 			else
-				return S(X,X, second_);
+				return S(X,X, tt<1>());
 		}
 
-		if (firstBool)
-			return S(X,_, first_);
+		if (bl[0])
+			return S(X,_, tt<0>());
 
-		if (secondBool)
-			return S(_,X, second_);
+		if (bl[1])
+			return S(_,X, tt<1>());
 
 		return SP(_,_, nullptr);
 	}
 
 private:
-	FirstIteratorPair	first_;
-	SecondIteratorPair	second_;
+	IteratorTuple	tt_;
+	HitTuple	hit_;
 
-	bool			firstHit_;
-	bool			secondHit_;
-
-	const Pair              *pair_;
+	const Pair      *pair_;
 
 private:
 	static_assert(
@@ -135,6 +147,8 @@ private:
 		"TABLE1::Iterator::difference_type must be same as TABLE2::iterator::difference_type"
 	);
 };
+
+
 
 } // namespace multi
 } // namespace

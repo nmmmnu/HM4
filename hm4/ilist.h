@@ -92,14 +92,13 @@ auto insert(LIST &list, Pair const &src){
 
 // ==============================
 
-template<class List>
-auto getIterator(List const &list, std::true_type){
-	return std::begin(list);
-}
 
-template<class List>
-auto getIterator(List const &list, std::false_type){
-	return std::end(list);
+template<class List, bool B>
+auto getIterator(List const &list, std::bool_constant<B>){
+	if constexpr(B)
+		return std::begin(list);
+	else
+		return std::end(list);
 }
 
 template<class List, bool B>

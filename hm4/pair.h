@@ -26,18 +26,6 @@ namespace hm4{
 		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
 
-	namespace impl_{
-		template<typename T>
-		constexpr auto neg(T const &a, std::true_type){
-			return +a;
-		}
-
-		template<typename T>
-		constexpr auto neg(T const &a, std::false_type){
-			return -a;
-		}
-	}
-
 
 
 	struct Pair{
@@ -256,11 +244,14 @@ namespace hm4{
 		}
 
 		template<bool B>
-		int cmpWithTime(Pair const &pair, std::bool_constant<B> tag) const noexcept{
+		int cmpWithTime(Pair const &pair, std::bool_constant<B>) const noexcept{
 			if (int const result = cmp(pair); result)
 				return result;
 
-			return impl_::neg(cmpTime(pair), tag);
+			if constexpr(B)
+				return + cmpTime(pair);
+			else
+				return - cmpTime(pair);
 		}
 
 		int cmpWithTime(Pair const &pair) const noexcept{
