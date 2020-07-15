@@ -28,6 +28,10 @@ namespace FileBuilder{
 
 		void operator()(Pair const &pair);
 
+		void flush(){
+			file_data.flush();
+		}
+
 		void close(){
 			file_data.close();
 		}

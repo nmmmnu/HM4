@@ -45,13 +45,14 @@ namespace DBAdapterFactory{
 		using MyDBAdapter	= DBAdapter;
 
 		template<typename UStringData, typename UStringBinLog>
-		MutableBinLog(UStringData &&path_data, UStringBinLog &&path_binlog, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
+		MutableBinLog(UStringData &&path_data, UStringBinLog &&path_binlog, bool const fsync_binlog, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
 						loader_(std::forward<UStringData>(path_data)),
 						memList_(allocator),
 						binLogList_{
 							memList_,
 							BinLogger{
 								std::forward<UStringBinLog>(path_binlog),
+								/* fsync   */ fsync_binlog,
 								/* aligned */ true
 							}
 						},

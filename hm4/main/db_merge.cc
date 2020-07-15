@@ -1,8 +1,8 @@
 #include "disk/filebuilder.h"
 
-#include <unistd.h>	// access
-
 #include "version.h"
+
+#include "myfs.h"
 
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
@@ -22,10 +22,6 @@ namespace{
 		);
 
 		return 10;
-	}
-
-	inline bool fileExists(std::string_view const name) {
-		return access(name.data(), F_OK) != -1;
 	}
 
 	template <class FACTORY>

@@ -11,6 +11,7 @@
 #include "arenaallocator.h"
 
 #include "version.h"
+#include "myfs.h"
 
 // ----------------------------------
 
@@ -85,7 +86,7 @@ namespace{
 			if (have_binlog){
 				fmt::print(std::clog, "Starting {} server with {} of {} MB...\n", "mutable binlog", "ArenaAllocator", opt.max_memlist_arena);
 
-				return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, max_memlist_size, arenaAllocator } );
+				return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, opt.binlog_fsync != 0, max_memlist_size, arenaAllocator } );
 			}else{
 				fmt::print(std::clog, "Starting {} server with {} of {} MB...\n", "mutable", "ArenaAllocator", opt.max_memlist_arena);
 
@@ -97,7 +98,7 @@ namespace{
 			if (have_binlog){
 				fmt::print(std::clog, "Starting {} server with {}...\n", "mutable binlog", "STDAllocator");
 
-				return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, max_memlist_size, stdAllocator } );
+				return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, opt.binlog_fsync != 0, max_memlist_size, stdAllocator } );
 			}else{
 				fmt::print(std::clog, "Starting {} server with {}...\n", "mutable", "STDAllocator");
 
@@ -157,6 +158,9 @@ namespace{
 
 		if (opt.port == 0)
 			printError("Can not create server socket on port zero...");
+
+		if (!opt.binlog_path.empty() && fileExists(hm4::disk::filenameData(opt.binlog_path)))
+			printError("Binlog file exists. please replay and remove it...");
 
 		return opt;
 	}

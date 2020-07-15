@@ -19,6 +19,10 @@ public:
 						list_		(&list	),
 						binlogger_	(std::forward<UBinLogger>(binlogger)	){}
 
+	~BinLogList(){
+		binlogger_.unlinkFile();
+	}
+
 	auto insert(	std::string_view const key, std::string_view const val,
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
