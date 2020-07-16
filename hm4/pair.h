@@ -20,6 +20,7 @@ namespace hm4{
 	namespace PairConf{
 		constexpr size_t	ALIGN		= sizeof(void *);
 		constexpr uint16_t	MAX_KEY_MASK	= 0b0'0000'0011'1111'1111;	// 1023, MySQL is 1000
+		constexpr uint16_t	MAX_KEY_MASK_BE	= htobe<uint16_t>(MAX_KEY_MASK);
 		constexpr uint16_t	MAX_KEY_SIZE	= MAX_KEY_MASK;			// 1023, MySQL is 1000
 		constexpr uint16_t	MAX_VAL_SIZE	= 0xFFFF;
 
@@ -168,7 +169,7 @@ namespace hm4{
 	public:
 		constexpr
 		bool empty() const noexcept{
-			return getKeyLen_() > 0;
+			return !(keylen & PairConf::MAX_KEY_MASK_BE);
 		}
 
 	public:

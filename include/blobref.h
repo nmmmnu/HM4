@@ -5,6 +5,7 @@
 #include <cassert>
 #include <type_traits>	// is_pod
 
+#include <cstdio>
 
 class BlobRef{
 public:
@@ -51,9 +52,18 @@ public:
 	}
 
 	const void *safeAccessMemory(const void *ptr, size_t const size) const noexcept{
+		auto endpoint = [](const char *p, size_t size){
+			return p + size;
+		};
+
 		const char *ptrc = (const char *) ptr;
 
-		if (empty() || size == 0 || ptrc < mem_ || ptrc >= mem_ + size_)
+	//	printf("Buffer check %p %p / %p %p\n",
+	//			(const void *) ptrc, (const void *) endpoint(ptrc, size),
+	//			(const void *) mem_, (const void *) endpoint(mem_, size_)
+	//	);
+
+		if ( empty() || size == 0 || ptrc < mem_ || endpoint(ptrc, size) > endpoint(mem_, size_) )
 			return nullptr;
 
 		return ptr;

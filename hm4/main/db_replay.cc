@@ -103,7 +103,7 @@ int listReplay(LIST &list, INPUT_LIST const &inputList, size_t const process_ste
 	for(auto const &pair : inputList){
 		if (!pair.empty())
 			list.insert(pair);
-
+print(pair);
 		++i;
 
 		if (i % process_step == 0){

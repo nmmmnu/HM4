@@ -14,7 +14,6 @@
 #include "logger.h"
 
 
-
 namespace hm4{
 namespace disk{
 
@@ -28,12 +27,14 @@ static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 // ==============================
 
 namespace{
-	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &list, std::true_type){
-		return result.found ? result.it : list.ra_end();
-	}
 
-	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &, std::false_type){
-		return result.it;
+	template<bool B>
+	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &list, std::bool_constant<B>){
+		if constexpr(B)
+			return result.found ? result.it : list.ra_end();
+		else
+			return result.it;
+
 	}
 
 	// -----------------------------------
@@ -312,14 +313,21 @@ namespace fd_impl_{
 		return ! aligned ? size : my_align::calc(size, PairConf::ALIGN);
 	}
 
+	template<bool B>
 	const Pair *fdSafeAccess(BlobRef const &mData, const Pair *blob){
 		if (!blob)
 			return nullptr;
 
-		// check for overrun because PairBlob is dynamic size
-		bool const access = mData.safeAccessMemory(blob, blob->bytes());
+		// check for overrun, because Pair might be not complete...
+		if constexpr(B)
+		if (! mData.safeAccessMemory(blob, sizeof(Pair)) )
+			return nullptr;
 
-		return access ? blob : nullptr;
+		// check for overrun, because Pair is dynamic size...
+		if (! mData.safeAccessMemory(blob, blob->bytes()) )
+			return nullptr;
+
+		return blob;
 	}
 
 	const Pair *fdGetFirst(BlobRef const &mData){
@@ -328,7 +336,7 @@ namespace fd_impl_{
 		const Pair *blob = mData.as<const Pair>(offset);
 
 		// check for overrun because PairBlob is dynamic size
-		return fdSafeAccess(mData, blob);
+		return fdSafeAccess<false>(mData, blob);
 	}
 
 	const Pair *fdGetNext(BlobRef const &mData, const Pair *current, bool const aligned){
@@ -339,7 +347,7 @@ namespace fd_impl_{
 		const Pair *blob = mData.as<const Pair>(currentC + size);
 
 		// check for overrun because PairBlob is dynamic size
-		return fdSafeAccess(mData, blob);
+		return fdSafeAccess<false>(mData, blob);
 	}
 
 	const Pair *fdGetAt(BlobRef const &mData, BlobRef const &mIndx, size_type const index){
@@ -355,7 +363,7 @@ namespace fd_impl_{
 		const Pair *blob = mData.as<const Pair>(offset);
 
 		// check for overrun because PairBlob is dynamic size
-		return fdSafeAccess(mData, blob);
+		return fdSafeAccess<false>(mData, blob);
 	}
 }
 
