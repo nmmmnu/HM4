@@ -87,7 +87,6 @@ public:
 	// ambiguous call guard for 0
 	template <class T>
 	const T *as(int const pos, size_t const elements = 1) const noexcept{
-		assert(pos == 0);
 		return pos < 0 ? nullptr : as<T>( static_cast<size_t>(pos), elements );
 	}
 
