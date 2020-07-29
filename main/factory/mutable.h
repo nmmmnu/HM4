@@ -1,71 +1,31 @@
-#include "listloader/directorylistloader.h"
-#include "multi/collectionlist.h"
-
-#include "skiplist.h"
-#include "idgenerator/idgeneratordate.h"
-#include "flusher/diskfilepredicate.h"
-#include "flusher/diskfileflush.h"
-#include "flushlist.h"
-
-#include "multi/duallist.h"
-
-#include "listdbadapter.h"
+#include "basicmutable.h"
 
 namespace DBAdapterFactory{
 
 	struct Mutable{
-		using ListLoader	= hm4::listloader::DirectoryListLoader;
-
-		using CommandReloadObject	= ListLoader;
-
 		using MemList		= hm4::SkipList;
-		using Predicate		= hm4::flusher::DiskFilePredicate;
-		using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
-		using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-		using MutableFlushList	= hm4::FlushList<MemList, Predicate, Flush, ListLoader>;
 
-		using DList		= hm4::multi::DualList<MutableFlushList, ListLoader::List, /* erase tombstones */ true>;
+		using BasicMutable_	= BasicMutable<MemList>;
 
-		using CommandSaveObject	= MutableFlushList;
-
-		using DBAdapter		= ListDBAdapter<
-						DList,
-						CommandSaveObject,
-						CommandReloadObject
-					>;
-
-		using MyDBAdapter	= DBAdapter;
+		using MyDBAdapter	= BasicMutable_::DBAdapter;
 
 		template<typename UString>
 		Mutable(UString &&path, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
-						loader_(std::forward<UString>(path)),
-						memList_(allocator),
-						muFlushList_{
-							memList_,
-							Predicate{ memListSize },
-							Flush{ IDGenerator{}, path },
-							loader_
-						},
-						list_{
-							muFlushList_,
-							loader_.getList()
-						},
-						adapter_{
-							list_,
-							/* cmd Save   */ muFlushList_,
-							/* cmd Reload */ loader_
-						}{}
+					memList_{ allocator },
+					base_{
+						std::forward<UString>(path),
+						memListSize,
+						memList_
+					}{}
 
 		auto &operator()(){
-			return adapter_;
+			return base_();
 		}
 
 	private:
-		ListLoader		loader_		;
-		MemList			memList_	;
-		MutableFlushList	muFlushList_	;
-		DList			list_		;
-		DBAdapter		adapter_	;
+		MemList		memList_;
+
+		BasicMutable_	base_;
 	};
 
 }
