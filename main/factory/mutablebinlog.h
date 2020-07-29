@@ -18,71 +18,40 @@
 namespace DBAdapterFactory{
 
 	struct MutableBinLog{
-		using ListLoader	= hm4::listloader::DirectoryListLoader;
-
-		using CommandReloadObject	= ListLoader;
-
 		using MemList		= hm4::SkipList;
-
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger>;
 
-		using Predicate		= hm4::flusher::DiskFilePredicate;
-		using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
-		using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-		using MutableFlushList	= hm4::FlushList<BinLogList, Predicate, Flush, ListLoader>;
+		using BasicMutable_	= BasicMutable<BinLogList>;
 
-		using DList		= hm4::multi::DualList<MutableFlushList, ListLoader::List, /* erase tombstones */ true>;
+		using MyDBAdapter	= BasicMutable_::DBAdapter;
 
-		using CommandSaveObject	= MutableFlushList;
-
-		using DBAdapter		= ListDBAdapter<
-						DList,
-						CommandSaveObject,
-						CommandReloadObject
-					>;
-
-		using MyDBAdapter	= DBAdapter;
-
-		template<typename UStringData, typename UStringBinLog>
-		MutableBinLog(UStringData &&path_data, UStringBinLog &&path_binlog, bool const fsync_binlog, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
-						loader_(std::forward<UStringData>(path_data)),
-						memList_(allocator),
-						binLogList_{
-							memList_,
-							BinLogger{
-								std::forward<UStringBinLog>(path_binlog),
-								/* fsync   */ fsync_binlog,
-								/* aligned */ true
-							}
-						},
-						muFlushList_{
-							binLogList_,
-							Predicate{ memListSize },
-							Flush{ IDGenerator{}, path_data },
-							loader_
-						},
-						list_{
-							muFlushList_,
-							loader_.getList()
-						},
-						adapter_{
-							list_,
-							/* cmd Save   */ muFlushList_,
-							/* cmd Reload */ loader_
-						}{}
+		template<typename UStringPathData, typename UStringPathBinLog>
+		MutableBinLog(UStringPathData &&path_data, UStringPathBinLog &&path_binlog, bool const fsync_binlog, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
+					memList_{ allocator },
+					binLogList_{
+						memList_,
+						BinLogger{
+							std::forward<UStringPathBinLog>(path_binlog),
+							/* fsync   */ fsync_binlog,
+							/* aligned */ true
+						}
+					},
+					base_{
+						std::forward<UStringPathData>(path_data),
+						memListSize,
+						binLogList_
+					}{}
 
 		auto &operator()(){
-			return adapter_;
+			return base_();
 		}
 
 	private:
-		ListLoader		loader_		;
 		MemList			memList_	;
 		BinLogList		binLogList_	;
-		MutableFlushList	muFlushList_	;
-		DList			list_		;
-		DBAdapter		adapter_	;
+
+		BasicMutable_		base_		;
 	};
 
 }

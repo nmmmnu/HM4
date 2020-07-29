@@ -9,11 +9,11 @@ namespace DBAdapterFactory{
 
 		using MyDBAdapter	= BasicMutable_::DBAdapter;
 
-		template<typename UString>
-		Mutable(UString &&path, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
+		template<typename UStringPathData>
+		Mutable(UStringPathData &&path_data, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
 					memList_{ allocator },
 					base_{
-						std::forward<UString>(path),
+						std::forward<UStringPathData>(path_data),
 						memListSize,
 						memList_
 					}{}
@@ -23,9 +23,9 @@ namespace DBAdapterFactory{
 		}
 
 	private:
-		MemList		memList_;
+		MemList		memList_	;
 
-		BasicMutable_	base_;
+		BasicMutable_	base_		;
 	};
 
 }
