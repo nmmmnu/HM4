@@ -1,19 +1,8 @@
-#include "listloader/directorylistloader.h"
-#include "multi/collectionlist.h"
-
+#include "mutablebase.h"
 #include "skiplist.h"
 
 #include "binlogger/diskfilebinlogger.h"
 #include "binloglist.h"
-
-#include "idgenerator/idgeneratordate.h"
-#include "flusher/diskfilepredicate.h"
-#include "flusher/diskfileflush.h"
-#include "flushlist.h"
-
-#include "multi/duallist.h"
-
-#include "listdbadapter.h"
 
 namespace DBAdapterFactory{
 
@@ -22,9 +11,9 @@ namespace DBAdapterFactory{
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger>;
 
-		using BasicMutable_	= BasicMutable<BinLogList>;
+		using MutableBase_	= MutableBase<BinLogList>;
 
-		using MyDBAdapter	= BasicMutable_::DBAdapter;
+		using MyDBAdapter	= MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData, typename UStringPathBinLog>
 		MutableBinLog(UStringPathData &&path_data, UStringPathBinLog &&path_binlog, bool const fsync_binlog, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
@@ -51,7 +40,7 @@ namespace DBAdapterFactory{
 		MemList			memList_	;
 		BinLogList		binLogList_	;
 
-		BasicMutable_		base_		;
+		MutableBase_		base_		;
 	};
 
 }

@@ -1,13 +1,14 @@
-#include "basicmutable.h"
+#include "mutablebase.h"
+#include "skiplist.h"
 
 namespace DBAdapterFactory{
 
 	struct Mutable{
 		using MemList		= hm4::SkipList;
 
-		using BasicMutable_	= BasicMutable<MemList>;
+		using MutableBase_	= MutableBase<MemList>;
 
-		using MyDBAdapter	= BasicMutable_::DBAdapter;
+		using MyDBAdapter	= MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
 		Mutable(UStringPathData &&path_data, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
@@ -25,7 +26,7 @@ namespace DBAdapterFactory{
 	private:
 		MemList		memList_	;
 
-		BasicMutable_	base_		;
+		MutableBase_	base_		;
 	};
 
 }

@@ -7,26 +7,31 @@
 namespace DBAdapterFactory{
 
 	struct Immutable{
-		using ListLoader	= hm4::listloader::DirectoryListLoader;
+		using ListLoader		= hm4::listloader::DirectoryListLoader;
 
-		using CommandObject	= ListLoader;
+		using CommandObject		= ListLoader;
+		using CommandSaveObject		= CommandObject;
+		using CommandReloadObject	= CommandObject;
 
-		using DBAdapter		= ListDBAdapter<
-						ListLoader::List,
-						CommandObject,
-						CommandObject
-					>;
 
-		using MyDBAdapter	= DBAdapter;
+		using DBAdapter			= ListDBAdapter<
+							ListLoader::List,
+							CommandSaveObject,
+							CommandReloadObject
+						>;
 
-		template<typename UString>
-		Immutable(UString &&path) :
-						loader_(std::forward<UString>(path)),
-						adapter_(
+		using MyDBAdapter		= DBAdapter;
+
+		template<typename UStringPathData>
+		Immutable(UStringPathData &&path_data) :
+						loader_{
+							std::forward<UStringPathData>(path_data)
+						},
+						adapter_{
 							loader_.getList(),
 							/* cmd Save   */ loader_,
 							/* cmd Reload */ loader_
-						){}
+						}{}
 
 		auto &operator()(){
 			return adapter_;
