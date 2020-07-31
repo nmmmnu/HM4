@@ -2,8 +2,6 @@
 #include "multi/collectionlist.h"
 #include "listdbadapter.h"
 
-#include <vector>
-
 namespace DBAdapterFactory{
 
 	struct Immutable{

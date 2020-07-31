@@ -60,18 +60,28 @@ namespace{
 	MyOptions prepareOptions(int argc, char **argv);
 
 	template<class FACTORY>
-	int main2(const MyOptions &opt, FACTORY &&adapter_f);
+	int main2(const MyOptions &opt, FACTORY &&adapter_factory);
+
+
+	template<class Factory, typename ...Args>
+	int fLists(const MyOptions &opt, Factory &&adapter_factory, Args &&... args){
+		fmt::print(std::clog, std::forward<Args>(args)...);
+		return main2(opt, std::move(adapter_factory));
+	}
 
 	int immutableLists(const MyOptions &opt){
 		using hm4::listloader::DirectoryListLoader;
 
-		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path)){
-				fmt::print(std::clog, "Starting immutable server...\n");
-				return main2(opt, DBAdapterFactory::Immutable{ opt.db_path } );
-		}else{
-				fmt::print(std::clog, "Starting singlelist server...\n");
-				return main2(opt, DBAdapterFactory::SingleList{ opt.db_path } );
-		}
+		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path))
+				return fLists(
+					opt, DBAdapterFactory::Immutable{ opt.db_path },
+					"Starting immutable server...\n"
+				);
+		else
+				return fLists(
+					opt, DBAdapterFactory::SingleList{ opt.db_path },
+					"Starting singlelist server...\n"
+				);
 	}
 
 	int mutableLists(const MyOptions &opt){
@@ -82,28 +92,32 @@ namespace{
 
 		if (max_memlist_arena){
 			MyArenaAllocator arenaAllocator{ max_memlist_arena };
+			std::string_view const allocatorName = "ArenaAllocator";
 
-			if (have_binlog){
-				fmt::print(std::clog, "Starting {} server with {} of {} MB...\n", "mutable binlog", "ArenaAllocator", opt.max_memlist_arena);
-
-				return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, opt.binlog_fsync != 0, max_memlist_size, arenaAllocator } );
-			}else{
-				fmt::print(std::clog, "Starting {} server with {} of {} MB...\n", "mutable", "ArenaAllocator", opt.max_memlist_arena);
-
-				return main2(opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, arenaAllocator } );
-			}
+			if (have_binlog)
+				return fLists(
+					opt, DBAdapterFactory::MutableBinLog{ opt.db_path, opt.binlog_path, opt.binlog_fsync != 0, max_memlist_size, arenaAllocator },
+					"Starting {} server with {} of {} MB...\n", "mutable binlog", allocatorName, opt.max_memlist_arena
+				);
+			else
+				return fLists(
+					opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, arenaAllocator },
+					"Starting {} server with {} of {} MB...\n", "mutable", allocatorName, opt.max_memlist_arena
+				);
 		}else{
 			MySTDAllocator stdAllocator;
+			std::string_view const allocatorName = "STDAllocator";
 
-			if (have_binlog){
-				fmt::print(std::clog, "Starting {} server with {}...\n", "mutable binlog", "STDAllocator");
-
-				return main2(opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, opt.binlog_fsync != 0, max_memlist_size, stdAllocator } );
-			}else{
-				fmt::print(std::clog, "Starting {} server with {}...\n", "mutable", "STDAllocator");
-
-				return main2(opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, stdAllocator } );
-			}
+			if (have_binlog)
+				return fLists(
+					opt, DBAdapterFactory::MutableBinLog{   opt.db_path, opt.binlog_path, opt.binlog_fsync != 0, max_memlist_size, stdAllocator },
+					"Starting {} server with {}...\n", "mutable binlog", allocatorName
+				);
+			else
+				return fLists(
+					opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, stdAllocator },
+					"Starting {} server with {}...\n", "mutable", allocatorName
+				);
 		}
 	}
 }
