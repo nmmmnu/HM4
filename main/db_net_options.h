@@ -24,7 +24,8 @@ public:
 	uint16_t	immutable		= 1;
 	std::string	db_path;
 
-	std::string	binlog_path;
+	std::string	binlog_path1;
+	std::string	binlog_path2;
 	uint16_t	binlog_fsync		= 0;
 
 	std::nullptr_t	host			= nullptr;
@@ -39,9 +40,11 @@ public:
 	void operator()(std::string_view const name, std::string_view const value){
 		switch( hash(name) ){
 		case hash("immutable"		)	: return assign_(immutable,		value);
-		case hash("db_path"		)	: return assign_(db_path,  	    	value);
+		case hash("db_path"		)	: return assign_(db_path,		value);
 
-		case hash("binlog_path"		)	: return assign_(binlog_path,  	    	value);
+		case hash("binlog_path"		)	: return assign_(binlog_path1,		value);
+		case hash("binlog_path1"	)	: return assign_(binlog_path1,		value);
+		case hash("binlog_path2"	)	: return assign_(binlog_path2,		value);
 		case hash("binlog_fsync"	)	: return assign_(binlog_fsync,		value);
 
 		case hash("host"		)	: return assign_(host,			value);
@@ -67,6 +70,8 @@ public:
 		put("db_path",						"Path to database"				);
 
 		put("binlog_path",					"Path to binlog, empty for none"		);
+		put("binlog_path1",					"Path to binlog, empty for none"		);
+		put("binlog_path2",					"Path to binlog, empty for none"		);
 		put("binlog_fsync",		binlog_fsync,		"fsync() binlog - none = 0, yes = 1"		);
 
 		put("host",						"TCP host to listen (not working)"		);

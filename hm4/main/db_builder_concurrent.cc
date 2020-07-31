@@ -2,11 +2,11 @@
 
 #include "version.h"
 
-#include "unsortedlist.h"
+#include "skiplist.h"
 #include "idgenerator/idgeneratordate.h"
 #include "flusher/diskfilepredicate.h"
 #include "flusher/diskfileflush.h"
-#include "flushlist.h"
+#include "concurrentflushlist.h"
 
 #include "filereader.h"
 #include "stringtokenizer.h"
@@ -51,16 +51,18 @@ int listLoad(LIST &list, READER &reader, size_t const process_step, std::bool_co
 
 
 struct MyListFactory{
-	using MemList		= hm4::UnsortedList;
+	using MemList		= hm4::SkipList;
 	using Predicate		= hm4::flusher::DiskFilePredicate;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
+	using MyList		= hm4::ConcurrentFlushList<MemList,Predicate,Flush>;
 
-	MyListFactory(std::string_view path, MyAllocator::PMAllocator &allocator) :
-				memlist{ allocator },
+	MyListFactory(std::string_view path, MyAllocator::PMAllocator &allocator1, MyAllocator::PMAllocator &allocator2) :
+				memlist1{ allocator1 },
+				memlist2{ allocator2 },
 				mylist{
-					memlist,
+					memlist1,
+					memlist2,
 					Predicate{},
 					Flush{ IDGenerator{}, std::string(path) }
 				}{}
@@ -70,9 +72,11 @@ struct MyListFactory{
 	}
 
 private:
-	MemList	memlist;
+	MemList	memlist1;
+	MemList	memlist2;
 	MyList	mylist;
 };
+
 
 
 int main(int argc, char **argv){
@@ -85,9 +89,10 @@ int main(int argc, char **argv){
 
 	bool const blob = argc >= 5 && argv[4][0] == 'b';
 
-	MyArenaAllocator allocator{ max_memlist_arena * MB };
+	MyArenaAllocator allocator1{ max_memlist_arena * MB };
+	MyArenaAllocator allocator2{ max_memlist_arena * MB };
 
-	MyListFactory factory{ path, allocator };
+	MyListFactory factory{ path, allocator1, allocator2 };
 
 	auto &mylist = factory();
 

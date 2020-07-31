@@ -32,6 +32,8 @@ public:
 		clear();
 	}
 
+	void swap(SkipList &other);
+
 public:
 	bool clear();
 
@@ -153,6 +155,11 @@ inline auto SkipList::insert(Pair const &src) -> iterator{
 	return hm4::insert(*this, src);
 }
 
+// ==============================
+
+inline auto swap(SkipList &a, SkipList &b){
+	return a.swap(b);
+}
 
 } // namespace
 

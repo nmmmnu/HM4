@@ -92,6 +92,13 @@ SkipList::SkipList(SkipList &&other):
 	other.zeroing_();
 }
 
+void SkipList::swap(SkipList &other){
+	using std::swap;
+	swap(heads_,		other.heads_		);
+	swap(lc_,		other.lc_		);
+	swap(allocator_,	other.allocator_	);
+}
+
 void SkipList::deallocate_(Node *node){
 	allocator_->deallocate(node->data);
 	allocator_->deallocate(node);
