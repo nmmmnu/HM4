@@ -7,6 +7,10 @@
 namespace MyAllocator{
 
 	struct NULLAllocator{
+		constexpr static const char *getName(){
+			return "NULLAllocator";
+		}
+
 		constexpr
 		static void *allocate(std::size_t) noexcept{
 			return nullptr;

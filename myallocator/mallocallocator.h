@@ -7,6 +7,10 @@
 namespace MyAllocator{
 
 	struct MallocAllocator{
+		constexpr static const char *getName(){
+			return "MallocAllocator";
+		}
+
 		static void *allocate(std::size_t const size) noexcept{
 			return malloc(size);
 		}

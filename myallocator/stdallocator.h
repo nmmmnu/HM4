@@ -6,6 +6,10 @@
 namespace MyAllocator{
 
 	struct STDAllocator{
+		constexpr static const char *getName(){
+			return "STDAllocator";
+		}
+
 		static void *allocate(std::size_t const size) noexcept{
 			return ::operator new(size, std::nothrow);
 		}

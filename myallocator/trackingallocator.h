@@ -9,6 +9,10 @@ namespace MyAllocator{
 
 	template<class Allocator>
 	struct TrackingAllocator{
+		const char *getName() const{
+			return a.getName();
+		}
+
 		constexpr static const char *TAG = "[TrackingAllocator]";
 
 		TrackingAllocator() = default;

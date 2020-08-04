@@ -6,6 +6,10 @@
 namespace MyAllocator{
 
 	struct PMAllocator{
+		const char *getName(){
+			return getName_();
+		}
+
 		void *allocate(std::size_t const size){
 			return allocate_(size);
 		}
@@ -45,6 +49,8 @@ namespace MyAllocator{
 		}
 
 	private:
+		virtual const char *getName_() const = 0;
+
 		virtual void *allocate_(std::size_t) = 0;
 		virtual void deallocate_(void *p) = 0;
 		virtual bool reset_() = 0;
@@ -86,6 +92,10 @@ namespace MyAllocator{
 
 		inline std::size_t getUsedMemory_() const override final{
 			return allocator.getUsedMemory();
+		}
+
+		inline const char *getName_() const override final{
+			return allocator.getName();
 		}
 
 	private:

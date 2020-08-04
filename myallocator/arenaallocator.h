@@ -7,6 +7,10 @@
 namespace MyAllocator{
 
 	struct ArenaAllocator{
+		constexpr static const char *getName(){
+			return "ArenaAllocator";
+		}
+
 		ArenaAllocator(std::size_t const maxsize) :
 						maxsize(maxsize),
 						data( allocate__(maxsize) ){}

@@ -6,6 +6,7 @@
 #include "factory/mutable.h"
 #include "factory/mutablebinlog.h"
 #include "factory/mutableconcurrent.h"
+#include "factory/mutablebinlogcurrent.h"
 
 #include "pmallocator.h"
 #include "stdallocator.h"
@@ -103,29 +104,41 @@ namespace{
 	}
 
 	template<class Allocator>
-	int mutableLists_binlog(const MyOptions &opt, std::string_view const allocatorName){
-		bool const have_binlog = ! opt.binlog_path1.empty();
+	int mutableLists_binlog(const MyOptions &opt){
 		size_t const max_memlist_size  = opt.max_memlist_size  * MB;
 
-		if (have_binlog){
-			auto allocator = createAllocator<Allocator>(opt);
+		if constexpr(USE_CONCURRENCY){
+			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
 
-			return fLists(
-				opt, DBAdapterFactory::MutableBinLog{ opt.db_path, opt.binlog_path1, opt.binlog_fsync != 0, max_memlist_size, allocator },
-				"Starting {} server with {}...\n", "mutable binlog", allocatorName
-			);
-		}else{
-			if constexpr(USE_CONCURRENCY){
-				auto allocator1 = createAllocator<Allocator>(opt);
-				auto allocator2 = createAllocator<Allocator>(opt);
+			auto allocator1 = createAllocator<Allocator>(opt);
+			auto allocator2 = createAllocator<Allocator>(opt);
 
+			auto allocatorName = allocator1.getName();
+
+			if (have_binlog){
+				return fLists(
+					opt, DBAdapterFactory::MutableBinLogConcurrent{ opt.db_path, opt.binlog_path1, opt.binlog_path2, opt.binlog_fsync != 0, max_memlist_size, allocator1, allocator2 },
+					"Starting {} server with {}...\n", "mutable concurrent binlog", allocatorName
+				);
+			}else{
 				return fLists(
 					opt, DBAdapterFactory::MutableConcurrent{   opt.db_path, max_memlist_size, allocator1, allocator2 },
 					"Starting {} server with {}...\n", "mutable concurrent", allocatorName
 				);
-			}else{
-				auto allocator = createAllocator<Allocator>(opt);
+			}
+		}else{
+			bool const have_binlog = ! opt.binlog_path1.empty();
 
+			auto allocator = createAllocator<Allocator>(opt);
+
+			auto allocatorName = allocator.getName();
+
+			if (have_binlog){
+				return fLists(
+					opt, DBAdapterFactory::MutableBinLog{ opt.db_path, opt.binlog_path1, opt.binlog_fsync != 0, max_memlist_size, allocator },
+					"Starting {} server with {}...\n", "mutable binlog", allocatorName
+				);
+			}else{
 				return fLists(
 					opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, allocator },
 					"Starting {} server with {}...\n", "mutable", allocatorName
@@ -136,9 +149,9 @@ namespace{
 
 	int mutableLists_allocator(const MyOptions &opt){
 		if (opt.max_memlist_arena)
-			return mutableLists_binlog<MyArenaAllocator>	(opt, "ArenaAllocator");
+			return mutableLists_binlog<MyArenaAllocator	>(opt);
 		else
-			return mutableLists_binlog<MySTDAllocator>	(opt, "STDAllocator");
+			return mutableLists_binlog<MySTDAllocator	>(opt);
 	}
 
 	int mutableLists(const MyOptions &opt){
