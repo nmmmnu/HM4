@@ -1,7 +1,7 @@
 #ifndef BIN_LOG_LIST_H_
 #define BIN_LOG_LIST_H_
 
-#include "decoratorlist.h"
+#include "multi/singlelist.h"
 #include "logger.h"
 
 
@@ -9,14 +9,13 @@ namespace hm4{
 
 
 template <class List, class BinLogger>
-class BinLogList : public DecoratorList<List>{
+class BinLogList : public multi::SingleList<List>{
 public:
-	using Allocator = typename DecoratorList<List>::Allocator;
+	using Allocator = typename multi::SingleList<List>::Allocator;
 
 	template <class UBinLogger>
 	BinLogList(List &list, UBinLogger &&binlogger) :
-					DecoratorList<List>(list),
-						list_		(&list	),
+					multi::SingleList<List>(list),
 						binlogger_	(std::forward<UBinLogger>(binlogger)	){}
 
 	~BinLogList(){
@@ -55,7 +54,7 @@ public:
 	}
 
 private:
-	List		*list_;
+	using		multi::SingleList<List>::list_;
 	BinLogger	binlogger_;
 };
 

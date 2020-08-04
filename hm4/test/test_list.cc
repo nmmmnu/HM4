@@ -245,7 +245,7 @@ void list_test(const char *name, Args &&...args){
 #include "multi/duallist.h"
 #include "vectorlist.h"
 
-using MyDualList = hm4::multi::DualList<hm4::VectorList, hm4::BlackHoleList, false>;
+using MyDualList = hm4::multi::DualList<hm4::VectorList, hm4::BlackHoleList, hm4::multi::DualListEraseType::NORMAL>;
 
 template <>
 void list_test<MyDualList>(const char *name){
@@ -257,14 +257,14 @@ void list_test<MyDualList>(const char *name){
 	return list_test(name, list);
 }
 
-#include "decoratorlist.h"
+#include "multi/singlelist.h"
 
-using MyDecoratorList = hm4::DecoratorList<hm4::VectorList>;
+using MySingleList = hm4::multi::SingleList<hm4::VectorList>;
 
 template <>
-void list_test<MyDecoratorList>(const char *name){
+void list_test<MySingleList>(const char *name){
 	hm4::VectorList		memtable{ allocator };
-	MyDecoratorList		list{ memtable };
+	MySingleList		list{ memtable };
 
 	return list_test(name, list);
 }
@@ -298,7 +298,7 @@ int main(){
 	list_test<hm4::BlackHoleList	>("BlackHoleList"	, allocator	);
 	list_test<hm4::VectorList	>("VectorList"		, allocator	);
 	list_test<MyDualList		>("DualList"				);
-	list_test<MyDecoratorList	>("DecoratorList"			);
+	list_test<MySingleList		>("SingeList"				);
 
 	list_test<hm4::LinkList		>("LinkList"		, allocator	);
 	list_test<hm4::SkipList		>("SkipList"		, allocator	);

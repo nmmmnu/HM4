@@ -172,7 +172,7 @@ void test_DualList(const char *name, List &&list1, List &&list2){
 		listInsert(list2, "4 os",	"Linux"	) +
 	0;
 
-	using MyMultiList = hm4::multi::DualList<const List, const List, false>;
+	using MyMultiList = hm4::multi::DualList<const List, const List, hm4::multi::DualListEraseType::NORMAL>;
 
 	MyMultiList list{ list1, list2 };
 
@@ -188,7 +188,7 @@ void test_DualListEmpty(const char *name, List &&list1, List &&list2){
 		listInsert(list2, "4 os",	"Linux"	) +
 	0;
 
-	using MyMultiList = hm4::multi::DualList<List const, List const, false>;
+	using MyMultiList = hm4::multi::DualList<List const, List const, hm4::multi::DualListEraseType::NORMAL>;
 
 	mytest.begin(name);
 

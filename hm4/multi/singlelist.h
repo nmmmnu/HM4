@@ -1,25 +1,25 @@
-#ifndef DECORATOR_LIST_H_
-#define DECORATOR_LIST_H_
+#ifndef DECORATOR_List_H_
+#define DECORATOR_List_H_
 
 
 #include "ilist.h"
 
 #include <cassert>
 
-namespace hm4{
+namespace hm4::multi{
 
 
-template <class LIST>
-class DecoratorList{
+
+template <class List>
+class SingleListBase{
 public:
-	using iterator		= typename LIST::iterator;
-	using Allocator		= typename LIST::Allocator;
+	using iterator		= typename List::iterator;
 
-	using size_type		= typename LIST::size_type;
-	using difference_type	= typename LIST::difference_type;
+	using size_type		= typename List::size_type;
+	using difference_type	= typename List::difference_type;
 
 public:
-	DecoratorList(LIST &list) : list_(& list){}
+	SingleListBase(List &list) : list_(& list){}
 
 public:
 	// Immutable Methods
@@ -30,10 +30,6 @@ public:
 
 	size_t bytes() const{
 		return list_->bytes();
-	}
-
-	auto &getAllocator() const{
-		return list_->getAllocator();
 	}
 
 public:
@@ -48,6 +44,31 @@ public:
 	template<bool B>
 	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
 		return list_->find(key, exact);
+	}
+
+protected:
+	List	*list_;
+};
+
+
+
+template<class List, class = std::void_t<> >
+class SingleList : public SingleListBase<List>{
+public:
+	using SingleListBase<List>::SingleListBase;
+};
+
+
+
+template<class List>
+class SingleList<List, std::void_t<typename List::Allocator> > : public SingleListBase<List>{
+public:
+	using SingleListBase<List>::SingleListBase;
+
+	using Allocator = typename List::Allocator;
+
+	auto &getAllocator() const{
+		return list_->getAllocator();
 	}
 
 public:
@@ -79,12 +100,14 @@ public:
 		return list_->insert(std::move(newdata));
 	}
 
-private:
-	LIST	*list_;
+protected:
+	using SingleListBase<List>::list_;
 };
 
 
+
 } // namespace
+
 
 
 #endif

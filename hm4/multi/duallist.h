@@ -5,13 +5,18 @@
 
 #include "dualiterator.h"
 #include <cassert>
+#include <type_traits>
 
 namespace hm4{
 namespace multi{
 
+enum class DualListEraseType{
+	NORMAL,
+	TOMBSTONE
+};
 
-template <class List1, class List2, bool EraseWithTombstone>
-class DualList{
+template <class List1, class List2, DualListEraseType EraseType>
+class DualListBase{
 public:
 	using iterator		= DualIterator<
 					typename List1::iterator,
@@ -24,7 +29,7 @@ public:
 	using estimated_size	= std::true_type;
 
 public:
-	DualList(List1 &list1, const List2 &list2) :
+	DualListBase(List1 &list1, List2 &list2) :
 					list1_(&list1),
 					list2_(&list2){}
 
@@ -54,6 +59,35 @@ public:
 		return { *list1_, *list2_, key, exact };
 	}
 
+protected:
+	List1	*list1_;
+	List2	*list2_;
+};
+
+
+
+template<class List1, class List2, DualListEraseType EraseType, class = std::void_t<> >
+class DualListRW : public DualListBase<List1, List2, EraseType>{
+public:
+	using DualListBase<List1, List2, EraseType>::DualListBase;
+};
+
+
+
+template<class List1, class List2, DualListEraseType EraseType>
+class DualListRW<List1, List2, EraseType, std::void_t<typename List1::Allocator> > : public DualListBase<List1, List2, EraseType>{
+public:
+	using Base_ = DualListBase<List1, List2, EraseType>;
+	using iterator  = typename Base_::iterator;
+
+	using Allocator = typename List1::Allocator;
+
+	auto &getAllocator() const{
+		return list1_->getAllocator();
+	}
+
+	using Base_::DualListBase;
+
 public:
 	// Mutable Methods
 
@@ -65,41 +99,55 @@ public:
 	bool erase(std::string_view const key){
 		assert(Pair::check(key));
 
-		if constexpr (EraseWithTombstone){
+		if constexpr (EraseType == DualListEraseType::NORMAL){
 			return list1_->insert(key, Pair::TOMBSTONE) != std::end(*list1_);
-		}else{
+		}
+
+		if constexpr (EraseType == DualListEraseType::TOMBSTONE){
 			return list1_->erase(key);
 		}
 	}
 
-	iterator insert(	std::string_view const key, std::string_view const val,
+	auto insert(	std::string_view const key, std::string_view const val,
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 
-		return insert_( hm4::insert(*list1_, key, val, expires, created) );
+		return hm4::insert(*this, key, val, expires, created);
 	}
 
-	iterator insert(Pair const &src){
-		return insert_( hm4::insert(*list1_, src) );
+	auto insert(Pair const &src){
+		return hm4::insert(*this, src);
 	}
 
-private:
-	iterator insert_(typename List1::iterator &&it){
+	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+		return fixDualIterator_(
+			list1_->insert(std::move(newdata))
+		);
+	}
+
+protected:
+	iterator fixDualIterator_(typename List1::iterator &&it){
 		return {
 			{	std::move(it),		std::end(*list1_)	},
 			{	std::end(*list2_),	std::end(*list2_)	}
 		};
 	}
 
-private:
-	      List1	*list1_;
-	const List2	*list2_;
+protected:
+	using Base_::list1_;
+	using Base_::list2_;
 };
 
 
-} // multi
 
+template <class List1, class List2, DualListEraseType EraseType>
+using DualList = DualListRW<List1, const List2, DualListEraseType::TOMBSTONE>;
+
+
+
+} // multi
 } // namespace
+
 
 
 #endif

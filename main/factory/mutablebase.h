@@ -16,7 +16,10 @@
 
 namespace DBAdapterFactory{
 
-	template<class MemListType>
+	template<
+		class MemListType,
+		template<class, class, class, class> class MutableFlushListType
+	>
 	struct MutableBase{
 		using ListLoader		= hm4::listloader::DirectoryListLoader;
 
@@ -24,9 +27,13 @@ namespace DBAdapterFactory{
 		using Predicate			= hm4::flusher::DiskFilePredicate;
 		using IDGenerator		= hm4::idgenerator::IDGeneratorDate;
 		using Flush			= hm4::flusher::DiskFileFlush<IDGenerator>;
-		using MutableFlushList		= hm4::FlushList<MemList, Predicate, Flush, ListLoader>;
+		using MutableFlushList		= MutableFlushListType<MemList, Predicate, Flush, ListLoader>;
 
-		using DList			= hm4::multi::DualList<MutableFlushList, ListLoader::List, /* erase tombstones */ true>;
+		using DList			= hm4::multi::DualList<
+							MutableFlushList,
+							ListLoader::List,
+							hm4::multi::DualListEraseType::TOMBSTONE
+						>;
 
 		using CommandSaveObject		= MutableFlushList;
 		using CommandReloadObject	= ListLoader;
@@ -39,13 +46,13 @@ namespace DBAdapterFactory{
 
 		using MyDBAdapter		= DBAdapter;
 
-		template<typename UStringPathData>
-		MutableBase(UStringPathData &&path_data, size_t const memListSize, MemList &memList) :
+		template<typename UStringPathData, typename... FlushListArgs>
+		MutableBase(UStringPathData &&path_data, size_t const memListSize, FlushListArgs&&... args) :
 						loader_{
 							std::forward<UStringPathData>(path_data)
 						},
 						muFlushList_{
-							memList,
+							std::forward<FlushListArgs>(args)...,
 							Predicate{ memListSize },
 							Flush{ IDGenerator{}, path_data },
 							loader_

@@ -6,7 +6,7 @@ namespace DBAdapterFactory{
 	struct Mutable{
 		using MemList		= hm4::SkipList;
 
-		using MutableBase_	= MutableBase<MemList>;
+		using MutableBase_	= MutableBase<MemList, hm4::FlushList>;
 
 		using MyDBAdapter	= MutableBase_::MyDBAdapter;
 

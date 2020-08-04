@@ -38,11 +38,9 @@ LL_ALL		= -lstdc++
 
 LINK		= $(MYCC) $(LD_ALL) -o $@ $^ $(LL_ALL)
 
-#LINK		+= -static -lpthread
-LINK		+= -lpthread
-
-#LIBPTHREAD	= /usr/lib/libpthread.a
-#LIBPTHREAD	= -lpthread
+# https://stackoverflow.com/questions/9002264/starting-a-stdthread-with-static-linking-causes-segmentation-fault
+LINK		+= -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
+#LINK		+= -lpthread
 
 # ======================================================
 

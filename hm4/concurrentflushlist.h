@@ -1,7 +1,7 @@
-#ifndef FLUSH_LIST_H_
-#define FLUSH_LIST_H_
+#ifndef CONCURREN_FLUSH_LIST_H_
+#define CONCURREN_FLUSH_LIST_H_
 
-#include "decoratorlist.h"
+#include "multi/duallist.h"
 
 #include "logger.h"
 #include "scopedthread.h"
@@ -9,20 +9,24 @@
 namespace hm4{
 
 
+
+template <class List>
+using ConcurrentFlushListBase = multi::DualListRW<List, List, hm4::multi::DualListEraseType::TOMBSTONE>;
+
+
+
 template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
-class ConcurrentFlushList : public DecoratorList<List>{
+class ConcurrentFlushList : public ConcurrentFlushListBase<List>{
 private:
 	template <class UPredicate, class UFlusher>
 	ConcurrentFlushList(List &list1, List &list2, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
-					DecoratorList<List>(list1),
-						list_		(&list1					),
-						listRO_		(&list2					),
+					ConcurrentFlushListBase<List>(list1, list2),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
 						loader_		(loader					){}
 
 public:
-	using Allocator = typename DecoratorList<List>::Allocator;
+	using Allocator = typename ConcurrentFlushListBase<List>::Allocator;
 
 	template <class UPredicate, class UFlusher>
 	ConcurrentFlushList(List &list1, List &list2, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
@@ -33,7 +37,7 @@ public:
 					ConcurrentFlushList(list1, list2, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~ConcurrentFlushList(){
-		save_(*list_);
+		save_(*list1_);
 
 		// ScopedThread joins now.
 	}
@@ -50,9 +54,11 @@ public:
 	}
 
 	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
-		auto result = list_->insert(std::move(newdata));
+		auto result = this->fixDualIterator_(
+			list1_->insert(std::move(newdata))
+		);
 
-		if (predicate_(*list_))
+		if (predicate_(*list1_))
 			flush();
 
 		return result;
@@ -65,15 +71,15 @@ public:
 		thread_.join();
 
 		using std::swap;
-		swap(*list_, *listRO_);
+		swap(list1_, list2_);
 
-		if (!empty(*listRO_)){
-			thread_ = ScopedThread{ [this](){ save_(*listRO_, false); } };
-		//	save_(*listRO_);
+		if (!empty(*list2_)){
+			thread_ = ScopedThread{ [this](){ save_(*list2_, false); } };
+		//	save_(*list2_);
 		}
 
-		if (!empty(*list_)){
-			list_->clear();
+		if (!empty(*list1_)){
+			list1_->clear();
 			notifyLoader_();
 		}
 
@@ -107,8 +113,9 @@ private:
 	}
 
 private:
-	List		*list_;
-	List		*listRO_;
+	using		ConcurrentFlushListBase<List>::list1_;
+	using		ConcurrentFlushListBase<List>::list2_;
+
 	Predicate	predicate_;
 	Flusher		flusher_;
 	ListLoader	*loader_;
@@ -117,7 +124,9 @@ private:
 };
 
 
+
 } // namespace
+
 
 
 #endif

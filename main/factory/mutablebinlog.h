@@ -11,7 +11,7 @@ namespace DBAdapterFactory{
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger>;
 
-		using MutableBase_	= MutableBase<BinLogList>;
+		using MutableBase_	= MutableBase<BinLogList, hm4::FlushList>;
 
 		using MyDBAdapter	= MutableBase_::MyDBAdapter;
 

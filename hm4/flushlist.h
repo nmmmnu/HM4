@@ -1,7 +1,7 @@
 #ifndef FLUSH_LIST_H_
 #define FLUSH_LIST_H_
 
-#include "decoratorlist.h"
+#include "multi/singlelist.h"
 
 #include "logger.h"
 
@@ -11,18 +11,17 @@ namespace hm4{
 
 
 template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
-class FlushList : public DecoratorList<List>{
+class FlushList : public multi::SingleList<List>{
 private:
 	template <class UPredicate, class UFlusher>
 	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
-					DecoratorList<List>(list),
-						list_		(&list					),
+					multi::SingleList<List>(list),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
 						loader_		(loader					){}
 
 public:
-	using Allocator = typename DecoratorList<List>::Allocator;
+	using Allocator = typename multi::SingleList<List>::Allocator;
 
 	template <class UPredicate, class UFlusher>
 	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
@@ -48,6 +47,7 @@ public:
 	}
 
 	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+
 		auto result = list_->insert(std::move(newdata));
 
 		if (predicate_(*list_))
@@ -89,7 +89,8 @@ private:
 	}
 
 private:
-	List		*list_;
+	using multi::SingleList<List>::list_;
+
 	Predicate	predicate_;
 	Flusher		flusher_;
 	ListLoader	*loader_;

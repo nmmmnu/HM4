@@ -21,8 +21,8 @@
 		}
 	}
 
-	template<typename... ARGS>
-	void log__(ARGS... args){
+	template<typename... Args>
+	void log__(Args&&... args){
 		using namespace log_impl_;
 
 		(logx(args), ...);
