@@ -18,15 +18,14 @@ struct MockDBAdapter{
 		return "value";
 	}
 
-	constexpr
-	auto getx(std::string_view, uint16_t, std::string_view) const{
-		return std::array<std::string_view, 4 * 2 + 1>{
-			"key1", "value1",
-			"key2", "value2",
-			"key3", "value3",
-			"key4", "value4",
-			""
-		};
+	template<class Accumulator>
+	auto foreach(std::string_view, uint16_t, std::string_view, Accumulator &accumulator) const{
+		accumulator("key1", "value1");
+		accumulator("key2", "value2");
+		accumulator("key3", "value3");
+		accumulator("key4", "value4");
+
+		return accumulator.result();
 	}
 
 	constexpr

@@ -5,8 +5,11 @@
 
 #include "mystring.h"
 #include "myinvokeclassmember.h"
+#include "fixedvector.h"
 
 #include <type_traits>
+#include <limits>
+#include <algorithm>
 
 namespace net{
 namespace worker{
@@ -15,6 +18,15 @@ template<class PROTOCOL, class DB_ADAPTER, class CONNECTION>
 class KeyValueWorkerProcessor{
 public:
 	using Command = RedisCommands::Command;
+
+	struct RESULTS{
+		constexpr static uint16_t MIN		= 10;
+		constexpr static uint16_t MAX		= 1000;
+		constexpr static uint16_t ACCUMULATE	= 10000;
+	};
+
+	template<size_t Size>
+	using VectorGETX = FixedVector<std::string_view,Size>;
 
 public:
 	KeyValueWorkerProcessor(PROTOCOL &protocol, DB_ADAPTER &db, CONNECTION &buffer) :
@@ -116,6 +128,8 @@ private:
 	}
 
 private:
+	// SYSTEM
+
 	WorkerStatus do_info(){
 		const auto &p = protocol_.getParams();
 
@@ -149,6 +163,8 @@ private:
 		return do_save_(&DB_ADAPTER::reload);
 	}
 
+	// IMMUTABLE
+
 	WorkerStatus do_get(){
 		const auto &p = protocol_.getParams();
 
@@ -165,8 +181,10 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	template<typename F>
-	WorkerStatus do_accumulate_(F func){
+	// HIGHER LEVEL ACCUMULATORS
+
+	template<typename Acummulator>
+	WorkerStatus do_accumulate_(Acummulator &accumulator){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 4)
@@ -176,32 +194,158 @@ private:
 		uint16_t const count = from_string<uint16_t>(p[2]);
 		const auto &prefix = p[3];
 
-		protocol_.response_strings(buffer_, invoke_class_member(db_, func, key, count, prefix) );
+		if constexpr(Acummulator::container()){
+			auto const count2 = std::clamp(count, RESULTS::MIN, RESULTS::MAX);
+
+			auto const container = db_.foreach(key, count2, prefix, accumulator);
+
+			protocol_.response_strings(buffer_, container );
+		}else{
+			auto const count2 = std::clamp(count, RESULTS::MIN, RESULTS::ACCUMULATE);
+
+			auto const [ data, lastKey ] = db_.foreach(key, count2, prefix, accumulator);
+
+			std::array<std::string, 2> container{
+				std::to_string(data),
+				{ lastKey.data(), lastKey.size() }
+			};
+
+			protocol_.response_strings(buffer_, container );
+		}
 
 		return WorkerStatus::WRITE;
 	}
 
 	auto do_getx(){
-		return do_accumulate_(&DB_ADAPTER::getx);
+		constexpr size_t size = 2 * RESULTS::MAX + 1;
+
+		using MyVector = VectorGETX<size>;
+
+		struct AccumulatorVectorNew{
+			MyVector data;
+
+			AccumulatorVectorNew(typename MyVector::size_type size){
+				data.reserve(size);
+			}
+
+			void operator()(std::string_view key, std::string_view val){
+				data.emplace_back(key);
+				data.emplace_back(val);
+			}
+
+			const auto &result(std::string_view key = ""){
+				// emplace even empty
+				data.emplace_back(key);
+
+				return data;
+			}
+
+			constexpr static auto container(){
+				return true;
+			}
+		};
+
+		AccumulatorVectorNew accumulator(size);
+
+		return do_accumulate_(accumulator);
 	}
 
 	auto do_count(){
-		return do_accumulate_(&DB_ADAPTER::count);
+		using T = int64_t;
+
+		struct{
+			T data = 0;
+
+			void operator()(std::string_view, std::string_view){
+				++data;
+			}
+
+			auto result(std::string_view key = "") const{
+				return std::make_pair(data, key);
+			}
+
+			constexpr static auto container(){
+				return false;
+			}
+		} accumulator;
+
+		return do_accumulate_(accumulator);
 	}
 
 	auto do_sum(){
-		return do_accumulate_(&DB_ADAPTER::sum);
+		using T = int64_t;
+
+		struct{
+			T data = 0;
+
+			void operator()(std::string_view, std::string_view val){
+				data += from_string<T>(val);
+			}
+
+			auto result(std::string_view key = "") const{
+				return std::make_pair(data, key);
+			}
+
+			constexpr static auto container(){
+				return false;
+			}
+		} accumulator;
+
+		return do_accumulate_(accumulator);
 	}
 
 	auto do_min(){
-		return do_accumulate_(&DB_ADAPTER::min);
+		using T = int64_t;
+
+		struct{
+			T data = std::numeric_limits<T>::max();
+
+			void operator()(std::string_view, std::string_view val){
+				auto x = from_string<T>(val);
+
+				if (x < data)
+					data = x;
+			}
+
+			auto result(std::string_view key = "") const{
+				return std::make_pair(data, key);
+			}
+
+			constexpr static auto container(){
+				return false;
+			}
+		} accumulator;
+
+		return do_accumulate_(accumulator);
 	}
 
 	auto do_max(){
-		return do_accumulate_(&DB_ADAPTER::max);
+		using T = int64_t;
+
+		struct{
+			T data = std::numeric_limits<T>::min();
+
+			void operator()(std::string_view, std::string_view val){
+				auto x = from_string<T>(val);
+
+				if (x > data)
+					data = x;
+			}
+
+			auto result(std::string_view key = "") const{
+				return std::make_pair(data, key);
+			}
+
+			constexpr static auto container(){
+				return false;
+			}
+		} accumulator;
+
+		return do_accumulate_(accumulator);
 	}
 
-private:
+	// MUTABLE
+
 	WorkerStatus do_set(){
 		const auto &p = protocol_.getParams();
 
@@ -258,8 +402,10 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
+	// HIGHER LEVEL ATOMIC COUNTERS
+
 	template<int Sign>
-	WorkerStatus do_incrdecr(){
+	WorkerStatus do_incr_decr(){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 2 && p.size() != 3)
@@ -270,22 +416,31 @@ private:
 		if (key.empty())
 			return err_BadRequest_();
 
-		int64_t const val = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
+		int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
 
-		if (val == 0)
+		if (n == 0)
 			return err_BadRequest_();
 
-		protocol_.response_string(buffer_, db_.incr(key, val));
+		if (! key.empty())
+			n += from_string<int64_t>( db_.get(key) );
+
+		to_string_buffer_t buffer;
+
+		std::string_view const val = to_string(n, buffer);
+
+		db_.set(key, val);
+
+		protocol_.response_string(buffer_, val);
 
 		return WorkerStatus::WRITE;
 	}
 
 	auto do_incr(){
-		return do_incrdecr<+1>();
+		return do_incr_decr<+1>();
 	}
 
 	auto do_decr(){
-		return do_incrdecr<-1>();
+		return do_incr_decr<-1>();
 	}
 
 	auto do_getset(){
