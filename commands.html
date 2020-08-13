@@ -71,16 +71,26 @@
 	<li><a href="#SUM	">SUM		</a></li>
 	<li><a href="#MIN	">MIN		</a></li>
 	<li><a href="#MAX	">MAX		</a></li>
+
 	<li><a href="#SET	">SET		</a></li>
 	<li><a href="#SETEX	">SETEX		</a></li>
-	<li><a href="#INCR	">INCR / INCRBY	</a></li>
 	<li><a href="#DEL	">DEL		</a></li>
+
+	<li><a href="#INCR	">INCR / INCRBY	</a></li>
+	<li><a href="#DECR	">DECR / DECRBY	</a></li>
+	<li><a href="#GETSET	">GETSET	</a></li>
+
 	<li><a href="#INFO	">INFO		</a></li>
 	<li><a href="#SAVE	">SAVE / BGSAVE	</a></li>
 	<li><a href="#RELOAD	">RELOAD	</a></li>
 	<li><a href="#EXIT	">EXIT		</a></li>
 	<li><a href="#SHUTDOWN	">SHUTDOWN	</a></li>
 </ul>
+
+
+
+<h1>Immutable commands</h1>
+<hr />
 
 
 
@@ -329,6 +339,13 @@
 
 <a href="#top">top</a>
 
+
+
+<h1>Mutable commands</h1>
+<hr />
+
+
+
 <div class="cmd" id="SET">
 	<h2>SET key value</h2>
 
@@ -370,32 +387,6 @@
 </div>
 
 <a href="#top">top</a>
-
-<div class="cmd" id="INCR">
-	<h2>INCR / INCRBY key [increase value=1]</h2>
-
-	<h3>Description:</h3>
-
-		Increase numerical value of the <i>key</i> with  <i>increase value</i>.<br />
-		It uses <b>int64_t</b> as a number type.
-
-	<h3>Return value:</h3>
-
-		New increased value.
-
-	<h3>Info:</h3>
-
-		<table border="1">
-			<tr><td>Available since		</td><td>1.1.0		</td></tr>
-			<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
-			<tr><td>Redis compatible	</td><td>YES		</td></tr>
-			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
-			<tr><td>Mutable			</td><td>YES		</td></tr>
-		</table>
-</div>
-
-<a href="#top">top</a>
-
 <div class="cmd" id="DEL">
 	<h2>DEL</h2>
 
@@ -419,6 +410,95 @@
 </div>
 
 <a href="#top">top</a>
+
+
+
+<h1>Higher Level Atomic Counters</h1>
+<hr />
+
+
+
+<div class="cmd" id="INCR">
+	<h2>INCR / INCRBY key [increase value=+1]</h2>
+
+	<h3>Description:</h3>
+
+		Increase numerical value of the <i>key</i> with <i>increase value</i>.<br />
+		It uses <b>int64_t</b> as a number type.
+
+	<h3>Return value:</h3>
+
+		New increased value.
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.1.0		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
+</div>
+
+<a href="#top">top</a>
+
+<div class="cmd" id="DECR">
+	<h2>DECR / DECRBY key [decrease value=-1]</h2>
+
+	<h3>Description:</h3>
+
+		Increase numerical value of the <i>key</i> with <i>decrease value</i>.<br />
+		It uses <b>int64_t</b> as a number type.
+
+	<h3>Return value:</h3>
+
+		New decreased value.
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.8		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
+</div>
+
+<a href="#top">top</a>
+
+<div class="cmd" id="GETSET">
+	<h2>GETSET key value</h2>
+
+	<h3>Description:</h3>
+
+		Get value of the <i>key</i>. Exact match.<br />
+		Set <i>key</i> -> <i>value</i> pair.
+
+	<h3>Return value:</h3>
+
+		Value of the old key or empty string.
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.8		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
+</div>
+
+<a href="#top">top</a>
+
+
+
+<h1>System commands</h1>
+<hr />
+
+
 
 <div class="cmd" id="INFO">
 	<h2>INFO</h2>

@@ -11,12 +11,16 @@ public:
 	enum class Command : uint8_t{
 		UNKNOWN		,
 
+		// System
+
 		EXIT		,
 		SHUTDOWN	,
 
 		INFO		,
 		SAVE		,
 		RELOAD		,
+
+		// Immutable
 
 		GET		,
 		GETX		,
@@ -26,11 +30,17 @@ public:
 		MIN		,
 		MAX		,
 
+		// Mutable
+
 		SET		,
 		SETEX		,
 		DEL		,
 
-		INCR
+		// Higher Level Atomic Counters
+
+		INCR		,
+		DECR		,
+		GETSET
 	};
 
 	constexpr static auto h(const char *s){
@@ -41,6 +51,9 @@ public:
 		// using namespace std::literals;
 
 		switch(hash(cmd)){
+
+		// System
+
 		case h("exit"		)	:
 		case h("EXIT"		)	: return Command::EXIT		;
 
@@ -57,6 +70,8 @@ public:
 
 		case h("reload"		)	:
 		case h("RELOAD"		)	: return Command::RELOAD	;
+
+		// Immutable
 
 		case h("get"		)	:
 		case h("GET"		)	: return Command::GET		;
@@ -76,6 +91,8 @@ public:
 		case h("max"		)	:
 		case h("MAX"		)	: return Command::MAX		;
 
+		// Mutable
+
 		case h("set"		)	:
 		case h("SET"		)	: return Command::SET		;
 
@@ -85,10 +102,22 @@ public:
 		case h("del"		)	:
 		case h("DEL"		)	: return Command::DEL		;
 
+		// Higher Level Atomic Counters
+
 		case h("incr"		)	:
 		case h("INCR"		)	:
 		case h("incrby"		)	:
 		case h("INCRBY"		)	: return Command::INCR		;
+
+		case h("decr"		)	:
+		case h("DECR"		)	:
+		case h("decrby"		)	:
+		case h("decrBY"		)	: return Command::DECR		;
+
+		case h("getset"		)	:
+		case h("GETSET"		)	: return Command::GETSET	;
+
+		// EOF
 
 		default				: return Command::UNKNOWN	;
 		}

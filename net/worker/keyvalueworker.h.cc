@@ -90,6 +90,8 @@ private:
 		case Command::DEL	: return do_del();
 
 		case Command::INCR	: return do_incr();
+		case Command::DECR	: return do_decr();
+		case Command::GETSET	: return do_getset();
 
 		default			: return executeCommand_(cmd, std::false_type{});
 		}
@@ -256,7 +258,8 @@ private:
 		return WorkerStatus::WRITE;
 	}
 
-	WorkerStatus do_incr(){
+	template<int Sign>
+	WorkerStatus do_incrdecr(){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 2 && p.size() != 3)
@@ -267,15 +270,48 @@ private:
 		if (key.empty())
 			return err_BadRequest_();
 
-		int64_t val = 1;  // INCR
-
-		if (p.size() == 3)
-			val = from_string<int64_t>(p[2]);
+		int64_t const val = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
 
 		if (val == 0)
 			return err_BadRequest_();
 
 		protocol_.response_string(buffer_, db_.incr(key, val));
+
+		return WorkerStatus::WRITE;
+	}
+
+	auto do_incr(){
+		return do_incrdecr<+1>();
+	}
+
+	auto do_decr(){
+		return do_incrdecr<-1>();
+	}
+
+	auto do_getset(){
+		const auto &p = protocol_.getParams();
+
+		if (p.size() != 3)
+			return err_BadRequest_();
+
+		// GET
+
+		const auto &key = p[1];
+
+		if (key.empty())
+			return err_BadRequest_();
+
+		protocol_.response_string(buffer_, db_.get(key));
+		// now old value is inserted in the buffer and
+		// we do not care if pair is overwritten
+
+		// SET
+
+		const auto &val = p[2];
+
+		db_.set(key, val);
+
+		// return
 
 		return WorkerStatus::WRITE;
 	}
