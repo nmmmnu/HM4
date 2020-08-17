@@ -68,6 +68,9 @@ public:
 	template<class CONNECTION, class CONTAINER>
 	static void response_strings(CONNECTION &buffer, const CONTAINER &list);
 
+	template<class CONNECTION>
+	static void response_strings(CONNECTION &buffer, std::string_view msg1, std::string_view msg2);
+
 public:
 	template<class CONNECTION>
 	static void response_string(CONNECTION &buffer, uint64_t const msg){
@@ -130,6 +133,18 @@ void RedisProtocol::response_strings(CONNECTION &buffer, const CONTAINER &list){
 
 	for(const auto &msg : list)
 		response_string(buffer, msg);
+}
+
+template<class CONNECTION>
+void RedisProtocol::response_strings(CONNECTION &buffer, std::string_view const msg1, std::string_view const msg2){
+	constexpr std::string_view count = "2";
+
+	buffer.push(STAR);
+	buffer.push(count);
+	buffer.push(ENDLN);
+
+	response_string(buffer, msg1);
+	response_string(buffer, msg2);
 }
 
 

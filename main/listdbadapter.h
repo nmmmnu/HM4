@@ -62,7 +62,8 @@ public:
 				return accumulator.result();
 
 			if (it->isValid(std::true_type{}))
-				accumulator(it->getKey(), it->getVal());
+				if (!accumulator(it->getKey(), it->getVal()))
+					break;
 		}
 
 		return accumulator.result();

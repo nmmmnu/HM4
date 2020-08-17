@@ -205,12 +205,9 @@ private:
 
 			auto const [ data, lastKey ] = db_.foreach(key, count2, prefix, accumulator);
 
-			std::array<std::string, 2> container{
-				std::to_string(data),
-				{ lastKey.data(), lastKey.size() }
-			};
+			to_string_buffer_t buffer;
 
-			protocol_.response_strings(buffer_, container );
+			protocol_.response_strings(buffer_, to_string(data, buffer), lastKey);
 		}
 
 		return WorkerStatus::WRITE;
@@ -228,9 +225,10 @@ private:
 				data.reserve(size);
 			}
 
-			void operator()(std::string_view key, std::string_view val){
+			auto operator()(std::string_view key, std::string_view val){
 				data.emplace_back(key);
 				data.emplace_back(val);
+				return true;
 			}
 
 			const auto &result(std::string_view key = ""){
@@ -256,8 +254,9 @@ private:
 		struct{
 			T data = 0;
 
-			void operator()(std::string_view, std::string_view){
+			auto operator()(std::string_view, std::string_view){
 				++data;
+				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -278,8 +277,9 @@ private:
 		struct{
 			T data = 0;
 
-			void operator()(std::string_view, std::string_view val){
+			auto operator()(std::string_view, std::string_view val){
 				data += from_string<T>(val);
+				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -300,11 +300,12 @@ private:
 		struct{
 			T data = std::numeric_limits<T>::max();
 
-			void operator()(std::string_view, std::string_view val){
+			auto operator()(std::string_view, std::string_view val){
 				auto x = from_string<T>(val);
 
 				if (x < data)
 					data = x;
+				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -325,11 +326,12 @@ private:
 		struct{
 			T data = std::numeric_limits<T>::min();
 
-			void operator()(std::string_view, std::string_view val){
+			auto operator()(std::string_view, std::string_view val){
 				auto x = from_string<T>(val);
 
 				if (x > data)
 					data = x;
+				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -349,16 +351,17 @@ private:
 	WorkerStatus do_set(){
 		const auto &p = protocol_.getParams();
 
-		if (p.size() != 3)
+		if (p.size() != 3 && p.size() != 4)
 			return err_BadRequest_();
 
 		const auto &key = p[1];
 		const auto &val = p[2];
+		uint32_t const exp = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 		if (key.empty())
 			return err_BadRequest_();
 
-		db_.set(key, val);
+		db_.set(key, val, exp);
 
 		protocol_.response_ok(buffer_);
 
@@ -374,7 +377,7 @@ private:
 		const auto &key = p[1];
 		const auto &val = p[3];
 
-		uint32_t exp = from_string<uint32_t>(p[2]);
+		uint32_t const exp = from_string<uint32_t>(p[2]);
 
 		if (key.empty())
 			return err_BadRequest_();
