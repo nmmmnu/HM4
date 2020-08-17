@@ -14,6 +14,18 @@
 namespace net{
 namespace worker{
 
+namespace worker_impl_{
+
+	inline bool samePrefix(std::string_view const p, std::string_view const s){
+		if (p.size() > s.size())
+			return false;
+
+		return std::equal(std::begin(p), std::end(p), std::begin(s));
+	}
+
+} // worker_impl_
+
+
 template<class PROTOCOL, class DB_ADAPTER, class CONNECTION>
 class KeyValueWorkerProcessor{
 public:
@@ -22,7 +34,7 @@ public:
 	struct RESULTS{
 		constexpr static uint16_t MIN		= 10;
 		constexpr static uint16_t MAX		= 1000;
-		constexpr static uint16_t ACCUMULATE	= 10000;
+		constexpr static uint16_t ITERATIONS	= 10000;
 	};
 
 	template<size_t Size>
@@ -183,8 +195,36 @@ private:
 
 	// HIGHER LEVEL ACCUMULATORS
 
-	template<typename Acummulator>
-	WorkerStatus do_accumulate_(Acummulator &accumulator){
+	template<typename Accumulator, class It>
+	static auto do_accumulateIterations__(Accumulator &accumulator, uint16_t const maxResults, std::string_view const prefix, It it, It last){
+		using worker_impl_::samePrefix;
+
+		uint16_t iterations	= 0;
+		uint16_t results	= 0;
+
+		for(; it != last; ++it){
+			auto const &key = it->getKey();
+
+			if (++iterations > RESULTS::ITERATIONS)
+				return accumulator.result(key);
+
+			if (! prefix.empty() && ! samePrefix(prefix, key))
+				return accumulator.result();
+
+			if (! it->isValid(std::true_type{}))
+				continue;
+
+			if (++results > maxResults)
+				return accumulator.result(key);
+
+			accumulator(key, it->getVal());
+		}
+
+		return accumulator.result();
+	}
+
+	template<typename Accumulator, bool Container>
+	WorkerStatus do_accumulate_(Accumulator &accumulator, std::bool_constant<Container> ){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 4)
@@ -194,16 +234,18 @@ private:
 		uint16_t const count = from_string<uint16_t>(p[2]);
 		const auto &prefix = p[3];
 
-		if constexpr(Acummulator::container()){
-			auto const count2 = std::clamp(count, RESULTS::MIN, RESULTS::MAX);
+		auto const container = do_accumulateIterations__(
+						accumulator,
+						std::clamp(count, RESULTS::MIN, RESULTS::MAX),
+						prefix,
+						db_.search(key),
+						std::end(db_)
+		);
 
-			auto const container = db_.foreach(key, count2, prefix, accumulator);
-
+		if constexpr(Container){
 			protocol_.response_strings(buffer_, container );
 		}else{
-			auto const count2 = std::clamp(count, RESULTS::MIN, RESULTS::ACCUMULATE);
-
-			auto const [ data, lastKey ] = db_.foreach(key, count2, prefix, accumulator);
+			auto const [ data, lastKey ] = container;
 
 			to_string_buffer_t buffer;
 
@@ -228,7 +270,6 @@ private:
 			auto operator()(std::string_view key, std::string_view val){
 				data.emplace_back(key);
 				data.emplace_back(val);
-				return true;
 			}
 
 			const auto &result(std::string_view key = ""){
@@ -237,15 +278,11 @@ private:
 
 				return data;
 			}
-
-			constexpr static auto container(){
-				return true;
-			}
 		};
 
 		AccumulatorVectorNew accumulator(size);
 
-		return do_accumulate_(accumulator);
+		return do_accumulate_(accumulator, std::true_type{});
 	}
 
 	auto do_count(){
@@ -262,13 +299,9 @@ private:
 			auto result(std::string_view key = "") const{
 				return std::make_pair(data, key);
 			}
-
-			constexpr static auto container(){
-				return false;
-			}
 		} accumulator;
 
-		return do_accumulate_(accumulator);
+		return do_accumulate_(accumulator, std::false_type{});
 	}
 
 	auto do_sum(){
@@ -285,13 +318,9 @@ private:
 			auto result(std::string_view key = "") const{
 				return std::make_pair(data, key);
 			}
-
-			constexpr static auto container(){
-				return false;
-			}
 		} accumulator;
 
-		return do_accumulate_(accumulator);
+		return do_accumulate_(accumulator, std::false_type{});
 	}
 
 	auto do_min(){
@@ -311,13 +340,9 @@ private:
 			auto result(std::string_view key = "") const{
 				return std::make_pair(data, key);
 			}
-
-			constexpr static auto container(){
-				return false;
-			}
 		} accumulator;
 
-		return do_accumulate_(accumulator);
+		return do_accumulate_(accumulator, std::false_type{});
 	}
 
 	auto do_max(){
@@ -337,13 +362,9 @@ private:
 			auto result(std::string_view key = "") const{
 				return std::make_pair(data, key);
 			}
-
-			constexpr static auto container(){
-				return false;
-			}
 		} accumulator;
 
-		return do_accumulate_(accumulator);
+		return do_accumulate_(accumulator, std::false_type{});
 	}
 
 	// MUTABLE
@@ -481,7 +502,9 @@ private:
 };
 
 
+
 // ====================================
+
 
 
 template<class PROTOCOL, class DB_ADAPTER>

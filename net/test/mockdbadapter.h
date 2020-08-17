@@ -1,56 +1,37 @@
 #ifndef MOCK_DB_ADAPTER_H_
 #define MOCK_DB_ADAPTER_H_
 
-#include <array>
+#include <cassert>
+
 #include <string_view>
 
-struct MockDBAdapter{
-	constexpr static bool MUTABLE = false;
+#include "vectorlist.h"
+#include "stdallocator.h"
 
-	// Mock commands
+struct MockDBAdapter{
+	constexpr static bool MUTABLE = true;
+
+	// Immutable Methods
+
+	std::string_view get(std::string_view const key) const{
+		auto it = list_.find(key, std::true_type{});
+
+		return it != std::end(list_) ? it->getVal() : "";
+	}
+
+	auto search(std::string_view const key = "") const{
+		return key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
+	}
+
+	auto end() const{
+		return std::end(list_);
+	}
+
+	// System Methods
+
 	constexpr
 	static std::string_view info(){
 		return "Mock Adapter\n";
-	}
-
-	constexpr
-	static std::string_view get(std::string_view){
-		return "value";
-	}
-
-	template<class Accumulator>
-	auto foreach(std::string_view, uint16_t, std::string_view, Accumulator &accumulator) const{
-		accumulator("key1", "value1");
-		accumulator("key2", "value2");
-		accumulator("key3", "value3");
-		accumulator("key4", "value4");
-
-		return accumulator.result();
-	}
-
-	constexpr
-	static auto do_accumulate_(){
-		return std::array<std::string_view, 2>{ "0", "" };
-	}
-
-	constexpr
-	static auto count(std::string_view, uint16_t, std::string_view){
-		return do_accumulate_();
-	}
-
-	constexpr
-	static auto sum(std::string_view, uint16_t, std::string_view){
-		return do_accumulate_();
-	}
-
-	constexpr
-	static auto min(std::string_view, uint16_t, std::string_view){
-		return do_accumulate_();
-	}
-
-	constexpr
-	static auto max(std::string_view, uint16_t, std::string_view){
-		return do_accumulate_();
 	}
 
 	constexpr
@@ -62,6 +43,27 @@ struct MockDBAdapter{
 	static bool reload(){
 		return true;
 	}
+
+	// Mutable Methods
+
+	void set(std::string_view const key, std::string_view const val, uint32_t expires = 0){
+		assert(!key.empty());
+
+		list_.insert(key, val, expires);
+	}
+
+	bool del(std::string_view const key){
+		assert(!key.empty());
+
+		return list_.erase(key);
+	}
+
+private:
+	using Allocator = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+
+	Allocator allocator_;
+
+	hm4::VectorList list_{ allocator_ };
 };
 
 #endif

@@ -1,20 +1,7 @@
 #ifndef List_DB_ADAPTER_H_
 #define List_DB_ADAPTER_H_
 
-#include <algorithm>
-
 #include "version.h"
-
-namespace accumulator_impl_{
-
-	inline bool samePrefix(std::string_view const p, std::string_view const s){
-		if (p.size() > s.size())
-			return false;
-
-		return std::equal(std::begin(p), std::end(p), std::begin(s));
-	}
-
-} // accumulator_impl_
 
 template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 class ListDBAdapter{
@@ -44,32 +31,16 @@ public:
 		return getVal_( list_.find(key, std::true_type{} ) );
 	}
 
-	template<class Accumulator>
-	auto foreach(std::string_view const key, uint16_t const resultCount, std::string_view const prefix, Accumulator &accumulator) const{
-		using accumulator_impl_::samePrefix;
-
-		uint16_t count = 0;
-
-		auto it = key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
-
-		for(; it != std::end(list_); ++it){
-			auto const &key = it->getKey();
-
-			if (++count > resultCount)
-				return accumulator.result(key);
-
-			if ( ! prefix.empty() && ! samePrefix(prefix, key))
-				return accumulator.result();
-
-			if (it->isValid(std::true_type{}))
-				if (!accumulator(it->getKey(), it->getVal()))
-					break;
-		}
-
-		return accumulator.result();
+	auto search(std::string_view const key = "") const{
+		return key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 	}
 
-public:
+	auto end() const{
+		return std::end(list_);
+	}
+
+	// System Methods
+
 	std::string info() const{
 		to_string_buffer_t buffer[2];
 
