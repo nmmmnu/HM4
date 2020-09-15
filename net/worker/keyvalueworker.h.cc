@@ -225,18 +225,20 @@ private:
 
 	template<typename Accumulator, bool Container>
 	WorkerStatus do_accumulate_(Accumulator &accumulator, std::bool_constant<Container> ){
-		const auto &p = protocol_.getParams();
+		auto const &p = protocol_.getParams();
 
 		if (p.size() != 4)
 			return err_BadRequest_();
 
-		const auto &key    = p[1];
-		uint16_t const count = from_string<uint16_t>(p[2]);
-		const auto &prefix = p[3];
+		auto const &key    = p[1];
+		auto const count   = from_string<uint16_t>(p[2]);
+		auto const &prefix = p[3];
+
+		auto const max = Container ? RESULTS::MAX : RESULTS::ITERATIONS;
 
 		auto const container = do_accumulateIterations__(
 						accumulator,
-						std::clamp(count, RESULTS::MIN, RESULTS::MAX),
+						std::clamp(count, RESULTS::MIN, max),
 						prefix,
 						db_.search(key),
 						std::end(db_)
@@ -293,7 +295,6 @@ private:
 
 			auto operator()(std::string_view, std::string_view){
 				++data;
-				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -312,7 +313,6 @@ private:
 
 			auto operator()(std::string_view, std::string_view val){
 				data += from_string<T>(val);
-				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -334,7 +334,6 @@ private:
 
 				if (x < data)
 					data = x;
-				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -356,7 +355,6 @@ private:
 
 				if (x > data)
 					data = x;
-				return true;
 			}
 
 			auto result(std::string_view key = "") const{
@@ -375,9 +373,9 @@ private:
 		if (p.size() != 3 && p.size() != 4)
 			return err_BadRequest_();
 
-		const auto &key = p[1];
-		const auto &val = p[2];
-		uint32_t const exp = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
+		auto const &key = p[1];
+		auto const &val = p[2];
+		auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 		if (key.empty())
 			return err_BadRequest_();
@@ -395,10 +393,9 @@ private:
 		if (p.size() != 4)
 			return err_BadRequest_();
 
-		const auto &key = p[1];
-		const auto &val = p[3];
-
-		uint32_t const exp = from_string<uint32_t>(p[2]);
+		auto const &key = p[1];
+		auto const &val = p[3];
+		auto const exp  = from_string<uint32_t>(p[2]);
 
 		if (key.empty())
 			return err_BadRequest_();
@@ -429,7 +426,7 @@ private:
 	// HIGHER LEVEL ATOMIC COUNTERS
 
 	template<int Sign>
-	WorkerStatus do_incr_decr(){
+	WorkerStatus do_incr_decr_(){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 2 && p.size() != 3)
@@ -460,14 +457,14 @@ private:
 	}
 
 	auto do_incr(){
-		return do_incr_decr<+1>();
+		return do_incr_decr_<+1>();
 	}
 
 	auto do_decr(){
-		return do_incr_decr<-1>();
+		return do_incr_decr_<-1>();
 	}
 
-	auto do_getset(){
+	WorkerStatus do_getset(){
 		const auto &p = protocol_.getParams();
 
 		if (p.size() != 3)

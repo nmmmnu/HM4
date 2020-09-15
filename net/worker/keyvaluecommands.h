@@ -7,7 +7,6 @@ namespace net{
 namespace worker{
 
 struct RedisCommands{
-public:
 	enum class Command : uint8_t{
 		UNKNOWN		,
 

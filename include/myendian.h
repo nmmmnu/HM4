@@ -6,35 +6,43 @@
 #include "mybyteswap.h"
 
 namespace myendian_impl_{
-	class is_be{
-	private:
-		constexpr static uint32_t host = 0x00112233;
-		constexpr static uint16_t mem  = (const uint16_t &) host;
-
-	private:
-		static_assert(mem == 0x0011 || mem == 0x2233, "I can handle only big and little endian");
-
-	public:
-		constexpr static bool value = mem == 0x0011;
-
-		using type = std::bool_constant<value>;
+	enum class Endian{
+		LITTLE	,
+		BIG	,
+		UNKNOWN
 	};
 
-	template<typename T>
-	constexpr T be_byteswap(T const a, std::true_type){
-		return a;
+	constexpr static auto check__(){
+		#if	defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+
+			return Endian::BIG;
+
+		#elif	defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+
+			return Endian::LITTLE;
+
+		#else
+
+			return Endian::UNKNOWN;
+
+		#endif
 	}
 
-	template<typename T>
-	constexpr T be_byteswap(T const a, std::false_type){
-		return byteswap(a);
-	}
+	static_assert(check__() == Endian::LITTLE || check__() == Endian::BIG, "I can handle only big and little endian");
+
+	namespace is_be{
+		constexpr static bool value = check__() == Endian::BIG;
+	};
 
 	template<typename T>
 	constexpr T be_byteswap(T const a){
 		static_assert(std::is_unsigned<T>::value, "be_byteswap<> supports only unsigned type");
 
-		return be_byteswap(a, is_be::type{});
+		if constexpr(is_be::value){
+			return a;
+		}else{
+			return byteswap(a);
+		}
 	}
 
 	constexpr uint8_t be_byteswap(uint8_t const a){
