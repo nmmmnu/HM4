@@ -12,7 +12,7 @@ namespace myendian_impl_{
 		UNKNOWN
 	};
 
-	constexpr static auto check__(){
+	constexpr auto getEndian(){
 		#if	defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 
 			return Endian::BIG;
@@ -28,17 +28,13 @@ namespace myendian_impl_{
 		#endif
 	}
 
-	static_assert(check__() == Endian::LITTLE || check__() == Endian::BIG, "I can handle only big and little endian");
-
-	namespace is_be{
-		constexpr static bool value = check__() == Endian::BIG;
-	};
+	static_assert(getEndian() == Endian::LITTLE || getEndian() == Endian::BIG, "I can handle only big and little endian");
 
 	template<typename T>
 	constexpr T be_byteswap(T const a){
 		static_assert(std::is_unsigned<T>::value, "be_byteswap<> supports only unsigned type");
 
-		if constexpr(is_be::value){
+		if constexpr(getEndian() == Endian::BIG){
 			return a;
 		}else{
 			return byteswap(a);
@@ -72,7 +68,7 @@ namespace myendian_impl_{
 	namespace test_{
 		template<typename T>
 		constexpr T htobe_test(T const a, T const be, T const le){
-			auto const result = is_be::value ? be : le;
+			auto const result = getEndian() == Endian::BIG ? be : le;
 			return htobe(a) == result;
 		}
 
