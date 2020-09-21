@@ -187,7 +187,8 @@ constexpr inline auto DiskList::end() const -> forward_iterator{
 
 template<bool B>
 auto DiskList::find(std::string_view const key, std::bool_constant<B> const exact) const -> forward_iterator{
-	return { ra_find(key, exact) };
+	// gcc error if "forward_iterator" ommited
+	return forward_iterator{ ra_find(key, exact) };
 }
 
 

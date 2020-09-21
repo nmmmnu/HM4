@@ -19,6 +19,7 @@ namespace{
 	void pair_test_expired();
 	void pair_test();
 	void pair_test_ctor();
+	void pair_size_test(size_t step);
 }
 
 
@@ -29,6 +30,7 @@ int main(){
 	pair_test();
 	pair_test_expired();
 	pair_test_ctor();
+	pair_size_test(7);
 
 	//printf("Size: %zu bytes\n", sizeof(OPair));
 
@@ -137,6 +139,36 @@ namespace{
 		mytest("valid",			! t->isValid(std::true_type{})	);
 
 		mytest("valid",			! t->isValidForReplace(*p)	);
+	}
+
+	[[maybe_unused]]
+	void pair_size_test(size_t const step){
+		mytest.begin("Pair Size (slow)");
+
+		auto f = [](const char *msg, size_t i, std::string_view x, auto const &p){
+			printf("%zu | %s\n", i, x.data());
+
+			print(p);
+			mytest(msg, false);
+		};
+
+		std::string_view const key = "k";
+
+		std::string master_val( hm4::PairConf::MAX_VAL_SIZE, '*' );
+
+		for(size_t i = 0; i < hm4::PairConf::MAX_VAL_SIZE; i += step){
+			std::string_view const val{ master_val.data(), i };
+
+			const OPair p = Pair::create( key, val );
+
+		//	printf("%10zu | %10zu | %10zu\n", i, p->getKey().size(), p->getVal().size() );
+
+			if (p->getKey() != key)
+				f("size error key ", i, key, p);
+
+			if (p->getVal() != val)
+				f("size error val ", i, val, p);
+		}
 	}
 
 } // anonymous namespace

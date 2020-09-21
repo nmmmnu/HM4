@@ -9,10 +9,21 @@ Pair *Pair::copy_(Pair *pair,
 			std::string_view const val,
 			uint32_t const expires, uint32_t const created) noexcept{
 
+	// this is private and sizes are checked already
+
+	uint16_t const keylen = uint16_t(
+			(   key.size()					& PairConf::MAX_KEY_MASK	)	|
+			( ( val.size() >> PairConf::MAX_VAL_MASK_SH )	& PairConf::MAX_VAL_MASK	)
+	);
+
+	uint16_t const vallen =
+			val.size() & 0xffff
+	;
+
 	pair->created	= htobe<uint64_t>(getCreateTime__(created));
 	pair->expires	= htobe<uint32_t>(expires);
-	pair->vallen	= htobe<uint16_t>(narrow<uint16_t>(val.size()));
-	pair->keylen	= htobe<uint16_t>(narrow<uint16_t>(key.size()));
+	pair->keylen	= htobe<uint16_t>(keylen);
+	pair->vallen	= htobe<uint16_t>(vallen);
 
 	// memcpy so we can switch to blobs later...
 	memcpy(& pair->buffer[0],		key.data(), key.size());

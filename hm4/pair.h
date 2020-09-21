@@ -19,10 +19,15 @@
 namespace hm4{
 	namespace PairConf{
 		constexpr size_t	ALIGN		= sizeof(void *);
-		constexpr uint16_t	MAX_KEY_MASK	= 0b0'0000'0011'1111'1111;	// 1023, MySQL is 1000
+
+		constexpr uint16_t	MAX_KEY_SIZE	= 0b0'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
+		constexpr uint32_t	MAX_VAL_SIZE	= 0b0'1111'1111'1111'1111'1111;
+		constexpr uint16_t	MAX_VAL_MASK	= 0b0'0000'1111'0000'0000'0000;
+		constexpr size_t	MAX_VAL_MASK_SH	= 4;
+
+		constexpr uint16_t	MAX_KEY_MASK	= MAX_KEY_SIZE;
+
 		constexpr uint16_t	MAX_KEY_MASK_BE	= htobe<uint16_t>(MAX_KEY_MASK);
-		constexpr uint16_t	MAX_KEY_SIZE	= MAX_KEY_MASK;			// 1023, MySQL is 1000
-		constexpr uint16_t	MAX_VAL_SIZE	= 0xFFFF;
 
 		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
@@ -32,7 +37,7 @@ namespace hm4{
 	struct Pair{
 		uint64_t	created;	// 8
 		uint32_t	expires;	// 4, 136 years, not that bad.
-		uint16_t	keylen;		// 2, 6 bits are  reserved for future versions
+		uint16_t	keylen;		// 2, 4 bits are used for vallen. 2 bits are reserved for future versions.
 		uint16_t	vallen;		// 2
 		char		buffer[2];	// dynamic, these are the two \0 terminators.
 
@@ -92,16 +97,14 @@ namespace hm4{
 				if (!src)
 					return nullptr;
 
-				Pair *pair = static_cast<Pair *>(
-						allocator.allocate(src->bytes())
-				);
+				void *pair = allocator.allocate(src->bytes());
 
 				if (!pair)
 					return nullptr;
 
 				memcpy(pair, src, src->bytes());
 
-				return pair;
+				return static_cast<Pair *>(pair);
 			}
 
 			template<class Allocator>
@@ -202,15 +205,14 @@ namespace hm4{
 
 		template<size_t start>
 		int cmpX(std::string_view const key) const noexcept{
-		//	assert(key.size() >= start);
-		//	assert(getKeyLen_() >= start);
+			if constexpr(start == 0){
+				return ::compare(getKey_(), getKeyLen_(), key.data(), key.size());
+			}else{
+			//	assert(key.size() >= start);
+			//	assert(getKeyLen_() >= start);
 
-			return ::compare(getKey_() + start, getKeyLen_() - start, key.data() + start, key.size() - start);
-		}
-
-		template<>
-		int cmpX<0>(std::string_view const key) const noexcept{
-			return ::compare(getKey_(), getKeyLen_(), key.data(), key.size());
+				return ::compare(getKey_() + start, getKeyLen_() - start, key.data() + start, key.size() - start);
+			}
 		}
 
 	public:
@@ -226,14 +228,13 @@ namespace hm4{
 
 		template<size_t start>
 		bool equalsX(std::string_view const key) const noexcept{
-		//	assert(key.size() >= start);
-		//	assert(getKeyLen_() >= start);
-			return ::equals(getKey_() + start, getKeyLen_() - start, key.data() + start, key.size() - start);
-		}
-
-		template<>
-		bool equalsX<0>(std::string_view const key) const noexcept{
-			return ::equals(getKey_(), getKeyLen_(), key.data(), key.size());
+			if constexpr(start == 0){
+				return ::equals(getKey_(), getKeyLen_(), key.data(), key.size());
+			}else{
+			//	assert(key.size() >= start);
+			//	assert(getKeyLen_() >= start);
+				return ::equals(getKey_() + start, getKeyLen_() - start, key.data() + start, key.size() - start);
+			}
 		}
 
 	public:
@@ -342,12 +343,19 @@ namespace hm4{
 			return & buffer[ getKeyLen_() + 1 ];
 		}
 
+		constexpr
 		size_t getKeyLen_() const noexcept{
 			return betoh<uint16_t>(keylen) & PairConf::MAX_KEY_MASK;
 		}
 
+		constexpr
 		size_t getValLen_() const noexcept{
-			return betoh<uint16_t>(vallen);
+			// if we do magic with betoh<>(PairConf::MAX_VAL_MASK),
+			// we will not know how much to shift
+
+			uint32_t const bits16 = betoh<uint16_t>(keylen) & PairConf::MAX_VAL_MASK;
+
+			return bits16 << PairConf::MAX_VAL_MASK_SH | betoh<uint16_t>(vallen);
 		}
 
 	private:
@@ -359,10 +367,12 @@ namespace hm4{
 
 	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
 
+#if 0
 	// not used
 	inline bool less____(const Pair *p1, const Pair *p2){
 		return p1->cmp(*p2) < 0;
 	}
+#endif
 
 	inline bool equals(const Pair *p1, const Pair *p2){
 		return p1->equals(*p2);
