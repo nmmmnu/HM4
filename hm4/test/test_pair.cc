@@ -54,7 +54,7 @@ namespace{
 	}
 
 	const Pair *raw_memory(){
-		static const char blob[] = {
+		static const uint8_t blob[] = {
 			0x50, 0x00, 0x00, 0x00,		// created, 2012-07-13 11:01:20
 			0x00, 0x00, 0x00, 0x00,		// milliseconds
 			0x00, 0x00, 0x00, 0x00,		// expires
