@@ -9,7 +9,7 @@ namespace DBAdapterFactory{
 	struct MutableBinLog{
 		using MemList		= hm4::SkipList;
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
-		using BinLogList	= hm4::BinLogList<MemList,BinLogger>;
+		using BinLogList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ true>;
 
 		using MutableBase_	= MutableBase<BinLogList, hm4::FlushList>;
 
