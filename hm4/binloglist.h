@@ -53,6 +53,9 @@ public:
 	}
 
 	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+		if (!newdata)
+			return this->end();
+
 		binlogger_(*newdata);
 
 		return list_->insert(std::move(newdata));

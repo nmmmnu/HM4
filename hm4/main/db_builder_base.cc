@@ -44,6 +44,37 @@ void listInsert(List &list, std::string_view const key, std::string_view const v
 }
 
 
+
+template <bool InsertIgnore, class List>
+void printStats(List &list, size_t const count){
+	auto const used = list.getAllocator().getUsedMemory();
+
+	if constexpr(InsertIgnore){
+		fmt::print(stderr,
+			"Processed {:15} records.\n",
+			count
+		);
+	}else if (used != std::numeric_limits<decltype(used)>::max()){
+		fmt::print(stderr,
+			"Processed {:15} records. "
+			"In memory {:15} records, {:15} bytes. "
+			"Allocator {:15} bytes.\n",
+			count,
+			list.size(), list.bytes(),
+			used
+		);
+	}else{
+		fmt::print(stderr,
+			"Processed {:15} records. "
+			"In memory {:15} records, {:15} bytes.\n",
+			count,
+			list.size(), list.bytes()
+		);
+	}
+}
+
+
+
 template <class List, class Reader, bool Base64, bool InsertIgnore>
 int listLoad(List &list, Reader &reader, size_t const process_step, std::bool_constant<Base64> base64, std::bool_constant<InsertIgnore> insertIgnore){
 	size_t i = 0;
@@ -64,34 +95,14 @@ int listLoad(List &list, Reader &reader, size_t const process_step, std::bool_co
 
 		++i;
 
-		if (i % process_step == 0){
-			auto const used = list.getAllocator().getUsedMemory();
-
-			if (used != std::numeric_limits<decltype(used)>::max()){
-				fmt::print(stderr,
-					"Processed {:15} records. "
-					"In memory {:15} records, {:15} bytes. "
-					"Allocator {:15} bytes.\n",
-					i,
-					list.size(), list.bytes(),
-					used
-				);
-			}else{
-				fmt::print(stderr,
-					"Processed {:15} records. "
-					"In memory {:15} records, {:15} bytes.\n",
-					i,
-					list.size(), list.bytes()
-				);
-			}
-		}
+		if (i % process_step == 0)
+			printStats<InsertIgnore>(list, i);
 	}
 
 	return 0;
 }
 
-template<class MyReader>
-int printUsage(const char *cmd){
+int printUsage(std::string_view const cmd, std::string_view const reader_name){
 	fmt::print(	"db_builder version {0}\n"
 			"\n"
 			"Usage:\n"
@@ -105,11 +116,16 @@ int printUsage(const char *cmd){
 			"\n",
 			hm4::version::str,
 			cmd,
-			MyReader::name(),
+			reader_name,
 			BUFFER_SIZE
 	);
 
 	return 10;
+}
+
+template<class MyReader>
+int printUsage(std::string_view const cmd){
+	return printUsage(cmd, MyReader::name());
 }
 
 template<class MyReader, class List, bool Base64, bool InsertIgnore>
