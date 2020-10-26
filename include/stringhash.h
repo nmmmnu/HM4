@@ -12,21 +12,21 @@
 
 template<typename T>
 class StringHash{
-	constexpr static auto SIZE = sizeof(T);
+public:
+	constexpr static auto N = sizeof(T);
 
-	constexpr static auto MASK = htobe( T{ 0xFF } << (sizeof(T) - 1) * 8 );
-
+private:
 	template<bool KnownSize>
 	static T createBE__(const char *src, size_t size = 0) noexcept{
 		union{
-			char	s[SIZE];
+			char	s[N];
 			T	u = 0;
 		};
 
 		if constexpr(KnownSize)
-			memcpy(s, src, size);
+			memcpy(s, src, std::min(N, size));
 		else
-			strncpy(s, src, SIZE);
+			strncpy(s, src, N);
 
 		return u;
 	}
@@ -42,6 +42,8 @@ class StringHash{
 
 	template<class Result>
 	static std::pair<bool, Result> sizeCheck__(T const a, T const b, Result const result) noexcept{
+		constexpr auto MASK = htobe( T{ 0xFF } << (sizeof(T) - 1) * 8 );
+
 		bool const size_overflow = (a | b) & MASK;
 
 		return { !size_overflow, result };
@@ -53,7 +55,7 @@ public:
 	}
 
 	static T create(const char *src, size_t const size) noexcept{
-		return create__<true>(src, std::min(SIZE, size));
+		return create__<true>(src, size);
 	}
 
 	static T create(std::string_view const s) noexcept{
@@ -65,7 +67,7 @@ public:
 	}
 
 	static T createBE(const char *src, size_t const size) noexcept{
-		return createBE__<true>(src, std::min(SIZE, size));
+		return createBE__<true>(src, size);
 	}
 
 	static T createBE(std::string_view const s) noexcept{

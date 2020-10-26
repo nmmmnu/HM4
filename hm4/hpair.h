@@ -11,7 +11,7 @@ namespace hm4{
 		using HKey		= uint64_t;
 		using SS		= StringHash<HKey>;
 
-		constexpr auto N	= sizeof(HKey);
+		constexpr auto N	= SS::N;
 
 		inline int cmp(HKey const src_hkey, Pair const &src_pair, HKey const hkey, std::string_view const key){
 			auto [ ok, result ] = SS::compare(src_hkey, hkey);
@@ -20,7 +20,7 @@ namespace hm4{
 			// if OK is false, this means, key.size() >= HPair::N  &&  src_pair.getKey().size() <= HPair::N,
 			// so we can skip comparing first HPair::N characters
 
-			return ok ? result : src_pair.cmpX<HPair::N>(key);
+			return ok ? result : src_pair.cmpX<N>(key);
 		}
 
 		inline auto toStringView(HKey const &hkey){
