@@ -93,7 +93,8 @@ namespace{
 			return { false, list.ra_end() };
 		}
 
-		auto const listPos = betoh<uint64_t>(it->pos);
+		// Return type fix clang error on MacOS
+		DiskList::size_type const listPos = betoh<uint64_t>(it->pos);
 
 		if ( listPos >= list.size() ){
 			log__("Hotline corruption detected. Advice Hotline removal.");

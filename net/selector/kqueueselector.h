@@ -5,6 +5,7 @@
 #include "hidden_pointer_iterator.h"
 
 #include <vector>
+#include <string_view>
 
 struct kevent;
 
