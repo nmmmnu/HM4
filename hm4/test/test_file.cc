@@ -14,14 +14,17 @@
 
 constexpr size_t ARENA_SIZE = 1ULL * 1024 * 1024 * 1024;
 
-using Allocator_s0 = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-using Allocator_s1 = MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
-using Allocator_s  = Allocator_s0;
-using Allocator_a  = MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
+using Allocator_std0	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_std1	= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+using Allocator_std	= Allocator_std0;
+using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
+template<size_t Size>
+using Allocator_arenaSt	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocatorStatic<Size> >;
 
 
-Allocator_s allocator_s;
-Allocator_a allocator_a{ ARENA_SIZE };
+Allocator_std			allocator_std;
+//Allocator_arena		allocator_arena{ ARENA_SIZE };
+Allocator_arenaSt<ARENA_SIZE>	allocator_arena;
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
 
@@ -67,9 +70,10 @@ namespace{
 
 			if (i % PROCESS_STEP == 0){
 				fmt::print(
-					"Processed {:10} records, {:10} bytes.\n",
+					"Processed {:10} records, {:10} bytes, {:10} allocator.\n",
 					i,
-					list.bytes()
+					list.bytes(),
+					list.getAllocator().getUsedMemory()
 				);
 			}
 		}
@@ -128,13 +132,13 @@ namespace {
 
 		switch(type){
 		default:
-		case 's':	return listSearchProcess(hm4::SkipList	 { allocator_s }, reader, key, it);
-		case 'v':	return listSearchProcess(hm4::VectorList { allocator_s }, reader, key, it);
-		case 'l':	return listSearchProcess(hm4::LinkList	 { allocator_s }, reader, key, it);
+		case 's':	return listSearchProcess(hm4::SkipList	 { allocator_std   }, reader, key, it);
+		case 'v':	return listSearchProcess(hm4::VectorList { allocator_std   }, reader, key, it);
+		case 'l':	return listSearchProcess(hm4::LinkList	 { allocator_std   }, reader, key, it);
 
-		case 'S':	return listSearchProcess(hm4::SkipList	 { allocator_a }, reader, key, it);
-		case 'V':	return listSearchProcess(hm4::VectorList { allocator_a }, reader, key, it);
-		case 'L':	return listSearchProcess(hm4::LinkList	 { allocator_a }, reader, key, it);
+		case 'S':	return listSearchProcess(hm4::SkipList	 { allocator_arena }, reader, key, it);
+		case 'V':	return listSearchProcess(hm4::VectorList { allocator_arena }, reader, key, it);
+		case 'L':	return listSearchProcess(hm4::LinkList	 { allocator_arena }, reader, key, it);
 		}
 	}
 

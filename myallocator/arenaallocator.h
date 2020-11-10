@@ -1,28 +1,29 @@
 #ifndef MY_ARENA_ALLOCATOR
 #define MY_ARENA_ALLOCATOR
 
-#include  <cstddef>
-#include  <memory>
+#include <memory>
 
 namespace MyAllocator{
 
-	struct ArenaAllocator{
+	struct ArenaAllocatorRaw{
 		constexpr static const char *getName(){
 			return "ArenaAllocator";
 		}
 
-		ArenaAllocator(std::size_t const maxsize) :
-						maxsize(maxsize),
-						data( allocate__(maxsize) ){}
+		ArenaAllocatorRaw(std::byte *data, std::size_t size) :
+						data(data),
+						size(size){}
 
-		template<std::size_t Align = sizeof(void *)>
+		constexpr static std::size_t DEFAULT_ALIGN = sizeof(void *);
+
+		template<std::size_t Align = DEFAULT_ALIGN>
 		void *allocate(std::size_t const size) noexcept{
 			pos = align_(pos, Align);
 
-			if (pos + size > maxsize)
+			if (pos + size > this->size)
 				return nullptr;
 
-			std::byte *result = data.get() + pos;
+			std::byte *result = data + pos;
 
 			pos += size;
 
@@ -43,7 +44,7 @@ namespace MyAllocator{
 		}
 
 		std::size_t getFreeMemory() const noexcept{
-			return maxsize - pos;
+			return size - pos;
 		}
 
 		std::size_t getUsedMemory() const noexcept{
@@ -63,20 +64,41 @@ namespace MyAllocator{
 
 	private:
 		// http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator
-		constexpr static std::size_t align_(std::size_t n, std::size_t align = sizeof(void *)) {
+		constexpr static std::size_t align_(std::size_t n, std::size_t align = DEFAULT_ALIGN) {
 			return (n + align - 1) & ~(align - 1);
 		}
 
-		static std::byte *allocate__(std::size_t const maxsize){
-			return static_cast<std::byte *>(
-				::operator new(maxsize)
-			);
-		}
-
 	private:
-		std::size_t			pos	= 0;
-		std::size_t			maxsize;
-		std::unique_ptr<std::byte>	data;
+		std::byte	*data;
+		std::size_t	size;
+		std::size_t	pos	= 0;
+	};
+
+	namespace ArenaAllocatorImpl{
+		struct DynamicBuffer{
+			DynamicBuffer(std::size_t size) : buffer{ std::make_unique<std::byte[]>(size) }{}
+
+			std::unique_ptr<std::byte[]> buffer;
+		};
+
+		template<std::size_t Size>
+		struct StaticBuffer{
+			std::byte buffer[Size];
+		};
+	} // ArenaAllocatorImpl
+
+	struct ArenaAllocator : private ArenaAllocatorImpl::DynamicBuffer, public ArenaAllocatorRaw{
+		ArenaAllocator(std::size_t size) :
+					DynamicBuffer(size),
+					ArenaAllocatorRaw(buffer.get(), size){}
+	};
+
+	template<std::size_t Size>
+	struct ArenaAllocatorStatic : private ArenaAllocatorImpl::StaticBuffer<Size>, public ArenaAllocatorRaw{
+		using ArenaAllocatorImpl::StaticBuffer<Size>::buffer;
+
+		ArenaAllocatorStatic() :
+					ArenaAllocatorRaw(buffer, Size){}
 	};
 
 } // namespace MyAllocator
