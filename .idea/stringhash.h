@@ -4,11 +4,13 @@
 #include "myendian.h"
 
 #include <cstring>
+#include <cstdio>
 
 #include <string_view>
 #include <algorithm>
 #include <utility>
 #include <type_traits>
+#include <iostream>
 
 template<typename T>
 class StringHash{
@@ -18,7 +20,8 @@ public:
 private:
 	enum class CreateType{
 		CSTR,
-		SIZE
+		SIZE,
+		ALIGNED
 	};
 
 	template<bool BigEndian, CreateType CT>
@@ -28,11 +31,28 @@ private:
 			T	u = 0;
 		};
 
-		if constexpr(CT == CreateType::CSTR)
-			strncpy(s, src, N);
+		/* switch constexpr */ {
+			if constexpr(CT == CreateType::CSTR)
+				strncpy(s, src, N);
 
-		if constexpr(CT == CreateType::SIZE)
-			memcpy(s, src, std::min(N, size));
+			if constexpr(CT == CreateType::SIZE)
+				memcpy(s, src, std::min(N, size));
+
+			if constexpr(CT == CreateType::ALIGNED){
+				// string is BE, so mask must be BE as well.
+				auto const mask_ = ~ T{ 0 } >> (size * 8);	// FFFFFF -> 00FFFF
+			//	std::cout << mask_ << '\n';
+				auto const mask  = betoh( ~(mask_) );	// 00FFFF -> FF0000
+
+				printf("%16x\n", mask_);
+				printf("%16x\n", ~mask_);
+				printf("%16x\n", ~0u);
+
+				u = *reinterpret_cast<const T *>(src) & mask;
+
+				printf("%s | %zu | %8x | %8x | %zu \n", src, size, mask, u, N );
+			}
+		}
 
 		if constexpr(BigEndian == false)
 			return betoh(u);
@@ -63,6 +83,11 @@ public:
 	template<bool BigEndian = false>
 	static T create(std::string_view const s) noexcept{
 		return create<BigEndian>(s.data(), s.size());
+	}
+
+	template<bool BigEndian = false>
+	static T createAligned(const char *src, size_t const size) noexcept{
+		return create__<BigEndian, CreateType::ALIGNED>(src, size);
 	}
 
 	static std::pair<bool, int> compare(T const a, T const b) noexcept{
