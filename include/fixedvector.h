@@ -32,8 +32,8 @@ public:
 	using const_iterator	= const T*;
 
 private:
-	size_type	length	= 0;
-	T		buffer[Size]{};
+	size_type	size_	= 0;
+	T		data_[Size]{};
 
 public:
 	// STANDARD C-TORS
@@ -62,13 +62,13 @@ public:
 
 	constexpr
 	void clear() noexcept{
-		length = 0;
+		size_ = 0;
 	}
 
 	// COMPARISSON
 
 	constexpr bool operator==(const FixedVector &other) const noexcept{
-		if (length != other.length)
+		if (size_ != other.size_)
 			return false;
 
 		auto first = other.begin();
@@ -83,8 +83,7 @@ public:
 		return true;
 	}
 
-	template<typename CONTAINER>
-	constexpr bool operator!=(const CONTAINER &other) const noexcept{
+	constexpr bool operator!=(const FixedVector &other) const noexcept{
 		return ! operator==(other);
 	}
 
@@ -92,22 +91,22 @@ public:
 
 	constexpr
 	iterator begin() noexcept{
-		return buffer;
+		return data_;
 	}
 
 	constexpr
 	iterator end() noexcept{
-		return buffer + length;
+		return data_ + size_;
 	}
 
 	// CONST ITERATORS
 
 	constexpr const_iterator begin() const noexcept{
-		return buffer;
+		return data_;
 	}
 
 	constexpr const_iterator end() const noexcept{
-		return buffer + length;
+		return data_ + size_;
 	}
 
 	// C++11 CONST ITERATORS
@@ -123,7 +122,7 @@ public:
 	// Size
 
 	constexpr size_type size() const noexcept{
-		return length;
+		return size_;
 	}
 
 	constexpr bool empty() const noexcept{
@@ -144,11 +143,11 @@ public:
 
 	constexpr
 	value_type *data() noexcept{
-		return buffer;
+		return data_;
 	}
 
 	constexpr const value_type *data() const noexcept{
-		return buffer;
+		return data_;
 	}
 
 	// ACCESS WITH RANGE CHECK
@@ -156,12 +155,12 @@ public:
 	constexpr
 	value_type &at(size_type const index){
 		validateIndex_(index);
-		return buffer[index];
+		return data_[index];
 	}
 
 	constexpr const value_type &at(size_type const index) const{
 		validateIndex_(index);
-		return buffer[index];
+		return data_[index];
 	}
 
 	// ACCESS DIRECTLY
@@ -169,12 +168,12 @@ public:
 	constexpr
 	value_type &operator[](size_type const index) noexcept{
 		// see [1] behavior is undefined
-		return buffer[index];
+		return data_[index];
 	}
 
 	constexpr const value_type &operator[](size_type const index) const noexcept{
 		// see [1] behavior is undefined
-		return buffer[index];
+		return data_[index];
 	}
 
 	// FRONT
@@ -182,12 +181,12 @@ public:
 	constexpr
 	value_type &front() noexcept{
 		// see [1] behavior is undefined
-		return buffer[0];
+		return data_[0];
 	}
 
 	constexpr const value_type &front() const noexcept{
 		// see [1] behavior is undefined
-		return buffer[0];
+		return data_[0];
 	}
 
 	// BACK
@@ -195,12 +194,12 @@ public:
 	constexpr
 	value_type &back() noexcept{
 		// see [1] behavior is undefined
-		return buffer[length - 1];
+		return data_[size_ - 1];
 	}
 
 	constexpr const value_type &back() const noexcept{
 		// see [1] behavior is undefined
-		return buffer[length - 1];
+		return data_[size_ - 1];
 	}
 
 	// MUTATIONS
@@ -218,17 +217,17 @@ public:
 	template<typename... Args>
 	constexpr
 	void emplace_back(Args&&... args){
-		if (length == Size){
+		if (size_ == Size){
 			throw std::bad_alloc{};
 		}
 
-		buffer[length++] = value_type(std::forward<Args>(args)...);
+		data_[size_++] = value_type(std::forward<Args>(args)...);
 	}
 
 	constexpr
 	void pop_back() noexcept{
 		// see [1]
-		--length;
+		--size_;
 	}
 
 public:
@@ -255,7 +254,7 @@ public:
 private:
 	constexpr
 	void validateIndex_(size_type const index) const{
-		if (index >= length){
+		if (index >= size_){
 			throw std::out_of_range("Out of Range");
 		}
 	}
