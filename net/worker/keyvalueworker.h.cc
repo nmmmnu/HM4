@@ -47,43 +47,13 @@ public:
 					buffer_(buffer){}
 
 public:
-	WorkerStatus operator()(){
-		using Status  = protocol::ProtocolStatus;
-
-		// PASS
-
-		if (buffer_.size() == 0)
-			return WorkerStatus::PASS;
-
-		const Status status = protocol_( std::string_view{ buffer_.data(), buffer_.size() } );
-
-		if (status == Status::BUFFER_NOT_READ)
-			return WorkerStatus::PASS;
-
-		// ERROR
-
-		buffer_.clear();
-
-		if (status == Status::ERROR)
-			return err_InternalError_();
-
-		// fetch command
-
-		const auto &str = protocol_.getParams().front();
-
-		const auto &cmd = RedisCommands::get(str);
-
-		// EXEC
-		return executeCommand_(cmd);
-	}
-
-private:
-	WorkerStatus executeCommand_(const Command cmd){
+	WorkerStatus operator()(const Command cmd){
 		using mutable_type = std::integral_constant<bool, DBAdapter::MUTABLE>;
 
 		return executeCommand_(cmd, mutable_type{});
 	}
 
+private:
 	WorkerStatus executeCommand_(const Command cmd, std::false_type){
 		switch(cmd){
 
@@ -135,9 +105,9 @@ private:
 		return err_String_("Not Implemented");
 	}
 
-	WorkerStatus err_InternalError_(){
-		return err_String_("Internal Error");
-	}
+//	WorkerStatus err_InternalError_(){
+//		return err_String_("Internal Error");
+//	}
 
 private:
 	// SYSTEM
@@ -506,11 +476,40 @@ private:
 
 template<class Protocol, class DBAdapter>
 WorkerStatus KeyValueWorker<Protocol, DBAdapter>::operator()(IOBuffer &buffer){
+	using Status  = protocol::ProtocolStatus;
+
+	// PASS
+
+	if (buffer.size() == 0)
+		return WorkerStatus::PASS;
+
+	const Status status = protocol_( std::string_view{ buffer } );
+
+	if (status == Status::BUFFER_NOT_READ)
+		return WorkerStatus::PASS;
+
+	// ERROR
+
+	buffer.clear();
+
+	if (status == Status::ERROR){
+		protocol_.response_error(buffer, "Internal Error");
+		return WorkerStatus::WRITE;
+	}
+
+	// fetch command
+
+	const auto &str = protocol_.getParams().front();
+
+	const auto &cmd = RedisCommands::get(str);
+
+	// EXEC
+
 	using MyKeyValueWorkerProcessor = KeyValueWorkerProcessor<Protocol, DBAdapter>;
 
 	MyKeyValueWorkerProcessor processor{ protocol_, db_, buffer };
 
-	return processor();
+	return processor(cmd);
 }
 
 

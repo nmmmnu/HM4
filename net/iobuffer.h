@@ -35,6 +35,10 @@ public:
 		return buffer_.size() - head_;
 	}
 
+	explicit operator std::string_view(){
+		return std::string_view{ data(), size() };
+	}
+
 	// ==================================
 
 	bool push(const char c){
