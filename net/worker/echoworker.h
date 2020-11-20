@@ -2,6 +2,7 @@
 #define _ECHO_WORKER_H
 
 #include "workerdefs.h"
+#include "iobuffer.h"
 
 #include "mystring.h"
 
@@ -12,8 +13,7 @@ namespace worker{
 
 class EchoWorker{
 public:
-	template<class CONNECTION>
-	WorkerStatus operator()(CONNECTION &buffer);
+	WorkerStatus operator()(IOBuffer &buffer);
 
 private:
 	constexpr static std::string_view cmd_hello	= "hello"	"\r\n";

@@ -26,7 +26,7 @@ namespace worker_impl_{
 } // worker_impl_
 
 
-template<class PROTOCOL, class DB_ADAPTER, class CONNECTION>
+template<class Protocol, class DBAdapter>
 class KeyValueWorkerProcessor{
 public:
 	using Command = RedisCommands::Command;
@@ -41,7 +41,7 @@ public:
 	using VectorGETX = FixedVector<std::string_view,Size>;
 
 public:
-	KeyValueWorkerProcessor(PROTOCOL &protocol, DB_ADAPTER &db, CONNECTION &buffer) :
+	KeyValueWorkerProcessor(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) :
 					protocol_(protocol),
 					db_(db),
 					buffer_(buffer){}
@@ -79,7 +79,7 @@ public:
 
 private:
 	WorkerStatus executeCommand_(const Command cmd){
-		using mutable_type = std::integral_constant<bool, DB_ADAPTER::MUTABLE>;
+		using mutable_type = std::integral_constant<bool, DBAdapter::MUTABLE>;
 
 		return executeCommand_(cmd, mutable_type{});
 	}
@@ -168,11 +168,11 @@ private:
 	}
 
 	WorkerStatus do_save(){
-		return do_save_(&DB_ADAPTER::save);
+		return do_save_(&DBAdapter::save);
 	}
 
 	WorkerStatus do_reload(){
-		return do_save_(&DB_ADAPTER::reload);
+		return do_save_(&DBAdapter::reload);
 	}
 
 	// IMMUTABLE
@@ -493,9 +493,9 @@ private:
 	}
 
 private:
-	PROTOCOL	&protocol_;
-	DB_ADAPTER	&db_;
-	CONNECTION	&buffer_;
+	Protocol	&protocol_;
+	DBAdapter	&db_;
+	IOBuffer	&buffer_;
 };
 
 
@@ -504,10 +504,9 @@ private:
 
 
 
-template<class PROTOCOL, class DB_ADAPTER>
-template<class CONNECTION>
-WorkerStatus KeyValueWorker<PROTOCOL, DB_ADAPTER>::operator()(CONNECTION &buffer){
-	using MyKeyValueWorkerProcessor = KeyValueWorkerProcessor<PROTOCOL, DB_ADAPTER, CONNECTION>;
+template<class Protocol, class DBAdapter>
+WorkerStatus KeyValueWorker<Protocol, DBAdapter>::operator()(IOBuffer &buffer){
+	using MyKeyValueWorkerProcessor = KeyValueWorkerProcessor<Protocol, DBAdapter>;
 
 	MyKeyValueWorkerProcessor processor{ protocol_, db_, buffer };
 
