@@ -3,8 +3,7 @@ namespace net{
 namespace worker{
 
 
-template<class CONNECTION>
-WorkerStatus EchoWorker::operator()(CONNECTION &buffer){
+WorkerStatus EchoWorker::operator()(IOBuffer &buffer){
 	if (buffer.size() == 0)
 		return WorkerStatus::PASS;
 

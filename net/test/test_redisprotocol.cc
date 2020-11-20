@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-template <class PROTOCOL_STATUS>
-const char *test_status(const PROTOCOL_STATUS status){
-	using Status = PROTOCOL_STATUS;
+template <class ProtocolStatus>
+const char *test_status(const ProtocolStatus status){
+	using Status = ProtocolStatus;
 
 	switch(status){
 	case Status::OK			: return "OK"		;
@@ -14,9 +14,9 @@ const char *test_status(const PROTOCOL_STATUS status){
 	}
 }
 
-template <class PROTOCOL>
-void test(PROTOCOL &p, const char *data){
-	using Status = typename PROTOCOL::Status;
+template <class Protocol>
+void test(Protocol &p, const char *data){
+	using Status = typename Protocol::Status;
 
 	const Status status = p(data);
 
