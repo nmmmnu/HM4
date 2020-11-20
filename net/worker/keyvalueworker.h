@@ -10,22 +10,45 @@
 #include "keyvaluecommands/cmd_counter.h"	// INCR, INCRBY, DECR, DECRBY
 
 #include "protocol/protocoldefs.h"
-#include "keyvaluecommands.h"
 
+#include <unordered_map>
 
-
-namespace net{
-namespace worker{
-
-
-
-	template<class Protocol, class DBAdapter, bool Mutable>
-	struct KeyValueWorkerExecCommand;
+namespace net::worker{
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct KeyValueWorkerExecCommand<Protocol, DBAdapter, false>{
+	struct KeyValueWorkerCommandMapBase{
+		auto const &operator*() const{
+			return map;
+		}
+
+		const auto *operator->() const{
+			return &map;
+		}
+
+	protected:
+		template<class T>
+		void register_(T &cmd){
+			for(auto &str : T::cmd)
+				map[str] = &cmd;
+		}
+
+	private:
+		using CommandMap = std::unordered_map<std::string_view, cmd_base<Protocol, DBAdapter> *>;
+
+		CommandMap map;
+	};
+
+
+
+	template<class Protocol, class DBAdapter, bool Mutable>
+	struct KeyValueWorkerCommandMap;
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct KeyValueWorkerCommandMap<Protocol, DBAdapter, false> : KeyValueWorkerCommandMapBase<Protocol, DBAdapter>{
 		cmd_EXIT	<Protocol, DBAdapter>	exit		;
 		cmd_SHUTDOWN	<Protocol, DBAdapter>	shutdown	;
 
@@ -41,41 +64,51 @@ namespace worker{
 		cmd_MIN		<Protocol, DBAdapter>	min		;
 		cmd_MAX		<Protocol, DBAdapter>	max		;
 
-		using Command = RedisCommands::Command;
+		KeyValueWorkerCommandMap(){
+			auto R = [this](auto &x){
+				this->register_(x);
+			};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer, const Command cmd);
+			R(exit		);
+			R(shutdown	);
+
+			R(info		);
+			R(save		);
+			R(reload	);
+
+			R(get		);
+			R(getx		);
+
+			R(count		);
+			R(sum		);
+			R(min		);
+			R(max		);
+		}
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct KeyValueWorkerExecCommand<Protocol, DBAdapter, true>{
-		cmd_EXIT	<Protocol, DBAdapter>	exit		;
-		cmd_SHUTDOWN	<Protocol, DBAdapter>	shutdown	;
-
-		cmd_INFO	<Protocol, DBAdapter>	info		;
-		cmd_SAVE	<Protocol, DBAdapter>	save		;
-		cmd_RELOAD	<Protocol, DBAdapter>	reload		;
-
-		cmd_GET		<Protocol, DBAdapter>	get		;
-		cmd_GETX	<Protocol, DBAdapter>	getx		;
-
-		cmd_COUNT	<Protocol, DBAdapter>	count		;
-		cmd_SUM		<Protocol, DBAdapter>	sum		;
-		cmd_MIN		<Protocol, DBAdapter>	min		;
-		cmd_MAX		<Protocol, DBAdapter>	max		;
-
+	struct KeyValueWorkerCommandMap<Protocol, DBAdapter, true> : KeyValueWorkerCommandMap<Protocol, DBAdapter, false>{
 		cmd_SET		<Protocol, DBAdapter>	set		;
 		cmd_SETEX	<Protocol, DBAdapter>	setex		;
 		cmd_DEL		<Protocol, DBAdapter>	del		;
 		cmd_GETSET	<Protocol, DBAdapter>	getset		;
-
 		cmd_INCR	<Protocol, DBAdapter>	incr		;
 		cmd_DECR	<Protocol, DBAdapter>	decr		;
 
-		using Command = RedisCommands::Command;
+		KeyValueWorkerCommandMap(){
+			auto R = [this](auto &x){
+				this->register_(x);
+			};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer, const Command cmd);
+			R(set		);
+			R(setex		);
+			R(del		);
+			R(getset	);
+			R(incr		);
+			R(decr		);
+		}
 	};
 
 
@@ -85,8 +118,7 @@ namespace worker{
 
 
 	template<class Protocol, class DBAdapter>
-	class KeyValueWorker{
-	public:
+	struct KeyValueWorker{
 		KeyValueWorker(DBAdapter &db) : db_(db){}
 
 		WorkerStatus operator()(IOBuffer &buffer);
@@ -94,15 +126,57 @@ namespace worker{
 	private:
 		Protocol	protocol_;
 		DBAdapter	&db_;
+
+		KeyValueWorkerCommandMap<Protocol, DBAdapter, DBAdapter::MUTABLE>	map_;
 	};
 
 
-} // namespace worker
+
+	// ==================================
+
+
+
+	template<class Protocol, class DBAdapter>
+	WorkerStatus KeyValueWorker<Protocol, DBAdapter>::operator()(IOBuffer &buffer){
+		using Status  = protocol::ProtocolStatus;
+
+		// PASS
+
+		if (buffer.size() == 0)
+			return WorkerStatus::PASS;
+
+		const Status status = protocol_( std::string_view{ buffer } );
+
+		if (status == Status::BUFFER_NOT_READ)
+			return WorkerStatus::PASS;
+
+		// ERROR
+
+		buffer.clear();
+
+		if (status == Status::ERROR)
+			return error::InternalError(protocol_, buffer);
+
+		// FETCH command
+
+		const auto &str = protocol_.getParams().front();
+
+		auto it = map_->find(str);
+
+		if (it == std::end(*map_))
+			return error::NotImplemented(protocol_, buffer);
+
+		auto &command = *it->second;
+
+		// EXEC command
+
+		return command(protocol_, db_, buffer);
+	}
+
+
+
 } // namespace
 
 
-// ==================================
-
-#include "keyvalueworker.h.cc"
 
 #endif

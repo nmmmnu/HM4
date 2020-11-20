@@ -2,14 +2,17 @@
 
 
 
-namespace net{
-namespace worker{
+namespace net::worker{
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_INFO : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"info",	"INFO"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			const auto &p = protocol.getParams();
 
 			if (p.size() != 1)
@@ -23,6 +26,6 @@ namespace worker{
 
 
 
-}
-}
+} // namespace
+
 

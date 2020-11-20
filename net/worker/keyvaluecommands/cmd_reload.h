@@ -2,14 +2,18 @@
 
 
 
-namespace net{
-namespace worker{
+namespace net::worker{
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SAVE : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"save",		"SAVE",
+			"bgsave",	"BGSAVE"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			const auto &p = protocol.getParams();
 
 			if (p.size() != 1)
@@ -25,7 +29,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_RELOAD : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"reload",
+			"RELOAD"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			const auto &p = protocol.getParams();
 
 			if (p.size() != 1)
@@ -41,6 +50,6 @@ namespace worker{
 
 
 
-}
-}
+} // namespace
+
 

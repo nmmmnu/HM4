@@ -6,8 +6,7 @@
 
 
 
-namespace net{
-namespace worker{
+namespace net::worker{
 
 	namespace acumulator_impl_{
 
@@ -98,8 +97,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_GETX : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view cmd[] = {
+			"getx",
+			"GETX"
+		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulator_impl_;
 
 			AccumulatorVectorNew accumulator(size);
@@ -138,15 +141,18 @@ namespace worker{
 				return data;
 			}
 		};
-
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_COUNT : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view cmd[] = {
+			"count",
+			"COUNT"
+		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulator_impl_;
 
 			using T = int64_t;
@@ -174,8 +180,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SUM : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view cmd[] = {
+			"sum",
+			"SUM"
+		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulator_impl_;
 
 			using T = int64_t;
@@ -203,8 +213,11 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_MIN : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view cmd[] = {
+			"min",	"MIN"
+		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulator_impl_;
 
 			using T = int64_t;
@@ -235,8 +248,11 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_MAX : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view cmd[] = {
+			"max",	"MAX"
+		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulator_impl_;
 
 			using T = int64_t;
@@ -265,6 +281,5 @@ namespace worker{
 
 
 
-}
-}
+} // namespace
 

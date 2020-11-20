@@ -2,14 +2,17 @@
 
 
 
-namespace net{
-namespace worker{
+namespace net::worker{
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SET : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"set",	"SET"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			const auto &p = protocol.getParams();
 
 			if (p.size() != 3 && p.size() != 4)
@@ -34,7 +37,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SETEX : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"setex",
+			"SETEX"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			const auto &p = protocol.getParams();
 
 			if (p.size() != 4)
@@ -59,7 +67,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_DEL : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"del",
+			"DEL"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			const auto &p = protocol.getParams();
 
 			if (p.size() != 2)
@@ -80,7 +93,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_GETSET : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"getset",
+			"GETSET"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			const auto &p = protocol.getParams();
 
 			if (p.size() != 3)
@@ -111,6 +129,6 @@ namespace worker{
 
 
 
-}
-}
+} // namespace
+
 

@@ -3,8 +3,7 @@
 
 
 
-namespace net{
-namespace worker{
+namespace net::worker{
 
 
 	namespace counter_impl_{
@@ -45,7 +44,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_INCR : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"incr",		"INCR",
+			"incrby",	"INCRBY"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace counter_impl_;
 
 			return do_incr_decr<+1>(protocol, db, buffer);
@@ -56,7 +60,12 @@ namespace worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_DECR : cmd_base<Protocol, DBAdapter>{
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) final{
+		constexpr inline static std::string_view cmd[] = {
+			"decr",		"DECR",
+			"decrby",	"DECRBY"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace counter_impl_;
 
 			return do_incr_decr<-1>(protocol, db, buffer);
@@ -65,6 +74,5 @@ namespace worker{
 
 
 
-}
-}
+} // namespace
 
