@@ -8,6 +8,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SAVE : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "save";
 		constexpr inline static std::string_view cmd[] = {
 			"save",		"SAVE",
 			"bgsave",	"BGSAVE"
@@ -29,6 +30,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_RELOAD : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "reload";
 		constexpr inline static std::string_view cmd[] = {
 			"reload",
 			"RELOAD"

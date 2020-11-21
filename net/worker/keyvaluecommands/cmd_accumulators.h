@@ -97,6 +97,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_GETX : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "getx";
 		constexpr inline static std::string_view cmd[] = {
 			"getx",
 			"GETX"
@@ -147,6 +148,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_COUNT : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "count";
 		constexpr inline static std::string_view cmd[] = {
 			"count",
 			"COUNT"
@@ -180,6 +182,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SUM : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "sum";
 		constexpr inline static std::string_view cmd[] = {
 			"sum",
 			"SUM"
@@ -213,6 +216,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_MIN : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "min";
 		constexpr inline static std::string_view cmd[] = {
 			"min",	"MIN"
 		};
@@ -248,6 +252,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_MAX : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "max";
 		constexpr inline static std::string_view cmd[] = {
 			"max",	"MAX"
 		};

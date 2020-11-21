@@ -8,6 +8,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_GET : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "get";
 		constexpr inline static std::string_view cmd[] = {
 			"get",	"GET"
 		};

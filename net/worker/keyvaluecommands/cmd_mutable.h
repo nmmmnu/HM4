@@ -8,6 +8,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SET : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "set";
 		constexpr inline static std::string_view cmd[] = {
 			"set",	"SET"
 		};
@@ -37,6 +38,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_SETEX : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "setex";
 		constexpr inline static std::string_view cmd[] = {
 			"setex",
 			"SETEX"
@@ -67,6 +69,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_DEL : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "del";
 		constexpr inline static std::string_view cmd[] = {
 			"del",
 			"DEL"
@@ -93,6 +96,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_GETSET : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "getset";
 		constexpr inline static std::string_view cmd[] = {
 			"getset",
 			"GETSET"

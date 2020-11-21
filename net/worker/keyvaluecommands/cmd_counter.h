@@ -44,6 +44,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_INCR : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "incr";
 		constexpr inline static std::string_view cmd[] = {
 			"incr",		"INCR",
 			"incrby",	"INCRBY"
@@ -60,6 +61,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct cmd_DECR : cmd_base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name = "decr";
 		constexpr inline static std::string_view cmd[] = {
 			"decr",		"DECR",
 			"decrby",	"DECRBY"

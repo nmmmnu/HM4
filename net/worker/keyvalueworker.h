@@ -11,103 +11,99 @@
 
 #include "protocol/protocoldefs.h"
 
+#include <memory>
 #include <unordered_map>
+
+#include "logger.h"
 
 namespace net::worker{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct KeyValueWorkerCommandMapBase{
-		auto const &operator*() const{
-			return map;
-		}
-
-		const auto *operator->() const{
-			return &map;
-		}
-
-	protected:
-		template<class T>
-		void register_(T &cmd){
-			for(auto &str : T::cmd)
-				map[str] = &cmd;
-		}
-
-	private:
-		using CommandMap = std::unordered_map<std::string_view, cmd_base<Protocol, DBAdapter> *>;
-
-		CommandMap map;
-	};
-
-
-
 	template<class Protocol, class DBAdapter, bool Mutable>
-	struct KeyValueWorkerCommandMap;
-
-
+	struct KeyValueWorkerCommandStorage;
 
 	template<class Protocol, class DBAdapter>
-	struct KeyValueWorkerCommandMap<Protocol, DBAdapter, false> : KeyValueWorkerCommandMapBase<Protocol, DBAdapter>{
-		cmd_EXIT	<Protocol, DBAdapter>	exit		;
-		cmd_SHUTDOWN	<Protocol, DBAdapter>	shutdown	;
+	struct KeyValueWorkerCommandStorage<Protocol, DBAdapter, false>{
+		cmd_EXIT	<Protocol, DBAdapter> exit	;
+		cmd_SHUTDOWN	<Protocol, DBAdapter> shutdown	;
+		cmd_INFO	<Protocol, DBAdapter> info	;
+		cmd_SAVE	<Protocol, DBAdapter> save	;
+		cmd_RELOAD	<Protocol, DBAdapter> reload	;
+		cmd_GET		<Protocol, DBAdapter> get	;
+		cmd_GETX	<Protocol, DBAdapter> getx	;
+		cmd_COUNT	<Protocol, DBAdapter> count	;
+		cmd_SUM		<Protocol, DBAdapter> sum	;
+		cmd_MIN		<Protocol, DBAdapter> min	;
+		cmd_MAX		<Protocol, DBAdapter> max	;
 
-		cmd_INFO	<Protocol, DBAdapter>	info		;
-		cmd_SAVE	<Protocol, DBAdapter>	save		;
-		cmd_RELOAD	<Protocol, DBAdapter>	reload		;
-
-		cmd_GET		<Protocol, DBAdapter>	get		;
-		cmd_GETX	<Protocol, DBAdapter>	getx		;
-
-		cmd_COUNT	<Protocol, DBAdapter>	count		;
-		cmd_SUM		<Protocol, DBAdapter>	sum		;
-		cmd_MIN		<Protocol, DBAdapter>	min		;
-		cmd_MAX		<Protocol, DBAdapter>	max		;
-
-		KeyValueWorkerCommandMap(){
-			auto R = [this](auto &x){
-				this->register_(x);
+		template<class Map>
+		void populateMap(Map &m){
+			auto r = [&m](auto const &t){
+				for(auto const &key : t.cmd)
+					m.emplace(key, &t);
 			};
 
-			R(exit		);
-			R(shutdown	);
-
-			R(info		);
-			R(save		);
-			R(reload	);
-
-			R(get		);
-			R(getx		);
-
-			R(count		);
-			R(sum		);
-			R(min		);
-			R(max		);
+			r(exit		);
+			r(shutdown	);
+			r(info		);
+			r(save		);
+			r(reload	);
+			r(get		);
+			r(getx		);
+			r(count		);
+			r(sum		);
+			r(min		);
+			r(max		);
 		}
 	};
 
-
-
 	template<class Protocol, class DBAdapter>
-	struct KeyValueWorkerCommandMap<Protocol, DBAdapter, true> : KeyValueWorkerCommandMap<Protocol, DBAdapter, false>{
-		cmd_SET		<Protocol, DBAdapter>	set		;
-		cmd_SETEX	<Protocol, DBAdapter>	setex		;
-		cmd_DEL		<Protocol, DBAdapter>	del		;
-		cmd_GETSET	<Protocol, DBAdapter>	getset		;
-		cmd_INCR	<Protocol, DBAdapter>	incr		;
-		cmd_DECR	<Protocol, DBAdapter>	decr		;
+	struct KeyValueWorkerCommandStorage<Protocol, DBAdapter, true>{
+		cmd_EXIT	<Protocol, DBAdapter> exit	;
+		cmd_SHUTDOWN	<Protocol, DBAdapter> shutdown	;
+		cmd_INFO	<Protocol, DBAdapter> info	;
+		cmd_SAVE	<Protocol, DBAdapter> save	;
+		cmd_RELOAD	<Protocol, DBAdapter> reload	;
+		cmd_GET		<Protocol, DBAdapter> get	;
+		cmd_GETX	<Protocol, DBAdapter> getx	;
+		cmd_COUNT	<Protocol, DBAdapter> count	;
+		cmd_SUM		<Protocol, DBAdapter> sum	;
+		cmd_MIN		<Protocol, DBAdapter> min	;
+		cmd_MAX		<Protocol, DBAdapter> max	;
 
-		KeyValueWorkerCommandMap(){
-			auto R = [this](auto &x){
-				this->register_(x);
+		cmd_SET		<Protocol, DBAdapter> set	;
+		cmd_SETEX	<Protocol, DBAdapter> setex	;
+		cmd_DEL		<Protocol, DBAdapter> del	;
+		cmd_GETSET	<Protocol, DBAdapter> getset	;
+		cmd_INCR	<Protocol, DBAdapter> incr	;
+		cmd_DECR	<Protocol, DBAdapter> decr	;
+
+		template<class Map>
+		void populateMap(Map &m){
+			auto r = [&m](auto const &t){
+				for(auto const &key : t.cmd)
+					m.emplace(key, &t);
 			};
 
-			R(set		);
-			R(setex		);
-			R(del		);
-			R(getset	);
-			R(incr		);
-			R(decr		);
+			r(exit		);
+			r(shutdown	);
+			r(info		);
+			r(save		);
+			r(reload	);
+			r(get		);
+			r(getx		);
+			r(count		);
+			r(sum		);
+			r(min		);
+			r(max		);
+
+			r(set		);
+			r(setex		);
+			r(del		);
+			r(getset	);
+			r(incr		);
+			r(decr		);
 		}
 	};
 
@@ -119,59 +115,62 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorker{
-		KeyValueWorker(DBAdapter &db) : db_(db){}
+		KeyValueWorker(DBAdapter &db) : db_(db){
+			cmdStorage_.populateMap(map_);
+		}
 
-		WorkerStatus operator()(IOBuffer &buffer);
+		WorkerStatus operator()(IOBuffer &buffer){
+			using Status  = protocol::ProtocolStatus;
+
+			// PASS
+
+			if (buffer.size() == 0)
+				return WorkerStatus::PASS;
+
+			const Status status = protocol_( std::string_view{ buffer } );
+
+			if (status == Status::BUFFER_NOT_READ)
+				return WorkerStatus::PASS;
+
+			buffer.clear();
+
+			// ERROR
+
+			if (status == Status::ERROR)
+				return error::InternalError(protocol_, buffer);
+
+			// FETCH command
+
+			const auto &p = protocol_.getParams();
+
+			if (p.empty())
+				return error::BadRequest(protocol_, buffer);
+
+			// EXEC command
+
+
+			auto it = map_.find(p.front());
+
+			if (it == std::end(map_))
+				return error::NotImplemented(protocol_, buffer);
+
+			auto &command = *it->second;
+
+			return command(protocol_, db_, buffer);
+		}
+
+	private:
+		using my_cmd_base = cmd_base<Protocol, DBAdapter>;
+		using Map	= std::unordered_map<std::string_view, const my_cmd_base *>;
 
 	private:
 		Protocol	protocol_;
 		DBAdapter	&db_;
 
-		KeyValueWorkerCommandMap<Protocol, DBAdapter, DBAdapter::MUTABLE>	map_;
+		KeyValueWorkerCommandStorage<Protocol, DBAdapter, DBAdapter::MUTABLE>	cmdStorage_;
+
+		Map		map_;
 	};
-
-
-
-	// ==================================
-
-
-
-	template<class Protocol, class DBAdapter>
-	WorkerStatus KeyValueWorker<Protocol, DBAdapter>::operator()(IOBuffer &buffer){
-		using Status  = protocol::ProtocolStatus;
-
-		// PASS
-
-		if (buffer.size() == 0)
-			return WorkerStatus::PASS;
-
-		const Status status = protocol_( std::string_view{ buffer } );
-
-		if (status == Status::BUFFER_NOT_READ)
-			return WorkerStatus::PASS;
-
-		// ERROR
-
-		buffer.clear();
-
-		if (status == Status::ERROR)
-			return error::InternalError(protocol_, buffer);
-
-		// FETCH command
-
-		const auto &str = protocol_.getParams().front();
-
-		auto it = map_->find(str);
-
-		if (it == std::end(*map_))
-			return error::NotImplemented(protocol_, buffer);
-
-		auto &command = *it->second;
-
-		// EXEC command
-
-		return command(protocol_, db_, buffer);
-	}
 
 
 
