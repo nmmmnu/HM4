@@ -21,8 +21,6 @@ using pollfd_event_type = decltype(pollfd::events);
 
 inline bool socket_poll_(int const fd, pollfd_event_type event, int const timeout);
 
-inline bool socket_setOption_(int const fd, int const proto, int const opt, int const val = 1);
-
 inline int socket_error_(int const fd, int const error);
 
 template <class SOCKADDR>
@@ -38,20 +36,26 @@ bool socket_makeNonBlocking(int const fd) noexcept{
 	return fcntl(fd, F_SETFL, O_NONBLOCK) >= 0;
 }
 
-bool socket_makeReuseAddr_(int const fd) noexcept{
-	return socket_setOption_(fd, SOL_SOCKET, SO_REUSEADDR);
+template<int Proto, int Opt>
+bool socket_setOption_(int const fd, int const val = 1){
+	return setsockopt(fd, Proto, Opt, & val, sizeof val) >= 0;
 }
 
-bool socket_makeReusePort_(int const fd) noexcept{
-	return socket_setOption_(fd, SOL_SOCKET, SO_REUSEPORT);
+
+bool socket_makeReuseAddr(int const fd) noexcept{
+	return socket_setOption_<SOL_SOCKET, SO_REUSEADDR>(fd);
+}
+
+bool socket_makeReusePort(int const fd) noexcept{
+	return socket_setOption_<SOL_SOCKET, SO_REUSEPORT>(fd);
 }
 
 bool socket_makeTCPNoDelay(int const fd) noexcept{
-	return socket_setOption_(fd, IPPROTO_TCP, TCP_NODELAY);
+	return socket_setOption_<IPPROTO_TCP, TCP_NODELAY>(fd);
 }
 
 bool socket_makeKeepAlive(int const fd) noexcept{
-	return socket_setOption_(fd, SOL_SOCKET, SO_KEEPALIVE);
+	return socket_setOption_<SOL_SOCKET, SO_KEEPALIVE>(fd);
 }
 
 void socket_close(int const fd) noexcept{
@@ -98,33 +102,35 @@ ssize_t socket_write(int const fd, const void *buf, size_t const count, int cons
 
 // ===========================
 
+bool socket_options(int fd, options_type const options) noexcept{
+	if (options & SOCKET_REUSEADDR	&& ! socket_makeReuseAddr(fd) )
+		return false;
+
+	if (options & SOCKET_REUSEPORT	&& ! socket_makeReusePort(fd) )
+		return false;
+
+	if (options & SOCKET_NONBLOCK	&& ! socket_makeNonBlocking(fd) )
+		return false;
+
+	if (options & SOCKET_TCPNODELAY	&& ! socket_makeTCPNoDelay(fd) )
+		return false;
+
+	if (options & SOCKET_KEEPALIVE	&& ! socket_makeKeepAlive(fd) )
+		return false;
+
+	return true;
+}
+
 int socket_create(SOCKET_TCP, const char *ip, uint16_t const port, uint16_t const backlog, options_type const options) noexcept{
 	(void) ip;
 
 	int fd = socket(AF_INET , SOCK_STREAM , 0);
 
 	if(fd < 0)
-		return SOCKET_ERROR_CREATE;
+		return SOCKET_ERROR::CREATE;
 
-	if (options & SOCKET_REUSEADDR)
-		if (! socket_makeReuseAddr_(fd))
-			socket_error_(fd, SOCKET_ERROR_OPTIONS);
-
-	if (options & SOCKET_REUSEPORT)
-		if (! socket_makeReusePort_(fd))
-			socket_error_(fd, SOCKET_ERROR_OPTIONS);
-
-	if (options & SOCKET_NONBLOCK)
-		if (! socket_makeNonBlocking(fd) )
-			socket_error_(fd, SOCKET_ERROR_NONBLOCK);
-
-	if (options & SOCKET_TCPNODELAY)
-		if (! socket_makeTCPNoDelay(fd) )
-			socket_error_(fd, SOCKET_ERROR_NODELAY);
-
-	if (options & SOCKET_KEEPALIVE)
-		if (! socket_makeKeepAlive(fd) )
-			socket_error_(fd, SOCKET_ERROR_KEEPALIVE);
+	if (!socket_options(fd, options))
+		return socket_error_(fd, SOCKET_ERROR::OPTIONS);
 
 	struct sockaddr_in address;
 
@@ -137,17 +143,16 @@ int socket_create(SOCKET_TCP, const char *ip, uint16_t const port, uint16_t cons
 
 int socket_create(SOCKET_UNIX, const char *path, uint16_t const backlog, options_type const options) noexcept{
 	if (sizeof sockaddr_un::sun_path < strlen(path))
-		return SOCKET_NAME_SIZE;
+		return SOCKET_ERROR::NAME_SIZE;
 
 
 	int fd = socket(AF_UNIX , SOCK_STREAM , 0);
 
 	if(fd < 0)
-		return SOCKET_ERROR_CREATE;
+		return SOCKET_ERROR::CREATE;
 
-	if (options & SOCKET_NONBLOCK)
-		if (! socket_makeNonBlocking(fd) )
-			socket_error_(fd, SOCKET_ERROR_NONBLOCK);
+	if (!socket_options(fd, options))
+		return socket_error_(fd, SOCKET_ERROR::OPTIONS);
 
 	struct sockaddr_un address;
 	address.sun_family = AF_UNIX;
@@ -174,20 +179,16 @@ inline bool socket_poll_(int const fd, pollfd_event_type event, int const timeou
 
 // ===========================
 
-inline bool socket_setOption_(int const fd, int const proto, int const opt, int const val){
-	return setsockopt(fd, proto, opt, & val, sizeof val) >= 0;
-}
-
 template <class SOCKADDR>
 int socket_server_(int const fd, SOCKADDR &address, uint16_t const backlog){
 	if (bind(fd, (struct sockaddr *) & address, sizeof address) < 0){
 		::close(fd);
-		return SOCKET_ERROR_BIND;
+		return SOCKET_ERROR::BIND;
 	}
 
 	if (listen(fd, backlog ? backlog : SOMAXCONN) < 0){
 		::close(fd);
-		return SOCKET_ERROR_BACKLOG;
+		return SOCKET_ERROR::BACKLOG;
 	}
 
 	return fd;
