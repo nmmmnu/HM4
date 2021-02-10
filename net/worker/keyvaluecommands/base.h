@@ -4,8 +4,7 @@
 #include "iobuffer.h"
 #include "worker/keyvalueerror.h"
 
-namespace net{
-namespace worker{
+namespace net::worker{
 
 
 
@@ -17,7 +16,6 @@ namespace worker{
 
 
 
-}
 }
 
 

@@ -13,6 +13,7 @@ constexpr options_type SOCKET_NONBLOCK		= 1 << 0;
 constexpr options_type SOCKET_REUSEADDR		= 1 << 1;
 constexpr options_type SOCKET_TCPNODELAY	= 1 << 2;
 constexpr options_type SOCKET_KEEPALIVE		= 1 << 3;
+constexpr options_type SOCKET_REUSEPORT		= 1 << 4;
 
 // ===========================
 

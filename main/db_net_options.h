@@ -32,6 +32,8 @@ public:
 	uint16_t	port			= 2000;
 	uint32_t	timeout			= 30;
 
+	uint16_t	tcp_reuseport		= 0;
+
 	uint32_t	max_clients		= 512;
 	size_t		max_memlist_size	= 128;
 	size_t		max_memlist_arena	= 0;
@@ -50,6 +52,8 @@ public:
 		case hash("host"		)	: return assign_(host,			value);
 		case hash("port"		)	: return assign_(port,			value);
 		case hash("timeout"		)	: return assign_(timeout,		value);
+
+		case hash("tcp_reuseport"	)	: return assign_(tcp_reuseport,		value);
 
 		case hash("max_clients"		)	: return assign_(max_clients,		value);
 		case hash("max_memlist_size"	)	: return assign_(max_memlist_size,	value);
@@ -77,6 +81,8 @@ public:
 		put("host",						"TCP host to listen (not working)"		);
 		put("port",			port,			"TCP port to listen"				);
 		put("timeout",			timeout,		"Connection timeout in seconds"			);
+
+		put("tcp_reuseport",		tcp_reuseport,		"Activate SO_REUSEPORT"				);
 
 		put("max_clients",		max_clients,		"Max Clients"					);
 		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB"			);

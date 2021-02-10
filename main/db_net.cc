@@ -225,7 +225,12 @@ namespace{
 
 		size_t const max_packet_size = hm4::Pair::maxBytes() * 2;
 
-		int const fd = net::socket_create(net::SOCKET_TCP{}, opt.host, opt.port);
+		uint16_t const socket_options = opt.tcp_reuseport ?
+				net::SOCKET_DEFAULTOPT_TCP	:
+				net::SOCKET_DEFAULTOPT_TCP | net::SOCKET_REUSEPORT
+		;
+
+		int const fd = net::socket_create(net::SOCKET_TCP{}, opt.host, opt.port,  socket_options);
 
 		if (fd < 0)
 			printError("Can not create server socket...");

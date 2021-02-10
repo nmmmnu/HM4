@@ -42,6 +42,10 @@ bool socket_makeReuseAddr_(int const fd) noexcept{
 	return socket_setOption_(fd, SOL_SOCKET, SO_REUSEADDR);
 }
 
+bool socket_makeReusePort_(int const fd) noexcept{
+	return socket_setOption_(fd, SOL_SOCKET, SO_REUSEPORT);
+}
+
 bool socket_makeTCPNoDelay(int const fd) noexcept{
 	return socket_setOption_(fd, IPPROTO_TCP, TCP_NODELAY);
 }
@@ -104,6 +108,10 @@ int socket_create(SOCKET_TCP, const char *ip, uint16_t const port, uint16_t cons
 
 	if (options & SOCKET_REUSEADDR)
 		if (! socket_makeReuseAddr_(fd))
+			socket_error_(fd, SOCKET_ERROR_OPTIONS);
+
+	if (options & SOCKET_REUSEPORT)
+		if (! socket_makeReusePort_(fd))
 			socket_error_(fd, SOCKET_ERROR_OPTIONS);
 
 	if (options & SOCKET_NONBLOCK)

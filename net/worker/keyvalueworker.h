@@ -60,17 +60,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorkerCommandStorage<Protocol, DBAdapter, true>{
-		cmd_EXIT	<Protocol, DBAdapter> exit	;
-		cmd_SHUTDOWN	<Protocol, DBAdapter> shutdown	;
-		cmd_INFO	<Protocol, DBAdapter> info	;
-		cmd_SAVE	<Protocol, DBAdapter> save	;
-		cmd_RELOAD	<Protocol, DBAdapter> reload	;
-		cmd_GET		<Protocol, DBAdapter> get	;
-		cmd_GETX	<Protocol, DBAdapter> getx	;
-		cmd_COUNT	<Protocol, DBAdapter> count	;
-		cmd_SUM		<Protocol, DBAdapter> sum	;
-		cmd_MIN		<Protocol, DBAdapter> min	;
-		cmd_MAX		<Protocol, DBAdapter> max	;
+		KeyValueWorkerCommandStorage<Protocol, DBAdapter, false> parentStorage_;
 
 		cmd_SET		<Protocol, DBAdapter> set	;
 		cmd_SETEX	<Protocol, DBAdapter> setex	;
@@ -81,22 +71,12 @@ namespace net::worker{
 
 		template<class Map>
 		void populateMap(Map &m){
+			parentStorage_.populateMap(m);
+
 			auto r = [&m](auto const &t){
 				for(auto const &key : t.cmd)
 					m.emplace(key, &t);
 			};
-
-			r(exit		);
-			r(shutdown	);
-			r(info		);
-			r(save		);
-			r(reload	);
-			r(get		);
-			r(getx		);
-			r(count		);
-			r(sum		);
-			r(min		);
-			r(max		);
 
 			r(set		);
 			r(setex		);
@@ -116,7 +96,7 @@ namespace net::worker{
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorker{
 		KeyValueWorker(DBAdapter &db) : db_(db){
-			cmdStorage_.populateMap(map_);
+			cmdStorage_->populateMap(map_);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){
@@ -160,14 +140,16 @@ namespace net::worker{
 		}
 
 	private:
-		using my_cmd_base = cmd_base<Protocol, DBAdapter>;
-		using Map	= std::unordered_map<std::string_view, const my_cmd_base *>;
+		using my_cmd_base	= cmd_base<Protocol, DBAdapter>;
+		using Map		= std::unordered_map<std::string_view, const my_cmd_base *>;
+		using MyStorage		= KeyValueWorkerCommandStorage<Protocol, DBAdapter, DBAdapter::MUTABLE>;
 
 	private:
 		Protocol	protocol_;
 		DBAdapter	&db_;
 
-		KeyValueWorkerCommandStorage<Protocol, DBAdapter, DBAdapter::MUTABLE>	cmdStorage_;
+		// memory allocation gives stable references.
+		std::unique_ptr<MyStorage>	cmdStorage_ = std::make_unique<MyStorage>();
 
 		Map		map_;
 	};
