@@ -42,11 +42,11 @@ int socket_create(SOCKET_UNIX, const char *path,              uint16_t backlog =
 
 bool socket_options(int fd, options_type options) noexcept;
 
-bool socket_makeNonBlocking	(int fd) noexcept;
-bool socket_makeReuseAddr	(int fd) noexcept;
-bool socket_makeReusePort	(int fd) noexcept;
-bool socket_makeTCPNoDelay	(int fd) noexcept;
-bool socket_makeKeepAlive	(int fd) noexcept;
+bool socket_options_setNonBlocking	(int fd) noexcept;
+bool socket_options_setReuseAddr	(int fd) noexcept;
+bool socket_options_setReusePort	(int fd) noexcept;
+bool socket_options_setTCPNoDelay	(int fd) noexcept;
+bool socket_options_setKeepAlive	(int fd) noexcept;
 
 int socket_accept(int fd) noexcept;
 

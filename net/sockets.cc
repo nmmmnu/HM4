@@ -32,7 +32,7 @@ bool socket_check_eagain() noexcept{
 	return errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK;
 }
 
-bool socket_makeNonBlocking(int const fd) noexcept{
+bool socket_options_setNonBlocking(int const fd) noexcept{
 	return fcntl(fd, F_SETFL, O_NONBLOCK) >= 0;
 }
 
@@ -42,19 +42,19 @@ bool socket_setOption_(int const fd, int const val = 1){
 }
 
 
-bool socket_makeReuseAddr(int const fd) noexcept{
+bool socket_options_setReuseAddr(int const fd) noexcept{
 	return socket_setOption_<SOL_SOCKET, SO_REUSEADDR>(fd);
 }
 
-bool socket_makeReusePort(int const fd) noexcept{
+bool socket_options_setReusePort(int const fd) noexcept{
 	return socket_setOption_<SOL_SOCKET, SO_REUSEPORT>(fd);
 }
 
-bool socket_makeTCPNoDelay(int const fd) noexcept{
+bool socket_options_setTCPNoDelay(int const fd) noexcept{
 	return socket_setOption_<IPPROTO_TCP, TCP_NODELAY>(fd);
 }
 
-bool socket_makeKeepAlive(int const fd) noexcept{
+bool socket_options_setKeepAlive(int const fd) noexcept{
 	return socket_setOption_<SOL_SOCKET, SO_KEEPALIVE>(fd);
 }
 
@@ -103,19 +103,19 @@ ssize_t socket_write(int const fd, const void *buf, size_t const count, int cons
 // ===========================
 
 bool socket_options(int fd, options_type const options) noexcept{
-	if (options & SOCKET_REUSEADDR	&& ! socket_makeReuseAddr(fd) )
+	if (options & SOCKET_REUSEADDR	&& ! socket_options_setReuseAddr(fd) )
 		return false;
 
-	if (options & SOCKET_REUSEPORT	&& ! socket_makeReusePort(fd) )
+	if (options & SOCKET_REUSEPORT	&& ! socket_options_setReusePort(fd) )
 		return false;
 
-	if (options & SOCKET_NONBLOCK	&& ! socket_makeNonBlocking(fd) )
+	if (options & SOCKET_NONBLOCK	&& ! socket_options_setNonBlocking(fd) )
 		return false;
 
-	if (options & SOCKET_TCPNODELAY	&& ! socket_makeTCPNoDelay(fd) )
+	if (options & SOCKET_TCPNODELAY	&& ! socket_options_setTCPNoDelay(fd) )
 		return false;
 
-	if (options & SOCKET_KEEPALIVE	&& ! socket_makeKeepAlive(fd) )
+	if (options & SOCKET_KEEPALIVE	&& ! socket_options_setKeepAlive(fd) )
 		return false;
 
 	return true;

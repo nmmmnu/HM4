@@ -30,7 +30,7 @@ AsyncLoop<SELECTOR, WORKER>::AsyncLoop(SELECTOR &&selector, WORKER &&worker, con
 					conf_connectionTimeout_	(	max__(conf_connectionTimeout,	CONNECTION_TIMEOUT	)),
 					conf_maxPacketSize_	(	max__(conf_maxPacketSize,	BUFFER_CAPACITY		)){
 	for(int const fd : serverFD_){
-		socket_makeNonBlocking(fd);
+		socket_options_setNonBlocking(fd);
 		selector_.insertFD(fd);
 	}
 }
@@ -211,7 +211,7 @@ bool AsyncLoop<SELECTOR, WORKER>::handleConnect_(int const fd){
 		return false;
 
 	if ( clients_.size() < conf_maxClients && insertFD_(newFD) ){
-		// socket_makeNonBlocking(newFD);
+		// socket_options_setNonBlocking(newFD);
 
 		log_("Connect", newFD);
 	}else{
