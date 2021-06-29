@@ -3,10 +3,11 @@
 #include "mystring.h"
 
 #include <algorithm>
+#include <limits>
 
 
 
-namespace net::worker{
+namespace net::worker::commands_accumulators{
 
 	namespace acumulator_impl_{
 

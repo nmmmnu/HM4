@@ -25,17 +25,21 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorkerCommandStorage<Protocol, DBAdapter, false>{
-		cmd_EXIT	<Protocol, DBAdapter> exit	;
-		cmd_SHUTDOWN	<Protocol, DBAdapter> shutdown	;
-		cmd_INFO	<Protocol, DBAdapter> info	;
-		cmd_SAVE	<Protocol, DBAdapter> save	;
-		cmd_RELOAD	<Protocol, DBAdapter> reload	;
-		cmd_GET		<Protocol, DBAdapter> get	;
-		cmd_GETX	<Protocol, DBAdapter> getx	;
-		cmd_COUNT	<Protocol, DBAdapter> count	;
-		cmd_SUM		<Protocol, DBAdapter> sum	;
-		cmd_MIN		<Protocol, DBAdapter> min	;
-		cmd_MAX		<Protocol, DBAdapter> max	;
+		commands_system		::cmd_EXIT	<Protocol, DBAdapter> exit	;
+		commands_system		::cmd_SHUTDOWN	<Protocol, DBAdapter> shutdown	;
+
+		commands_info		::cmd_INFO	<Protocol, DBAdapter> info	;
+
+		commands_reload		::cmd_SAVE	<Protocol, DBAdapter> save	;
+		commands_reload		::cmd_RELOAD	<Protocol, DBAdapter> reload	;
+
+		commands_immutable	::cmd_GET	<Protocol, DBAdapter> get	;
+
+		commands_accumulators	::cmd_GETX	<Protocol, DBAdapter> getx	;
+		commands_accumulators	::cmd_COUNT	<Protocol, DBAdapter> count	;
+		commands_accumulators	::cmd_SUM	<Protocol, DBAdapter> sum	;
+		commands_accumulators	::cmd_MIN	<Protocol, DBAdapter> min	;
+		commands_accumulators	::cmd_MAX	<Protocol, DBAdapter> max	;
 
 		template<class Map>
 		void populateMap(Map &m){
@@ -62,12 +66,13 @@ namespace net::worker{
 	struct KeyValueWorkerCommandStorage<Protocol, DBAdapter, true>{
 		KeyValueWorkerCommandStorage<Protocol, DBAdapter, false> parentStorage_;
 
-		cmd_SET		<Protocol, DBAdapter> set	;
-		cmd_SETEX	<Protocol, DBAdapter> setex	;
-		cmd_DEL		<Protocol, DBAdapter> del	;
-		cmd_GETSET	<Protocol, DBAdapter> getset	;
-		cmd_INCR	<Protocol, DBAdapter> incr	;
-		cmd_DECR	<Protocol, DBAdapter> decr	;
+		commands_mutable	::cmd_SET	<Protocol, DBAdapter> set	;
+		commands_mutable	::cmd_SETEX	<Protocol, DBAdapter> setex	;
+		commands_mutable	::cmd_DEL	<Protocol, DBAdapter> del	;
+		commands_mutable	::cmd_GETSET	<Protocol, DBAdapter> getset	;
+
+		commands_counter	::cmd_INCR	<Protocol, DBAdapter> incr	;
+		commands_counter	::cmd_DECR	<Protocol, DBAdapter> decr	;
 
 		template<class Map>
 		void populateMap(Map &m){

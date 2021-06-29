@@ -3,7 +3,7 @@
 
 
 
-namespace net::worker{
+namespace net::worker::commands_counter{
 
 
 	namespace counter_impl_{
