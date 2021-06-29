@@ -2,12 +2,12 @@
 
 
 
-namespace net::worker::commands_mutable{
+namespace net::worker::commands::Mutable{
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_SET : cmd_base<Protocol, DBAdapter>{
+	struct SET : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "set";
 		constexpr inline static std::string_view cmd[] = {
 			"set",	"SET"
@@ -37,7 +37,7 @@ namespace net::worker::commands_mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_SETEX : cmd_base<Protocol, DBAdapter>{
+	struct SETEX : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "setex";
 		constexpr inline static std::string_view cmd[] = {
 			"setex",
@@ -68,7 +68,7 @@ namespace net::worker::commands_mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_DEL : cmd_base<Protocol, DBAdapter>{
+	struct DEL : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "del";
 		constexpr inline static std::string_view cmd[] = {
 			"del",
@@ -95,7 +95,7 @@ namespace net::worker::commands_mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_GETSET : cmd_base<Protocol, DBAdapter>{
+	struct GETSET : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "getset";
 		constexpr inline static std::string_view cmd[] = {
 			"getset",
@@ -132,6 +132,22 @@ namespace net::worker::commands_mutable{
 	};
 
 
+
+	template<class Protocol, class DBAdapter>
+	struct Cointainer{
+		SET		<Protocol, DBAdapter> set	;
+		SETEX		<Protocol, DBAdapter> setex	;
+		DEL		<Protocol, DBAdapter> del	;
+		GETSET		<Protocol, DBAdapter> getset	;
+
+		template<class Map>
+		void registerModule(Map &m){
+			registerCmd(m, set	);
+			registerCmd(m, setex	);
+			registerCmd(m, del	);
+			registerCmd(m, getset	);
+		}
+	};
 
 } // namespace
 

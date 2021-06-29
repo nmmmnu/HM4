@@ -2,12 +2,12 @@
 
 
 
-namespace net::worker::commands_info{
+namespace net::worker::commands::Info{
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_INFO : cmd_base<Protocol, DBAdapter>{
+	struct INFO : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "info";
 		constexpr inline static std::string_view cmd[] = {
 			"info",	"INFO"
@@ -26,6 +26,16 @@ namespace net::worker::commands_info{
 	};
 
 
+
+	template<class Protocol, class DBAdapter>
+	struct Cointainer{
+		INFO		<Protocol, DBAdapter> info	;
+
+		template<class Map>
+		void registerModule(Map &m){
+			registerCmd(m, info	);
+		}
+	};
 
 } // namespace
 

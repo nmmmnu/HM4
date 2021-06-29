@@ -2,12 +2,12 @@
 
 
 
-namespace net::worker::commands_immutable{
+namespace net::worker::commands::Immutable{
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_GET : cmd_base<Protocol, DBAdapter>{
+	struct GET : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "get";
 		constexpr inline static std::string_view cmd[] = {
 			"get",	"GET"
@@ -31,6 +31,16 @@ namespace net::worker::commands_immutable{
 	};
 
 
+
+	template<class Protocol, class DBAdapter>
+	struct Cointainer{
+		GET		<Protocol, DBAdapter> get	;
+
+		template<class Map>
+		void registerModule(Map &m){
+			registerCmd(m, get	);
+		}
+	};
 
 } // namespace
 

@@ -2,12 +2,12 @@
 
 
 
-namespace net::worker::commands_reload{
+namespace net::worker::commands::Reload{
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_SAVE : cmd_base<Protocol, DBAdapter>{
+	struct SAVE : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "save";
 		constexpr inline static std::string_view cmd[] = {
 			"save",		"SAVE",
@@ -29,7 +29,7 @@ namespace net::worker::commands_reload{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_RELOAD : cmd_base<Protocol, DBAdapter>{
+	struct RELOAD : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "reload";
 		constexpr inline static std::string_view cmd[] = {
 			"reload",
@@ -51,6 +51,18 @@ namespace net::worker::commands_reload{
 	};
 
 
+
+	template<class Protocol, class DBAdapter>
+	struct Cointainer{
+		SAVE		<Protocol, DBAdapter> save	;
+		RELOAD		<Protocol, DBAdapter> reload	;
+
+		template<class Map>
+		void registerModule(Map &m){
+			registerCmd(m, save	);
+			registerCmd(m, reload	);
+		}
+	};
 
 } // namespace
 

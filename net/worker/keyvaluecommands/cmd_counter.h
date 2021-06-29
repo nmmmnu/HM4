@@ -3,8 +3,7 @@
 
 
 
-namespace net::worker::commands_counter{
-
+namespace net::worker::commands::Counter{
 
 	namespace counter_impl_{
 
@@ -43,7 +42,7 @@ namespace net::worker::commands_counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_INCR : cmd_base<Protocol, DBAdapter>{
+	struct INCR : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "incr";
 		constexpr inline static std::string_view cmd[] = {
 			"incr",		"INCR",
@@ -60,7 +59,7 @@ namespace net::worker::commands_counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_DECR : cmd_base<Protocol, DBAdapter>{
+	struct DECR : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "decr";
 		constexpr inline static std::string_view cmd[] = {
 			"decr",		"DECR",
@@ -75,6 +74,18 @@ namespace net::worker::commands_counter{
 	};
 
 
+
+	template<class Protocol, class DBAdapter>
+	struct Cointainer{
+		INCR		<Protocol, DBAdapter> incr	;
+		DECR		<Protocol, DBAdapter> derc	;
+
+		template<class Map>
+		void registerModule(Map &m){
+			registerCmd(m, incr	);
+			registerCmd(m, derc	);
+		}
+	};
 
 } // namespace
 

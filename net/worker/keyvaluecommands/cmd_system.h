@@ -2,12 +2,12 @@
 
 
 
-namespace net::worker::commands_system{
+namespace net::worker::commands::System{
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_EXIT : cmd_base<Protocol, DBAdapter>{
+	struct EXIT : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "exit";
 		constexpr inline static std::string_view cmd[] = {
 			"exit",		"EXIT"
@@ -19,7 +19,7 @@ namespace net::worker::commands_system{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_SHUTDOWN : cmd_base<Protocol, DBAdapter>{
+	struct SHUTDOWN : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "shutdown";
 		constexpr inline static std::string_view cmd[] = {
 			"shutdown",	"SHUTDOWN"
@@ -30,6 +30,19 @@ namespace net::worker::commands_system{
 		}
 	};
 
+
+
+	template<class Protocol, class DBAdapter>
+	struct Cointainer{
+		EXIT		<Protocol, DBAdapter> exit	;
+		SHUTDOWN	<Protocol, DBAdapter> shutdown	;
+
+		template<class Map>
+		void registerModule(Map &m){
+			registerCmd(m, exit	);
+			registerCmd(m, shutdown	);
+		}
+	};
 
 } // namespace
 

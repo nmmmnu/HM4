@@ -23,72 +23,43 @@ namespace net::worker{
 	template<class Protocol, class DBAdapter, bool Mutable>
 	struct KeyValueWorkerCommandStorage;
 
+
+
 	template<class Protocol, class DBAdapter>
-	struct KeyValueWorkerCommandStorage<Protocol, DBAdapter, false>{
-		commands_system		::cmd_EXIT	<Protocol, DBAdapter> exit	;
-		commands_system		::cmd_SHUTDOWN	<Protocol, DBAdapter> shutdown	;
+	class KeyValueWorkerCommandStorage<Protocol, DBAdapter, false>{
+		commands::System	::Cointainer<Protocol, DBAdapter>	mod_system		;
+		commands::Info		::Cointainer<Protocol, DBAdapter>	mod_info		;
+		commands::Reload	::Cointainer<Protocol, DBAdapter>	mod_reload		;
+		commands::Immutable	::Cointainer<Protocol, DBAdapter>	mod_immutable		;
+		commands::Accumulators	::Cointainer<Protocol, DBAdapter>	mod_accumulators	;
 
-		commands_info		::cmd_INFO	<Protocol, DBAdapter> info	;
-
-		commands_reload		::cmd_SAVE	<Protocol, DBAdapter> save	;
-		commands_reload		::cmd_RELOAD	<Protocol, DBAdapter> reload	;
-
-		commands_immutable	::cmd_GET	<Protocol, DBAdapter> get	;
-
-		commands_accumulators	::cmd_GETX	<Protocol, DBAdapter> getx	;
-		commands_accumulators	::cmd_COUNT	<Protocol, DBAdapter> count	;
-		commands_accumulators	::cmd_SUM	<Protocol, DBAdapter> sum	;
-		commands_accumulators	::cmd_MIN	<Protocol, DBAdapter> min	;
-		commands_accumulators	::cmd_MAX	<Protocol, DBAdapter> max	;
-
+	public:
 		template<class Map>
-		void populateMap(Map &m){
-			auto r = [&m](auto const &t){
-				for(auto const &key : t.cmd)
-					m.emplace(key, &t);
-			};
-
-			r(exit		);
-			r(shutdown	);
-			r(info		);
-			r(save		);
-			r(reload	);
-			r(get		);
-			r(getx		);
-			r(count		);
-			r(sum		);
-			r(min		);
-			r(max		);
+		void registerModules(Map &m){
+			mod_system		.registerModule(m);
+			mod_info		.registerModule(m);
+			mod_reload		.registerModule(m);
+			mod_immutable		.registerModule(m);
+			mod_accumulators	.registerModule(m);
 		}
 	};
 
+
+
 	template<class Protocol, class DBAdapter>
-	struct KeyValueWorkerCommandStorage<Protocol, DBAdapter, true>{
+	class KeyValueWorkerCommandStorage<Protocol, DBAdapter, true>{
 		KeyValueWorkerCommandStorage<Protocol, DBAdapter, false> parentStorage_;
 
-		commands_mutable	::cmd_SET	<Protocol, DBAdapter> set	;
-		commands_mutable	::cmd_SETEX	<Protocol, DBAdapter> setex	;
-		commands_mutable	::cmd_DEL	<Protocol, DBAdapter> del	;
-		commands_mutable	::cmd_GETSET	<Protocol, DBAdapter> getset	;
+		commands::Mutable	::Cointainer<Protocol, DBAdapter>	mod_mutable	;
+		commands::Counter	::Cointainer<Protocol, DBAdapter>	mod_counter	;
 
-		commands_counter	::cmd_INCR	<Protocol, DBAdapter> incr	;
-		commands_counter	::cmd_DECR	<Protocol, DBAdapter> decr	;
-
+	public:
 		template<class Map>
-		void populateMap(Map &m){
-			parentStorage_.populateMap(m);
+		void registerModules(Map &m){
+			parentStorage_.registerModules(m);
 
-			auto r = [&m](auto const &t){
-				for(auto const &key : t.cmd)
-					m.emplace(key, &t);
-			};
-
-			r(set		);
-			r(setex		);
-			r(del		);
-			r(getset	);
-			r(incr		);
-			r(decr		);
+			mod_mutable	.registerModule(m);
+			mod_counter	.registerModule(m);
 		}
 	};
 
@@ -101,7 +72,7 @@ namespace net::worker{
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorker{
 		KeyValueWorker(DBAdapter &db) : db_(db){
-			cmdStorage_->populateMap(map_);
+			cmdStorage_->registerModules(map_);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){
@@ -133,7 +104,6 @@ namespace net::worker{
 
 			// EXEC command
 
-
 			auto it = map_.find(p.front());
 
 			if (it == std::end(map_))
@@ -145,9 +115,9 @@ namespace net::worker{
 		}
 
 	private:
-		using my_cmd_base	= cmd_base<Protocol, DBAdapter>;
-		using Map		= std::unordered_map<std::string_view, const my_cmd_base *>;
-		using MyStorage		= KeyValueWorkerCommandStorage<Protocol, DBAdapter, DBAdapter::MUTABLE>;
+		using MyBase	= commands::Base<Protocol, DBAdapter>;
+		using Map	= std::unordered_map<std::string_view, const MyBase *>;
+		using MyStorage	= KeyValueWorkerCommandStorage<Protocol, DBAdapter, DBAdapter::MUTABLE>;
 
 	private:
 		Protocol	protocol_;

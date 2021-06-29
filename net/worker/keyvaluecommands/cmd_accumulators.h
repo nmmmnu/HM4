@@ -7,9 +7,9 @@
 
 
 
-namespace net::worker::commands_accumulators{
+namespace net::worker::commands::Accumulators{
 
-	namespace acumulator_impl_{
+	namespace acumulators_impl_{
 
 		constexpr static uint16_t MIN		= 10;
 		constexpr static uint16_t MAX		= 1000;
@@ -97,7 +97,7 @@ namespace net::worker::commands_accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_GETX : cmd_base<Protocol, DBAdapter>{
+	struct GETX : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "getx";
 		constexpr inline static std::string_view cmd[] = {
 			"getx",
@@ -105,7 +105,7 @@ namespace net::worker::commands_accumulators{
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			using namespace acumulator_impl_;
+			using namespace acumulators_impl_;
 
 			AccumulatorVectorNew accumulator(size);
 
@@ -120,7 +120,7 @@ namespace net::worker::commands_accumulators{
 		template<size_t Size>
 		using VectorGETX = FixedVector<std::string_view,Size>;
 
-		constexpr static size_t size = 2 * acumulator_impl_::MAX + 1;
+		constexpr static size_t size = 2 * acumulators_impl_::MAX + 1;
 
 		using MyVector = VectorGETX<size>;
 
@@ -148,7 +148,7 @@ namespace net::worker::commands_accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_COUNT : cmd_base<Protocol, DBAdapter>{
+	struct COUNT : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "count";
 		constexpr inline static std::string_view cmd[] = {
 			"count",
@@ -156,7 +156,7 @@ namespace net::worker::commands_accumulators{
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			using namespace acumulator_impl_;
+			using namespace acumulators_impl_;
 
 			using T = int64_t;
 
@@ -182,7 +182,7 @@ namespace net::worker::commands_accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_SUM : cmd_base<Protocol, DBAdapter>{
+	struct SUM : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "sum";
 		constexpr inline static std::string_view cmd[] = {
 			"sum",
@@ -190,7 +190,7 @@ namespace net::worker::commands_accumulators{
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			using namespace acumulator_impl_;
+			using namespace acumulators_impl_;
 
 			using T = int64_t;
 
@@ -216,14 +216,14 @@ namespace net::worker::commands_accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_MIN : cmd_base<Protocol, DBAdapter>{
+	struct MIN : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "min";
 		constexpr inline static std::string_view cmd[] = {
 			"min",	"MIN"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			using namespace acumulator_impl_;
+			using namespace acumulators_impl_;
 
 			using T = int64_t;
 
@@ -252,14 +252,14 @@ namespace net::worker::commands_accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct cmd_MAX : cmd_base<Protocol, DBAdapter>{
+	struct MAX : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name = "max";
 		constexpr inline static std::string_view cmd[] = {
 			"max",	"MAX"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			using namespace acumulator_impl_;
+			using namespace acumulators_impl_;
 
 			using T = int64_t;
 
@@ -282,6 +282,26 @@ namespace net::worker::commands_accumulators{
 					protocol, db, buffer,
 					accumulator
 			);
+		}
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct Cointainer{
+		GETX		<Protocol, DBAdapter> getx	;
+		COUNT		<Protocol, DBAdapter> count	;
+		SUM		<Protocol, DBAdapter> sum	;
+		MIN		<Protocol, DBAdapter> min	;
+		MAX		<Protocol, DBAdapter> max	;
+
+		template<class Map>
+		void registerModule(Map &m){
+			registerCmd(m, getx	);
+			registerCmd(m, count	);
+			registerCmd(m, sum	);
+			registerCmd(m, min	);
+			registerCmd(m, max	);
 		}
 	};
 
