@@ -43,8 +43,9 @@ namespace net::worker::commands::Counter{
 
 	template<class Protocol, class DBAdapter>
 	struct INCR : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "incr";
-		constexpr inline static std::string_view cmd[] = {
+		constexpr inline static std::string_view name	= "incr";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
 			"incr",		"INCR",
 			"incrby",	"INCRBY"
 		};
@@ -60,8 +61,9 @@ namespace net::worker::commands::Counter{
 
 	template<class Protocol, class DBAdapter>
 	struct DECR : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "decr";
-		constexpr inline static std::string_view cmd[] = {
+		constexpr inline static std::string_view name	= "decr";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
 			"decr",		"DECR",
 			"decrby",	"DECRBY"
 		};
@@ -77,8 +79,8 @@ namespace net::worker::commands::Counter{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<INCR	<Protocol, DBAdapter>  >(s, m);
-		registerCmd<DECR	<Protocol, DBAdapter>  >(s, m);
+		registerCmd<INCR	<Protocol, DBAdapter> >(s, m);
+		registerCmd<DECR	<Protocol, DBAdapter> >(s, m);
 	}
 
 

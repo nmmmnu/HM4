@@ -8,8 +8,8 @@ namespace net::worker::commands::Immutable{
 
 	template<class Protocol, class DBAdapter>
 	struct GET : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "get";
-		constexpr inline static std::string_view cmd[] = {
+		constexpr inline static std::string_view name	= "get";
+		constexpr inline static std::string_view cmd[]	= {
 			"get",	"GET"
 		};
 

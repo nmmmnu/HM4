@@ -8,8 +8,8 @@ namespace net::worker::commands::System{
 
 	template<class Protocol, class DBAdapter>
 	struct EXIT : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "exit";
-		constexpr inline static std::string_view cmd[] = {
+		constexpr inline static std::string_view name	= "exit";
+		constexpr inline static std::string_view cmd[]	= {
 			"exit",		"EXIT"
 		};
 
@@ -20,8 +20,8 @@ namespace net::worker::commands::System{
 
 	template<class Protocol, class DBAdapter>
 	struct SHUTDOWN : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "shutdown";
-		constexpr inline static std::string_view cmd[] = {
+		constexpr inline static std::string_view name	= "shutdown";
+		constexpr inline static std::string_view cmd[]	= {
 			"shutdown",	"SHUTDOWN"
 		};
 

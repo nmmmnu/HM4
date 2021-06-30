@@ -14,27 +14,24 @@
 #include <memory>
 #include <unordered_map>
 
-#include "logger.h"
-
 namespace net::worker{
+
 
 
 	namespace key_value_worker_impl_{
 
-		template<class Protocol, class DBAdapter, bool Mutable, class Storage, class Map>
+		template<class Protocol, class DBAdapter, class Storage, class Map>
 		void registerModules(Storage &s, Map &m){
-			if constexpr(true){
-				commands::System	::registerModule<Protocol, DBAdapter>(s, m);
-				commands::Info		::registerModule<Protocol, DBAdapter>(s, m);
-				commands::Reload	::registerModule<Protocol, DBAdapter>(s, m);
-				commands::Immutable	::registerModule<Protocol, DBAdapter>(s, m);
-				commands::Accumulators	::registerModule<Protocol, DBAdapter>(s, m);
-			}
+			s.reserve(5 + 2);
 
-			if constexpr(Mutable){
-				commands::Mutable	::registerModule<Protocol, DBAdapter>(s, m);
-				commands::Counter	::registerModule<Protocol, DBAdapter>(s, m);
-			}
+			commands::System	::registerModule<Protocol, DBAdapter>(s, m);
+			commands::Info		::registerModule<Protocol, DBAdapter>(s, m);
+			commands::Reload	::registerModule<Protocol, DBAdapter>(s, m);
+			commands::Immutable	::registerModule<Protocol, DBAdapter>(s, m);
+			commands::Accumulators	::registerModule<Protocol, DBAdapter>(s, m);
+
+			commands::Mutable	::registerModule<Protocol, DBAdapter>(s, m);
+			commands::Counter	::registerModule<Protocol, DBAdapter>(s, m);
 		}
 
 	}
@@ -50,7 +47,7 @@ namespace net::worker{
 		KeyValueWorker(DBAdapter &db) : db_(db){
 			using namespace key_value_worker_impl_;
 
-			registerModules<Protocol, DBAdapter, DBAdapter::MUTABLE>(storage_, map_);
+			registerModules<Protocol, DBAdapter>(storage_, map_);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){

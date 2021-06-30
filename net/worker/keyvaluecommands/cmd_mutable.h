@@ -8,9 +8,10 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter>
 	struct SET : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "set";
-		constexpr inline static std::string_view cmd[] = {
-			"set",	"SET"
+		constexpr inline static std::string_view name	= "set";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"set",		"SET"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -38,10 +39,10 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter>
 	struct SETEX : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "setex";
-		constexpr inline static std::string_view cmd[] = {
-			"setex",
-			"SETEX"
+		constexpr inline static std::string_view name	= "setex";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"setex",	"SETEX"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -69,10 +70,10 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter>
 	struct DEL : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "del";
-		constexpr inline static std::string_view cmd[] = {
-			"del",
-			"DEL"
+		constexpr inline static std::string_view name	= "del";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"del",		"DEL"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -96,10 +97,10 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter>
 	struct GETSET : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "getset";
-		constexpr inline static std::string_view cmd[] = {
-			"getset",
-			"GETSET"
+		constexpr inline static std::string_view name	= "getset";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"getset",	"GETSET"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -135,10 +136,10 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<SET		<Protocol, DBAdapter>  >(s, m);
-		registerCmd<SETEX	<Protocol, DBAdapter>  >(s, m);
-		registerCmd<DEL		<Protocol, DBAdapter>  >(s, m);
-		registerCmd<GETSET	<Protocol, DBAdapter>  >(s, m);
+		registerCmd<SET		<Protocol, DBAdapter> >(s, m);
+		registerCmd<SETEX	<Protocol, DBAdapter> >(s, m);
+		registerCmd<DEL		<Protocol, DBAdapter> >(s, m);
+		registerCmd<GETSET	<Protocol, DBAdapter> >(s, m);
 	}
 
 

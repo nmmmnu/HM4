@@ -98,10 +98,9 @@ namespace net::worker::commands::Accumulators{
 
 	template<class Protocol, class DBAdapter>
 	struct GETX : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "getx";
-		constexpr inline static std::string_view cmd[] = {
-			"getx",
-			"GETX"
+		constexpr inline static std::string_view name	= "getx";
+		constexpr inline static std::string_view cmd[]	= {
+			"getx",		"GETX"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -149,10 +148,9 @@ namespace net::worker::commands::Accumulators{
 
 	template<class Protocol, class DBAdapter>
 	struct COUNT : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "count";
-		constexpr inline static std::string_view cmd[] = {
-			"count",
-			"COUNT"
+		constexpr inline static std::string_view name	= "count";
+		constexpr inline static std::string_view cmd[]	= {
+			"count",	"COUNT"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -183,10 +181,9 @@ namespace net::worker::commands::Accumulators{
 
 	template<class Protocol, class DBAdapter>
 	struct SUM : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "sum";
-		constexpr inline static std::string_view cmd[] = {
-			"sum",
-			"SUM"
+		constexpr inline static std::string_view name	= "sum";
+		constexpr inline static std::string_view cmd[]	= {
+			"sum",		"SUM"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -217,9 +214,9 @@ namespace net::worker::commands::Accumulators{
 
 	template<class Protocol, class DBAdapter>
 	struct MIN : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "min";
-		constexpr inline static std::string_view cmd[] = {
-			"min",	"MIN"
+		constexpr inline static std::string_view name	= "min";
+		constexpr inline static std::string_view cmd[]	= {
+			"min",		"MIN"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -253,9 +250,9 @@ namespace net::worker::commands::Accumulators{
 
 	template<class Protocol, class DBAdapter>
 	struct MAX : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name = "max";
-		constexpr inline static std::string_view cmd[] = {
-			"max",	"MAX"
+		constexpr inline static std::string_view name	= "max";
+		constexpr inline static std::string_view cmd[]	= {
+			"max",		"MAX"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
