@@ -34,7 +34,7 @@ namespace net::worker::commands::Immutable{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<GET		<Protocol, DBAdapter> >(s, m);
+		registerCmd<GET		, Protocol, DBAdapter>(s, m);
 	}
 
 

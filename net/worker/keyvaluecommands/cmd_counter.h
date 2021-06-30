@@ -79,8 +79,8 @@ namespace net::worker::commands::Counter{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<INCR	<Protocol, DBAdapter> >(s, m);
-		registerCmd<DECR	<Protocol, DBAdapter> >(s, m);
+		registerCmd<INCR	, Protocol, DBAdapter>(s, m);
+		registerCmd<DECR	, Protocol, DBAdapter>(s, m);
 	}
 
 

@@ -136,10 +136,10 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<SET		<Protocol, DBAdapter> >(s, m);
-		registerCmd<SETEX	<Protocol, DBAdapter> >(s, m);
-		registerCmd<DEL		<Protocol, DBAdapter> >(s, m);
-		registerCmd<GETSET	<Protocol, DBAdapter> >(s, m);
+		registerCmd<SET		, Protocol, DBAdapter>(s, m);
+		registerCmd<SETEX	, Protocol, DBAdapter>(s, m);
+		registerCmd<DEL		, Protocol, DBAdapter>(s, m);
+		registerCmd<GETSET	, Protocol, DBAdapter>(s, m);
 	}
 
 
