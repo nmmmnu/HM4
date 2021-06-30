@@ -32,17 +32,13 @@ namespace net::worker::commands::System{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct Cointainer{
-		EXIT		<Protocol, DBAdapter> exit	;
-		SHUTDOWN	<Protocol, DBAdapter> shutdown	;
+	template<class Protocol, class DBAdapter, class Storage, class Map>
+	void registerModule(Storage &s, Map &m){
+		registerCmd<EXIT	<Protocol, DBAdapter> >(s, m);
+		registerCmd<SHUTDOWN	<Protocol, DBAdapter> >(s, m);
+	}
 
-		template<class Map>
-		void registerModule(Map &m){
-			registerCmd(m, exit	);
-			registerCmd(m, shutdown	);
-		}
-	};
+
 
 } // namespace
 

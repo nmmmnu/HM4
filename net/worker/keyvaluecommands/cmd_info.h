@@ -27,15 +27,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct Cointainer{
-		INFO		<Protocol, DBAdapter> info	;
+	template<class Protocol, class DBAdapter, class Storage, class Map>
+	void registerModule(Storage &s, Map &m){
+		registerCmd<INFO	<Protocol, DBAdapter>  >(s, m);
+	}
 
-		template<class Map>
-		void registerModule(Map &m){
-			registerCmd(m, info	);
-		}
-	};
+
 
 } // namespace
 

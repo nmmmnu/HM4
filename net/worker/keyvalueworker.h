@@ -19,49 +19,25 @@
 namespace net::worker{
 
 
+	namespace key_value_worker_impl_{
 
-	template<class Protocol, class DBAdapter, bool Mutable>
-	struct KeyValueWorkerCommandStorage;
+		template<class Protocol, class DBAdapter, bool Mutable, class Storage, class Map>
+		void registerModules(Storage &s, Map &m){
+			if constexpr(true){
+				commands::System	::registerModule<Protocol, DBAdapter>(s, m);
+				commands::Info		::registerModule<Protocol, DBAdapter>(s, m);
+				commands::Reload	::registerModule<Protocol, DBAdapter>(s, m);
+				commands::Immutable	::registerModule<Protocol, DBAdapter>(s, m);
+				commands::Accumulators	::registerModule<Protocol, DBAdapter>(s, m);
+			}
 
-
-
-	template<class Protocol, class DBAdapter>
-	class KeyValueWorkerCommandStorage<Protocol, DBAdapter, false>{
-		commands::System	::Cointainer<Protocol, DBAdapter>	mod_system		;
-		commands::Info		::Cointainer<Protocol, DBAdapter>	mod_info		;
-		commands::Reload	::Cointainer<Protocol, DBAdapter>	mod_reload		;
-		commands::Immutable	::Cointainer<Protocol, DBAdapter>	mod_immutable		;
-		commands::Accumulators	::Cointainer<Protocol, DBAdapter>	mod_accumulators	;
-
-	public:
-		template<class Map>
-		void registerModules(Map &m){
-			mod_system		.registerModule(m);
-			mod_info		.registerModule(m);
-			mod_reload		.registerModule(m);
-			mod_immutable		.registerModule(m);
-			mod_accumulators	.registerModule(m);
+			if constexpr(Mutable){
+				commands::Mutable	::registerModule<Protocol, DBAdapter>(s, m);
+				commands::Counter	::registerModule<Protocol, DBAdapter>(s, m);
+			}
 		}
-	};
 
-
-
-	template<class Protocol, class DBAdapter>
-	class KeyValueWorkerCommandStorage<Protocol, DBAdapter, true>{
-		KeyValueWorkerCommandStorage<Protocol, DBAdapter, false> parentStorage_;
-
-		commands::Mutable	::Cointainer<Protocol, DBAdapter>	mod_mutable	;
-		commands::Counter	::Cointainer<Protocol, DBAdapter>	mod_counter	;
-
-	public:
-		template<class Map>
-		void registerModules(Map &m){
-			parentStorage_.registerModules(m);
-
-			mod_mutable	.registerModule(m);
-			mod_counter	.registerModule(m);
-		}
-	};
+	}
 
 
 
@@ -72,7 +48,9 @@ namespace net::worker{
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorker{
 		KeyValueWorker(DBAdapter &db) : db_(db){
-			cmdStorage_->registerModules(map_);
+			using namespace key_value_worker_impl_;
+
+			registerModules<Protocol, DBAdapter, DBAdapter::MUTABLE>(storage_, map_);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){
@@ -115,17 +93,15 @@ namespace net::worker{
 		}
 
 	private:
-		using MyBase	= commands::Base<Protocol, DBAdapter>;
-		using Map	= std::unordered_map<std::string_view, const MyBase *>;
-		using MyStorage	= KeyValueWorkerCommandStorage<Protocol, DBAdapter, DBAdapter::MUTABLE>;
+		using MyBase		= commands::Base<Protocol, DBAdapter>;
+		using Storage		= std::vector<std::unique_ptr<const MyBase> >;
+		using Map		= std::unordered_map<std::string_view, const MyBase *>;
 
 	private:
 		Protocol	protocol_;
 		DBAdapter	&db_;
 
-		// memory allocation gives stable references.
-		std::unique_ptr<MyStorage>	cmdStorage_ = std::make_unique<MyStorage>();
-
+		Storage		storage_;
 		Map		map_;
 	};
 

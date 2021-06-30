@@ -287,23 +287,14 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct Cointainer{
-		GETX		<Protocol, DBAdapter> getx	;
-		COUNT		<Protocol, DBAdapter> count	;
-		SUM		<Protocol, DBAdapter> sum	;
-		MIN		<Protocol, DBAdapter> min	;
-		MAX		<Protocol, DBAdapter> max	;
-
-		template<class Map>
-		void registerModule(Map &m){
-			registerCmd(m, getx	);
-			registerCmd(m, count	);
-			registerCmd(m, sum	);
-			registerCmd(m, min	);
-			registerCmd(m, max	);
-		}
-	};
+	template<class Protocol, class DBAdapter, class Storage, class Map>
+	void registerModule(Storage &s, Map &m){
+		registerCmd<GETX	<Protocol, DBAdapter> >(s, m);
+		registerCmd<COUNT	<Protocol, DBAdapter> >(s, m);
+		registerCmd<SUM		<Protocol, DBAdapter> >(s, m);
+		registerCmd<MIN		<Protocol, DBAdapter> >(s, m);
+		registerCmd<MAX		<Protocol, DBAdapter> >(s, m);
+	}
 
 
 

@@ -32,15 +32,12 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct Cointainer{
-		GET		<Protocol, DBAdapter> get	;
+	template<class Protocol, class DBAdapter, class Storage, class Map>
+	void registerModule(Storage &s, Map &m){
+		registerCmd<GET		<Protocol, DBAdapter> >(s, m);
+	}
 
-		template<class Map>
-		void registerModule(Map &m){
-			registerCmd(m, get	);
-		}
-	};
+
 
 } // namespace
 

@@ -4,6 +4,8 @@
 #include "iobuffer.h"
 #include "worker/keyvalueerror.h"
 
+#include <memory>
+
 namespace net::worker::commands{
 
 
@@ -16,10 +18,12 @@ namespace net::worker::commands{
 
 
 
-	template<class Command, class Map>
-	void registerCmd(Map &m, Command const &command){
-		for(auto const &key : command.cmd)
-			m.emplace(key, &command);
+	template<class Command, class Storage, class Map>
+	void registerCmd(Storage &s, Map &m){
+		const auto &up = s.emplace_back(std::make_unique<Command>());
+
+		for(auto const &key : Command::cmd)
+			m.emplace(key, up.get());
 	}
 
 

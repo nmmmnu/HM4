@@ -133,21 +133,15 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct Cointainer{
-		SET		<Protocol, DBAdapter> set	;
-		SETEX		<Protocol, DBAdapter> setex	;
-		DEL		<Protocol, DBAdapter> del	;
-		GETSET		<Protocol, DBAdapter> getset	;
+	template<class Protocol, class DBAdapter, class Storage, class Map>
+	void registerModule(Storage &s, Map &m){
+		registerCmd<SET		<Protocol, DBAdapter>  >(s, m);
+		registerCmd<SETEX	<Protocol, DBAdapter>  >(s, m);
+		registerCmd<DEL		<Protocol, DBAdapter>  >(s, m);
+		registerCmd<GETSET	<Protocol, DBAdapter>  >(s, m);
+	}
 
-		template<class Map>
-		void registerModule(Map &m){
-			registerCmd(m, set	);
-			registerCmd(m, setex	);
-			registerCmd(m, del	);
-			registerCmd(m, getset	);
-		}
-	};
+
 
 } // namespace
 
