@@ -59,7 +59,7 @@ bool AsyncLoop<SELECTOR, WORKER>::process(){
 		return true;
 	}
 
-	for(auto const &t : selector_){
+	for(auto const t : selector_){
 		switch(t.status){
 		case FDStatus::READ:
 			handleRead_( t.fd );
