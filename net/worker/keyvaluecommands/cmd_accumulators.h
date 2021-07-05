@@ -27,7 +27,7 @@ namespace net::worker::commands::Accumulators{
 
 
 		template<typename Accumulator, class It>
-		static auto do_accumulateIteratior(Accumulator &accumulator, uint16_t const maxResults, std::string_view const prefix, It it, It last){
+		auto do_accumulateIteratior(Accumulator &accumulator, uint16_t const maxResults, std::string_view const prefix, It it, It last){
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 

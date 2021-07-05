@@ -1,5 +1,5 @@
-#ifndef LEVEL_ORDER_LOOKUP_H
-#define LEVEL_ORDER_LOOKUP_H
+#ifndef BFS_LOOKUP_H
+#define BFS_LOOKUP_H
 
 
 #include <cstdint>
@@ -9,10 +9,7 @@
 #include "fixedvector.h"
 
 template<typename T, T Levels>
-class LevelOrderLookupFactory{
-public:
-	constexpr static T SIZE = (1 << Levels) - 1;
-
+class BFSLookupFactory{
 private:
 	constexpr void reorder_(){
 		for(T level = 0; level < Levels; ++level)
@@ -45,7 +42,7 @@ private:
 
 public:
 	constexpr static auto build(){
-		LevelOrderLookupFactory f;
+		BFSLookupFactory f;
 		f.reorder_();
 
 		std::array<T, SIZE> a{};
@@ -58,6 +55,8 @@ public:
 	}
 
 private:
+	constexpr static T SIZE = (1 << Levels) - 1;
+
 	FixedVector<T, SIZE> value;
 };
 

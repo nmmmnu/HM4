@@ -22,7 +22,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<XXX		<Protocol, DBAdapter> >(s, m);
+		registerCmd<XXX		, Protocol, DBAdapter>(s, m);
 	}
 
 

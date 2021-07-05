@@ -1,7 +1,7 @@
 #ifndef BTREE_INDEX_NODE_H
 #define BTREE_INDEX_NODE_H
 
-#include "levelorderlookup.h"
+#include "bfslookup.h"
 
 #include <cstdint>
 #include <limits>
@@ -18,7 +18,7 @@ using level_type	= uint8_t;
 
 constexpr level_type	NODE_LEVELS	= 7;
 
-constexpr auto LL = LevelOrderLookupFactory<level_type, btree::NODE_LEVELS>::build();
+constexpr auto LL = BFSLookupFactory<level_type, btree::NODE_LEVELS>::build();
 
 constexpr level_type	VALUES		= LL.size();
 

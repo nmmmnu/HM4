@@ -8,6 +8,8 @@ namespace hm4{
 		constexpr int major	= 1;
 		constexpr int minor	= 2;
 		constexpr int revision	= 9;
+
+		constexpr int num	= 1020903;
 	}
 }
 

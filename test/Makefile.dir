@@ -1,11 +1,11 @@
 SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
-EXTRA_INCL += -I$(SRC_DIR)test_levelorderlookup
+EXTRA_INCL += -I$(SRC_DIR)test_bfslookup
 
 # $(A)test_smallstring
 
 MY_TARGETS = $(A)test_stringhash $(A)test_stringreplace $(A)test_trim $(A)test_stringtokenizer	\
-		$(A)test_blobref $(A)test_binarysearch $(A)test_levelorderlookup		\
+		$(A)test_blobref $(A)test_binarysearch $(A)test_bfslookup		\
 		$(A)test_glob  $(A)test_myalign $(A)test_mynarrow $(A)test_signalguard		\
 		$(A)test_base64
 
@@ -36,7 +36,7 @@ $(A)test_blobref: $(O)test_blobref.o
 $(A)test_binarysearch: $(O)test_binarysearch.o
 	$(LINK)
 
-$(A)test_levelorderlookup: $(O)test_levelorderlookup.o
+$(A)test_bfslookup: $(O)test_bfslookup.o
 	$(LINK)
 
 $(A)test_glob: $(O)test_glob.o $(O)myglob.o
