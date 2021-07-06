@@ -10,17 +10,15 @@ using MyReader = FileReader;
 
 #include "stdallocator.h"
 
-
-
 struct MyListFactory{
 	using MemList	= hm4::BlackHoleList;
 	using BinLogger	= hm4::binlogger::DiskFileBinLogger;
 	using MyList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ false>;
 
-	MyListFactory(std::string_view const binLogFilename, bool const aligned) :
+	MyListFactory(std::string_view const binLogFilename, hm4::Pair::WriteOptions const writeOptions) :
 				mylist{
 					memlist,
-					BinLogger{ binLogFilename, aligned }
+					BinLogger{ binLogFilename, writeOptions }
 				}{}
 
 	MyList &operator()(){
@@ -47,10 +45,8 @@ int main(int argc, char **argv){
 
 	bool const blob = argc >= 4 && argv[3][0] == 'b';
 
-	bool const aligned = true;
-
 	return process<FileReader>(
-			MyListFactory{ path, aligned },
+			MyListFactory{ path, hm4::Pair::WriteOptions::ALIGNED },
 			filename,
 			blob
 	);

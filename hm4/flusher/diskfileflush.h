@@ -13,16 +13,18 @@ class DiskFileFlush{
 private:
 	constexpr static char DIR_WILDCARD = '*';
 
+	using TombstoneOptions = hm4::disk::FileBuilder::TombstoneOptions;
+
 public:
 	template<class UIDGENERATOR>
 	DiskFileFlush(
 			UIDGENERATOR &&idGenerator,
 			std::string path,
-			bool const keepTombstones = true
+			TombstoneOptions const tombstoneOptions = TombstoneOptions::KEEP
 		):
 				idGenerator_(std::forward<UIDGENERATOR>(idGenerator)),
 				path_(std::move(path)),
-				keepTombstones_(keepTombstones){}
+				tombstoneOptions_(tombstoneOptions){}
 
 public:
 	template<class It>
@@ -32,15 +34,15 @@ public:
 
 		std::string const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_());
 
-		disk::FileBuilder::build(filename, first, last, keepTombstones_, /* aligned */ true);
+		disk::FileBuilder::build(filename, first, last, tombstoneOptions_, Pair::WriteOptions::ALIGNED);
 
 		return true;
 	}
 
 private:
-	IDGENERATOR	idGenerator_;
-	std::string	path_;
-	bool		keepTombstones_;
+	IDGENERATOR		idGenerator_;
+	std::string		path_;
+	TombstoneOptions	tombstoneOptions_;
 };
 
 } // namespace flusher

@@ -14,32 +14,37 @@ private:
 	using FileDataBuilder = disk::FileBuilder::FileDataBuilder;
 
 public:
-	template<typename UString>
-	DiskFileBinLogger(UString &&filename, bool const fsync, bool const aligned):
-				filename_	(std::forward<UString>(filename)	),
-				fsync_		(fsync					),
-				aligned_	(aligned				){}
+	enum class SyncOptions : bool{
+		NONE	= false,
+		FSYNC	= true
+	};
 
 	template<typename UString>
-	DiskFileBinLogger(UString &&filename, bool const aligned):
+	DiskFileBinLogger(UString &&filename, SyncOptions const syncOprions, Pair::WriteOptions const writeOptions):
+				filename_	(std::forward<UString>(filename)	),
+				syncOprions_	(syncOprions				),
+				writeOptions_	(writeOptions				){}
+
+	template<typename UString>
+	DiskFileBinLogger(UString &&filename, Pair::WriteOptions const writeOptions):
 				DiskFileBinLogger(
 					std::forward<UString>(filename),
-					/* fsync */ false,
-					aligned
+					SyncOptions::NONE,
+					writeOptions
 				){}
 
 public:
 	void operator()(Pair const &pair){
 		dataBuilder_(pair);
 
-		if (fsync_)
+		if (syncOprions_ == SyncOptions::FSYNC)
 			dataBuilder_.flush();
 	}
 
 	bool clear(){
 		dataBuilder_.close();
 		// file is sync to disk.
-		dataBuilder_ = { filename_, aligned_ };
+		dataBuilder_ = { filename_, writeOptions_ };
 		return true;
 	}
 
@@ -53,10 +58,10 @@ public:
 	}
 
 private:
-	std::string	filename_;
-	bool		fsync_;
-	bool		aligned_;
-	FileDataBuilder	dataBuilder_{ filename_, aligned_ };
+	std::string		filename_;
+	SyncOptions		syncOprions_;
+	Pair::WriteOptions	writeOptions_;
+	FileDataBuilder		dataBuilder_{ filename_, writeOptions_ };
 };
 
 

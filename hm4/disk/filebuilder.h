@@ -13,18 +13,20 @@
 namespace hm4{
 namespace disk{
 namespace FileBuilder{
-
 	namespace config{
 		constexpr std::ios::openmode MODE = std::ios::out | std::ios::binary | std::ios::trunc;
 	}
 
-
+	enum class TombstoneOptions : bool{
+		NONE,
+		KEEP
+	};
 
 	class FileDataBuilder{
 	public:
-		FileDataBuilder(std::string_view const filename, bool const aligned) :
+		FileDataBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
 							file_data(filenameData(filename), config::MODE),
-							aligned(aligned){}
+							fileWriteOptions(fileWriteOptions){}
 
 		void operator()(Pair const &pair);
 
@@ -37,25 +39,25 @@ namespace FileBuilder{
 		}
 
 	private:
-		std::ofstream	file_data;
+		std::ofstream		file_data;
 
-		bool		aligned;
+		Pair::WriteOptions	fileWriteOptions;
 	};
 
 
 
 	class FileIndxBuilder{
 	public:
-		FileIndxBuilder(std::string_view const filename, bool const aligned) :
+		FileIndxBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
 							file_indx(filenameIndx(filename), config::MODE),
-							aligned(aligned){}
+							fileWriteOptions(fileWriteOptions){}
 
 		void operator()(Pair const &pair);
 
 	private:
 		std::ofstream	file_indx;
 
-		bool		aligned;
+		Pair::WriteOptions	fileWriteOptions;
 
 		uint64_t	index		= 0;
 	};
@@ -81,9 +83,9 @@ namespace FileBuilder{
 
 	class FileMetaBuilder{
 	public:
-		FileMetaBuilder(std::string_view const filename, bool const aligned) :
+		FileMetaBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
 							file_meta(filenameMeta(filename), config::MODE),
-							aligned(aligned){}
+							fileWriteOptions(fileWriteOptions){}
 
 		~FileMetaBuilder();
 
@@ -92,7 +94,7 @@ namespace FileBuilder{
 	private:
 		std::ofstream	file_meta;
 
-		bool		aligned;
+		Pair::WriteOptions	fileWriteOptions;
 
 		uint64_t	minCreated	= std::numeric_limits<uint64_t>::max();
 		uint64_t	maxCreated	= std::numeric_limits<uint64_t>::min();
@@ -107,11 +109,11 @@ namespace FileBuilder{
 	public:
 		using value_type = Pair const;
 
-		FileBuilder(std::string_view const filename, bool const aligned):
-					meta(filename, aligned),
-					indx(filename, aligned),
-					line(filename         ),
-					data(filename, aligned){}
+		FileBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions):
+					meta(filename, fileWriteOptions	),
+					indx(filename, fileWriteOptions	),
+					line(filename			),
+					data(filename, fileWriteOptions	){}
 
 		void operator()(Pair const &pair){
 			push_back(pair);
@@ -135,13 +137,14 @@ namespace FileBuilder{
 
 	// ==============================
 
+
 	template <class IT>
 	bool build(std::string_view const filename, IT first, IT last,
-					bool const keepTombstones, bool const aligned){
+					TombstoneOptions const tombstoneOptions, Pair::WriteOptions const fileWriteOptions){
 
-		FileBuilder builder(filename, aligned);
+		FileBuilder builder(filename, fileWriteOptions);
 
-		if (keepTombstones){
+		if (tombstoneOptions == TombstoneOptions::KEEP){
 
 			// invalid pairs must be kept as tombstones
 			std::copy(first, last, std::back_inserter(builder));

@@ -36,7 +36,7 @@ namespace FileBuilder{
 
 
 	void FileDataBuilder::operator()(Pair const &pair){
-		pair.fwrite(file_data, aligned);
+		pair.fwrite(file_data, fileWriteOptions);
 	}
 
 
@@ -44,7 +44,7 @@ namespace FileBuilder{
 	void FileIndxBuilder::operator()(Pair const &pair){
 		writeU64(file_indx, index);
 
-		if (aligned)
+		if (fileWriteOptions == Pair::WriteOptions::ALIGNED)
 			index += my_align::calc(pair.bytes(), PairConf::ALIGN);
 		else
 			index += pair.bytes();
@@ -85,7 +85,7 @@ namespace FileBuilder{
 
 	FileMetaBuilder::~FileMetaBuilder(){
 		// write the header
-		uint16_t const option_aligned = aligned ? FileMetaBlob::OPTIONS_ALIGNED : FileMetaBlob::OPTIONS_NONE;
+		uint16_t const option_aligned = fileWriteOptions == Pair::WriteOptions::ALIGNED ? FileMetaBlob::OPTIONS_ALIGNED : FileMetaBlob::OPTIONS_NONE;
 
 		// write table header
 		uint16_t const options =

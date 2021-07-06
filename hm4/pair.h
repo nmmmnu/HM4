@@ -47,6 +47,11 @@ namespace hm4{
 		inline
 		static constexpr std::string_view	TOMBSTONE	= "";
 
+		enum class WriteOptions : bool{
+			NONE	= false,
+			ALIGNED	= true
+		};
+
 	public:
 		Pair() = delete;
 		Pair(Pair const &) = delete;
@@ -309,10 +314,10 @@ namespace hm4{
 
 		void print() const noexcept;
 
-		void fwrite(std::ostream & os, bool const aligned) const{
+		void fwrite(std::ostream & os, WriteOptions const writeOptions) const{
 			os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
 
-			if (aligned)
+			if (writeOptions == WriteOptions::ALIGNED)
 				my_align::fwriteGap(os, bytes(), PairConf::ALIGN);
 		}
 

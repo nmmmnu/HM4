@@ -116,8 +116,11 @@ namespace{
 			auto allocatorName = allocator1.getName();
 
 			if (have_binlog){
+				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
+				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
+
 				return fLists(
-					opt, DBAdapterFactory::MutableBinLogConcurrent{ opt.db_path, opt.binlog_path1, opt.binlog_path2, opt.binlog_fsync != 0, max_memlist_size, allocator1, allocator2 },
+					opt, DBAdapterFactory::MutableBinLogConcurrent{ opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, max_memlist_size, allocator1, allocator2 },
 					"Starting {} server with {}...\n", "mutable concurrent binlog", allocatorName
 				);
 			}else{
@@ -134,8 +137,11 @@ namespace{
 			auto allocatorName = allocator.getName();
 
 			if (have_binlog){
+				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
+				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
+
 				return fLists(
-					opt, DBAdapterFactory::MutableBinLog{ opt.db_path, opt.binlog_path1, opt.binlog_fsync != 0, max_memlist_size, allocator },
+					opt, DBAdapterFactory::MutableBinLog{ opt.db_path, opt.binlog_path1, syncOprions, max_memlist_size, allocator },
 					"Starting {} server with {}...\n", "mutable binlog", allocatorName
 				);
 			}else{

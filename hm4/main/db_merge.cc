@@ -25,8 +25,8 @@ namespace{
 	}
 
 	template <class FACTORY>
-	int mergeFromFactory(const FACTORY &f, const char *output_file, bool const keepTombstones){
-		hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()), keepTombstones, /* aligned */ true);
+	int mergeFromFactory(const FACTORY &f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions){
+		hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()), tombstoneOptions, hm4::Pair::WriteOptions::ALIGNED);
 
 		return 0;
 	}
@@ -106,7 +106,9 @@ int main(int argc, char **argv){
 		return 2;
 	}
 
-	bool const keepTombstones = argv[1][0] == 't' ? false : true;
+	using hm4::disk::FileBuilder::TombstoneOptions;
+
+	TombstoneOptions const tombstoneOptions = argv[1][0] == 't' ? TombstoneOptions::KEEP : TombstoneOptions::NONE;
 
 	int const table_count	= argc - 3;
 	const char **path	= (const char **) &argv[3];
@@ -122,7 +124,7 @@ int main(int argc, char **argv){
 
 			MergeListFactory_1 factory{ path[0], DEFAULT_ADVICE, DEFAULT_MODE };
 
-			return mergeFromFactory(factory, output, keepTombstones);
+			return mergeFromFactory(factory, output, tombstoneOptions);
 		}
 
 	case 2:
@@ -135,7 +137,7 @@ int main(int argc, char **argv){
 
 			MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE };
 
-			return mergeFromFactory(factory, output, keepTombstones);
+			return mergeFromFactory(factory, output, tombstoneOptions);
 
 		}
 
@@ -145,7 +147,7 @@ int main(int argc, char **argv){
 
 			MergeListFactory_N<const char **> factory{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE };
 
-			return mergeFromFactory(factory, output, keepTombstones);
+			return mergeFromFactory(factory, output, tombstoneOptions);
 		}
 	}
 }
