@@ -1,5 +1,9 @@
 #include "pair.h"
 
+#include "pmallocator.h"
+#include "trackingallocator.h"
+#include "mallocallocator.h"
+
 #include "mytest.h"
 
 MyTest mytest;
@@ -19,6 +23,7 @@ namespace{
 	void pair_test_expired();
 	void pair_test();
 	void pair_test_ctor();
+	void pair_test_allocator();
 	void pair_size_test(size_t step);
 }
 
@@ -30,6 +35,7 @@ int main(){
 	pair_test();
 	pair_test_expired();
 	pair_test_ctor();
+	pair_test_allocator();
 	pair_size_test(7);
 
 	//printf("Size: %zu bytes\n", sizeof(OPair));
@@ -107,6 +113,19 @@ namespace{
 
 		const OPair b = Pair::clone( *a );
 		mytest("copy Pair",		b->getKey() == "1"		);
+	}
+
+	void pair_test_allocator(){
+		mytest.begin("allocator");
+
+		using namespace MyAllocator;
+		using Allocator = PMOwnerAllocator<TrackingAllocator<MallocAllocator> >;
+
+		Allocator a;
+
+		const auto p = Pair::smart_ptr::create( a, "key", "val" );
+
+		p->print();
 	}
 
 	void pair_test(){

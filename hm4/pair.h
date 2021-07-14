@@ -60,12 +60,14 @@ namespace hm4{
 		Pair &operator=(Pair &&) = delete;
 
 	public:
+		[[nodiscard]]
 		constexpr static bool check(
 					std::string_view const key
 				) noexcept{
 			return key.size() > 0 && key.size() <= PairConf::MAX_KEY_SIZE;
 		}
 
+		[[nodiscard]]
 		constexpr static bool check(
 					std::string_view const key,
 					std::string_view const val
@@ -73,54 +75,59 @@ namespace hm4{
 			return check(key) && val.size() <= PairConf::MAX_VAL_SIZE;
 		}
 
-	public:
-		struct ptr {
-			template<class Allocator>
-			[[nodiscard]]
-			static Pair *create(
-					Allocator &allocator,
-					std::string_view const key,
-					std::string_view const val,
-					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
+	private:
+		[[nodiscard]]
+		static Pair *createInRawMemory__(Pair *pair,
+				std::string_view key,
+				std::string_view val,
+				uint32_t expires, uint32_t created) noexcept;
 
-				if ( ! check(key, val) )
-					return nullptr;
+		template<class Allocator>
+		[[nodiscard]]
+		static Pair *create__(
+				Allocator &allocator,
+				std::string_view const key,
+				std::string_view const val,
+				uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
-				Pair *pair = static_cast<Pair *>(
-						allocator.allocate( Pair::bytes(key.size(), val.size()) )
-				);
+			if ( ! check(key, val) )
+				return nullptr;
 
-				if (!pair)
-					return nullptr;
+			Pair *pair = static_cast<Pair *>(
+					allocator.allocate( Pair::bytes(key.size(), val.size()) )
+			);
 
-				return copy_(pair, key, val, expires, created);
-			}
+			if (!pair)
+				return nullptr;
 
-			template<class Allocator>
-			[[nodiscard]]
-			static Pair *clone(Allocator &allocator, const Pair *src) noexcept{
-				if (!src)
-					return nullptr;
+			return createInRawMemory__(pair, key, val, expires, created);
+		}
 
-				void *pair = allocator.allocate(src->bytes());
+		template<class Allocator>
+		[[nodiscard]]
+		static Pair *clone__(Allocator &allocator, const Pair *src) noexcept{
+			if (!src)
+				return nullptr;
 
-				if (!pair)
-					return nullptr;
+			void *pair = allocator.allocate(src->bytes());
 
-				memcpy(pair, src, src->bytes());
+			if (!pair)
+				return nullptr;
 
-				return static_cast<Pair *>(pair);
-			}
+			memcpy(pair, src, src->bytes());
 
-			template<class Allocator>
-			static void destroy(Allocator &allocator, Pair *pair) noexcept{
-				return allocator.deallocate(pair);
-			}
-		};
+			return static_cast<Pair *>(pair);
+		}
+
+		template<class Allocator>
+		static void destroy__(Allocator &allocator, Pair *pair) noexcept{
+			return allocator.deallocate(pair);
+		}
 
 	public:
 		struct smart_ptr{
 			template<class Allocator>
+			[[nodiscard]]
 			static auto create(
 					Allocator &allocator,
 					std::string_view const key,
@@ -128,18 +135,20 @@ namespace hm4{
 					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
 				return allocator.wrapInSmartPtr(
-					ptr::create(allocator, key, val, expires, created)
+					create__(allocator, key, val, expires, created)
 				);
 			}
 
 			template<class Allocator>
+			[[nodiscard]]
 			static auto clone(Allocator &allocator, const Pair *src) noexcept{
 				return allocator.wrapInSmartPtr(
-					ptr::clone(allocator, src)
+					clone__(allocator, src)
 				);
 			}
 
 			template<class Allocator>
+			[[nodiscard]]
 			static auto clone(Allocator &allocator, const Pair &src) noexcept{
 				return clone(allocator, & src);
 			}
@@ -149,6 +158,7 @@ namespace hm4{
 		};
 
 	public:
+		[[nodiscard]]
 		static auto create(
 				std::string_view const key,
 				std::string_view const val,
@@ -158,56 +168,60 @@ namespace hm4{
 			return smart_ptr::create(allocator, key, val, expires, created);
 		}
 
+		[[nodiscard]]
 		static auto clone(const Pair *src) noexcept{
 			MyAllocator::STDAllocator allocator;
 			return smart_ptr::clone(allocator, src);
 		}
 
+		[[nodiscard]]
 		static auto clone(const Pair &src) noexcept{
 			return clone(& src);
 		}
 
-	private:
-		static Pair *copy_(Pair *pair,
-				std::string_view key,
-				std::string_view val,
-				uint32_t expires, uint32_t created) noexcept;
-
 	public:
+		[[nodiscard]]
 		constexpr
 		bool empty() const noexcept{
 			return !(keylen & PairConf::MAX_KEY_MASK_BE);
 		}
 
 	public:
+		[[nodiscard]]
 		std::string_view getKey() const noexcept{
 			return { getKey_(), getKeyLen_() };
 		}
 
+		[[nodiscard]]
 		std::string_view getVal() const noexcept{
 			return { getVal_(), getValLen_() };
 		}
 
+		[[nodiscard]]
 		bool isTombstone() const noexcept{
 			return vallen == 0;
 		}
 
+		[[nodiscard]]
 		uint64_t getCreated() const noexcept{
 			return betoh<uint64_t>(created);
 		}
 
 	public:
+		[[nodiscard]]
 		int cmp(std::string_view const key) const noexcept{
 			return std::empty(key) ?
 				CMP_NULLKEY :
 				cmpX<0>(key);
 		}
 
+		[[nodiscard]]
 		int cmp(Pair const &pair) const noexcept{
 			return cmp(pair.getKey());
 		}
 
 		template<size_t start>
+		[[nodiscard]]
 		int cmpX(std::string_view const key) const noexcept{
 			if constexpr(start == 0){
 				return ::compare(getKey_(), getKeyLen_(), key.data(), key.size());
@@ -220,17 +234,20 @@ namespace hm4{
 		}
 
 	public:
+		[[nodiscard]]
 		bool equals(std::string_view const key) const noexcept{
 			return std::empty(key) ?
 				false :
 				equalsX<0>(key);
 		}
 
+		[[nodiscard]]
 		int equals(Pair const &pair) const noexcept{
 			return equals(pair.getKey());
 		}
 
 		template<size_t start>
+		[[nodiscard]]
 		bool equalsX(std::string_view const key) const noexcept{
 			if constexpr(start == 0){
 				return ::equals(getKey_(), getKeyLen_(), key.data(), key.size());
@@ -242,6 +259,7 @@ namespace hm4{
 		}
 
 	public:
+		[[nodiscard]]
 		int cmpTime(Pair const &pair) const noexcept{
 			return comparator::comp(
 				getCreated(),
@@ -250,6 +268,7 @@ namespace hm4{
 		}
 
 		template<bool B>
+		[[nodiscard]]
 		int cmpWithTime(Pair const &pair, std::bool_constant<B>) const noexcept{
 			if (int const result = cmp(pair); result)
 				return result;
@@ -260,11 +279,13 @@ namespace hm4{
 				return - cmpTime(pair);
 		}
 
+		[[nodiscard]]
 		int cmpWithTime(Pair const &pair) const noexcept{
 			return cmpWithTime(pair, std::true_type{});
 		}
 
 	public:
+		[[nodiscard]]
 		bool isValid(std::false_type) const noexcept{
 			// check if expired.
 			if ( isExpired_() )
@@ -274,6 +295,7 @@ namespace hm4{
 			return true;
 		}
 
+		[[nodiscard]]
 		bool isValid(std::true_type) const noexcept{
 			// check if is tombstone
 			if ( isTombstone() )
@@ -284,6 +306,7 @@ namespace hm4{
 		}
 
 		template<bool B>
+		[[nodiscard]]
 		bool isValidForReplace(Pair const &other, std::bool_constant<B> tag) const noexcept{
 			// if other is created after this,
 			// then obviously this is not valid
@@ -296,16 +319,19 @@ namespace hm4{
 
 		// ==============================
 
+		[[nodiscard]]
 		bool isValid() const noexcept{
 			return isValid(std::false_type{});
 		}
 
+		[[nodiscard]]
 		bool isValidForReplace(const Pair &other) const noexcept{
 			return isValidForReplace(other, std::false_type{});
 		}
 
 		// ==============================
 
+		[[nodiscard]]
 		size_t bytes() const noexcept{
 			return bytes(getKeyLen_(), getValLen_());
 		}
@@ -323,35 +349,42 @@ namespace hm4{
 
 		// ==============================
 
+		[[nodiscard]]
 		constexpr
 		static size_t bytes(size_t const keyLen, size_t const valLen) noexcept{
 			return sizeof(Pair) + keyLen + valLen;
 		}
 
+		[[nodiscard]]
 		constexpr
 		static size_t bytes(std::string_view const key, std::string_view const val) noexcept{
 			return bytes(key.size(), val.size());
 		}
 
+		[[nodiscard]]
 		constexpr
 		static size_t maxBytes() noexcept{
 			return bytes(PairConf::MAX_KEY_SIZE, PairConf::MAX_VAL_SIZE);
 		}
 
 	private:
+		[[nodiscard]]
 		const char *getKey_() const noexcept{
 			return buffer;
 		}
 
+		[[nodiscard]]
 		const char *getVal_() const noexcept{
 			return & buffer[ getKeyLen_() + 1 ];
 		}
 
+		[[nodiscard]]
 		constexpr
 		size_t getKeyLen_() const noexcept{
 			return betoh<uint16_t>(keylen) & PairConf::MAX_KEY_MASK;
 		}
 
+		[[nodiscard]]
 		constexpr
 		size_t getValLen_() const noexcept{
 			// if we do magic with betoh<>(PairConf::MAX_VAL_MASK),
@@ -363,6 +396,7 @@ namespace hm4{
 		}
 
 	private:
+		[[nodiscard]]
 		bool isExpired_() const noexcept;
 
 		static uint64_t getCreateTime__(uint32_t created) noexcept;
@@ -371,13 +405,7 @@ namespace hm4{
 
 	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
 
-#if 0
-	// not used
-	inline bool less____(const Pair *p1, const Pair *p2){
-		return p1->cmp(*p2) < 0;
-	}
-#endif
-
+	[[nodiscard]]
 	inline bool equals(const Pair *p1, const Pair *p2){
 		return p1->equals(*p2);
 	}

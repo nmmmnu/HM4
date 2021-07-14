@@ -106,10 +106,10 @@ namespace MyAllocator{
 
 
 	template<class Allocator>
-	struct PMChainAllocator : PMAllocator{
-		PMChainAllocator(Allocator &allocator) : PMChainAllocator( &allocator){}
+	struct PMNonOwnerAllocator : PMAllocator{
+		PMNonOwnerAllocator(Allocator &allocator) : PMNonOwnerAllocator( &allocator){}
 
-		PMChainAllocator(Allocator *allocator) : allocator(allocator){}
+		PMNonOwnerAllocator(Allocator *allocator) : allocator(allocator){}
 
 	private:
 		inline void *allocate_(std::size_t const size) override final{
@@ -122,6 +122,18 @@ namespace MyAllocator{
 
 		inline bool need_deallocate_() const override final{
 			return allocator->need_deallocate_();
+		}
+
+		inline std::size_t getFreeMemory_() const override final{
+			return allocator->getFreeMemory();
+		}
+
+		inline std::size_t getUsedMemory_() const override final{
+			return allocator->getUsedMemory();
+		}
+
+		inline const char *getName_() const override final{
+			return allocator->getName();
 		}
 
 	private:

@@ -4,7 +4,7 @@
 
 namespace hm4{
 
-Pair *Pair::copy_(Pair *pair,
+Pair *Pair::createInRawMemory__(Pair *pair,
 			std::string_view const key,
 			std::string_view const val,
 			uint32_t const expires, uint32_t const created) noexcept{
