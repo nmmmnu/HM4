@@ -22,7 +22,11 @@ private:
 public:
 	constexpr BlackHoleList(Allocator &allocator) : allocator_(& allocator){}
 
-	constexpr Allocator &getAllocator() const{
+	constexpr const Allocator &getAllocator() const{
+		return *allocator_;
+	}
+
+	constexpr Allocator &getAllocator(){
 		return *allocator_;
 	}
 

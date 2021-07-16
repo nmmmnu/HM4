@@ -82,7 +82,11 @@ public:
 
 	using Allocator = typename List1::Allocator;
 
-	auto &getAllocator() const{
+	const auto &getAllocator() const{
+		return list1_->getAllocator();
+	}
+
+	auto &getAllocator(){
 		return list1_->getAllocator();
 	}
 

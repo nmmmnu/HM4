@@ -67,7 +67,11 @@ public:
 
 	using Allocator = typename List::Allocator;
 
-	auto &getAllocator() const{
+	const auto &getAllocator() const{
+		return list_->getAllocator();
+	}
+
+	auto &getAllocator(){
 		return list_->getAllocator();
 	}
 

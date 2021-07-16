@@ -54,7 +54,11 @@ public:
 		return lc_.bytes();
 	}
 
-	Allocator &getAllocator() const{
+	const Allocator &getAllocator() const{
+		return *allocator_;
+	}
+
+	Allocator &getAllocator(){
 		return *allocator_;
 	}
 
