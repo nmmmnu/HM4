@@ -271,13 +271,18 @@ void test_CollectionList(const char *name){
 // ==============================
 
 #include "vectorlist.h"
+#include "intrusivelinklist.h"
 
-int main(){
-	using List = hm4::VectorList;
-
+template <class List>
+void test(){
 	test_DualListEmpty	<List>("DualList (Empty)"	, List{ allocator }, List{ allocator }	);
 	test_DualList		<List>("DualList"		, List{ allocator }, List{ allocator }	);
 	test_CollectionList	<List>("CollectionList"							);
+}
+
+int main(){
+	test<hm4::VectorList		>();
+	test<hm4::IntrusiveLinkList	>();
 
 	return mytest.end();
 }

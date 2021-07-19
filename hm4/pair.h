@@ -75,13 +75,17 @@ namespace hm4{
 			return check(key) && val.size() <= PairConf::MAX_VAL_SIZE;
 		}
 
-	private:
-		[[nodiscard]]
-		static Pair *createInRawMemory__(Pair *pair,
+	public:
+		static void createInRawMemory(Pair *pair,
 				std::string_view key,
 				std::string_view val,
 				uint32_t expires, uint32_t created) noexcept;
 
+		static void cloneInRawMemory(Pair *pair, const Pair &src) noexcept{
+			memcpy((void *) pair, & src, src.bytes());
+		}
+
+	private:
 		template<class Allocator>
 		[[nodiscard]]
 		static Pair *create__(
@@ -100,7 +104,24 @@ namespace hm4{
 			if (!pair)
 				return nullptr;
 
-			return createInRawMemory__(pair, key, val, expires, created);
+			createInRawMemory(pair, key, val, expires, created);
+
+			return pair;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		static Pair *clone__(Allocator &allocator, const Pair &src) noexcept{
+			Pair *pair = static_cast<Pair *>(
+					allocator.allocate(src.bytes())
+			);
+
+			if (!pair)
+				return nullptr;
+
+			cloneInRawMemory(pair, src);
+
+			return pair;
 		}
 
 		template<class Allocator>
@@ -109,14 +130,7 @@ namespace hm4{
 			if (!src)
 				return nullptr;
 
-			void *pair = allocator.allocate(src->bytes());
-
-			if (!pair)
-				return nullptr;
-
-			memcpy(pair, src, src->bytes());
-
-			return static_cast<Pair *>(pair);
+			return clone__(allocator, *src);
 		}
 
 		template<class Allocator>
@@ -150,7 +164,9 @@ namespace hm4{
 			template<class Allocator>
 			[[nodiscard]]
 			static auto clone(Allocator &allocator, const Pair &src) noexcept{
-				return clone(allocator, & src);
+				return allocator.wrapInSmartPtr(
+					clone__(allocator, src)
+				);
 			}
 
 			template<class Allocator>
@@ -205,6 +221,11 @@ namespace hm4{
 		[[nodiscard]]
 		uint64_t getCreated() const noexcept{
 			return betoh<uint64_t>(created);
+		}
+
+		[[nodiscard]]
+		uint32_t getExpires() const noexcept{
+			return betoh<uint32_t>(expires);
 		}
 
 	public:

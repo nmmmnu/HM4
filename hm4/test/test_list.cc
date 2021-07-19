@@ -152,6 +152,10 @@ void list_test(List &list){
 
 	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
+	list.insert(*hm4::Pair::create(key_over, "very old", 0, 100));
+
+	mytest("overwrite with old",	getCheck(list, key_over,	val_over,	std::true_type{}	));
+
 	// INSERT BY CLONING PAIR
 
 	{
@@ -293,15 +297,20 @@ static void skiplist_lanes_test(){
 // ==============================
 
 #include "linklist.h"
+#include "intrusivelinklist.h"
+#include "intrusiveskiplist.h"
 
 int main(){
-	list_test<hm4::BlackHoleList	>("BlackHoleList"	, allocator	);
-	list_test<hm4::VectorList	>("VectorList"		, allocator	);
-	list_test<MyDualList		>("DualList"				);
-	list_test<MySingleList		>("SingeList"				);
-
-	list_test<hm4::LinkList		>("LinkList"		, allocator	);
-	list_test<hm4::SkipList		>("SkipList"		, allocator	);
+//	list_test<hm4::BlackHoleList		>("BlackHoleList"	, allocator	);
+//	list_test<hm4::VectorList		>("VectorList"		, allocator	);
+//	list_test<MyDualList			>("DualList"				);
+//	list_test<MySingleList			>("SingeList"				);
+//
+//	list_test<hm4::LinkList			>("LinkList"		, allocator	);
+//	list_test<hm4::SkipList			>("SkipList"		, allocator	);
+//
+//	list_test<hm4::IntrusiveLinkList	>("IntrusiveLinkList"	, allocator	);
+	list_test<hm4::IntrusiveSkipList	>("IntrusiveSkipList"	, allocator	);
 
 //	skiplist_lanes_test();
 
