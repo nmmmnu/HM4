@@ -40,11 +40,9 @@ public:
 	bool erase(std::string_view const key);
 
 	iterator insert(	std::string_view key, std::string_view val,
-			uint32_t expires = 0, uint32_t created = 0);
+				uint32_t expires = 0, uint32_t created = 0);
 
 	iterator insert(Pair const &src);
-
-	iterator insert(typename Pair::smart_ptr::type<Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();
@@ -91,7 +89,12 @@ private:
 
 	void zeroing_();
 
+	template<class P>
+	iterator insert_(std::string_view key, P constructPair, size_t bytes);
+
 	struct NodeLocator;
+
+	bool erase_(NodeLocator const &nl);
 
 	template<bool ShortcutEvaluation>
 	NodeLocator locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>);
@@ -148,17 +151,6 @@ inline auto SkipList::begin() const -> iterator{
 
 constexpr auto SkipList::end() -> iterator{
 	return nullptr;
-}
-
-inline auto SkipList::insert(
-		std::string_view key, std::string_view val,
-		uint32_t expires, uint32_t created) -> iterator{
-
-	return hm4::insert(*this, key, val, expires, created);
-}
-
-inline auto SkipList::insert(Pair const &src) -> iterator{
-	return hm4::insert(*this, src);
 }
 
 // ==============================
