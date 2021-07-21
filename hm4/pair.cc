@@ -4,7 +4,7 @@
 
 namespace hm4{
 
-Pair *Pair::createInRawMemory__(Pair *pair,
+void Pair::createInRawMemory(Pair *pair,
 			std::string_view const key,
 			std::string_view const val,
 			uint32_t const expires, uint32_t const created) noexcept{
@@ -32,8 +32,6 @@ Pair *Pair::createInRawMemory__(Pair *pair,
 	// this is safe with NULL pointer.
 	memcpy(& pair->buffer[key.size() + 1],	val.data(), val.size());
 	pair->buffer[key.size() + 1 + val.size()] = '\0';
-
-	return pair;
 }
 
 // ==============================
@@ -54,7 +52,7 @@ void Pair::print() const noexcept{
 // ==============================
 
 bool Pair::isExpired_() const noexcept{
-	return expires &&  MyTime::expired( getCreated(), betoh<uint32_t>(expires) );
+	return expires &&  MyTime::expired( getCreated(), getExpires() );
 }
 
 uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
