@@ -106,7 +106,7 @@ namespace{
 			log__(
 				"Not found",
 				"pos", listPos,
-				"key", HPair::toStringView(it->key)
+				"key", HPair::toStringView(it->key, std::false_type{})
 			);
 
 			return { false,  { list, listPos } };
@@ -145,7 +145,7 @@ namespace{
 
 		log__(
 			"Proceed with Binary Search with same prefix", listPos, listPosLast,
-			"Hotline Key prefix", HPair::toStringView(it->key)
+			"Hotline Key prefix", HPair::toStringView(it->key, std::false_type{})
 		);
 
 		return searchBinary<HPair::N>(key, list, listPos, listPosLast);

@@ -5,6 +5,8 @@
 
 #include "stringhash.h"
 
+//#include <type_traits>
+
 namespace hm4{
 
 	namespace HPair{
@@ -23,11 +25,15 @@ namespace hm4{
 			return ok ? result : src_pair.cmpX<N>(key);
 		}
 
-		inline auto toStringView(HKey const &hkey){
+		template<bool B>
+		inline auto toStringView(HKey const &hkey, std::bool_constant<B>){
 			// must be const ref to preserve the address...
 			const char *s = reinterpret_cast<const char *>(& hkey);
 
-			return std::string_view{ s, N };
+			if constexpr(B)
+				return std::string_view{ s, strnlen(s, N) };
+			else
+				return std::string_view{ s, N };
 		}
 
 	} // namespace

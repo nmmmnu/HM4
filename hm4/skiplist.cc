@@ -132,7 +132,7 @@ auto SkipList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata) -> it
 
 	auto const &key = newdata->getKey();
 
-	const auto nl = locate_(key, true);
+	const auto nl = locate_(key, std::true_type{});
 
 	if (nl.node){
 		// update in place.
@@ -202,7 +202,7 @@ bool SkipList::erase(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
-	const auto nl = locate_(key, false);
+	const auto nl = locate_(key, std::false_type{});
 
 	if (nl.node == nullptr)
 		return true;
@@ -240,9 +240,20 @@ void SkipList::printLane(height_size_type const lane) const{
 	}
 }
 
+void SkipList::printLanesSummary() const{
+	for(height_size_type lane = MAX_HEIGHT; lane --> 0;){
+		uint64_t count = 0;
+		for(const Node *node = heads_[lane]; node; node = node->next[lane])
+			++count;
+
+		printf("Lane # %5u -> %8zu\n", lane, count);
+	}
+}
+
 // ==============================
 
-auto SkipList::locate_(std::string_view const key, bool const shortcut_evaluation) -> NodeLocator{
+template<bool ShortcutEvaluation>
+auto SkipList::locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>) -> NodeLocator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
@@ -261,15 +272,12 @@ auto SkipList::locate_(std::string_view const key, bool const shortcut_evaluatio
 				int const cmp = node->cmp(hkey, key);
 
 				if (cmp >= 0){
-					if (cmp == 0 && (shortcut_evaluation || h == 0) ){
+					if (cmp == 0 && (h == 0 || ShortcutEvaluation)){
 						// found
 						nl.node = node;
 
-						if (shortcut_evaluation){
-							// at this point, we do not really care,
-							// if nl.prev is setup correctly.
+						if constexpr(ShortcutEvaluation)
 							return nl;
-						}
 					}
 
 					break;

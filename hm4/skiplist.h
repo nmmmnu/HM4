@@ -71,6 +71,7 @@ public:
 public:
 	void printLanes() const;
 	void printLane(height_size_type lane) const;
+	void printLanesSummary() const;
 
 private:
 	struct 			Node;
@@ -92,7 +93,8 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(std::string_view const key, bool shortcut_evaluation);
+	template<bool ShortcutEvaluation>
+	NodeLocator locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>);
 
 	const Node *locateNode_(std::string_view const key, bool const exact) const;
 
