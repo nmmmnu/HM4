@@ -46,23 +46,23 @@ public:
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 
-		return hm4::insert(*this, key, val, expires, created);
+		return insert__(key, val, expires, created);
 	}
 
 	auto insert(Pair const &src){
-		return hm4::insert(*this, src);
+		return insert__(src);
 	}
 
-	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
-		auto result = this->fixDualIterator_(
-			list1_->insert(std::move(newdata))
-		);
-
-		if (predicate_(*list1_))
-			flush();
-
-		return result;
-	}
+//	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
+//		auto result = this->fixDualIterator_(
+//			list1_->insert(std::move(newdata))
+//		);
+//
+//		if (predicate_(*list1_))
+//			flush();
+//
+//		return result;
+//	}
 
 	bool flush(){
 		log__("Start Flushing data...");
@@ -92,6 +92,18 @@ public:
 	}
 
 private:
+	template<typename ...Ts>
+	auto insert__(Ts&&... ts){
+		auto it = this->fixDualIterator_(
+			list1_->insert(std::forward<Ts>(ts)...)
+		);
+
+		if (predicate_(*list1_))
+			flush();
+
+		return it;
+	}
+
 	void save_(List &list, bool const fg = true) const{
 		[[maybe_unused]]
 		std::string_view const id = fg ? "Foreground" : "Background";
