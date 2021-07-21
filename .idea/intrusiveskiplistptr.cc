@@ -99,11 +99,6 @@ void SkipList::swap(SkipList &other){
 	swap(allocator_,	other.allocator_	);
 }
 
-void SkipList::deallocate_(Node *node){
-	allocator_->deallocate(node->data);
-	allocator_->deallocate(node);
-}
-
 void SkipList::zeroing_(){
 	lc_.clr();
 
@@ -117,7 +112,7 @@ bool SkipList::clear(){
 
 			node = node->next[0];
 
-			deallocate_(copy);
+			allocator_->deallocate(copy);
 		}
 	}
 
@@ -126,52 +121,43 @@ bool SkipList::clear(){
 	return true;
 }
 
-auto SkipList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
-	if (!newdata)
-		return this->end();
-
-	auto const &key = newdata->getKey();
-
-	const auto nl = locate_(key, std::true_type{});
-
-	if (nl.node){
-		// update in place.
-
-		Pair *olddata = nl.node->data;
-
-		// check if the data in database is valid
-		if (! newdata->isValidForReplace(*olddata) ){
-			// newdata will be magically destroyed.
-			return this->end();
-		}
-
-		lc_.upd( olddata->bytes(), newdata->bytes() );
-
-		// assign new pair
-		nl.node->hkey = HPair::SS::create(key);
-		nl.node->data = newdata.release();
-
-		// deallocate old pair
-		allocator_->deallocate(olddata);
-
-		return { nl.node };
-	}
-
+template<class P>
+auto SkipList::insert_(std::string_view key, P constructPair, size_t const bytesPair) -> iterator{
 	// create new node
-
-	size_t const size = newdata->bytes();
 
 	height_size_type const height = getRandomHeight_();
 
-	Node *newnode = static_cast<Node *>( allocator_->allocate( Node::calcSize(height) ) );
+	size_t const bytesNode = Node::calcSize(height);
 
-	if (newnode == nullptr){
-		// newdata will be magically destroyed.
+	std::byte *raw = static_cast<std::byte *>( allocator_->allocate(bytesNode + bytesPair) );
+
+	if (raw == nullptr)
 		return this->end();
-	}
+
+	Node *newnode = reinterpret_cast<Node *>(raw			);
+	Pair *newdata = reinterpret_cast<Pair *>(raw + bytesNode	);
+
 
 	newnode->hkey = HPair::SS::create(key);
-	newnode->data = newdata.release();
+	newnode->data = newdata;
+
+	constructPair(newnode->data);
+
+	const auto nl = locate_(key, std::false_type{});
+
+	if (nl.node){
+		const Pair *olddata = nl.node->data;
+
+		// check if the data in database is valid
+		if (! newdata->isValidForReplace(*olddata) ){
+			allocator_->deallocate(newnode);
+
+			return this->end();
+		}
+
+		// delete old node
+		erase_(nl);
+	}
 
 	/* exchange pointers */
 	{
@@ -193,20 +179,43 @@ auto SkipList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&n
 		// newnode->next[i] = NULL;
 	}
 
-	lc_.inc(size);
+	lc_.inc(bytesPair);
 
 	return { newnode };
 }
 
-bool SkipList::erase(std::string_view const key){
-	// better Pair::check(key), but might fail because of the caller.
-	assert(!key.empty());
+auto SkipList::insert(
+		std::string_view key, std::string_view val,
+		uint32_t expires, uint32_t created) -> iterator{
 
-	const auto nl = locate_(key, std::false_type{});
+	if (! Pair::check(key, val))
+		return this->end();
 
-	if (nl.node == nullptr)
-		return true;
+	return insert_(
+		key,
 
+		[&](Pair *mem){
+			Pair::createInRawMemory(mem, key, val, expires, created);
+		},
+
+		Pair::bytes(key, val)
+	);
+}
+
+auto SkipList::insert(Pair const &src) -> iterator{
+	return insert_(
+		src.getKey(),
+
+		[&](Pair *mem){
+			Pair::cloneInRawMemory(mem, src);
+		},
+
+		src.bytes()
+	);
+}
+
+
+bool SkipList::erase_(NodeLocator const &nl){
 	for(height_size_type h = 0; h < MAX_HEIGHT; ++h){
 		if (*nl.prev[h] == nl.node)
 			*nl.prev[h] = nl.node->next[h];
@@ -216,9 +225,21 @@ bool SkipList::erase(std::string_view const key){
 
 	lc_.dec( nl.node->data->bytes() );
 
-	deallocate_(nl.node);
+	allocator_->deallocate(nl.node);
 
 	return true;
+}
+
+bool SkipList::erase(std::string_view const key){
+	// better Pair::check(key), but might fail because of the caller.
+	assert(!key.empty());
+
+	const auto nl = locate_(key, std::false_type{});
+
+	if (nl.node == nullptr)
+		return false;
+
+	return erase_(nl);
 }
 
 // ==============================

@@ -48,11 +48,11 @@ public:
 	}
 
 	iterator insert(	std::string_view key, std::string_view val,
-			uint32_t expires = 0, uint32_t created = 0);
+				uint32_t expires = 0, uint32_t created = 0);
 
 	iterator insert(Pair const &src);
 
-	iterator insert(typename Pair::smart_ptr::type<Allocator> &&newdata);
+	iterator insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();

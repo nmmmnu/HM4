@@ -46,23 +46,12 @@ public:
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 
-		return insert__(key, val, expires, created);
+		return insert_(key, val, expires, created);
 	}
 
 	auto insert(Pair const &src){
-		return insert__(src);
+		return insert_(src);
 	}
-
-//	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
-//		auto result = this->fixDualIterator_(
-//			list1_->insert(std::move(newdata))
-//		);
-//
-//		if (predicate_(*list1_))
-//			flush();
-//
-//		return result;
-//	}
 
 	bool flush(){
 		log__("Start Flushing data...");
@@ -93,7 +82,7 @@ public:
 
 private:
 	template<typename ...Ts>
-	auto insert__(Ts&&... ts){
+	auto insert_(Ts&&... ts){
 		auto it = this->fixDualIterator_(
 			list1_->insert(std::forward<Ts>(ts)...)
 		);

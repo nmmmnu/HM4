@@ -39,21 +39,11 @@ public:
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 
-		return hm4::insert(*this, key, val, expires, created);
+		return insert_(key, val, expires, created);
 	}
 
 	auto insert(Pair const &src){
-		return hm4::insert(*this, src);
-	}
-
-	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
-
-		auto result = list_->insert(std::move(newdata));
-
-		if (predicate_(*list_))
-			flush();
-
-		return result;
+		return insert_(src);
 	}
 
 	bool flush(){
@@ -71,6 +61,16 @@ public:
 	}
 
 private:
+	template<typename ...Ts>
+	auto insert_(Ts&&... ts){
+		auto it = list_->insert(std::forward<Ts>(ts)...);
+
+		if (predicate_(*list_))
+			flush();
+
+		return it;
+	}
+
 	void save_() const{
 		log__("Flushing data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 

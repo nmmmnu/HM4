@@ -35,7 +35,7 @@ auto VectorList::find(std::string_view const key, std::false_type) const noexcep
 	return it;
 }
 
-auto VectorList::insert(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
+auto VectorList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 

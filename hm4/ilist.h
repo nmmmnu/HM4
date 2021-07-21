@@ -77,7 +77,7 @@ auto insert( LIST &list,
 		std::string_view key, std::string_view val,
 		uint32_t const expires = 0, uint32_t const created = 0){
 
-	return list.insert(
+	return list.insertSmartPtrPair_(
 		Pair::smart_ptr::create(list.getAllocator(), key, val, expires, created)
 	);
 }
@@ -85,7 +85,7 @@ auto insert( LIST &list,
 template<class LIST>
 auto insert(LIST &list, Pair const &src){
 
-	return list.insert(
+	return list.insertSmartPtrPair_(
 		Pair::smart_ptr::clone(list.getAllocator(), src)
 	);
 }

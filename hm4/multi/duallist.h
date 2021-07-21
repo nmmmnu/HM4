@@ -116,16 +116,14 @@ public:
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 
-		return hm4::insert(*this, key, val, expires, created);
+		return fixDualIterator_(
+			list1_->insert(key, val, expires, created)
+		);
 	}
 
 	auto insert(Pair const &src){
-		return hm4::insert(*this, src);
-	}
-
-	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
 		return fixDualIterator_(
-			list1_->insert(std::move(newdata))
+			list1_->insert(src)
 		);
 	}
 

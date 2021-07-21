@@ -45,20 +45,11 @@ public:
 			uint32_t const expires = 0, uint32_t const created = 0
 			){
 
-		return hm4::insert(*this, key, val, expires, created);
+		return insert_(key, val, expires, created);
 	}
 
 	auto insert(Pair const &src){
-		return hm4::insert(*this, src);
-	}
-
-	auto insert(typename Pair::smart_ptr::type<Allocator> &&newdata){
-		if (!newdata)
-			return this->end();
-
-		binlogger_(*newdata);
-
-		return list_->insert(std::move(newdata));
+		return insert_(src);
 	}
 
 	bool erase(std::string_view const key){
@@ -73,6 +64,19 @@ public:
 		binlogger_.clear();
 
 		return result;
+	}
+
+private:
+	template<typename ...Ts>
+	auto insert_(Ts&&... ts){
+		auto it = list_->insert(std::forward<Ts>(ts)...);
+
+		if (it == std::end(*list_))
+			return it;
+
+		binlogger_(*it);
+
+		return it;
 	}
 
 private:

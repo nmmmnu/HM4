@@ -50,11 +50,6 @@ public:
 	}
 
 	constexpr static
-	iterator insert(typename Pair::smart_ptr::type<Allocator> &&){
-		return nullptr;
-	}
-
-	constexpr static
 	size_type size(){
 		return 0;
 	}
