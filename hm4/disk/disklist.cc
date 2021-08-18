@@ -59,7 +59,6 @@ namespace{
 		return searchBinaryIt_<start>(key, list.ra_begin(), list.ra_end());
 	}
 
-
 	// -----------------------------------
 
 	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;

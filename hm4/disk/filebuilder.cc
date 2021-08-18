@@ -53,7 +53,7 @@ namespace FileBuilder{
 
 
 	void FileLineBuilder::operator()(Pair const &pair){
-		auto hkey = HPair::SS::create<true>(pair.getKey());
+		auto hkey = HPair::SS::create<HPair::SS::ByteOrder::BigEndian>(pair.getKey());
 
 		if (hkey_ != hkey){
 			// store new key

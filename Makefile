@@ -18,7 +18,7 @@ CF_INCL		= -Iinclude $(EXTRA_INCL)
 CF_OPTIM	= -O3 -g
 #CF_OPTIM	= -O3 -DNDEBUG
 CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
-CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wno-unknown-warning-option
+CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wno-unknown-warning-option -Wno-stringop-truncation
 
 #CF_MISC	= -DNOT_HAVE_CHARCONV
 

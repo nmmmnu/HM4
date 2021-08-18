@@ -15,13 +15,18 @@ class StringHash{
 public:
 	constexpr static auto N = sizeof(T);
 
+	enum class ByteOrder{
+		Host,
+		BigEndian
+	};
+
 private:
 	enum class CreateType{
 		CSTR,
 		SIZE
 	};
 
-	template<bool BigEndian, CreateType CT>
+	template<ByteOrder ResultByteOrder = ByteOrder::Host, CreateType CT>
 	static T create__(const char *src, size_t size = 0) noexcept{
 		union{
 			char	s[N];
@@ -34,9 +39,10 @@ private:
 		if constexpr(CT == CreateType::SIZE)
 			memcpy(s, src, std::min(N, size));
 
-		if constexpr(BigEndian == false)
+		if constexpr(ResultByteOrder == ByteOrder::Host)
 			return betoh(u);
-		else
+
+		if constexpr(ResultByteOrder == ByteOrder::BigEndian)
 			return u;
 	}
 
@@ -50,19 +56,19 @@ private:
 	}
 
 public:
-	template<bool BigEndian = false>
+	template<ByteOrder ResultByteOrder = ByteOrder::Host>
 	static T create(const char *src) noexcept{
-		return create__<BigEndian, CreateType::CSTR>(src);
+		return create__<ResultByteOrder, CreateType::CSTR>(src);
 	}
 
-	template<bool BigEndian = false>
+	template<ByteOrder ResultByteOrder = ByteOrder::Host>
 	static T create(const char *src, size_t const size) noexcept{
-		return create__<BigEndian, CreateType::SIZE>(src, size);
+		return create__<ResultByteOrder, CreateType::SIZE>(src, size);
 	}
 
-	template<bool BigEndian = false>
+	template<ByteOrder ResultByteOrder = ByteOrder::Host>
 	static T create(std::string_view const s) noexcept{
-		return create<BigEndian>(s.data(), s.size());
+		return create<ResultByteOrder>(s.data(), s.size());
 	}
 
 	static std::pair<bool, int> compare(T const a, T const b) noexcept{

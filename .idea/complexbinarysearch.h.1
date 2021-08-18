@@ -1,0 +1,107 @@
+#ifndef COMPLEX_BINARY_SEARCH_H_
+#define COMPLEX_BINARY_SEARCH_H_
+
+
+
+#include <iterator>	// std::iterator_traits
+
+
+
+template<
+		class Iterator
+>
+struct ComplexBinarySearchResult{
+	bool		found;
+	Iterator	it;
+};
+
+
+
+/*
+struct Adapter{
+	constexpr static bool supportsFastPrev = false;
+	constexpr static bool supportsFastNext = true;
+
+	const value_type &getFastPrev(const value_type &);
+	const value_type &getFastNext(const value_type &);
+};
+*/
+
+
+
+template <
+		class Iterator,
+		class difference_type = typename std::iterator_traits<Iterator>::difference_type,
+		class T,
+		class Comp,
+		class Adapter
+>
+auto complexBinarySearch(
+		Iterator const &first, Iterator const &last,
+		T const &key,
+		Comp comp,
+		Adapter adapter
+) -> ComplexBinarySearchResult<Iterator>{
+	/*
+	 * Lazy based from Linux kernel...
+	 * http://lxr.free-electrons.com/source/lib/bsearch.c
+	 */
+	auto start = difference_type{ 0 };
+	auto end   = last - first;
+
+	Iterator const &array = first;
+
+	const int slideCount = 3;
+
+	while (start < end){
+		difference_type mid = static_cast<difference_type>( start + ((end - start) >> 1) );
+
+		auto *data = & array[mid];
+
+		int const cmp = comp(*data, key);
+
+		if (cmp < 0){
+			// go right
+
+			if constexpr(adapter.supportsFastNext){
+				// slide right
+
+				for(int i = 0; i < slideCount; ++i){
+					if (mid + 1 >= end)
+						return { false, array + mid + 1 };
+
+					data = & adapter.getFastNext(*data);
+
+					printf(".");
+
+					int const cmp2 = comp(*data, key);
+
+					if (cmp2 > 0)
+						break;
+
+					if (cmp2 == 0)
+						return { true, array + mid + 1 };
+
+					++mid;
+				}
+			}
+
+			start = mid + 1;
+		}else if (cmp > 0){
+			// go left
+			end = mid;
+		}else{
+			// found
+			// index = mid
+			return { true, array + mid };
+		}
+	}
+
+	return { false, array + start };
+}
+
+
+
+
+#endif
+
