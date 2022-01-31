@@ -1,6 +1,8 @@
 #ifndef MY_ARENA_ALLOCATOR
 #define MY_ARENA_ALLOCATOR
 
+#include <new>
+
 namespace MyAllocator{
 	namespace ArenaAllocatorImpl{
 
@@ -119,7 +121,11 @@ namespace MyAllocator{
 		struct DynamicBuffer{
 			DynamicBuffer(std::size_t size) :
 						data_(reinterpret_cast<std::byte *>(allocator.allocate(size))	),
-						size_(size							){}
+						size_(size							){
+
+				if (data_ == nullptr)
+					throw std::bad_alloc{};
+			}
 
 			~DynamicBuffer(){
 				allocator.deallocate(data_);
