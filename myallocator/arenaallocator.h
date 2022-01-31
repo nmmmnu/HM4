@@ -1,10 +1,18 @@
 #ifndef MY_ARENA_ALLOCATOR
 #define MY_ARENA_ALLOCATOR
 
-#include <memory>
-
 namespace MyAllocator{
 	namespace ArenaAllocatorImpl{
+
+		struct MinimalSTDAllocator{
+			static void *allocate(std::size_t const size) noexcept{
+				return ::operator new(size, std::nothrow);
+			}
+
+			static void deallocate(void *p) noexcept{
+				return ::operator delete(p);
+			}
+		};
 
 		template<class Buffer>
 		struct ArenaAllocatorBase{
@@ -93,24 +101,6 @@ namespace MyAllocator{
 			std::size_t	size_;
 		};
 
-		struct DynamicBuffer{
-			DynamicBuffer(std::size_t size) :
-						size_(size){}
-
-			std::byte *data(){
-				return data_.get();
-			}
-
-			auto size() const{
-				return size_;
-			}
-
-		private:
-			std::size_t			size_;
-			std::unique_ptr<std::byte[]>	data_ = std::make_unique<std::byte[]>(size_);
-		};
-
-
 		template<std::size_t Size>
 		struct StaticBuffer{
 			std::byte *data(){
@@ -125,12 +115,35 @@ namespace MyAllocator{
 			std::byte 	data_[Size];
 		};
 
-	} // ArenaAllocatorImpl
+		template<class Allocator>
+		struct DynamicBuffer{
+			DynamicBuffer(std::size_t size) :
+						data_(reinterpret_cast<std::byte *>(allocator.allocate(size))	),
+						size_(size							){}
 
+			~DynamicBuffer(){
+				allocator.deallocate(data_);
+			}
+
+			std::byte *data(){
+				return data_;
+			}
+
+			auto size() const{
+				return size_;
+			}
+
+		private:
+			Allocator			allocator;
+			std::byte 			*data_;
+			std::size_t			size_;
+		};
+
+	} // ArenaAllocatorImpl
 
 	using ArenaAllocatorRaw		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::RawBuffer>;
 
-	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::DynamicBuffer>;
+	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::DynamicBuffer<ArenaAllocatorImpl::MinimalSTDAllocator> >;
 
 	template<std::size_t Size>
 	using ArenaAllocatorStatic	= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::StaticBuffer<Size> >;
