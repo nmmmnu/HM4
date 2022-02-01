@@ -117,10 +117,12 @@ namespace MyAllocator{
 			std::byte 	data_[Size];
 		};
 
-		template<class Allocator>
+		template<class Allocator = MinimalSTDAllocator>
 		struct DynamicBuffer{
-			DynamicBuffer(std::size_t size) :
-						data_(reinterpret_cast<std::byte *>(allocator.allocate(size))	),
+			template<class ...Args>
+			DynamicBuffer(std::size_t size, Args &&...args) :
+						allocator_( std::forward<Args>(args)...				),
+						data_(reinterpret_cast<std::byte *>(allocator_.allocate(size))	),
 						size_(size							){
 
 				if (data_ == nullptr)
@@ -128,7 +130,7 @@ namespace MyAllocator{
 			}
 
 			~DynamicBuffer(){
-				allocator.deallocate(data_);
+				allocator_.deallocate(data_);
 			}
 
 			std::byte *data(){
@@ -140,7 +142,7 @@ namespace MyAllocator{
 			}
 
 		private:
-			Allocator			allocator;
+			Allocator			allocator_;
 			std::byte 			*data_;
 			std::size_t			size_;
 		};
@@ -149,7 +151,7 @@ namespace MyAllocator{
 
 	using ArenaAllocatorRaw		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::RawBuffer>;
 
-	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::DynamicBuffer<ArenaAllocatorImpl::MinimalSTDAllocator> >;
+	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::DynamicBuffer<> >;
 
 	template<std::size_t Size>
 	using ArenaAllocatorStatic	= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::StaticBuffer<Size> >;
