@@ -6,7 +6,7 @@
 #include <cassert>
 #include <array>
 
-#include "fixedvector.h"
+#include "staticvector.h"
 
 template<typename T, T Levels>
 class BFSLookupFactory{
@@ -48,7 +48,7 @@ public:
 		std::array<T, SIZE> a{};
 
 		// std::copy
-		for(typename FixedVector<T, SIZE>::size_type i = 0; i < f.value.size(); ++i)
+		for(typename StaticVector<T, SIZE>::size_type i = 0; i < f.value.size(); ++i)
 			a[i] = f.value[i];
 
 		return a;
@@ -57,7 +57,7 @@ public:
 private:
 	constexpr static T SIZE = (1 << Levels) - 1;
 
-	FixedVector<T, SIZE> value;
+	StaticVector<T, SIZE> value;
 };
 
 #endif

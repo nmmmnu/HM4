@@ -9,7 +9,7 @@
 
 #include "mystring.h"
 
-#include "fixedvector.h"
+#include "staticvector.h"
 
 namespace net{
 namespace protocol{
@@ -32,7 +32,7 @@ public:
 	#if 0
 	using StringVector = std::vector<std::string_view>;
 	#else
-	using StringVector = FixedVector<std::string_view, MAX_PARAMS>;
+	using StringVector = StaticVector<std::string_view, MAX_PARAMS>;
 	#endif
 
 public:

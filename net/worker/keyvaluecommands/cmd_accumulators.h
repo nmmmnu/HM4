@@ -1,5 +1,5 @@
 #include "base.h"
-#include "fixedvector.h"
+#include "staticvector.h"
 #include "mystring.h"
 
 #include <algorithm>
@@ -117,7 +117,7 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		template<size_t Size>
-		using VectorGETX = FixedVector<std::string_view,Size>;
+		using VectorGETX = StaticVector<std::string_view,Size>;
 
 		constexpr static size_t size = 2 * acumulators_impl_::MAX + 1;
 

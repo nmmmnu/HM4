@@ -12,7 +12,7 @@
 //
 
 template<typename T, std::size_t Size>
-class FixedVector{
+class StaticVector{
 	static_assert(std::is_trivially_copyable<T>::value,	"T must be trivially copyable type");
 
 public:
@@ -38,19 +38,19 @@ private:
 public:
 	// STANDARD C-TORS
 
-	constexpr FixedVector() = default;
+	constexpr StaticVector() = default;
 
-	constexpr FixedVector(size_type const count, T const &value) {
+	constexpr StaticVector(size_type const count, T const &value) {
 		assign(count, value);
 	}
 
 	template<class IT>
-	constexpr FixedVector(IT begin, IT end){
+	constexpr StaticVector(IT begin, IT end){
 		assign(begin, end);
 	}
 
-	constexpr FixedVector(std::initializer_list<T> const &list) :
-		FixedVector(list.begin(), list.end()){}
+	constexpr StaticVector(std::initializer_list<T> const &list) :
+		StaticVector(list.begin(), list.end()){}
 
 
 	// MISC
@@ -67,7 +67,7 @@ public:
 
 	// COMPARISSON
 
-	constexpr bool operator==(const FixedVector &other) const noexcept{
+	constexpr bool operator==(const StaticVector &other) const noexcept{
 		if (size_ != other.size_)
 			return false;
 
@@ -83,7 +83,7 @@ public:
 		return true;
 	}
 
-	constexpr bool operator!=(const FixedVector &other) const noexcept{
+	constexpr bool operator!=(const StaticVector &other) const noexcept{
 		return ! operator==(other);
 	}
 

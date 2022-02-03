@@ -1,4 +1,4 @@
-#include "fixedvector.h"
+#include "staticvector.h"
 #include <vector>
 #include <algorithm>	// heap
 
@@ -101,6 +101,6 @@ private:
 	}
 
 private:
-//	FixedVector<IteratorPair, 2>	tt_;
+//	StaticVector<IteratorPair, 2>	tt_;
 	std::vector<IteratorPair>		tt_;
 };
