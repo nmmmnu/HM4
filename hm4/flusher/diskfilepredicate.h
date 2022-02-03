@@ -1,14 +1,12 @@
 #ifndef DISK_FILE_PREDICATE_H_
 #define DISK_FILE_PREDICATE_H_
 
-#include "pair.h"
-
 namespace hm4{
 namespace flusher{
 
 
 
-struct DiskFileInfinitePredicate{
+struct DiskFileAllocatorPredicate{
 	template<class List>
 	bool operator()(List const &list) const{
 		return list.getAllocator().getFreeMemory() < minBytes;
@@ -20,12 +18,12 @@ private:
 
 
 
-struct DiskFilePredicate : DiskFileInfinitePredicate{
+struct DiskFilePredicate : DiskFileAllocatorPredicate{
 	DiskFilePredicate(size_t const maxSize) : maxSize_(maxSize){}
 
 	template<class List>
 	bool operator()(List const &list) const{
-		return	DiskFileInfinitePredicate::operator()(list)	||
+		return	DiskFileAllocatorPredicate::operator()(list)	||
 			list.bytes() > maxSize_
 		;
 	}
