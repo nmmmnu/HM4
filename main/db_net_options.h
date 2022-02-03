@@ -72,24 +72,24 @@ public:
 	void printOptions() const{
 		using impl_::put;
 
-		put("immutable",		immutable,		"Start mutable = 0, immutable = 1"		);
-		put("db_path",						"Path to database"				);
+		put("immutable",		immutable,		"Start mutable = 0, immutable = 1"				);
+		put("db_path",						"Path to database"						);
 
-		put("binlog_path",					"Path to binlog, empty for none"		);
-		put("binlog_path1",					"Path to binlog, empty for none"		);
-		put("binlog_path2",					"Path to binlog, empty for none"		);
-		put("binlog_fsync",		binlog_fsync,		"fsync() binlog - none = 0, yes = 1"		);
+		put("binlog_path",					"Path to binlog, empty for none"				);
+		put("binlog_path1",					"Path to binlog, empty for none"				);
+		put("binlog_path2",					"Path to binlog, empty for none"				);
+		put("binlog_fsync",		binlog_fsync,		"fsync() binlog - none = 0, yes = 1"				);
 
-		put("host",						"TCP host to listen (not working)"		);
-		put("port",			port,			"TCP port to listen"				);
-		put("timeout",			timeout,		"Connection timeout in seconds"			);
+		put("host",						"TCP host to listen (not working)"				);
+		put("port",			port,			"TCP port to listen"						);
+		put("timeout",			timeout,		"Connection timeout in seconds"					);
 
-		put("tcp_backlog",		tcp_backlog,		"TCP backlog"					);
-		put("tcp_reuseport",		tcp_reuseport,		"TCP Activate SO_REUSEPORT"			);
+		put("tcp_backlog",		tcp_backlog,		"TCP backlog"							);
+		put("tcp_reuseport",		tcp_reuseport,		"TCP Activate SO_REUSEPORT"					);
 
-		put("max_clients",		max_clients,		"Max Clients"					);
-		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB"			);
-		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"	);
+		put("max_clients",		max_clients,		"Max Clients"							);
+		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB"					);
+		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB, overcommit OK"	);
 	}
 
 private:

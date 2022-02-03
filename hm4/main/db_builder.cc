@@ -23,7 +23,7 @@ constexpr size_t MIN_ARENA_SIZE = 128;
 
 struct MyListFactory{
 	using MemList		= hm4::UnsortedList;
-	using Predicate		= hm4::flusher::DiskFilePredicate;
+	using Predicate		= hm4::flusher::DiskFileInfinitePredicate;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
 	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
