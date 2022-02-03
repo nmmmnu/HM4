@@ -13,7 +13,15 @@
 
 template<typename T, std::size_t Size>
 class StaticVector{
-	static_assert(std::is_trivially_copyable<T>::value,	"T must be trivially copyable type");
+	static_assert(
+		std::is_trivially_copyable		<T>::value	&&
+		std::is_trivially_copy_constructible	<T>::value	&&
+		std::is_trivially_move_constructible	<T>::value	&&
+		std::is_trivially_destructible		<T>::value	&&
+		std::is_standard_layout			<T>::value	&&
+
+		true,	"T must be POD-like type"
+	);
 
 public:
 	// TYPES
