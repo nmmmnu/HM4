@@ -28,14 +28,15 @@ struct MyListFactory{
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
 	using MyList		= hm4::ConcurrentFlushList<MemList,Predicate,Flush>;
 
-	MyListFactory(std::string_view path, MyAllocator::PMAllocator &allocator1, MyAllocator::PMAllocator &allocator2) :
+	template<typename UString>
+	MyListFactory(UString &path, MyAllocator::PMAllocator &allocator1, MyAllocator::PMAllocator &allocator2) :
 				memlist1{ allocator1 },
 				memlist2{ allocator2 },
 				mylist{
 					memlist1,
 					memlist2,
 					Predicate{},
-					Flush{ IDGenerator{}, std::string(path) }
+					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
 
 	MyList &operator()(){

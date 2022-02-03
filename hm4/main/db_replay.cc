@@ -72,8 +72,9 @@ namespace{
 			       "Usage:\n"
 			       "\t{1} [file.data] [lsm_path] [memlist arena in MB] [n = import as non aligned] - load file.data, then create / add to lsm_path\n"
 			       "\t\tPath names must be written with quotes:\n"
-			       "\t\tExample directory/file.'*'.db\n"
-			       "\t\tThe '*', will be replaced with ID's\n"
+			       "\t\t\tExample directory/file.'*'.db\n"
+			       "\t\t\tThe '*', will be replaced with ID's\n"
+				"\t\tDo not overcommit memlist arena!\n"
 			       "\n",
 			       hm4::version::str,
 			       cmd

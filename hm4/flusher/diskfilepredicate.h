@@ -8,8 +8,10 @@ namespace flusher{
 
 class DiskFilePredicate{
 	constexpr static size_t minBytes = Pair::maxBytes() + 1024u;
+
 public:
-	DiskFilePredicate(size_t const maxSize = std::numeric_limits<size_t>::max()) : maxSize_(maxSize){}
+	DiskFilePredicate() = default;
+	DiskFilePredicate(size_t const maxSize) : maxSize_(maxSize){}
 
 	template<class List>
 	bool operator()(List const &list) const{
@@ -19,7 +21,7 @@ public:
 	}
 
 private:
-	size_t maxSize_;
+	size_t maxSize_ = std::numeric_limits<size_t>::max();
 };
 
 } // namespace flusher

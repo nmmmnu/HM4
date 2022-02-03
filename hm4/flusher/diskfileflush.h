@@ -8,7 +8,7 @@
 namespace hm4{
 namespace flusher{
 
-template<class IDGENERATOR>
+template<class IDGenerator>
 class DiskFileFlush{
 private:
 	constexpr static char DIR_WILDCARD = '*';
@@ -16,14 +16,14 @@ private:
 	using TombstoneOptions = hm4::disk::FileBuilder::TombstoneOptions;
 
 public:
-	template<class UIDGENERATOR>
+	template<class UIDGenerator, typename UString>
 	DiskFileFlush(
-			UIDGENERATOR &&idGenerator,
-			std::string path,
+			UIDGenerator &&idGenerator,
+			UString &&path,
 			TombstoneOptions const tombstoneOptions = TombstoneOptions::KEEP
 		):
-				idGenerator_(std::forward<UIDGENERATOR>(idGenerator)),
-				path_(std::move(path)),
+				idGenerator_(std::forward<UIDGenerator>(idGenerator)),
+				path_(std::forward<UString>(path)),
 				tombstoneOptions_(tombstoneOptions){}
 
 public:
@@ -40,7 +40,7 @@ public:
 	}
 
 private:
-	IDGENERATOR		idGenerator_;
+	IDGenerator		idGenerator_;
 	std::string		path_;
 	TombstoneOptions	tombstoneOptions_;
 };

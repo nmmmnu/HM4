@@ -301,8 +301,9 @@ namespace{
 			"\t{cmd} w [lsm_path] [optional tcp port] - start mutable    server\n"
 			"\n"
 			"\t\tPath names must be written with quotes:\n"
-			"\t\tExample directory/file.'*'.db\n"
-			"\t\tThe '*', will be replaced with ID's\n"
+			"\t\t\tExample directory/file.'*'.db\n"
+			"\t\t\tThe '*', will be replaced with ID's\n"
+			"\t\tYou may overcommit memlist arena, if your system supports it.\n"
 			"\n"
 			,
 
