@@ -45,35 +45,25 @@ namespace MyAllocator{
 
 
 
-	namespace SmartPtrWrapper_{
-		template<class Allocator>
-		struct Wrapper{
-			template<typename T>
-			static auto make(Allocator &allocator, T *p) noexcept{
-				auto deleter = [&](void *p){
-					allocator.xdeallocate(p);
-				};
-
-				return std::unique_ptr<T, decltype(deleter)>{
-					p,
-					deleter
-				};
-			}
-		};
-	}
-
-
-
-	// Because of polymorphic types,
-	// this function must be partially specialized.
-	// This is why a helper class is used.
 	template<typename T, class Allocator>
-	static auto wrapInSmartPtr(Allocator &allocator, T *p) noexcept{
-		return SmartPtrWrapper_::Wrapper<Allocator>::make(allocator, p);
+	inline auto wrapInSmartPtr(Allocator &allocator, T *p) noexcept{
+		auto deleter = [&](void *p){
+			allocator.xdeallocate(p);
+		};
+
+		return std::unique_ptr<T, decltype(deleter)>{
+			p,
+			deleter
+		};
 	}
 
 	template<typename T, class Allocator>
 	using SmartPtrType = decltype(
+		// because of polymorphic classes,
+		// this needs to be done in this way.
+		// then in each class that require different deleter,
+		// you need to add wrapInSmartPtr() function
+
 		wrapInSmartPtr(
 			std::declval<Allocator &>(),
 			std::declval<T *>()

@@ -42,14 +42,9 @@ namespace MyAllocator{
 
 
 
-	namespace SmartPtrWrapper_{
-		template<>
-		struct Wrapper<STDAllocator>{
-			template<typename T>
-			static auto make(STDAllocator &, T *p) noexcept{
-				return std::unique_ptr<T>{ p };
-			}
-		};
+	template<typename T>
+	inline auto wrapInSmartPtr(STDAllocator &, T *p) noexcept{
+		return std::unique_ptr<T>{ p };
 	}
 
 } // namespace MyAllocator

@@ -57,20 +57,15 @@ namespace MyAllocator{
 
 
 
-	namespace SmartPtrWrapper_{
-		template<>
-		struct Wrapper<PMAllocator>{
-			template<typename T>
-			static auto make(PMAllocator &allocator, T *p) noexcept{
-				auto deleter = [&](void *p){
-					allocator.xdeallocate(p);
-				};
+	template<typename T>
+	inline auto wrapInSmartPtr(PMAllocator &allocator, T *p) noexcept{
+		auto deleter = [&](void *p){
+			allocator.xdeallocate(p);
+		};
 
-				return std::unique_ptr<T, decltype(deleter)>{
-					p,
-					deleter
-				};
-			}
+		return std::unique_ptr<T, decltype(deleter)>{
+			p,
+			deleter
 		};
 	}
 

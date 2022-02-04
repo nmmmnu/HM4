@@ -444,8 +444,9 @@ namespace hm4{
 	}
 
 
-
 	using OPair = MyAllocator::SmartPtrType<Pair, MyAllocator::STDAllocator>;
+
+	static_assert(std::is_same_v<OPair, std::unique_ptr<Pair> >, "OPair is not std::unique_ptr");
 
 	inline void print(OPair const &pair){
 		if (pair)
