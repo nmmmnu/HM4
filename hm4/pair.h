@@ -97,8 +97,11 @@ namespace hm4{
 			if ( ! check(key, val) )
 				return nullptr;
 
-			Pair *pair = static_cast<Pair *>(
-					allocator.allocate( Pair::bytes(key.size(), val.size()) )
+			using namespace MyAllocator;
+
+			Pair *pair = allocate<Pair>(
+					allocator,
+					Pair::bytes(key.size(), val.size())
 			);
 
 			if (!pair)
@@ -112,8 +115,11 @@ namespace hm4{
 		template<class Allocator>
 		[[nodiscard]]
 		static Pair *clone__(Allocator &allocator, const Pair &src) noexcept{
-			Pair *pair = static_cast<Pair *>(
-					allocator.allocate(src.bytes())
+			using namespace MyAllocator;
+
+			Pair *pair = allocate<Pair>(
+					allocator,
+					src.bytes()
 			);
 
 			if (!pair)
@@ -135,7 +141,9 @@ namespace hm4{
 
 		template<class Allocator>
 		static void destroy__(Allocator &allocator, Pair *pair) noexcept{
-			return allocator.deallocate(pair);
+			using namespace MyAllocator;
+
+			return deallocate(allocator, pair);
 		}
 
 	public:

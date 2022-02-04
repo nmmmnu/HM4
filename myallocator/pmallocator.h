@@ -1,8 +1,8 @@
 #ifndef MY_PM_ALLOCATOR_H
 #define MY_PM_ALLOCATOR_H
 
-#include <cstddef>
-#include <memory>
+#include <new>
+#include "allocator_base.h"
 
 namespace MyAllocator{
 
@@ -11,11 +11,11 @@ namespace MyAllocator{
 			return getName_();
 		}
 
-		void *allocate(std::size_t const size){
+		void *xallocate(std::size_t const size){
 			return allocate_(size);
 		}
 
-		void deallocate(void *p){
+		void xdeallocate(void *p){
 			return deallocate_(p);
 		}
 
@@ -25,6 +25,10 @@ namespace MyAllocator{
 
 		bool need_deallocate() const{
 			return need_deallocate_();
+		}
+
+		bool knownMemoryUsage() noexcept{
+			return knownMemoryUsage_();
 		}
 
 		std::size_t getFreeMemory() const{
@@ -40,7 +44,7 @@ namespace MyAllocator{
 		template<typename T>
 		auto wrapInSmartPtr(T *p) noexcept{
 			auto deleter = [this](void *p){
-				deallocate(p);
+				xdeallocate(p);
 			};
 
 			return std::unique_ptr<T, decltype(deleter)>{
@@ -57,6 +61,7 @@ namespace MyAllocator{
 		virtual bool reset_() = 0;
 
 		virtual bool need_deallocate_() const = 0;
+		virtual bool knownMemoryUsage_() const = 0;
 
 		virtual std::size_t getFreeMemory_() const = 0;
 		virtual std::size_t getUsedMemory_() const = 0;
@@ -72,11 +77,11 @@ namespace MyAllocator{
 
 	private:
 		inline void *allocate_(std::size_t const size) override final{
-			return allocator.allocate(size);
+			return allocator.xallocate(size);
 		}
 
 		inline void deallocate_(void *p) override final{
-			return allocator.deallocate(p);
+			return allocator.xdeallocate(p);
 		}
 
 		inline bool need_deallocate_() const override final{
@@ -85,6 +90,10 @@ namespace MyAllocator{
 
 		inline bool reset_() override final{
 			return allocator.reset();
+		}
+
+		inline bool knownMemoryUsage_() const override final{
+			return allocator.knownMemoryUsage();
 		}
 
 		inline std::size_t getFreeMemory_() const override final{
@@ -122,6 +131,10 @@ namespace MyAllocator{
 
 		inline bool need_deallocate_() const override final{
 			return allocator->need_deallocate_();
+		}
+
+		inline bool knownMemoryUsage_() const override final{
+			return allocator->getFreeMemory();
 		}
 
 		inline std::size_t getFreeMemory_() const override final{

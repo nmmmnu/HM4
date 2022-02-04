@@ -60,7 +60,9 @@ auto VectorList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &
 		*it = newdata.release();
 
 		// deallocate old pair
-		allocator_->deallocate(olddata);
+		using namespace MyAllocator;
+
+		deallocate(allocator_, olddata);
 
 		return { it };
 	}
@@ -94,7 +96,8 @@ bool VectorList::erase(std::string_view const key){
 
 	lc_.dec((*it)->bytes());
 
-	allocator_->deallocate(*it);
+	using namespace MyAllocator;
+	deallocate(allocator_, *it);
 
 	vector_.erase(it);
 
@@ -104,7 +107,8 @@ bool VectorList::erase(std::string_view const key){
 bool VectorList::clear(){
 	if (allocator_->reset() == false){
 		std::for_each(std::begin(vector_), std::end(vector_), [this](void *p){
-			allocator_->deallocate(p);
+			using namespace MyAllocator;
+			deallocate(allocator_, p);
 		});
 	}
 

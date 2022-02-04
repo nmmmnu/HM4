@@ -1,8 +1,7 @@
 #ifndef MY_NULL_ALLOCATOR
 #define MY_NULL_ALLOCATOR
 
-#include <cstddef>
-#include <limits>
+#include "allocator_base.h"
 
 namespace MyAllocator{
 
@@ -12,16 +11,20 @@ namespace MyAllocator{
 		}
 
 		constexpr
-		static void *allocate(std::size_t) noexcept{
+		static void *xallocate(std::size_t) noexcept{
 			return nullptr;
 		}
 
 		constexpr
-		static void deallocate(void *) noexcept{
+		static void xdeallocate(void *) noexcept{
 		}
 
 		constexpr static bool need_deallocate() noexcept{
 			return false;
+		}
+
+		constexpr static bool knownMemoryUsage() noexcept{
+			return true;
 		}
 
 		constexpr static bool reset() noexcept{
@@ -29,11 +32,11 @@ namespace MyAllocator{
 		}
 
 		constexpr static std::size_t getFreeMemory() noexcept{
-			return std::numeric_limits<std::size_t>::max();
+			return 0;
 		}
 
 		constexpr static std::size_t getUsedMemory() noexcept{
-			return std::numeric_limits<std::size_t>::max();
+			return 0;
 		}
 
 		template<typename T>

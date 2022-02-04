@@ -1,7 +1,7 @@
 #ifndef MY_TRACKING_ALLOCATOR
 #define MY_TRACKING_ALLOCATOR
 
-#include  <cstddef>
+#include "allocator_base.h"
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
 
@@ -39,22 +39,26 @@ namespace MyAllocator{
 			fmt::print(mask, TAG, "Lost",		allocations - deallocations	);
 		}
 
-		void *allocate(std::size_t const size) noexcept{
+		void *xallocate(std::size_t const size) noexcept{
 			allocated += size;
 			++allocations;
-			void *p = a.allocate(size);
+			void *p = a.xallocate(size);
 			fmt::print("{} Allocate {:8} -> {}\n", TAG, size, p);
 			return p;
 		}
 
-		void deallocate(void *p) noexcept{
+		void xdeallocate(void *p) noexcept{
 			++deallocations;
 			fmt::print("{} Deallocate {}\n", TAG, p);
-			return a.deallocate(p);
+			return a.xdeallocate(p);
 		}
 
 		bool need_deallocate() const noexcept{
 			return a.need_deallocate();
+		}
+
+		bool knownMemoryUsage() const noexcept{
+			return a.knownMemoryUsage();
 		}
 
 		bool reset() noexcept{
@@ -72,7 +76,7 @@ namespace MyAllocator{
 		template<typename T>
 		auto wrapInSmartPtr(T *p) noexcept{
 			auto deleter = [this](void *p){
-				deallocate(p);
+				xdeallocate(p);
 			};
 
 			return std::unique_ptr<T, decltype(deleter)>{

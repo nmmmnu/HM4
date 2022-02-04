@@ -35,8 +35,10 @@ LinkList::LinkList(LinkList &&other):
 }
 
 void LinkList::deallocate_(Node *node){
-	allocator_->deallocate(node->data);
-	allocator_->deallocate(node);
+	using namespace MyAllocator;
+
+	deallocate(allocator_, node->data);
+	deallocate(allocator_, node);
 }
 
 void LinkList::clear_(){
@@ -87,7 +89,9 @@ auto LinkList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&n
 		loc.node->data = newdata.release();
 
 		// deallocate old pair
-		allocator_->deallocate(olddata);
+		using namespace MyAllocator;
+
+		deallocate(allocator_, olddata);
 
 		return { loc.node };
 	}
@@ -96,7 +100,10 @@ auto LinkList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&n
 
 	size_t const size = newdata->bytes();
 
-	Node *newnode = static_cast<Node *>(allocator_->allocate(sizeof(Node)));
+	using namespace MyAllocator;
+
+	Node *newnode = allocate<Node>(allocator_);
+
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
 		return this->end();

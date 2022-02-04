@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <limits>
+#include "allocator_base.h"
 
 namespace MyAllocator{
 
@@ -11,16 +12,20 @@ namespace MyAllocator{
 			return "MallocAllocator";
 		}
 
-		static void *allocate(std::size_t const size) noexcept{
+		static void *xallocate(std::size_t const size) noexcept{
 			return malloc(size);
 		}
 
-		static void deallocate(void *p) noexcept{
+		static void xdeallocate(void *p) noexcept{
 			return free(p);
 		}
 
 		constexpr static bool need_deallocate() noexcept{
 			return true;
+		}
+
+		constexpr static bool knownMemoryUsage() noexcept{
+			return false;
 		}
 
 		constexpr static bool reset() noexcept{
@@ -38,7 +43,7 @@ namespace MyAllocator{
 		template<typename T>
 		static auto wrapInSmartPtr(T *p) noexcept{
 			auto deleter = [](void *p){
-				deallocate(p);
+				xdeallocate(p);
 			};
 
 			return std::unique_ptr<T, decltype(deleter)>{

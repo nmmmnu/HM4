@@ -2,6 +2,7 @@
 #define MY_CPP_ALLOCATOR
 
 #include  <cstddef>
+#include "allocator_base.h"
 
 namespace MyAllocator{
 
@@ -10,16 +11,20 @@ namespace MyAllocator{
 			return "STDAllocator";
 		}
 
-		static void *allocate(std::size_t const size) noexcept{
+		static void *xallocate(std::size_t const size) noexcept{
 			return ::operator new(size, std::nothrow);
 		}
 
-		static void deallocate(void *p) noexcept{
+		static void xdeallocate(void *p) noexcept{
 			return ::operator delete(p);
 		}
 
 		constexpr static bool need_deallocate() noexcept{
 			return true;
+		}
+
+		constexpr static bool knownMemoryUsage() noexcept{
+			return false;
 		}
 
 		constexpr static bool reset() noexcept{

@@ -100,8 +100,10 @@ void SkipList::swap(SkipList &other){
 }
 
 void SkipList::deallocate_(Node *node){
-	allocator_->deallocate(node->data);
-	allocator_->deallocate(node);
+	using namespace MyAllocator;
+
+	deallocate(allocator_, node->data);
+	deallocate(allocator_, node);
 }
 
 void SkipList::zeroing_(){
@@ -151,8 +153,10 @@ auto SkipList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&n
 		nl.node->hkey = HPair::SS::create(key);
 		nl.node->data = newdata.release();
 
+		using namespace MyAllocator;
+
 		// deallocate old pair
-		allocator_->deallocate(olddata);
+		deallocate(allocator_, olddata);
 
 		return { nl.node };
 	}
@@ -163,7 +167,12 @@ auto SkipList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&n
 
 	height_size_type const height = getRandomHeight_();
 
-	Node *newnode = static_cast<Node *>( allocator_->allocate( Node::calcSize(height) ) );
+	using namespace MyAllocator;
+
+	Node *newnode = allocate<Node>(
+				allocator_,
+				Node::calcSize(height)
+	);
 
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.

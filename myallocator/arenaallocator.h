@@ -2,16 +2,17 @@
 #define MY_ARENA_ALLOCATOR
 
 #include <new>
+#include "allocator_base.h"
 
 namespace MyAllocator{
 	namespace ArenaAllocatorImpl{
 
 		struct MinimalSTDAllocator{
-			static void *allocate(std::size_t const size) noexcept{
+			static void *xallocate(std::size_t const size) noexcept{
 				return ::operator new(size, std::nothrow);
 			}
 
-			static void deallocate(void *p) noexcept{
+			static void xdeallocate(void *p) noexcept{
 				return ::operator delete(p);
 			}
 		};
@@ -28,7 +29,7 @@ namespace MyAllocator{
 			constexpr static std::size_t DEFAULT_ALIGN = sizeof(void *);
 
 			template<std::size_t Align = DEFAULT_ALIGN>
-			void *allocate(std::size_t const size) noexcept{
+			void *xallocate(std::size_t const size) noexcept{
 				pos = align_(pos, Align);
 
 				if (pos + size > buffer.size())
@@ -42,11 +43,15 @@ namespace MyAllocator{
 			}
 
 			constexpr
-			static void deallocate(void *) noexcept{
+			static void xdeallocate(void *) noexcept{
 			}
 
 			constexpr static bool need_deallocate() noexcept{
 				return false;
+			}
+
+			constexpr static bool knownMemoryUsage() noexcept{
+				return true;
 			}
 
 			bool reset() noexcept{
@@ -121,16 +126,16 @@ namespace MyAllocator{
 		struct DynamicBuffer{
 			template<class ...Args>
 			DynamicBuffer(std::size_t size, Args &&...args) :
-						allocator_( std::forward<Args>(args)...				),
-						data_(reinterpret_cast<std::byte *>(allocator_.allocate(size))	),
-						size_(size							){
+						allocator_( std::forward<Args>(args)...		),
+						data_(allocate<std::byte>(allocator_, size)	),
+						size_(size					){
 
 				if (data_ == nullptr)
 					throw std::bad_alloc{};
 			}
 
 			~DynamicBuffer(){
-				allocator_.deallocate(data_);
+				deallocate(allocator_, data_);
 			}
 
 			std::byte *data(){
@@ -142,9 +147,9 @@ namespace MyAllocator{
 			}
 
 		private:
-			Allocator			allocator_;
-			std::byte 			*data_;
-			std::size_t			size_;
+			Allocator	allocator_;
+			std::byte 	*data_;
+			std::size_t	size_;
 		};
 
 	} // ArenaAllocatorImpl
