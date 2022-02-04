@@ -156,7 +156,8 @@ namespace hm4{
 					std::string_view const val,
 					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
-				return allocator.wrapInSmartPtr(
+				return wrapInSmartPtr(
+					allocator,
 					create__(allocator, key, val, expires, created)
 				);
 			}
@@ -164,7 +165,8 @@ namespace hm4{
 			template<class Allocator>
 			[[nodiscard]]
 			static auto clone(Allocator &allocator, const Pair *src) noexcept{
-				return allocator.wrapInSmartPtr(
+				return wrapInSmartPtr(
+					allocator,
 					clone__(allocator, src)
 				);
 			}
@@ -172,13 +174,11 @@ namespace hm4{
 			template<class Allocator>
 			[[nodiscard]]
 			static auto clone(Allocator &allocator, const Pair &src) noexcept{
-				return allocator.wrapInSmartPtr(
+				return wrapInSmartPtr(
+					allocator,
 					clone__(allocator, src)
 				);
 			}
-
-			template<class Allocator>
-			using type = decltype( clone(std::declval<Allocator &>(), nullptr) );
 		};
 
 	public:
@@ -445,7 +445,7 @@ namespace hm4{
 
 
 
-	using OPair = std::unique_ptr<Pair>;
+	using OPair = MyAllocator::SmartPtrType<Pair, MyAllocator::STDAllocator>;
 
 	inline void print(OPair const &pair){
 		if (pair)

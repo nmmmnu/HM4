@@ -63,7 +63,7 @@ bool LinkList::clear(){
 	return true;
 }
 
-auto LinkList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
+auto LinkList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 

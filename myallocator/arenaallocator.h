@@ -56,17 +56,6 @@ namespace MyAllocator{
 				return pos;
 			}
 
-			template<typename T>
-			static auto wrapInSmartPtr(T *p) noexcept{
-				auto deleter = [](){
-				};
-
-				return std::unique_ptr<T, decltype(deleter)>{
-					p,
-					deleter
-				};
-			}
-
 		private:
 			// http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator
 			constexpr static std::size_t align_(std::size_t n, std::size_t align = DEFAULT_ALIGN) {
@@ -111,7 +100,7 @@ namespace MyAllocator{
 			std::byte 	data_[Size];
 		};
 
-		template<class Allocator = nullptr_t>
+		template<class Allocator = std::nullptr_t>
 		struct DynamicBuffer{
 			template<class ...Args>
 			DynamicBuffer(std::size_t size, Args &&...args) :

@@ -41,18 +41,6 @@ namespace MyAllocator{
 
 		virtual ~PMAllocator(){}
 
-		template<typename T>
-		auto wrapInSmartPtr(T *p) noexcept{
-			auto deleter = [this](void *p){
-				xdeallocate(p);
-			};
-
-			return std::unique_ptr<T, decltype(deleter)>{
-				p,
-				deleter
-			};
-		}
-
 	private:
 		virtual const char *getName_() const = 0;
 
@@ -67,6 +55,24 @@ namespace MyAllocator{
 		virtual std::size_t getUsedMemory_() const = 0;
 	};
 
+
+
+	namespace SmartPtrWrapper_{
+		template<>
+		struct Wrapper<PMAllocator>{
+			template<typename T>
+			static auto make(PMAllocator &allocator, T *p) noexcept{
+				auto deleter = [&](void *p){
+					allocator.xdeallocate(p);
+				};
+
+				return std::unique_ptr<T, decltype(deleter)>{
+					p,
+					deleter
+				};
+			}
+		};
+	}
 
 
 	template<class Allocator>

@@ -128,7 +128,7 @@ bool SkipList::clear(){
 	return true;
 }
 
-auto SkipList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
+auto SkipList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 

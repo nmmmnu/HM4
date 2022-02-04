@@ -80,7 +80,7 @@ public:
 
 	iterator insert(Pair const &src);
 
-	iterator insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata);
+	iterator insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();
@@ -166,7 +166,7 @@ inline auto UnsortedList::insert(Pair const &src) -> iterator{
 	return hm4::insert(*this, src);
 }
 
-inline auto UnsortedList::insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata) -> iterator{
+inline auto UnsortedList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 

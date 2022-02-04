@@ -44,7 +44,7 @@ public:
 
 	iterator insert(Pair const &src);
 
-	iterator insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata);
+	iterator insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();

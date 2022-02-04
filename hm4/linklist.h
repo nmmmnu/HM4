@@ -13,7 +13,6 @@ namespace hm4{
 class LinkList{
 public:
 	using Allocator		= MyAllocator::PMAllocator;
-
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
@@ -37,7 +36,7 @@ public:
 
 	iterator insert(Pair const &src);
 
-	iterator insertSmartPtrPair_(typename Pair::smart_ptr::type<Allocator> &&newdata);
+	iterator insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata);
 
 	auto size() const{
 		return lc_.size();

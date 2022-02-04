@@ -38,12 +38,19 @@ namespace MyAllocator{
 		constexpr static std::size_t getUsedMemory() noexcept{
 			return std::numeric_limits<std::size_t>::max();
 		}
-
-		template<typename T>
-		static auto wrapInSmartPtr(T *p) noexcept{
-			return std::unique_ptr<T>{ p };
-		}
 	};
+
+
+
+	namespace SmartPtrWrapper_{
+		template<>
+		struct Wrapper<STDAllocator>{
+			template<typename T>
+			static auto make(STDAllocator &, T *p) noexcept{
+				return std::unique_ptr<T>{ p };
+			}
+		};
+	}
 
 } // namespace MyAllocator
 

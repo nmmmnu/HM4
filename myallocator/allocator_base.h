@@ -6,12 +6,17 @@
 
 namespace MyAllocator{
 
-	inline void *allocate(nullptr_t, std::size_t const size){
+	inline void *allocate(std::nullptr_t, std::size_t const size){
 		return ::operator new(size, std::nothrow);
 	}
 
-	inline void deallocate(nullptr_t, void *p){
+	inline void deallocate(std::nullptr_t, void *p){
 		::operator delete(p);
+	}
+
+	template<typename T>
+	static auto wrapInSmartPtr(std::nullptr_t &, T *p) noexcept{
+		return std::unique_ptr<T>{ p };
 	}
 
 
@@ -19,11 +24,6 @@ namespace MyAllocator{
 	template<class Allocator>
 	void *allocate(Allocator &allocator, std::size_t const size){
 		return allocator.xallocate(size);
-	}
-
-	template<class Allocator>
-	void deallocate(Allocator &allocator, void *p){
-		allocator.xdeallocate(p);
 	}
 
 	template<typename T, class Allocator>
@@ -37,6 +37,48 @@ namespace MyAllocator{
 	T *allocate(Allocator &allocator){
 		return allocate<T>(allocator, sizeof(T));
 	}
+
+	template<class Allocator>
+	void deallocate(Allocator &allocator, void *p){
+		allocator.xdeallocate(p);
+	}
+
+
+
+	namespace SmartPtrWrapper_{
+		template<class Allocator>
+		struct Wrapper{
+			template<typename T>
+			static auto make(Allocator &allocator, T *p) noexcept{
+				auto deleter = [&](void *p){
+					allocator.xdeallocate(p);
+				};
+
+				return std::unique_ptr<T, decltype(deleter)>{
+					p,
+					deleter
+				};
+			}
+		};
+	}
+
+
+
+	// Because of polymorphic types,
+	// this function must be partially specialized.
+	// This is why a helper class is used.
+	template<typename T, class Allocator>
+	static auto wrapInSmartPtr(Allocator &allocator, T *p) noexcept{
+		return SmartPtrWrapper_::Wrapper<Allocator>::make(allocator, p);
+	}
+
+	template<typename T, class Allocator>
+	using SmartPtrType = decltype(
+		wrapInSmartPtr(
+			std::declval<Allocator &>(),
+			std::declval<T *>()
+		)
+	);
 
 
 

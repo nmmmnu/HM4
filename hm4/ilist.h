@@ -22,8 +22,8 @@ namespace config{
 
 // ==============================
 
-template<class LIST>
-void print(LIST const &list, typename LIST::size_type count = config::LIST_PRINT_COUNT){
+template<class List>
+void print(List const &list, typename List::size_type count = config::LIST_PRINT_COUNT){
 	for(auto const &p : list){
 		print(p);
 
@@ -35,45 +35,45 @@ void print(LIST const &list, typename LIST::size_type count = config::LIST_PRINT
 // ==============================
 
 namespace ilist_impl_{
-	template<class LIST, class = void>
+	template<class List, class = void>
 	struct size_estimated : std::false_type{};
 
-	template<class LIST>
-	struct size_estimated<LIST, std::void_t<typename LIST::estimated_size> >: std::true_type{};
+	template<class List>
+	struct size_estimated<List, std::void_t<typename List::estimated_size> >: std::true_type{};
 } // namespace ilist_impl
 
 // ==============================
 
-template<class LIST>
-auto size(LIST const &list, std::false_type){
+template<class List>
+auto size(List const &list, std::false_type){
 	return list.size();
 }
 
-template<class LIST>
-auto size(LIST const &list, std::true_type){
-	return narrow<typename LIST::size_type>(
+template<class List>
+auto size(List const &list, std::true_type){
+	return narrow<typename List::size_type>(
 		std::distance(std::begin(list), std::end(list))
 	);
 }
 
-template<class LIST>
-auto size(LIST const &list){
-	using size_estimated = ilist_impl_::size_estimated<LIST>;
+template<class List>
+auto size(List const &list){
+	using size_estimated = ilist_impl_::size_estimated<List>;
 
 	return size(list, size_estimated{});
 }
 
 // ==============================
 
-template<class LIST>
-bool empty(LIST const &list){
+template<class List>
+bool empty(List const &list){
 	return size(list, std::false_type{}) == 0;
 }
 
 // ==============================
 
-template<class LIST>
-auto insert( LIST &list,
+template<class List>
+auto insert(List &list,
 		std::string_view key, std::string_view val,
 		uint32_t const expires = 0, uint32_t const created = 0){
 
@@ -82,8 +82,8 @@ auto insert( LIST &list,
 	);
 }
 
-template<class LIST>
-auto insert(LIST &list, Pair const &src){
+template<class List>
+auto insert(List &list, Pair const &src){
 
 	return list.insertSmartPtrPair_(
 		Pair::smart_ptr::clone(list.getAllocator(), src)

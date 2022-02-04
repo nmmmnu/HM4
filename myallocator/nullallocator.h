@@ -38,17 +38,6 @@ namespace MyAllocator{
 		constexpr static std::size_t getUsedMemory() noexcept{
 			return 0;
 		}
-
-		template<typename T>
-		static auto wrapInSmartPtr(T *p) noexcept{
-			auto deleter = [](){
-			};
-
-			return std::unique_ptr<T, decltype(deleter)>{
-				p,
-				deleter
-			};
-		}
 	};
 
 } // namespace MyAllocator
