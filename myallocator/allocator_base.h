@@ -2,8 +2,19 @@
 #define MY_ALLOCATOR_BASE
 
 #include <cstddef>
+#include <new>
 
 namespace MyAllocator{
+
+	inline void *allocate(nullptr_t, std::size_t const size){
+		return ::operator new(size, std::nothrow);
+	}
+
+	inline void deallocate(nullptr_t, void *p){
+		::operator delete(p);
+	}
+
+
 
 	template<class Allocator>
 	void *allocate(Allocator &allocator, std::size_t const size){

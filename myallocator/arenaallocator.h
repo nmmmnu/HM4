@@ -1,21 +1,10 @@
 #ifndef MY_ARENA_ALLOCATOR
 #define MY_ARENA_ALLOCATOR
 
-#include <new>
 #include "allocator_base.h"
 
 namespace MyAllocator{
 	namespace ArenaAllocatorImpl{
-
-		struct MinimalSTDAllocator{
-			static void *xallocate(std::size_t const size) noexcept{
-				return ::operator new(size, std::nothrow);
-			}
-
-			static void xdeallocate(void *p) noexcept{
-				return ::operator delete(p);
-			}
-		};
 
 		template<class Buffer>
 		struct ArenaAllocatorBase{
@@ -122,7 +111,7 @@ namespace MyAllocator{
 			std::byte 	data_[Size];
 		};
 
-		template<class Allocator = MinimalSTDAllocator>
+		template<class Allocator = nullptr_t>
 		struct DynamicBuffer{
 			template<class ...Args>
 			DynamicBuffer(std::size_t size, Args &&...args) :
