@@ -1,5 +1,5 @@
-#ifndef MY_ALLOCATOR_BASE
-#define MY_ALLOCATOR_BASE
+#ifndef MY_BASE_ALLOCATOR_H_
+#define MY_BASE_ALLOCATOR_H_
 
 #include <cstddef>
 #include <new>
@@ -15,7 +15,7 @@ namespace MyAllocator{
 	}
 
 	template<typename T>
-	static auto wrapInSmartPtr(std::nullptr_t &, T *p) noexcept{
+	auto wrapInSmartPtr(std::nullptr_t &, T *p) noexcept{
 		return std::unique_ptr<T>{ p };
 	}
 

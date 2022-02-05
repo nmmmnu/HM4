@@ -14,7 +14,7 @@
 #include "mystring.h"
 #include "comparator.h"
 
-#include "stdallocator.h"
+#include "baseallocator.h"
 
 namespace hm4{
 	namespace PairConf{
@@ -156,6 +156,8 @@ namespace hm4{
 					std::string_view const val,
 					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
+				using MyAllocator::wrapInSmartPtr;
+
 				return wrapInSmartPtr(
 					allocator,
 					create__(allocator, key, val, expires, created)
@@ -165,6 +167,9 @@ namespace hm4{
 			template<class Allocator>
 			[[nodiscard]]
 			static auto clone(Allocator &allocator, const Pair *src) noexcept{
+
+				using MyAllocator::wrapInSmartPtr;
+
 				return wrapInSmartPtr(
 					allocator,
 					clone__(allocator, src)
@@ -174,6 +179,9 @@ namespace hm4{
 			template<class Allocator>
 			[[nodiscard]]
 			static auto clone(Allocator &allocator, const Pair &src) noexcept{
+
+				using MyAllocator::wrapInSmartPtr;
+
 				return wrapInSmartPtr(
 					allocator,
 					clone__(allocator, src)
@@ -188,13 +196,13 @@ namespace hm4{
 				std::string_view const val,
 				uint32_t const expires = 0, uint32_t const created = 0) noexcept{
 
-			MyAllocator::STDAllocator allocator;
+			std::nullptr_t allocator;
 			return smart_ptr::create(allocator, key, val, expires, created);
 		}
 
 		[[nodiscard]]
 		static auto clone(const Pair *src) noexcept{
-			MyAllocator::STDAllocator allocator;
+			std::nullptr_t allocator;
 			return smart_ptr::clone(allocator, src);
 		}
 
@@ -444,7 +452,7 @@ namespace hm4{
 	}
 
 
-	using OPair = MyAllocator::SmartPtrType<Pair, MyAllocator::STDAllocator>;
+	using OPair = MyAllocator::SmartPtrType<Pair, std::nullptr_t>;
 
 	static_assert(std::is_same_v<OPair, std::unique_ptr<Pair> >, "OPair is not std::unique_ptr");
 
