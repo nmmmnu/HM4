@@ -69,6 +69,7 @@ namespace MyAllocator{
 	}
 
 
+
 	template<class Allocator>
 	struct PMOwnerAllocator : PMAllocator{
 
@@ -115,10 +116,10 @@ namespace MyAllocator{
 
 
 	template<class Allocator>
-	struct PMNonOwnerAllocator : PMAllocator{
-		PMNonOwnerAllocator(Allocator &allocator) : PMNonOwnerAllocator( &allocator){}
+	struct PMLinkedAllocator : PMAllocator{
+		PMLinkedAllocator(Allocator &allocator) : PMLinkedAllocator( &allocator){}
 
-		PMNonOwnerAllocator(Allocator *allocator) : allocator(allocator){}
+		PMLinkedAllocator(Allocator *allocator) : allocator(allocator){}
 
 	private:
 		inline void *allocate_(std::size_t const size) override final{

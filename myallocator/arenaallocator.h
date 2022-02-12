@@ -2,9 +2,12 @@
 #define MY_ARENA_ALLOCATOR
 
 #include "baseallocator.h"
+#include "allocatedbuffer.h"
 
 namespace MyAllocator{
 	namespace ArenaAllocatorImpl{
+
+		using PtrType = std::byte;
 
 		template<class Buffer>
 		struct ArenaAllocatorBase{
@@ -24,7 +27,7 @@ namespace MyAllocator{
 				if (pos + size > buffer.size())
 					return nullptr;
 
-				std::byte *result = buffer.data() + pos;
+				PtrType *result = buffer.data() + pos;
 
 				pos += size;
 
@@ -68,73 +71,20 @@ namespace MyAllocator{
 			std::size_t	pos	= 0;
 		};
 
-		struct RawBuffer{
-			RawBuffer(std::byte *data, std::size_t size) :
-						data_(data),
-						size_(size){}
 
-			std::byte *data(){
-				return data_;
-			}
 
-			auto size() const{
-				return size_;
-			}
-
-		private:
-			std::byte 	*data_;
-			std::size_t	size_;
-		};
+		using LinkedBuffer		= MyBuffer::LinkedBuffer<PtrType>;
 
 		template<std::size_t Size>
-		struct StaticBuffer{
-			std::byte *data(){
-				return data_;
-			}
-
-			constexpr static auto size(){
-				return Size;
-			}
-
-		private:
-			std::byte 	data_[Size];
-		};
+		using  StaticBuffer		= MyBuffer::StaticBuffer<PtrType, Size>;
 
 		template<class Allocator = std::nullptr_t>
-		struct DynamicBuffer{
-			template<class ...Args>
-			DynamicBuffer(std::size_t size, Args &&...args) :
-						allocator_( std::forward<Args>(args)...		),
-						data_(allocate<std::byte>(allocator_, size)	),
-						size_(size					){
-
-				if (data_ == nullptr)
-					throw std::bad_alloc{};
-			}
-
-			~DynamicBuffer(){
-				deallocate(allocator_, data_);
-			}
-
-			std::byte *data(){
-				return data_;
-			}
-
-			auto size() const{
-				return size_;
-			}
-
-		private:
-			Allocator	allocator_;
-			std::byte 	*data_;
-			std::size_t	size_;
-		};
-
+		using AllocatedByteBuffer	= MyBuffer::AllocatedBuffer<PtrType, Allocator>;
 	} // ArenaAllocatorImpl
 
-	using ArenaAllocatorRaw		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::RawBuffer>;
+	using ArenaAllocatorRaw		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::LinkedBuffer>;
 
-	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::DynamicBuffer<> >;
+	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::AllocatedByteBuffer<> >;
 
 	template<std::size_t Size>
 	using ArenaAllocatorStatic	= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::StaticBuffer<Size> >;
