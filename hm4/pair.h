@@ -17,7 +17,11 @@
 #include "baseallocator.h"
 
 namespace hm4{
+inline namespace version_2_00_00{
+
 	namespace PairConf{
+		constexpr uint32_t	VERSION		= 20000;
+
 		constexpr size_t	ALIGN		= sizeof(void *);
 
 		constexpr uint16_t	MAX_KEY_SIZE	= 0b0'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
@@ -463,6 +467,9 @@ namespace hm4{
 			printf("%s\n", PairConf::EMPTY_MESSAGE);
 	}
 
+
+
+} // anonymous namespace
 } // namespace
 
 #endif

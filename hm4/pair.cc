@@ -4,6 +4,10 @@
 
 namespace hm4{
 
+inline namespace version_2_00_00{
+
+
+
 void Pair::createInRawMemory(Pair *pair,
 			std::string_view const key,
 			std::string_view const val,
@@ -60,5 +64,7 @@ uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
 }
 
 
+
+} // anonymous namespace
 } // namespace
 

@@ -23,6 +23,10 @@ class BufferedVector{
 		true,	"T must be POD-like type"
 	);
 
+	static_assert(
+		std::is_same_v<T, typename Buffer::value_type>,
+		"T is different from Buffer::value_type"
+	);
 public:
 	// TYPES
 

@@ -10,6 +10,10 @@ namespace MyBuffer{
 		using value_type	= T;
 		using size_type		= std::size_t;
 
+		template<class Buffer>
+		constexpr LinkedBuffer(Buffer &buffer) :
+					LinkedBuffer(buffer.data(), buffer.size()){}
+
 		constexpr LinkedBuffer(value_type *data, size_type size) :
 					data_(data),
 					size_(size){}

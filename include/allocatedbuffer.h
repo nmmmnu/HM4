@@ -13,8 +13,8 @@ namespace MyBuffer{
 
 		template<class ...Args>
 		AllocatedBuffer(size_type const size, Args &&...args) :
-					allocator_( std::forward<Args>(args)...	),
-					size_(size				){
+					allocator_	(std::forward<Args>(args)...	),
+					size_		(size				){
 
 			if (data_ == nullptr)
 				throw std::bad_alloc{};
@@ -24,22 +24,22 @@ namespace MyBuffer{
 			MyAllocator::deallocate(allocator_, data_);
 		}
 
-		value_type *data(){
+		value_type *data() noexcept{
 			return data_;
 		}
 
-		const value_type *data() const{
+		const value_type *data() const noexcept{
 			return data_;
 		}
 
-		auto size() const{
+		auto size() const noexcept{
 			return size_;
 		}
 
 	private:
 		Allocator	allocator_;
 		size_type	size_;
-		value_type	 *data_	= MyAllocator::allocate<value_type>(allocator_, size_);
+		value_type	*data_	= MyAllocator::allocate<value_type>(allocator_, size_);
 	};
 
 } // namespace MyBuffer
