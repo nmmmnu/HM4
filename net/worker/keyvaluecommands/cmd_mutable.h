@@ -134,12 +134,55 @@ namespace net::worker::commands::Mutable{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct SETNX : Base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name	= "setnx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"setnx",	"SETNX"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+			const auto &p = protocol.getParams();
+
+			if (p.size() != 3)
+				return error::BadRequest(protocol, buffer);
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return error::BadRequest(protocol, buffer);
+
+			if (! db.get(key).empty()){
+				// No Set.
+
+				protocol.response_bool(buffer, false);
+			}else{
+				// SET
+
+				const auto &val = p[2];
+
+				db.set(key, val);
+
+				protocol.response_bool(buffer, true);
+			}
+			// return
+
+			return WorkerStatus::WRITE;
+		}
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
 		registerCmd<SET		, Protocol, DBAdapter>(s, m);
 		registerCmd<SETEX	, Protocol, DBAdapter>(s, m);
 		registerCmd<DEL		, Protocol, DBAdapter>(s, m);
 		registerCmd<GETSET	, Protocol, DBAdapter>(s, m);
+		registerCmd<SETNX	, Protocol, DBAdapter>(s, m);
 	}
 
 

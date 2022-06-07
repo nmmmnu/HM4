@@ -79,6 +79,7 @@
 	<li><a href="#INCR	">INCR / INCRBY	</a></li>
 	<li><a href="#DECR	">DECR / DECRBY	</a></li>
 	<li><a href="#GETSET	">GETSET	</a></li>
+	<li><a href="#SETNX	">SETNX		</a></li>
 
 	<li><a href="#INFO	">INFO		</a></li>
 	<li><a href="#SAVE	">SAVE / BGSAVE	</a></li>
@@ -482,7 +483,7 @@
 			<tr><td>Available since		</td><td>1.2.8		</td></tr>
 			<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
 			<tr><td>Redis compatible	</td><td>YES		</td></tr>
-			<tr><td>Blobs as values		</td><td>N/A		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
 			<tr><td>Mutable			</td><td>YES		</td></tr>
 		</table>
 
@@ -494,6 +495,38 @@
 
 </div>
 
+<a href="#top">top</a>
+
+<div class="cmd" id="SETNX">
+	<h2>GETSET key value</h2>
+
+	<h3>Description:</h3>
+
+		Set value of the <i>key</i>, if key does not exists.<br />
+		Set <i>key</i> -> <i>value</i> pair.
+
+	<h3>Return value:</h3>
+
+		0 if key value pair existed.<br />
+		1 if the key is set.
+
+	<h3>Info:</h3>
+
+		<table border="1">
+			<tr><td>Available since		</td><td>1.2.10		</td></tr>
+			<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+			<tr><td>Redis compatible	</td><td>YES		</td></tr>
+			<tr><td>Blobs as values		</td><td>YES		</td></tr>
+			<tr><td>Mutable			</td><td>YES		</td></tr>
+		</table>
+
+	<h3>Example:</h3>
+
+		This command is used to set value of atomic key.
+
+		<pre>setnx process_start 2012-04-45</pre>
+
+</div>
 <a href="#top">top</a>
 
 
