@@ -31,6 +31,12 @@ public:
 		return getVal_( list_.find(key, std::true_type{} ) );
 	}
 
+	uint64_t ttl(std::string_view const key) const{
+		assert(!key.empty());
+
+		return getTTL_( list_.find(key, std::true_type{} ) );
+	}
+
 	auto search(std::string_view const key = "") const{
 		return key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
 	}
@@ -90,6 +96,13 @@ private:
 			return it->getVal();
 		else
 			return {};
+	}
+
+	uint64_t getTTL_(typename List::iterator const &it) const{
+		if (it != std::end(list_) && it->isValid(std::true_type{}))
+			return it->getTTL();
+		else
+			return 0;
 	}
 
 private:

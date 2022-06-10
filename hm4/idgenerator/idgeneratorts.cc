@@ -22,13 +22,13 @@ void IDGeneratorTS::format_(std::ostream &buff, uint32_t const value) const{
 std::string IDGeneratorTS::operator()() const{
 	std::ostringstream buff;
 
-	auto now = MyTime::now();
+	auto const now = MyTime::now();
 
-	format_(buff, MyTime::uncombine(now));
+	format_(buff, MyTime::to32(now));
 
 	buff << '.';
 
-	format_(buff, MyTime::uncombine2(now));
+	format_(buff, MyTime::toUsec(now));
 
 	return buff.str();
 }

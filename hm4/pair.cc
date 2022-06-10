@@ -2,6 +2,8 @@
 
 #include "mytime.h"
 
+#include <iostream>
+
 namespace hm4{
 
 inline namespace version_2_00_00{
@@ -60,9 +62,21 @@ bool Pair::isExpired_() const noexcept{
 }
 
 uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
-	return created ? MyTime::combine(created) : MyTime::now();
+	return created ? MyTime::to64(created) : MyTime::now();
 }
 
+uint64_t Pair::getTTL() const noexcept{
+	if (!expires)
+		return 0;
+
+	uint32_t const exp = getExpires();
+
+	uint64_t const endTime64 = MyTime::addTime(getCreated(), exp);
+
+	uint64_t const now64 = MyTime::now();
+
+	return endTime64 < now64 ? 0 : MyTime::to32(endTime64 - now64);
+}
 
 
 } // anonymous namespace

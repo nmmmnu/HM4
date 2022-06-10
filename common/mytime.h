@@ -29,20 +29,24 @@ public:
 	static uint32_t now32() noexcept;
 	static uint64_t now64() noexcept;
 
-	static bool expired(uint64_t const date, uint32_t const expiration) noexcept{
-		return date + combine(expiration) < now();
+	static uint64_t addTime(uint64_t const date, uint32_t const expiration) noexcept{
+		return date + to64(expiration);
 	}
 
-	constexpr static uint64_t combine(uint32_t const sec, uint32_t const usec = 0) noexcept{
+	static bool expired(uint64_t const date, uint32_t const expiration) noexcept{
+		return addTime(date, expiration) < now();
+	}
+
+	constexpr static uint64_t to64(uint32_t const sec, uint32_t const usec = 0) noexcept{
 		return (uint64_t) sec << 32 | usec;
 	}
 
-	constexpr static uint32_t uncombine(uint64_t const timestamp) noexcept{
+	constexpr static uint32_t to32(uint64_t const timestamp) noexcept{
 		return uint32_t( timestamp >> 32 );
 	}
 
-	constexpr static uint32_t uncombine2(uint64_t const timestamp) noexcept{
-		return uint32_t( timestamp & 0xFFffFFff );
+	constexpr static uint32_t toUsec(uint64_t const timestamp) noexcept{
+		return uint32_t( timestamp & 0xFF'FF'FF'FF );
 	}
 
 private:

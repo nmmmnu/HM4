@@ -1,13 +1,15 @@
 #ifndef _KEY_VALUE_WORKER_H
 #define _KEY_VALUE_WORKER_H
 
-#include "keyvaluecommands/cmd_system.h"	// EXIT, SHUTDOWN
-#include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
-#include "keyvaluecommands/cmd_info.h"		// INFO
-#include "keyvaluecommands/cmd_immutable.h"	// GET
+#include "keyvaluecommands/cmd_immutable.h"	// GET, TTL
 #include "keyvaluecommands/cmd_accumulators.h"	// GETX, COUNT, SUM, MIN, MAX
-#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, DEL, GETSET
-#include "keyvaluecommands/cmd_counter.h"	// INCR, INCRBY, DECR, DECRBY
+
+#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, DEL, GETSET, EXPIRE
+#include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
+
+#include "keyvaluecommands/cmd_info.h"		// INFO
+#include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
+#include "keyvaluecommands/cmd_system.h"	// EXIT, SHUTDOWN
 
 #include "protocol/protocoldefs.h"
 

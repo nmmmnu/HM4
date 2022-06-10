@@ -1,4 +1,5 @@
 #include "base.h"
+#include "mystring.h"
 
 
 
@@ -32,9 +33,40 @@ namespace net::worker::commands::Immutable{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct TTL : Base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name	= "ttl";
+		constexpr inline static std::string_view cmd[]	= {
+			"ttl",	"TTL"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+			const auto &p = protocol.getParams();
+
+			if (p.size() != 2)
+				return error::BadRequest(protocol, buffer);
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return error::BadRequest(protocol, buffer);
+
+			to_string_buffer_t std_buffer;
+
+			std::string_view const val = to_string(db.ttl(key), std_buffer);
+
+			protocol.response_string(buffer, val);
+
+			return WorkerStatus::WRITE;
+		}
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
 		registerCmd<GET		, Protocol, DBAdapter>(s, m);
+		registerCmd<TTL		, Protocol, DBAdapter>(s, m);
 	}
 
 

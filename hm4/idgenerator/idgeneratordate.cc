@@ -14,10 +14,12 @@ std::string IDGeneratorDate::operator()() const{
 
 	constexpr const char *FORMAT = MyTime::TIME_FORMAT_NUMBER;
 
-	buff	<< MyTime::toString(MyTime::now(), FORMAT)
+	auto const now = MyTime::now();
+
+	buff	<< MyTime::toString(now, FORMAT)
 		<< "."
 		<< std::setfill('0') << std::setw(10)
-		<< MyTime::uncombine2(MyTime::now());
+		<< MyTime::toUsec(now);
 
 
 	return buff.str();

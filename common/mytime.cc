@@ -25,11 +25,11 @@ uint64_t MyTime::now64() noexcept{
 	const auto sec_int = (uint32_t) sec.count();
 	const auto mil_int = (uint32_t) mil.count();
 
-	return combine(sec_int, mil_int);
+	return to64(sec_int, mil_int);
 }
 
 const char *MyTime::toString(uint64_t const date2, const char *format) noexcept{
-	uint32_t const date = uncombine(date2);
+	uint32_t const date = to32(date2);
 
 	return toString(date, format);
 }

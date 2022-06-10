@@ -69,6 +69,49 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
+	struct SETNX : Base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name	= "setnx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"setnx",	"SETNX"
+		};
+
+		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+			const auto &p = protocol.getParams();
+
+			if (p.size() != 3 && p.size() != 4)
+				return error::BadRequest(protocol, buffer);
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return error::BadRequest(protocol, buffer);
+
+			if (! db.get(key).empty()){
+				// No Set.
+
+				protocol.response_bool(buffer, false);
+			}else{
+				// SET
+
+				const auto &val = p[2];
+				const auto exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
+
+				db.set(key, val, exp);
+
+				protocol.response_bool(buffer, true);
+			}
+			// return
+
+			return WorkerStatus::WRITE;
+		}
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct DEL : Base<Protocol, DBAdapter>{
 		constexpr inline static std::string_view name	= "del";
 		constexpr inline static bool mut		= true;
@@ -135,11 +178,11 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SETNX : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name	= "setnx";
+	struct EXPIRE : Base<Protocol, DBAdapter>{
+		constexpr inline static std::string_view name	= "expire";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
-			"setnx",	"SETNX"
+			"expire",	"EXPIRE"
 		};
 
 		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
@@ -155,20 +198,18 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return error::BadRequest(protocol, buffer);
 
-			if (! db.get(key).empty()){
-				// No Set.
+			auto const &val = db.get(key);
 
+			if (val.empty()){
 				protocol.response_bool(buffer, false);
 			}else{
 				// SET
+				auto const exp  = from_string<uint32_t>(p[2]);
 
-				const auto &val = p[2];
+				db.set(key, val, exp);
 
-				db.set(key, val);
-
-				protocol.response_bool(buffer, true);
+				protocol.response_ok(buffer);
 			}
-			// return
 
 			return WorkerStatus::WRITE;
 		}
@@ -180,9 +221,10 @@ namespace net::worker::commands::Mutable{
 	void registerModule(Storage &s, Map &m){
 		registerCmd<SET		, Protocol, DBAdapter>(s, m);
 		registerCmd<SETEX	, Protocol, DBAdapter>(s, m);
+		registerCmd<SETNX	, Protocol, DBAdapter>(s, m);
 		registerCmd<DEL		, Protocol, DBAdapter>(s, m);
 		registerCmd<GETSET	, Protocol, DBAdapter>(s, m);
-		registerCmd<SETNX	, Protocol, DBAdapter>(s, m);
+		registerCmd<EXPIRE	, Protocol, DBAdapter>(s, m);
 	}
 
 

@@ -248,6 +248,9 @@ inline namespace version_2_00_00{
 			return betoh<uint32_t>(expires);
 		}
 
+		[[nodiscard]]
+		uint64_t getTTL() const noexcept;
+
 	public:
 		[[nodiscard]]
 		int cmp(std::string_view const key) const noexcept{
