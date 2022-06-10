@@ -208,7 +208,7 @@ namespace net::worker::commands::Mutable{
 
 				db.set(key, val, exp);
 
-				protocol.response_ok(buffer);
+				protocol.response_bool(buffer, true);
 			}
 
 			return WorkerStatus::WRITE;
@@ -217,17 +217,20 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter, class Storage, class Map>
-	void registerModule(Storage &s, Map &m){
-		return registerCommands<Protocol, DBAdapter, Storage, Map,
-			SET	,
-			SETEX	,
-			SETNX	,
-			DEL	,
-			GETSET	,
-			EXPIRE
-		>(s, m);
-	}
+	template<class Protocol, class DBAdapter>
+	struct RegisterModule{
+		template<class Storage, class Map>
+		void operator()(Storage &s, Map &m){
+			return registerCommands<Protocol, DBAdapter, Storage, Map,
+				SET	,
+				SETEX	,
+				SETNX	,
+				DEL	,
+				GETSET	,
+				EXPIRE
+			>(s, m);
+		}
+	};
 
 
 } // namespace

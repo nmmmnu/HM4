@@ -22,18 +22,28 @@ namespace net::worker{
 
 	namespace key_value_worker_impl_{
 
+		template<class Protocol, class DBAdapter, class Storage, class Map, template<class, class> typename... Modules>
+		void registerModulesAll(Storage &s, Map &m){
+			( Modules<Protocol, DBAdapter>()(s, m), ...);
+		}
+
+
 		template<class Protocol, class DBAdapter, class Storage, class Map>
 		void registerModules(Storage &s, Map &m){
 			s.reserve(5 + 2);
 
-			commands::System	::registerModule<Protocol, DBAdapter>(s, m);
-			commands::Info		::registerModule<Protocol, DBAdapter>(s, m);
-			commands::Reload	::registerModule<Protocol, DBAdapter>(s, m);
-			commands::Immutable	::registerModule<Protocol, DBAdapter>(s, m);
-			commands::Accumulators	::registerModule<Protocol, DBAdapter>(s, m);
+			using namespace commands;
 
-			commands::Mutable	::registerModule<Protocol, DBAdapter>(s, m);
-			commands::Counter	::registerModule<Protocol, DBAdapter>(s, m);
+			registerModulesAll<Protocol, DBAdapter, Storage, Map,
+				System		::RegisterModule,
+				Info		::RegisterModule,
+				Reload		::RegisterModule,
+				Immutable	::RegisterModule,
+				Accumulators	::RegisterModule,
+
+				Mutable		::RegisterModule,
+				Counter		::RegisterModule
+			>(s, m);
 		}
 
 	}

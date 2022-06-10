@@ -77,13 +77,16 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter, class Storage, class Map>
-	void registerModule(Storage &s, Map &m){
-		return registerCommands<Protocol, DBAdapter, Storage, Map,
-			INCR	,
-			DECR
-		>(s, m);
-	}
+	template<class Protocol, class DBAdapter>
+	struct RegisterModule{
+		template<class Storage, class Map>
+		void operator()(Storage &s, Map &m){
+			return registerCommands<Protocol, DBAdapter, Storage, Map,
+				INCR	,
+				DECR
+			>(s, m);
+		}
+	};
 
 
 
