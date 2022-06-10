@@ -219,14 +219,15 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<SET		, Protocol, DBAdapter>(s, m);
-		registerCmd<SETEX	, Protocol, DBAdapter>(s, m);
-		registerCmd<SETNX	, Protocol, DBAdapter>(s, m);
-		registerCmd<DEL		, Protocol, DBAdapter>(s, m);
-		registerCmd<GETSET	, Protocol, DBAdapter>(s, m);
-		registerCmd<EXPIRE	, Protocol, DBAdapter>(s, m);
+		return registerCommands<Protocol, DBAdapter, Storage, Map,
+			SET	,
+			SETEX	,
+			SETNX	,
+			DEL	,
+			GETSET	,
+			EXPIRE
+		>(s, m);
 	}
-
 
 
 } // namespace

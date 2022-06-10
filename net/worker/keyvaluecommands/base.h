@@ -42,6 +42,19 @@ namespace net::worker::commands{
 
 
 
+	template<
+		class Protocol,
+		class DBAdapter,
+		class Storage,
+		class Map,
+		template<class, class>  typename... Commands
+	>
+	void registerCommands(Storage &s, Map &m){
+		( registerCmd<Commands, Protocol, DBAdapter>(s, m), ... );
+	}
+
+
+
 }
 
 

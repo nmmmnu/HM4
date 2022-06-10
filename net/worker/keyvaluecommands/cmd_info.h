@@ -29,7 +29,9 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<INFO	, Protocol, DBAdapter>(s, m);
+		return registerCommands<Protocol, DBAdapter, Storage, Map,
+			INFO
+		>(s, m);
 	}
 
 

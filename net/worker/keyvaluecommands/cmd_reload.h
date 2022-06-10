@@ -53,8 +53,10 @@ namespace net::worker::commands::Reload{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<SAVE	, Protocol, DBAdapter>(s, m);
-		registerCmd<RELOAD	, Protocol, DBAdapter>(s, m);
+		return registerCommands<Protocol, DBAdapter, Storage, Map,
+			SAVE	,
+			RELOAD
+		>(s, m);
 	}
 
 

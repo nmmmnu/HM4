@@ -286,11 +286,13 @@ namespace net::worker::commands::Accumulators{
 
 	template<class Protocol, class DBAdapter, class Storage, class Map>
 	void registerModule(Storage &s, Map &m){
-		registerCmd<GETX	, Protocol, DBAdapter>(s, m);
-		registerCmd<COUNT	, Protocol, DBAdapter>(s, m);
-		registerCmd<SUM		, Protocol, DBAdapter>(s, m);
-		registerCmd<MIN		, Protocol, DBAdapter>(s, m);
-		registerCmd<MAX		, Protocol, DBAdapter>(s, m);
+		return registerCommands<Protocol, DBAdapter, Storage, Map,
+			GETX	,
+			COUNT	,
+			SUM	,
+			MIN	,
+			MAX
+		>(s, m);
 	}
 
 
