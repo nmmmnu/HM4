@@ -79,8 +79,10 @@ namespace net::worker::commands::Counter{
 
 	template<class Protocol, class DBAdapter>
 	struct RegisterModule{
+		constexpr inline static std::string_view name	= "counters";
+
 		template<class Storage, class Map>
-		static void go(Storage &s, Map &m){
+		static void load(Storage &s, Map &m){
 			return registerCommands<Protocol, DBAdapter, Storage, Map,
 				INCR	,
 				DECR

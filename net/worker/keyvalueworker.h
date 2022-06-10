@@ -16,17 +16,26 @@
 #include <memory>
 #include <unordered_map>
 
+//#define log__(...) /* nada */
+#include "logger.h"
+
 namespace net::worker{
 
 
 
 	namespace key_value_worker_impl_{
+		template<template<class, class> class Module, class Protocol, class DBAdapter, class Storage, class Map>
+		void registerModule(Storage &s, Map &m){
+			using M = Module<Protocol, DBAdapter>;
+
+			log__("Loading", M::name, "module...");
+			M::load(s, m);
+		}
 
 		template<class Protocol, class DBAdapter, class Storage, class Map, template<class, class> typename... Modules>
 		void registerModulesAll(Storage &s, Map &m){
-			( Modules<Protocol, DBAdapter>::go(s, m), ...);
+			( registerModule<Modules, Protocol, DBAdapter>(s, m), ...);
 		}
-
 
 		template<class Protocol, class DBAdapter, class Storage, class Map>
 		void registerModules(Storage &s, Map &m){
