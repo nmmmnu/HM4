@@ -24,7 +24,7 @@ namespace net::worker{
 
 		template<class Protocol, class DBAdapter, class Storage, class Map, template<class, class> typename... Modules>
 		void registerModulesAll(Storage &s, Map &m){
-			( Modules<Protocol, DBAdapter>()(s, m), ...);
+			( Modules<Protocol, DBAdapter>::go(s, m), ...);
 		}
 
 
