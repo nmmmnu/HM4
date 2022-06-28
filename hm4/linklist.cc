@@ -21,6 +21,18 @@ struct LinkList::NodeLocator{
 	Node *node;
 };
 
+namespace{
+	constexpr bool corruptionCheck = true;
+
+	[[maybe_unused]]
+	void corruptionExit(){
+		fprintf(stderr, "====================================\n");
+		fprintf(stderr, "=== Detected LinkList corruption ===\n");
+		fprintf(stderr, "====================================\n");
+		exit(100);
+	}
+}
+
 // ==============================
 
 LinkList::LinkList(Allocator &allocator) : allocator_(& allocator){
@@ -126,6 +138,10 @@ bool LinkList::erase(std::string_view const key){
 	auto loc = locate_(key);
 
 	if (loc.node){
+		if constexpr(corruptionCheck)
+			if (*loc.prev != loc.node)
+				corruptionExit();
+
 		*loc.prev = loc.node->next;
 
 		lc_.dec( loc.node->data->bytes() );

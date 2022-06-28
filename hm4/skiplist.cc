@@ -26,6 +26,16 @@ namespace{
 
 		return result;
 	}
+
+	constexpr bool corruptionCheck = true;
+
+	[[maybe_unused]]
+	void corruptionExit(){
+		fprintf(stderr, "====================================\n");
+		fprintf(stderr, "=== Detected SkipList corruption ===\n");
+		fprintf(stderr, "====================================\n");
+		exit(100);
+	}
 }
 
 // ==============================
@@ -216,12 +226,27 @@ bool SkipList::erase(std::string_view const key){
 	if (nl.node == nullptr)
 		return true;
 
-	for(height_size_type h = 0; h < MAX_HEIGHT; ++h){
-		if (*nl.prev[h] == nl.node)
-			*nl.prev[h] = nl.node->next[h];
-		else
-			break;
+	/* if constexpr unroll */ {
+		height_size_type const h = 0;
+
+		if constexpr(corruptionCheck)
+			if (*nl.prev[h] != nl.node)
+				corruptionExit();
+
+		/* loop unroll */ {
+			/* if unroll */ {
+				*nl.prev[h] = nl.node->next[h];
+			}
+		}
 	}
+
+	if constexpr(MAX_HEIGHT >= 1)
+		for(height_size_type h = 1; h < MAX_HEIGHT; ++h){
+			if (*nl.prev[h] == nl.node)
+				*nl.prev[h] = nl.node->next[h];
+			else
+				break;
+		}
 
 	lc_.dec( nl.node->data->bytes() );
 
