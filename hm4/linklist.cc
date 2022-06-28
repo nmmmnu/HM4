@@ -22,7 +22,8 @@ struct LinkList::NodeLocator{
 };
 
 namespace{
-	constexpr bool corruptionCheck = true;
+	// we not really need to check the integrity of the list
+	constexpr bool corruptionCheck = false;
 
 	[[maybe_unused]]
 	void corruptionExit(){
