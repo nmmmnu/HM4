@@ -28,15 +28,18 @@ namespace net::worker::commands{
 		class Map
 	>
 	void registerCmd(Storage &s, Map &m){
-		using Command = Cmd<Protocol,DBAdapter>;
+		using Command		= Cmd <Protocol, DBAdapter>;
+		using CommandBase	= Base<Protocol, DBAdapter>;
 
-		static_assert(std::is_base_of_v<Base<Protocol, DBAdapter>, Command>, "Command not seems to be a command");
+		static_assert(std::is_base_of_v<CommandBase, Command>, "Command not seems to be a command");
 
 		if constexpr(Command::mut == false || Command::mut == DBAdapter::MUTABLE ){
 			const auto &up = s.emplace_back(std::make_unique<Command>());
 
+			const CommandBase *p = up.get();
+
 			for(auto const &key : Command::cmd)
-				m.emplace(key, up.get());
+				m.emplace(key, p);
 		}
 	}
 

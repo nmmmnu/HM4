@@ -14,6 +14,7 @@
 #include "protocol/protocoldefs.h"
 
 #include <memory>
+#include <vector>
 #include <unordered_map>
 
 //#define log__(...) /* nada */
@@ -39,19 +40,20 @@ namespace net::worker{
 
 		template<class Protocol, class DBAdapter, class Storage, class Map>
 		void registerModules(Storage &s, Map &m){
-			s.reserve(5 + 2);
+			s.reserve(2 + 2 + 3);
 
 			using namespace commands;
 
 			registerModulesAll<Protocol, DBAdapter, Storage, Map,
-				System		::RegisterModule,
-				Info		::RegisterModule,
-				Reload		::RegisterModule,
 				Immutable	::RegisterModule,
 				Accumulators	::RegisterModule,
 
 				Mutable		::RegisterModule,
-				Counter		::RegisterModule
+				Counter		::RegisterModule,
+
+				Info		::RegisterModule,
+				Reload		::RegisterModule,
+				System		::RegisterModule
 			>(s, m);
 		}
 

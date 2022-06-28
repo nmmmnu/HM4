@@ -50,30 +50,30 @@ public:
 	void print() const;
 
 public:
-	template<class CONNECTION>
-	static void response_empty(CONNECTION &buffer);
+	template<class Buffer>
+	static void response_empty(Buffer &buffer);
 
-	template<class CONNECTION>
-	static void response_ok(CONNECTION &buffer);
+	template<class Buffer>
+	static void response_ok(Buffer &buffer);
 
-	template<class CONNECTION>
-	static void response_error(CONNECTION &buffer, std::string_view msg);
+	template<class Buffer>
+	static void response_error(Buffer &buffer, std::string_view msg);
 
-	template<class CONNECTION>
-	static void response_bool(CONNECTION &buffer, bool b);
+	template<class Buffer>
+	static void response_bool(Buffer &buffer, bool b);
 
-	template<class CONNECTION>
-	static void response_string(CONNECTION &buffer, std::string_view msg);
+	template<class Buffer>
+	static void response_string(Buffer &buffer, std::string_view msg);
 
-	template<class CONNECTION, class CONTAINER>
-	static void response_strings(CONNECTION &buffer, const CONTAINER &list);
+	template<class Buffer, class Container>
+	static void response_strings(Buffer &buffer, const Container &list);
 
-	template<class CONNECTION>
-	static void response_strings(CONNECTION &buffer, std::string_view msg1, std::string_view msg2);
+	template<class Buffer>
+	static void response_strings(Buffer &buffer, std::string_view msg1, std::string_view msg2);
 
 public:
-	template<class CONNECTION>
-	static void response_string(CONNECTION &buffer, uint64_t const msg){
+	template<class Buffer>
+	static void response_string(Buffer &buffer, uint64_t const msg){
 		// if we change uint64_t to template, std::string will come here.
 		return response_string(buffer, std::to_string(msg));
 	}
@@ -86,33 +86,33 @@ private:
 // ==================================
 
 
-template<class CONNECTION>
-void RedisProtocol::response_empty(CONNECTION &buffer){
+template<class Buffer>
+void RedisProtocol::response_empty(Buffer &buffer){
 	buffer.push("$-1");
 	buffer.push(ENDLN);
 }
 
-template<class CONNECTION>
-void RedisProtocol::response_ok(CONNECTION &buffer){
+template<class Buffer>
+void RedisProtocol::response_ok(Buffer &buffer){
 	buffer.push("+OK");
 	buffer.push(ENDLN);
 }
 
-template<class CONNECTION>
-void RedisProtocol::response_error(CONNECTION &buffer, std::string_view const msg){
+template<class Buffer>
+void RedisProtocol::response_error(Buffer &buffer, std::string_view const msg){
 	buffer.push("-ERR ");
 	buffer.push(msg);
 	buffer.push(ENDLN);
 }
 
-template<class CONNECTION>
-void RedisProtocol::response_bool(CONNECTION &buffer, bool const b){
+template<class Buffer>
+void RedisProtocol::response_bool(Buffer &buffer, bool const b){
 	buffer.push(b ? ":1" : ":0");
 	buffer.push(ENDLN);
 }
 
-template<class CONNECTION>
-void RedisProtocol::response_string(CONNECTION &buffer, std::string_view const msg){
+template<class Buffer>
+void RedisProtocol::response_string(Buffer &buffer, std::string_view const msg){
 	to_string_buffer_t mybuffer;
 
 	buffer.push(DOLLAR);
@@ -123,8 +123,8 @@ void RedisProtocol::response_string(CONNECTION &buffer, std::string_view const m
 	buffer.push(ENDLN);
 }
 
-template<class CONNECTION, class CONTAINER>
-void RedisProtocol::response_strings(CONNECTION &buffer, const CONTAINER &list){
+template<class Buffer, class Container>
+void RedisProtocol::response_strings(Buffer &buffer, const Container &list){
 	to_string_buffer_t mybuffer;
 
 	buffer.push(STAR);
@@ -135,8 +135,8 @@ void RedisProtocol::response_strings(CONNECTION &buffer, const CONTAINER &list){
 		response_string(buffer, msg);
 }
 
-template<class CONNECTION>
-void RedisProtocol::response_strings(CONNECTION &buffer, std::string_view const msg1, std::string_view const msg2){
+template<class Buffer>
+void RedisProtocol::response_strings(Buffer &buffer, std::string_view const msg1, std::string_view const msg2){
 	constexpr std::string_view count = "2";
 
 	buffer.push(STAR);

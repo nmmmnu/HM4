@@ -63,8 +63,8 @@ constexpr size_t MIN_ARENA_SIZE = 128;
 namespace{
 	MyOptions prepareOptions(int argc, char **argv);
 
-	template<class FACTORY>
-	int main2(const MyOptions &opt, FACTORY &&adapter_factory);
+	template<class Factory>
+	int main2(const MyOptions &opt, Factory &&adapter_factory);
 
 
 	template<class Factory, typename ...Args>

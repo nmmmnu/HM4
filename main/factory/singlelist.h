@@ -8,7 +8,7 @@ namespace DBAdapterFactory{
 
 		using CommandObject		= ListLoader;
 		using CommandSaveObject		= CommandObject;
-		using CommandReloadObject	 = CommandObject;
+		using CommandReloadObject	= CommandObject;
 
 		using DBAdapter			= ListDBAdapter<
 							ListLoader::List,

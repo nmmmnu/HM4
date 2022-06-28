@@ -2,7 +2,8 @@
 <head>
 	<title>HM4 - command reference</title>
 
-	<!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css.map" crossorigin="anonymous" / --da>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css.map" crossorigin="anonymous" />
+	<!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"    crossorigin="anonymous" / -->
 
 	<style><!--
 	pre {
@@ -22,11 +23,18 @@
 	}
 
 	div.cmd h2 {
-		border-top:	solid 1px black;
+		--border-top:	solid 1px black;
 		border-bottom:	solid 1px black;
 
-		background-color: #aaa;
-		padding:	10px;
+		--background-color: #aaa;
+		padding-top:	30px;
+		padding-bottom:	10px;
+	}
+
+	div.cmd p.top {
+		border-top:	solid 1px black;
+		padding-top:	10px;
+		padding-bottom:	10px;
 	}
 
 	div.cmd i {
@@ -36,14 +44,6 @@
 		font-style:	normal;
 		font-weight:	bold;
 		border:		dotted 1px black;
-	}
-
-	div.cmd table.db {
-		border:		solid 1px #777;
-		border-collapse: collapse;
-
-		margin-top:	10px;
-		margin-bottom:	10px;
 	}
 
 	div.cmd table {
@@ -92,15 +92,8 @@
 
 			<h2>GET key</h2>
 
-			<h3>Description:</h3>
-			Get value of the <i>key</i>. Exact match.
-			<h3>Return type:</h3>
-			string
-			<h3>Return value:</h3>
-			Value of the key or empty string.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
+			<table border="1">
+				<tr><td>Command			</td><td>GET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
 				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
@@ -108,13 +101,26 @@
 				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
 			</table>
 
+			<h3>Description:</h3>
+			Get value of the <i>key</i>. Exact match.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Value of the key or empty string.
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="TTL">
 
 			<h2>TTL key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TTL</td></tr>
+				<tr><td>Available since		</td><td>1.2.11</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Get TTL value of the <i>key</i>. Exact match.
@@ -122,33 +128,14 @@
 			int
 			<h3>Return value:</h3>
 			Value of the TTL or 0 if there is no expiration set.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="GETX">
 
 			<h2>GETX key number prefix</h2>
 
-			<h3>Description:</h3>
-			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Returns up to 1'000 elements.
-			<h3>Return type:</h3>
-			array
-			<h3>Return value:</h3>
-			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
+			<table border="1">
+				<tr><td>Command			</td><td>GETX</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
 				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -156,61 +143,68 @@
 				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
 			</table>
 
+			<h3>Description:</h3>
+			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Returns up to 1'000 elements.<br /><br /><u>Example:</u><br /><br /><pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br />getx u:001: 1000 u:001:</pre>
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="COUNT">
 
 			<h2>COUNT key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>COUNT</td></tr>
+				<tr><td>Available since		</td><td>1.2.4</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
-			First element  - count of valid elements.<br />Second element - last key, if there is second page.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.2.4</td></tr>
-				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
-			</table>
-
+			First element  - count of valid elements.<br />Second element - last key, if there is second page.<br /><br /><u>Example:</u><br /><br /><pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br />count dom:google: 10000 dom:google:</pre>
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="SUM">
 
 			<h2>SUM key number prefix</h2>
 
-			<h3>Description:</h3>
-			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.
-			<h3>Return type:</h3>
-			array
-			<h3>Return value:</h3>
-			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
-			<h3>Info:</h3>
+			<table border="1">
+				<tr><td>Command			</td><td>SUM</td></tr>
+				<tr><td>Available since		</td><td>First element  - sum of valid elements.<br />Second element - last key, if there is second page.</td></tr>
+				<tr><td>Time complexity		</td><td>1.2.4</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cmd_.h</td></tr>
+			</table>
 
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.2.4</td></tr>
+			<h3>Description:</h3>
+			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.<br />
+			<h3>Return type:</h3>
+			<br /><u>Example:</u><br /><br /><pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br />sum visits:202001 10000 visits:202001<br />sum visits:2020   10000 visits:2020</pre>
+			<h3>Return value:</h3>
+			array
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MIN">
+
+			<h2>MIN key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MIN</td></tr>
+				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
 			</table>
-
-		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
-				<div class="cmd" id="MIN">
-
-			<h2>MIN key number prefix</h2>
 
 			<h3>Description:</h3>
 			Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.
@@ -218,23 +212,20 @@
 			array
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
-			<h3>Info:</h3>
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MAX">
 
-			<table border="1" cellpadding="5">
+			<h2>MAX key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MAX</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
 			</table>
-
-		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
-				<div class="cmd" id="MAX">
-
-			<h2>MAX key number prefix</h2>
 
 			<h3>Description:</h3>
 			Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.
@@ -242,23 +233,20 @@
 			array
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.2.5</td></tr>
-				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="SET">
 
 			<h2>SET key value [seconds=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SET</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Set <i>key</i> -> <i>value</i> pair, with optional expiration of <i>seconds</i> seconds.
@@ -266,47 +254,41 @@
 			OK
 			<h3>Return value:</h3>
 			OK
-			<h3>Info:</h3>
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SETEX">
 
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
+			<h2>SETEX key seconds value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SETEX</td></tr>
+				<tr><td>Available since		</td><td>1.2.11</td></tr>
+				<tr><td>Time complexity		</td><td>O(1)</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
 			</table>
 
-		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
-				<div class="cmd" id="SETEX">
-
-			<h2>SETEX key seconds value</h2>
-
 			<h3>Description:</h3>
-			Set <i>key</i> -> <i>value</i> pair, if key does not exists, with optional expiration of <i>seconds</i> seconds.
+			Set <i>key</i> -> <i>value</i> pair, if key does not exists, with expiration of <i>seconds</i> seconds.<br />Doing same as <i>SET key value seconds</i>, but in Redis-compatible way.<br />disk.This command is used for PHP session handler.
 			<h3>Return type:</h3>
-			bool
+			OK
 			<h3>Return value:</h3>
-			0 if key value pair do not existed.<br />1 if the key existed and expiration is set.
-			<h3>Info:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SETNX">
 
-			<table border="1" cellpadding="5">
+			<h2>SETNX key value [seconds=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SETNX</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
 				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
 			</table>
-
-		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
-				<div class="cmd" id="SETNX">
-
-			<h2>SETNX key value [seconds=0]</h2>
 
 			<h3>Description:</h3>
 			Atomically Set value of the <i>key</i>, if key does not exists, with optional expiration of <i>seconds</i> seconds.<br />Note: The command internally GET old key first.
@@ -314,57 +296,35 @@
 			bool
 			<h3>Return value:</h3>
 			0 if key value pair existed.<br />1 if the key does not existed and is set.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="EXPIRE">
 
 			<h2>EXPIRE key seconds</h2>
 
+			<table border="1">
+				<tr><td>Command			</td><td>EXPIRE</td></tr>
+				<tr><td>Available since		</td><td>1.2.11</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+			</table>
+
 			<h3>Description:</h3>
-			Atomically Change the expiration of the <i>key</i> to <i>seconds</i> seconds.<br />Note: The command internally GET old key first.If you can, use SET or SETEX instead.
+			Atomically Change the expiration of the <i>key</i> to <i>seconds</i> seconds.<br />Note: The command internally GET old key first.<br />If you can, use SET or SETEX instead.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
 			0 if key value pair do not existed.<br />1 if the key existed and expiration is set.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="GETSET">
 
 			<h2>GETSET key value [seconds=0]</h2>
 
-			<h3>Description:</h3>
-			Gets the value of the <i>key</i>. Exact match.<br />Then atomically Set <i>key</i> -> <i>value</i> pair.This command is often used to get value of atomic counter and reset its value to zero.
-			<h3>Return type:</h3>
-			string
-			<h3>Return value:</h3>
-			Value of the key or empty string.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
+			<table border="1">
+				<tr><td>Command			</td><td>GETSET</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
 				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
@@ -372,23 +332,20 @@
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
 			</table>
 
+			<h3>Description:</h3>
+			Gets the value of the <i>key</i>. Exact match.<br />Then atomically Set <i>key</i> -> <i>value</i> pair.<br />This command is often used to get value of atomic counter and reset its value to zero.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Value of the key or empty string.
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="DEL">
 
 			<h2>DEL key</h2>
 
-			<h3>Description:</h3>
-			Removes <i>key</i>.
-			<h3>Return type:</h3>
-			bool
-			<h3>Return value:</h3>
-			Always return 1
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
+			<table border="1">
+				<tr><td>Command			</td><td>DEL</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
 				<tr><td>Time complexity		</td><td>O(1)</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
@@ -396,23 +353,41 @@
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
 			</table>
 
+			<h3>Description:</h3>
+			Removes <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="INCR">
 
-			<h2>INCR / INCRBY key [increase value=+1]</h2>
+			<h2>INCR / INCRBY key [increase value=1]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>INCR</td></tr>
+				<tr><td>Available since		</td><td>1.1.0</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cmd_counter.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
-			Atomically increase numerical value of the <i>key</i> with <i>increase value</i>.<br />It uses <b>int64_t</b> as a number type.
+			Atomically increase numerical value of the <i>key</i> with <i>increase value</i>.<br />Uses <b>int64_t</b> as a number type.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
 			New increased value.
-			<h3>Info:</h3>
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="DECR">
 
-			<table border="1" cellpadding="5">
+			<h2>DECR / DECRBY key [decrease value=1]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>DECR</td></tr>
 				<tr><td>Available since		</td><td>1.1.0</td></tr>
 				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
@@ -420,37 +395,26 @@
 				<tr><td>Module			</td><td>cmd_counter.h</td></tr>
 			</table>
 
-		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
-				<div class="cmd" id="DECR">
-
-			<h2>DECR / DECRBY key [decrease value=+1]</h2>
-
 			<h3>Description:</h3>
-			Atomically decrease numerical value of the <i>key</i> with <i>decrease value</i>.<br />It uses <b>int64_t</b> as a number type.
+			Atomically decrease numerical value of the <i>key</i> with <i>decrease value</i>.<br />Uses <b>int64_t</b> as a number type.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
 			New decrease value.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.1.0</td></tr>
-				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_counter.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="INFO">
 
 			<h2>INFO</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>INFO</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Returns server information.
@@ -458,23 +422,20 @@
 			array
 			<h3>Return value:</h3>
 			Server information.
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_info.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="SAVE">
 
 			<h2>SAVE / BGSAVE</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SAVE</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Flushes memtable to the disk (this is no-op on immutable servers).Reloads the disktable(s) from the disk.
@@ -482,23 +443,20 @@
 			OK
 			<h3>Return value:</h3>
 			OK
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="RELOAD">
 
 			<h2>RELOAD</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>RELOAD</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Reloads the disktable(s) from the disk.This command is used when disktable(s) are updated or replaced from an external process.
@@ -506,23 +464,20 @@
 			OK
 			<h3>Return value:</h3>
 			OK
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="EXIT">
 
 			<h2>EXIT</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>EXIT</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_system.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Disconnect from the server.
@@ -530,23 +485,20 @@
 			n/a
 			<h3>Return value:</h3>
 			n/a
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_system.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 				<div class="cmd" id="SHUTDOWN">
 
 			<h2>SHUTDOWN</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SHUTDOWN</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_system.h</td></tr>
+			</table>
 
 			<h3>Description:</h3>
 			Shutdowns the server.<br />SAVE / NOSAVE is not supported yet.
@@ -554,20 +506,8 @@
 			n/a
 			<h3>Return value:</h3>
 			n/a
-			<h3>Info:</h3>
-
-			<table border="1" cellpadding="5">
-				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_system.h</td></tr>
-			</table>
-
+			<p class="top"><a href="#top">top</a></p>
 		</div>
-
-		<p></p><a href="#top">top</a></p>
-		<hr />
 		
 </body>
 </html>
