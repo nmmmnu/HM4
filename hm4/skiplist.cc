@@ -227,6 +227,11 @@ bool SkipList::erase(std::string_view const key){
 	if (nl.node == nullptr)
 		return true;
 
+
+	// *nl.prev[0] is always valid.
+	// it always point to the nl.node
+	// unrolling...
+
 	/* if constexpr unroll */ {
 		height_size_type const h = 0;
 
@@ -241,13 +246,18 @@ bool SkipList::erase(std::string_view const key){
 		}
 	}
 
-	if constexpr(MAX_HEIGHT >= 1)
+	// *nl.prev contains MAX_HEIGHT pointers.
+	// some of them are nullptr, but they are present there.
+	// some of them needs to be exchanged, some does not need.
+
+	if constexpr(MAX_HEIGHT > 1){
 		for(height_size_type h = 1; h < MAX_HEIGHT; ++h){
 			if (*nl.prev[h] == nl.node)
 				*nl.prev[h] = nl.node->next[h];
 			else
 				break;
 		}
+	}
 
 	lc_.dec( nl.node->data->bytes() );
 
