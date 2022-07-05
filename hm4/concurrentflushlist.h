@@ -3,7 +3,6 @@
 
 #include "multi/duallist.h"
 
-#include "logger.h"
 #include "scopedthread.h"
 
 #include "flushlistbase.h"
