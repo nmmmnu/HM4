@@ -17,14 +17,9 @@ public:
 
 	using iterator		= const Pair *;
 
-private:
-	Allocator	*allocator_ = nullptr;
-
 public:
-	constexpr BlackHoleList() = default;
-
 	constexpr const Allocator &getAllocator() const{
-		return *allocator_;
+		return MyAllocator::var_NULLAllocator;
 	}
 
 public:

@@ -38,6 +38,8 @@ namespace MyAllocator{
 		}
 	};
 
+	constexpr NULLAllocator var_NULLAllocator;
+
 } // namespace MyAllocator
 
 #endif

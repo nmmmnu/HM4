@@ -40,6 +40,8 @@ namespace MyAllocator{
 		}
 	};
 
+	constexpr STDAllocator var_STDAllocator;
+
 
 
 	template<typename T>

@@ -41,6 +41,8 @@ namespace MyAllocator{
 		}
 	};
 
+	constexpr MallocAllocator var_MallocAllocator;
+
 } // namespace MyAllocator
 
 #endif
