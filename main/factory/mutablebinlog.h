@@ -1,22 +1,26 @@
 #include "mutablebase.h"
 #include "skiplist.h"
+#include "arenaallocator.h"
 
 #include "binlogger/diskfilebinlogger.h"
 #include "binloglist.h"
 
 namespace DBAdapterFactory{
 
+	template<class AllocatorX>
 	struct MutableBinLog{
-		using MemList		= hm4::SkipList<MyAllocator::PMAllocator>;
+		using Allocator		= AllocatorX;
+
+		using MemList		= hm4::SkipList<Allocator>;
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ true>;
 
 		using MutableBase_	= MutableBase<BinLogList, hm4::FlushList>;
 
-		using MyDBAdapter	= MutableBase_::MyDBAdapter;
+		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData, typename UStringPathBinLog>
-		MutableBinLog(UStringPathData &&path_data, UStringPathBinLog &&path_binlog, BinLogger::SyncOptions const syncOprions, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
+		MutableBinLog(UStringPathData &&path_data, UStringPathBinLog &&path_binlog, BinLogger::SyncOptions const syncOprions, Allocator &allocator) :
 					memList_{ allocator },
 					binLogList_{
 						memList_,
@@ -28,7 +32,6 @@ namespace DBAdapterFactory{
 					},
 					base_{
 						std::forward<UStringPathData>(path_data),
-						memListSize,
 						binLogList_
 					}{}
 

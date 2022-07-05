@@ -24,7 +24,7 @@ namespace DBAdapterFactory{
 		using ListLoader		= hm4::listloader::DirectoryListLoader;
 
 		using MemList			= MemListType;
-		using Predicate			= hm4::flusher::DiskFilePredicate;
+		using Predicate			= hm4::flusher::DiskFileAllocatorPredicate;
 		using IDGenerator		= hm4::idgenerator::IDGeneratorDate;
 		using Flush			= hm4::flusher::DiskFileFlush<IDGenerator>;
 		using MutableFlushList		= MutableFlushListType<MemList, Predicate, Flush, ListLoader>;
@@ -47,13 +47,13 @@ namespace DBAdapterFactory{
 		using MyDBAdapter		= DBAdapter;
 
 		template<typename UStringPathData, typename... FlushListArgs>
-		MutableBase(UStringPathData &&path_data, size_t const memListSize, FlushListArgs&&... args) :
+		MutableBase(UStringPathData &&path_data, FlushListArgs&&... args) :
 						loader_{
 							std::forward<UStringPathData>(path_data)
 						},
 						muFlushList_{
 							std::forward<FlushListArgs>(args)...,
-							Predicate{ memListSize },
+							Predicate{},
 							Flush{ IDGenerator{}, path_data },
 							loader_
 						},

@@ -1,22 +1,24 @@
 #include "mutablebase.h"
 #include "skiplist.h"
-#include "pmallocator.h"
+#include "arenaallocator.h"
 
 namespace DBAdapterFactory{
 
+	template<class AllocatorX>
 	struct Mutable{
-		using MemList		= hm4::SkipList<MyAllocator::PMAllocator>;
+		using Allocator		= AllocatorX;
+
+		using MemList		= hm4::SkipList<Allocator>;
 
 		using MutableBase_	= MutableBase<MemList, hm4::FlushList>;
 
-		using MyDBAdapter	= MutableBase_::MyDBAdapter;
+		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
-		Mutable(UStringPathData &&path_data, size_t const memListSize, MyAllocator::PMAllocator &allocator) :
+		Mutable(UStringPathData &&path_data, Allocator &allocator) :
 					memList_{ allocator },
 					base_{
 						std::forward<UStringPathData>(path_data),
-						memListSize,
 						memList_
 					}{}
 

@@ -34,7 +34,7 @@ namespace flushlist_impl_{
 	}
 
 	template<class List, class Flusher>
-	void flush(List &list, Flusher &flusher){
+	void save(List &list, Flusher &flusher){
 		if constexpr(HasPrepareFlush<List>::value){
 			list.prepareFlush();
 		}

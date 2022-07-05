@@ -100,7 +100,7 @@ private:
 
 		log__("TH#", id, "Flushing data...", "List record(s): ", list.size(), "List size: ", list.bytes());
 
-		flushlist_impl_::flush(list, flusher_);
+		flushlist_impl_::save(list, flusher_);
 
 		log__("TH#", id, "Flushing done");
 	}

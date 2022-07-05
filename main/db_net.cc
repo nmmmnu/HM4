@@ -8,8 +8,6 @@
 #include "factory/mutableconcurrent.h"
 #include "factory/mutablebinlogcurrent.h"
 
-#include "pmallocator.h"
-#include "stdallocator.h"
 #include "arenaallocator.h"
 
 #include "version.h"
@@ -43,8 +41,7 @@ constexpr bool USE_CONCURRENCY = true;
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
-using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
-using MySTDAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using MyArenaAllocator	= MyAllocator::ArenaAllocator;
 
 // ----------------------------------
 
@@ -61,6 +58,11 @@ constexpr size_t MIN_ARENA_SIZE = 128;
 #include <iostream>
 
 namespace{
+	void printError(const char *msg){
+		fmt::print(stderr, "{}\n", msg);
+		exit(1);
+	}
+
 	MyOptions prepareOptions(int argc, char **argv);
 
 	template<class Factory>
@@ -73,7 +75,7 @@ namespace{
 		return main2(opt, std::move(adapter_factory));
 	}
 
-	int immutableLists(const MyOptions &opt){
+	int select_ImmutableLists(const MyOptions &opt){
 		using hm4::listloader::DirectoryListLoader;
 
 		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path))
@@ -88,30 +90,28 @@ namespace{
 			);
 	}
 
-	template<class Allocator>
-	Allocator createAllocator(const MyOptions &opt);
-
-	template<>
-	MySTDAllocator createAllocator(const MyOptions &){
-		return MySTDAllocator{};
-	}
-
-	template<>
 	MyArenaAllocator createAllocator(const MyOptions &opt){
-		size_t const max_memlist_arena = opt.max_memlist_arena < MIN_ARENA_SIZE ? MIN_ARENA_SIZE : opt.max_memlist_arena * MB;
+		// uncomment for virtual Allocator
+		static_assert(MyArenaAllocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
-		return MyArenaAllocator{ max_memlist_arena };
+		if (!MyArenaAllocator::knownMemoryUsage())
+			printError("Allocator must know its memory usage");
+
+		auto const max_memlist_arena = std::max(MIN_ARENA_SIZE, opt.max_memlist_arena);
+
+		MyArenaAllocator allocator{ max_memlist_arena * MB };
+
+		fmt::print(std::clog, "Creating {} with size of {} MB\n", allocator.getName(), max_memlist_arena);
+
+		return allocator;
 	}
 
-	template<class Allocator>
-	int mutableLists_binlog(const MyOptions &opt){
-		size_t const max_memlist_size  = opt.max_memlist_size  * MB;
-
+	int select_MutableLists(const MyOptions &opt){
 		if constexpr(USE_CONCURRENCY){
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
 
-			auto allocator1 = createAllocator<Allocator>(opt);
-			auto allocator2 = createAllocator<Allocator>(opt);
+			auto allocator1 = createAllocator(opt);
+			auto allocator2 = createAllocator(opt);
 
 			auto allocatorName = allocator1.getName();
 
@@ -120,19 +120,19 @@ namespace{
 				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
 
 				return fLists(
-					opt, DBAdapterFactory::MutableBinLogConcurrent{ opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, max_memlist_size, allocator1, allocator2 },
+					opt, DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
 					"Starting {} server with {}...\n", "mutable concurrent binlog", allocatorName
 				);
 			}else{
 				return fLists(
-					opt, DBAdapterFactory::MutableConcurrent{   opt.db_path, max_memlist_size, allocator1, allocator2 },
+					opt, DBAdapterFactory::MutableConcurrent<MyArenaAllocator>{   opt.db_path, allocator1, allocator2 },
 					"Starting {} server with {}...\n", "mutable concurrent", allocatorName
 				);
 			}
 		}else{
 			bool const have_binlog = ! opt.binlog_path1.empty();
 
-			auto allocator = createAllocator<Allocator>(opt);
+			auto allocator = createAllocator(opt);
 
 			auto allocatorName = allocator.getName();
 
@@ -141,43 +141,35 @@ namespace{
 				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
 
 				return fLists(
-					opt, DBAdapterFactory::MutableBinLog{ opt.db_path, opt.binlog_path1, syncOprions, max_memlist_size, allocator },
+					opt, DBAdapterFactory::MutableBinLog<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, syncOprions, allocator },
 					"Starting {} server with {}...\n", "mutable binlog", allocatorName
 				);
 			}else{
 				return fLists(
-					opt, DBAdapterFactory::Mutable{   opt.db_path, max_memlist_size, allocator },
+					opt, DBAdapterFactory::Mutable<MyArenaAllocator>{   opt.db_path, allocator },
 					"Starting {} server with {}...\n", "mutable", allocatorName
 				);
 			}
 		}
 	}
 
-	int mutableLists_allocator(const MyOptions &opt){
-		if (opt.max_memlist_arena)
-			return mutableLists_binlog<MyArenaAllocator	>(opt);
+	int select_List(const MyOptions &opt){
+		if (opt.immutable)
+			return select_ImmutableLists(opt);
 		else
-			return mutableLists_binlog<MySTDAllocator	>(opt);
-	}
-
-	int mutableLists(const MyOptions &opt){
-		return mutableLists_allocator(opt);
+			return select_MutableLists(opt);
 	}
 }
 
 int main(int argc, char **argv){
 	MyOptions const opt = prepareOptions(argc, argv);
 
-	if (opt.immutable)
-		return immutableLists(opt);
-	else
-		return mutableLists(opt);
+	return select_List(opt);
 }
 
 namespace{
 
 	void printUsage(const char *cmd);
-	void printError(const char *msg);
 
 	MyOptions prepareOptions(int argc, char **argv){
 		auto argImutable = [](const char *s) -> uint16_t{
@@ -274,11 +266,6 @@ namespace{
 	}
 
 	// ----------------------------------
-
-	void printError(const char *msg){
-		fmt::print(stderr, "{}\n", msg);
-		exit(1);
-	}
 
 	void printUsage(const char *cmd){
 		#ifdef NOT_HAVE_CHARCONV

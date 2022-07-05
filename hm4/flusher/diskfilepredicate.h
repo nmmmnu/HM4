@@ -17,7 +17,7 @@ private:
 };
 
 
-
+#if 0
 struct DiskFilePredicate : DiskFileAllocatorPredicate{
 	DiskFilePredicate(size_t const maxSize) : maxSize_(maxSize){}
 
@@ -31,7 +31,7 @@ struct DiskFilePredicate : DiskFileAllocatorPredicate{
 private:
 	size_t maxSize_;
 };
-
+#endif
 
 
 } // namespace flusher

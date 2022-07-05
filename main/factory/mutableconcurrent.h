@@ -1,23 +1,27 @@
 #include "mutablebase.h"
 #include "skiplist.h"
+#include "arenaallocator.h"
+
 #include "concurrentflushlist.h"
 
 namespace DBAdapterFactory{
 
+	template<class AllocatorX>
 	struct MutableConcurrent{
-		using MemList		= hm4::SkipList<MyAllocator::PMAllocator>;
+		using Allocator		= AllocatorX;
+
+		using MemList		= hm4::SkipList<Allocator>;
 
 		using MutableBase_	= MutableBase<MemList, hm4::ConcurrentFlushList>;
 
-		using MyDBAdapter	= MutableBase_::MyDBAdapter;
+		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
-		MutableConcurrent(UStringPathData &&path_data, size_t const memListSize, MyAllocator::PMAllocator &allocator1, MyAllocator::PMAllocator &allocator2) :
+		MutableConcurrent(UStringPathData &&path_data, Allocator &allocator1, Allocator &allocator2) :
 					memList1_{ allocator1 },
 					memList2_{ allocator2 },
 					base_{
 						std::forward<UStringPathData>(path_data),
-						memListSize,
 						memList1_,
 						memList2_
 					}{}

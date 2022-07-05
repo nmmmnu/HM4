@@ -36,7 +36,7 @@ public:
 	uint16_t	tcp_reuseport		= 0;
 
 	uint32_t	max_clients		= 512;
-	size_t		max_memlist_size	= 128;
+	std::nullptr_t	max_memlist_size	= nullptr;
 	size_t		max_memlist_arena	= 0;
 
 public:
@@ -88,8 +88,8 @@ public:
 		put("tcp_reuseport",		tcp_reuseport,		"TCP Activate SO_REUSEPORT"					);
 
 		put("max_clients",		max_clients,		"Max Clients"							);
-		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB"					);
-		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB, overcommit OK"	);
+		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB (deprecated and ignored)"		);
+		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"			);
 	}
 
 private:

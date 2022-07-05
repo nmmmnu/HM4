@@ -46,7 +46,8 @@ public:
 	}
 
 	void flush(){
-		flushlist_impl_::flush(*list_, flusher_);
+		save_();
+
 		flushlist_impl_::clear(*list_, loader_);
 
 	//	return true;
@@ -69,11 +70,11 @@ private:
 	}
 
 	void save_() const{
-		log__("Flushing data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
+		log__("Save data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 
-		flushlist_impl_::flush(*list_, flusher_);
+		flushlist_impl_::save(*list_, flusher_);
 
-		log__("Flushing done");
+		log__("Save done");
 	}
 
 private:
