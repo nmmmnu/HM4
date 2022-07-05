@@ -74,7 +74,10 @@ private:
 	void save_() const{
 		log__("Flushing data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 
-		flusher_(std::begin(*list_), std::end(*list_));
+		// UnsortedList function parameters evaluation workaround...
+		auto b = std::begin(*list_);
+
+		flusher_(std::move(b), std::end(*list_));
 
 		log__("Flushing done");
 	}
