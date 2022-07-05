@@ -37,7 +37,7 @@ public:
 		clear();
 	}
 
-	void sort(){
+	void prepareFlush(){
 		if (needSort_ == false)
 			return;
 
@@ -101,7 +101,7 @@ public:
 	}
 
 public:
-	iterator begin() noexcept;
+	iterator begin() const noexcept;
 	iterator end() const noexcept;
 };
 
@@ -149,10 +149,8 @@ private:
 // ==============================
 
 template<class T_Allocator>
-inline auto UnsortedList<T_Allocator>::begin() noexcept -> iterator{
-	sort();
-
-	return std::cbegin(vector_);
+inline auto UnsortedList<T_Allocator>::begin() const noexcept -> iterator{
+	return std::begin(vector_);
 }
 
 template<class T_Allocator>

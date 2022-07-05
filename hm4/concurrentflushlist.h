@@ -6,6 +6,8 @@
 #include "logger.h"
 #include "scopedthread.h"
 
+#include "flushlistbase.h"
+
 namespace hm4{
 
 
@@ -53,7 +55,7 @@ public:
 		return insert_(src);
 	}
 
-	bool flush(){
+	void flush(){
 		log__("Start Flushing data...");
 
 		// we have to switch lists, so need to join()
@@ -67,17 +69,17 @@ public:
 		//	save_(*list2_);
 		}
 
-		if (!empty(*list1_)){
-			list1_->clear();
-			notifyLoader_();
-		}
-
-		return true;
+		if (!empty(*list1_))
+			flushlist_impl_::clear(*list1_, loader_);
+		else
+			log__("No data for flushing.");
 	}
 
 	// Command pattern
 	bool command(){
-		return flush();
+		flush();
+
+		return true;
 	}
 
 private:
@@ -99,18 +101,9 @@ private:
 
 		log__("TH#", id, "Flushing data...", "List record(s): ", list.size(), "List size: ", list.bytes());
 
-		flusher_(std::begin(list), std::end(list));
+		flushlist_impl_::flush(list, flusher_);
 
 		log__("TH#", id, "Flushing done");
-	}
-
-	bool notifyLoader_(){
-		if constexpr(std::is_same_v<ListLoader, std::nullptr_t>){
-			return true;
-		}else{
-			log__("Reloading data...");
-			return loader_ && loader_->refresh();
-		}
 	}
 
 private:

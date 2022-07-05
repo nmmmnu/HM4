@@ -3,11 +3,10 @@
 
 #include "multi/singlelist.h"
 
-#include "logger.h"
-
-#include <algorithm>
+#include "flushlistbase.h"
 
 namespace hm4{
+
 
 
 template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
@@ -46,13 +45,11 @@ public:
 		return insert_(src);
 	}
 
-	bool flush(){
-		save_();
+	void flush(){
+		flushlist_impl_::flush(*list_, flusher_);
+		flushlist_impl_::clear(*list_, loader_);
 
-		list_->clear();
-		notifyLoader_();
-
-		return true;
+	//	return true;
 	}
 
 	// Command pattern
@@ -74,18 +71,9 @@ private:
 	void save_() const{
 		log__("Flushing data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 
-		flusher_(std::begin(*list_), std::end(*list_));
+		flushlist_impl_::flush(*list_, flusher_);
 
 		log__("Flushing done");
-	}
-
-	bool notifyLoader_(){
-		if constexpr(std::is_same_v<ListLoader, std::nullptr_t>){
-			return true;
-		}else{
-			log__("Reloading data...");
-			return loader_ && loader_->refresh();
-		}
 	}
 
 private:
