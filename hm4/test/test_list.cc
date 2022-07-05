@@ -13,12 +13,21 @@ MyTest mytest;
 #include "trackingallocator.h"
 #include "stdallocator.h"
 
-using Allocator_1 = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-using Allocator_2 = MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+struct Allocator_1{
+	using type	= MyAllocator::STDAllocator;
+	using v		= type;
+};
 
-using Allocator = Allocator_1;
+struct Allocator_2{
+	using type	= MyAllocator::PMAllocator;
+	using v		= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+};
 
-Allocator allocator;
+using Allocator_	= Allocator_1;
+
+using Allocator		= Allocator_::type;
+
+Allocator_::v allocator;
 
 // ==============================
 
@@ -245,26 +254,28 @@ void list_test(const char *name, Args &&...args){
 #include "multi/duallist.h"
 #include "vectorlist.h"
 
-using MyDualList = hm4::multi::DualList<hm4::VectorList, hm4::BlackHoleList, hm4::multi::DualListEraseType::NORMAL>;
+template<class Allocator>
+using MyDualList = hm4::multi::DualList<hm4::VectorList<Allocator>, hm4::BlackHoleList, hm4::multi::DualListEraseType::NORMAL>;
 
 template <>
-void list_test<MyDualList>(const char *name){
-	hm4::VectorList		memtable{ allocator };
-	hm4::BlackHoleList	disktable{ allocator };
+void list_test<MyDualList<Allocator> >(const char *name){
+	hm4::VectorList<Allocator>	memtable{ allocator };
+	hm4::BlackHoleList		disktable;
 
-	MyDualList list{ memtable, disktable };
+	MyDualList<Allocator> list{ memtable, disktable };
 
 	return list_test(name, list);
 }
 
 #include "multi/singlelist.h"
 
-using MySingleList = hm4::multi::SingleList<hm4::VectorList>;
+template<class Allocator>
+using MySingleList = hm4::multi::SingleList<hm4::VectorList<Allocator> >;
 
 template <>
-void list_test<MySingleList>(const char *name){
-	hm4::VectorList		memtable{ allocator };
-	MySingleList		list{ memtable };
+void list_test<MySingleList<Allocator> >(const char *name){
+	hm4::VectorList<Allocator>	memtable{ allocator };
+	MySingleList<Allocator>		list{ memtable };
 
 	return list_test(name, list);
 }
@@ -273,7 +284,7 @@ void list_test<MySingleList>(const char *name){
 
 [[maybe_unused]]
 static void skiplist_lanes_test(){
-	hm4::SkipList list{ allocator };
+	hm4::SkipList<Allocator> list{ allocator };
 
 	list.insert("name",	"Niki"		);
 	list.insert("city",	"Sofia"		);
@@ -295,13 +306,13 @@ static void skiplist_lanes_test(){
 #include "linklist.h"
 
 int main(){
-	list_test<hm4::BlackHoleList	>("BlackHoleList"	, allocator	);
-	list_test<hm4::VectorList	>("VectorList"		, allocator	);
-	list_test<MyDualList		>("DualList"				);
-	list_test<MySingleList		>("SingeList"				);
+	list_test<hm4::BlackHoleList			>("BlackHoleList"			);
+	list_test<hm4::VectorList	<Allocator>	>("VectorList"		, allocator	);
+	list_test<MyDualList		<Allocator>	>("DualList"				);
+	list_test<MySingleList		<Allocator>	>("SingeList"				);
 
-	list_test<hm4::LinkList		>("LinkList"		, allocator	);
-	list_test<hm4::SkipList		>("SkipList"		, allocator	);
+	list_test<hm4::LinkList		<Allocator>	>("LinkList"		, allocator	);
+	list_test<hm4::SkipList		<Allocator>	>("SkipList"		, allocator	);
 
 //	skiplist_lanes_test();
 

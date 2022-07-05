@@ -1,8 +1,6 @@
 #ifndef MY_NULL_ALLOCATOR
 #define MY_NULL_ALLOCATOR
 
-#include "allocator_base.h"
-
 namespace MyAllocator{
 
 	struct NULLAllocator{

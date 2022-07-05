@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <cassert>
 
+#include "arenaallocator.h"
+#include "stdallocator.h"
+#include "pmallocator.h"
+
 namespace hm4{
 
 namespace{
@@ -18,7 +22,8 @@ namespace{
 	}
 } // anonymous namespace
 
-auto VectorList::find(std::string_view const key, std::true_type) const noexcept -> iterator{
+template<class T_Allocator>
+auto VectorList<T_Allocator>::find(std::string_view const key, std::true_type) const noexcept -> iterator{
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -27,7 +32,8 @@ auto VectorList::find(std::string_view const key, std::true_type) const noexcept
 	return found ? it : end();
 }
 
-auto VectorList::find(std::string_view const key, std::false_type) const noexcept -> iterator{
+template<class T_Allocator>
+auto VectorList<T_Allocator>::find(std::string_view const key, std::false_type) const noexcept -> iterator{
 	assert(!key.empty());
 
 	const auto &[found, it] = binarySearch(vector_, key);
@@ -35,7 +41,8 @@ auto VectorList::find(std::string_view const key, std::false_type) const noexcep
 	return it;
 }
 
-auto VectorList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
+template<class T_Allocator>
+auto VectorList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 
@@ -83,7 +90,8 @@ auto VectorList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> 
 	}
 }
 
-bool VectorList::erase(std::string_view const key){
+template<class T_Allocator>
+bool VectorList<T_Allocator>::erase(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -104,7 +112,8 @@ bool VectorList::erase(std::string_view const key){
 	return true;
 }
 
-bool VectorList::clear(){
+template<class T_Allocator>
+bool VectorList<T_Allocator>::clear(){
 	if (allocator_->reset() == false){
 		std::for_each(std::begin(vector_), std::end(vector_), [this](void *p){
 			using namespace MyAllocator;
@@ -116,6 +125,12 @@ bool VectorList::clear(){
 	lc_.clr();
 	return true;
 }
+
+// ==============================
+
+template class VectorList<MyAllocator::PMAllocator>;
+template class VectorList<MyAllocator::ArenaAllocator>;
+template class VectorList<MyAllocator::STDAllocator>;
 
 } // namespace
 

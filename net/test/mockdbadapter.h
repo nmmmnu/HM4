@@ -7,6 +7,7 @@
 
 #include "vectorlist.h"
 #include "stdallocator.h"
+#include "pmallocator.h"
 
 struct MockDBAdapter{
 	constexpr static bool MUTABLE = true;
@@ -68,7 +69,7 @@ private:
 
 	Allocator allocator_;
 
-	hm4::VectorList list_{ allocator_ };
+	hm4::VectorList<MyAllocator::PMAllocator> list_{ allocator_ };
 };
 
 #endif

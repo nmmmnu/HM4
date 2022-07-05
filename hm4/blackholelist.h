@@ -2,14 +2,15 @@
 #define _BLACK_HOLE_LIST_LIST_H
 
 #include "ilist.h"
-#include "pmallocator.h"
+#include "nullallocator.h"
 
 namespace hm4{
 
 
+
 class BlackHoleList{
 public:
-	using Allocator		= MyAllocator::PMAllocator;
+	using Allocator		= MyAllocator::NULLAllocator;
 
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
@@ -20,6 +21,8 @@ private:
 	Allocator	*allocator_ = nullptr;
 
 public:
+	constexpr BlackHoleList() = default;
+
 	constexpr BlackHoleList(Allocator &allocator) : allocator_(& allocator){}
 
 	constexpr const Allocator &getAllocator() const{
@@ -76,6 +79,7 @@ public:
 		return nullptr;
 	}
 };
+
 
 
 } // namespace

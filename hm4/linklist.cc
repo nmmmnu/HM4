@@ -4,9 +4,14 @@
 
 #include "hpair.h"
 
+#include "arenaallocator.h"
+#include "stdallocator.h"
+#include "pmallocator.h"
+
 namespace hm4{
 
-struct LinkList::Node{
+template<class T_Allocator>
+struct LinkList<T_Allocator>::Node{
 	HPair::HKey	hkey;
 	Pair		*data;
 	Node		*next = nullptr;
@@ -16,7 +21,8 @@ struct LinkList::Node{
 	}
 };
 
-struct LinkList::NodeLocator{
+template<class T_Allocator>
+struct LinkList<T_Allocator>::NodeLocator{
 	Node **prev;
 	Node *node;
 };
@@ -36,31 +42,36 @@ namespace{
 
 // ==============================
 
-LinkList::LinkList(Allocator &allocator) : allocator_(& allocator){
+template<class T_Allocator>
+LinkList<T_Allocator>::LinkList(Allocator &allocator) : allocator_(& allocator){
 	clear_();
 }
 
-LinkList::LinkList(LinkList &&other):
+template<class T_Allocator>
+LinkList<T_Allocator>::LinkList(LinkList &&other):
 			head_		(std::move(other.head_		)),
 			lc_		(std::move(other.lc_		)),
 			allocator_	(std::move(other.allocator_	)){
 	other.clear_();
 }
 
-void LinkList::deallocate_(Node *node){
+template<class T_Allocator>
+void LinkList<T_Allocator>::deallocate_(Node *node){
 	using namespace MyAllocator;
 
 	deallocate(allocator_, node->data);
 	deallocate(allocator_, node);
 }
 
-void LinkList::clear_(){
+template<class T_Allocator>
+void LinkList<T_Allocator>::clear_(){
 	lc_.clr();
 
 	head_ = nullptr;
 }
 
-bool LinkList::clear(){
+template<class T_Allocator>
+bool LinkList<T_Allocator>::clear(){
 	if (allocator_->reset() == false){
 		for(Node *node = head_; node; ){
 			Node *copy = node;
@@ -76,7 +87,8 @@ bool LinkList::clear(){
 	return true;
 }
 
-auto LinkList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
+template<class T_Allocator>
+auto LinkList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 
@@ -132,7 +144,8 @@ auto LinkList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&
 	return { newnode };
 }
 
-bool LinkList::erase(std::string_view const key){
+template<class T_Allocator>
+bool LinkList<T_Allocator>::erase(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -155,7 +168,8 @@ bool LinkList::erase(std::string_view const key){
 
 // ==============================
 
-auto LinkList::locate_(std::string_view const key) -> NodeLocator{
+template<class T_Allocator>
+auto LinkList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -184,7 +198,8 @@ auto LinkList::locate_(std::string_view const key) -> NodeLocator{
 	return { jtable, nullptr };
 }
 
-auto LinkList::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
+template<class T_Allocator>
+auto LinkList<T_Allocator>::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
 	assert(!key.empty());
 
 	auto hkey = HPair::SS::create(key);
@@ -211,18 +226,25 @@ auto LinkList::locateNode_(std::string_view const key, bool const exact) const -
 // ==============================
 
 
-auto LinkList::iterator::operator++() -> iterator &{
+template<class T_Allocator>
+auto LinkList<T_Allocator>::iterator::operator++() -> iterator &{
 	node_ = node_->next;
 
 	return *this;
 }
 
-const Pair &LinkList::iterator::operator*() const{
+template<class T_Allocator>
+const Pair &LinkList<T_Allocator>::iterator::operator*() const{
 	assert(node_);
 
 	return *(node_->data);
 }
 
+// ==============================
+
+template class LinkList<MyAllocator::PMAllocator>;
+template class LinkList<MyAllocator::ArenaAllocator>;
+template class LinkList<MyAllocator::STDAllocator>;
 
 } // namespace
 

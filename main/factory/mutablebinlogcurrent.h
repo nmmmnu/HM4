@@ -7,7 +7,7 @@
 namespace DBAdapterFactory{
 
 	struct MutableBinLogConcurrent{
-		using MemList		= hm4::SkipList;
+		using MemList		= hm4::SkipList<MyAllocator::PMAllocator>;
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ true>;
 

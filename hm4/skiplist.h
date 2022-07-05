@@ -6,14 +6,13 @@
 
 #include <array>
 
-#include "pmallocator.h"
-
 namespace hm4{
 
 
+template<class T_Allocator>
 class SkipList{
 public:
-	using Allocator		= MyAllocator::PMAllocator;
+	using Allocator		= T_Allocator;
 
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
@@ -103,7 +102,8 @@ private:
 
 // ==============================
 
-class SkipList::iterator{
+template<class T_Allocator>
+class SkipList<T_Allocator>::iterator{
 public:
 	constexpr iterator(const Node *node) : node_(node){}
 
@@ -137,36 +137,43 @@ private:
 
 // ==============================
 
+template<class T_Allocator>
 template<bool B>
-inline auto SkipList::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
+inline auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
 	return locateNode_(key, exact.value);
 }
 
-inline auto SkipList::begin() const -> iterator{
+template<class T_Allocator>
+inline auto SkipList<T_Allocator>::begin() const -> iterator{
 	return heads_[0];
 }
 
-constexpr auto SkipList::end() -> iterator{
+template<class T_Allocator>
+constexpr auto SkipList<T_Allocator>::end() -> iterator{
 	return nullptr;
 }
 
-inline auto SkipList::insert(
+template<class T_Allocator>
+inline auto SkipList<T_Allocator>::insert(
 		std::string_view key, std::string_view val,
 		uint32_t expires, uint32_t created) -> iterator{
 
 	return hm4::insert(*this, key, val, expires, created);
 }
 
-inline auto SkipList::insert(Pair const &src) -> iterator{
+template<class T_Allocator>
+inline auto SkipList<T_Allocator>::insert(Pair const &src) -> iterator{
 	return hm4::insert(*this, src);
 }
 
 // ==============================
 
-inline auto swap(SkipList &a, SkipList &b){
+template<class T_Allocator>
+inline auto swap(SkipList<T_Allocator> &a, SkipList<T_Allocator> &b){
 	return a.swap(b);
 }
 
 } // namespace
 
 #endif
+

@@ -22,12 +22,21 @@ inline void sleep(){
 #include "trackingallocator.h"
 #include "stdallocator.h"
 
-using Allocator_1 = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-using Allocator_2 = MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+struct Allocator_1{
+	using type	= MyAllocator::STDAllocator;
+	using v		= type;
+};
 
-using Allocator = Allocator_1;
+struct Allocator_2{
+	using type	= MyAllocator::PMAllocator;
+	using v		= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+};
 
-Allocator allocator;
+using Allocator_	= Allocator_1;
+
+using Allocator		= Allocator_::type;
+
+Allocator_::v allocator;
 
 
 
@@ -273,7 +282,7 @@ void test_CollectionList(const char *name){
 #include "vectorlist.h"
 
 int main(){
-	using List = hm4::VectorList;
+	using List = hm4::VectorList<Allocator>;
 
 	test_DualListEmpty	<List>("DualList (Empty)"	, List{ allocator }, List{ allocator }	);
 	test_DualList		<List>("DualList"		, List{ allocator }, List{ allocator }	);

@@ -10,26 +10,24 @@
 
 using MyReader = FileReader;
 
-#include "pmallocator.h"
-#include "stdallocator.h"
 #include "arenaallocator.h"
 
-using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
-using MySTDAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+// Yay, non virtual :)
+using MyArenaAllocator = MyAllocator::ArenaAllocator;
 
 constexpr size_t MIN_ARENA_SIZE = 128;
 
 
 
 struct MyListFactory{
-	using MemList		= hm4::SkipList;
+	using MemList		= hm4::SkipList<MyArenaAllocator>;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
 	using MyList		= hm4::ConcurrentFlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	MyListFactory(UString &path, MyAllocator::PMAllocator &allocator1, MyAllocator::PMAllocator &allocator2) :
+	MyListFactory(UString &path, MyArenaAllocator &allocator1, MyArenaAllocator &allocator2) :
 				memlist1{ allocator1 },
 				memlist2{ allocator2 },
 				mylist{

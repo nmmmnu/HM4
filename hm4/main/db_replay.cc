@@ -6,28 +6,26 @@
 #include "flusher/diskfileflush.h"
 #include "flushlist.h"
 
-#include "pmallocator.h"
-#include "stdallocator.h"
-#include "arenaallocator.h"
-
 #include "disk/disklist.h"
 
-using MyArenaAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
-using MySTDAllocator	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+#include "arenaallocator.h"
+
+// Yay, non virtual :)
+using MyArenaAllocator = MyAllocator::ArenaAllocator;
 
 constexpr size_t	MIN_ARENA_SIZE		= 128;
 
 
 
 struct MyListFactory{
-	using MemList		= hm4::UnsortedList;
+	using MemList		= hm4::UnsortedList<MyArenaAllocator>;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= hm4::idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
 	using MyList		= hm4::FlushList<MemList,Predicate, Flush>;
 
 	template<typename UString>
-	MyListFactory(UString &&path, MyAllocator::PMAllocator &allocator) :
+	MyListFactory(UString &&path, MyArenaAllocator &allocator) :
 				memlist{ allocator },
 				mylist{
 					memlist,

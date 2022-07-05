@@ -6,6 +6,10 @@
 
 #include "hpair.h"
 
+#include "arenaallocator.h"
+#include "stdallocator.h"
+#include "pmallocator.h"
+
 namespace hm4{
 
 namespace{
@@ -41,7 +45,8 @@ namespace{
 
 // ==============================
 
-auto SkipList::getRandomHeight_() -> height_size_type{
+template<class T_Allocator>
+auto SkipList<T_Allocator>::getRandomHeight_() -> height_size_type{
 	height_size_type const x = modifiedLSB<height_size_type>(rand64());
 
 	// keeping this because of clang
@@ -69,7 +74,8 @@ Uncommend DEBUG_PRINT_LANES for visualisation.
 #define DEBUG_PRINT_LANES
 */
 
-struct SkipList::Node{
+template<class T_Allocator>
+struct SkipList<T_Allocator>::Node{
 	HPair::HKey	hkey;
 	Pair		*data;
 	Node		*next[1];	// system dependent, dynamic, at least 1
@@ -85,45 +91,52 @@ struct SkipList::Node{
 
 // ==============================
 
-struct SkipList::NodeLocator{
+template<class T_Allocator>
+struct SkipList<T_Allocator>::NodeLocator{
 	HeightArray<Node **>	prev;
 	Node			*node	= nullptr;
 };
 
 // ==============================
 
-SkipList::SkipList(Allocator &allocator) : allocator_(& allocator){
+template<class T_Allocator>
+SkipList<T_Allocator>::SkipList(Allocator &allocator) : allocator_(& allocator){
 	zeroing_();
 }
 
-SkipList::SkipList(SkipList &&other):
+template<class T_Allocator>
+SkipList<T_Allocator>::SkipList(SkipList &&other):
 		heads_		(std::move(other.heads_		)),
 		lc_		(std::move(other.lc_		)),
 		allocator_	(std::move(other.allocator_	)){
 	other.zeroing_();
 }
 
-void SkipList::swap(SkipList &other){
+template<class T_Allocator>
+void SkipList<T_Allocator>::swap(SkipList &other){
 	using std::swap;
 	swap(heads_,		other.heads_		);
 	swap(lc_,		other.lc_		);
 	swap(allocator_,	other.allocator_	);
 }
 
-void SkipList::deallocate_(Node *node){
+template<class T_Allocator>
+void SkipList<T_Allocator>::deallocate_(Node *node){
 	using namespace MyAllocator;
 
 	deallocate(allocator_, node->data);
 	deallocate(allocator_, node);
 }
 
-void SkipList::zeroing_(){
+template<class T_Allocator>
+void SkipList<T_Allocator>::zeroing_(){
 	lc_.clr();
 
 	std::fill(heads_.begin(), heads_.end(), nullptr);
 }
 
-bool SkipList::clear(){
+template<class T_Allocator>
+bool SkipList<T_Allocator>::clear(){
 	if (allocator_->reset() == false){
 		for(Node *node = heads_[0]; node; ){
 			Node *copy = node;
@@ -139,7 +152,8 @@ bool SkipList::clear(){
 	return true;
 }
 
-auto SkipList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
+template<class T_Allocator>
+auto SkipList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 
@@ -218,7 +232,8 @@ auto SkipList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&
 	return { newnode };
 }
 
-bool SkipList::erase(std::string_view const key){
+template<class T_Allocator>
+bool SkipList<T_Allocator>::erase(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -268,14 +283,16 @@ bool SkipList::erase(std::string_view const key){
 
 // ==============================
 
-void SkipList::printLanes() const{
+template<class T_Allocator>
+void SkipList<T_Allocator>::printLanes() const{
 	for(height_size_type lane = MAX_HEIGHT; lane --> 0;){
 		printf("Lane # %5u :\n", lane);
 		printLane(lane);
 	}
 }
 
-void SkipList::printLane(height_size_type const lane) const{
+template<class T_Allocator>
+void SkipList<T_Allocator>::printLane(height_size_type const lane) const{
 	uint64_t i = 0;
 	for(const Node *node = heads_[lane]; node; node = node->next[lane]){
 		hm4::print(*node->data);
@@ -285,7 +302,8 @@ void SkipList::printLane(height_size_type const lane) const{
 	}
 }
 
-void SkipList::printLanesSummary() const{
+template<class T_Allocator>
+void SkipList<T_Allocator>::printLanesSummary() const{
 	for(height_size_type lane = MAX_HEIGHT; lane --> 0;){
 		uint64_t count = 0;
 		for(const Node *node = heads_[lane]; node; node = node->next[lane])
@@ -297,8 +315,9 @@ void SkipList::printLanesSummary() const{
 
 // ==============================
 
+template<class T_Allocator>
 template<bool ShortcutEvaluation>
-auto SkipList::locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>) -> NodeLocator{
+auto SkipList<T_Allocator>::locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>) -> NodeLocator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
@@ -340,7 +359,8 @@ auto SkipList::locate_(std::string_view const key, std::bool_constant<ShortcutEv
 	return nl;
 }
 
-auto SkipList::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
+template<class T_Allocator>
+auto SkipList<T_Allocator>::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateNode_" };
@@ -381,17 +401,25 @@ auto SkipList::locateNode_(std::string_view const key, bool const exact) const -
 // ==============================
 
 
-auto SkipList::iterator::operator++() -> iterator &{
+template<class T_Allocator>
+auto SkipList<T_Allocator>::iterator::operator++() -> iterator &{
 	node_ = node_->next[0];
 
 	return *this;
 }
 
-const Pair &SkipList::iterator::operator*() const{
+template<class T_Allocator>
+const Pair &SkipList<T_Allocator>::iterator::operator*() const{
 	assert(node_);
 
 	return *(node_->data);
 }
+
+// ==============================
+
+template class SkipList<MyAllocator::PMAllocator>;
+template class SkipList<MyAllocator::ArenaAllocator>;
+template class SkipList<MyAllocator::STDAllocator>;
 
 
 } // namespace

@@ -5,14 +5,13 @@
 
 #include "listcounter.h"
 
-#include "pmallocator.h"
-
 namespace hm4{
 
 
+template<class T_Allocator>
 class LinkList{
 public:
-	using Allocator		= MyAllocator::PMAllocator;
+	using Allocator		= T_Allocator;
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
@@ -83,7 +82,8 @@ private:
 
 // ==============================
 
-class LinkList::iterator {
+template<class T_Allocator>
+class LinkList<T_Allocator>::iterator {
 public:
 	constexpr iterator(const Node *node) : node_(node){}
 
@@ -117,31 +117,34 @@ private:
 
 // ==============================
 
+template<class T_Allocator>
 template<bool B>
-inline auto LinkList::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
+inline auto LinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
 	return locateNode_(key, exact.value);
 }
 
-inline auto LinkList::begin() const -> iterator{
+template<class T_Allocator>
+inline auto LinkList<T_Allocator>::begin() const -> iterator{
 	return head_;
 }
 
-inline constexpr auto LinkList::end() -> iterator{
+template<class T_Allocator>
+constexpr auto LinkList<T_Allocator>::end() -> iterator{
 	return nullptr;
 }
 
-inline auto LinkList::insert(
+template<class T_Allocator>
+inline auto LinkList<T_Allocator>::insert(
 		std::string_view key, std::string_view val,
 		uint32_t expires, uint32_t created) -> iterator{
 
 	return hm4::insert(*this, key, val, expires, created);
 }
 
-inline auto LinkList::insert(Pair const &src) -> iterator{
+template<class T_Allocator>
+inline auto LinkList<T_Allocator>::insert(Pair const &src) -> iterator{
 	return hm4::insert(*this, src);
 }
-
-
 
 }
 

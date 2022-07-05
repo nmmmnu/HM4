@@ -8,12 +8,10 @@
 
 using MyReader = FileReader;
 
-#include "stdallocator.h"
-
 struct MyListFactory{
 	using MemList	= hm4::BlackHoleList;
 	using BinLogger	= hm4::binlogger::DiskFileBinLogger;
-	using MyList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ false>;
+	using MyList	= hm4::BinLogList<MemList, BinLogger, /* unlink */ false>;
 
 	MyListFactory(std::string_view const binLogFilename, hm4::Pair::WriteOptions const writeOptions) :
 				mylist{
@@ -26,11 +24,7 @@ struct MyListFactory{
 	}
 
 private:
-	using MySTDAllocator = MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-
-private:
-	MySTDAllocator	allocator;
-	MemList		memlist{ allocator };
+	MemList		memlist;
 	MyList		mylist;
 };
 

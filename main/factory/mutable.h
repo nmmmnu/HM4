@@ -1,10 +1,11 @@
 #include "mutablebase.h"
 #include "skiplist.h"
+#include "pmallocator.h"
 
 namespace DBAdapterFactory{
 
 	struct Mutable{
-		using MemList		= hm4::SkipList;
+		using MemList		= hm4::SkipList<MyAllocator::PMAllocator>;
 
 		using MutableBase_	= MutableBase<MemList, hm4::FlushList>;
 

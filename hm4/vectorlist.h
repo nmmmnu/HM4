@@ -8,17 +8,15 @@
 
 #include <vector>
 
-#include "pmallocator.h"
-
 namespace hm4{
 
-
+template<class T_Allocator>
 class VectorList{
 	using OVector	= std::vector<Pair *>;
 	using OVectorIt	= OVector::const_iterator;
 
 public:
-	using Allocator		= MyAllocator::PMAllocator;
+	using Allocator		= T_Allocator;
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
@@ -79,7 +77,8 @@ public:
 
 // ==============================
 
-class VectorList::iterator{
+template<class T_Allocator>
+class VectorList<T_Allocator>::iterator{
 public:
 	constexpr iterator(OVectorIt const &it) : ptr(it){}
 	constexpr iterator(OVectorIt &&it) : ptr(std::move(it)){}
@@ -191,26 +190,28 @@ private:
 
 // ==============================
 
-inline auto VectorList::begin() const noexcept -> iterator{
+template<class T_Allocator>
+inline auto VectorList<T_Allocator>::begin() const noexcept -> iterator{
 	return std::begin(vector_);
 }
 
-inline auto VectorList::end() const noexcept -> iterator{
+template<class T_Allocator>
+inline auto VectorList<T_Allocator>::end() const noexcept -> iterator{
 	return std::end(vector_);
 }
 
-inline auto VectorList::insert(
+template<class T_Allocator>
+inline auto VectorList<T_Allocator>::insert(
 		std::string_view key, std::string_view val,
 		uint32_t expires, uint32_t created) -> iterator{
 
 	return hm4::insert(*this, key, val, expires, created);
 }
 
-inline auto VectorList::insert(Pair const &src) -> iterator{
+template<class T_Allocator>
+inline auto VectorList<T_Allocator>::insert(Pair const &src) -> iterator{
 	return hm4::insert(*this, src);
 }
-
-
 
 } // namespace
 

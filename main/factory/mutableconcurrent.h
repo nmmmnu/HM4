@@ -5,7 +5,7 @@
 namespace DBAdapterFactory{
 
 	struct MutableConcurrent{
-		using MemList		= hm4::SkipList;
+		using MemList		= hm4::SkipList<MyAllocator::PMAllocator>;
 
 		using MutableBase_	= MutableBase<MemList, hm4::ConcurrentFlushList>;
 

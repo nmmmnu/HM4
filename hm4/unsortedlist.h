@@ -14,12 +14,14 @@
 namespace hm4{
 
 
+
+template<class T_Allocator>
 class UnsortedList{
 	using OVector	= std::vector<Pair *>;
 	using OVectorIt	= OVector::const_iterator;
 
 public:
-	using Allocator		= MyAllocator::PMAllocator;
+	using Allocator		= T_Allocator;
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
@@ -105,7 +107,8 @@ public:
 
 // ==============================
 
-class UnsortedList::iterator{
+template<class T_Allocator>
+class UnsortedList<T_Allocator>::iterator{
 public:
 	iterator(OVectorIt const &it) : ptr(it){}
 
@@ -145,28 +148,33 @@ private:
 
 // ==============================
 
-inline auto UnsortedList::begin() noexcept -> iterator{
+template<class T_Allocator>
+inline auto UnsortedList<T_Allocator>::begin() noexcept -> iterator{
 	sort();
 
 	return std::cbegin(vector_);
 }
 
-inline auto UnsortedList::end() const noexcept -> iterator{
+template<class T_Allocator>
+inline auto UnsortedList<T_Allocator>::end() const noexcept -> iterator{
 	return std::end(vector_);
 }
 
-inline auto UnsortedList::insert(
+template<class T_Allocator>
+inline auto UnsortedList<T_Allocator>::insert(
 		std::string_view key, std::string_view val,
 		uint32_t expires, uint32_t created) -> iterator{
 
 	return hm4::insert(*this, key, val, expires, created);
 }
 
-inline auto UnsortedList::insert(Pair const &src) -> iterator{
+template<class T_Allocator>
+inline auto UnsortedList<T_Allocator>::insert(Pair const &src) -> iterator{
 	return hm4::insert(*this, src);
 }
 
-inline auto UnsortedList::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
+template<class T_Allocator>
+inline auto UnsortedList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
 	if (!newdata)
 		return this->end();
 
