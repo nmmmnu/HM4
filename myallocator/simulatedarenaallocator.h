@@ -1,15 +1,15 @@
 #ifndef MY_SIMULATED_ARENA_ALLOCATOR
 #define MY_SIMULATED_ARENA_ALLOCATOR
 
-#include <cstdlib>
-#include <limits>
-#include "baseallocator.h"
-
 #include <malloc.h>
+#include "baseallocator.h"
 
 namespace MyAllocator{
 
-	struct SimulatedArenaAllocator{
+	class SimulatedArenaAllocator{
+		constexpr static size_t BUFFER = sizeof(void *) * 4;
+
+	public:
 		SimulatedArenaAllocator(size_t arena) : arena(arena){}
 
 		constexpr static const char *getName(){
@@ -17,7 +17,7 @@ namespace MyAllocator{
 		}
 
 		void *xallocate(std::size_t const size) noexcept{
-			if (allocated + size + sizeof(void *) > arena)
+			if (allocated + size + BUFFER > arena)
 				return nullptr;
 
 			auto p = malloc(size);

@@ -5,9 +5,10 @@
 #include <algorithm>
 #include <cassert>
 
-#include "arenaallocator.h"
-#include "stdallocator.h"
 #include "pmallocator.h"
+#include "stdallocator.h"
+#include "arenaallocator.h"
+#include "simulatedarenaallocator.h"
 
 namespace hm4{
 
@@ -129,8 +130,9 @@ bool VectorList<T_Allocator>::clear(){
 // ==============================
 
 template class VectorList<MyAllocator::PMAllocator>;
-template class VectorList<MyAllocator::ArenaAllocator>;
 template class VectorList<MyAllocator::STDAllocator>;
+template class VectorList<MyAllocator::ArenaAllocator>;
+template class VectorList<MyAllocator::SimulatedArenaAllocator>;
 
 } // namespace
 

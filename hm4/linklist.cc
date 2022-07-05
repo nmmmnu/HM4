@@ -4,9 +4,10 @@
 
 #include "hpair.h"
 
-#include "arenaallocator.h"
-#include "stdallocator.h"
 #include "pmallocator.h"
+#include "stdallocator.h"
+#include "arenaallocator.h"
+#include "simulatedarenaallocator.h"
 
 namespace hm4{
 
@@ -243,8 +244,9 @@ const Pair &LinkList<T_Allocator>::iterator::operator*() const{
 // ==============================
 
 template class LinkList<MyAllocator::PMAllocator>;
-template class LinkList<MyAllocator::ArenaAllocator>;
 template class LinkList<MyAllocator::STDAllocator>;
+template class LinkList<MyAllocator::ArenaAllocator>;
+template class LinkList<MyAllocator::SimulatedArenaAllocator>;
 
 } // namespace
 

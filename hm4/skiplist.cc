@@ -6,9 +6,10 @@
 
 #include "hpair.h"
 
-#include "arenaallocator.h"
-#include "stdallocator.h"
 #include "pmallocator.h"
+#include "stdallocator.h"
+#include "arenaallocator.h"
+#include "simulatedarenaallocator.h"
 
 namespace hm4{
 
@@ -418,9 +419,9 @@ const Pair &SkipList<T_Allocator>::iterator::operator*() const{
 // ==============================
 
 template class SkipList<MyAllocator::PMAllocator>;
-template class SkipList<MyAllocator::ArenaAllocator>;
 template class SkipList<MyAllocator::STDAllocator>;
-
+template class SkipList<MyAllocator::ArenaAllocator>;
+template class SkipList<MyAllocator::SimulatedArenaAllocator>;
 
 } // namespace
 
