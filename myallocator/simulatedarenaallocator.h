@@ -1,7 +1,7 @@
 #ifndef MY_SIMULATED_ARENA_ALLOCATOR
 #define MY_SIMULATED_ARENA_ALLOCATOR
 
-#include <malloc.h>
+#include "malloc_usable_size.h"
 #include "baseallocator.h"
 
 namespace MyAllocator{
@@ -10,25 +10,26 @@ namespace MyAllocator{
 		constexpr static size_t BUFFER = sizeof(void *) * 4;
 
 	public:
-		SimulatedArenaAllocator(size_t arena) : arena(arena){}
+		constexpr explicit SimulatedArenaAllocator(size_t arena) : arena(arena){}
 
 		constexpr static const char *getName(){
 			return "SimulatedArenaAllocator";
 		}
 
-		void *xallocate(std::size_t const size) noexcept{
+		void *xallocate(size_t const size) noexcept{
 			if (allocated + size + BUFFER > arena)
 				return nullptr;
 
 			auto p = malloc(size);
 
-			allocated += malloc_usable_size(p);
+			// thats OK with nullptr
+			allocated += msize(p);
 
 			return p;
 		}
 
 		void xdeallocate(void *p) noexcept{
-			allocated -= malloc_usable_size(p);
+			allocated -= msize(p);
 
 			return free(p);
 		}
@@ -45,12 +46,17 @@ namespace MyAllocator{
 			return false;
 		}
 
-		std::size_t getFreeMemory() const noexcept{
+		size_t getFreeMemory() const noexcept{
 			return arena - allocated;
 		}
 
-		std::size_t getUsedMemory() const noexcept{
+		size_t getUsedMemory() const noexcept{
 			return allocated;
+		}
+
+	private:
+		static size_t msize(void *p) noexcept{
+			return malloc_usable_size(p);
 		}
 
 	private:

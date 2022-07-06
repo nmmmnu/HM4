@@ -57,6 +57,7 @@ ifeq ($(UNAME), Linux)
 
 # add epoll support...
 
+EXTRA_INCL	+= -Iinclude.linux/
 CF_MISC		+= -DSELECTOR_EPOOL
 LL_SELECTOR	 = $(O)epollselector.o
 
