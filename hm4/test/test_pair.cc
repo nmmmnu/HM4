@@ -165,9 +165,14 @@ namespace{
 		mytest.begin("Pair Size (slow)");
 
 		auto f = [](const char *msg, size_t i, std::string_view x, auto const &p){
-			printf("%zu | %s\n", i, x.data());
+			if constexpr(0){
+				printf("%zu | %s\n", i, x.data());
 
-			print(p);
+				print(p);
+			}else{
+				printf("%zu\n", i);
+			}
+
 			mytest(msg, false);
 		};
 
@@ -187,6 +192,14 @@ namespace{
 
 			if (p->getVal() != val)
 				f("size error val ", i, val, p);
+
+			if (i == 0){
+				if (!p->isTombstone())
+					f("size error tomb zero ", i, val, p);
+			}else{
+				if (p->isTombstone())
+					f("size error tomb", i, val, p);
+			}
 		}
 	}
 

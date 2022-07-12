@@ -32,6 +32,7 @@ inline namespace version_2_00_00{
 		constexpr uint16_t	MAX_KEY_MASK	= MAX_KEY_SIZE;
 
 		constexpr uint16_t	MAX_KEY_MASK_BE	= htobe<uint16_t>(MAX_KEY_MASK);
+		constexpr uint16_t	MAX_VAL_MASK_BE	= htobe<uint16_t>(MAX_VAL_MASK);
 
 		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
@@ -219,7 +220,8 @@ inline namespace version_2_00_00{
 		[[nodiscard]]
 		constexpr
 		bool empty() const noexcept{
-			return !(keylen & PairConf::MAX_KEY_MASK_BE);
+			return (keylen & PairConf::MAX_KEY_MASK_BE) == 0;
+		//	return getKeyLen_() == 0;
 		}
 
 	public:
@@ -235,7 +237,8 @@ inline namespace version_2_00_00{
 
 		[[nodiscard]]
 		bool isTombstone() const noexcept{
-			return vallen == 0;
+			return vallen == 0 && (keylen & PairConf::MAX_VAL_MASK_BE) == 0;
+		//	return getValLen_() == 0;
 		}
 
 		[[nodiscard]]
