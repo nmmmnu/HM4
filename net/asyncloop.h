@@ -2,13 +2,15 @@
 #define _NET_ASYNC_LOOP_H
 
 #include "selector/selectordefs.h"
-#include "clientbuffer.h"
+
+#include "iobuffer.h"
+#include "mytime.h"
 
 #include <unordered_map>
 
 namespace net{
 
-template<class SELECTOR, class WORKER>
+template<class Selector, class Worker>
 class AsyncLoop{
 public:
 	constexpr static bool		LOG_ENABLED		= true;
@@ -24,15 +26,20 @@ public:
 private:
 	constexpr static int		WAIT_TIMEOUT_MS		=  WAIT_TIMEOUT * 1000;
 
-	using ClientBufferContainer	= std::unordered_map<int, ClientBuffer>;
+	struct Client{
+		IOBuffer	buffer;
+		MyTimer 	timer;
+	};
 
-	using WorkerStatus		= worker::WorkerStatus;
+	using ClientContainer	= std::unordered_map<int, Client>;
+
+	using WorkerStatus	= worker::WorkerStatus;
 
 public:
-	AsyncLoop(SELECTOR &&selector, WORKER &&worker, const std::initializer_list<int> &serverFD,
+	AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
 				uint32_t conf_maxClients	= MAX_CLIENTS,
 				uint32_t conf_connectionTimeout	= 0,
-				size_t   conf_maxPacketSize	= 0
+				size_t   conf_maxRequestSize	= 0
 	);
 
 	bool process();
@@ -47,8 +54,8 @@ private:
 		ERROR,
 		TIMEOUT,
 
-		WORKER_NORMAL,
-		WORKER_ERROR,
+		Worker_NORMAL,
+		Worker_ERROR,
 
 		PROBLEM_MAP_NOT_FOUND,
 		PROBLEM_BUFFER_READ,
@@ -60,7 +67,7 @@ private:
 	void handleWrite_(int fd);
 	bool handleConnect_(int fd);
 	void handleDisconnect_(int fd, const DisconnectStatus error);
-	bool handleWorker_(int fd, ClientBuffer &connection);
+	bool handleWorker_(int fd, IOBuffer &buffer);
 
 	void handleSocketOps_(int fd, ssize_t size);
 
@@ -83,25 +90,17 @@ private:
 	}
 
 private:
-	template<typename T>
-	constexpr static T max__(T const a, T const b){
-		// using std::max directly will result in link error,
-		// because it returns reference
-		return std::max(a, b);
-	}
-
-private:
-	SELECTOR		selector_;
-	WORKER			worker_;
+	Selector		selector_;
+	Worker			worker_;
 	std::vector<int>	serverFD_;
-	ClientBufferContainer	clients_;
+	ClientContainer		clients_;
 	bool			keepProcessing_ = true;
 
 	uint32_t		conf_maxClients;
 	uint32_t		conf_connectionTimeout_;
-	size_t			conf_maxPacketSize_;
+	size_t			conf_maxRequestSize_;
 
-	char			inputBuffer_[4 * 1024];
+	char			inputBuffer_[BUFFER_CAPACITY];
 };
 
 

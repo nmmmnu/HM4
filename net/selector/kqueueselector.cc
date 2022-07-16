@@ -154,10 +154,6 @@ namespace{
 
 
 
-bool KQueueSelector::HPI::eq(const value_type *a, const value_type *b){
-	return a == b;
-}
-
 void KQueueSelector::HPI::inc(const value_type * &a){
 	++a;
 }

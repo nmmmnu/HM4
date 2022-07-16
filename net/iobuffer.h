@@ -42,7 +42,7 @@ public:
 	// ==================================
 
 	bool push(const char c){
-		buffer_.push_back(c);
+		push_(c);
 		return true;
 	}
 
@@ -101,21 +101,14 @@ private:
 
 		return true;
 	}
+
+	bool push_(const char c){
+		buffer_.push_back(c);
+		return true;
+	}
 };
 
 } // namespace
 
-#endif
-
-
-
-#if 0
-	bool push(ssize_t const len, const char *ptr){
-		return push(narrow<size_t>(len), ptr);
-	}
-
-	bool pop(ssize_t const len){
-		return pop(narrow<size_t>(len));
-	}
 #endif
 

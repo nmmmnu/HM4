@@ -17,7 +17,6 @@ WorkerStatus EchoWorker::operator()(IOBuffer &buffer){
 		return WorkerStatus::DISCONNECT;
 	}
 
-
 	if (cmp_(buffer, cmd_hello	)){
 		buffer.clear();
 		buffer.push("Hello, how are you?\r\n");

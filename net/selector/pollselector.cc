@@ -136,9 +136,6 @@ namespace{
 
 
 
-bool PollSelector::HPI::eq(const value_type *a, const value_type *b){
-	return a == b;
-}
 
 void PollSelector::HPI::inc(const value_type * &a){
 	++a;

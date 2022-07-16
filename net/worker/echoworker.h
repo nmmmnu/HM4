@@ -30,8 +30,7 @@ private:
 				"\r\n";
 
 private:
-	template<class CONNECTION>
-	static bool cmp_(const CONNECTION &b, std::string_view const cmd){
+	static bool cmp_(IOBuffer const &b, std::string_view const cmd){
 		return equals(b.data(), b.size(), cmd.data(), cmd.size());
 	}
 };

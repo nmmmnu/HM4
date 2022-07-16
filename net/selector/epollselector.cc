@@ -128,10 +128,6 @@ namespace {
 
 
 
-bool EPollSelector::HPI::eq(const value_type *a, const value_type *b){
-	return a == b;
-}
-
 void EPollSelector::HPI::inc(const value_type * &a){
 	++a;
 }
