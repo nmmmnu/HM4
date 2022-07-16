@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-namespace net{
-namespace worker{
+namespace net::worker{
+
 
 
 enum class WorkerStatus : uint8_t{
@@ -17,7 +17,31 @@ enum class WorkerStatus : uint8_t{
 };
 
 
-} // namespace worker
+
+namespace error{
+	template<class Protocol, class Buffer>
+	WorkerStatus error_(Protocol &protocol, Buffer &buffer, std::string_view const error){
+		protocol.response_error(buffer, error);
+		return WorkerStatus::WRITE;
+	}
+
+	template<class Protocol, class Buffer>
+	WorkerStatus NotImplemented(Protocol &protocol, Buffer &buffer){
+		return error_(protocol, buffer,"Not Implemented");
+	}
+
+	template<class Protocol, class Buffer>
+	WorkerStatus BadRequest(Protocol &protocol, Buffer &buffer){
+		return error_(protocol, buffer,"Not Implemented");
+	}
+
+	template<class Protocol, class Buffer>
+	WorkerStatus InternalError(Protocol &protocol, Buffer &buffer){
+		return error_(protocol, buffer,"Internal Error");
+	}
+}
+
+
 } // namespace
 
 #endif

@@ -55,9 +55,9 @@ namespace net::worker::commands::Accumulators{
 
 
 		template<class Protocol, class DBAdapter, class Accumulator, bool ResultIsContainer>
-		WorkerStatus do_accumulate(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator, std::bool_constant<ResultIsContainer>){
+		Result do_accumulate(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator, std::bool_constant<ResultIsContainer>){
 			if (p.size() != 4)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			auto const &key    = p[1];
 			auto const count   = from_string<uint16_t>(p[2]);
@@ -83,11 +83,11 @@ namespace net::worker::commands::Accumulators{
 				protocol.response_strings(buffer, to_string(data, std_buffer), lastKey);
 			}
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 
 		template<class Protocol, class DBAdapter, class Accumulator>
-		WorkerStatus do_accumulate(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator){
+		Result do_accumulate(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator){
 			return do_accumulate(protocol, params, db, buffer, accumulator, std::false_type{});
 		}
 	}
@@ -101,7 +101,7 @@ namespace net::worker::commands::Accumulators{
 			"getx",		"GETX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			AccumulatorVectorNew accumulator(size);
@@ -151,7 +151,7 @@ namespace net::worker::commands::Accumulators{
 			"count",	"COUNT"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -184,7 +184,7 @@ namespace net::worker::commands::Accumulators{
 			"sum",		"SUM"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -217,7 +217,7 @@ namespace net::worker::commands::Accumulators{
 			"min",		"MIN"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -253,7 +253,7 @@ namespace net::worker::commands::Accumulators{
 			"max",		"MAX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;

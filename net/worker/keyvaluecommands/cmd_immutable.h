@@ -14,18 +14,18 @@ namespace net::worker::commands::Immutable{
 			"get",	"GET"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			protocol.response_string(buffer, db.get(key));
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 
@@ -38,14 +38,14 @@ namespace net::worker::commands::Immutable{
 			"ttl",	"TTL"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			to_string_buffer_t std_buffer;
 
@@ -53,7 +53,7 @@ namespace net::worker::commands::Immutable{
 
 			protocol.response_string(buffer, val);
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 

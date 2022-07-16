@@ -14,22 +14,22 @@ namespace net::worker::commands::Mutable{
 			"set",		"SET"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3 && p.size() != 4)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			auto const &key = p[1];
 			auto const &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			db.set(key, val, exp);
 
 			protocol.response_ok(buffer);
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 
@@ -43,22 +43,22 @@ namespace net::worker::commands::Mutable{
 			"setex",	"SETEX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 4)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			auto const &key = p[1];
 			auto const &val = p[3];
 			auto const exp  = from_string<uint32_t>(p[2]);
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			db.set(key, val, exp);
 
 			protocol.response_ok(buffer);
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 
@@ -72,16 +72,16 @@ namespace net::worker::commands::Mutable{
 			"setnx",	"SETNX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3 && p.size() != 4)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			if (! db.get(key).empty()){
 				// No Set.
@@ -99,7 +99,7 @@ namespace net::worker::commands::Mutable{
 			}
 			// return
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 
@@ -113,18 +113,18 @@ namespace net::worker::commands::Mutable{
 			"del",		"DEL"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			protocol.response_bool(buffer, db.del(key));
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 
@@ -138,16 +138,16 @@ namespace net::worker::commands::Mutable{
 			"getset",	"GETSET"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			protocol.response_string(buffer, db.get(key));
 			// now old value is inserted in the buffer and
@@ -161,7 +161,7 @@ namespace net::worker::commands::Mutable{
 
 			// return
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 
@@ -175,16 +175,16 @@ namespace net::worker::commands::Mutable{
 			"expire",	"EXPIRE"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			auto const &val = db.get(key);
 
@@ -199,7 +199,7 @@ namespace net::worker::commands::Mutable{
 				protocol.response_bool(buffer, true);
 			}
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 

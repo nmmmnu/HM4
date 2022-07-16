@@ -13,13 +13,13 @@ namespace net::worker::commands::Info{
 			"info",	"INFO"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 1)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			protocol.response_string(buffer, db.info());
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 

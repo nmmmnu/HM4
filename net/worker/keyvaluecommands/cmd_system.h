@@ -13,8 +13,8 @@ namespace net::worker::commands::System{
 			"exit",		"EXIT"
 		};
 
-		WorkerStatus operator()(Protocol &, typename Protocol::StringVector const &, DBAdapter &, IOBuffer &) const final{
-			return WorkerStatus::DISCONNECT;
+		Result operator()(Protocol &, typename Protocol::StringVector const &, DBAdapter &, IOBuffer &) const final{
+			return Status::DISCONNECT;
 		}
 	};
 
@@ -25,8 +25,8 @@ namespace net::worker::commands::System{
 			"shutdown",	"SHUTDOWN"
 		};
 
-		WorkerStatus operator()(Protocol &, typename Protocol::StringVector const &, DBAdapter &, IOBuffer &) const final{
-			return WorkerStatus::SHUTDOWN;
+		Result operator()(Protocol &, typename Protocol::StringVector const &, DBAdapter &, IOBuffer &) const final{
+			return Status::SHUTDOWN;
 		}
 	};
 

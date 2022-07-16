@@ -14,15 +14,15 @@ namespace net::worker::commands::Reload{
 			"bgsave",	"BGSAVE"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 1)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			db.save();
 
 			protocol.response_ok(buffer);
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 
@@ -33,15 +33,15 @@ namespace net::worker::commands::Reload{
 			"reload",	"RELOAD"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 1)
-				return error::BadRequest(protocol, buffer);
+				return Status::ERROR;
 
 			db.reload();
 
 			protocol.response_ok(buffer);
 
-			return WorkerStatus::WRITE;
+			return {};
 		}
 	};
 

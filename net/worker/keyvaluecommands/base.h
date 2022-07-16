@@ -2,11 +2,31 @@
 #define _KEY_VALUE_COMMANDS_BASE_H
 
 #include "iobuffer.h"
-#include "worker/keyvalueerror.h"
+#include "../workerdefs.h"
 
 #include <memory>
 
 namespace net::worker::commands{
+
+
+
+	enum class Status{
+		OK,
+		ERROR,
+
+		DISCONNECT,
+		SHUTDOWN
+	};
+
+
+
+	struct Result{
+		Status	status	= Status::OK;
+
+
+		constexpr Result() = default;
+		constexpr Result(Status const status) : status(status){};
+	};
 
 
 
@@ -15,7 +35,7 @@ namespace net::worker::commands{
 		constexpr static bool mut		= false;
 
 		virtual ~Base() = default;
-		virtual WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const = 0;
+		virtual Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const = 0;
 	};
 
 

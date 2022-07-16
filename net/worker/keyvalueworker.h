@@ -109,13 +109,29 @@ namespace net::worker{
 
 			auto &command = *it->second;
 
-			return command(protocol_, protocol_.getParams(), db_, buffer);
+			auto result = command(protocol_, protocol_.getParams(), db_, buffer);
+
+			return translate__(result.status);
 		}
 
 	private:
 		using MyBase		= commands::Base<Protocol, DBAdapter>;
 		using Storage		= std::vector<std::unique_ptr<const MyBase> >;
 		using Map		= std::unordered_map<std::string_view, const MyBase *>;
+
+		constexpr static WorkerStatus translate__(commands::Status const status){
+			using cs = commands::Status;
+			using ws = WorkerStatus;
+
+			switch(status){
+			case cs::DISCONNECT	: return ws::DISCONNECT;
+			case cs::SHUTDOWN  	: return ws::SHUTDOWN;
+
+			default			: // avoid warning
+			case cs::OK		:
+			case cs::ERROR		: return ws::WRITE;
+			}
+		}
 
 	private:
 		Protocol	protocol_;
