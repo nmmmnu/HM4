@@ -1,9 +1,8 @@
 #include "base.h"
-#include "staticvector.h"
 #include "mystring.h"
 
-#include <algorithm>
 #include <limits>
+#include <algorithm>
 
 
 
@@ -12,22 +11,14 @@ namespace net::worker::commands::Accumulators{
 	namespace acumulators_impl_{
 
 		constexpr static uint16_t MIN		= 10;
-		constexpr static uint16_t MAX		= 1000;
 		constexpr static uint16_t ITERATIONS	= 10000;
 
 
 
-		inline bool samePrefix(std::string_view const p, std::string_view const s){
-			if (p.size() > s.size())
-				return false;
-
-			return std::equal(std::begin(p), std::end(p), std::begin(s));
-		}
-
-
-
 		template<typename Accumulator, class It>
-		auto do_accumulateIteratior(Accumulator &accumulator, uint16_t const maxResults, std::string_view const prefix, It it, It last){
+		auto accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, It last){
+			Accumulator accumulator;
+
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 
@@ -37,7 +28,7 @@ namespace net::worker::commands::Accumulators{
 				if (++iterations > ITERATIONS)
 					return accumulator.result(key);
 
-				if (! prefix.empty() && ! samePrefix(prefix, key))
+				if (! prefix.empty() && ! same_prefix(prefix, key))
 					return accumulator.result();
 
 				if (! it->isValid(std::true_type{}))
@@ -54,8 +45,8 @@ namespace net::worker::commands::Accumulators{
 
 
 
-		template<class Protocol, class DBAdapter, class Accumulator, bool ResultIsContainer>
-		Result do_accumulate(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator, std::bool_constant<ResultIsContainer>){
+		template<class Accumulator, class Protocol, class DBAdapter>
+		Result execCommand(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer){
 			if (p.size() != 4)
 				return Status::ERROR;
 
@@ -63,84 +54,22 @@ namespace net::worker::commands::Accumulators{
 			auto const count   = from_string<uint16_t>(p[2]);
 			auto const &prefix = p[3];
 
-			auto const max = ResultIsContainer ? MAX : ITERATIONS;
-
-			auto const result = do_accumulateIteratior(
-							accumulator,
-							std::clamp(count, MIN, max),
+			auto const result = accumulateResults<Accumulator>(
+							std::clamp(count, MIN, ITERATIONS),
 							prefix,
 							db.search(key),
 							std::end(db)
 			);
 
-			if constexpr(ResultIsContainer){
-				protocol.response_strings(buffer, result);
-			}else{
-				auto const [ data, lastKey ] = result;
+			auto const [ data, lastKey ] = result;
 
-				to_string_buffer_t std_buffer;
+			to_string_buffer_t std_buffer;
 
-				protocol.response_strings(buffer, to_string(data, std_buffer), lastKey);
-			}
+			protocol.response_strings(buffer, to_string(data, std_buffer), lastKey);
 
 			return {};
 		}
-
-		template<class Protocol, class DBAdapter, class Accumulator>
-		Result do_accumulate(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator){
-			return do_accumulate(protocol, params, db, buffer, accumulator, std::false_type{});
-		}
 	}
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct GETX : Base<Protocol, DBAdapter>{
-		constexpr inline static std::string_view name	= "getx";
-		constexpr inline static std::string_view cmd[]	= {
-			"getx",		"GETX"
-		};
-
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
-			using namespace acumulators_impl_;
-
-			AccumulatorVectorNew accumulator(size);
-
-			return do_accumulate(
-					protocol, params, db, buffer,
-					accumulator,
-					std::true_type{}
-			);
-		}
-
-	private:
-		template<size_t Size>
-		using VectorGETX = StaticVector<std::string_view,Size>;
-
-		constexpr static size_t size = 2 * acumulators_impl_::MAX + 1;
-
-		using MyVector = VectorGETX<size>;
-
-		struct AccumulatorVectorNew{
-			MyVector data;
-
-			AccumulatorVectorNew(typename MyVector::size_type size){
-				data.reserve(size);
-			}
-
-			auto operator()(std::string_view key, std::string_view val){
-				data.emplace_back(key);
-				data.emplace_back(val);
-			}
-
-			const auto &result(std::string_view key = ""){
-				// emplace even empty
-				data.emplace_back(key);
-
-				return data;
-			}
-		};
-	};
 
 
 
@@ -156,7 +85,7 @@ namespace net::worker::commands::Accumulators{
 
 			using T = int64_t;
 
-			struct{
+			struct COUNT_{
 				T data = 0;
 
 				auto operator()(std::string_view, std::string_view){
@@ -166,12 +95,9 @@ namespace net::worker::commands::Accumulators{
 				auto result(std::string_view key = "") const{
 					return std::make_pair(data, key);
 				}
-			} accumulator;
+			};
 
-			return do_accumulate(
-					protocol, params, db, buffer,
-					accumulator
-			);
+			return execCommand<COUNT_>(protocol, params, db, buffer);
 		}
 	};
 
@@ -189,7 +115,7 @@ namespace net::worker::commands::Accumulators{
 
 			using T = int64_t;
 
-			struct{
+			struct SUM_{
 				T data = 0;
 
 				auto operator()(std::string_view, std::string_view val){
@@ -199,12 +125,9 @@ namespace net::worker::commands::Accumulators{
 				auto result(std::string_view key = "") const{
 					return std::make_pair(data, key);
 				}
-			} accumulator;
+			};
 
-			return do_accumulate(
-					protocol, params, db, buffer,
-					accumulator
-			);
+			return execCommand<SUM_>(protocol, params, db, buffer);
 		}
 	};
 
@@ -222,7 +145,7 @@ namespace net::worker::commands::Accumulators{
 
 			using T = int64_t;
 
-			struct{
+			struct MIN_{
 				T data = std::numeric_limits<T>::max();
 
 				auto operator()(std::string_view, std::string_view val){
@@ -235,12 +158,9 @@ namespace net::worker::commands::Accumulators{
 				auto result(std::string_view key = "") const{
 					return std::make_pair(data, key);
 				}
-			} accumulator;
+			};
 
-			return do_accumulate(
-					protocol, params, db, buffer,
-					accumulator
-			);
+			return execCommand<MIN_>(protocol, params, db, buffer);
 		}
 	};
 
@@ -258,8 +178,8 @@ namespace net::worker::commands::Accumulators{
 
 			using T = int64_t;
 
-			struct{
-				T data = std::numeric_limits<T>::max();
+			struct MAX_{
+				T data = std::numeric_limits<T>::min();
 
 				auto operator()(std::string_view, std::string_view val){
 					auto x = from_string<T>(val);
@@ -271,12 +191,9 @@ namespace net::worker::commands::Accumulators{
 				auto result(std::string_view key = "") const{
 					return std::make_pair(data, key);
 				}
-			} accumulator;
+			};
 
-			return do_accumulate(
-					protocol, params, db, buffer,
-					accumulator
-			);
+			return execCommand<MAX_>(protocol, params, db, buffer);
 		}
 	};
 
@@ -289,7 +206,6 @@ namespace net::worker::commands::Accumulators{
 		template<class Storage, class Map>
 		static void load(Storage &s, Map &m){
 			return registerCommands<Protocol, DBAdapter, Storage, Map,
-				GETX	,
 				COUNT	,
 				SUM	,
 				MIN	,

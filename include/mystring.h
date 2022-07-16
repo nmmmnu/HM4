@@ -35,6 +35,13 @@ constexpr bool equals(const char *s1, size_t const size1, const char *s2, size_t
 	return size1 == size2 && memcmp(s1, s2, size1) == 0;
 }
 
+constexpr bool same_prefix(std::string_view const prefix, std::string_view const s) noexcept{
+	auto const size1 = prefix.size();
+	auto const size2 = s.size();
+
+	return size1 <= size2 && equals(prefix.data(), size1, s.data(), size1);
+}
+
 
 
 template<typename... Args>

@@ -2,7 +2,8 @@
 #define _KEY_VALUE_WORKER_H
 
 #include "keyvaluecommands/cmd_immutable.h"	// GET, TTL
-#include "keyvaluecommands/cmd_accumulators.h"	// GETX, COUNT, SUM, MIN, MAX
+#include "keyvaluecommands/cmd_accumulators.h"	// COUNT, SUM, MIN, MAX
+#include "keyvaluecommands/cmd_getx.h"		// GETX
 
 #include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, DEL, GETSET, EXPIRE
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
@@ -47,6 +48,7 @@ namespace net::worker{
 			registerModulesAll<Protocol, DBAdapter, Storage, Map,
 				Immutable	::RegisterModule,
 				Accumulators	::RegisterModule,
+				GetX		::RegisterModule,
 
 				Mutable		::RegisterModule,
 				Counter		::RegisterModule,
@@ -111,7 +113,7 @@ namespace net::worker{
 
 			auto result = command(protocol_, protocol_.getParams(), db_, buffer);
 
-			return translate__(result.status);
+			return translate_(result.status, buffer);
 		}
 
 	private:
@@ -119,7 +121,7 @@ namespace net::worker{
 		using Storage		= std::vector<std::unique_ptr<const MyBase> >;
 		using Map		= std::unordered_map<std::string_view, const MyBase *>;
 
-		constexpr static WorkerStatus translate__(commands::Status const status){
+		WorkerStatus translate_(commands::Status const status, IOBuffer &buffer) const{
 			using cs = commands::Status;
 			using ws = WorkerStatus;
 
@@ -128,8 +130,9 @@ namespace net::worker{
 			case cs::SHUTDOWN  	: return ws::SHUTDOWN;
 
 			default			: // avoid warning
-			case cs::OK		:
-			case cs::ERROR		: return ws::WRITE;
+			case cs::ERROR		: return error::BadRequest(protocol_, buffer);
+
+			case cs::OK		: return ws::WRITE;
 			}
 		}
 
