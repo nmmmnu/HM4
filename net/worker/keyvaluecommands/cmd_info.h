@@ -6,34 +6,33 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct INFO : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct INFO : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "info";
 		constexpr inline static std::string_view cmd[]	= {
 			"info",	"INFO"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 1)
-				return Status::ERROR;
+				return Result::error();
 
-			protocol.response_string(buffer, db.info());
+			// db.info() "probably" return a std::string.
 
-			return {};
+			return Result::ok(std::move(db.info()));
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "info";
 
-		template<class Storage, class Map>
-		static void load(Storage &s, Map &m){
-			return registerCommands<Protocol, DBAdapter, Storage, Map,
+		static void load(RegisterPack &pack){
+			return registerCommands<DBAdapter, RegisterPack,
 				INFO
-			>(s, m);
+			>(pack);
 		}
 	};
 

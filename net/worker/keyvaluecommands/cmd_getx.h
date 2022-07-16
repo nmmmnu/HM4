@@ -1,5 +1,4 @@
 #include "base.h"
-#include "staticvector.h"
 #include "mystring.h"
 
 
@@ -13,8 +12,8 @@ namespace net::worker::commands::GetX{
 
 
 
-		template<class It, class Container>
-		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, It last, Container &data){
+		template<class It, class OutputContainer>
+		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, It last, OutputContainer &data){
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 
@@ -49,16 +48,16 @@ namespace net::worker::commands::GetX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETX : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct GETX : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "getx";
 		constexpr inline static std::string_view cmd[]	= {
 			"getx",		"GETX"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &container) const final{
 			if (p.size() != 4)
-				return Status::ERROR;
+				return Result::error();
 
 			auto const &key    = p[1];
 			auto const count   = from_string<uint16_t>(p[2]);
@@ -68,45 +67,33 @@ namespace net::worker::commands::GetX{
 
 			using namespace getx_impl_;
 
-			MyVector data;
-			data.reserve(SIZE);
+			static_assert(OutputContainerSize >= 2 * ITERATIONS + 1);
+
+			container.clear();
 
 			accumulateResults(
 				std::clamp(count, MIN, ITERATIONS),
 				prefix,
 				db.search(key),
 				std::end(db),
-				data
+				container
 			);
 
-
-
-			protocol.response_strings(buffer, data);
-
-			return {};
+			return Result::ok(&container);
 		}
-
-	private:
-		template<size_t Size>
-		using VectorGETX = StaticVector<std::string_view,Size>;
-
-		constexpr static size_t SIZE = 2 * getx_impl_::ITERATIONS + 1;
-
-		using MyVector = VectorGETX<SIZE>;
 	};
 
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "getx";
 
-		template<class Storage, class Map>
-		static void load(Storage &s, Map &m){
-			return registerCommands<Protocol, DBAdapter, Storage, Map,
+		static void load(RegisterPack &pack){
+			return registerCommands<DBAdapter, RegisterPack,
 				GETX
-			>(s, m);
+			>(pack);
 		}
 	};
 

@@ -100,7 +100,7 @@ bool VectorList<T_Allocator>::erase(std::string_view const key){
 
 	if (! found){
 		// the key does not exists in the vector.
-		return true;
+		return false;
 	}
 
 	lc_.dec((*it)->bytes());

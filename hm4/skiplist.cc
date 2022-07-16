@@ -241,7 +241,7 @@ bool SkipList<T_Allocator>::erase(std::string_view const key){
 	const auto nl = locate_(key, std::false_type{});
 
 	if (nl.node == nullptr)
-		return true;
+		return false;
 
 
 	// *nl.prev[0] is always valid.

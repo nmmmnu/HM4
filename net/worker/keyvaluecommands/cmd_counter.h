@@ -7,20 +7,20 @@ namespace net::worker::commands::Counter{
 
 	namespace counter_impl_{
 
-		template<int Sign, class Protocol, class DBAdapter>
-		Result do_incr_decr(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer){
+		template<int Sign, class DBAdapter>
+		Result do_incr_decr(ParamContainer const &p, DBAdapter &db){
 			if (p.size() != 2 && p.size() != 3)
-				return Status::ERROR;
+				return Result::error();
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
 			int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
 
 			if (n == 0)
-				return Status::ERROR;
+				return Result::error();
 
 			if (! key.empty())
 				n += from_string<int64_t>( db.get(key) );
@@ -31,16 +31,14 @@ namespace net::worker::commands::Counter{
 
 			db.set(key, val);
 
-			protocol.response_string(buffer, val);
-
-			return {};
+			return Result::ok(n);
 		}
 	}
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct INCR : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct INCR : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "incr";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -48,17 +46,17 @@ namespace net::worker::commands::Counter{
 			"incrby",	"INCRBY"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputContainer &) const final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<+1>(protocol, params, db, buffer);
+			return do_incr_decr<+1>(params, db);
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DECR : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct DECR : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "decr";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -66,25 +64,24 @@ namespace net::worker::commands::Counter{
 			"decrby",	"DECRBY"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputContainer &) const final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<-1>(protocol, params, db, buffer);
+			return do_incr_decr<-1>(params, db);
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "counters";
 
-		template<class Storage, class Map>
-		static void load(Storage &s, Map &m){
-			return registerCommands<Protocol, DBAdapter, Storage, Map,
+		static void load(RegisterPack &pack){
+			return registerCommands<DBAdapter, RegisterPack,
 				INCR	,
 				DECR
-			>(s, m);
+			>(pack);
 		}
 	};
 

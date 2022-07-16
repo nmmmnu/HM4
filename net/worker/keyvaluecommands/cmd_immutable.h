@@ -7,68 +7,63 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GET : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct GET : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "get";
 		constexpr inline static std::string_view cmd[]	= {
 			"get",	"GET"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 2)
-				return Status::ERROR;
+				return Result::error();
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
-			protocol.response_string(buffer, db.get(key));
+			auto const &val = db.get(key);
 
-			return {};
+			return Result::ok(val);
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TTL : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct TTL : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "ttl";
 		constexpr inline static std::string_view cmd[]	= {
 			"ttl",	"TTL"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 2)
-				return Status::ERROR;
+				return Result::error();
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
-			to_string_buffer_t std_buffer;
+			auto const number = db.ttl(key);
 
-			std::string_view const val = to_string(db.ttl(key), std_buffer);
-
-			protocol.response_string(buffer, val);
-
-			return {};
+			return Result::ok(number);
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "immutable";
 
-		template<class Storage, class Map>
-		static void load(Storage &s, Map &m){
-			return registerCommands<Protocol, DBAdapter, Storage, Map,
+		static void load(RegisterPack &pack){
+			return registerCommands<DBAdapter, RegisterPack,
 				GET	,
 				TTL
-			>(s, m);
+			>(pack);
 		}
 	};
 

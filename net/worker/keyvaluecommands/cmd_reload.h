@@ -6,57 +6,52 @@ namespace net::worker::commands::Reload{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SAVE : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct SAVE : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "save";
 		constexpr inline static std::string_view cmd[]	= {
 			"save",		"SAVE",
 			"bgsave",	"BGSAVE"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 1)
-				return Status::ERROR;
+				return Result::error();
 
 			db.save();
 
-			protocol.response_ok(buffer);
-
-			return {};
+			return Result::ok();
 		}
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct RELOAD : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct RELOAD : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "reload";
 		constexpr inline static std::string_view cmd[]	= {
 			"reload",	"RELOAD"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 1)
-				return Status::ERROR;
+				return Result::error();
 
 			db.reload();
 
-			protocol.response_ok(buffer);
-
-			return {};
+			return Result::ok();
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "reload";
 
-		template<class Storage, class Map>
-		static void load(Storage &s, Map &m){
-			return registerCommands<Protocol, DBAdapter, Storage, Map,
+		static void load(RegisterPack &pack){
+			return registerCommands<DBAdapter, RegisterPack,
 				SAVE	,
 				RELOAD
-			>(s, m);
+			>(pack);
 		}
 	};
 

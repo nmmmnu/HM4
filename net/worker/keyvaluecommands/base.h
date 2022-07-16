@@ -6,6 +6,8 @@
 #include "../workerdefs.h"
 
 #include <memory>
+#include <variant>
+#include "staticvector.h"
 
 namespace net::worker::commands{
 
@@ -21,64 +23,86 @@ namespace net::worker::commands{
 
 
 
+	constexpr static size_t OutputContainerSize = 2048;
+	using OutputContainer = StaticVector<std::string_view,OutputContainerSize>;
+
+
+
 	struct Result{
-		Status	status	= Status::OK;
+		using ResultData = std::variant<
+			std::nullptr_t		,
+			bool			,
+			int64_t			,
+			uint64_t		,
+			std::string_view	,
+			std::string		,
+			const OutputContainer *	,
+			std::pair<int64_t, std::string_view>
+		>;
 
 
-		constexpr Result() = default;
-		constexpr Result(Status const status) : status(status){};
+
+		Status		status	= Status::OK;
+		ResultData	data	= std::nullptr_t{};
+
+		Result(Status const status, ResultData &&data) : status(status), data(std::move(data)){};
+
+		static Result ok(ResultData &&data = nullptr){
+			return { Status::OK, std::move(data) };
+		}
+
+		static Result error(){
+			return { Status::ERROR, nullptr };
+		}
 	};
 
 
 
-	using ParamContainer = MySpan<std::string_view>;
+	using ParamContainer  = MySpan<std::string_view>;
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter>
 	struct Base{
 		constexpr static bool mut		= false;
 
 		virtual ~Base() = default;
-		virtual Result operator()(Protocol &protocol, ParamContainer const &params, DBAdapter &db, IOBuffer &buffer) const = 0;
+
+		virtual Result operator()(ParamContainer const &params, DBAdapter &db, OutputContainer &) const = 0;
 	};
 
 
 
 	template<
-		template<class, class>  class Cmd,
-		class Protocol,
+		template<class>  class Cmd,
 		class DBAdapter,
-		class Storage,
-		class Map
+		class RegisterPack
 	>
-	void registerCmd(Storage &s, Map &m){
-		using Command		= Cmd <Protocol, DBAdapter>;
-		using CommandBase	= Base<Protocol, DBAdapter>;
+	void registerCommand(RegisterPack &pack){
+		using Command		= Cmd <DBAdapter>;
+		using CommandBase	= Base<DBAdapter>;
 
 		static_assert(std::is_base_of_v<CommandBase, Command>, "Command not seems to be a command");
 
 		if constexpr(Command::mut == false || Command::mut == DBAdapter::MUTABLE ){
-			const auto &up = s.emplace_back(std::make_unique<Command>());
+			auto &up = pack.storage.emplace_back(std::make_unique<Command>());
 
 			const CommandBase *p = up.get();
 
 			for(auto const &key : Command::cmd)
-				m.emplace(key, p);
+				pack.map.emplace(key, p);
 		}
 	}
 
 
 
 	template<
-		class Protocol,
 		class DBAdapter,
-		class Storage,
-		class Map,
-		template<class, class> typename... Commands
+		class RegisterPack,
+		template<class> typename... Commands
 	>
-	void registerCommands(Storage &s, Map &m){
-		( registerCmd<Commands, Protocol, DBAdapter>(s, m), ... );
+	void registerCommands(RegisterPack &pack){
+		( registerCommand<Commands, DBAdapter>(pack), ... );
 	}
 
 

@@ -6,42 +6,41 @@ namespace net::worker::commands::System{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct EXIT : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct EXIT : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "exit";
 		constexpr inline static std::string_view cmd[]	= {
 			"exit",		"EXIT"
 		};
 
-		Result operator()(Protocol &, ParamContainer const &, DBAdapter &, IOBuffer &) const final{
-			return Status::DISCONNECT;
+		Result operator()(ParamContainer const &, DBAdapter &, OutputContainer &) const final{
+			return { Status::DISCONNECT, nullptr };
 		}
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct SHUTDOWN : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct SHUTDOWN : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "shutdown";
 		constexpr inline static std::string_view cmd[]	= {
 			"shutdown",	"SHUTDOWN"
 		};
 
-		Result operator()(Protocol &, ParamContainer const &, DBAdapter &, IOBuffer &) const final{
-			return Status::SHUTDOWN;
+		Result operator()(ParamContainer const &, DBAdapter &, OutputContainer &) const final{
+			return { Status::SHUTDOWN, nullptr };
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "system";
 
-		template<class Storage, class Map>
-		static void load(Storage &s, Map &m){
-			return registerCommands<Protocol, DBAdapter, Storage, Map,
+		static void load(RegisterPack &pack){
+			return registerCommands<DBAdapter, RegisterPack,
 				EXIT	,
 				SHUTDOWN
-			>(s, m);
+			>(pack);
 		}
 	};
 

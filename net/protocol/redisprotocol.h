@@ -10,6 +10,7 @@
 #include "mystring.h"
 
 #include "staticvector.h"
+#include "myspan.h"
 
 namespace net{
 namespace protocol{
@@ -50,23 +51,23 @@ public:
 	void print() const;
 
 public:
-	template<class Buffer>
-	static void response_empty(Buffer &buffer);
+//	template<class Buffer>
+//	static void response_empty(Buffer &buffer);
 
 	template<class Buffer>
 	static void response_ok(Buffer &buffer);
 
 	template<class Buffer>
-	static void response_error(Buffer &buffer, std::string_view msg);
+	static void response_bool(Buffer &buffer, bool b);
 
 	template<class Buffer>
-	static void response_bool(Buffer &buffer, bool b);
+	static void response_error(Buffer &buffer, std::string_view msg);
 
 	template<class Buffer>
 	static void response_string(Buffer &buffer, std::string_view msg);
 
-	template<class Buffer, class Container>
-	static void response_strings(Buffer &buffer, const Container &list);
+	template<class Buffer>
+	static void response_strings(Buffer &buffer, MySpan<std::string_view> const &list);
 
 	template<class Buffer>
 	static void response_strings(Buffer &buffer, std::string_view msg1, std::string_view msg2);
@@ -86,15 +87,21 @@ private:
 // ==================================
 
 
-template<class Buffer>
-void RedisProtocol::response_empty(Buffer &buffer){
-	buffer.push("$-1");
-	buffer.push(ENDLN);
-}
+// template<class Buffer>
+// void RedisProtocol::response_empty(Buffer &buffer){
+// 	buffer.push("$-1");
+// 	buffer.push(ENDLN);
+// }
 
 template<class Buffer>
 void RedisProtocol::response_ok(Buffer &buffer){
 	buffer.push("+OK");
+	buffer.push(ENDLN);
+}
+
+template<class Buffer>
+void RedisProtocol::response_bool(Buffer &buffer, bool const b){
+	buffer.push(b ? ":1" : ":0");
 	buffer.push(ENDLN);
 }
 
@@ -106,29 +113,23 @@ void RedisProtocol::response_error(Buffer &buffer, std::string_view const msg){
 }
 
 template<class Buffer>
-void RedisProtocol::response_bool(Buffer &buffer, bool const b){
-	buffer.push(b ? ":1" : ":0");
-	buffer.push(ENDLN);
-}
-
-template<class Buffer>
 void RedisProtocol::response_string(Buffer &buffer, std::string_view const msg){
-	to_string_buffer_t mybuffer;
+	to_string_buffer_t std_buffer;
 
 	buffer.push(DOLLAR);
-	buffer.push(to_string(msg.size(), mybuffer));
+	buffer.push(to_string(msg.size(), std_buffer));
 	buffer.push(ENDLN);
 
 	buffer.push(msg);
 	buffer.push(ENDLN);
 }
 
-template<class Buffer, class Container>
-void RedisProtocol::response_strings(Buffer &buffer, const Container &list){
-	to_string_buffer_t mybuffer;
+template<class Buffer>
+void RedisProtocol::response_strings(Buffer &buffer, MySpan<std::string_view> const &list){
+	to_string_buffer_t std_buffer;
 
 	buffer.push(STAR);
-	buffer.push(to_string(list.size(), mybuffer));
+	buffer.push(to_string(list.size(), std_buffer));
 	buffer.push(ENDLN);
 
 	for(const auto &msg : list)

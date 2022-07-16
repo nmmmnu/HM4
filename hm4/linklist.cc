@@ -152,17 +152,18 @@ bool LinkList<T_Allocator>::erase(std::string_view const key){
 
 	auto loc = locate_(key);
 
-	if (loc.node){
-		if constexpr(corruptionCheck)
-			if (*loc.prev != loc.node)
-				corruptionExit();
+	if (loc.node == nullptr)
+		return false;
 
-		*loc.prev = loc.node->next;
+	if constexpr(corruptionCheck)
+		if (*loc.prev != loc.node)
+			corruptionExit();
 
-		lc_.dec( loc.node->data->bytes() );
+	*loc.prev = loc.node->next;
 
-		deallocate_(loc.node);
-	}
+	lc_.dec( loc.node->data->bytes() );
+
+	deallocate_(loc.node);
 
 	return true;
 }

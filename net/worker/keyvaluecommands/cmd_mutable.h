@@ -6,87 +6,83 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SET : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct SET : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "set";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"set",		"SET"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 3 && p.size() != 4)
-				return Status::ERROR;
+				return Result::error();
 
 			auto const &key = p[1];
 			auto const &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
 			db.set(key, val, exp);
 
-			protocol.response_ok(buffer);
-
-			return {};
+			return Result::ok();
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SETEX : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct SETEX : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "setex";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"setex",	"SETEX"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 4)
-				return Status::ERROR;
+				return Result::error();
 
 			auto const &key = p[1];
 			auto const &val = p[3];
 			auto const exp  = from_string<uint32_t>(p[2]);
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
 			db.set(key, val, exp);
 
-			protocol.response_ok(buffer);
-
-			return {};
+			return Result::ok();
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SETNX : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct SETNX : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "setnx";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"setnx",	"SETNX"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 3 && p.size() != 4)
-				return Status::ERROR;
+				return Result::error();
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
 			if (! db.get(key).empty()){
 				// No Set.
 
-				protocol.response_bool(buffer, false);
+				return Result::ok(false);
 			}else{
 				// SET
 
@@ -95,63 +91,61 @@ namespace net::worker::commands::Mutable{
 
 				db.set(key, val, exp);
 
-				protocol.response_bool(buffer, true);
+				return Result::ok(true);
 			}
-			// return
-
-			return {};
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DEL : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct DEL : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "del";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"del",		"DEL"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 2)
-				return Status::ERROR;
+				return Result::error();
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
-			protocol.response_bool(buffer, db.del(key));
+			bool const result = db.del(key);
 
-			return {};
+			return Result::ok(result);
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETSET : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct GETSET : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "getset";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"getset",	"GETSET"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 3)
-				return Status::ERROR;
+				return Result::error();
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
-			protocol.response_string(buffer, db.get(key));
-			// now old value is inserted in the buffer and
-			// we do not care if pair is overwritten
+			// because old_value may be overwritten,
+			// we had to make a copy.
+
+			std::string old_value{ db.get(key) };
 
 			// SET
 
@@ -161,64 +155,63 @@ namespace net::worker::commands::Mutable{
 
 			// return
 
-			return {};
+			return Result::ok(std::move(old_value));
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct EXPIRE : Base<Protocol, DBAdapter>{
+	template<class DBAdapter>
+	struct EXPIRE : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "expire";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"expire",	"EXPIRE"
 		};
 
-		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
 			if (p.size() != 3)
-				return Status::ERROR;
+				return Result::error();
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Status::ERROR;
+				return Result::error();
 
 			auto const &val = db.get(key);
 
 			if (val.empty()){
-				protocol.response_bool(buffer, false);
+				return Result::ok(false);
 			}else{
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
 				db.set(key, val, exp);
 
-				protocol.response_bool(buffer, true);
+				return Result::ok(true);
 			}
 
-			return {};
+
 		}
 	};
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mutable";
 
-		template<class Storage, class Map>
-		static void load(Storage &s, Map &m){
-			return registerCommands<Protocol, DBAdapter, Storage, Map,
+		static void load(RegisterPack &pack){
+			return registerCommands<DBAdapter, RegisterPack,
 				SET	,
 				SETEX	,
 				SETNX	,
 				DEL	,
 				GETSET	,
 				EXPIRE
-			>(s, m);
+			>(pack);
 		}
 	};
 
