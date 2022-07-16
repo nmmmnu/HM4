@@ -13,9 +13,7 @@ namespace net::worker::commands::Info{
 			"info",	"INFO"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 1)
 				return error::BadRequest(protocol, buffer);
 

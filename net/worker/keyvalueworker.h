@@ -109,7 +109,7 @@ namespace net::worker{
 
 			auto &command = *it->second;
 
-			return command(protocol_, db_, buffer);
+			return command(protocol_, protocol_.getParams(), db_, buffer);
 		}
 
 	private:

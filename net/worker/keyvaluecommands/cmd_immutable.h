@@ -14,9 +14,7 @@ namespace net::worker::commands::Immutable{
 			"get",	"GET"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
 				return error::BadRequest(protocol, buffer);
 
@@ -40,9 +38,7 @@ namespace net::worker::commands::Immutable{
 			"ttl",	"TTL"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
 				return error::BadRequest(protocol, buffer);
 

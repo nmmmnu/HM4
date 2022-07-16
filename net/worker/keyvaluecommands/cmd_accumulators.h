@@ -55,9 +55,7 @@ namespace net::worker::commands::Accumulators{
 
 
 		template<class Protocol, class DBAdapter, class Accumulator, bool ResultIsContainer>
-		WorkerStatus do_accumulate(Protocol &protocol, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator, std::bool_constant<ResultIsContainer>){
-			auto const &p = protocol.getParams();
-
+		WorkerStatus do_accumulate(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator, std::bool_constant<ResultIsContainer>){
 			if (p.size() != 4)
 				return error::BadRequest(protocol, buffer);
 
@@ -89,8 +87,8 @@ namespace net::worker::commands::Accumulators{
 		}
 
 		template<class Protocol, class DBAdapter, class Accumulator>
-		WorkerStatus do_accumulate(Protocol &protocol, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator){
-			return do_accumulate(protocol, db, buffer, accumulator, std::false_type{});
+		WorkerStatus do_accumulate(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer, Accumulator &accumulator){
+			return do_accumulate(protocol, params, db, buffer, accumulator, std::false_type{});
 		}
 	}
 
@@ -103,13 +101,13 @@ namespace net::worker::commands::Accumulators{
 			"getx",		"GETX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			AccumulatorVectorNew accumulator(size);
 
 			return do_accumulate(
-					protocol, db, buffer,
+					protocol, params, db, buffer,
 					accumulator,
 					std::true_type{}
 			);
@@ -153,7 +151,7 @@ namespace net::worker::commands::Accumulators{
 			"count",	"COUNT"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -171,7 +169,7 @@ namespace net::worker::commands::Accumulators{
 			} accumulator;
 
 			return do_accumulate(
-					protocol, db, buffer,
+					protocol, params, db, buffer,
 					accumulator
 			);
 		}
@@ -186,7 +184,7 @@ namespace net::worker::commands::Accumulators{
 			"sum",		"SUM"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -204,7 +202,7 @@ namespace net::worker::commands::Accumulators{
 			} accumulator;
 
 			return do_accumulate(
-					protocol, db, buffer,
+					protocol, params, db, buffer,
 					accumulator
 			);
 		}
@@ -219,7 +217,7 @@ namespace net::worker::commands::Accumulators{
 			"min",		"MIN"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -240,7 +238,7 @@ namespace net::worker::commands::Accumulators{
 			} accumulator;
 
 			return do_accumulate(
-					protocol, db, buffer,
+					protocol, params, db, buffer,
 					accumulator
 			);
 		}
@@ -255,7 +253,7 @@ namespace net::worker::commands::Accumulators{
 			"max",		"MAX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -276,7 +274,7 @@ namespace net::worker::commands::Accumulators{
 			} accumulator;
 
 			return do_accumulate(
-					protocol, db, buffer,
+					protocol, params, db, buffer,
 					accumulator
 			);
 		}

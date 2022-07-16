@@ -14,9 +14,7 @@ namespace net::worker::commands::Mutable{
 			"set",		"SET"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3 && p.size() != 4)
 				return error::BadRequest(protocol, buffer);
 
@@ -45,9 +43,7 @@ namespace net::worker::commands::Mutable{
 			"setex",	"SETEX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 4)
 				return error::BadRequest(protocol, buffer);
 
@@ -76,9 +72,7 @@ namespace net::worker::commands::Mutable{
 			"setnx",	"SETNX"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3 && p.size() != 4)
 				return error::BadRequest(protocol, buffer);
 
@@ -119,9 +113,7 @@ namespace net::worker::commands::Mutable{
 			"del",		"DEL"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
 				return error::BadRequest(protocol, buffer);
 
@@ -146,9 +138,7 @@ namespace net::worker::commands::Mutable{
 			"getset",	"GETSET"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3)
 				return error::BadRequest(protocol, buffer);
 
@@ -185,9 +175,7 @@ namespace net::worker::commands::Mutable{
 			"expire",	"EXPIRE"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
-			const auto &p = protocol.getParams();
-
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3)
 				return error::BadRequest(protocol, buffer);
 

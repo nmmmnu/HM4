@@ -15,7 +15,7 @@ namespace net::worker::commands{
 		constexpr static bool mut		= false;
 
 		virtual ~Base() = default;
-		virtual WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const = 0;
+		virtual WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const = 0;
 	};
 
 

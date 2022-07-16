@@ -8,9 +8,7 @@ namespace net::worker::commands::Counter{
 	namespace counter_impl_{
 
 		template<int Sign, class Protocol, class DBAdapter>
-		WorkerStatus do_incr_decr(Protocol &protocol, DBAdapter &db, IOBuffer &buffer){
-			const auto &p = protocol.getParams();
-
+		WorkerStatus do_incr_decr(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer){
 			if (p.size() != 2 && p.size() != 3)
 				return error::BadRequest(protocol, buffer);
 
@@ -50,10 +48,10 @@ namespace net::worker::commands::Counter{
 			"incrby",	"INCRBY"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<+1>(protocol, db, buffer);
+			return do_incr_decr<+1>(protocol, params, db, buffer);
 		}
 	};
 
@@ -68,10 +66,10 @@ namespace net::worker::commands::Counter{
 			"decrby",	"DECRBY"
 		};
 
-		WorkerStatus operator()(Protocol &protocol, DBAdapter &db, IOBuffer &buffer) const final{
+		WorkerStatus operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<-1>(protocol, db, buffer);
+			return do_incr_decr<-1>(protocol, params, db, buffer);
 		}
 	};
 
