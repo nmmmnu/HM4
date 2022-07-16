@@ -73,7 +73,7 @@ namespace net::worker{
 			Protocol const	&protocol;
 			IOBuffer	&buffer;
 
-			void operator()(nullptr_t){
+			void operator()(std::nullptr_t){
 				protocol.response_ok(buffer);
 			}
 

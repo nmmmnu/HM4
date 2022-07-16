@@ -20,16 +20,12 @@ namespace MyBuffer{
 				throw std::bad_alloc{};
 		}
 
-		~AllocatedBuffer(){
-			MyAllocator::deallocate(allocator_, data_);
-		}
-
 		value_type *data() noexcept{
-			return data_;
+			return data_.get();
 		}
 
 		const value_type *data() const noexcept{
-			return data_;
+			return data_.get();
 		}
 
 		auto size() const noexcept{
@@ -37,9 +33,19 @@ namespace MyBuffer{
 		}
 
 	private:
+		using SmartPtrType = MyAllocator::SmartPtrType<value_type,Allocator>;
+
+		static SmartPtrType allocate__(Allocator allocator, size_type size){
+			return MyAllocator::wrapInSmartPtr(
+					allocator,
+					MyAllocator::allocate<value_type>(allocator, size)
+			);
+		}
+
+	private:
 		Allocator	allocator_;
 		size_type	size_;
-		value_type	*data_	= MyAllocator::allocate<value_type>(allocator_, size_);
+		SmartPtrType	data_	= allocate__(allocator_, size_);
 	};
 
 } // namespace MyBuffer
