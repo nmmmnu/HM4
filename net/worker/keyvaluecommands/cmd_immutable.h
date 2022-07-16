@@ -14,7 +14,7 @@ namespace net::worker::commands::Immutable{
 			"get",	"GET"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
 				return Status::ERROR;
 
@@ -38,7 +38,7 @@ namespace net::worker::commands::Immutable{
 			"ttl",	"TTL"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
 				return Status::ERROR;
 

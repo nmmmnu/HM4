@@ -1,6 +1,7 @@
 #ifndef _KEY_VALUE_COMMANDS_BASE_H
 #define _KEY_VALUE_COMMANDS_BASE_H
 
+#include "myspan.h"
 #include "iobuffer.h"
 #include "../workerdefs.h"
 
@@ -30,12 +31,16 @@ namespace net::worker::commands{
 
 
 
+	using ParamContainer = MySpan<std::string_view>;
+
+
+
 	template<class Protocol, class DBAdapter>
 	struct Base{
 		constexpr static bool mut		= false;
 
 		virtual ~Base() = default;
-		virtual Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const = 0;
+		virtual Result operator()(Protocol &protocol, ParamContainer const &params, DBAdapter &db, IOBuffer &buffer) const = 0;
 	};
 
 

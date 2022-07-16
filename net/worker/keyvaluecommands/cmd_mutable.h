@@ -14,7 +14,7 @@ namespace net::worker::commands::Mutable{
 			"set",		"SET"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3 && p.size() != 4)
 				return Status::ERROR;
 
@@ -43,7 +43,7 @@ namespace net::worker::commands::Mutable{
 			"setex",	"SETEX"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 4)
 				return Status::ERROR;
 
@@ -72,7 +72,7 @@ namespace net::worker::commands::Mutable{
 			"setnx",	"SETNX"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3 && p.size() != 4)
 				return Status::ERROR;
 
@@ -113,7 +113,7 @@ namespace net::worker::commands::Mutable{
 			"del",		"DEL"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 2)
 				return Status::ERROR;
 
@@ -138,7 +138,7 @@ namespace net::worker::commands::Mutable{
 			"getset",	"GETSET"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3)
 				return Status::ERROR;
 
@@ -175,7 +175,7 @@ namespace net::worker::commands::Mutable{
 			"expire",	"EXPIRE"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 3)
 				return Status::ERROR;
 

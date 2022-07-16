@@ -111,7 +111,12 @@ namespace net::worker{
 
 			auto &command = *it->second;
 
-			auto result = command(protocol_, protocol_.getParams(), db_, buffer);
+			auto result = command(
+						protocol_,
+						commands::ParamContainer{ protocol_.getParams() },
+						db_,
+						buffer
+			);
 
 			return translate_(result.status, buffer);
 		}

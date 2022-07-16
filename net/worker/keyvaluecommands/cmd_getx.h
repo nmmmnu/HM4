@@ -56,7 +56,7 @@ namespace net::worker::commands::GetX{
 			"getx",		"GETX"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 4)
 				return Status::ERROR;
 

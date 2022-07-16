@@ -13,7 +13,7 @@ namespace net::worker::commands::Info{
 			"info",	"INFO"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 1)
 				return Status::ERROR;
 

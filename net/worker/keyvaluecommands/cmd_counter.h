@@ -8,7 +8,7 @@ namespace net::worker::commands::Counter{
 	namespace counter_impl_{
 
 		template<int Sign, class Protocol, class DBAdapter>
-		Result do_incr_decr(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer){
+		Result do_incr_decr(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer){
 			if (p.size() != 2 && p.size() != 3)
 				return Status::ERROR;
 
@@ -48,7 +48,7 @@ namespace net::worker::commands::Counter{
 			"incrby",	"INCRBY"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace counter_impl_;
 
 			return do_incr_decr<+1>(protocol, params, db, buffer);
@@ -66,7 +66,7 @@ namespace net::worker::commands::Counter{
 			"decrby",	"DECRBY"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &params, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &params, DBAdapter &db, IOBuffer &buffer) const final{
 			using namespace counter_impl_;
 
 			return do_incr_decr<-1>(protocol, params, db, buffer);

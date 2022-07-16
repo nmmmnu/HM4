@@ -14,7 +14,7 @@ namespace net::worker::commands::Reload{
 			"bgsave",	"BGSAVE"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 1)
 				return Status::ERROR;
 
@@ -33,7 +33,7 @@ namespace net::worker::commands::Reload{
 			"reload",	"RELOAD"
 		};
 
-		Result operator()(Protocol &protocol, typename Protocol::StringVector const &p, DBAdapter &db, IOBuffer &buffer) const final{
+		Result operator()(Protocol &protocol, ParamContainer const &p, DBAdapter &db, IOBuffer &buffer) const final{
 			if (p.size() != 1)
 				return Status::ERROR;
 
