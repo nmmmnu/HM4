@@ -59,23 +59,35 @@ namespace net::worker::commands::GetX{
 			if (p.size() != 4)
 				return Result::error();
 
-			auto const &key    = p[1];
-			auto const count   = from_string<uint16_t>(p[2]);
-			auto const &prefix = p[3];
-
 
 
 			using namespace getx_impl_;
 
 			static_assert(OutputContainerSize >= 2 * ITERATIONS + 1);
-
 			container.clear();
 
+			// using uint64_t from the user, allow more user-friendly behavour.
+			// suppose he enters 1'000'000'000.
+			// because this value is great than max uint16_t,
+			// the converted value will go to 0, then to MIN.
+
+			auto myClamp = [](auto a){
+				return static_cast<uint16_t>(
+					std::clamp<uint64_t>(a, MIN, ITERATIONS)
+				);
+			};
+
+
+
+			auto const &key    = p[1];
+			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
+			auto const &prefix = p[3];
+
 			accumulateResults(
-				std::clamp(count, MIN, ITERATIONS),
-				prefix,
-				db.search(key),
-				std::end(db),
+				count		,
+				prefix		,
+				db.search(key)	,
+				std::end(db)	,
 				container
 			);
 
