@@ -1,7 +1,7 @@
 #ifndef _IO_BUFFER_H
 #define _IO_BUFFER_H
 
-#include <string>
+#include <vector>
 #include <string_view>
 
 #include <cstdio>
@@ -11,14 +11,20 @@ namespace net{
 
 class IOBuffer{
 private:
-	using container_type	= std::string;
+	using container_type	= std::vector<char>;
 	using size_type		= container_type::size_type;
+
+	constexpr static size_t INITIAL_RESERVE = 64;
 
 private:
 	size_type		head_	= 0;
 	container_type		buffer_;
 
 public:
+	IOBuffer(size_t const reserve = INITIAL_RESERVE){
+		buffer_.reserve(reserve);
+	}
+
 	void clear(){
 		buffer_.clear();
 		head_ = 0;
@@ -41,13 +47,19 @@ public:
 
 	// ==================================
 
+	void reserve(container_type::size_type const size){
+		buffer_.reserve(size);
+	}
+
+	auto capacity() const{
+		return buffer_.capacity();
+	}
+
+	// ==================================
+
 	bool push(const char c){
 		push_(c);
 		return true;
-	}
-
-	bool push(const char *p){
-		return push(std::string_view{ p });
 	}
 
 	bool push(std::string_view const sv){
@@ -97,7 +109,7 @@ private:
 		assert(ptr);
 		assert(len);
 
-		buffer_.append(ptr, len);
+		buffer_.insert(std::end(buffer_), ptr, ptr + len);
 
 		return true;
 	}

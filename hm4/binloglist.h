@@ -2,7 +2,6 @@
 #define BIN_LOG_LIST_H_
 
 #include "multi/singlelist.h"
-#include "logger.h"
 
 
 namespace hm4{

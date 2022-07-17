@@ -1,5 +1,3 @@
-#include "logger.h"
-
 namespace hm4{
 namespace disk{
 

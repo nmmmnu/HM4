@@ -18,7 +18,6 @@
 #include <vector>
 #include <unordered_map>
 
-//#define log__(...) /* nada */
 #include "logger.h"
 
 namespace net::worker{
