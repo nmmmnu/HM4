@@ -71,15 +71,15 @@ bool AsyncLoop<Selector, Worker>::process(){
 	for(auto const t : selector_){
 		switch(t.status){
 		case FDStatus::READ:
-			handleRead_( t.fd );
+			client_Read_( t.fd );
 			break;
 
 		case FDStatus::WRITE:
-			handleWrite_( t.fd );
+			client_Write_( t.fd );
 			break;
 
 		case FDStatus::ERROR:
-			handleDisconnect_( t.fd, DisconnectStatus::ERROR );
+			client_Disconnect_( t.fd, DisconnectStatus::ERROR );
 			break;
 
 		case FDStatus::STOP:
@@ -100,18 +100,24 @@ bool AsyncLoop<Selector, Worker>::process(){
 // ===========================
 
 template<class Selector, class Worker>
-void AsyncLoop<Selector, Worker>::handleRead_(int const fd){
-	if ( impl_::findFD(serverFD_, fd) ){
-		while (handleConnect_(fd));
-		return;
-	}
+void AsyncLoop<Selector, Worker>::client_Read_(int fd){
+	if ( impl_::findFD(serverFD_, fd) )
+		client_Read_(fd, std::false_type{});
+	else
+		client_Read_(fd, std::true_type{});
+}
 
-	// -------------------------------------
+template<class Selector, class Worker>
+void AsyncLoop<Selector, Worker>::client_Read_(int const fd, std::false_type){
+	while (client_Connect_(fd));
+}
 
+template<class Selector, class Worker>
+void AsyncLoop<Selector, Worker>::client_Read_(int const fd, std::true_type){
 	auto it = clients_.find(fd);
 
 	if (it == clients_.end())
-		return handleDisconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
+		return client_Disconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
 
 	auto &client = it->second;
 
@@ -120,32 +126,38 @@ void AsyncLoop<Selector, Worker>::handleRead_(int const fd){
 	ssize_t const size = ::read(fd, inputBuffer_, BUFFER_CAPACITY);
 
 	if (size <= 0)
-		return handleSocketOps_(fd, size);
+		return client_SocketOps_(fd, size);
 
 	if (client.buffer.size() + narrow<size_t>(size) > conf_maxRequestSize_)
-		return handleDisconnect_(fd, DisconnectStatus::ERROR);
+		return client_Disconnect_(fd, DisconnectStatus::ERROR);
 
 	// size is checked already
 	client.buffer.push( static_cast<size_t>(size), inputBuffer_);
 
 	client.timer.restart();
 
-	handleWorker_(fd, client.buffer);
+	client_Worker_(fd, client.buffer);
 }
 
 template<class Selector, class Worker>
-void AsyncLoop<Selector, Worker>::handleWrite_(int const fd){
-	if ( impl_::findFD(serverFD_, fd) ){
-		// WTF?!?
-		return;
-	}
+void AsyncLoop<Selector, Worker>::client_Write_(int fd){
+if ( impl_::findFD(serverFD_, fd) )
+	client_Write_(fd, std::false_type{});
+else
+	client_Write_(fd, std::true_type{});
+}
 
-	// -------------------------------------
+template<class Selector, class Worker>
+void AsyncLoop<Selector, Worker>::client_Write_(int, std::false_type){
+	// WTF?!? Should never happen...
+}
 
+template<class Selector, class Worker>
+void AsyncLoop<Selector, Worker>::client_Write_(int const fd, std::true_type){
 	auto it = clients_.find(fd);
 
 	if (it == clients_.end())
-		return handleDisconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
+		return client_Disconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
 
 	auto &client = it->second;
 
@@ -157,7 +169,7 @@ void AsyncLoop<Selector, Worker>::handleWrite_(int const fd){
 		ssize_t const size = ::write(fd, client.buffer.data(), client.buffer.size());
 
 		if (size <= 0)
-			return handleSocketOps_(fd, size);
+			return client_SocketOps_(fd, size);
 
 		// size is checked already
 		client.buffer.pop( static_cast<size_t>(size) );
@@ -174,10 +186,10 @@ void AsyncLoop<Selector, Worker>::handleWrite_(int const fd){
 }
 
 template<class Selector, class Worker>
-bool AsyncLoop<Selector, Worker>::handleWorker_(int const fd, IOBuffer &buffer){
+bool AsyncLoop<Selector, Worker>::client_Worker_(int const fd, IOBuffer &buffer){
 	const WorkerStatus status = worker_( buffer );
 
-	switch( status ){
+	switch(status){
 	case WorkerStatus::PASS:
 		return false;
 
@@ -192,26 +204,26 @@ bool AsyncLoop<Selector, Worker>::handleWorker_(int const fd, IOBuffer &buffer){
 		return true;
 
 	case WorkerStatus::DISCONNECT:
-		handleDisconnect_(fd, DisconnectStatus::Worker_NORMAL);
+		client_Disconnect_(fd, DisconnectStatus::Worker_NORMAL);
 
 		return true;
 
 	case WorkerStatus::SHUTDOWN:
-	//	handleDisconnect_(fd, DisconnectStatus::Worker_NORMAL);
+	//	client_Disconnect_(fd, DisconnectStatus::Worker_NORMAL);
 		keepProcessing_ = false;
 
 		return true;
 
 	default:
 	case WorkerStatus::DISCONNECT_ERROR:
-		handleDisconnect_(fd, DisconnectStatus::Worker_ERROR);
+		client_Disconnect_(fd, DisconnectStatus::Worker_ERROR);
 
 		return true;
 	}
 }
 
 template<class Selector, class Worker>
-bool AsyncLoop<Selector, Worker>::handleConnect_(int const fd){
+bool AsyncLoop<Selector, Worker>::client_Connect_(int const fd){
 	// fd is same as serverFD_
 	int const newFD = socket_accept(fd);
 
@@ -219,7 +231,7 @@ bool AsyncLoop<Selector, Worker>::handleConnect_(int const fd){
 	if (newFD < 0)
 		return false;
 
-	if ( clients_.size() < conf_maxClients && insertFD_(newFD) ){
+	if ( clients_.size() < conf_maxClients && iinsertFD_(newFD) ){
 		// socket_options_setNonBlocking(newFD);
 
 		log_("Connect", newFD);
@@ -233,7 +245,7 @@ bool AsyncLoop<Selector, Worker>::handleConnect_(int const fd){
 }
 
 template<class Selector, class Worker>
-void AsyncLoop<Selector, Worker>::handleDisconnect_(int const fd, const DisconnectStatus error){
+void AsyncLoop<Selector, Worker>::client_Disconnect_(int const fd, const DisconnectStatus error){
 	removeFD_(fd);
 
 	socket_close(fd);
@@ -255,27 +267,27 @@ void AsyncLoop<Selector, Worker>::handleDisconnect_(int const fd, const Disconne
 // ===========================
 
 template<class Selector, class Worker>
-void AsyncLoop<Selector, Worker>::handleSocketOps_(int const fd, ssize_t const size){
+void AsyncLoop<Selector, Worker>::client_SocketOps_(int const fd, ssize_t const size){
 	if (size < 0){
 		if ( socket_check_eagain() ){
 			// try again
 			return;
 		}else{
 			// error, disconnect.
-			return handleDisconnect_(fd, DisconnectStatus::ERROR);
+			return client_Disconnect_(fd, DisconnectStatus::ERROR);
 		}
 	}
 
 	if (size == 0){
 		// normal, disconnect.
-		return handleDisconnect_(fd, DisconnectStatus::NORMAL);
+		return client_Disconnect_(fd, DisconnectStatus::NORMAL);
 	}
 }
 
 // ===========================
 
 template<class Selector, class Worker>
-bool AsyncLoop<Selector, Worker>::insertFD_(int const fd){
+bool AsyncLoop<Selector, Worker>::iinsertFD_(int const fd){
 	if ( ! selector_.insertFD(fd) )
 		return false;
 
@@ -295,7 +307,7 @@ template<class Selector, class Worker>
 void AsyncLoop<Selector, Worker>::expireFD_(){
 	for(const auto &[fd, c] : clients_){
 		if (c.timer.expired(conf_connectionTimeout_)){
-			handleDisconnect_(fd, DisconnectStatus::TIMEOUT);
+			client_Disconnect_(fd, DisconnectStatus::TIMEOUT);
 			// iterator is invalid now...
 			return;
 		}

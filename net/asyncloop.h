@@ -63,22 +63,29 @@ private:
 	};
 
 private:
-	void handleRead_(int fd);
-	void handleWrite_(int fd);
-	bool handleConnect_(int fd);
-	void handleDisconnect_(int fd, const DisconnectStatus error);
-	bool handleWorker_(int fd, IOBuffer &buffer);
+	bool client_Connect_(int fd);
+	void client_Disconnect_(int fd, DisconnectStatus error);
 
-	void handleSocketOps_(int fd, ssize_t size);
+	void client_Read_(int fd);
+	void client_Read_(int fd, std::true_type);
+	void client_Read_(int fd, std::false_type);
+
+	void client_Write_(int fd);
+	void client_Write_(int fd, std::true_type);
+	void client_Write_(int, std::false_type);
+
+	bool client_Worker_(int fd, IOBuffer &buffer);
+
+	void client_SocketOps_(int fd, ssize_t size);
 
 private:
-	bool insertFD_(int fd);
+	bool iinsertFD_(int fd);
 	void removeFD_(int fd);
 	void expireFD_();
 
 private:
 	void log_(const char *s, int const fd = -1) const{
-		if (! LOG_ENABLED)
+		if constexpr(! LOG_ENABLED)
 			return;
 
 		// printf suppose to be faster than std::cout
