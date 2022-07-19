@@ -35,8 +35,7 @@ struct MockDBAdapter{
 
 	// System Methods
 
-	constexpr
-	static std::string_view info(){
+	constexpr static std::string_view info(std::string &){
 		return "Mock Adapter\n";
 	}
 

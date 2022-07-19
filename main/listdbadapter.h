@@ -47,15 +47,19 @@ public:
 
 	// System Methods
 
-	std::string info() const{
+	std::string_view info(std::string &str) const{
 		to_string_buffer_t buffer[2];
 
-		return concatenate(
+		concatenate(
+			str,
+
 			"Version          : ", hm4::version::str,			"\n",
 			"Keys (estimated) : ", to_string(list_.size(),  buffer[0]),	"\n",
 			"Size             : ", to_string(list_.bytes(), buffer[1]),	"\n",
 			"Mutable          : ", MUTABLE ? "Yes" : "No",			"\n"
 		);
+
+		return std::string_view{ str };
 	}
 
 	auto save(){

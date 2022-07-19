@@ -6,6 +6,7 @@
 #include "../workerdefs.h"
 
 #include <memory>
+#include <array>
 #include <variant>
 #include "staticvector.h"
 
@@ -23,20 +24,29 @@ namespace net::worker::commands{
 
 
 
-	constexpr static size_t OutputContainerSize = 2048;
-	using OutputContainer = StaticVector<std::string_view,OutputContainerSize>;
+	struct OutputBlob{
+		constexpr static size_t ContainerSize	= 2048;
+		using Container = StaticVector<std::string_view,ContainerSize>;
+
+		OutputBlob(){
+			container.reserve(ContainerSize);
+		}
+
+		Container	container;
+		std::string	buffer;
+	};
 
 
 
 	struct Result{
 		using ResultData = std::variant<
-			std::nullptr_t		,
-			bool			,
-			int64_t			,
-			uint64_t		,
-			std::string_view	,
-			std::string		,
-			const OutputContainer *	,
+			std::nullptr_t			,
+			bool				,
+			int64_t				,
+			uint64_t			,
+			std::string_view		,
+			std::string			,
+			const OutputBlob::Container *	,
 			std::pair<int64_t, std::string_view>
 		>;
 
@@ -68,7 +78,7 @@ namespace net::worker::commands{
 
 		virtual ~Base() = default;
 
-		virtual Result operator()(ParamContainer const &params, DBAdapter &db, OutputContainer &) const = 0;
+		virtual Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const = 0;
 	};
 
 

@@ -14,7 +14,7 @@ namespace net::worker::commands::Immutable{
 			"get",	"GET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -38,7 +38,7 @@ namespace net::worker::commands::Immutable{
 			"ttl",	"TTL"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 2)
 				return Result::error();
 

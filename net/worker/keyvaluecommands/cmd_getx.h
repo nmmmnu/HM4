@@ -12,8 +12,8 @@ namespace net::worker::commands::GetX{
 
 
 
-		template<class It, class OutputContainer>
-		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, It last, OutputContainer &data){
+		template<class It, class OutputBlob>
+		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, It last, OutputBlob &data){
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 
@@ -55,7 +55,7 @@ namespace net::worker::commands::GetX{
 			"getx",		"GETX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &container) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 4)
 				return Result::error();
 
@@ -63,7 +63,9 @@ namespace net::worker::commands::GetX{
 
 			using namespace getx_impl_;
 
-			static_assert(OutputContainerSize >= 2 * ITERATIONS + 1);
+			auto &container = blob.container;
+
+			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 			container.clear();
 
 			// using uint64_t from the user, allow more user-friendly behavour.

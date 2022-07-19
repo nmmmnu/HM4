@@ -14,7 +14,7 @@ namespace net::worker::commands::Mutable{
 			"set",		"SET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
@@ -41,7 +41,7 @@ namespace net::worker::commands::Mutable{
 			"setex",	"SETEX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 4)
 				return Result::error();
 
@@ -68,7 +68,7 @@ namespace net::worker::commands::Mutable{
 			"setnx",	"SETNX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
@@ -106,7 +106,7 @@ namespace net::worker::commands::Mutable{
 			"del",		"DEL"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -131,7 +131,7 @@ namespace net::worker::commands::Mutable{
 			"getset",	"GETSET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 3)
 				return Result::error();
 
@@ -169,7 +169,7 @@ namespace net::worker::commands::Mutable{
 			"expire",	"EXPIRE"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
 			if (p.size() != 3)
 				return Result::error();
 

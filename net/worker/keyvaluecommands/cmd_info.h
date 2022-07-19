@@ -13,13 +13,15 @@ namespace net::worker::commands::Info{
 			"info",	"INFO"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputContainer &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 1)
 				return Result::error();
 
 			// db.info() "probably" return a std::string.
 
-			return Result::ok(std::move(db.info()));
+			return Result::ok(
+				db.info(blob.buffer)
+			);
 		}
 	};
 

@@ -223,7 +223,7 @@ function getData(){
 				false,
 				false,
 
-				"accumulators"
+				"getx"
 		),
 
 		new Cmd(

@@ -102,7 +102,7 @@ namespace net::worker{
 				);
 			}
 
-			void operator()(const commands::OutputContainer *list){
+			void operator()(const commands::OutputBlob *list){
 				protocol.response_strings(buffer, *list);
 			}
 
@@ -133,8 +133,6 @@ namespace net::worker{
 			using namespace key_value_worker_impl_;
 
 			registerModules<DBAdapter>(storage_, map_);
-
-			output_.reserve(commands::OutputContainerSize);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){
@@ -217,7 +215,7 @@ namespace net::worker{
 		Storage				storage_;
 		Map				map_;
 
-		commands::OutputContainer	output_;
+		commands::OutputBlob	output_;
 	};
 
 

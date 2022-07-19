@@ -13,7 +13,7 @@ namespace net::worker::commands::System{
 			"exit",		"EXIT"
 		};
 
-		Result operator()(ParamContainer const &, DBAdapter &, OutputContainer &) const final{
+		Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
 			return { Status::DISCONNECT, nullptr };
 		}
 	};
@@ -25,7 +25,7 @@ namespace net::worker::commands::System{
 			"shutdown",	"SHUTDOWN"
 		};
 
-		Result operator()(ParamContainer const &, DBAdapter &, OutputContainer &) const final{
+		Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
 			return { Status::SHUTDOWN, nullptr };
 		}
 	};
