@@ -31,7 +31,7 @@ namespace redis_protocol_impl_{
 		return 1;
 	}
 
-	constexpr int fast_digit_estimation(uint64_t const a){
+	constexpr size_t fast_digit_estimation(uint64_t const a){
 		return
 			(a < 10llu				)	?  1	:
 			(a < 100llu				)	?  2	:

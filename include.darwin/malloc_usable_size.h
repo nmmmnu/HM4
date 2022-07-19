@@ -3,7 +3,7 @@
 
 #include <malloc/malloc.h>
 
-#define malloc_size malloc_usable_size
+#define malloc_usable_size malloc_size
 
 #endif
 

@@ -6,7 +6,7 @@
 #include "../workerdefs.h"
 
 #include <memory>
-#include <array>
+#include <string>
 #include <variant>
 #include "staticvector.h"
 
