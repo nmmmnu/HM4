@@ -67,6 +67,7 @@
 
 <ul>
 		<li><a href="#GET">GET</a></li>
+				<li><a href="#EXISTS">EXISTS</a></li>
 				<li><a href="#TTL">TTL</a></li>
 				<li><a href="#GETX">GETX</a></li>
 				<li><a href="#COUNT">COUNT</a></li>
@@ -108,6 +109,27 @@
 			string
 			<h3>Return value:</h3>
 			Value of the key or empty string.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="EXISTS">
+
+			<h2>EXISTS key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>EXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get information if <i>key</i> exists. Exact match.<br />Operation is not recommended, because is as fast as if you get the <i>key</i> itself.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			1 = exists / 0 = not exists
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TTL">
@@ -420,7 +442,7 @@
 			<h3>Description:</h3>
 			Returns server information.
 			<h3>Return type:</h3>
-			array
+			string
 			<h3>Return value:</h3>
 			Server information.
 			<p class="top"><a href="#top">top</a></p>

@@ -102,8 +102,8 @@ namespace net::worker{
 				);
 			}
 
-			void operator()(const commands::OutputBlob *list){
-				protocol.response_strings(buffer, *list);
+			void operator()(const MySpan<std::string_view, true> container){
+				protocol.response_strings(buffer, container);
 			}
 
 

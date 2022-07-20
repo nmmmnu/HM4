@@ -93,7 +93,7 @@ namespace net::worker::commands::GetX{
 				container
 			);
 
-			return Result::ok(&container);
+			return Result::ok_container(container);
 		}
 	};
 

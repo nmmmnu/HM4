@@ -8,7 +8,9 @@
 #include <memory>
 #include <string>
 #include <variant>
+#include <functional>
 #include "staticvector.h"
+#include "ptrwrapper.h"
 
 namespace net::worker::commands{
 
@@ -40,13 +42,13 @@ namespace net::worker::commands{
 
 	struct Result{
 		using ResultData = std::variant<
-			std::nullptr_t			,
-			bool				,
-			int64_t				,
-			uint64_t			,
-			std::string_view		,
-			std::string			,
-			const OutputBlob::Container *	,
+			std::nullptr_t					,
+			bool						,
+			int64_t						,
+			uint64_t					,
+			std::string_view				,
+			std::string					,
+			MySpan<std::string_view, true>			,
 			std::pair<int64_t, std::string_view>
 		>;
 
@@ -59,6 +61,12 @@ namespace net::worker::commands{
 
 		static Result ok(ResultData &&data = nullptr){
 			return { Status::OK, std::move(data) };
+		}
+
+		static Result ok_container(const OutputBlob::Container &container){
+			return ok(
+				MySpan<std::string_view, true>{ container }
+			);
 		}
 
 		static Result error(){

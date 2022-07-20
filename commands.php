@@ -175,6 +175,24 @@ function getData(){
 		),
 
 		new Cmd(
+				"EXISTS",
+
+				"EXISTS key",
+
+				"Get information if <i>key</i> exists. Exact match.<br />" .
+				"Operation is not recommended, because is as fast as if you get the <i>key</i> itself.",
+
+				"bool",
+				"1 = exists / 0 = not exists",
+				"1.2.16",
+				"O(log n)",
+				true,
+				false,
+
+				"immutable"
+		),
+
+		new Cmd(
 				"TTL",
 
 				"TTL key",
@@ -487,7 +505,7 @@ function getData(){
 				"INFO",
 
 				"Returns server information.",
-				"array",
+				"string",
 				"Server information.",
 				"1.0.0",
 				"n/a",
