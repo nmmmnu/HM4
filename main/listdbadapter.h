@@ -2,6 +2,7 @@
 #define List_DB_ADAPTER_H_
 
 #include "version.h"
+#include "myprocess.h"
 
 template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 class ListDBAdapter{
@@ -48,18 +49,23 @@ public:
 	// System Methods
 
 	std::string_view info(std::string &str) const{
-		to_string_buffer_t buffer[2];
+		to_string_buffer_t buffer[3];
 
 		concatenate(
 			str,
 
-			"Version          : ", hm4::version::str,			"\n",
-			"Keys (estimated) : ", to_string(list_.size(),  buffer[0]),	"\n",
-			"Size             : ", to_string(list_.bytes(), buffer[1]),	"\n",
-			"Mutable          : ", MUTABLE ? "Yes" : "No",			"\n"
+			"Version          : ", hm4::version::str,				"\n",
+			"Keys (estimated) : ", to_string(list_.size(),		buffer[0]),	"\n",
+			"Size             : ", to_string(list_.bytes(),		buffer[1]),	"\n",
+			"Mutable          : ", MUTABLE ? "Yes" : "No",				"\n",
+			"PID              : ", to_string(getProcessID(),	buffer[2]),	"\n"
 		);
 
 		return std::string_view{ str };
+	}
+
+	constexpr static std::string_view version(){
+		return hm4::version::str;
 	}
 
 	auto save(){

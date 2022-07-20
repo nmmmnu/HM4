@@ -26,6 +26,7 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)myglob.o				\
 								\
 			$(O)signalguard.o			\
-			$(O)redisprotocol.o $(O)sockets.o
+			$(O)redisprotocol.o $(O)sockets.o	\
+			$(O)myprocess.o
 	$(LINK)
 

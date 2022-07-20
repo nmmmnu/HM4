@@ -82,6 +82,7 @@
 				<li><a href="#INCR">INCR</a></li>
 				<li><a href="#DECR">DECR</a></li>
 				<li><a href="#INFO">INFO</a></li>
+				<li><a href="#VERSION">VERSION</a></li>
 				<li><a href="#SAVE">SAVE</a></li>
 				<li><a href="#RELOAD">RELOAD</a></li>
 				<li><a href="#EXIT">EXIT</a></li>
@@ -424,6 +425,27 @@
 			Server information.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="VERSION">
+
+			<h2>VERSION</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>VERSION</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns server version.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Server version.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="SAVE">
 
 			<h2>SAVE / BGSAVE</h2>
@@ -453,7 +475,7 @@
 				<tr><td>Command			</td><td>RELOAD</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
 				<tr><td>Time complexity		</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
 			</table>

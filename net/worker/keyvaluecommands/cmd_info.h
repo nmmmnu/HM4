@@ -17,10 +17,27 @@ namespace net::worker::commands::Info{
 			if (p.size() != 1)
 				return Result::error();
 
-			// db.info() "probably" return a std::string.
-
 			return Result::ok(
 				db.info(blob.buffer)
+			);
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct VERSION : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "version";
+		constexpr inline static std::string_view cmd[]	= {
+			"version",	"VERSION"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			if (p.size() != 1)
+				return Result::error();
+
+			return Result::ok(
+				db.version()
 			);
 		}
 	};
@@ -33,7 +50,8 @@ namespace net::worker::commands::Info{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,
-				INFO
+				INFO,
+				VERSION
 			>(pack);
 		}
 	};

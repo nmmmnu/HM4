@@ -497,6 +497,22 @@ function getData(){
 				"info"
 		),
 
+		new Cmd(
+				"VERSION",
+
+				"VERSION",
+
+				"Returns server version.",
+				"string",
+				"Server version.",
+				"1.2.16",
+				"n/a",
+				false,
+				null,
+
+				"info"
+		),
+
 
 
 		/* cmd_reload */
@@ -529,7 +545,7 @@ function getData(){
 				"OK",
 				"1.0.0",
 				"n/a",
-				true,
+				false,
 				null,
 
 				"reload"
