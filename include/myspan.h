@@ -3,8 +3,8 @@
 
 #include <initializer_list>
 
-template<typename T>
-class MyBasicSpan{
+template<typename T, bool ExplicitConstructor = false>
+class MySpan{
 public:
 	// TYPES
 
@@ -26,11 +26,14 @@ private:
 	size_type	size_;
 
 public:
-	constexpr MyBasicSpan(const T *data, size_type size) : data_(data), size_(size){}
+	constexpr MySpan(const T *data, size_type size) : data_(data), size_(size){}
+
+	template<class Container>
+	constexpr MySpan(const Container &v) : MySpan(v.data(), v.size()){}
 
 	// COMPARISSON
 
-	constexpr bool operator==(const MyBasicSpan &other) const noexcept{
+	constexpr bool operator==(const MySpan &other) const noexcept{
 		if (size_ != other.size_)
 			return false;
 
@@ -46,7 +49,7 @@ public:
 		return true;
 	}
 
-	constexpr bool operator!=(const MyBasicSpan &other) const noexcept{
+	constexpr bool operator!=(const MySpan &other) const noexcept{
 		return ! operator==(other);
 	}
 
@@ -125,62 +128,13 @@ private:
 
 
 
-template<typename T, bool Explicit = false>
-class MySpan : public MyBasicSpan<T>{
-	using B = MyBasicSpan<T>;
-
-public:
-	// TYPES
-
-	using value_type	= typename B::value_type	;
-	using size_type		= typename B::size_type	;
-	using difference_type	= typename B::difference_type	;
-
-	using reference		= typename B::reference	;
-	using const_reference	= typename B::const_reference	;
-
-	using pointer		= typename B::pointer		;
-	using const_pointer	= typename B::const_pointer	;
-
-	using iterator		= typename B::iterator	;
-	using const_iterator	= typename B::const_iterator	;
-
-public:
-	using MyBasicSpan<T>::MyBasicSpan;
-
-	template<class Container>
-	constexpr MySpan(const Container &v) : MyBasicSpan<T>(v.data(), v.size()){}
-
-};
-
-
-
 template<typename T>
-class MySpan<T, true> : public MyBasicSpan<T>{
-	using B = MyBasicSpan<T>;
-
-public:
-	// TYPES
-
-	using value_type	= typename B::value_type	;
-	using size_type		= typename B::size_type	;
-	using difference_type	= typename B::difference_type	;
-
-	using reference		= typename B::reference	;
-	using const_reference	= typename B::const_reference	;
-
-	using pointer		= typename B::pointer		;
-	using const_pointer	= typename B::const_pointer	;
-
-	using iterator		= typename B::iterator	;
-	using const_iterator	= typename B::const_iterator	;
-
-public:
-	using MyBasicSpan<T>::MyBasicSpan;
+struct MySpan<T, true> : public MySpan<T, false>{
+	using MySpan<T, false>::MySpan;
 
 	template<class Container>
 	explicit
-	constexpr MySpan(const Container &v) : MyBasicSpan<T>(v.data(), v.size()){}
+	constexpr MySpan(const Container &v) : MySpan<T, false>(v){}
 };
 
 

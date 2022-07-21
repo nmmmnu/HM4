@@ -125,11 +125,11 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get information if <i>key</i> exists. Exact match.<br />Operation is not recommended, because is as fast as if you get the <i>key</i> itself.
+			Get information if <i>key</i> exists. Exact match.<br />Operation is not recommended, because it is as fast as if you get the <i>key</i> itself.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
-			1 = exists / 0 = not exists
+			0 if the key value pair do not exists.<br />1 if the key value pair exists.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TTL">
@@ -318,7 +318,7 @@
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
-			0 if key value pair existed.<br />1 if the key does not existed and is set.
+			0 if the key value pair exists.<br />1 if the key value pair do not exists and is set.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXPIRE">
@@ -339,7 +339,7 @@
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
-			0 if key value pair do not existed.<br />1 if the key existed and expiration is set.
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is set.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETSET">

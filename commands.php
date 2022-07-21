@@ -180,10 +180,11 @@ function getData(){
 				"EXISTS key",
 
 				"Get information if <i>key</i> exists. Exact match.<br />" .
-				"Operation is not recommended, because is as fast as if you get the <i>key</i> itself.",
+				"Operation is not recommended, because it is as fast as if you get the <i>key</i> itself.",
 
 				"bool",
-				"1 = exists / 0 = not exists",
+				"0 if the key value pair do not exists.<br />" .
+				"1 if the key value pair exists.",
 				"1.2.16",
 				"O(log n)",
 				true,
@@ -393,8 +394,8 @@ function getData(){
 				"Note: The command internally GET old key first.",
 
 				"bool",
-				"0 if key value pair existed.<br />" .
-				"1 if the key does not existed and is set.",
+				"0 if the key value pair exists.<br />" .
+				"1 if the key value pair do not exists and is set.",
 				"1.2.11",
 				"O(log n) + O(1)",
 				true,
@@ -413,8 +414,8 @@ function getData(){
 				"If you can, use SET or SETEX instead.",
 
 				"bool",
-				"0 if key value pair do not existed.<br />" .
-				"1 if the key existed and expiration is set.",
+				"0 if the key value pair do not exists.<br />" .
+				"1 if the key value pair exists and expiration is set.",
 				"1.2.11",
 				"O(log n) + O(1)",
 				true,

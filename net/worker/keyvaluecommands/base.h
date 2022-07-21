@@ -47,7 +47,6 @@ namespace net::worker::commands{
 			int64_t						,
 			uint64_t					,
 			std::string_view				,
-			std::string					,
 			MySpan<std::string_view, true>			,
 			std::pair<int64_t, std::string_view>
 		>;
@@ -57,19 +56,19 @@ namespace net::worker::commands{
 		Status		status	= Status::OK;
 		ResultData	data	= std::nullptr_t{};
 
-		Result(Status const status, ResultData &&data) : status(status), data(std::move(data)){};
+		constexpr Result(Status const status, ResultData &&data) : status(status), data(std::move(data)){};
 
-		static Result ok(ResultData &&data = nullptr){
+		constexpr static Result ok(ResultData &&data = nullptr){
 			return { Status::OK, std::move(data) };
 		}
 
-		static Result ok_container(const OutputBlob::Container &container){
+		constexpr static Result ok_container(const OutputBlob::Container &container){
 			return ok(
 				MySpan<std::string_view, true>{ container }
 			);
 		}
 
-		static Result error(){
+		constexpr static Result error(){
 			return { Status::ERROR, nullptr };
 		}
 	};
