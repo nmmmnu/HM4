@@ -1,5 +1,4 @@
 #include "base.h"
-#include "mystring.h"
 
 #include <limits>
 #include <algorithm>
@@ -46,7 +45,7 @@ namespace net::worker::commands::Accumulators{
 
 
 		template<class Accumulator, class DBAdapter>
-		Result execCommand(ParamContainer const &p, DBAdapter &db){
+		Result execCommand(ParamContainer const &p, DBAdapter &db, OutputBlob &blob){
 			if (p.size() != 4)
 				return Result::error();
 
@@ -69,16 +68,22 @@ namespace net::worker::commands::Accumulators{
 			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
 			auto const &prefix = p[3];
 
-			auto const result = accumulateResults<Accumulator>(
+			auto const [ number, lastKey ] = accumulateResults<Accumulator>(
 							count		,
 							prefix		,
 							db.search(key)	,
 							std::end(db)
 			);
 
-		//	auto const [ number, lastKey ] = result;
+			blob.container.clear();
+			blob.container.push_back(
+				to_string(number, blob.std_buffer[0])
+			);
+			blob.container.push_back(
+				lastKey
+			);
 
-			return Result::ok(result);
+			return Result::ok_container(blob.container);
 		}
 	}
 
@@ -91,7 +96,7 @@ namespace net::worker::commands::Accumulators{
 			"count",	"COUNT"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -108,7 +113,7 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<COUNT_>(params, db);
+			return execCommand<COUNT_>(params, db, blob);
 		}
 	};
 
@@ -121,7 +126,7 @@ namespace net::worker::commands::Accumulators{
 			"sum",		"SUM"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -138,7 +143,7 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<SUM_>(params, db);
+			return execCommand<SUM_>(params, db, blob);
 		}
 	};
 
@@ -151,7 +156,7 @@ namespace net::worker::commands::Accumulators{
 			"min",		"MIN"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -171,7 +176,7 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MIN_>(params, db);
+			return execCommand<MIN_>(params, db, blob);
 		}
 	};
 
@@ -184,7 +189,7 @@ namespace net::worker::commands::Accumulators{
 			"max",		"MAX"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) const final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -204,7 +209,7 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MAX_>(params, db);
+			return execCommand<MAX_>(params, db, blob);
 		}
 	};
 

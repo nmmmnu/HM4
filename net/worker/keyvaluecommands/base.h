@@ -8,9 +8,9 @@
 #include <memory>
 #include <string>
 #include <variant>
-#include <functional>
+
 #include "staticvector.h"
-#include "ptrwrapper.h"
+#include "mystring.h"
 
 namespace net::worker::commands{
 
@@ -34,8 +34,9 @@ namespace net::worker::commands{
 			container.reserve(ContainerSize);
 		}
 
-		Container	container;
-		std::string	buffer;
+		Container		container;
+		std::string		buffer;
+		to_string_buffer_t	std_buffer[1];
 	};
 
 
@@ -47,8 +48,7 @@ namespace net::worker::commands{
 			int64_t						,
 			uint64_t					,
 			std::string_view				,
-			MySpan<std::string_view, true>			,
-			std::pair<int64_t, std::string_view>
+			MySpan<std::string_view, true>
 		>;
 
 

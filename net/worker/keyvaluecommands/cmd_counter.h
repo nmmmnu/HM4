@@ -1,5 +1,4 @@
 #include "base.h"
-#include "mystring.h"
 
 
 
@@ -8,7 +7,7 @@ namespace net::worker::commands::Counter{
 	namespace counter_impl_{
 
 		template<int Sign, class DBAdapter>
-		Result do_incr_decr(ParamContainer const &p, DBAdapter &db){
+		Result do_incr_decr(ParamContainer const &p, DBAdapter &db, OutputBlob &blob){
 			if (p.size() != 2 && p.size() != 3)
 				return Result::error();
 
@@ -25,9 +24,7 @@ namespace net::worker::commands::Counter{
 			if (! key.empty())
 				n += from_string<int64_t>( db.get(key) );
 
-			to_string_buffer_t std_buffer;
-
-			std::string_view const val = to_string(n, std_buffer);
+			std::string_view const val = to_string(n, blob.std_buffer[0]);
 
 			db.set(key, val);
 
@@ -46,10 +43,10 @@ namespace net::worker::commands::Counter{
 			"incrby",	"INCRBY"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) const final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<+1>(params, db);
+			return do_incr_decr<+1>(params, db, blob);
 		}
 	};
 
@@ -64,10 +61,10 @@ namespace net::worker::commands::Counter{
 			"decrby",	"DECRBY"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) const final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<-1>(params, db);
+			return do_incr_decr<-1>(params, db, blob);
 		}
 	};
 

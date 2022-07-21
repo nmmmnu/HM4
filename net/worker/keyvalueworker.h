@@ -93,15 +93,6 @@ namespace net::worker{
 				protocol.response_string(buffer, s);
 			}
 
-			void operator()(std::pair<int64_t, std::string_view> const &pair){
-				to_string_buffer_t std_buffer;
-
-				protocol.response_strings(buffer,
-					to_string(pair.first, std_buffer),
-					pair.second
-				);
-			}
-
 			void operator()(const MySpan<std::string_view, true> container){
 				protocol.response_strings(buffer, container);
 			}
