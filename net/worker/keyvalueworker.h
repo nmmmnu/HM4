@@ -93,7 +93,7 @@ namespace net::worker{
 				protocol.response_string(buffer, s);
 			}
 
-			void operator()(const MySpan<std::string_view, true> container){
+			void operator()(const MySpan<std::string_view, MySpanExplicitConstructor::EXPLICIT> container){
 				protocol.response_strings(buffer, container);
 			}
 

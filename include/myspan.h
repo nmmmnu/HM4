@@ -3,7 +3,12 @@
 
 #include <initializer_list>
 
-template<typename T, bool ExplicitConstructor = false>
+enum class MySpanExplicitConstructor{
+	NORMAL		,
+	EXPLICIT
+};
+
+template<typename T, MySpanExplicitConstructor ExplicitConstructor = MySpanExplicitConstructor::NORMAL>
 class MySpan{
 public:
 	// TYPES
@@ -129,12 +134,12 @@ private:
 
 
 template<typename T>
-struct MySpan<T, true> : public MySpan<T, false>{
-	using MySpan<T, false>::MySpan;
+struct MySpan<T, MySpanExplicitConstructor::EXPLICIT> : public MySpan<T, MySpanExplicitConstructor::NORMAL>{
+	using MySpan<T, MySpanExplicitConstructor::NORMAL>::MySpan;
 
 	template<class Container>
 	explicit
-	constexpr MySpan(const Container &v) : MySpan<T, false>(v){}
+	constexpr MySpan(const Container &v) : MySpan<T, MySpanExplicitConstructor::NORMAL>(v){}
 };
 
 

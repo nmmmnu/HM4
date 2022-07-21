@@ -43,12 +43,12 @@ namespace net::worker::commands{
 
 	struct Result{
 		using ResultData = std::variant<
-			std::nullptr_t					,
-			bool						,
-			int64_t						,
-			uint64_t					,
-			std::string_view				,
-			MySpan<std::string_view, true>
+			std::nullptr_t		,
+			bool			,
+			int64_t			,
+			uint64_t		,
+			std::string_view	,
+			MySpan<std::string_view, MySpanExplicitConstructor::EXPLICIT>
 		>;
 
 
@@ -64,7 +64,7 @@ namespace net::worker::commands{
 
 		constexpr static Result ok_container(const OutputBlob::Container &container){
 			return ok(
-				MySpan<std::string_view, true>{ container }
+				MySpan<std::string_view, MySpanExplicitConstructor::EXPLICIT>{ container }
 			);
 		}
 
