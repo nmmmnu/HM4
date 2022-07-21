@@ -131,8 +131,8 @@ namespace net::worker::commands::Mutable{
 			"getset",	"GETSET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() != 3)
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
 			// GET
@@ -145,17 +145,54 @@ namespace net::worker::commands::Mutable{
 			// because old_value may be overwritten,
 			// we had to make a copy.
 
-			std::string old_value{ db.get(key) };
+			blob.string = db.get(key);
 
 			// SET
 
 			const auto &val = p[2];
+			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
-			db.set(key, val);
+			db.set(key, val, exp);
 
 			// return
 
-			return Result::ok(std::move(old_value));
+			return Result::ok(blob.string);
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct GETDEL : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "getdel";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"getdel",	"GETDEL"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			if (p.size() != 2)
+				return Result::error();
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return Result::error();
+
+			// because old_value may be overwritten,
+			// we had to make a copy.
+
+			blob.string = db.get(key);
+
+			// DEL
+
+			db.del(key);
+
+			// return
+
+			return Result::ok(blob.string);
 		}
 	};
 
@@ -210,6 +247,7 @@ namespace net::worker::commands::Mutable{
 				SETNX	,
 				DEL	,
 				GETSET	,
+				GETDEL	,
 				EXPIRE
 			>(pack);
 		}

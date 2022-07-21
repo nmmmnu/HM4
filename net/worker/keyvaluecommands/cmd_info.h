@@ -18,7 +18,7 @@ namespace net::worker::commands::Info{
 				return Result::error();
 
 			return Result::ok(
-				db.info(blob.buffer)
+				db.info(blob.string)
 			);
 		}
 	};

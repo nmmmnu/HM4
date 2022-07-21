@@ -104,11 +104,11 @@ public:
 		assert(Pair::check(key));
 
 		if constexpr (EraseType == DualListEraseType::NORMAL){
-			return list1_->insert(key, Pair::TOMBSTONE) != std::end(*list1_);
+			return list1_->erase(key);
 		}
 
 		if constexpr (EraseType == DualListEraseType::TOMBSTONE){
-			return list1_->erase(key);
+			return list1_->insert(key, Pair::TOMBSTONE) != std::end(*list1_);
 		}
 	}
 

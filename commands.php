@@ -443,6 +443,23 @@ function getData(){
 		),
 
 		new Cmd(
+				"GETDEL",
+
+				"GETDEL key",
+
+				"Gets the value of the <i>key</i>. Exact match.<br />" .
+				"Then atomically delete the <i>key</i> -> <i>value</i> pair.<br />",
+				"string",
+				"Value of the key or empty string.",
+				"1.2.16",
+				"O(log n) + O(1)",
+				true,
+				true,
+
+				"mutable"
+		),
+
+		new Cmd(
 				"DEL",
 
 				"DEL key",
