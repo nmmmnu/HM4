@@ -71,7 +71,10 @@ bool getCheck(List const &list, const char *key){
 	auto const it = list.find(key, std::true_type{});
 	auto const et = list.end();
 
-	return it == et;
+	return
+		it == et ||
+		! it->isValid(std::true_type{})
+	;
 }
 
 // ==============================
@@ -165,6 +168,46 @@ size_t listInsert(List &list, const char *key, const char *value){
 }
 
 template <class List>
+void test_DualListErase(const char *name, List &&list1, List &&list2){
+	mytest.begin(name);
+
+	{
+		list2.insert("a",	"2"	);
+		sleep();
+		list1.insert("a",	"1"	);
+
+		using MyMultiList = hm4::multi::DualList<List, List, hm4::multi::DualListEraseType::NORMAL>;
+
+		MyMultiList listM{ list1, list2 };
+
+		mytest("get erased N1",			getCheck(listM, "a",		"1", std::true_type{}	));
+
+		listM.erase("a");
+
+		mytest("get erased N2",			getCheck(listM, "a",		"2", std::true_type{}	));
+	}
+
+	// --------
+
+	{
+		list2.insert("a",	"2"	);
+		sleep();
+		list1.insert("a",	"1"	);
+
+		using MyMultiList = hm4::multi::DualList<List, List, hm4::multi::DualListEraseType::TOMBSTONE>;
+
+		MyMultiList listM{ list1, list2 };
+
+		mytest("get erased T1",			getCheck(listM, "a",		"1", std::true_type{}	));
+
+		listM.erase("a");
+
+		mytest("get erased T2",			getCheck(listM, "a"					));
+	}
+
+}
+
+template <class List>
 void test_DualList(const char *name, List &&list1, List &&list2){
 	mytest.begin(name);
 
@@ -185,7 +228,7 @@ void test_DualList(const char *name, List &&list1, List &&list2){
 
 	MyMultiList list{ list1, list2 };
 
-	return list_test(list, 4, bytes);
+	list_test(list, 4, bytes);
 }
 
 template <class List>
@@ -284,8 +327,9 @@ void test_CollectionList(const char *name){
 int main(){
 	using List = hm4::VectorList<Allocator>;
 
-	test_DualListEmpty	<List>("DualList (Empty)"	, List{ allocator }, List{ allocator }	);
+	test_DualListEmpty	<List>("DualList (empty)"	, List{ allocator }, List{ allocator }	);
 	test_DualList		<List>("DualList"		, List{ allocator }, List{ allocator }	);
+	test_DualListErase	<List>("DualList (erase)"	, List{ allocator }, List{ allocator }	);
 	test_CollectionList	<List>("CollectionList"							);
 
 	return mytest.end();

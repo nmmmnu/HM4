@@ -67,15 +67,15 @@ protected:
 
 
 template<class List1, class List2, DualListEraseType EraseType, class = std::void_t<> >
-class DualListRW : public DualListBase<List1, List2, EraseType>{
+class DualList : public DualListBase<List1, List2, EraseType>{
 public:
 	using DualListBase<List1, List2, EraseType>::DualListBase;
 };
 
 
 
-template<class List1, class List2, DualListEraseType EraseType>
-class DualListRW<List1, List2, EraseType, std::void_t<typename List1::Allocator> > : public DualListBase<List1, List2, EraseType>{
+template<class List1, class List2, DualListEraseType EraseType >
+class DualList<List1, List2, EraseType, std::void_t<typename List1::Allocator> > : public DualListBase<List1, List2, EraseType>{
 public:
 	using Base_ = DualListBase<List1, List2, EraseType>;
 	using iterator  = typename Base_::iterator;
@@ -139,11 +139,6 @@ protected:
 	using Base_::list1_;
 	using Base_::list2_;
 };
-
-
-
-template <class List1, class List2, DualListEraseType EraseType>
-using DualList = DualListRW<List1, const List2, DualListEraseType::TOMBSTONE>;
 
 
 

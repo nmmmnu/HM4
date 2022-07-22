@@ -48,7 +48,7 @@ namespace net::worker::commands{
 			int64_t			,
 			uint64_t		,
 			std::string_view	,
-			MySpan<std::string_view, MySpanExplicitConstructor::EXPLICIT>
+			MySpan<std::string_view, MySpanConstructor::EXPLICIT>
 		>;
 
 
@@ -64,7 +64,7 @@ namespace net::worker::commands{
 
 		constexpr static Result ok_container(const OutputBlob::Container &container){
 			return ok(
-				MySpan<std::string_view, MySpanExplicitConstructor::EXPLICIT>{ container }
+				MySpan<std::string_view, MySpanConstructor::EXPLICIT>{ container }
 			);
 		}
 
