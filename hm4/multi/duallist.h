@@ -74,7 +74,7 @@ public:
 
 
 
-template<class List1, class List2, DualListEraseType EraseType >
+template<class List1, class List2, DualListEraseType EraseType>
 class DualList<List1, List2, EraseType, std::void_t<typename List1::Allocator> > : public DualListBase<List1, List2, EraseType>{
 public:
 	using Base_ = DualListBase<List1, List2, EraseType>;

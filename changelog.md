@@ -11,8 +11,12 @@ Changelog
 -	make more user-friendly behavour in GETX and accumulators,
 	by changing clamp-ing of the input value -
 	now it will still clamp to higher value if you specify very big number like 100'000.
--	new command VERSION
--	new command GETDEL
 -	bug fix expiration in GETSET
 -	bug fix tombstone in DEL
+-	new command GETDEL
+-	new command PERSIST
+-	new command COPY
+-	new command RENAME
+-	new command VERSION
+-	new command TYPE
 

@@ -20,9 +20,16 @@ struct MockDBAdapter{
 		return it != std::end(list_) ? it->getVal() : "";
 	}
 
-	constexpr
-	static uint64_t ttl(std::string_view){
-		return 0;
+	auto getAll(std::string_view const key){
+		struct R{
+			std::string_view	val;
+			uint32_t		exp;
+		};
+
+		return R{
+			get(key),
+			0u
+		};
 	}
 
 	auto search(std::string_view const key = "") const{

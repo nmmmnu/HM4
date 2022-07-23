@@ -236,6 +236,138 @@ namespace net::worker::commands::Mutable{
 
 
 
+	template<class DBAdapter>
+	struct PERSIST : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "persist";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"persist",	"PERSIST"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			if (p.size() != 2)
+				return Result::error();
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return Result::error();
+
+			auto const &r = db.getAll(key);
+
+			if (r.val.empty()){
+				return Result::ok(false);
+			}else{
+				// SET
+
+				if (r.exp > 0)
+					db.set(key, r.val, 0);
+
+				return Result::ok(true);
+			}
+
+
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct RENAME : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "rename";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"rename",	"RENAME"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			if (p.size() != 3)
+				return Result::error();
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return Result::error();
+
+			const auto &newkey = p[2];
+
+			if (newkey.empty())
+				return Result::error();
+
+			if (key == newkey)
+				return Result::error();
+
+			auto const &r = db.getAll(key);
+
+			if (r.val.empty()){
+				return Result::ok(false);
+			}else{
+				// SET
+
+				db.set(newkey, r.val, r.exp);
+
+				// DELETE
+
+				db.del(key);
+
+				return Result::ok(true);
+			}
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct COPY : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "copy";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"copy",	"COPY"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			if (p.size() != 3)
+				return Result::error();
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return Result::error();
+
+			const auto &newkey = p[2];
+
+			if (newkey.empty())
+				return Result::error();
+
+			if (key == newkey)
+				return Result::error();
+
+			auto const &r = db.getAll(key);
+
+			if (r.val.empty()){
+				return Result::ok(false);
+			}else{
+				// SET
+
+				db.set(newkey, r.val, r.exp);
+
+				// DELETE
+
+				// do not delete
+
+				return Result::ok(true);
+			}
+		}
+	};
+
+
+
 	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mutable";
@@ -248,7 +380,10 @@ namespace net::worker::commands::Mutable{
 				DEL	,
 				GETSET	,
 				GETDEL	,
-				EXPIRE
+				EXPIRE	,
+				PERSIST	,
+				COPY	,
+				RENAME
 			>(pack);
 		}
 	};

@@ -78,6 +78,9 @@
 				<li><a href="#SETEX">SETEX</a></li>
 				<li><a href="#SETNX">SETNX</a></li>
 				<li><a href="#EXPIRE">EXPIRE</a></li>
+				<li><a href="#PERSIST">PERSIST</a></li>
+				<li><a href="#COPY">COPY</a></li>
+				<li><a href="#RENAME">RENAME</a></li>
 				<li><a href="#GETSET">GETSET</a></li>
 				<li><a href="#GETDEL">GETDEL</a></li>
 				<li><a href="#DEL">DEL</a></li>
@@ -85,6 +88,7 @@
 				<li><a href="#DECR">DECR</a></li>
 				<li><a href="#INFO">INFO</a></li>
 				<li><a href="#VERSION">VERSION</a></li>
+				<li><a href="#TYPE">TYPE</a></li>
 				<li><a href="#SAVE">SAVE</a></li>
 				<li><a href="#RELOAD">RELOAD</a></li>
 				<li><a href="#EXIT">EXIT</a></li>
@@ -336,11 +340,74 @@
 			</table>
 
 			<h3>Description:</h3>
-			Atomically Change the expiration of the <i>key</i> to <i>seconds</i> seconds.<br />Note: The command internally GET old key first.<br />If you can, use SET or SETEX instead.
+			Atomically Change the expiration of the <i>key</i> to <i>seconds</i> seconds.<br />Note: The command internally GET <i>key</i> first.<br />If you can, use SET or SETEX instead.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is set.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PERSIST">
+
+			<h2>PERSIST key seconds</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PERSIST</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically remove the expiration of the <i>key</i>.<br />Note: The command internally GET <i>key</i> first.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is removed.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="COPY">
+
+			<h2>COPY old_key new_key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>COPY</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n) + O(1)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically copy the <i>old_key</i> to the <i>new_key</i>.<br />Note: The command internally GET <i>old_key</i> first.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="RENAME">
+
+			<h2>RENAME old_key new_key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>RENAME</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Time complexity		</td><td>O(log n) + O(1) + O(1)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically renames <i>old_key</i> to <i>new_key</i>.<br />Note: The command internally GET <i>old_key</i> first.<br />
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETSET">
@@ -484,6 +551,27 @@
 
 			<h3>Description:</h3>
 			Returns server version.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Server version.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TYPE">
+
+			<h2>TYPE key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TYPE</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns type of given <i>key</i>.<br />For compatibility, always return 'string'
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>

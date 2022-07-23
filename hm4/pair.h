@@ -259,7 +259,7 @@ inline namespace version_2_00_00{
 		}
 
 		[[nodiscard]]
-		uint64_t getTTL() const noexcept;
+		uint32_t getTTL() const noexcept;
 
 	public:
 		[[nodiscard]]

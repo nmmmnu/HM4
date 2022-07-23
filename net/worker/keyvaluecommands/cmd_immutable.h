@@ -71,9 +71,13 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return Result::error();
 
-			auto const number = db.ttl(key);
+			auto const &r = db.getAll(key);
 
-			return Result::ok(number);
+			return Result::ok(
+				static_cast<uint64_t>(
+					r.exp
+				)
+			);
 		}
 	};
 

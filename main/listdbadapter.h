@@ -32,10 +32,21 @@ public:
 		return getVal_( list_.find(key, std::true_type{} ) );
 	}
 
-	uint64_t ttl(std::string_view const key) const{
+	auto getAll(std::string_view const key) const{
 		assert(!key.empty());
 
-		return getTTL_( list_.find(key, std::true_type{} ) );
+		auto it = list_.find(key, std::true_type{});
+
+		struct R{
+		//	std::string_view	key;
+			std::string_view	val;
+			uint32_t		exp;
+		};
+
+		return R{
+			getVal_(it),
+			getTTL_(it)
+		};
 	}
 
 	auto search(std::string_view const key = "") const{
@@ -108,7 +119,7 @@ private:
 			return {};
 	}
 
-	uint64_t getTTL_(typename List::iterator const &it) const{
+	uint32_t getTTL_(typename List::iterator const &it) const{
 		if (it != std::end(list_) && it->isValid(std::true_type{}))
 			return it->getTTL();
 		else

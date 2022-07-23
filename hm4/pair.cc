@@ -65,7 +65,7 @@ uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
 	return created ? MyTime::to64(created) : MyTime::now();
 }
 
-uint64_t Pair::getTTL() const noexcept{
+uint32_t Pair::getTTL() const noexcept{
 	if (!expires)
 		return 0;
 
