@@ -519,7 +519,7 @@ function getData(){
 		new Cmd(
 				"DEL",
 
-				"DEL key",
+				"DEL key / UNLINK key",
 
 				"Removes <i>key</i>.",
 				"bool",

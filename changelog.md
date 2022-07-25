@@ -19,4 +19,5 @@ Changelog
 -	new command RENAME
 -	new command VERSION
 -	new command TYPE
+-	new command UNLINK (alias to DEL)
 

@@ -103,7 +103,8 @@ namespace net::worker::commands::Mutable{
 		constexpr inline static std::string_view name	= "del";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
-			"del",		"DEL"
+			"del",		"DEL"	,
+			"unlink",	"UNLINK"
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
