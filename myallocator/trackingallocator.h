@@ -2,6 +2,10 @@
 #define MY_TRACKING_ALLOCATOR
 
 #include "baseallocator.h"
+#include "malloc_usable_size.h"
+#include "mallocallocator.h"
+#include "stdallocator.h"
+
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
 
@@ -20,6 +24,7 @@ namespace MyAllocator{
 		TrackingAllocator(TrackingAllocator &&other) :
 					a		(std::move(other.a		)),
 					allocated	(std::move(other.allocated	)),
+					deallocated	(std::move(other.deallocated	)),
 					allocations	(std::move(other.allocations	)),
 					deallocations	(std::move(other.deallocations	)),
 					printSummary	(std::move(other.printSummary	)){
@@ -33,22 +38,26 @@ namespace MyAllocator{
 
 			const char *mask = "{} Total {:16} {:8}\n";
 
-			fmt::print(mask, TAG, "Allocated Size",	allocated			);
-			fmt::print(mask, TAG, "Allocations",	allocations			);
-			fmt::print(mask, TAG, "Dellocations",	deallocations			);
-			fmt::print(mask, TAG, "Lost",		allocations - deallocations	);
+			fmt::print(mask, TAG, "Allocated Size",		allocated			);
+			fmt::print(mask, TAG, "Deallocated Size",	deallocated			);
+			fmt::print(mask, TAG, "Allocations",		allocations			);
+			fmt::print(mask, TAG, "Dellocations",		deallocations			);
+			fmt::print(mask, TAG, "Lost bytes",		deallocated - deallocated	);
+			fmt::print(mask, TAG, "Lost count",		allocations - deallocations	);
 		}
 
 		void *xallocate(std::size_t const size) noexcept{
-			allocated += size;
 			++allocations;
 			void *p = a.xallocate(size);
+			allocated += malloc_usable_size__(p);
+
 			fmt::print("{} Allocate {:8} -> {}\n", TAG, size, p);
 			return p;
 		}
 
 		void xdeallocate(void *p) noexcept{
 			++deallocations;
+			deallocated += malloc_usable_size__(p);
 			fmt::print("{} Deallocate {}\n", TAG, p);
 			return a.xdeallocate(p);
 		}
@@ -65,21 +74,37 @@ namespace MyAllocator{
 			return a.reset();
 		}
 
-		std::size_t getFreeMemory() const noexcept{
+		size_t getFreeMemory() const noexcept{
 			return a.getFreeMemory();
 		}
 
-		std::size_t getUsedMemory() const noexcept{
+		size_t getUsedMemory() const noexcept{
 			return allocated;
 		}
 
 	private:
+		static size_t malloc_usable_size__(void *) noexcept{
+			return 0;
+		}
+
+	private:
 		Allocator a;
-		std::size_t allocated		= 0;
-		std::size_t allocations		= 0;
-		std::size_t deallocations	= 0;
-		bool printSummary		= true;
+		size_t allocated	= 0;
+		size_t deallocated	= 0;
+		size_t allocations	= 0;
+		size_t deallocations	= 0;
+		bool printSummary	= true;
 	};
+
+	template<>
+	size_t TrackingAllocator<MallocAllocator>::malloc_usable_size__(void *p) noexcept{
+		return malloc_usable_size(p);
+	}
+
+	template<>
+	size_t TrackingAllocator<STDAllocator>::malloc_usable_size__(void *p) noexcept{
+		return malloc_usable_size(p);
+	}
 
 } // namespace MyAllocator
 
