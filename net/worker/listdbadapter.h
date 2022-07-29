@@ -2,7 +2,7 @@
 #define List_DB_ADAPTER_H_
 
 #include "version.h"
-#include "myprocess.h"
+#include "myprocess.h"	// get PID
 
 template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 class ListDBAdapter{
@@ -29,28 +29,20 @@ public:
 	std::string_view get(std::string_view const key) const{
 		assert(!key.empty());
 
-		return getVal_( list_.find(key, std::true_type{} ) );
-	}
-
-	auto getAll(std::string_view const key) const{
-		assert(!key.empty());
-
 		auto it = list_.find(key, std::true_type{});
 
-		struct R{
-		//	std::string_view	key;
-			std::string_view	val;
-			uint32_t		exp;
-		};
-
-		return R{
-			getVal_(it),
-			getTTL_(it)
-		};
+		return valid(it) ? it->getVal() : "";
 	}
 
-	auto search(std::string_view const key = "") const{
-		return key.empty() ? std::begin(list_) : list_.find(key, std::false_type{} );
+	bool valid(typename List::iterator const &it) const{
+		return it != std::end(list_) && it->isValid(std::true_type{});
+	}
+
+
+
+	template<bool B = true>
+	auto search(std::string_view const key, std::bool_constant<B> tag = {}) const{
+		return key.empty() ? std::begin(list_) : list_.find(key, tag);
 	}
 
 	auto end() const{
@@ -109,21 +101,6 @@ public:
 		assert(!key.empty());
 
 		return list_.erase(key);
-	}
-
-private:
-	std::string_view getVal_(typename List::iterator const &it) const{
-		if (it != std::end(list_) && it->isValid(std::true_type{}))
-			return it->getVal();
-		else
-			return {};
-	}
-
-	uint32_t getTTL_(typename List::iterator const &it) const{
-		if (it != std::end(list_) && it->isValid(std::true_type{}))
-			return it->getTTL();
-		else
-			return 0;
 	}
 
 private:

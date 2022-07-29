@@ -86,10 +86,10 @@ namespace net::worker::commands::GetX{
 			auto const &prefix = p[3];
 
 			accumulateResults(
-				count		,
-				prefix		,
-				db.search(key)	,
-				std::end(db)	,
+				count					,
+				prefix					,
+				db.search(key, std::false_type{})	,
+				std::end(db)				,
 				container
 			);
 

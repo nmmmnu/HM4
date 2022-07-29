@@ -47,9 +47,11 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return Result::error();
 
-			auto const &val = db.get(key);
+			auto it = db.search(key);
 
-			return Result::ok(!val.empty());
+			return Result::ok(
+				db.valid(it)
+			);
 		}
 	};
 
@@ -71,12 +73,12 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return Result::error();
 
-			auto const &r = db.getAll(key);
+			auto it = db.search(key);
+
+			auto ttl = db.valid(it) ? it->getTTL() : 0;
 
 			return Result::ok(
-				static_cast<uint64_t>(
-					r.exp
-				)
+				static_cast<uint64_t>(ttl)
 			);
 		}
 	};

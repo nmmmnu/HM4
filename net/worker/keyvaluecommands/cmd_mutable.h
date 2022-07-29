@@ -79,7 +79,9 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			if (! db.get(key).empty()){
+			auto it = db.search(key);
+
+			if (! db.valid(it)){
 				// No Set.
 
 				return Result::ok(false);
@@ -218,15 +220,15 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			auto const &val = db.get(key);
+			auto it = db.search(key);
 
-			if (val.empty()){
+			if (db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
-				db.set(key, val, exp);
+				db.set(key, it->getVal(), exp);
 
 				return Result::ok(true);
 			}
@@ -256,15 +258,15 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			auto const &r = db.getAll(key);
+			auto it = db.search(key);
 
-			if (r.val.empty()){
+			if (db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET
 
-				if (r.exp > 0)
-					db.set(key, r.val, 0);
+				if (it->getTTL() > 0)
+					db.set(key, it->getVal(), 0);
 
 				return Result::ok(true);
 			}
@@ -302,14 +304,14 @@ namespace net::worker::commands::Mutable{
 			if (key == newkey)
 				return Result::error();
 
-			auto const &r = db.getAll(key);
+			auto it = db.search(key);
 
-			if (r.val.empty()){
+			if (db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET
 
-				db.set(newkey, r.val, r.exp);
+				db.set(newkey, it->getVal(), it->getTTL());
 
 				// DELETE
 
@@ -349,14 +351,14 @@ namespace net::worker::commands::Mutable{
 			if (key == newkey)
 				return Result::error();
 
-			auto const &r = db.getAll(key);
+			auto it = db.search(key);
 
-			if (r.val.empty()){
+			if (db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET
 
-				db.set(newkey, r.val, r.exp);
+				db.set(newkey, it->getVal(), it->getTTL());
 
 				// DELETE
 

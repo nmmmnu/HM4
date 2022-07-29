@@ -69,9 +69,9 @@ namespace net::worker::commands::Accumulators{
 			auto const &prefix = p[3];
 
 			auto const [ number, lastKey ] = accumulateResults<Accumulator>(
-							count		,
-							prefix		,
-							db.search(key)	,
+							count					,
+							prefix					,
+							db.search(key, std::false_type{})	,
 							std::end(db)
 			);
 
