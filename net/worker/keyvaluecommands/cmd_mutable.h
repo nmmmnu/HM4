@@ -81,7 +81,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.search(key);
 
-			if (! db.valid(it)){
+			if (db.valid(it)){
 				// No Set.
 
 				return Result::ok(false);
@@ -222,7 +222,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.search(key);
 
-			if (db.valid(it)){
+			if (!db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET
@@ -260,7 +260,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.search(key);
 
-			if (db.valid(it)){
+			if (! db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET
@@ -306,7 +306,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.search(key);
 
-			if (db.valid(it)){
+			if (! db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET
@@ -353,7 +353,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.search(key);
 
-			if (db.valid(it)){
+			if (! db.valid(it)){
 				return Result::ok(false);
 			}else{
 				// SET

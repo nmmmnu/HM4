@@ -92,7 +92,6 @@ auto insert(List &list, Pair const &src){
 
 // ==============================
 
-
 template<class List, bool B>
 auto getIterator(List const &list, std::bool_constant<B>){
 	if constexpr(B)
@@ -106,6 +105,19 @@ auto getIterator(List const &list, std::string_view const key, std::bool_constan
 	return list.find(key, exact);
 }
 
+// ==============================
+
+template<class List>
+auto valid(List const &list, typename List::iterator const &it){
+	return it != std::end(list) && it->isValid(std::true_type{});
+}
+
+template<class List>
+auto get(List const &list, std::string_view const key){
+	auto it = getIterator(list, key, std::true_type{});
+
+	return valid(list, it) ? it->getVal() : "";
+}
 
 
 } // namespace

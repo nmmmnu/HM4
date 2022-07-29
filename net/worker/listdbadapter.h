@@ -29,16 +29,12 @@ public:
 	std::string_view get(std::string_view const key) const{
 		assert(!key.empty());
 
-		auto it = list_.find(key, std::true_type{});
-
-		return valid(it) ? it->getVal() : "";
+		return hm4::get(list_, key);
 	}
 
 	bool valid(typename List::iterator const &it) const{
-		return it != std::end(list_) && it->isValid(std::true_type{});
+		return hm4:: valid(list_, it);
 	}
-
-
 
 	template<bool B = true>
 	auto search(std::string_view const key, std::bool_constant<B> tag = {}) const{
