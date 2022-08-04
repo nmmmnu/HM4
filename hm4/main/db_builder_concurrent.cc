@@ -1,7 +1,7 @@
 #include "db_builder_base.cc"
 
 #include "skiplist.h"
-#include "idgenerator/idgeneratordate.h"
+#include "idgenerator.h"
 #include "flusher/diskfilepredicate.h"
 #include "flusher/diskfileflush.h"
 #include "concurrentflushlist.h"

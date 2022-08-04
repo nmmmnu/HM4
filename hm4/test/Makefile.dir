@@ -30,6 +30,4 @@ $(A)test_file: $(O)test_file.o $(PAIR_OBJ)			\
 		$(O)filemetablob.o
 	$(LINK)
 
-$(A)test_idgenerator: $(O)test_idgenerator.o $(O)idgeneratorts.o $(O)idgeneratordate.o $(O)mytime.o
-		$(LINK)
 

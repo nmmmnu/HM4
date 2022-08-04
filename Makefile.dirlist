@@ -3,7 +3,6 @@ SUBDIRS = test common myallocator	\
 		hm4					\
 			hm4/disk			\
 			hm4/listloader			\
-			hm4/idgenerator			\
 			hm4/test hm4/main		\
 		net					\
 			net/selector			\

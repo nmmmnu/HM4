@@ -102,7 +102,10 @@ auto getIterator(List const &list, std::bool_constant<B>){
 
 template<class List, bool B>
 auto getIterator(List const &list, std::string_view const key, std::bool_constant<B> const exact){
-	return list.find(key, exact);
+	if (key.empty())
+		return std::begin(list);
+	else
+		return list.find(key, exact);
 }
 
 // ==============================

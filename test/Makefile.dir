@@ -54,3 +54,6 @@ $(A)test_signalguard: $(O)test_signalguard.o $(O)signalguard.o
 $(A)test_base64: $(O)test_base64.o $(O)base64.o
 	$(LINK)
 
+$(A)test_idgenerator: $(O)test_idgenerator.o $(O)idgenerator.o $(O)mytime.o
+	$(LINK)
+

@@ -32,7 +32,9 @@ public:
 		if (first == last)
 			return false;
 
-		std::string const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_());
+		char buffer[IDGenerator::BUFFER_SIZE];
+
+		std::string const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_(buffer));
 
 		disk::FileBuilder::build(filename, first, last, tombstoneOptions_, Pair::WriteOptions::ALIGNED);
 

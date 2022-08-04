@@ -5,7 +5,7 @@
 #include "listloader/directorylistloader.h"
 #include "multi/collectionlist.h"
 
-#include "idgenerator/idgeneratordate.h"
+#include "idgenerator.h"
 #include "flusher/diskfilepredicate.h"
 #include "flusher/diskfileflush.h"
 #include "flushlist.h"

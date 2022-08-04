@@ -6,6 +6,6 @@ EXTRA_INCL += -I$(SRC_DIR)
 
 include Makefile.sub
 
-all: $(O)mytime.o $(O)myglob.o $(O)mmapfile.o $(O)signalguard.o $(O)base64.o $(O)myprocess.o
+all: $(O)mytime.o $(O)myglob.o $(O)mmapfile.o $(O)signalguard.o $(O)base64.o $(O)myprocess.o $(O)idgenerator.o
 
 

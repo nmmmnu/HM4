@@ -38,7 +38,7 @@ public:
 
 	template<bool B = true>
 	auto search(std::string_view const key, std::bool_constant<B> tag = {}) const{
-		return key.empty() ? std::begin(list_) : list_.find(key, tag);
+		return hm4::getIterator(list_, key, tag);
 	}
 
 	auto end() const{
