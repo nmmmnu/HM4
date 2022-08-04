@@ -21,12 +21,12 @@ namespace{
 namespace hm4{
 namespace idgenerator{
 
-	std::string_view IDGeneratorTS_DEC::operator()(char *buffer) const{
-		return idgeneratorTS(buffer, "%10u.%010u");
+	std::string_view IDGeneratorTS_HEX::operator()(char *buffer) const{
+		return idgeneratorTS(buffer, "%08x.%08x");
 	}
 
-	std::string_view IDGeneratorTS_HEX::operator()(char *buffer) const{
-		return idgeneratorTS(buffer, "%8u.%08x");
+	std::string_view IDGeneratorTS_DEC::operator()(char *buffer) const{
+		return idgeneratorTS(buffer, "%010u.%010u");
 	}
 
 	std::string_view IDGeneratorDate::operator()(char *buffer) const{
@@ -34,9 +34,11 @@ namespace idgenerator{
 
 		auto const now = MyTime::now();
 
+		char time_buffer[MyTime::BUFFER_SIZE];
+
 		sprintf(buffer,
 				"%s.%010u",
-					MyTime::toString(now, FORMAT),
+					MyTime::toString(time_buffer, now, FORMAT).data(),
 					MyTime::toUsec(now)
 		);
 

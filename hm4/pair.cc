@@ -47,10 +47,12 @@ void Pair::print() const noexcept{
 	const char *format      = "%-32s | %-20s | %s | %8u\n";
 	const char *fnull	= "(null)";
 
+	char buffer[MyTime::BUFFER_SIZE];
+
 	printf(format,
 		getKey_(),
 		vallen ? getVal_() : fnull,
-		MyTime::toString(getCreated(), time_format),
+		MyTime::toString(buffer, getCreated(), time_format).data(),
 		betoh<uint32_t>(expires)
 	);
 }

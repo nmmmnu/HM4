@@ -3,9 +3,13 @@
 
 #include <cstdint>
 #include <cstring>	// strlen
+#include <string_view>
 
 class MyTime{
 public:
+	// __builtin_strlen is constexpr in clang
+	constexpr static size_t BUFFER_SIZE			= __builtin_strlen("1980-01-01 00:00:00") + 1;
+
 	constexpr static const char *TIME_FORMAT_STANDARD	= "%Y-%m-%d %H:%M:%S";
 	constexpr static const char *TIME_FORMAT_NUMBER		= "%Y%m%d.%H%M%S";
 
@@ -15,11 +19,14 @@ public:
 	constexpr static const char *DATE_FORMAT_DEFAULT	= TIME_FORMAT_STANDARD;
 
 public:
-	static const char *toString(uint32_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept;
-	static const char *toString(uint64_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept;
+	static std::string_view toString(char *buffer, uint32_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept;
 
-	static const char *toString(const char *format = DATE_FORMAT_DEFAULT) noexcept{
-		return toString(now(), format);
+	static std::string_view toString(char *buffer, uint64_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept{
+		return toString(buffer, to32(date), format);
+	}
+
+	static std::string_view toString(char *buffer, const char *format = DATE_FORMAT_DEFAULT) noexcept{
+		return toString(buffer, now(), format);
 	}
 
 	static uint64_t now() noexcept{
@@ -48,13 +55,6 @@ public:
 	constexpr static uint32_t toUsec(uint64_t const timestamp) noexcept{
 		return uint32_t( timestamp & 0xFF'FF'FF'FF );
 	}
-
-private:
-	// __builtin_strlen is constexpr in clang
-	constexpr static size_t BUFFER_SIZE			= __builtin_strlen("1980-01-01 00:00:00") + 1;
-
-	static char buffer[BUFFER_SIZE];
-
 };
 
 

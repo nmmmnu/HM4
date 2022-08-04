@@ -4,9 +4,6 @@
 
 #include <time.h>	// localtime, strftime
 
-char MyTime::buffer[BUFFER_SIZE];
-
-
 uint32_t MyTime::now32() noexcept{
 	const auto now = std::chrono::system_clock::now().time_since_epoch();
 
@@ -28,22 +25,16 @@ uint64_t MyTime::now64() noexcept{
 	return to64(sec_int, mil_int);
 }
 
-const char *MyTime::toString(uint64_t const date2, const char *format) noexcept{
-	uint32_t const date = to32(date2);
-
-	return toString(date, format);
-}
-
-const char *MyTime::toString(uint32_t const date2, const char *format) noexcept{
+std::string_view MyTime::toString(char *buffer, uint32_t const date2, const char *format) noexcept{
 	time_t const date = date2;
 
 	if (date == 0)
-		return nullptr;
+		return "";
 
 	struct tm *tm = localtime(& date);
 
 	if (tm == nullptr)
-		return nullptr;
+		return "";
 
 	strftime(buffer, BUFFER_SIZE, format, tm);
 

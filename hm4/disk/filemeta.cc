@@ -37,6 +37,8 @@ inline bool FileMeta::openFail_(std::string_view){
 }
 
 void FileMeta::print() const{
+	char buffer[MyTime::BUFFER_SIZE];
+
 	const char *format = "{:<14}: {}\n";
 
 	fmt::print(format,	"Version",	version()		);
@@ -46,9 +48,9 @@ void FileMeta::print() const{
 	fmt::print(format,	"Sorted",	sorted()  ? "Y" : "N"	);
 	fmt::print(format,	"Aligned",	aligned() ? "Y" : "N"	);
 
-	fmt::print(format,	"Created",	blob.created    ? MyTime::toString(betoh(blob.created)   ) : "n/a" 	);
-	fmt::print(format,	"Created::MIN",	blob.createdMin ? MyTime::toString(betoh(blob.createdMin)) : "n/a" 	);
-	fmt::print(format,	"Created::MAX",	blob.createdMax ? MyTime::toString(betoh(blob.createdMax)) : "n/a" 	);
+	fmt::print(format,	"Created",	blob.created    ? MyTime::toString(buffer, betoh(blob.created)   ) : "n/a" 	);
+	fmt::print(format,	"Created::MIN",	blob.createdMin ? MyTime::toString(buffer, betoh(blob.createdMin)) : "n/a" 	);
+	fmt::print(format,	"Created::MAX",	blob.createdMax ? MyTime::toString(buffer, betoh(blob.createdMax)) : "n/a" 	);
 }
 
 
