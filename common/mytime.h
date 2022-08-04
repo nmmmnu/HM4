@@ -19,14 +19,14 @@ public:
 	constexpr static const char *DATE_FORMAT_DEFAULT	= TIME_FORMAT_STANDARD;
 
 public:
-	static std::string_view toString(char *buffer, uint32_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept;
+	static std::string_view toString(uint32_t date, const char *format, char *buffer) noexcept;
 
-	static std::string_view toString(char *buffer, uint64_t date, const char *format = DATE_FORMAT_DEFAULT) noexcept{
-		return toString(buffer, to32(date), format);
+	static std::string_view toString(uint64_t date, const char *format, char *buffer) noexcept{
+		return toString(to32(date), format, buffer);
 	}
 
-	static std::string_view toString(char *buffer, const char *format = DATE_FORMAT_DEFAULT) noexcept{
-		return toString(buffer, now(), format);
+	static std::string_view toString(const char *format, char *buffer) noexcept{
+		return toString(now(), format, buffer);
 	}
 
 	static uint64_t now() noexcept{

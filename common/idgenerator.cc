@@ -38,7 +38,7 @@ namespace idgenerator{
 
 		sprintf(buffer,
 				"%s.%010u",
-					MyTime::toString(time_buffer, now, FORMAT).data(),
+					MyTime::toString(now, FORMAT, time_buffer).data(),
 					MyTime::toUsec(now)
 		);
 

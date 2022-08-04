@@ -52,7 +52,7 @@ void Pair::print() const noexcept{
 	printf(format,
 		getKey_(),
 		vallen ? getVal_() : fnull,
-		MyTime::toString(buffer, getCreated(), time_format).data(),
+		MyTime::toString(getCreated(), time_format, buffer).data(),
 		betoh<uint32_t>(expires)
 	);
 }

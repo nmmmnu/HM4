@@ -25,7 +25,7 @@ uint64_t MyTime::now64() noexcept{
 	return to64(sec_int, mil_int);
 }
 
-std::string_view MyTime::toString(char *buffer, uint32_t const date2, const char *format) noexcept{
+std::string_view MyTime::toString(uint32_t const date2, const char *format, char *buffer) noexcept{
 	time_t const date = date2;
 
 	if (date == 0)

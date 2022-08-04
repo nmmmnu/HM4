@@ -41,6 +41,8 @@ void FileMeta::print() const{
 
 	const char *format = "{:<14}: {}\n";
 
+	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
+
 	fmt::print(format,	"Version",	version()		);
 	fmt::print(format,	"Records",	size()			);
 	fmt::print(format,	"Tombstones",	betoh(blob.tombstones)	);
@@ -48,9 +50,13 @@ void FileMeta::print() const{
 	fmt::print(format,	"Sorted",	sorted()  ? "Y" : "N"	);
 	fmt::print(format,	"Aligned",	aligned() ? "Y" : "N"	);
 
-	fmt::print(format,	"Created",	blob.created    ? MyTime::toString(buffer, betoh(blob.created)   ) : "n/a" 	);
-	fmt::print(format,	"Created::MIN",	blob.createdMin ? MyTime::toString(buffer, betoh(blob.createdMin)) : "n/a" 	);
-	fmt::print(format,	"Created::MAX",	blob.createdMax ? MyTime::toString(buffer, betoh(blob.createdMax)) : "n/a" 	);
+	auto x = [&buffer, time_format](auto date){
+		return date    ? MyTime::toString(betoh(date), time_format, buffer) : "n/a";
+	};
+
+	fmt::print(format,	"Created",	x(blob.created   	) );
+	fmt::print(format,	"Created::MIN",	x(blob.createdMin	) );
+	fmt::print(format,	"Created::MAX",	x(blob.createdMax	) );
 }
 
 
