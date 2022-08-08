@@ -3,29 +3,29 @@
 
 #include <cstdint>
 #include <cstring>	// strlen
+#include <array>
 #include <string_view>
 
 class MyTime{
 public:
-	// __builtin_strlen is constexpr in clang
-	constexpr static size_t BUFFER_SIZE			= __builtin_strlen("1980-01-01 00:00:00") + 1;
+	// 1980-01-01 00:00:00
+	// size 19
+	constexpr static std::size_t to_string_buffer_t_size	= 24;
+	using to_string_buffer_t = std::array<char, to_string_buffer_t_size>;
 
-	constexpr static const char *TIME_FORMAT_STANDARD	= "%Y-%m-%d %H:%M:%S";
-	constexpr static const char *TIME_FORMAT_NUMBER		= "%Y%m%d.%H%M%S";
-
-	constexpr static const char *DATE_FORMAT_STANDARD2	= "%Y-%m-%d";
-	constexpr static const char *DATE_FORMAT_NUMBER2	= "%Y%m%d";
-
-	constexpr static const char *DATE_FORMAT_DEFAULT	= TIME_FORMAT_STANDARD;
+	constexpr static std::string_view TIME_FORMAT_STANDARD	= "%Y-%m-%d %H:%M:%S";
+	constexpr static std::string_view TIME_FORMAT_NUMBER	= "%Y%m%d.%H%M%S";
+	constexpr static std::string_view DATE_FORMAT_STANDARD2	= "%Y-%m-%d";
+	constexpr static std::string_view DATE_FORMAT_NUMBER2	= "%Y%m%d";
 
 public:
-	static std::string_view toString(uint32_t date, const char *format, char *buffer) noexcept;
+	static std::string_view toString(uint32_t date, std::string_view const format, to_string_buffer_t &buffer) noexcept;
 
-	static std::string_view toString(uint64_t date, const char *format, char *buffer) noexcept{
+	static std::string_view toString(uint64_t date, std::string_view const format, to_string_buffer_t &buffer) noexcept{
 		return toString(to32(date), format, buffer);
 	}
 
-	static std::string_view toString(const char *format, char *buffer) noexcept{
+	static std::string_view toString(std::string_view const format, to_string_buffer_t &buffer) noexcept{
 		return toString(now(), format, buffer);
 	}
 

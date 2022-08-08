@@ -5,7 +5,7 @@
 
 template <class T>
 void test(T id, const char *name, unsigned count = 10){
-	char buffer[T::BUFFER_SIZE];
+	typename T::to_string_buffer_t buffer;
 
 	std::cout	<< name
 			<< '\n';

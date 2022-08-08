@@ -43,16 +43,15 @@ void Pair::createInRawMemory(Pair *pair,
 // ==============================
 
 void Pair::print() const noexcept{
-	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
 	const char *format      = "%-32s | %-20s | %s | %8u\n";
 	const char *fnull	= "(null)";
 
-	char buffer[MyTime::BUFFER_SIZE];
+	MyTime::to_string_buffer_t buffer;
 
 	printf(format,
 		getKey_(),
 		vallen ? getVal_() : fnull,
-		MyTime::toString(getCreated(), time_format, buffer).data(),
+		MyTime::toString(getCreated(), MyTime::TIME_FORMAT_STANDARD, buffer).data(),
 		betoh<uint32_t>(expires)
 	);
 }

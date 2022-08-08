@@ -37,11 +37,11 @@ inline bool FileMeta::openFail_(std::string_view){
 }
 
 void FileMeta::print() const{
-	char buffer[MyTime::BUFFER_SIZE];
+	MyTime::to_string_buffer_t buffer;
 
 	const char *format = "{:<14}: {}\n";
 
-	const char *time_format = MyTime::TIME_FORMAT_STANDARD;
+	constexpr auto time_format = MyTime::TIME_FORMAT_STANDARD;
 
 	fmt::print(format,	"Version",	version()		);
 	fmt::print(format,	"Records",	size()			);
