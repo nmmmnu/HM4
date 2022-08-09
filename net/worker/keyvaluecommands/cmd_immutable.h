@@ -47,7 +47,7 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return Result::error();
 
-			auto it = db.search(key);
+			auto it = db.find(key);
 
 			return Result::ok(
 				db.valid(it)
@@ -73,7 +73,7 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return Result::error();
 
-			auto it = db.search(key);
+			auto it = db.find(key);
 
 			auto ttl = db.valid(it) ? it->getTTL() : 0;
 

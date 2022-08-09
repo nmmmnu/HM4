@@ -88,7 +88,7 @@ namespace net::worker::commands::GetX{
 			accumulateResults(
 				count					,
 				prefix					,
-				db.search(key, std::false_type{})	,
+				db.find(key, std::false_type{})	,
 				std::end(db)				,
 				container
 			);

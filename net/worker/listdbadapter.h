@@ -9,11 +9,6 @@ class ListDBAdapter{
 public:
 	constexpr static bool MUTABLE = ! std::is_const_v<List>;
 
-	enum class AdapterCommand : int{
-		SAVE	= 1,
-		RELOAD	= 2
-	};
-
 public:
 	ListDBAdapter(List &list, CommandSave &cmdSave, CommandReload &cmdReload) :
 				list_(list),
@@ -24,27 +19,19 @@ public:
 //				ListDBAdapter(list, cmdSave, cmdSave){}
 
 public:
-	// Immutable Methods
+	// Help Methods
 
-	std::string_view get(std::string_view const key) const{
-		assert(!key.empty());
+	std::string_view get(std::string_view const key){
+		auto it = find(key);
 
-		return hm4::get(list_, key);
+		return valid(it) ? it->getVal() : "";
 	}
 
-	bool valid(typename List::iterator const &it) const{
-		return hm4:: valid(list_, it);
+	bool valid(typename List::iterator const &it){
+		return it != std::end(list_) && it->isValid(std::true_type{});
 	}
 
-	template<bool B = true>
-	auto search(std::string_view const key, std::bool_constant<B> tag = {}) const{
-		return hm4::getIterator(list_, key, tag);
-	}
-
-	auto end() const{
-		return std::end(list_);
-	}
-
+public:
 	// System Methods
 
 	std::string_view info(std::string &str) const{
@@ -75,13 +62,16 @@ public:
 		return invokeCommand__(cmdReload_);
 	}
 
-private:
-	template<class Command>
-	static bool invokeCommand__(Command *cmd){
-		if constexpr(std::is_same_v<Command,std::nullptr_t>)
-			return false;
-		else
-			return cmd && cmd->command();
+public:
+	// Immutable Methods
+
+	template<bool B = true>
+	auto find(std::string_view const key, std::bool_constant<B> tag = {}) const{
+		return hm4::getIterator(list_, key, tag);
+	}
+
+	auto end() const{
+		return std::end(list_);
 	}
 
 public:
@@ -97,6 +87,15 @@ public:
 		assert(!key.empty());
 
 		return list_.erase(key);
+	}
+
+private:
+	template<class Command>
+	static bool invokeCommand__(Command *cmd){
+		if constexpr(std::is_same_v<Command,std::nullptr_t>)
+			return false;
+		else
+			return cmd && cmd->command();
 	}
 
 private:

@@ -21,8 +21,7 @@ namespace net::worker::commands::Counter{
 			if (n == 0)
 				return Result::error();
 
-			if (! key.empty())
-				n += from_string<int64_t>( db.get(key) );
+			n += from_string<int64_t>( db.get(key) );
 
 			std::string_view const val = to_string(n, blob.std_buffer[0]);
 
