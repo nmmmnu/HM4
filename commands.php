@@ -167,7 +167,7 @@ function getData(){
 				"string",
 				"Value of the key or empty string.",
 				"1.0.0",
-				"O(log n)",
+				"Mem + Disk",
 				true,
 				false,
 
@@ -186,7 +186,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists.",
 				"1.2.16",
-				"O(log n)",
+				"Mem + Disk",
 				true,
 				false,
 
@@ -204,13 +204,12 @@ function getData(){
 				"Value of the TTL or 0 if there is no expiration set.",
 
 				"1.2.11",
-				"O(log n)",
+				"Mem + Disk",
 				true,
 				false,
 
 				"immutable"
 		),
-
 
 
 
@@ -238,7 +237,7 @@ function getData(){
 				"Second group of single element - Last key, if there is second page.",
 
 				"1.0.0",
-				"O(log n)",
+				"Mem + Disk",
 				false,
 				false,
 
@@ -268,7 +267,7 @@ function getData(){
 				"count dom:google: 10000 dom:google:</pre>",
 
 				"1.2.4",
-				"O(log n)",
+				"Mem + Disk",
 				false,
 				false,
 
@@ -298,7 +297,7 @@ function getData(){
 				"Second element - last key, if there is second page.",
 
 				"1.2.4",
-				"O(log n)",
+				"Mem + Disk",
 				false,
 				false,
 
@@ -318,7 +317,7 @@ function getData(){
 				"Second element - last key, if there is second page.",
 
 				"1.2.5",
-				"O(log n)",
+				"Mem + Disk",
 				false,
 				false,
 
@@ -338,7 +337,7 @@ function getData(){
 				"Second element - last key, if there is second page.",
 
 				"1.2.5",
-				"O(log n)",
+				"Mem + Disk",
 				false,
 				false,
 
@@ -359,7 +358,7 @@ function getData(){
 				"OK",
 				"OK",
 				"1.0.0",
-				"O(log n)",
+				"Mem",
 				true,
 				true,
 
@@ -378,7 +377,7 @@ function getData(){
 				"OK",
 				"OK",
 				"1.2.11",
-				"O(1)",
+				"Mem",
 				true,
 				true,
 
@@ -397,7 +396,7 @@ function getData(){
 				"0 if the key value pair exists.<br />" .
 				"1 if the key value pair do not exists and is set.",
 				"1.2.11",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -417,7 +416,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and expiration is set.",
 				"1.2.11",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -436,7 +435,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and expiration is removed.",
 				"1.2.16",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -455,7 +454,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and name is changed.",
 				"1.2.16",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -474,7 +473,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and name is changed.",
 				"1.2.16",
-				"O(log n) + O(1) + O(1)",
+				"3 * Mem + Disk",
 				true,
 				true,
 
@@ -492,7 +491,7 @@ function getData(){
 				"string",
 				"Value of the key or empty string.",
 				"1.2.11",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -509,7 +508,7 @@ function getData(){
 				"string",
 				"Value of the key or empty string.",
 				"1.2.16",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -525,7 +524,7 @@ function getData(){
 				"bool",
 				"Always return 1",
 				"1.0.0",
-				"O(1)",
+				"Mem",
 				true,
 				true,
 
@@ -546,7 +545,7 @@ function getData(){
 				"string (int)",
 				"New increased value.",
 				"1.1.0",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -563,7 +562,7 @@ function getData(){
 				"string (int)",
 				"New decrease value.",
 				"1.1.0",
-				"O(log n) + O(1)",
+				"2 * Mem + Disk",
 				true,
 				true,
 
@@ -614,7 +613,7 @@ function getData(){
 				"Returns type of given <i>key</i>.<br />" .
 				"For compatibility, always return 'string'",
 				"string",
-				"Server version.",
+				"string",
 				"1.2.16",
 				"n/a",
 				true,

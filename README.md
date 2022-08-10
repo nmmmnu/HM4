@@ -17,6 +17,7 @@ Goals of the project are.
 -   Consistent
 -   High quality code
 -   Supported [commands]
+-   Complexity is a lie :)
 
 ---
 ### Architecture
@@ -129,6 +130,35 @@ Unlike Apache Cassandra, there are a safe way to compact several tables into sin
 - db_file	- reads DiskTable or LSM
 - db_merge	- merge DiskTable(s)
 - db_preload	- preload DiskTable into system cache, by reading 1024 samples from the DiskTable
+
+---
+### Complexity is a lie :)
+
+Time complexity of most of the operations is O(Log N). However it heavily depends of the operation.
+
+First example is **GET** command.
+
+- First it need to do search in memlist O(Log N).
+- Then it need to do search in disklist. If we have 4 files on the disk, thats another O(4 Log N). However, compared to memlist, this is much slower operation.
+- Total complexity wouldb "Mem + Disk"
+
+Second example is **DEL** command.
+
+- Only thing it need to do is to insert tombstone in memlist O(Log N).
+- Total complexity wouldb "Mem"
+
+Next example **GETX**
+
+- First it need to do search in memlist O(Log N).
+- Then it need to do search in disklist. If we have 4 files on the disk, thats another O(4 Log N). However, compared to memlist, this is much slower operation.
+- To find subsequent keys, no time is wasted.
+- Total complexity wouldb "Mem + Disk"
+
+Last example is **INCR** command.
+
+- First it need to get the current value of the key. This is same as **GET**
+- Second it need to store new value - this is same as **SET** or **DEL**
+- Total complexity wouldb "2 * Mem + Disk"
 
 
 
