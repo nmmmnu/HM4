@@ -23,7 +23,9 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return Result::error();
 
-			auto const &val = db.find(key).getValid();
+			auto it = db.find(key);
+
+			auto const val = it && it->isValid(std::true_type{}) ? it->getVal() : "";
 
 			return Result::ok(val);
 		}
@@ -50,7 +52,7 @@ namespace net::worker::commands::Immutable{
 			auto it = db.find(key);
 
 			return Result::ok(
-				it.valid()
+				it && it->isValid(std::true_type{})
 			);
 		}
 	};
@@ -75,7 +77,7 @@ namespace net::worker::commands::Immutable{
 
 			auto it = db.find(key);
 
-			auto ttl = it.valid() ? it.getTTL() : 0;
+			auto ttl = it && it->isValid(std::true_type{}) ? it->getTTL() : 0;
 
 			return Result::ok(
 				static_cast<uint64_t>(ttl)

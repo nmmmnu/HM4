@@ -89,6 +89,8 @@
 				<li><a href="#INFO">INFO</a></li>
 				<li><a href="#VERSION">VERSION</a></li>
 				<li><a href="#TYPE">TYPE</a></li>
+				<li><a href="#PING">PING</a></li>
+				<li><a href="#ECHO">ECHO</a></li>
 				<li><a href="#SAVE">SAVE</a></li>
 				<li><a href="#RELOAD">RELOAD</a></li>
 				<li><a href="#EXIT">EXIT</a></li>
@@ -102,7 +104,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
@@ -123,7 +125,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>EXISTS</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
@@ -144,7 +146,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>TTL</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
@@ -165,7 +167,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GETX</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_getx.h</td></tr>
@@ -186,7 +188,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>COUNT</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
@@ -207,7 +209,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SUM</td></tr>
 				<tr><td>Available since		</td><td>First element  - sum of valid elements.<br />Second element - last key, if there is second page.</td></tr>
-				<tr><td>Time complexity		</td><td>1.2.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>1.2.4</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_.h</td></tr>
@@ -228,7 +230,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MIN</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
@@ -249,7 +251,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MAX</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
@@ -270,7 +272,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -291,7 +293,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SETEX</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -312,7 +314,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SETNX</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -333,7 +335,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>EXPIRE</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -354,7 +356,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PERSIST</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -375,7 +377,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>COPY</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Time complexity		</td><td>2*Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -396,7 +398,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RENAME</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Time complexity		</td><td>2*Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>3 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -417,7 +419,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GETSET</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -438,7 +440,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GETDEL</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -459,7 +461,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>DEL</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
@@ -480,7 +482,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>INCR</td></tr>
 				<tr><td>Available since		</td><td>1.1.0</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_counter.h</td></tr>
@@ -501,7 +503,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>DECR</td></tr>
 				<tr><td>Available since		</td><td>1.1.0</td></tr>
-				<tr><td>Time complexity		</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cmd_counter.h</td></tr>
@@ -522,7 +524,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>INFO</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_info.h</td></tr>
@@ -543,7 +545,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>VERSION</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_info.h</td></tr>
@@ -564,7 +566,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>TYPE</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_info.h</td></tr>
@@ -575,7 +577,49 @@
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
+			Always rerurn string
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PING">
+
+			<h2>PING</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PING</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns PONG
+			<h3>Return type:</h3>
 			string
+			<h3>Return value:</h3>
+			pong
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="ECHO">
+
+			<h2>ECHO message</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>ECHO</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns <i>message</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			the message
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SAVE">
@@ -585,7 +629,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SAVE</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
@@ -606,7 +650,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RELOAD</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
@@ -627,7 +671,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>EXIT</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_system.h</td></tr>
@@ -648,7 +692,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SHUTDOWN</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Time complexity		</td><td>n/a</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
 				<tr><td>Module			</td><td>cmd_system.h</td></tr>

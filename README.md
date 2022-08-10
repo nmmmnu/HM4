@@ -147,7 +147,7 @@ Second example is **DEL** command.
 - Only thing it need to do is to insert tombstone in memlist O(Log N).
 - Total complexity wouldb "Mem"
 
-Next example **GETX**
+Next example is **GETX**
 
 - First it need to do search in memlist O(Log N).
 - Then it need to do search in disklist. If we have 4 files on the disk, thats another O(4 Log N). However, compared to memlist, this is much slower operation.

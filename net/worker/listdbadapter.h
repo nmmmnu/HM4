@@ -4,45 +4,36 @@
 #include "version.h"
 #include "myprocess.h"	// get PID
 
+
+
 template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
-class ListDBAdapter{
-public:
+struct ListDBAdapter{
 	constexpr static bool MUTABLE = ! std::is_const_v<List>;
 
 	struct IteratorAdapter{
-		IteratorAdapter(typename List::iterator it, typename List::iterator end) : it(std::move(it)), end(std::move(end)){}
+		using Iterator = typename List::iterator;
 
-		bool valid() const{
-			return it != end && it->isValid(std::true_type{});
+		IteratorAdapter(Iterator it, Iterator end) : it(std::move(it)), end(std::move(end)){}
+
+		const hm4::Pair *operator->() const{
+			return & *it;
 		}
 
-		std::string_view getValid() const{
-			return valid() ? it->getVal() : "";
-		}
+	//	const hm4::Pair &operator*() const{
+	//		return *it;
+	//	}
 
-		std::string_view getKey() const{
-			return it->getKey();
-		}
-
-		std::string_view getVal() const{
-			return it->getVal();
-		}
-
-		uint32_t getTTL() const{
-			return it->getTTL();
-		}
-
-		void next(){
+		void operator++(){
 			++it;
 		}
 
-		bool hasNext() const{
+		operator bool() const{
 			return it != end;
 		}
 
 	private:
-		typename List::iterator it;
-		typename List::iterator end;
+		Iterator it;
+		Iterator end;
 	};
 
 public:

@@ -42,7 +42,7 @@ class Cmd{
 			<table border="1">
 				<tr><td>Command			</td><td><?=$this->id				?></td></tr>
 				<tr><td>Available since		</td><td><?=$this->version			?></td></tr>
-				<tr><td>Time complexity		</td><td><?=$this->complexity			?></td></tr>
+				<tr><td>Data lookup complexity	</td><td><?=$this->complexity			?></td></tr>
 				<tr><td>Redis compatible	</td><td><?=self::yn($this->compatible	)	?></td></tr>
 				<tr><td>Mutable			</td><td><?=self::yn($this->mutable	)	?></td></tr>
 				<tr><td>Module			</td><td><?=$this->module			?></td></tr>
@@ -186,7 +186,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists.",
 				"1.2.16",
-				"Mem + Disk",
+				"Mem + N * Disk",
 				true,
 				false,
 
@@ -204,7 +204,7 @@ function getData(){
 				"Value of the TTL or 0 if there is no expiration set.",
 
 				"1.2.11",
-				"Mem + Disk",
+				"Mem + N * Disk",
 				true,
 				false,
 
@@ -237,7 +237,7 @@ function getData(){
 				"Second group of single element - Last key, if there is second page.",
 
 				"1.0.0",
-				"Mem + Disk",
+				"Mem + N * Disk",
 				false,
 				false,
 
@@ -297,7 +297,7 @@ function getData(){
 				"Second element - last key, if there is second page.",
 
 				"1.2.4",
-				"Mem + Disk",
+				"Mem + N * Disk",
 				false,
 				false,
 
@@ -317,7 +317,7 @@ function getData(){
 				"Second element - last key, if there is second page.",
 
 				"1.2.5",
-				"Mem + Disk",
+				"Mem + N * Disk",
 				false,
 				false,
 
@@ -337,7 +337,7 @@ function getData(){
 				"Second element - last key, if there is second page.",
 
 				"1.2.5",
-				"Mem + Disk",
+				"Mem + N * Disk",
 				false,
 				false,
 
@@ -396,7 +396,7 @@ function getData(){
 				"0 if the key value pair exists.<br />" .
 				"1 if the key value pair do not exists and is set.",
 				"1.2.11",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -416,7 +416,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and expiration is set.",
 				"1.2.11",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -435,7 +435,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and expiration is removed.",
 				"1.2.16",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -454,7 +454,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and name is changed.",
 				"1.2.16",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -473,7 +473,7 @@ function getData(){
 				"0 if the key value pair do not exists.<br />" .
 				"1 if the key value pair exists and name is changed.",
 				"1.2.16",
-				"3 * Mem + Disk",
+				"3 * Mem + N * Disk",
 				true,
 				true,
 
@@ -491,7 +491,7 @@ function getData(){
 				"string",
 				"Value of the key or empty string.",
 				"1.2.11",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -508,7 +508,7 @@ function getData(){
 				"string",
 				"Value of the key or empty string.",
 				"1.2.16",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -545,7 +545,7 @@ function getData(){
 				"string (int)",
 				"New increased value.",
 				"1.1.0",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -562,7 +562,7 @@ function getData(){
 				"string (int)",
 				"New decrease value.",
 				"1.1.0",
-				"2 * Mem + Disk",
+				"2 * Mem + N * Disk",
 				true,
 				true,
 
@@ -613,7 +613,39 @@ function getData(){
 				"Returns type of given <i>key</i>.<br />" .
 				"For compatibility, always return 'string'",
 				"string",
+				"Always rerurn string",
+				"1.2.16",
+				"n/a",
+				true,
+				null,
+
+				"info"
+		),
+
+		new Cmd(
+				"PING",
+
+				"PING",
+
+				"Returns PONG",
 				"string",
+				"pong",
+				"1.2.16",
+				"n/a",
+				true,
+				null,
+
+				"info"
+		),
+
+		new Cmd(
+				"ECHO",
+
+				"ECHO message",
+
+				"Returns <i>message</i>.",
+				"string",
+				"the message",
 				"1.2.16",
 				"n/a",
 				true,

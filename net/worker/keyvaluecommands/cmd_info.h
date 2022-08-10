@@ -63,6 +63,42 @@ namespace net::worker::commands::Info{
 
 
 
+	template<class DBAdapter>
+	struct PING : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "ping";
+		constexpr inline static std::string_view cmd[]	= {
+			"ping",	"PING"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &) const final{
+			if (p.size() != 1)
+				return Result::error();
+
+			return Result::ok("pong");
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct ECHO : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "echo";
+		constexpr inline static std::string_view cmd[]	= {
+			"echo",	"ECHO"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &) const final{
+			if (p.size() != 2)
+				return Result::error();
+
+			const auto &message = p[1];
+
+			return Result::ok(message);
+		}
+	};
+
+
+
 	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "info";
@@ -71,7 +107,9 @@ namespace net::worker::commands::Info{
 			return registerCommands<DBAdapter, RegisterPack,
 				INFO	,
 				VERSION	,
-				TYPE
+				TYPE	,
+				PING	,
+				ECHO
 			>(pack);
 		}
 	};

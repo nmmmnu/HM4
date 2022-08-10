@@ -81,7 +81,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (it.valid()){
+			if (it && it->isValid(std::true_type{})){
 				// No Set.
 
 				return Result::ok(false);
@@ -145,10 +145,12 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
+			auto it = db.find(key);
+
 			// because old_value may be overwritten,
 			// we had to make a copy.
 
-			blob.string = db.find(key).getValid();
+			blob.string = it && it->isValid(std::true_type{}) ? it->getVal() : "";
 
 			// SET
 
@@ -189,18 +191,18 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! it.valid()){
-				blob.string = "";
-
-				return Result::ok(blob.string);
-			}else{
-				blob.string = it.getVal();
+			if (it && it->isValid(std::true_type{})){
+				blob.string = it->getVal();
 
 				// DEL
 
 				db.del(key);
 
 				// return
+
+				return Result::ok(blob.string);
+			}else{
+				blob.string = "";
 
 				return Result::ok(blob.string);
 			}
@@ -230,15 +232,15 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! it.valid()){
-				return Result::ok(false);
-			}else{
+			if (it && it->isValid(std::true_type{})){
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
-				db.set(key, it.getVal(), exp);
+				db.set(key, it->getVal(), exp);
 
 				return Result::ok(true);
+			}else{
+				return Result::ok(false);
 			}
 		}
 	};
@@ -266,15 +268,15 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! it.valid()){
-				return Result::ok(false);
-			}else{
+			if (it && it->isValid(std::true_type{})){
 				// SET
 
-				if (it.getTTL() > 0)
-					db.set(key, it.getVal(), 0);
+				if (it->getTTL() > 0)
+					db.set(key, it->getVal(), 0);
 
 				return Result::ok(true);
+			}else{
+				return Result::ok(false);
 			}
 
 
@@ -313,18 +315,18 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! it.valid()){
-				return Result::ok(false);
-			}else{
+			if (it && it->isValid(std::true_type{})){
 				// SET
 
-				db.set(newkey, it.getVal(), it.getTTL());
+				db.set(newkey, it->getVal(), it->getTTL());
 
 				// DELETE
 
 				db.del(key);
 
 				return Result::ok(true);
+			}else{
+				return Result::ok(false);
 			}
 		}
 	};
@@ -360,18 +362,18 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! it.valid()){
-				return Result::ok(false);
-			}else{
+			if (it && it->isValid(std::true_type{})){
 				// SET
 
-				db.set(newkey, it.getVal(), it.getTTL());
+				db.set(newkey, it->getVal(), it->getTTL());
 
 				// DELETE
 
 				// do not delete
 
 				return Result::ok(true);
+			}else{
+				return Result::ok(false);
 			}
 		}
 	};

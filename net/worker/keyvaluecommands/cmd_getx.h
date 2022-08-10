@@ -17,8 +17,8 @@ namespace net::worker::commands::GetX{
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 
-			for(;it.hasNext();it.next()){
-				auto const &key = it.getKey();
+			for(;it;++it){
+				auto const key = it->getKey();
 
 				if (++iterations > ITERATIONS){
 					data.emplace_back(key);
@@ -30,7 +30,7 @@ namespace net::worker::commands::GetX{
 					return;
 				}
 
-				if (! it.valid())
+				if (! it->isValid(std::true_type()))
 					continue;
 
 				if (++results > maxResults){
@@ -38,7 +38,7 @@ namespace net::worker::commands::GetX{
 					return;
 				}
 
-				auto const &val = it.getVal();
+				auto const val = it->getVal();
 
 				data.emplace_back(key);
 				data.emplace_back(val);

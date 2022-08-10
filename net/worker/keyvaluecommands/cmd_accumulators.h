@@ -21,8 +21,8 @@ namespace net::worker::commands::Accumulators{
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 
-			for(;it.hasNext();it.next()){
-				auto const &key = it.getKey();
+			for(;it;++it){
+				auto const key = it->getKey();
 
 				if (++iterations > ITERATIONS)
 					return accumulator.result(key);
@@ -30,13 +30,13 @@ namespace net::worker::commands::Accumulators{
 				if (! prefix.empty() && ! same_prefix(prefix, key))
 					return accumulator.result();
 
-				if (! it.valid())
+				if (! it->isValid(std::true_type{}))
 					continue;
 
 				if (++results > maxResults)
 					return accumulator.result(key);
 
-				accumulator(key, it.getVal());
+				accumulator(key, it->getVal());
 			}
 
 			return accumulator.result();
