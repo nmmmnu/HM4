@@ -46,13 +46,30 @@
 		border:		dotted 1px black;
 	}
 
-	div.cmd table {
+	div.cmd table,
+	table.x {
 		border:		solid 3px black;
 		border-collapse: collapse;
 	}
 
 	div.cmd table td {
 		padding:	10px;
+	}
+
+	div.menurow {
+		display:	flex;
+		flex-wrap:	wrap;
+	}
+
+	div.menurow div {
+		flex:		100px;
+
+		border:		dotted 1px #007;
+
+		margin:		3px;
+		padding:	10px;
+
+		vertical-align:	top;
 	}
 
 	--></style>
@@ -65,16 +82,36 @@
 
 <h2>List of commands</h2>
 
-<ul>
-		<li><a href="#GET">GET</a></li>
+
+<div class="menurow">
+			<div>
+			<b>immutable.h</b><br />
+			&nbsp;
+
+					<li><a href="#GET">GET</a></li>
 				<li><a href="#EXISTS">EXISTS</a></li>
 				<li><a href="#TTL">TTL</a></li>
-				<li><a href="#GETX">GETX</a></li>
-				<li><a href="#COUNT">COUNT</a></li>
+				</div>
+			<div>
+			<b>getx.h</b><br />
+			&nbsp;
+
+					<li><a href="#GETX">GETX</a></li>
+				</div>
+			<div>
+			<b>accumulators.h</b><br />
+			&nbsp;
+
+					<li><a href="#COUNT">COUNT</a></li>
 				<li><a href="#SUM">SUM</a></li>
 				<li><a href="#MIN">MIN</a></li>
 				<li><a href="#MAX">MAX</a></li>
-				<li><a href="#SET">SET</a></li>
+				</div>
+			<div>
+			<b>mutable.h</b><br />
+			&nbsp;
+
+					<li><a href="#SET">SET</a></li>
 				<li><a href="#SETEX">SETEX</a></li>
 				<li><a href="#SETNX">SETNX</a></li>
 				<li><a href="#EXPIRE">EXPIRE</a></li>
@@ -84,19 +121,42 @@
 				<li><a href="#GETSET">GETSET</a></li>
 				<li><a href="#GETDEL">GETDEL</a></li>
 				<li><a href="#DEL">DEL</a></li>
-				<li><a href="#INCR">INCR</a></li>
+				</div>
+			<div>
+			<b>counter.h</b><br />
+			&nbsp;
+
+					<li><a href="#INCR">INCR</a></li>
 				<li><a href="#DECR">DECR</a></li>
-				<li><a href="#INFO">INFO</a></li>
+				</div>
+			<div>
+			<b>info.h</b><br />
+			&nbsp;
+
+					<li><a href="#INFO">INFO</a></li>
 				<li><a href="#VERSION">VERSION</a></li>
 				<li><a href="#TYPE">TYPE</a></li>
 				<li><a href="#PING">PING</a></li>
 				<li><a href="#ECHO">ECHO</a></li>
-				<li><a href="#SAVE">SAVE</a></li>
+				</div>
+			<div>
+			<b>reload.h</b><br />
+			&nbsp;
+
+					<li><a href="#SAVE">SAVE</a></li>
 				<li><a href="#RELOAD">RELOAD</a></li>
-				<li><a href="#EXIT">EXIT</a></li>
+				</div>
+			<div>
+			<b>system.h</b><br />
+			&nbsp;
+
+					<li><a href="#EXIT">EXIT</a></li>
 				<li><a href="#SHUTDOWN">SHUTDOWN</a></li>
-		</ul>
-<hr />
+				</div>
+	</div>
+
+
+
 		<div class="cmd" id="GET">
 
 			<h2>GET key</h2>
@@ -104,10 +164,10 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -128,7 +188,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -149,7 +209,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_immutable.h</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -170,7 +230,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_getx.h</td></tr>
+				<tr><td>Module			</td><td>getx.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -191,7 +251,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem + Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -212,7 +272,7 @@
 				<tr><td>Data lookup complexity	</td><td>1.2.4</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_.h</td></tr>
+				<tr><td>Module			</td><td>.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -233,7 +293,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -254,7 +314,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cmd_accumulators.h</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -275,7 +335,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -296,7 +356,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -317,7 +377,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -338,7 +398,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -359,7 +419,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -380,7 +440,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -401,7 +461,7 @@
 				<tr><td>Data lookup complexity	</td><td>3 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -422,7 +482,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -443,7 +503,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -464,7 +524,7 @@
 				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -485,7 +545,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_counter.h</td></tr>
+				<tr><td>Module			</td><td>counter.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -506,7 +566,7 @@
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cmd_counter.h</td></tr>
+				<tr><td>Module			</td><td>counter.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -527,7 +587,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -548,7 +608,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -569,7 +629,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -590,7 +650,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -611,7 +671,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_info.h</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -632,7 +692,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
+				<tr><td>Module			</td><td>reload.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -653,7 +713,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_reload.h</td></tr>
+				<tr><td>Module			</td><td>reload.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -674,7 +734,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_system.h</td></tr>
+				<tr><td>Module			</td><td>system.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -695,7 +755,7 @@
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cmd_system.h</td></tr>
+				<tr><td>Module			</td><td>system.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -707,6 +767,8 @@
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 		
+
+
 </body>
 </html>
 

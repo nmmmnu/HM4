@@ -23,7 +23,7 @@ class Cmd{
 		$this->complexity	= $complexity		;
 		$this->compatible	= $compatible		;
 		$this->mutable		= $mutable		;
-		$this->module		= "cmd_$module.h"	;
+		$this->module		= "$module.h"	;
 	}
 
 	static function yn($b){
@@ -117,13 +117,30 @@ class Cmd{
 		border:		dotted 1px black;
 	}
 
-	div.cmd table {
+	div.cmd table,
+	table.x {
 		border:		solid 3px black;
 		border-collapse: collapse;
 	}
 
 	div.cmd table td {
 		padding:	10px;
+	}
+
+	div.menurow {
+		display:	flex;
+		flex-wrap:	wrap;
+	}
+
+	div.menurow div {
+		flex:		100px;
+
+		border:		dotted 1px #007;
+
+		margin:		3px;
+		padding:	10px;
+
+		vertical-align:	top;
 	}
 
 	--></style>
@@ -136,17 +153,30 @@ class Cmd{
 
 <h2>List of commands</h2>
 
-<ul>
+
+<div class="menurow">
+	<?php foreach(getData() as $module => $data) : ?>
+		<div>
+			<b><?=$module ?>.h</b><br />
+			&nbsp;
+
+			<?php
+			foreach($data as $c)
+				$c->printRef();
+			?>
+		</div>
+	<?php endforeach ?>
+</div>
+
+
+
 <?php
-foreach(getData() as $c)
-	$c->printRef();
+foreach(getData() as $module => $data)
+	foreach($data as $c)
+		$c->printBody();
 ?>
-</ul>
-<hr />
-<?php
-foreach(getData() as $c)
-	$c->printBody();
-?>
+
+
 
 </body>
 </html>
@@ -155,578 +185,610 @@ foreach(getData() as $c)
 
 function getData(){
 	return array(
-		/* cmd_immutable */
 
-		new Cmd(
-				"GET",
 
-				"GET key",
 
-				"Get value of the <i>key</i>. Exact match.",
+		"immutable" => array(
 
-				"string",
-				"Value of the key or empty string.",
-				"1.0.0",
-				"Mem + Disk",
-				true,
-				false,
 
-				"immutable"
+
+			new Cmd(
+					"GET",
+
+					"GET key",
+
+					"Get value of the <i>key</i>. Exact match.",
+
+					"string",
+					"Value of the key or empty string.",
+					"1.0.0",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"immutable"
+			),
+
+			new Cmd(
+					"EXISTS",
+
+					"EXISTS key",
+
+					"Get information if <i>key</i> exists. Exact match.<br />" .
+					"Operation is not recommended, because it is as fast as if you get the <i>key</i> itself.",
+
+					"bool",
+					"0 if the key value pair do not exists.<br />" .
+					"1 if the key value pair exists.",
+					"1.2.16",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"immutable"
+			),
+
+			new Cmd(
+					"TTL",
+
+					"TTL key",
+
+					"Get TTL value of the <i>key</i>. Exact match.",
+
+					"int",
+					"Value of the TTL or 0 if there is no expiration set.",
+
+					"1.2.11",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"immutable"
+			),
+
+
+
 		),
+		"getx" => array(
 
-		new Cmd(
-				"EXISTS",
 
-				"EXISTS key",
 
-				"Get information if <i>key</i> exists. Exact match.<br />" .
-				"Operation is not recommended, because it is as fast as if you get the <i>key</i> itself.",
+			new Cmd(
+					"GETX",
 
-				"bool",
-				"0 if the key value pair do not exists.<br />" .
-				"1 if the key value pair exists.",
-				"1.2.16",
-				"Mem + N * Disk",
-				true,
-				false,
+					"GETX key number prefix",
 
-				"immutable"
+					"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
+					"Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
+					"Returns up to 1'000 elements.<br />" .
+					"<br />" .
+					"<u>Example:</u><br />" .
+					"<br />" .
+					"<pre>set u:001:name  John<br />" .
+					"set u:001:city  LA<br />" .
+					"set u:001:state CA<br />" .
+					"set u:001:phone 1.800.12345678<br />" .
+					"getx u:001: 1000 u:001:</pre>",
+
+					"array",
+					"First group of element         - array of key and values.<br />" .
+					"Second group of single element - Last key, if there is second page.",
+
+					"1.0.0",
+					"Mem + N * Disk",
+					false,
+					false,
+
+					"getx"
+			),
+
+
+
 		),
+		"accumulators" => array(
 
-		new Cmd(
-				"TTL",
 
-				"TTL key",
 
-				"Get TTL value of the <i>key</i>. Exact match.",
+			new Cmd(
+					"COUNT",
 
-				"int",
-				"Value of the TTL or 0 if there is no expiration set.",
+					"COUNT key number prefix",
 
-				"1.2.11",
-				"Mem + N * Disk",
-				true,
-				false,
+					"Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />" .
+					"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
+					"Accumulate up to 10'000 elements.",
 
-				"immutable"
+					"array",
+					"First element  - count of valid elements.<br />" .
+					"Second element - last key, if there is second page.<br />" .
+					"<br />" .
+					"<u>Example:</u><br />" .
+					"<br />" .
+					"<pre>set dom:google:google.com  some_data<br />" .
+					"set dom:google:youtube.com some_data<br />" .
+					"set dom:google:gmail.com   some_data<br />" .
+					"set dom:google:blogger.com some_data<br />" .
+					"set dom:google:abc.xyz     some_data<br />" .
+					"count dom:google: 10000 dom:google:</pre>",
+
+					"1.2.4",
+					"Mem + Disk",
+					false,
+					false,
+
+					"accumulators"
+			),
+
+			new Cmd(
+					"SUM",
+
+					"SUM key number prefix",
+
+					"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
+					"See COUNT for details.<br />",
+					"<br />" .
+					"<u>Example:</u><br />" .
+					"<br />" .
+					"<pre>set visits:20200101 123<br />" .
+					"set visits:20200102 263<br />" .
+					"set visits:20200103 173<br />" .
+					"set visits:20200104 420<br />" .
+					"set visits:20200105 345<br />" .
+					"sum visits:202001 10000 visits:202001<br />" .
+					"sum visits:2020   10000 visits:2020</pre>",
+
+					"array",
+					"First element  - sum of valid elements.<br />" .
+					"Second element - last key, if there is second page.",
+
+					"1.2.4",
+					"Mem + N * Disk",
+					false,
+					false,
+
+					"accumulators"
+			),
+
+			new Cmd(
+					"MIN",
+
+					"MIN key number prefix",
+
+					"Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />" .
+					"See COUNT for details.",
+
+					"array",
+					"First element  - min of valid elements.<br />" .
+					"Second element - last key, if there is second page.",
+
+					"1.2.5",
+					"Mem + N * Disk",
+					false,
+					false,
+
+					"accumulators"
+			),
+
+			new Cmd(
+					"MAX",
+
+					"MAX key number prefix",
+
+					"Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />" .
+					"See COUNT for details.",
+
+					"array",
+					"First element  - max of valid elements.<br />" .
+					"Second element - last key, if there is second page.",
+
+					"1.2.5",
+					"Mem + N * Disk",
+					false,
+					false,
+
+					"accumulators"
+			),
+
+
+
 		),
+		"mutable" => array(
 
 
 
-		/* cmd_accumulators */
+			new Cmd(
+					"SET",
 
-		new Cmd(
-				"GETX",
+					"SET key value [seconds=0]",
 
-				"GETX key number prefix",
+					"Set <i>key</i> -> <i>value</i> pair, with optional expiration of <i>seconds</i> seconds.",
 
-				"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
-				"Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-				"Returns up to 1'000 elements.<br />" .
-				"<br />" .
-				"<u>Example:</u><br />" .
-				"<br />" .
-				"<pre>set u:001:name  John<br />" .
-				"set u:001:city  LA<br />" .
-				"set u:001:state CA<br />" .
-				"set u:001:phone 1.800.12345678<br />" .
-				"getx u:001: 1000 u:001:</pre>",
+					"OK",
+					"OK",
+					"1.0.0",
+					"Mem",
+					true,
+					true,
 
-				"array",
-				"First group of element         - array of key and values.<br />" .
-				"Second group of single element - Last key, if there is second page.",
+					"mutable"
+			),
 
-				"1.0.0",
-				"Mem + N * Disk",
-				false,
-				false,
+			new Cmd(
+					"SETEX",
 
-				"getx"
+					"SETEX key seconds value",
+
+					"Set <i>key</i> -> <i>value</i> pair, if key does not exists, with expiration of <i>seconds</i> seconds.<br />" .
+					"Doing same as <i>SET key value seconds</i>, but in Redis-compatible way.<br />" .
+					"disk.This command is used for PHP session handler.",
+
+					"OK",
+					"OK",
+					"1.2.11",
+					"Mem",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"SETNX",
+
+					"SETNX key value [seconds=0]",
+
+					"Atomically Set value of the <i>key</i>, if key does not exists, with optional expiration of <i>seconds</i> seconds.<br />" .
+					"Note: The command internally GET old key first.",
+
+					"bool",
+					"0 if the key value pair exists.<br />" .
+					"1 if the key value pair do not exists and is set.",
+					"1.2.11",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"EXPIRE",
+
+					"EXPIRE key seconds",
+
+					"Atomically Change the expiration of the <i>key</i> to <i>seconds</i> seconds.<br />" .
+					"Note: The command internally GET <i>key</i> first.<br />" .
+					"If you can, use SET or SETEX instead.",
+
+					"bool",
+					"0 if the key value pair do not exists.<br />" .
+					"1 if the key value pair exists and expiration is set.",
+					"1.2.11",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"PERSIST",
+
+					"PERSIST key seconds",
+
+					"Atomically remove the expiration of the <i>key</i>.<br />" .
+					"Note: The command internally GET <i>key</i> first.",
+
+					"bool",
+					"0 if the key value pair do not exists.<br />" .
+					"1 if the key value pair exists and expiration is removed.",
+					"1.2.16",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"COPY",
+
+					"COPY old_key new_key",
+
+					"Atomically copy the <i>old_key</i> to the <i>new_key</i>.<br />" .
+					"Note: The command internally GET <i>old_key</i> first.",
+
+					"bool",
+					"0 if the key value pair do not exists.<br />" .
+					"1 if the key value pair exists and name is changed.",
+					"1.2.16",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"RENAME",
+
+					"RENAME old_key new_key / MOVE old_key new_key",
+
+					"Atomically renames <i>old_key</i> to <i>new_key</i>.<br />" .
+					"Note: The command internally GET <i>old_key</i> first.",
+
+					"bool",
+					"0 if the key value pair do not exists.<br />" .
+					"1 if the key value pair exists and name is changed.",
+					"1.2.16",
+					"3 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"GETSET",
+
+					"GETSET key value [seconds=0]",
+
+					"Gets the value of the <i>key</i>. Exact match.<br />" .
+					"Then atomically Set <i>key</i> -> <i>value</i> pair.<br />" .
+					"This command is often used to get value of atomic counter and reset its value to zero.",
+					"string",
+					"Value of the key or empty string.",
+					"1.2.11",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"GETDEL",
+
+					"GETDEL key",
+
+					"Gets the value of the <i>key</i>. Exact match.<br />" .
+					"Then atomically delete the <i>key</i> -> <i>value</i> pair.<br />",
+					"string",
+					"Value of the key or empty string.",
+					"1.2.16",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"DEL",
+
+					"DEL key / UNLINK key",
+
+					"Removes <i>key</i>.",
+					"bool",
+					"Always return 1",
+					"1.0.0",
+					"Mem",
+					true,
+					true,
+
+					"mutable"
+			),
+
+
+
 		),
+		"counter" => array(
 
-		new Cmd(
-				"COUNT",
 
-				"COUNT key number prefix",
 
-				"Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />" .
-				"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-				"Accumulate up to 10'000 elements.",
+			new Cmd(
+					"INCR",
 
-				"array",
-				"First element  - count of valid elements.<br />" .
-				"Second element - last key, if there is second page.<br />" .
-				"<br />" .
-				"<u>Example:</u><br />" .
-				"<br />" .
-				"<pre>set dom:google:google.com  some_data<br />" .
-				"set dom:google:youtube.com some_data<br />" .
-				"set dom:google:gmail.com   some_data<br />" .
-				"set dom:google:blogger.com some_data<br />" .
-				"set dom:google:abc.xyz     some_data<br />" .
-				"count dom:google: 10000 dom:google:</pre>",
+					"INCR / INCRBY key [increase value=1]",
 
-				"1.2.4",
-				"Mem + Disk",
-				false,
-				false,
+					"Atomically increase numerical value of the <i>key</i> with <i>increase value</i>.<br />" .
+					"Uses <b>int64_t</b> as a number type.",
+					"string (int)",
+					"New increased value.",
+					"1.1.0",
+					"2 * Mem + N * Disk",
+					true,
+					true,
 
-				"accumulators"
+					"counter"
+			),
+
+			new Cmd(
+					"DECR",
+
+					"DECR / DECRBY key [decrease value=1]",
+
+					"Atomically decrease numerical value of the <i>key</i> with <i>decrease value</i>.<br />" .
+					"Uses <b>int64_t</b> as a number type.",
+					"string (int)",
+					"New decrease value.",
+					"1.1.0",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"counter"
+			),
+
+
+
 		),
+		"info" => array(
 
-		new Cmd(
-				"SUM",
 
-				"SUM key number prefix",
 
-				"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
-				"See COUNT for details.<br />",
-				"<br />" .
-				"<u>Example:</u><br />" .
-				"<br />" .
-				"<pre>set visits:20200101 123<br />" .
-				"set visits:20200102 263<br />" .
-				"set visits:20200103 173<br />" .
-				"set visits:20200104 420<br />" .
-				"set visits:20200105 345<br />" .
-				"sum visits:202001 10000 visits:202001<br />" .
-				"sum visits:2020   10000 visits:2020</pre>",
+			new Cmd(
+					"INFO",
 
-				"array",
-				"First element  - sum of valid elements.<br />" .
-				"Second element - last key, if there is second page.",
+					"INFO",
 
-				"1.2.4",
-				"Mem + N * Disk",
-				false,
-				false,
+					"Returns server information.",
+					"string",
+					"Server information.",
+					"1.0.0",
+					"n/a",
+					true,
+					null,
 
-				"accumulators"
+					"info"
+			),
+
+			new Cmd(
+					"VERSION",
+
+					"VERSION",
+
+					"Returns server version.",
+					"string",
+					"Server version.",
+					"1.2.16",
+					"n/a",
+					false,
+					null,
+
+					"info"
+			),
+
+			new Cmd(
+					"TYPE",
+
+					"TYPE key",
+
+					"Returns type of given <i>key</i>.<br />" .
+					"For compatibility, always return 'string'",
+					"string",
+					"Always rerurn string",
+					"1.2.16",
+					"n/a",
+					true,
+					null,
+
+					"info"
+			),
+
+			new Cmd(
+					"PING",
+
+					"PING",
+
+					"Returns PONG",
+					"string",
+					"pong",
+					"1.2.16",
+					"n/a",
+					true,
+					null,
+
+					"info"
+			),
+
+			new Cmd(
+					"ECHO",
+
+					"ECHO message",
+
+					"Returns <i>message</i>.",
+					"string",
+					"the message",
+					"1.2.16",
+					"n/a",
+					true,
+					null,
+
+					"info"
+			),
+
+
+
+
 		),
+		"reload" => array(
 
-		new Cmd(
-				"MIN",
 
-				"MIN key number prefix",
 
-				"Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />" .
-				"See COUNT for details.",
+			new Cmd(
+					"SAVE",
 
-				"array",
-				"First element  - min of valid elements.<br />" .
-				"Second element - last key, if there is second page.",
+					"SAVE / BGSAVE",
 
-				"1.2.5",
-				"Mem + N * Disk",
-				false,
-				false,
+					"Flushes memtable to the disk (this is no-op on immutable servers)." .
+					"Reloads the disktable(s) from the disk.",
+					"OK",
+					"OK",
+					"1.0.0",
+					"n/a",
+					true,
+					null,
 
-				"accumulators"
+					"reload"
+			),
+
+			new Cmd(
+					"RELOAD",
+
+					"RELOAD",
+
+					"Reloads the disktable(s) from the disk." .
+					"This command is used when disktable(s) are updated or replaced from an external process.",
+					"OK",
+					"OK",
+					"1.0.0",
+					"n/a",
+					false,
+					null,
+
+					"reload"
+			),
+
+
+
 		),
+		"system" => array(
 
-		new Cmd(
-				"MAX",
 
-				"MAX key number prefix",
 
-				"Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />" .
-				"See COUNT for details.",
+			new Cmd(
+					"EXIT",
 
-				"array",
-				"First element  - max of valid elements.<br />" .
-				"Second element - last key, if there is second page.",
+					"EXIT",
 
-				"1.2.5",
-				"Mem + N * Disk",
-				false,
-				false,
+					"Disconnect from the server.",
+					"n/a",
+					"n/a",
+					"1.0.0",
+					"n/a",
+					true,
+					null,
 
-				"accumulators"
-		),
+					"system"
+			),
 
+			new Cmd(
+					"SHUTDOWN",
 
+					"SHUTDOWN",
 
-		/* cmd_mutable */
+					"Shutdowns the server.<br />" .
+					"SAVE / NOSAVE is not supported yet.",
+					"n/a",
+					"n/a",
+					"1.0.0",
+					"n/a",
+					true,
+					null,
 
-		new Cmd(
-				"SET",
-
-				"SET key value [seconds=0]",
-
-				"Set <i>key</i> -> <i>value</i> pair, with optional expiration of <i>seconds</i> seconds.",
-
-				"OK",
-				"OK",
-				"1.0.0",
-				"Mem",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"SETEX",
-
-				"SETEX key seconds value",
-
-				"Set <i>key</i> -> <i>value</i> pair, if key does not exists, with expiration of <i>seconds</i> seconds.<br />" .
-				"Doing same as <i>SET key value seconds</i>, but in Redis-compatible way.<br />" .
-				"disk.This command is used for PHP session handler.",
-
-				"OK",
-				"OK",
-				"1.2.11",
-				"Mem",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"SETNX",
-
-				"SETNX key value [seconds=0]",
-
-				"Atomically Set value of the <i>key</i>, if key does not exists, with optional expiration of <i>seconds</i> seconds.<br />" .
-				"Note: The command internally GET old key first.",
-
-				"bool",
-				"0 if the key value pair exists.<br />" .
-				"1 if the key value pair do not exists and is set.",
-				"1.2.11",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"EXPIRE",
-
-				"EXPIRE key seconds",
-
-				"Atomically Change the expiration of the <i>key</i> to <i>seconds</i> seconds.<br />" .
-				"Note: The command internally GET <i>key</i> first.<br />" .
-				"If you can, use SET or SETEX instead.",
-
-				"bool",
-				"0 if the key value pair do not exists.<br />" .
-				"1 if the key value pair exists and expiration is set.",
-				"1.2.11",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"PERSIST",
-
-				"PERSIST key seconds",
-
-				"Atomically remove the expiration of the <i>key</i>.<br />" .
-				"Note: The command internally GET <i>key</i> first.",
-
-				"bool",
-				"0 if the key value pair do not exists.<br />" .
-				"1 if the key value pair exists and expiration is removed.",
-				"1.2.16",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"COPY",
-
-				"COPY old_key new_key",
-
-				"Atomically copy the <i>old_key</i> to the <i>new_key</i>.<br />" .
-				"Note: The command internally GET <i>old_key</i> first.",
-
-				"bool",
-				"0 if the key value pair do not exists.<br />" .
-				"1 if the key value pair exists and name is changed.",
-				"1.2.16",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"RENAME",
-
-				"RENAME old_key new_key / MOVE old_key new_key",
-
-				"Atomically renames <i>old_key</i> to <i>new_key</i>.<br />" .
-				"Note: The command internally GET <i>old_key</i> first.",
-
-				"bool",
-				"0 if the key value pair do not exists.<br />" .
-				"1 if the key value pair exists and name is changed.",
-				"1.2.16",
-				"3 * Mem + N * Disk",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"GETSET",
-
-				"GETSET key value [seconds=0]",
-
-				"Gets the value of the <i>key</i>. Exact match.<br />" .
-				"Then atomically Set <i>key</i> -> <i>value</i> pair.<br />" .
-				"This command is often used to get value of atomic counter and reset its value to zero.",
-				"string",
-				"Value of the key or empty string.",
-				"1.2.11",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"GETDEL",
-
-				"GETDEL key",
-
-				"Gets the value of the <i>key</i>. Exact match.<br />" .
-				"Then atomically delete the <i>key</i> -> <i>value</i> pair.<br />",
-				"string",
-				"Value of the key or empty string.",
-				"1.2.16",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"mutable"
-		),
-
-		new Cmd(
-				"DEL",
-
-				"DEL key / UNLINK key",
-
-				"Removes <i>key</i>.",
-				"bool",
-				"Always return 1",
-				"1.0.0",
-				"Mem",
-				true,
-				true,
-
-				"mutable"
-		),
-
-
-
-		/* cmd_counter */
-
-		new Cmd(
-				"INCR",
-
-				"INCR / INCRBY key [increase value=1]",
-
-				"Atomically increase numerical value of the <i>key</i> with <i>increase value</i>.<br />" .
-				"Uses <b>int64_t</b> as a number type.",
-				"string (int)",
-				"New increased value.",
-				"1.1.0",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"counter"
-		),
-
-		new Cmd(
-				"DECR",
-
-				"DECR / DECRBY key [decrease value=1]",
-
-				"Atomically decrease numerical value of the <i>key</i> with <i>decrease value</i>.<br />" .
-				"Uses <b>int64_t</b> as a number type.",
-				"string (int)",
-				"New decrease value.",
-				"1.1.0",
-				"2 * Mem + N * Disk",
-				true,
-				true,
-
-				"counter"
-		),
-
-
-
-		/* cmd_info */
-
-		new Cmd(
-				"INFO",
-
-				"INFO",
-
-				"Returns server information.",
-				"string",
-				"Server information.",
-				"1.0.0",
-				"n/a",
-				true,
-				null,
-
-				"info"
-		),
-
-		new Cmd(
-				"VERSION",
-
-				"VERSION",
-
-				"Returns server version.",
-				"string",
-				"Server version.",
-				"1.2.16",
-				"n/a",
-				false,
-				null,
-
-				"info"
-		),
-
-		new Cmd(
-				"TYPE",
-
-				"TYPE key",
-
-				"Returns type of given <i>key</i>.<br />" .
-				"For compatibility, always return 'string'",
-				"string",
-				"Always rerurn string",
-				"1.2.16",
-				"n/a",
-				true,
-				null,
-
-				"info"
-		),
-
-		new Cmd(
-				"PING",
-
-				"PING",
-
-				"Returns PONG",
-				"string",
-				"pong",
-				"1.2.16",
-				"n/a",
-				true,
-				null,
-
-				"info"
-		),
-
-		new Cmd(
-				"ECHO",
-
-				"ECHO message",
-
-				"Returns <i>message</i>.",
-				"string",
-				"the message",
-				"1.2.16",
-				"n/a",
-				true,
-				null,
-
-				"info"
-		),
-
-
-
-		/* cmd_reload */
-
-		new Cmd(
-				"SAVE",
-
-				"SAVE / BGSAVE",
-
-				"Flushes memtable to the disk (this is no-op on immutable servers)." .
-				"Reloads the disktable(s) from the disk.",
-				"OK",
-				"OK",
-				"1.0.0",
-				"n/a",
-				true,
-				null,
-
-				"reload"
-		),
-
-		new Cmd(
-				"RELOAD",
-
-				"RELOAD",
-
-				"Reloads the disktable(s) from the disk." .
-				"This command is used when disktable(s) are updated or replaced from an external process.",
-				"OK",
-				"OK",
-				"1.0.0",
-				"n/a",
-				false,
-				null,
-
-				"reload"
-		),
-
-
-
-		/* cmd_system */
-
-		new Cmd(
-				"EXIT",
-
-				"EXIT",
-
-				"Disconnect from the server.",
-				"n/a",
-				"n/a",
-				"1.0.0",
-				"n/a",
-				true,
-				null,
-
-				"system"
-		),
-
-		new Cmd(
-				"SHUTDOWN",
-
-				"SHUTDOWN",
-
-				"Shutdowns the server.<br />" .
-				"SAVE / NOSAVE is not supported yet.",
-				"n/a",
-				"n/a",
-				"1.0.0",
-				"n/a",
-				true,
-				null,
-
-				"system"
+					"system"
+			),
 		),
 	);
 }
