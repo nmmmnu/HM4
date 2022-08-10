@@ -13,12 +13,12 @@ namespace net::worker::commands::GetX{
 
 
 		template<class It, class OutputBlob>
-		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, It last, OutputBlob &data){
+		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, OutputBlob &data){
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 
-			for(; it != last; ++it){
-				auto const &key = it->getKey();
+			for(;it.hasNext();it.next()){
+				auto const &key = it.getKey();
 
 				if (++iterations > ITERATIONS){
 					data.emplace_back(key);
@@ -30,7 +30,7 @@ namespace net::worker::commands::GetX{
 					return;
 				}
 
-				if (! it->isValid(std::true_type{}))
+				if (! it.valid())
 					continue;
 
 				if (++results > maxResults){
@@ -38,7 +38,7 @@ namespace net::worker::commands::GetX{
 					return;
 				}
 
-				auto const &val = it->getVal();
+				auto const &val = it.getVal();
 
 				data.emplace_back(key);
 				data.emplace_back(val);
@@ -86,10 +86,9 @@ namespace net::worker::commands::GetX{
 			auto const &prefix = p[3];
 
 			accumulateResults(
-				count					,
-				prefix					,
+				count				,
+				prefix				,
 				db.find(key, std::false_type{})	,
-				std::end(db)				,
 				container
 			);
 

@@ -465,7 +465,7 @@ function getData(){
 		new Cmd(
 				"RENAME",
 
-				"RENAME old_key new_key",
+				"RENAME old_key new_key / MOVE old_key new_key",
 
 				"Atomically renames <i>old_key</i> to <i>new_key</i>.<br />" .
 				"Note: The command internally GET <i>old_key</i> first.",

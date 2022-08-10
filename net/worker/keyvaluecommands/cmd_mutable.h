@@ -81,7 +81,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (db.valid(it)){
+			if (it.valid()){
 				// No Set.
 
 				return Result::ok(false);
@@ -148,7 +148,7 @@ namespace net::worker::commands::Mutable{
 			// because old_value may be overwritten,
 			// we had to make a copy.
 
-			blob.string = db.get(key);
+			blob.string = db.find(key).getValid();
 
 			// SET
 
@@ -187,15 +187,23 @@ namespace net::worker::commands::Mutable{
 			// because old_value may be overwritten,
 			// we had to make a copy.
 
-			blob.string = db.get(key);
+			auto it = db.find(key);
 
-			// DEL
+			if (! it.valid()){
+				blob.string = "";
 
-			db.del(key);
+				return Result::ok(blob.string);
+			}else{
+				blob.string = it.getVal();
 
-			// return
+				// DEL
 
-			return Result::ok(blob.string);
+				db.del(key);
+
+				// return
+
+				return Result::ok(blob.string);
+			}
 		}
 	};
 
@@ -222,18 +230,16 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (!db.valid(it)){
+			if (! it.valid()){
 				return Result::ok(false);
 			}else{
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
-				db.set(key, it->getVal(), exp);
+				db.set(key, it.getVal(), exp);
 
 				return Result::ok(true);
 			}
-
-
 		}
 	};
 
@@ -260,13 +266,13 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! db.valid(it)){
+			if (! it.valid()){
 				return Result::ok(false);
 			}else{
 				// SET
 
-				if (it->getTTL() > 0)
-					db.set(key, it->getVal(), 0);
+				if (it.getTTL() > 0)
+					db.set(key, it.getVal(), 0);
 
 				return Result::ok(true);
 			}
@@ -282,7 +288,8 @@ namespace net::worker::commands::Mutable{
 		constexpr inline static std::string_view name	= "rename";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
-			"rename",	"RENAME"
+			"rename",	"RENAME"	,
+			"move",		"MOVE"
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
@@ -306,12 +313,12 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! db.valid(it)){
+			if (! it.valid()){
 				return Result::ok(false);
 			}else{
 				// SET
 
-				db.set(newkey, it->getVal(), it->getTTL());
+				db.set(newkey, it.getVal(), it.getTTL());
 
 				// DELETE
 
@@ -353,12 +360,12 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db.find(key);
 
-			if (! db.valid(it)){
+			if (! it.valid()){
 				return Result::ok(false);
 			}else{
 				// SET
 
-				db.set(newkey, it->getVal(), it->getTTL());
+				db.set(newkey, it.getVal(), it.getTTL());
 
 				// DELETE
 

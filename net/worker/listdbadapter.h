@@ -9,6 +9,42 @@ class ListDBAdapter{
 public:
 	constexpr static bool MUTABLE = ! std::is_const_v<List>;
 
+	struct IteratorAdapter{
+		IteratorAdapter(typename List::iterator it, typename List::iterator end) : it(std::move(it)), end(std::move(end)){}
+
+		bool valid() const{
+			return it != end && it->isValid(std::true_type{});
+		}
+
+		std::string_view getValid() const{
+			return valid() ? it->getVal() : "";
+		}
+
+		std::string_view getKey() const{
+			return it->getKey();
+		}
+
+		std::string_view getVal() const{
+			return it->getVal();
+		}
+
+		uint32_t getTTL() const{
+			return it->getTTL();
+		}
+
+		void next(){
+			++it;
+		}
+
+		bool hasNext() const{
+			return it != end;
+		}
+
+	private:
+		typename List::iterator it;
+		typename List::iterator end;
+	};
+
 public:
 	ListDBAdapter(List &list, CommandSave &cmdSave, CommandReload &cmdReload) :
 				list_(list),
@@ -17,19 +53,6 @@ public:
 
 //	ListDBAdapter(List &list, CommandSave &cmdSave) :
 //				ListDBAdapter(list, cmdSave, cmdSave){}
-
-public:
-	// Help Methods
-
-	std::string_view get(std::string_view const key){
-		auto it = find(key);
-
-		return valid(it) ? it->getVal() : "";
-	}
-
-	bool valid(typename List::iterator const &it){
-		return it != std::end(list_) && it->isValid(std::true_type{});
-	}
 
 public:
 	// System Methods
@@ -67,11 +90,10 @@ public:
 
 	template<bool B = true>
 	auto find(std::string_view const key, std::bool_constant<B> tag = {}) const{
-		return hm4::getIterator(list_, key, tag);
-	}
-
-	auto end() const{
-		return std::end(list_);
+		return IteratorAdapter{
+			hm4::getIterator(list_, key, tag),
+			std::end(list_)
+		};
 	}
 
 public:
