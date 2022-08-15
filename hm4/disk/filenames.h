@@ -21,24 +21,24 @@ inline auto filenameMeta(std::string_view const filename){
 }
 
 inline auto filenameIndx(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_INDX	);
+	return concatenateString( filename, file_ext::DOT_INDX	);
 }
 
 inline auto filenameLine(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_LINE	);
+	return concatenateString( filename, file_ext::DOT_LINE	);
 }
 
 inline auto filenameData(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_DATA	);
+	return concatenateString( filename, file_ext::DOT_DATA	);
 }
 
 
 inline auto filenameBTreeIndx(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_BTREE_INDX	);
+	return concatenateString( filename, file_ext::DOT_BTREE_INDX	);
 }
 
 inline auto filenameBTreeData(std::string_view const filename){
-	return concatenate( filename, file_ext::DOT_BTREE_DATA	);
+	return concatenateString( filename, file_ext::DOT_BTREE_DATA	);
 }
 
 } // namespace diskfile

@@ -45,25 +45,7 @@ constexpr bool same_prefix(std::string_view const prefix, std::string_view const
 
 
 template<typename... Args>
-std::string concatenate(Args &&... args){
-	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
-
-	// super cheap concatenation,
-	// with single allocation
-
-	size_t const reserve_size = (std::string_view{ args }.size() + ...);
-
-	std::string s;
-
-	s.reserve(reserve_size);
-
-	(s.append(std::forward<Args>(args)), ...);
-
-	return s;
-}
-
-template<typename... Args>
-std::string const &concatenate(std::string &s, Args &&... args){
+std::string_view concatenateBuffer(std::string &s, Args &&... args){
 	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
 
 	// super cheap concatenation,
@@ -78,6 +60,17 @@ std::string const &concatenate(std::string &s, Args &&... args){
 		s.reserve(reserve_size);
 
 	(s.append(std::forward<Args>(args)), ...);
+
+	return s;
+}
+
+
+
+template<typename... Args>
+std::string concatenateString(Args &&... args){
+	std::string s;
+
+	concatenateBuffer(s, std::forward<Args>(args)...);
 
 	return s;
 }

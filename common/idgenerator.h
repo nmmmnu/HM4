@@ -4,10 +4,7 @@
 #include <array>
 #include <string_view>
 
-namespace hm4{
 namespace idgenerator{
-
-
 
 struct IDGeneratorTS_HEX{
 	// 62ec3590.0007c22b
@@ -37,7 +34,6 @@ struct IDGeneratorDate{
 };
 
 } // namespace idgenerator
-} // namespace
 
 #endif
 

@@ -51,7 +51,7 @@ public:
 	std::string_view info(std::string &str) const{
 		to_string_buffer_t buffer[3];
 
-		concatenate(
+		concatenateBuffer(
 			str,
 
 			"Version          : ", hm4::version::str,				"\n",

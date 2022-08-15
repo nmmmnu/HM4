@@ -25,7 +25,7 @@ namespace DBAdapterFactory{
 
 		using MemList			= MemListType;
 		using Predicate			= hm4::flusher::DiskFileAllocatorPredicate;
-		using IDGenerator		= hm4::idgenerator::IDGeneratorDate;
+		using IDGenerator		= idgenerator::IDGeneratorDate;
 		using Flush			= hm4::flusher::DiskFileFlush<IDGenerator>;
 		using MutableFlushList		= MutableFlushListType<MemList, Predicate, Flush, ListLoader>;
 

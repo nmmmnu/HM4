@@ -19,11 +19,12 @@ namespace net::worker::commands::Mutable{
 				return Result::error();
 
 			auto const &key = p[1];
-			auto const &val = p[2];
-			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			if (key.empty())
 				return Result::error();
+
+			auto const &val = p[2];
+			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			db.set(key, val, exp);
 
@@ -46,11 +47,12 @@ namespace net::worker::commands::Mutable{
 				return Result::error();
 
 			auto const &key = p[1];
-			auto const &val = p[3];
-			auto const exp  = from_string<uint32_t>(p[2]);
 
 			if (key.empty())
 				return Result::error();
+
+			auto const &val = p[3];
+			auto const exp  = from_string<uint32_t>(p[2]);
 
 			db.set(key, val, exp);
 

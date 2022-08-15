@@ -18,7 +18,7 @@ void test(T id, const char *name, unsigned count = 10){
 }
 
 int main(){
-	namespace idg = hm4::idgenerator;
+	namespace idg = idgenerator;
 
 	test( idg::IDGeneratorTS_HEX{},	"IDGeneratorTS@Hex"	);
 	test( idg::IDGeneratorTS_DEC{},	"IDGeneratorTS@Dec"	);

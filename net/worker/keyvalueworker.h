@@ -8,6 +8,8 @@
 #include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, DEL, GETSET, EXPIRE
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
 
+#include "keyvaluecommands/cmd_queue.h"		// SADD, SPOP
+
 #include "keyvaluecommands/cmd_info.h"		// INFO
 #include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
 #include "keyvaluecommands/cmd_system.h"	// EXIT, SHUTDOWN
@@ -58,6 +60,8 @@ namespace net::worker{
 
 				Mutable		::RegisterModule,
 				Counter		::RegisterModule,
+
+				Queue		::RegisterModule,
 
 				Info		::RegisterModule,
 				Reload		::RegisterModule,

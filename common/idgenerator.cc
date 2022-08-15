@@ -18,7 +18,6 @@ namespace{
 	}
 }
 
-namespace hm4{
 namespace idgenerator{
 
 	std::string_view IDGeneratorTS_HEX::operator()(to_string_buffer_t &buffer) const{
@@ -46,4 +45,4 @@ namespace idgenerator{
 	}
 
 } // namespace idgenerator
-} // namespace
+
