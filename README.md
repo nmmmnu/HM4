@@ -166,24 +166,24 @@ Last example is **INCR** command.
 
 HM4 supports **atomic queues**. Supported commands are **SADD** and **SPOP**.
 
-Each queue is stored as several keys stored continious.
+Each queue is stored as several keys stored continuous.
 
-- Control key - same name as queue name. If queue name is "q", then the control key is also "q". This key may or may not exists.
-- Data keys - each key name is same as queue name + current time with microseconds. If queue name is "q", one of the data keys could be "q62fabbc0.000490be".
-  "62fabbc0" was current time, "000490be" were current microseconds.
+- Control key - same name as queue name.
+If queue name is "q", then the control key is also "q". This key may or may not exists.
+- Data keys - each key name is same as queue name + current time with microseconds.
+If queue name is "q", one of the data keys could be "q62fabbc0.000490be".
+"62fabbc0" was current time at the moment when key was created, "000490be" were current microseconds.
 
-How it works: (Example keys "q" and "q62fabbc0.000490be" will be used)
+How it works:
 
-- When a value is pushed in the queue, e.g. **SADD**, the system just set key such example key "q62fabbc0.000490be".
-
+- When a value is pushed in the queue, e.g. **SADD**, the system just set new key, for example "q62fabbc0.000490be".
 Since current time with microseconds is as good as UUID, no collision can happen.
 
-- When a value is removed from the queur, e.g. **SPOP**, the system search for control key "q".
-
-If control key is present, it is read. It contains the last removed key from the queue. Then new search is made to retrieve the "head" of the queue.
-
-If control key is not present, this means that the search is positioned to the "head" of the queue.
-
+- When a value is removed from the "head" of the queue, e.g. **SPOP**, the system search for the control key, for exaple "q".
+  - If control key is present, it is read. It contains the last removed key from the queue.
+  Then new search is made to retrieve the "head" of the queue.
+  - If control key is not present, this means that the search is already positioned to the "head" of the queue.
+- Finally the system deletes the data key and eventually updates the control key.
 
 
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
