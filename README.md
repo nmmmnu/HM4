@@ -18,6 +18,7 @@ Goals of the project are.
 -   High quality code
 -   Supported [commands]
 -   Complexity is a lie :)
+-   Atomic queues
 
 ---
 ### Architecture
@@ -160,6 +161,28 @@ Last example is **INCR** command.
 - Second it need to store new value - this is same as **SET** or **DEL**
 - Total complexity wouldb "2 * Mem + Disk"
 
+---
+### Atomic queues
+
+HM4 supports **atomic queues**. Supported commands are **SADD** and **SPOP**.
+
+Each queue is stored as several keys stored continious.
+
+- Control key - same name as queue name. If queue name is "q", then the control key is also "q". This key may or may not exists.
+- Data keys - each key name is same as queue name + current time with microseconds. If queue name is "q", one of the data keys could be "q62fabbc0.000490be".
+  "62fabbc0" was current time, "000490be" were current microseconds.
+
+How it works: (Example keys "q" and "q62fabbc0.000490be" will be used)
+
+- When a value is pushed in the queue, e.g. **SADD**, the system just set key such example key "q62fabbc0.000490be".
+
+Since current time with microseconds is as good as UUID, no collision can happen.
+
+- When a value is removed from the queur, e.g. **SPOP**, the system search for control key "q".
+
+If control key is present, it is read. It contains the last removed key from the queue. Then new search is made to retrieve the "head" of the queue.
+
+If control key is not present, this means that the search is positioned to the "head" of the queue.
 
 
 

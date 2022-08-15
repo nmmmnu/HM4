@@ -130,6 +130,13 @@
 				<li><a href="#DECR">DECR</a></li>
 				</div>
 			<div>
+			<b>queue.h</b><br />
+			&nbsp;
+
+					<li><a href="#SADD">SADD</a></li>
+				<li><a href="#SPOP">SPOP</a></li>
+				</div>
+			<div>
 			<b>info.h</b><br />
 			&nbsp;
 
@@ -575,6 +582,48 @@
 			string (int)
 			<h3>Return value:</h3>
 			New decrease value.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SADD">
+
+			<h2>SADD key val [expiration]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SADD</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>queue.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically add <i>value</i> into queue <i>key</i>, with optional expiration of seconds seconds.<br />Works exactly as Redis SADD, except internally set key for each value.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SPOP">
+
+			<h2>SPOP key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SPOP</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>queue.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically remove single element from queue <i>key</i>.<br />Works exactly as Redis SPOP, except internally set <b>control key</b> for each queue, also remove the key for the value.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			Value of the removed element or empty string.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INFO">
