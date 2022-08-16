@@ -140,26 +140,26 @@ Time complexity of most of the operations is O(Log N). However it heavily depend
 First example is **GET** command.
 
 - First it need to do search in memlist O(Log N).
-- Then it need to do search in disklist. If we have 4 files on the disk, thats another O(4 Log N). However, compared to memlist, this is much slower operation.
-- Total complexity wouldb "Mem + Disk"
+- Then it need to do search in disklist. If we have M files on the disk, thats another O(M Log N). However, compared to memlist, this is much slower operation.
+- Total complexity is "Mem + M * Disk"
 
 Second example is **DEL** command.
 
 - Only thing it need to do is to insert tombstone in memlist O(Log N).
-- Total complexity wouldb "Mem"
+- Total complexity is "Mem"
 
 Next example is **GETX**
 
 - First it need to do search in memlist O(Log N).
-- Then it need to do search in disklist. If we have 4 files on the disk, thats another O(4 Log N). However, compared to memlist, this is much slower operation.
+- Then it need to do search in disklist. If we have M files on the disk, thats another O(M Log N). However, compared to memlist, this is much slower operation.
 - To find subsequent keys, no time is wasted.
-- Total complexity wouldb "Mem + Disk"
+- Total complexity is "Mem + M * Disk"
 
 Last example is **INCR** command.
 
 - First it need to get the current value of the key. This is same as **GET**
 - Second it need to store new value - this is same as **SET** or **DEL**
-- Total complexity wouldb "2 * Mem + Disk"
+- Total complexity is "2 * Mem + M * Disk"
 
 ---
 ### Atomic queues

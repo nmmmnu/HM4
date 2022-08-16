@@ -43,7 +43,7 @@ function checkParameters(){
 	if (count($argv) > 1)
 		return;
 
-	printf("HM4 :: dump_queue.php\n");
+	printf("HM4 :: Map Queue\n");
 	printf("\n");
 	printf("Usage:\n");
 	printf("\t%s [set_control_key]\n", $argv[0]);
