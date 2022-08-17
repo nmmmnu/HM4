@@ -115,21 +115,14 @@ namespace net::worker::commands::Queue{
 
 	private:
 		template<typename... Args>
-		static void log__(Args&&...){
+		static void log__(Args&&... /* args */){
 		//	::log__(args...);
-		}
-
-		static void logPair__(typename DBAdapter::IteratorAdapter const &it){
-			(void) it;
-		//	it->print();
 		}
 
 		Result collect_(std::string_view control_key, typename DBAdapter::IteratorAdapter it, DBAdapter &db, OutputBlob &blob) const{
 			uint16_t iterations = 0;
 
 			for(;it;++it){
-				logPair__(it);
-
 				auto const &key = it->getKey();
 
 				if (! same_prefix(control_key, key)){
@@ -180,10 +173,9 @@ namespace net::worker::commands::Queue{
 		Result finalizeEnd_(std::string_view control_key, DBAdapter &db, OutputBlob &) const{
 			// delete control key...
 			// better don't, because else there will be lots of syncs if new data come.
-		//	db.del(control_key);
-
-			(void)control_key;
-			(void)db;
+			if constexpr(0){
+				db.del(control_key);
+			}
 
 			// there is no valid data key.
 
@@ -204,6 +196,7 @@ namespace net::worker::commands::Queue{
 			>(pack);
 		}
 	};
+
 
 
 } // namespace

@@ -4,6 +4,67 @@
 
 namespace net::worker::commands::Mutable{
 
+	namespace impl_{
+		template<class DBAdapter>
+		auto exists(DBAdapter &db, std::string_view key){
+			auto it = db.find(key);
+
+			return it && it->isValid(std::true_type{});
+		}
+
+		enum class CPMVOperation{
+			MV	,
+			MV_NX	,
+			CP	,
+			CP_NX
+		};
+
+		template<CPMVOperation operation, class DBAdapter>
+		Result cpmv(ParamContainer const &p, DBAdapter &db){
+			if (p.size() != 3)
+				return Result::error();
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return Result::error();
+
+			const auto &newkey = p[2];
+
+			if (newkey.empty())
+				return Result::error();
+
+			if (key == newkey)
+				return Result::error();
+
+			if constexpr(operation == CPMVOperation::CP_NX || operation == CPMVOperation::MV_NX){
+				if (impl_::exists(db, newkey))
+					return Result::ok(false);
+			}
+
+			if (auto it = db.find(key);
+				it && it->isValid(std::true_type{})){
+
+				// SET
+
+				db.set(newkey, it->getVal(), it->getTTL());
+
+				if constexpr(operation == CPMVOperation::MV || operation == CPMVOperation::MV_NX){
+					// DELETE
+
+					db.del(key);
+				}
+
+				return Result::ok(true);
+			}else{
+				return Result::ok(false);
+			}
+		}
+
+	}
+
 
 
 	template<class DBAdapter>
@@ -81,11 +142,7 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			auto it = db.find(key);
-
-			if (it && it->isValid(std::true_type{})){
-				// No Set.
-
+			if (impl_::exists(db, key)){
 				return Result::ok(false);
 			}else{
 				// SET
@@ -147,12 +204,16 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			auto it = db.find(key);
-
 			// because old_value may be overwritten,
 			// we had to make a copy.
 
-			blob.string = it && it->isValid(std::true_type{}) ? it->getVal() : "";
+			if (auto it = db.find(key);
+				it && it->isValid(std::true_type{})){
+
+				blob.string = it->getVal();
+			}else{
+				blob.string = "";
+			}
 
 			// SET
 
@@ -188,12 +249,11 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			// because old_value may be overwritten,
-			// we had to make a copy.
+			if (auto it = db.find(key);
+				it && it->isValid(std::true_type{})){
 
-			auto it = db.find(key);
-
-			if (it && it->isValid(std::true_type{})){
+				// because old_value may be overwritten,
+				// we had to make a copy.
 				blob.string = it->getVal();
 
 				// DEL
@@ -232,9 +292,11 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			auto it = db.find(key);
 
-			if (it && it->isValid(std::true_type{})){
+
+			if (auto it = db.find(key);
+				it && it->isValid(std::true_type{})){
+
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
@@ -268,9 +330,9 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			auto it = db.find(key);
+			if (auto it = db.find(key);
+				it && it->isValid(std::true_type{})){
 
-			if (it && it->isValid(std::true_type{})){
 				// SET
 
 				if (it->getTTL() > 0)
@@ -293,43 +355,29 @@ namespace net::worker::commands::Mutable{
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"rename",	"RENAME"	,
-			"move",		"MOVE"
+			"move",		"MOVE"		,
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() != 3)
-				return Result::error();
+			using namespace impl_;
+			return cpmv<CPMVOperation::MV>(p, db);
+		}
+	};
 
-			// GET
 
-			const auto &key = p[1];
 
-			if (key.empty())
-				return Result::error();
+	template<class DBAdapter>
+	struct RENAMENX : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "renamenx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"renamenx",	"RENAMENX"	,
+			"movenx",	"MOVENX"
+		};
 
-			const auto &newkey = p[2];
-
-			if (newkey.empty())
-				return Result::error();
-
-			if (key == newkey)
-				return Result::error();
-
-			auto it = db.find(key);
-
-			if (it && it->isValid(std::true_type{})){
-				// SET
-
-				db.set(newkey, it->getVal(), it->getTTL());
-
-				// DELETE
-
-				db.del(key);
-
-				return Result::ok(true);
-			}else{
-				return Result::ok(false);
-			}
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			using namespace impl_;
+			return cpmv<CPMVOperation::MV_NX>(p, db);
 		}
 	};
 
@@ -344,39 +392,25 @@ namespace net::worker::commands::Mutable{
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() != 3)
-				return Result::error();
+			using namespace impl_;
+			return cpmv<CPMVOperation::CP>(p, db);
 
-			// GET
+		}
+	};
 
-			const auto &key = p[1];
 
-			if (key.empty())
-				return Result::error();
 
-			const auto &newkey = p[2];
+	template<class DBAdapter>
+	struct COPYNX : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "copynx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"copynx",	"COPYNX"
+		};
 
-			if (newkey.empty())
-				return Result::error();
-
-			if (key == newkey)
-				return Result::error();
-
-			auto it = db.find(key);
-
-			if (it && it->isValid(std::true_type{})){
-				// SET
-
-				db.set(newkey, it->getVal(), it->getTTL());
-
-				// DELETE
-
-				// do not delete
-
-				return Result::ok(true);
-			}else{
-				return Result::ok(false);
-			}
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			using namespace impl_;
+			return cpmv<CPMVOperation::CP_NX>(p, db);
 		}
 	};
 
@@ -388,16 +422,18 @@ namespace net::worker::commands::Mutable{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,
-				SET	,
-				SETEX	,
-				SETNX	,
-				DEL	,
-				GETSET	,
-				GETDEL	,
-				EXPIRE	,
-				PERSIST	,
-				COPY	,
-				RENAME
+				SET		,
+				SETEX		,
+				SETNX		,
+				DEL		,
+				GETSET		,
+				GETDEL		,
+				EXPIRE		,
+				PERSIST		,
+				COPY		,
+				COPYNX		,
+				RENAME		,
+				RENAMENX
 			>(pack);
 		}
 	};

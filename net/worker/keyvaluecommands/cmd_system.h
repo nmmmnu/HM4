@@ -7,10 +7,23 @@ namespace net::worker::commands::System{
 
 
 	template<class DBAdapter>
+	struct SELECT : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "select";
+		constexpr inline static std::string_view cmd[]	= {
+			"select",	"SELECT"
+		};
+
+		Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
+			return Result::ok();
+		}
+	};
+
+	template<class DBAdapter>
 	struct EXIT : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "exit";
 		constexpr inline static std::string_view cmd[]	= {
-			"exit",		"EXIT"
+			"exit",		"EXIT",
+			"quit",		"QUIT"
 		};
 
 		Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
@@ -38,6 +51,7 @@ namespace net::worker::commands::System{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,
+				SELECT	,
 				EXIT	,
 				SHUTDOWN
 			>(pack);
