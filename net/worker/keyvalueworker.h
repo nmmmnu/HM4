@@ -5,14 +5,15 @@
 #include "keyvaluecommands/cmd_accumulators.h"	// COUNT, SUM, MIN, MAX
 #include "keyvaluecommands/cmd_getx.h"		// GETX
 
-#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, DEL, GETSET, EXPIRE
+#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, DEL, GETSET, GETDEL, EXPIRE, PERSIST
+#include "keyvaluecommands/cmd_copy.h"		// COPY, COPYNX, RENAME, RENAMENX
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
 
 #include "keyvaluecommands/cmd_queue.h"		// SADD, SPOP
 
-#include "keyvaluecommands/cmd_info.h"		// INFO
+#include "keyvaluecommands/cmd_info.h"		// INFO, VERSION, TYPE, PING, ECHO
 #include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
-#include "keyvaluecommands/cmd_system.h"	// EXIT, SHUTDOWN
+#include "keyvaluecommands/cmd_system.h"	// SELECT, EXIT, SHUTDOWN
 
 #include "protocol/protocoldefs.h"
 
@@ -59,6 +60,7 @@ namespace net::worker{
 				GetX		::RegisterModule,
 
 				Mutable		::RegisterModule,
+				Copy		::RegisterModule,
 				Counter		::RegisterModule,
 
 				Queue		::RegisterModule,

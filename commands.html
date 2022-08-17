@@ -116,13 +116,18 @@
 				<li><a href="#SETNX">SETNX</a></li>
 				<li><a href="#EXPIRE">EXPIRE</a></li>
 				<li><a href="#PERSIST">PERSIST</a></li>
-				<li><a href="#COPY">COPY</a></li>
-				<li><a href="#COPYNX">COPYNX</a></li>
-				<li><a href="#RENAME">RENAME</a></li>
-				<li><a href="#RENAMENX">RENAMENX</a></li>
 				<li><a href="#GETSET">GETSET</a></li>
 				<li><a href="#GETDEL">GETDEL</a></li>
 				<li><a href="#DEL">DEL</a></li>
+				</div>
+			<div>
+			<b>copy.h</b><br />
+			&nbsp;
+
+					<li><a href="#COPY">COPY</a></li>
+				<li><a href="#COPYNX">COPYNX</a></li>
+				<li><a href="#RENAME">RENAME</a></li>
+				<li><a href="#RENAMENX">RENAMENX</a></li>
 				</div>
 			<div>
 			<b>counter.h</b><br />
@@ -440,90 +445,6 @@
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is removed.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="COPY">
-
-			<h2>COPY old_key new_key</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>COPY</td></tr>
-				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mutable.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Atomically copy the <i>old_key</i> to the <i>new_key</i>.<br />Note: The command internally GET <i>old_key</i> first.
-			<h3>Return type:</h3>
-			bool
-			<h3>Return value:</h3>
-			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="COPYNX">
-
-			<h2>COPYNX old_key new_key</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>COPYNX</td></tr>
-				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + 2 * N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mutable.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Atomically copy the <i>old_key</i> to the <i>new_key</i>, if <i>new_key</i> does not exists.<br />Note: The command internally GET <i>old_key</i> and <i>new_key</i> first.<br />Note: Redis does not support this operation.
-			<h3>Return type:</h3>
-			bool
-			<h3>Return value:</h3>
-			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="RENAME">
-
-			<h2>RENAME old_key new_key / MOVE old_key new_key</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>RENAME</td></tr>
-				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>3 * Mem + N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mutable.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Atomically renames <i>old_key</i> to <i>new_key</i>.<br />Note: The command internally GET <i>old_key</i> first.
-			<h3>Return type:</h3>
-			bool
-			<h3>Return value:</h3>
-			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="RENAMENX">
-
-			<h2>RENAMENX old_key new_key / MOVENX old_key new_key</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>RENAMENX</td></tr>
-				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>3 * Mem + 2 * N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mutable.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Atomically renames <i>old_key</i> to <i>new_key</i>, if <i>new_key</i> does not exists.<br />Note: The command internally GET <i>old_key</i> and <i>new_key</i> first.
-			<h3>Return type:</h3>
-			bool
-			<h3>Return value:</h3>
-			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
-			<p class="top"><a href="#top">top</a></p>
-		</div>
 				<div class="cmd" id="GETSET">
 
 			<h2>GETSET key value [seconds=0]</h2>
@@ -585,6 +506,90 @@
 			bool
 			<h3>Return value:</h3>
 			Always return 1
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="COPY">
+
+			<h2>COPY old_key new_key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>COPY</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>copy.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically copy the <i>old_key</i> to the <i>new_key</i>.<br />Note: The command internally GET <i>old_key</i> first.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="COPYNX">
+
+			<h2>COPYNX old_key new_key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>COPYNX</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>copy.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically copy the <i>old_key</i> to the <i>new_key</i>, if <i>new_key</i> does not exists.<br />Note: The command internally GET <i>old_key</i> and <i>new_key</i> first.<br />Note: Redis does not support this operation.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="RENAME">
+
+			<h2>RENAME old_key new_key / MOVE old_key new_key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>RENAME</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>3 * Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>copy.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically renames <i>old_key</i> to <i>new_key</i>.<br />Note: The command internally GET <i>old_key</i> first.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="RENAMENX">
+
+			<h2>RENAMENX old_key new_key / MOVENX old_key new_key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>RENAMENX</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>3 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>copy.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically renames <i>old_key</i> to <i>new_key</i>, if <i>new_key</i> does not exists.<br />Note: The command internally GET <i>old_key</i> and <i>new_key</i> first.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INCR">
