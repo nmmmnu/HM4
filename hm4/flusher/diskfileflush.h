@@ -11,7 +11,7 @@ namespace flusher{
 template<class IDGenerator>
 class DiskFileFlush{
 private:
-	constexpr static char DIR_WILDCARD = '*';
+	constexpr static inline std::string_view DIR_WILDCARD = "*";
 
 	using TombstoneOptions = hm4::disk::FileBuilder::TombstoneOptions;
 

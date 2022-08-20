@@ -133,7 +133,7 @@ class Cmd{
 	}
 
 	div.menurow div {
-		flex:		100px;
+		flex:		200px;
 
 		border:		dotted 1px #007;
 

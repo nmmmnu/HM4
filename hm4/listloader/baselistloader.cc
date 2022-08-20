@@ -23,8 +23,8 @@ namespace hm4{
 namespace listloader{
 	namespace impl_{
 
-		void ContainerHelper::push_back_(const char *filename){
-			if (isFile(filename)){
+		void ContainerHelper::push_back_(std::string_view filename){
+			if (isFile(filename.data())){
 				container_.emplace_back();
 				container_.back().open(filename, advice_, mode_);
 			}

@@ -16,13 +16,10 @@ int main(){
 	const char *resultne	= "hello..db";
 
 	mytest("", StringReplace::replaceByCopy(s, find	,	 replace	) == result	);
-	mytest("", StringReplace::replaceByCopy(s, find[0]	, replace	) == result	);
 
 	mytest("", StringReplace::replaceByCopy(s, find		, ""		) == resultne	);
-	mytest("", StringReplace::replaceByCopy(s, find[0]	, ""		) == resultne	);
 
 	mytest("", StringReplace::replaceByCopy(s, findne	, replace	) == s		);
-	mytest("", StringReplace::replaceByCopy(s, findne[0]	, replace	) == s		);
 
 	mytest("", StringReplace::replaceByCopy(s, ""		, replace	) == s		);
 	mytest("", StringReplace::replaceByCopy(s, ""		, replace	) == s		);

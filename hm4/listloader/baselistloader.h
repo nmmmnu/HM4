@@ -5,6 +5,7 @@
 #include "multi/collectionlist.h"
 
 #include <vector>
+#include <string_view>
 
 
 
@@ -36,12 +37,12 @@ namespace listloader{
 				container_.clear();
 				container_.reserve(size);
 
-				for(auto it = std::make_reverse_iterator(last); it != std::make_reverse_iterator(first); ++it)
+				for(auto it = first; it != last; ++it)
 					push_back_(*it);
 			}
 
 		private:
-			void push_back_(const char *filename);
+			void push_back_(std::string_view filename);
 
 		private:
 			Container		container_;

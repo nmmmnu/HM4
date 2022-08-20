@@ -10,7 +10,8 @@
 
 #include "myalign.h"
 
-#include "logger.h"
+#define log__(...) /* nada */
+//#include "logger.h"
 
 
 namespace hm4{
@@ -150,9 +151,13 @@ namespace{
 	}
 
 	[[maybe_unused]]
-	void log__file__(std::string_view filename, bool const mmap){
-		if constexpr (0)
+	void log__file__(std::string_view const filename, bool const mmap){
+		if constexpr (0){
 			log__("- ", filename, mmap ? "Success" : "Error");
+		}else{
+			(void) filename;
+			(void) mmap;
+		}
 	}
 
 } // anonymous namespace

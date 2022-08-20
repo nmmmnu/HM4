@@ -108,7 +108,7 @@ int main(int argc, char **argv){
 
 	using hm4::disk::FileBuilder::TombstoneOptions;
 
-	TombstoneOptions const tombstoneOptions = argv[1][0] == 't' ? TombstoneOptions::NONE : TombstoneOptions::KEEP;
+	TombstoneOptions const tombstoneOptions = argv[1][0] == 't' ? TombstoneOptions::REMOVE : TombstoneOptions::KEEP;
 
 	int const table_count	= argc - 3;
 	const char **path	= (const char **) &argv[3];

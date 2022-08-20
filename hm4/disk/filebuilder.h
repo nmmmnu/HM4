@@ -18,7 +18,7 @@ namespace FileBuilder{
 	}
 
 	enum class TombstoneOptions : bool{
-		NONE,
+		REMOVE,
 		KEEP
 	};
 
