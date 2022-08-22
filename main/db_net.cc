@@ -58,6 +58,7 @@ constexpr size_t MIN_ARENA_SIZE = 128;
 #include <iostream>
 
 namespace{
+
 	void printError(const char *msg){
 		fmt::print(stderr, "{}\n", msg);
 		exit(1);
@@ -159,7 +160,8 @@ namespace{
 		else
 			return select_MutableLists(opt);
 	}
-}
+
+} // anonymous namespace
 
 int main(int argc, char **argv){
 	MyOptions const opt = prepareOptions(argc, argv);
