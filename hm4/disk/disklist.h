@@ -94,6 +94,10 @@ public:
 		return aligned_;
 	}
 
+	uint32_t created() const{
+		return metadata_.created();
+	}
+
 public:
 	random_access_iterator ra_begin() const;
 	random_access_iterator ra_end() const;

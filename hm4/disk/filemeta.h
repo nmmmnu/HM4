@@ -60,6 +60,10 @@ public:
 		return betoh<uint64_t>(blob.size);
 	}
 
+	uint32_t created() const{
+		return betoh<uint32_t>(blob.created);
+	}
+
 public:
 	void print() const;
 
