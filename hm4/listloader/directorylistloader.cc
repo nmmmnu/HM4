@@ -25,7 +25,7 @@ void DirectoryListLoader::refresh_(){
 	if (files.open(path_))
 		container_.copy(std::begin(files), std::end(files));
 	else
-		container_.copy(nullptr, nullptr);
+		container_.copy();
 }
 
 

@@ -37,22 +37,14 @@ constexpr TombstoneOptions TOMBSTONE_OPTION = TombstoneOptions::KEEP;
 
 namespace{
 
-	void printError(const char *msg){
-		fmt::print("{}\n", msg);
-		exit(1);
-	}
-
 	MyOptions prepareOptions(int argc, char **argv);
-	std::vector<std::string> prepareSmartMergeFileList(MyOptions const &opt);
 
-	std::string getNewFilename(std::string_view db_path);
+	int compact(MyOptions const &opt);
 
 	template <class Factory>
 	void mergeFromFactory(Factory const &f, std::string_view output_file){
 		hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()), TOMBSTONE_OPTION, hm4::Pair::WriteOptions::ALIGNED);
 	}
-
-	void renameFiles(MySpan<std::string> const files, std::string_view from, std::string_view to);
 
 } // anonymous namespace
 
@@ -96,74 +88,14 @@ private:
 int main(int argc, char **argv){
 	MyOptions const opt = prepareOptions(argc, argv);
 
-	while(true){
-		auto const path = prepareSmartMergeFileList(opt);
-
-		switch(path.size()){
-		case 0:
-		case 1:
-			{
-				fmt::print(	"No need to compact...\n");
-
-				return 0;
-			}
-
-		case 2:
-			{
-				auto const output_file = getNewFilename(opt.db_path);
-
-				fmt::print(	"Merging two tables into {}\n", output_file);
-
-				MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE };
-
-				mergeFromFactory(factory, output_file);
-
-				break;
-			}
-
-		default:
-			{
-				auto const output_file = getNewFilename(opt.db_path);
-
-				fmt::print(	"Merging multiple tables into {}\n", output_file);
-
-				MergeListFactory_N factory{ std::begin(path), std::end(path), DEFAULT_ADVICE, DEFAULT_MODE };
-
-				mergeFromFactory(factory, output_file);
-
-				break;
-			}
-		}
-
-		renameFiles(path, opt.rename_from, opt.rename_to);
-
-		fmt::print("\n\n\n");
-		fmt::print("*** Loop processing ***\n");
-		fmt::print("\n\n\n");
-	}
-
-	return 0;
+	return compact(opt);
 }
 
 namespace{
 
-	void printUsage(const char *cmd);
-
-	MyOptions prepareOptions(int argc, char **argv){
-		MyOptions opt;
-
-		switch(argc){
-		case 1 + 1:
-			if (! readINIFile(argv[1], opt))
-				printError("Can not open config file...");
-
-			break;
-
-		default:
-			printUsage(argv[0]);
-		}
-
-		return opt;
+	void printError(const char *msg){
+		fmt::print("{}\n", msg);
+		exit(1);
 	}
 
 	void printUsage(const char *cmd){
@@ -188,6 +120,23 @@ namespace{
 		exit(10);
 	}
 
+	MyOptions prepareOptions(int argc, char **argv){
+		MyOptions opt;
+
+		switch(argc){
+		case 1 + 1:
+			if (! readINIFile(argv[1], opt))
+				printError("Can not open config file...");
+
+			break;
+
+		default:
+			printUsage(argv[0]);
+		}
+
+		return opt;
+	}
+
 	std::string getNewFilename(std::string_view db_path){
 		constexpr std::string_view DIR_WILDCARD = "*";
 
@@ -205,6 +154,8 @@ namespace{
 		list.open(filename, DEFAULT_ADVICE, DEFAULT_MODE);
 		return list.size();
 	}
+
+
 
 	std::vector<std::string> prepareSmartMergeFileList(MyOptions const &opt){
 		using DBFilePair = std::pair<hm4::disk::DiskList::size_type, std::string_view>;
@@ -256,12 +207,15 @@ namespace{
 				continue;
 			}
 
-			auto const total_m = static_cast<size_t>(
-							static_cast<double>(total) *
-							( out.size() == 1 ? 1.25 : 1.00 )
-			);
+			if (auto const total_m = static_cast<size_t>(
+					static_cast<double>(total) *
+					( out.size() == 1 ? 1.25 : 1.00 )
+				);
+				size	< opt.compaction_max_records					&&
+				total_m	< opt.compaction_max_records * opt.compaction_max_tables	&&
+				size < total_m
+					){
 
-			if (size < opt.compaction_max_records && size < total_m){
 				total += size;
 				out.emplace_back(filename);
 				continue;
@@ -310,6 +264,58 @@ namespace{
 			}
 		}
 
+	}
+
+
+
+	int compact(MyOptions const &opt){
+		while(true){
+			auto const path = prepareSmartMergeFileList(opt);
+
+			switch(path.size()){
+			case 0:
+			case 1:
+				{
+					fmt::print(	"No need to compact...\n");
+
+					return 0;
+				}
+
+			case 2:
+				{
+					auto const output_file = getNewFilename(opt.db_path);
+
+					fmt::print(	"Merging two tables into {}\n", output_file);
+
+					MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE };
+
+					mergeFromFactory(factory, output_file);
+
+					break;
+				}
+
+			default:
+				{
+					auto const output_file = getNewFilename(opt.db_path);
+
+					fmt::print(	"Merging multiple tables into {}\n", output_file);
+
+					MergeListFactory_N factory{ std::begin(path), std::end(path), DEFAULT_ADVICE, DEFAULT_MODE };
+
+					mergeFromFactory(factory, output_file);
+
+					break;
+				}
+			}
+
+			renameFiles(path, opt.rename_from, opt.rename_to);
+
+			fmt::print("\n\n\n");
+			fmt::print("*** Loop processing ***\n");
+			fmt::print("\n\n\n");
+		}
+
+		return 0;
 	}
 
 } // anonymous namespace

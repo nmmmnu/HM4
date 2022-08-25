@@ -253,6 +253,10 @@ namespace{
 				adapter_factory().save();
 				return true;
 
+			case Signal::USR1:
+				adapter_factory().reload();
+				return true;
+
 			case Signal::INT:
 			case Signal::TERM:
 				return false;

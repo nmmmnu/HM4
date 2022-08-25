@@ -30,6 +30,10 @@ namespace listloader{
 				container_.clear();
 			}
 
+			void copy(){
+				container_.clear();
+			}
+
 			template<class IT>
 			void copy(IT first, IT last){
 				size_t const size = narrow<typename Container::size_type>(std::distance(first, last));
