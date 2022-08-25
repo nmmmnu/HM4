@@ -23,7 +23,7 @@ $(A)db_net: $(O)db_net.o	\
 								\
 			$(O)directorylistloader.o 		\
 			$(O)baselistloader.o			\
-			$(O)myglob.o				\
+			$(O)myglob.o $(O)myfs.o			\
 								\
 			$(O)signalguard.o			\
 			$(O)redisprotocol.o $(O)sockets.o	\
