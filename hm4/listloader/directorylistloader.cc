@@ -6,20 +6,20 @@
 namespace hm4{
 namespace listloader{
 
+
+
 bool DirectoryListLoader::checkIfLoaderNeed(std::string_view const s){
 	return std::find(std::begin(s), std::end(s), '*') != std::end(s);
 }
 
-void DirectoryListLoader::refresh_(){
+void DirectoryListLoader::stop__(std::string_view const s){
+	log__("Refusing to open path without wildcard", s);
+	exit(1);
+}
+
+void DirectoryListLoader::refresh(){
 	if (path_.empty())
 		return;
-
-	// guard against missing '*'
-	if (checkIfLoaderNeed(path_) == false){
-		log__("Refusing to open path without wildcard", path_);
-		exit(1);
-		return;
-	}
 
 	MyGlob files;
 	if (files.open(path_))
@@ -27,6 +27,7 @@ void DirectoryListLoader::refresh_(){
 	else
 		container_.copy();
 }
+
 
 
 } // namespace listloader

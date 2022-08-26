@@ -29,7 +29,9 @@ namespace flushlist_impl_{
 			return true;
 		}else{
 			log__("Reloading data...");
-			return loader && loader->refresh();
+			if (loader)
+				loader->refresh();
+			return true;
 		}
 	}
 

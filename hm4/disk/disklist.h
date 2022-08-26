@@ -67,10 +67,6 @@ public:
 
 	void close();
 
-	operator bool(){
-		return metadata_;
-	}
-
 	void printMetadata() const{
 		metadata_.print();
 	}

@@ -26,10 +26,6 @@ namespace listloader{
 				return list_;
 			}
 
-			void copy(std::nullptr_t, std::nullptr_t){
-				container_.clear();
-			}
-
 			void copy(){
 				container_.clear();
 			}

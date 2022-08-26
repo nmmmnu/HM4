@@ -45,9 +45,8 @@ int main(int argc, char **argv){
 	using DiskList = hm4::disk::DiskList;
 
 	DiskList list;
-	list.open(input_file);
 
-	if (list == false){
+	if ( list.open(input_file) ){
 		fmt::print("List is invalid. Please check it and try again.\n");
 		return 3;
 	}

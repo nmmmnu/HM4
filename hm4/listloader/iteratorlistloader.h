@@ -15,32 +15,20 @@ public:
 
 public:
 	IteratorListLoader(IT first, IT last, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				container_(advice, mode),
-				first_(std::move(first)),
-				last_(std::move(last)){
-		refresh();
+				container_(advice, mode){
+
+		container_.copy(first, last);
 	}
 
-	bool refresh(){
-		container_.copy(first_, last_);
+	// reload not supported
+	// Command pattern not supported
 
-		return true;
-	}
-
-	// Command pattern
-	bool command(){
-		return refresh();
-	}
-
-	/* const */ List &getList() const{
+	List const &getList() const{
 		return container_.getList();
 	}
 
 private:
 	impl_::ContainerHelper	container_;
-
-	IT first_;
-	IT last_;
 };
 
 

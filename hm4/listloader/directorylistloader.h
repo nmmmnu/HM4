@@ -16,21 +16,25 @@ public:
 	DirectoryListLoader(UString &&path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
 				container_(advice, mode),
 				path_(std::forward<UString>(path)){
-		refresh_();
+
+		if (checkIfLoaderNeed(path_) == false){
+			// guard against missing '*'
+			stop__(path_);
+		}
+
+		refresh();
 	}
 
-	bool refresh(){
-		refresh_();
+	void refresh();
+
+	// Command pattern
+	bool command(){
+		refresh();
 
 		return true;
 	}
 
-	// Command pattern
-	bool command(){
-		return refresh();
-	}
-
-	/* const */ List &getList() const{
+	List const &getList() const{
 		return container_.getList();
 	}
 
@@ -38,12 +42,14 @@ public:
 	static bool checkIfLoaderNeed(std::string_view const s);
 
 private:
-	void refresh_();
+	static void stop__(std::string_view const s);
 
 private:
 	impl_::ContainerHelper	container_;
 
 	std::string		path_;
+
+//	std::map<uint64_t, >	inodes_;
 };
 
 

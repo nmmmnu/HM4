@@ -11,7 +11,7 @@ namespace hm4{
 namespace multi{
 
 
-template <class StoreContainer>
+template <class StoreContainer, class Projection = std::nullptr_t>
 class CollectionList{
 public:
 	using List		= typename StoreContainer::value_type;
@@ -19,7 +19,7 @@ public:
 	using size_type		= typename List::size_type;
 	using difference_type	= typename List::difference_type;
 
-	using iterator		= CollectionIterator<typename List::iterator>;
+	using iterator		= CollectionIterator<typename List::iterator, Projection>;
 
 	using estimated_size	= std::true_type;
 

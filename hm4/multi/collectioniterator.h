@@ -11,7 +11,8 @@ namespace hm4{
 namespace multi{
 
 
-template <class Iterator>
+
+template <class Iterator, class Projection = std::nullptr_t>
 class CollectionIterator{
 public:
 	CollectionIterator(CollectionIterator const &other) = default;
@@ -100,7 +101,13 @@ public:
 
 public:
 	reference operator*() const{
-		return *itp_.front();
+		if constexpr(std::is_same_v<Projection, std::nullptr_t>){
+			return *itp_.front();
+		}else{
+			return Projection()(
+				*itp_.front()
+			);
+		}
 	}
 
 	bool operator==(CollectionIterator const &other) const{

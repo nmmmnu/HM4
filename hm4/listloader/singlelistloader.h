@@ -2,6 +2,7 @@
 #define SINGLE_LIST_LOADER_H_
 
 #include "disk/disklist.h"
+#include "myfs.h"
 
 namespace hm4{
 namespace listloader{
@@ -21,25 +22,36 @@ public:
 		open_();
 	}
 
-	bool refresh(){
-		list_.close();
+	void refresh(){
+		auto const inode = fileInode(filename_);
 
-		return open_();
+		if (inode == inode_)
+			return;
+
+		inode_ = inode;
+
+		refresh_();
 	}
 
 	// Command pattern
 	bool command(){
-		return refresh();
+		refresh();
+
+		return true;
 	}
 
-	/* const */ List &getList() const{
+	List const &getList() const{
 		return list_;
 	}
 
 private:
-	int open_(){
-		list_.open(filename_, advice_, mode_);
-		return true;
+	bool open_(){
+		return list_.open(filename_, advice_, mode_);
+	}
+
+	void refresh_(){
+		list_.close();
+		open_();
 	}
 
 private:
@@ -48,6 +60,8 @@ private:
 	std::string		filename_;
 	MMAPFile::Advice	advice_;
 	DiskList::OpenMode	mode_;
+
+	uint64_t		inode_ = 0;
 };
 
 

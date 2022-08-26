@@ -10,8 +10,8 @@
 
 #include "myalign.h"
 
-#define log__(...) /* nada */
-//#include "logger.h"
+//#define log__(...) /* nada */
+#include "logger.h"
 
 
 namespace hm4{
