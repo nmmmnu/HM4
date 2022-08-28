@@ -4,6 +4,27 @@
 #include <fcntl.h>	// open
 #include <unistd.h>	// close, lseek
 
+namespace{
+	bool openFail__(int const fd, bool const result = false){
+		::close(fd);
+		return result;
+	}
+
+	int convertAdv__(MMAPFile::Advice const advice){
+		using Advice = MMAPFile::Advice;
+
+		switch(advice){
+		default:
+		case Advice::NORMAL:		return MADV_NORMAL	;
+		case Advice::SEQUENTIAL:	return MADV_SEQUENTIAL	;
+		case Advice::RANDOM:		return MADV_RANDOM	;
+		}
+	}
+
+} // namespace
+
+
+
 MMAPFile::MMAPFile(MMAPFile &&other) :
 		mem_		( std::move(other.mem_		)),
 		size_		( std::move(other.size_		)),
@@ -12,13 +33,19 @@ MMAPFile::MMAPFile(MMAPFile &&other) :
 	other.size_ = 0;
 }
 
-bool MMAPFile::open(std::string_view filename, const Advice advice){
+bool MMAPFile::open(std::string_view filename, Advice const advice){
 	return open_(filename, O_RDONLY, PROT_READ, convertAdv__(advice));
 }
 
-inline bool MMAPFile::openFail__(int const fd){
-	::close(fd);
-	return false;
+void MMAPFile::close(){
+	if (mem_ == nullptr)
+		return;
+
+	munmap((void *) mem_, size_);
+	::close(fd_);
+
+	mem_ = nullptr;
+	size_ = 0;
 }
 
 bool MMAPFile::open_(std::string_view filename, int const mode, int const prot, int const advice){
@@ -38,7 +65,7 @@ bool MMAPFile::open_(std::string_view filename, int const mode, int const prot, 
 	size_t size = size2 <= 0 ? 0 : static_cast<size_t>(size2);
 
 	if (size == 0)
-		return openFail__(fd);
+		return openFail__(fd, true);
 
 	/* const */ void *mem = mmap(nullptr, size, prot, MAP_SHARED, fd, /* offset */ 0);
 
@@ -52,28 +79,6 @@ bool MMAPFile::open_(std::string_view filename, int const mode, int const prot, 
 	mem_ = mem;
 
 	return true;
-}
-
-int MMAPFile::convertAdv__(const Advice advice){
-	switch(advice){
-	default:
-	case Advice::NORMAL:		return MADV_NORMAL	;
-	case Advice::SEQUENTIAL:	return MADV_SEQUENTIAL	;
-	case Advice::RANDOM:		return MADV_RANDOM	;
-	}
-
-
-}
-
-void MMAPFile::close(){
-	if (mem_ == nullptr)
-		return;
-
-	munmap((void *) mem_, size_);
-	::close(fd_);
-
-	mem_ = nullptr;
-	size_ = 0;
 }
 
 #if 0

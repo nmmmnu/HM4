@@ -59,17 +59,17 @@ public:
 	void printOptions() const{
 		using impl_::put;
 
-		put("db_path",						"Path to database"						);
+		put("db_path",						"Path to database"							);
 
-		put("compaction_percent",	compaction_percent,	"not used yet. hard set to 25%"					);
+		put("compaction_percent",	compaction_percent,	"not used yet. hard set to 25%"						);
 
 		put("compaction_min_records",	compaction_min_records,	"Tables with less than min_records are always compacted, 0 = disabled"	);
 		put("compaction_max_records",	compaction_max_records,	"Tables with more than min_records are *NOT*  compacted, 0 = disabled"	);
 
 		put("compaction_max_tables",	compaction_max_tables,	"Max tables to compact at once                         , 0 = disabled"	);
 
-		put("rename_from",					"Rename from"							);
-		put("rename_to",					"Rename to"						);
+		put("rename_from",					"Rename from"								);
+		put("rename_to",					"Rename to"								);
 	}
 
 private:

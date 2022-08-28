@@ -4,14 +4,7 @@
 #include "mmapfile.h"
 #include "blobref.h"
 
-class MMAPFilePlus{
-public:
-	MMAPFilePlus() = default;
-
-	// no need d-tor,
-	// MMAPFile-s will be closed automatically
-
-public:
+struct MMAPFilePlus{
 	bool open(std::string_view const filename, const MMAPFile::Advice advice = MMAPFile::Advice::NORMAL){
 		file_.open(filename, advice);
 		blob_ = { file_.mem(), file_.size() };

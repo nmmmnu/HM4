@@ -469,6 +469,7 @@ inline namespace version_2_00_00{
 	}
 
 
+
 	using OPair = MyAllocator::SmartPtrType<Pair, std::nullptr_t>;
 
 	static_assert(std::is_same_v<OPair, std::unique_ptr<Pair> >, "OPair is not std::unique_ptr");

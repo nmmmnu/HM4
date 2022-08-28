@@ -157,20 +157,53 @@ namespace{
 
 
 
-	std::vector<std::string> prepareSmartMergeFileList(MyOptions const &opt){
+	void renameFiles(MySpan<std::string> const files, std::string_view from, std::string_view to){
+		std::string buffer;
+
+		for(auto const &file : files){
+			MyGlob gl;
+			gl.open( concatenateBuffer(buffer, file, "*") );
+
+			fmt::print("Moving {}\n", file);
+
+			for(std::string_view const file1 : gl){
+				std::string const file2 = StringReplace::replaceByCopy(file1, from, to);
+
+				fmt::print(" -{:<60} -> {}\n", file1, file2);
+
+				rename(file1.data(), file2.data());
+			}
+		}
+
+	}
+
+
+
+	auto prepareSmartMergeFileList(MyOptions const &opt){
 		using DBFilePair = std::pair<hm4::disk::DiskList::size_type, std::string_view>;
 
 		std::vector<DBFilePair> files;
 
+		struct Out{
+			std::vector<std::string> zero;
+			std::vector<std::string> path;
+		};
+
+		Out out;
+
 		MyGlob gl;
 		gl.open(opt.db_path);
-
 
 		for(auto &file : gl){
 			auto const size = getSize(file);
 
-			if (size == 0)
+			if (size == 0){
+			//	fmt::print("Zero len table: {}\n", file);
+
+				out.zero.push_back(file);
+
 				continue;
+			}
 
 			files.emplace_back(size, file);
 		}
@@ -179,66 +212,67 @@ namespace{
 
 
 
+		auto &path = out.path;
+
 		if constexpr(1){
 			fmt::print("Sorted file list to consider:\n");
 
 			for(auto &[size, filename] : files)
-				fmt::print("\t- {:<62} {:>8}\n", filename, size);
+				fmt::print(" - {:<62} {:>8}\n", filename, size);
 
 			fmt::print("\n");
 		}
 
 
 
-		std::vector<std::string> out;
-
 		size_t total = 0;
 
 		for(auto &[size, filename] : files){
-			if (out.size() == 0){
+			if (path.size() == 0){
 				total = size;
-				out.emplace_back(filename);
+				path.emplace_back(filename);
 				continue;
 			}
 
 			if (opt.compaction_min_records && size <= opt.compaction_min_records){
 				total += size;
-				out.emplace_back(filename);
+				path.emplace_back(filename);
 				continue;
 			}
 
 			if (auto const total_m = static_cast<size_t>(
 					static_cast<double>(total) *
-					( out.size() == 1 ? 1.25 : 1.00 )
+					( path.size() == 1 ? 1.25 : 1.00 )
 				);
-				size < opt.compaction_max_records					&&
+				size < opt.compaction_max_records	&&
 				size < total_m
 					){
 
 				total += size;
-				out.emplace_back(filename);
+				path.emplace_back(filename);
 
 				continue;
 			}
 
-			if (out.size() > 1)
+			if (path.size() > 1)
 				break;
 
-			out.clear();
+			path.clear();
 			total = size;
-			out.emplace_back(filename);
+			path.emplace_back(filename);
 		}
 
-		if (opt.compaction_max_tables > 1 && out.size() > opt.compaction_max_tables)
-			out.resize(opt.compaction_max_tables);
+		if (opt.compaction_max_tables > 1 && path.size() > opt.compaction_max_tables)
+			path.resize(opt.compaction_max_tables);
 
 
 
 		if constexpr(1){
-			fmt::print("File list to compact (Cumulative size {}):\n", total);
+			fmt::print("File list to compact\n");
+			fmt::print("Total records ~ {}\n", total);
 
-			for(auto &filename : out)
-				fmt::print("\t- {}\n", filename);
+			for(auto &filename : path)
+				fmt::print(" - {}\n", filename);
 
 			fmt::print("\n");
 		}
@@ -250,29 +284,13 @@ namespace{
 
 
 
-	void renameFiles(MySpan<std::string> const files, std::string_view from, std::string_view to){
-		std::string buffer;
-
-		for(auto const &file : files){
-			MyGlob gl;
-			gl.open( concatenateBuffer(buffer, file, "*") );
-
-			for(std::string_view const file1 : gl){
-				std::string const file2 = StringReplace::replaceByCopy(file1, from, to);
-
-			//	fmt::print("mv {:<60} -> {}\n", file1, file2);
-
-				rename(file1.data(), file2.data());
-			}
-		}
-
-	}
-
-
-
 	int compact(MyOptions const &opt){
 		while(true){
-			auto const path = prepareSmartMergeFileList(opt);
+			auto const out = prepareSmartMergeFileList(opt);
+
+			renameFiles(out.zero, opt.rename_from, opt.rename_to);
+
+			auto &path = out.path;
 
 			switch(path.size()){
 			case 0:

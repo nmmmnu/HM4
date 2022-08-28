@@ -39,10 +39,6 @@ public:
 private:
 	bool open_(std::string_view filename, int mode, int prot, int advice);
 
-	static bool openFail__(int const fd);
-
-	static int convertAdv__(Advice advice);
-
 private:
 	void	*mem_		= nullptr;
 	size_t	size_		= 0;
