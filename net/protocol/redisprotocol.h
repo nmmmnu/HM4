@@ -51,6 +51,9 @@ namespace redis_protocol_impl_{
 
 class RedisProtocol{
 public:
+	constexpr static auto LL_RESPONCE = LogLevel::NOTICE;
+
+public:
 	constexpr static inline char			STAR	= '*';
 	constexpr static inline char			DOLLAR	= '$';
 
@@ -118,7 +121,7 @@ private:
 	constexpr static size_t calc_sstr(std::string_view s);
 
 	static void response_log_(std::string_view const type, size_t const res, size_t const capacity){
-		log__("Responce", type, "reserve", res, "capacity", capacity);
+		log__<LL_RESPONCE>("Responce", type, "reserve", res, "capacity", capacity);
 	}
 
 private:

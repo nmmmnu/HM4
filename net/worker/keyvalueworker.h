@@ -32,7 +32,7 @@ namespace net::worker{
 		void registerModule(RegisterPack &pack){
 			using M = Module<DBAdapter, RegisterPack>;
 
-			log__("Loading", M::name, "module...");
+			log__<LogLevel::NOTICE>("Loading", M::name, "module...");
 			M::load(pack);
 		}
 

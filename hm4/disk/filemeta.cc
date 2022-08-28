@@ -37,11 +37,11 @@ inline bool FileMeta::openFail_(std::string_view){
 }
 
 void FileMeta::print() const{
-	MyTime::to_string_buffer_t buffer;
+	mytime::to_string_buffer_t buffer;
 
 	const char *format = "{:<14}: {}\n";
 
-	constexpr auto time_format = MyTime::TIME_FORMAT_STANDARD;
+	constexpr auto time_format = mytime::TIME_FORMAT_STANDARD;
 
 	fmt::print(format,	"Version",	version()		);
 	fmt::print(format,	"Records",	size()			);
@@ -51,7 +51,7 @@ void FileMeta::print() const{
 	fmt::print(format,	"Aligned",	aligned() ? "Y" : "N"	);
 
 	auto x = [&buffer, time_format](auto date){
-		return date    ? MyTime::toString(betoh(date), time_format, buffer) : "n/a";
+		return date    ? mytime::toString(betoh(date), time_format, buffer) : "n/a";
 	};
 
 	fmt::print(format,	"Created",	x(blob.created   	) );

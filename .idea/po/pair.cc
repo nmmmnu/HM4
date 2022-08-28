@@ -6,8 +6,6 @@
 #include <cassert>
 #include <cstdio>
 
-#define log__(...) /* nada */
-
 namespace hm4{
 
 // ==============================

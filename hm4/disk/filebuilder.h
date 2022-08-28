@@ -83,18 +83,19 @@ namespace FileBuilder{
 
 	class FileMetaBuilder{
 	public:
-		FileMetaBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
-							file_meta(filenameMeta(filename), config::MODE),
-							fileWriteOptions(fileWriteOptions){}
+		template<typename UString>
+		FileMetaBuilder(UString &&filename, Pair::WriteOptions const fileWriteOptions) :
+							fileWriteOptions(fileWriteOptions),
+							filename(std::forward<UString>(filename)){}
 
 		~FileMetaBuilder();
 
 		void operator()(Pair const &pair);
 
 	private:
-		std::ofstream	file_meta;
-
 		Pair::WriteOptions	fileWriteOptions;
+
+		std::string		filename;
 
 		uint64_t	minCreated	= std::numeric_limits<uint64_t>::max();
 		uint64_t	maxCreated	= std::numeric_limits<uint64_t>::min();

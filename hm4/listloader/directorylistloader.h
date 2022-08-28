@@ -6,6 +6,8 @@
 namespace hm4{
 namespace listloader{
 
+
+
 class DirectoryListLoader{
 public:
 	using DiskList	= hm4::disk::DiskList;
@@ -17,12 +19,8 @@ public:
 				container_(advice, mode),
 				path_(std::forward<UString>(path)){
 
-		if (checkIfLoaderNeed(path_) == false){
-			// guard against missing '*'
-			stop__(path_);
-		}
-
-		refresh();
+		// guard against missing '*'
+		checkAndRefresh_();
 	}
 
 	void refresh();
@@ -42,15 +40,14 @@ public:
 	static bool checkIfLoaderNeed(std::string_view const s);
 
 private:
-	static void stop__(std::string_view const s);
+	void checkAndRefresh_();
 
 private:
 	impl_::ContainerHelper	container_;
 
 	std::string		path_;
-
-//	std::map<uint64_t, >	inodes_;
 };
+
 
 
 } // namespace listloader

@@ -6,12 +6,12 @@
 
 namespace{
 	std::string_view idgeneratorTS(char *buffer, const char *format){
-		auto const now = MyTime::now();
+		auto const now = mytime::now();
 
 		sprintf(buffer,
 				format,
-					MyTime::to32(now),
-					MyTime::toUsec(now)
+					mytime::to32(now),
+					mytime::toUsec(now)
 		);
 
 		return buffer;
@@ -29,16 +29,16 @@ namespace idgenerator{
 	}
 
 	std::string_view IDGeneratorDate::operator()(to_string_buffer_t &buffer) const{
-		constexpr auto FORMAT = MyTime::TIME_FORMAT_NUMBER;
+		constexpr auto FORMAT = mytime::TIME_FORMAT_NUMBER;
 
-		auto const now = MyTime::now();
+		auto const now = mytime::now();
 
-		MyTime::to_string_buffer_t time_buffer;
+		mytime::to_string_buffer_t time_buffer;
 
 		sprintf(buffer.data(),
 				"%s.%010u",
-					MyTime::toString(now, FORMAT, time_buffer).data(),
-					MyTime::toUsec(now)
+					mytime::toString(now, FORMAT, time_buffer).data(),
+					mytime::toUsec(now)
 		);
 
 		return buffer.data();

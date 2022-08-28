@@ -70,11 +70,11 @@ private:
 	}
 
 	void save_() const{
-		log__("Save data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
+		log__<LogLevel::WARNING>("Save data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 
 		flushlist_impl_::save(*list_, flusher_);
 
-		log__("Save done");
+		log__<LogLevel::WARNING>("Save done");
 	}
 
 private:

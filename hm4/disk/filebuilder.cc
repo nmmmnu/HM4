@@ -104,7 +104,17 @@ namespace FileBuilder{
 			fixMax(maxCreated)
 		);
 
-		file_meta.write( (const char *) & blob, sizeof(FileMetaBlob));
+		auto const filename_temp = filenameMetaTemp(filename);
+		auto const filename_norm = filenameMeta_string_view(filename);
+
+		{
+			std::ofstream file_meta{ filename_temp, config::MODE };
+			file_meta.write( (const char *) & blob, sizeof(FileMetaBlob));
+			file_meta.close();
+		}
+
+		// "weird rename" in lock free environment.
+		rename(filename_temp.data(), filename_norm.data());
 	}
 
 

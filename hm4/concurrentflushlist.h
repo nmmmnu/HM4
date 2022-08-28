@@ -55,7 +55,7 @@ public:
 	}
 
 	void flush(){
-		log__("Start Flushing data...");
+		log__<LogLevel::WARNING>("Start Flushing data...");
 
 		// we have to switch lists, so need to join()
 		thread_.join();
@@ -71,7 +71,7 @@ public:
 		if (!empty(*list1_))
 			flushlist_impl_::clear(*list1_, loader_);
 		else
-			log__("No data for flushing.");
+			log__<LogLevel::WARNING>("No data for flushing.");
 	}
 
 	// Command pattern
@@ -98,11 +98,11 @@ private:
 		[[maybe_unused]]
 		std::string_view const id = fg ? "Foreground" : "Background";
 
-		log__("TH#", id, "Flushing data...", "List record(s): ", list.size(), "List size: ", list.bytes());
+		log__<LogLevel::WARNING>("TH#", id, "Flushing data...", "List record(s): ", list.size(), "List size: ", list.bytes());
 
 		flushlist_impl_::save(list, flusher_);
 
-		log__("TH#", id, "Flushing done");
+		log__<LogLevel::WARNING>("TH#", id, "Flushing done");
 	}
 
 private:

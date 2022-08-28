@@ -7,6 +7,8 @@ namespace hm4{
 namespace disk{
 
 namespace file_ext{
+	constexpr std::string_view DOT_TEMP		= ".temp";
+
 	constexpr std::string_view DOT_INDX		= ".indx";
 	constexpr std::string_view DOT_DATA		= ".data";
 	constexpr std::string_view DOT_LINE		= ".line";
@@ -16,8 +18,12 @@ namespace file_ext{
 } // namespace
 
 
-inline auto filenameMeta(std::string_view const filename){
-	return std::string{ filename };
+inline std::string_view filenameMeta_string_view(std::string_view const filename){
+	return filename;
+}
+
+inline auto filenameMetaTemp(std::string_view const filename){
+	return concatenateString( filename, file_ext::DOT_TEMP	);
 }
 
 inline auto filenameIndx(std::string_view const filename){

@@ -266,7 +266,15 @@ namespace{
 			}
 		};
 
-		while( loop.process() && signal_processing(guard()) );
+		MyTimer timer_reload;
+
+		auto const crontab_reload = opt.crontab_reload == 0 ? 0 : std::min(opt.crontab_reload, opt.crontab_reload_min);
+
+		while( loop.process() && signal_processing(guard()) ){
+			crontab(timer_reload, crontab_reload, [&adapter_factory](){
+				adapter_factory().reload();
+			});
+		}
 
 		return 0;
 	}

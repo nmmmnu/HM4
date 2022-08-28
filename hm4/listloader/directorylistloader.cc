@@ -12,9 +12,13 @@ bool DirectoryListLoader::checkIfLoaderNeed(std::string_view const s){
 	return std::find(std::begin(s), std::end(s), '*') != std::end(s);
 }
 
-void DirectoryListLoader::stop__(std::string_view const s){
-	log__("Refusing to open path without wildcard", s);
-	exit(1);
+void DirectoryListLoader::checkAndRefresh_(){
+	if (checkIfLoaderNeed(path_) == false){
+		log__<LogLevel::ERROR>("Refusing to open path without wildcard", path_);
+		exit(1);
+	}
+
+	refresh();
 }
 
 void DirectoryListLoader::refresh(){

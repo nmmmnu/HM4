@@ -3,6 +3,7 @@
 
 #include "disk/disklist.h"
 #include "multi/collectionlist.h"
+#include "myfs.h"
 
 #include <vector>
 #include <string_view>
@@ -34,15 +35,35 @@ namespace listloader{
 			void copy(IT first, IT last){
 				size_t const size = narrow<typename Container::size_type>(std::distance(first, last));
 
-				container_.clear();
-				container_.reserve(size);
+				Container neo;
+				neo.reserve(size);
 
-				for(auto it = first; it != last; ++it)
-					push_back_(*it);
+				for(auto it = first; it != last; ++it){
+					std::string_view filename = *it;
+
+					auto const id = checkFileInode(filename);
+
+					if (id == 0)
+						continue;
+
+					auto f = [id](auto const &table){
+						return table.id() == id;
+					};
+
+					auto table_it = std::find_if(std::begin(container_), std::end(container_), f);
+
+					if (table_it != std::end(container_)){
+						// found, move it.
+						neo.push_back(std::move(*table_it));
+					}else{
+						// not found, add new
+						neo.emplace_back();
+						neo.back().open(id, filename, advice_, mode_);
+					}
+				}
+
+				container_ = std::move(neo);
 			}
-
-		private:
-			void push_back_(std::string_view filename);
 
 		private:
 			Container		container_;

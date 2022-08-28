@@ -15,10 +15,10 @@ PAIR_OBJ = $(O)pair.o $(O)mytime.o
 DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o
 
 
-$(A)db_file: $(O)db_file.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)directorylistloader.o $(O)baselistloader.o $(O)myglob.o
+$(A)db_file: $(O)db_file.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)directorylistloader.o $(O)myfs.o $(O)myglob.o
 	$(LINK)
 
-$(A)db_merge: $(O)db_merge.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)baselistloader.o $(O)myfs.o
+$(A)db_merge: $(O)db_merge.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o $(O)myfs.o
 	$(LINK)
 
 $(A)db_replay: $(O)db_replay.o		$(PAIR_OBJ) $(DISKLIST_OBJ) $(O)filebuilder.o                $(O)idgenerator.o $(O)base64.o

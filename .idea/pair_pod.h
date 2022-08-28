@@ -9,8 +9,6 @@
 #include "mystring.h"
 #include "comparator.h"
 
-#define log__(...) /* nada */
-
 namespace hm4{
 
 namespace pair_impl_{

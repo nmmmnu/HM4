@@ -59,7 +59,16 @@ public:
 
 	// no need d-tor,
 	// MMAPFile-s will be closed automatically
-	// ~DiskList() = default;
+	// However, we wanted printed message
+	~DiskList(){
+		close();
+	}
+
+	bool open(uint64_t id, std::string_view filename, MMAPFile::Advice advice = DEFAULT_ADVICE, OpenMode mode = DEFAULT_MODE){
+		id_ = id;
+
+		return open(filename, advice, mode);
+	}
 
 	bool open(std::string_view filename, MMAPFile::Advice advice = DEFAULT_ADVICE, OpenMode mode = DEFAULT_MODE);
 
@@ -90,8 +99,8 @@ public:
 		return aligned_;
 	}
 
-	uint32_t created() const{
-		return metadata_.created();
+	auto id() const{
+		return id_;
 	}
 
 public:
@@ -147,6 +156,8 @@ private:
 	SearchMode	searchMode_	= SearchMode::BINARY;
 
 	bool		aligned_	= true;
+
+	uint64_t	id_		= 0;
 };
 
 

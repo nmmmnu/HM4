@@ -46,12 +46,12 @@ void Pair::print() const noexcept{
 	const char *format      = "%-32s | %-20s | %s | %8u\n";
 	const char *fnull	= "(null)";
 
-	MyTime::to_string_buffer_t buffer;
+	mytime::to_string_buffer_t buffer;
 
 	printf(format,
 		getKey_(),
 		vallen ? getVal_() : fnull,
-		MyTime::toString(getCreated(), MyTime::TIME_FORMAT_STANDARD, buffer).data(),
+		mytime::toString(getCreated(), mytime::TIME_FORMAT_STANDARD, buffer).data(),
 		betoh<uint32_t>(expires)
 	);
 }
@@ -59,11 +59,11 @@ void Pair::print() const noexcept{
 // ==============================
 
 bool Pair::isExpired_() const noexcept{
-	return expires &&  MyTime::expired( getCreated(), getExpires() );
+	return expires &&  mytime::expired( getCreated(), getExpires() );
 }
 
 uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
-	return created ? MyTime::to64(created) : MyTime::now();
+	return created ? mytime::to64(created) : mytime::now();
 }
 
 uint32_t Pair::getTTL() const noexcept{
@@ -72,11 +72,11 @@ uint32_t Pair::getTTL() const noexcept{
 
 	uint32_t const exp = getExpires();
 
-	uint64_t const endTime64 = MyTime::addTime(getCreated(), exp);
+	uint64_t const endTime64 = mytime::addTime(getCreated(), exp);
 
-	uint64_t const now64 = MyTime::now();
+	uint64_t const now64 = mytime::now();
 
-	return endTime64 < now64 ? 0 : MyTime::to32(endTime64 - now64);
+	return endTime64 < now64 ? 0 : mytime::to32(endTime64 - now64);
 }
 
 

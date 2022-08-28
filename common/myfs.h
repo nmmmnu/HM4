@@ -6,10 +6,10 @@
 
 
 
-bool fileExists(std::string_view const name);
-bool fileUnlink(std::string_view const name);
-uint64_t fileInode(std::string_view const name);
-
+bool fileExists(std::string_view name) noexcept;
+bool fileUnlink(std::string_view name) noexcept;
+uint64_t fileInode(std::string_view name) noexcept;
+uint64_t checkFileInode(std::string_view filename) noexcept;
 
 
 #endif

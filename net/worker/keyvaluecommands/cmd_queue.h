@@ -1,7 +1,7 @@
 #include "base.h"
 #include "idgenerator.h"
 #include "mystring.h"
-//#include "logger.h"
+#include "logger.h"
 
 
 namespace net::worker::commands::Queue{

@@ -8,12 +8,14 @@
 
 #include <unordered_map>
 
+#include "logger.h"
+
 namespace net{
 
 template<class Selector, class Worker>
 class AsyncLoop{
 public:
-	constexpr static bool		LOG_ENABLED		= true;
+	constexpr static auto		MY_LOG_LEVEL		= LogLevel::WARNING;
 
 public:
 	constexpr static uint32_t	MIN_CLIENTS		= 4;
@@ -85,7 +87,7 @@ private:
 
 private:
 	void log_(const char *s, int const fd = -1) const{
-		if constexpr(! LOG_ENABLED)
+		if constexpr(MY_LOG_LEVEL > LogLevel::GlobalLogLevel)
 			return;
 
 		// printf suppose to be faster than std::cout

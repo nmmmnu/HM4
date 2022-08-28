@@ -39,6 +39,9 @@ public:
 	std::nullptr_t	max_memlist_size	= nullptr;
 	size_t		max_memlist_arena	= 0;
 
+	uint32_t	crontab_reload		= 90;
+	uint32_t	crontab_reload_min	= 15;
+
 public:
 	void operator()(std::string_view const name, std::string_view const value){
 		switch( hash(name) ){
@@ -60,6 +63,8 @@ public:
 		case hash("max_clients"		)	: return assign_(max_clients,		value);
 		case hash("max_memlist_size"	)	: return assign_(max_memlist_size,	value);
 		case hash("max_memlist_arena"	)	: return assign_(max_memlist_arena,	value);
+
+		case hash("crontab_reload"	)	: return assign_(crontab_reload,	value);
 
 		default					: return;
 		}
@@ -90,6 +95,8 @@ public:
 		put("max_clients",					"Max Clients"							);
 		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB (deprecated and ignored)"		);
 		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"			);
+
+		put("crontab_reload",		crontab_reload,		"crontab - reload every XX seconds, 0 disabled, min 15 sec"	);
 	}
 
 private:

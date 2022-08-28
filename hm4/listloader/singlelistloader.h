@@ -25,12 +25,11 @@ public:
 	void refresh(){
 		auto const inode = fileInode(filename_);
 
-		if (inode == inode_)
+		if (inode == list_.id())
 			return;
 
-		inode_ = inode;
-
-		refresh_();
+		list_.close();
+		list_.open(inode, filename_, advice_, mode_);
 	}
 
 	// Command pattern
@@ -46,12 +45,12 @@ public:
 
 private:
 	bool open_(){
-		return list_.open(filename_, advice_, mode_);
-	}
+		auto const inode = fileInode(filename_);
 
-	void refresh_(){
-		list_.close();
-		open_();
+		if (inode == 0)
+			return false;
+
+		return list_.open(inode, filename_, advice_, mode_);
 	}
 
 private:
@@ -60,8 +59,6 @@ private:
 	std::string		filename_;
 	MMAPFile::Advice	advice_;
 	DiskList::OpenMode	mode_;
-
-	uint64_t		inode_ = 0;
 };
 
 

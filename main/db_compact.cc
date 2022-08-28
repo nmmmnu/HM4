@@ -196,7 +196,7 @@ namespace{
 
 		for(auto &[size, filename] : files){
 			if (out.size() == 0){
-				total += size;
+				total = size;
 				out.emplace_back(filename);
 				continue;
 			}
@@ -211,13 +211,13 @@ namespace{
 					static_cast<double>(total) *
 					( out.size() == 1 ? 1.25 : 1.00 )
 				);
-				size	< opt.compaction_max_records					&&
-				total_m	< opt.compaction_max_records * opt.compaction_max_tables	&&
+				size < opt.compaction_max_records					&&
 				size < total_m
 					){
 
 				total += size;
 				out.emplace_back(filename);
+
 				continue;
 			}
 
@@ -225,6 +225,8 @@ namespace{
 				break;
 
 			out.clear();
+			total = size;
+			out.emplace_back(filename);
 		}
 
 		if (opt.compaction_max_tables > 1 && out.size() > opt.compaction_max_tables)

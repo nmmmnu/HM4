@@ -22,7 +22,6 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)idgenerator.o			\
 								\
 			$(O)directorylistloader.o 		\
-			$(O)baselistloader.o			\
 			$(O)myglob.o $(O)myfs.o			\
 								\
 			$(O)signalguard.o			\
@@ -36,7 +35,5 @@ $(A)db_compact: $(O)db_compact.o	\
 								\
 			$(O)idgenerator.o			\
 								\
-			$(O)baselistloader.o			\
-			$(O)myglob.o				\
-
+			$(O)myglob.o $(O)myfs.o
 	$(LINK)

@@ -16,6 +16,7 @@ UNAME		= $(shell uname -s)
 CF_DEPS		= -MMD -MP
 CF_INCL		= -Iinclude $(EXTRA_INCL)
 CF_OPTIM	= -O3 -g
+CF_LTO		= -flto
 #CF_OPTIM	= -O3 -DNDEBUG
 CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
 CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wno-unknown-warning-option -Wno-stringop-truncation
@@ -23,6 +24,7 @@ CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wno-unknown-warni
 #CF_MISC	= -DNOT_HAVE_CHARCONV
 
 CF_ALL		= -std=c++17	\
+			$(CF_LTO)	\
 			$(CF_DEPS)	\
 			$(CF_INCL)	\
 			$(CF_OPTIM)	\
@@ -35,8 +37,9 @@ CXX		= $(MYCC) $(CF_ALL)
 
 LD_ALL		=
 LL_ALL		= -lstdc++
+LL_LTO		= -flto
 
-LINK		= $(MYCC) $(LD_ALL) -o $@ $^ $(LL_ALL)
+LINK		= $(MYCC) $(LL_LTO) $(LD_ALL) -o $@ $^ $(LL_ALL)
 
 # https://stackoverflow.com/questions/9002264/starting-a-stdthread-with-static-linking-causes-segmentation-fault
 LINK		+= -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
