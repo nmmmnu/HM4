@@ -20,4 +20,10 @@ Changelog
 -	new command VERSION
 -	new command TYPE
 -	new command UNLINK (alias to DEL)
+-	new command PING, ECHO
+-	new command SADD / SPOP (atomic queues)
+-	new command COPYNX, RENAMENX
+-	new command SELECT
+-	implement file inode based reload
+-	implement db_net automatic-reload
 
