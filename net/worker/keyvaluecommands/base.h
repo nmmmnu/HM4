@@ -35,7 +35,8 @@ namespace net::worker::commands{
 		}
 
 		Container		container;
-		std::string		string;
+		std::string		string_key;
+		std::string		string_val;
 		to_string_buffer_t	std_buffer[1];
 	};
 

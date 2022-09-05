@@ -18,12 +18,7 @@ namespace net::worker::commands::Queue{
 
 		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
 
-		constexpr static std::size_t MAX_KEY_SIZE =
-						hm4::PairConf::MAX_KEY_SIZE
-						- MyIDGenerator::to_string_buffer_t_size
-						- 16 /* HEX */
-						-  1 /* DBAdapter::SEPARATOR */
-		;
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE - MyIDGenerator::to_string_buffer_t_size - 16;
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 3 && p.size() != 4)
@@ -37,8 +32,6 @@ namespace net::worker::commands::Queue{
 			if (keyN.size() > MAX_KEY_SIZE)
 				return Result::error();
 
-			std::string const key = concatenateString(keyN, DBAdapter::SEPARATOR);
-
 			auto const &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
@@ -46,9 +39,9 @@ namespace net::worker::commands::Queue{
 
 			auto const &id = MyIDGenerator{}(buffer);
 
-			concatenateBuffer(blob.string, key, id);
+			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, id);
 
-			db.set(blob.string, val, exp);
+			db.set(key, val, exp);
 
 			return Result::ok();
 		}
@@ -77,7 +70,7 @@ namespace net::worker::commands::Queue{
 			if (keyN.empty())
 				return Result::error();
 
-			std::string const key = concatenateString(keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR);
 
 			auto it = db.find(key, std::false_type{});
 
@@ -157,7 +150,7 @@ namespace net::worker::commands::Queue{
 
 		Result finalizeOK_(std::string_view control_key, std::string_view key, std::string_view val, DBAdapter &db, OutputBlob &blob, uint16_t const iterations) const{
 			// store value, because we will delete it...
-			blob.string = val;
+			blob.string_val = val;
 
 			if (iterations > ITERATIONS_UPDATE_CONTROL_KEY){
 				// update control key...
@@ -167,7 +160,7 @@ namespace net::worker::commands::Queue{
 			// delete data key...
 			db.del(key);
 
-			return Result::ok(blob.string);
+			return Result::ok(blob.string_val);
 		}
 
 		Result finalizeTryAgain_(std::string_view control_key, std::string_view key, DBAdapter &db, OutputBlob &) const{

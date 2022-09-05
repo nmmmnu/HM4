@@ -158,9 +158,9 @@ namespace net::worker::commands::Mutable{
 			if (auto it = db.find(key);
 				it && it->isValid(std::true_type{})){
 
-				blob.string = it->getVal();
+				blob.string_val = it->getVal();
 			}else{
-				blob.string = "";
+				blob.string_val = "";
 			}
 
 			// SET
@@ -172,7 +172,7 @@ namespace net::worker::commands::Mutable{
 
 			// return
 
-			return Result::ok(blob.string);
+			return Result::ok(blob.string_val);
 		}
 	};
 
@@ -202,7 +202,7 @@ namespace net::worker::commands::Mutable{
 
 				// because old_value may be overwritten,
 				// we had to make a copy.
-				blob.string = it->getVal();
+				blob.string_val = it->getVal();
 
 				// DEL
 
@@ -210,11 +210,9 @@ namespace net::worker::commands::Mutable{
 
 				// return
 
-				return Result::ok(blob.string);
+				return Result::ok(blob.string_val);
 			}else{
-				blob.string = "";
-
-				return Result::ok(blob.string);
+				return Result::ok("");
 			}
 		}
 	};
