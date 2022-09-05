@@ -171,7 +171,7 @@ bool DiskList::openDataOnly_(std::string_view const filename){
 	return mData_.open(filenameData(filename), advice);
 }
 
-bool DiskList::openDataOnly(std::string_view const filename, bool const aligned){
+bool DiskList::openDataOnly_with_bool(std::string_view const filename, bool const aligned){
 	log__<LogLevel::WARNING>("Open disktable for repair", filename);
 
 	aligned_ = aligned;

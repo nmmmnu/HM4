@@ -72,7 +72,18 @@ public:
 
 	bool open(std::string_view filename, MMAPFile::Advice advice = DEFAULT_ADVICE, OpenMode mode = DEFAULT_MODE);
 
-	bool openDataOnly(std::string_view filename, bool aligned);
+	bool openDataOnly_with_bool(std::string_view filename, bool aligned);
+
+	bool openDataOnly(std::string_view filename, hm4::Pair::WriteOptions writeOptions){
+		auto translateOptions = [](auto x){
+			switch(x){
+			case hm4::Pair::WriteOptions::ALIGNED	: return true;
+			case hm4::Pair::WriteOptions::NONE	: return false;
+			}
+		};
+
+		return openDataOnly_with_bool(filename, translateOptions(writeOptions) );
+	}
 
 	void close();
 

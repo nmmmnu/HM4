@@ -7,6 +7,7 @@
 #include "factory/mutablebinlog.h"
 #include "factory/mutableconcurrent.h"
 #include "factory/mutablebinlogcurrent.h"
+#include "factory/binlogreplay.h"
 
 #include "arenaallocator.h"
 
@@ -44,8 +45,6 @@ using MyProtocol	= net::protocol::RedisProtocol;
 using MyArenaAllocator	= MyAllocator::ArenaAllocator;
 
 // ----------------------------------
-
-constexpr size_t MB = 1024 * 1024;
 
 constexpr size_t MIN_ARENA_SIZE = 128;
 
@@ -92,6 +91,8 @@ namespace{
 	}
 
 	MyArenaAllocator createAllocator(const MyOptions &opt){
+		constexpr size_t MB = 1024 * 1024;
+
 		// uncomment for virtual Allocator
 		static_assert(MyArenaAllocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
@@ -107,6 +108,18 @@ namespace{
 		return allocator;
 	}
 
+	void replayBinlogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator);
+
+	void checkBinLogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
+		if (file.empty())
+			return;
+
+		if (!fileExists(hm4::disk::filenameData(file)))
+			return;
+
+		return replayBinlogFile(file, path, allocator);
+	}
+
 	int select_MutableLists(const MyOptions &opt){
 		if constexpr(USE_CONCURRENCY){
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
@@ -119,6 +132,11 @@ namespace{
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
 				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
+
+				auto &allocator = allocator1;
+
+				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
+				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator);
 
 				return fLists(
 					opt, DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
@@ -140,6 +158,8 @@ namespace{
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
 				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
+
+				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 
 				return fLists(
 					opt, DBAdapterFactory::MutableBinLog<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, syncOprions, allocator },
@@ -207,12 +227,6 @@ namespace{
 			printUsage(argv[0]);
 		}
 
-		if (opt.port == 0)
-			printError("Can not create server socket on port zero...");
-
-		if (!opt.binlog_path1.empty() && fileExists(hm4::disk::filenameData(opt.binlog_path1)))
-			printError("Binlog file exists. please replay and remove it...");
-
 		return opt;
 	}
 
@@ -222,6 +236,9 @@ namespace{
 		using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
 		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
 		using MyLoop		= net::AsyncLoop<MySelector, MyWorker>;
+
+		if (opt.port == 0)
+			printError("Can not create server socket on port zero...");
 
 		size_t const max_packet_size = hm4::Pair::maxBytes() * 2;
 
@@ -323,6 +340,44 @@ namespace{
 		exit(10);
 	}
 
-} // anonymous namespace
 
+
+	void replayBinlogFile_(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
+
+		fmt::print(std::clog, "Binlog file exists. Trying to replay...\n");
+
+		using hm4::disk::DiskList;
+
+		DiskList input;
+
+		auto const result = input.openDataOnly(file, hm4::Pair::WriteOptions::ALIGNED);
+
+		if (! result){
+			fmt::print(std::clog, "Replay failed.\n");
+			return;
+		}
+
+		/* nested scope for the d-tor */
+		{
+			DBAdapterFactory::BinLogReplay factory{ path, allocator };
+
+			auto &list = factory();
+
+			// no need to show messages.
+			// messages will be shown from the builder.
+			for(auto const &pair : input)
+				if (!pair.empty())
+					list.insert(pair);
+
+		} /* d-tor of list kicks here */
+
+		fmt::print(std::clog, "Replay done.\n");
+	}
+
+	void replayBinlogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
+		replayBinlogFile_(file, path, allocator);
+		allocator.reset();
+	}
+
+} // anonymous namespace
 

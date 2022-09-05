@@ -18,19 +18,26 @@ namespace net::worker::commands::Queue{
 
 		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE - MyIDGenerator::to_string_buffer_t_size - 16;
+		constexpr static std::size_t MAX_KEY_SIZE =
+						hm4::PairConf::MAX_KEY_SIZE
+						- MyIDGenerator::to_string_buffer_t_size
+						- 16 /* HEX */
+						-  1 /* DBAdapter::SEPARATOR */
+		;
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
-			auto const &key = p[1];
+			auto const &keyN = p[1];
 
-			if (key.empty())
+			if (keyN.empty())
 				return Result::error();
 
-			if (key.size() > MAX_KEY_SIZE)
+			if (keyN.size() > MAX_KEY_SIZE)
 				return Result::error();
+
+			std::string const key = concatenateString(keyN, DBAdapter::SEPARATOR);
 
 			auto const &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
@@ -65,10 +72,12 @@ namespace net::worker::commands::Queue{
 				return Result::error();
 
 			// GET
-			const auto &key = p[1];
+			const auto &keyN = p[1];
 
-			if (key.empty())
+			if (keyN.empty())
 				return Result::error();
+
+			std::string const key = concatenateString(keyN, DBAdapter::SEPARATOR);
 
 			auto it = db.find(key, std::false_type{});
 

@@ -48,7 +48,7 @@ public:
 		case hash("immutable"		)	: return assign_(immutable,		value);
 		case hash("db_path"		)	: return assign_(db_path,		value);
 
-		case hash("binlog_path"		)	: return assign_(binlog_path1,		value);
+	//	case hash("binlog_path"		)	: return assign_(binlog_path1,		value);
 		case hash("binlog_path1"	)	: return assign_(binlog_path1,		value);
 		case hash("binlog_path2"	)	: return assign_(binlog_path2,		value);
 		case hash("binlog_fsync"	)	: return assign_(binlog_fsync,		value);

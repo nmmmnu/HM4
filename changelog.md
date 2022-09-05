@@ -27,3 +27,7 @@ Changelog
 -	implement file inode based reload
 -	implement db_net automatic-reload
 
+### 1.2.17
+
+-	automatic binlog replay when db_net starts
+

@@ -107,7 +107,7 @@ int main(int argc, char **argv){
 
 	DiskList input;
 
-	auto const result = input.openDataOnly(inputFile, ! non_aligned);
+	auto const result = input.openDataOnly_with_bool(inputFile, ! non_aligned);
 
 	if (! result){
 		fmt::print("Can not open input table.\n", inputFile);
