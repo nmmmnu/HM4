@@ -10,7 +10,6 @@ Changelog
 
 -	make more user-friendly behavour in GETX and accumulators,
 	by changing clamp-ing of the input value -
-
 	now it will still clamp to higher value if you specify very big number like 100'000.
 -	bug fix expiration in GETSET
 -	bug fix tombstone in DEL
@@ -33,7 +32,5 @@ Changelog
 -	automatic binlog replay when db_net starts
 -	special seprator (currently ~) is added after SADD / SPOP keys,
 	to avoid mixing with user keys.
-
-	For example keys "user_q" and "user_q631661f5.00039314" can mix with key "user_queue",
-
-	but keys "user_q~" and "user_q~631661f5.00039314" will not.
+For example keys "user_q" and "user_q631661f5.00039314" can mix with key "user_queue",
+but keys "user_q~" and "user_q~631661f5.00039314" will not.
