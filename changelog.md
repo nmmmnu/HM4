@@ -30,7 +30,7 @@ Changelog
 ### 1.2.17
 
 -	automatic binlog replay when db_net starts
--	special seprator (currently ~) is added after SADD / SPOP keys,
+-	special seprator (currently \~) is added after SADD / SPOP keys,
 	to avoid mixing with user keys.
 For example keys "user_q" and "user_q631661f5.00039314" can mix with key "user_queue",
-but keys "user_q~" and "user_q~631661f5.00039314" will not.
+but keys "user_q\~" and "user_q\~631661f5.00039314" will not.
