@@ -137,6 +137,16 @@
 				<li><a href="#DECR">DECR</a></li>
 				</div>
 			<div>
+			<b>(collection module) hash.h</b><br />
+			&nbsp;
+
+					<li><a href="#HGETALL">HGETALL</a></li>
+				<li><a href="#HGET">HGET</a></li>
+				<li><a href="#HEXISTS">HEXISTS</a></li>
+				<li><a href="#HSET">HSET</a></li>
+				<li><a href="#HDEL">HDEL</a></li>
+				</div>
+			<div>
 			<b>queue.h</b><br />
 			&nbsp;
 
@@ -632,6 +642,111 @@
 			string (int)
 			<h3>Return value:</h3>
 			New decrease value.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HGETALL">
+
+			<h2>HSET key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HGETALL</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>getx.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get <i>key</i> hash.<br />Returns up to 1'000 elements.<br />Works exactly as Redis HSET, except internally set key for each value.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array of subkey and values from key hash
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HGET">
+
+			<h2>HGET key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HGET</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get <i>key</i> -> <i>subkey</i> hash.<br />Works exactly as Redis HSET, except internally set key for each value.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Value of the key -> subkey hash or empty string.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HEXISTS">
+
+			<h2>HEXISTS key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HEXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get information if <i>key</i> -> <i>subkey</i> hash exists.<br /><br />Works exactly as Redis HSET, except internally set key for each value.<br />Operation is not recommended, because it is as fast as if you get the hash itself.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key -> subkey hash do not exists.<br />1 if the key -> subkey hash exists.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HSET">
+
+			<h2>HSET key subkey val [seconds]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HSET</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>key</i> -> <i>subkey</i> -> <i>value</i> hash, with optional expiration of <i>seconds</i> seconds.<br />Works exactly as Redis HSET, except internally set key for each value.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HDEL">
+
+			<h2>HDEL key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HDEL</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>key</i> -> <i>subkey</i> hash.<br />Works exactly as Redis HSET, except internally set key for each value.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SADD">

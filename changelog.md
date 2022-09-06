@@ -32,3 +32,7 @@ Changelog
 -	automatic binlog replay when db_net starts
 -	special seprator (currently \~) is added after SADD / SPOP keys,
 	to avoid mixing with user keys.
+-	new command HGETALL ... in getx module
+-	new command HGET, HEXISTS ... in immutable module
+-	new command HSET, HDEL ... in mutable module
+

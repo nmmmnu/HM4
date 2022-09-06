@@ -12,16 +12,20 @@ namespace net::worker::commands::GetX{
 
 
 
-		template<class It, class OutputBlob>
-		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, OutputBlob &data){
+		template<bool Tail, class It, class OutputBlob, class ProjectionKey>
+		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, OutputBlob &data, ProjectionKey projKey){
 			uint16_t iterations	= 0;
 			uint16_t results	= 0;
 
 			for(;it;++it){
 				auto const &key = it->getKey();
 
+				auto pkey = projKey(key);
+
 				if (++iterations > ITERATIONS){
-					data.emplace_back(key);
+					if constexpr(Tail)
+						data.emplace_back(pkey);
+
 					return;
 				}
 
@@ -34,15 +38,22 @@ namespace net::worker::commands::GetX{
 					continue;
 
 				if (++results > maxResults){
-					data.emplace_back(key);
+					data.emplace_back(pkey);
 					return;
 				}
 
 				auto const &val = it->getVal();
 
-				data.emplace_back(key);
+				data.emplace_back(pkey);
 				data.emplace_back(val);
 			}
+		}
+
+		template<class It, class OutputBlob>
+		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, OutputBlob &data){
+			return accumulateResults<true>(maxResults, prefix, it, data, [](auto x){
+				return x;
+			});
 		}
 	}
 
@@ -98,6 +109,66 @@ namespace net::worker::commands::GetX{
 
 
 
+	template<class DBAdapter>
+	struct HGETALL : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "hgetall";
+		constexpr inline static std::string_view cmd[]	= {
+			"hgetall",	"HGETALL"
+		};
+
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- DBAdapter::SEPARATOR.size()
+						- 16;
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			if (p.size() != 2)
+				return Result::error();
+
+
+
+			using namespace getx_impl_;
+
+			auto &container = blob.container;
+
+			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
+			container.clear();
+
+
+
+			auto const &keyN = p[1];
+
+			if (keyN.empty())
+				return Result::error();
+
+			if (keyN.size() > MAX_KEY_SIZE)
+				return Result::error();
+
+			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR);
+
+			auto const key_size = key.size();
+
+			auto proj = [key_size](std::string_view x) -> std::string_view{
+				if (key_size <= x.size())
+					return x.substr(key_size);
+				else
+					return x;
+			};
+
+			bool const no_tail = false;
+
+			accumulateResults<no_tail>(
+				ITERATIONS			,
+				key				,
+				db.find(key, std::false_type{})	,
+				container			,
+				proj
+			);
+
+			return Result::ok_container(container);
+		}
+	};
+
+
 
 	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
@@ -105,7 +176,8 @@ namespace net::worker::commands::GetX{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,
-				GETX
+				GETX,
+				HGETALL
 			>(pack);
 		}
 	};

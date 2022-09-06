@@ -3,7 +3,7 @@
 
 #include "keyvaluecommands/cmd_immutable.h"	// GET, TTL
 #include "keyvaluecommands/cmd_accumulators.h"	// COUNT, SUM, MIN, MAX
-#include "keyvaluecommands/cmd_getx.h"		// GETX
+#include "keyvaluecommands/cmd_getx.h"		// GETX, HGETALL
 
 #include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, DEL, GETSET, GETDEL, EXPIRE, PERSIST
 #include "keyvaluecommands/cmd_copy.h"		// COPY, COPYNX, RENAME, RENAMENX

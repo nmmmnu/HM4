@@ -6,8 +6,6 @@
 
 namespace net::worker::commands::Queue{
 
-
-
 	template<class DBAdapter>
 	struct SADD : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "sadd";
@@ -18,7 +16,10 @@ namespace net::worker::commands::Queue{
 
 		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE - MyIDGenerator::to_string_buffer_t_size - 16;
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- MyIDGenerator::to_string_buffer_t_size
+						- DBAdapter::SEPARATOR.size()
+						- 16;
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 3 && p.size() != 4)
@@ -60,6 +61,13 @@ namespace net::worker::commands::Queue{
 		constexpr static uint16_t ITERATIONS			= 1000;
 		constexpr static uint16_t ITERATIONS_UPDATE_CONTROL_KEY	= 10;
 
+		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
+
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- MyIDGenerator::to_string_buffer_t_size
+						- DBAdapter::SEPARATOR.size()
+						- 16;
+
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 2)
 				return Result::error();
@@ -68,6 +76,9 @@ namespace net::worker::commands::Queue{
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
+				return Result::error();
+
+			if (keyN.size() > MAX_KEY_SIZE)
 				return Result::error();
 
 			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR);

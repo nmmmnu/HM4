@@ -72,6 +72,47 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class DBAdapter>
+	struct HSET : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "hset";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"hset",		"HSET"
+		};
+
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- DBAdapter::SEPARATOR.size()
+						- 16;
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			if (p.size() != 4 && p.size() != 5)
+				return Result::error();
+
+			const auto &keyN = p[1];
+
+			if (keyN.empty())
+				return Result::error();
+
+			const auto &subN = p[2];
+
+			if (subN.empty())
+				return Result::error();
+
+			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+				return Result::error();
+
+			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+			auto const &val = p[3];
+			auto const exp  = p.size() == 5 ? from_string<uint32_t>(p[4]) : 0;
+
+			db.set(key, val, exp);
+
+			return Result::ok();
+		}
+	};
+
+
+
+	template<class DBAdapter>
 	struct SETNX : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "setnx";
 		constexpr inline static bool mut		= true;
@@ -124,6 +165,45 @@ namespace net::worker::commands::Mutable{
 
 			if (key.empty())
 				return Result::error();
+
+			bool const result = db.del(key);
+
+			return Result::ok(result);
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct HDEL : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "hdel";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"hdel",		"HDEL"
+		};
+
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- DBAdapter::SEPARATOR.size()
+						- 16;
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			if (p.size() != 4 && p.size() != 3)
+				return Result::error();
+
+			const auto &keyN = p[1];
+
+			if (keyN.empty())
+				return Result::error();
+
+			const auto &subN = p[2];
+
+			if (subN.empty())
+				return Result::error();
+
+			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+				return Result::error();
+
+			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
 
 			bool const result = db.del(key);
 
@@ -303,8 +383,10 @@ namespace net::worker::commands::Mutable{
 			return registerCommands<DBAdapter, RegisterPack,
 				SET		,
 				SETEX		,
+				HSET		,
 				SETNX		,
 				DEL		,
+				HDEL		,
 				GETSET		,
 				GETDEL		,
 				EXPIRE		,

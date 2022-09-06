@@ -669,6 +669,110 @@ function getData(){
 
 
 		),
+		"(collection module) hash" => array(
+
+
+
+			new Cmd(
+					"HGETALL",
+
+					"HSET key",
+
+					"Get <i>key</i> hash.<br />" .
+					"Returns up to 1'000 elements.<br />" .
+					"Works exactly as Redis HSET, except internally set key for each value.",
+					"array",
+					"array of subkey and values from key hash",
+					"1.2.17",
+					"Mem + N * Disk",
+					true,
+					true,
+
+					"getx"
+			),
+
+
+
+			new Cmd(
+					"HGET",
+
+					"HGET key subkey",
+
+					"Get <i>key</i> -> <i>subkey</i> hash.<br />" .
+					"Works exactly as Redis HSET, except internally set key for each value.",
+					"string",
+					"Value of the key -> subkey hash or empty string.",
+					"1.2.17",
+					"Mem + N * Disk",
+					true,
+					true,
+
+					"immutable"
+			),
+
+
+
+			new Cmd(
+					"HEXISTS",
+
+					"HEXISTS key subkey",
+
+					"Get information if <i>key</i> -> <i>subkey</i> hash exists.<br /><br />" .
+					"Works exactly as Redis HSET, except internally set key for each value.<br />" .
+					"Operation is not recommended, because it is as fast as if you get the hash itself.",
+					"bool",
+					"0 if the key -> subkey hash do not exists.<br />" .
+					"1 if the key -> subkey hash exists.",
+					"1.2.17",
+					"Mem",
+					true,
+					true,
+
+					"immutable"
+			),
+
+
+
+			new Cmd(
+					"HSET",
+
+					"HSET key subkey val [seconds]",
+
+					"Set <i>key</i> -> <i>subkey</i> -> <i>value</i> hash, with optional expiration of <i>seconds</i> seconds.<br />" .
+					"Works exactly as Redis HSET, except internally set key for each value.",
+					"OK",
+					"OK",
+					"1.2.17",
+					"Mem",
+					true,
+					true,
+
+					"mutable"
+			),
+
+
+
+			new Cmd(
+					"HDEL",
+
+					"HDEL key subkey",
+
+					"Removes <i>key</i> -> <i>subkey</i> hash.<br />" .
+					"Works exactly as Redis HSET, except internally set key for each value.",
+					"OK",
+					"OK",
+					"1.2.17",
+					"Mem",
+					true,
+					true,
+
+					"mutable"
+			),
+
+
+
+
+		),
 		"queue" => array(
 
 
