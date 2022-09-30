@@ -724,7 +724,7 @@ function getData(){
 					"0 if the key -> subkey hash do not exists.<br />" .
 					"1 if the key -> subkey hash exists.",
 					"1.2.17",
-					"Mem",
+					"Mem + N * Disk",
 					true,
 					true,
 

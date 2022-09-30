@@ -80,7 +80,7 @@ public:
 		put("immutable",		immutable,		"Start mutable = 0, immutable = 1"				);
 		put("db_path",						"Path to database"						);
 
-		put("binlog_path",					"Path to binlog, empty for none"				);
+	//	put("binlog_path",					"Path to binlog, empty for none"				);
 		put("binlog_path1",					"Path to binlog, empty for none"				);
 		put("binlog_path2",					"Path to binlog, empty for none"				);
 		put("binlog_fsync",		binlog_fsync,		"fsync() binlog - none = 0, yes = 1"				);

@@ -20,8 +20,10 @@ namespace{
 	// than DeBruijn-like algorithms,
 	// e.g. 0x03F6EAF2CD271461
 
+	#if 0
+
 	template<typename T>
-	constexpr T modifiedLSB(uint64_t x){
+	constexpr T CLZ(uint64_t x){
 		T result = 1;
 
 		while(x & 1u){
@@ -31,6 +33,17 @@ namespace{
 
 		return result;
 	}
+
+	#else
+
+	template<typename T>
+	constexpr T CLZ(uint64_t x){
+		return static_cast<T>(__builtin_clzll(x) + 1);
+	}
+
+	#endif
+
+
 
 	// we not really need to check the integrity of the list
 	constexpr bool corruptionCheck = false;
@@ -48,7 +61,7 @@ namespace{
 
 template<class T_Allocator>
 auto SkipList<T_Allocator>::getRandomHeight_() -> height_size_type{
-	height_size_type const x = modifiedLSB<height_size_type>(rand64());
+	height_size_type const x = CLZ<height_size_type>(rand64());
 
 	// keeping this because of clang
 	// don't optimize, it is branchless
