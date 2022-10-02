@@ -10,6 +10,7 @@
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
 
 #include "keyvaluecommands/cmd_queue.h"		// SADD, SPOP
+#include "keyvaluecommands/cmd_hll.h"		// PFADD, PFCOUNT, PFMERGE, PFINTERSECT
 
 #include "keyvaluecommands/cmd_info.h"		// INFO, VERSION, TYPE, PING, ECHO
 #include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
@@ -64,6 +65,7 @@ namespace net::worker{
 				Counter		::RegisterModule,
 
 				Queue		::RegisterModule,
+				HLL		::RegisterModule,
 
 				Info		::RegisterModule,
 				Reload		::RegisterModule,

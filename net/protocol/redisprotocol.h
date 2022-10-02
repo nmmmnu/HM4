@@ -60,8 +60,12 @@ public:
 	constexpr static inline std::string_view	ENDLN	= "\r\n";
 
 public:
-	constexpr static size_t	MAX_PARAMS	= 4;	// setex name 100 hello
+	constexpr static size_t	MAX_PARAMS	= 7;	// originally was 4
+							// setex name 100 hello
 							// getx  name 100 prefix
+							//
+							// changed to 7
+							// pfmerge dest a b c d e
 
 public:
 	using Status = ProtocolStatus;

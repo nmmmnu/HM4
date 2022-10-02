@@ -61,12 +61,12 @@ $(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o				$(O)mytime.
 
 
 
-$(A)test_redis_poll: $(O)test_redis_poll.o	$(O)pollselector.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o $(O)vectorlist.o $(O)pair.o	$(O)myprocess.o $(O)idgenerator.o
+$(A)test_redis_poll: $(O)test_redis_poll.o	$(O)pollselector.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o $(O)vectorlist.o $(O)pair.o	$(O)myprocess.o $(O)idgenerator.o	$(O)hyperloglog.o $(O)murmur_hash_64a.o
 	$(LINK)
 
-$(A)test_redis_epoll: $(O)test_redis_epoll.o	$(O)epollselector.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o $(O)vectorlist.o $(O)pair.o	$(O)myprocess.o $(O)idgenerator.o
+$(A)test_redis_epoll: $(O)test_redis_epoll.o	$(O)epollselector.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o $(O)vectorlist.o $(O)pair.o	$(O)myprocess.o $(O)idgenerator.o	$(O)hyperloglog.o $(O)murmur_hash_64a.o
 	$(LINK)
 
-$(A)test_redis_kqueue: $(O)test_redis_kqueue.o	$(O)kqueueselector.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o $(O)vectorlist.o $(O)pair.o	$(O)myprocess.o $(O)idgenerator.o
+$(A)test_redis_kqueue: $(O)test_redis_kqueue.o	$(O)kqueueselector.o	$(O)redisprotocol.o	$(O)mytime.o $(O)sockets.o $(O)vectorlist.o $(O)pair.o	$(O)myprocess.o $(O)idgenerator.o	$(O)hyperloglog.o $(O)murmur_hash_64a.o
 	$(LINK)
 

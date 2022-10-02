@@ -24,6 +24,8 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)directorylistloader.o 		\
 			$(O)myglob.o $(O)myfs.o			\
 								\
+			$(O)hyperloglog.o $(O)murmur_hash_64a.o \
+								\
 			$(O)signalguard.o			\
 			$(O)redisprotocol.o $(O)sockets.o	\
 			$(O)myprocess.o

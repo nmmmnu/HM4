@@ -19,6 +19,7 @@ Goals of the project are.
 -   Supported [commands]
 -   Complexity is a lie :)
 -   Atomic queues
+-   HyperLogLog
 
 ---
 ### Architecture
@@ -177,7 +178,7 @@ If queue name is "q", one of the data keys could be "q62fabbc0.000490be".
 
 How it works:
 
-- When a value is pushed in the queue, e.g. **SADD**, the system just set new key, for example "q62fabbc0.000490be".
+- When a value is pushed in the queue, e.g. **SADD**, the system just set new key, for example "q\~62fabbc0.000490be".
 Since current time with microseconds is as good as UUID, no collision can happen.
 
 - When a value is removed from the "head" of the queue, e.g. **SPOP**, the system search for the control key, for exaple "q".
@@ -186,7 +187,54 @@ Since current time with microseconds is as good as UUID, no collision can happen
   - If control key is not present, this means that the search is already positioned to the "head" of the queue.
 - Finally the system deletes the data key and eventually updates the control key.
 
+---
+### HyperLogLog
+
+HyperLogLog is an algorithm for counting unique elements.
+
+[HyperLogLog]
+
+Implementation uses 12bits. This means each key is 4096 bytes and the error rate is 1.62%.
+
+How it works:
+
+- Value can be added using **PFADD**. If the key does not exists or contains different information, it is overwritten.
+
+- Cardinality is estimated using **PFCOUNT**. It can be called with zero, one or up to 5 keys.
+If more than one key is supplied, a HLL union is performed and result is returned.
+
+      redis> pfadd a john
+      "1"
+      redis> pfadd a steven
+      "1"
+      redis> pfadd b bob
+      "1"
+      redis> pfadd b steven
+      "1"
+      redis> pfcount a
+      "2"
+      redis> pfcount b
+      "2"
+      redis> pfcount a b
+      "3"
+
+Note how "pfcount a b" returns just 3 elements because "steven" was added in both a and b.
+
+- Intersection of the cardinality can be estimated using **PFINTERSECT**.  It can be called with zero, one or up to 5 keys.
+
+      redis> pfintersect a b
+      "1"
+
+This command is not redis compatible and generally is slow if is performed with 5 keys.
+
+- HLL union can be stored using **PFMERGE**. It can be called with zero, one or up to 5 keys.
+
+      redis> pfmerge dest a b
+      OK
+      redis> pfcount dest
+      "3"
 
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]: http://www-users.cs.umn.edu/~he/diff/p256-severance.pdf
 [commands]: https://htmlpreview.github.io/?https://raw.githubusercontent.com/nmmmnu/HM4/master/commands.html
+[HyperLogLog]: https://en.wikipedia.org/wiki/HyperLogLog

@@ -154,6 +154,17 @@
 				<li><a href="#SPOP">SPOP</a></li>
 				</div>
 			<div>
+			<b>hll.h</b><br />
+			&nbsp;
+
+					<li><a href="#PFADD">PFADD</a></li>
+				<li><a href="#PFCOUNT">PFCOUNT</a></li>
+				<li><a href="#PFINTERSECT">PFINTERSECT</a></li>
+				<li><a href="#PFMERGE">PFMERGE</a></li>
+				<li><a href="#PFBITS">PFBITS</a></li>
+				<li><a href="#PFERROR">PFERROR</a></li>
+				</div>
+			<div>
 			<b>info.h</b><br />
 			&nbsp;
 
@@ -693,7 +704,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HEXISTS</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -789,6 +800,132 @@
 			string (int)
 			<h3>Return value:</h3>
 			Value of the removed element or empty string.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFADD">
+
+			<h2>PFADD / HLLADD key value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFADD</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>value</i> into HLL <i>key</i>.<br />Read HLL information document.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			always returns 1
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFCOUNT">
+
+			<h2>PFCOUNT / HLLCOUNT [key1] [key2] [key3] [key4] [key5]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate count of HLL union of up to 5 keys.<br />Works with single key too, but returns standard estimation.<br />Works without key too, but returns 0.<br />Read HLL information document.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			estimated count
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFINTERSECT">
+
+			<h2>PFINTERSECT / HLLINTERSECT [key1] [key2] [key3] [key4] [key5]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFINTERSECT</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate count of the intersection of up to 5 keys, using HLL unions.<br />Works with single key too, but returns standard estimation.<br />Works without key too, but returns 0.<br />Read HLL information document.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			estimated count of intersection
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFMERGE">
+
+			<h2>PFMERGE / HLLMERGE dest_key [key1] [key2] [key3] [key4] [key5]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFMERGE</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + [number of keys] * N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Make a HLL union of up to 5 keys and store it in <i>dest_key</i><br />Works with single key too. Works without key too.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			Value of the removed element or empty string.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFBITS">
+
+			<h2>PFBITS / HLLBITS</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFBITS</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			return HLL bits
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			HLL bits
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFERROR">
+
+			<h2>PFERROR / HLLERROR</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFERROR</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			return HLL error rate
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			HLL error rate as percent, but multiplied to 1'00'00
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INFO">
