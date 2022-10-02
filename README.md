@@ -190,11 +190,13 @@ Since current time with microseconds is as good as UUID, no collision can happen
 ---
 ### HyperLogLog
 
-HyperLogLog is an algorithm for counting unique elements.
+HyperLogLog (HLL) is an algorithm for counting unique elements.
 
 [HyperLogLog]
 
 Implementation uses 12bits. This means each key is 4096 bytes and the error rate is 1.62%.
+
+There are no fancy encodings, these 4096 bytes are uint8_t counters from the standard HLL.
 
 How it works:
 
@@ -225,7 +227,9 @@ How it works:
       redis> pfintersect a b
       "1"
 
-  This command is not redis compatible and generally is slow if is performed with 5 keys.
+  This command is not redis compatible and generally is slow, if it is performed with 5 keys.
+  Also note if you intersect small HLL set with large HLL set, the error of the large HLL set, might be bigger than the cardinality of the small HLL set.
+  This means the result error rate, might be much great from the standard error rate.
 
 - HLL union can be stored using **PFMERGE**. It can be called with zero, one or up to 5 keys.
 
