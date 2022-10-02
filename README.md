@@ -201,7 +201,7 @@ How it works:
 - Value can be added using **PFADD**. If the key does not exists or contains different information, it is overwritten.
 
 - Cardinality is estimated using **PFCOUNT**. It can be called with zero, one or up to 5 keys.
-If more than one key is supplied, a HLL union is performed and result is returned.
+  If more than one key is supplied, a HLL union is performed and result is returned.
 
       redis> pfadd a john
       "1"
@@ -218,14 +218,14 @@ If more than one key is supplied, a HLL union is performed and result is returne
       redis> pfcount a b
       "3"
 
-Note how "pfcount a b" returns just 3 elements because "steven" was added in both a and b.
+  Note how "pfcount a b" returns just 3 elements because "steven" was added in both a and b.
 
 - Intersection of the cardinality can be estimated using **PFINTERSECT**.  It can be called with zero, one or up to 5 keys.
 
       redis> pfintersect a b
       "1"
 
-This command is not redis compatible and generally is slow if is performed with 5 keys.
+  This command is not redis compatible and generally is slow if is performed with 5 keys.
 
 - HLL union can be stored using **PFMERGE**. It can be called with zero, one or up to 5 keys.
 
