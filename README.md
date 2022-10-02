@@ -179,7 +179,7 @@ If queue name is "q", one of the data keys could be "q62fabbc0.000490be".
 How it works:
 
 - When a value is pushed in the queue, e.g. **SADD**, the system just set new key, for example "q\~62fabbc0.000490be".
-Since current time with microseconds is as good as UUID, no collision can happen.
+  Since current time with microseconds is as good as UUID, no collision can happen.
 
 - When a value is removed from the "head" of the queue, e.g. **SPOP**, the system search for the control key, for exaple "q".
   - If control key is present, it is read. It contains the last removed key from the queue.
@@ -202,7 +202,7 @@ How it works:
 
 - Value can be added using **PFADD**. If the key does not exists or contains different information, it is overwritten.
 
-- Cardinality is estimated using **PFCOUNT**. It can be called with zero, one or up to 5 keys.
+- Cardinality can be estimated using **PFCOUNT**. It can be called with zero, one or up to 5 keys / HLL sets.
   If more than one key is supplied, a HLL union is performed and result is returned.
 
       redis> pfadd a john
@@ -222,16 +222,17 @@ How it works:
 
   Note how "pfcount a b" returns just 3 elements because "steven" was added in both a and b.
 
-- Intersection of the cardinality can be estimated using **PFINTERSECT**.  It can be called with zero, one or up to 5 keys.
+- Intersection of the cardinality can be estimated using **PFINTERSECT**.  It can be called with zero, one or up to 5 keys / HLL sets.
 
       redis> pfintersect a b
       "1"
 
-  This command is not redis compatible and generally is slow, if it is performed with 5 keys.
+  This command is not redis compatible and generally is slow, if it is performed with 5 keys / HLL sets.
   Also note if you intersect small HLL set with large HLL set, the error of the large HLL set, might be bigger than the cardinality of the small HLL set.
   This means the result error rate, might be much great from the standard error rate.
 
-- HLL union can be stored using **PFMERGE**. It can be called with zero, one or up to 5 keys.
+- HLL union can be stored using **PFMERGE**. It can be called with zero, one or up to 5 keys / HLL sets.
+  Using **PFMERGE**, union can be calculated from more than 5 keys / HLL sets.
 
       redis> pfmerge dest a b
       OK
