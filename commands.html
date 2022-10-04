@@ -171,6 +171,7 @@
 					<li><a href="#INFO">INFO</a></li>
 				<li><a href="#VERSION">VERSION</a></li>
 				<li><a href="#TYPE">TYPE</a></li>
+				<li><a href="#TOUCH">TOUCH</a></li>
 				<li><a href="#PING">PING</a></li>
 				<li><a href="#ECHO">ECHO</a></li>
 				</div>
@@ -988,7 +989,28 @@
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
-			Always rerurn string
+			Always return 'string'
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TOUCH">
+
+			<h2>TOUCH key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TOUCH</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns number of touched keys.<br />For compatibility, always return '1'
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Always return '1'
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PING">

@@ -36,4 +36,4 @@ Changelog
 -	new command HGET, HEXISTS ... in immutable module
 -	new command HSET, HDEL ... in mutable module
 -	new command PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS
-
+-	new command TOUCH

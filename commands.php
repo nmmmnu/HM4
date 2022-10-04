@@ -968,8 +968,25 @@ function getData(){
 					"Returns type of given <i>key</i>.<br />" .
 					"For compatibility, always return 'string'",
 					"string",
-					"Always rerurn string",
+					"Always return 'string'",
 					"1.2.16",
+					"n/a",
+					true,
+					null,
+
+					"info"
+			),
+
+			new Cmd(
+					"TOUCH",
+
+					"TOUCH key",
+
+					"Returns number of touched keys.<br />" .
+					"For compatibility, always return '1'",
+					"string",
+					"Always return '1'",
+					"1.2.17",
 					"n/a",
 					true,
 					null,
