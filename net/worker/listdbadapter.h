@@ -107,17 +107,15 @@ public:
 
 	template<typename T>
 	[[nodiscard]]
-	T *canUpdateInPlace(const T *p){
-		if constexpr(ENABLE_UPDATE_INPLACE){
+	constexpr T *canUpdateInPlace(const T *p){
+		if constexpr(ENABLE_UPDATE_INPLACE)
 			return canUpdateInPlace_(p);
-		}else{
+		else
 			return nullptr;
-		}
 	}
 
 private:
 	template<typename T>
-	[[nodiscard]]
 	T *canUpdateInPlace_(const T *p){
 		if (list_.getAllocator().owns(p)){
 			// pointer is in a Pair in the memlist and it is safe to be overwitten.
@@ -132,7 +130,6 @@ private:
 		return nullptr;
 	}
 
-private:
 	template<class Command>
 	static bool invokeCommand__(Command *cmd){
 		if constexpr(std::is_same_v<Command,std::nullptr_t>)
