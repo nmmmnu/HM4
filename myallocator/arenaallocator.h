@@ -38,6 +38,13 @@ namespace MyAllocator{
 			static void xdeallocate(void *) noexcept{
 			}
 
+			bool owns(const void *p) const{
+				return
+					p >= buffer.data() &&
+					p <  buffer.data() + buffer.size()
+				;
+			}
+
 			constexpr static bool need_deallocate() noexcept{
 				return false;
 			}

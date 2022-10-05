@@ -18,6 +18,10 @@ namespace MyAllocator{
 			return deallocate_(p);
 		}
 
+		bool owns(const void *p) const{
+			return owns_(p);
+		}
+
 		bool reset(){
 			return reset_();
 		}
@@ -46,6 +50,8 @@ namespace MyAllocator{
 		virtual void *allocate_(std::size_t) = 0;
 		virtual void deallocate_(void *p) = 0;
 		virtual bool reset_() = 0;
+
+		virtual bool owns_(const void *) const = 0;
 
 		virtual bool need_deallocate_() const = 0;
 		virtual bool knownMemoryUsage_() const = 0;
@@ -77,35 +83,39 @@ namespace MyAllocator{
 		PMOwnerAllocator(Args &&...args) : allocator( std::forward<Args>(args)... ){}
 
 	private:
-		inline void *allocate_(std::size_t const size) override final{
+		void *allocate_(std::size_t const size) override final{
 			return allocator.xallocate(size);
 		}
 
-		inline void deallocate_(void *p) override final{
+		void deallocate_(void *p) override final{
 			return allocator.xdeallocate(p);
 		}
 
-		inline bool need_deallocate_() const override final{
+		bool owns_(const void *p) const override final{
+			return allocator.owns(p);
+		}
+
+		bool need_deallocate_() const override final{
 			return allocator.need_deallocate();
 		}
 
-		inline bool reset_() override final{
+		bool reset_() override final{
 			return allocator.reset();
 		}
 
-		inline bool knownMemoryUsage_() const override final{
+		bool knownMemoryUsage_() const override final{
 			return allocator.knownMemoryUsage();
 		}
 
-		inline std::size_t getFreeMemory_() const override final{
+		std::size_t getFreeMemory_() const override final{
 			return allocator.getFreeMemory();
 		}
 
-		inline std::size_t getUsedMemory_() const override final{
+		std::size_t getUsedMemory_() const override final{
 			return allocator.getUsedMemory();
 		}
 
-		inline const char *getName_() const override final{
+		const char *getName_() const override final{
 			return allocator.getName();
 		}
 
@@ -122,31 +132,35 @@ namespace MyAllocator{
 		PMLinkedAllocator(Allocator *allocator) : allocator(allocator){}
 
 	private:
-		inline void *allocate_(std::size_t const size) override final{
+		void *allocate_(std::size_t const size) override final{
 			return allocator->allocate(size);
 		}
 
-		inline void deallocate_(void *p) override final{
+		void deallocate_(void *p) override final{
 			return allocator->deallocate_(p);
 		}
 
-		inline bool need_deallocate_() const override final{
+		bool owns_(const void *p) const override final{
+			return allocator->owns(p);
+		}
+
+		bool need_deallocate_() const override final{
 			return allocator->need_deallocate_();
 		}
 
-		inline bool knownMemoryUsage_() const override final{
+		bool knownMemoryUsage_() const override final{
 			return allocator->getFreeMemory();
 		}
 
-		inline std::size_t getFreeMemory_() const override final{
+		std::size_t getFreeMemory_() const override final{
 			return allocator->getFreeMemory();
 		}
 
-		inline std::size_t getUsedMemory_() const override final{
+		std::size_t getUsedMemory_() const override final{
 			return allocator->getUsedMemory();
 		}
 
-		inline const char *getName_() const override final{
+		const char *getName_() const override final{
 			return allocator->getName();
 		}
 

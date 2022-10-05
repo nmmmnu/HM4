@@ -17,6 +17,10 @@ namespace MyAllocator{
 		static void xdeallocate(void *) noexcept{
 		}
 
+		constexpr static bool owns(const void *) noexcept{
+			return false;
+		}
+
 		constexpr static bool need_deallocate() noexcept{
 			return false;
 		}

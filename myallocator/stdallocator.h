@@ -19,6 +19,10 @@ namespace MyAllocator{
 			return ::operator delete(p);
 		}
 
+		constexpr static bool owns(const void *) noexcept{
+			return false;
+		}
+
 		constexpr static bool need_deallocate() noexcept{
 			return true;
 		}

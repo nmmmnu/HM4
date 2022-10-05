@@ -62,6 +62,10 @@ namespace MyAllocator{
 			return a.xdeallocate(p);
 		}
 
+		bool owns(const void *p) const noexcept{
+			return a.owns(p);
+		}
+
 		bool need_deallocate() const noexcept{
 			return a.need_deallocate();
 		}
