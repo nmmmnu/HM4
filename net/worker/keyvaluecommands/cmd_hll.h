@@ -17,6 +17,7 @@ namespace net::worker::commands::HLL{
 
 		constexpr uint32_t HLL_M = getHLL().m;
 
+	#if 0
 		template<class DBAdapter>
 		bool load(DBAdapter &db, std::string_view key, uint8_t *hll){
 			auto it = db.find(key);
@@ -35,6 +36,7 @@ namespace net::worker::commands::HLL{
 			if (load(db, key, hll) == false)
 				getHLL().clear(hll);
 		}
+	#endif
 
 		template<class DBAdapter>
 		auto store(DBAdapter &db, std::string_view key, uint8_t *hll){
