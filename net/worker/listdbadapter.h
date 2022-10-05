@@ -9,6 +9,7 @@
 template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 struct ListDBAdapter{
 	constexpr static bool MUTABLE = ! std::is_const_v<List>;
+	constexpr static bool ENABLE_UPDATE_INPLACE = true;
 
 	constexpr static inline std::string_view SEPARATOR = "~";
 
@@ -102,6 +103,33 @@ public:
 		assert(!key.empty());
 
 		return list_.erase(key);
+	}
+
+	template<typename T>
+	[[nodiscard]]
+	T *canUpdateInPlace(const T *p){
+		if constexpr(ENABLE_UPDATE_INPLACE){
+			return canUpdateInPlace_(p);
+		}else{
+			return nullptr;
+		}
+	}
+
+private:
+	template<typename T>
+	[[nodiscard]]
+	T *canUpdateInPlace_(const T *p){
+		if (list_.getAllocator().owns(p)){
+			// pointer is in a Pair in the memlist and it is safe to be overwitten.
+			// the create time is not updated, but this is not that important,
+			// since the Pair is not yet flushed.
+
+			// function is deliberately non const,
+			// because the Pair will be overwritten soon anyway.
+			return const_cast<T *>(p);
+		}
+
+		return nullptr;
 	}
 
 private:

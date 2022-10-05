@@ -153,15 +153,42 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			uint8_t hll[HLL_M];
+			const uint8_t *b = load_ptr(db, key);
 
-			load_clean(db, key, hll);
+			if (b == nullptr){
+				// invalid key.
 
-			getHLL().add(hll, val);
+				uint8_t hll[HLL_M];
 
-			store(db, key, hll);
+				getHLL().clear(hll);
 
-			return Result::ok(1);
+				getHLL().add(hll, val);
+
+				store(db, key, hll);
+
+				return Result::ok(1);
+			}else if (uint8_t *hll_in_place = db.canUpdateInPlace(b); hll_in_place){
+				// value is in memory and can be updated in place
+
+				getHLL().add(hll_in_place, val);
+
+			//	printf("PFADD: update in place\n");
+
+				return Result::ok(1);
+			}else{
+				// proceed with normal update
+
+				uint8_t hll[HLL_M];
+
+				// copy b -> hll
+				getHLL().load(hll, b);
+
+				getHLL().add(hll, val);
+
+				store(db, key, hll);
+
+				return Result::ok(1);
+			}
 		}
 	};
 
