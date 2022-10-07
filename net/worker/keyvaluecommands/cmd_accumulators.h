@@ -10,7 +10,7 @@ namespace net::worker::commands::Accumulators{
 	namespace acumulators_impl_{
 
 		constexpr static uint16_t MIN		= 10;
-		constexpr static uint16_t ITERATIONS	= 10000;
+		constexpr static uint16_t ITERATIONS	= 10'000;
 
 
 

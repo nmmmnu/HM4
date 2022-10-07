@@ -282,6 +282,34 @@ function getData(){
 					"getx"
 			),
 
+			new Cmd(
+					"DELX",
+
+					"DELX key prefix",
+
+					"Delete up to 10'000 key-value pairs after <i>key</i>.<br />" .
+					"Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br />" .
+					"<br />" .
+					"<u>Example:</u><br />" .
+					"<br />" .
+					"<pre>set u:001:name  John<br />" .
+					"set u:001:city  LA<br />" .
+					"set u:001:state CA<br />" .
+					"set u:001:phone 1.800.12345678<br />" .
+					"getx u:001: 1000 u:001:<br />" .
+					"delx u:001:      u:001:</pre>",
+
+					"string",
+					"Last key, if there is second page.",
+
+					"1.2.17",
+					"2 * Mem + N * Disk",
+					false,
+					true,
+
+					"getx"
+			),
+
 
 
 		),
@@ -312,7 +340,7 @@ function getData(){
 					"count dom:google: 10000 dom:google:</pre>",
 
 					"1.2.4",
-					"Mem + Disk",
+					"Mem + N * Disk",
 					false,
 					false,
 
@@ -847,7 +875,7 @@ function getData(){
 					"string (int)",
 					"estimated count",
 					"1.2.17",
-					"[number of keys] * N * Disk",
+					"[number of keys] * (Mem + N * Disk)",
 					true,
 					false,
 
@@ -866,7 +894,7 @@ function getData(){
 					"string (int)",
 					"estimated count of intersection",
 					"1.2.17",
-					"[number of keys] * N * Disk",
+					"[number of keys] * (Mem + N * Disk)",
 					false,
 					false,
 
@@ -883,7 +911,7 @@ function getData(){
 					"OK",
 					"Value of the removed element or empty string.",
 					"1.2.17",
-					"Mem + [number of keys] * N * Disk",
+					"Mem + [number of keys] * (Mem + N * Disk)",
 					true,
 					false,
 

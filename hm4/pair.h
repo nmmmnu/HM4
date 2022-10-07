@@ -87,6 +87,17 @@ inline namespace version_2_00_00{
 			memcpy((void *) pair, & src, src.bytes());
 		}
 
+	public:
+		// Non const members
+		void changeToTombstoneInPlace() noexcept{
+			vallen &= 0x00;
+			keylen &= ~PairConf::MAX_VAL_MASK;
+
+			char *s = getVal_();
+
+			s[0] = '\0';
+		}
+
 	private:
 		template<class Allocator>
 		[[nodiscard]]
@@ -429,6 +440,11 @@ inline namespace version_2_00_00{
 
 		[[nodiscard]]
 		const char *getVal_() const noexcept{
+			return & buffer[ getKeyLen_() + 1 ];
+		}
+
+		[[nodiscard]]
+		char *getVal_() noexcept{
 			return & buffer[ getKeyLen_() + 1 ];
 		}
 

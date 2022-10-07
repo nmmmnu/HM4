@@ -7,8 +7,9 @@ namespace net::worker::commands::GetX{
 
 	namespace getx_impl_{
 
-		constexpr static uint16_t MIN		= 10;
-		constexpr static uint16_t ITERATIONS	= 1000;
+		constexpr static uint16_t MIN			= 10;
+		constexpr static uint16_t ITERATIONS		= 1'000;
+		constexpr static uint16_t ITERATIONS_DELX	= 10'000;
 
 
 
@@ -80,7 +81,7 @@ namespace net::worker::commands::GetX{
 			container.clear();
 
 			// using uint64_t from the user, allow more user-friendly behavour.
-			// suppose he enters 1'000'000'000.
+			// suppose he / she enters 1'000'000'000.
 			// because this value is great than max uint16_t,
 			// the converted value will go to 0, then to MIN.
 
@@ -170,14 +171,62 @@ namespace net::worker::commands::GetX{
 
 
 
+	template<class DBAdapter>
+	struct DELX : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "delx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"delx",		"DELX"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			if (p.size() != 3)
+				return Result::error();
+
+			auto const &key    = p[1];
+			auto const &prefix = p[2];
+
+			if (prefix.empty())
+				return Result::error();
+
+
+
+			using namespace getx_impl_;
+
+			uint16_t iterations	= 0;
+
+			auto it = db.find(key, std::false_type{});
+
+			for(;it;++it){
+				auto const key = it->getKey();
+
+				if (! same_prefix(prefix, key))
+					return Result::ok();
+
+				if (++iterations > ITERATIONS_DELX)
+					return Result::ok(key);
+
+				if (! it->isValid(std::true_type{}))
+					continue;
+
+				db.del(it->getKey(), & *it);
+			}
+
+			return Result::ok();
+		}
+	};
+
+
+
 	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "getx";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,
-				GETX,
-				HGETALL
+				GETX	,
+				HGETALL	,
+				DELX
 			>(pack);
 		}
 	};

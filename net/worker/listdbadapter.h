@@ -22,9 +22,9 @@ struct ListDBAdapter{
 			return & *it;
 		}
 
-	//	const hm4::Pair &operator*() const{
-	//		return *it;
-	//	}
+		const hm4::Pair &operator*() const{
+			return *it;
+		}
 
 		void operator++(){
 			++it;
@@ -99,8 +99,30 @@ public:
 		list_.insert(key, val, expires);
 	}
 
+	void set(std::string_view const key, std::string_view const val, uint32_t expires, const hm4::Pair *hint){
+		if constexpr(false)
+		if (auto *p = canUpdateInPlace(hint); p){
+			// todo:
+			// if size of the data is same,
+			// update in place
+		}
+
+		return set(key, val, expires);
+	}
+
 	bool del(std::string_view const key){
 		assert(!key.empty());
+
+		return list_.erase(key);
+	}
+
+	bool del(std::string_view const key, const hm4::Pair *hint){
+		assert(!key.empty());
+
+		if (auto *p = canUpdateInPlace(hint); p){
+			p->changeToTombstoneInPlace();
+			return true;
+		}
 
 		return list_.erase(key);
 	}

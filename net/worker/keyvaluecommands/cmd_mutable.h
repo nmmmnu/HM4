@@ -235,8 +235,9 @@ namespace net::worker::commands::Mutable{
 			// because old_value may be overwritten,
 			// we had to make a copy.
 
-			if (auto it = db.find(key);
-				it && it->isValid(std::true_type{})){
+			auto it = db.find(key);
+
+			if (it && it->isValid(std::true_type{})){
 
 				blob.string_val = it->getVal();
 			}else{
@@ -248,7 +249,9 @@ namespace net::worker::commands::Mutable{
 			const auto &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
-			db.set(key, val, exp);
+			const auto &hint = *it;
+
+			db.set(key, val, exp, & hint);
 
 			// return
 
@@ -286,7 +289,9 @@ namespace net::worker::commands::Mutable{
 
 				// DEL
 
-				db.del(key);
+				const auto &hint = *it;
+
+				db.del(key, & hint);
 
 				// return
 
@@ -326,7 +331,9 @@ namespace net::worker::commands::Mutable{
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
-				db.set(key, it->getVal(), exp);
+				const auto &hint = *it;
+
+				db.set(key, it->getVal(), exp, & hint);
 
 				return Result::ok(true);
 			}else{
@@ -361,8 +368,11 @@ namespace net::worker::commands::Mutable{
 
 				// SET
 
-				if (it->getTTL() > 0)
-					db.set(key, it->getVal(), 0);
+				if (it->getTTL() > 0){
+					const auto &hint = *it;
+
+					db.set(key, it->getVal(), 0, & hint);
+				}
 
 				return Result::ok(true);
 			}else{
