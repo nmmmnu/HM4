@@ -2,7 +2,8 @@
 #define MY_BASE_ALLOCATOR_H_
 
 #include <cstddef>
-#include <new>
+//#include <new>
+#include <memory>
 
 namespace MyAllocator{
 

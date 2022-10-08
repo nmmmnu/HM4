@@ -109,8 +109,8 @@ public:
 	template<class Buffer>
 	static void response_strings(Buffer &buffer, MySpan<std::string_view> const &list);
 
-	template<class Buffer>
-	static void response_strings(Buffer &buffer, std::string_view msg1, std::string_view msg2);
+//	template<class Buffer>
+//	static void response_strings(Buffer &buffer, std::string_view msg1, std::string_view msg2);
 
 private:
 	template<class Buffer>
@@ -270,7 +270,7 @@ void RedisProtocol::response_strings(Buffer &buffer, MySpan<std::string_view> co
 
 	response_log_("strings<*>", res, buffer.capacity());
 }
-
+/*
 template<class Buffer>
 void RedisProtocol::response_strings(Buffer &buffer, std::string_view const msg1, std::string_view const msg2){
 	using namespace redis_protocol_impl_;
@@ -299,7 +299,7 @@ void RedisProtocol::response_strings(Buffer &buffer, std::string_view const msg1
 
 	response_log_("strings<2>", res, buffer.capacity());
 }
-
+*/
 
 } // namespace protocol
 } // namespace

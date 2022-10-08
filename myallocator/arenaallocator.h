@@ -22,7 +22,7 @@ namespace MyAllocator{
 
 			template<std::size_t Align = DEFAULT_ALIGN>
 			void *xallocate(std::size_t const size) noexcept{
-				pos = align_(pos, Align);
+				pos = align__<Align>(pos);
 
 				if (pos + size > buffer.size())
 					return nullptr;
@@ -68,8 +68,13 @@ namespace MyAllocator{
 
 		private:
 			// http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator
-			constexpr static std::size_t align_(std::size_t n, std::size_t align = DEFAULT_ALIGN) {
-				return (n + align - 1) & ~(align - 1);
+		//	constexpr static std::size_t align__(std::size_t n, std::size_t align) noexcept{
+		//		return (n + align - 1) & ~(align - 1);
+		//	}
+
+			template<std::size_t Align>
+			constexpr static std::size_t align__(std::size_t n) noexcept{
+				return (n + Align - 1) & ~(Align - 1);
 			}
 
 		private:
