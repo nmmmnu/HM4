@@ -1,15 +1,13 @@
 #include "base.h"
 #include "mystring.h"
 
-
-
 namespace net::worker::commands::GetX{
 
 	namespace getx_impl_{
 
 		constexpr static uint16_t MIN			= 10;
 		constexpr static uint16_t ITERATIONS		= 1'000;
-		constexpr static uint16_t ITERATIONS_DELX	= 10'000;
+		constexpr static uint16_t ITERATIONS_DELX	= 1'000;
 
 
 
@@ -179,7 +177,7 @@ namespace net::worker::commands::GetX{
 			"delx",		"DELX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 3)
 				return Result::error();
 
@@ -193,7 +191,12 @@ namespace net::worker::commands::GetX{
 
 			using namespace getx_impl_;
 
-			uint16_t iterations	= 0;
+			uint16_t iterations = 0;
+
+			blob.string_key = "";
+
+			std::vector<std::string> container;
+			container.reserve(ITERATIONS_DELX);
 
 			auto it = db.find(key, std::false_type{});
 
@@ -201,18 +204,29 @@ namespace net::worker::commands::GetX{
 				auto const key = it->getKey();
 
 				if (! same_prefix(prefix, key))
-					return Result::ok();
+					break;
 
-				if (++iterations > ITERATIONS_DELX)
-					return Result::ok(key);
+				if (++iterations > ITERATIONS_DELX){
+					blob.string_key = key;
+					break;
+				}
 
 				if (! it->isValid(std::true_type{}))
 					continue;
 
-				db.del(it->getKey(), & *it);
+				container.emplace_back(key);
+
+				// db.del(it->getKey());
 			}
 
-			return Result::ok();
+			for(auto const &x : container){
+				db.del(x);
+			}
+
+			if (!blob.string_key.empty())
+				return Result::ok(blob.string_key);
+			else
+				return Result::ok();
 		}
 	};
 

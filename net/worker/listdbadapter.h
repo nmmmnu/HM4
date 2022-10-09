@@ -99,30 +99,8 @@ public:
 		list_.insert(key, val, expires);
 	}
 
-	void set(std::string_view const key, std::string_view const val, uint32_t expires, const hm4::Pair *hint){
-		if constexpr(false)
-		if (auto *p = canUpdateInPlace(hint); p){
-			// todo:
-			// if size of the data is same,
-			// update in place
-		}
-
-		return set(key, val, expires);
-	}
-
 	bool del(std::string_view const key){
 		assert(!key.empty());
-
-		return list_.erase(key);
-	}
-
-	bool del(std::string_view const key, const hm4::Pair *hint){
-		assert(!key.empty());
-
-		if (auto *p = canUpdateInPlace(hint); p){
-			p->changeToTombstoneInPlace();
-			return true;
-		}
 
 		return list_.erase(key);
 	}
@@ -138,7 +116,7 @@ public:
 
 private:
 	template<typename T>
-	T *canUpdateInPlace_(const T *p){
+	constexpr T *canUpdateInPlace_(const T *p){
 		if (list_.getAllocator().owns(p)){
 			// pointer is in a Pair in the memlist and it is safe to be overwitten.
 			// the create time is not updated, but this is not that important,

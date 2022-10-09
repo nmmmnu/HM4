@@ -89,6 +89,7 @@ inline namespace version_2_00_00{
 
 	public:
 		// Non const members
+		#if 0
 		void changeToTombstoneInPlace() noexcept{
 			vallen &= 0x00;
 			keylen &= ~PairConf::MAX_VAL_MASK;
@@ -97,6 +98,7 @@ inline namespace version_2_00_00{
 
 			s[0] = '\0';
 		}
+		#endif
 
 	private:
 		template<class Allocator>
