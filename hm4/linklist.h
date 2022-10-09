@@ -41,7 +41,7 @@ public:
 		return lc_.size();
 	}
 
-	auto mutable_size(){
+	auto mutable_size() const{
 		return size();
 	}
 

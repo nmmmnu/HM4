@@ -41,7 +41,7 @@ public:
 		return list1_->size() + list2_->size();
 	}
 
-	auto mutable_size(){
+	auto mutable_size() const{
 		return list1_->mutable_size();
 	}
 

@@ -28,7 +28,7 @@ public:
 		return list_->size();
 	}
 
-	auto mutable_size(){
+	auto mutable_size() const{
 		return list_->mutable_size();
 	}
 
