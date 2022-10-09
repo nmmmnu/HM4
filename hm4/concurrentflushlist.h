@@ -55,6 +55,11 @@ public:
 	}
 
 	void flush(){
+		if (empty(*list1_)){
+			log__<LogLevel::WARNING>("No data for flushing.");
+			return;
+		}
+
 		log__<LogLevel::WARNING>("Start Flushing data...");
 
 		// we have to switch lists, so need to join()
@@ -63,15 +68,15 @@ public:
 		using std::swap;
 		swap(list1_, list2_);
 
-		if (!empty(*list2_)){
-			thread_ = ScopedThread{ [this](){ save_(*list2_, false); } };
-		//	save_(*list2_);
-		}
+		// we already know the list is not empty.
+		thread_ = ScopedThread{ [this](){
+			 save_(*list2_, false);
+		} };
 
-		if (!empty(*list1_))
+		if (!empty(*list1_)){
+			// this also notifiying the loader...
 			flushlist_impl_::clear(*list1_, loader_);
-		else
-			log__<LogLevel::WARNING>("No data for flushing.");
+		}
 	}
 
 	// Command pattern
