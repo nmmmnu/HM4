@@ -88,6 +88,10 @@ public:
 		return lc_.size();
 	}
 
+	auto mutable_size(){
+		return size();
+	}
+
 	auto bytes() const{
 		return lc_.bytes();
 	}

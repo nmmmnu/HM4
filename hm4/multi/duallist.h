@@ -41,6 +41,10 @@ public:
 		return list1_->size() + list2_->size();
 	}
 
+	auto mutable_size(){
+		return list1_->mutable_size();
+	}
+
 	size_t bytes() const{
 		return list1_->bytes() + list2_->bytes();
 	}

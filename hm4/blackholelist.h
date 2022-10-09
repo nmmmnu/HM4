@@ -47,6 +47,11 @@ public:
 	}
 
 	constexpr static
+	size_type mutable_size(){
+		return 0;
+	}
+
+	constexpr static
 	size_t bytes(){
 		return 0;
 	}

@@ -27,7 +27,7 @@ namespace net::worker::commands{
 
 
 	struct OutputBlob{
-		constexpr static size_t ContainerSize	= 2048;
+		constexpr static size_t ContainerSize	= 4096 + 1;
 		using Container = StaticVector<std::string_view,ContainerSize>;
 
 		OutputBlob(){

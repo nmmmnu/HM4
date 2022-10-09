@@ -9,17 +9,17 @@ namespace net::worker::commands::Accumulators{
 
 	namespace acumulators_impl_{
 
-		constexpr static uint16_t MIN		= 10;
-		constexpr static uint16_t ITERATIONS	= 10'000;
+		constexpr static uint32_t MIN		= 10;
+		constexpr static uint32_t ITERATIONS	= 65'536;
 
 
 
 		template<typename Accumulator, class It>
-		auto accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it){
+		auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it){
 			Accumulator accumulator;
 
-			uint16_t iterations	= 0;
-			uint16_t results	= 0;
+			uint32_t iterations	= 0;
+			uint32_t results	= 0;
 
 			for(;it;++it){
 				auto const key = it->getKey();
@@ -53,11 +53,11 @@ namespace net::worker::commands::Accumulators{
 
 			// using uint64_t from the user, allow more user-friendly behavour.
 			// suppose he enters 1'000'000'000.
-			// because this value is great than max uint16_t,
+			// because this value is great than max uint32_t,
 			// the converted value will go to 0, then to MIN.
 
 			auto myClamp = [](auto a){
-				return static_cast<uint16_t>(
+				return static_cast<uint32_t>(
 					std::clamp<uint64_t>(a, MIN, ITERATIONS)
 				);
 			};
@@ -84,7 +84,7 @@ namespace net::worker::commands::Accumulators{
 
 			return Result::ok_container(blob.container);
 		}
-	}
+	} // namespace
 
 
 

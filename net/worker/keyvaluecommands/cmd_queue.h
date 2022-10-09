@@ -5,6 +5,14 @@
 
 
 namespace net::worker::commands::Queue{
+	namespace getx_impl_{
+		constexpr static uint32_t ITERATIONS			= 65'536;
+		constexpr static uint32_t ITERATIONS_UPDATE_CONTROL_KEY	= 10;
+
+		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
+	} // namespace
+
+
 
 	template<class DBAdapter>
 	struct SADD : Base<DBAdapter>{
@@ -14,7 +22,7 @@ namespace net::worker::commands::Queue{
 			"sadd",		"SADD"
 		};
 
-		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
+		using MyIDGenerator = getx_impl_::MyIDGenerator;
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
 						- MyIDGenerator::to_string_buffer_t_size
@@ -58,10 +66,7 @@ namespace net::worker::commands::Queue{
 			"spop",	"SPOP"
 		};
 
-		constexpr static uint16_t ITERATIONS			= 1000;
-		constexpr static uint16_t ITERATIONS_UPDATE_CONTROL_KEY	= 10;
-
-		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
+		using MyIDGenerator = getx_impl_::MyIDGenerator;
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
 						- MyIDGenerator::to_string_buffer_t_size
@@ -97,7 +102,7 @@ namespace net::worker::commands::Queue{
 				if (it->isValid(std::true_type{})){
 					// case 2.1. control key is valid, go to case 3
 
-					log__("Control key", key, "is valid");
+					log__<LogLevel::DEBUG>("Control key", key, "is valid");
 
 					return collect_(
 						key,
@@ -108,7 +113,7 @@ namespace net::worker::commands::Queue{
 				}else{
 					// case 2.2. control key is NOT valid, go to case 3
 
-					log__("Control key", key, "is NOT valid");
+					log__<LogLevel::DEBUG>("Control key", key, "is NOT valid");
 
 					++it;
 				}
@@ -116,7 +121,7 @@ namespace net::worker::commands::Queue{
 
 			// case 3, search next keys...
 
-			log__("Next key for control key", key);
+			log__<LogLevel::DEBUG>("Next key for control key", key);
 
 			return collect_(
 				key,
@@ -127,30 +132,27 @@ namespace net::worker::commands::Queue{
 		}
 
 	private:
-		template<typename... Args>
-		static void log__(Args&&... /* args */){
-		//	::log__(args...);
-		}
-
 		Result collect_(std::string_view control_key, typename DBAdapter::IteratorAdapter it, DBAdapter &db, OutputBlob &blob) const{
-			uint16_t iterations = 0;
+			using namespace getx_impl_;
+
+			uint32_t iterations = 0;
 
 			for(;it;++it){
 				auto const &key = it->getKey();
 
 				if (! same_prefix(control_key, key)){
-					log__("New prefix, done");
+					log__<LogLevel::DEBUG>("New prefix, done");
 					return finalizeEnd_(control_key, db, blob);
 				}
 
 				if (it->isValid(std::true_type{})){
-					log__("Valid key, done");
+					log__<LogLevel::DEBUG>("Valid key, done");
 					auto const &val = it->getVal();
 					return finalizeOK_(control_key, key, val, db, blob, iterations);
 				}
 
 				if (++iterations > ITERATIONS){
-					log__("Lots of iterations, done");
+					log__<LogLevel::DEBUG>("Lots of iterations, done");
 					return finalizeTryAgain_(control_key, key, db, blob);
 				}
 			}
@@ -159,7 +161,9 @@ namespace net::worker::commands::Queue{
 			return finalizeEnd_(control_key, db, blob);
 		}
 
-		Result finalizeOK_(std::string_view control_key, std::string_view key, std::string_view val, DBAdapter &db, OutputBlob &blob, uint16_t const iterations) const{
+		Result finalizeOK_(std::string_view control_key, std::string_view key, std::string_view val, DBAdapter &db, OutputBlob &blob, uint32_t const iterations) const{
+			using namespace getx_impl_;
+
 			// store value, because we will delete it...
 			blob.string_val = val;
 

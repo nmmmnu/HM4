@@ -114,6 +114,10 @@ public:
 			return nullptr;
 	}
 
+	auto mutable_size(){
+		return list_.mutable_size();
+	}
+
 private:
 	template<typename T>
 	constexpr T *canUpdateInPlace_(const T *p){

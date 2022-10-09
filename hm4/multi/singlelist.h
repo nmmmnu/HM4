@@ -28,6 +28,10 @@ public:
 		return list_->size();
 	}
 
+	auto mutable_size(){
+		return list_->mutable_size();
+	}
+
 	size_t bytes() const{
 		return list_->bytes();
 	}

@@ -1,20 +1,23 @@
 #include "base.h"
 #include "mystring.h"
+#include "logger.h"
 
 namespace net::worker::commands::GetX{
 
 	namespace getx_impl_{
 
-		constexpr static uint16_t MIN			= 10;
-		constexpr static uint16_t ITERATIONS		= 1'000;
-		constexpr static uint16_t ITERATIONS_DELX	= 1'000;
+		constexpr static uint32_t MIN			= 10;
+		constexpr static uint32_t ITERATIONS		= 2'000;
+		constexpr static uint32_t ITERATIONS_DELX	= 65'536;
+
+		static_assert(ITERATIONS_DELX >= OutputBlob::ContainerSize, "Increase ITERATIONS_DELX");
 
 
 
 		template<bool Tail, class It, class OutputBlob, class ProjectionKey>
-		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, OutputBlob &data, ProjectionKey projKey){
-			uint16_t iterations	= 0;
-			uint16_t results	= 0;
+		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, OutputBlob &data, ProjectionKey projKey){
+			uint32_t iterations	= 0;
+			uint32_t results	= 0;
 
 			for(;it;++it){
 				auto const &key = it->getKey();
@@ -49,7 +52,7 @@ namespace net::worker::commands::GetX{
 		}
 
 		template<class It, class OutputBlob>
-		void accumulateResults(uint16_t const maxResults, std::string_view const prefix, It it, OutputBlob &data){
+		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, OutputBlob &data){
 			return accumulateResults<true>(maxResults, prefix, it, data, [](auto x){
 				return x;
 			});
@@ -80,11 +83,11 @@ namespace net::worker::commands::GetX{
 
 			// using uint64_t from the user, allow more user-friendly behavour.
 			// suppose he / she enters 1'000'000'000.
-			// because this value is great than max uint16_t,
+			// because this value is great than max uint32_t,
 			// the converted value will go to 0, then to MIN.
 
 			auto myClamp = [](auto a){
-				return static_cast<uint16_t>(
+				return static_cast<uint32_t>(
 					std::clamp<uint64_t>(a, MIN, ITERATIONS)
 				);
 			};
@@ -191,12 +194,21 @@ namespace net::worker::commands::GetX{
 
 			using namespace getx_impl_;
 
-			uint16_t iterations = 0;
+			std::vector<std::string_view> container;
+			container.reserve(ITERATIONS_DELX);
+
+			uint8_t check_passes = 0;
+
+
+
+		// label for goto
+		start:
+			uint32_t iterations = 0;
 
 			blob.string_key = "";
 
-			std::vector<std::string> container;
-			container.reserve(ITERATIONS_DELX);
+		//	auto &container = blob.container;
+			container.clear();
 
 			auto it = db.find(key, std::false_type{});
 
@@ -207,6 +219,7 @@ namespace net::worker::commands::GetX{
 					break;
 
 				if (++iterations > ITERATIONS_DELX){
+					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
 					blob.string_key = key;
 					break;
 				}
@@ -215,12 +228,22 @@ namespace net::worker::commands::GetX{
 					continue;
 
 				container.emplace_back(key);
-
-				// db.del(it->getKey());
 			}
 
 			for(auto const &x : container){
 				db.del(x);
+
+				if (db.mutable_size() == 0){
+					// list just flushed.
+					++check_passes;
+
+					log__<LogLevel::WARNING>("DELX", "Restart because of table flush", check_passes);
+
+					if (check_passes < 3)
+						goto start;
+					else
+						return Result::ok(blob.string_key);
+				}
 			}
 
 			if (!blob.string_key.empty())
