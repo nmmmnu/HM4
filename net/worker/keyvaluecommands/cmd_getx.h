@@ -2,6 +2,8 @@
 #include "mystring.h"
 #include "logger.h"
 
+#include <mutex>
+
 namespace net::worker::commands::GetX{
 
 	namespace getx_impl_{
@@ -9,6 +11,7 @@ namespace net::worker::commands::GetX{
 		constexpr static uint32_t MIN			= 10;
 		constexpr static uint32_t ITERATIONS		= 2'000;
 		constexpr static uint32_t ITERATIONS_DELX	= 65'536;
+		constexpr static uint32_t PASSES_DELX		= 3;
 
 		static_assert(ITERATIONS_DELX >= OutputBlob::ContainerSize, "Increase ITERATIONS_DELX");
 
@@ -57,7 +60,7 @@ namespace net::worker::commands::GetX{
 				return x;
 			});
 		}
-	}
+	} // namespace
 
 
 
@@ -180,6 +183,17 @@ namespace net::worker::commands::GetX{
 			"delx",		"DELX"
 		};
 
+		using Container = StaticVector<std::string_view, getx_impl_::ITERATIONS_DELX>;
+
+		mutable Container	container;
+		mutable std::mutex	mutex;
+
+		DELX(){
+			using namespace getx_impl_;
+
+			container.reserve(ITERATIONS_DELX);
+		}
+
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 3)
 				return Result::error();
@@ -192,10 +206,11 @@ namespace net::worker::commands::GetX{
 
 
 
+			const std::lock_guard<std::mutex> lock(mutex);
+
 			using namespace getx_impl_;
 
-			std::vector<std::string_view> container;
-			container.reserve(ITERATIONS_DELX);
+
 
 			uint8_t check_passes = 0;
 
@@ -207,12 +222,9 @@ namespace net::worker::commands::GetX{
 
 			blob.string_key = "";
 
-		//	auto &container = blob.container;
 			container.clear();
 
-			auto it = db.find(key, std::false_type{});
-
-			for(;it;++it){
+			for(auto it = db.find(key, std::false_type{});it;++it){
 				auto const key = it->getKey();
 
 				if (! same_prefix(prefix, key))
@@ -239,7 +251,7 @@ namespace net::worker::commands::GetX{
 
 					log__<LogLevel::WARNING>("DELX", "Restart because of table flush", check_passes);
 
-					if (check_passes < 3)
+					if (check_passes < PASSES_DELX)
 						goto start;
 					else
 						return Result::ok(blob.string_key);
