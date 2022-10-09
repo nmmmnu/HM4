@@ -2,18 +2,14 @@
 #include "mystring.h"
 #include "logger.h"
 
-#include <mutex>
-
 namespace net::worker::commands::GetX{
 
 	namespace getx_impl_{
 
 		constexpr static uint32_t MIN			= 10;
-		constexpr static uint32_t ITERATIONS		= 2'000;
-		constexpr static uint32_t ITERATIONS_DELX	= 65'536;
+		constexpr static uint32_t ITERATIONS		= (OutputBlob::ContainerSize - 1) / 2;
+		constexpr static uint32_t ITERATIONS_DELX	=  OutputBlob::ContainerSize;
 		constexpr static uint32_t PASSES_DELX		= 3;
-
-		static_assert(ITERATIONS_DELX >= OutputBlob::ContainerSize, "Increase ITERATIONS_DELX");
 
 
 
@@ -185,15 +181,6 @@ namespace net::worker::commands::GetX{
 
 		using Container = StaticVector<std::string_view, getx_impl_::ITERATIONS_DELX>;
 
-		mutable Container	container;
-		mutable std::mutex	mutex;
-
-		DELX(){
-			using namespace getx_impl_;
-
-			container.reserve(ITERATIONS_DELX);
-		}
-
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
 			if (p.size() != 3)
 				return Result::error();
@@ -206,15 +193,12 @@ namespace net::worker::commands::GetX{
 
 
 
-			const std::lock_guard<std::mutex> lock(mutex);
-
 			using namespace getx_impl_;
 
-
+			auto &container = blob.container;
+			container.reserve(ITERATIONS_DELX);
 
 			uint8_t check_passes = 0;
-
-
 
 		// label for goto
 		start:

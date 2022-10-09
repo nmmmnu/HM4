@@ -170,7 +170,7 @@ namespace net::worker{
 
 			auto &command = *it->second;
 
-			auto result = command(protocol_.getParams(), db_, output_);
+			auto result = command(protocol_.getParams(), db_, *output_);
 
 			return translate_(result, buffer);
 		}
@@ -208,13 +208,13 @@ namespace net::worker{
 		}
 
 	private:
-		Protocol			protocol_;
-		DBAdapter			&db_;
+		Protocol				protocol_	;
+		DBAdapter				&db_		;
 
-		Storage				storage_;
-		Map				map_;
+		Storage					storage_	;
+		Map					map_		;
 
-		commands::OutputBlob	output_;
+		std::unique_ptr<commands::OutputBlob>	output_ = std::make_unique<commands::OutputBlob>();
 	};
 
 

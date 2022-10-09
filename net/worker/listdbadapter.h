@@ -52,16 +52,18 @@ public:
 	// System Methods
 
 	std::string_view info(std::string &str) const{
-		to_string_buffer_t buffer[3];
+		to_string_buffer_t buffer[5];
 
 		concatenateBuffer(
 			str,
 
-			"Version          : ", hm4::version::str,				"\n",
-			"Keys (estimated) : ", to_string(list_.size(),		buffer[0]),	"\n",
-			"Size             : ", to_string(list_.bytes(),		buffer[1]),	"\n",
-			"Mutable          : ", MUTABLE ? "Yes" : "No",				"\n",
-			"PID              : ", to_string(getProcessID(),	buffer[2]),	"\n"
+			"Version          : ", hm4::version::str				,			"\n",
+			"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
+			"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
+		//	"Allocator free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[2]),	"\n",
+		//	"Allocator used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[3]),	"\n",
+			"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
+			"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
 		);
 
 		return std::string_view{ str };
