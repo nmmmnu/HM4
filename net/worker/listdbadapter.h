@@ -52,19 +52,35 @@ public:
 	// System Methods
 
 	std::string_view info(std::string &str) const{
-		to_string_buffer_t buffer[5];
+		to_string_buffer_t buffer[6];
 
-		concatenateBuffer(
-			str,
+		if constexpr(!MUTABLE){
+			concatenateBuffer(
+				str,
 
-			"Version          : ", hm4::version::str				,			"\n",
-			"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
-			"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
-		//	"Allocator free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[2]),	"\n",
-		//	"Allocator used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[3]),	"\n",
-			"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
-			"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
-		);
+				"Version          : ", hm4::version::str				,			"\n",
+				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
+				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
+			//	"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[2]),	"\n",
+			//	"Allocator free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[2]),	"\n",
+			//	"Allocator used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[3]),	"\n",
+				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
+				"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
+			);
+		}else{
+			concatenateBuffer(
+				str,
+
+				"Version          : ", hm4::version::str				,			"\n",
+				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
+				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
+				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[2]),	"\n",
+				"Allocator free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[3]),	"\n",
+				"Allocator used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[4]),	"\n",
+				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
+				"PID              : ", to_string(getProcessID()				,	buffer[5]),	"\n"
+			);
+		}
 
 		return std::string_view{ str };
 	}

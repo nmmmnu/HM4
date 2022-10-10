@@ -202,29 +202,7 @@ namespace net::worker::commands::GetX{
 
 		// label for goto
 		start:
-			uint32_t iterations = 0;
-
-			blob.string_key = "";
-
-			container.clear();
-
-			for(auto it = db.find(key, std::false_type{});it;++it){
-				auto const key = it->getKey();
-
-				if (! same_prefix(prefix, key))
-					break;
-
-				if (++iterations > ITERATIONS_DELX){
-					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
-					blob.string_key = key;
-					break;
-				}
-
-				if (! it->isValid(std::true_type{}))
-					continue;
-
-				container.emplace_back(key);
-			}
+			std::string_view string_key = scanKeys(db, prefix, key, container);
 
 			for(auto const &x : container){
 				db.del(x);
@@ -238,14 +216,68 @@ namespace net::worker::commands::GetX{
 					if (check_passes < PASSES_DELX)
 						goto start;
 					else
-						return Result::ok(blob.string_key);
+						return scanForLastKey(db, prefix, key);
 				}
 			}
 
 			if (!blob.string_key.empty())
-				return Result::ok(blob.string_key);
+				return Result::ok(string_key);
 			else
 				return Result::ok();
+		}
+
+	private:
+		template<class Container>
+		std::string_view scanKeys(DBAdapter &db, std::string_view prefix, std::string_view key, Container &container) const{
+			using namespace getx_impl_;
+
+			container.clear();
+
+			uint32_t iterations = 0;
+
+			for(auto it = db.find(key, std::false_type{});it;++it){
+				auto const key = it->getKey();
+
+				if (! same_prefix(prefix, key))
+					break;
+
+				if (++iterations > ITERATIONS_DELX){
+					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
+					return key;
+				}
+
+				if (! it->isValid(std::true_type{}))
+					continue;
+
+				container.emplace_back(key);
+			}
+
+			return {};
+		}
+
+		Result scanForLastKey(DBAdapter &db, std::string_view prefix, std::string_view key) const{
+			using namespace getx_impl_;
+
+			uint32_t iterations = 0;
+
+			for(auto it = db.find(key, std::false_type{});it;++it){
+				auto const key = it->getKey();
+
+				if (! same_prefix(prefix, key))
+					break;
+
+				if (++iterations > ITERATIONS_DELX){
+					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
+					return Result::ok(key);
+				}
+
+				if (! it->isValid(std::true_type{}))
+					continue;
+
+				return Result::ok(key);
+			}
+
+			return Result::ok();
 		}
 	};
 
