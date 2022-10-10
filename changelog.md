@@ -37,6 +37,6 @@ Changelog
 -	new command HSET, HDEL ... in mutable module
 -	new command PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS
 -	new command TOUCH
--	implement update and delete in place
+-	implement update in place
 -	new command DELX
-
+-	improve INFO - allocator information is shown now.

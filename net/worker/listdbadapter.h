@@ -61,9 +61,6 @@ public:
 				"Version          : ", hm4::version::str				,			"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
-			//	"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[2]),	"\n",
-			//	"Allocator free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[2]),	"\n",
-			//	"Allocator used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[3]),	"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
 			);
@@ -75,8 +72,9 @@ public:
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
 				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[2]),	"\n",
-				"Allocator free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[3]),	"\n",
-				"Allocator used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[4]),	"\n",
+			//	"Allocator        : ", list_.getAllocator().getName()			,			"\n",
+				"Allocator Free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[3]),	"\n",
+				"Allocator Used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[4]),	"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[5]),	"\n"
 			);
