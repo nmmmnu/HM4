@@ -202,7 +202,7 @@ namespace net::worker::commands::GetX{
 
 		// label for goto
 		start:
-			std::string_view string_key = scanKeys(db, prefix, key, container);
+			std::string_view string_key = scanKeysAndDeleteInPlace_(db, prefix, key, container);
 
 			for(auto const &x : container){
 				db.del(x);
@@ -216,7 +216,7 @@ namespace net::worker::commands::GetX{
 					if (check_passes < PASSES_DELX)
 						goto start;
 					else
-						return scanForLastKey(db, prefix, key);
+						return scanForLastKey_(db, prefix, key);
 				}
 			}
 
@@ -228,7 +228,7 @@ namespace net::worker::commands::GetX{
 
 	private:
 		template<class Container>
-		std::string_view scanKeys(DBAdapter &db, std::string_view prefix, std::string_view key, Container &container) const{
+		std::string_view scanKeysAndDeleteInPlace_(DBAdapter &db, std::string_view prefix, std::string_view key, Container &container) const{
 			using namespace getx_impl_;
 
 			container.clear();
@@ -249,13 +249,19 @@ namespace net::worker::commands::GetX{
 				if (! it->isValid(std::true_type{}))
 					continue;
 
-				container.emplace_back(key);
+				if (auto *p = db.canUpdateInPlace(& *it); p){
+					// remove in place.
+					p->inPlaceTombstone();
+				}else{
+					// add to remove list
+					container.emplace_back(key);
+				}
 			}
 
 			return {};
 		}
 
-		Result scanForLastKey(DBAdapter &db, std::string_view prefix, std::string_view key) const{
+		Result scanForLastKey_(DBAdapter &db, std::string_view prefix, std::string_view key) const{
 			using namespace getx_impl_;
 
 			uint32_t iterations = 0;

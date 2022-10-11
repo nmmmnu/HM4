@@ -80,7 +80,7 @@ namespace net::worker::commands::Immutable{
 			auto ttl = it && it->isValid(std::true_type{}) ? it->getTTL() : 0;
 
 			return Result::ok(
-				static_cast<uint64_t>(ttl)
+				uint64_t{ttl}
 			);
 		}
 	};

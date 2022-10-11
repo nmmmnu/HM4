@@ -17,7 +17,7 @@
 #include "baseallocator.h"
 
 namespace hm4{
-inline namespace version_2_00_00{
+inline namespace version_3_00_00{
 
 	namespace PairConf{
 		constexpr uint32_t	VERSION		= 20000;
@@ -31,6 +31,8 @@ inline namespace version_2_00_00{
 
 		constexpr uint16_t	MAX_KEY_MASK	= MAX_KEY_SIZE;
 
+		constexpr uint32_t	EXPIRES_TOMBSTONE = 0xFFFF'FFFF;
+
 		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
 	}
 
@@ -38,7 +40,7 @@ inline namespace version_2_00_00{
 
 	struct Pair{
 		uint64_t	created;	// 8
-		uint32_t	expires;	// 4, 136 years, not that bad.
+		uint32_t	expires;	// 4, 136 years, not that bad. but beware for problem 2038-01-19
 		uint16_t	keylen;		// 2, 4 bits are used for vallen. 2 bits are reserved for future versions.
 		uint16_t	vallen;		// 2
 		char		buffer[2];	// dynamic, these are the two \0 terminators.
@@ -89,16 +91,17 @@ inline namespace version_2_00_00{
 
 	public:
 		// Non const members
-		#if 0
-		void changeToTombstoneInPlace() noexcept{
-			vallen &= 0x00;
-			keylen &= ~PairConf::MAX_VAL_MASK;
-
-			char *s = getVal_();
-
-			s[0] = '\0';
+		void inPlaceExpires(uint32_t const exp) noexcept{
+			expires = htobe<uint32_t>(exp);
 		}
-		#endif
+
+		void inPlacePersist() noexcept{
+			expires = 0x0;
+		}
+
+		void inPlaceTombstone() noexcept{
+			expires = PairConf::EXPIRES_TOMBSTONE;
+		}
 
 	private:
 		template<class Allocator>
@@ -253,6 +256,11 @@ inline namespace version_2_00_00{
 		[[nodiscard]]
 		bool isTombstone() const noexcept{
 			if constexpr(1){
+				if (expires == PairConf::EXPIRES_TOMBSTONE)
+					return true;
+			}
+
+			if constexpr(1){
 				constexpr uint16_t mask_be = htobe<uint16_t>(PairConf::MAX_VAL_MASK);
 
 				return !(vallen | (keylen & mask_be));
@@ -354,6 +362,7 @@ inline namespace version_2_00_00{
 	public:
 		[[nodiscard]]
 		bool isValid(std::false_type) const noexcept{
+			// beware problem 2038 !!!
 			// check if expired.
 			if ( isExpired_() )
 				return false;
@@ -468,6 +477,7 @@ inline namespace version_2_00_00{
 		}
 
 	private:
+		// beware problem 2038 !!!
 		[[nodiscard]]
 		bool isExpired_() const noexcept;
 

@@ -6,7 +6,7 @@
 
 namespace hm4{
 
-inline namespace version_2_00_00{
+inline namespace version_3_00_00{
 
 
 
@@ -59,6 +59,7 @@ void Pair::print() const noexcept{
 // ==============================
 
 bool Pair::isExpired_() const noexcept{
+	// beware problem 2038 !!!
 	return expires &&  mytime::expired( getCreated(), getExpires() );
 }
 

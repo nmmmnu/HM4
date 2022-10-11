@@ -26,7 +26,7 @@ namespace mytime{
 	}
 
 	constexpr uint64_t to64(uint32_t const sec, uint32_t const usec = 0) noexcept{
-		return (uint64_t) sec << 32 | usec;
+		return uint64_t{sec} << 32 | usec;
 	}
 
 	constexpr uint32_t to32(uint64_t const timestamp) noexcept{
@@ -34,7 +34,7 @@ namespace mytime{
 	}
 
 	constexpr uint32_t toUsec(uint64_t const timestamp) noexcept{
-		return uint32_t( timestamp & 0xFF'FF'FF'FF );
+		return uint32_t( timestamp & 0xFFFF'FFFF );
 	}
 
 	std::string_view toString(uint32_t date, std::string_view const format, to_string_buffer_t &buffer) noexcept;
