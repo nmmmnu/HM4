@@ -3,6 +3,7 @@
 #include "mytime.h"
 
 #include <iostream>
+#include <algorithm>	// std::min
 
 namespace hm4{
 
@@ -27,7 +28,7 @@ void Pair::createInRawMemory(Pair *pair,
 	;
 
 	pair->created	= htobe<uint64_t>(getCreateTime__(created));
-	pair->expires	= htobe<uint32_t>(expires);
+	pair->expires	= htobe<uint32_t>(std::min(expires, PairConf::EXPIRES_MAX));
 	pair->keylen	= htobe<uint16_t>(keylen);
 	pair->vallen	= htobe<uint16_t>(vallen);
 

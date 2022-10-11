@@ -48,7 +48,15 @@ namespace mytime{
 	}
 
 	inline uint64_t addTime(uint64_t const date, uint32_t const expiration) noexcept{
-		return date + to64(expiration);
+		uint64_t const a = date;
+		uint64_t const b = to64(expiration);
+
+		uint64_t const max = UINT64_MAX; // lets not add <limits>
+
+		if (max - a < b)
+			return max; // overflow detected.
+		else
+			return a + b;
 	}
 
 	inline bool expired(uint64_t const date, uint32_t const expiration) noexcept{

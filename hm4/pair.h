@@ -20,20 +20,21 @@ namespace hm4{
 inline namespace version_3_00_00{
 
 	namespace PairConf{
-		constexpr uint32_t	VERSION		= 20000;
+		constexpr uint32_t	VERSION			= 20000;
 
-		constexpr size_t	ALIGN		= sizeof(void *);
+		constexpr size_t	ALIGN			= sizeof(void *);
 
-		constexpr uint16_t	MAX_KEY_SIZE	= 0b0'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
-		constexpr uint32_t	MAX_VAL_SIZE	= 0b0'1111'1111'1111'1111'1111; // 1048575, 1 MB
-		constexpr uint16_t	MAX_VAL_MASK	= 0b0'0000'1111'0000'0000'0000;
-		constexpr size_t	MAX_VAL_MASK_SH	= 4;
+		constexpr uint16_t	MAX_KEY_SIZE		= 0b0'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
+		constexpr uint32_t	MAX_VAL_SIZE		= 0b0'1111'1111'1111'1111'1111; // 1048575, 1 MB
+		constexpr uint16_t	MAX_VAL_MASK		= 0b0'0000'1111'0000'0000'0000;
+		constexpr size_t	MAX_VAL_MASK_SH		= 4;
 
-		constexpr uint16_t	MAX_KEY_MASK	= MAX_KEY_SIZE;
+		constexpr uint16_t	MAX_KEY_MASK		= MAX_KEY_SIZE;
 
-		constexpr uint32_t	EXPIRES_TOMBSTONE = 0xFFFF'FFFF;
+		constexpr uint32_t	EXPIRES_TOMBSTONE	= 0xFFFF'FFFF;
+		constexpr uint32_t	EXPIRES_MAX		= EXPIRES_TOMBSTONE - 1;
 
-		constexpr const char	*EMPTY_MESSAGE	= "---pair-is-empty---";
+		constexpr const char	*EMPTY_MESSAGE		= "---pair-is-empty---";
 	}
 
 
@@ -256,7 +257,7 @@ inline namespace version_3_00_00{
 		[[nodiscard]]
 		bool isTombstone() const noexcept{
 			if constexpr(1){
-				if (expires == PairConf::EXPIRES_TOMBSTONE)
+				if (expires > PairConf::EXPIRES_MAX)
 					return true;
 			}
 
