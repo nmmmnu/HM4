@@ -100,8 +100,17 @@ public:
 		return list_->insert(key, val, expires, created);
 	}
 
+	auto insert(	std::string_view const key){
+		return list_->insert(key);
+	}
+
 	auto insert(Pair const &src){
 		return list_->insert(src);
+	}
+
+	template<class PFactory>
+	auto insertLazyPair_(PFactory &&factory){
+		return list_->insertLazyPair_(std::move(factory));
 	}
 
 protected:

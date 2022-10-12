@@ -249,13 +249,10 @@ namespace net::worker::commands::GetX{
 				if (! it->isValid(std::true_type{}))
 					continue;
 
-				if (auto *p = db.canUpdateInPlace(& *it); p){
-					// remove in place.
-					p->inPlaceTombstone();
-				}else{
-					// add to remove list
+				if (db.canUpdateWithHint(& *it))
+					db.delHint(& *it, key);
+				else
 					container.emplace_back(key);
-				}
 			}
 
 			return {};

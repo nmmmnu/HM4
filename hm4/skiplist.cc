@@ -167,11 +167,9 @@ bool SkipList<T_Allocator>::clear(){
 }
 
 template<class T_Allocator>
-auto SkipList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
-	if (!newdata)
-		return this->end();
-
-	auto const &key = newdata->getKey();
+template<class PFactory>
+auto SkipList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
+	auto const &key = factory.getKey();
 
 	const auto nl = locate_(key, std::true_type{});
 
@@ -180,12 +178,26 @@ auto SkipList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, 
 
 		Pair *olddata = nl.node->data;
 
-		// check if the data in database is valid
-		if (! newdata->isValidForReplace(*olddata) ){
-			// newdata will be magically destroyed.
-			return this->end();
+		// try update pair in place.
+		// we check nothing :)
+		if (factory(olddata)){
+			// successfully updated.
+
+			return { nl.node };
 		}
 
+		auto newdata = factory(getAllocator());
+
+		if (!newdata)
+			return this->end();
+
+		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
+			// check if the data in database is valid
+			if (! newdata->isValidForReplace(*olddata) ){
+				// newdata will be magically destroyed.
+				return this->end();
+			}
+		}
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// assign new pair
@@ -201,6 +213,11 @@ auto SkipList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, 
 	}
 
 	// create new node
+
+	auto newdata = factory(getAllocator());
+
+	if (!newdata)
+		return this->end();
 
 	size_t const size = newdata->bytes();
 
@@ -435,6 +452,21 @@ template class SkipList<MyAllocator::PMAllocator>;
 template class SkipList<MyAllocator::STDAllocator>;
 template class SkipList<MyAllocator::ArenaAllocator>;
 template class SkipList<MyAllocator::SimulatedArenaAllocator>;
+
+template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory		&&factory) -> iterator;
+template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory		&&factory) -> iterator;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory		&&factory) -> iterator;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory		&&factory) -> iterator;
+
+template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+
+template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
+template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
 
 } // namespace
 

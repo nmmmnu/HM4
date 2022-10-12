@@ -43,11 +43,9 @@ auto VectorList<T_Allocator>::find(std::string_view const key, std::false_type) 
 }
 
 template<class T_Allocator>
-auto VectorList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
-	if (!newdata)
-		return this->end();
-
-	auto const &key = newdata->getKey();
+template<class PFactory>
+auto VectorList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
+	auto const &key = factory.getKey();
 
 	const auto &[found, it] = binarySearch(vector_, key);
 
@@ -56,10 +54,25 @@ auto VectorList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair
 
 		Pair *olddata = *it;
 
-		// check if the data in database is valid
-		if (! newdata->isValidForReplace(*olddata) ){
-			// newdata will be magically destroyed.
+		// try update pair in place.
+		// we check nothing :)
+		if (factory(olddata)){
+			// successfully updated.
+
+			return { it };
+		}
+
+		auto newdata = factory(getAllocator());
+
+		if (!newdata)
 			return this->end();
+
+		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
+			// check if the data in database is valid
+			if (! newdata->isValidForReplace(*olddata) ){
+				// newdata will be magically destroyed.
+				return this->end();
+			}
 		}
 
 		lc_.upd(olddata->bytes(), newdata->bytes());
@@ -74,6 +87,11 @@ auto VectorList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair
 
 		return { it };
 	}
+
+	auto newdata = factory(getAllocator());
+
+	if (!newdata)
+		return this->end();
 
 	// key not exists, shift, then add
 
@@ -133,6 +151,21 @@ template class VectorList<MyAllocator::PMAllocator>;
 template class VectorList<MyAllocator::STDAllocator>;
 template class VectorList<MyAllocator::ArenaAllocator>;
 template class VectorList<MyAllocator::SimulatedArenaAllocator>;
+
+template auto VectorList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory		&&factory) -> iterator;
+template auto VectorList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory		&&factory) -> iterator;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory		&&factory) -> iterator;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory		&&factory) -> iterator;
+
+template auto VectorList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+template auto VectorList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactoryTombstone	&&factory) -> iterator;
+
+template auto VectorList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
+template auto VectorList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactoryClone	&&factory) -> iterator;
 
 } // namespace
 

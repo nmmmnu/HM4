@@ -512,6 +512,83 @@ inline namespace version_3_00_00{
 
 
 
+	struct PairFactory{
+		std::string_view key;
+		std::string_view val;
+		uint32_t expires = 0;
+		uint32_t created = 0;
+
+		[[nodiscard]]
+		constexpr auto getKey() const noexcept{
+			return key;
+		}
+
+		[[nodiscard]]
+		bool operator()(Pair *hint) const noexcept{
+			if (expires == 0 && val.size() == hint->getVal().size()){
+				char *dest = const_cast<char *>(hint->getVal().data());
+
+				memcpy(dest, val.data(), val.size());
+
+				hint->expires = 0; // we checked expires == 0
+
+				return true;
+			}
+
+			return false;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		auto operator()(Allocator &allocator) const noexcept{
+			return Pair::smart_ptr::create(allocator, key, val, expires, created);
+		}
+	};
+
+	struct PairFactoryTombstone{
+		std::string_view key;
+
+		[[nodiscard]]
+		constexpr auto getKey() const noexcept{
+			return key;
+		}
+
+		[[nodiscard]]
+		bool operator()(Pair *hint) const noexcept{
+			hint->inPlaceTombstone();
+
+			return true;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		auto operator()(Allocator &allocator) const noexcept{
+			return Pair::smart_ptr::create(allocator, key, Pair::TOMBSTONE);
+		}
+	};
+
+	struct PairFactoryClone{
+		const Pair *src;
+
+		[[nodiscard]]
+		constexpr auto getKey() const noexcept{
+			return src->getKey();
+		}
+
+		[[nodiscard]]
+		constexpr bool operator()(Pair *) const noexcept{
+			return false;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		auto operator()(Allocator &allocator) const noexcept{
+			return Pair::smart_ptr::clone(allocator, src);
+		}
+	};
+
+
+
 } // anonymous namespace
 } // namespace
 

@@ -3,13 +3,13 @@
 
 #include "version.h"
 #include "myprocess.h"	// get PID
-
-
+#include "logger.h"
 
 template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 struct ListDBAdapter{
-	constexpr static bool MUTABLE = ! std::is_const_v<List>;
-	constexpr static bool ENABLE_UPDATE_INPLACE = true;
+	constexpr static bool MUTABLE 			= ! std::is_const_v<List>;
+	constexpr static bool TRY_INSERT_HINTS		= true;
+	constexpr static bool DELETE_USE_TOMBSTONES	= true;
 
 	constexpr static inline std::string_view SEPARATOR = "~";
 
@@ -115,41 +115,52 @@ public:
 		list_.insert(key, val, expires);
 	}
 
+	void setHint(const hm4::Pair *pair, std::string_view const key, std::string_view const val, uint32_t expires = 0){
+		assert(!key.empty());
+
+		if constexpr(TRY_INSERT_HINTS){
+			if (hm4::tryInsertHint(list_, pair, key, val, expires)){
+				log__<LogLevel::NOTICE>("setHint", "Bypassing list");
+				return;
+			}
+		}
+
+		return set(key, val, expires);
+	}
+
 	bool del(std::string_view const key){
 		assert(!key.empty());
 
-		return list_.erase(key);
+		list_.erase(key);
+
+		return true;
 	}
 
-	template<typename T>
-	[[nodiscard]]
-	constexpr T *canUpdateInPlace(const T *p){
-		if constexpr(ENABLE_UPDATE_INPLACE)
-			return canUpdateInPlace_(p);
-		else
-			return nullptr;
+	bool delHint(const hm4::Pair *pair, std::string_view const key){
+		assert(!key.empty());
+
+		if constexpr(TRY_INSERT_HINTS && DELETE_USE_TOMBSTONES){
+			// this is a bit ugly,
+			// because ListDBAdapter not suppose to know,
+			// if it is with tombstone or not.
+			if (hm4::tryInsertHint(list_, pair, key)){
+				log__<LogLevel::NOTICE>("delHint", "Bypassing list");
+				return true;
+			}
+		}
+
+		return del(key);
 	}
 
 	auto mutable_size() const{
 		return list_.mutable_size();
 	}
 
-private:
-	template<typename T>
-	constexpr T *canUpdateInPlace_(const T *p){
-		if (list_.getAllocator().owns(p)){
-			// pointer is in a Pair in the memlist and it is safe to be overwitten.
-			// the create time is not updated, but this is not that important,
-			// since the Pair is not yet flushed.
-
-			// function is deliberately non const,
-			// because the Pair will be overwritten soon anyway.
-			return const_cast<T *>(p);
-		}
-
-		return nullptr;
+	bool canUpdateWithHint(const hm4::Pair *p) const{
+		return list_.getAllocator().owns(p);
 	}
 
+private:
 	template<class Command>
 	static bool invokeCommand__(Command *cmd){
 		if constexpr(std::is_same_v<Command,std::nullptr_t>)

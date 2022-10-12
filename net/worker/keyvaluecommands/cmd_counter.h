@@ -23,34 +23,15 @@ namespace net::worker::commands::Counter{
 
 			auto it = db.find(key);
 
-			to_string_buffer_t buffer;
-			memset(buffer.data(), 0, buffer.size());
-
 			if(it && it->isValid()){
-				std::string_view val = it->getVal();
+				auto const val = it->getVal();
 
 				n += from_string<int64_t>(val);
-
-				if (val.size() == buffer.size())
-					if (char *val_in_place = db.canUpdateInPlace(val.data()); val_in_place){
-						// update in place can be done...
-
-						to_string(n, buffer);
-
-						// would be nice to be done in the buffer directly,
-						// but API does not allows it.
-						strcpy(val_in_place, buffer.data());
-
-					//	printf("INCR / DECR: update in place\n");
-
-						return Result::ok(n);
-					}
 			}
 
-			// ensure size is buffer.size(), so update in place kicks up later.
-			to_string(n, buffer);
+			to_string_buffer_t buffer;
 
-			std::string_view const val = std::string_view{ buffer.data(), buffer.size() };
+			auto const val = to_string(n, buffer);
 
 			db.set(key, val);
 

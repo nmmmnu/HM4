@@ -112,7 +112,7 @@ public:
 		}
 
 		if constexpr (EraseType == DualListEraseType::TOMBSTONE){
-			return list1_->insert(key, Pair::TOMBSTONE) != std::end(*list1_);
+			return list1_->insert(key) != std::end(*list1_);
 		}
 	}
 
@@ -125,9 +125,22 @@ public:
 		);
 	}
 
+	auto insert(	std::string_view const key){
+		return fixDualIterator_(
+			list1_->insert(key)
+		);
+	}
+
 	auto insert(Pair const &src){
 		return fixDualIterator_(
 			list1_->insert(src)
+		);
+	}
+
+	template<class PFactory>
+	auto insertLazyPair_(PFactory &&factory){
+		return fixDualIterator_(
+			list1_->insertLazyPair_(std::move(factory))
 		);
 	}
 

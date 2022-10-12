@@ -34,10 +34,19 @@ public:
 	}
 
 	constexpr static
-	iterator insert(
-			std::string_view, std::string_view,
-			uint32_t = 0, uint32_t = 0
-		){
+	iterator insert(	std::string_view, std::string_view,
+				uint32_t = 0, uint32_t = 0
+				){
+		return nullptr;
+	}
+
+	constexpr static
+	iterator insert(	std::string_view){
+		return nullptr;
+	}
+
+	constexpr static
+	iterator insert(Pair const &){
 		return nullptr;
 	}
 

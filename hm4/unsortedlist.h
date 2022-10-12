@@ -80,9 +80,12 @@ public:
 	iterator insert(	std::string_view key, std::string_view val,
 				uint32_t expires = 0, uint32_t created = 0);
 
+	iterator insert(	std::string_view key);
+
 	iterator insert(Pair const &src);
 
-	iterator insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata);
+	template<class PFactory>
+	iterator insertLazyPair_(PFactory &&factory);
 
 	auto size() const{
 		return lc_.size();
@@ -171,12 +174,20 @@ inline auto UnsortedList<T_Allocator>::insert(
 }
 
 template<class T_Allocator>
+inline auto UnsortedList<T_Allocator>::insert(std::string_view key) -> iterator{
+	return hm4::insert(*this, key);
+}
+
+template<class T_Allocator>
 inline auto UnsortedList<T_Allocator>::insert(Pair const &src) -> iterator{
 	return hm4::insert(*this, src);
 }
 
 template<class T_Allocator>
-inline auto UnsortedList<T_Allocator>::insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata) -> iterator{
+template<class PFactory>
+inline auto UnsortedList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
+	auto newdata = factory(getAllocator());
+
 	if (!newdata)
 		return this->end();
 

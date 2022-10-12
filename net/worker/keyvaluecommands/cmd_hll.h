@@ -1,6 +1,5 @@
 #include "base.h"
 #include "hyperloglog.h"
-
 #include "logger.h"
 
 namespace net::worker::commands::HLL{
@@ -39,7 +38,7 @@ namespace net::worker::commands::HLL{
 	#endif
 
 		template<class DBAdapter>
-		auto store(DBAdapter &db, std::string_view key, uint8_t *hll){
+		auto store(DBAdapter &db, std::string_view key, const uint8_t *hll){
 			return db.set(
 				key,
 				std::string_view{
@@ -50,11 +49,33 @@ namespace net::worker::commands::HLL{
 		}
 
 		template<class DBAdapter>
-		const uint8_t *load_ptr(DBAdapter &db, std::string_view key){
+		auto store(DBAdapter &db, std::string_view key, const uint8_t *hll, const hm4::Pair *pair){
+			return db.setHint(
+				pair,
+				key,
+				std::string_view{
+					reinterpret_cast<const char *>(hll),
+					HLL_M
+				}
+			);
+		}
+
+		template<class DBAdapter>
+		const hm4::Pair *load_pair(DBAdapter &db, std::string_view key){
 			auto it = db.find(key);
 
 			if (it && it->isValid(std::true_type{}) && it->getVal().size() == HLL_M)
-				return reinterpret_cast<const uint8_t *>(it->getVal().data());
+				return & *it;
+			else
+				return nullptr;
+		}
+
+		template<class DBAdapter>
+		const uint8_t *load_ptr(DBAdapter &db, std::string_view key){
+			const auto *pair =  load_pair(db, key);
+
+			if (pair)
+				return reinterpret_cast<const uint8_t *>(pair->getVal().data());
 			else
 				return nullptr;
 		}
@@ -155,9 +176,9 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			const uint8_t *b = load_ptr(db, key);
+			const auto *pair = load_pair(db, key);
 
-			if (b == nullptr){
+			if (pair == nullptr){
 				// invalid key.
 
 				uint8_t hll[HLL_M];
@@ -169,25 +190,19 @@ namespace net::worker::commands::HLL{
 				store(db, key, hll);
 
 				return Result::ok(1);
-			}else if (uint8_t *hll_in_place = db.canUpdateInPlace(b); hll_in_place){
-				// value is in memory and can be updated in place
-
-				getHLL().add(hll_in_place, val);
-
-			//	printf("PFADD: update in place\n");
-
-				return Result::ok(1);
 			}else{
 				// proceed with normal update
 
 				uint8_t hll[HLL_M];
+
+				const uint8_t *b = reinterpret_cast<const uint8_t *>(pair->getVal().data());
 
 				// copy b -> hll
 				getHLL().load(hll, b);
 
 				getHLL().add(hll, val);
 
-				store(db, key, hll);
+				store(db, key, hll, pair);
 
 				return Result::ok(1);
 			}

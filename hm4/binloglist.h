@@ -47,6 +47,10 @@ public:
 		return insert_(key, val, expires, created);
 	}
 
+	auto insert(	std::string_view const key){
+		return insert_(key);
+	}
+
 	auto insert(Pair const &src){
 		return insert_(src);
 	}

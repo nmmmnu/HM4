@@ -6,8 +6,6 @@
 
 #include "pair.h"
 
-#include "mynarrow.h"
-
 namespace hm4{
 
 namespace config{
@@ -17,7 +15,9 @@ namespace config{
 	static_assert(sizeof(size_type      ) == 8, "You need 64bit system!");
 	static_assert(sizeof(difference_type) == 8, "You need 64bit system!");
 
-	constexpr size_type	LIST_PRINT_COUNT	= 10;
+	constexpr size_type	LIST_PRINT_COUNT		= 10;
+
+	constexpr bool		LIST_CHECK_PAIR_FOR_REPLACE	= true;
 }
 
 // ==============================
@@ -72,22 +72,45 @@ bool empty(List const &list){
 
 // ==============================
 
-template<class List>
-auto insert(List &list,
+constexpr auto getPairFactory(
 		std::string_view key, std::string_view val,
 		uint32_t const expires = 0, uint32_t const created = 0){
 
-	return list.insertSmartPtrPair_(
-		Pair::smart_ptr::create(list.getAllocator(), key, val, expires, created)
+	return PairFactory{ key, val, expires, created };
+}
+
+constexpr auto getPairFactory(std::string_view key){
+	return PairFactoryTombstone{ key };
+}
+
+constexpr auto getPairFactory(Pair const &src){
+	return PairFactoryClone{ & src };
+}
+
+// ==============================
+
+template<class List, typename ...Args>
+auto insert(List &list, Args &&...args){
+	return list.insertLazyPair_(
+		getPairFactory(std::forward<Args>(args)...)
 	);
 }
 
-template<class List>
-auto insert(List &list, Pair const &src){
+template<class List, typename ...Args>
+bool tryInsertHint(List &list, const Pair *pair, Args &&...args){
+	auto factory = getPairFactory(std::forward<Args>(args)...);
 
-	return list.insertSmartPtrPair_(
-		Pair::smart_ptr::clone(list.getAllocator(), src)
-	);
+	if (list.getAllocator().owns(pair)){
+		// Pair is in the memlist and it is safe to be overwitten.
+		// the create time is not updated, but this is not that important,
+		// since the Pair is not yet flushed.
+
+		Pair *m_pair = const_cast<Pair *>(pair);
+
+		return factory(m_pair);
+	}
+
+	return false;
 }
 
 // ==============================

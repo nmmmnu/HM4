@@ -249,7 +249,7 @@ namespace net::worker::commands::Mutable{
 			const auto &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
-			db.set(key, val, exp);
+			db.setHint(& *it, key, val, exp);
 
 			// return
 
@@ -286,11 +286,7 @@ namespace net::worker::commands::Mutable{
 				blob.string_val = it->getVal();
 
 				// DEL
-
-				if (auto *p = db.canUpdateInPlace(& *it); p)
-					p->inPlaceTombstone();
-				else
-					db.del(key);
+				db.delHint(& *it, key);
 
 				// return
 
@@ -330,10 +326,7 @@ namespace net::worker::commands::Mutable{
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
-				if (auto *p = db.canUpdateInPlace(& *it); p)
-					p->inPlaceExpires(exp);
-				else
-					db.set(key, it->getVal(), exp);
+				db.set(key, it->getVal(), exp);
 
 				return Result::ok(true);
 			}else{
@@ -366,12 +359,8 @@ namespace net::worker::commands::Mutable{
 			if (auto it = db.find(key); it && it->isValid(std::true_type{})){
 				// SET
 
-				if (it->getTTL() > 0){
-					if (auto *p = db.canUpdateInPlace(& *it); p)
-						p->inPlacePersist();
-					else
-						db.set(key, it->getVal(), 0);
-				}
+				if (it->getTTL() > 0)
+					db.setHint(& *it, key, it->getVal(), 0);
 
 				return Result::ok(true);
 			}else{

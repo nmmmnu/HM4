@@ -48,9 +48,12 @@ public:
 	iterator insert(	std::string_view key, std::string_view val,
 				uint32_t expires = 0, uint32_t created = 0);
 
+	iterator insert(	std::string_view key);
+
 	iterator insert(Pair const &src);
 
-	iterator insertSmartPtrPair_(MyAllocator::SmartPtrType<Pair, Allocator> &&newdata);
+	template<class PFactory>
+	iterator insertLazyPair_(PFactory &&factory);
 
 	auto size() const{
 		return lc_.size();
@@ -210,6 +213,11 @@ inline auto VectorList<T_Allocator>::insert(
 		uint32_t expires, uint32_t created) -> iterator{
 
 	return hm4::insert(*this, key, val, expires, created);
+}
+
+template<class T_Allocator>
+inline auto VectorList<T_Allocator>::insert(std::string_view key) -> iterator{
+	return hm4::insert(*this, key);
 }
 
 template<class T_Allocator>
