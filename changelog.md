@@ -40,3 +40,8 @@ Changelog
 -	implement update in place
 -	new command DELX
 -	improve INFO - allocator information is shown now.
+-	addressing "problem 2038' in mytime
+-	implement update in place for EXPIRE / PERSIST / GETDEL / DELX
+
+
+
