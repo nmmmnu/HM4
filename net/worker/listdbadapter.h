@@ -10,6 +10,7 @@ struct ListDBAdapter{
 	constexpr static bool MUTABLE 			= ! std::is_const_v<List>;
 	constexpr static bool TRY_INSERT_HINTS		= true;
 	constexpr static bool DELETE_USE_TOMBSTONES	= true;
+	constexpr static auto LOG_LEVEL			= LogLevel::NOTICE;
 
 	constexpr static inline std::string_view SEPARATOR = "~";
 
@@ -120,7 +121,7 @@ public:
 
 		if constexpr(TRY_INSERT_HINTS){
 			if (hm4::tryInsertHint(list_, pair, key, val, expires)){
-				log__<LogLevel::NOTICE>("setHint", "Bypassing list");
+				log__<LOG_LEVEL>("setHint", "Bypassing list");
 				return;
 			}
 		}
@@ -144,7 +145,7 @@ public:
 			// because ListDBAdapter not suppose to know,
 			// if it is with tombstone or not.
 			if (hm4::tryInsertHint(list_, pair, key)){
-				log__<LogLevel::NOTICE>("delHint", "Bypassing list");
+				log__<LOG_LEVEL>("delHint", "Bypassing list");
 				return true;
 			}
 		}

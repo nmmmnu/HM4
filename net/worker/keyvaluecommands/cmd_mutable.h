@@ -326,7 +326,7 @@ namespace net::worker::commands::Mutable{
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
-				db.set(key, it->getVal(), exp);
+				db.setHint(& *it, key, it->getVal(), exp);
 
 				return Result::ok(true);
 			}else{
@@ -359,8 +359,10 @@ namespace net::worker::commands::Mutable{
 			if (auto it = db.find(key); it && it->isValid(std::true_type{})){
 				// SET
 
-				if (it->getTTL() > 0)
-					db.setHint(& *it, key, it->getVal(), 0);
+				if (it->getTTL() > 0){
+					uint32_t const exp = 0;
+					db.setHint(& *it, key, it->getVal(), exp);
+				}
 
 				return Result::ok(true);
 			}else{

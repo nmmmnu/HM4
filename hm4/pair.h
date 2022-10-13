@@ -525,12 +525,11 @@ inline namespace version_3_00_00{
 
 		[[nodiscard]]
 		bool operator()(Pair *hint) const noexcept{
-			if (expires == 0 && val.size() == hint->getVal().size()){
-				char *dest = const_cast<char *>(hint->getVal().data());
+			if (val.size() == hint->getVal().size()){
+				// because we know key is the same,
+				// then size of the whole pair is the same.
 
-				memcpy(dest, val.data(), val.size());
-
-				hint->expires = 0; // we checked expires == 0
+				Pair::createInRawMemory(hint, key, val, expires, created);
 
 				return true;
 			}
@@ -576,7 +575,16 @@ inline namespace version_3_00_00{
 		}
 
 		[[nodiscard]]
-		constexpr bool operator()(Pair *) const noexcept{
+		bool operator()(Pair *hint) const noexcept{
+			if (src->getVal().size() == hint->getVal().size()){
+				// because we know key is the same,
+				// then size of the whole pair is the same.
+
+				Pair::cloneInRawMemory(hint, *src);
+
+				return true;
+			}
+
 			return false;
 		}
 
