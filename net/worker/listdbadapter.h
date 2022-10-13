@@ -59,10 +59,15 @@ public:
 			concatenateBuffer(
 				str,
 
+				"# Server"											"\n",
 				"Version          : ", hm4::version::str				,			"\n",
+
+			"\n"	"# Keys"											"\n",
+				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
-				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
+
+			"\n"	"# System"											"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
 			);
 		}else{
@@ -76,14 +81,21 @@ public:
 			concatenateBuffer(
 				str,
 
+				"# Server"											"\n",
 				"Version          : ", hm4::version::str				,			"\n",
+
+			"\n"	"# Keys"											"\n",
+				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
 				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[2]),	"\n",
+
+			"\n"	"# Allocator"											"\n",
 				"Allocator        : ", list_.getAllocator().getName()			,			"\n",
 				"Allocator Free   : ", mem_format(list_.getAllocator().getFreeMemory()	,	buffer[3]),	"\n",
 				"Allocator Used   : ", mem_format(list_.getAllocator().getUsedMemory()	,	buffer[4]),	"\n",
-				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
+
+			"\n"	"# System"											"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[5]),	"\n"
 			);
 		}
