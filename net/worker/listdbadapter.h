@@ -66,6 +66,13 @@ public:
 				"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
 			);
 		}else{
+			auto mem_format = [](uint64_t const a, to_string_buffer_t &buffer) -> std::string_view{
+				if (a == std::numeric_limits<std::size_t>::max())
+					return "n/a";
+				else
+					return to_string(a, buffer);
+			};
+
 			concatenateBuffer(
 				str,
 
@@ -73,9 +80,9 @@ public:
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
 				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[2]),	"\n",
-			//	"Allocator        : ", list_.getAllocator().getName()			,			"\n",
-				"Allocator Free   : ", to_string(list_.getAllocator().getFreeMemory()	,	buffer[3]),	"\n",
-				"Allocator Used   : ", to_string(list_.getAllocator().getUsedMemory()	,	buffer[4]),	"\n",
+				"Allocator        : ", list_.getAllocator().getName()			,			"\n",
+				"Allocator Free   : ", mem_format(list_.getAllocator().getFreeMemory()	,	buffer[3]),	"\n",
+				"Allocator Used   : ", mem_format(list_.getAllocator().getUsedMemory()	,	buffer[4]),	"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[5]),	"\n"
 			);
