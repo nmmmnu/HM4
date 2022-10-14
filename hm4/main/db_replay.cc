@@ -50,7 +50,7 @@ int listReplay(List &list, InputList const &inputList, size_t const process_step
 
 	for(auto const &pair : inputList){
 		if (!pair.empty())
-			list.insert(pair);
+			insert(list, pair);
 
 		++i;
 

@@ -77,13 +77,6 @@ public:
 		return true;
 	}
 
-	iterator insert(	std::string_view key, std::string_view val,
-				uint32_t expires = 0, uint32_t created = 0);
-
-	iterator insert(	std::string_view key);
-
-	iterator insert(Pair const &src);
-
 	template<class PFactory>
 	iterator insertLazyPair_(PFactory &&factory);
 
@@ -93,6 +86,9 @@ public:
 
 	auto mutable_size() const{
 		return size();
+	}
+
+	constexpr static void mutable_notify(const Pair *){
 	}
 
 	auto bytes() const{
@@ -163,24 +159,6 @@ inline auto UnsortedList<T_Allocator>::begin() const noexcept -> iterator{
 template<class T_Allocator>
 inline auto UnsortedList<T_Allocator>::end() const noexcept -> iterator{
 	return std::end(vector_);
-}
-
-template<class T_Allocator>
-inline auto UnsortedList<T_Allocator>::insert(
-		std::string_view key, std::string_view val,
-		uint32_t expires, uint32_t created) -> iterator{
-
-	return hm4::insert(*this, key, val, expires, created);
-}
-
-template<class T_Allocator>
-inline auto UnsortedList<T_Allocator>::insert(std::string_view key) -> iterator{
-	return hm4::insert(*this, key);
-}
-
-template<class T_Allocator>
-inline auto UnsortedList<T_Allocator>::insert(Pair const &src) -> iterator{
-	return hm4::insert(*this, src);
 }
 
 template<class T_Allocator>

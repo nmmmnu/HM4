@@ -264,7 +264,7 @@ auto SkipList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
 }
 
 template<class T_Allocator>
-bool SkipList<T_Allocator>::erase(std::string_view const key){
+bool SkipList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 

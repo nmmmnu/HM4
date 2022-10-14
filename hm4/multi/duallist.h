@@ -45,6 +45,10 @@ public:
 		return list1_->mutable_size();
 	}
 
+	constexpr void mutable_notify(Pair *p){
+		return list1_->mutable_notify(p);
+	}
+
 	size_t bytes() const{
 		return list1_->bytes() + list2_->bytes();
 	}
@@ -104,37 +108,16 @@ public:
 		return list1_->clear();
 	}
 
-	bool erase(std::string_view const key){
+	bool erase_(std::string_view const key){
 		assert(Pair::check(key));
 
 		if constexpr (EraseType == DualListEraseType::NORMAL){
-			return list1_->erase(key);
+			return hm4::erase(*list1_, key);
 		}
 
 		if constexpr (EraseType == DualListEraseType::TOMBSTONE){
-			return list1_->insert(key) != std::end(*list1_);
+			return hm4::insert(*list1_, key) != std::end(*list1_);
 		}
-	}
-
-	auto insert(	std::string_view const key, std::string_view const val,
-			uint32_t const expires = 0, uint32_t const created = 0
-			){
-
-		return fixDualIterator_(
-			list1_->insert(key, val, expires, created)
-		);
-	}
-
-	auto insert(	std::string_view const key){
-		return fixDualIterator_(
-			list1_->insert(key)
-		);
-	}
-
-	auto insert(Pair const &src){
-		return fixDualIterator_(
-			list1_->insert(src)
-		);
 	}
 
 	template<class PFactory>

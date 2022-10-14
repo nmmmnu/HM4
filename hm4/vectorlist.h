@@ -39,18 +39,11 @@ private:
 public:
 	bool clear();
 
-	bool erase(std::string_view key);
+	bool erase_(std::string_view key);
 
 	Pair const &operator[](size_type const index) const{
 		return *vector_[index];
 	}
-
-	iterator insert(	std::string_view key, std::string_view val,
-				uint32_t expires = 0, uint32_t created = 0);
-
-	iterator insert(	std::string_view key);
-
-	iterator insert(Pair const &src);
 
 	template<class PFactory>
 	iterator insertLazyPair_(PFactory &&factory);
@@ -61,6 +54,9 @@ public:
 
 	auto mutable_size() const{
 		return size();
+	}
+
+	constexpr static void mutable_notify(const Pair *){
 	}
 
 	auto bytes() const{
@@ -207,25 +203,10 @@ inline auto VectorList<T_Allocator>::end() const noexcept -> iterator{
 	return std::end(vector_);
 }
 
-template<class T_Allocator>
-inline auto VectorList<T_Allocator>::insert(
-		std::string_view key, std::string_view val,
-		uint32_t expires, uint32_t created) -> iterator{
 
-	return hm4::insert(*this, key, val, expires, created);
-}
-
-template<class T_Allocator>
-inline auto VectorList<T_Allocator>::insert(std::string_view key) -> iterator{
-	return hm4::insert(*this, key);
-}
-
-template<class T_Allocator>
-inline auto VectorList<T_Allocator>::insert(Pair const &src) -> iterator{
-	return hm4::insert(*this, src);
-}
 
 } // namespace
+
 
 
 #endif

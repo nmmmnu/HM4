@@ -40,25 +40,10 @@ public:
 					multi::SingleList<List>(list),
 					binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>(std::forward<UBinLogger>(binlogger)){}
 
-	auto insert(	std::string_view const key, std::string_view const val,
-			uint32_t const expires = 0, uint32_t const created = 0
-			){
-
-		return insert_(key, val, expires, created);
-	}
-
-	auto insert(	std::string_view const key){
-		return insert_(key);
-	}
-
-	auto insert(Pair const &src){
-		return insert_(src);
-	}
-
-	bool erase(std::string_view const key){
+	bool erase_(std::string_view const key){
 		assert(Pair::check(key));
 
-		return this->insert(key, Pair::TOMBSTONE) != std::end(*list_);
+		return insert(*this, key) != std::end(*list_);
 	}
 
 	bool clear(){
@@ -69,10 +54,9 @@ public:
 		return result;
 	}
 
-private:
-	template<typename ...Ts>
-	auto insert_(Ts&&... ts){
-		auto it = list_->insert(std::forward<Ts>(ts)...);
+	template<class PFactory>
+	auto insertLazyPair_(PFactory &&factory){
+		auto it = list_->insertLazyPair_(std::move(factory));
 
 		if (it == std::end(*list_))
 			return it;
@@ -82,10 +66,15 @@ private:
 		return it;
 	}
 
+	void mutable_notify(const Pair *p){
+		binlogger_(*p);
+	}
+
 private:
 	using	multi::SingleList<List>::list_;
 	using	binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>::binlogger_;
 };
+
 
 
 } // namespace

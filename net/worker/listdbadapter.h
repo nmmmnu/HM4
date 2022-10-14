@@ -132,7 +132,7 @@ public:
 	void set(std::string_view const key, std::string_view const val, uint32_t expires = 0){
 		assert(!key.empty());
 
-		list_.insert(key, val, expires);
+		insert(list_, key, val, expires);
 	}
 
 	void setHint(const hm4::Pair *pair, std::string_view const key, std::string_view const val, uint32_t expires = 0){
@@ -151,7 +151,7 @@ public:
 	bool del(std::string_view const key){
 		assert(!key.empty());
 
-		list_.erase(key);
+		erase(list_, key);
 
 		return true;
 	}

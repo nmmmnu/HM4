@@ -98,8 +98,6 @@ auto insert(List &list, Args &&...args){
 
 template<class List, typename ...Args>
 bool tryInsertHint(List &list, const Pair *pair, Args &&...args){
-	auto factory = getPairFactory(std::forward<Args>(args)...);
-
 	if (list.getAllocator().owns(pair)){
 		// Pair is in the memlist and it is safe to be overwitten.
 		// the create time is not updated, but this is not that important,
@@ -107,10 +105,20 @@ bool tryInsertHint(List &list, const Pair *pair, Args &&...args){
 
 		Pair *m_pair = const_cast<Pair *>(pair);
 
-		return factory(m_pair);
+		auto factory = getPairFactory(std::forward<Args>(args)...);
+
+		if (factory(m_pair)){
+			list.mutable_notify(m_pair);
+			return true;
+		}
 	}
 
 	return false;
+}
+
+template<class List>
+bool erase(List &list, std::string_view const key){
+	return list.erase_(key);
 }
 
 // ==============================

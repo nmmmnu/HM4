@@ -43,21 +43,6 @@ public:
 		// ScopedThread joins now.
 	}
 
-	auto insert(	std::string_view const key, std::string_view const val,
-			uint32_t const expires = 0, uint32_t const created = 0
-			){
-
-		return insert_(key, val, expires, created);
-	}
-
-	auto insert(	std::string_view const key){
-		return insert_(key);
-	}
-
-	auto insert(Pair const &src){
-		return insert_(src);
-	}
-
 	void flush(){
 		if (empty(*list1_)){
 			log__<LogLevel::WARNING>("No data for flushing.");
@@ -90,11 +75,10 @@ public:
 		return true;
 	}
 
-private:
-	template<typename ...Ts>
-	auto insert_(Ts&&... ts){
+	template<class PFactory>
+	auto insertLazyPair_(PFactory &&factory){
 		auto it = this->fixDualIterator_(
-			list1_->insert(std::forward<Ts>(ts)...)
+			list1_->insertLazyPair_(std::move(factory))
 		);
 
 		if (predicate_(*list1_))
@@ -103,6 +87,7 @@ private:
 		return it;
 	}
 
+private:
 	void save_(List &list, bool const fg = true) const{
 		[[maybe_unused]]
 		std::string_view const id = fg ? "Foreground" : "Background";

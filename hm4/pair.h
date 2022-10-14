@@ -570,7 +570,7 @@ inline namespace version_3_00_00{
 		const Pair *src;
 
 		[[nodiscard]]
-		constexpr auto getKey() const noexcept{
+		auto getKey() const noexcept{
 			return src->getKey();
 		}
 

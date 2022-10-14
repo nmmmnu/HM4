@@ -29,26 +29,15 @@ public:
 	}
 
 	constexpr static
-	bool erase(std::string_view ){
+	bool erase_(std::string_view ){
 		return true;
 	}
 
-	constexpr static
-	iterator insert(	std::string_view, std::string_view,
-				uint32_t = 0, uint32_t = 0
-				){
+	template<class PFactory>
+	iterator insertLazyPair_(PFactory &&){
 		return nullptr;
 	}
 
-	constexpr static
-	iterator insert(	std::string_view){
-		return nullptr;
-	}
-
-	constexpr static
-	iterator insert(Pair const &){
-		return nullptr;
-	}
 
 	constexpr static
 	size_type size(){
@@ -58,6 +47,9 @@ public:
 	constexpr static
 	size_type mutable_size(){
 		return 0;
+	}
+
+	constexpr static void mutable_notify(const Pair *){
 	}
 
 	constexpr static

@@ -86,32 +86,22 @@ public:
 		return list_->clear();
 	}
 
-	bool erase(std::string_view const key){
+	bool erase_(std::string_view const key){
 		// better Pair::check(key), but might fail because of the caller.
 		assert(!key.empty());
 
-		return list_->erase(key);
-	}
-
-	auto insert(	std::string_view const key, std::string_view const val,
-			uint32_t const expires = 0, uint32_t const created = 0
-			){
-
-		return list_->insert(key, val, expires, created);
-	}
-
-	auto insert(	std::string_view const key){
-		return list_->insert(key);
-	}
-
-	auto insert(Pair const &src){
-		return list_->insert(src);
+		return hm4::erase(*list_, key);
 	}
 
 	template<class PFactory>
 	auto insertLazyPair_(PFactory &&factory){
 		return list_->insertLazyPair_(std::move(factory));
 	}
+
+	constexpr void mutable_notify(Pair *p){
+		return list_->mutable_notify(p);
+	}
+
 
 protected:
 	using SingleListBase<List>::list_;

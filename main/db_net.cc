@@ -367,7 +367,7 @@ namespace{
 			// messages will be shown from the builder.
 			for(auto const &pair : input)
 				if (!pair.empty())
-					list.insert(pair);
+					insert(list, pair);
 
 		} /* d-tor of list kicks here */
 

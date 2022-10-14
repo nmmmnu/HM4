@@ -26,9 +26,9 @@ auto listInsert(List &list, std::string_view const key, std::string_view const v
 	MyReaderBuffer base64_buffer;
 
 	if constexpr(Base64)
-		return list.insert(key, base64_decode(val, base64_buffer.data()));
+		return insert(list, key, base64_decode(val, base64_buffer.data()));
 	else
-		return list.insert(key, val);
+		return insert(list, key, val);
 }
 
 

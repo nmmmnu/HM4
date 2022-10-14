@@ -34,21 +34,6 @@ public:
 		save_();
 	}
 
-	auto insert(	std::string_view const key, std::string_view const val,
-			uint32_t const expires = 0, uint32_t const created = 0
-			){
-
-		return insert_(key, val, expires, created);
-	}
-
-	auto insert(	std::string_view const key){
-		return insert_(key);
-	}
-
-	auto insert(Pair const &src){
-		return insert_(src);
-	}
-
 	void flush(){
 		save_();
 
@@ -62,10 +47,9 @@ public:
 		return flush();
 	}
 
-private:
-	template<typename ...Ts>
-	auto insert_(Ts&&... ts){
-		auto it = list_->insert(std::forward<Ts>(ts)...);
+	template<class PFactory>
+	auto insertLazyPair_(PFactory &&factory){
+		auto it = list_->insertLazyPair_(std::move(factory));
 
 		if (predicate_(*list_))
 			flush();
@@ -73,6 +57,7 @@ private:
 		return it;
 	}
 
+private:
 	void save_() const{
 		log__<LogLevel::WARNING>("Save data...", "List record(s): ", list_->size(), "List size: ", list_->bytes());
 

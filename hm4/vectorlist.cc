@@ -110,7 +110,7 @@ auto VectorList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
 }
 
 template<class T_Allocator>
-bool VectorList<T_Allocator>::erase(std::string_view const key){
+bool VectorList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 

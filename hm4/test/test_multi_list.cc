@@ -163,7 +163,7 @@ void list_test(const List &list, typename List::size_type const count, size_t co
 template <class List>
 size_t listInsert(List &list, const char *key, const char *value){
 	size_t const size = Pair::bytes(key, value);
-	list.insert(key, value);
+	insert(list, key, value);
 	return size;
 }
 
@@ -172,9 +172,9 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 	mytest.begin(name);
 
 	{
-		list2.insert("a",	"2"	);
+		insert(list2, "a",	"2"	);
 		sleep();
-		list1.insert("a",	"1"	);
+		insert(list1, "a",	"1"	);
 
 		using MyMultiList = hm4::multi::DualList<List, List, hm4::multi::DualListEraseType::NORMAL>;
 
@@ -182,7 +182,7 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 
 		mytest("get erased N1",			getCheck(listM, "a",		"1", std::true_type{}	));
 
-		listM.erase("a");
+		erase(listM, "a");
 
 		mytest("get erased N2",			getCheck(listM, "a",		"2", std::true_type{}	));
 	}
@@ -190,9 +190,9 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 	// --------
 
 	{
-		list2.insert("a",	"2"	);
+		insert(list2, "a",	"2"	);
 		sleep();
-		list1.insert("a",	"1"	);
+		insert(list1, "a",	"1"	);
 
 		using MyMultiList = hm4::multi::DualList<List, List, hm4::multi::DualListEraseType::TOMBSTONE>;
 
@@ -200,7 +200,7 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 
 		mytest("get erased T1",			getCheck(listM, "a",		"1", std::true_type{}	));
 
-		listM.erase("a");
+		erase(listM, "a");
 
 		mytest("get erased T2",			getCheck(listM, "a"					));
 	}
@@ -270,8 +270,8 @@ void test_CollectionList(const char *name){
 
 	{
 		List l = f();
-		l.insert("1 name",		"DIRTY"	);
-		l.insert("2 age",		"DIRTY"	);
+		insert(l, "1 name",		"DIRTY"	);
+		insert(l, "2 age",		"DIRTY"	);
 
 		bytes += l.bytes();
 
@@ -284,8 +284,8 @@ void test_CollectionList(const char *name){
 
 	{
 		List l = f();
-		l.insert("1 name",		"Niki"	);
-		l.insert("2 age",		"DIRTY"	);
+		insert(l, "1 name",		"Niki"	);
+		insert(l, "2 age",		"DIRTY"	);
 
 		bytes += l.bytes();
 
@@ -298,9 +298,9 @@ void test_CollectionList(const char *name){
 
 	{
 		List l = f();
-		l.insert("2 age",		"22"	);
-		l.insert("3 city",		"Sofia"	);
-		l.insert("4 os",		"Linux"	);
+		insert(l, "2 age",		"22"	);
+		insert(l, "3 city",		"Sofia"	);
+		insert(l, "4 os",		"Linux"	);
 
 		bytes += l.bytes();
 

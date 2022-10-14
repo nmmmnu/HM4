@@ -33,7 +33,7 @@ Allocator_::v allocator;
 
 template <class List>
 size_t listInsert(List &list, const char *key, const char *value){
-	auto it = list.insert(key, value);
+	auto it = insert(list, key, value);
 
 	// collect size, but via iterator...
 	if (it != std::end(list))
@@ -156,8 +156,8 @@ void list_test(List &list){
 	const char *key_over = "2 val";
 	const char *val_over = "overwritten";
 
-	list.insert(key_over, "original"	);
-	list.insert(key_over, val_over		);
+	insert(list, key_over, "original"	);
+	insert(list, key_over, val_over		);
 
 	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
@@ -165,7 +165,7 @@ void list_test(List &list){
 
 	{
 		OPair const p = Pair::create("clone_pair", "123");
-		list.insert(*p);
+		insert(list, *p);
 	}
 
 	mytest("clone",			getCheck(list, "clone_pair",	"123",		std::true_type{}	));
@@ -175,25 +175,25 @@ void list_test(List &list){
 	listPopulate(list);
 
 	// remove non existent
-	list.erase("nonexistent");
+	erase(list, "nonexistent");
 
 	// remove middle
-	list.erase("2 age");
+	erase(list, "2 age");
 
 	// remove first
-	list.erase("1 firstname");
+	erase(list, "1 firstname");
 
 	// remove last
-	list.erase("4 os");
+	erase(list, "4 os");
 
 	mytest("overwrite",		getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
 	mytest("remove count",		list.size() == 1				);
 
 	// remove last element
-	list.erase("3 city");
+	erase(list, "3 city");
 
 	// remove non existent from empty list
-	list.erase("nonexistent");
+	erase(list, "nonexistent");
 
 	mytest("remove count",		list.size() == 0				);
 	mytest("remove empty",		empty(list)					);
@@ -230,10 +230,10 @@ void list_test(hm4::BlackHoleList &list){
 	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0	);
 	mytest("sizeof",		list.bytes() == 0					);
 
-	mytest("put",			list.insert("key", "val") == std::end(list)		);
+	mytest("put",			insert(list, "key", "val") == std::end(list)		);
 	mytest("find",			list.find("key", std::false_type{}) == std::end(list)	);
 	mytest("find",			list.find("key", std::true_type{} ) == std::end(list)	);
-	mytest("remove",		list.erase("key")					);
+	mytest("remove",		erase(list, "key")					);
 }
 
 template <class List>
@@ -286,17 +286,17 @@ void list_test<MySingleList<Allocator> >(const char *name){
 static void skiplist_lanes_test(){
 	hm4::SkipList<Allocator> list{ allocator };
 
-	list.insert("name",	"Niki"		);
-	list.insert("city",	"Sofia"		);
-	list.insert("state",	"na"		);
-	list.insert("zip",	"1000"		);
-	list.insert("country",	"BG"		);
-	list.insert("phone",	"+358 888 1000"	);
-	list.insert("fax",	"+358 888 2000"	);
-	list.insert("email",	"user@aol.com"	);
-	list.insert("laptop",	"Dell"		);
-	list.insert("os",	"Archlinux"	);
-	list.insert("mouse",	"Logitech"	);
+	insert(list, "name",	"Niki"		);
+	insert(list, "city",	"Sofia"		);
+	insert(list, "state",	"na"		);
+	insert(list, "zip",	"1000"		);
+	insert(list, "country",	"BG"		);
+	insert(list, "phone",	"+358 888 1000"	);
+	insert(list, "fax",	"+358 888 2000"	);
+	insert(list, "email",	"user@aol.com"	);
+	insert(list, "laptop",	"Dell"		);
+	insert(list, "os",	"Archlinux"	);
+	insert(list, "mouse",	"Logitech"	);
 
 	list.printLanes();
 }

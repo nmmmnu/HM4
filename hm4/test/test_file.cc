@@ -66,7 +66,7 @@ namespace{
 			std::string_view const val = tombstones ? "" : key;
 
 			if (! key.empty())
-				list.insert(key, val);
+				insert(list, key, val);
 
 			++i;
 
