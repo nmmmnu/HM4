@@ -49,7 +49,7 @@ public:
 		return 0;
 	}
 
-	constexpr static void mutable_notify(const Pair *){
+	constexpr static void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &){
 	}
 
 	constexpr static

@@ -90,20 +90,6 @@ inline namespace version_3_00_00{
 			memcpy((void *) pair, & src, src.bytes());
 		}
 
-	public:
-		// Non const members
-		void inPlaceExpires(uint32_t const exp) noexcept{
-			expires = htobe<uint32_t>(exp);
-		}
-
-		void inPlacePersist() noexcept{
-			expires = 0x0;
-		}
-
-		void inPlaceTombstone() noexcept{
-			expires = PairConf::EXPIRES_TOMBSTONE;
-		}
-
 	private:
 		template<class Allocator>
 		[[nodiscard]]
@@ -509,91 +495,6 @@ inline namespace version_3_00_00{
 		else
 			printf("%s\n", PairConf::EMPTY_MESSAGE);
 	}
-
-
-
-	struct PairFactory{
-		std::string_view key;
-		std::string_view val;
-		uint32_t expires = 0;
-		uint32_t created = 0;
-
-		[[nodiscard]]
-		constexpr auto getKey() const noexcept{
-			return key;
-		}
-
-		[[nodiscard]]
-		bool operator()(Pair *hint) const noexcept{
-			if (val.size() == hint->getVal().size()){
-				// because we know key is the same,
-				// then size of the whole pair is the same.
-
-				Pair::createInRawMemory(hint, key, val, expires, created);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		auto operator()(Allocator &allocator) const noexcept{
-			return Pair::smart_ptr::create(allocator, key, val, expires, created);
-		}
-	};
-
-	struct PairFactoryTombstone{
-		std::string_view key;
-
-		[[nodiscard]]
-		constexpr auto getKey() const noexcept{
-			return key;
-		}
-
-		[[nodiscard]]
-		bool operator()(Pair *hint) const noexcept{
-			hint->inPlaceTombstone();
-
-			return true;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		auto operator()(Allocator &allocator) const noexcept{
-			return Pair::smart_ptr::create(allocator, key, Pair::TOMBSTONE);
-		}
-	};
-
-	struct PairFactoryClone{
-		const Pair *src;
-
-		[[nodiscard]]
-		auto getKey() const noexcept{
-			return src->getKey();
-		}
-
-		[[nodiscard]]
-		bool operator()(Pair *hint) const noexcept{
-			if (src->getVal().size() == hint->getVal().size()){
-				// because we know key is the same,
-				// then size of the whole pair is the same.
-
-				Pair::cloneInRawMemory(hint, *src);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		auto operator()(Allocator &allocator) const noexcept{
-			return Pair::smart_ptr::clone(allocator, src);
-		}
-	};
 
 
 

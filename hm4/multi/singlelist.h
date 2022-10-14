@@ -98,8 +98,8 @@ public:
 		return list_->insertLazyPair_(std::move(factory));
 	}
 
-	constexpr void mutable_notify(Pair *p){
-		return list_->mutable_notify(p);
+	constexpr void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
+		return list_->mutable_notify(p, message);
 	}
 
 

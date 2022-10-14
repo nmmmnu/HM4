@@ -88,7 +88,7 @@ public:
 		return size();
 	}
 
-	constexpr static void mutable_notify(const Pair *){
+	constexpr static void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &){
 	}
 
 	auto bytes() const{

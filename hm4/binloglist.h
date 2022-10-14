@@ -66,8 +66,10 @@ public:
 		return it;
 	}
 
-	void mutable_notify(const Pair *p){
+	void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
 		binlogger_(*p);
+
+		return list_->mutable_notify(p, message);
 	}
 
 private:

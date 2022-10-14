@@ -49,7 +49,8 @@ public:
 		return size();
 	}
 
-	constexpr static void mutable_notify(const Pair *){
+	void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &msg){
+		lc_.upd(msg.bytes_old, msg.bytes_new);
 	}
 
 	auto bytes() const{

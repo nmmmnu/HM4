@@ -72,27 +72,135 @@ bool empty(List const &list){
 
 // ==============================
 
-constexpr auto getPairFactory(
-		std::string_view key, std::string_view val,
-		uint32_t const expires = 0, uint32_t const created = 0){
+namespace PairFactory{
+	struct MutableNotifyMessage{
+		size_t bytes_old = 0;
+		size_t bytes_new = 0;
+	};
 
-	return PairFactory{ key, val, expires, created };
-}
+	struct Normal{
+		std::string_view key;
+		std::string_view val;
+		uint32_t expires = 0;
+		uint32_t created = 0;
 
-constexpr auto getPairFactory(std::string_view key){
-	return PairFactoryTombstone{ key };
-}
+		[[nodiscard]]
+		constexpr auto getKey() const noexcept{
+			return key;
+		}
 
-constexpr auto getPairFactory(Pair const &src){
-	return PairFactoryClone{ & src };
-}
+		template<class List>
+		[[nodiscard]]
+		bool operator()(Pair *hint, List &list) const noexcept{
+			MutableNotifyMessage msg;
+			msg.bytes_old = hint->bytes();
+			msg.bytes_new = Pair::bytes(key, val);
+
+			if (msg.bytes_new <= msg.bytes_old){
+				Pair::createInRawMemory(hint, key, val, expires, created);
+
+				list.mutable_notify(hint, msg);
+
+				return true;
+			}
+
+			return false;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		auto operator()(Allocator &allocator) const noexcept{
+			return Pair::smart_ptr::create(allocator, key, val, expires, created);
+		}
+	};
+
+	struct Tombstone{
+		std::string_view key;
+
+		[[nodiscard]]
+		constexpr auto getKey() const noexcept{
+			return key;
+		}
+
+		template<class List>
+		[[nodiscard]]
+		bool operator()(Pair *hint, List &list) const noexcept{
+			MutableNotifyMessage msg;
+			msg.bytes_old = hint->bytes();
+			msg.bytes_new = Pair::bytes(key, Pair::TOMBSTONE);
+
+			Pair::createInRawMemory(hint, key, Pair::TOMBSTONE, 0, 0);
+
+			list.mutable_notify(hint, msg);
+
+			return true;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		auto operator()(Allocator &allocator) const noexcept{
+			return Pair::smart_ptr::create(allocator, key, Pair::TOMBSTONE);
+		}
+	};
+
+	struct Clone{
+		const Pair *src;
+
+		[[nodiscard]]
+		auto getKey() const noexcept{
+			return src->getKey();
+		}
+
+		template<class List>
+		[[nodiscard]]
+		bool operator()(Pair *hint, List &list) const noexcept{
+			MutableNotifyMessage msg;
+			msg.bytes_old = hint->bytes();
+			msg.bytes_new =  src->bytes();
+
+			if (msg.bytes_new <= msg.bytes_old){
+				Pair::cloneInRawMemory(hint, *src);
+
+				list.mutable_notify(hint, msg);
+
+				return true;
+			}
+
+			return false;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		auto operator()(Allocator &allocator) const noexcept{
+			return Pair::smart_ptr::clone(allocator, src);
+		}
+	};
+
+	constexpr auto factory(
+			std::string_view key, std::string_view val,
+			uint32_t const expires = 0, uint32_t const created = 0){
+
+		return PairFactory::Normal{ key, val, expires, created };
+	}
+
+	constexpr auto factory(std::string_view key){
+		return PairFactory::Tombstone{ key };
+	}
+
+	constexpr auto factory(Pair const &src){
+		return PairFactory::Clone{ & src };
+	}
+
+} // namespace PairFactory
+
+using PairFactoryMutableNotifyMessage = PairFactory::MutableNotifyMessage;
 
 // ==============================
 
 template<class List, typename ...Args>
 auto insert(List &list, Args &&...args){
 	return list.insertLazyPair_(
-		getPairFactory(std::forward<Args>(args)...)
+		PairFactory::factory(std::forward<Args>(args)...)
 	);
 }
 
@@ -105,12 +213,10 @@ bool tryInsertHint(List &list, const Pair *pair, Args &&...args){
 
 		Pair *m_pair = const_cast<Pair *>(pair);
 
-		auto factory = getPairFactory(std::forward<Args>(args)...);
+		auto factory = PairFactory::factory(std::forward<Args>(args)...);
 
-		if (factory(m_pair)){
-			list.mutable_notify(m_pair);
+		if (factory(m_pair, list))
 			return true;
-		}
 	}
 
 	return false;
