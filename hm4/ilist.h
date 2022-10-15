@@ -97,7 +97,7 @@ namespace PairFactory{
 			msg.bytes_new = Pair::bytes(key, val);
 
 			if (msg.bytes_new <= msg.bytes_old){
-				Pair::createInRawMemoryNK(hint, key, val, expires, created);
+				Pair::createInRawMemory<0,1>(hint, key, val, expires, created);
 
 				list.mutable_notify(hint, msg);
 
@@ -128,7 +128,7 @@ namespace PairFactory{
 		template<class List>
 		[[nodiscard]]
 		bool operator()(Pair *hint, List &list) const noexcept{
-			Pair::createInRawMemoryNKNV(hint, key, val, expires, created);
+			Pair::createInRawMemory<0,0>(hint, key, val, expires, created);
 
 			MutableNotifyMessage msg;
 			list.mutable_notify(hint, msg);
@@ -158,7 +158,7 @@ namespace PairFactory{
 			msg.bytes_old = hint->bytes();
 			msg.bytes_new = Pair::bytes(key, Pair::TOMBSTONE);
 
-			Pair::createInRawMemoryNK(hint, key, Pair::TOMBSTONE, 0, 0);
+			Pair::createInRawMemory<0,1>(hint, key, Pair::TOMBSTONE, 0, 0);
 
 			list.mutable_notify(hint, msg);
 

@@ -80,33 +80,51 @@ inline namespace version_3_00_00{
 			return check(key) && val.size() <= PairConf::MAX_VAL_SIZE;
 		}
 
-	private:
-		template<bool CopyKey, bool CopyVal>
-		static void createInRawMemory_(Pair *pair,
-				std::string_view key,
-				std::string_view val,
-				uint32_t expires, uint32_t created) noexcept;
-
 	public:
-		static void createInRawMemory(Pair *pair,
-				std::string_view key,
-				std::string_view val,
-				uint32_t expires, uint32_t created) noexcept{
-			return createInRawMemory_<true, true>(pair, key, val, expires, created);
-		}
+		template<bool copy_key = true, bool copy_val = true>
+		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t expires, uint32_t created){
+			static_assert(
+				(copy_key == 0 && copy_val == 0) ||
+				(copy_key == 0 && copy_val == 1) ||
+				(copy_key == 1 && copy_val == 1) ||
+				true
+			);
 
-		static void createInRawMemoryNK(Pair *pair,
-				std::string_view key,
-				std::string_view val,
-				uint32_t expires, uint32_t created) noexcept{
-			return createInRawMemory_<false, true>(pair, key, val, expires, created);
-		}
+			pair->created	= htobe<uint64_t>(getCreateTime__(created));
+			pair->expires	= htobe<uint32_t>(std::min(expires, PairConf::EXPIRES_MAX));
 
-		static void createInRawMemoryNKNV(Pair *pair,
-				std::string_view key,
-				std::string_view val,
-				uint32_t expires, uint32_t created) noexcept{
-			return createInRawMemory_<false, false>(pair, key, val, expires, created);
+			if constexpr(copy_key == false && copy_val == false)
+				return;
+
+			uint16_t const keylen = uint16_t(
+					(   key.size()					& PairConf::MAX_KEY_MASK	)	|
+					( ( val.size() >> PairConf::MAX_VAL_MASK_SH )	& PairConf::MAX_VAL_MASK	)
+			);
+
+			uint16_t const vallen =
+					val.size() & 0xffff
+			;
+
+			pair->keylen	= htobe<uint16_t>(keylen);
+			pair->vallen	= htobe<uint16_t>(vallen);
+
+			#pragma GCC diagnostic push
+			#pragma GCC diagnostic ignored "-Warray-bounds"
+			#pragma GCC diagnostic ignored "-Wstringop-overflow"
+
+			if constexpr(copy_key){
+				memcpy(& pair->buffer[0],		key.data(), key.size());
+				pair->buffer[key.size()] = '\0';
+			}
+
+
+			if constexpr(copy_val){
+				// this is safe with NULL pointer.
+				memcpy(& pair->buffer[key.size() + 1],	val.data(), val.size());
+				pair->buffer[key.size() + 1 + val.size()] = '\0';
+			}
+
+			#pragma GCC diagnostic pop
 		}
 
 		static void cloneInRawMemory(Pair *pair, const Pair &src) noexcept{
