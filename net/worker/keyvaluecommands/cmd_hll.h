@@ -50,9 +50,10 @@ namespace net::worker::commands::HLL{
 
 		template<class DBAdapter>
 		auto store(DBAdapter &db, std::string_view key, const uint8_t *hll, const hm4::Pair *pair){
+			(void)key;
+
 			return db.setHint(
 				pair,
-				key,
 				std::string_view{
 					reinterpret_cast<const char *>(hll),
 					HLL_M

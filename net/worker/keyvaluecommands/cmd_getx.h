@@ -250,7 +250,7 @@ namespace net::worker::commands::GetX{
 					continue;
 
 				if (db.canUpdateWithHint(& *it))
-					db.delHint(& *it, key);
+					db.delHint(& *it);
 				else
 					container.emplace_back(key);
 			}

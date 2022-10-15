@@ -97,7 +97,7 @@ namespace PairFactory{
 			msg.bytes_new = Pair::bytes(key, val);
 
 			if (msg.bytes_new <= msg.bytes_old){
-				Pair::createInRawMemory(hint, key, val, expires, created);
+				Pair::createInRawMemoryNK(hint, key, val, expires, created);
 
 				list.mutable_notify(hint, msg);
 
@@ -105,6 +105,35 @@ namespace PairFactory{
 			}
 
 			return false;
+		}
+
+		template<class Allocator>
+		[[nodiscard]]
+		auto operator()(Allocator &allocator) const noexcept{
+			return Pair::smart_ptr::create(allocator, key, val, expires, created);
+		}
+	};
+
+	struct NormalExpiresOnly{
+		std::string_view key;
+		std::string_view val;
+		uint32_t expires = 0;
+		uint32_t created = 0;
+
+		[[nodiscard]]
+		constexpr auto getKey() const noexcept{
+			return key;
+		}
+
+		template<class List>
+		[[nodiscard]]
+		bool operator()(Pair *hint, List &list) const noexcept{
+			Pair::createInRawMemoryNKNV(hint, key, val, expires, created);
+
+			MutableNotifyMessage msg;
+			list.mutable_notify(hint, msg);
+
+			return true;
 		}
 
 		template<class Allocator>
@@ -129,7 +158,7 @@ namespace PairFactory{
 			msg.bytes_old = hint->bytes();
 			msg.bytes_new = Pair::bytes(key, Pair::TOMBSTONE);
 
-			Pair::createInRawMemory(hint, key, Pair::TOMBSTONE, 0, 0);
+			Pair::createInRawMemoryNK(hint, key, Pair::TOMBSTONE, 0, 0);
 
 			list.mutable_notify(hint, msg);
 
@@ -178,9 +207,17 @@ namespace PairFactory{
 
 	constexpr auto factory(
 			std::string_view key, std::string_view val,
-			uint32_t const expires = 0, uint32_t const created = 0){
+			uint32_t const expires = 0,
+			uint32_t const created = 0){
 
 		return PairFactory::Normal{ key, val, expires, created };
+	}
+
+	constexpr auto factory(
+			uint32_t const expires,
+			std::string_view key, std::string_view val,
+			uint32_t const created = 0){
+		return PairFactory::NormalExpiresOnly{ key, val, expires, created };
 	}
 
 	constexpr auto factory(std::string_view key){

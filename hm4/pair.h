@@ -80,11 +80,34 @@ inline namespace version_3_00_00{
 			return check(key) && val.size() <= PairConf::MAX_VAL_SIZE;
 		}
 
+	private:
+		template<bool CopyKey, bool CopyVal>
+		static void createInRawMemory_(Pair *pair,
+				std::string_view key,
+				std::string_view val,
+				uint32_t expires, uint32_t created) noexcept;
+
 	public:
 		static void createInRawMemory(Pair *pair,
 				std::string_view key,
 				std::string_view val,
-				uint32_t expires, uint32_t created) noexcept;
+				uint32_t expires, uint32_t created) noexcept{
+			return createInRawMemory_<true, true>(pair, key, val, expires, created);
+		}
+
+		static void createInRawMemoryNK(Pair *pair,
+				std::string_view key,
+				std::string_view val,
+				uint32_t expires, uint32_t created) noexcept{
+			return createInRawMemory_<false, true>(pair, key, val, expires, created);
+		}
+
+		static void createInRawMemoryNKNV(Pair *pair,
+				std::string_view key,
+				std::string_view val,
+				uint32_t expires, uint32_t created) noexcept{
+			return createInRawMemory_<false, false>(pair, key, val, expires, created);
+		}
 
 		static void cloneInRawMemory(Pair *pair, const Pair &src) noexcept{
 			memcpy((void *) pair, & src, src.bytes());
@@ -231,12 +254,12 @@ inline namespace version_3_00_00{
 
 	public:
 		[[nodiscard]]
-		std::string_view getKey() const noexcept{
+		constexpr std::string_view getKey() const noexcept{
 			return { getKey_(), getKeyLen_() };
 		}
 
 		[[nodiscard]]
-		std::string_view getVal() const noexcept{
+		constexpr std::string_view getVal() const noexcept{
 			return { getVal_(), getValLen_() };
 		}
 
@@ -432,17 +455,17 @@ inline namespace version_3_00_00{
 
 	private:
 		[[nodiscard]]
-		const char *getKey_() const noexcept{
+		constexpr const char *getKey_() const noexcept{
 			return buffer;
 		}
 
 		[[nodiscard]]
-		const char *getVal_() const noexcept{
+		constexpr const char *getVal_() const noexcept{
 			return & buffer[ getKeyLen_() + 1 ];
 		}
 
 		[[nodiscard]]
-		char *getVal_() noexcept{
+		constexpr char *getVal_() noexcept{
 			return & buffer[ getKeyLen_() + 1 ];
 		}
 

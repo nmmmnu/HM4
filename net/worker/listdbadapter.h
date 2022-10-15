@@ -135,17 +135,26 @@ public:
 		insert(list_, key, val, expires);
 	}
 
-	void setHint(const hm4::Pair *pair, std::string_view const key, std::string_view const val, uint32_t expires = 0){
-		assert(!key.empty());
-
+	void setHint(const hm4::Pair *pair, std::string_view const val, uint32_t expires = 0){
 		if constexpr(TRY_INSERT_HINTS){
-			if (hm4::tryInsertHint(list_, pair, key, val, expires)){
+			if (hm4::tryInsertHint(list_, pair, pair->getKey(), val, expires)){
 				log__<LOG_LEVEL>("setHint", "Bypassing list");
 				return;
 			}
 		}
 
-		return set(key, val, expires);
+		return set(pair->getKey(), val, expires);
+	}
+
+	void expHint(const hm4::Pair *pair, uint32_t expires){
+		if constexpr(TRY_INSERT_HINTS){
+			if (hm4::tryInsertHint(list_, pair, expires, pair->getKey(), pair->getVal())){
+				log__<LOG_LEVEL>("expHint", "Bypassing list");
+				return;
+			}
+		}
+
+		return set(pair->getKey(), pair->getVal(), expires);
 	}
 
 	bool del(std::string_view const key){
@@ -156,20 +165,18 @@ public:
 		return true;
 	}
 
-	bool delHint(const hm4::Pair *pair, std::string_view const key){
-		assert(!key.empty());
-
+	bool delHint(const hm4::Pair *pair){
 		if constexpr(TRY_INSERT_HINTS && DELETE_USE_TOMBSTONES){
 			// this is a bit ugly,
 			// because ListDBAdapter not suppose to know,
 			// if it is with tombstone or not.
-			if (hm4::tryInsertHint(list_, pair, key)){
+			if (hm4::tryInsertHint(list_, pair, pair->getKey())){
 				log__<LOG_LEVEL>("delHint", "Bypassing list");
 				return true;
 			}
 		}
 
-		return del(key);
+		return del(pair->getKey());
 	}
 
 	auto mutable_size() const{

@@ -11,10 +11,12 @@ inline namespace version_3_00_00{
 
 
 
-void Pair::createInRawMemory(Pair *pair,
+template<bool CopyKey, bool CopyVal>
+void Pair::createInRawMemory_(Pair *pair,
 			std::string_view const key,
 			std::string_view const val,
-			uint32_t const expires, uint32_t const created) noexcept{
+			uint32_t const expires, uint32_t const created
+			) noexcept{
 
 	// this is private and sizes are checked already
 
@@ -32,14 +34,37 @@ void Pair::createInRawMemory(Pair *pair,
 	pair->keylen	= htobe<uint16_t>(keylen);
 	pair->vallen	= htobe<uint16_t>(vallen);
 
-	// memcpy so we can switch to blobs later...
-	memcpy(& pair->buffer[0],		key.data(), key.size());
-	pair->buffer[key.size()] = '\0';
+	if constexpr(CopyKey){
+		// memcpy so we can switch to blobs later...
+		memcpy(& pair->buffer[0],		key.data(), key.size());
+		pair->buffer[key.size()] = '\0';
+	}
 
-	// this is safe with NULL pointer.
-	memcpy(& pair->buffer[key.size() + 1],	val.data(), val.size());
-	pair->buffer[key.size() + 1 + val.size()] = '\0';
+	if constexpr(CopyVal){
+		// this is safe with NULL pointer.
+		memcpy(& pair->buffer[key.size() + 1],	val.data(), val.size());
+		pair->buffer[key.size() + 1 + val.size()] = '\0';
+	}
 }
+
+template void Pair::createInRawMemory_<true, true>(Pair *pair,
+			std::string_view const key,
+			std::string_view const val,
+			uint32_t const expires, uint32_t const created
+			) noexcept;
+
+template void Pair::createInRawMemory_<false, true>(Pair *pair,
+			std::string_view const key,
+			std::string_view const val,
+			uint32_t const expires, uint32_t const created
+			) noexcept;
+
+template void Pair::createInRawMemory_<false, false>(Pair *pair,
+			std::string_view const key,
+			std::string_view const val,
+			uint32_t const expires, uint32_t const created
+			) noexcept;
+
 
 // ==============================
 
