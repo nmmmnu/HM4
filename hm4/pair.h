@@ -128,7 +128,7 @@ inline namespace version_3_00_00{
 		}
 
 		static void cloneInRawMemory(Pair *pair, const Pair &src) noexcept{
-			memcpy((void *) pair, & src, src.bytes());
+			memcpy(static_cast<void *>(pair), & src, src.bytes());
 		}
 
 	private:
@@ -479,11 +479,6 @@ inline namespace version_3_00_00{
 
 		[[nodiscard]]
 		constexpr const char *getVal_() const noexcept{
-			return & buffer[ getKeyLen_() + 1 ];
-		}
-
-		[[nodiscard]]
-		constexpr char *getVal_() noexcept{
 			return & buffer[ getKeyLen_() + 1 ];
 		}
 

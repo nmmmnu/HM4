@@ -16,27 +16,6 @@ namespace net::worker::commands::HLL{
 
 		constexpr uint32_t HLL_M = getHLL().m;
 
-	#if 0
-		template<class DBAdapter>
-		bool load(DBAdapter &db, std::string_view key, uint8_t *hll){
-			auto it = db.find(key);
-
-			if (it && it->isValid(std::true_type{}) && it->getVal().size() == HLL_M){
-				getHLL().load(hll, it->getVal().data());
-
-				return true;
-			}
-
-			return false;
-		}
-
-		template<class DBAdapter>
-		void load_clean(DBAdapter &db, std::string_view key, uint8_t *hll){
-			if (load(db, key, hll) == false)
-				getHLL().clear(hll);
-		}
-	#endif
-
 		template<class DBAdapter>
 		auto store(DBAdapter &db, std::string_view key, const uint8_t *hll){
 			return db.set(
@@ -49,16 +28,9 @@ namespace net::worker::commands::HLL{
 		}
 
 		template<class DBAdapter>
-		auto store(DBAdapter &db, std::string_view key, const uint8_t *hll, const hm4::Pair *pair){
-			(void)key;
-
-			return db.setHint(
-				pair,
-				std::string_view{
-					reinterpret_cast<const char *>(hll),
-					HLL_M
-				}
-			);
+		auto store(DBAdapter &db, const hm4::Pair *pair){
+			// update only timestamps
+			return db.expHint(pair, 0);
 		}
 
 		template<class DBAdapter>
@@ -191,6 +163,21 @@ namespace net::worker::commands::HLL{
 				store(db, key, hll);
 
 				return Result::ok(1);
+			}else if (db.canUpdateWithHint(pair)){
+				auto cast = [](const char *s){
+					const uint8_t *c = reinterpret_cast<const uint8_t *>(s);
+
+					return const_cast<uint8_t *>(c);
+				};
+
+				uint8_t *hll = cast(pair->getVal().data());
+
+				getHLL().add(hll, val);
+
+				store(db, pair);
+
+				return Result::ok(1);
+
 			}else{
 				// proceed with normal update
 
@@ -203,7 +190,7 @@ namespace net::worker::commands::HLL{
 
 				getHLL().add(hll, val);
 
-				store(db, key, hll, pair);
+				store(db, key, hll);
 
 				return Result::ok(1);
 			}

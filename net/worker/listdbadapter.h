@@ -137,10 +137,8 @@ public:
 
 	void setHint(const hm4::Pair *pair, std::string_view const val, uint32_t expires = 0){
 		if constexpr(TRY_INSERT_HINTS){
-			if (hm4::tryInsertHint(list_, pair, pair->getKey(), val, expires)){
-				log__<LOG_LEVEL>("setHint", "Bypassing list");
-				return;
-			}
+			if (hm4::tryInsertHint(list_, pair, pair->getKey(), val, expires))
+				return logHint__("setHint");
 		}
 
 		return set(pair->getKey(), val, expires);
@@ -148,10 +146,8 @@ public:
 
 	void expHint(const hm4::Pair *pair, uint32_t expires){
 		if constexpr(TRY_INSERT_HINTS){
-			if (hm4::tryInsertHint(list_, pair, expires, pair->getKey(), pair->getVal())){
-				log__<LOG_LEVEL>("expHint", "Bypassing list");
-				return;
-			}
+			if (hm4::tryInsertHint(list_, pair, expires, pair->getKey(), pair->getVal()))
+				return logHint__("expHint");
 		}
 
 		return set(pair->getKey(), pair->getVal(), expires);
@@ -170,10 +166,8 @@ public:
 			// this is a bit ugly,
 			// because ListDBAdapter not suppose to know,
 			// if it is with tombstone or not.
-			if (hm4::tryInsertHint(list_, pair, pair->getKey())){
-				log__<LOG_LEVEL>("delHint", "Bypassing list");
-				return true;
-			}
+			if (hm4::tryInsertHint(list_, pair, pair->getKey()))
+				return logHintBool__("delHint");
 		}
 
 		return del(pair->getKey());
@@ -188,6 +182,15 @@ public:
 	}
 
 private:
+	static void logHint__(const char *msg){
+		log__<LOG_LEVEL>(msg, "Bypassing list");
+	}
+
+	static bool logHintBool__(const char *msg){
+		logHint__(msg);
+		return true;
+	}
+
 	template<class Command>
 	static bool invokeCommand__(Command *cmd){
 		if constexpr(std::is_same_v<Command,std::nullptr_t>)
