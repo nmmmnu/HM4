@@ -91,6 +91,7 @@
 					<li><a href="#GET">GET</a></li>
 				<li><a href="#EXISTS">EXISTS</a></li>
 				<li><a href="#TTL">TTL</a></li>
+				<li><a href="#STRLEN / SIZE">STRLEN / SIZE</a></li>
 				</div>
 			<div>
 			<b>getx.h</b><br />
@@ -256,6 +257,27 @@
 			int
 			<h3>Return value:</h3>
 			Value of the TTL or 0 if there is no expiration set.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="STRLEN / SIZE">
+
+			<h2>STRLEN key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>STRLEN / SIZE</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get size of the value of the <i>key</i>. Exact match.<br />Useful for debuging HLL and BIT commands.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			Size of the value TTL or 0 if key does not exists.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETX">

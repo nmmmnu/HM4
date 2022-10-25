@@ -246,6 +246,25 @@ function getData(){
 					"immutable"
 			),
 
+			new Cmd(
+					"STRLEN / SIZE",
+
+					"STRLEN key",
+
+					"Get size of the value of the <i>key</i>. Exact match.<br />" .
+					"Useful for debuging HLL and BIT commands.",
+
+					"int",
+					"Size of the value TTL or 0 if key does not exists.",
+
+					"1.2.17",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"immutable"
+			),
+
 
 
 		),

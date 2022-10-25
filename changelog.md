@@ -42,6 +42,7 @@ Changelog
 -	improve INFO - allocator information is shown now.
 -	addressing "problem 2038' in mytime
 -	implement update in place for EXPIRE / PERSIST / GETDEL / DELX
+-	new command STRLEN (useful for debugging HLL and BIT modules)
 
 
 

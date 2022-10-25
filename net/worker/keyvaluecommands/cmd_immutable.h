@@ -88,6 +88,35 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class DBAdapter>
+	struct STRLEN : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "strlen";
+		constexpr inline static std::string_view cmd[]	= {
+			"strlen",	"STRLEN"	,
+			"size",		"SIZE"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			if (p.size() != 2)
+				return Result::error();
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return Result::error();
+
+			auto it = db.find(key);
+
+			auto size = it && it->isValid(std::true_type{}) ? it->getVal().size() : 0;
+
+			return Result::ok(
+				uint64_t{size}
+			);
+		}
+	};
+
+
+
+	template<class DBAdapter>
 	struct HGET : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "hget";
 		constexpr inline static std::string_view cmd[]	= {
@@ -176,6 +205,7 @@ namespace net::worker::commands::Immutable{
 				GET	,
 				EXISTS	,
 				TTL	,
+				STRLEN	,
 				HGET	,
 				HEXISTS
 			>(pack);
