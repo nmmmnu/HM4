@@ -43,6 +43,7 @@ Changelog
 -	addressing "problem 2038' in mytime
 -	implement update in place for EXPIRE / PERSIST / GETDEL / DELX
 -	new command STRLEN (useful for debugging HLL and BIT modules)
+-	new command BITSET, BITGET, BITCOUNT, BITMAX
 
 
 

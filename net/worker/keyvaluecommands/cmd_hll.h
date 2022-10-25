@@ -307,7 +307,7 @@ namespace net::worker::commands::HLL{
 			"hllbits",	"HLLBITS"
 		};
 
-		Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
+		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
 			using namespace hll_impl_;
 
 			return Result::ok(uint64_t{HLL_Bits});
@@ -324,7 +324,7 @@ namespace net::worker::commands::HLL{
 			"hllerror",	"HLLERROR"
 		};
 
-		Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
+		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
 			using namespace hll_impl_;
 
 			return Result::ok(static_cast<uint64_t>(getHLL().error() * 10000));

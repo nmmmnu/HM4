@@ -12,6 +12,8 @@
 #include "keyvaluecommands/cmd_queue.h"		// SADD, SPOP
 #include "keyvaluecommands/cmd_hll.h"		// PFADD, PFCOUNT, PFMERGE, PFINTERSECT
 
+#include "keyvaluecommands/cmd_bitset.h"	// SETBIT, GETBIT, BITCOUNT
+
 #include "keyvaluecommands/cmd_info.h"		// INFO, VERSION, TYPE, PING, ECHO
 #include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
 #include "keyvaluecommands/cmd_system.h"	// SELECT, EXIT, SHUTDOWN
@@ -66,6 +68,7 @@ namespace net::worker{
 
 				Queue		::RegisterModule,
 				HLL		::RegisterModule,
+				BITSET		::RegisterModule,
 
 				Info		::RegisterModule,
 				Reload		::RegisterModule,
