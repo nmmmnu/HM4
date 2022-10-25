@@ -971,6 +971,81 @@ function getData(){
 
 
 		),
+		"bitset" => array(
+
+
+
+			new Cmd(
+					"SETBIT",
+
+					"SETBIT / BITSET key index value",
+
+					"Set bit of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />" .
+					"Read Bitset information document.",
+					"OK",
+					"OK",
+					"1.2.17",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"GETBIT",
+
+					"GETBIT / BITGET key index value",
+
+					"Get bit of the <i>key</i> with <i>index</i>.<br />" .
+					"Read Bitset information document.",
+					"string (int)",
+					"0 / 1",
+					"1.2.17",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"BITCOUNT",
+
+					"BITCOUNT key",
+
+					"Calculate bitcount (popcount) of the <i>key</i>,<br />" .
+					"e.g. number of bits set to 1.",
+					"string (int)",
+					"bitcount",
+					"1.2.17",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"BITMAX",
+
+					"BITMAX",
+
+					"Return maximum suported index,<br />" .
+					"it is limited of max value size - currently 1MB * 8 bits = 8'388'608 bits.",
+					"string (int)",
+					"Maximum suported index.",
+					"1.2.17",
+					"n/a",
+					false,
+					null,
+
+					"bitset"
+			),
+
+
+
+		),
 		"info" => array(
 
 

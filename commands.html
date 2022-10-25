@@ -167,6 +167,15 @@
 				<li><a href="#PFERROR">PFERROR</a></li>
 				</div>
 			<div>
+			<b>bitset.h</b><br />
+			&nbsp;
+
+					<li><a href="#SETBIT">SETBIT</a></li>
+				<li><a href="#GETBIT">GETBIT</a></li>
+				<li><a href="#BITCOUNT">BITCOUNT</a></li>
+				<li><a href="#BITMAX">BITMAX</a></li>
+				</div>
+			<div>
 			<b>info.h</b><br />
 			&nbsp;
 
@@ -971,6 +980,90 @@
 			string (int)
 			<h3>Return value:</h3>
 			HLL error rate as percent, but multiplied to 1'00'00
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SETBIT">
+
+			<h2>SETBIT / BITSET key index value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SETBIT</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set bit of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />Read Bitset information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GETBIT">
+
+			<h2>GETBIT / BITGET key index value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GETBIT</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get bit of the <i>key</i> with <i>index</i>.<br />Read Bitset information document.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			0 / 1
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BITCOUNT">
+
+			<h2>BITCOUNT key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Calculate bitcount (popcount) of the <i>key</i>,<br />e.g. number of bits set to 1.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			bitcount
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BITMAX">
+
+			<h2>BITMAX</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITMAX</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Return maximum suported index,<br />it is limited of max value size - currently 1MB * 8 bits = 8'388'608 bits.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			Maximum suported index.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INFO">
