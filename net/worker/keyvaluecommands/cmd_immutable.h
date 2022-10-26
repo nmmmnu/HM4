@@ -34,6 +34,44 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class DBAdapter>
+	struct MGET : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "mget";
+		constexpr inline static std::string_view cmd[]	= {
+			"mget",	"MGET"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			if (p.size() < 2)
+				return Result::error();
+
+			auto &container = blob.container;
+
+			if (container.capacity() < p.size() - 1)
+				return Result::error();
+
+			for(auto itk = std::begin(p) + 1; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; key.empty())
+					return Result::error();
+
+			container.clear();
+
+			for(auto itk = std::begin(p) + 1; itk != std::end(p); ++itk){
+				const auto &key = *itk;
+
+				auto it = db.find(key);
+
+				container.emplace_back(
+					it && it->isValid(std::true_type{}) ? it->getVal() : ""
+				);
+			}
+
+			return Result::ok_container(container);
+		}
+	};
+
+
+
+	template<class DBAdapter>
 	struct EXISTS : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "exists";
 		constexpr inline static std::string_view cmd[]	= {
@@ -203,6 +241,7 @@ namespace net::worker::commands::Immutable{
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,
 				GET	,
+				MGET	,
 				EXISTS	,
 				TTL	,
 				STRLEN	,

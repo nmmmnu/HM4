@@ -44,6 +44,8 @@ Changelog
 -	implement update in place for EXPIRE / PERSIST / GETDEL / DELX
 -	new command STRLEN (useful for debugging HLL and BIT modules)
 -	new command BITSET, BITGET, BITCOUNT, BITMAX
+-	new command MGET with multiple keys
+-	new command DEL with multiple keys
 
 
 

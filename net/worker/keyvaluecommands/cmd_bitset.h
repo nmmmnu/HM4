@@ -121,7 +121,7 @@ namespace net::worker::commands::BITSET{
 
 	template<class DBAdapter>
 	struct BITGET : Base<DBAdapter>{
-		constexpr inline static std::string_view name	= "getbit";
+		constexpr inline static std::string_view name	= "bitget";
 		constexpr inline static std::string_view cmd[]	= {
 			"getbit",	"GETBIT"	,
 			"bitget",	"BITGET"
@@ -222,6 +222,7 @@ namespace net::worker::commands::BITSET{
 			>(pack);
 		}
 	};
+
 
 
 } // namespace

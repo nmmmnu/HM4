@@ -210,6 +210,24 @@ function getData(){
 			),
 
 			new Cmd(
+					"MGET",
+
+					"MGET key1 [key2]...",
+
+					"Get value of the <i>key1</i>, <i>key2</i>... Exact match.<br />" .
+					"Same as GET but array responce.",
+
+					"array",
+					"Value of the key or empty string.",
+					"1.0.0",
+					"[number of keys] * (Mem + N * Disk)",
+					true,
+					false,
+
+					"immutable"
+			),
+
+			new Cmd(
 					"EXISTS",
 
 					"EXISTS key",
@@ -247,9 +265,9 @@ function getData(){
 			),
 
 			new Cmd(
-					"STRLEN / SIZE",
+					"STRLEN",
 
-					"STRLEN key",
+					"STRLEN / SIZE key",
 
 					"Get size of the value of the <i>key</i>. Exact match.<br />" .
 					"Useful for debuging HLL and BIT commands.",
@@ -372,7 +390,7 @@ function getData(){
 					"SUM key number prefix",
 
 					"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
-					"See COUNT for details.<br />",
+					"See COUNT for details.<br />" .
 					"<br />" .
 					"<u>Example:</u><br />" .
 					"<br />" .
@@ -575,9 +593,9 @@ function getData(){
 			new Cmd(
 					"DEL",
 
-					"DEL key / UNLINK key",
+					"DEL key [key2]... / UNLINK key [key2]...",
 
-					"Removes <i>key</i>.",
+					"Removes <i>key</i>, <i>key2</i>...",
 					"bool",
 					"Always return 1",
 					"1.0.0",
@@ -627,7 +645,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and name is changed.",
 					"1.2.16",
-					"2 * Mem + 2 * N * Disk",
+					"3 * Mem + 2 * N * Disk",
 					false,
 					true,
 
@@ -639,14 +657,13 @@ function getData(){
 
 					"RENAME old_key new_key / MOVE old_key new_key",
 
-					"Atomically renames <i>old_key</i> to <i>new_key</i>.<br />" .
-					"Note: The command internally GET <i>old_key</i> first.",
+					"Atomically renames <i>old_key</i> to <i>new_key</i>.",
 
 					"bool",
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and name is changed.",
 					"1.2.16",
-					"3 * Mem + N * Disk",
+					"2 * Mem + N * Disk",
 					true,
 					true,
 
@@ -665,7 +682,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and name is changed.",
 					"1.2.16",
-					"3 * Mem + 2 * N * Disk",
+					"4 * Mem + 2 * N * Disk",
 					true,
 					true,
 

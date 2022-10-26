@@ -89,9 +89,10 @@
 			&nbsp;
 
 					<li><a href="#GET">GET</a></li>
+				<li><a href="#MGET">MGET</a></li>
 				<li><a href="#EXISTS">EXISTS</a></li>
 				<li><a href="#TTL">TTL</a></li>
-				<li><a href="#STRLEN / SIZE">STRLEN / SIZE</a></li>
+				<li><a href="#STRLEN">STRLEN</a></li>
 				</div>
 			<div>
 			<b>getx.h</b><br />
@@ -226,6 +227,27 @@
 			Value of the key or empty string.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="MGET">
+
+			<h2>MGET key1 [key2]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MGET</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (Mem + N * Disk)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get value of the <i>key1</i>, <i>key2</i>... Exact match.<br />Same as GET but array responce.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			Value of the key or empty string.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="EXISTS">
 
 			<h2>EXISTS key</h2>
@@ -268,12 +290,12 @@
 			Value of the TTL or 0 if there is no expiration set.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="STRLEN / SIZE">
+				<div class="cmd" id="STRLEN">
 
-			<h2>STRLEN key</h2>
+			<h2>STRLEN / SIZE key</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>STRLEN / SIZE</td></tr>
+				<tr><td>Command			</td><td>STRLEN</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
 				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
@@ -358,19 +380,19 @@
 
 			<table border="1">
 				<tr><td>Command			</td><td>SUM</td></tr>
-				<tr><td>Available since		</td><td>First element  - sum of valid elements.<br />Second element - last key, if there is second page.</td></tr>
-				<tr><td>Data lookup complexity	</td><td>1.2.4</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Available since		</td><td>1.2.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>.h</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.<br />
+			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.<br /><br /><u>Example:</u><br /><br /><pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br />sum visits:202001 10000 visits:202001<br />sum visits:2020   10000 visits:2020</pre>
 			<h3>Return type:</h3>
-			<br /><u>Example:</u><br /><br /><pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br />sum visits:202001 10000 visits:202001<br />sum visits:2020   10000 visits:2020</pre>
-			<h3>Return value:</h3>
 			array
+			<h3>Return value:</h3>
+			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MIN">
@@ -564,7 +586,7 @@
 		</div>
 				<div class="cmd" id="DEL">
 
-			<h2>DEL key / UNLINK key</h2>
+			<h2>DEL key [key2]... / UNLINK key [key2]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>DEL</td></tr>
@@ -576,7 +598,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Removes <i>key</i>.
+			Removes <i>key</i>, <i>key2</i>...
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -611,7 +633,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>COPYNX</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>3 * Mem + 2 * N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
@@ -632,14 +654,14 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RENAME</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>3 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Atomically renames <i>old_key</i> to <i>new_key</i>.<br />Note: The command internally GET <i>old_key</i> first.
+			Atomically renames <i>old_key</i> to <i>new_key</i>.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -653,7 +675,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RENAMENX</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>3 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>4 * Mem + 2 * N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>

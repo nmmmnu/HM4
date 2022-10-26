@@ -158,17 +158,19 @@ namespace net::worker::commands::Mutable{
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() != 2)
+			if (p.size() < 2)
 				return Result::error();
 
-			const auto &key = p[1];
+			for(auto itk = std::begin(p) + 1; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; key.empty())
+					return Result::error();
 
-			if (key.empty())
-				return Result::error();
+			for(auto itk = std::begin(p) + 1; itk != std::end(p); ++itk){
+				const auto &key = *itk;
+				db.del(key);
+			}
 
-			bool const result = db.del(key);
-
-			return Result::ok(result);
+			return Result::ok(1);
 		}
 	};
 
