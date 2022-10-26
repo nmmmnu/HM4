@@ -117,6 +117,7 @@
 					<li><a href="#SET">SET</a></li>
 				<li><a href="#SETEX">SETEX</a></li>
 				<li><a href="#SETNX">SETNX</a></li>
+				<li><a href="#SETXX">SETXX</a></li>
 				<li><a href="#EXPIRE">EXPIRE</a></li>
 				<li><a href="#PERSIST">PERSIST</a></li>
 				<li><a href="#GETSET">GETSET</a></li>
@@ -499,6 +500,27 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair exists.<br />1 if the key value pair do not exists and is set.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SETXX">
+
+			<h2>SETXX key value [seconds=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SETXX</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically Set value of the <i>key</i>, if key exists, with optional expiration of <i>seconds</i> seconds.<br />Note: The command internally GET old key first.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair exists and is set.<br />1 if the key value pair do not exists.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXPIRE">

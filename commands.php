@@ -517,6 +517,25 @@ function getData(){
 			),
 
 			new Cmd(
+					"SETXX",
+
+					"SETXX key value [seconds=0]",
+
+					"Atomically Set value of the <i>key</i>, if key exists, with optional expiration of <i>seconds</i> seconds.<br />" .
+					"Note: The command internally GET old key first.",
+
+					"bool",
+					"0 if the key value pair exists and is set.<br />" .
+					"1 if the key value pair do not exists.",
+					"1.2.17",
+					"2 * Mem + N * Disk",
+					false,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
 					"EXPIRE",
 
 					"EXPIRE key seconds",

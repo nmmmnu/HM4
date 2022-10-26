@@ -4,15 +4,6 @@
 
 namespace net::worker::commands::Mutable{
 
-	namespace impl_{
-		template<class DBAdapter>
-		auto exists(DBAdapter &db, std::string_view key){
-			auto it = db.find(key);
-
-			return it && it->isValid(std::true_type{});
-		}
-	}
-
 
 
 	template<class DBAdapter>
@@ -131,7 +122,7 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			if (impl_::exists(db, key)){
+			if (auto it = db.find(key); it && it->isValid(std::true_type{})){
 				return Result::ok(false);
 			}else{
 				// SET
@@ -142,6 +133,42 @@ namespace net::worker::commands::Mutable{
 				db.set(key, val, exp);
 
 				return Result::ok(true);
+			}
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct SETXX : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "setxx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"setxx",	"SETXX"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			if (p.size() != 3 && p.size() != 4)
+				return Result::error();
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return Result::error();
+
+			if (auto it = db.find(key); it && it->isValid(std::true_type{})){
+				// SET
+
+				const auto &val = p[2];
+				const auto exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
+
+				db.setHint(& *it, val, exp);
+
+				return Result::ok(true);
+			}else{
+				return Result::ok(false);
 			}
 		}
 	};
@@ -290,8 +317,7 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return Result::error();
 
-			if (auto it = db.find(key);
-				it && it->isValid(std::true_type{})){
+			if (auto it = db.find(key); it && it->isValid(std::true_type{})){
 
 				// because old_value may be overwritten,
 				// we had to make a copy.
@@ -332,8 +358,7 @@ namespace net::worker::commands::Mutable{
 
 
 
-			if (auto it = db.find(key);
-				it && it->isValid(std::true_type{})){
+			if (auto it = db.find(key); it && it->isValid(std::true_type{})){
 
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
@@ -397,6 +422,7 @@ namespace net::worker::commands::Mutable{
 				SETEX		,
 				HSET		,
 				SETNX		,
+				SETXX		,
 				DEL		,
 				HDEL		,
 				GETSET		,
