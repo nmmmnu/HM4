@@ -189,7 +189,7 @@ namespace net::worker::commands::Mutable{
 						- 16;
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
-			if (p.size() != 4 && p.size() != 3)
+			if (p.size() < 3)
 				return Result::error();
 
 			const auto &keyN = p[1];
@@ -197,19 +197,25 @@ namespace net::worker::commands::Mutable{
 			if (keyN.empty())
 				return Result::error();
 
-			const auto &subN = p[2];
+			for(auto itk = std::begin(p) + 2; itk != std::end(p); ++itk){
+				const auto &subN = *itk;
 
-			if (subN.empty())
-				return Result::error();
+				if (subN.empty())
+					return Result::error();
 
-			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
-				return Result::error();
+				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+					return Result::error();
+			}
 
-			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+			for(auto itk = std::begin(p) + 2; itk != std::end(p); ++itk){
+				const auto &subN = *itk;
 
-			bool const result = db.del(key);
+				auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
 
-			return Result::ok(result);
+				db.del(key);
+			}
+
+			return Result::ok(1);
 		}
 	};
 

@@ -134,7 +134,7 @@ namespace net::worker::commands::HLL{
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() != 3)
+			if (p.size() < 3)
 				return Result::error();
 
 			auto const &key = p[1];
@@ -142,10 +142,19 @@ namespace net::worker::commands::HLL{
 			if (key.empty())
 				return Result::error();
 
-			auto const &val = p[2];
+			for(auto itk = std::begin(p) + 2; itk != std::end(p); ++itk)
+				if (const auto &val = *itk; val.empty())
+					return Result::error();
 
-			if (val.empty())
-				return Result::error();
+			auto add_values = [&p](auto &hll){
+				for(auto itk = std::begin(p) + 2; itk != std::end(p); ++itk){
+					const auto &val = *itk;
+
+					using namespace hll_impl_;
+
+					getHLL().add(hll, val);
+				}
+			};
 
 			using namespace hll_impl_;
 
@@ -158,7 +167,7 @@ namespace net::worker::commands::HLL{
 
 				getHLL().clear(hll);
 
-				getHLL().add(hll, val);
+				add_values(hll);
 
 				store(db, key, hll);
 
@@ -172,12 +181,11 @@ namespace net::worker::commands::HLL{
 
 				uint8_t *hll = cast(pair->getVal().data());
 
-				getHLL().add(hll, val);
+				add_values(hll);
 
 				store(db, pair);
 
 				return Result::ok(1);
-
 			}else{
 				// proceed with normal update
 
@@ -188,7 +196,7 @@ namespace net::worker::commands::HLL{
 				// copy b -> hll
 				getHLL().load(hll, b);
 
-				getHLL().add(hll, val);
+				add_values(hll);
 
 				store(db, key, hll);
 

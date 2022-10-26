@@ -819,12 +819,12 @@ function getData(){
 			new Cmd(
 					"HDEL",
 
-					"HDEL key subkey",
+					"HDEL key subkey [subkey2]...",
 
-					"Removes <i>key</i> -> <i>subkey</i> hash.<br />" .
+					"Removes <i>key</i> -> <i>subkey</i>, <i>key</i> -> <i>subkey2</i>... hash.<br />" .
 					"Works exactly as Redis HSET, except internally set key for each value.",
-					"OK",
-					"OK",
+					"bool",
+					"Always return 1",
 					"1.2.17",
 					"Mem",
 					true,
@@ -832,7 +832,6 @@ function getData(){
 
 					"mutable"
 			),
-
 
 
 
@@ -885,9 +884,9 @@ function getData(){
 			new Cmd(
 					"PFADD",
 
-					"PFADD / HLLADD key value",
+					"PFADD / HLLADD key value [value2]...",
 
-					"Add <i>value</i> into HLL <i>key</i>.<br />" .
+					"Add <i>value</i>, <i>value2</i>... into HLL <i>key</i>.<br />" .
 					"Read HLL information document.",
 					"string (int)",
 					"always returns 1",

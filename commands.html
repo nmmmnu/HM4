@@ -817,7 +817,7 @@
 		</div>
 				<div class="cmd" id="HDEL">
 
-			<h2>HDEL key subkey</h2>
+			<h2>HDEL key subkey [subkey2]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>HDEL</td></tr>
@@ -829,11 +829,11 @@
 			</table>
 
 			<h3>Description:</h3>
-			Removes <i>key</i> -> <i>subkey</i> hash.<br />Works exactly as Redis HSET, except internally set key for each value.
+			Removes <i>key</i> -> <i>subkey</i>, <i>key</i> -> <i>subkey2</i>... hash.<br />Works exactly as Redis HSET, except internally set key for each value.
 			<h3>Return type:</h3>
-			OK
+			bool
 			<h3>Return value:</h3>
-			OK
+			Always return 1
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SADD">
@@ -880,7 +880,7 @@
 		</div>
 				<div class="cmd" id="PFADD">
 
-			<h2>PFADD / HLLADD key value</h2>
+			<h2>PFADD / HLLADD key value [value2]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>PFADD</td></tr>
@@ -892,7 +892,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Add <i>value</i> into HLL <i>key</i>.<br />Read HLL information document.
+			Add <i>value</i>, <i>value2</i>... into HLL <i>key</i>.<br />Read HLL information document.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
