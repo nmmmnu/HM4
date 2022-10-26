@@ -145,6 +145,7 @@
 
 					<li><a href="#HGETALL">HGETALL</a></li>
 				<li><a href="#HGET">HGET</a></li>
+				<li><a href="#HMGET">HMGET</a></li>
 				<li><a href="#HEXISTS">HEXISTS</a></li>
 				<li><a href="#HSET">HSET</a></li>
 				<li><a href="#HDEL">HDEL</a></li>
@@ -591,7 +592,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>DEL</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -733,7 +734,7 @@
 		</div>
 				<div class="cmd" id="HGETALL">
 
-			<h2>HSET key</h2>
+			<h2>HGETALL key</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>HGETALL</td></tr>
@@ -745,7 +746,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get <i>key</i> hash.<br />Returns up to 1'000 elements.<br />Works exactly as Redis HSET, except internally set key for each value.
+			Get <i>key</i> hash.<br />Returns up to 1'000 elements.<br />Works exactly as Redis HGETALL, except internally set key for each value.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
@@ -766,9 +767,30 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get <i>key</i> -> <i>subkey</i> hash.<br />Works exactly as Redis HSET, except internally set key for each value.
+			Get <i>key</i> -> <i>subkey</i> hash.<br />Works exactly as Redis HGET, except internally set key for each value.
 			<h3>Return type:</h3>
 			string
+			<h3>Return value:</h3>
+			Value of the key -> subkey hash or empty string.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HMGET">
+
+			<h2>HMGET key subkey [subkey1]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HMGET</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (Mem + N * Disk)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get <i>key</i> -> <i>subkey</i>, <i>subkey1</i>... hash.<br />Works exactly as Redis HMGET, except internally set key for each value.<br />If you can, use HGETALL it is much faster.
+			<h3>Return type:</h3>
+			array
 			<h3>Return value:</h3>
 			Value of the key -> subkey hash or empty string.
 			<p class="top"><a href="#top">top</a></p>
@@ -822,7 +844,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HDEL</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * Mem</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>

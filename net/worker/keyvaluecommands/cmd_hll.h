@@ -142,12 +142,14 @@ namespace net::worker::commands::HLL{
 			if (key.empty())
 				return Result::error();
 
-			for(auto itk = std::begin(p) + 2; itk != std::end(p); ++itk)
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &val = *itk; val.empty())
 					return Result::error();
 
 			auto add_values = [&p](auto &hll){
-				for(auto itk = std::begin(p) + 2; itk != std::end(p); ++itk){
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					const auto &val = *itk;
 
 					using namespace hll_impl_;

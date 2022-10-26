@@ -599,7 +599,7 @@ function getData(){
 					"bool",
 					"Always return 1",
 					"1.0.0",
-					"Mem",
+					"[number of keys] * Mem",
 					true,
 					true,
 
@@ -740,11 +740,11 @@ function getData(){
 			new Cmd(
 					"HGETALL",
 
-					"HSET key",
+					"HGETALL key",
 
 					"Get <i>key</i> hash.<br />" .
 					"Returns up to 1'000 elements.<br />" .
-					"Works exactly as Redis HSET, except internally set key for each value.",
+					"Works exactly as Redis HGETALL, except internally set key for each value.",
 					"array",
 					"array of subkey and values from key hash",
 					"1.2.17",
@@ -763,11 +763,31 @@ function getData(){
 					"HGET key subkey",
 
 					"Get <i>key</i> -> <i>subkey</i> hash.<br />" .
-					"Works exactly as Redis HSET, except internally set key for each value.",
+					"Works exactly as Redis HGET, except internally set key for each value.",
 					"string",
 					"Value of the key -> subkey hash or empty string.",
 					"1.2.17",
 					"Mem + N * Disk",
+					true,
+					true,
+
+					"immutable"
+			),
+
+
+
+			new Cmd(
+					"HMGET",
+
+					"HMGET key subkey [subkey1]...",
+
+					"Get <i>key</i> -> <i>subkey</i>, <i>subkey1</i>... hash.<br />" .
+					"Works exactly as Redis HMGET, except internally set key for each value.<br />" .
+					"If you can, use HGETALL it is much faster.",
+					"array",
+					"Value of the key -> subkey hash or empty string.",
+					"1.2.17",
+					"[number of keys] * (Mem + N * Disk)",
 					true,
 					true,
 
@@ -826,7 +846,7 @@ function getData(){
 					"bool",
 					"Always return 1",
 					"1.2.17",
-					"Mem",
+					"[number of keys] * Mem",
 					true,
 					true,
 

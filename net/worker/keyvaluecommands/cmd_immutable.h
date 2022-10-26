@@ -46,16 +46,18 @@ namespace net::worker::commands::Immutable{
 
 			auto &container = blob.container;
 
-			if (container.capacity() < p.size() - 1)
+			auto const varg = 1;
+
+			if (container.capacity() < p.size() - varg)
 				return Result::error();
 
-			for(auto itk = std::begin(p) + 1; itk != std::end(p); ++itk)
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; key.empty())
 					return Result::error();
 
 			container.clear();
 
-			for(auto itk = std::begin(p) + 1; itk != std::end(p); ++itk){
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &key = *itk;
 
 				auto it = db.find(key);
@@ -195,6 +197,63 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class DBAdapter>
+	struct HMGET : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "hmget";
+		constexpr inline static std::string_view cmd[]	= {
+			"hmget",	"HMGET"
+		};
+
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- DBAdapter::SEPARATOR.size()
+						- 16;
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			if (p.size() < 3)
+				return Result::error();
+
+			const auto &keyN = p[1];
+
+			if (keyN.empty())
+				return Result::error();
+
+			auto &container = blob.container;
+
+			auto const varg = 2;
+
+			if (container.capacity() < p.size() - varg)
+				return Result::error();
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				const auto &subN = *itk;
+
+				if (subN.empty())
+					return Result::error();
+
+				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+					return Result::error();
+			}
+
+			container.clear();
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				const auto &subN = *itk;
+
+				auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+
+				auto it = db.find(key);
+
+				container.emplace_back(
+					it && it->isValid(std::true_type{}) ? it->getVal() : ""
+				);
+			}
+
+			return Result::ok_container(container);
+		}
+	};
+
+
+
+	template<class DBAdapter>
 	struct HEXISTS : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "hexists";
 		constexpr inline static std::string_view cmd[]	= {
@@ -246,6 +305,7 @@ namespace net::worker::commands::Immutable{
 				TTL	,
 				STRLEN	,
 				HGET	,
+				HMGET	,
 				HEXISTS
 			>(pack);
 		}
