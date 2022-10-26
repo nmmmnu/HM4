@@ -45,44 +45,6 @@ namespace net::worker::commands::Info{
 
 
 	template<class DBAdapter>
-	struct TYPE : Base<DBAdapter>{
-		constexpr inline static std::string_view name	= "type";
-		constexpr inline static std::string_view cmd[]	= {
-			"type",	"TYPE"
-		};
-
-		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &) const final{
-			if (p.size() != 2)
-				return Result::error();
-
-			return Result::ok(
-				"string"
-			);
-		}
-	};
-
-
-
-	template<class DBAdapter>
-	struct TOUCH : Base<DBAdapter>{
-		constexpr inline static std::string_view name	= "touch";
-		constexpr inline static std::string_view cmd[]	= {
-			"touch",	"TOUCH"
-		};
-
-		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &) const final{
-			if (p.size() != 2)
-				return Result::error();
-
-			return Result::ok(
-				1
-			);
-		}
-	};
-
-
-
-	template<class DBAdapter>
 	struct PING : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "ping";
 		constexpr inline static std::string_view cmd[]	= {
@@ -126,8 +88,6 @@ namespace net::worker::commands::Info{
 			return registerCommands<DBAdapter, RegisterPack,
 				INFO	,
 				VERSION	,
-				TYPE	,
-				TOUCH	,
 				PING	,
 				ECHO
 			>(pack);
