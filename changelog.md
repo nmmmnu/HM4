@@ -48,6 +48,7 @@ Changelog
 -	new command DEL, HDEL, PFADD with multiple keys
 -	new command HMGET with multiple keys
 -	new command SETXX
+-	new command CAS, CAD, compatible with Alibaba Tair Cloud.
 
 
 

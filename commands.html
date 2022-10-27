@@ -125,6 +125,13 @@
 				<li><a href="#DEL">DEL</a></li>
 				</div>
 			<div>
+			<b>cas.h</b><br />
+			&nbsp;
+
+					<li><a href="#CAS">CAS</a></li>
+				<li><a href="#CAD">CAD</a></li>
+				</div>
+			<div>
 			<b>copy.h</b><br />
 			&nbsp;
 
@@ -631,6 +638,48 @@
 			bool
 			<h3>Return value:</h3>
 			Always return 1
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CAS">
+
+			<h2>CAS key old_value new_value [seconds=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CAS</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cas.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set the value of the <i>key</i> to <i>new_value</i>,only if the current value of the <i>key</i>  is equal to <i>old_value</i>.<br />This command is compatible to Alibaba Tair Cloud.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			if the key value is set or not
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CAD">
+
+			<h2>CAD key old_value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CAD</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cas.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Delete the the <i>key</i>,only if the current value of the <i>key</i>  is equal to <i>old_value</i>.<br />This command is compatible to Alibaba Tair Cloud.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			if the key is removed or not
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="COPY">

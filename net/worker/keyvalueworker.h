@@ -9,6 +9,7 @@
 
 #include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, SETXX, EXPIRE, PERSIST, GETSET, GETDEL, DEL
 						// HSET, HDEL
+#include "keyvaluecommands/cmd_cas.h"		// CAS, CAD
 #include "keyvaluecommands/cmd_copy.h"		// COPY, COPYNX, RENAME, RENAMENX
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
 
@@ -69,6 +70,7 @@ namespace net::worker{
 				GetX		::RegisterModule,
 
 				Mutable		::RegisterModule,
+				CAS		::RegisterModule,
 				Copy		::RegisterModule,
 				Counter		::RegisterModule,
 
