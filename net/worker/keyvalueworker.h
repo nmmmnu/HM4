@@ -1,22 +1,28 @@
 #ifndef _KEY_VALUE_WORKER_H
 #define _KEY_VALUE_WORKER_H
 
-#include "keyvaluecommands/cmd_immutable.h"	// GET, TTL
+#include "keyvaluecommands/cmd_immutable.h"	// GET, MGET, EXISTS, TTL, STRLEN
+						// HGET, HEXISTS
+#include "keyvaluecommands/cmd_getx.h"		// GETX, HGETALL, DELX
+						// HGETALL
 #include "keyvaluecommands/cmd_accumulators.h"	// COUNT, SUM, MIN, MAX
-#include "keyvaluecommands/cmd_getx.h"		// GETX, HGETALL
 
-#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, DEL, GETSET, GETDEL, EXPIRE, PERSIST
+#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, SETXX, EXPIRE, PERSIST, GETSET, GETDEL, DEL
+						// HSET, HDEL
 #include "keyvaluecommands/cmd_copy.h"		// COPY, COPYNX, RENAME, RENAMENX
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
 
 #include "keyvaluecommands/cmd_queue.h"		// SADD, SPOP
-#include "keyvaluecommands/cmd_hll.h"		// PFADD, PFCOUNT, PFMERGE, PFINTERSECT
+#include "keyvaluecommands/cmd_hll.h"		// PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS, PFERROR
 
-#include "keyvaluecommands/cmd_bitset.h"	// SETBIT, GETBIT, BITCOUNT
+#include "keyvaluecommands/cmd_bitset.h"	// SETBIT, GETBIT, BITCOUNT, BITMAX
 
-#include "keyvaluecommands/cmd_info.h"		// INFO, VERSION, TYPE, PING, ECHO
+#include "keyvaluecommands/cmd_info.h"		// INFO, VERSION, PING, ECHO
+
+#include "keyvaluecommands/cmd_compat.h"	// SELECT, TYPE, TOUCH
+
 #include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
-#include "keyvaluecommands/cmd_system.h"	// SELECT, EXIT, SHUTDOWN
+#include "keyvaluecommands/cmd_system.h"	// EXIT, SHUTDOWN
 
 #include "protocol/protocoldefs.h"
 
@@ -71,6 +77,8 @@ namespace net::worker{
 				BITSET		::RegisterModule,
 
 				Info		::RegisterModule,
+				Compat		::RegisterModule,
+
 				Reload		::RegisterModule,
 				System		::RegisterModule
 			>(pack);

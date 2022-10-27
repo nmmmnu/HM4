@@ -1214,7 +1214,7 @@ function getData(){
 
 
 		),
-		"system" => array(
+		"compat" => array(
 
 
 
@@ -1231,7 +1231,7 @@ function getData(){
 					true,
 					null,
 
-					"system"
+					"compat"
 			),
 
 			new Cmd(
@@ -1248,7 +1248,7 @@ function getData(){
 					true,
 					null,
 
-					"system"
+					"compat"
 			),
 
 			new Cmd(
@@ -1265,8 +1265,15 @@ function getData(){
 					true,
 					null,
 
-					"system"
+					"compat"
 			),
+
+
+
+		),
+		"system" => array(
+
+
 
 			new Cmd(
 					"EXIT",

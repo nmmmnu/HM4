@@ -2,6 +2,8 @@
 #include "mystring.h"
 #include "logger.h"
 
+#include <algorithm>	// std::clamp
+
 namespace net::worker::commands::GetX{
 
 	namespace getx_impl_{
