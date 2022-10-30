@@ -6,7 +6,7 @@ namespace net::worker::commands::HLL{
 
 	namespace hll_impl_{
 
-		constexpr auto LL_HLL = LogLevel::NOTICE;
+		constexpr auto LL_HLL = LogLevel::WARNING;
 
 		constexpr uint8_t HLL_Bits = 12;
 
@@ -53,71 +53,36 @@ namespace net::worker::commands::HLL{
 				return nullptr;
 		}
 
-		enum class hll_op_operation{
-			merge		,
-			intersect
-		};
+		template<class DBAdapter>
+		double hll_op_intersect(MySpan<std::string_view> const &keys, DBAdapter &db){
+			StaticVector<const uint8_t *, 5> b;
 
-		template<hll_op_operation Op, class DBAdapter>
-		double hll_op(MySpan<std::string_view> const &keys, DBAdapter &db){
-			const uint8_t *b[5];
+			for(auto it = std::begin(keys); it != std::end(keys); ++it)
+				if (const auto *x = load_ptr(db, *it); x){
+					b.push_back(x);
 
-			size_t count = 0;
-
-			for(auto it = std::begin(keys); it != std::end(keys); ++it){
-				b[count] = load_ptr(db, *it);
-				if (b[count]){
-					++count;
-
-					if constexpr(1){
-						if constexpr(Op == hll_op_operation::merge)
-							log__<LL_HLL>("HLL Operation", "merge", *it);
-
-						if constexpr(Op == hll_op_operation::intersect)
-							log__<LL_HLL>("HLL Operation", "intersect", *it);
-					}
+					if constexpr(1)
+						log__<LL_HLL>("HLL Operation", "intersect", *it);
 				}
+
+			log__<LL_HLL>("HLL Operation count", b.size());
+
+			auto hll_ops = getHLL().getOperations();
+
+			uint8_t _[HLL_M];
+
+			switch(b.size()){
+			default:
+			case 0: return hll_ops.intersect(_	 				);
+			case 1: return hll_ops.intersect(_, b[0]				);
+			case 2: return hll_ops.intersect(_, b[0], b[1]				);
+			case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
+			case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
+			case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
 			}
-
-			log__<LL_HLL>("HLL Operation count", count);
-
-			auto estimator = [&](){
-				auto hll_ops = getHLL().getOperations();
-
-				uint8_t _[HLL_M];
-
-				if constexpr(Op == hll_op_operation::merge){
-					switch(count){
-					default:
-					case 0: return hll_ops.merge(_	 					);
-					case 1: return hll_ops.merge(_, b[0]					);
-					case 2: return hll_ops.merge(_, b[0], b[1]				);
-					case 3: return hll_ops.merge(_, b[0], b[1], b[2]			);
-					case 4: return hll_ops.merge(_, b[0], b[1], b[2], b[3]			);
-					case 5: return hll_ops.merge(_, b[0], b[1], b[2], b[3], b[4]		);
-					}
-				}
-
-				if constexpr(Op == hll_op_operation::intersect){
-					switch(count){
-					default:
-					case 0: return hll_ops.intersect(_	 				);
-					case 1: return hll_ops.intersect(_, b[0]				);
-					case 2: return hll_ops.intersect(_, b[0], b[1]				);
-					case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
-					case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
-					case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
-					}
-				}
-			};
-
-			return estimator();
 		}
 
-		template<hll_op_operation Op, class DBAdapter>
-		uint64_t hll_op_round(MySpan<std::string_view> const &keys, DBAdapter &db){
-			double const estimate = hll_op<Op>(keys, db);
-
+		uint64_t hll_op_round(double const estimate){
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
 		}
 	}
@@ -210,34 +175,6 @@ namespace net::worker::commands::HLL{
 
 
 	template<class DBAdapter>
-	struct PFCOUNT : Base<DBAdapter>{
-		constexpr inline static std::string_view name	= "pfcount";
-		constexpr inline static std::string_view cmd[]	= {
-			"pfcount",	"PFCOUNT"		,
-			"hllcount",	"HLLCOUNT"
-		};
-
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() < 2 && p.size() > 6)
-				return Result::error();
-
-			for(auto it = std::next(std::begin(p)); it != std::end(p); ++it)
-				if (it->empty())
-					return Result::error();
-
-			MySpan<std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
-
-			using namespace hll_impl_;
-
-			uint64_t const n = hll_op_round<hll_op_operation::merge>(keys, db);
-
-			return Result::ok( n );
-		}
-	};
-
-
-
-	template<class DBAdapter>
 	struct PFINTERSECT : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "pfintersect";
 		constexpr inline static std::string_view cmd[]	= {
@@ -246,21 +183,75 @@ namespace net::worker::commands::HLL{
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() < 2 && p.size() > 6)
+
+			// we support just "PFINTERSECT" without arguments
+			if (p.size() == 1)
+				return Result::ok(0);
+
+			// we support intersect of up to 5 sets
+			if (p.size() > 6)
 				return Result::error();
 
-			for(auto it = std::next(std::begin(p)); it != std::end(p); ++it)
-				if (it->empty())
+			auto const varg = 1;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; key.empty())
 					return Result::error();
 
 			MySpan<std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
 
 			using namespace hll_impl_;
 
-			uint64_t const n = hll_op_round<hll_op_operation::intersect>(keys, db);
+			uint64_t const n = hll_op_round(
+						hll_op_intersect(keys, db)
+			);
 
 			return Result::ok( n );
 		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct PFCOUNT : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "pfcount";
+		constexpr inline static std::string_view cmd[]	= {
+			"pfcount",	"PFCOUNT"		,
+			"hllcount",	"HLLCOUNT"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+
+			// we support just "PFCOUNT" without arguments
+			if (p.size() == 1)
+				return Result::ok(0);
+
+		//	if (p.size() < 2)
+		//		return Result::error();
+
+			auto const varg = 1;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; key.empty())
+					return Result::error();
+
+			using namespace hll_impl_;
+
+			uint8_t hll[HLL_M];
+
+			getHLL().clear(hll);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto *b = load_ptr(db, *itk); b)
+					getHLL().merge(hll, b);
+
+			uint64_t const n = hll_op_round(
+						getHLL().estimate(hll)
+			);
+
+			return Result::ok( n );
+		}
+
 	};
 
 
@@ -275,7 +266,7 @@ namespace net::worker::commands::HLL{
 		};
 
 		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
-			if (p.size() < 3 && p.size() > 7)
+			if (p.size() < 3)
 				return Result::error();
 
 			const auto &dest_key = p[1];
@@ -283,8 +274,10 @@ namespace net::worker::commands::HLL{
 			if (dest_key.empty())
 				return Result::error();
 
-			for(auto it = std::next(std::next(std::begin(p))); it != std::end(p); ++it)
-				if (it->empty())
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; key.empty())
 					return Result::error();
 
 			using namespace hll_impl_;
@@ -293,20 +286,16 @@ namespace net::worker::commands::HLL{
 
 			getHLL().clear(hll);
 
-			MySpan<std::string_view> const &keys{ p.data() + 2, p.size() - 2 };
-
-			for(auto it = std::begin(keys); it != std::end(keys); ++it){
-				const uint8_t *b = load_ptr(db, *it);
-
-				if (b)
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto *b = load_ptr(db, *itk); b)
 					getHLL().merge(hll, b);
-			}
 
 			store(db, dest_key, hll);
 
 			return Result::ok();
 		}
 	};
+
 
 
 	template<class DBAdapter>

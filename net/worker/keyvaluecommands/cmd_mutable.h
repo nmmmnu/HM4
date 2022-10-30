@@ -35,6 +35,38 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class DBAdapter>
+	struct MSET : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "mset";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"mset",		"MSET"
+		};
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+			// should be odd number arguments
+			// mset a 5 b 6
+			if (p.size() < 3 || p.size() % 2 == 0)
+				return Result::error();
+
+			auto const varg = 1;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+				if (const auto &key = *itk; key.empty())
+					return Result::error();
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const &key = *itk;
+				auto const &val = *std::next(itk);
+				db.set(key, val);
+			}
+
+			return Result::ok();
+		}
+	};
+
+
+
+	template<class DBAdapter>
 	struct SETEX : Base<DBAdapter>{
 		constexpr inline static std::string_view name	= "setex";
 		constexpr inline static bool mut		= true;
@@ -96,6 +128,56 @@ namespace net::worker::commands::Mutable{
 			auto const exp  = p.size() == 5 ? from_string<uint32_t>(p[4]) : 0;
 
 			db.set(key, val, exp);
+
+			return Result::ok();
+		}
+	};
+
+
+
+	template<class DBAdapter>
+	struct HMSET : Base<DBAdapter>{
+		constexpr inline static std::string_view name	= "hmset";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"hmset",		"HMSET"
+		};
+
+		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- DBAdapter::SEPARATOR.size()
+						- 16;
+
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+			// should be even number arguments
+			// mset a sub1 5 sub2 6
+			if (p.size() < 3 || p.size() % 2 != 0)
+				return Result::error();
+
+			const auto &keyN = p[1];
+
+			if (keyN.empty())
+				return Result::error();
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const &subN = *itk;
+
+				if (subN.empty())
+					return Result::error();
+
+				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+					return Result::error();
+			}
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const &subN = *itk;
+
+				auto const &key  = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+				auto const &val  = *std::next(itk);
+
+				db.set(key, val);
+			}
 
 			return Result::ok();
 		}
@@ -419,8 +501,10 @@ namespace net::worker::commands::Mutable{
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,
 				SET		,
+				MSET		,
 				SETEX		,
 				HSET		,
+				HMSET		,
 				SETNX		,
 				SETXX		,
 				DEL		,

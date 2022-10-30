@@ -90,7 +90,6 @@ private:
 
 private:
 	void deallocate_(Node *node);
-	void deallocate_(void *p);
 
 	void zeroing_();
 

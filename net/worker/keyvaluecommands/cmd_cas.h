@@ -95,7 +95,7 @@ namespace net::worker::commands::CAS{
 
 	template<class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "mutable";
+		constexpr inline static std::string_view name	= "cas";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<DBAdapter, RegisterPack,

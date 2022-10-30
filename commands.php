@@ -642,6 +642,7 @@ function getData(){
 
 					"Set the value of the <i>key</i> to <i>new_value</i>," .
 					"only if the current value of the <i>key</i>  is equal to <i>old_value</i>.<br />" .
+					"You can check C++ command std::compare_exchange_weak() / std::compare_exchange_strong as well.<br />" .
 					"This command is compatible to Alibaba Tair Cloud.",
 					"bool",
 					"if the key value is set or not",
@@ -986,9 +987,9 @@ function getData(){
 			new Cmd(
 					"PFCOUNT",
 
-					"PFCOUNT / HLLCOUNT [key1] [key2] [key3] [key4] [key5]",
+					"PFCOUNT / HLLCOUNT [key] [key2]...",
 
-					"Estimate count of HLL union of up to 5 keys.<br />" .
+					"Estimate count of HLL union of provided keys.<br />" .
 					"Works with single key too, but returns standard estimation.<br />" .
 					"Works without key too, but returns 0.<br />" .
 					"Read HLL information document.",

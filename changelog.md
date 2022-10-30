@@ -45,10 +45,11 @@ Changelog
 -	new command STRLEN (useful for debugging HLL and BIT modules)
 -	new command BITSET, BITGET, BITCOUNT, BITMAX
 -	new command MGET with multiple keys
--	new command DEL, HDEL, PFADD with multiple keys
+-	improve DEL, HDEL, PFADD, PFCOUNT, PFMERGE with multiple keys
 -	new command HMGET with multiple keys
 -	new command SETXX
 -	new command CAS, CAD, compatible with Alibaba Tair Cloud.
+-	Release
 
 
 

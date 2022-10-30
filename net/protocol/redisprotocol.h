@@ -54,18 +54,25 @@ public:
 	constexpr static auto LL_RESPONCE = LogLevel::NOTICE;
 
 public:
-	constexpr static inline char			STAR	= '*';
-	constexpr static inline char			DOLLAR	= '$';
+	constexpr static inline char			STAR		= '*';
+	constexpr static inline char			DOLLAR		= '$';
 
-	constexpr static inline std::string_view	ENDLN	= "\r\n";
+	constexpr static inline std::string_view	ENDLN		= "\r\n";
 
 public:
-	constexpr static size_t	MAX_PARAMS	= 7;	// originally was 4
-							// setex name 100 hello
-							// getx  name 100 prefix
-							//
-							// changed to 7
-							// pfmerge dest a b c d e
+	constexpr static inline size_t			MAX_PARAMS	= 25;
+
+	static_assert(MAX_PARAMS >= 7, "7 params is the minimum - pfmerge dest a b c d e");
+
+	// originally was 4
+	// setex name 100 hello
+	// getx  name 100 prefix
+	//
+	// changed to 7
+	// pfmerge dest a b c d e
+	//
+	// changed to 25, because redis on the web, have similar limit.
+	// del a b c...
 
 public:
 	using Status = ProtocolStatus;

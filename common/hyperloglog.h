@@ -321,9 +321,9 @@ namespace hyperloglog{
 
 		//	A ^ B ^ C ^ D ^ E =
 		//		+ A + B + C + D + E
-		//		− A u B − A u C − A u D − A u E − B u C − B u D − B u E − C u D − C u E − D u E
+		//		- A u B - A u C - A u D - A u E - B u C - B u D - B u E - C u D - C u E - D u E
 		//		+ A u B u C + A u B u D + A u B u E + A u C u D + A u C u E + A u D u E + B u C u D + B u C u E + B u D u E + C u D u E
-		//		− A u B u C u D − A u B u C u E − A u B u D u E − A u C u D u E − B u C u D u E
+		//		- A u B u C u D - A u B u C u E - A u B u D u E - A u C u D u E - B u C u D u E
 		//		+ A u B u C u D u E
 
 		//	5 + 10 + 10 + 5 + 1 = 31 calcs total
