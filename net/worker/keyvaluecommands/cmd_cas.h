@@ -14,7 +14,7 @@ namespace net::worker::commands::CAS{
 			"cas",	"CAS"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 4 && p.size() != 5)
 				return Result::error();
 
@@ -61,7 +61,7 @@ namespace net::worker::commands::CAS{
 			"cad",	"CAD"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 3)
 				return Result::error();
 

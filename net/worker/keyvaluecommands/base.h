@@ -5,12 +5,10 @@
 #include "iobuffer.h"
 #include "../workerdefs.h"
 
-#include <memory>
-#include <string>
-#include <variant>
-
 #include "staticvector.h"
 #include "mystring.h"
+
+#include <variant>
 
 namespace net::worker::commands{
 
@@ -31,14 +29,15 @@ namespace net::worker::commands{
 		using Container = StaticVector<std::string_view,ContainerSize>;
 
 		constexpr static size_t BufferKeySize	= hm4::PairConf::MAX_KEY_SIZE + 16;
+		using BufferKey = std::array<char, BufferKeySize>;
 
 		OutputBlob(){
 			container.reserve(ContainerSize);
 		}
 
-		Container			container;
-		std::array<char, BufferKeySize>	buffer_key;
-		std::string			string;
+		Container	container;
+		BufferKey	buffer_key;
+		std::string	string;
 	};
 
 
@@ -98,7 +97,7 @@ namespace net::worker::commands{
 
 		virtual ~Base() = default;
 
-		virtual Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) const = 0;
+		virtual Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) = 0;
 	};
 
 
@@ -117,7 +116,7 @@ namespace net::worker::commands{
 		if constexpr(Command::mut == false || Command::mut == DBAdapter::MUTABLE ){
 			auto &up = pack.storage.emplace_back(std::make_unique<Command>());
 
-			const CommandBase *p = up.get();
+			CommandBase *p = up.get();
 
 			for(auto const &key : Command::cmd)
 				pack.map.emplace(key, p);

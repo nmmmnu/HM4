@@ -69,7 +69,7 @@ namespace net::worker::commands::GetX{
 			"getx",		"GETX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 4)
 				return Result::error();
 
@@ -123,7 +123,7 @@ namespace net::worker::commands::GetX{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -183,7 +183,7 @@ namespace net::worker::commands::GetX{
 
 		using Container = StaticVector<std::string_view, getx_impl_::ITERATIONS_DELX>;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 3)
 				return Result::error();
 

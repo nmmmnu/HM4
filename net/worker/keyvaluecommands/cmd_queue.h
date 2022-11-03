@@ -28,7 +28,7 @@ namespace net::worker::commands::Queue{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
@@ -72,7 +72,7 @@ namespace net::worker::commands::Queue{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 2)
 				return Result::error();
 

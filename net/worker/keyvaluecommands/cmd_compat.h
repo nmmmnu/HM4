@@ -13,7 +13,7 @@ namespace net::worker::commands::Compat{
 			"select",	"SELECT"
 		};
 
-		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
+		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) final{
 			return Result::ok();
 		}
 	};
@@ -25,7 +25,7 @@ namespace net::worker::commands::Compat{
 			"type",	"TYPE"
 		};
 
-		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
+		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) final{
 			return Result::ok(
 				"string"
 			);
@@ -39,7 +39,7 @@ namespace net::worker::commands::Compat{
 			"touch",	"TOUCH"
 		};
 
-		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) const final{
+		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) final{
 			return Result::ok(
 				1
 			);

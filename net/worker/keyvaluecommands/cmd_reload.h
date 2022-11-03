@@ -14,7 +14,7 @@ namespace net::worker::commands::Reload{
 			"bgsave",	"BGSAVE"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 1)
 				return Result::error();
 
@@ -31,7 +31,7 @@ namespace net::worker::commands::Reload{
 			"reload",	"RELOAD"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 1)
 				return Result::error();
 

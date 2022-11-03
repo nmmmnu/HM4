@@ -13,7 +13,7 @@ namespace net::worker::commands::Info{
 			"info",	"INFO"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 1)
 				return Result::error();
 
@@ -32,7 +32,7 @@ namespace net::worker::commands::Info{
 			"version",	"VERSION"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 1)
 				return Result::error();
 
@@ -51,7 +51,7 @@ namespace net::worker::commands::Info{
 			"ping",	"PING"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &) final{
 			if (p.size() != 1)
 				return Result::error();
 
@@ -68,7 +68,7 @@ namespace net::worker::commands::Info{
 			"echo",	"ECHO"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &blob) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &blob) final{
 			if (p.size() != 2)
 				return Result::error();
 

@@ -53,7 +53,7 @@ namespace net::worker{
 
 		template<class DBAdapter, class Storage, class Map>
 		void registerModules(Storage &s, Map &m){
-			s.reserve(3 + 2 + 3);
+			s.reserve(3 + 4 + 3 + 2 + 2);
 
 			struct RegisterPack{
 				Storage	&storage;
@@ -188,7 +188,7 @@ namespace net::worker{
 	private:
 		using MyBase		= commands::Base<DBAdapter>;
 		using Storage		= std::vector<std::unique_ptr<MyBase> >;
-		using Map		= std::unordered_map<std::string_view, const MyBase *>;
+		using Map		= std::unordered_map<std::string_view, MyBase *>;
 
 		WorkerStatus translate_(commands::Result const result, IOBuffer &buffer) const{
 			buffer.clear();
