@@ -48,7 +48,7 @@ namespace net::worker::commands::Queue{
 
 			auto const &id = MyIDGenerator{}(buffer);
 
-			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, id);
+			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, id);
 
 			db.set(key, val, exp);
 
@@ -86,7 +86,7 @@ namespace net::worker::commands::Queue{
 			if (keyN.size() > MAX_KEY_SIZE)
 				return Result::error();
 
-			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
 			auto it = db.find(key, std::false_type{});
 

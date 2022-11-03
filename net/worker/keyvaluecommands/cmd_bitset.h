@@ -148,9 +148,9 @@ namespace net::worker::commands::BITSET{
 
 				const bool b = bits[n_byte] & n_mask;
 
-				return Result::ok( b );
+				return Result::ok(b);
 			}else{
-				return Result::ok( 0 );
+				return Result::ok_0();
 			}
 		}
 	};
@@ -186,7 +186,7 @@ namespace net::worker::commands::BITSET{
 
 				return Result::ok(count);
 			}else{
-				return Result::ok(0);
+				return Result::ok_0();
 			}
 		}
 	};

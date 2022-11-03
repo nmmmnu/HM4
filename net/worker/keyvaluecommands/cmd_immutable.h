@@ -184,7 +184,7 @@ namespace net::worker::commands::Immutable{
 			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
 				return Result::error();
 
-			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
 			auto it = db.find(key);
 
@@ -238,7 +238,7 @@ namespace net::worker::commands::Immutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
-				auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+				auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
 				auto it = db.find(key);
 
@@ -281,7 +281,7 @@ namespace net::worker::commands::Immutable{
 			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
 				return Result::error();
 
-			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
 			auto it = db.find(key);
 

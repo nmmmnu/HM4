@@ -146,7 +146,7 @@ namespace net::worker::commands::GetX{
 			if (keyN.size() > MAX_KEY_SIZE)
 				return Result::error();
 
-			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
 			auto const key_size = key.size();
 
@@ -222,10 +222,7 @@ namespace net::worker::commands::GetX{
 				}
 			}
 
-			if (!blob.string_key.empty())
-				return Result::ok(string_key);
-			else
-				return Result::ok();
+			return Result::ok(string_key);
 		}
 
 	private:

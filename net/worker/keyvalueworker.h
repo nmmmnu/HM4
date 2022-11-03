@@ -118,8 +118,6 @@ namespace net::worker{
 				protocol.response_strings(buffer, container);
 			}
 
-
-
 		private:
 			template<typename T>
 			void response_number(T number){
@@ -197,11 +195,10 @@ namespace net::worker{
 			buffer.clear();
 
 			using cs = commands::Status;
-			using ws = WorkerStatus;
 
 			switch(result.status){
-			case cs::DISCONNECT	: return ws::DISCONNECT;
-			case cs::SHUTDOWN  	: return ws::SHUTDOWN;
+			case cs::DISCONNECT	: return WorkerStatus::DISCONNECT;
+			case cs::SHUTDOWN  	: return WorkerStatus::SHUTDOWN;
 
 			default			: // avoid warning
 			case cs::ERROR		: return error::BadRequest(protocol_, buffer);

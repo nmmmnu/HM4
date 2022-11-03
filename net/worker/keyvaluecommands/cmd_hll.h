@@ -138,7 +138,7 @@ namespace net::worker::commands::HLL{
 
 				store(db, key, hll);
 
-				return Result::ok(1);
+				return Result::ok_1();
 			}else if (db.canUpdateWithHint(pair)){
 				auto cast = [](const char *s){
 					const uint8_t *c = reinterpret_cast<const uint8_t *>(s);
@@ -152,7 +152,7 @@ namespace net::worker::commands::HLL{
 
 				store(db, pair);
 
-				return Result::ok(1);
+				return Result::ok_1();
 			}else{
 				// proceed with normal update
 
@@ -167,7 +167,7 @@ namespace net::worker::commands::HLL{
 
 				store(db, key, hll);
 
-				return Result::ok(1);
+				return Result::ok_1();
 			}
 		}
 	};
@@ -186,7 +186,7 @@ namespace net::worker::commands::HLL{
 
 			// we support just "PFINTERSECT" without arguments
 			if (p.size() == 1)
-				return Result::ok(0);
+				return Result::ok_0();
 
 			// we support intersect of up to 5 sets
 			if (p.size() > 6)
@@ -224,7 +224,7 @@ namespace net::worker::commands::HLL{
 
 			// we support just "PFCOUNT" without arguments
 			if (p.size() == 1)
-				return Result::ok(0);
+				return Result::ok_0();
 
 		//	if (p.size() < 2)
 		//		return Result::error();

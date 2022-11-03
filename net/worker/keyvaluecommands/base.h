@@ -30,14 +30,16 @@ namespace net::worker::commands{
 		constexpr static size_t ContainerSize	= 65'536;
 		using Container = StaticVector<std::string_view,ContainerSize>;
 
+		constexpr static size_t BufferKeySize	= hm4::PairConf::MAX_KEY_SIZE + 16;
+
 		OutputBlob(){
 			container.reserve(ContainerSize);
 		}
 
-		Container		container;
-		std::string		string_key;
-		std::string		string_val;
-		to_string_buffer_t	std_buffer[1];
+		Container			container;
+		std::array<char, BufferKeySize>	buffer_key;
+		std::string			string_val;
+		to_string_buffer_t		std_buffer;
 	};
 
 
@@ -61,6 +63,14 @@ namespace net::worker::commands{
 
 		constexpr static Result ok(ResultData &&data = nullptr){
 			return { Status::OK, std::move(data) };
+		}
+
+		constexpr static Result ok_0(){
+			return { Status::OK, "0" };
+		}
+
+		constexpr static Result ok_1(){
+			return { Status::OK, "1" };
 		}
 
 		constexpr static Result ok_container(const OutputBlob::Container &container){

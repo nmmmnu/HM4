@@ -123,7 +123,7 @@ namespace net::worker::commands::Mutable{
 			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
 				return Result::error();
 
-			auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 			auto const &val = p[3];
 			auto const exp  = p.size() == 5 ? from_string<uint32_t>(p[4]) : 0;
 
@@ -173,7 +173,7 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &subN = *itk;
 
-				auto const &key  = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+				auto const &key  = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 				auto const &val  = *std::next(itk);
 
 				db.set(key, val);
@@ -281,7 +281,7 @@ namespace net::worker::commands::Mutable{
 				db.del(key);
 			}
 
-			return Result::ok(1);
+			return Result::ok_1();
 		}
 	};
 
@@ -323,12 +323,12 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
-				auto const key = concatenateBuffer(blob.string_key, keyN, DBAdapter::SEPARATOR, subN);
+				auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
 				db.del(key);
 			}
 
-			return Result::ok(1);
+			return Result::ok_1();
 		}
 	};
 
