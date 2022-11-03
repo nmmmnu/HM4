@@ -109,7 +109,6 @@ namespace net::worker{
 				response_number(number);
 			}
 
-			// this also collect std::string
 			void operator()(std::string_view s){
 				protocol.response_string(buffer, s);
 			}

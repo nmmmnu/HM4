@@ -3,7 +3,6 @@
 #include "mystring.h"
 #include "logger.h"
 
-
 namespace net::worker::commands::Queue{
 	namespace getx_impl_{
 		constexpr static uint32_t ITERATIONS			= 65'536;
@@ -165,7 +164,7 @@ namespace net::worker::commands::Queue{
 			using namespace getx_impl_;
 
 			// store value, because we will delete it...
-			blob.string_val = val;
+			blob.string = val;
 
 			if (iterations > ITERATIONS_UPDATE_CONTROL_KEY){
 				// update control key...
@@ -175,7 +174,7 @@ namespace net::worker::commands::Queue{
 			// delete data key...
 			db.del(key);
 
-			return Result::ok(blob.string_val);
+			return Result::ok(blob.string);
 		}
 
 		Result finalizeTryAgain_(std::string_view control_key, std::string_view key, DBAdapter &db, OutputBlob &) const{

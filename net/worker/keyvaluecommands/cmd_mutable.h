@@ -359,10 +359,9 @@ namespace net::worker::commands::Mutable{
 			auto it = db.find(key);
 
 			if (it && it->isValid(std::true_type{})){
-
-				blob.string_val = it->getVal();
+				blob.string = it->getVal();
 			}else{
-				blob.string_val = "";
+				blob.string = "";
 			}
 
 			// SET
@@ -374,7 +373,7 @@ namespace net::worker::commands::Mutable{
 
 			// return
 
-			return Result::ok(blob.string_val);
+			return Result::ok(blob.string);
 		}
 	};
 
@@ -403,14 +402,14 @@ namespace net::worker::commands::Mutable{
 
 				// because old_value may be overwritten,
 				// we had to make a copy.
-				blob.string_val = it->getVal();
+				blob.string = it->getVal();
 
 				// DEL
 				db.delHint(& *it);
 
 				// return
 
-				return Result::ok(blob.string_val);
+				return Result::ok(blob.string);
 			}else{
 				return Result::ok("");
 			}

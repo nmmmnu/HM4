@@ -46,13 +46,13 @@ namespace net::worker::commands::BITSET{
 				// create new and update
 
 				// do not use c-tor in order to avoid capacity reallocation
-				blob.string_val = "";
-				blob.string_val.resize(n_byte_size, '\0');
+				blob.string = "";
+				blob.string.resize(n_byte_size, '\0');
 
-				flipBit__(blob.string_val.data(),
+				flipBit__(blob.string.data(),
 						bit, n_byte, n_mask);
 
-				db.set(key, blob.string_val);
+				db.set(key, blob.string);
 
 				return Result::ok();
 
@@ -68,18 +68,18 @@ namespace net::worker::commands::BITSET{
 			}else{
 				// normal update
 
-				blob.string_val = pair->getVal();
+				blob.string = pair->getVal();
 
-				if (blob.string_val.size() < n_byte_size)
-					blob.string_val.resize(n_byte_size, '\0');
+				if (blob.string.size() < n_byte_size)
+					blob.string.resize(n_byte_size, '\0');
 
-				flipBit__(blob.string_val.data(),
+				flipBit__(blob.string.data(),
 						bit, n_byte, n_mask);
 
 				// here size optimization may kick up.
 				// see recalc_size__
 
-				db.set(key, blob.string_val);
+				db.set(key, blob.string);
 
 				return Result::ok();
 			}

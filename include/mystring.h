@@ -134,9 +134,10 @@ using to_string_buffer_t = std::array<char, to_string_buffer_t_size>;
 	}
 	*/
 
-	template<typename T>
-	std::string_view to_string(T const value, to_string_buffer_t &buffer){
-		static_assert(std::is_integral_v<T>, "T must be integral");
+	template<size_t N, typename T>
+	std::string_view to_string(T const value, std::array<char, N> &buffer){
+		static_assert(N >= to_string_buffer_t_size,	"use to_string_buffer_t instead");
+		static_assert(std::is_integral_v<T>,		"T must be integral");
 
 		auto const s    = std::to_string(value);
 		auto const size = std::min(s.size(), buffer.size());
@@ -163,9 +164,10 @@ using to_string_buffer_t = std::array<char, to_string_buffer_t_size>;
 #else
 	// Modern faster <charconv>
 
-	template<typename T>
-	std::string_view to_string(T const value, to_string_buffer_t &buffer){
-		static_assert(std::is_integral_v<T>, "T must be integral");
+	template<size_t N, typename T>
+	std::string_view to_string(T const value, std::array<char, N> &buffer){
+		static_assert(N >= to_string_buffer_t_size,	"use to_string_buffer_t instead");
+		static_assert(std::is_integral_v<T>,		"T must be integral");
 
 		auto [p, ec] = std::to_chars(std::begin(buffer), std::end(buffer), value);
 

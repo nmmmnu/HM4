@@ -18,7 +18,7 @@ namespace net::worker::commands::Info{
 				return Result::error();
 
 			return Result::ok(
-				db.info(blob.string_val)
+				db.info(blob.string)
 			);
 		}
 	};
@@ -72,13 +72,10 @@ namespace net::worker::commands::Info{
 			if (p.size() != 2)
 				return Result::error();
 
-			// this works directly too.
-			// however it depends of how std::vector<char> is programmed,
-			// because it is used in IOBuffer::container_type.
-			// ECHO is not used often anyway.
-			blob.string_val = p[1];
+			// this is input parameter, so need to be saved.
+			blob.string = p[1];
 
-			return Result::ok(blob.string_val);
+			return Result::ok(blob.string);
 		}
 	};
 

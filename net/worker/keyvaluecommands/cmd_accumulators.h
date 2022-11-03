@@ -76,7 +76,7 @@ namespace net::worker::commands::Accumulators{
 
 			blob.container.clear();
 			blob.container.push_back(
-				to_string(number, blob.std_buffer)
+				to_string(number, blob.buffer_key)
 			);
 			blob.container.push_back(
 				lastKey

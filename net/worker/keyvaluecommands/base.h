@@ -38,20 +38,21 @@ namespace net::worker::commands{
 
 		Container			container;
 		std::array<char, BufferKeySize>	buffer_key;
-		std::string			string_val;
-		to_string_buffer_t		std_buffer;
+		std::string			string;
 	};
 
 
 
 	struct Result{
+		using ResultDataSpan = MySpan<std::string_view, MySpanConstructor::EXPLICIT>;
+
 		using ResultData = std::variant<
 			std::nullptr_t		,
 			bool			,
 			int64_t			,
 			uint64_t		,
 			std::string_view	,
-			MySpan<std::string_view, MySpanConstructor::EXPLICIT>
+			ResultDataSpan
 		>;
 
 
@@ -59,7 +60,7 @@ namespace net::worker::commands{
 		Status		status	= Status::OK;
 		ResultData	data	= std::nullptr_t{};
 
-		constexpr Result(Status const status, ResultData &&data) : status(status), data(std::move(data)){};
+
 
 		constexpr static Result ok(ResultData &&data = nullptr){
 			return { Status::OK, std::move(data) };
@@ -73,9 +74,10 @@ namespace net::worker::commands{
 			return { Status::OK, "1" };
 		}
 
-		constexpr static Result ok_container(const OutputBlob::Container &container){
+		template<class Container>
+		constexpr static Result ok_container(const Container &container){
 			return ok(
-				MySpan<std::string_view, MySpanConstructor::EXPLICIT>{ container }
+				ResultDataSpan{ container }
 			);
 		}
 
