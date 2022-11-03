@@ -48,13 +48,13 @@ namespace net::worker{
 
 		template<class DBAdapter, class RegisterPack, template<class, class> typename... Modules>
 		void registerModulesAll(RegisterPack &pack){
+			pack.storage.reserve(sizeof...(Modules));
+
 			( registerModule<Modules, DBAdapter, RegisterPack>(pack), ...);
 		}
 
 		template<class DBAdapter, class Storage, class Map>
 		void registerModules(Storage &s, Map &m){
-			s.reserve(3 + 4 + 3 + 2 + 2);
-
 			struct RegisterPack{
 				Storage	&storage;
 				Map	&map;
@@ -101,20 +101,20 @@ namespace net::worker{
 				protocol.response_bool(buffer, b);
 			}
 
+			void operator()(std::string_view s){
+				protocol.response_string(buffer, s);
+			}
+
+			void operator()(commands::Result::ResultDataSpan container){
+				protocol.response_strings(buffer, container);
+			}
+
 			void operator()(int64_t number){
 				response_number(number);
 			}
 
 			void operator()(uint64_t number){
 				response_number(number);
-			}
-
-			void operator()(std::string_view s){
-				protocol.response_string(buffer, s);
-			}
-
-			void operator()(const MySpan<std::string_view, MySpanConstructor::EXPLICIT> container){
-				protocol.response_strings(buffer, container);
 			}
 
 		private:

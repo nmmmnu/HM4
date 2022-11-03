@@ -93,7 +93,7 @@ namespace net::worker::commands{
 
 	template<class DBAdapter>
 	struct Base{
-		constexpr static bool mut		= false;
+		constexpr static bool mut = false;
 
 		virtual ~Base() = default;
 
