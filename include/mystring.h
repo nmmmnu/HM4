@@ -44,8 +44,31 @@ constexpr bool same_prefix(std::string_view const prefix, std::string_view const
 
 
 
+template<size_t N, typename... Args>
+std::string_view concatenateBuffer(std::array<char, N> &buffer, Args &&... args){
+	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
+
+	size_t const reserve_size = (std::string_view{ args }.size() + ...);
+
+	if (reserve_size > buffer.size())
+		return "";
+
+	size_t pos = 0;
+
+	auto append = [&pos, &buffer](std::string_view x){
+		memcpy(buffer.data() + pos, x.data(), x.size());
+		pos += x.size();
+	};
+
+	(append(std::forward<Args>(args)), ...);
+
+	return std::string_view{ buffer.data(), reserve_size };
+}
+
+
+
 template<typename... Args>
-std::string_view concatenateBuffer(std::string &s, Args &&... args){
+std::string_view concatenateBuffer(std::string &buffer, Args &&... args){
 	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
 
 	// super cheap concatenation,
@@ -53,15 +76,15 @@ std::string_view concatenateBuffer(std::string &s, Args &&... args){
 
 	size_t const reserve_size = (std::string_view{ args }.size() + ...);
 
-	s.clear();
+	buffer.clear();
 
 	// reserve() will shrink capacity
-	if (reserve_size > s.capacity())
-		s.reserve(reserve_size);
+	if (reserve_size > buffer.capacity())
+		buffer.reserve(reserve_size);
 
-	(s.append(std::forward<Args>(args)), ...);
+	(buffer.append(std::forward<Args>(args)), ...);
 
-	return s;
+	return buffer;
 }
 
 
