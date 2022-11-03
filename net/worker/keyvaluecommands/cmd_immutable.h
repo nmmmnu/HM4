@@ -14,7 +14,7 @@ namespace net::worker::commands::Immutable{
 			"get",	"GET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -40,7 +40,7 @@ namespace net::worker::commands::Immutable{
 			"mget",	"MGET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() < 2)
 				return Result::error();
 
@@ -80,7 +80,7 @@ namespace net::worker::commands::Immutable{
 			"exists",	"EXISTS"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -106,7 +106,7 @@ namespace net::worker::commands::Immutable{
 			"ttl",	"TTL"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -135,7 +135,7 @@ namespace net::worker::commands::Immutable{
 			"size",		"SIZE"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -167,7 +167,7 @@ namespace net::worker::commands::Immutable{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 3)
 				return Result::error();
 
@@ -207,7 +207,7 @@ namespace net::worker::commands::Immutable{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() < 3)
 				return Result::error();
 
@@ -264,7 +264,7 @@ namespace net::worker::commands::Immutable{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 3)
 				return Result::error();
 

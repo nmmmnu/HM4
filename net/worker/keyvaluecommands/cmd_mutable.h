@@ -14,7 +14,7 @@ namespace net::worker::commands::Mutable{
 			"set",		"SET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
@@ -42,7 +42,7 @@ namespace net::worker::commands::Mutable{
 			"mset",		"MSET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			// should be odd number arguments
 			// mset a 5 b 6
 			if (p.size() < 3 || p.size() % 2 == 0)
@@ -74,7 +74,7 @@ namespace net::worker::commands::Mutable{
 			"setex",	"SETEX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 4)
 				return Result::error();
 
@@ -106,7 +106,7 @@ namespace net::worker::commands::Mutable{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 4 && p.size() != 5)
 				return Result::error();
 
@@ -147,7 +147,7 @@ namespace net::worker::commands::Mutable{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			// should be even number arguments
 			// mset a sub1 5 sub2 6
 			if (p.size() < 3 || p.size() % 2 != 0)
@@ -193,7 +193,7 @@ namespace net::worker::commands::Mutable{
 			"setnx",	"SETNX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
@@ -229,7 +229,7 @@ namespace net::worker::commands::Mutable{
 			"setxx",	"SETXX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
@@ -266,7 +266,7 @@ namespace net::worker::commands::Mutable{
 			"unlink",	"UNLINK"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() < 2)
 				return Result::error();
 
@@ -299,7 +299,7 @@ namespace net::worker::commands::Mutable{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() < 3)
 				return Result::error();
 
@@ -342,7 +342,7 @@ namespace net::worker::commands::Mutable{
 			"getset",	"GETSET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 3 && p.size() != 4)
 				return Result::error();
 
@@ -387,7 +387,7 @@ namespace net::worker::commands::Mutable{
 			"getdel",	"GETDEL"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -426,7 +426,7 @@ namespace net::worker::commands::Mutable{
 			"expire",	"EXPIRE"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 3)
 				return Result::error();
 
@@ -463,7 +463,7 @@ namespace net::worker::commands::Mutable{
 			"persist",	"PERSIST"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 2)
 				return Result::error();
 

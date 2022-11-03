@@ -19,7 +19,7 @@ namespace net::worker::commands::BITSET{
 			"bitset",	"BITSET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
 			if (p.size() != 4)
 				return Result::error();
 
@@ -127,7 +127,7 @@ namespace net::worker::commands::BITSET{
 			"bitget",	"BITGET"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 3)
 				return Result::error();
 
@@ -164,7 +164,7 @@ namespace net::worker::commands::BITSET{
 			"bitcount",	"BITCOUNT"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() != 2)
 				return Result::error();
 
@@ -200,7 +200,7 @@ namespace net::worker::commands::BITSET{
 			"bitmax",	"BITMAX"
 		};
 
-		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) final{
+		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
 			using namespace bit_impl_;
 
 			return Result::ok(BIT_MAX);

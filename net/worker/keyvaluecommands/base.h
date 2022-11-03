@@ -97,7 +97,12 @@ namespace net::worker::commands{
 
 		virtual ~Base() = default;
 
-		virtual Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) = 0;
+		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob){
+			return process(params, db, blob);
+		}
+
+	private:
+		virtual Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) = 0;
 	};
 
 

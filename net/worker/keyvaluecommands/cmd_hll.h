@@ -98,7 +98,7 @@ namespace net::worker::commands::HLL{
 			"hlladd",	"HLLADD"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() < 3)
 				return Result::error();
 
@@ -182,7 +182,7 @@ namespace net::worker::commands::HLL{
 			"hllintersect",	"HLLINTERSECT"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 
 			// we support just "PFINTERSECT" without arguments
 			if (p.size() == 1)
@@ -220,7 +220,7 @@ namespace net::worker::commands::HLL{
 			"hllcount",	"HLLCOUNT"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 
 			// we support just "PFCOUNT" without arguments
 			if (p.size() == 1)
@@ -265,7 +265,7 @@ namespace net::worker::commands::HLL{
 			"hllmerge",	"HLLMERGE"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			if (p.size() < 3)
 				return Result::error();
 
@@ -306,7 +306,7 @@ namespace net::worker::commands::HLL{
 			"hllbits",	"HLLBITS"
 		};
 
-		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) final{
+		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
 			using namespace hll_impl_;
 
 			return Result::ok(uint64_t{HLL_Bits});
@@ -323,7 +323,7 @@ namespace net::worker::commands::HLL{
 			"hllerror",	"HLLERROR"
 		};
 
-		constexpr Result operator()(ParamContainer const &, DBAdapter &, OutputBlob &) final{
+		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
 			using namespace hll_impl_;
 
 			return Result::ok(static_cast<uint64_t>(getHLL().error() * 10000));

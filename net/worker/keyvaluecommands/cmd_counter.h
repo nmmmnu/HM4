@@ -50,7 +50,7 @@ namespace net::worker::commands::Counter{
 			"incrby",	"INCRBY"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &) final{
 			using namespace counter_impl_;
 
 			return do_incr_decr<+1>(params, db);
@@ -68,7 +68,7 @@ namespace net::worker::commands::Counter{
 			"decrby",	"DECRBY"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &) final{
 			using namespace counter_impl_;
 
 			return do_incr_decr<-1>(params, db);

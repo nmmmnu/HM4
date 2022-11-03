@@ -95,7 +95,7 @@ namespace net::worker::commands::Accumulators{
 			"count",	"COUNT"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -125,7 +125,7 @@ namespace net::worker::commands::Accumulators{
 			"sum",		"SUM"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -155,7 +155,7 @@ namespace net::worker::commands::Accumulators{
 			"min",		"MIN"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -188,7 +188,7 @@ namespace net::worker::commands::Accumulators{
 			"max",		"MAX"
 		};
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;

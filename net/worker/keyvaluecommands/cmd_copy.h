@@ -76,7 +76,7 @@ namespace net::worker::commands::Copy{
 			"move",		"MOVE"		,
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::MV>(p, db);
 		}
@@ -93,7 +93,7 @@ namespace net::worker::commands::Copy{
 			"movenx",	"MOVENX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::MV_NX>(p, db);
 		}
@@ -109,7 +109,7 @@ namespace net::worker::commands::Copy{
 			"copy",	"COPY"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::CP>(p, db);
 
@@ -126,7 +126,7 @@ namespace net::worker::commands::Copy{
 			"copynx",	"COPYNX"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::CP_NX>(p, db);
 		}
