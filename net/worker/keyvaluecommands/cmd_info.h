@@ -68,13 +68,17 @@ namespace net::worker::commands::Info{
 			"echo",	"ECHO"
 		};
 
-		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &) const final{
+		Result operator()(ParamContainer const &p, DBAdapter &, OutputBlob &blob) const final{
 			if (p.size() != 2)
 				return Result::error();
 
-			const auto &message = p[1];
+			// this works directly too.
+			// however it depends of how std::vector<char> is programmed,
+			// because it is used in IOBuffer::container_type.
+			// ECHO is not used often anyway.
+			blob.string_val = p[1];
 
-			return Result::ok(message);
+			return Result::ok(blob.string_val);
 		}
 	};
 

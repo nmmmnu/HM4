@@ -26,6 +26,7 @@ Changelog
 -	new command SELECT
 -	implement file inode based reload
 -	implement db_net automatic-reload
+-	new tool db_compact - perform "smart" merge
 
 ### 1.2.17
 
