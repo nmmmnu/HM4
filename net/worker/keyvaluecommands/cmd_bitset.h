@@ -5,13 +5,15 @@ namespace net::worker::commands::BITSET{
 	namespace bit_impl_{
 		// for 1 MB * 8 = 8'388'608
 		// uint32_t will do fine, but lets be on the safe side
-		using size_type = uint64_t;
+		using size_type				= uint64_t;
 
-		constexpr size_type BIT_MAX = hm4::PairConf::MAX_VAL_SIZE * 8 - 1;
+		constexpr size_type BIT_MAX		= hm4::PairConf::MAX_VAL_SIZE * 8 - 1;
+
+		constexpr size_t    BIT_STRING_RESERVE	=  hm4::PairConf::MAX_VAL_SIZE + 16;
 	}
 
-	template<class DBAdapter>
-	struct BITSET : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct BITSET : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "setbit";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -19,21 +21,27 @@ namespace net::worker::commands::BITSET{
 			"bitset",	"BITSET"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		BITSET(){
+			using namespace bit_impl_;
+
+			string.reserve(BIT_STRING_RESERVE);
+		}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
-				return Result::error();
+				return;
 
 			using namespace bit_impl_;
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			const auto n      = from_string<size_type>(p[2]);
 
 			if (n > BIT_MAX)
-				return Result::error();
+				return;
 
 			size_t  const n_byte		= n / 8;
 			size_t  const n_byte_size	= n_byte + 1;
@@ -46,15 +54,15 @@ namespace net::worker::commands::BITSET{
 				// create new and update
 
 				// do not use c-tor in order to avoid capacity reallocation
-				blob.string = "";
-				blob.string.resize(n_byte_size, '\0');
+				string = "";
+				string.resize(n_byte_size, '\0');
 
-				flipBit__(blob.string.data(),
+				flipBit__(string.data(),
 						bit, n_byte, n_mask);
 
-				db.set(key, blob.string);
+				db.set(key, string);
 
-				return Result::ok();
+				return result.set();
 
 			}else if (pair->getVal().size() >= n_byte_size && db.canUpdateWithHint(pair)){
 				// valid pair, update in place
@@ -64,26 +72,29 @@ namespace net::worker::commands::BITSET{
 
 				db.expHint(pair, 0);
 
-				return Result::ok();
+				return result.set();
 			}else{
 				// normal update
 
-				blob.string = pair->getVal();
+				string = pair->getVal();
 
-				if (blob.string.size() < n_byte_size)
-					blob.string.resize(n_byte_size, '\0');
+				if (string.size() < n_byte_size)
+					string.resize(n_byte_size, '\0');
 
-				flipBit__(blob.string.data(),
+				flipBit__(string.data(),
 						bit, n_byte, n_mask);
 
 				// here size optimization may kick up.
 				// see recalc_size__
 
-				db.set(key, blob.string);
+				db.set(key, string);
 
-				return Result::ok();
+				return result.set();
 			}
 		}
+
+	private:
+		std::string string;
 
 	private:
 		static void flipBit__(char *bits_buffer, bool const bit, size_t const n_byte, uint8_t const n_mask){
@@ -119,24 +130,24 @@ namespace net::worker::commands::BITSET{
 
 
 
-	template<class DBAdapter>
-	struct BITGET : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct BITGET : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "bitget";
 		constexpr inline static std::string_view cmd[]	= {
 			"getbit",	"GETBIT"	,
 			"bitget",	"BITGET"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return Result::error();
+				return;
 
 			using namespace bit_impl_;
 
 			const auto &key		= p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			const auto n     	= from_string<size_type>(p[2]);
 			const auto n_byte	= n / 8;
@@ -148,30 +159,30 @@ namespace net::worker::commands::BITSET{
 
 				const bool b = bits[n_byte] & n_mask;
 
-				return Result::ok(b);
+				return result.set(b);
 			}else{
-				return Result::ok_0();
+				return result.set_0();
 			}
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct BITCOUNT : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct BITCOUNT : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "bitcount";
 		constexpr inline static std::string_view cmd[]	= {
 			"bitcount",	"BITCOUNT"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return Result::error();
+				return;
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			if (auto it = db.find(key); it && it->isValid(std::true_type{}) ){
 				auto const &val = it->getVal();
@@ -184,37 +195,37 @@ namespace net::worker::commands::BITSET{
 				for(auto it = bits; it != bits + val.size(); ++it)
 					count += __builtin_popcount(*it);
 
-				return Result::ok(count);
+				return result.set(count);
 			}else{
-				return Result::ok_0();
+				return result.set_0();
 			}
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct BITMAX : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct BITMAX : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "maxbit";
 		constexpr inline static std::string_view cmd[]	= {
 			"bitmax",	"BITMAX"
 		};
 
-		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace bit_impl_;
 
-			return Result::ok(BIT_MAX);
+			return result.set(BIT_MAX);
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "hll";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				BITSET		,
 				BITGET		,
 				BITCOUNT	,

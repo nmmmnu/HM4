@@ -8,7 +8,7 @@
 #include "staticvector.h"
 #include "mystring.h"
 
-#include <variant>
+//#include <variant>
 
 namespace net::worker::commands{
 
@@ -16,7 +16,6 @@ namespace net::worker::commands{
 
 	enum class Status{
 		OK,
-		ERROR,
 
 		DISCONNECT,
 		SHUTDOWN
@@ -37,51 +36,90 @@ namespace net::worker::commands{
 
 		Container	container;
 		BufferKey	buffer_key;
-		std::string	string;
+	//	std::string	string;
 	};
 
 
 
-	struct Result{
-		using ResultDataSpan = MySpan<std::string_view, MySpanConstructor::EXPLICIT>;
+	template<class Protocol>
+	class Result{
+		Protocol	&protocol_;
+		IOBuffer	&buffer_;
 
-		using ResultData = std::variant<
-			std::nullptr_t		,
-			bool			,
-			int64_t			,
-			uint64_t		,
-			std::string_view	,
-			ResultDataSpan
-		>;
+		Status          status  = Status::OK;
 
+	public:
+		using Container = MySpan<std::string_view, MySpanConstructor::EXPLICIT>;
 
+		Result(Protocol &protocol, IOBuffer &buffer) :
+						protocol_	(protocol	),
+						buffer_		(buffer		){}
 
-		Status		status	= Status::OK;
-		ResultData	data	= std::nullptr_t{};
-
-
-
-		constexpr static Result ok(ResultData &&data = nullptr){
-			return { Status::OK, std::move(data) };
+		auto getStatus() const{
+			return status;
 		}
 
-		constexpr static Result ok_0(){
-			return { Status::OK, "0" };
+	public:
+		void set_status(Status status2){
+			status = status2;
 		}
 
-		constexpr static Result ok_1(){
-			return { Status::OK, "1" };
+	//	void error(){
+	//		return set_status(Status::ERROR);
+	//	}
+
+		void set(){
+			set_status(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_ok(buffer_);
 		}
 
-		template<class Container>
-		constexpr static Result ok_container(const Container &container){
-			return ok(
-				ResultDataSpan{ container }
-			);
+		void set(bool b){
+			set_status(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_bool(buffer_, b);
 		}
 
-		constexpr static Result error(){
-			return { Status::ERROR, nullptr };
+		void set(std::string_view s){
+			set_status(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_string(buffer_, s);
+		}
+
+		void set_container(MySpan<std::string_view> const &container){
+			set_status(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_strings(buffer_, container);
+		}
+
+		void set_0(){
+			return set("0");
+		}
+
+		void set_1(){
+			return set("1");
+		}
+
+		void set(int64_t number){
+			return set_number(number);
+		}
+
+		void set(uint64_t number){
+			return set_number(number);
+		}
+
+	private:
+		template<typename T>
+		void set_number(T number){
+			to_string_buffer_t std_buffer;
+
+			std::string_view const val = to_string(number, std_buffer);
+
+			return set(val);
 		}
 	};
 
@@ -91,30 +129,31 @@ namespace net::worker::commands{
 
 
 
-	template<class DBAdapter>
+	template<class Protocol, class DBAdapter>
 	struct Base{
 		constexpr static bool mut = false;
 
 		virtual ~Base() = default;
 
-		Result operator()(ParamContainer const &params, DBAdapter &db, OutputBlob &blob){
-			return process(params, db, blob);
+		void operator()(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			return process(params, db, result, blob);
 		}
 
 	private:
-		virtual Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) = 0;
+		virtual void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) = 0;
 	};
 
 
 
 	template<
-		template<class>  class Cmd,
+		template<class, class>  class Cmd,
+		class Protocol,
 		class DBAdapter,
 		class RegisterPack
 	>
 	void registerCommand(RegisterPack &pack){
-		using Command		= Cmd <DBAdapter>;
-		using CommandBase	= Base<DBAdapter>;
+		using Command		= Cmd <Protocol, DBAdapter>;
+		using CommandBase	= Base<Protocol, DBAdapter>;
 
 		static_assert(std::is_base_of_v<CommandBase, Command>, "Command not seems to be a command");
 
@@ -131,12 +170,13 @@ namespace net::worker::commands{
 
 
 	template<
+		class Protocol,
 		class DBAdapter,
 		class RegisterPack,
-		template<class> typename... Commands
+		template<class,class> typename... Commands
 	>
 	void registerCommands(RegisterPack &pack){
-		( registerCommand<Commands, DBAdapter>(pack), ... );
+		( registerCommand<Commands, Protocol, DBAdapter>(pack), ... );
 	}
 
 

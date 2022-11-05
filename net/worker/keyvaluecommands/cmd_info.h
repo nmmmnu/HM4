@@ -6,37 +6,39 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class DBAdapter>
-	struct INFO : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct INFO : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "info";
 		constexpr inline static std::string_view cmd[]	= {
 			"info",	"INFO"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return Result::error();
+				return;
 
-			return Result::ok(
-				db.info(blob.string)
+			std::array<char, 1024> buffer;
+
+			return result.set(
+				db.info(buffer)
 			);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct VERSION : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct VERSION : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "version";
 		constexpr inline static std::string_view cmd[]	= {
 			"version",	"VERSION"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return Result::error();
+				return;
 
-			return Result::ok(
+			return result.set(
 				db.version()
 			);
 		}
@@ -44,49 +46,51 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class DBAdapter>
-	struct PING : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct PING : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "ping";
 		constexpr inline static std::string_view cmd[]	= {
 			"ping",	"PING"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return Result::error();
+				return;
 
-			return Result::ok("pong");
+			return result.set("pong");
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct ECHO : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct ECHO : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "echo";
 		constexpr inline static std::string_view cmd[]	= {
 			"echo",	"ECHO"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return Result::error();
+				return;
 
-			// this is input parameter, so need to be saved.
-			blob.string = p[1];
+			auto const&message = p[1];
 
-			return Result::ok(blob.string);
+			// message seamlessly, go to output buffer,
+			// without interfering the input buffer.
+
+			return result.set(message);
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "info";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				INFO	,
 				VERSION	,
 				PING	,

@@ -15,8 +15,8 @@ namespace net::worker::commands::GetX{
 
 
 
-		template<bool Tail, class It, class OutputBlob, class ProjectionKey>
-		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, OutputBlob &data, ProjectionKey projKey){
+		template<bool Tail, class It, class Container, class ProjectionKey>
+		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, Container &container, ProjectionKey projKey){
 			uint32_t iterations	= 0;
 			uint32_t results	= 0;
 
@@ -27,7 +27,7 @@ namespace net::worker::commands::GetX{
 
 				if (++iterations > ITERATIONS){
 					if constexpr(Tail)
-						data.emplace_back(pkey);
+						container.emplace_back(pkey);
 
 					return;
 				}
@@ -41,20 +41,20 @@ namespace net::worker::commands::GetX{
 					continue;
 
 				if (++results > maxResults){
-					data.emplace_back(pkey);
+					container.emplace_back(pkey);
 					return;
 				}
 
 				auto const &val = it->getVal();
 
-				data.emplace_back(pkey);
-				data.emplace_back(val);
+				container.emplace_back(pkey);
+				container.emplace_back(val);
 			}
 		}
 
-		template<class It, class OutputBlob>
-		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, OutputBlob &data){
-			return accumulateResults<true>(maxResults, prefix, it, data, [](auto x){
+		template<class It, class Container>
+		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, Container &container){
+			return accumulateResults<true>(maxResults, prefix, it, container, [](auto x){
 				return x;
 			});
 		}
@@ -62,16 +62,16 @@ namespace net::worker::commands::GetX{
 
 
 
-	template<class DBAdapter>
-	struct GETX : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct GETX : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "getx";
 		constexpr inline static std::string_view cmd[]	= {
 			"getx",		"GETX"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return Result::error();
+				return;
 
 
 
@@ -106,14 +106,14 @@ namespace net::worker::commands::GetX{
 				container
 			);
 
-			return Result::ok_container(container);
+			return result.set_container(container);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct HGETALL : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct HGETALL : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "hgetall";
 		constexpr inline static std::string_view cmd[]	= {
 			"hgetall",	"HGETALL"
@@ -123,9 +123,9 @@ namespace net::worker::commands::GetX{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return Result::error();
+				return;
 
 
 
@@ -141,10 +141,10 @@ namespace net::worker::commands::GetX{
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return Result::error();
+				return;
 
 			if (keyN.size() > MAX_KEY_SIZE)
-				return Result::error();
+				return;
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -167,14 +167,14 @@ namespace net::worker::commands::GetX{
 				proj
 			);
 
-			return Result::ok_container(container);
+			return result.set_container(container);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct DELX : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct DELX : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "delx";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -183,15 +183,15 @@ namespace net::worker::commands::GetX{
 
 		using Container = StaticVector<std::string_view, getx_impl_::ITERATIONS_DELX>;
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return Result::error();
+				return;
 
 			auto const &key    = p[1];
 			auto const &prefix = p[2];
 
 			if (prefix.empty())
-				return Result::error();
+				return;
 
 
 
@@ -218,11 +218,11 @@ namespace net::worker::commands::GetX{
 					if (check_passes < PASSES_DELX)
 						goto start;
 					else
-						return scanForLastKey_(db, prefix, key);
+						return scanForLastKey_(db, prefix, key, result);
 				}
 			}
 
-			return Result::ok(string_key);
+			return result.set(string_key);
 		}
 
 	private:
@@ -257,7 +257,7 @@ namespace net::worker::commands::GetX{
 			return {};
 		}
 
-		Result scanForLastKey_(DBAdapter &db, std::string_view prefix, std::string_view key) const{
+		void scanForLastKey_(DBAdapter &db, std::string_view prefix, std::string_view key, Result<Protocol> &result) const{
 			using namespace getx_impl_;
 
 			uint32_t iterations = 0;
@@ -270,27 +270,27 @@ namespace net::worker::commands::GetX{
 
 				if (++iterations > ITERATIONS_DELX){
 					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
-					return Result::ok(key);
+					return result.set(key);
 				}
 
 				if (! it->isValid(std::true_type{}))
 					continue;
 
-				return Result::ok(key);
+				return result.set(key);
 			}
 
-			return Result::ok();
+			return result.set();
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "getx";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				GETX	,
 				HGETALL	,
 				DELX

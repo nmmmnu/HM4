@@ -44,10 +44,10 @@ namespace net::worker::commands::Accumulators{
 
 
 
-		template<class Accumulator, class DBAdapter>
-		Result execCommand(ParamContainer const &p, DBAdapter &db, OutputBlob &blob){
+		template<class Accumulator, class Protocol, class DBAdapter>
+		void execCommand(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4)
-				return Result::error();
+				return;
 
 
 
@@ -74,28 +74,27 @@ namespace net::worker::commands::Accumulators{
 							db.find(key, std::false_type{})
 			);
 
-			blob.container.clear();
-			blob.container.push_back(
-				to_string(number, blob.buffer_key)
-			);
-			blob.container.push_back(
-				lastKey
-			);
+			to_string_buffer_t buffer;
 
-			return Result::ok_container(blob.container);
+			const std::array<std::string_view, 2> container{
+				to_string(number, buffer),
+				lastKey
+			};
+
+			return result.set_container(container);
 		}
 	} // namespace
 
 
 
-	template<class DBAdapter>
-	struct COUNT : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct COUNT : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "count";
 		constexpr inline static std::string_view cmd[]	= {
 			"count",	"COUNT"
 		};
 
-		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -112,20 +111,20 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<COUNT_>(params, db, blob);
+			return execCommand<COUNT_>(params, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct SUM : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct SUM : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "sum";
 		constexpr inline static std::string_view cmd[]	= {
 			"sum",		"SUM"
 		};
 
-		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -142,20 +141,20 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<SUM_>(params, db, blob);
+			return execCommand<SUM_>(params, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct MIN : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct MIN : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "min";
 		constexpr inline static std::string_view cmd[]	= {
 			"min",		"MIN"
 		};
 
-		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -175,20 +174,20 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MIN_>(params, db, blob);
+			return execCommand<MIN_>(params, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct MAX : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct MAX : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "max";
 		constexpr inline static std::string_view cmd[]	= {
 			"max",		"MAX"
 		};
 
-		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
 			using T = int64_t;
@@ -208,18 +207,18 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MAX_>(params, db, blob);
+			return execCommand<MAX_>(params, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "accumulators";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				COUNT	,
 				SUM	,
 				MIN	,

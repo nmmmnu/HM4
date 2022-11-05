@@ -6,54 +6,50 @@ namespace net::worker::commands::Compat{
 
 
 
-	template<class DBAdapter>
-	struct SELECT : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct SELECT : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "select";
 		constexpr inline static std::string_view cmd[]	= {
 			"select",	"SELECT"
 		};
 
-		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
-			return Result::ok();
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return result.set();
 		}
 	};
 
-	template<class DBAdapter>
-	struct TYPE : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct TYPE : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "type";
 		constexpr inline static std::string_view cmd[]	= {
 			"type",	"TYPE"
 		};
 
-		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
-			return Result::ok(
-				"string"
-			);
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return result.set("string");
 		}
 	};
 
-	template<class DBAdapter>
-	struct TOUCH : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct TOUCH : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "touch";
 		constexpr inline static std::string_view cmd[]	= {
 			"touch",	"TOUCH"
 		};
 
-		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
-			return Result::ok(
-				1
-			);
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return result.set_1();
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "compat";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				SELECT	,
 				TYPE	,
 				TOUCH

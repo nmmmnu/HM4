@@ -13,8 +13,8 @@ namespace net::worker::commands::Queue{
 
 
 
-	template<class DBAdapter>
-	struct SADD : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct SADD : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "sadd";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -28,17 +28,17 @@ namespace net::worker::commands::Queue{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3 && p.size() != 4)
-				return Result::error();
+				return;
 
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return Result::error();
+				return;
 
 			if (keyN.size() > MAX_KEY_SIZE)
-				return Result::error();
+				return;
 
 			auto const &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
@@ -51,14 +51,14 @@ namespace net::worker::commands::Queue{
 
 			db.set(key, val, exp);
 
-			return Result::ok();
+			return result.set();
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct SPOP : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct SPOP : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "spop";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -72,18 +72,18 @@ namespace net::worker::commands::Queue{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return Result::error();
+				return;
 
 			// GET
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return Result::error();
+				return;
 
 			if (keyN.size() > MAX_KEY_SIZE)
-				return Result::error();
+				return;
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -92,7 +92,7 @@ namespace net::worker::commands::Queue{
 			if (!it){
 				// case 1. it == end, no any data
 
-				return Result::ok("");
+				return result.set("");
 			}
 
 			if (it->getKey() == key){
@@ -107,7 +107,7 @@ namespace net::worker::commands::Queue{
 						key,
 						db.find(it->getVal(), std::false_type{}),
 						db,
-						blob
+						result
 					);
 				}else{
 					// case 2.2. control key is NOT valid, go to case 3
@@ -126,12 +126,12 @@ namespace net::worker::commands::Queue{
 				key,
 				it,
 				db,
-				blob
+				result
 			);
 		}
 
 	private:
-		Result collect_(std::string_view control_key, typename DBAdapter::IteratorAdapter it, DBAdapter &db, OutputBlob &blob) const{
+		void collect_(std::string_view control_key, typename DBAdapter::IteratorAdapter it, DBAdapter &db, Result<Protocol> &result) const{
 			using namespace getx_impl_;
 
 			uint32_t iterations = 0;
@@ -141,30 +141,30 @@ namespace net::worker::commands::Queue{
 
 				if (! same_prefix(control_key, key)){
 					log__<LogLevel::DEBUG>("New prefix, done");
-					return finalizeEnd_(control_key, db, blob);
+					return finalizeEnd_(control_key, db, result);
 				}
 
 				if (it->isValid(std::true_type{})){
 					log__<LogLevel::DEBUG>("Valid key, done");
 					auto const &val = it->getVal();
-					return finalizeOK_(control_key, key, val, db, blob, iterations);
+					return finalizeOK_(control_key, key, val, db, result, iterations);
 				}
 
 				if (++iterations > ITERATIONS){
 					log__<LogLevel::DEBUG>("Lots of iterations, done");
-					return finalizeTryAgain_(control_key, key, db, blob);
+					return finalizeTryAgain_(control_key, key, db, result);
 				}
 			}
 
 			// it == end
-			return finalizeEnd_(control_key, db, blob);
+			return finalizeEnd_(control_key, db, result);
 		}
 
-		Result finalizeOK_(std::string_view control_key, std::string_view key, std::string_view val, DBAdapter &db, OutputBlob &blob, uint32_t const iterations) const{
+		void finalizeOK_(std::string_view control_key, std::string_view key, std::string_view val, DBAdapter &db, Result<Protocol> &result, uint32_t const iterations) const{
 			using namespace getx_impl_;
 
-			// store value, because we will delete it...
-			blob.string = val;
+			// seamlessly send value to output buffer...
+			result.set(val);
 
 			if (iterations > ITERATIONS_UPDATE_CONTROL_KEY){
 				// update control key...
@@ -174,19 +174,19 @@ namespace net::worker::commands::Queue{
 			// delete data key...
 			db.del(key);
 
-			return Result::ok(blob.string);
+			return;
 		}
 
-		Result finalizeTryAgain_(std::string_view control_key, std::string_view key, DBAdapter &db, OutputBlob &) const{
+		void finalizeTryAgain_(std::string_view control_key, std::string_view key, DBAdapter &db, Result<Protocol> &result) const{
 			// update control key...
 			db.set(control_key, key);
 
 			// there is no valid data key.
 
-			return Result::ok("");
+			return result.set("");
 		}
 
-		Result finalizeEnd_(std::string_view control_key, DBAdapter &db, OutputBlob &) const{
+		void finalizeEnd_(std::string_view control_key, DBAdapter &db, Result<Protocol> &result) const{
 			// delete control key...
 			// better don't, because else there will be lots of syncs if new data come.
 			if constexpr(0){
@@ -195,18 +195,18 @@ namespace net::worker::commands::Queue{
 
 			// there is no valid data key.
 
-			return Result::ok("");
+			return result.set("");
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "queue";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				SADD	,
 				SPOP
 			>(pack);

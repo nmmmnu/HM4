@@ -4,29 +4,39 @@
 
 namespace net::worker::commands::Counter{
 
+	constexpr bool MAY_RETURN_STRING = false;
+
 	namespace counter_impl_{
 
-		template<int Sign, class DBAdapter>
-		Result do_incr_decr(ParamContainer const &p, DBAdapter &db){
+		template<int Sign, class Protocol, class DBAdapter>
+		void do_incr_decr(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 2 && p.size() != 3)
-				return Result::error();
+				return;
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
 
 			if (n == 0)
-				return Result::error();
+				return;
 
 			auto it = db.find(key);
 
-			if(it && it->isValid()){
-				auto const val = it->getVal();
+			if (it && it->isValid()){
+				auto const &val = it->getVal();
 
 				n += from_string<int64_t>(val);
+
+				if constexpr(MAY_RETURN_STRING){
+					result.set(val);
+				}else{
+					result.set(n);
+				}
+			}else{
+				result.set_0();
 			}
 
 			to_string_buffer_t buffer;
@@ -35,14 +45,14 @@ namespace net::worker::commands::Counter{
 
 			db.set(key, val);
 
-			return Result::ok(n);
+			return;
 		}
 	}
 
 
 
-	template<class DBAdapter>
-	struct INCR : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct INCR : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "incr";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -50,17 +60,17 @@ namespace net::worker::commands::Counter{
 			"incrby",	"INCRBY"
 		};
 
-		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<+1>(params, db);
+			return do_incr_decr<+1>(params, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct DECR : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct DECR : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "decr";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -68,21 +78,21 @@ namespace net::worker::commands::Counter{
 			"decrby",	"DECRBY"
 		};
 
-		Result process(ParamContainer const &params, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<-1>(params, db);
+			return do_incr_decr<-1>(params, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "counters";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				INCR	,
 				DECR
 			>(pack);

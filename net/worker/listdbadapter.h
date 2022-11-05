@@ -52,11 +52,12 @@ public:
 public:
 	// System Methods
 
-	std::string_view info(std::string &str) const{
+	template<size_t N>
+	std::string_view info(std::array<char, N> &str) const{
 		to_string_buffer_t buffer[6];
 
 		if constexpr(!MUTABLE){
-			concatenateBuffer(
+			return concatenateBuffer(
 				str,
 
 				"# Server"											"\n",
@@ -78,7 +79,7 @@ public:
 					return to_string(a, buffer);
 			};
 
-			concatenateBuffer(
+			return concatenateBuffer(
 				str,
 
 				"# Server"											"\n",
@@ -99,8 +100,6 @@ public:
 				"PID              : ", to_string(getProcessID()				,	buffer[5]),	"\n"
 			);
 		}
-
-		return std::string_view{ str };
 	}
 
 	constexpr static std::string_view version(){

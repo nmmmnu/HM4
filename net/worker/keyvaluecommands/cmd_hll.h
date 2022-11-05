@@ -89,8 +89,8 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class DBAdapter>
-	struct PFADD : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct PFADD : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "pfadd";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -98,20 +98,20 @@ namespace net::worker::commands::HLL{
 			"hlladd",	"HLLADD"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
-				return Result::error();
+				return;
 
 			auto const &key = p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &val = *itk; val.empty())
-					return Result::error();
+					return;
 
 			auto add_values = [&p](auto &hll){
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
@@ -138,7 +138,7 @@ namespace net::worker::commands::HLL{
 
 				store(db, key, hll);
 
-				return Result::ok_1();
+				return result.set_1();
 			}else if (db.canUpdateWithHint(pair)){
 				auto cast = [](const char *s){
 					const uint8_t *c = reinterpret_cast<const uint8_t *>(s);
@@ -152,7 +152,7 @@ namespace net::worker::commands::HLL{
 
 				store(db, pair);
 
-				return Result::ok_1();
+				return result.set_1();
 			}else{
 				// proceed with normal update
 
@@ -167,36 +167,36 @@ namespace net::worker::commands::HLL{
 
 				store(db, key, hll);
 
-				return Result::ok_1();
+				return result.set_1();
 			}
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct PFINTERSECT : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct PFINTERSECT : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "pfintersect";
 		constexpr inline static std::string_view cmd[]	= {
 			"pfintersect",	"PFINTERSECT"		,
 			"hllintersect",	"HLLINTERSECT"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 
 			// we support just "PFINTERSECT" without arguments
 			if (p.size() == 1)
-				return Result::ok_0();
+				return result.set_0();
 
 			// we support intersect of up to 5 sets
 			if (p.size() > 6)
-				return Result::error();
+				return;
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; key.empty())
-					return Result::error();
+					return;
 
 			MySpan<std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
 
@@ -206,34 +206,34 @@ namespace net::worker::commands::HLL{
 						hll_op_intersect(keys, db)
 			);
 
-			return Result::ok( n );
+			return result.set( n );
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct PFCOUNT : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct PFCOUNT : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "pfcount";
 		constexpr inline static std::string_view cmd[]	= {
 			"pfcount",	"PFCOUNT"		,
 			"hllcount",	"HLLCOUNT"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 
 			// we support just "PFCOUNT" without arguments
 			if (p.size() == 1)
-				return Result::ok_0();
+				return result.set_0();
 
 		//	if (p.size() < 2)
-		//		return Result::error();
+		//		return;
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; key.empty())
-					return Result::error();
+					return;
 
 			using namespace hll_impl_;
 
@@ -249,15 +249,15 @@ namespace net::worker::commands::HLL{
 						getHLL().estimate(hll)
 			);
 
-			return Result::ok( n );
+			return result.set( n );
 		}
 
 	};
 
 
 
-	template<class DBAdapter>
-	struct PFMERGE : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct PFMERGE : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "pfmerge";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -265,20 +265,20 @@ namespace net::worker::commands::HLL{
 			"hllmerge",	"HLLMERGE"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
-				return Result::error();
+				return;
 
 			const auto &dest_key = p[1];
 
 			if (dest_key.empty())
-				return Result::error();
+				return;
 
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; key.empty())
-					return Result::error();
+					return;
 
 			using namespace hll_impl_;
 
@@ -292,52 +292,52 @@ namespace net::worker::commands::HLL{
 
 			store(db, dest_key, hll);
 
-			return Result::ok();
+			return result.set();
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct PFBITS : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct PFBITS : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "pfbits";
 		constexpr inline static std::string_view cmd[]	= {
 			"pfbits",	"PFBITS"		,
 			"hllbits",	"HLLBITS"
 		};
 
-		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hll_impl_;
 
-			return Result::ok(uint64_t{HLL_Bits});
+			return result.set(uint64_t{HLL_Bits});
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct PFERROR : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct PFERROR : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "pferror";
 		constexpr inline static std::string_view cmd[]	= {
 			"pferror",	"PFERROR"		,
 			"hllerror",	"HLLERROR"
 		};
 
-		constexpr Result process(ParamContainer const &, DBAdapter &, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hll_impl_;
 
-			return Result::ok(static_cast<uint64_t>(getHLL().error() * 10000));
+			return result.set(static_cast<uint64_t>(getHLL().error() * 10000));
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "hll";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				PFADD		,
 				PFCOUNT		,
 				PFINTERSECT	,

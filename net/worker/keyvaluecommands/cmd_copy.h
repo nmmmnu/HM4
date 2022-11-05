@@ -19,29 +19,29 @@ namespace net::worker::commands::Copy{
 			CP_NX
 		};
 
-		template<CPMVOperation operation, class DBAdapter>
-		Result cpmv(ParamContainer const &p, DBAdapter &db){
+		template<CPMVOperation operation, class Protocol, class DBAdapter>
+		void cpmv(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
-				return Result::error();
+				return;
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			const auto &newkey = p[2];
 
 			if (newkey.empty())
-				return Result::error();
+				return;
 
 			if (key == newkey)
-				return Result::error();
+				return;
 
 			if constexpr(operation == CPMVOperation::CP_NX || operation == CPMVOperation::MV_NX){
 				if (impl_::exists(db, newkey))
-					return Result::ok(false);
+					return result.set(false);
 			}
 
 			if (auto it = db.find(key);
@@ -57,9 +57,9 @@ namespace net::worker::commands::Copy{
 					db.del(key);
 				}
 
-				return Result::ok(true);
+				return result.set(true);
 			}else{
-				return Result::ok(false);
+				return result.set(false);
 			}
 		}
 
@@ -67,8 +67,8 @@ namespace net::worker::commands::Copy{
 
 
 
-	template<class DBAdapter>
-	struct RENAME : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct RENAME : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "rename";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -76,16 +76,16 @@ namespace net::worker::commands::Copy{
 			"move",		"MOVE"		,
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
-			return cpmv<CPMVOperation::MV>(p, db);
+			return cpmv<CPMVOperation::MV>(p, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct RENAMENX : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct RENAMENX : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "renamenx";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
@@ -93,53 +93,53 @@ namespace net::worker::commands::Copy{
 			"movenx",	"MOVENX"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
-			return cpmv<CPMVOperation::MV_NX>(p, db);
+			return cpmv<CPMVOperation::MV_NX>(p, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct COPY : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct COPY : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "copy";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"copy",	"COPY"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
-			return cpmv<CPMVOperation::CP>(p, db);
+			return cpmv<CPMVOperation::CP>(p, db, result);
 
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct COPYNX : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct COPYNX : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "copynx";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"copynx",	"COPYNX"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
-			return cpmv<CPMVOperation::CP_NX>(p, db);
+			return cpmv<CPMVOperation::CP_NX>(p, db, result);
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mutable";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				COPY		,
 				COPYNX		,
 				RENAME		,

@@ -52,5 +52,9 @@ Changelog
 -	new command CAS, CAD, compatible with Alibaba Tair Cloud.
 -	Release
 
+### 1.2.18
 
+-	If configured,
+	INCR / INCRBY / DECR / DECRBY may return a string (convertible to zero),
+	if previous value is some string (convertible to zero)
 

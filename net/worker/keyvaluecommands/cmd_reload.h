@@ -6,49 +6,49 @@ namespace net::worker::commands::Reload{
 
 
 
-	template<class DBAdapter>
-	struct SAVE : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct SAVE : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "save";
 		constexpr inline static std::string_view cmd[]	= {
 			"save",		"SAVE",
 			"bgsave",	"BGSAVE"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return Result::error();
+				return;
 
 			db.save();
 
-			return Result::ok();
+			return result.set();
 		}
 	};
 
-	template<class DBAdapter>
-	struct RELOAD : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct RELOAD : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "reload";
 		constexpr inline static std::string_view cmd[]	= {
 			"reload",	"RELOAD"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return Result::error();
+				return;
 
 			db.reload();
 
-			return Result::ok();
+			return result.set();
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "reload";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				SAVE	,
 				RELOAD
 			>(pack);

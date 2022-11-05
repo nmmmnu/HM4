@@ -38,22 +38,22 @@ namespace net::worker{
 
 
 	namespace key_value_worker_impl_{
-		template<template<class, class> class Module, class DBAdapter, class RegisterPack>
+		template<template<class, class, class> class Module, class Protocol, class DBAdapter, class RegisterPack>
 		void registerModule(RegisterPack &pack){
-			using M = Module<DBAdapter, RegisterPack>;
+			using M = Module<Protocol, DBAdapter, RegisterPack>;
 
 			log__<LogLevel::NOTICE>("Loading", M::name, "module...");
 			M::load(pack);
 		}
 
-		template<class DBAdapter, class RegisterPack, template<class, class> typename... Modules>
+		template<class Protocol, class DBAdapter, class RegisterPack, template<class, class, class> typename... Modules>
 		void registerModulesAll(RegisterPack &pack){
 			pack.storage.reserve(sizeof...(Modules));
 
-			( registerModule<Modules, DBAdapter, RegisterPack>(pack), ...);
+			( registerModule<Modules, Protocol, DBAdapter, RegisterPack>(pack), ...);
 		}
 
-		template<class DBAdapter, class Storage, class Map>
+		template<class Protocol, class DBAdapter, class Storage, class Map>
 		void registerModules(Storage &s, Map &m){
 			struct RegisterPack{
 				Storage	&storage;
@@ -64,10 +64,10 @@ namespace net::worker{
 
 			using namespace commands;
 
-			registerModulesAll<DBAdapter, RegisterPack,
+			registerModulesAll<Protocol, DBAdapter, RegisterPack,
 				Immutable	::RegisterModule,
-				Accumulators	::RegisterModule,
 				GetX		::RegisterModule,
+				Accumulators	::RegisterModule,
 
 				Mutable		::RegisterModule,
 				CAS		::RegisterModule,
@@ -85,54 +85,7 @@ namespace net::worker{
 				System		::RegisterModule
 			>(pack);
 		}
-
-
-
-		template<class Protocol>
-		struct Visitor{
-			Protocol const	&protocol;
-			IOBuffer	&buffer;
-
-			void operator()(std::nullptr_t){
-				protocol.response_ok(buffer);
-			}
-
-			void operator()(bool b){
-				protocol.response_bool(buffer, b);
-			}
-
-			void operator()(std::string_view s){
-				protocol.response_string(buffer, s);
-			}
-
-			void operator()(commands::Result::ResultDataSpan container){
-				protocol.response_strings(buffer, container);
-			}
-
-			void operator()(int64_t number){
-				response_number(number);
-			}
-
-			void operator()(uint64_t number){
-				response_number(number);
-			}
-
-		private:
-			template<typename T>
-			void response_number(T number){
-				to_string_buffer_t std_buffer;
-
-				std::string_view const val = to_string(number, std_buffer);
-
-				this->operator()(val);
-			}
-		};
-
 	}
-
-
-
-	// ====================================
 
 
 
@@ -141,7 +94,7 @@ namespace net::worker{
 		KeyValueWorker(DBAdapter &db) : db_(db){
 			using namespace key_value_worker_impl_;
 
-			registerModules<DBAdapter>(storage_, map_);
+			registerModules<Protocol, DBAdapter>(storage_, map_);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){
@@ -180,38 +133,33 @@ namespace net::worker{
 
 			auto &command = *it->second;
 
-			auto result = command(protocol_.getParams(), db_, *output_);
+			commands::Result<Protocol> result{ protocol_, output_buffer_ };
+
+			command(protocol_.getParams(), db_, result, *output_);
 
 			return translate_(result, buffer);
 		}
 
 	private:
-		using MyBase		= commands::Base<DBAdapter>;
+		using MyBase		= commands::Base<Protocol, DBAdapter>;
 		using Storage		= std::vector<std::unique_ptr<MyBase> >;
 		using Map		= std::unordered_map<std::string_view, MyBase *>;
 
-		WorkerStatus translate_(commands::Result const result, IOBuffer &buffer) const{
-			buffer.clear();
-
+		WorkerStatus translate_(commands::Result<Protocol> const result, IOBuffer &buffer){
 			using cs = commands::Status;
 
-			switch(result.status){
+			if (output_buffer_.size() == 0){
+				return error::BadRequest(protocol_, buffer);
+			}
+
+			switch(result.getStatus()){
 			case cs::DISCONNECT	: return WorkerStatus::DISCONNECT;
 			case cs::SHUTDOWN  	: return WorkerStatus::SHUTDOWN;
-
-			default			: // avoid warning
-			case cs::ERROR		: return error::BadRequest(protocol_, buffer);
-
-			case cs::OK		: return formatBuffer_(result.data, buffer);
+			case cs::OK		: break;
 			}
-		}
 
-		WorkerStatus formatBuffer_(commands::Result::ResultData const data, IOBuffer &buffer) const{
-			using namespace key_value_worker_impl_;
-
-			Visitor<Protocol> v{ protocol_, buffer };
-
-			std::visit(v, data);
+			using std::swap;
+			swap(output_buffer_, buffer);
 
 			return WorkerStatus::WRITE;
 		}
@@ -224,6 +172,8 @@ namespace net::worker{
 		Map					map_		;
 
 		std::unique_ptr<commands::OutputBlob>	output_ = std::make_unique<commands::OutputBlob>();
+
+		IOBuffer				output_buffer_	;
 	};
 
 

@@ -6,34 +6,34 @@ namespace net::worker::commands::CAS{
 
 
 
-	template<class DBAdapter>
-	struct CAS : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct CAS : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "cas";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"cas",	"CAS"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4 && p.size() != 5)
-				return Result::error();
+				return;
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			const auto &old_val = p[2];
 
 			if (old_val.empty())
-				return Result::error();
+				return;
 
 			const auto &val = p[3];
 
 			if (val.empty())
-				return Result::error();
+				return;
 
 			if (auto it = db.find(key);
 					it && it->isValid(std::true_type{}) &&
@@ -44,38 +44,38 @@ namespace net::worker::commands::CAS{
 
 				db.setHint(& *it, val, exp);
 
-				return Result::ok(true);
+				return result.set(true);
 			}
 
-			return Result::ok(false);
+			return result.set(false);
 		}
 	};
 
 
 
-	template<class DBAdapter>
-	struct CAD : Base<DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct CAD : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "cad";
 		constexpr inline static bool mut		= true;
 		constexpr inline static std::string_view cmd[]	= {
 			"cad",	"CAD"
 		};
 
-		Result process(ParamContainer const &p, DBAdapter &db, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return Result::error();
+				return;
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (key.empty())
-				return Result::error();
+				return;
 
 			const auto &old_val = p[2];
 
 			if (old_val.empty())
-				return Result::error();
+				return;
 
 			if (auto it = db.find(key);
 					it && it->isValid(std::true_type{}) &&
@@ -84,21 +84,21 @@ namespace net::worker::commands::CAS{
 
 				db.delHint(& *it);
 
-				return Result::ok(true);
+				return result.set(true);
 			}
 
-			return Result::ok(false);
+			return result.set(false);
 		}
 	};
 
 
 
-	template<class DBAdapter, class RegisterPack>
+	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "cas";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<DBAdapter, RegisterPack,
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				CAS		,
 				CAD
 			>(pack);
