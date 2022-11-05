@@ -54,7 +54,9 @@ Changelog
 
 ### 1.2.18
 
--	If configured,
+-	if configured,
 	INCR / INCRBY / DECR / DECRBY may return a string (convertible to zero),
 	if previous value is some string (convertible to zero)
+-	implement no copy commands such GETSET and GETDEL
+	via separate input and output buffers
 
