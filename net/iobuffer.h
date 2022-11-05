@@ -30,6 +30,12 @@ public:
 		head_ = 0;
 	}
 
+	void swap(IOBuffer &other){
+		using std::swap;
+		swap(head_	, other.head_	);
+		swap(buffer_	, other.buffer_	);
+	}
+
 	// ==================================
 
 	const char *data() const{
@@ -119,6 +125,14 @@ private:
 		return true;
 	}
 };
+
+
+
+void swap(IOBuffer &a, IOBuffer &b){
+	a.swap(b);
+}
+
+
 
 } // namespace
 
