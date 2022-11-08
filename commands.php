@@ -1169,6 +1169,22 @@ function getData(){
 			),
 
 			new Cmd(
+					"DBSIZE",
+
+					"DBSIZE",
+
+					"Returns number of keys.",
+					"string (int)",
+					"number of keys",
+					"1.2.18",
+					"n/a",
+					true,
+					null,
+
+					"info"
+			),
+
+			new Cmd(
 					"VERSION",
 
 					"VERSION",
@@ -1274,6 +1290,22 @@ function getData(){
 					"OK",
 					"OK",
 					"1.2.16",
+					"n/a",
+					true,
+					null,
+
+					"compat"
+			),
+
+			new Cmd(
+					"RESET",
+
+					"RESET",
+
+					"Provided for compatibility",
+					"OK",
+					"OK",
+					"1.2.18",
 					"n/a",
 					true,
 					null,

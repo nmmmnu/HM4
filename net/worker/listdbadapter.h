@@ -102,6 +102,14 @@ public:
 		}
 	}
 
+	template<bool B = false>
+	auto size() const{
+		if constexpr(B)
+			return list_.mutable_size();
+		else
+			return list_.size();
+	}
+
 	constexpr static std::string_view version(){
 		return hm4::version::str;
 	}

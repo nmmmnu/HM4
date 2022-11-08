@@ -130,7 +130,7 @@ namespace net::worker::commands::HLL{
 			if (pair == nullptr){
 				// invalid key.
 
-				uint8_t hll[HLL_M];
+				uint8_t *hll = hll_;
 
 				getHLL().clear(hll);
 
@@ -156,7 +156,7 @@ namespace net::worker::commands::HLL{
 			}else{
 				// proceed with normal update
 
-				uint8_t hll[HLL_M];
+				uint8_t *hll = hll_;
 
 				const uint8_t *b = reinterpret_cast<const uint8_t *>(pair->getVal().data());
 
@@ -170,6 +170,9 @@ namespace net::worker::commands::HLL{
 				return result.set_1();
 			}
 		}
+
+	private:
+		uint8_t hll_[hll_impl_::HLL_M];
 	};
 
 
@@ -237,7 +240,7 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			uint8_t hll[HLL_M];
+			uint8_t *hll = hll_;
 
 			getHLL().clear(hll);
 
@@ -252,6 +255,8 @@ namespace net::worker::commands::HLL{
 			return result.set( n );
 		}
 
+	private:
+		uint8_t hll_[hll_impl_::HLL_M];
 	};
 
 
@@ -282,7 +287,7 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			uint8_t hll[HLL_M];
+			uint8_t *hll = hll_;
 
 			getHLL().clear(hll);
 
@@ -294,6 +299,9 @@ namespace net::worker::commands::HLL{
 
 			return result.set();
 		}
+
+	private:
+		uint8_t hll_[hll_impl_::HLL_M];
 	};
 
 

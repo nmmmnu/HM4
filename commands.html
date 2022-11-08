@@ -190,6 +190,7 @@
 			&nbsp;
 
 					<li><a href="#INFO">INFO</a></li>
+				<li><a href="#DBSIZE">DBSIZE</a></li>
 				<li><a href="#VERSION">VERSION</a></li>
 				<li><a href="#PING">PING</a></li>
 				<li><a href="#ECHO">ECHO</a></li>
@@ -206,6 +207,7 @@
 			&nbsp;
 
 					<li><a href="#SELECT">SELECT</a></li>
+				<li><a href="#RESET">RESET</a></li>
 				<li><a href="#TYPE">TYPE</a></li>
 				<li><a href="#TOUCH">TOUCH</a></li>
 				</div>
@@ -999,7 +1001,7 @@
 		</div>
 				<div class="cmd" id="PFCOUNT">
 
-			<h2>PFCOUNT / HLLCOUNT [key1] [key2] [key3] [key4] [key5]</h2>
+			<h2>PFCOUNT / HLLCOUNT [key] [key2]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>PFCOUNT</td></tr>
@@ -1011,7 +1013,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Estimate count of HLL union of up to 5 keys.<br />Works with single key too, but returns standard estimation.<br />Works without key too, but returns 0.<br />Read HLL information document.
+			Estimate count of HLL union of provided keys.<br />Works with single key too, but returns standard estimation.<br />Works without key too, but returns 0.<br />Read HLL information document.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
@@ -1207,6 +1209,27 @@
 			Server information.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="DBSIZE">
+
+			<h2>DBSIZE</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>DBSIZE</td></tr>
+				<tr><td>Available since		</td><td>1.2.18</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns number of keys.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			number of keys
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="VERSION">
 
 			<h2>VERSION</h2>
@@ -1319,6 +1342,27 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SELECT</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>compat.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Provided for compatibility
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="RESET">
+
+			<h2>RESET</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>RESET</td></tr>
+				<tr><td>Available since		</td><td>1.2.18</td></tr>
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>

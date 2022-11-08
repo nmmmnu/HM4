@@ -28,6 +28,25 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
+	struct DBSIZE : Base<Protocol,DBAdapter>{
+		constexpr inline static std::string_view name	= "dbsize";
+		constexpr inline static std::string_view cmd[]	= {
+			"dbsize",	"DBSIZE"
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 1)
+				return;
+
+			return result.set(
+				db.size()
+			);
+		}
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct VERSION : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "version";
 		constexpr inline static std::string_view cmd[]	= {
@@ -92,6 +111,7 @@ namespace net::worker::commands::Info{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				INFO	,
+				DBSIZE	,
 				VERSION	,
 				PING	,
 				ECHO

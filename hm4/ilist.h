@@ -114,17 +114,7 @@ namespace PairFactory{
 		}
 	};
 
-	struct NormalExpiresOnly{
-		std::string_view key;
-		std::string_view val;
-		uint32_t expires = 0;
-		uint32_t created = 0;
-
-		[[nodiscard]]
-		constexpr auto getKey() const noexcept{
-			return key;
-		}
-
+	struct NormalExpiresOnly : Normal{
 		template<class List>
 		[[nodiscard]]
 		bool operator()(Pair *hint, List &list) const noexcept{
@@ -134,12 +124,6 @@ namespace PairFactory{
 			list.mutable_notify(hint, msg);
 
 			return true;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		auto operator()(Allocator &allocator) const noexcept{
-			return Pair::smart_ptr::create(allocator, key, val, expires, created);
 		}
 	};
 

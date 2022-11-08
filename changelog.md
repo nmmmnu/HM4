@@ -59,4 +59,5 @@ Changelog
 	if previous value is some string (convertible to zero)
 -	implement no copy commands such GETSET and GETDEL
 	via separate input and output buffers
-
+-	new command RESET
+-	new command DBSIZE
