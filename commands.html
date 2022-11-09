@@ -115,6 +115,9 @@
 			&nbsp;
 
 					<li><a href="#SET">SET</a></li>
+				<li><a href="#MSET">MSET</a></li>
+				<li><a href="#MSETNX">MSETNX</a></li>
+				<li><a href="#MSETXX">MSETXX</a></li>
 				<li><a href="#SETEX">SETEX</a></li>
 				<li><a href="#SETNX">SETNX</a></li>
 				<li><a href="#SETXX">SETXX</a></li>
@@ -472,6 +475,69 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MSET">
+
+			<h2>MSET key value [key2] [val2]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MSET</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * mem</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />Operation is atomic, so all given keys are set at once.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MSETNX">
+
+			<h2>MSETNX key value [key2] [val2]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MSETNX</td></tr>
+				<tr><td>Available since		</td><td>1.2.18</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (2 * Mem + N * Disk)</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />No keys will set, if just a single key already exists.<br />Operation is atomic, so all given keys are set at once.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			0 if some of the key value pair exists.<br />1 if none of the key value pair do not exists and keys are set.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MSETXX">
+
+			<h2>MSETXX key value [key2] [val2]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MSETXX</td></tr>
+				<tr><td>Available since		</td><td>1.2.18</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (2 * Mem + N * Disk)</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />No keys will set, if just a single key does not exists.<br />Operation is atomic, so all given keys are set at once.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			0 if some of the key value pair does not exists.<br />1 if none of the key value pair exists and keys are set.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SETEX">

@@ -48,6 +48,7 @@ Changelog
 -	new command MGET with multiple keys
 -	improve DEL, HDEL, PFADD, PFCOUNT, PFMERGE with multiple keys
 -	new command HMGET with multiple keys
+-	new command MSET
 -	new command SETXX
 -	new command CAS, CAD, compatible with Alibaba Tair Cloud.
 -	Release
@@ -61,3 +62,5 @@ Changelog
 	via separate input and output buffers
 -	new command RESET
 -	new command DBSIZE
+-	new command MSETNX, MSETXX
+

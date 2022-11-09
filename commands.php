@@ -479,6 +479,64 @@ function getData(){
 			),
 
 			new Cmd(
+					"MSET",
+
+					"MSET key value [key2] [val2]",
+
+					"Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />" .
+					"Operation is atomic, so all given keys are set at once.",
+
+					"OK",
+					"OK",
+					"1.2.17",
+					"[number of keys] * mem",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"MSETNX",
+
+					"MSETNX key value [key2] [val2]",
+
+					"Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />" .
+					"No keys will set, if just a single key already exists.<br />" .
+					"Operation is atomic, so all given keys are set at once.",
+
+					"int",
+					"0 if some of the key value pair exists.<br />" .
+					"1 if none of the key value pair do not exists and keys are set.",
+					"1.2.18",
+					"[number of keys] * (2 * Mem + N * Disk)",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
+					"MSETXX",
+
+					"MSETXX key value [key2] [val2]",
+
+					"Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />" .
+					"No keys will set, if just a single key does not exists.<br />" .
+					"Operation is atomic, so all given keys are set at once.",
+
+					"int",
+					"0 if some of the key value pair does not exists.<br />" .
+					"1 if none of the key value pair exists and keys are set.",
+					"1.2.18",
+					"[number of keys] * (2 * Mem + N * Disk)",
+					false,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
 					"SETEX",
 
 					"SETEX key seconds value",

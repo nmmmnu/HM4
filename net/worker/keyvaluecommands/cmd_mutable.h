@@ -67,6 +67,114 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
+	struct MSETNX : Base<Protocol,DBAdapter>{
+		constexpr inline static std::string_view name	= "msetnx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"msetnx",		"MSETNX"
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			// should be odd number arguments
+			// mset a 5 b 6
+			if (p.size() < 3 || p.size() % 2 == 0)
+				return;
+
+			auto const varg = 1;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+				if (const auto &key = *itk; key.empty())
+					return;
+
+			// check if any key exists
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const &key = *itk;
+				if (auto it = db.find(key); it && it->isValid(std::true_type{}))
+					return result.set_0();
+			}
+
+			// set keys
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const &key = *itk;
+				auto const &val = *std::next(itk);
+				db.set(key, val);
+			}
+
+			return result.set_1();
+		}
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MSETXX : Base<Protocol,DBAdapter>{
+		constexpr inline static std::string_view name	= "msetxx";
+		constexpr inline static bool mut		= true;
+		constexpr inline static std::string_view cmd[]	= {
+			"msetxx",		"MSETXX"
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			// should be odd number arguments
+			// mset a 5 b 6
+			if (p.size() < 3 || p.size() % 2 == 0)
+				return;
+
+			auto const varg = 1;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+				if (const auto &key = *itk; key.empty())
+					return;
+
+			buffer_.clear();
+			buffer_.reserve(std::end(p) - std::begin(p) + varg);
+
+			// check if any key NOT exists
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const &key = *itk;
+
+				if (auto it = db.find(key); it && it->isValid(std::true_type{})){
+
+					auto const &val = *std::next(itk);
+
+					if (const auto *p = & *it; db.canUpdateWithHint(p))
+						buffer_.emplace_back(p, key, val);
+					else
+						buffer_.emplace_back(nullptr, key, val);
+
+				}else
+					return result.set_0();
+			}
+
+			// set keys with hints
+			for(auto &x : buffer_)
+				if (x.p)
+					db.setHint(x.p, x.val);
+
+			// set keys without hints
+			for(auto &x : buffer_)
+				if (x.p == nullptr)
+					db.set(x.key, x.val);
+
+			return result.set_1();
+		}
+
+	private:
+		struct msetxx_data{
+			const hm4::Pair *p;
+			std::string_view key;
+			std::string_view val;
+
+			constexpr msetxx_data(const hm4::Pair *p, std::string_view key, std::string_view val) :
+							p(p), key(key), val(val){}
+		};
+
+		std::vector<msetxx_data> buffer_;
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct SETEX : Base<Protocol,DBAdapter>{
 		constexpr inline static std::string_view name	= "setex";
 		constexpr inline static bool mut		= true;
@@ -506,6 +614,8 @@ namespace net::worker::commands::Mutable{
 				HSET		,
 				HMSET		,
 				SETNX		,
+				MSETNX		,
+				MSETXX		,
 				SETXX		,
 				DEL		,
 				HDEL		,

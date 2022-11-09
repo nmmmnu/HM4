@@ -8,7 +8,7 @@
 #include "staticvector.h"
 #include "mystring.h"
 
-//#include <variant>
+#include "logger.h"
 
 namespace net::worker::commands{
 
@@ -47,6 +47,8 @@ namespace net::worker::commands{
 		IOBuffer	&buffer_;
 
 		Status          status  = Status::OK;
+
+		constexpr inline static std::string_view zo_[2]{"0", "1"};
 
 	public:
 		using Container = MySpan<std::string_view, MySpanConstructor::EXPLICIT>;
@@ -89,6 +91,13 @@ namespace net::worker::commands{
 			protocol_.response_string(buffer_, s);
 		}
 
+		// avoid convert const char * to bool
+		void set(const char *s){
+			return set(
+				std::string_view(s)
+			);
+		}
+
 		void set_container(MySpan<std::string_view> const &container){
 			set_status(Status::OK);
 
@@ -97,18 +106,20 @@ namespace net::worker::commands{
 		}
 
 		void set_0(){
-			return set("0");
+			return set(zo_[0]);
 		}
 
 		void set_1(){
-			return set("1");
+			return set(zo_[1]);
 		}
 
 		void set(int64_t number){
+			log__<LogLevel::ERROR>("int");
 			return set_number(number);
 		}
 
 		void set(uint64_t number){
+			log__<LogLevel::ERROR>("uint");
 			return set_number(number);
 		}
 

@@ -248,8 +248,8 @@ namespace net::worker::commands::GetX{
 				if (! it->isValid(std::true_type{}))
 					continue;
 
-				if (db.canUpdateWithHint(& *it))
-					db.delHint(& *it);
+				if (const auto *p = & *it; db.canUpdateWithHint(p))
+					db.delHint(p);
 				else
 					container.emplace_back(key);
 			}
