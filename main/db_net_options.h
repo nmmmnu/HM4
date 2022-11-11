@@ -30,7 +30,7 @@ public:
 
 	std::nullptr_t	host			= nullptr;
 	uint16_t	port			= 2000;
-	uint32_t	timeout			= 30;
+	uint32_t	timeout			= 60 * 5;
 
 	uint16_t	tcp_backlog		= 0;
 	uint16_t	tcp_reuseport		= 0;
