@@ -10,30 +10,50 @@
 namespace net{
 
 class IOBuffer{
-private:
+public:
 	using container_type	= std::vector<char>;
 	using size_type		= container_type::size_type;
 
-	constexpr static size_t INITIAL_RESERVE = 64;
+	constexpr static size_type INITIAL_RESERVE = 64;
 
 private:
 	size_type		head_	= 0;
 	container_type		buffer_;
 
 public:
-	IOBuffer(size_t const reserve = INITIAL_RESERVE){
-		buffer_.reserve(reserve);
+	IOBuffer(size_type const size = INITIAL_RESERVE){
+		reserve(size);
 	}
+
+	IOBuffer(container_type &&buffer) : buffer_(std::move(buffer)){
+	}
+
+//	IOBuffer(container_type &buffer){
+//		swap(buffer_, buffer);
+//	}
 
 	void clear(){
 		buffer_.clear();
 		head_ = 0;
 	}
 
+	void swap(container_type &buffer){
+		using std::swap;
+		swap(buffer_	, buffer	);
+	}
+
 	void swap(IOBuffer &other){
 		using std::swap;
 		swap(head_	, other.head_	);
 		swap(buffer_	, other.buffer_	);
+	}
+
+	container_type const &getBuffer() const{
+		return buffer_;
+	}
+
+	container_type &getBuffer(){
+		return buffer_;
 	}
 
 	// ==================================
@@ -53,7 +73,7 @@ public:
 
 	// ==================================
 
-	void reserve(container_type::size_type const size){
+	void reserve(size_type const size){
 		buffer_.reserve(size);
 	}
 

@@ -17,7 +17,7 @@ struct MyWorkerFactory{
 	using Worker = net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
 
 	Worker operator()(){
-		return { adapter };
+		return { adapter, net::IOBuffer::INITIAL_RESERVE };
 	}
 
 private:

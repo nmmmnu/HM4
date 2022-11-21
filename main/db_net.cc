@@ -232,6 +232,7 @@ namespace{
 
 	template<class Factory>
 	int main2(const MyOptions &opt, Factory &&adapter_factory){
+
 		using MyAdapterFactory	= Factory;
 		using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
 		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
@@ -257,9 +258,11 @@ namespace{
 
 		MyLoop loop{
 				/* selector */	MySelector	{ opt.max_clients },
-				/* worker */	MyWorker	{ adapter_factory() },
+				/* worker */	MyWorker	{ adapter_factory(), opt.buffer_spare_pool },
 				/* server fd */	{ fd },
-				opt.max_clients, opt.timeout, max_packet_size
+				opt.max_clients, opt.max_spare_pool, opt.timeout,
+				opt.buffer_spare_pool,
+				max_packet_size
 		};
 
 		SignalGuard guard;

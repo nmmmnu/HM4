@@ -36,7 +36,10 @@ public:
 	uint16_t	tcp_reuseport		= 0;
 
 	uint32_t	max_clients		= 512;
-	std::nullptr_t	max_memlist_size	= nullptr;
+	uint32_t	max_spare_pool		= 32;
+
+	size_t		buffer_spare_pool	= 64;
+
 	size_t		max_memlist_arena	= 0;
 
 	uint32_t	crontab_reload		= 90;
@@ -61,7 +64,10 @@ public:
 		case hash("tcp_reuseport"	)	: return assign_(tcp_reuseport,		value);
 
 		case hash("max_clients"		)	: return assign_(max_clients,		value);
-		case hash("max_memlist_size"	)	: return assign_(max_memlist_size,	value);
+		case hash("max_spare_pool"	)	: return assign_(max_spare_pool,	value);
+
+		case hash("buffer_spare_pool"	)	: return assign_(buffer_spare_pool,	value);
+
 		case hash("max_memlist_arena"	)	: return assign_(max_memlist_arena,	value);
 
 		case hash("crontab_reload"	)	: return assign_(crontab_reload,	value);
@@ -93,7 +99,10 @@ public:
 		put("tcp_reuseport",		tcp_reuseport,		"TCP Activate SO_REUSEPORT"					);
 
 		put("max_clients",		max_clients,		"Max Clients"							);
-		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB (deprecated and ignored)"		);
+		put("max_spare_pool",		max_spare_pool,		"Max Spare Pool Buffers"					);
+
+		put("buffer_spare_pool",	buffer_spare_pool,	"Initial size of Spare Pool Buffers"				);
+
 		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"			);
 
 		put("crontab_reload",		crontab_reload,		"crontab - reload every XX seconds, 0 disabled, min 15 sec"	);

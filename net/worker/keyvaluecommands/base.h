@@ -114,12 +114,10 @@ namespace net::worker::commands{
 		}
 
 		void set(int64_t number){
-			log__<LogLevel::ERROR>("int");
 			return set_number(number);
 		}
 
 		void set(uint64_t number){
-			log__<LogLevel::ERROR>("uint");
 			return set_number(number);
 		}
 

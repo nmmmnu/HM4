@@ -91,7 +91,10 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorker{
-		KeyValueWorker(DBAdapter &db) : db_(db){
+		KeyValueWorker(DBAdapter &db, size_t output_buffer_reserve) :
+							db_(db),
+							output_buffer_(output_buffer_reserve){
+
 			using namespace key_value_worker_impl_;
 
 			registerModules<Protocol, DBAdapter>(storage_, map_);

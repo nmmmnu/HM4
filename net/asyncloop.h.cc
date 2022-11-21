@@ -4,8 +4,7 @@
 #include "worker/workerdefs.h"
 
 #include <unistd.h>	// read
-#include <algorithm>	// find
-#include <iostream>
+//#include <iostream>
 
 namespace net{
 
@@ -14,33 +13,33 @@ namespace impl_{
 	bool findFD(Container const &c, int const fd){
 		return std::find(std::begin(c), std::end(c), fd) != std::end(c);
 	}
-
-#if 0
-	template<typename T>
-	constexpr static T max(T const a, T const b){
-		// using std::max directly will result in link error,
-		// because it returns reference
-		return std::max(a, b);
-	}
-#endif
 }
 
 template<class Selector, class Worker>
-AsyncLoop<Selector, Worker>::AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
+AsyncLoop<Selector, Worker>::AsyncLoop(
+			Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
 			uint32_t const conf_maxClients		,
+			uint32_t const conf_sparePoolSize	,
 			uint32_t const conf_connectionTimeout	,
+			size_t   const conf_buffer_spare_pool	,
 			size_t   const conf_maxRequestSize
 		) :
-					selector_(std::move(selector)),
-					worker_(std::move(worker)),
-					serverFD_(serverFD),
+					selector_	(std::move(selector)),
+					worker_		(std::move(worker)),
+					serverFD_	(serverFD),
 
 					conf_maxClients		(	std::max(conf_maxClients,		MIN_CLIENTS		)),
+					conf_sparePoolSize_	(	std::min(conf_sparePoolSize, 		conf_maxClients		)),
 					conf_connectionTimeout_	(	std::max(conf_connectionTimeout,	CONNECTION_TIMEOUT	)),
+					conf_buffer_spare_pool_	(	std::max(conf_buffer_spare_pool,	size_t{ MIN_CLIENTS }	)),
 					conf_maxRequestSize_	(	std::max(conf_maxRequestSize,		BUFFER_CAPACITY		)){
 	for(int const fd : serverFD_){
 		socket_options_setNonBlocking(fd);
 		selector_.insertFD(fd);
+	}
+
+	for(auto &s : sparePool_){
+		s.reserve(conf_buffer_spare_pool_);
 	}
 }
 
@@ -123,7 +122,9 @@ void AsyncLoop<Selector, Worker>::client_Read_(int const fd, std::true_type){
 
 	// -------------------------------------
 
-	ssize_t const size = ::read(fd, inputBuffer_, BUFFER_CAPACITY);
+	char buffer[BUFFER_CAPACITY];
+
+	ssize_t const size = ::read(fd, buffer, BUFFER_CAPACITY);
 
 	if (size <= 0)
 		return client_SocketOps_(fd, size);
@@ -132,7 +133,7 @@ void AsyncLoop<Selector, Worker>::client_Read_(int const fd, std::true_type){
 		return client_Disconnect_(fd, DisconnectStatus::ERROR);
 
 	// size is checked already
-	client.buffer.push( static_cast<size_t>(size), inputBuffer_);
+	client.buffer.push( static_cast<size_t>(size), buffer);
 
 	client.timer.restart();
 
@@ -291,7 +292,19 @@ bool AsyncLoop<Selector, Worker>::insertFD_(int const fd){
 	if ( ! selector_.insertFD(fd) )
 		return false;
 
-	clients_[fd];
+	if (! sparePool_.empty()){
+		// insert by stealing.
+		clients_.emplace(fd, std::move(sparePool_.back()) );
+
+		sparePool_.pop_back();
+
+		log_("Using spare pool.");
+	}else{
+		// insert normal.
+		clients_.emplace(fd, conf_buffer_spare_pool_);
+
+		log_("No spare pool items left.");
+	}
 
 	return true;
 }
@@ -300,7 +313,31 @@ template<class Selector, class Worker>
 void AsyncLoop<Selector, Worker>::removeFD_(int const fd){
 	selector_.removeFD(fd);
 
-	clients_.erase(fd);
+	if (sparePool_.size() < conf_sparePoolSize_){
+		// Find and steal
+
+		auto it = clients_.find(fd);
+
+		if (it == clients_.end()){
+			// do nothing, error is already reported.
+			return;
+		}
+
+		IOBuffer &buffer = it->second.buffer;
+
+		// steal
+		sparePool_.push_back(std::move(buffer.getBuffer()));
+
+		// erase
+		clients_.erase(it);
+
+		log_("Return item to spare pool.");
+	}else{
+		// Just erase
+		clients_.erase(fd);
+
+		log_("Spare pool full.");
+	}
 }
 
 template<class Selector, class Worker>
