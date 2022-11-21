@@ -81,7 +81,7 @@ private:
 	void client_SocketOps_(int fd, ssize_t size);
 
 private:
-	bool iinsertFD_(int fd);
+	bool insertFD_(int fd);
 	void removeFD_(int fd);
 	void expireFD_();
 

@@ -63,4 +63,5 @@ Changelog
 -	new command RESET
 -	new command DBSIZE
 -	new command MSETNX, MSETXX
+-	increase default value of "timeout" in the ini file to 5 min
 

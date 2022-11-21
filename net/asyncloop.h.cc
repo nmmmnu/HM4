@@ -231,7 +231,7 @@ bool AsyncLoop<Selector, Worker>::client_Connect_(int const fd){
 	if (newFD < 0)
 		return false;
 
-	if ( clients_.size() < conf_maxClients && iinsertFD_(newFD) ){
+	if ( clients_.size() < conf_maxClients && insertFD_(newFD) ){
 		// socket_options_setNonBlocking(newFD);
 
 		log_("Connect", newFD);
@@ -287,7 +287,7 @@ void AsyncLoop<Selector, Worker>::client_SocketOps_(int const fd, ssize_t const 
 // ===========================
 
 template<class Selector, class Worker>
-bool AsyncLoop<Selector, Worker>::iinsertFD_(int const fd){
+bool AsyncLoop<Selector, Worker>::insertFD_(int const fd){
 	if ( ! selector_.insertFD(fd) )
 		return false;
 

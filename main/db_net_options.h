@@ -92,7 +92,7 @@ public:
 		put("tcp_backlog",		tcp_backlog,		"TCP backlog"							);
 		put("tcp_reuseport",		tcp_reuseport,		"TCP Activate SO_REUSEPORT"					);
 
-		put("max_clients",					"Max Clients"							);
+		put("max_clients",		max_clients,		"Max Clients"							);
 		put("max_memlist_size",		max_memlist_size,	"Max size of memlist in MB (deprecated and ignored)"		);
 		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"			);
 
