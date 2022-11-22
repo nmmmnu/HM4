@@ -4,6 +4,9 @@
 #include <vector>
 #include <string_view>
 
+#include <limits>
+
+#include <cstring>
 #include <cstdio>
 #include <cassert>
 
@@ -84,23 +87,65 @@ public:
 	// ==================================
 
 	bool push(const char c){
-		push_(c);
+		buffer_.push_back(c);
 		return true;
 	}
 
 	bool push(std::string_view const sv){
-		if (sv.size())
-			return push_(sv.size(), sv.data());
-
-		return false;
+		return push(sv.size(), sv.data());
 	}
 
 	bool push(size_t const len, const char *ptr){
-		if (ptr && len)
-			return push_(len, ptr);
+		if (!len)
+			return false;
 
-		return false;
+		if constexpr(false){
+			buffer_.insert(std::end(buffer_), ptr, ptr + len);
+			return true;
+		}else{
+			return push(std::false_type{}, len, [ptr,len](void *dest){
+				memcpy(dest, ptr, len);
+
+				return len;
+			});
+		}
 	}
+
+	template<class Lazy>
+	bool push(std::true_type, size_t const desired_len, Lazy f){
+		if (!desired_len)
+			return false;
+
+		auto const size = buffer_.size();
+
+		buffer_.resize(size + desired_len);
+
+		char *dest = & buffer_[size];
+
+		auto const final_len = f(dest);
+
+		buffer_.resize(size + final_len);
+
+		return true;
+	}
+
+	template<class Lazy>
+	bool push(std::false_type, size_t const len, Lazy f){
+		if (!len)
+			return false;
+
+		auto const size = buffer_.size();
+
+		buffer_.resize(size + len);
+
+		char *dest = & buffer_[size];
+
+		f(dest);
+
+		return true;
+	}
+
+	// ==================================
 
 	bool pop(size_t const len){
 		if (len == 0)
@@ -123,26 +168,14 @@ public:
 
 	// ==================================
 
-	void print() const{
-		printf("h: %3zu | s: %3zu | %.*s\n",
-				head_,
-				size(),
-				(int) size(), buffer_.data() );
-	}
-
-private:
-	bool push_(size_t const len, const char *ptr){
-		assert(ptr);
-		assert(len);
-
-		buffer_.insert(std::end(buffer_), ptr, ptr + len);
-
-		return true;
-	}
-
-	bool push_(const char c){
-		buffer_.push_back(c);
-		return true;
+	void print(bool const body = true) const{
+		printf("h: %10zu | s: %10zu | c: %10zu | %.*s\n",
+			head_		,
+			size()		,
+			capacity()	,
+			(int) size()	,
+			body ? buffer_.data() : "[data]"
+		);
 	}
 };
 

@@ -51,7 +51,8 @@ namespace redis_protocol_impl_{
 
 class RedisProtocol{
 public:
-	constexpr static auto LL_RESPONCE = LogLevel::NOTICE;
+	constexpr static auto LL_RESPONCE = LogLevel::WARNING;
+//	constexpr static auto LL_RESPONCE = LogLevel::NOTICE;
 
 public:
 	constexpr static inline char			STAR		= '*';

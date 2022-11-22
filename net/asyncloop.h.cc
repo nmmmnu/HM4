@@ -4,7 +4,6 @@
 #include "worker/workerdefs.h"
 
 #include <unistd.h>	// read
-//#include <iostream>
 
 namespace net{
 
@@ -122,18 +121,38 @@ void AsyncLoop<Selector, Worker>::client_Read_(int const fd, std::true_type){
 
 	// -------------------------------------
 
-	char buffer[BUFFER_CAPACITY];
+	if constexpr(false){
+		char buffer[BUFFER_CAPACITY];
 
-	ssize_t const size = ::read(fd, buffer, BUFFER_CAPACITY);
+		ssize_t const size = ::read(fd, buffer, BUFFER_CAPACITY);
 
-	if (size <= 0)
-		return client_SocketOps_(fd, size);
+		if (size <= 0)
+			return client_SocketOps_(fd, size);
 
-	if (client.buffer.size() + narrow<size_t>(size) > conf_maxRequestSize_)
-		return client_Disconnect_(fd, DisconnectStatus::ERROR);
+		if (client.buffer.size() + narrow<size_t>(size) > conf_maxRequestSize_)
+			return client_Disconnect_(fd, DisconnectStatus::ERROR);
 
-	// size is checked already
-	client.buffer.push( static_cast<size_t>(size), buffer);
+		// size is checked already
+		client.buffer.push( static_cast<size_t>(size), buffer);
+	}else{
+		ssize_t size;
+
+		client.buffer.push(std::true_type{}, BUFFER_CAPACITY, [&size, fd](void *buffer){
+			size = ::read(fd, buffer, BUFFER_CAPACITY);
+
+			return size;
+		});
+
+		if (size <= 0)
+			return client_SocketOps_(fd, size);
+
+		if (client.buffer.size() > conf_maxRequestSize_)
+			return client_Disconnect_(fd, DisconnectStatus::ERROR);
+	}
+
+	if constexpr(false){
+		client.buffer.print(false);
+	}
 
 	client.timer.restart();
 

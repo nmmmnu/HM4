@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <algorithm>	// min, find
 
-#include "logger.h"
+#include "logger.h"	// LogLevel::WARNING
 
 namespace net{
 

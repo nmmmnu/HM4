@@ -28,8 +28,8 @@ private:
 	constexpr static auto	MAX_PARAMS	= RedisProtocol::MAX_PARAMS;
 
 private:
-	constexpr static size_t	MAX_PARAM_SIZE	= 16 * 1024;
-	constexpr static size_t	INT_BUFFER_SIZE	= 8;	// to be able to store MAX_PARAM_SIZE as string.
+	constexpr static size_t	MAX_PARAM_SIZE	= 1024 * 1024;	// same or greater than max value
+	constexpr static size_t	INT_BUFFER_SIZE	= 8;		// to be able to store MAX_PARAM_SIZE as string.
 
 public:
 	RedisProtocolParser(std::string_view const src, StringVector &params) : src(src), params(params){}
