@@ -58,10 +58,13 @@ Changelog
 -	if configured,
 	INCR / INCRBY / DECR / DECRBY may return a string (convertible to zero),
 	if previous value is some string (convertible to zero)
--	implement no copy commands such GETSET and GETDEL
+-	implement "no copy buffer" commands such GETSET and GETDEL
 	via separate input and output buffers
 -	new command RESET
 -	new command DBSIZE
 -	new command MSETNX, MSETXX
 -	increase default value of "timeout" in the ini file to 5 min
+-	implement max_spare_pool of allocated buffer,
+	similar to Apache httpd MinSpareServers / MaxSpareServers
+-	implement "no copy buffer" when read() from socket
 

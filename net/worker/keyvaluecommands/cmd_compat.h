@@ -13,22 +13,9 @@ namespace net::worker::commands::Compat{
 			}
 		};
 
-		template<class Protocol, class DBAdapter>
-		struct STR : Base<Protocol,DBAdapter>{
-			constexpr STR(std::string_view s) : s(s){
-			}
-
-			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-				return result.set(s);
-			}
-
-		private:
-			std::string_view s;
-		};
-
 		template<class Protocol, class DBAdapter, typename T>
-		struct SCALAR : Base<Protocol,DBAdapter>{
-			constexpr SCALAR(T n) : n(n){
+		struct VAL : Base<Protocol,DBAdapter>{
+			constexpr VAL(T const &n) : n(n){
 			}
 
 			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
@@ -58,24 +45,24 @@ namespace net::worker::commands::Compat{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct TYPE : compat_impl_::STR<Protocol,DBAdapter>{
+	struct TYPE : compat_impl_::VAL<Protocol,DBAdapter,std::string_view>{
 		constexpr inline static std::string_view name	= "type";
 		constexpr inline static std::string_view cmd[]	= {
 			"type",		"TYPE"
 		};
 
-		constexpr TYPE() : compat_impl_::STR<Protocol,DBAdapter>("string"){
+		constexpr TYPE() : compat_impl_::VAL<Protocol,DBAdapter,std::string_view>("string"){
 		}
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct TOUCH : compat_impl_::SCALAR<Protocol,DBAdapter,bool>{
+	struct TOUCH : compat_impl_::VAL<Protocol,DBAdapter,bool>{
 		constexpr inline static std::string_view name	= "touch";
 		constexpr inline static std::string_view cmd[]	= {
 			"touch",	"TOUCH"
 		};
 
-		constexpr TOUCH() : compat_impl_::SCALAR<Protocol,DBAdapter,bool>(true){
+		constexpr TOUCH() : compat_impl_::VAL<Protocol,DBAdapter,bool>(true){
 		}
 	};
 
