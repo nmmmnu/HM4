@@ -244,7 +244,7 @@ namespace{
 		size_t const max_packet_size = hm4::Pair::maxBytes() * 2;
 
 		net::options_type const socket_options = opt.tcp_reuseport ?
-				net::SOCKET_DEFAULTOPT_TCP | net::SOCKET_REUSEPORT :
+				SOCKET_DEFAULTOPT_TCP_REUSE :
 				net::SOCKET_DEFAULTOPT_TCP
 		;
 

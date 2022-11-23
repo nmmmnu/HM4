@@ -17,8 +17,9 @@ constexpr options_type SOCKET_REUSEPORT		= 1 << 4;
 
 // ===========================
 
-constexpr options_type SOCKET_DEFAULTOPT_TCP	= SOCKET_NONBLOCK | SOCKET_REUSEADDR | SOCKET_TCPNODELAY;
-constexpr options_type SOCKET_DEFAULTOPT_UNIX	= SOCKET_NONBLOCK;
+constexpr options_type SOCKET_DEFAULTOPT_TCP_REUSE	= SOCKET_NONBLOCK | SOCKET_TCPNODELAY | SOCKET_REUSEADDR ;
+constexpr options_type SOCKET_DEFAULTOPT_TCP		= SOCKET_NONBLOCK | SOCKET_TCPNODELAY;
+constexpr options_type SOCKET_DEFAULTOPT_UNIX		= SOCKET_NONBLOCK;
 
 // ===========================
 
