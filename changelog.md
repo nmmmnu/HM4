@@ -68,4 +68,5 @@ Changelog
 	similar to Apache httpd MinSpareServers / MaxSpareServers
 -	increase max MAX_PARAM_SIZE in RedisProtocol parser
 -	implement "no copy buffer" when read() from socket
+-	Bugfix, prevent crash if db file exists, but other files does not.
 

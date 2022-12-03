@@ -206,7 +206,12 @@ bool DiskList::openForward_(std::string_view const filename){
 	if (checkMetadata(metadata_) == false)
 		return false;
 
-	return openDataOnly_(filename);
+	bool const result = openDataOnly_(filename);
+
+	if (!result)
+		metadata_.clear();
+
+	return result;
 }
 
 bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice const advice){
