@@ -228,7 +228,12 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice co
 
 	aligned_ = metadata_.aligned();
 
-	return b1 && b2 && b3;
+	bool const result =  b1 && b2 && b3;
+
+	if (!result)
+		metadata_.clear();
+
+	return result;
 }
 
 bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice const advice){
