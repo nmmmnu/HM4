@@ -18,28 +18,66 @@ template<class Selector, class Worker>
 AsyncLoop<Selector, Worker>::AsyncLoop(
 			Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
 			uint32_t const conf_maxClients		,
-			uint32_t const conf_sparePoolSize	,
+			uint32_t const conf_minSparePoolSize	,
+			uint32_t const conf_maxSparePoolSize	,
 			uint32_t const conf_connectionTimeout	,
-			size_t   const conf_buffer_spare_pool	,
+			size_t   const conf_buffer_capacity	,
 			size_t   const conf_maxRequestSize
 		) :
-					selector_	(std::move(selector)),
-					worker_		(std::move(worker)),
-					serverFD_	(serverFD),
+					selector_		(std::move(selector)	),
+					worker_			(std::move(worker)	),
+					serverFD_		(serverFD		),
 
-					conf_maxClients		(	std::max(conf_maxClients,		MIN_CLIENTS		)),
-					conf_sparePoolSize_	(	std::min(conf_sparePoolSize, 		conf_maxClients		)),
-					conf_connectionTimeout_	(	std::max(conf_connectionTimeout,	CONNECTION_TIMEOUT	)),
-					conf_buffer_spare_pool_	(	std::max(conf_buffer_spare_pool,	size_t{ MIN_CLIENTS }	)),
-					conf_maxRequestSize_	(	std::max(conf_maxRequestSize,		BUFFER_CAPACITY		)){
+					conf_maxClients_	( std::max	(conf_maxClients,		MIN_CLIENTS					) ),
+					conf_minSparePoolSize_	( std::clamp	(conf_minSparePoolSize,		MIN_CLIENTS,		conf_maxClients_	) ),
+					conf_maxSparePoolSize_	( std::clamp	(conf_maxSparePoolSize,		conf_minSparePoolSize_,	conf_maxClients_	) ),
+					conf_connectionTimeout_	( 		(conf_connectionTimeout								) ),
+					conf_bufferCapacity_	( std::max	(conf_buffer_capacity,		BUFFER_CAPACITY					) ),
+					conf_maxRequestSize_	( std::max	(conf_maxRequestSize,		conf_bufferCapacity_				) ){
+
+	// fixParameters();
+
 	for(int const fd : serverFD_){
 		socket_options_setNonBlocking(fd);
 		selector_.insertFD(fd);
 	}
+}
 
-	for(auto &s : sparePool_){
-		s.reserve(conf_buffer_spare_pool_);
-	}
+#if 0
+template<class Selector, class Worker>
+bool AsyncLoop<Selector, Worker>::fixParameters(){
+	// can be done in c-tor,
+	// but made here in order to be visible.
+
+	if (conf_maxClients_ < MIN_CLIENTS)
+		conf_maxClients_ = MIN_CLIENTS;
+
+	if (conf_minSparePoolSize_ > conf_maxClients_)
+		conf_minSparePoolSize_ = conf_maxClients_;
+
+	if (conf_maxSparePoolSize_ < conf_minSparePoolSize_)
+		conf_maxSparePoolSize_ = conf_minSparePoolSize_;
+
+	if (conf_connectionTimeout_ < CONNECTION_TIMEOUT)
+		conf_connectionTimeout_ = CONNECTION_TIMEOUT;
+
+	if (conf_bufferCapacity_ < BUFFER_CAPACITY)
+		conf_bufferCapacity_ = BUFFER_CAPACITY;
+
+	if (conf_maxRequestSize_ < BUFFER_CAPACITY)
+		conf_maxRequestSize_ = BUFFER_CAPACITY;
+}
+#endif
+
+template<class Selector, class Worker>
+void AsyncLoop<Selector, Worker>::print() const{
+	const char *mask = "%-20s = %zu\n";
+	fprintf(stderr, mask, "max clients"		, conf_maxClients_		);
+	fprintf(stderr, mask, "min spare pool"		, conf_minSparePoolSize_	);
+	fprintf(stderr, mask, "max spare pool"		, conf_maxSparePoolSize_	);
+	fprintf(stderr, mask, "timeout"			, conf_connectionTimeout_	);
+	fprintf(stderr, mask, "buffer capacity"		, conf_bufferCapacity_		);
+	fprintf(stderr, mask, "max request size"	, conf_maxRequestSize_		);
 }
 
 // ===========================
@@ -62,7 +100,7 @@ bool AsyncLoop<Selector, Worker>::process(){
 
 	if (status == WaitStatus::NONE){
 		// idle loop, check for expired conn
-		expireFD_();
+		idle_loop();
 		return true;
 	}
 
@@ -93,6 +131,13 @@ bool AsyncLoop<Selector, Worker>::process(){
 	break2: // label for goto... ;)
 
 	return keepProcessing_;
+}
+
+template<class Selector, class Worker>
+void AsyncLoop<Selector, Worker>::idle_loop(){
+	expireFD_();
+
+	sparePool_.balance();
 }
 
 // ===========================
@@ -251,7 +296,7 @@ bool AsyncLoop<Selector, Worker>::client_Connect_(int const fd){
 	if (newFD < 0)
 		return false;
 
-	if ( clients_.size() < conf_maxClients && insertFD_(newFD) ){
+	if ( clients_.size() < conf_maxClients_ && insertFD_(newFD) ){
 		// socket_options_setNonBlocking(newFD);
 
 		log_("Connect", newFD);
@@ -311,19 +356,7 @@ bool AsyncLoop<Selector, Worker>::insertFD_(int const fd){
 	if ( ! selector_.insertFD(fd) )
 		return false;
 
-	if (! sparePool_.empty()){
-		// insert by stealing.
-		clients_.emplace(fd, std::move(sparePool_.back()) );
-
-		sparePool_.pop_back();
-
-		log_("Using spare pool.");
-	}else{
-		// insert normal.
-		clients_.emplace(fd, conf_buffer_spare_pool_);
-
-		log_("No spare pool items left.");
-	}
+	clients_.emplace(fd, sparePool_.pop() );
 
 	return true;
 }
@@ -332,31 +365,22 @@ template<class Selector, class Worker>
 void AsyncLoop<Selector, Worker>::removeFD_(int const fd){
 	selector_.removeFD(fd);
 
-	if (sparePool_.size() < conf_sparePoolSize_){
-		// Find and steal
+	// Find and steal
 
-		auto it = clients_.find(fd);
+	auto it = clients_.find(fd);
 
-		if (it == clients_.end()){
-			// do nothing, error is already reported.
-			return;
-		}
-
-		IOBuffer &buffer = it->second.buffer;
-
-		// steal
-		sparePool_.push_back(std::move(buffer.getBuffer()));
-
-		// erase
-		clients_.erase(it);
-
-		log_("Return item to spare pool.");
-	}else{
-		// Just erase
-		clients_.erase(fd);
-
-		log_("Spare pool full.");
+	if (it == clients_.end()){
+		// do nothing, error is already reported.
+		return;
 	}
+
+	IOBuffer &buffer = it->second.buffer;
+
+	// steal
+	sparePool_.push(std::move(buffer.getBuffer()));
+
+	// erase
+	clients_.erase(it);
 }
 
 template<class Selector, class Worker>

@@ -129,8 +129,8 @@ private:
 
 	constexpr static size_t calc_sstr(std::string_view s);
 
-	static void response_log_(std::string_view const type, size_t const res, size_t const capacity){
-		log__<LL_RESPONCE>("Responce", type, "reserve", res, "capacity", capacity);
+	static void response_log_(std::string_view const type, size_t const res, size_t const capacity, const void *p){
+		log__<LL_RESPONCE>("Responce", type, "reserve", res, "capacity", capacity, "addr", p);
 	}
 
 private:
@@ -163,7 +163,7 @@ void RedisProtocol::response_ok(Buffer &buffer){
 	buffer.push(OK);
 	buffer.push(ENDLN);
 
-	response_log_("ok", res, buffer.capacity());
+	response_log_("ok", res, buffer.capacity(), buffer.data());
 }
 
 template<class Buffer>
@@ -186,7 +186,7 @@ void RedisProtocol::response_bool(Buffer &buffer, bool const b){
 	buffer.push(b ? TRUE : FALSE);
 	buffer.push(ENDLN);
 
-	response_log_("bool", res, buffer.capacity());
+	response_log_("bool", res, buffer.capacity(), buffer.data());
 }
 
 template<class Buffer>
@@ -208,7 +208,7 @@ void RedisProtocol::response_error(Buffer &buffer, std::string_view const msg){
 	buffer.push(msg);
 	buffer.push(ENDLN);
 
-	response_log_("error", res, buffer.capacity());
+	response_log_("error", res, buffer.capacity(), buffer.data());
 }
 
 template<class Buffer>
@@ -243,7 +243,7 @@ void RedisProtocol::response_string(Buffer &buffer, std::string_view const msg){
 
 	response_string_nr(buffer, msg);
 
-	response_log_("string<1>", res, buffer.capacity());
+	response_log_("string<1>", res, buffer.capacity(), buffer.data());
 }
 
 template<class Buffer>
@@ -273,7 +273,7 @@ void RedisProtocol::response_strings(Buffer &buffer, MySpan<std::string_view> co
 		response_string_nr(buffer, msg);
 
 
-	response_log_("strings<*>", res, buffer.capacity());
+	response_log_("strings<*>", res, buffer.capacity(), buffer.data());
 }
 
 

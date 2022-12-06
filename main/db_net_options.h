@@ -36,9 +36,10 @@ public:
 	uint16_t	tcp_reuseport		= 0;
 
 	uint32_t	max_clients		= 512;
-	uint32_t	max_spare_pool		= 32;
+	uint32_t	min_spare_pool		= 32;
+	uint32_t	max_spare_pool		= 64;
 
-	size_t		buffer_spare_pool	= 64;
+	size_t		buffer_capacity		= 4096;
 
 	size_t		max_memlist_arena	= 0;
 
@@ -48,29 +49,30 @@ public:
 public:
 	void operator()(std::string_view const name, std::string_view const value){
 		switch( hash(name) ){
-		case hash("immutable"		)	: return assign_(immutable,		value);
-		case hash("db_path"		)	: return assign_(db_path,		value);
+		case hash("immutable"			)	: return assign_(immutable,			value);
+		case hash("db_path"			)	: return assign_(db_path,			value);
 
-	//	case hash("binlog_path"		)	: return assign_(binlog_path1,		value);
-		case hash("binlog_path1"	)	: return assign_(binlog_path1,		value);
-		case hash("binlog_path2"	)	: return assign_(binlog_path2,		value);
-		case hash("binlog_fsync"	)	: return assign_(binlog_fsync,		value);
+	//	case hash("binlog_path"			)	: return assign_(binlog_path1,			value);
+		case hash("binlog_path1"		)	: return assign_(binlog_path1,			value);
+		case hash("binlog_path2"		)	: return assign_(binlog_path2,			value);
+		case hash("binlog_fsync"		)	: return assign_(binlog_fsync,			value);
 
-		case hash("host"		)	: return assign_(host,			value);
-		case hash("port"		)	: return assign_(port,			value);
-		case hash("timeout"		)	: return assign_(timeout,		value);
+		case hash("host"			)	: return assign_(host,				value);
+		case hash("port"			)	: return assign_(port,				value);
+		case hash("timeout"			)	: return assign_(timeout,			value);
 
-		case hash("tcp_backlog"		)	: return assign_(tcp_backlog,		value);
-		case hash("tcp_reuseport"	)	: return assign_(tcp_reuseport,		value);
+		case hash("tcp_backlog"			)	: return assign_(tcp_backlog,			value);
+		case hash("tcp_reuseport"		)	: return assign_(tcp_reuseport,			value);
 
-		case hash("max_clients"		)	: return assign_(max_clients,		value);
-		case hash("max_spare_pool"	)	: return assign_(max_spare_pool,	value);
+		case hash("max_clients"			)	: return assign_(max_clients,			value);
+		case hash("min_spare_pool"		)	: return assign_(min_spare_pool,		value);
+		case hash("max_spare_pool"		)	: return assign_(max_spare_pool,		value);
 
-		case hash("buffer_spare_pool"	)	: return assign_(buffer_spare_pool,	value);
+		case hash("buffer_capacity"		)	: return assign_(buffer_capacity,		value);
 
-		case hash("max_memlist_arena"	)	: return assign_(max_memlist_arena,	value);
+		case hash("max_memlist_arena"		)	: return assign_(max_memlist_arena,		value);
 
-		case hash("crontab_reload"	)	: return assign_(crontab_reload,	value);
+		case hash("crontab_reload"		)	: return assign_(crontab_reload,		value);
 
 		default					: return;
 		}
@@ -99,9 +101,10 @@ public:
 		put("tcp_reuseport",		tcp_reuseport,		"TCP Activate SO_REUSEPORT"					);
 
 		put("max_clients",		max_clients,		"Max Clients"							);
+		put("min_spare_pool",		min_spare_pool,		"Min Spare Pool Buffers"					);
 		put("max_spare_pool",		max_spare_pool,		"Max Spare Pool Buffers"					);
 
-		put("buffer_spare_pool",	buffer_spare_pool,	"Initial size of Spare Pool Buffers"				);
+		put("buffer_capacity",		buffer_capacity,	"Initial size of Spare Pool Buffers"				);
 
 		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"			);
 

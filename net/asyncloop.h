@@ -6,6 +6,9 @@
 #include "iobuffer.h"
 #include "mytime.h"
 
+// #include "simplesparepool.h"
+#include "heapsparepool.h"
+
 #include <unordered_map>
 #include <algorithm>	// min, find
 
@@ -42,20 +45,24 @@ private:
 
 	using ClientContainer		= std::unordered_map<int, Client>;
 
-	using SparePoolContainer	= std::vector<IOBuffer::container_type>;
+//	using SparePool			= SimpleSparePool;
+	using SparePool			= HeapSparePool;
 
 	using WorkerStatus		= worker::WorkerStatus;
 
 public:
 	AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
-				uint32_t conf_maxClients	= MAX_CLIENTS,
-				uint32_t conf_sparePoolSize	= MIN_CLIENTS,
-				uint32_t conf_connectionTimeout	= 0,
-				size_t   conf_buffer_spare_pool = 0,
-				size_t   conf_maxRequestSize	= 0
+				uint32_t conf_maxClients		= MAX_CLIENTS,
+				uint32_t conf_minSparePoolSize		= MIN_CLIENTS,
+				uint32_t conf_maxSparePoolSize		= MIN_CLIENTS,
+				uint32_t conf_connectionTimeout		= CONNECTION_TIMEOUT,
+				size_t   conf_buffer_capacity		= BUFFER_CAPACITY,
+				size_t   conf_maxRequestSize		= BUFFER_CAPACITY
 	);
 
 	bool process();
+
+	void idle_loop();
 
 	auto connectedClients() const{
 		return clients_.size();
@@ -64,6 +71,8 @@ public:
 	auto sparePoolSize() const{
 		return sparePool_.size();
 	}
+
+	void print() const;
 
 private:
 	enum class DisconnectStatus{
@@ -120,13 +129,17 @@ private:
 	ClientContainer		clients_;
 	bool			keepProcessing_ = true;
 
-	uint32_t		conf_maxClients;
-	uint32_t		conf_sparePoolSize_;
+	uint32_t		conf_maxClients_;
+
+	uint32_t		conf_minSparePoolSize_;
+	uint32_t		conf_maxSparePoolSize_;
+
 	uint32_t		conf_connectionTimeout_;
-	size_t			conf_buffer_spare_pool_;
+
+	size_t			conf_bufferCapacity_;
 	size_t			conf_maxRequestSize_;
 
-	SparePoolContainer	sparePool_{conf_sparePoolSize_};
+	SparePool		sparePool_{ conf_minSparePoolSize_, conf_maxSparePoolSize_, conf_bufferCapacity_ };
 };
 
 

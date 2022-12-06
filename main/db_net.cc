@@ -58,6 +58,12 @@ constexpr size_t MIN_ARENA_SIZE = 128;
 
 namespace{
 
+	template<typename T, T factor = 1024>
+	constexpr T round_up(T n){
+		auto const c = n + factor - 1;
+		return c - c % factor;
+	}
+
 	void printError(const char *msg){
 		fmt::print(stderr, "{}\n", msg);
 		exit(1);
@@ -241,8 +247,6 @@ namespace{
 		if (opt.port == 0)
 			printError("Can not create server socket on port zero...");
 
-		size_t const max_packet_size = hm4::Pair::maxBytes() * 2;
-
 		net::options_type const socket_options = opt.tcp_reuseport ?
 				net::SOCKET_DEFAULTOPT_TCP_REUSE :
 				net::SOCKET_DEFAULTOPT_TCP
@@ -256,14 +260,23 @@ namespace{
 		if (opt.tcp_reuseport)
 			fmt::print(std::clog, "Warning: Server start with SO_REUSEPORT.\n");
 
+		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS	);
+		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::BUFFER_CAPACITY	);
+
+		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
+
 		MyLoop loop{
-				/* selector */	MySelector	{ opt.max_clients },
-				/* worker */	MyWorker	{ adapter_factory(), opt.buffer_spare_pool },
+				/* selector */	MySelector	{ max_clients },
+				/* worker */	MyWorker	{ adapter_factory(), buffer_capacity },
 				/* server fd */	{ fd },
-				opt.max_clients, opt.max_spare_pool, opt.timeout,
-				opt.buffer_spare_pool,
+				max_clients,
+				opt.min_spare_pool, opt.max_spare_pool,
+				opt.timeout,
+				buffer_capacity,
 				max_packet_size
 		};
+
+		loop.print();
 
 		SignalGuard guard;
 
