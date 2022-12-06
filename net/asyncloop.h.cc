@@ -32,7 +32,7 @@ AsyncLoop<Selector, Worker>::AsyncLoop(
 					conf_minSparePoolSize_	( std::clamp	(conf_minSparePoolSize,		MIN_CLIENTS,		conf_maxClients_	) ),
 					conf_maxSparePoolSize_	( std::clamp	(conf_maxSparePoolSize,		conf_minSparePoolSize_,	conf_maxClients_	) ),
 					conf_connectionTimeout_	( 		(conf_connectionTimeout								) ),
-					conf_bufferCapacity_	( std::max	(conf_buffer_capacity,		BUFFER_CAPACITY					) ),
+					conf_bufferCapacity_	( std::max	(conf_buffer_capacity,		IO_BUFFER_CAPACITY					) ),
 					conf_maxRequestSize_	( std::max	(conf_maxRequestSize,		conf_bufferCapacity_				) ){
 
 	// fixParameters();
@@ -42,32 +42,6 @@ AsyncLoop<Selector, Worker>::AsyncLoop(
 		selector_.insertFD(fd);
 	}
 }
-
-#if 0
-template<class Selector, class Worker>
-bool AsyncLoop<Selector, Worker>::fixParameters(){
-	// can be done in c-tor,
-	// but made here in order to be visible.
-
-	if (conf_maxClients_ < MIN_CLIENTS)
-		conf_maxClients_ = MIN_CLIENTS;
-
-	if (conf_minSparePoolSize_ > conf_maxClients_)
-		conf_minSparePoolSize_ = conf_maxClients_;
-
-	if (conf_maxSparePoolSize_ < conf_minSparePoolSize_)
-		conf_maxSparePoolSize_ = conf_minSparePoolSize_;
-
-	if (conf_connectionTimeout_ < CONNECTION_TIMEOUT)
-		conf_connectionTimeout_ = CONNECTION_TIMEOUT;
-
-	if (conf_bufferCapacity_ < BUFFER_CAPACITY)
-		conf_bufferCapacity_ = BUFFER_CAPACITY;
-
-	if (conf_maxRequestSize_ < BUFFER_CAPACITY)
-		conf_maxRequestSize_ = BUFFER_CAPACITY;
-}
-#endif
 
 template<class Selector, class Worker>
 void AsyncLoop<Selector, Worker>::print() const{
@@ -167,9 +141,9 @@ void AsyncLoop<Selector, Worker>::client_Read_(int const fd, std::true_type){
 	// -------------------------------------
 
 	if constexpr(false){
-		char buffer[BUFFER_CAPACITY];
+		char buffer[IO_BUFFER_CAPACITY];
 
-		ssize_t const size = ::read(fd, buffer, BUFFER_CAPACITY);
+		ssize_t const size = ::read(fd, buffer, IO_BUFFER_CAPACITY);
 
 		if (size <= 0)
 			return client_SocketOps_(fd, size);
@@ -182,8 +156,8 @@ void AsyncLoop<Selector, Worker>::client_Read_(int const fd, std::true_type){
 	}else{
 		ssize_t size;
 
-		client.buffer.push(std::true_type{}, BUFFER_CAPACITY, [&size, fd](void *buffer){
-			size = ::read(fd, buffer, BUFFER_CAPACITY);
+		client.buffer.push(std::true_type{}, IO_BUFFER_CAPACITY, [&size, fd](void *buffer){
+			size = ::read(fd, buffer, IO_BUFFER_CAPACITY);
 
 			return size;
 		});

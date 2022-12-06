@@ -260,8 +260,8 @@ namespace{
 		if (opt.tcp_reuseport)
 			fmt::print(std::clog, "Warning: Server start with SO_REUSEPORT.\n");
 
-		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS	);
-		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::BUFFER_CAPACITY	);
+		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS		);
+		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
 
 		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
 

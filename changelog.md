@@ -64,9 +64,10 @@ Changelog
 -	new command DBSIZE
 -	new command MSETNX, MSETXX
 -	increase default value of "timeout" in the ini file to 5 min
--	implement max_spare_pool of allocated buffer,
+-	implement SparePool of allocated buffer,
 	similar to Apache httpd MinSpareServers / MaxSpareServers
 -	increase max MAX_PARAM_SIZE in RedisProtocol parser
 -	implement "no copy buffer" when read() from socket
 -	bug fix, prevent crash if db file exists, but other files does not.
+-	implement SparePool as MinMaxHeap,
 
