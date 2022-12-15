@@ -8,14 +8,6 @@
 namespace three_way_quicksort_implementation_{
 	namespace{
 
-		template<typename It>
-		void swapIt(It a, It b){
-			using std::swap;
-			swap(*a, *b);
-		}
-
-
-
 		enum class M3{
 			a,
 			b,
@@ -37,90 +29,98 @@ namespace three_way_quicksort_implementation_{
 			}
 		}
 
+		constexpr static auto subAt(std::string_view s, size_t digit){
+			return digit < s.size() ? s.substr(digit) : "";
+		}
+
+		template<typename It, typename Projection>
+		bool compareLT(It a, It b, size_t digit, Projection &p){
+			return subAt(std::invoke(p, *a), digit) < subAt(std::invoke(p, *b), digit);
+		}
+
 	} // namespace
 
 
 
-	template<typename Projection>
-	struct Insertion_Sort{
-		Insertion_Sort(Projection p) : p(std::move(p)){}
+	template<typename It, typename Projection>
+	void super2_Sort(It it, size_t digit, Projection p){
+		auto &a = it;
+		auto b = std::next(a);
 
-		template<typename It>
-		void operator()(It first, It last, size_t digit) const{
-			for (It i = first; i < last; ++i)
-				for (It j = i; j > first && compare(j, j - 1, digit); --j)
-					swapIt(j, j - 1);
-		}
+		auto _ = [digit, &p](auto a, auto b){
+			if (compareLT(b, a, digit, p))
+				std::iter_swap(b, a);
+		};
 
-	private:
-		constexpr static auto subAt(std::string_view s, size_t digit){
-			return digit < s.size() ? s.substr(digit) : "";
-		}
+		_(a, b);
 
-		template<typename It>
-		bool compare(It a, It b, size_t digit) const{
-			return subAt(std::invoke(p, *a), digit) < subAt(std::invoke(p, *b), digit);
-		}
-
-	private:
-		Projection p;
-	};
+	}
 
 
 
-	template<typename Projection>
-	struct Shell_Sort{
-		Shell_Sort(Projection p) : p(std::move(p)){}
+	template<typename It, typename Projection>
+	void super3_Sort(It it, size_t digit, Projection p){
+		auto &a = it;
+		auto b = std::next(a);
+		auto c = std::next(b);
 
-		template<typename It>
-		void operator()(It first, It last, size_t digit) const{
-			size_t const size = std::distance(first, last);
+		auto _ = [digit, &p](auto a, auto b){
+			if (compareLT(b, a, digit, p))
+				std::iter_swap(b, a);
+		};
 
-			if (size <= 1)
-				return;
+		_(a, c);
+		_(a, b);
+		_(b, c);
+	}
 
-			size_t step = size - 1;
 
-			for(;;){
-				bool sorted = false;
 
-				while ( ! sorted ){
-					sorted = true;
+	template<typename It, typename Projection>
+	void insertion_Sort(It first, It last, size_t digit, Projection p){
+		for (It i = first; i < last; ++i)
+			for (It j = i; j > first && compareLT(j, j - 1, digit, p); --j)
+				std::iter_swap(j, j - 1);
+	}
 
-					for (size_t i = 0; i < size - step; ++i){
-						auto j = i + step;
 
-						if (compare(first + i, first + j, digit)){
-							swapIt(first + i, first + j);
 
-							sorted = false;
-						}
+	template<typename It, typename Projection>
+	void shell_Sort(It first, It last, size_t digit, Projection p){
+		size_t const size = std::distance(first, last);
+
+		if (size <= 1)
+			return;
+
+		size_t step = size - 1;
+
+		for(;;){
+			bool sorted = false;
+
+			while ( ! sorted ){
+				sorted = true;
+
+				for (size_t i = 0; i < size - step; ++i){
+					auto j = i + step;
+
+					// LT compare, so reversed arguments...
+					if (compareLT(first + j, first + i, digit, p)){
+						std::iter_swap(first + j, first + i);
+
+						sorted = false;
 					}
 				}
-
-				if (sorted && step == 1)
-					break;
-
-				step = step / 2;
-
-				if (step < 1)
-					step = 1;
 			}
-		}
 
-	private:
-		constexpr static auto subAt(std::string_view s, size_t digit){
-			return digit < s.size() ? s.substr(digit) : "";
-		}
+			if (sorted && step == 1)
+				break;
 
-		template<typename It>
-		constexpr bool compare(It a, It b, size_t digit) const{
-			return subAt(std::invoke(p, *a), digit) > subAt(std::invoke(p, *b), digit);
-		}
+			step = step / 2;
 
-	private:
-		Projection p;
-	};
+			if (step < 1)
+				step = 1;
+		}
+	}
 
 
 
@@ -130,15 +130,15 @@ namespace three_way_quicksort_implementation_{
 
 	template<typename Projection>
 	struct Quick3Way_Sort{
-		constexpr static bool  CUTOFF_INS_ENABLED = false;
-		constexpr static short CUTOFF_INS  = 4;
-		constexpr static short CUTOFF_DEEP = 16;
+		constexpr static size_t MIN_CUTOFF_DEEP = 16;
 
-		Quick3Way_Sort(Projection p) : p(std::move(p)){}
+		Quick3Way_Sort(Projection p, size_t cuttof_deep = MIN_CUTOFF_DEEP) :
+					p		(std::move(p)							),
+					cuttof_deep	(cuttof_deep < MIN_CUTOFF_DEEP ? MIN_CUTOFF_DEEP : cuttof_deep	){}
 
 		template<typename It>
-		void operator()(It first, It last, size_t digit, size_t deep) const{
-			return sort(first, last, digit, deep);
+		void operator()(It first, It last, size_t digit) const{
+			return sort(first, last, digit, 0);
 		}
 
 	private:
@@ -146,14 +146,18 @@ namespace three_way_quicksort_implementation_{
 		void median(It first, It last, size_t digit) const{
 			It mid = first + ((last - first) >> 1);
 
-			if (charAt(mid, digit) < charAt(first, digit))
-				swapIt(first, mid);
+			auto _ = [this, digit](auto x){
+				return charAt(x, digit);
+			};
 
-			if (charAt(mid, digit) < charAt(last, digit))
-				swapIt(last, mid);
+			if (_(mid) < _(first))
+				std::iter_swap(first, mid);
 
-			if (charAt(first, digit) < charAt(last, digit))
-				swapIt(first, last);
+			if (_(mid) < _(last))
+				std::iter_swap(last, mid);
+
+			if (_(first) < _(last))
+				std::iter_swap(first, last);
 		}
 
 		template<typename It>
@@ -164,33 +168,20 @@ namespace three_way_quicksort_implementation_{
 			for(;;){
 				auto const distance = std::distance(first, last);
 
-				if (distance <= 1)
-					return;
-
-				if constexpr(CUTOFF_INS_ENABLED){
-					if (distance <= CUTOFF_INS){
-					//	printf("Cut Off: distance %zu\n", std::distance(first, last) );
-
-						Insertion_Sort<Projection> sort{p};
-
-						return sort(first, last, digit);
-					}
+				switch(distance){
+				case 0:
+				case 1:  return;
+				case 2:  return super2_Sort(first, digit, p);
+				case 3:  return super3_Sort(first, digit, p);
+				case 4:  return insertion_Sort(first, last, digit, p);
+				default: break;
 				}
 
-				if (deep > CUTOFF_DEEP){
-					size_t const size = std::distance(first, last);
+				if (deep > cuttof_deep){
+					printf("Cut Off: too deep recursion %zu\n", distance);
 
-					printf("Cut Off: too deep recursion %zu\n", size);
-
-					if (size <= CUTOFF_INS){
-						Insertion_Sort<Projection> sort{p};
-
-						return sort(first, last, digit);
-					}else{
-						Shell_Sort<Projection> sort{p};
-
-						return sort(first, last, digit);
-					}
+					// if we are here, the distance is great than 4
+					return shell_Sort(first, last, digit, p);
 				}
 
 				auto lt = first;
@@ -207,9 +198,9 @@ namespace three_way_quicksort_implementation_{
 					auto const t = charAt(it, digit);
 
 					if (t < pivot)
-						swapIt(lt++, it++);
+						std::iter_swap(lt++, it++);
 					else if (t > pivot)
-						swapIt(it, gt--);
+						std::iter_swap(it, gt--);
 					else
 						++it;
 				}
@@ -279,42 +270,35 @@ namespace three_way_quicksort_implementation_{
 		}
 
 		template<typename It>
-		constexpr int charAt(It it, size_t digit) const{
+		int charAt(It it, size_t digit) const{
 			return charAt(std::invoke(p, *it), digit);
 		}
 
 	private:
-		Projection p;
+		Projection	p;
+		size_t		cuttof_deep;
 	};
 
 
 
 	template<typename It, typename Projection>
-	void doInsertionSort(It lo, It hi, Projection p) {
-		Insertion_Sort<Projection> sort{ std::move(p) };
-
+	void doInsertionSort(It lo, It hi, Projection p){
 		size_t const digit = 0;
-
-		return sort(lo, hi, digit);
+		return insertion_Sort(lo, hi, digit, std::move(p));
 	}
 
 	template<typename It, typename Projection>
-	void doShellSort(It lo, It hi, Projection p) {
-		Shell_Sort<Projection> sort{ std::move(p) };
-
+	void doShellSort(It lo, It hi, Projection p){
 		size_t const digit = 0;
-
-		return sort(lo, hi, digit);
+		return shell_Sort(lo, hi, digit, std::move(p));
 	}
 
 	template<typename It, typename Projection>
-	void doThreeWayQuickSort(It lo, It hi, Projection p) {
+	void doThreeWayQuickSort(It lo, It hi, Projection p){
 		Quick3Way_Sort<Projection> sort{ std::move(p) };
 
 		size_t const digit = 0;
-		size_t const deep  = 0;
-
-		return sort(lo, hi, digit, deep);
+		return sort(lo, hi, digit);
 
 	}
 
