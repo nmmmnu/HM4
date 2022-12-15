@@ -301,12 +301,6 @@ namespace three_way_quicksort_implementation_{
 		return sort(lo, hi, digit);
 
 	}
-
-
-
-	auto standardProjection = [](auto const &a) -> auto const &{
-		return a;
-	};
 }
 
 template<typename It, typename Projection>
@@ -320,7 +314,11 @@ template<typename It>
 void threeWayQuickSort(It first, It last){
 	using namespace three_way_quicksort_implementation_;
 
-	return doThreeWayQuickSort(first, last, standardProjection);
+	auto p = [](auto const &a) -> auto const &{
+		return a;
+	};
+
+	return threeWayQuickSort(first, last, p);
 }
 
 #endif
