@@ -178,7 +178,7 @@ namespace three_way_quicksort_implementation_{
 				}
 
 				if (deep > cuttof_deep){
-					printf("Cut Off: too deep recursion %zu\n", distance);
+				//	fprintf(stderr, "Cut Off: too deep recursion %zu\n", distance);
 
 					// if we are here, the distance is great than 4
 					return shell_Sort(first, last, digit, p);
