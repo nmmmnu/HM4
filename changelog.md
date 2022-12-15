@@ -70,4 +70,5 @@ Changelog
 -	implement "no copy buffer" when read() from socket
 -	bug fix, prevent crash if db file exists, but other files does not.
 -	implement SparePool as MinMaxHeap,
+-	use 3 way quicksort in UnsortedList for db_builder and log replay speedup of 30%
 

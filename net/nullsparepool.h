@@ -1,14 +1,18 @@
-#ifndef NET_SIMPLE_SPARE_POOL_H
-#define NET_SIMPLE_SPARE_POOL_H
+#ifndef NULL_SPARE_POOL_H
+#define NULL_SPARE_POOL_H
+
+#include "iobuffer.h"
 
 namespace net{
 
-struct SimpleSparePool{
-	constexpr SimpleSparePool(uint32_t, uint32_t, size_t conf_bufferCapacity) :
+struct NullSparePool{
+	using data_type = IOBuffer::container_type;
+
+	constexpr NullSparePool(uint32_t, uint32_t, size_t conf_bufferCapacity) :
 					conf_bufferCapacity_(conf_bufferCapacity){
 	}
 
-	constexpr auto pop() const{
+	auto pop() const{
 		data_type x;
 		x.reserve(conf_bufferCapacity_);
 		return x;
@@ -18,7 +22,7 @@ struct SimpleSparePool{
 		return true;
 	}
 
-	constexpr static bool size(){
+	constexpr static size_t size(){
 		return 0;
 	}
 

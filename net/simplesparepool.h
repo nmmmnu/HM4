@@ -1,7 +1,6 @@
-#ifndef NET_SIMPLE_SPARE_POOL_H
-#define NET_SIMPLE_SPARE_POOL_H
+#ifndef SIMPLE_SPARE_POOL_H
+#define SIMPLE_SPARE_POOL_H
 
-#include <vector>
 #include "iobuffer.h"
 
 namespace net{

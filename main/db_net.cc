@@ -19,6 +19,8 @@
 #include "protocol/redisprotocol.h"
 #include "worker/keyvalueworker.h"
 #include "asyncloop.h"
+#include "simplesparepool.h"
+#include "heapsparepool.h"
 
 // ----------------------------------
 
@@ -242,7 +244,8 @@ namespace{
 		using MyAdapterFactory	= Factory;
 		using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
 		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
-		using MyLoop		= net::AsyncLoop<MySelector, MyWorker>;
+		using MySparePool	= net::HeapSparePool;
+		using MyLoop		= net::AsyncLoop<MySelector, MyWorker, MySparePool>;
 
 		if (opt.port == 0)
 			printError("Can not create server socket on port zero...");

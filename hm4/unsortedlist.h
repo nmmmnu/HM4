@@ -11,14 +11,37 @@
 
 #include "pmallocator.h"
 
+#include "threewayquicksort.h"
+
 namespace hm4{
 
+namespace unsorted_list_impl_{
+	template<typename It, typename Comp, typename SubComp>
+	static It special_unique(It first, It last, Comp comp, SubComp scomp){
+		if (first == last)
+			return last;
+
+		auto result = first;
+		while (++first != last)
+			if (! comp(*result, *first) && ++result != first){
+				*result = std::move(*first);
+			}else if ( scomp(*result, *first) ){
+				using std::swap;
+				swap(*result, *first);
+			}
+
+		return ++result;
+	}
+}
 
 
 template<class T_Allocator>
 class UnsortedList{
 	using OVector	= std::vector<Pair *>;
 	using OVectorIt	= OVector::const_iterator;
+
+	constexpr static bool USE_3WAY_QUICKSORT		= true;
+	constexpr static bool USE_3WAY_QUICKSORT_CHECK_RESULT	= true;
 
 public:
 	using Allocator		= T_Allocator;
@@ -46,13 +69,42 @@ public:
 			return p1->cmpWithTime(*p2, std::false_type{}) < 0;
 		};
 
-		std::sort(std::begin(vector_), std::end(vector_), comp);
+		if constexpr(USE_3WAY_QUICKSORT){
+			threeWayQuickSort(std::begin(vector_), std::end(vector_), &Pair::getKey);
 
-		// this keep first occurance
-		vector_.erase(
-			std::unique(std::begin(vector_), std::end(vector_), equals),
-			std::end(vector_)
-		);
+			using namespace unsorted_list_impl_;
+
+			auto comp1 = [](const Pair *p1, const Pair *p2){
+				// return bigger time or first
+				return p1->equals(*p2);
+			};
+
+			auto comp2 = [](const Pair *p1, const Pair *p2){
+				// return bigger time or first
+				return p1->cmpTime(*p2) < 0;
+			};
+
+			// this keep first occurance
+			vector_.erase(
+				special_unique(std::begin(vector_), std::end(vector_), comp1, comp2),
+				std::end(vector_)
+			);
+
+			if constexpr(USE_3WAY_QUICKSORT_CHECK_RESULT){
+				if (!std::is_sorted(std::begin(vector_), std::end(vector_), comp)){
+					fprintf(stderr, "ERROR ERROR ERROR!!! List is not sorted!!!\n");
+					exit(1);
+				}
+			}
+		}else{
+			std::sort(std::begin(vector_), std::end(vector_), comp);
+
+			// this keep first occurance
+			vector_.erase(
+				std::unique(std::begin(vector_), std::end(vector_), equals),
+				std::end(vector_)
+			);
+		}
 
 		needSort_ = false;
 	}

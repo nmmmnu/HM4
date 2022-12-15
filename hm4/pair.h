@@ -345,7 +345,7 @@ inline namespace version_3_00_00{
 		}
 
 		[[nodiscard]]
-		int equals(Pair const &pair) const noexcept{
+		bool equals(Pair const &pair) const noexcept{
 			return equals(pair.getKey());
 		}
 

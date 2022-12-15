@@ -6,8 +6,7 @@
 #include "iobuffer.h"
 #include "mytime.h"
 
-// #include "simplesparepool.h"
-#include "heapsparepool.h"
+#include "nullsparepool.h"
 
 #include <unordered_map>
 #include <algorithm>	// min, find
@@ -16,7 +15,7 @@
 
 namespace net{
 
-template<class Selector, class Worker>
+template<class Selector, class Worker, class SparePool = NullSparePool>
 class AsyncLoop{
 public:
 	constexpr static auto		MY_LOG_LEVEL		= LogLevel::WARNING;
@@ -44,9 +43,6 @@ private:
 	};
 
 	using ClientContainer		= std::unordered_map<int, Client>;
-
-//	using SparePool			= SimpleSparePool;
-	using SparePool			= HeapSparePool;
 
 	using WorkerStatus		= worker::WorkerStatus;
 
