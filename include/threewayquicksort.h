@@ -38,6 +38,11 @@ namespace three_way_quicksort_implementation_{
 			return subAt(std::invoke(p, *a), digit) < subAt(std::invoke(p, *b), digit);
 		}
 
+		template<typename It, typename Projection>
+		bool compareGT(It a, It b, size_t digit, Projection &p){
+			return compareLT(b, a, digit, p);
+		}
+
 	} // namespace
 
 
@@ -48,7 +53,7 @@ namespace three_way_quicksort_implementation_{
 		auto b = std::next(a);
 
 		auto _ = [digit, &p](auto a, auto b){
-			if (compareLT(b, a, digit, p))
+			if (compareGT(a, b, digit, p))
 				std::iter_swap(b, a);
 		};
 
@@ -65,7 +70,7 @@ namespace three_way_quicksort_implementation_{
 		auto c = std::next(b);
 
 		auto _ = [digit, &p](auto a, auto b){
-			if (compareLT(b, a, digit, p))
+			if (compareGT(a, b, digit, p))
 				std::iter_swap(b, a);
 		};
 
@@ -95,24 +100,44 @@ namespace three_way_quicksort_implementation_{
 		size_t step = size - 1;
 
 		for(;;){
-			bool sorted = false;
+			for(;;){
+				if constexpr(true){
+					bool sorted = true;
 
-			while ( ! sorted ){
-				sorted = true;
+					for (size_t i = 0; i < size - step; ++i){
+						auto const j = i + step;
 
-				for (size_t i = 0; i < size - step; ++i){
-					auto j = i + step;
+						if (compareGT(first + i, first + j, digit, p)){
+							std::iter_swap(first + i, first + j);
 
-					// LT compare, so reversed arguments...
-					if (compareLT(first + j, first + i, digit, p)){
-						std::iter_swap(first + j, first + i);
-
-						sorted = false;
+							sorted = false;
+						}
 					}
+
+					if (sorted)
+						break;
+				}
+
+				if constexpr(true){
+					bool sorted = true;
+
+					for (size_t ii = 0; ii < size - step; ++ii){
+						auto const i = size - ii - 1;
+						auto const j = i + step;
+
+						if (compareGT(first + i, first + j, digit, p)){
+							std::iter_swap(first + i, first + j);
+
+							sorted = false;
+						}
+					}
+
+					if (sorted)
+						break;
 				}
 			}
 
-			if (sorted && step == 1)
+			if (step == 1)
 				break;
 
 			step = step / 2;
@@ -299,7 +324,6 @@ namespace three_way_quicksort_implementation_{
 
 		size_t const digit = 0;
 		return sort(lo, hi, digit);
-
 	}
 }
 
