@@ -176,10 +176,10 @@ namespace three_way_quicksort_implementation_{
 			};
 
 			if (_(mid) < _(first))
-				std::iter_swap(first, mid);
+				std::iter_swap(mid, first);
 
 			if (_(mid) < _(last))
-				std::iter_swap(last, mid);
+				std::iter_swap(mid, last);
 
 			if (_(first) < _(last))
 				std::iter_swap(first, last);
