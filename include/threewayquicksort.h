@@ -100,11 +100,14 @@ namespace three_way_quicksort_implementation_{
 		size_t step = size - 1;
 
 		for(;;){
-			for(;;){
+			size_t ix_first = 0;
+			size_t ix_last  = size;
+
+			while(ix_first < ix_last){
 				if constexpr(true){
 					bool sorted = true;
 
-					for (size_t i = 0; i < size - step; ++i){
+					for (size_t i = ix_first; i < ix_last - step; ++i){
 						auto const j = i + step;
 
 						if (compareGT(first + i, first + j, digit, p)){
@@ -116,16 +119,17 @@ namespace three_way_quicksort_implementation_{
 
 					if (sorted)
 						break;
+
+					--ix_last;
 				}
 
 				if constexpr(true){
 					bool sorted = true;
 
-					for (size_t ii = 0; ii < size - step; ++ii){
-						auto const i = size - ii - 1;
-						auto const j = i + step;
+					for (size_t i = ix_last; i --> ix_first + step;){
+						auto const j = i - step;
 
-						if (compareGT(first + i, first + j, digit, p)){
+						if (compareLT(first + i, first + j, digit, p)){
 							std::iter_swap(first + i, first + j);
 
 							sorted = false;
@@ -134,13 +138,15 @@ namespace three_way_quicksort_implementation_{
 
 					if (sorted)
 						break;
+
+					++ix_first;
 				}
 			}
 
 			if (step == 1)
 				break;
 
-			step = step / 2;
+			step = step >> 1;
 
 			if (step < 1)
 				step = 1;
