@@ -106,6 +106,7 @@ namespace three_way_quicksort_implementation_{
 			while(ix_first < ix_last){
 				if constexpr(true){
 					bool sorted = true;
+					size_t ix = ix_first;
 
 					for (size_t i = ix_first; i < ix_last - step; ++i){
 						auto const j = i + step;
@@ -114,17 +115,19 @@ namespace three_way_quicksort_implementation_{
 							std::iter_swap(first + i, first + j);
 
 							sorted = false;
+							ix = i;
 						}
 					}
 
 					if (sorted)
 						break;
 
-					--ix_last;
+					ix_last = ix + 1;
 				}
 
 				if constexpr(true){
 					bool sorted = true;
+					size_t ix = ix_last;
 
 					for (size_t i = ix_last; i --> ix_first + step;){
 						auto const j = i - step;
@@ -133,13 +136,14 @@ namespace three_way_quicksort_implementation_{
 							std::iter_swap(first + i, first + j);
 
 							sorted = false;
+							ix = i;
 						}
 					}
 
 					if (sorted)
 						break;
 
-					++ix_first;
+					ix_first = ix;
 				}
 			}
 
@@ -204,7 +208,9 @@ namespace three_way_quicksort_implementation_{
 				case 1:  return;
 				case 2:  return super2_Sort(first, digit, p);
 				case 3:  return super3_Sort(first, digit, p);
-				case 4:  return insertion_Sort(first, last, digit, p);
+				case 4:
+				case 5:
+				case 6:  return insertion_Sort(first, last, digit, p);
 				default: break;
 				}
 
@@ -216,7 +222,7 @@ namespace three_way_quicksort_implementation_{
 				}
 
 				auto lt = first;
-				auto gt = last - 1;
+				auto gt = last  - 1;
 				auto it = first + 1;
 
 				median(lt, gt, digit);
