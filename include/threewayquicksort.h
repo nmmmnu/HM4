@@ -29,17 +29,20 @@ namespace three_way_quicksort_implementation_{
 			}
 		}
 
-		constexpr static auto subAt(std::string_view s, size_t digit){
-			return digit < s.size() ? s.substr(digit) : "";
+		template<typename T, typename Projection>
+		bool compareLT(T const &a, T const &b, size_t digit, Projection &p){
+
+			auto _ = [digit, &p](T const &a){
+				std::string_view const s = std::invoke(p, a);
+
+				return digit < s.size() ? s.substr(digit) : "";
+			};
+
+			return _(a) < _(b);
 		}
 
-		template<typename It, typename Projection>
-		bool compareLT(It a, It b, size_t digit, Projection &p){
-			return subAt(std::invoke(p, *a), digit) < subAt(std::invoke(p, *b), digit);
-		}
-
-		template<typename It, typename Projection>
-		bool compareGT(It a, It b, size_t digit, Projection &p){
+		template<typename T, typename Projection>
+		bool compareGT(T const &a, T const &b, size_t digit, Projection &p){
 			return compareLT(b, a, digit, p);
 		}
 
@@ -53,7 +56,7 @@ namespace three_way_quicksort_implementation_{
 		auto b = std::next(a);
 
 		auto _ = [digit, &p](auto a, auto b){
-			if (compareGT(a, b, digit, p))
+			if (compareGT(*a, *b, digit, p))
 				std::iter_swap(b, a);
 		};
 
@@ -70,7 +73,7 @@ namespace three_way_quicksort_implementation_{
 		auto c = std::next(b);
 
 		auto _ = [digit, &p](auto a, auto b){
-			if (compareGT(a, b, digit, p))
+			if (compareGT(*a, *b, digit, p))
 				std::iter_swap(b, a);
 		};
 
@@ -83,8 +86,8 @@ namespace three_way_quicksort_implementation_{
 
 	template<typename It, typename Projection>
 	void insertion_Sort(It first, It last, size_t digit, Projection p){
-		for (It i = first; i < last; ++i)
-			for (It j = i; j > first && compareLT(j, j - 1, digit, p); --j)
+		for (It it = first; it < last; ++it)
+			for (It j = it; j > first && compareLT(*j, *(j - 1), digit, p); --j)
 				std::iter_swap(j, j - 1);
 	}
 
@@ -92,68 +95,17 @@ namespace three_way_quicksort_implementation_{
 
 	template<typename It, typename Projection>
 	void shell_Sort(It first, It last, size_t digit, Projection p){
-		size_t const size = std::distance(first, last);
+		for(auto gap = std::distance(first, last) / 2; gap > 0; gap /= 2){
+			for (It it = first + gap; it != last; ++it){
+				auto j = it;
 
-		if (size <= 1)
-			return;
+				auto const temp = std::move(*j);
 
-		size_t step = size - 1;
+				for (; j >= first + gap && compareLT(temp, *(j - gap), digit, p); j -= gap)
+					*j = std::move(*(j - gap));
 
-		for(;;){
-			size_t ix_first = 0;
-			size_t ix_last  = size;
-
-			while(ix_first < ix_last){
-				if constexpr(true){
-					bool sorted = true;
-					size_t ix = ix_first;
-
-					for (size_t i = ix_first; i < ix_last - step; ++i){
-						auto const j = i + step;
-
-						if (compareGT(first + i, first + j, digit, p)){
-							std::iter_swap(first + i, first + j);
-
-							sorted = false;
-							ix = i;
-						}
-					}
-
-					if (sorted)
-						break;
-
-					ix_last = ix + 1;
-				}
-
-				if constexpr(true){
-					bool sorted = true;
-					size_t ix = ix_last;
-
-					for (size_t i = ix_last; i --> ix_first + step;){
-						auto const j = i - step;
-
-						if (compareLT(first + i, first + j, digit, p)){
-							std::iter_swap(first + i, first + j);
-
-							sorted = false;
-							ix = i;
-						}
-					}
-
-					if (sorted)
-						break;
-
-					ix_first = ix;
-				}
+				*j = std::move(temp);
 			}
-
-			if (step == 1)
-				break;
-
-			step = step >> 1;
-
-			if (step < 1)
-				step = 1;
 		}
 	}
 
@@ -217,7 +169,7 @@ namespace three_way_quicksort_implementation_{
 				if (deep > cuttof_deep){
 				//	fprintf(stderr, "Cut Off: too deep recursion %zu\n", distance);
 
-					// if we are here, the distance is great than 4
+					// if we are here, the distance is great than 6
 					return shell_Sort(first, last, digit, p);
 				}
 
@@ -348,8 +300,6 @@ void threeWayQuickSort(It first, It last, Projection p){
 
 template<typename It>
 void threeWayQuickSort(It first, It last){
-	using namespace three_way_quicksort_implementation_;
-
 	auto p = [](auto const &a) -> auto const &{
 		return a;
 	};
