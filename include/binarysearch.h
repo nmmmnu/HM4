@@ -6,10 +6,15 @@
 
 #include "comparator.h"
 
+#include "software_prefetch.h"
 
 
-auto binarySearchComp = [](auto const a, auto const b){
+
+auto binarySearchCompFn = [](auto const &a, auto const &b){
 	return comparator::comp(a, b);
+};
+
+auto binarySearchPrefetchFn = [](auto const &){
 };
 
 
@@ -25,20 +30,41 @@ struct BinarySearchResult{
 #include "binarysearch.h.cc"
 
 template <
-		class Iterator,
-		class difference_type = typename std::iterator_traits<Iterator>::difference_type,
-		class T,
-		class Comp = decltype(binarySearchComp)
+		class Iterator								,
+		class T									,
+		class Comp		= decltype(binarySearchCompFn)			,
+		class difference_type	= typename std::iterator_traits<Iterator>::difference_type
 >
 auto binarySearch(
-		Iterator first, Iterator const &last,
-		T const &key,
-		Comp comp = binarySearchComp,
-		difference_type const minimum_distance = 5
+		Iterator first, Iterator const &last					,
+		T const &key								,
+		Comp comp				= binarySearchCompFn		,
+		difference_type const minimum_distance	= 5
 ) -> BinarySearchResult<Iterator>{
 	using tag = typename std::iterator_traits<Iterator>::iterator_category;
 
-	return binarySearch(std::move(first), last, key, comp, minimum_distance, tag{});
+	return binarySearch(std::move(first), last, key, comp, nullptr, minimum_distance, tag{});
+}
+
+
+
+template <
+		class Iterator								,
+		class T									,
+		class Comp		= decltype(binarySearchCompFn)			,
+		class Prefetch		= decltype(binarySearchPrefetchFn)		,
+		class difference_type	= typename std::iterator_traits<Iterator>::difference_type
+>
+auto binarySearchPrefetch(
+		Iterator first, Iterator const &last					,
+		T const &key								,
+		Comp comp				= binarySearchCompFn		,
+		Prefetch prefetch			= binarySearchPrefetchFn	,
+		difference_type const minimum_distance	= 5
+) -> BinarySearchResult<Iterator>{
+	using tag = typename std::iterator_traits<Iterator>::iterator_category;
+
+	return binarySearch(std::move(first), last, key, comp, prefetch, minimum_distance, tag{});
 }
 
 

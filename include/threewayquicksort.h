@@ -5,6 +5,8 @@
 #include <cstdio>	// also provides size_t
 #include <functional>	// std::invoke
 
+#include "software_prefetch.h"
+
 namespace three_way_quicksort_implementation_{
 	namespace{
 
@@ -30,7 +32,7 @@ namespace three_way_quicksort_implementation_{
 		}
 
 		template<typename T, typename Projection>
-		bool compareLT(T const &a, T const &b, size_t digit, Projection &p){
+		bool compareLT(T const &a, T const &b, size_t digit, Projection p){
 
 			auto _ = [digit, &p](T const &a){
 				std::string_view const s = std::invoke(p, a);
@@ -42,7 +44,7 @@ namespace three_way_quicksort_implementation_{
 		}
 
 		template<typename T, typename Projection>
-		bool compareGT(T const &a, T const &b, size_t digit, Projection &p){
+		bool compareGT(T const &a, T const &b, size_t digit, Projection p){
 			return compareLT(b, a, digit, p);
 		}
 
@@ -149,6 +151,8 @@ namespace three_way_quicksort_implementation_{
 
 		template<typename It>
 		void sort(It first, It last, size_t digit, size_t deep) const{
+			bool const use_prefetch = true;
+
 			++deep;
 
 			// controls tail recursion.
@@ -184,6 +188,12 @@ namespace three_way_quicksort_implementation_{
 				auto const pivot = charAt(lt, digit);
 
 				while (it <= gt) {
+					if constexpr(use_prefetch){
+						builtin_prefetch( *(lt + 1) );
+						builtin_prefetch( *(it + 1) );
+						builtin_prefetch( *(gt - 1) );
+					}
+
 					auto const t = charAt(it, digit);
 
 					if (t < pivot)

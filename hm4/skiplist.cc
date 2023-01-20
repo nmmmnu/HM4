@@ -11,6 +11,8 @@
 #include "arenaallocator.h"
 #include "simulatedarenaallocator.h"
 
+#include "software_prefetch.h"
+
 namespace hm4{
 
 namespace{
@@ -94,12 +96,21 @@ struct SkipList<T_Allocator>::Node{
 	Pair		*data;
 	Node		*next[1];	// system dependent, dynamic, at least 1
 
-	static size_t calcSize(height_size_type const height){
+	constexpr static size_t calcSize(height_size_type const height){
 		return sizeof(Node) + (height - 1) * sizeof(Node *);
 	}
 
 	int cmp(HPair::HKey const hkey, std::string_view const key) const{
 		return HPair::cmp(this->hkey, *this->data, hkey, key);
+	}
+
+	constexpr void prefetch(height_size_type const height) const{
+		constexpr bool use_prefetch = true;
+
+		if constexpr(use_prefetch){
+			builtin_prefetch(this->data,         0, 1);
+			builtin_prefetch(this->next[height], 0, 1);
+		}
 	}
 };
 
@@ -154,6 +165,8 @@ bool SkipList<T_Allocator>::clear(){
 	if (allocator_->reset() == false){
 		for(Node *node = heads_[0]; node; ){
 			Node *copy = node;
+
+			node->prefetch(0);
 
 			node = node->next[0];
 
@@ -326,6 +339,8 @@ template<class T_Allocator>
 void SkipList<T_Allocator>::printLane(height_size_type const lane) const{
 	uint64_t i = 0;
 	for(const Node *node = heads_[lane]; node; node = node->next[lane]){
+		// no prefetch here.
+
 		hm4::print(*node->data);
 
 		if (++i > 10)
@@ -337,8 +352,11 @@ template<class T_Allocator>
 void SkipList<T_Allocator>::printLanesSummary() const{
 	for(height_size_type lane = MAX_HEIGHT; lane --> 0;){
 		uint64_t count = 0;
-		for(const Node *node = heads_[lane]; node; node = node->next[lane])
+		for(const Node *node = heads_[lane]; node; node = node->next[lane]){
+			// no prefetch here.
+
 			++count;
+		}
 
 		printf("Lane # %5u -> %8zu\n", lane, count);
 	}
@@ -362,6 +380,9 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key, std::bool_consta
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
+
+			node->prefetch(h);
+
 			// this allows comparisson with single ">", instead of more complicated 3-way.
 			if (node->hkey >= hkey){
 				int const cmp = node->cmp(hkey, key);
@@ -405,6 +426,9 @@ auto SkipList<T_Allocator>::locateNode_(std::string_view const key, bool const e
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){
+
+			node->prefetch(h);
+
 			// this allows comparisson with single ">", instead of more complicated 3-way.
 			if (node->hkey >= hkey){
 				int const cmp = node->cmp(hkey, key);

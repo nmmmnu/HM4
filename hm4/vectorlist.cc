@@ -13,13 +13,24 @@
 namespace hm4{
 
 namespace{
-	int comp(const Pair *p, std::string_view const key){
-		return p->cmp(key);
-	}
-
 	template<class T>
 	auto binarySearch(T &v, std::string_view const key){
-		return ::binarySearch(std::begin(v), std::end(v), key, comp);
+
+		auto comp = [](const Pair *p, std::string_view const key){
+			return p->cmp(key);
+		};
+
+		// there are not much improvement,
+		// but just to be on the safe side
+
+		auto prefetch = [](const Pair *p){
+			constexpr bool use_prefetch = true;
+
+			if constexpr(use_prefetch)
+				builtin_prefetch(p, 0, 1);
+		};
+
+		return ::binarySearchPrefetch(std::begin(v), std::end(v), key, comp, prefetch);
 	}
 } // anonymous namespace
 

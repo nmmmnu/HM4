@@ -9,6 +9,8 @@
 #include "arenaallocator.h"
 #include "simulatedarenaallocator.h"
 
+#include "software_prefetch.h"
+
 namespace hm4{
 
 template<class T_Allocator>
@@ -19,6 +21,15 @@ struct LinkList<T_Allocator>::Node{
 
 	int cmp(HPair::HKey const hkey, std::string_view const key) const{
 		return HPair::cmp(this->hkey, *this->data, hkey, key);
+	}
+
+	constexpr void prefetch() const{
+		constexpr bool use_prefetch = true;
+
+		if constexpr(use_prefetch){
+			builtin_prefetch(this->data, 0, 1);
+			builtin_prefetch(this->next, 0, 1);
+		}
 	}
 };
 
@@ -76,6 +87,8 @@ bool LinkList<T_Allocator>::clear(){
 	if (allocator_->reset() == false){
 		for(Node *node = head_; node; ){
 			Node *copy = node;
+
+			node->prefetch();
 
 			node = node->next;
 
@@ -198,6 +211,9 @@ auto LinkList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 	auto hkey = HPair::SS::create(key);
 
 	for(Node *node = *jtable; node; node = node->next){
+
+		node->prefetch();
+
 		// this allows comparisson with single ">", instead of more complicated 3-way.
 		if (node->hkey >= hkey){
 			int const cmp = node->cmp(hkey, key);
@@ -225,6 +241,9 @@ auto LinkList<T_Allocator>::locateNode_(std::string_view const key, bool const e
 	auto hkey = HPair::SS::create(key);
 
 	for(const Node *node = head_; node; node = node->next){
+
+		node->prefetch();
+
 		// this allows comparisson with single ">", instead of more complicated 3-way.
 		if (node->hkey >= hkey){
 			int const cmp = node->cmp(hkey, key);
