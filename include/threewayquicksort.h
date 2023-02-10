@@ -32,8 +32,8 @@ namespace three_way_quicksort_implementation_{
 		template<typename T, typename Projection>
 		bool compareLT(T const &a, T const &b, size_t digit, Projection p){
 
-			auto _ = [digit, &p](T const &a){
-				std::string_view const s = std::invoke(p, a);
+			auto _ = [digit, &p](T const &x){
+				std::string_view const s = std::invoke(p, x);
 
 				return digit < s.size() ? s.substr(digit) : "";
 			};
@@ -57,11 +57,10 @@ namespace three_way_quicksort_implementation_{
 
 		auto _ = [digit, &p](auto a, auto b){
 			if (compareGT(*a, *b, digit, p))
-				std::iter_swap(b, a);
+				std::iter_swap(a, b);
 		};
 
 		_(a, b);
-
 	}
 
 
@@ -74,12 +73,13 @@ namespace three_way_quicksort_implementation_{
 
 		auto _ = [digit, &p](auto a, auto b){
 			if (compareGT(*a, *b, digit, p))
-				std::iter_swap(b, a);
+				std::iter_swap(a, b);
 		};
 
-		_(a, c);
+		// bubble sort
 		_(a, b);
 		_(b, c);
+		_(a, b);
 	}
 
 
@@ -133,18 +133,45 @@ namespace three_way_quicksort_implementation_{
 		void median(It first, It last, size_t digit) const{
 			It mid = first + ((last - first) >> 1);
 
+			auto &a = first;
+			auto &b = mid;
+			auto &c = last;
+
 			auto _ = [this, digit](auto x){
 				return charAt(x, digit);
 			};
 
-			if (_(mid) < _(first))
-				std::iter_swap(mid, first);
+			auto _a = [](){
+			};
 
-			if (_(mid) < _(last))
-				std::iter_swap(mid, last);
+			auto _b = [first, b](){
+				std::iter_swap(first, b);
+			};
 
-			if (_(first) < _(last))
-				std::iter_swap(first, last);
+			auto _c = [first, c](){
+				std::iter_swap(first, c);
+			};
+
+			// https://www.geeksforgeeks.org/middle-of-three-using-minimum-comparisons/
+			// in this case, sometimes, it do just 2 operations
+
+			if (_(a) > _(b)){
+				if (_(b) > _(c))
+					return _b();
+
+				if (_(a) > _(c))
+					return _c();
+				else
+					return _a();
+			}else{
+				if (_(a) > _(c))
+					return _a();
+
+				if (_(b) > _(c))
+					return _c();
+				else
+					return _b();
+			}
 		}
 
 		template<typename It>

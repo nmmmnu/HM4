@@ -24,7 +24,7 @@ namespace net::worker::commands{
 
 
 	struct OutputBlob{
-		constexpr static size_t ContainerSize	= 65'536;
+		constexpr static size_t ContainerSize	= 0xFFFF;
 		using Container = StaticVector<std::string_view,ContainerSize>;
 
 		constexpr static size_t BufferKeySize	= hm4::PairConf::MAX_KEY_SIZE + 16;
