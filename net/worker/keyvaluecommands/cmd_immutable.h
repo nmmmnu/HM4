@@ -9,9 +9,12 @@ namespace net::worker::commands::Immutable{
 
 	template<class Protocol, class DBAdapter>
 	struct GET : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "get";
-		constexpr inline static std::string_view cmd[]	= {
-			"get",	"GET"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -23,21 +26,27 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return;
 
-			auto it = db.find(key);
-
-			auto const val = it && it->isValid(std::true_type{}) ? it->getVal() : "";
-
-			return result.set(val);
+			return result.set(
+				hm4::getPairVal(*db, key)
+			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"get",	"GET"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MGET : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "mget";
-		constexpr inline static std::string_view cmd[]	= {
-			"mget",	"MGET"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -57,27 +66,29 @@ namespace net::worker::commands::Immutable{
 
 			container.clear();
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto &key = *itk;
-
-				auto it = db.find(key);
-
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				container.emplace_back(
-					it && it->isValid(std::true_type{}) ? it->getVal() : ""
+					hm4::getPairVal(*db, *itk)
 				);
-			}
 
 			return result.set_container(container);
 		}
-	};
 
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"mget",	"MGET"
+		};
+	};
 
 
 	template<class Protocol, class DBAdapter>
 	struct EXISTS : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "exists";
-		constexpr inline static std::string_view cmd[]	= {
-			"exists",	"EXISTS"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -89,21 +100,26 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return;
 
-			auto it = db.find(key);
-
 			return result.set(
-				it && it->isValid(std::true_type{})
+				hm4::getPairOK(*db, key)
 			);
 		}
-	};
 
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"exists",	"EXISTS"
+		};
+	};
 
 
 	template<class Protocol, class DBAdapter>
 	struct TTL : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "ttl";
-		constexpr inline static std::string_view cmd[]	= {
-			"ttl",	"TTL"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -115,24 +131,29 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return;
 
-			auto it = db.find(key);
+			uint64_t const ttl = hm4::getPair_(*db, key, [](bool b, auto it){
+				return b ? it->getTTL() : 0;
+			});
 
-			auto ttl = it && it->isValid(std::true_type{}) ? it->getTTL() : 0;
-
-			return result.set(
-				uint64_t{ttl}
-			);
+			return result.set(ttl);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ttl",	"TTL"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct STRLEN : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "strlen";
-		constexpr inline static std::string_view cmd[]	= {
-			"strlen",	"STRLEN"	,
-			"size",		"SIZE"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -144,23 +165,30 @@ namespace net::worker::commands::Immutable{
 			if (key.empty())
 				return;
 
-			auto it = db.find(key);
-
-			auto size = it && it->isValid(std::true_type{}) ? it->getVal().size() : 0;
-
 			return result.set(
-				uint64_t{size}
+				hm4::getPair_(*db, key, [](bool b, auto it) -> uint64_t{
+					return b ? it->getVal().size() : 0;
+				})
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"strlen",	"STRLEN"	,
+			"size",		"SIZE"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HGET : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "hget";
-		constexpr inline static std::string_view cmd[]	= {
-			"hget",	"HGET"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
@@ -186,21 +214,27 @@ namespace net::worker::commands::Immutable{
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
-			auto it = db.find(key);
-
-			auto const val = it && it->isValid(std::true_type{}) ? it->getVal() : "";
-
-			return result.set(val);
+			return result.set(
+				hm4::getPairVal(*db, key)
+			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hget",	"HGET"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HMGET : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "hmget";
-		constexpr inline static std::string_view cmd[]	= {
-			"hmget",	"HMGET"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
@@ -240,24 +274,30 @@ namespace net::worker::commands::Immutable{
 
 				auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
-				auto it = db.find(key);
-
 				container.emplace_back(
-					it && it->isValid(std::true_type{}) ? it->getVal() : ""
+					hm4::getPairVal(*db, key)
 				);
 			}
 
 			return result.set_container(container);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hmget",	"HMGET"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HEXISTS : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "hexists";
-		constexpr inline static std::string_view cmd[]	= {
-			"hexists",	"HEXISTS"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
@@ -283,12 +323,15 @@ namespace net::worker::commands::Immutable{
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
-			auto it = db.find(key);
-
 			return result.set(
-				it && it->isValid(std::true_type{})
+				hm4::getPairOK(*db, key)
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hexists",	"HEXISTS"
+		};
 	};
 
 

@@ -13,12 +13,13 @@ namespace net::worker::commands::BITSET{
 	}
 
 	template<class Protocol, class DBAdapter>
-	struct BITSET : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "setbit";
-		constexpr inline static bool mut		= true;
-		constexpr inline static std::string_view cmd[]	= {
-			"setbit",	"SETBIT"	,
-			"bitset",	"BITSET"
+	struct BITSET : MBase<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		BITSET(){
@@ -38,7 +39,7 @@ namespace net::worker::commands::BITSET{
 			if (key.empty())
 				return;
 
-			const auto n      = from_string<size_type>(p[2]);
+			const auto n = from_string<size_type>(p[2]);
 
 			if (n > BIT_MAX)
 				return;
@@ -48,7 +49,7 @@ namespace net::worker::commands::BITSET{
 			uint8_t const n_mask		= 1 << (n % 8);
 			bool    const bit		= from_string<uint64_t>(p[3]);
 
-			const auto *pair = getPair__(db, key);
+			const auto *pair = hm4::getPairPtr(*db, key);
 
 			if (pair == nullptr){
 				// create new and update
@@ -60,11 +61,13 @@ namespace net::worker::commands::BITSET{
 				flipBit__(string.data(),
 						bit, n_byte, n_mask);
 
-				db.set(key, string);
+				hm4::insert(*db, key, string);
 
 				return result.set();
 
-			}else if (pair->getVal().size() >= n_byte_size && db.canUpdateWithHint(pair)){
+			}/* else if (pair->getVal().size() >= n_byte_size && db.canUpdateWithHint(pair)){
+				TODO HINT
+
 				// valid pair, update in place
 
 				flipBit__(const_cast<char *>( pair->getVal().data() ),
@@ -73,7 +76,7 @@ namespace net::worker::commands::BITSET{
 				db.expHint(pair, 0);
 
 				return result.set();
-			}else{
+			}*/else{
 				// normal update
 
 				string = pair->getVal();
@@ -87,7 +90,7 @@ namespace net::worker::commands::BITSET{
 				// here size optimization may kick up.
 				// see recalc_size__
 
-				db.set(key, string);
+				hm4::insert(*db, key, string);
 
 				return result.set();
 			}
@@ -106,13 +109,6 @@ namespace net::worker::commands::BITSET{
 				bits[n_byte] &= ~n_mask;
 		}
 
-		static const hm4::Pair *getPair__(DBAdapter &db, std::string_view const key){
-			if (auto it = db.find(key); it && it->isValid(std::true_type{}))
-				return & *it;
-			else
-				return nullptr;
-		}
-
 		#if 0
 		static auto recalc_size__(std::string_view const s){
 			size_t max = 0;
@@ -126,16 +122,24 @@ namespace net::worker::commands::BITSET{
 			return max;
 		}
 		# endif
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"setbit",	"SETBIT"	,
+			"bitset",	"BITSET"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BITGET : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "bitget";
-		constexpr inline static std::string_view cmd[]	= {
-			"getbit",	"GETBIT"	,
-			"bitget",	"BITGET"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -152,9 +156,14 @@ namespace net::worker::commands::BITSET{
 			const auto n     	= from_string<size_type>(p[2]);
 			const auto n_byte	= n / 8;
 
-			if (auto it = db.find(key); it && it->isValid(std::true_type{}) && it->getVal().size() >= n_byte){
-				const uint8_t *bits = reinterpret_cast<const uint8_t *>(it->getVal().data());
+			const uint8_t *bits = hm4::getPair_(*db, key, [n_byte](bool b, auto it) -> const uint8_t *{
+				if (b && it->getVal().size() >= n_byte)
+					return reinterpret_cast<const uint8_t *>(it->getVal().data());
+				else
+					return nullptr;
+			});
 
+			if (bits){
 				const auto n_mask  = 1 << (n % 8);
 
 				const bool b = bits[n_byte] & n_mask;
@@ -164,15 +173,24 @@ namespace net::worker::commands::BITSET{
 				return result.set_0();
 			}
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"getbit",	"GETBIT"	,
+			"bitget",	"BITGET"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BITCOUNT : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "bitcount";
-		constexpr inline static std::string_view cmd[]	= {
-			"bitcount",	"BITCOUNT"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -184,9 +202,9 @@ namespace net::worker::commands::BITSET{
 			if (key.empty())
 				return;
 
-			if (auto it = db.find(key); it && it->isValid(std::true_type{}) ){
-				auto const &val = it->getVal();
 
+
+			if (auto const val = hm4::getPairVal(*db, key); !std::empty(val)){
 				const uint8_t *bits = reinterpret_cast<const uint8_t *>(val.data());
 
 				// std::accumulate fails to compile
@@ -200,15 +218,23 @@ namespace net::worker::commands::BITSET{
 				return result.set_0();
 			}
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"bitcount",	"BITCOUNT"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BITMAX : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "maxbit";
-		constexpr inline static std::string_view cmd[]	= {
-			"bitmax",	"BITMAX"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
@@ -216,6 +242,11 @@ namespace net::worker::commands::BITSET{
 
 			return result.set(BIT_MAX);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"bitmax",	"BITMAX"
+		};
 	};
 
 

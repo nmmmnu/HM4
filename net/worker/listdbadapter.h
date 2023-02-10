@@ -5,8 +5,10 @@
 #include "myprocess.h"	// get PID
 #include "logger.h"
 
-template<class List, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
+template<class List_, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 struct ListDBAdapter{
+	using List = List_;
+
 	constexpr static bool MUTABLE 			= ! std::is_const_v<List>;
 	constexpr static bool TRY_INSERT_HINTS		= true;
 	constexpr static bool DELETE_USE_TOMBSTONES	= true;
@@ -14,40 +16,11 @@ struct ListDBAdapter{
 
 	constexpr static inline std::string_view SEPARATOR = "~";
 
-	struct IteratorAdapter{
-		using Iterator = typename List::iterator;
-
-		IteratorAdapter(Iterator it, Iterator end) : it(std::move(it)), end(std::move(end)){}
-
-		const hm4::Pair *operator->() const{
-			return & *it;
-		}
-
-		const hm4::Pair &operator*() const{
-			return *it;
-		}
-
-		void operator++(){
-			++it;
-		}
-
-		operator bool() const{
-			return it != end;
-		}
-
-	private:
-		Iterator it;
-		Iterator end;
-	};
-
 public:
 	ListDBAdapter(List &list, CommandSave &cmdSave, CommandReload &cmdReload) :
 				list_(list),
 				cmdSave_	(& cmdSave	),
 				cmdReload_	(& cmdReload	){}
-
-//	ListDBAdapter(List &list, CommandSave &cmdSave) :
-//				ListDBAdapter(list, cmdSave, cmdSave){}
 
 public:
 	// System Methods
@@ -61,7 +34,7 @@ public:
 				str,
 
 				"# Server"											"\n",
-				"Version          : ", hm4::version::str				,			"\n",
+				"Version          : ", version()					,			"\n",
 
 			"\n"	"# Keys"											"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
@@ -83,7 +56,7 @@ public:
 				str,
 
 				"# Server"											"\n",
-				"Version          : ", hm4::version::str				,			"\n",
+				"Version          : ", version()					,			"\n",
 
 			"\n"	"# Keys"											"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
@@ -102,14 +75,6 @@ public:
 		}
 	}
 
-	template<bool B = false>
-	auto size() const{
-		if constexpr(B)
-			return list_.mutable_size();
-		else
-			return list_.size();
-	}
-
 	constexpr static std::string_view version(){
 		return hm4::version::str;
 	}
@@ -123,25 +88,26 @@ public:
 	}
 
 public:
-	// Immutable Methods
+	// List Access Methods
 
-	template<bool B = true>
-	auto find(std::string_view const key, std::bool_constant<B> tag = {}) const{
-		return IteratorAdapter{
-			hm4::getIterator(list_, key, tag),
-			std::end(list_)
-		};
+	auto const &operator*() const{
+		return list_;
+	}
+
+	auto const *operator->() const{
+		return &list_;
+	}
+
+	auto &operator*(){
+		return list_;
+	}
+
+	auto *operator->(){
+		return &list_;
 	}
 
 public:
-	// Mutable Methods
-
-	void set(std::string_view const key, std::string_view const val, uint32_t expires = 0){
-		assert(!key.empty());
-
-		insert(list_, key, val, expires);
-	}
-
+/*
 	void setHint(const hm4::Pair *pair, std::string_view const val, uint32_t expires = 0){
 		if constexpr(TRY_INSERT_HINTS){
 			if (hm4::tryInsertHint(list_, pair, pair->getKey(), val, expires))
@@ -160,43 +126,32 @@ public:
 		return set(pair->getKey(), pair->getVal(), expires);
 	}
 
-	bool del(std::string_view const key){
-		assert(!key.empty());
-
-		erase(list_, key);
-
-		return true;
-	}
-
 	bool delHint(const hm4::Pair *pair){
 		if constexpr(TRY_INSERT_HINTS && DELETE_USE_TOMBSTONES){
 			// this is a bit ugly,
 			// because ListDBAdapter not suppose to know,
 			// if it is with tombstone or not.
 			if (hm4::tryInsertHint(list_, pair, pair->getKey()))
-				return logHintBool__("delHint");
+				return logHint__("delHint", true);
 		}
 
 		return del(pair->getKey());
 	}
 
-	auto mutable_size() const{
-		return list_.mutable_size();
-	}
-
 	bool canUpdateWithHint(const hm4::Pair *p) const{
 		return list_.getAllocator().owns(p);
 	}
-
 private:
 	static void logHint__(const char *msg){
 		log__<LOG_LEVEL>(msg, "Bypassing list");
 	}
 
-	static bool logHintBool__(const char *msg){
+	template<typename T>
+	static T logHint__(const char *msg, T t){
 		logHint__(msg);
-		return true;
+		return t;
 	}
+*/
 
 	template<class Command>
 	static bool invokeCommand__(Command *cmd){

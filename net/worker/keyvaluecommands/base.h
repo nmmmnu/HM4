@@ -140,7 +140,8 @@ namespace net::worker::commands{
 
 	template<class Protocol, class DBAdapter>
 	struct Base{
-		constexpr static bool mut = false;
+		virtual const std::string_view *begin() const = 0;
+		virtual const std::string_view *end()   const = 0;
 
 		virtual ~Base() = default;
 
@@ -154,6 +155,12 @@ namespace net::worker::commands{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct MBase : Base<Protocol,DBAdapter>{
+	};
+
+
+
 	template<
 		template<class, class>  class Cmd,
 		class Protocol,
@@ -161,18 +168,19 @@ namespace net::worker::commands{
 		class RegisterPack
 	>
 	void registerCommand(RegisterPack &pack){
-		using Command		= Cmd <Protocol, DBAdapter>;
-		using CommandBase	= Base<Protocol, DBAdapter>;
+		using Command		= Cmd	<Protocol, DBAdapter>;
+		using CommandBase	= Base	<Protocol, DBAdapter>;
+		using CommandMutBase	= MBase	<Protocol, DBAdapter>;
 
 		static_assert(std::is_base_of_v<CommandBase, Command>, "Command not seems to be a command");
 
-		if constexpr(Command::mut == false || Command::mut == DBAdapter::MUTABLE ){
+		bool const mut = std::is_base_of_v<CommandMutBase, Command>;
+
+		if constexpr(mut == false || mut == DBAdapter::MUTABLE){
 			auto &up = pack.storage.emplace_back(std::make_unique<Command>());
 
-			CommandBase *p = up.get();
-
-			for(auto const &key : Command::cmd)
-				pack.map.emplace(key, p);
+			for(auto const &key : *up)
+				pack.map.emplace(key, up.get());
 		}
 	}
 
@@ -187,9 +195,6 @@ namespace net::worker::commands{
 	void registerCommands(RegisterPack &pack){
 		( registerCommand<Commands, Protocol, DBAdapter>(pack), ... );
 	}
-
-
-
 }
 
 

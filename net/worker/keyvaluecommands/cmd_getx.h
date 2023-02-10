@@ -16,11 +16,11 @@ namespace net::worker::commands::GetX{
 
 
 		template<bool Tail, class It, class Container, class ProjectionKey>
-		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, Container &container, ProjectionKey projKey){
+		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container, ProjectionKey projKey){
 			uint32_t iterations	= 0;
 			uint32_t results	= 0;
 
-			for(;it;++it){
+			for(;it != eit;++it){
 				auto const &key = it->getKey();
 
 				auto pkey = projKey(key);
@@ -53,8 +53,8 @@ namespace net::worker::commands::GetX{
 		}
 
 		template<class It, class Container>
-		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, Container &container){
-			return accumulateResults<true>(maxResults, prefix, it, container, [](auto x){
+		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
+			return accumulateResults<true>(maxResults, prefix, it, eit, container, [](auto x){
 				return x;
 			});
 		}
@@ -64,9 +64,12 @@ namespace net::worker::commands::GetX{
 
 	template<class Protocol, class DBAdapter>
 	struct GETX : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "getx";
-		constexpr inline static std::string_view cmd[]	= {
-			"getx",		"GETX"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -100,23 +103,32 @@ namespace net::worker::commands::GetX{
 			auto const &prefix = p[3];
 
 			accumulateResults(
-				count				,
-				prefix				,
-				db.find(key, std::false_type{})	,
+				count					,
+				prefix					,
+				db->find(key, std::false_type{})	,
+				std::end(*db)				,
 				container
 			);
 
 			return result.set_container(container);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"getx",		"GETX"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HGETALL : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "hgetall";
-		constexpr inline static std::string_view cmd[]	= {
-			"hgetall",	"HGETALL"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
@@ -160,25 +172,33 @@ namespace net::worker::commands::GetX{
 			bool const no_tail = false;
 
 			accumulateResults<no_tail>(
-				ITERATIONS			,
-				key				,
-				db.find(key, std::false_type{})	,
-				container			,
+				ITERATIONS				,
+				key					,
+				db->find(key, std::false_type{})	,
+				std::end(*db)				,
+				container				,
 				proj
 			);
 
 			return result.set_container(container);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hgetall",	"HGETALL"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct DELX : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "delx";
-		constexpr inline static bool mut		= true;
-		constexpr inline static std::string_view cmd[]	= {
-			"delx",		"DELX"
+	struct DELX : MBase<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		using Container = StaticVector<std::string_view, getx_impl_::ITERATIONS_DELX>;
@@ -204,12 +224,12 @@ namespace net::worker::commands::GetX{
 
 		// label for goto
 		start:
-			std::string_view string_key = scanKeysAndDeleteInPlace_(db, prefix, key, container);
+			std::string_view string_key = scanKeysAndDeleteInPlace_(*db, prefix, key, container);
 
 			for(auto const &x : container){
-				db.del(x);
+				hm4::erase(*db, x);
 
-				if (db.mutable_size() == 0){
+				if (db->mutable_size() == 0){
 					// list just flushed.
 					++check_passes;
 
@@ -218,7 +238,7 @@ namespace net::worker::commands::GetX{
 					if (check_passes < PASSES_DELX)
 						goto start;
 					else
-						return scanForLastKey_(db, prefix, key, result);
+						return scanForLastKey_(*db, prefix, key, result);
 				}
 			}
 
@@ -227,14 +247,14 @@ namespace net::worker::commands::GetX{
 
 	private:
 		template<class Container>
-		std::string_view scanKeysAndDeleteInPlace_(DBAdapter &db, std::string_view prefix, std::string_view key, Container &container) const{
+		std::string_view scanKeysAndDeleteInPlace_(typename DBAdapter::List &list, std::string_view prefix, std::string_view key, Container &container) const{
 			using namespace getx_impl_;
 
 			container.clear();
 
 			uint32_t iterations = 0;
 
-			for(auto it = db.find(key, std::false_type{});it;++it){
+			for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
 				auto const key = it->getKey();
 
 				if (! same_prefix(prefix, key))
@@ -248,21 +268,19 @@ namespace net::worker::commands::GetX{
 				if (! it->isValid(std::true_type{}))
 					continue;
 
-				if (const auto *p = & *it; db.canUpdateWithHint(p))
-					db.delHint(p);
-				else
-					container.emplace_back(key);
+			//	TODO HINT !!!
+				container.emplace_back(key);
 			}
 
 			return {};
 		}
 
-		void scanForLastKey_(DBAdapter &db, std::string_view prefix, std::string_view key, Result<Protocol> &result) const{
+		void scanForLastKey_(typename DBAdapter::List &list, std::string_view prefix, std::string_view key, Result<Protocol> &result) const{
 			using namespace getx_impl_;
 
 			uint32_t iterations = 0;
 
-			for(auto it = db.find(key, std::false_type{});it;++it){
+			for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
 				auto const key = it->getKey();
 
 				if (! same_prefix(prefix, key))
@@ -281,6 +299,11 @@ namespace net::worker::commands::GetX{
 
 			return result.set();
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"delx",		"DELX"
+		};
 	};
 
 

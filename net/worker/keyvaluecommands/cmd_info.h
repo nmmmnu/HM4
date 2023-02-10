@@ -8,9 +8,12 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct INFO : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "info";
-		constexpr inline static std::string_view cmd[]	= {
-			"info",	"INFO"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -23,15 +26,23 @@ namespace net::worker::commands::Info{
 				db.info(buffer)
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"info",	"INFO"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DBSIZE : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "dbsize";
-		constexpr inline static std::string_view cmd[]	= {
-			"dbsize",	"DBSIZE"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -39,18 +50,26 @@ namespace net::worker::commands::Info{
 				return;
 
 			return result.set(
-				db.size()
+				db->size()
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"dbsize",	"DBSIZE"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VERSION : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "version";
-		constexpr inline static std::string_view cmd[]	= {
-			"version",	"VERSION"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -61,15 +80,23 @@ namespace net::worker::commands::Info{
 				db.version()
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"version",	"VERSION"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PING : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "ping";
-		constexpr inline static std::string_view cmd[]	= {
-			"ping",	"PING"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
@@ -78,15 +105,23 @@ namespace net::worker::commands::Info{
 
 			return result.set("pong");
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ping",	"PING"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ECHO : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "echo";
-		constexpr inline static std::string_view cmd[]	= {
-			"echo",	"ECHO"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
@@ -100,6 +135,11 @@ namespace net::worker::commands::Info{
 
 			return result.set(message);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"echo",	"ECHO"
+		};
 	};
 
 

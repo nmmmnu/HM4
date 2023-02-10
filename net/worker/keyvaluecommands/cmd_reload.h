@@ -8,10 +8,12 @@ namespace net::worker::commands::Reload{
 
 	template<class Protocol, class DBAdapter>
 	struct SAVE : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "save";
-		constexpr inline static std::string_view cmd[]	= {
-			"save",		"SAVE",
-			"bgsave",	"BGSAVE"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -22,13 +24,22 @@ namespace net::worker::commands::Reload{
 
 			return result.set();
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"save",		"SAVE",
+			"bgsave",	"BGSAVE"
+		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct RELOAD : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "reload";
-		constexpr inline static std::string_view cmd[]	= {
-			"reload",	"RELOAD"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -39,6 +50,11 @@ namespace net::worker::commands::Reload{
 
 			return result.set();
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"reload",	"RELOAD"
+		};
 	};
 
 

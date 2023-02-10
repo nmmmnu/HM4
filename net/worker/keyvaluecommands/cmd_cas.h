@@ -7,11 +7,13 @@ namespace net::worker::commands::CAS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CAS : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "cas";
-		constexpr inline static bool mut		= true;
-		constexpr inline static std::string_view cmd[]	= {
-			"cas",	"CAS"
+	struct CAS : MBase<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -35,30 +37,40 @@ namespace net::worker::commands::CAS{
 			if (val.empty())
 				return;
 
-			if (auto it = db.find(key);
-					it && it->isValid(std::true_type{}) &&
-					it->getVal() == old_val){
+
+
+			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){
 				// SET
 
 				auto const exp  = p.size() == 5 ? from_string<uint32_t>(p[4]) : 0;
 
-				db.setHint(& *it, val, exp);
+				// TODO HINT
+			//	db.setHint(& *it, val, exp);
+
+				hm4::insert(*db, key, val, exp);
 
 				return result.set(true);
 			}
 
 			return result.set(false);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cas",	"CAS"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct CAD : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "cad";
-		constexpr inline static bool mut		= true;
-		constexpr inline static std::string_view cmd[]	= {
-			"cad",	"CAD"
+	struct CAD : MBase<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -77,18 +89,23 @@ namespace net::worker::commands::CAS{
 			if (old_val.empty())
 				return;
 
-			if (auto it = db.find(key);
-					it && it->isValid(std::true_type{}) &&
-					it->getVal() == old_val){
+			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){
 				// DEL
 
-				db.delHint(& *it);
+				// TODO HINT
+			//	db.delHint(& *it);
+				hm4::erase(*db, key);
 
 				return result.set(true);
 			}
 
 			return result.set(false);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cad",	"CAD"
+		};
 	};
 
 

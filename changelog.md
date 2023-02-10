@@ -72,3 +72,7 @@ Changelog
 -	implement SparePool as MinMaxHeap,
 -	use 3 way quicksort in UnsortedList for db_builder and log replay speedup of 30%
 
+### 1.2.19
+
+-	fix bug in INCR / INCRBY / DECR / DECRBY
+

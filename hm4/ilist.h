@@ -197,11 +197,12 @@ namespace PairFactory{
 		return PairFactory::Normal{ key, val, expires, created };
 	}
 
-	constexpr auto factory(
+	constexpr auto factory_XXXX(
 			uint32_t const expires,
 			std::string_view key, std::string_view val,
 			uint32_t const created = 0){
-		return PairFactory::NormalExpiresOnly{ key, val, expires, created };
+	//	return PairFactory::NormalExpiresOnly{ key, val, expires, created };
+		return PairFactory::Normal{ key, val, expires, created };
 	}
 
 	constexpr auto factory(std::string_view key){
@@ -264,6 +265,38 @@ auto getIterator(List const &list, std::string_view const key, std::bool_constan
 		return std::begin(list);
 	else
 		return list.find(key, exact);
+}
+
+// ==============================
+
+template<typename List, typename Predicate>
+auto getPair_(List const &list, std::string_view key, Predicate p){
+	auto it = list.find(key, std::true_type{});
+
+	bool const b = it != std::end(list) && it->isValid(std::true_type{});
+
+	return p(b, it);
+}
+
+template<typename List>
+auto getPairVal(List const &list, std::string_view key){
+	return getPair_(list, key, [](bool b, auto it){
+		return b ? it->getVal() : "";
+	});
+}
+
+template<typename List>
+auto getPairPtr(List const &list, std::string_view key){
+	return getPair_(list, key, [](bool b, auto it){
+		return b ? & *it : nullptr;
+	});
+}
+
+template<typename List>
+auto getPairOK(List const &list, std::string_view key){
+	return getPair_(list, key, [](bool b, auto ){
+		return b;
+	});
 }
 
 } // namespace

@@ -8,8 +8,8 @@ namespace net::worker::commands::Counter{
 
 	namespace counter_impl_{
 
-		template<int Sign, class Protocol, class DBAdapter>
-		void do_incr_decr(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		template<int Sign, class Protocol, class List>
+		void do_incr_decr(ParamContainer const &p, List &list, Result<Protocol> &result){
 			if (p.size() != 2 && p.size() != 3)
 				return;
 
@@ -23,11 +23,9 @@ namespace net::worker::commands::Counter{
 			if (n == 0)
 				return;
 
-			auto it = db.find(key);
 
-			if (it && it->isValid()){
-				auto const &val = it->getVal();
 
+			if (auto const val = hm4::getPairVal(list, key); !std::empty(val)){
 				n += from_string<int64_t>(val);
 
 				if constexpr(MAY_RETURN_STRING){
@@ -36,53 +34,65 @@ namespace net::worker::commands::Counter{
 					result.set(n);
 				}
 			}else{
-				result.set_0();
+				result.set(n);
 			}
 
 			to_string_buffer_t buffer;
 
 			auto const val = to_string(n, buffer);
 
-			db.set(key, val);
-
-			return;
+			hm4::insert(list, key, val);
 		}
 	}
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct INCR : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "incr";
-		constexpr inline static bool mut		= true;
-		constexpr inline static std::string_view cmd[]	= {
-			"incr",		"INCR",
-			"incrby",	"INCRBY"
+	struct INCR : MBase<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<+1>(params, db, result);
+			return do_incr_decr<+1>(params, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"incr",		"INCR",
+			"incrby",	"INCRBY"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct DECR : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "decr";
-		constexpr inline static bool mut		= true;
-		constexpr inline static std::string_view cmd[]	= {
-			"decr",		"DECR",
-			"decrby",	"DECRBY"
+	struct DECR : MBase<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
 
-			return do_incr_decr<-1>(params, db, result);
+			return do_incr_decr<-1>(params, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"decr",		"DECR",
+			"decrby",	"DECRBY"
+		};
 	};
 
 

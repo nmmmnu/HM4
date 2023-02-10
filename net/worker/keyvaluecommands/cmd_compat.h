@@ -30,7 +30,15 @@ namespace net::worker::commands::Compat{
 
 	template<class Protocol, class DBAdapter>
 	struct SELECT : compat_impl_::OK<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "select";
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"select",	"SELECT"
 		};
@@ -38,7 +46,15 @@ namespace net::worker::commands::Compat{
 
 	template<class Protocol, class DBAdapter>
 	struct RESET : compat_impl_::OK<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "reset";
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"reset",	"RESET"
 		};
@@ -46,24 +62,40 @@ namespace net::worker::commands::Compat{
 
 	template<class Protocol, class DBAdapter>
 	struct TYPE : compat_impl_::VAL<Protocol,DBAdapter,std::string_view>{
-		constexpr inline static std::string_view name	= "type";
-		constexpr inline static std::string_view cmd[]	= {
-			"type",		"TYPE"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		constexpr TYPE() : compat_impl_::VAL<Protocol,DBAdapter,std::string_view>("string"){
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"type",		"TYPE"
+		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct TOUCH : compat_impl_::VAL<Protocol,DBAdapter,bool>{
-		constexpr inline static std::string_view name	= "touch";
-		constexpr inline static std::string_view cmd[]	= {
-			"touch",	"TOUCH"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		constexpr TOUCH() : compat_impl_::VAL<Protocol,DBAdapter,bool>(true){
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"touch",	"TOUCH"
+		};
 	};
 
 

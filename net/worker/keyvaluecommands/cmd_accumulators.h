@@ -15,13 +15,13 @@ namespace net::worker::commands::Accumulators{
 
 
 		template<typename Accumulator, class It>
-		auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it){
+		auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit){
 			Accumulator accumulator;
 
 			uint32_t iterations	= 0;
 			uint32_t results	= 0;
 
-			for(;it;++it){
+			for(;it != eit;++it){
 				auto const key = it->getKey();
 
 				if (++iterations > ITERATIONS)
@@ -44,8 +44,8 @@ namespace net::worker::commands::Accumulators{
 
 
 
-		template<class Accumulator, class Protocol, class DBAdapter>
-		void execCommand(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		template<class Accumulator, class Protocol, class List>
+		void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
 			if (p.size() != 4)
 				return;
 
@@ -69,9 +69,10 @@ namespace net::worker::commands::Accumulators{
 			auto const &prefix = p[3];
 
 			auto const [ number, lastKey ] = accumulateResults<Accumulator>(
-							count				,
-							prefix				,
-							db.find(key, std::false_type{})
+							count					,
+							prefix					,
+							list.find(key, std::false_type{})	,
+							std::end(list)
 			);
 
 			to_string_buffer_t buffer;
@@ -89,9 +90,12 @@ namespace net::worker::commands::Accumulators{
 
 	template<class Protocol, class DBAdapter>
 	struct COUNT : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "count";
-		constexpr inline static std::string_view cmd[]	= {
-			"count",	"COUNT"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -111,17 +115,25 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<COUNT_>(params, db, result);
+			return execCommand<COUNT_>(params, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"count",	"COUNT"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SUM : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "sum";
-		constexpr inline static std::string_view cmd[]	= {
-			"sum",		"SUM"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -141,17 +153,25 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<SUM_>(params, db, result);
+			return execCommand<SUM_>(params, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"sum",		"SUM"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MIN : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "min";
-		constexpr inline static std::string_view cmd[]	= {
-			"min",		"MIN"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -174,17 +194,25 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MIN_>(params, db, result);
+			return execCommand<MIN_>(params, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"min",		"MIN"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MAX : Base<Protocol,DBAdapter>{
-		constexpr inline static std::string_view name	= "max";
-		constexpr inline static std::string_view cmd[]	= {
-			"max",		"MAX"
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
 		};
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -207,8 +235,13 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MAX_>(params, db, result);
+			return execCommand<MAX_>(params, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"max",		"MAX"
+		};
 	};
 
 
