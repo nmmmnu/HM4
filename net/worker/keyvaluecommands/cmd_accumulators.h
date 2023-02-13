@@ -89,7 +89,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct COUNT : Base<Protocol,DBAdapter>{
+	struct COUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -127,7 +127,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SUM : Base<Protocol,DBAdapter>{
+	struct SUM : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -165,7 +165,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MIN : Base<Protocol,DBAdapter>{
+	struct MIN : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -206,7 +206,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MAX : Base<Protocol,DBAdapter>{
+	struct MAX : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

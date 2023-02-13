@@ -13,7 +13,7 @@ namespace net::worker::commands::BITSET{
 	}
 
 	template<class Protocol, class DBAdapter>
-	struct BITSET : MBase<Protocol,DBAdapter>{
+	struct BITSET : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -65,18 +65,21 @@ namespace net::worker::commands::BITSET{
 
 				return result.set();
 
-			}/* else if (pair->getVal().size() >= n_byte_size && db.canUpdateWithHint(pair)){
-				TODO HINT
+			}else if (hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, pair, n_byte_size)){
+				// HINT
 
 				// valid pair, update in place
-
 				flipBit__(const_cast<char *>( pair->getVal().data() ),
 						bit, n_byte, n_mask);
 
-				db.expHint(pair, 0);
+				const auto *hint = pair;
+				// condition already checked,
+				// update the expiration,
+				// will always succeed
+				hm4::proceedInsertHint(*db, hint, 0, key, pair->getVal());
 
 				return result.set();
-			}*/else{
+			}else{
 				// normal update
 
 				string = pair->getVal();
@@ -133,7 +136,7 @@ namespace net::worker::commands::BITSET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BITGET : Base<Protocol,DBAdapter>{
+	struct BITGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -184,7 +187,7 @@ namespace net::worker::commands::BITSET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BITCOUNT : Base<Protocol,DBAdapter>{
+	struct BITCOUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -228,7 +231,7 @@ namespace net::worker::commands::BITSET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BITMAX : Base<Protocol,DBAdapter>{
+	struct BITMAX : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

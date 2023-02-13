@@ -8,7 +8,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GET : Base<Protocol,DBAdapter>{
+	struct GET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -40,7 +40,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MGET : Base<Protocol,DBAdapter>{
+	struct MGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -82,7 +82,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXISTS : Base<Protocol,DBAdapter>{
+	struct EXISTS : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -113,7 +113,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TTL : Base<Protocol,DBAdapter>{
+	struct TTL : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -147,7 +147,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct STRLEN : Base<Protocol,DBAdapter>{
+	struct STRLEN : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -182,7 +182,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HGET : Base<Protocol,DBAdapter>{
+	struct HGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -228,7 +228,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HMGET : Base<Protocol,DBAdapter>{
+	struct HMGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -291,7 +291,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HEXISTS : Base<Protocol,DBAdapter>{
+	struct HEXISTS : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

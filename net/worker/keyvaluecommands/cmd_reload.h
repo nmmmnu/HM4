@@ -7,7 +7,7 @@ namespace net::worker::commands::Reload{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SAVE : Base<Protocol,DBAdapter>{
+	struct SAVE : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -33,7 +33,7 @@ namespace net::worker::commands::Reload{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct RELOAD : Base<Protocol,DBAdapter>{
+	struct RELOAD : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

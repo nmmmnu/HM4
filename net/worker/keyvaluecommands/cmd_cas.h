@@ -7,7 +7,7 @@ namespace net::worker::commands::CAS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CAS : MBase<Protocol,DBAdapter>{
+	struct CAS : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -44,10 +44,9 @@ namespace net::worker::commands::CAS{
 
 				auto const exp  = p.size() == 5 ? from_string<uint32_t>(p[4]) : 0;
 
-				// TODO HINT
-			//	db.setHint(& *it, val, exp);
-
-				hm4::insert(*db, key, val, exp);
+				// HINT
+				const auto *hint = & *it;
+				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
 
 				return result.set(true);
 			}
@@ -64,7 +63,7 @@ namespace net::worker::commands::CAS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CAD : MBase<Protocol,DBAdapter>{
+	struct CAD : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -92,9 +91,10 @@ namespace net::worker::commands::CAS{
 			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){
 				// DEL
 
-				// TODO HINT
-			//	db.delHint(& *it);
-				hm4::erase(*db, key);
+				// HINT
+				const auto *hint = & *it;
+				// put tombstone
+				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key);
 
 				return result.set(true);
 			}

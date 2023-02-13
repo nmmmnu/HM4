@@ -63,7 +63,7 @@ namespace net::worker::commands::GetX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETX : Base<Protocol,DBAdapter>{
+	struct GETX : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -122,7 +122,7 @@ namespace net::worker::commands::GetX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HGETALL : Base<Protocol,DBAdapter>{
+	struct HGETALL : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -192,7 +192,7 @@ namespace net::worker::commands::GetX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DELX : MBase<Protocol,DBAdapter>{
+	struct DELX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -227,10 +227,16 @@ namespace net::worker::commands::GetX{
 			std::string_view string_key = scanKeysAndDeleteInPlace_(*db, prefix, key, container);
 
 			for(auto const &x : container){
+				auto const s1 = db->mutable_size();
+
 				hm4::erase(*db, x);
 
-				if (db->mutable_size() == 0){
+				auto const s2 = db->mutable_size();
+
+				if (s2 < s1){
+					// something hapenned.
 					// list just flushed.
+					// the container contains junk now.
 					++check_passes;
 
 					log__<LogLevel::WARNING>("DELX", "Restart because of table flush", check_passes);
@@ -258,7 +264,7 @@ namespace net::worker::commands::GetX{
 				auto const key = it->getKey();
 
 				if (! same_prefix(prefix, key))
-					break;
+					return {};
 
 				if (++iterations > ITERATIONS_DELX){
 					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
@@ -268,8 +274,15 @@ namespace net::worker::commands::GetX{
 				if (! it->isValid(std::true_type{}))
 					continue;
 
-			//	TODO HINT !!!
-				container.emplace_back(key);
+				// HINT !!!
+
+				if (const auto *hint = & *it; hm4::canInsertHint<DBAdapter::TRY_INSERT_HINTS>(list, hint)){
+					// put tombstone now
+					hm4::proceedInsertHint(list, hint, key);
+				}else{
+					// put tombstone later
+					container.emplace_back(key);
+				}
 			}
 
 			return {};
@@ -284,7 +297,7 @@ namespace net::worker::commands::GetX{
 				auto const key = it->getKey();
 
 				if (! same_prefix(prefix, key))
-					break;
+					return result.set();
 
 				if (++iterations > ITERATIONS_DELX){
 					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);

@@ -27,12 +27,6 @@ namespace net::worker::commands::HLL{
 			);
 		}
 
-	//	template<class List>
-	//	auto store(List &, const hm4::Pair *pair){
-	//		// update only timestamps
-	//	//	return db.expHint(pair, 0);
-	//	}
-
 		template<class List>
 		const hm4::Pair *load_pair(List &list, std::string_view key){
 			return hm4::getPair_(list, key, [](bool b, auto it) -> const hm4::Pair *{
@@ -90,7 +84,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFADD : MBase<Protocol,DBAdapter>{
+	struct PFADD : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -140,8 +134,8 @@ namespace net::worker::commands::HLL{
 				store(*db, key, hll);
 
 				return result.set_1();
-			}/* else if (db.canUpdateWithHint(pair)){
-				TODO HINT
+			}else if (hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, pair)){
+				// HINT
 
 				auto cast = [](const char *s){
 					const uint8_t *c = reinterpret_cast<const uint8_t *>(s);
@@ -151,12 +145,17 @@ namespace net::worker::commands::HLL{
 
 				uint8_t *hll = cast(pair->getVal().data());
 
+				// valid pair, update in place
 				add_values(hll);
 
-				store(*db, pair);
+				const auto *hint = pair;
+				// condition already checked,
+				// update the expiration,
+				// will always succeed
+				hm4::proceedInsertHint(*db, hint, 0, key, pair->getVal());
 
 				return result.set_1();
-			}*/else{
+			}else{
 				// proceed with normal update
 
 				uint8_t *hll = hll_;
@@ -187,7 +186,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFINTERSECT : Base<Protocol,DBAdapter>{
+	struct PFINTERSECT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -233,7 +232,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFCOUNT : Base<Protocol,DBAdapter>{
+	struct PFCOUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -287,7 +286,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFMERGE : MBase<Protocol,DBAdapter>{
+	struct PFMERGE : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -339,7 +338,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFBITS : Base<Protocol,DBAdapter>{
+	struct PFBITS : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -364,7 +363,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFERROR : Base<Protocol,DBAdapter>{
+	struct PFERROR : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

@@ -477,20 +477,25 @@ template class SkipList<MyAllocator::STDAllocator>;
 template class SkipList<MyAllocator::ArenaAllocator>;
 template class SkipList<MyAllocator::SimulatedArenaAllocator>;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Normal		&&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Normal		&&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Normal		&&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Normal		&&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
+template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Tombstone	&&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Tombstone	&&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Tombstone	&&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Tombstone	&&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
+template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Clone		&&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Clone		&&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Clone		&&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Clone		&&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
+template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
+
+template auto SkipList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
+template auto SkipList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
 
 } // namespace
 

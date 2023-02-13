@@ -7,7 +7,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct INFO : Base<Protocol,DBAdapter>{
+	struct INFO : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -36,7 +36,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DBSIZE : Base<Protocol,DBAdapter>{
+	struct DBSIZE : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -63,7 +63,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct VERSION : Base<Protocol,DBAdapter>{
+	struct VERSION : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -90,7 +90,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PING : Base<Protocol,DBAdapter>{
+	struct PING : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -115,7 +115,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct ECHO : Base<Protocol,DBAdapter>{
+	struct ECHO : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

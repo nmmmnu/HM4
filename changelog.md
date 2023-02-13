@@ -75,4 +75,5 @@ Changelog
 ### 1.2.19
 
 -	fix bug in INCR / INCRBY / DECR / DECRBY
+-	refactor all commands
 

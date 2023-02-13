@@ -7,14 +7,14 @@ namespace net::worker::commands::Compat{
 	namespace compat_impl_{
 
 		template<class Protocol, class DBAdapter>
-		struct OK : Base<Protocol,DBAdapter>{
+		struct OK : BaseRO<Protocol,DBAdapter>{
 			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 				return result.set();
 			}
 		};
 
 		template<class Protocol, class DBAdapter, typename T>
-		struct VAL : Base<Protocol,DBAdapter>{
+		struct VAL : BaseRO<Protocol,DBAdapter>{
 			constexpr VAL(T const &n) : n(n){
 			}
 

@@ -7,7 +7,7 @@ namespace net::worker::commands::System{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXIT : Base<Protocol,DBAdapter>{
+	struct EXIT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -28,7 +28,7 @@ namespace net::worker::commands::System{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct SHUTDOWN : Base<Protocol,DBAdapter>{
+	struct SHUTDOWN : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

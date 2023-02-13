@@ -7,7 +7,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SET : MBase<Protocol,DBAdapter>{
+	struct SET : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -42,7 +42,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MSET : MBase<Protocol,DBAdapter>{
+	struct MSET : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -82,7 +82,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MSETNX : MBase<Protocol,DBAdapter>{
+	struct MSETNX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -131,7 +131,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MSETXX : MBase<Protocol,DBAdapter>{
+	struct MSETXX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -162,39 +162,42 @@ namespace net::worker::commands::Mutable{
 				if (auto *it = hm4::getPairPtr(*db, key); it){
 					auto const &val = *std::next(itk);
 
-				// TODO HINT
+					// HINT
 
-				//	if (const auto *p = & *it; db.canUpdateWithHint(p))
-				//		buffer_.emplace_back(p, key, val);
-				//	else
-
-					buffer_.emplace_back(nullptr, key, val);
+					if (const auto *hint = & *it; hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, hint, val.size()))
+						buffer_.emplace_back(hint, key, val);
+					else
+						buffer_.emplace_back(nullptr, key, val);
 
 				}else
 					return result.set_0();
 			}
 
-			// set keys with hints
-			// for(auto &x : buffer_)
-			// 	if (x.p)
-			// 		db.setHint(x.p, x.val);
+			// first set keys with hints
+			for(auto const &x : buffer_)
+				if (x.hint){
+					// condition already checked,
+					// update the expiration,
+					// will always succeed
+					hm4::proceedInsertHint(*db, x.hint, x.key, x.val);
+				}
 
 			// set keys without hints
-			for(auto &x : buffer_)
-			//	if (x.p == nullptr)
-				hm4::insert(*db, x.key, x.val);
+			for(auto const &x : buffer_)
+				if (!x.hint)
+					hm4::insert(*db, x.key, x.val);
 
 			return result.set_1();
 		}
 
 	private:
 		struct msetxx_data{
-			const hm4::Pair *p;
+			const hm4::Pair *hint;
 			std::string_view key;
 			std::string_view val;
 
-			constexpr msetxx_data(const hm4::Pair *p, std::string_view key, std::string_view val) :
-							p(p), key(key), val(val){}
+			constexpr msetxx_data(const hm4::Pair *hint, std::string_view key, std::string_view val) :
+							hint(hint), key(key), val(val){}
 		};
 
 		std::vector<msetxx_data> buffer_;
@@ -208,7 +211,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SETEX : MBase<Protocol,DBAdapter>{
+	struct SETEX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -243,7 +246,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HSET : MBase<Protocol,DBAdapter>{
+	struct HSET : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -291,7 +294,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HMSET : MBase<Protocol,DBAdapter>{
+	struct HMSET : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -348,7 +351,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SETNX : MBase<Protocol,DBAdapter>{
+	struct SETNX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -391,7 +394,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SETXX : MBase<Protocol,DBAdapter>{
+	struct SETXX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -419,10 +422,9 @@ namespace net::worker::commands::Mutable{
 				const auto &val = p[2];
 				const auto exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
-			// TODO HINT
-			//	db.setHint(& *it, val, exp);
-
-				hm4::insert(*db, key, val, exp);
+				// HINT
+				const auto *hint = & *it;
+				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
 
 				return result.set(true);
 			}else{
@@ -439,7 +441,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DEL : MBase<Protocol,DBAdapter>{
+	struct DEL : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -477,7 +479,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HDEL : MBase<Protocol,DBAdapter>{
+	struct HDEL : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -531,7 +533,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETSET : MBase<Protocol,DBAdapter>{
+	struct GETSET : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -568,10 +570,9 @@ namespace net::worker::commands::Mutable{
 			const auto &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
-			// TODO HINT
-			// db.setHint(& *it, val, exp);
-
-			hm4::insert(*db, key, val, exp);
+			// HINT
+			const auto *hint = & *it;
+			hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
 
 			// return
 
@@ -587,7 +588,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETDEL : MBase<Protocol,DBAdapter>{
+	struct GETDEL : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -615,9 +616,11 @@ namespace net::worker::commands::Mutable{
 				result.set(it->getVal());
 
 				// DEL
-				// TODO HINT
-				// db.delHint(& *it);
-				hm4::erase(*db, key);
+
+				// HINT
+				const auto *hint = & *it;
+				// put tombstone
+				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key);
 
 				// return
 
@@ -636,7 +639,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXPIRE : MBase<Protocol,DBAdapter>{
+	struct EXPIRE : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -662,9 +665,9 @@ namespace net::worker::commands::Mutable{
 				// SET
 				auto const exp  = from_string<uint32_t>(p[2]);
 
-				// TODO HINT
-				// db.expHint(& *it, exp);
-				hm4::insert(*db, key, it->getVal(), exp);
+				// HINT
+				const auto *hint = & *it;
+				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, exp, key, hint->getVal());
 
 				return result.set(true);
 			}else{
@@ -681,7 +684,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PERSIST : MBase<Protocol,DBAdapter>{
+	struct PERSIST : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -709,9 +712,9 @@ namespace net::worker::commands::Mutable{
 				if (it->getTTL() > 0){
 					uint32_t const exp = 0;
 
-					// TODO HINT
-					// db.expHint(& *it, exp);
-					hm4::insert(*db, key, it->getVal(), exp);
+					// HINT
+					const auto *hint = & *it;
+					hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, exp, key, hint->getVal());
 				}
 
 				return result.set(true);

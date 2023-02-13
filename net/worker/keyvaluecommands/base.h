@@ -140,6 +140,10 @@ namespace net::worker::commands{
 
 	template<class Protocol, class DBAdapter>
 	struct Base{
+		bool mut() const{
+			return mut_();
+		}
+
 		virtual const std::string_view *begin() const = 0;
 		virtual const std::string_view *end()   const = 0;
 
@@ -151,13 +155,26 @@ namespace net::worker::commands{
 
 	private:
 		virtual void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) = 0;
+		virtual bool mut_() const = 0;
 	};
 
 
+
+	template<class Protocol, class DBAdapter, bool Mutable>
+	struct Base_ : Base<Protocol,DBAdapter>{
+		constexpr static bool MUTABLE = Mutable;
+
+	private:
+		virtual bool mut_() const final{
+			return MUTABLE;
+		}
+	};
 
 	template<class Protocol, class DBAdapter>
-	struct MBase : Base<Protocol,DBAdapter>{
-	};
+	using BaseRO = Base_<Protocol,DBAdapter,false>;
+
+	template<class Protocol, class DBAdapter>
+	using BaseRW = Base_<Protocol,DBAdapter,true>;
 
 
 
@@ -168,13 +185,19 @@ namespace net::worker::commands{
 		class RegisterPack
 	>
 	void registerCommand(RegisterPack &pack){
-		using Command		= Cmd	<Protocol, DBAdapter>;
-		using CommandBase	= Base	<Protocol, DBAdapter>;
-		using CommandMutBase	= MBase	<Protocol, DBAdapter>;
+		using Command		= Cmd		<Protocol, DBAdapter>;
+		using CommandBase	= Base		<Protocol, DBAdapter>;
+		using CommandBaseRO	= BaseRO	<Protocol, DBAdapter>;
+		using CommandBaseRW	= BaseRW	<Protocol, DBAdapter>;
 
-		static_assert(std::is_base_of_v<CommandBase, Command>, "Command not seems to be a command");
+		static_assert(	std::is_base_of_v<CommandBase, Command>,
+							"Command not seems to be a command");
 
-		bool const mut = std::is_base_of_v<CommandMutBase, Command>;
+		static_assert(	std::is_base_of_v<CommandBaseRO, Command> ||
+				std::is_base_of_v<CommandBaseRW, Command>,
+							"Command not seems to be a command");
+
+		bool const mut = std::is_base_of_v<CommandBaseRW, Command>;
 
 		if constexpr(mut == false || mut == DBAdapter::MUTABLE){
 			auto &up = pack.storage.emplace_back(std::make_unique<Command>());

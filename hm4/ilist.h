@@ -125,6 +125,8 @@ namespace PairFactory{
 
 			return true;
 		}
+
+		using Normal::operator();
 	};
 
 	struct Tombstone{
@@ -197,12 +199,11 @@ namespace PairFactory{
 		return PairFactory::Normal{ key, val, expires, created };
 	}
 
-	constexpr auto factory_XXXX(
+	constexpr auto factory(
 			uint32_t const expires,
 			std::string_view key, std::string_view val,
 			uint32_t const created = 0){
-	//	return PairFactory::NormalExpiresOnly{ key, val, expires, created };
-		return PairFactory::Normal{ key, val, expires, created };
+		return PairFactory::NormalExpiresOnly{ key, val, expires, created };
 	}
 
 	constexpr auto factory(std::string_view key){
@@ -219,6 +220,11 @@ using PairFactoryMutableNotifyMessage = PairFactory::MutableNotifyMessage;
 
 // ==============================
 
+template<class List>
+bool erase(List &list, std::string_view const key){
+	return list.erase_(key);
+}
+
 template<class List, typename ...Args>
 auto insert(List &list, Args &&...args){
 	return list.insertLazyPair_(
@@ -226,27 +232,51 @@ auto insert(List &list, Args &&...args){
 	);
 }
 
+template<bool AllowHints, class List>
+constexpr bool canInsertHint(const List &list, const Pair *pair){
+	if constexpr(AllowHints)
+		return list.getAllocator().owns(pair);
+
+	return false;
+}
+
+template<bool AllowHints, class List>
+constexpr bool canInsertHint(const List &list, const Pair *pair, size_t val_size){
+	if constexpr(AllowHints)
+		return list.getAllocator().owns(pair) && pair->getVal().size() >= val_size;
+
+	return false;
+}
+
 template<class List, typename ...Args>
-bool tryInsertHint(List &list, const Pair *pair, Args &&...args){
-	if (list.getAllocator().owns(pair)){
-		// Pair is in the memlist and it is safe to be overwitten.
-		// the create time is not updated, but this is not that important,
-		// since the Pair is not yet flushed.
+constexpr bool proceedInsertHint(List &list, const Pair *pair, Args &&...args){
+	// Pair is in the memlist and it is safe to be overwitten.
+	// the create time is not updated, but this is not that important,
+	// since the Pair is not yet flushed.
+	Pair *m_pair = const_cast<Pair *>(pair);
 
-		Pair *m_pair = const_cast<Pair *>(pair);
+	auto factory = PairFactory::factory(std::forward<Args>(args)...);
 
-		auto factory = PairFactory::factory(std::forward<Args>(args)...);
+	if (factory(m_pair, list))
+		return true;
+	else
+		return false;
+}
 
-		if (factory(m_pair, list))
-			return true;
+template<bool AllowHints = true, class List, typename ...Args>
+constexpr bool tryInsertHint(List &list, const Pair *pair, Args &&...args){
+	if constexpr(AllowHints){
+		if (canInsertHint<AllowHints>(list, pair))
+			return proceedInsertHint(list, pair, std::forward<Args>(args)...);
 	}
 
 	return false;
 }
 
-template<class List>
-bool erase(List &list, std::string_view const key){
-	return list.erase_(key);
+template<bool AllowHints = true, class List, typename ...Args>
+void insertHint(List &list, const Pair *pair, Args &&...args){
+	if (tryInsertHint<AllowHints>(list, pair, std::forward<Args>(args)...) == false)
+		insert(list, std::forward<Args>(args)...);
 }
 
 // ==============================

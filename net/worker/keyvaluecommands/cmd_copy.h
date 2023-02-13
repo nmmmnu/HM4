@@ -61,7 +61,7 @@ namespace net::worker::commands::Copy{
 
 
 	template<class Protocol, class DBAdapter>
-	struct RENAME : MBase<Protocol,DBAdapter>{
+	struct RENAME : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -85,7 +85,7 @@ namespace net::worker::commands::Copy{
 
 
 	template<class Protocol, class DBAdapter>
-	struct RENAMENX : MBase<Protocol,DBAdapter>{
+	struct RENAMENX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -109,7 +109,7 @@ namespace net::worker::commands::Copy{
 
 
 	template<class Protocol, class DBAdapter>
-	struct COPY : MBase<Protocol,DBAdapter>{
+	struct COPY : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -132,7 +132,7 @@ namespace net::worker::commands::Copy{
 
 
 	template<class Protocol, class DBAdapter>
-	struct COPYNX : MBase<Protocol,DBAdapter>{
+	struct COPYNX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

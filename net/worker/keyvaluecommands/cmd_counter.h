@@ -48,7 +48,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct INCR : MBase<Protocol,DBAdapter>{
+	struct INCR : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -73,7 +73,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DECR : MBase<Protocol,DBAdapter>{
+	struct DECR : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
