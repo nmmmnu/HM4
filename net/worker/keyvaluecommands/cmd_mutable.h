@@ -140,7 +140,7 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			// should be odd number arguments
 			// mset a 5 b 6
 			if (p.size() < 3 || p.size() % 2 == 0)
@@ -152,55 +152,54 @@ namespace net::worker::commands::Mutable{
 				if (const auto &key = *itk; key.empty())
 					return;
 
-			buffer_.clear();
-			buffer_.reserve(std::end(p) - std::begin(p) + varg);
+			auto &container = blob.pcontainer;
+
+			// theoretically can happen
+			if (p.size() / 2 > container.capacity())
+				return;
+
+			container.clear();
+			container.reserve(std::end(p) - std::begin(p) + varg);
 
 			// check if any key NOT exists
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &key = *itk;
+				auto const &val = *std::next(itk);
 
 				if (auto *it = hm4::getPairPtr(*db, key); it){
-					auto const &val = *std::next(itk);
-
-					// HINT
-
-					if (const auto *hint = & *it; hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, hint, val.size()))
-						buffer_.emplace_back(hint, key, val);
-					else
-						buffer_.emplace_back(nullptr, key, val);
-
+					if (const auto *hint = & *it; hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, hint, val.size())){
+						// HINT
+						container.push_back(hint);
+					}else
+						container.push_back(nullptr);
 				}else
 					return result.set_0();
 			}
 
-			// first set keys with hints
-			for(auto const &x : buffer_)
-				if (x.hint){
-					// condition already checked,
-					// update the expiration,
-					// will always succeed
-					hm4::proceedInsertHint(*db, x.hint, x.key, x.val);
-				}
+			// HINT
+			for(size_t i = 0; i < container.size(); ++i){
+				if (const auto *hint = container[i]; hint){
+					auto const &key = p[varg + i * 2 + 0];
+					auto const &val = p[varg + i * 2 + 1];
 
-			// set keys without hints
-			for(auto const &x : buffer_)
-				if (!x.hint)
-					hm4::insert(*db, x.key, x.val);
+					assert(key == hint->getKey());
+
+					hm4::proceedInsertHint(*db, hint, key, val);
+				}
+			}
+
+			// NORMAL
+			for(size_t i = 0; i < container.size(); ++i){
+				if (const auto *hint = container[i]; !hint){
+					auto const &key = p[varg + i * 2 + 0];
+					auto const &val = p[varg + i * 2 + 1];
+
+					hm4::insert(*db, key, val);
+				}
+			}
 
 			return result.set_1();
 		}
-
-	private:
-		struct msetxx_data{
-			const hm4::Pair *hint;
-			std::string_view key;
-			std::string_view val;
-
-			constexpr msetxx_data(const hm4::Pair *hint, std::string_view key, std::string_view val) :
-							hint(hint), key(key), val(val){}
-		};
-
-		std::vector<msetxx_data> buffer_;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

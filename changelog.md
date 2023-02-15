@@ -78,4 +78,6 @@ Changelog
 -	refactor all commands
 -	split GETX module into IMMUTABLEX and MUTABLEX
 -	new command PERSISTX, EXPIREX
+-	remove allocation in MSETXX
+
 
