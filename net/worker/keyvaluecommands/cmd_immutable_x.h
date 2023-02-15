@@ -4,14 +4,12 @@
 
 #include <algorithm>	// std::clamp
 
-namespace net::worker::commands::GetX{
+namespace net::worker::commands::ImmutableX{
 
 	namespace getx_impl_{
 
 		constexpr static uint32_t MIN			= 10;
 		constexpr static uint32_t ITERATIONS		= (OutputBlob::ContainerSize - 1) / 2;
-		constexpr static uint32_t ITERATIONS_DELX	=  OutputBlob::ContainerSize;
-		constexpr static uint32_t PASSES_DELX		= 3;
 
 
 
@@ -19,6 +17,8 @@ namespace net::worker::commands::GetX{
 		void accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container, ProjectionKey projKey){
 			uint32_t iterations	= 0;
 			uint32_t results	= 0;
+
+			container.clear();
 
 			for(;it != eit;++it){
 				auto const &key = it->getKey();
@@ -80,10 +80,7 @@ namespace net::worker::commands::GetX{
 
 			using namespace getx_impl_;
 
-			auto &container = blob.container;
-
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-			container.clear();
 
 			// using uint64_t from the user, allow more user-friendly behavour.
 			// suppose he / she enters 1'000'000'000.
@@ -107,10 +104,10 @@ namespace net::worker::commands::GetX{
 				prefix					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				container
+				blob.container
 			);
 
-			return result.set_container(container);
+			return result.set_container(blob.container);
 		}
 
 	private:
@@ -143,10 +140,7 @@ namespace net::worker::commands::GetX{
 
 			using namespace getx_impl_;
 
-			auto &container = blob.container;
-
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-			container.clear();
 
 
 
@@ -176,146 +170,16 @@ namespace net::worker::commands::GetX{
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				container				,
+				blob.container				,
 				proj
 			);
 
-			return result.set_container(container);
+			return result.set_container(blob.container);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"hgetall",	"HGETALL"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct DELX : BaseRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		using Container = StaticVector<std::string_view, getx_impl_::ITERATIONS_DELX>;
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			if (p.size() != 3)
-				return;
-
-			auto const &key    = p[1];
-			auto const &prefix = p[2];
-
-			if (prefix.empty())
-				return;
-
-
-
-			using namespace getx_impl_;
-
-			auto &container = blob.container;
-			container.reserve(ITERATIONS_DELX);
-
-			uint8_t check_passes = 0;
-
-		// label for goto
-		start:
-			std::string_view string_key = scanKeysAndDeleteInPlace_(*db, prefix, key, container);
-
-			for(auto const &x : container){
-				auto const s1 = db->mutable_size();
-
-				hm4::erase(*db, x);
-
-				auto const s2 = db->mutable_size();
-
-				if (s2 < s1){
-					// something hapenned.
-					// list just flushed.
-					// the container contains junk now.
-					++check_passes;
-
-					log__<LogLevel::WARNING>("DELX", "Restart because of table flush", check_passes);
-
-					if (check_passes < PASSES_DELX)
-						goto start;
-					else
-						return scanForLastKey_(*db, prefix, key, result);
-				}
-			}
-
-			return result.set(string_key);
-		}
-
-	private:
-		template<class Container>
-		std::string_view scanKeysAndDeleteInPlace_(typename DBAdapter::List &list, std::string_view prefix, std::string_view key, Container &container) const{
-			using namespace getx_impl_;
-
-			container.clear();
-
-			uint32_t iterations = 0;
-
-			for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
-				auto const key = it->getKey();
-
-				if (! same_prefix(prefix, key))
-					return {};
-
-				if (++iterations > ITERATIONS_DELX){
-					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
-					return key;
-				}
-
-				if (! it->isValid(std::true_type{}))
-					continue;
-
-				// HINT !!!
-
-				if (const auto *hint = & *it; hm4::canInsertHint<DBAdapter::TRY_INSERT_HINTS>(list, hint)){
-					// put tombstone now
-					hm4::proceedInsertHint(list, hint, key);
-				}else{
-					// put tombstone later
-					container.emplace_back(key);
-				}
-			}
-
-			return {};
-		}
-
-		void scanForLastKey_(typename DBAdapter::List &list, std::string_view prefix, std::string_view key, Result<Protocol> &result) const{
-			using namespace getx_impl_;
-
-			uint32_t iterations = 0;
-
-			for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
-				auto const key = it->getKey();
-
-				if (! same_prefix(prefix, key))
-					return result.set();
-
-				if (++iterations > ITERATIONS_DELX){
-					log__<LogLevel::NOTICE>("DELX", "iterations", iterations, key);
-					return result.set(key);
-				}
-
-				if (! it->isValid(std::true_type{}))
-					continue;
-
-				return result.set(key);
-			}
-
-			return result.set();
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"delx",		"DELX"
 		};
 	};
 
@@ -328,8 +192,7 @@ namespace net::worker::commands::GetX{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				GETX	,
-				HGETALL	,
-				DELX
+				HGETALL
 			>(pack);
 		}
 	};

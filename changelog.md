@@ -74,6 +74,8 @@ Changelog
 
 ### 1.2.19
 
--	fix bug in INCR / INCRBY / DECR / DECRBY
+-	fix potential bug in INCR / INCRBY / DECR / DECRBY
 -	refactor all commands
+-	split GETX module into IMMUTABLEX and MUTABLEX
+-	new command PERSISTX, EXPIREX
 

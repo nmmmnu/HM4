@@ -3,12 +3,13 @@
 
 #include "keyvaluecommands/cmd_immutable.h"	// GET, MGET, EXISTS, TTL, STRLEN
 						// HGET, HEXISTS
-#include "keyvaluecommands/cmd_getx.h"		// GETX, HGETALL, DELX
+#include "keyvaluecommands/cmd_immutable_x.h"	// GETX, HGETALL
 						// HGETALL
 #include "keyvaluecommands/cmd_accumulators.h"	// COUNT, SUM, MIN, MAX
 
 #include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, SETXX, EXPIRE, PERSIST, GETSET, GETDEL, DEL
 						// HSET, HDEL
+#include "keyvaluecommands/cmd_mutable_x.h"	// DELX
 #include "keyvaluecommands/cmd_cas.h"		// CAS, CAD
 #include "keyvaluecommands/cmd_copy.h"		// COPY, COPYNX, RENAME, RENAMENX
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
@@ -66,10 +67,11 @@ namespace net::worker{
 
 			registerModulesAll<Protocol, DBAdapter, RegisterPack,
 				Immutable	::RegisterModule,
-				GetX		::RegisterModule,
+				ImmutableX	::RegisterModule,
 				Accumulators	::RegisterModule,
 
 				Mutable		::RegisterModule,
+				MutableX	::RegisterModule,
 				CAS		::RegisterModule,
 				Copy		::RegisterModule,
 				Counter		::RegisterModule,
