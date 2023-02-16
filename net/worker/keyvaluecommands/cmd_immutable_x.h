@@ -13,6 +13,13 @@ namespace net::worker::commands::ImmutableX{
 
 
 
+		template<class DBAdapter>
+		constexpr static std::size_t MAX_HKEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+						- DBAdapter::SEPARATOR.size()
+						- 16;
+
+
+
 		enum class AccumulateOutput{
 			KEYS,
 			VALS,
@@ -167,10 +174,6 @@ namespace net::worker::commands::ImmutableX{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
 				return;
@@ -188,7 +191,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return;
 
-			if (keyN.size() > MAX_KEY_SIZE)
+			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
 				return;
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
@@ -232,10 +235,6 @@ namespace net::worker::commands::ImmutableX{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
 				return;
@@ -253,7 +252,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return;
 
-			if (keyN.size() > MAX_KEY_SIZE)
+			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
 				return;
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
@@ -297,10 +296,6 @@ namespace net::worker::commands::ImmutableX{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
 				return;
@@ -318,7 +313,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return;
 
-			if (keyN.size() > MAX_KEY_SIZE)
+			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
 				return;
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
