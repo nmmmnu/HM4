@@ -948,6 +948,66 @@ function getData(){
 
 
 			new Cmd(
+					"HGETKEYS",
+
+					"HGETKEYS key",
+
+					"Get <i>key</i> hash.<br />" .
+					"Returns up to 1'000 elements.<br />" .
+					"Works exactly as Redis HGETALL, except internally set key for each value.",
+					"array",
+					"array of subkey from key hash",
+					"1.2.19",
+					"Mem + N * Disk",
+					true,
+					true,
+
+					"immutable_x"
+			),
+
+
+
+			new Cmd(
+					"HGETVALS",
+
+					"HGETVALS key",
+
+					"Get <i>key</i> hash.<br />" .
+					"Returns up to 1'000 elements.<br />" .
+					"Works exactly as Redis HGETVALS, except internally set key for each value.",
+					"array",
+					"array of values from key hash",
+					"1.2.19",
+					"Mem + N * Disk",
+					true,
+					true,
+
+					"immutable_x"
+			),
+
+
+
+			new Cmd(
+					"HLEN",
+
+					"HLEN key",
+
+					"Get <i>key</i> hash.<br />" .
+					"Counts up to 1'000 elements.<br />" .
+					"Works exactly as Redis HLEN, except internally set key for each value.",
+					"int",
+					"number of elements in key hash",
+					"1.2.19",
+					"Mem + N * Disk",
+					true,
+					true,
+
+					"immutable_x"
+			),
+
+
+
+			new Cmd(
 					"HGET",
 
 					"HGET key subkey",

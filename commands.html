@@ -162,6 +162,9 @@
 			&nbsp;
 
 					<li><a href="#HGETALL">HGETALL</a></li>
+				<li><a href="#HGETKEYS">HGETKEYS</a></li>
+				<li><a href="#HGETVALS">HGETVALS</a></li>
+				<li><a href="#HLEN">HLEN</a></li>
 				<li><a href="#HGET">HGET</a></li>
 				<li><a href="#HMGET">HMGET</a></li>
 				<li><a href="#HEXISTS">HEXISTS</a></li>
@@ -944,6 +947,69 @@
 			array
 			<h3>Return value:</h3>
 			array of subkey and values from key hash
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HGETKEYS">
+
+			<h2>HGETKEYS key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HGETKEYS</td></tr>
+				<tr><td>Available since		</td><td>1.2.19</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get <i>key</i> hash.<br />Returns up to 1'000 elements.<br />Works exactly as Redis HGETALL, except internally set key for each value.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array of subkey from key hash
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HGETVALS">
+
+			<h2>HGETVALS key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HGETVALS</td></tr>
+				<tr><td>Available since		</td><td>1.2.19</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get <i>key</i> hash.<br />Returns up to 1'000 elements.<br />Works exactly as Redis HGETVALS, except internally set key for each value.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array of values from key hash
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HLEN">
+
+			<h2>HLEN key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HLEN</td></tr>
+				<tr><td>Available since		</td><td>1.2.19</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get <i>key</i> hash.<br />Counts up to 1'000 elements.<br />Works exactly as Redis HLEN, except internally set key for each value.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			number of elements in key hash
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGET">

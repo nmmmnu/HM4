@@ -100,7 +100,6 @@ namespace net::worker::commands::ImmutableX{
 
 		template<AccumulateOutput Out, class It, class Container>
 		void accumulateResultsH(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
-
 			auto const prefix_size = prefix.size();
 
 			auto proj = [prefix_size](std::string_view x) -> std::string_view{
