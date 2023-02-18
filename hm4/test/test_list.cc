@@ -161,6 +161,10 @@ void list_test(List &list){
 
 	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
+	insert(list, key_over, "original", 0, 1	);
+
+	mytest("overwrite 2",		getCheck(list, key_over,	val_over,	std::true_type{}	));
+
 	// INSERT BY CLONING PAIR
 
 	{

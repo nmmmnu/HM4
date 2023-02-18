@@ -72,6 +72,23 @@ bool empty(List const &list){
 
 // ==============================
 
+[[nodiscard]]
+inline bool isValidForReplace(uint64_t const neo_created_64, Pair const &old) noexcept{
+	return neo_created_64 >= old.getCreated();
+}
+
+[[nodiscard]]
+inline bool isValidForReplace(uint32_t const neo_created, Pair const &old) noexcept{
+	return isValidForReplace(Pair::prepareCreateTime(neo_created), old);
+}
+
+[[nodiscard]]
+inline bool isValidForReplace(Pair const &neo, Pair const &old) noexcept{
+	return isValidForReplace(neo.getCreated(), old);
+}
+
+// ==============================
+
 namespace PairFactory{
 	struct MutableNotifyMessage{
 		size_t bytes_old = 0;
@@ -87,6 +104,11 @@ namespace PairFactory{
 		[[nodiscard]]
 		constexpr auto getKey() const noexcept{
 			return key;
+		}
+
+		[[nodiscard]]
+		constexpr uint32_t getCreated() const noexcept{
+			return created;
 		}
 
 		template<class List>
@@ -137,6 +159,11 @@ namespace PairFactory{
 			return key;
 		}
 
+		[[nodiscard]]
+		constexpr static uint32_t getCreated() noexcept{
+			return 0;
+		}
+
 		template<class List>
 		[[nodiscard]]
 		bool operator()(Pair *hint, List &list) const noexcept{
@@ -164,6 +191,11 @@ namespace PairFactory{
 		[[nodiscard]]
 		auto getKey() const noexcept{
 			return src->getKey();
+		}
+
+		[[nodiscard]]
+		uint64_t getCreated() const noexcept{
+			return src->getCreated();
 		}
 
 		template<class List>

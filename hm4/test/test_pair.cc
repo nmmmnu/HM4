@@ -1,4 +1,5 @@
 #include "pair.h"
+#include "ilist.h"
 
 #include "pmallocator.h"
 #include "trackingallocator.h"
@@ -151,13 +152,13 @@ namespace{
 		mytest("!eq",			! p->equals("something")	);
 
 		mytest("valid",			p->isValid()			);
-		mytest("valid",			p->isValidForReplace(*t)	);
+		mytest("valid",			hm4::isValidForReplace(*p, *t)	);
 
 		mytest("valid",			t->isValid()			);
 		mytest("valid",			t->isValid(std::false_type{})	);
 		mytest("valid",			! t->isValid(std::true_type{})	);
 
-		mytest("valid",			! t->isValidForReplace(*p)	);
+		mytest("valid",			! hm4::isValidForReplace(*t, *p));
 	}
 
 	[[maybe_unused]]

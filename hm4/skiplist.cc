@@ -191,8 +191,14 @@ auto SkipList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
 
 		Pair *olddata = nl.node->data;
 
-		// try update pair in place.
+		// check if we can update
 
+		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
+			if (!isValidForReplace(factory.getCreated(), *olddata))
+				return this->end();
+		}
+
+		// try update pair in place.
 		if (factory(olddata, *this)){
 			// successfully updated.
 
@@ -204,13 +210,6 @@ auto SkipList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
 		if (!newdata)
 			return this->end();
 
-		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
-			// check if the data in database is valid
-			if (! newdata->isValidForReplace(*olddata) ){
-				// newdata will be magically destroyed.
-				return this->end();
-			}
-		}
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// assign new pair

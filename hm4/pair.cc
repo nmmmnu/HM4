@@ -32,7 +32,7 @@ bool Pair::isExpired_() const noexcept{
 	return expires &&  mytime::expired( getCreated(), getExpires() );
 }
 
-uint64_t Pair::getCreateTime__(uint32_t const created) noexcept{
+uint64_t Pair::prepareCreateTime(uint32_t const created) noexcept{
 	return created ? mytime::to64(created) : mytime::now();
 }
 

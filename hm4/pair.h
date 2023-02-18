@@ -80,6 +80,8 @@ inline namespace version_3_00_00{
 			return check(key) && val.size() <= PairConf::MAX_VAL_SIZE;
 		}
 
+		static uint64_t prepareCreateTime(uint32_t created) noexcept;
+
 	public:
 		template<bool copy_key = true, bool copy_val = true>
 		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t expires, uint32_t created){
@@ -90,7 +92,7 @@ inline namespace version_3_00_00{
 				true
 			);
 
-			pair->created	= htobe<uint64_t>(getCreateTime__(created));
+			pair->created	= htobe<uint64_t>(prepareCreateTime(created));
 			pair->expires	= htobe<uint32_t>(std::min(expires, PairConf::EXPIRES_MAX));
 
 			if constexpr(copy_key == false && copy_val == false)
@@ -409,28 +411,11 @@ inline namespace version_3_00_00{
 			return isValid(std::false_type{});
 		}
 
-		template<bool B>
-		[[nodiscard]]
-		bool isValidForReplace(Pair const &other, std::bool_constant<B> tag) const noexcept{
-			// if other is created after this,
-			// then obviously this is not valid
-			if (other.getCreated() > getCreated())
-				return false;
-
-			// chaining
-			return isValid(tag);
-		}
-
 		// ==============================
 
 		[[nodiscard]]
 		bool isValid() const noexcept{
 			return isValid(std::false_type{});
-		}
-
-		[[nodiscard]]
-		bool isValidForReplace(const Pair &other) const noexcept{
-			return isValidForReplace(other, std::false_type{});
 		}
 
 		// ==============================
@@ -503,8 +488,6 @@ inline namespace version_3_00_00{
 		// beware problem 2038 !!!
 		[[nodiscard]]
 		bool isExpired_() const noexcept;
-
-		static uint64_t getCreateTime__(uint32_t created) noexcept;
 
 	} __attribute__((__packed__));
 
