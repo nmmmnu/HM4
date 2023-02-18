@@ -79,7 +79,7 @@ inline bool isValidForReplace(uint64_t const neo_created_64, Pair const &old) no
 
 [[nodiscard]]
 inline bool isValidForReplace(uint32_t const neo_created, Pair const &old) noexcept{
-	return isValidForReplace(Pair::prepareCreateTime(neo_created), old);
+	return isValidForReplace(Pair::prepareCreateTimeSymulate(neo_created), old);
 }
 
 [[nodiscard]]

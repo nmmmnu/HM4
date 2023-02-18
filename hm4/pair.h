@@ -81,6 +81,7 @@ inline namespace version_3_00_00{
 		}
 
 		static uint64_t prepareCreateTime(uint32_t created) noexcept;
+		static uint64_t prepareCreateTimeSymulate(uint32_t created) noexcept;
 
 	public:
 		template<bool copy_key = true, bool copy_val = true>

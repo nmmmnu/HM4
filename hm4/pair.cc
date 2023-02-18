@@ -36,6 +36,10 @@ uint64_t Pair::prepareCreateTime(uint32_t const created) noexcept{
 	return created ? mytime::to64(created) : mytime::now();
 }
 
+uint64_t Pair::prepareCreateTimeSymulate(uint32_t const created) noexcept{
+	return created ? mytime::to64(created) : std::numeric_limits<uint64_t>::max();
+}
+
 uint32_t Pair::getTTL() const noexcept{
 	if (!expires)
 		return 0;
