@@ -80,4 +80,6 @@ Changelog
 -	new command PERSISTX, EXPIREX
 -	remove allocation in MSETXX
 -	new command HGETKEYS, HGETVALS, HLEN
+-	optimized overwrite in lists
+
 
