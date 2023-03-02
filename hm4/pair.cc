@@ -36,7 +36,7 @@ uint64_t Pair::prepareCreateTime(uint32_t const created) noexcept{
 	return created ? mytime::to64(created) : mytime::now();
 }
 
-uint64_t Pair::prepareCreateTimeSymulate(uint32_t const created) noexcept{
+uint64_t Pair::prepareCreateTimeSimulate(uint32_t const created) noexcept{
 	return created ? mytime::to64(created) : std::numeric_limits<uint64_t>::max();
 }
 
