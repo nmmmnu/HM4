@@ -20,8 +20,8 @@ struct FileMetaBlob{
 	uint64_t	createdMax;	// 8
 
 public:
-	static constexpr const char	*LOGO		= "ZUSE004";
-	static constexpr uint16_t	VERSION		= 5;
+	static constexpr const char	*LOGO		= "ZUSE005";
+	static constexpr uint16_t	VERSION		= 6;
 
 	static constexpr uint16_t	OPTIONS_NONE	= 0;
 	static constexpr uint16_t	OPTIONS_SORTED	= 1 << 0;
