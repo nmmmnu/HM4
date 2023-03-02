@@ -17,19 +17,18 @@
 #include "baseallocator.h"
 
 namespace hm4{
-inline namespace version_3_00_00{
+inline namespace version_4_00_00{
 
 	namespace PairConf{
-		constexpr uint32_t	VERSION			= 20000;
+		constexpr uint32_t	VERSION			= 4'00'00;
 
 		constexpr size_t	ALIGN			= sizeof(void *);
 
-		constexpr uint16_t	MAX_KEY_SIZE		= 0b0'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
-		constexpr uint32_t	MAX_VAL_SIZE		= 0b0'1111'1111'1111'1111'1111; // 1048575, 1 MB
-		constexpr uint16_t	MAX_VAL_MASK		= 0b0'0000'1111'0000'0000'0000;
-		constexpr size_t	MAX_VAL_MASK_SH		= 4;
+		constexpr uint16_t	MAX_KEY_SIZE		= 0b0'0000'0000'0000'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
+		constexpr uint32_t	MAX_VAL_SIZE		= 0b0'0000'1111'1111'1111'1111'1111'1111'1111;	// 256 MB
 
 		constexpr uint16_t	MAX_KEY_MASK		= MAX_KEY_SIZE;
+		constexpr uint32_t	MAX_VAL_MASK		= MAX_VAL_SIZE;
 
 		constexpr uint32_t	EXPIRES_TOMBSTONE	= 0xFFFF'FFFF;
 		constexpr uint32_t	EXPIRES_MAX		= EXPIRES_TOMBSTONE - 1;
@@ -42,8 +41,8 @@ inline namespace version_3_00_00{
 	struct Pair{
 		uint64_t	created;	// 8
 		uint32_t	expires;	// 4, 136 years, not that bad. but beware for problem 2038-01-19
-		uint16_t	keylen;		// 2, 4 bits are used for vallen. 2 bits are reserved for future versions.
-		uint16_t	vallen;		// 2
+		uint32_t	vallen;		// 4, 28 bits used
+		uint16_t	keylen;		// 2, 10 bits used
 		char		buffer[2];	// dynamic, these are the two \0 terminators.
 
 	public:
@@ -99,17 +98,11 @@ inline namespace version_3_00_00{
 			if constexpr(copy_key == false && copy_val == false)
 				return;
 
-			uint16_t const keylen = uint16_t(
-					(   key.size()					& PairConf::MAX_KEY_MASK	)	|
-					( ( val.size() >> PairConf::MAX_VAL_MASK_SH )	& PairConf::MAX_VAL_MASK	)
-			);
-
-			uint16_t const vallen =
-					val.size() & 0xffff
-			;
+			uint16_t const keylen = static_cast<uint16_t>(key.size() & PairConf::MAX_KEY_MASK);
+			uint32_t const vallen = static_cast<uint32_t>(val.size() & PairConf::MAX_VAL_MASK);
 
 			pair->keylen	= htobe<uint16_t>(keylen);
-			pair->vallen	= htobe<uint16_t>(vallen);
+			pair->vallen	= htobe<uint32_t>(vallen);
 
 			#pragma GCC diagnostic push
 			#pragma GCC diagnostic ignored "-Warray-bounds"
@@ -264,13 +257,8 @@ inline namespace version_3_00_00{
 		[[nodiscard]]
 		constexpr
 		bool empty() const noexcept{
-			if constexpr(1){
-				constexpr uint16_t mask_be = htobe<uint16_t>(PairConf::MAX_KEY_MASK);
-
-				return !(keylen & mask_be);
-			}else{
-				return !getKeyLen_();
-			}
+			// big endian 0
+			return (keylen & htobe<uint16_t>(PairConf::MAX_KEY_MASK)) != 0;
 		}
 
 	public:
@@ -286,18 +274,11 @@ inline namespace version_3_00_00{
 
 		[[nodiscard]]
 		bool isTombstone() const noexcept{
-			if constexpr(1){
-				if (expires > PairConf::EXPIRES_MAX)
-					return true;
-			}
+			if (expires > PairConf::EXPIRES_MAX)
+				return true;
 
-			if constexpr(1){
-				constexpr uint16_t mask_be = htobe<uint16_t>(PairConf::MAX_VAL_MASK);
-
-				return !(vallen | (keylen & mask_be));
-			}else{
-				return !getValLen_();
-			}
+			// big endian 0
+			return (vallen & htobe<uint32_t>(PairConf::MAX_VAL_MASK)) == 0;
 		}
 
 		[[nodiscard]]
@@ -477,12 +458,7 @@ inline namespace version_3_00_00{
 		[[nodiscard]]
 		constexpr
 		size_t getValLen_() const noexcept{
-			// if we do magic with betoh<>(PairConf::MAX_VAL_MASK),
-			// we will not know how much to shift
-
-			uint32_t const bits16 = betoh<uint16_t>(keylen) & PairConf::MAX_VAL_MASK;
-
-			return bits16 << PairConf::MAX_VAL_MASK_SH | betoh<uint16_t>(vallen);
+			return betoh<uint32_t>(vallen) & PairConf::MAX_VAL_MASK;
 		}
 
 	private:

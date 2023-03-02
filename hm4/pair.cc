@@ -7,7 +7,7 @@
 
 namespace hm4{
 
-inline namespace version_3_00_00{
+inline namespace version_4_00_00{
 
 
 

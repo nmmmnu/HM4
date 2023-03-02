@@ -37,7 +37,8 @@ int main(){
 	pair_test_expired();
 	pair_test_ctor();
 	pair_test_allocator();
-	pair_size_test(7);
+	// no need for v.4 pair
+	//pair_size_test(7);
 
 	//printf("Size: %zu bytes\n", sizeof(OPair));
 
@@ -65,8 +66,8 @@ namespace{
 			0x50, 0x00, 0x00, 0x00,		// created, 2012-07-13 11:01:20
 			0x00, 0x00, 0x00, 0x00,		// milliseconds
 			0x00, 0x00, 0x00, 0x00,		// expires
+			0x00, 0x00, 0x00, 0x05,		// vallen
 			0x00, 0x04,			// keylen
-			0x00, 0x05,			// vallen
 			'n', 'a', 'm', 'e', '\0',	// key
 			'P', 'e', 't', 'e', 'r', '\0'	// val
 		};
