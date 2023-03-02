@@ -27,6 +27,10 @@ inline namespace version_4_00_00{
 		constexpr uint16_t	MAX_KEY_SIZE		= 0b0'0000'0000'0000'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
 		constexpr uint32_t	MAX_VAL_SIZE		= 0b0'0000'1111'1111'1111'1111'1111'1111'1111;	// 256 MB
 
+		// Note, in net/protocol/redisprotocol.cc,
+		// there is seemingly unrelated value MAX_PARAM_SIZE
+		// You need to set it manually to MAX_VAL_SIZE or larger
+
 		constexpr uint16_t	MAX_KEY_MASK		= MAX_KEY_SIZE;
 		constexpr uint32_t	MAX_VAL_MASK		= MAX_VAL_SIZE;
 
