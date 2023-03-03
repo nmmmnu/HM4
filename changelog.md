@@ -87,4 +87,7 @@ Changelog
 -	refactor pair to support values up to 64 GB
 -	refactor BITSET / BITGET
 -	new commands BITMSET, BITMGET
+-	new commands APPEND, GETRANGE
+-	command INFO shows pair limits (Max Key Size / Max Val Size)
+-	new commands MAXKEYSIZE, MAXVALSIZE
 

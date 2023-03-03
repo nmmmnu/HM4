@@ -16,11 +16,8 @@ namespace net::worker::commands::Info{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() != 1)
-				return;
-
-			std::array<char, 1024> buffer;
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			std::array<char, 2048> buffer;
 
 			return result.set(
 				db.info(buffer)
@@ -45,10 +42,7 @@ namespace net::worker::commands::Info{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() != 1)
-				return;
-
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
 				db->size()
 			);
@@ -72,10 +66,7 @@ namespace net::worker::commands::Info{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() != 1)
-				return;
-
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
 				db.version()
 			);
@@ -84,6 +75,50 @@ namespace net::worker::commands::Info{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"version",	"VERSION"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MAXKEYSIZE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return result.set(uint64_t{ hm4::PairConf::MAX_KEY_SIZE });
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"maxkeysize",	"MAXKEYSIZE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MAXVALSIZE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return result.set(uint64_t{ hm4::PairConf::MAX_VAL_SIZE });
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"maxvalsize",	"MAXVALSIZE"
 		};
 	};
 
@@ -99,10 +134,7 @@ namespace net::worker::commands::Info{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() != 1)
-				return;
-
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set("pong");
 		}
 
@@ -150,10 +182,12 @@ namespace net::worker::commands::Info{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				INFO	,
-				DBSIZE	,
-				VERSION	,
-				PING	,
+				INFO		,
+				DBSIZE		,
+				VERSION		,
+				MAXKEYSIZE	,
+				MAXVALSIZE	,
+				PING		,
 				ECHO
 			>(pack);
 		}

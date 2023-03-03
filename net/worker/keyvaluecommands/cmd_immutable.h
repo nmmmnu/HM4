@@ -147,6 +147,48 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
+	struct GETRANGE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 4)
+				return;
+
+			const auto &key   = p[1];
+			auto const start  = from_string<uint64_t>(p[2]);
+			auto const finish = from_string<uint64_t>(p[3]);
+
+			if (key.empty())
+				return;
+
+			if (finish < start)
+				return result.set("");
+
+			auto val = hm4::getPairVal(*db, key);
+
+			if (start >= val.size())
+				return result.set("");
+
+			return result.set(
+				val.substr(start, finish - start + 1)
+			);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"getrange",	"GETRANGE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct STRLEN : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -342,13 +384,14 @@ namespace net::worker::commands::Immutable{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				GET	,
-				MGET	,
-				EXISTS	,
-				TTL	,
-				STRLEN	,
-				HGET	,
-				HMGET	,
+				GET		,
+				MGET		,
+				EXISTS		,
+				TTL		,
+				GETRANGE	,
+				STRLEN		,
+				HGET		,
+				HMGET		,
 				HEXISTS
 			>(pack);
 		}

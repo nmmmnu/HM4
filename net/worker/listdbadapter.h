@@ -3,6 +3,7 @@
 
 #include "version.h"
 #include "myprocess.h"	// get PID
+#include "pair.h"
 #include "logger.h"
 
 template<class List_, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
@@ -27,7 +28,7 @@ public:
 
 	template<size_t N>
 	std::string_view info(std::array<char, N> &str) const{
-		to_string_buffer_t buffer[6];
+		to_string_buffer_t buffer[8];
 
 		if constexpr(!MUTABLE){
 			return concatenateBuffer(
@@ -36,10 +37,14 @@ public:
 				"# Server"											"\n",
 				"Version          : ", version()					,			"\n",
 
+			"\n"	"# Pair Limits"											"\n",
+				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[0]),	"\n",
+				"Max Val Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[1]),	"\n",
+
 			"\n"	"# Keys"											"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
-				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
-				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
+				"Keys (estimated) : ", to_string(list_.size()				,	buffer[2]),	"\n",
+				"Size             : ", to_string(list_.bytes()				,	buffer[3]),	"\n",
 
 			"\n"	"# System"											"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
@@ -58,19 +63,23 @@ public:
 				"# Server"											"\n",
 				"Version          : ", version()					,			"\n",
 
+			"\n"	"# Pair Limits"											"\n",
+				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[0]),	"\n",
+				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[1]),	"\n",
+
 			"\n"	"# Keys"											"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
-				"Keys (estimated) : ", to_string(list_.size()				,	buffer[0]),	"\n",
-				"Size             : ", to_string(list_.bytes()				,	buffer[1]),	"\n",
-				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[2]),	"\n",
+				"Keys (estimated) : ", to_string(list_.size()				,	buffer[2]),	"\n",
+				"Size             : ", to_string(list_.bytes()				,	buffer[3]),	"\n",
+				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[4]),	"\n",
 
 			"\n"	"# Allocator"											"\n",
 				"Allocator        : ", list_.getAllocator().getName()			,			"\n",
-				"Allocator Free   : ", mem_format(list_.getAllocator().getFreeMemory()	,	buffer[3]),	"\n",
-				"Allocator Used   : ", mem_format(list_.getAllocator().getUsedMemory()	,	buffer[4]),	"\n",
+				"Allocator Free   : ", mem_format(list_.getAllocator().getFreeMemory()	,	buffer[5]),	"\n",
+				"Allocator Used   : ", mem_format(list_.getAllocator().getUsedMemory()	,	buffer[6]),	"\n",
 
 			"\n"	"# System"											"\n",
-				"PID              : ", to_string(getProcessID()				,	buffer[5]),	"\n"
+				"PID              : ", to_string(getProcessID()				,	buffer[7]),	"\n"
 			);
 		}
 	}

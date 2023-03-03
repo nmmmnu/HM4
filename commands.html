@@ -92,6 +92,7 @@
 				<li><a href="#MGET">MGET</a></li>
 				<li><a href="#EXISTS">EXISTS</a></li>
 				<li><a href="#TTL">TTL</a></li>
+				<li><a href="#GETRANGE">GETRANGE</a></li>
 				<li><a href="#STRLEN">STRLEN</a></li>
 				</div>
 			<div>
@@ -128,6 +129,7 @@
 				<li><a href="#SETEX">SETEX</a></li>
 				<li><a href="#SETNX">SETNX</a></li>
 				<li><a href="#SETXX">SETXX</a></li>
+				<li><a href="#APPEND">APPEND</a></li>
 				<li><a href="#EXPIRE">EXPIRE</a></li>
 				<li><a href="#PERSIST">PERSIST</a></li>
 				<li><a href="#GETSET">GETSET</a></li>
@@ -206,6 +208,8 @@
 					<li><a href="#INFO">INFO</a></li>
 				<li><a href="#DBSIZE">DBSIZE</a></li>
 				<li><a href="#VERSION">VERSION</a></li>
+				<li><a href="#MAXKEYSIZE">MAXKEYSIZE</a></li>
+				<li><a href="#MAXVALSIZE">MAXVALSIZE</a></li>
 				<li><a href="#PING">PING</a></li>
 				<li><a href="#ECHO">ECHO</a></li>
 				</div>
@@ -320,6 +324,27 @@
 			Value of the TTL or 0 if there is no expiration set.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="GETRANGE">
+
+			<h2>GETRANGE key index_start index_finish</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GETRANGE</td></tr>
+				<tr><td>Available since		</td><td>1.2.30</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get substring of the value of the <i>key</i> from <i>index_start</i> to <i>index_finish</i>. Exact match.<br />Unlike Redis, negative indexes are not supported.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			substring of the value or empty string.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="STRLEN">
 
 			<h2>STRLEN / SIZE key</h2>
@@ -338,7 +363,7 @@
 			<h3>Return type:</h3>
 			int
 			<h3>Return value:</h3>
-			Size of the value TTL or 0 if key does not exists.
+			Size of the value.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETX">
@@ -654,6 +679,27 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair exists and is set.<br />1 if the key value pair do not exists.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="APPEND">
+
+			<h2>APPEND key value [seconds=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>APPEND</td></tr>
+				<tr><td>Available since		</td><td>1.3.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically Append value of the <i>key</i>, with optional expiration of <i>seconds</i> seconds.<br />Note: The command internally GET old key first.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXPIRE">
@@ -1452,6 +1498,48 @@
 			string
 			<h3>Return value:</h3>
 			Server version.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MAXKEYSIZE">
+
+			<h2>MAXKEYSIZE</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MAXKEYSIZE</td></tr>
+				<tr><td>Available since		</td><td>1.2.30</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns MAX_KEY_SIZE.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			max key size
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MAXVALSIZE">
+
+			<h2>MAXVALSIZE</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MAXVALSIZE</td></tr>
+				<tr><td>Available since		</td><td>1.2.30</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns MAX_VAL_SIZE.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			max value size
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PING">

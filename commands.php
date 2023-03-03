@@ -265,6 +265,25 @@ function getData(){
 			),
 
 			new Cmd(
+					"GETRANGE",
+
+					"GETRANGE key index_start index_finish",
+
+					"Get substring of the value of the <i>key</i> from <i>index_start</i> to <i>index_finish</i>. Exact match.<br />" .
+					"Unlike Redis, negative indexes are not supported.",
+
+					"string",
+					"substring of the value or empty string.",
+
+					"1.2.30",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"immutable"
+			),
+
+			new Cmd(
 					"STRLEN",
 
 					"STRLEN / SIZE key",
@@ -273,7 +292,7 @@ function getData(){
 					"Useful for debuging HLL and BIT commands.",
 
 					"int",
-					"Size of the value TTL or 0 if key does not exists.",
+					"Size of the value.",
 
 					"1.2.17",
 					"Mem + N * Disk",
@@ -660,6 +679,24 @@ function getData(){
 			),
 
 			new Cmd(
+					"APPEND",
+
+					"APPEND key value [seconds=0]",
+
+					"Atomically Append value of the <i>key</i>, with optional expiration of <i>seconds</i> seconds.<br />" .
+					"Note: The command internally GET old key first.",
+
+					"OK",
+					"OK",
+					"1.3.0",
+					"2 * Mem + N * Disk",
+					true,
+					true,
+
+					"mutable"
+			),
+
+			new Cmd(
 					"EXPIRE",
 
 					"EXPIRE key seconds",
@@ -748,9 +785,6 @@ function getData(){
 
 					"mutable"
 			),
-
-
-
 
 
 
@@ -1394,6 +1428,38 @@ function getData(){
 					"string",
 					"Server version.",
 					"1.2.16",
+					"n/a",
+					false,
+					null,
+
+					"info"
+			),
+
+			new Cmd(
+					"MAXKEYSIZE",
+
+					"MAXKEYSIZE",
+
+					"Returns MAX_KEY_SIZE.",
+					"int",
+					"max key size",
+					"1.2.30",
+					"n/a",
+					false,
+					null,
+
+					"info"
+			),
+
+			new Cmd(
+					"MAXVALSIZE",
+
+					"MAXVALSIZE",
+
+					"Returns MAX_VAL_SIZE.",
+					"int",
+					"max value size",
+					"1.2.30",
 					"n/a",
 					false,
 					null,

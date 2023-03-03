@@ -638,6 +638,63 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
+	struct APPEND : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 3)
+				return;
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return;
+
+			std::string_view val = p[2];
+
+			auto it = db->find(key, std::true_type{});
+
+			if (it != std::end(*db) && it->isValid(std::true_type{})){
+				if (it->getVal().size() + val.size() > hm4::PairConf::MAX_VAL_SIZE)
+					return;
+
+				val = concatenateBuffer(blob.buffer_val, it->getVal(), val);
+			}else{
+				// already appended.
+				// done
+			}
+
+			// SET
+
+			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
+
+			// HINT
+			// will not work, but who knows in the future.
+			const auto *hint = & *it;
+			hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
+
+			// return
+
+			result.set(val.size());
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"append",	"APPEND"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct EXPIRE : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -751,6 +808,7 @@ namespace net::worker::commands::Mutable{
 				HDEL		,
 				GETSET		,
 				GETDEL		,
+				APPEND		,
 				EXPIRE		,
 				PERSIST
 			>(pack);
