@@ -1262,11 +1262,11 @@ function getData(){
 
 
 			new Cmd(
-					"SETBIT",
+					"BITSET",
 
-					"SETBIT / BITSET key index value",
+					"BITSET / BITMSET / SETBIT key index value [index] [value]",
 
-					"Set bit of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />" .
+					"Set bit(s) of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />" .
 					"Read Bitset information document.",
 					"OK",
 					"OK",
@@ -1279,15 +1279,32 @@ function getData(){
 			),
 
 			new Cmd(
-					"GETBIT",
+					"BITGET",
 
-					"GETBIT / BITGET key index value",
+					"BITGET / GETBIT key index",
 
 					"Get bit of the <i>key</i> with <i>index</i>.<br />" .
 					"Read Bitset information document.",
 					"string (int)",
 					"0 / 1",
 					"1.2.17",
+					"Mem + N * Disk",
+					true,
+					false,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"BITMGET",
+
+					"BITMGET key index [index1]",
+
+					"Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />" .
+					"Read Bitset information document.",
+					"array",
+					"0 / 1",
+					"1.3.0",
 					"Mem + N * Disk",
 					true,
 					false,

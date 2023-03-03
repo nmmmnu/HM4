@@ -1,15 +1,53 @@
 #include "base.h"
 #include "logger.h"
 
+namespace net::worker::shared::bit{
+
+	struct BitOps{
+		size_t  const n_byte;
+		uint8_t const n_mask;
+
+		constexpr BitOps(size_t n) :
+				n_byte(n / 8		),
+				n_mask(1 << (n % 8)	){}
+
+		constexpr size_t size() const{
+			return n_byte + 1;
+		}
+
+		void set(char *buffer, bool bit) const{
+			uint8_t *bits = reinterpret_cast<uint8_t *>(buffer);
+
+			if (bit)
+				bits[n_byte] |= n_mask;
+			else
+				bits[n_byte] &= ~n_mask;
+		}
+
+		bool get(const char *buffer) const{
+			const uint8_t *bits = reinterpret_cast<const uint8_t *>(buffer);
+
+			return bits[n_byte] & n_mask;
+		}
+
+		constexpr static size_t max(size_t buffer_size){
+			return buffer_size * 8 - 1;
+		}
+	};
+
+}
+
 namespace net::worker::commands::BITSET{
 	namespace bit_impl_{
+		using namespace shared::bit;
+
 		// for 1 MB * 8 = 8'388'608
 		// uint32_t will do fine, but lets be on the safe side
 		using size_type				= uint64_t;
 
-		constexpr size_type BIT_MAX		= hm4::PairConf::MAX_VAL_SIZE * 8 - 1;
+		constexpr size_type BIT_MAX		= BitOps::max(hm4::PairConf::MAX_VAL_SIZE);
 
-		constexpr size_t    BIT_STRING_RESERVE	=  hm4::PairConf::MAX_VAL_SIZE + 16;
+		constexpr size_t    BIT_STRING_RESERVE	= hm4::PairConf::MAX_VAL_SIZE + 16;
 	}
 
 	template<class Protocol, class DBAdapter>
@@ -29,7 +67,9 @@ namespace net::worker::commands::BITSET{
 		}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() != 4)
+			// should be even number arguments
+			// bitset key 5 1 6 0
+			if (p.size() < 4 || p.size() % 2 == 1)
 				return;
 
 			using namespace bit_impl_;
@@ -39,15 +79,10 @@ namespace net::worker::commands::BITSET{
 			if (key.empty())
 				return;
 
-			const auto n = from_string<size_type>(p[2]);
+			auto const [ok, n_size] = getNSize_(p);
 
-			if (n > BIT_MAX)
+			if (!ok)
 				return;
-
-			size_t  const n_byte		= n / 8;
-			size_t  const n_byte_size	= n_byte + 1;
-			uint8_t const n_mask		= 1 << (n % 8);
-			bool    const bit		= from_string<uint64_t>(p[3]);
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
@@ -56,21 +91,22 @@ namespace net::worker::commands::BITSET{
 
 				// do not use c-tor in order to avoid capacity reallocation
 				string = "";
-				string.resize(n_byte_size, '\0');
+				string.resize(n_size, '\0');
 
-				flipBit__(string.data(),
-						bit, n_byte, n_mask);
+				char *data = string.data();
+				updateAll_(p, data);
 
 				hm4::insert(*db, key, string);
 
 				return result.set();
 
-			}else if (hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, pair, n_byte_size)){
+			}else if (hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, pair, n_size)){
 				// HINT
 
 				// valid pair, update in place
-				flipBit__(const_cast<char *>( pair->getVal().data() ),
-						bit, n_byte, n_mask);
+
+				char *data = const_cast<char *>( pair->getVal().data() );
+				updateAll_(p, data);
 
 				const auto *hint = pair;
 				// condition already checked,
@@ -84,14 +120,11 @@ namespace net::worker::commands::BITSET{
 
 				string = pair->getVal();
 
-				if (string.size() < n_byte_size)
-					string.resize(n_byte_size, '\0');
+				if (string.size() < n_size)
+					string.resize(n_size, '\0');
 
-				flipBit__(string.data(),
-						bit, n_byte, n_mask);
-
-				// here size optimization may kick up.
-				// see recalc_size__
+				char *data = string.data();
+				updateAll_(p, data);
 
 				hm4::insert(*db, key, string);
 
@@ -100,36 +133,55 @@ namespace net::worker::commands::BITSET{
 		}
 
 	private:
-		std::string string;
+		static auto getNSize_(ParamContainer const &p){
+			using namespace bit_impl_;
+
+			bool ok = false;
+			size_type max = 0;
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const n = from_string<size_type>(*itk);
+
+				if (n <= BIT_MAX){
+					ok  = true;
+					max = std::max(max, n);
+				}
+			}
+
+			BitOps const bitops{ max };
+
+			return std::make_pair(ok, bitops.size());
+		}
+
+		static void updateAll_(ParamContainer const &p, char *data){
+			using namespace bit_impl_;
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				auto const n = from_string<size_type>(*itk);
+
+				if (n > BIT_MAX)
+					continue;
+
+				bool const bit	= from_string<uint64_t>(*std::next(itk));
+
+				BitOps const bitops{ n };
+
+				bitops.set(data, bit);
+			}
+		}
 
 	private:
-		static void flipBit__(char *bits_buffer, bool const bit, size_t const n_byte, uint8_t const n_mask){
-			uint8_t *bits = reinterpret_cast<uint8_t *>(bits_buffer);
-
-			if (bit)
-				bits[n_byte] |= n_mask;
-			else
-				bits[n_byte] &= ~n_mask;
-		}
-
-		#if 0
-		static auto recalc_size__(std::string_view const s){
-			size_t max = 0;
-
-			for(auto it = std::rbegin(s); it != std::rend(s); ++it)
-				if (*it == 0)
-					++max;
-				else
-					break;
-
-			return max;
-		}
-		# endif
+		std::string string;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"setbit",	"SETBIT"	,
-			"bitset",	"BITSET"
+			"bitset",	"BITSET"	,
+			"bitmset",	"BITMSET"
 		};
 	};
 
@@ -157,19 +209,18 @@ namespace net::worker::commands::BITSET{
 				return;
 
 			const auto n     	= from_string<size_type>(p[2]);
-			const auto n_byte	= n / 8;
 
-			const uint8_t *bits = hm4::getPair_(*db, key, [n_byte](bool b, auto it) -> const uint8_t *{
-				if (b && it->getVal().size() >= n_byte)
-					return reinterpret_cast<const uint8_t *>(it->getVal().data());
+			BitOps const bitops{ n };
+
+			const char *data = hm4::getPair_(*db, key, [size = bitops.size()](bool b, auto it) -> const char *{
+				if (b && it->getVal().size() >= size)
+					return it->getVal().data();
 				else
 					return nullptr;
 			});
 
-			if (bits){
-				const auto n_mask  = 1 << (n % 8);
-
-				const bool b = bits[n_byte] & n_mask;
+			if (data){
+				const bool b = bitops.get(data);
 
 				return result.set(b);
 			}else{
@@ -181,6 +232,71 @@ namespace net::worker::commands::BITSET{
 		constexpr inline static std::string_view cmd[]	= {
 			"getbit",	"GETBIT"	,
 			"bitget",	"BITGET"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct BITMGET : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() < 3)
+				return;
+
+			using namespace bit_impl_;
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return;
+
+			auto &container = blob.container;
+
+			auto const varg = 2;
+
+			if (container.capacity() < p.size() - varg)
+				return;
+
+			const char *data = hm4::getPair_(*db, key, [](bool b, auto it) -> const char *{
+				if (b)
+					return it->getVal().data();
+				else
+					return nullptr;
+			});
+
+			container.clear();
+
+			if (data){
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+					const auto n = from_string<size_type>(*itk);
+
+					BitOps const bitops{ n };
+
+					const bool b = bitops.get(data);
+
+					container.emplace_back(b ? "1" : "0");
+				}
+
+				return result.set_container(container);
+			}else{
+				// return zeroes
+				container.assign(p.size() - varg, "0");
+
+				return result.set_container(container);
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"bitmget",	"BITMGET"
 		};
 	};
 
@@ -262,6 +378,7 @@ namespace net::worker::commands::BITSET{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				BITSET		,
 				BITGET		,
+				BITMGET		,
 				BITCOUNT	,
 				BITMAX
 			>(pack);

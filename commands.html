@@ -193,8 +193,9 @@
 			<b>bitset.h</b><br />
 			&nbsp;
 
-					<li><a href="#SETBIT">SETBIT</a></li>
-				<li><a href="#GETBIT">GETBIT</a></li>
+					<li><a href="#BITSET">BITSET</a></li>
+				<li><a href="#BITGET">BITGET</a></li>
+				<li><a href="#BITMGET">BITMGET</a></li>
 				<li><a href="#BITCOUNT">BITCOUNT</a></li>
 				<li><a href="#BITMAX">BITMAX</a></li>
 				</div>
@@ -1285,12 +1286,12 @@
 			HLL error rate as percent, but multiplied to 1'00'00
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="SETBIT">
+				<div class="cmd" id="BITSET">
 
-			<h2>SETBIT / BITSET key index value</h2>
+			<h2>BITSET / BITMSET / SETBIT key index value [index] [value]</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>SETBIT</td></tr>
+				<tr><td>Command			</td><td>BITSET</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
 				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
@@ -1299,19 +1300,19 @@
 			</table>
 
 			<h3>Description:</h3>
-			Set bit of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />Read Bitset information document.
+			Set bit(s) of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />Read Bitset information document.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
 			OK
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="GETBIT">
+				<div class="cmd" id="BITGET">
 
-			<h2>GETBIT / BITGET key index value</h2>
+			<h2>BITGET / GETBIT key index</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>GETBIT</td></tr>
+				<tr><td>Command			</td><td>BITGET</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
 				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
@@ -1323,6 +1324,27 @@
 			Get bit of the <i>key</i> with <i>index</i>.<br />Read Bitset information document.
 			<h3>Return type:</h3>
 			string (int)
+			<h3>Return value:</h3>
+			0 / 1
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BITMGET">
+
+			<h2>BITMGET key index [index1]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITMGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />Read Bitset information document.
+			<h3>Return type:</h3>
+			array
 			<h3>Return value:</h3>
 			0 / 1
 			<p class="top"><a href="#top">top</a></p>
