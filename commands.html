@@ -202,6 +202,12 @@
 				<li><a href="#BITMAX">BITMAX</a></li>
 				</div>
 			<div>
+			<b>murmur.h</b><br />
+			&nbsp;
+
+					<li><a href="#MURMUR">MURMUR</a></li>
+				</div>
+			<div>
 			<b>info.h</b><br />
 			&nbsp;
 
@@ -1435,6 +1441,27 @@
 			string (int)
 			<h3>Return value:</h3>
 			Maximum suported index.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MURMUR">
+
+			<h2>MURMUR / MURMURHASH64A string [seed=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MURMUR</td></tr>
+				<tr><td>Available since		</td><td>1.3.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>murmur.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns murmur_hash64a from value with specific seed.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Returns murmur_hash64a from value with specific seed.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INFO">

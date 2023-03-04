@@ -1,15 +1,15 @@
 #ifndef _KEY_VALUE_WORKER_H
 #define _KEY_VALUE_WORKER_H
 
-#include "keyvaluecommands/cmd_immutable.h"	// GET, MGET, EXISTS, TTL, STRLEN
+#include "keyvaluecommands/cmd_immutable.h"	// GET, MGET, EXISTS, TTL, STRLEN, GETRANGE
 						// HGET, HEXISTS
 #include "keyvaluecommands/cmd_immutable_x.h"	// GETX, HGETALL
-						// HGETALL
+						// HGETALL, HGETKEYS, HGETVALS
 #include "keyvaluecommands/cmd_accumulators.h"	// COUNT, SUM, MIN, MAX
 
-#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, SETXX, EXPIRE, PERSIST, GETSET, GETDEL, DEL
+#include "keyvaluecommands/cmd_mutable.h"	// SET, SETEX, SETNX, SETXX, APPEND, EXPIRE, PERSIST, GETSET, GETDEL, DEL
 						// HSET, HDEL
-#include "keyvaluecommands/cmd_mutable_x.h"	// DELX
+#include "keyvaluecommands/cmd_mutable_x.h"	// DELX, EXPIREX, PERSISTX
 #include "keyvaluecommands/cmd_cas.h"		// CAS, CAD
 #include "keyvaluecommands/cmd_copy.h"		// COPY, COPYNX, RENAME, RENAMENX
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
@@ -19,9 +19,11 @@
 
 #include "keyvaluecommands/cmd_bitset.h"	// SETBIT, GETBIT, BITCOUNT, BITMAX
 
-#include "keyvaluecommands/cmd_info.h"		// INFO, VERSION, PING, ECHO
+#include "keyvaluecommands/cmd_info.h"		// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
 #include "keyvaluecommands/cmd_compat.h"	// SELECT, TYPE, TOUCH
+
+#include "keyvaluecommands/cmd_murmur.h"	// MURMUR
 
 #include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
 #include "keyvaluecommands/cmd_system.h"	// EXIT, SHUTDOWN
@@ -79,6 +81,8 @@ namespace net::worker{
 				Queue		::RegisterModule,
 				HLL		::RegisterModule,
 				BITSET		::RegisterModule,
+
+				Murmur		::RegisterModule,
 
 				Info		::RegisterModule,
 				Compat		::RegisterModule,

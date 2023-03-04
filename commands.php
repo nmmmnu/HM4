@@ -1383,6 +1383,29 @@ function getData(){
 
 
 		),
+		"murmur" => array(
+
+
+
+			new Cmd(
+					"MURMUR",
+
+					"MURMUR / MURMURHASH64A string [seed=0]",
+
+					"Returns murmur_hash64a from value with specific seed.",
+					"string",
+					"Returns murmur_hash64a from value with specific seed.",
+					"1.3.0",
+					"n/a",
+					null,
+					null,
+
+					"murmur"
+			),
+
+
+
+		),
 		"info" => array(
 
 
