@@ -202,7 +202,7 @@ function getData(){
 					"string",
 					"Value of the key or empty string.",
 					"1.0.0",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					false,
 
@@ -220,7 +220,7 @@ function getData(){
 					"array",
 					"Value of the key or empty string.",
 					"1.0.0",
-					"[number of keys] * (Mem + N * Disk)",
+					"[number of keys] * READ",
 					true,
 					false,
 
@@ -239,7 +239,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists.",
 					"1.2.16",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					false,
 
@@ -257,7 +257,7 @@ function getData(){
 					"Value of the TTL or 0 if there is no expiration set.",
 
 					"1.2.11",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					false,
 
@@ -276,7 +276,7 @@ function getData(){
 					"substring of the value or empty string.",
 
 					"1.2.30",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					false,
 
@@ -289,13 +289,13 @@ function getData(){
 					"STRLEN / SIZE key",
 
 					"Get size of the value of the <i>key</i>. Exact match.<br />" .
-					"Useful for debuging HLL and BIT commands.",
+					"Useful for debuging HLL, BF and BIT commands.",
 
 					"int",
 					"Size of the value.",
 
 					"1.2.17",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					false,
 
@@ -331,7 +331,7 @@ function getData(){
 					"Second group of single element - Last key, if there is second page.",
 
 					"1.0.0",
-					"Mem + N * Disk",
+					"READ",
 					false,
 					false,
 
@@ -366,7 +366,7 @@ function getData(){
 					"Last key, if there is second page.",
 
 					"1.2.17",
-					"2 * Mem + N * Disk",
+					"READ + [number of keys] * WRITE",
 					false,
 					true,
 
@@ -396,7 +396,7 @@ function getData(){
 					"Last key, if there is second page.",
 
 					"1.2.17",
-					"2 * Mem + N * Disk",
+					"READ + [number of keys] * WRITE",
 					false,
 					true,
 
@@ -425,7 +425,7 @@ function getData(){
 					"Last key, if there is second page.",
 
 					"1.2.17",
-					"2 * Mem + N * Disk",
+					"READ + [number of keys] * WRITE",
 					false,
 					true,
 
@@ -462,7 +462,7 @@ function getData(){
 					"count dom:google: 10000 dom:google:</pre>",
 
 					"1.2.4",
-					"Mem + N * Disk",
+					"READ",
 					false,
 					false,
 
@@ -492,7 +492,7 @@ function getData(){
 					"Second element - last key, if there is second page.",
 
 					"1.2.4",
-					"Mem + N * Disk",
+					"READ",
 					false,
 					false,
 
@@ -512,7 +512,7 @@ function getData(){
 					"Second element - last key, if there is second page.",
 
 					"1.2.5",
-					"Mem + N * Disk",
+					"READ",
 					false,
 					false,
 
@@ -532,7 +532,7 @@ function getData(){
 					"Second element - last key, if there is second page.",
 
 					"1.2.5",
-					"Mem + N * Disk",
+					"READ",
 					false,
 					false,
 
@@ -556,7 +556,7 @@ function getData(){
 					"OK",
 					"OK",
 					"1.0.0",
-					"Mem",
+					"WRITE",
 					true,
 					true,
 
@@ -574,7 +574,7 @@ function getData(){
 					"OK",
 					"OK",
 					"1.2.17",
-					"[number of keys] * mem",
+					"[number of keys] * WRITE",
 					true,
 					true,
 
@@ -594,7 +594,7 @@ function getData(){
 					"0 if some of the key value pair exists.<br />" .
 					"1 if none of the key value pair do not exists and keys are set.",
 					"1.2.18",
-					"[number of keys] * (2 * Mem + N * Disk)",
+					"[number of keys] * (READ + WRITE)",
 					true,
 					true,
 
@@ -614,7 +614,7 @@ function getData(){
 					"0 if some of the key value pair does not exists.<br />" .
 					"1 if none of the key value pair exists and keys are set.",
 					"1.2.18",
-					"[number of keys] * (2 * Mem + N * Disk)",
+					"[number of keys] * (READ + WRITE)",
 					false,
 					true,
 
@@ -633,7 +633,7 @@ function getData(){
 					"OK",
 					"OK",
 					"1.2.11",
-					"Mem",
+					"WRITE",
 					true,
 					true,
 
@@ -652,7 +652,7 @@ function getData(){
 					"0 if the key value pair exists.<br />" .
 					"1 if the key value pair do not exists and is set.",
 					"1.2.11",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -671,7 +671,7 @@ function getData(){
 					"0 if the key value pair exists and is set.<br />" .
 					"1 if the key value pair do not exists.",
 					"1.2.17",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					false,
 					true,
 
@@ -689,7 +689,7 @@ function getData(){
 					"OK",
 					"OK",
 					"1.3.0",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -709,7 +709,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and expiration is set.",
 					"1.2.11",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -728,7 +728,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and expiration is removed.",
 					"1.2.16",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -746,7 +746,7 @@ function getData(){
 					"string",
 					"Value of the key or empty string.",
 					"1.2.11",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -763,7 +763,7 @@ function getData(){
 					"string",
 					"Value of the key or empty string.",
 					"1.2.16",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -779,7 +779,7 @@ function getData(){
 					"bool",
 					"Always return 1",
 					"1.0.0",
-					"[number of keys] * Mem",
+					"[number of keys] * WRITE",
 					true,
 					true,
 
@@ -805,7 +805,7 @@ function getData(){
 					"bool",
 					"if the key value is set or not",
 					"1.2.17",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					false,
 					true,
 
@@ -823,7 +823,7 @@ function getData(){
 					"bool",
 					"if the key is removed or not",
 					"1.2.17",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					false,
 					true,
 
@@ -849,7 +849,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and name is changed.",
 					"1.2.16",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -869,7 +869,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and name is changed.",
 					"1.2.16",
-					"3 * Mem + 2 * N * Disk",
+					"2 * READ + WRITE",
 					false,
 					true,
 
@@ -887,7 +887,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and name is changed.",
 					"1.2.16",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -906,7 +906,7 @@ function getData(){
 					"0 if the key value pair do not exists.<br />" .
 					"1 if the key value pair exists and name is changed.",
 					"1.2.16",
-					"4 * Mem + 2 * N * Disk",
+					"2 * READ + WRITE",
 					true,
 					true,
 
@@ -930,7 +930,7 @@ function getData(){
 					"string (int)",
 					"New increased value.",
 					"1.1.0",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -947,7 +947,7 @@ function getData(){
 					"string (int)",
 					"New decrease value.",
 					"1.1.0",
-					"2 * Mem + N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
@@ -972,7 +972,7 @@ function getData(){
 					"array",
 					"array of subkey and values from key hash",
 					"1.2.17",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					true,
 
@@ -992,7 +992,7 @@ function getData(){
 					"array",
 					"array of subkey from key hash",
 					"1.2.19",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					true,
 
@@ -1012,7 +1012,7 @@ function getData(){
 					"array",
 					"array of values from key hash",
 					"1.2.19",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					true,
 
@@ -1032,7 +1032,7 @@ function getData(){
 					"int",
 					"number of elements in key hash",
 					"1.2.19",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					true,
 
@@ -1051,7 +1051,7 @@ function getData(){
 					"string",
 					"Value of the key -> subkey hash or empty string.",
 					"1.2.17",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					true,
 
@@ -1071,7 +1071,7 @@ function getData(){
 					"array",
 					"Value of the key -> subkey hash or empty string.",
 					"1.2.17",
-					"[number of keys] * (Mem + N * Disk)",
+					"[number of keys] * READ",
 					true,
 					true,
 
@@ -1092,7 +1092,7 @@ function getData(){
 					"0 if the key -> subkey hash do not exists.<br />" .
 					"1 if the key -> subkey hash exists.",
 					"1.2.17",
-					"Mem + N * Disk",
+					"READ",
 					true,
 					true,
 
@@ -1111,7 +1111,7 @@ function getData(){
 					"OK",
 					"OK",
 					"1.2.17",
-					"Mem",
+					"WRITE",
 					true,
 					true,
 
@@ -1130,7 +1130,7 @@ function getData(){
 					"bool",
 					"Always return 1",
 					"1.2.17",
-					"[number of keys] * Mem",
+					"[number of keys] * WRITE",
 					true,
 					true,
 
@@ -1154,7 +1154,7 @@ function getData(){
 					"OK",
 					"OK",
 					"1.2.16",
-					"Mem",
+					"WRITE",
 					true,
 					true,
 
@@ -1171,11 +1171,103 @@ function getData(){
 					"string (int)",
 					"Value of the removed element or empty string.",
 					"1.2.16",
-					"2 * Mem + 2 * N * Disk",
+					"READ + WRITE",
 					true,
 					true,
 
 					"queue"
+			),
+
+
+
+		),
+		"bitset" => array(
+
+
+
+			new Cmd(
+					"BITSET",
+
+					"BITSET / BITMSET / SETBIT key index value [index] [value]",
+
+					"Set bit(s) of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />" .
+					"Read Bitset information document.",
+					"OK",
+					"OK",
+					"1.2.17",
+					"READ + WRITE",
+					true,
+					true,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"BITGET",
+
+					"BITGET / GETBIT key index",
+
+					"Get bit of the <i>key</i> with <i>index</i>.<br />" .
+					"Read Bitset information document.",
+					"string (int)",
+					"0 / 1",
+					"1.2.17",
+					"READ",
+					true,
+					false,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"BITMGET",
+
+					"BITMGET key index [index1]",
+
+					"Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />" .
+					"Read Bitset information document.",
+					"array",
+					"0 / 1",
+					"1.3.0",
+					"READ",
+					true,
+					false,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"BITCOUNT",
+
+					"BITCOUNT key",
+
+					"Calculate bitcount (popcount) of the <i>key</i>,<br />" .
+					"e.g. number of bits set to 1.",
+					"string (int)",
+					"bitcount",
+					"1.2.17",
+					"READ",
+					true,
+					false,
+
+					"bitset"
+			),
+
+			new Cmd(
+					"BITMAX",
+
+					"BITMAX",
+
+					"Return maximum suported index,<br />" .
+					"it is limited of max value size - currently 1MB * 8 bits = 8'388'608 bits.",
+					"string (int)",
+					"Maximum suported index.",
+					"1.2.17",
+					"n/a",
+					false,
+					null,
+
+					"bitset"
 			),
 
 
@@ -1195,7 +1287,7 @@ function getData(){
 					"string (int)",
 					"always returns 1",
 					"1.2.17",
-					"Mem + N * Disk",
+					"[number of keys] * WRITE",
 					true,
 					true,
 
@@ -1214,7 +1306,7 @@ function getData(){
 					"string (int)",
 					"estimated count",
 					"1.2.17",
-					"[number of keys] * (Mem + N * Disk)",
+					"[number of keys] * READ",
 					true,
 					false,
 
@@ -1233,7 +1325,7 @@ function getData(){
 					"string (int)",
 					"estimated count of intersection",
 					"1.2.17",
-					"[number of keys] * (Mem + N * Disk)",
+					"[number of keys] * READ",
 					false,
 					false,
 
@@ -1250,7 +1342,7 @@ function getData(){
 					"OK",
 					"Value of the removed element or empty string.",
 					"1.2.17",
-					"Mem + [number of keys] * (Mem + N * Disk)",
+					"[number of keys] * READ + WRITE",
 					true,
 					false,
 
@@ -1291,93 +1383,78 @@ function getData(){
 
 
 		),
-		"bitset" => array(
+		"bf" => array(
 
 
 
 			new Cmd(
-					"BITSET",
+					"BFADD",
 
-					"BITSET / BITMSET / SETBIT key index value [index] [value]",
+					"BFADD key bits hash value [value]",
 
-					"Set bit(s) of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />" .
+					"Add (insert) <i>value</i>'s into the bloom filter with size <i>bits</i> and number of <i>hash</i> functions.<br />" .
 					"Read Bitset information document.",
 					"OK",
 					"OK",
-					"1.2.17",
-					"2 * Mem + N * Disk",
-					true,
+					"1.2.30",
+					"READ + WRITE",
+					false,
 					true,
 
-					"bitset"
+					"bf"
 			),
 
 			new Cmd(
-					"BITGET",
+					"BFRESERVE",
 
-					"BITGET / GETBIT key index",
+					"BFRESERVE key bits hash",
 
-					"Get bit of the <i>key</i> with <i>index</i>.<br />" .
-					"Read Bitset information document.",
-					"string (int)",
-					"0 / 1",
+					"Create new, empty bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />" .
+					"Value of <i>hash</i> is not used.<br />" .
+					"Read BF information document.",
+					"OK",
+					"OK",
 					"1.2.17",
-					"Mem + N * Disk",
+					"READ + WRITE",
+					false,
 					true,
+
+					"bf"
+			),
+
+			new Cmd(
+					"BFEXISTS",
+
+					"BFEXISTS key bits hash value",
+
+					"Check if <i>value</i> is present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />" .
+					"Read Bitset information document.",
+					"bool",
+					"0 if value is not present<br />" .
+					"1 if value is MAY BE present",
+					"1.3.0",
+					"READ",
+					false,
 					false,
 
-					"bitset"
+					"bf"
 			),
 
 			new Cmd(
-					"BITMGET",
+					"BFMEXISTS",
 
-					"BITMGET key index [index1]",
+					"BFMEXISTS key bits hash value [value]",
 
-					"Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />" .
+					"Check if <i>value</i>'s are present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />" .
 					"Read Bitset information document.",
 					"array",
-					"0 / 1",
+					"array",
 					"1.3.0",
-					"Mem + N * Disk",
-					true,
+					"READ",
+					false,
 					false,
 
-					"bitset"
-			),
-
-			new Cmd(
-					"BITCOUNT",
-
-					"BITCOUNT key",
-
-					"Calculate bitcount (popcount) of the <i>key</i>,<br />" .
-					"e.g. number of bits set to 1.",
-					"string (int)",
-					"bitcount",
-					"1.2.17",
-					"Mem + N * Disk",
-					true,
-					false,
-
-					"bitset"
-			),
-
-			new Cmd(
-					"BITMAX",
-
-					"BITMAX",
-
-					"Return maximum suported index,<br />" .
-					"it is limited of max value size - currently 1MB * 8 bits = 8'388'608 bits.",
-					"string (int)",
-					"Maximum suported index.",
-					"1.2.17",
-					"n/a",
-					false,
-					null,
-
-					"bitset"
+					"bf"
 			),
 
 
@@ -1681,3 +1758,5 @@ function getData(){
 		),
 	);
 }
+
+

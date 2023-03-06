@@ -91,4 +91,5 @@ Changelog
 -	command INFO shows pair limits (Max Key Size / Max Val Size)
 -	new commands MAXKEYSIZE, MAXVALSIZE
 -	new commands MURMUR / MURMURHASH64A
+-	new module Bloom Filter, new commands BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
 

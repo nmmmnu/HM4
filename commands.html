@@ -181,6 +181,16 @@
 				<li><a href="#SPOP">SPOP</a></li>
 				</div>
 			<div>
+			<b>bitset.h</b><br />
+			&nbsp;
+
+					<li><a href="#BITSET">BITSET</a></li>
+				<li><a href="#BITGET">BITGET</a></li>
+				<li><a href="#BITMGET">BITMGET</a></li>
+				<li><a href="#BITCOUNT">BITCOUNT</a></li>
+				<li><a href="#BITMAX">BITMAX</a></li>
+				</div>
+			<div>
 			<b>hll.h</b><br />
 			&nbsp;
 
@@ -192,14 +202,13 @@
 				<li><a href="#PFERROR">PFERROR</a></li>
 				</div>
 			<div>
-			<b>bitset.h</b><br />
+			<b>bf.h</b><br />
 			&nbsp;
 
-					<li><a href="#BITSET">BITSET</a></li>
-				<li><a href="#BITGET">BITGET</a></li>
-				<li><a href="#BITMGET">BITMGET</a></li>
-				<li><a href="#BITCOUNT">BITCOUNT</a></li>
-				<li><a href="#BITMAX">BITMAX</a></li>
+					<li><a href="#BFADD">BFADD</a></li>
+				<li><a href="#BFRESERVE">BFRESERVE</a></li>
+				<li><a href="#BFEXISTS">BFEXISTS</a></li>
+				<li><a href="#BFMEXISTS">BFMEXISTS</a></li>
 				</div>
 			<div>
 			<b>murmur.h</b><br />
@@ -253,7 +262,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -274,7 +283,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MGET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (Mem + N * Disk)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -295,7 +304,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>EXISTS</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -316,7 +325,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>TTL</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -337,7 +346,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GETRANGE</td></tr>
 				<tr><td>Available since		</td><td>1.2.30</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -358,14 +367,14 @@
 			<table border="1">
 				<tr><td>Command			</td><td>STRLEN</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Get size of the value of the <i>key</i>. Exact match.<br />Useful for debuging HLL and BIT commands.
+			Get size of the value of the <i>key</i>. Exact match.<br />Useful for debuging HLL, BF and BIT commands.
 			<h3>Return type:</h3>
 			int
 			<h3>Return value:</h3>
@@ -379,7 +388,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GETX</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>immutable_x.h</td></tr>
@@ -400,7 +409,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>DELX</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -421,7 +430,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PERSISTX</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -442,7 +451,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>EXPIREX</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -463,7 +472,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>COUNT</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>accumulators.h</td></tr>
@@ -484,7 +493,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SUM</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>accumulators.h</td></tr>
@@ -505,7 +514,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MIN</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>accumulators.h</td></tr>
@@ -526,7 +535,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MAX</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>accumulators.h</td></tr>
@@ -547,7 +556,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -568,7 +577,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MSET</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -589,7 +598,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MSETNX</td></tr>
 				<tr><td>Available since		</td><td>1.2.18</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (2 * Mem + N * Disk)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + WRITE)</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -610,7 +619,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MSETXX</td></tr>
 				<tr><td>Available since		</td><td>1.2.18</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (2 * Mem + N * Disk)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + WRITE)</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -631,7 +640,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SETEX</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -652,7 +661,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SETNX</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -673,7 +682,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SETXX</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -694,7 +703,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>APPEND</td></tr>
 				<tr><td>Available since		</td><td>1.3.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -715,7 +724,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>EXPIRE</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -736,7 +745,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PERSIST</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -757,7 +766,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GETSET</td></tr>
 				<tr><td>Available since		</td><td>1.2.11</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -778,7 +787,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GETDEL</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -799,7 +808,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>DEL</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -820,7 +829,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>CAS</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cas.h</td></tr>
@@ -841,7 +850,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>CAD</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>cas.h</td></tr>
@@ -862,7 +871,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>COPY</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
@@ -883,7 +892,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>COPYNX</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>3 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
@@ -904,7 +913,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RENAME</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
@@ -925,7 +934,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RENAMENX</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>4 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
@@ -946,7 +955,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>INCR</td></tr>
 				<tr><td>Available since		</td><td>1.1.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>counter.h</td></tr>
@@ -967,7 +976,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>DECR</td></tr>
 				<tr><td>Available since		</td><td>1.1.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>counter.h</td></tr>
@@ -988,7 +997,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HGETALL</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable_x.h</td></tr>
@@ -1009,7 +1018,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HGETKEYS</td></tr>
 				<tr><td>Available since		</td><td>1.2.19</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable_x.h</td></tr>
@@ -1030,7 +1039,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HGETVALS</td></tr>
 				<tr><td>Available since		</td><td>1.2.19</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable_x.h</td></tr>
@@ -1051,7 +1060,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HLEN</td></tr>
 				<tr><td>Available since		</td><td>1.2.19</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable_x.h</td></tr>
@@ -1072,7 +1081,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HGET</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -1093,7 +1102,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HMGET</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (Mem + N * Disk)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -1114,7 +1123,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HEXISTS</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>immutable.h</td></tr>
@@ -1135,7 +1144,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HSET</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -1156,7 +1165,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>HDEL</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable.h</td></tr>
@@ -1177,7 +1186,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SADD</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>queue.h</td></tr>
@@ -1198,7 +1207,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SPOP</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + 2 * N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>queue.h</td></tr>
@@ -1212,6 +1221,111 @@
 			Value of the removed element or empty string.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="BITSET">
+
+			<h2>BITSET / BITMSET / SETBIT key index value [index] [value]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITSET</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set bit(s) of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />Read Bitset information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BITGET">
+
+			<h2>BITGET / GETBIT key index</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITGET</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get bit of the <i>key</i> with <i>index</i>.<br />Read Bitset information document.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			0 / 1
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BITMGET">
+
+			<h2>BITMGET key index [index1]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITMGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />Read Bitset information document.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			0 / 1
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BITCOUNT">
+
+			<h2>BITCOUNT key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Calculate bitcount (popcount) of the <i>key</i>,<br />e.g. number of bits set to 1.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			bitcount
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BITMAX">
+
+			<h2>BITMAX</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BITMAX</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>bitset.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Return maximum suported index,<br />it is limited of max value size - currently 1MB * 8 bits = 8'388'608 bits.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			Maximum suported index.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="PFADD">
 
 			<h2>PFADD / HLLADD key value [value2]...</h2>
@@ -1219,7 +1333,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PFADD</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>hll.h</td></tr>
@@ -1240,7 +1354,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PFCOUNT</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (Mem + N * Disk)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>hll.h</td></tr>
@@ -1261,7 +1375,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PFINTERSECT</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (Mem + N * Disk)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>hll.h</td></tr>
@@ -1282,7 +1396,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PFMERGE</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + [number of keys] * (Mem + N * Disk)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>hll.h</td></tr>
@@ -1338,114 +1452,93 @@
 			HLL error rate as percent, but multiplied to 1'00'00
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="BITSET">
+				<div class="cmd" id="BFADD">
 
-			<h2>BITSET / BITMSET / SETBIT key index value [index] [value]</h2>
+			<h2>BFADD key bits hash value [value]</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>BITSET</td></tr>
-				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * Mem + N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Command			</td><td>BFADD</td></tr>
+				<tr><td>Available since		</td><td>1.2.30</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>bitset.h</td></tr>
+				<tr><td>Module			</td><td>bf.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Set bit(s) of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />Read Bitset information document.
+			Add (insert) <i>value</i>'s into the bloom filter with size <i>bits</i> and number of <i>hash</i> functions.<br />Read Bitset information document.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
 			OK
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="BITGET">
+				<div class="cmd" id="BFRESERVE">
 
-			<h2>BITGET / GETBIT key index</h2>
+			<h2>BFRESERVE key bits hash</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>BITGET</td></tr>
+				<tr><td>Command			</td><td>BFRESERVE</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>bitset.h</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>bf.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Get bit of the <i>key</i> with <i>index</i>.<br />Read Bitset information document.
+			Create new, empty bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />Value of <i>hash</i> is not used.<br />Read BF information document.
 			<h3>Return type:</h3>
-			string (int)
+			OK
 			<h3>Return value:</h3>
-			0 / 1
+			OK
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="BITMGET">
+				<div class="cmd" id="BFEXISTS">
 
-			<h2>BITMGET key index [index1]</h2>
+			<h2>BFEXISTS key bits hash value</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>BITMGET</td></tr>
+				<tr><td>Command			</td><td>BFEXISTS</td></tr>
 				<tr><td>Available since		</td><td>1.3.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>bitset.h</td></tr>
+				<tr><td>Module			</td><td>bf.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />Read Bitset information document.
+			Check if <i>value</i> is present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />Read Bitset information document.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if value is not present<br />1 if value is MAY BE present
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="BFMEXISTS">
+
+			<h2>BFMEXISTS key bits hash value [value]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>BFMEXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.3.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>bf.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check if <i>value</i>'s are present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />Read Bitset information document.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
-			0 / 1
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="BITCOUNT">
-
-			<h2>BITCOUNT key</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>BITCOUNT</td></tr>
-				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>Mem + N * Disk</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>bitset.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Calculate bitcount (popcount) of the <i>key</i>,<br />e.g. number of bits set to 1.
-			<h3>Return type:</h3>
-			string (int)
-			<h3>Return value:</h3>
-			bitcount
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="BITMAX">
-
-			<h2>BITMAX</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>BITMAX</td></tr>
-				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>bitset.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Return maximum suported index,<br />it is limited of max value size - currently 1MB * 8 bits = 8'388'608 bits.
-			<h3>Return type:</h3>
-			string (int)
-			<h3>Return value:</h3>
-			Maximum suported index.
+			array
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MURMUR">
 
-			<h2>MURMUR / MURMURHASH64A string [seed=0]</h2>
+			<h2>MURMUR / MURMURHASH64A string [seed=0] [modulo=0]</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MURMUR</td></tr>
@@ -1457,11 +1550,11 @@
 			</table>
 
 			<h3>Description:</h3>
-			Returns murmur_hash64a from value with specific seed.
+			Returns murmur_hash64a from value
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
-			Returns murmur_hash64a from value with specific seed.
+			Returns murmur_hash64a from value with specific seed and specific modulo.<br />e.g. murmur_hash64a(value, seed) % modulo<br />Very useful for debugging.
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INFO">
