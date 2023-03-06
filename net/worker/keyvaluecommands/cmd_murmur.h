@@ -18,16 +18,21 @@ namespace net::worker::commands::Murmur{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() < 2)
+			if (p.size() < 2 || p.size() > 4)
 				return;
 
 			auto const &val = p[1];
 
 			auto const seed = p.size() == 3 ? from_string<uint64_t>(p[2]) : 0;
 
-			return result.set(
-				murmur_hash64a(val, seed)
-			);
+			auto const mod  = p.size() == 4 ? from_string<uint64_t>(p[3]) : 0;
+
+			auto const hash = murmur_hash64a(val, seed);
+
+			if (mod)
+				return result.set(hash % mod);
+			else
+				return result.set(hash);
 		}
 
 	private:

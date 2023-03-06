@@ -159,7 +159,6 @@ namespace net::worker::commands::Mutable{
 				return;
 
 			container.clear();
-			container.reserve(std::end(p) - std::begin(p) + varg);
 
 			// check if any key NOT exists
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){

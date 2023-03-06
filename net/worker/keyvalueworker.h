@@ -15,9 +15,9 @@
 #include "keyvaluecommands/cmd_counter.h"	// INCR, DECR
 
 #include "keyvaluecommands/cmd_queue.h"		// SADD, SPOP
-#include "keyvaluecommands/cmd_hll.h"		// PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS, PFERROR
-
 #include "keyvaluecommands/cmd_bitset.h"	// SETBIT, GETBIT, BITCOUNT, BITMAX
+#include "keyvaluecommands/cmd_hll.h"		// PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS, PFERROR
+#include "keyvaluecommands/cmd_bf.h"		// BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
 
 #include "keyvaluecommands/cmd_info.h"		// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
@@ -79,8 +79,9 @@ namespace net::worker{
 				Counter		::RegisterModule,
 
 				Queue		::RegisterModule,
-				HLL		::RegisterModule,
 				BITSET		::RegisterModule,
+				HLL		::RegisterModule,
+				BF		::RegisterModule,
 
 				Murmur		::RegisterModule,
 

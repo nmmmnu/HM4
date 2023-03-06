@@ -44,6 +44,17 @@ constexpr bool same_prefix(std::string_view const prefix, std::string_view const
 
 
 
+inline void copyAndFill(char *buffer, size_t size, std::string_view src, char fill = '\0'){
+	if (size <= src.size()){
+		memcpy(buffer, src.data(), size);
+	}else{ // size > src.size()
+		memcpy(buffer, src.data(), src.size());
+		memset(buffer + src.size(), fill, size - src.size());
+	}
+}
+
+
+
 template<size_t N, typename... Args>
 std::string_view concatenateBuffer(std::array<char, N> &buffer, Args &&... args){
 	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
