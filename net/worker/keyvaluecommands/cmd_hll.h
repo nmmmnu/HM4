@@ -186,6 +186,56 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
+	struct PFRESERVE : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() < 2)
+				return;
+
+			auto const &key = p[1];
+
+			if (key.empty())
+				return;
+
+			using namespace hll_impl_;
+
+			bool const ok = load_pair(*db, key);
+
+			if (!ok){
+				// create new and update
+
+				uint8_t *hll = hll_;
+
+				getHLL().clear(hll);
+
+				store(*db, key, hll);
+
+				return result.set_1();
+			}else{
+				return result.set_0();
+			}
+		}
+
+	private:
+		uint8_t hll_[hll_impl_::HLL_M];
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"pfreserve",	"PFRESERVE"		,
+			"hllreserve",	"HLLRESERVE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct PFINTERSECT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -394,6 +444,7 @@ namespace net::worker::commands::HLL{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				PFADD		,
+				PFRESERVE	,
 				PFCOUNT		,
 				PFINTERSECT	,
 				PFMERGE		,
