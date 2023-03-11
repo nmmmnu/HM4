@@ -92,4 +92,8 @@ Changelog
 -	new commands MAXKEYSIZE, MAXVALSIZE
 -	new commands MURMUR / MURMURHASH64A
 -	new module Bloom Filter, new commands BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
+-	new commands PFRESERVE / HLLRESERVE
+-	increase minimal Arena Allocator size to 4 * Max Size of the pair
+
+
 
