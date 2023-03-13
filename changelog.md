@@ -82,7 +82,7 @@ Changelog
 -	new command HGETKEYS, HGETVALS, HLEN
 -	optimized overwrite in lists
 
-### 1.3.0
+### 1.3.1
 
 -	refactor pair to support values up to 64 GB
 -	refactor BITSET / BITGET
@@ -95,5 +95,8 @@ Changelog
 -	new commands PFRESERVE / HLLRESERVE
 -	increase minimal Arena Allocator size to 4 * Max Size of the pair
 
+### 1.3.1
+
+-	refactor insertion, so double buffer copy is avoid as much as possible
 
 
