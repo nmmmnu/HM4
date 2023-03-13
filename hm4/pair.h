@@ -68,27 +68,12 @@ inline namespace version_4_00_00{
 		Pair &operator=(Pair &&) = delete;
 
 	public:
-		[[nodiscard]]
-		constexpr static bool check(
-					std::string_view const key
-				) noexcept{
-			return key.size() > 0 && key.size() <= PairConf::MAX_KEY_SIZE;
-		}
-
-		[[nodiscard]]
-		constexpr static bool check(
-					std::string_view const key,
-					std::string_view const val
-				) noexcept{
-			return check(key) && val.size() <= PairConf::MAX_VAL_SIZE;
-		}
-
 		static uint64_t prepareCreateTime(uint32_t created) noexcept;
 		static uint64_t prepareCreateTimeSimulate(uint32_t created) noexcept;
 
 	public:
 		template<bool copy_key = true, bool copy_val = true>
-		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t expires, uint32_t created){
+		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
 			static_assert(
 				(copy_key == 0 && copy_val == 0) ||
 				(copy_key == 0 && copy_val == 1) ||
@@ -99,8 +84,8 @@ inline namespace version_4_00_00{
 			pair->created	= htobe<uint64_t>(prepareCreateTime(created));
 			pair->expires	= htobe<uint32_t>(std::min(expires, PairConf::EXPIRES_MAX));
 
-			if constexpr(copy_key == false && copy_val == false)
-				return;
+		//	if constexpr(copy_key == false && copy_val == false)
+		//		return;
 
 			uint16_t const keylen = static_cast<uint16_t>(key.size() & PairConf::MAX_KEY_MASK);
 			uint32_t const vallen = static_cast<uint32_t>(val.size() & PairConf::MAX_VAL_MASK);
@@ -127,113 +112,20 @@ inline namespace version_4_00_00{
 			#pragma GCC diagnostic pop
 		}
 
+		template<bool copy_key = true, bool copy_val = true>
+		static void createInRawMemory(Pair *pair, std::string_view const key, size_t const val_size, uint32_t const expires, uint32_t const created){
+			static_assert(copy_val == false, "When you pass null value, don't break the rules!");
+
+			// now break the rules
+			const char *val_str = nullptr;
+			std::string_view const val{ val_str, val_size };
+
+			return createInRawMemory<copy_key, copy_val>(pair, key, val, expires, created);
+		}
+
 		static void cloneInRawMemory(Pair *pair, const Pair &src) noexcept{
 			memcpy(static_cast<void *>(pair), & src, src.bytes());
 		}
-
-	private:
-		template<class Allocator>
-		[[nodiscard]]
-		static Pair *create__(
-				Allocator &allocator,
-				std::string_view const key,
-				std::string_view const val,
-				uint32_t const expires = 0, uint32_t const created = 0) noexcept{
-
-			if ( ! check(key, val) )
-				return nullptr;
-
-			using namespace MyAllocator;
-
-			Pair *pair = allocate<Pair>(
-					allocator,
-					Pair::bytes(key.size(), val.size())
-			);
-
-			if (!pair)
-				return nullptr;
-
-			createInRawMemory(pair, key, val, expires, created);
-
-			return pair;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		static Pair *clone__(Allocator &allocator, const Pair &src) noexcept{
-			using namespace MyAllocator;
-
-			Pair *pair = allocate<Pair>(
-					allocator,
-					src.bytes()
-			);
-
-			if (!pair)
-				return nullptr;
-
-			cloneInRawMemory(pair, src);
-
-			return pair;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		static Pair *clone__(Allocator &allocator, const Pair *src) noexcept{
-			if (!src)
-				return nullptr;
-
-			return clone__(allocator, *src);
-		}
-
-		template<class Allocator>
-		static void destroy__(Allocator &allocator, Pair *pair) noexcept{
-			using namespace MyAllocator;
-
-			return deallocate(allocator, pair);
-		}
-
-	public:
-		struct smart_ptr{
-			template<class Allocator>
-			[[nodiscard]]
-			static auto create(
-					Allocator &allocator,
-					std::string_view const key,
-					std::string_view const val,
-					uint32_t const expires = 0, uint32_t const created = 0) noexcept{
-
-				using MyAllocator::wrapInSmartPtr;
-
-				return wrapInSmartPtr(
-					allocator,
-					create__(allocator, key, val, expires, created)
-				);
-			}
-
-			template<class Allocator>
-			[[nodiscard]]
-			static auto clone(Allocator &allocator, const Pair *src) noexcept{
-
-				using MyAllocator::wrapInSmartPtr;
-
-				return wrapInSmartPtr(
-					allocator,
-					clone__(allocator, src)
-				);
-			}
-
-			template<class Allocator>
-			[[nodiscard]]
-			static auto clone(Allocator &allocator, const Pair &src) noexcept{
-
-				using MyAllocator::wrapInSmartPtr;
-
-				return wrapInSmartPtr(
-					allocator,
-					clone__(allocator, src)
-				);
-			}
-		};
 
 	public:
 		[[nodiscard]]
@@ -255,6 +147,86 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		static auto clone(const Pair &src) noexcept{
 			return clone(& src);
+		}
+
+	private:
+		template<class Allocator, class Factory>
+		[[nodiscard]]
+		static Pair *create__(Allocator &allocator, Factory &factory) noexcept{
+
+			if ( bool const ok = factory.getKey().size() > 0 && factory.getKey().size() <= PairConf::MAX_KEY_SIZE; ! ok )
+				return nullptr;
+
+			if ( factory.bytes() > maxBytes() )
+				return nullptr;
+
+			using namespace MyAllocator;
+
+			Pair *pair = allocate<Pair>(
+					allocator,
+					factory.bytes()
+			);
+
+			if (!pair)
+				return nullptr;
+
+			factory.create(pair);
+
+			return pair;
+		}
+
+		template<class Allocator>
+		static void destroy__(Allocator &allocator, Pair *pair) noexcept{
+			using namespace MyAllocator;
+
+			return deallocate(allocator, pair);
+		}
+
+	public:
+		struct smart_ptr{
+			template<class Allocator, class PairFactory>
+			[[nodiscard]]
+			static auto create(Allocator &allocator, PairFactory &factory) noexcept{
+				using MyAllocator::wrapInSmartPtr;
+
+				return wrapInSmartPtr(
+					allocator,
+					create__(allocator, factory)
+				);
+			}
+
+			template<class PairFactory, class Allocator, typename ...Args>
+			[[nodiscard]]
+			static auto createF(Allocator &allocator, Args &&...args) noexcept{
+				PairFactory factory{ std::forward<Args>(args)... };
+				return create(allocator, factory);
+			}
+
+			template<class Allocator>
+			[[nodiscard]]
+			static MyAllocator::SmartPtrType<Pair, Allocator> create(
+					Allocator &allocator,
+					std::string_view const key,
+					std::string_view const val,
+					uint32_t const expires = 0, uint32_t const created = 0) noexcept;
+
+			template<class Allocator>
+			[[nodiscard]]
+			static MyAllocator::SmartPtrType<Pair, Allocator> clone(Allocator &allocator, const Pair *src) noexcept;
+
+			template<class Allocator>
+			[[nodiscard]]
+			static auto clone(Allocator &allocator, const Pair &src) noexcept{
+				return clone(allocator, & src);
+			}
+		};
+
+	public:
+		template<class Allocator, class PairFactory>
+		[[nodiscard]]
+		static auto create(PairFactory &factory) noexcept{
+			std::nullptr_t allocator;
+			return smart_ptr::create(allocator, factory);
 		}
 
 	public:
@@ -407,7 +379,7 @@ inline namespace version_4_00_00{
 		// ==============================
 
 		[[nodiscard]]
-		size_t bytes() const noexcept{
+		constexpr size_t bytes() const noexcept{
 			return bytes(getKeyLen_(), getValLen_());
 		}
 
@@ -474,6 +446,8 @@ inline namespace version_4_00_00{
 
 	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
 
+
+
 	[[nodiscard]]
 	inline bool equals(const Pair *p1, const Pair *p2){
 		return p1->equals(*p2);
@@ -494,6 +468,192 @@ inline namespace version_4_00_00{
 			pair->print();
 		else
 			printf("%s\n", PairConf::EMPTY_MESSAGE);
+	}
+
+
+
+	namespace PairFactory{
+		struct MutableNotifyMessage{
+			size_t bytes_old = 0;
+			size_t bytes_new = 0;
+		};
+
+		struct Normal{
+			std::string_view key;
+			std::string_view val;
+			uint32_t expires;
+			uint32_t created;
+
+			constexpr Normal(
+				std::string_view const key,
+				std::string_view const val,
+				uint32_t const expires = 0, uint32_t const created = 0) :
+					key	(key		),
+					val	(val		),
+					expires	(expires	),
+					created	(created	){}
+
+			[[nodiscard]]
+			constexpr std::string_view getKey() const noexcept{
+				return key;
+			}
+
+			[[nodiscard]]
+			constexpr uint32_t getCreated() const noexcept{
+				return created;
+			}
+
+			[[nodiscard]]
+			constexpr size_t bytes() const{
+				return Pair::bytes(key.size(), val.size());
+			}
+
+			void createHint(Pair *pair) const{
+				Pair::createInRawMemory<0,1>(pair, key, val, expires, created);
+			}
+
+			void create(Pair *pair) const{
+				Pair::createInRawMemory(pair, key, val, expires, created);
+			}
+		};
+
+		struct NormalExpiresOnly{
+			std::string_view key;
+			std::string_view val;
+			uint32_t expires;
+			uint32_t created;
+
+			constexpr NormalExpiresOnly(
+				std::string_view const key,
+				std::string_view const val,
+				uint32_t const expires = 0, uint32_t const created = 0) :
+					key	(key		),
+					val	(val		),
+					expires	(expires	),
+					created	(created	){}
+
+			[[nodiscard]]
+			constexpr std::string_view getKey() const noexcept{
+				return key;
+			}
+
+			[[nodiscard]]
+			constexpr uint32_t getCreated() const noexcept{
+				return created;
+			}
+
+			[[nodiscard]]
+			constexpr size_t bytes() const{
+				return Pair::bytes(key.size(), val.size());
+			}
+
+			void createHint(Pair *pair) const{
+				Pair::createInRawMemory<0,0>(pair, key, val, expires, created);
+			}
+
+			void create(Pair *pair) const{
+				Pair::createInRawMemory(pair, key, val, expires, created);
+			}
+		};
+
+		struct Tombstone{
+			std::string_view key;
+
+			constexpr Tombstone(std::string_view const key) :
+					key(key){}
+
+			[[nodiscard]]
+			constexpr std::string_view getKey() const noexcept{
+				return key;
+			}
+
+			[[nodiscard]]
+			constexpr uint32_t getCreated() const noexcept{
+				return 0;
+			}
+
+			[[nodiscard]]
+			constexpr size_t bytes() const{
+				return Pair::bytes(key.size(), Pair::TOMBSTONE.size());
+			}
+
+			void createHint(Pair *pair) const{
+				Pair::createInRawMemory<0,1>(pair, key, Pair::TOMBSTONE, 0, 0);
+			}
+
+			void create(Pair *pair) const{
+				Pair::createInRawMemory(pair, key, Pair::TOMBSTONE, 0, 0);
+			}
+		};
+
+		struct Clone{
+			const Pair *src;
+
+			constexpr Clone(const Pair *src) :
+					src(src){}
+
+			constexpr Clone(const Pair &src) :
+					Clone(&src){}
+
+			[[nodiscard]]
+			constexpr std::string_view getKey() const noexcept{
+				return src->getKey();
+			}
+
+			[[nodiscard]]
+			uint32_t getCreated() const noexcept{
+				return (uint32_t) src->getCreated();
+			}
+
+			[[nodiscard]]
+			size_t bytes() const{
+				return src->bytes();
+			}
+
+			void createHint(Pair *pair) const{
+				Pair::cloneInRawMemory(pair, *src);
+			}
+
+			void create(Pair *pair) const{
+				Pair::cloneInRawMemory(pair, *src);
+			}
+		};
+
+		struct IFactory{
+			virtual ~IFactory() = default;
+
+			virtual std::string_view getKey() const = 0;
+			virtual uint32_t getCreated() const = 0;
+			virtual size_t bytes() const = 0;
+
+			virtual void createHint(Pair *pair) = 0;
+			virtual void create(Pair *pair) = 0;
+		};
+
+	} // namespace PairFactory
+
+
+
+	template<class Allocator>
+	[[nodiscard]]
+	MyAllocator::SmartPtrType<Pair, Allocator> Pair::smart_ptr::create(
+			Allocator &allocator,
+			std::string_view const key,
+			std::string_view const val,
+			uint32_t const expires, uint32_t const created) noexcept{
+
+		using namespace PairFactory;
+		return smart_ptr::createF<Normal>(allocator, key, val, expires, created);
+	}
+
+	template<class Allocator>
+	[[nodiscard]]
+	MyAllocator::SmartPtrType<Pair, Allocator> Pair::smart_ptr::clone(
+			Allocator &allocator,
+			const Pair *src) noexcept{
+
+		using namespace PairFactory;
+		return smart_ptr::createF<Clone>(allocator, src);
 	}
 
 

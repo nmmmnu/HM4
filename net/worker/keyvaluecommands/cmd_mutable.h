@@ -166,7 +166,7 @@ namespace net::worker::commands::Mutable{
 				auto const &val = *std::next(itk);
 
 				if (auto *it = hm4::getPairPtr(*db, key); it){
-					if (const auto *hint = & *it; hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, hint, val.size())){
+					if (const auto *hint = & *it; hm4::canInsertHint(*db, hint, val.size())){
 						// HINT
 						container.push_back(hint);
 					}else
@@ -183,7 +183,7 @@ namespace net::worker::commands::Mutable{
 
 					assert(key == hint->getKey());
 
-					hm4::proceedInsertHint(*db, hint, key, val);
+					hm4::proceedInsertHintF<hm4::PairFactory::Normal>(*db, hint, key, val);
 				}
 			}
 
@@ -422,7 +422,7 @@ namespace net::worker::commands::Mutable{
 
 				// HINT
 				const auto *hint = & *it;
-				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
+				hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, key, val, exp);
 
 				return result.set(true);
 			}else{
@@ -570,7 +570,7 @@ namespace net::worker::commands::Mutable{
 
 			// HINT
 			const auto *hint = & *it;
-			hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
+			hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, key, val, exp);
 
 			// return
 
@@ -618,7 +618,7 @@ namespace net::worker::commands::Mutable{
 				// HINT
 				const auto *hint = & *it;
 				// put tombstone
-				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key);
+				hm4::insertHintF<hm4::PairFactory::Tombstone>(*db, hint, key);
 
 				// return
 
@@ -678,7 +678,7 @@ namespace net::worker::commands::Mutable{
 			// HINT
 			// will not work, but who knows in the future.
 			const auto *hint = & *it;
-			hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
+			hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, key, val, exp);
 
 			// return
 
@@ -722,7 +722,7 @@ namespace net::worker::commands::Mutable{
 
 				// HINT
 				const auto *hint = & *it;
-				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, exp, key, hint->getVal());
+				hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(*db, hint, key, hint->getVal(), exp);
 
 				return result.set(true);
 			}else{
@@ -769,7 +769,7 @@ namespace net::worker::commands::Mutable{
 
 					// HINT
 					const auto *hint = & *it;
-					hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, exp, key, hint->getVal());
+					hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(*db, hint, key, hint->getVal(), exp);
 				}
 
 				return result.set(true);

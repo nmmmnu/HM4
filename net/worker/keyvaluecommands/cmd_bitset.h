@@ -7,11 +7,81 @@ namespace net::worker::commands::BITSET{
 	namespace bit_impl_{
 		using namespace shared::bit;
 
+		using Pair = hm4::Pair;
+
 		// for 1 MB * 8 = 8'388'608
 		// uint32_t will do fine, but lets be on the safe side
 		using size_type				= uint64_t;
 
 		constexpr size_type BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
+
+
+
+		template<typename It>
+		struct BITSET_Factory : hm4::PairFactory::IFactory{
+			BITSET_Factory(std::string_view const key, uint64_t val_size, It begin, It end, const Pair *pair) :
+							key		(key		),
+							val_size	(val_size	),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *pair) final{
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0>(pair, key, val_size, 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			void create_(Pair *pair) const{
+				char *data = const_cast<char *>(pair->getVal().data());
+
+				if (old_pair){
+					memcpy(data, old_pair->getVal().data(), val_size);
+				}else{
+					memset(data, '\0', val_size);
+				}
+			}
+
+			void add_(Pair *pair) const{
+				char *data = const_cast<char *>(pair->getVal().data());
+
+				for(auto it = begin; it != end; it += 2){
+					auto const n = from_string<size_type>(*it);
+
+					if (n >= BIT_MAX)
+						continue;
+
+					bool const bit	= from_string<uint64_t>(*std::next(it));
+
+					BitOps{ n }.set(data, bit);
+				}
+			}
+
+		private:
+			std::string_view	key;
+			uint64_t		val_size;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
 	}
 
 	template<class Protocol, class DBAdapter>
@@ -24,7 +94,7 @@ namespace net::worker::commands::BITSET{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			// should be even number arguments
 			// bitset key 5 1 6 0
 			if (p.size() < 4 || p.size() % 2 == 1)
@@ -44,46 +114,16 @@ namespace net::worker::commands::BITSET{
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
-			if (pair == nullptr){
-				// create new and update
+			using MyBITSET_Factory = BITSET_Factory<ParamContainer::iterator>;
 
-				char *buffer = blob.buffer_val.data();
-				memset(buffer, '\0', n_size);
+			auto const varg = 2;
 
-				updateAll_(p, buffer);
+			if (pair && hm4::canInsertHint(*db, pair, n_size))
+				hm4::proceedInsertHintV<MyBITSET_Factory>(*db, pair, key, n_size, std::begin(p) + varg, std::end(p), pair);
+			else
+				hm4::insertV<MyBITSET_Factory>(*db, key, n_size, std::begin(p) + varg, std::end(p), pair);
 
-				hm4::insert(*db, key, std::string_view{ buffer, n_size });
-
-				return result.set();
-
-			}else if (hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, pair, n_size)){
-				// HINT
-
-				// valid pair, update in place
-
-				char *data = const_cast<char *>( pair->getVal().data() );
-				updateAll_(p, data);
-
-				const auto *hint = pair;
-				// condition already checked,
-				// update the expiration,
-				// will always succeed
-				hm4::proceedInsertHint(*db, hint, 0, key, pair->getVal());
-
-				return result.set();
-			}else{
-				// normal update
-
-				char *buffer = blob.buffer_val.data();
-
-				copyAndFill(buffer, n_size, pair->getVal());
-
-				updateAll_(p, buffer);
-
-				hm4::insert(*db, key, std::string_view{ buffer, n_size });
-
-				return result.set();
-			}
+			return result.set();
 		}
 
 	private:
@@ -105,23 +145,6 @@ namespace net::worker::commands::BITSET{
 			}
 
 			return std::make_pair(ok, BitOps::size(max));
-		}
-
-		static void updateAll_(ParamContainer const &p, char *data){
-			using namespace bit_impl_;
-
-			auto const varg = 2;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
-				auto const n = from_string<size_type>(*itk);
-
-				if (n >= BIT_MAX)
-					continue;
-
-				bool const bit	= from_string<uint64_t>(*std::next(itk));
-
-				BitOps{ n }.set(data, bit);
-			}
 		}
 
 	private:

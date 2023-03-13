@@ -89,165 +89,6 @@ inline bool isValidForReplace(Pair const &neo, Pair const &old) noexcept{
 
 // ==============================
 
-namespace PairFactory{
-	struct MutableNotifyMessage{
-		size_t bytes_old = 0;
-		size_t bytes_new = 0;
-	};
-
-	struct Normal{
-		std::string_view key;
-		std::string_view val;
-		uint32_t expires = 0;
-		uint32_t created = 0;
-
-		[[nodiscard]]
-		constexpr auto getKey() const noexcept{
-			return key;
-		}
-
-		[[nodiscard]]
-		constexpr uint32_t getCreated() const noexcept{
-			return created;
-		}
-
-		template<class List>
-		[[nodiscard]]
-		bool operator()(Pair *hint, List &list) const noexcept{
-			MutableNotifyMessage msg;
-			msg.bytes_old = hint->bytes();
-			msg.bytes_new = Pair::bytes(key, val);
-
-			if (msg.bytes_new <= msg.bytes_old){
-				Pair::createInRawMemory<0,1>(hint, key, val, expires, created);
-
-				list.mutable_notify(hint, msg);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		auto operator()(Allocator &allocator) const noexcept{
-			return Pair::smart_ptr::create(allocator, key, val, expires, created);
-		}
-	};
-
-	struct NormalExpiresOnly : Normal{
-		template<class List>
-		[[nodiscard]]
-		bool operator()(Pair *hint, List &list) const noexcept{
-			Pair::createInRawMemory<0,0>(hint, key, val, expires, created);
-
-			MutableNotifyMessage msg;
-			list.mutable_notify(hint, msg);
-
-			return true;
-		}
-
-		using Normal::operator();
-	};
-
-	struct Tombstone{
-		std::string_view key;
-
-		[[nodiscard]]
-		constexpr auto getKey() const noexcept{
-			return key;
-		}
-
-		[[nodiscard]]
-		constexpr static uint32_t getCreated() noexcept{
-			return 0;
-		}
-
-		template<class List>
-		[[nodiscard]]
-		bool operator()(Pair *hint, List &list) const noexcept{
-			MutableNotifyMessage msg;
-			msg.bytes_old = hint->bytes();
-			msg.bytes_new = Pair::bytes(key, Pair::TOMBSTONE);
-
-			Pair::createInRawMemory<0,1>(hint, key, Pair::TOMBSTONE, 0, 0);
-
-			list.mutable_notify(hint, msg);
-
-			return true;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		auto operator()(Allocator &allocator) const noexcept{
-			return Pair::smart_ptr::create(allocator, key, Pair::TOMBSTONE);
-		}
-	};
-
-	struct Clone{
-		const Pair *src;
-
-		[[nodiscard]]
-		auto getKey() const noexcept{
-			return src->getKey();
-		}
-
-		[[nodiscard]]
-		uint64_t getCreated() const noexcept{
-			return src->getCreated();
-		}
-
-		template<class List>
-		[[nodiscard]]
-		bool operator()(Pair *hint, List &list) const noexcept{
-			MutableNotifyMessage msg;
-			msg.bytes_old = hint->bytes();
-			msg.bytes_new =  src->bytes();
-
-			if (msg.bytes_new <= msg.bytes_old){
-				Pair::cloneInRawMemory(hint, *src);
-
-				list.mutable_notify(hint, msg);
-
-				return true;
-			}
-
-			return false;
-		}
-
-		template<class Allocator>
-		[[nodiscard]]
-		auto operator()(Allocator &allocator) const noexcept{
-			return Pair::smart_ptr::clone(allocator, src);
-		}
-	};
-
-	constexpr auto factory(
-			std::string_view key, std::string_view val,
-			uint32_t const expires = 0,
-			uint32_t const created = 0){
-
-		return PairFactory::Normal{ key, val, expires, created };
-	}
-
-	constexpr auto factory(
-			uint32_t const expires,
-			std::string_view key, std::string_view val,
-			uint32_t const created = 0){
-		return PairFactory::NormalExpiresOnly{ key, val, expires, created };
-	}
-
-	constexpr auto factory(std::string_view key){
-		return PairFactory::Tombstone{ key };
-	}
-
-	constexpr auto factory(Pair const &src){
-		return PairFactory::Clone{ & src };
-	}
-
-} // namespace PairFactory
-
 using PairFactoryMutableNotifyMessage = PairFactory::MutableNotifyMessage;
 
 // ==============================
@@ -257,58 +98,152 @@ bool erase(List &list, std::string_view const key){
 	return list.erase_(key);
 }
 
-template<class List, typename ...Args>
-auto insert(List &list, Args &&...args){
-	return list.insertLazyPair_(
-		PairFactory::factory(std::forward<Args>(args)...)
-	);
+template<class List, class PairFactory>
+auto insert(List &list, PairFactory &factory) noexcept{
+	static_assert(!std::is_same_v<PairFactory, Pair>);
+	static_assert(!std::is_same_v<PairFactory, std::basic_string_view<char, std::char_traits<char> > const>);
+
+	return list.insertLazyPair_(factory);
 }
 
-template<bool AllowHints, class List>
+template<class PairFactory, class List, typename ...Args>
+auto insertF(List &list, Args &&...args) noexcept {
+	PairFactory factory{ std::forward<Args>(args)... };
+
+	return insert(list, factory);
+}
+
+template<class VPairFactory, class List, typename ...Args>
+auto insertV(List &list, Args &&...args) noexcept{
+	using VBase = PairFactory::IFactory;
+
+	static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from PairFactory::IFactory");
+
+	VPairFactory factory{ std::forward<Args>(args)... };
+
+	// lost the type
+	VBase &vbase = factory;
+
+	return insert(list, vbase);
+}
+
+template<class List>
+auto insert(List &list, std::string_view const key,
+			std::string_view const val,
+			uint32_t const expires = 0, uint32_t const created = 0) noexcept{
+
+	return insertF<PairFactory::Normal>(list, key, val, expires, created);
+}
+
+template<class List>
+auto insert(List &list, std::string_view const key) noexcept{
+	return insertF<PairFactory::Tombstone>(list, key);
+}
+
+template<class List>
+auto insert(List &list, Pair const &src) noexcept{
+	return insertF<PairFactory::Clone>(list, src);
+}
+
+// if not present, insert(list, Factory) will be called.
+template<class List>
+auto insert(List &list, Pair &src) noexcept{
+	return insertF<PairFactory::Clone>(list, & src);
+}
+
+// ==============================
+
+template<class List>
 constexpr bool canInsertHint(const List &list, const Pair *pair){
-	if constexpr(AllowHints)
-		return list.getAllocator().owns(pair);
-
-	return false;
+	return list.getAllocator().owns(pair);
 }
 
-template<bool AllowHints, class List>
-constexpr bool canInsertHint(const List &list, const Pair *pair, size_t val_size){
-	if constexpr(AllowHints)
-		return list.getAllocator().owns(pair) && pair->getVal().size() >= val_size;
-
-	return false;
+template<class List>
+constexpr bool canInsertHint(const List &list, const Pair *pair, size_t bytes){
+	return canInsertHint(list, pair) && pair->bytes() >= bytes;
 }
 
-template<class List, typename ...Args>
-constexpr bool proceedInsertHint(List &list, const Pair *pair, Args &&...args){
-	// Pair is in the memlist and it is safe to be overwitten.
-	// the create time is not updated, but this is not that important,
+// ==============================
+
+template<class List, class PairFactory>
+constexpr void proceedInsertHint(List &list, const Pair *pair, PairFactory &factory){
+	// Pair is in the memlist,
+	// data size is already checked and it is safe to be overwitten.
+	//
+	// The create time is not updated, but this is not that important,
 	// since the Pair is not yet flushed.
-	Pair *m_pair = const_cast<Pair *>(pair);
 
-	auto factory = PairFactory::factory(std::forward<Args>(args)...);
+	PairFactoryMutableNotifyMessage msg;
+	msg.bytes_old = pair->bytes();
+	msg.bytes_new = factory.bytes();
 
-	if (factory(m_pair, list))
-		return true;
-	else
+	factory.createHint( const_cast<Pair *>(pair) );
+
+	list.mutable_notify(pair, msg);
+}
+
+template<class PairFactory, class List, typename ...Args>
+auto proceedInsertHintF(List &list, const Pair *pair, Args &&...args){
+	PairFactory factory{ std::forward<Args>(args)... };
+
+	return proceedInsertHint(list, pair, factory);
+}
+
+template<class VPairFactory, class List, typename ...Args>
+auto proceedInsertHintV(List &list, const Pair *pair, Args &&...args){
+	using VBase = PairFactory::IFactory;
+
+	static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from PairFactory::IFactory");
+
+	VPairFactory factory{ std::forward<Args>(args)... };
+
+	// lost the type
+	VBase &vbase = factory;
+
+	return proceedInsertHint(list, pair, vbase);
+}
+
+// ==============================
+
+template<class List, class PairFactory>
+constexpr bool tryInsertHint(List &list, const Pair *pair, PairFactory &factory){
+	if (! canInsertHint(list, pair, factory.bytes()) )
 		return false;
+
+	proceedInsertHint(list, pair, factory);
+
+	return true;
 }
 
-template<bool AllowHints = true, class List, typename ...Args>
-constexpr bool tryInsertHint(List &list, const Pair *pair, Args &&...args){
-	if constexpr(AllowHints){
-		if (canInsertHint<AllowHints>(list, pair))
-			return proceedInsertHint(list, pair, std::forward<Args>(args)...);
-	}
+// ==============================
 
-	return false;
+template<class List, class PairFactory>
+void insertHint(List &list, const Pair *pair, PairFactory &factory){
+	if (canInsertHint(list, pair, factory.bytes()))
+		proceedInsertHint(list, pair, factory);
+	else
+		insert(list, factory);
 }
 
-template<bool AllowHints = true, class List, typename ...Args>
-void insertHint(List &list, const Pair *pair, Args &&...args){
-	if (tryInsertHint<AllowHints>(list, pair, std::forward<Args>(args)...) == false)
-		insert(list, std::forward<Args>(args)...);
+template<class PairFactory, class List, typename ...Args>
+auto insertHintF(List &list, const Pair *pair, Args &&...args){
+	PairFactory factory{ std::forward<Args>(args)... };
+
+	return insertHint(list, pair, factory);
+}
+
+template<class VPairFactory, class List, typename ...Args>
+auto insertHintV(List &list, const Pair *pair, Args &&...args){
+	using VBase = PairFactory::IFactory;
+
+	static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from PairFactory::IFactory");
+
+	VPairFactory factory{ std::forward<Args>(args)... };
+
+	// lost the type
+	VBase &vbase = factory;
+
+	return insertHint(list, pair, vbase);
 }
 
 // ==============================

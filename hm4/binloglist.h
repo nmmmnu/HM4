@@ -41,7 +41,7 @@ public:
 					binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>(std::forward<UBinLogger>(binlogger)){}
 
 	bool erase_(std::string_view const key){
-		assert(Pair::check(key));
+		assert(!key.empty());
 
 		return insert(*this, key) != std::end(*list_);
 	}
@@ -55,8 +55,8 @@ public:
 	}
 
 	template<class PFactory>
-	auto insertLazyPair_(PFactory &&factory){
-		auto it = list_->insertLazyPair_(std::move(factory));
+	auto insertLazyPair_(PFactory &factory){
+		auto it = list_->insertLazyPair_(factory);
 
 		if (it == std::end(*list_))
 			return it;

@@ -1,12 +1,14 @@
 #include "base.h"
 #include "hyperloglog.h"
 #include "logger.h"
+#include "pair_vfactory.h"
 
 namespace net::worker::commands::HLL{
 
 	namespace hll_impl_{
-
 		constexpr auto LL_HLL = LogLevel::WARNING;
+
+		using Pair = hm4::Pair;
 
 		constexpr uint8_t HLL_Bits = 12;
 
@@ -25,16 +27,6 @@ namespace net::worker::commands::HLL{
 					HLL_M
 				}
 			);
-		}
-
-		template<class List>
-		const hm4::Pair *load_pair(List &list, std::string_view key){
-			return hm4::getPair_(list, key, [](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == HLL_M)
-					return & *it;
-				else
-					return nullptr;
-			});
 		}
 
 		template<class List>
@@ -79,6 +71,76 @@ namespace net::worker::commands::HLL{
 		uint64_t hll_op_round(double const estimate){
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
 		}
+
+
+
+		template<typename It>
+		struct HLLADD_Factory : hm4::PairFactory::IFactory{
+			HLLADD_Factory(std::string_view const key, It begin, It end, const Pair *pair) :
+							key		(key		),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *pair) final{
+				if (pair->getVal().size() != val_size){
+					Pair::createInRawMemory<0,0>(pair, key, val_size, 0, 0);
+					create_(pair);
+				}
+
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0>(pair, key, val_size, 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			void create_(Pair *pair) const{
+				char *data = const_cast<char *>(pair->getVal().data());
+
+				if (old_pair){
+					memcpy(data, old_pair->getVal().data(), val_size);
+				}else{
+					memset(data, '\0', val_size);
+				}
+			}
+
+			void add_(Pair *pair) const{
+				char    *data     = const_cast<char *		>(pair->getVal().data());
+				uint8_t *hll_data = reinterpret_cast<uint8_t *	>(data);
+
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
+
+					getHLL().add(hll_data, val);
+				}
+			}
+
+		private:
+			constexpr static auto val_size = HLL_M;
+
+		private:
+			std::string_view	key;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
 	}
 
 
@@ -108,69 +170,23 @@ namespace net::worker::commands::HLL{
 				if (const auto &val = *itk; val.empty())
 					return;
 
-			auto add_values = [&p](auto &hll){
-				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-					const auto &val = *itk;
-
-					using namespace hll_impl_;
-
-					getHLL().add(hll, val);
-				}
-			};
-
 			using namespace hll_impl_;
 
-			const auto *pair = load_pair(*db, key);
+			const auto *pair = hm4::getPair_(*db, key, [](bool b, auto it) -> const hm4::Pair *{
+				if (b && it->getVal().size() == HLL_M)
+					return & *it;
+				else
+					return nullptr;
+			});
 
-			if (pair == nullptr){
-				// invalid key.
+			using MyHLLADD_Factory = HLLADD_Factory<ParamContainer::iterator>;
 
-				uint8_t *hll = hll_;
+			if (pair && hm4::canInsertHint(*db, pair, HLL_M))
+				hm4::proceedInsertHintV<MyHLLADD_Factory>(*db, pair, key, std::begin(p) + varg, std::end(p), pair);
+			else
+				hm4::insertV<MyHLLADD_Factory>(*db, key, std::begin(p) + varg, std::end(p), pair);
 
-				getHLL().clear(hll);
-
-				add_values(hll);
-
-				store(*db, key, hll);
-
-				return result.set_1();
-			}else if (hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, pair)){
-				// HINT
-
-				auto cast = [](const char *s){
-					const uint8_t *c = reinterpret_cast<const uint8_t *>(s);
-
-					return const_cast<uint8_t *>(c);
-				};
-
-				uint8_t *hll = cast(pair->getVal().data());
-
-				// valid pair, update in place
-				add_values(hll);
-
-				const auto *hint = pair;
-				// condition already checked,
-				// update the expiration,
-				// will always succeed
-				hm4::proceedInsertHint(*db, hint, 0, key, pair->getVal());
-
-				return result.set_1();
-			}else{
-				// proceed with normal update
-
-				uint8_t *hll = hll_;
-
-				const uint8_t *b = reinterpret_cast<const uint8_t *>(pair->getVal().data());
-
-				// copy b -> hll
-				getHLL().load(hll, b);
-
-				add_values(hll);
-
-				store(*db, key, hll);
-
-				return result.set_1();
-			}
+			return result.set_1();
 		}
 
 	private:
@@ -206,21 +222,9 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			bool const ok = load_pair(*db, key);
+			hm4::insertV<hm4::PairFactory::Reserve>(*db, key, HLL_M);
 
-			if (!ok){
-				// create new and update
-
-				uint8_t *hll = hll_;
-
-				getHLL().clear(hll);
-
-				store(*db, key, hll);
-
-				return result.set_1();
-			}else{
-				return result.set_0();
-			}
+			return result.set_1();
 		}
 
 	private:

@@ -37,7 +37,7 @@ namespace net::worker::commands::MutableX{
 
 				// HINT !!!
 
-				if (const auto *hint = & *it; hm4::canInsertHint<Predicate::tryInsertHints()>(list, hint)){
+				if (const auto *hint = & *it; hm4::canInsertHint(list, hint)){
 					p.processHint(list, hint);
 				}else{
 					container.emplace_back(hint);
@@ -120,10 +120,6 @@ namespace net::worker::commands::MutableX{
 		struct DeletePredicate{
 			using List = typename DBAdapter::List;
 
-			constexpr static bool tryInsertHints(){
-				return DBAdapter::TRY_INSERT_HINTS;
-			}
-
 			static void process(List &list, const hm4::Pair *hint){
 				// put tombstone
 				hm4::insert(list, hint->getKey());
@@ -131,7 +127,7 @@ namespace net::worker::commands::MutableX{
 
 			static void processHint(List &list, const hm4::Pair *hint){
 				// put tombstone
-				hm4::insertHint(list, hint, hint->getKey());
+				hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
 			}
 		};
 
@@ -141,16 +137,12 @@ namespace net::worker::commands::MutableX{
 
 			constexpr static uint32_t expires = 0;
 
-			constexpr static bool tryInsertHints(){
-				return DBAdapter::TRY_INSERT_HINTS;
-			}
-
 			static void process(List &list, const hm4::Pair *hint){
 				hm4::insert(list, hint->getKey(), hint->getVal(), expires);
 			}
 
 			static void processHint(List &list, const hm4::Pair *hint){
-				hm4::insertHint(list, hint, expires, hint->getKey(), hint->getVal());
+				hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(list, hint, hint->getKey(), hint->getVal(), expires);
 			}
 		};
 
@@ -160,16 +152,12 @@ namespace net::worker::commands::MutableX{
 
 			uint32_t expires;
 
-			constexpr static bool tryInsertHints(){
-				return DBAdapter::TRY_INSERT_HINTS;
-			}
-
 			void process(List &list, const hm4::Pair *hint) const{
 				hm4::insert(list, hint->getKey(), hint->getVal(), expires);
 			}
 
 			void processHint(List &list, const hm4::Pair *hint) const{
-				hm4::insertHint(list, hint, expires, hint->getKey(), hint->getVal());
+				hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(list, hint, hint->getKey(), hint->getVal(), expires);
 			}
 		};
 	} // namespace

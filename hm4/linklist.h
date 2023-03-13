@@ -31,7 +31,7 @@ public:
 	bool erase_(std::string_view const key);
 
 	template<class PFactory>
-	iterator insertLazyPair_(PFactory &&factory);
+	iterator insertLazyPair_(PFactory &factory);
 
 	auto size() const{
 		return lc_.size();

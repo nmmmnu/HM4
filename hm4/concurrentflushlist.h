@@ -76,9 +76,9 @@ public:
 	}
 
 	template<class PFactory>
-	auto insertLazyPair_(PFactory &&factory){
+	auto insertLazyPair_(PFactory &factory){
 		auto it = this->fixDualIterator_(
-			list1_->insertLazyPair_(std::move(factory))
+			list1_->insertLazyPair_(factory)
 		);
 
 		if (predicate_(*list1_))

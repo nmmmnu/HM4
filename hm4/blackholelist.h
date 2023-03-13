@@ -34,7 +34,7 @@ public:
 	}
 
 	template<class PFactory>
-	iterator insertLazyPair_(PFactory &&){
+	iterator insertLazyPair_(PFactory &){
 		return nullptr;
 	}
 

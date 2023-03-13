@@ -1,6 +1,7 @@
 #include "base.h"
 #include "murmur_hash_64a.h"
 #include "shared_bitops.h"
+#include "pair_vfactory.h"
 
 #include <algorithm>
 
@@ -8,6 +9,8 @@ namespace net::worker::commands::BF{
 
 	namespace bf_impl_{
 		using namespace shared::bit;
+
+		using Pair = hm4::Pair;
 
 		constexpr uint64_t	BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
 		constexpr uint64_t	BIT_MIN		= 32;
@@ -25,12 +28,6 @@ namespace net::worker::commands::BF{
 			}
 		}
 
-		template<typename It>
-		void bf_addMany(uint64_t max_bits, size_t max_hash, char *data, It begin, It end){
-			for(auto it = begin; it != end; ++it)
-				bf_add(max_bits, max_hash, data, *it);
-		}
-
 		bool bf_exists(uint64_t max_bits, size_t max_hash, const char *data, std::string_view val){
 			for(size_t seed = 0; seed < max_hash; ++seed){
 				auto n = murmur_hash64a(val, seed) % max_bits;
@@ -44,6 +41,73 @@ namespace net::worker::commands::BF{
 			return true;
 		}
 
+
+
+		template<typename It>
+		struct BFADD_Factory : hm4::PairFactory::IFactory{
+			BFADD_Factory(std::string_view const key, uint64_t max_bits, size_t max_hash, It begin, It end, const Pair *pair) :
+							key		(key		),
+							max_bits	(max_bits	),
+							max_hash	(max_hash	),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *pair) final{
+				if (pair->getVal().size() != val_size){
+					Pair::createInRawMemory<0,0>(pair, key, val_size, 0, 0);
+					create_(pair);
+				}
+
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0>(pair, key, val_size, 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			void create_(Pair *pair) const{
+				char *data = const_cast<char *>(pair->getVal().data());
+
+				if (old_pair){
+					memcpy(data, old_pair->getVal().data(), val_size);
+				}else{
+					memset(data, '\0', val_size);
+				}
+			}
+
+			void add_(Pair *pair) const{
+				char *data = const_cast<char *>(pair->getVal().data());
+
+				for(auto it = begin; it != end; ++it)
+					bf_add(max_bits, max_hash, data, *it);
+			}
+
+		private:
+			std::string_view	key;
+			uint64_t		max_bits;
+			uint64_t		val_size = BitOps::size(max_bits - 1);
+			size_t			max_hash;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
 	}
 
 
@@ -58,7 +122,7 @@ namespace net::worker::commands::BF{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 5)
 				return;
 
@@ -89,46 +153,14 @@ namespace net::worker::commands::BF{
 					return nullptr;
 			});
 
+			using MyBFADD_Factory = BFADD_Factory<ParamContainer::iterator>;
 
+			if (pair && hm4::canInsertHint(*db, pair, max_size))
+				hm4::proceedInsertHintV<MyBFADD_Factory>(*db, pair, key, max_bits, max_hash, std::begin(p) + varg, std::end(p), pair);
+			else
+				hm4::insertV<MyBFADD_Factory>(*db, key, max_bits, max_hash, std::begin(p) + varg, std::end(p), pair);
 
-			if (pair == nullptr){
-				// create new and update
-
-				char *buffer = blob.buffer_val.data();
-				memset(buffer, '\0', max_size);
-
-				bf_addMany(max_bits, max_hash, buffer, std::begin(p) + varg, std::end(p));
-
-				hm4::insert(*db, key, std::string_view{ buffer, max_size });
-
-				return result.set();
-			}else if (hm4::canInsertHint<db.TRY_INSERT_HINTS>(*db, pair, max_size)){
-				// HINT
-
-				// valid pair, update in place
-
-				char *buffer = const_cast<char *>( pair->getVal().data() );
-				bf_addMany(max_bits, max_hash, buffer, std::begin(p) + varg, std::end(p));
-
-				const auto *hint = pair;
-				// condition already checked,
-				// update the expiration,
-				// will always succeed
-				hm4::proceedInsertHint(*db, hint, 0, key, pair->getVal());
-
-				return result.set();
-			}else{
-				// normal update
-
-				char *buffer = blob.buffer_val.data();
-				memcpy(buffer, pair->getVal().data(), max_size);
-
-				bf_addMany(max_bits, max_hash, buffer, std::begin(p) + varg, std::end(p));
-
-				hm4::insert(*db, key, std::string_view{ buffer, max_size });
-
-				return result.set();
-			}
+			return result.set();
 		}
 
 	private:
@@ -149,44 +181,24 @@ namespace net::worker::commands::BF{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
 				return;
-
-			using namespace bf_impl_;
 
 			const auto &key		= p[1];
 
 			if (key.empty())
 				return;
 
+			using namespace bf_impl_;
+
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);
 		//	auto const max_hash = std::clamp<size_t		>(from_string<size_t	>(p[3]), 1,		HASH_MAX	);
 			auto const max_size = BitOps::size(max_bits - 1);
 
+			hm4::insertV<hm4::PairFactory::Reserve>(*db, key, max_size);
 
-
-			bool const ok = hm4::getPair_(*db, key, [max_size](bool b, auto it){
-				if (b && it->getVal().size() == max_size)
-					return true;
-				else
-					return false;
-			});
-
-
-
-			if (!ok){
-				// create new and update
-
-				char *buffer = blob.buffer_val.data();
-				memset(buffer, '\0', max_size);
-
-				hm4::insert(*db, key, std::string_view{ buffer, max_size });
-
-				return result.set_1();
-			}else{
-				return result.set_0();
-			}
+			return result.set_1();
 		}
 
 	private:

@@ -46,7 +46,7 @@ namespace net::worker::commands::CAS{
 
 				// HINT
 				const auto *hint = & *it;
-				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key, val, exp);
+				hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, key, val, exp);
 
 				return result.set(true);
 			}
@@ -94,7 +94,7 @@ namespace net::worker::commands::CAS{
 				// HINT
 				const auto *hint = & *it;
 				// put tombstone
-				hm4::insertHint<db.TRY_INSERT_HINTS>(*db, hint, key);
+				hm4::insertHintF<hm4::PairFactory::Tombstone>(*db, hint, key);
 
 				return result.set(true);
 			}

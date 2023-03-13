@@ -103,7 +103,7 @@ bool LinkList<T_Allocator>::clear(){
 
 template<class T_Allocator>
 template<class PFactory>
-auto LinkList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
+auto LinkList<T_Allocator>::insertLazyPair_(PFactory &factory) -> iterator{
 	auto const &key = factory.getKey();
 
 	const auto loc = locate_(key);
@@ -121,13 +121,15 @@ auto LinkList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
 		}
 
 		// try update pair in place.
-		if (factory(olddata, *this)){
+		if (auto const old_bytes = olddata->bytes(); tryInsertHint(*this, olddata, factory)){
 			// successfully updated.
+
+			lc_.upd(old_bytes, factory.bytes());
 
 			return { loc.node };
 		}
 
-		auto newdata = factory(getAllocator());
+		auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 		if (!newdata)
 			return this->end();
@@ -148,7 +150,7 @@ auto LinkList<T_Allocator>::insertLazyPair_(PFactory &&factory) -> iterator{
 
 	// create new node
 
-	auto newdata = factory(getAllocator());
+	auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 	if (!newdata)
 		return this->end();
@@ -284,25 +286,30 @@ template class LinkList<MyAllocator::STDAllocator>;
 template class LinkList<MyAllocator::ArenaAllocator>;
 template class LinkList<MyAllocator::SimulatedArenaAllocator>;
 
-template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
-template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
-template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
-template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Normal			&&factory) -> iterator;
+template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Normal			&factory) -> iterator;
+template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Normal			&factory) -> iterator;
+template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Normal			&factory) -> iterator;
+template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Normal			&factory) -> iterator;
 
-template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
-template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
-template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
-template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::NormalExpiresOnly	&&factory) -> iterator;
+template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
+template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
+template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
+template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
 
-template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
-template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
-template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
-template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Tombstone		&&factory) -> iterator;
+template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Tombstone		&factory) -> iterator;
+template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Tombstone		&factory) -> iterator;
+template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Tombstone		&factory) -> iterator;
+template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Tombstone		&factory) -> iterator;
 
-template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
-template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
-template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
-template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Clone			&&factory) -> iterator;
+template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Clone			&factory) -> iterator;
+template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Clone			&factory) -> iterator;
+template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Clone			&factory) -> iterator;
+template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Clone			&factory) -> iterator;
+
+template auto LinkList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::IFactory			&factory) -> iterator;
+template auto LinkList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::IFactory			&factory) -> iterator;
+template auto LinkList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::IFactory			&factory) -> iterator;
+template auto LinkList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::IFactory			&factory) -> iterator;
 
 } // namespace
 

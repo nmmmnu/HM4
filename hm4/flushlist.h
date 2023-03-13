@@ -48,8 +48,8 @@ public:
 	}
 
 	template<class PFactory>
-	auto insertLazyPair_(PFactory &&factory){
-		auto it = list_->insertLazyPair_(std::move(factory));
+	auto insertLazyPair_(PFactory &factory){
+		auto it = list_->insertLazyPair_(factory);
 
 		if (predicate_(*list_))
 			flush();

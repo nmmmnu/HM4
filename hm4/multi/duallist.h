@@ -109,7 +109,7 @@ public:
 	}
 
 	bool erase_(std::string_view const key){
-		assert(Pair::check(key));
+		assert(!key.empty());
 
 		if constexpr (EraseType == DualListEraseType::NORMAL){
 			return hm4::erase(*list1_, key);
@@ -121,9 +121,9 @@ public:
 	}
 
 	template<class PFactory>
-	auto insertLazyPair_(PFactory &&factory){
+	auto insertLazyPair_(PFactory &factory){
 		return fixDualIterator_(
-			list1_->insertLazyPair_(std::move(factory))
+			list1_->insertLazyPair_(factory)
 		);
 	}
 
