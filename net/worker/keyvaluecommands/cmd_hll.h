@@ -190,9 +190,6 @@ namespace net::worker::commands::HLL{
 		}
 
 	private:
-		uint8_t hll_[hll_impl_::HLL_M];
-
-	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"pfadd",	"PFADD"		,
 			"hlladd",	"HLLADD"
@@ -226,9 +223,6 @@ namespace net::worker::commands::HLL{
 
 			return result.set_1();
 		}
-
-	private:
-		uint8_t hll_[hll_impl_::HLL_M];
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -369,6 +363,9 @@ namespace net::worker::commands::HLL{
 			uint8_t *hll = hll_;
 
 			getHLL().clear(hll);
+
+			// this is not good candidate for a factory,
+			// because it will read and write at the same time.
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto *b = load_ptr(*db, *itk); b)
