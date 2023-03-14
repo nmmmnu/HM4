@@ -19,17 +19,6 @@ namespace net::worker::commands::HLL{
 		constexpr uint32_t HLL_M = getHLL().m;
 
 		template<class List>
-		auto store(List &list, std::string_view key, const uint8_t *hll){
-			return hm4::insert( list,
-				key,
-				std::string_view{
-					reinterpret_cast<const char *>(hll),
-					HLL_M
-				}
-			);
-		}
-
-		template<class List>
 		const uint8_t *load_ptr(List &list, std::string_view key){
 			return hm4::getPair_(list, key, [](bool b, auto it) -> const uint8_t *{
 				if (b && it->getVal().size() == HLL_M)
@@ -124,6 +113,65 @@ namespace net::worker::commands::HLL{
 			void add_(Pair *pair) const{
 				char    *data     = const_cast<char *		>(pair->getVal().data());
 				uint8_t *hll_data = reinterpret_cast<uint8_t *	>(data);
+
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
+
+					getHLL().add(hll_data, val);
+				}
+			}
+
+		private:
+			constexpr static auto val_size = HLL_M;
+
+		private:
+			std::string_view	key;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
+
+
+
+		template<typename It>
+		struct HLLMERGE_Factory : hm4::PairFactory::IFactory{
+			HLLMERGE_Factory(std::string_view const key, It begin, It end, const Pair *pair) :
+							key		(key		),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *pair) final{
+				if (pair->getVal().size() != val_size)
+					Pair::createInRawMemory<0,0>(pair, key, val_size, 0, 0);
+
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0>(pair, key, val_size, 0, 0);
+
+				add_(pair);
+			}
+
+		private:
+			void add_(Pair *pair) const{
+				char    *data     = const_cast<char *		>(pair->getVal().data());
+				uint8_t *hll_data = reinterpret_cast<uint8_t *	>(data);
+
+				getHLL().clear(hll_data);
 
 				for(auto itk = begin; itk != end; ++itk){
 					const auto &val = *itk;
@@ -343,7 +391,7 @@ namespace net::worker::commands::HLL{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
 				return;
 
@@ -358,19 +406,34 @@ namespace net::worker::commands::HLL{
 				if (const auto &key = *itk; key.empty())
 					return;
 
+			auto &container = blob.container;
+
+			if (container.capacity() < p.size())
+				return;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto const &key = *itk;
+
+				container.push_back(
+					hm4::getPairVal(*db, key)
+				);
+			}
+
 			using namespace hll_impl_;
+
+			using MyHLLMERGE_Factory = HLLMERGE_Factory<ParamContainer::iterator>;
+
+			hm4::insertV<MyHLLMERGE_Factory>(*db, key, std::begin(p) + varg, std::end(p), pair);
+
+
+
 
 			uint8_t *hll = hll_;
 
 			getHLL().clear(hll);
 
-			// This is not good candidate for a factory,
+			// this is not good candidate for a factory,
 			// because it will read and write at the same time.
-			// Even is values are added to a vector,
-			// a possibility of overwrite exists, e.g.
-			// PFMERGE KEY KEY
-			// or
-			// PFMERGE KEY a b c KEY a b c
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto *b = load_ptr(*db, *itk); b)
