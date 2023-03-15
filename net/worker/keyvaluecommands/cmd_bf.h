@@ -86,7 +86,7 @@ namespace net::worker::commands::BF{
 				char *data = pair->getValC();
 
 				if (old_pair){
-					memcpy(data, old_pair->getVal().data(), val_size);
+					memcpy(data, old_pair->getValC(), val_size);
 				}else{
 					memset(data, '\0', val_size);
 				}
@@ -139,12 +139,9 @@ namespace net::worker::commands::BF{
 
 			auto const varg = 4;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &val = *itk;
-
-				if (val.empty())
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &val = *itk; val.empty())
 					return;
-			}
 
 			const auto *pair = hm4::getPair_(*db, key, [max_size](bool b, auto it) -> const hm4::Pair *{
 				if (b && it->getVal().size() == max_size)

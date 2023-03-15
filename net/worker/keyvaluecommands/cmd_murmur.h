@@ -23,7 +23,7 @@ namespace net::worker::commands::Murmur{
 
 			auto const &val = p[1];
 
-			auto const seed = p.size() == 3 ? from_string<uint64_t>(p[2]) : 0;
+			auto const seed = p.size() >= 3 ? from_string<uint64_t>(p[2]) : 0;
 
 			auto const mod  = p.size() == 4 ? from_string<uint64_t>(p[3]) : 0;
 

@@ -115,7 +115,7 @@ namespace net::worker::commands::HLL{
 				char *data = pair->getValC();
 
 				if (old_pair){
-					memcpy(data, old_pair->getVal().data(), val_size);
+					memcpy(data, old_pair->getValC(), val_size);
 				}else{
 					memset(data, '\0', val_size);
 				}
