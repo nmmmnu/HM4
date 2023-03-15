@@ -27,6 +27,7 @@ namespace net::worker::commands{
 		constexpr static size_t ContainerSize	= 0xFFFF;
 		using Container		= StaticVector<std::string_view		,ContainerSize>;
 		using PairContainer	= StaticVector<const hm4::Pair *	,ContainerSize>;
+		using BufferContainer	= StaticVector<to_string_buffer_t	,ContainerSize>;
 
 		constexpr static size_t BufferKeySize	= hm4::PairConf::MAX_KEY_SIZE + 16;
 		using BufferKey = std::array<char, BufferKeySize>;
@@ -37,12 +38,14 @@ namespace net::worker::commands{
 		OutputBlob(){
 			container.reserve(ContainerSize);
 			pcontainer.reserve(ContainerSize);
+			bcontainer.reserve(ContainerSize);
 		}
 
-		Container	container;
-		PairContainer	pcontainer;
 		BufferKey	buffer_key;
 		BufferVal	buffer_val;
+		Container	container;
+		PairContainer	pcontainer;
+		BufferContainer	bcontainer;
 	};
 
 

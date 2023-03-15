@@ -222,6 +222,11 @@ public:
 	// MUTATIONS
 
 	constexpr
+	void push_back(){
+		emplace_back();
+	}
+
+	constexpr
 	void push_back(const value_type &value){
 		emplace_back(value);
 	}
