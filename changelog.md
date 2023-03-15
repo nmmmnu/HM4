@@ -98,5 +98,6 @@ Changelog
 ### 1.3.1
 
 -	refactor insertion, so double buffer copy is avoid as much as possible
+-	fix bug with system commands EXIT, SHUTDOWN
 
 

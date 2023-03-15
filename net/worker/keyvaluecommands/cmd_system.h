@@ -17,7 +17,7 @@ namespace net::worker::commands::System{
 		};
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			return result.set_status(Status::DISCONNECT);
+			return result.set_system(Status::DISCONNECT);
 		}
 
 	private:
@@ -38,7 +38,7 @@ namespace net::worker::commands::System{
 		};
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			return result.set_status(Status::SHUTDOWN);
+			return result.set_system(Status::SHUTDOWN);
 		}
 
 	private:

@@ -67,31 +67,40 @@ namespace net::worker::commands{
 			return status;
 		}
 
-	public:
-		void set_status(Status status2){
+	private:
+		void set_status_(Status status2){
 			status = status2;
 		}
 
+	public:
 	//	void error(){
 	//		return set_status(Status::ERROR);
 	//	}
 
+		void set_system(Status status){
+			set_status_(status);
+
+			buffer_.clear();
+			protocol_.response_ok(buffer_);
+		}
+
+
 		void set(){
-			set_status(Status::OK);
+			set_status_(Status::OK);
 
 			buffer_.clear();
 			protocol_.response_ok(buffer_);
 		}
 
 		void set(bool b){
-			set_status(Status::OK);
+			set_status_(Status::OK);
 
 			buffer_.clear();
 			protocol_.response_bool(buffer_, b);
 		}
 
 		void set(std::string_view s){
-			set_status(Status::OK);
+			set_status_(Status::OK);
 
 			buffer_.clear();
 			protocol_.response_string(buffer_, s);
@@ -105,7 +114,7 @@ namespace net::worker::commands{
 		}
 
 		void set_container(MySpan<std::string_view> const &container){
-			set_status(Status::OK);
+			set_status_(Status::OK);
 
 			buffer_.clear();
 			protocol_.response_strings(buffer_, container);
