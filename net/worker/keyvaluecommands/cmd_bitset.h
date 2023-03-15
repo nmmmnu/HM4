@@ -43,7 +43,7 @@ namespace net::worker::commands::BITSET{
 			}
 
 			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0>(pair, key, val_size, 0, 0);
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
 				create_(pair);
 
 				add_(pair);
@@ -51,7 +51,7 @@ namespace net::worker::commands::BITSET{
 
 		private:
 			void create_(Pair *pair) const{
-				char *data = const_cast<char *>(pair->getVal().data());
+				char *data = pair->getValC();
 
 				if (old_pair){
 					memcpy(data, old_pair->getVal().data(), val_size);
@@ -61,7 +61,7 @@ namespace net::worker::commands::BITSET{
 			}
 
 			void add_(Pair *pair) const{
-				char *data = const_cast<char *>(pair->getVal().data());
+				char *data = pair->getValC();
 
 				for(auto it = begin; it != end; it += 2){
 					auto const n = from_string<size_type>(*it);

@@ -68,7 +68,7 @@ namespace net::worker::commands::HLL{
 			}
 		}
 
-		uint64_t hll_op_round(double const estimate){
+		constexpr uint64_t hll_op_round(double const estimate){
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
 		}
 
@@ -96,7 +96,7 @@ namespace net::worker::commands::HLL{
 
 			void createHint(Pair *pair) final{
 				if (pair->getVal().size() != val_size){
-					Pair::createInRawMemory<0,0>(pair, key, val_size, 0, 0);
+					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
 					create_(pair);
 				}
 
@@ -104,7 +104,7 @@ namespace net::worker::commands::HLL{
 			}
 
 			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0>(pair, key, val_size, 0, 0);
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
 				create_(pair);
 
 				add_(pair);
@@ -112,7 +112,7 @@ namespace net::worker::commands::HLL{
 
 		private:
 			void create_(Pair *pair) const{
-				char *data = const_cast<char *>(pair->getVal().data());
+				char *data = pair->getValC();
 
 				if (old_pair){
 					memcpy(data, old_pair->getVal().data(), val_size);
@@ -122,8 +122,7 @@ namespace net::worker::commands::HLL{
 			}
 
 			void add_(Pair *pair) const{
-				char    *data     = const_cast<char *		>(pair->getVal().data());
-				uint8_t *hll_data = reinterpret_cast<uint8_t *	>(data);
+				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
 
 				for(auto itk = begin; itk != end; ++itk){
 					const auto &val = *itk;

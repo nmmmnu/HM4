@@ -142,7 +142,7 @@ namespace net::worker::commands::MutableX{
 			}
 
 			static void processHint(List &list, const hm4::Pair *hint){
-				hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(list, hint, hint->getKey(), hint->getVal(), expires);
+				hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
 			}
 		};
 
@@ -157,7 +157,7 @@ namespace net::worker::commands::MutableX{
 			}
 
 			void processHint(List &list, const hm4::Pair *hint) const{
-				hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(list, hint, hint->getKey(), hint->getVal(), expires);
+				hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
 			}
 		};
 	} // namespace

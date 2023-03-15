@@ -19,6 +19,11 @@ inline int compare(const char *s1, size_t const size1, const char *s2, size_t co
 		return (a > b) - (a < b);
 	};
 
+	// trick from gperf by comparing first characters
+
+	if (*s1 != *s2)
+		return sgn(*s1, *s2);
+
 	// First idea was lazy based on LLVM::StringRef
 	// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
 
@@ -30,9 +35,11 @@ inline int compare(const char *s1, size_t const size1, const char *s2, size_t co
 }
 
 constexpr bool equals(const char *s1, size_t const size1, const char *s2, size_t const size2) noexcept{
+	// trick from gperf by comparing first characters
+
 	// Idea based on LLVM::StringRef
 	// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
-	return size1 == size2 && memcmp(s1, s2, size1) == 0;
+	return size1 == size2 && *s1 == *s2 && memcmp(s1, s2, size1) == 0;
 }
 
 constexpr bool same_prefix(std::string_view const prefix, std::string_view const s) noexcept{

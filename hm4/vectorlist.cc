@@ -166,10 +166,10 @@ template auto VectorList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFacto
 template auto VectorList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Normal			&factory) -> iterator;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Normal			&factory) -> iterator;
 
-template auto VectorList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::NormalExpiresOnly	&factory) -> iterator;
+template auto VectorList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Expires			&factory) -> iterator;
+template auto VectorList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Expires			&factory) -> iterator;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertLazyPair_(PairFactory::Expires			&factory) -> iterator;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertLazyPair_(PairFactory::Expires			&factory) -> iterator;
 
 template auto VectorList<MyAllocator::PMAllocator>		::insertLazyPair_(PairFactory::Tombstone		&factory) -> iterator;
 template auto VectorList<MyAllocator::STDAllocator>		::insertLazyPair_(PairFactory::Tombstone		&factory) -> iterator;

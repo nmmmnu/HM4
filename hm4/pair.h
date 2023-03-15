@@ -72,13 +72,24 @@ inline namespace version_4_00_00{
 		static uint64_t prepareCreateTimeSimulate(uint32_t created) noexcept;
 
 	public:
-		template<bool copy_key = true, bool copy_val = true>
+		template<bool copy_key, bool copy_val,bool make_key, bool make_val>
 		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
 			static_assert(
-				(copy_key == 0 && copy_val == 0) ||
-				(copy_key == 0 && copy_val == 1) ||
-				(copy_key == 1 && copy_val == 1) ||
-				true
+				(make_key == 0			) ||
+				(make_key == 1 && make_val == 1	) ||
+				false
+			);
+
+			static_assert(
+				(copy_key == 0			) ||
+				(copy_key == 1 && make_key == 1	) ||
+				false
+			);
+
+			static_assert(
+				(copy_val == 0			) ||
+				(copy_val == 1 && make_val == 1	) ||
+				false
 			);
 
 			pair->created	= htobe<uint64_t>(prepareCreateTime(created));
@@ -87,11 +98,14 @@ inline namespace version_4_00_00{
 		//	if constexpr(copy_key == false && copy_val == false)
 		//		return;
 
-			uint16_t const keylen = static_cast<uint16_t>(key.size() & PairConf::MAX_KEY_MASK);
-			uint32_t const vallen = static_cast<uint32_t>(val.size() & PairConf::MAX_VAL_MASK);
-
-			pair->keylen	= htobe<uint16_t>(keylen);
-			pair->vallen	= htobe<uint32_t>(vallen);
+			if constexpr(copy_key || make_key){
+				uint16_t const keylen = static_cast<uint16_t>(key.size() & PairConf::MAX_KEY_MASK);
+				pair->keylen	= htobe<uint16_t>(keylen);
+			}
+			if constexpr(copy_val || make_val){
+				uint32_t const vallen = static_cast<uint32_t>(val.size() & PairConf::MAX_VAL_MASK);
+				pair->vallen	= htobe<uint32_t>(vallen);
+			}
 
 			#pragma GCC diagnostic push
 			#pragma GCC diagnostic ignored "-Warray-bounds"
@@ -112,7 +126,7 @@ inline namespace version_4_00_00{
 			#pragma GCC diagnostic pop
 		}
 
-		template<bool copy_key = true, bool copy_val = true>
+		template<bool copy_key, bool copy_val,bool make_key, bool make_val>
 		static void createInRawMemory(Pair *pair, std::string_view const key, size_t const val_size, uint32_t const expires, uint32_t const created){
 			static_assert(copy_val == false, "When you pass null value, don't break the rules!");
 
@@ -120,7 +134,7 @@ inline namespace version_4_00_00{
 			const char *val_str = nullptr;
 			std::string_view const val{ val_str, val_size };
 
-			return createInRawMemory<copy_key, copy_val>(pair, key, val, expires, created);
+			return createInRawMemory<copy_key, copy_val, make_key, make_val>(pair, key, val, expires, created);
 		}
 
 		static void cloneInRawMemory(Pair *pair, const Pair &src) noexcept{
@@ -246,6 +260,16 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		constexpr std::string_view getVal() const noexcept{
 			return { getVal_(), getValLen_() };
+		}
+
+		[[nodiscard]]
+		constexpr const char *getValC() const noexcept{
+			return getVal_();
+		}
+
+		[[nodiscard]]
+		constexpr char *getValC() noexcept{
+			return getVal_();
 		}
 
 		[[nodiscard]]
@@ -426,6 +450,11 @@ inline namespace version_4_00_00{
 		}
 
 		[[nodiscard]]
+		constexpr char *getVal_() noexcept{
+			return & buffer[ getKeyLen_() + 1 ];
+		}
+
+		[[nodiscard]]
 		constexpr
 		size_t getKeyLen_() const noexcept{
 			return betoh<uint16_t>(keylen) & PairConf::MAX_KEY_MASK;
@@ -509,21 +538,21 @@ inline namespace version_4_00_00{
 			}
 
 			void createHint(Pair *pair) const{
-				Pair::createInRawMemory<0,1>(pair, key, val, expires, created);
+				Pair::createInRawMemory<0,1,0,1>(pair, key, val, expires, created);
 			}
 
 			void create(Pair *pair) const{
-				Pair::createInRawMemory(pair, key, val, expires, created);
+				Pair::createInRawMemory<1,1,1,1>(pair, key, val, expires, created);
 			}
 		};
 
-		struct NormalExpiresOnly{
+		struct Expires{
 			std::string_view key;
 			std::string_view val;
 			uint32_t expires;
 			uint32_t created;
 
-			constexpr NormalExpiresOnly(
+			constexpr Expires(
 				std::string_view const key,
 				std::string_view const val,
 				uint32_t const expires = 0, uint32_t const created = 0) :
@@ -548,11 +577,11 @@ inline namespace version_4_00_00{
 			}
 
 			void createHint(Pair *pair) const{
-				Pair::createInRawMemory<0,0>(pair, key, val, expires, created);
+				Pair::createInRawMemory<0,0,0,0>(pair, key, val, expires, created);
 			}
 
 			void create(Pair *pair) const{
-				Pair::createInRawMemory(pair, key, val, expires, created);
+				Pair::createInRawMemory<1,1,1,1>(pair, key, val, expires, created);
 			}
 		};
 
@@ -578,11 +607,11 @@ inline namespace version_4_00_00{
 			}
 
 			void createHint(Pair *pair) const{
-				Pair::createInRawMemory<0,1>(pair, key, Pair::TOMBSTONE, 0, 0);
+				Pair::createInRawMemory<0,1,0,1>(pair, key, Pair::TOMBSTONE, 0, 0);
 			}
 
 			void create(Pair *pair) const{
-				Pair::createInRawMemory(pair, key, Pair::TOMBSTONE, 0, 0);
+				Pair::createInRawMemory<1,1,1,1>(pair, key, Pair::TOMBSTONE, 0, 0);
 			}
 		};
 

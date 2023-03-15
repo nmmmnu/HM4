@@ -722,7 +722,7 @@ namespace net::worker::commands::Mutable{
 
 				// HINT
 				const auto *hint = & *it;
-				hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(*db, hint, key, hint->getVal(), exp);
+				hm4::insertHintF<hm4::PairFactory::Expires>(*db, hint, key, hint->getVal(), exp);
 
 				return result.set(true);
 			}else{
@@ -769,7 +769,7 @@ namespace net::worker::commands::Mutable{
 
 					// HINT
 					const auto *hint = & *it;
-					hm4::insertHintF<hm4::PairFactory::NormalExpiresOnly>(*db, hint, key, hint->getVal(), exp);
+					hm4::insertHintF<hm4::PairFactory::Expires>(*db, hint, key, hint->getVal(), exp);
 				}
 
 				return result.set(true);

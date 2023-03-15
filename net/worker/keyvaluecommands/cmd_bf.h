@@ -67,7 +67,7 @@ namespace net::worker::commands::BF{
 
 			void createHint(Pair *pair) final{
 				if (pair->getVal().size() != val_size){
-					Pair::createInRawMemory<0,0>(pair, key, val_size, 0, 0);
+					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
 					create_(pair);
 				}
 
@@ -75,7 +75,7 @@ namespace net::worker::commands::BF{
 			}
 
 			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0>(pair, key, val_size, 0, 0);
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
 				create_(pair);
 
 				add_(pair);
@@ -83,7 +83,7 @@ namespace net::worker::commands::BF{
 
 		private:
 			void create_(Pair *pair) const{
-				char *data = const_cast<char *>(pair->getVal().data());
+				char *data = pair->getValC();
 
 				if (old_pair){
 					memcpy(data, old_pair->getVal().data(), val_size);
@@ -93,7 +93,7 @@ namespace net::worker::commands::BF{
 			}
 
 			void add_(Pair *pair) const{
-				char *data = const_cast<char *>(pair->getVal().data());
+				char *data = pair->getValC();
 
 				for(auto it = begin; it != end; ++it)
 					bf_add(max_bits, max_hash, data, *it);
