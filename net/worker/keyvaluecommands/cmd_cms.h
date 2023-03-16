@@ -60,6 +60,8 @@ namespace net::worker::commands::CMS{
 			return count;
 		}
 
+
+
 		template<typename It, typename T>
 		struct CMSADD_Factory : hm4::PairFactory::IFactory{
 			CMSADD_Factory(std::string_view const key, Matrix<T> cms, It begin, It end, const Pair *pair) :
@@ -132,6 +134,25 @@ namespace net::worker::commands::CMS{
 			It			end;
 			const Pair		*old_pair;
 		};
+
+
+
+		template<typename T>
+		struct type_identity{
+			// C++20 std::type_identity
+			using type = T;
+		};
+
+		template<typename F, typename... Args>
+		auto type_dispatch(uint8_t const t, F f, Args&&... args){
+			switch(t){
+			case  8 : return f(type_identity<uint8_t	>{});
+			case 16 : return f(type_identity<uint16_t	>{});
+			case 32 : return f(type_identity<uint32_t	>{});
+			case 64 : return f(type_identity<uint64_t	>{});
+			default : return f(type_identity<std::nullptr_t	>{});
+			}
+		}
 	}
 
 
@@ -147,6 +168,8 @@ namespace net::worker::commands::CMS{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace cms_impl_;
+
 			if (p.size() < 7 || p.size() % 2 == 0)
 				return;
 
@@ -162,13 +185,17 @@ namespace net::worker::commands::CMS{
 			if (w == 0 || d == 0)
 				return;
 
-			switch(t){
-			case  8: return process_(key, p, Matrix<uint8_t >(w, d), *db, result);
-			case 16: return process_(key, p, Matrix<uint16_t>(w, d), *db, result);
-			case 32: return process_(key, p, Matrix<uint32_t>(w, d), *db, result);
-			case 64: return process_(key, p, Matrix<uint64_t>(w, d), *db, result);
-			default: return; // emit an error
-			}
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return; // emit an error
+				}else{
+					return process_(key, p, Matrix<T>(w, d), *db, result);
+				}
+			};
+
+			return type_dispatch(t, f);
 		}
 
 	private:
@@ -206,6 +233,7 @@ namespace net::worker::commands::CMS{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
+			"cmsadd",	"CMSADD",
 			"cmsincr",	"CMSINCR",
 			"cmsincrby",	"CMSINCRBY"
 		};
@@ -224,6 +252,8 @@ namespace net::worker::commands::CMS{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace cms_impl_;
+
 			if (p.size() != 5)
 				return;
 
@@ -239,13 +269,17 @@ namespace net::worker::commands::CMS{
 			if (w == 0 || d == 0)
 				return;
 
-			switch(t){
-			case  8: return process_(key, Matrix<uint8_t >(w, d), *db, result);
-			case 16: return process_(key, Matrix<uint16_t>(w, d), *db, result);
-			case 32: return process_(key, Matrix<uint32_t>(w, d), *db, result);
-			case 64: return process_(key, Matrix<uint64_t>(w, d), *db, result);
-			default: return; // emit an error
-			}
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return; // emit an error
+				}else{
+					return process_(key, Matrix<T>(w, d), *db, result);
+				}
+			};
+
+			return type_dispatch(t, f);
 		}
 
 	private:
@@ -282,6 +316,8 @@ namespace net::worker::commands::CMS{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace cms_impl_;
+
 			if (p.size() != 6)
 				return;
 
@@ -299,13 +335,17 @@ namespace net::worker::commands::CMS{
 
 			const auto &val = p[5];
 
-			switch(t){
-			case  8: return process_(key, val, Matrix<uint8_t >(w, d), *db, result);
-			case 16: return process_(key, val, Matrix<uint16_t>(w, d), *db, result);
-			case 32: return process_(key, val, Matrix<uint32_t>(w, d), *db, result);
-			case 64: return process_(key, val, Matrix<uint64_t>(w, d), *db, result);
-			default: return; // emit an error
-			}
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return; // emit an error
+				}else{
+					return process_(key, val, Matrix<T>(w, d), *db, result);
+				}
+			};
+
+			return type_dispatch(t, f);
 		}
 
 	private:
@@ -347,6 +387,8 @@ namespace net::worker::commands::CMS{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace cms_impl_;
+
 			if (p.size() < 6)
 				return;
 
@@ -362,13 +404,17 @@ namespace net::worker::commands::CMS{
 			if (w == 0 || d == 0)
 				return;
 
-			switch(t){
-			case  8: return process_(key, p, Matrix<uint8_t >(w, d), *db, result, blob);
-			case 16: return process_(key, p, Matrix<uint16_t>(w, d), *db, result, blob);
-			case 32: return process_(key, p, Matrix<uint32_t>(w, d), *db, result, blob);
-			case 64: return process_(key, p, Matrix<uint64_t>(w, d), *db, result, blob);
-			default: return; // emit an error
-			}
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return; // emit an error
+				}else{
+					return process_(key, p, Matrix<T>(w, d), *db, result, blob);
+				}
+			};
+
+			return type_dispatch(t, f);
 		}
 
 	private:
