@@ -6,10 +6,10 @@ return array(
 			"BFADD / BFMADD key bits hash value [value]",
 
 			"Add (insert) <i>value</i>'s into the bloom filter with size <i>bits</i> and number of <i>hash</i> functions.<br />" .
-			"Read Bitset information document.",
+			"Read BF information document.",
 			"OK",
 			"OK",
-			"1.2.30",
+			"1.3.1",
 			"READ + WRITE",
 			false,
 			true,
@@ -27,7 +27,7 @@ return array(
 			"Read BF information document.",
 			"OK",
 			"OK",
-			"1.2.17",
+			"1.3.1",
 			"READ + WRITE",
 			false,
 			true,
@@ -41,11 +41,11 @@ return array(
 			"BFEXISTS key bits hash value",
 
 			"Check if <i>value</i> is present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />" .
-			"Read Bitset information document.",
+			"Read BF information document.",
 			"bool",
 			"0 if value is not present<br />" .
 			"1 if value is MAY BE present",
-			"1.3.0",
+			"1.3.1",
 			"READ",
 			false,
 			false,
@@ -61,8 +61,10 @@ return array(
 			"Check if <i>value</i>'s are present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />" .
 			"Read Bitset information document.",
 			"array",
-			"array",
-			"1.3.0",
+			"array of bools" .
+			"0 if value is not present<br />" .
+			"1 if value is MAY BE present",
+			"1.3.1",
 			"READ",
 			false,
 			false,

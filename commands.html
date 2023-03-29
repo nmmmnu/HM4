@@ -212,6 +212,15 @@
 				<li><a href="#BFMEXISTS">BFMEXISTS</a></li>
 				</div>
 			<div>
+			<b>cms.h</b><br />
+			&nbsp;
+
+					<li><a href="#CMSADD">CMSADD</a></li>
+				<li><a href="#CMSRESERVE">CMSRESERVE</a></li>
+				<li><a href="#CMSCOUNT">CMSCOUNT</a></li>
+				<li><a href="#CMSMCOUNT">CMSMCOUNT</a></li>
+				</div>
+			<div>
 			<b>murmur.h</b><br />
 			&nbsp;
 
@@ -1480,7 +1489,7 @@
 
 			<table border="1">
 				<tr><td>Command			</td><td>BFADD</td></tr>
-				<tr><td>Available since		</td><td>1.2.30</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
@@ -1488,7 +1497,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Add (insert) <i>value</i>'s into the bloom filter with size <i>bits</i> and number of <i>hash</i> functions.<br />Read Bitset information document.
+			Add (insert) <i>value</i>'s into the bloom filter with size <i>bits</i> and number of <i>hash</i> functions.<br />Read BF information document.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
@@ -1501,7 +1510,7 @@
 
 			<table border="1">
 				<tr><td>Command			</td><td>BFRESERVE</td></tr>
-				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
@@ -1522,7 +1531,7 @@
 
 			<table border="1">
 				<tr><td>Command			</td><td>BFEXISTS</td></tr>
-				<tr><td>Available since		</td><td>1.3.0</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
@@ -1530,7 +1539,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Check if <i>value</i> is present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />Read Bitset information document.
+			Check if <i>value</i> is present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />Read BF information document.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -1543,7 +1552,7 @@
 
 			<table border="1">
 				<tr><td>Command			</td><td>BFMEXISTS</td></tr>
-				<tr><td>Available since		</td><td>1.3.0</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
@@ -1555,7 +1564,91 @@
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
+			array of bools0 if value is not present<br />1 if value is MAY BE present
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CMSADD">
+
+			<h2>CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value [value]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i>'s into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />Read CMS information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CMSRESERVE">
+
+			<h2>CMSRESERVE key key W_width D_depth integer_size</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSRESERVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Create new, empty count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />Read CMS information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CMSCOUNT">
+
+			<h2>BFEXISTS key key W_width D_depth integer_size value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check estimated count of <i>value</i> that may be present into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />Read CMS information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CMSMCOUNT">
+
+			<h2>CMSMCOUNT / CMSQUERY key W_width D_depth integer_size value [value]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSMCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check estimated count of <i>value</i> that may be present into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />Read CMS information document.
+			<h3>Return type:</h3>
 			array
+			<h3>Return value:</h3>
+			array of estimated counts
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MURMUR">
