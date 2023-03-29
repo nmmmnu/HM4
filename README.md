@@ -365,8 +365,11 @@ These are derived constants from the configuration options:
 |            64 | uint64_t   |            8 bytes | 18,446,744,073,709,551,615 |
 
 When counter increases, it does not reset to zero, instead it stay at max values.
+
 Most of the cases 8 or 16 bit counters are enough.
+
 4 bit counters are under development.
+
 You definitely do not want 64 counters.
 
 #### Calculation of CMS configuration options
@@ -414,7 +417,7 @@ There are no fancy encoding, the implementation uses standard bitfield, same as 
       2) "4"
       3) "0"
 
-Notice how "steven" was increased first 2 times, then 2 more times.
+Notice how "steven" was increased first with 2, then with 2 more.
 
 The numbers 2048, 7 and 8 are the CMS configuration options:
 

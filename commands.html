@@ -1569,7 +1569,7 @@
 		</div>
 				<div class="cmd" id="CMSADD">
 
-			<h2>CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value [value]</h2>
+			<h2>CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value inc [value] [inc]</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>CMSADD</td></tr>
@@ -1581,7 +1581,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Add (insert) <i>value</i>'s into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />Read CMS information document.
+			Add (insert) <i>value</i>'s into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CMS information document.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
