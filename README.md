@@ -20,6 +20,9 @@ Goals of the project are.
 -   Complexity is a lie :)
 -   Atomic queues
 -   HyperLogLog
+-   Bloom Filters
+
+
 
 ---
 ### Architecture
@@ -43,12 +46,16 @@ Writes should be always fast. Reads should be fast if there are not too many dis
 As of 1.2.3 additionally there is optional binlog.
 In case of power loss or system crash, memtable can re recovered from binlog
 
+
+
 ---
 ### Memtable
 
 Memtable is stored in memory in SkipList. SkipList is very fast O(Log N) structure, very similar to binary tree.
 
 It is much faster than a vector O(Amortized Log N), but slower than hashtable O(Amortized 1).
+
+
 
 ---
 ### Memtable with VectorList
@@ -58,6 +65,8 @@ VectorList performance was very good, but worse than SkipList.
 However if you just want to load data, is much faster to use SkipList and sort just before store it on the disk.
 
 VectorList also have much low memory consumption, so you can fit 30-40% more data in same memory.
+
+
 
 ---
 ### Testing memtable with other structures
@@ -80,6 +89,8 @@ LinkedList performance was poor.
 
 Because of C++ classes all VectorList, LinkedList, SkipList are available.
 
+
+
 ---
 ### DiskTables
 
@@ -97,6 +108,8 @@ Effors were made HM4 to work on 32bit OS, but soon or later these runs out of ad
 
 HM4 "officially" needs 64bit OS.
 
+
+
 ---
 ### LSM tree notes.
 
@@ -107,6 +120,8 @@ Here is what Wikipedia say about:
 However there is 1976's research by Dennis G. Severance and Guy M. Lohman on the similar topic here:
 
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]
+
+
 
 ---
 ### LSM compaction.
@@ -121,6 +136,8 @@ Unlike Cassandra, it is your responcibility to run the process yourself.
 
 Unlike Apache Cassandra, there are a safe way to compact several tables into single file.
 
+
+
 ---
 ### List of software.
 
@@ -133,6 +150,8 @@ Unlike Apache Cassandra, there are a safe way to compact several tables into sin
 - db_mkbtree	- create btree to existing DiskTable for much faster access
 - db_file	- query DiskTable or LSM
 - db_preload	- preload DiskTable into system cache, by reading 1024 samples from the DiskTable
+
+
 
 ---
 ### Complexity is a lie :)
@@ -163,6 +182,8 @@ Last example is **INCR** command.
 - Second it need to store new value - this is same as **SET** or **DEL**
 - Total complexity is "2 * Mem + M * Disk"
 
+
+
 ---
 ### Atomic queues
 
@@ -187,18 +208,24 @@ How it works:
   - If control key is not present, this means that the search is already positioned to the "head" of the queue.
 - Finally the system deletes the data key and eventually updates the control key.
 
+
+
 ---
 ### HyperLogLog
 
-HyperLogLog (HLL) is an algorithm for counting unique elements.
+HyperLogLog (HLL) is a probabilistic algorithm for counting unique elements, in a constant space.
 
-[HyperLogLog]
+HLL store just elements "fingerprints", so is GDPR friendly :)
 
-Implementation uses 12bits. This means each key is 4096 bytes and the error rate is 1.62%.
+[HyperLogLog] at Wikipedia.
 
-There are no fancy encodings, these 4096 bytes are uint8_t counters from the standard HLL.
+#### Implementation
 
-How it works:
+The implementation uses 12bits. This means each key is 4096 bytes and the error rate is 1.62%.
+
+There are no fancy encoding, these 4096 bytes are uint8_t counters from the standard HLL.
+
+#### How it works:
 
 - Value can be added using **PFADD**. If the key does not exists or contains different information, it is overwritten.
 
@@ -239,7 +266,74 @@ How it works:
       redis> pfcount dest
       "3"
 
+
+
+---
+### Bloom filter
+
+Bloom filter (BF) is a probabilistic algorithm for checking if unique elements are members of a set, in a constant space.
+
+- If the element is not member of the set, BF will return "definitely not a member".
+- If the element is a member of the set, BF will return "maybe a member". This is so called false positive.
+
+[Bloom_filter] at Wikipedia.
+
+#### Configuration of a bloom filter
+
+- **count of bits**
+- **count of the hash functions**
+
+These are derived constants from the configuration options:
+
+- **elements until BF is saturated** - derived from **count of bits** and **count of the hash functions** - If a bloom filter is saturated, it will almost always return "maybe a member".
+- **error rate** - derived only from **count of the hash functions**
+
+These can be calculated using of of many "Bloom Filter Calculators".
+
+Some nice "round" values can be seen in [bloom_filter_calc].
+
+BF store just elements "fingerprints", so is GDPR friendly :)
+
+#### Implementation:
+
+The implementation is not Redis compatible.
+
+There are no fancy encoding, the implementation uses standard bitfield, same as in BITSET / BITGET.
+
+#### How it works:
+
+- Value can be added using **BFADD**. If the key does not exists or contains different information, it is overwritten.
+
+- Membershib can be check using **BFEXISTS**.
+
+      redis> bfadd a 2097152 7 john
+      OK
+      redis> bfadd a 2097152 7 steven
+      OK
+      redis> bfexists a 2097152 7 john
+      (integer) 1
+      redis> bfexists a 2097152 7 steven
+      (integer) 1
+      redis> bfexists a 2097152 7 peter
+      (integer) 0
+      redis> bfmexists a 2097152 7 john steven peter
+      1) "1"
+      2) "1"
+      3) "0"
+
+The numbers 2097152 and 7 are the BF configuration options:
+
+- 2097152 is count of bits.
+- 7 is count of the hash functions.
+
+You need to provide same config values on each BF command.
+
+
+
+
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]: http://www-users.cs.umn.edu/~he/diff/p256-severance.pdf
 [commands]: https://htmlpreview.github.io/?https://raw.githubusercontent.com/nmmmnu/HM4/master/commands.html
 [HyperLogLog]: https://en.wikipedia.org/wiki/HyperLogLog
+[Bloom_filter]: https://en.wikipedia.org/wiki/Bloom_filter
+[bloom_filter_calc]: https://github.com/nmmmnu/HM4/blob/master/bloom_filter.md
