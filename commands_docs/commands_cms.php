@@ -3,9 +3,10 @@ return array(
 	new Cmd(
 			"CMSADD",
 
-			"CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value [value]",
+			"CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value inc [value] [inc]",
 
 			"Add (insert) <i>value</i>'s into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />" .
+			"<int>inc</int> specify how many times you want to add it.<br />" .
 			"Read CMS information document.",
 			"OK",
 			"OK",

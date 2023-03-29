@@ -21,6 +21,7 @@ Goals of the project are.
 -   Atomic queues
 -   HyperLogLog
 -   Bloom Filters
+-   Count Min Sketch
 
 
 
@@ -269,30 +270,30 @@ There are no fancy encoding, these 4096 bytes are uint8_t counters from the stan
 
 
 ---
-### Bloom filter
+### Bloom filters
 
 Bloom filter (BF) is a probabilistic algorithm for checking if unique elements are members of a set, in a constant space.
 
 - If the element is not member of the set, BF will return "definitely not a member".
 - If the element is a member of the set, BF will return "maybe a member". This is so called false positive.
 
+BF store just elements "fingerprints", so is GDPR friendly :)
+
 [Bloom_filter] at Wikipedia.
 
-#### Configuration of a bloom filter
+#### Configuration of a BF
 
 - **count of bits**
 - **count of the hash functions**
 
 These are derived constants from the configuration options:
 
-- **elements until BF is saturated** - derived from **count of bits** and **count of the hash functions** - If a bloom filter is saturated, it will almost always return "maybe a member".
+- **elements until BF is saturated** - derived from **count of bits** and **count of the hash functions** - If a BF is saturated, it will almost always return "maybe a member".
 - **error rate** - derived only from **count of the hash functions**
 
 These can be calculated using of of many "Bloom Filter Calculators".
 
 Some nice "round" values can be seen in [bloom_filter_calc].
-
-BF store just elements "fingerprints", so is GDPR friendly :)
 
 #### Implementation:
 
@@ -330,6 +331,119 @@ You need to provide same config values on each BF command.
 
 
 
+---
+### Count Min Sketch
+
+Count min sketch (CMS) is a probabilistic algorithm for counting several unique elements that are members of a set, in a constant space.
+
+- If the element is not member of the set, CMS will return 0.
+- If the element is a member of the set, CMS will return a number. The number can be overestimated.
+
+CMS store just elements "fingerprints", so is GDPR friendly :)
+
+[Count–min sketch] at Wikipedia.
+
+#### Configuration of a CMS
+
+- **width**
+- **height** - e.g.count of the hash functions
+- **counter type**
+
+These are derived constants from the configuration options:
+
+- **elements until CMS is saturated** - derived from **width** and **height** - If a CMS is saturated, it will almost always return some number, even for elements with zero count.
+- **error rate** - derived only from **height**.
+
+#### Counter types
+
+| Bits          | C/C++ name | Memory per counter | Max value                  |
+|          ---: | :---       |               ---: |                       ---: |
+|             4 | n/a        |           1/2 byte |                         16 |
+|             8 | uint8_t    |             1 byte |                        255 |
+|            16 | uint16_t   |            2 bytes |                     65,535 |
+|            32 | uint32_t   |            4 bytes |              4,294,967,295 |
+|            64 | uint64_t   |            8 bytes | 18,446,744,073,709,551,615 |
+
+When counter increases, it does not reset to zero, instead it stay at max values.
+Most of the cases 8 or 16 bit counters are enough.
+4 bit counters are under development.
+You definitely do not want 64 counters.
+
+#### Calculation of CMS configuration options
+
+Calculation of the **width** is unclear. The formula we found useful is as following:
+
+```
+// Math notation:
+width = |number_of_elements * (e / 10)|
+
+// C / Java notation:
+unsigned width = (unsigned) (2.71828 * 0.1 * (double) number_of_elements)
+```
+
+Calculation of the **height**:
+
+Number 5 is always a good value here. Seriously :)
+
+#### Implementation:
+
+The implementation is not Redis compatible.
+
+There are no fancy encoding, the implementation uses standard bitfield, same as in BITSET / BITGET.
+
+#### How it works:
+
+- Value can be added using **CMSADD**. If the key does not exists or contains different information, it is overwritten.
+
+- Membershib can be check using **CMSCOUNT**.
+
+      redis> cmsadd a 2048 7 8 john 1
+      OK
+      redis> cmsadd a 2048 7 8 steven 2
+      OK
+      redis> cmsadd a 2048 7 8 john 1 steven 2
+      OK
+      redis> cmscount a 2048 7 8 john
+      "2"
+      redis> cmscount a 2048 7 8 steven
+      "4"
+      redis> cmscount a 2048 7 8 peter
+      "0"
+      redis> cmsmcount a 2048 7 8 john steven peter
+      1) "2"
+      2) "4"
+      3) "0"
+
+Notice how "steven" was increased first 2 times, then 2 more times.
+
+The numbers 2048, 7 and 8 are the CMS configuration options:
+
+- 2048 is width.
+- 7 is height.
+- 8 is counter type (1 byte, 0 - 255)
+
+You need to provide same config values on each CMS command.
+
+#### Counters does not overflow
+
+      redis> cmsadd a 2097152 7 8 max 100
+      OK
+      redis> cmscount a 2097152 7 8 max
+      "100"
+      redis> cmsadd a 2097152 7 8 max 100
+      OK
+      redis> cmscount a 2097152 7 8 max
+      "200"
+      redis> cmsadd a 2097152 7 8 max 100
+      OK
+      redis> cmscount a 2097152 7 8 max
+      "255"
+
+Notice how "max" was increased three times, with 100 each.
+
+However, because **8 bit** counter can not hold value more than 255, final result instead of 300, is 255.
+
+
 
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]: http://www-users.cs.umn.edu/~he/diff/p256-severance.pdf
@@ -337,3 +451,4 @@ You need to provide same config values on each BF command.
 [HyperLogLog]: https://en.wikipedia.org/wiki/HyperLogLog
 [Bloom_filter]: https://en.wikipedia.org/wiki/Bloom_filter
 [bloom_filter_calc]: https://github.com/nmmmnu/HM4/blob/master/bloom_filter.md
+[Count–min sketch]: https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch
