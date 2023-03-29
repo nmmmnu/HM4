@@ -82,7 +82,7 @@ Changelog
 -	new command HGETKEYS, HGETVALS, HLEN
 -	optimized overwrite in lists
 
-### 1.3.1
+### 1.3.0
 
 -	refactor pair to support values up to 64 GB
 -	refactor BITSET / BITGET
