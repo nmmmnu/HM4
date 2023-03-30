@@ -20,7 +20,7 @@
 
 namespace AppBundle\AppBundle\Helper;
 
-class RedisHelper{
+class RedisHelperGETX{
 	private $redis;
 
 	const MAX_ACCUMULATE = 10000;
