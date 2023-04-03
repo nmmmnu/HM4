@@ -99,5 +99,6 @@ Changelog
 
 -	refactor insertion, so double buffer copy is avoid as much as possible
 -	fix bug with system commands EXIT, SHUTDOWN
+-	fix bug with command INFO - shows pair limits correctly
 
 

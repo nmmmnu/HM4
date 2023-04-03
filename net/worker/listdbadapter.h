@@ -30,6 +30,11 @@ public:
 		to_string_buffer_t buffer[8];
 
 		if constexpr(!MUTABLE){
+			int i = 0;
+
+			#pragma GCC diagnostic push
+			#pragma GCC diagnostic ignored "-Wsequence-point"
+
 			return concatenateBuffer(
 				str,
 
@@ -37,17 +42,20 @@ public:
 				"Version          : ", version()					,			"\n",
 
 			"\n"	"# Pair Limits"											"\n",
-				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[0]),	"\n",
-				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[1]),	"\n",
+				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[i++]),	"\n",
+				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[i++]),	"\n",
 
 			"\n"	"# Keys"											"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
-				"Keys (estimated) : ", to_string(list_.size()				,	buffer[2]),	"\n",
-				"Size             : ", to_string(list_.bytes()				,	buffer[3]),	"\n",
+				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
+				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
 
 			"\n"	"# System"											"\n",
-				"PID              : ", to_string(getProcessID()				,	buffer[4]),	"\n"
+				"PID              : ", to_string(getProcessID()				,	buffer[i++]),	"\n"
 			);
+
+			#pragma GCC diagnostic pop
+
 		}else{
 			auto mem_format = [](uint64_t const a, to_string_buffer_t &buffer) -> std::string_view{
 				if (a == std::numeric_limits<std::size_t>::max())
@@ -56,6 +64,11 @@ public:
 					return to_string(a, buffer);
 			};
 
+			int i = 0;
+
+			#pragma GCC diagnostic push
+			#pragma GCC diagnostic ignored "-Wsequence-point"
+
 			return concatenateBuffer(
 				str,
 
@@ -63,23 +76,25 @@ public:
 				"Version          : ", version()					,			"\n",
 
 			"\n"	"# Pair Limits"											"\n",
-				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[0]),	"\n",
-				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[1]),	"\n",
+				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[i++]),	"\n",
+				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[i++]),	"\n",
 
 			"\n"	"# Keys"											"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
-				"Keys (estimated) : ", to_string(list_.size()				,	buffer[2]),	"\n",
-				"Size             : ", to_string(list_.bytes()				,	buffer[3]),	"\n",
-				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[4]),	"\n",
+				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
+				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
+				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[i++]),	"\n",
 
 			"\n"	"# Allocator"											"\n",
 				"Allocator        : ", list_.getAllocator().getName()			,			"\n",
-				"Allocator Free   : ", mem_format(list_.getAllocator().getFreeMemory()	,	buffer[5]),	"\n",
-				"Allocator Used   : ", mem_format(list_.getAllocator().getUsedMemory()	,	buffer[6]),	"\n",
+				"Allocator Free   : ", mem_format(list_.getAllocator().getFreeMemory()	,	buffer[i++]),	"\n",
+				"Allocator Used   : ", mem_format(list_.getAllocator().getUsedMemory()	,	buffer[i++]),	"\n",
 
 			"\n"	"# System"											"\n",
-				"PID              : ", to_string(getProcessID()				,	buffer[7]),	"\n"
+				"PID              : ", to_string(getProcessID()				,	buffer[i++]),	"\n"
 			);
+
+			#pragma GCC diagnostic pop
 		}
 	}
 
