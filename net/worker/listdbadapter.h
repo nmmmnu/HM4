@@ -38,7 +38,7 @@ public:
 
 			"\n"	"# Pair Limits"											"\n",
 				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[0]),	"\n",
-				"Max Val Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[1]),	"\n",
+				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[1]),	"\n",
 
 			"\n"	"# Keys"											"\n",
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
