@@ -324,8 +324,16 @@ using string_view = basic_string_view<char>;
 using wstring_view = basic_string_view<wchar_t>;
 
 #ifndef __cpp_char8_t
+	// nmmm, 2023-05-06
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wc++20-compat"
+
 // A UTF-8 code unit type.
+
 enum char8_t : unsigned char {};
+
+	#pragma GCC diagnostic pop
+
 #endif
 
 /** Specifies if ``T`` is a character type. Can be specialized by users. */
