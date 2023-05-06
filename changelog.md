@@ -101,4 +101,7 @@ Changelog
 -	fix bug with system commands EXIT, SHUTDOWN
 -	fix bug with command INFO - shows pair limits correctly
 
+### 1.3.2
+
+-	Fix potential buffer overflow with inserting hints in BITSET
 

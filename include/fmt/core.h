@@ -324,6 +324,7 @@ using string_view = basic_string_view<char>;
 using wstring_view = basic_string_view<wchar_t>;
 
 #ifndef __cpp_char8_t
+
 	// nmmm, 2023-05-06
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wc++20-compat"

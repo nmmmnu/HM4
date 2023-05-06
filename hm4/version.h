@@ -3,11 +3,11 @@
 
 namespace hm4{
 	namespace version{
-		constexpr const char *str = "1.3.1";
+		constexpr const char *str = "1.3.2";
 
 		constexpr int major	= 1;
 		constexpr int minor	= 3;
-		constexpr int revision	= 1;
+		constexpr int revision	= 2;
 		constexpr int build	= 0;
 
 		constexpr int num	=	major		* 100000	+
