@@ -19,6 +19,7 @@
 #include "keyvaluecommands/cmd_hll.h"		// PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS, PFERROR
 #include "keyvaluecommands/cmd_bf.h"		// BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
 #include "keyvaluecommands/cmd_cms.h"		// CMSADD, CMSRESERVE, CMSCOUNT, CMSMCOUNT
+#include "keyvaluecommands/cmd_array.h"		// CVSET, CVGET, CVMGET, CVMAX
 
 #include "keyvaluecommands/cmd_info.h"		// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
@@ -84,6 +85,7 @@ namespace net::worker{
 				HLL		::RegisterModule,
 				BF		::RegisterModule,
 				CMS		::RegisterModule,
+				CV		::RegisterModule,
 
 				Murmur		::RegisterModule,
 
