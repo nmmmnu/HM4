@@ -2,6 +2,7 @@
 #include "logger.h"
 
 #include "shared_bitops.h"
+#include "smart_memcpy.h"
 
 namespace net::worker::commands::BITSET{
 	namespace bit_impl_{
@@ -54,7 +55,8 @@ namespace net::worker::commands::BITSET{
 				char *data = pair->getValC();
 
 				if (old_pair){
-					memcpy(data, old_pair->getValC(), val_size);
+					auto const s = old_pair->getVal();
+					smart_memcpy(data, s.data(), s.size(), val_size);
 				}else{
 					memset(data, '\0', val_size);
 				}
