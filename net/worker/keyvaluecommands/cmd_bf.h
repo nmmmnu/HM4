@@ -40,74 +40,6 @@ namespace net::worker::commands::BF{
 
 			return true;
 		}
-
-
-
-		template<typename It>
-		struct BFADD_Factory : hm4::PairFactory::IFactory{
-			BFADD_Factory(std::string_view const key, uint64_t max_bits, size_t max_hash, It begin, It end, const Pair *pair) :
-							key		(key		),
-							max_bits	(max_bits	),
-							max_hash	(max_hash	),
-							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *pair) final{
-				if (pair->getVal().size() != val_size){
-					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
-					create_(pair);
-				}
-
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
-
-		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					memcpy(data, old_pair->getValC(), val_size);
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				for(auto it = begin; it != end; ++it)
-					bf_add(max_bits, max_hash, data, *it);
-			}
-
-		private:
-			std::string_view	key;
-			uint64_t		max_bits;
-			uint64_t		val_size = BitOps::size(max_bits - 1);
-			size_t			max_hash;
-			It			begin;
-			It			end;
-			const Pair		*old_pair;
-		};
 	}
 
 
@@ -159,6 +91,78 @@ namespace net::worker::commands::BF{
 
 			return result.set();
 		}
+
+	private:
+		template<typename It>
+		struct BFADD_Factory : hm4::PairFactory::IFactory{
+			using Pair   = hm4::Pair;
+			using BitOps = bf_impl_::BitOps;
+
+			BFADD_Factory(std::string_view const key, uint64_t max_bits, size_t max_hash, It begin, It end, const Pair *pair) :
+							key		(key		),
+							max_bits	(max_bits	),
+							max_hash	(max_hash	),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *pair) final{
+				if (pair->getVal().size() != val_size){
+					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
+					create_(pair);
+				}
+
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			void create_(Pair *pair) const{
+				char *data = pair->getValC();
+
+				if (old_pair){
+					memcpy(data, old_pair->getValC(), val_size);
+				}else{
+					memset(data, '\0', val_size);
+				}
+			}
+
+			void add_(Pair *pair) const{
+				using namespace bf_impl_;
+
+				char *data = pair->getValC();
+
+				for(auto it = begin; it != end; ++it)
+					bf_add(max_bits, max_hash, data, *it);
+			}
+
+		private:
+			std::string_view	key;
+			uint64_t		max_bits;
+			uint64_t		val_size = BitOps::size(max_bits - 1);
+			size_t			max_hash;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

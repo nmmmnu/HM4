@@ -71,75 +71,6 @@ namespace net::worker::commands::HLL{
 		constexpr uint64_t hll_op_round(double const estimate){
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
 		}
-
-
-
-		template<typename It>
-		struct HLLADD_Factory : hm4::PairFactory::IFactory{
-			HLLADD_Factory(std::string_view const key, It begin, It end, const Pair *pair) :
-							key		(key		),
-							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *pair) final{
-				if (pair->getVal().size() != val_size){
-					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
-					create_(pair);
-				}
-
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
-
-		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					memcpy(data, old_pair->getValC(), val_size);
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
-				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
-
-				for(auto itk = begin; itk != end; ++itk){
-					const auto &val = *itk;
-
-					getHLL().add(hll_data, val);
-				}
-			}
-
-		private:
-			constexpr static auto val_size = HLL_M;
-
-		private:
-			std::string_view	key;
-			It			begin;
-			It			end;
-			const Pair		*old_pair;
-		};
 	}
 
 
@@ -187,6 +118,78 @@ namespace net::worker::commands::HLL{
 
 			return result.set_1();
 		}
+
+	private:
+		template<typename It>
+		struct HLLADD_Factory : hm4::PairFactory::IFactory{
+			using Pair = hm4::Pair;
+
+			HLLADD_Factory(std::string_view const key, It begin, It end, const Pair *pair) :
+							key		(key		),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *pair) final{
+				if (pair->getVal().size() != val_size){
+					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
+					create_(pair);
+				}
+
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			void create_(Pair *pair) const{
+				char *data = pair->getValC();
+
+				if (old_pair){
+					memcpy(data, old_pair->getValC(), val_size);
+				}else{
+					memset(data, '\0', val_size);
+				}
+			}
+
+			void add_(Pair *pair) const{
+				using namespace hll_impl_;
+
+				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
+
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
+
+					getHLL().add(hll_data, val);
+				}
+			}
+
+		private:
+			constexpr static auto val_size = hll_impl_::HLL_M;
+
+		private:
+			std::string_view	key;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
