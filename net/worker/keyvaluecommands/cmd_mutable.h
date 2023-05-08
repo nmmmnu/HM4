@@ -1,6 +1,5 @@
 #include "base.h"
-
-
+#include <stdexcept>
 
 namespace net::worker::commands::Mutable{
 
@@ -712,9 +711,10 @@ namespace net::worker::commands::Mutable{
 				return Pair::bytes(key.size(), val_size());
 			}
 
-			void createHint(Pair *pair) final{
-				Pair::createInRawMemory<0,0,0,1>(pair, key, val_size(), expires, created);
-				val_copy(pair);
+			void createHint(Pair *) final{
+				throw std::logic_error("Must not call APPEND_Factory::createHint");
+			//	Pair::createInRawMemory<0,0,0,1>(pair, key, val_size(), expires, created);
+			//	val_copy(pair);
 			}
 
 			void create(Pair *pair) final{

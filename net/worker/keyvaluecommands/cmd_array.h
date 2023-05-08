@@ -2,10 +2,10 @@
 
 #include "smart_memcpy.h"
 
+#include <stdexcept>
+
 namespace net::worker::commands::CV{
 	namespace cv_impl_{
-		using Pair = hm4::Pair;
-
 		using size_type				= uint64_t;
 
 		template<typename T>
@@ -46,8 +46,168 @@ namespace net::worker::commands::CV{
 		}
 
 		template<typename T>
+		constexpr std::string_view size_fix(std::string_view v){
+			return { v.data(), size_cv<T>(v.size()) * sizeof(T) };
+		}
+
+		template<typename T>
 		constexpr size_type CV_MAX		= size_cv<T>(hm4::PairConf::MAX_VAL_SIZE);
 	}
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct CVPUSH : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			// cvpush key 32 1
+			if (p.size() < 4)
+				return;
+
+			using namespace cv_impl_;
+
+			const auto &key		= p[1];
+
+			if (key.empty())
+				return;
+
+			auto const t		= from_string<uint8_t>(p[2]);
+
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return; // emit an error
+				}else{
+					return process_<T>(key, p, *db, result);
+				}
+			};
+
+			return type_dispatch(t, f);
+		}
+
+	private:
+		template<typename T>
+		void process_(std::string_view key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			using namespace cv_impl_;
+
+			const auto *pair = hm4::getPairPtr(list, key);
+
+			auto const &val = pair ? size_fix<T>(pair->getVal()) : "";
+
+			auto const [ok, n_size] = getNSize_<T>(p, val);
+
+			if (!ok)
+				return;
+
+			using MyCVPUSH_Factory = CVPUSH_Factory<T, ParamContainer::iterator>;
+
+			auto const varg = 3;
+
+			if (pair && hm4::canInsertHint(list, pair, n_size))
+				hm4::proceedInsertHintV<MyCVPUSH_Factory>(list, pair, key, n_size, std::begin(p) + varg, std::end(p), pair);
+			else
+				hm4::insertV<MyCVPUSH_Factory>(list, key, n_size, std::begin(p) + varg, std::end(p), pair);
+
+			return result.set();
+		}
+
+		template<typename T>
+		static auto getNSize_(ParamContainer const &p, std::string_view const val){
+			using namespace cv_impl_;
+
+			auto const varg = 3;
+
+			size_type const max = size_cv<T>(val) - 1 + p.size() - varg;
+
+			bool const ok = max < CV_MAX<T>;
+
+			// max is index, but in this case, we want size
+			return std::make_pair(ok, (max + 1) * sizeof(T) );
+		}
+
+	private:
+		template<typename T, typename It>
+		struct CVPUSH_Factory : hm4::PairFactory::IFactory{
+			using Pair = hm4::Pair;
+
+			CVPUSH_Factory(std::string_view const key, uint64_t val_size, It begin, It end, const Pair *pair) :
+							key		(key		),
+							val_size	(val_size	),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *) final{
+				throw std::logic_error("Must not call CVPUSH_Factory::createHint");
+			//	add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			void create_(Pair *pair) const{
+				char *data = pair->getValC();
+
+				if (old_pair){
+					smart_memcpy<1,0>(data, val_size, old_pair->getVal());
+				}else{
+					memset(data, '\0', val_size);
+				}
+			}
+
+			void add_(Pair *pair) const{
+				using namespace cv_impl_;
+
+				auto *cv = cast_cv<T>(pair->getValC());
+
+				size_type n = old_pair ? size_cv<T>(old_pair->getVal()) : 0;
+
+				for(auto it = begin; it != end; ++it){
+					T const value = from_string<T>(*it);
+
+					cv[n++] = htobe<T>(value);
+				}
+			}
+
+		private:
+			std::string_view	key;
+			uint64_t		val_size;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cvpush",	"CVPUSH"	,
+			"cvmpush",	"CVMPUSH"
+		};
+	};
 
 
 
@@ -487,6 +647,7 @@ namespace net::worker::commands::CV{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
+				CVPUSH		,
 				CVSET		,
 				CVGET		,
 				CVMGET		,
