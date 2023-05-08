@@ -113,6 +113,9 @@ inline namespace version_4_00_00{
 
 			if constexpr(copy_key){
 				memcpy(& pair->buffer[0],		key.data(), key.size());
+			}
+
+			if constexpr(copy_key || make_key){
 				pair->buffer[key.size()] = '\0';
 			}
 
@@ -120,6 +123,9 @@ inline namespace version_4_00_00{
 			if constexpr(copy_val){
 				// this is safe with NULL pointer.
 				memcpy(& pair->buffer[key.size() + 1],	val.data(), val.size());
+			}
+
+			if constexpr(copy_val || make_val){
 				pair->buffer[key.size() + 1 + val.size()] = '\0';
 			}
 
