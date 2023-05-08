@@ -60,83 +60,6 @@ namespace net::worker::commands::CMS{
 			return count;
 		}
 
-
-
-		template<typename It, typename T>
-		struct CMSADD_Factory : hm4::PairFactory::IFactory{
-			CMSADD_Factory(std::string_view const key, Matrix<T> cms, It begin, It end, const Pair *pair) :
-							key		(key	),
-							cms		(cms	),
-							begin		(begin	),
-							end		(end	),
-							old_pair	(pair	){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size());
-			}
-
-			void createHint(Pair *pair) final{
-				if (pair->getVal().size() != val_size()){
-					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size(), 0, 0);
-					create_(pair);
-				}
-
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size(), 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
-
-		private:
-			constexpr auto val_size() const{
-				return cms.bytes();
-			}
-
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					memcpy(data, old_pair->getValC(), val_size());
-				}else{
-					memset(data, '\0', val_size());
-				}
-			}
-
-			void add_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				for(auto itk = begin; itk != end; itk += 2){
-					auto const &val = *itk;
-					auto const n   = std::max<uint64_t>( from_string<uint64_t>( *std::next(itk) ), 1);
-
-					using namespace cms_impl_;
-
-					cms_add(cms, data, val, n);
-				}
-			}
-
-		private:
-			std::string_view	key;
-			Matrix<T>		cms;
-			It			begin;
-			It			end;
-			const Pair		*old_pair;
-		};
-
-
-
 		template<typename T>
 		struct type_identity{
 			// C++20 std::type_identity
@@ -221,7 +144,7 @@ namespace net::worker::commands::CMS{
 					return nullptr;
 			});
 
-			using MyCMSADD_Factory = CMSADD_Factory<ParamContainer::iterator, T>;
+			using MyCMSADD_Factory = CMSADD_Factory<T, ParamContainer::iterator>;
 
 			if (pair && hm4::canInsertHint(list, pair, cms.bytes()))
 				hm4::proceedInsertHintV<MyCMSADD_Factory>(list, pair, key, cms, std::begin(p) + varg, std::end(p), pair);
@@ -230,6 +153,82 @@ namespace net::worker::commands::CMS{
 
 			return result.set();
 		}
+
+	private:
+		template<typename T, typename It>
+		struct CMSADD_Factory : hm4::PairFactory::IFactory{
+			using Pair = hm4::Pair;
+
+			CMSADD_Factory(std::string_view const key, Matrix<T> cms, It begin, It end, const Pair *pair) :
+							key		(key	),
+							cms		(cms	),
+							begin		(begin	),
+							end		(end	),
+							old_pair	(pair	){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size());
+			}
+
+			void createHint(Pair *pair) final{
+				if (pair->getVal().size() != val_size()){
+					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size(), 0, 0);
+					create_(pair);
+				}
+
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size(), 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			constexpr auto val_size() const{
+				return cms.bytes();
+			}
+
+			void create_(Pair *pair) const{
+				char *data = pair->getValC();
+
+				if (old_pair){
+					memcpy(data, old_pair->getValC(), val_size());
+				}else{
+					memset(data, '\0', val_size());
+				}
+			}
+
+			void add_(Pair *pair) const{
+				char *data = pair->getValC();
+
+				for(auto itk = begin; itk != end; itk += 2){
+					auto const &val = *itk;
+					auto const n   = std::max<uint64_t>( from_string<uint64_t>( *std::next(itk) ), 1);
+
+					using namespace cms_impl_;
+
+					cms_add(cms, data, val, n);
+				}
+			}
+
+		private:
+			std::string_view	key;
+			Matrix<T>		cms;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

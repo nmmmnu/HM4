@@ -646,7 +646,7 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
 				return;
 
@@ -657,33 +657,82 @@ namespace net::worker::commands::Mutable{
 			if (key.empty())
 				return;
 
-			std::string_view val = p[2];
+			std::string_view const val_new = p[2];
 
-			auto it = db->find(key, std::true_type{});
+			const auto *pair = hm4::getPairPtr(*db, key);
 
-			if (it != std::end(*db) && it->isValid(std::true_type{})){
-				if (it->getVal().size() + val.size() > hm4::PairConf::MAX_VAL_SIZE)
-					return;
-
-				val = concatenateBuffer(blob.buffer_val, it->getVal(), val);
-			}else{
-				// already appended.
-				// done
-			}
+			std::string_view const val_old = pair ? pair->getVal() : "";
 
 			// SET
-
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			// HINT
 			// will not work, but who knows in the future.
-			const auto *hint = & *it;
-			hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, key, val, exp);
+			const auto *hint = pair;
+			hm4::insertHintV<APPEND_Factory>(*db, hint, key, val_old, val_new, exp);
 
 			// return
 
-			result.set(val.size());
+			result.set(val_old.size() + val_new.size());
 		}
+
+	private:
+		struct APPEND_Factory : hm4::PairFactory::IFactory{
+			using Pair = hm4::Pair;
+
+			std::string_view key;
+			std::string_view val1;
+			std::string_view val2;
+			uint32_t expires;
+			uint32_t created;
+
+			constexpr APPEND_Factory(
+				std::string_view const key,
+				std::string_view const val1,
+				std::string_view const val2,
+				uint32_t const expires = 0, uint32_t const created = 0) :
+					key	(key		),
+					val1	(val1		),
+					val2	(val2		),
+					expires	(expires	),
+					created	(created	){}
+
+			[[nodiscard]]
+			constexpr std::string_view getKey() const noexcept final{
+				return key;
+			}
+
+			[[nodiscard]]
+			constexpr uint32_t getCreated() const noexcept final{
+				return created;
+			}
+
+			[[nodiscard]]
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size());
+			}
+
+			void createHint(Pair *pair) final{
+				Pair::createInRawMemory<0,0,0,1>(pair, key, val_size(), expires, created);
+				val_copy(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size(), expires, created);
+				val_copy(pair);
+			}
+
+		private:
+			[[nodiscard]]
+			constexpr size_t val_size() const{
+				return val1.size() + val2.size();
+			}
+
+			void val_copy(Pair *pair) const{
+				memcpy(pair->getValC() + 0,		val1.data(), val1.size());
+				memcpy(pair->getValC() + val1.size(),	val2.data(), val2.size());
+			}
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

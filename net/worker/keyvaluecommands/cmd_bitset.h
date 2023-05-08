@@ -15,75 +15,6 @@ namespace net::worker::commands::BITSET{
 		using size_type				= uint64_t;
 
 		constexpr size_type BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
-
-
-
-		template<typename It>
-		struct BITSET_Factory : hm4::PairFactory::IFactory{
-			BITSET_Factory(std::string_view const key, uint64_t val_size, It begin, It end, const Pair *pair) :
-							key		(key		),
-							val_size	(val_size	),
-							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *pair) final{
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
-
-		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					auto const s = old_pair->getVal();
-					smart_memcpy(data, s.data(), s.size(), val_size);
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				for(auto it = begin; it != end; it += 2){
-					auto const n = from_string<size_type>(*it);
-
-					if (n >= BIT_MAX)
-						continue;
-
-					bool const bit	= from_string<uint64_t>(*std::next(it));
-
-					BitOps{ n }.set(data, bit);
-				}
-			}
-
-		private:
-			std::string_view	key;
-			uint64_t		val_size;
-			It			begin;
-			It			end;
-			const Pair		*old_pair;
-		};
 	}
 
 	template<class Protocol, class DBAdapter>
@@ -150,6 +81,76 @@ namespace net::worker::commands::BITSET{
 		}
 
 	private:
+		template<typename It>
+		struct BITSET_Factory : hm4::PairFactory::IFactory{
+			using Pair = hm4::Pair;
+
+			BITSET_Factory(std::string_view const key, uint64_t val_size, It begin, It end, const Pair *pair) :
+							key		(key		),
+							val_size	(val_size	),
+							begin		(begin		),
+							end		(end		),
+							old_pair	(pair		){}
+
+			constexpr std::string_view getKey() const final{
+				return key;
+			}
+
+			constexpr uint32_t getCreated() const final{
+				return 0;
+			}
+
+			constexpr size_t bytes() const final{
+				return Pair::bytes(key.size(), val_size);
+			}
+
+			void createHint(Pair *pair) final{
+				add_(pair);
+			}
+
+			void create(Pair *pair) final{
+				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
+				create_(pair);
+
+				add_(pair);
+			}
+
+		private:
+			void create_(Pair *pair) const{
+				char *data = pair->getValC();
+
+				if (old_pair){
+					smart_memcpy(data, val_size, old_pair->getVal());
+				}else{
+					memset(data, '\0', val_size);
+				}
+			}
+
+			void add_(Pair *pair) const{
+				using namespace bit_impl_;
+
+				char *data = pair->getValC();
+
+				for(auto it = begin; it != end; it += 2){
+					auto const n = from_string<size_type>(*it);
+
+					if (n >= BIT_MAX)
+						continue;
+
+					bool const bit	= from_string<uint64_t>(*std::next(it));
+
+					BitOps{ n }.set(data, bit);
+				}
+			}
+
+		private:
+			std::string_view	key;
+			uint64_t		val_size;
+			It			begin;
+			It			end;
+			const Pair		*old_pair;
+		};
+			private:
 		constexpr inline static std::string_view cmd[]	= {
 			"setbit",	"SETBIT"	,
 			"bitset",	"BITSET"	,
