@@ -1,6 +1,7 @@
 #include "base.h"
 
 #include "smart_memcpy.h"
+#include "pair_vfactory.h"
 
 #include <stdexcept>
 
@@ -36,22 +37,27 @@ namespace net::worker::commands::CV{
 		}
 
 		template<typename T>
-		constexpr size_t size_cv(size_t size){
+		constexpr size_t len_cv(size_t const size){
 			return size / sizeof(T);
 		}
 
 		template<typename T>
-		constexpr size_t size_cv(std::string_view s){
-			return s.size() / sizeof(T);
+		constexpr size_t len_cv(std::string_view s){
+			return len_cv<T>(s.size());
+		}
+
+		template<typename T>
+		constexpr size_t len_cv(const hm4::Pair *p){
+			return p ? len_cv<T>(p->getVal()) : 0;
 		}
 
 		template<typename T>
 		constexpr std::string_view size_fix(std::string_view v){
-			return { v.data(), size_cv<T>(v.size()) * sizeof(T) };
+			return { v.data(), len_cv<T>(v.size()) * sizeof(T) };
 		}
 
 		template<typename T>
-		constexpr size_type CV_MAX		= size_cv<T>(hm4::PairConf::MAX_VAL_SIZE);
+		constexpr size_type CV_MAX		= len_cv<T>(hm4::PairConf::MAX_VAL_SIZE);
 	}
 
 
@@ -125,12 +131,12 @@ namespace net::worker::commands::CV{
 
 			auto const varg = 3;
 
-			size_type const max = size_cv<T>(val) - 1 + p.size() - varg;
+			size_type const len = len_cv<T>(val) - 1 + p.size() - varg;
 
-			bool const ok = max < CV_MAX<T>;
+			bool const ok = len < CV_MAX<T>;
 
 			// max is index, but in this case, we want size
-			return std::make_pair(ok, (max + 1) * sizeof(T) );
+			return std::make_pair(ok, (len + 1) * sizeof(T) );
 		}
 
 	private:
@@ -185,12 +191,12 @@ namespace net::worker::commands::CV{
 
 				auto *cv = cast_cv<T>(pair->getValC());
 
-				size_type n = old_pair ? size_cv<T>(old_pair->getVal()) : 0;
+				size_type len = old_pair ? len_cv<T>(old_pair->getVal()) : 0;
 
 				for(auto it = begin; it != end; ++it){
 					T const value = from_string<T>(*it);
 
-					cv[n++] = htobe<T>(value);
+					cv[len++] = htobe<T>(value);
 				}
 			}
 
@@ -206,6 +212,79 @@ namespace net::worker::commands::CV{
 		constexpr inline static std::string_view cmd[]	= {
 			"cvpush",	"CVPUSH"	,
 			"cvmpush",	"CVMPUSH"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct CVPOP : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			// cvpop key 32
+			if (p.size() != 3)
+				return;
+
+			using namespace cv_impl_;
+
+			const auto &key		= p[1];
+
+			if (key.empty())
+				return;
+
+			auto const t		= from_string<uint8_t>(p[2]);
+
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return; // emit an error
+				}else{
+					return process_<T>(key, *db, result);
+				}
+			};
+
+			return type_dispatch(t, f);
+		}
+
+	private:
+		template<typename T>
+		void process_(std::string_view key, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			using namespace cv_impl_;
+
+			const auto *pair = hm4::getPairPtr(list, key);
+
+			auto const len = len_cv<T>(pair);
+
+			if (len == 0)
+				return result.set_0();
+
+			const auto *cv = cast_cv<T>(pair->getValC());
+
+			uint64_t const r = betoh<T>(cv[len - 1]);
+
+			using MySetSize_Factory = hm4::PairFactory::SetSize;
+
+			auto const size = (len - 1) * sizeof(T);
+
+			if (pair && hm4::canInsertHint(list, pair, size))
+				hm4::proceedInsertHintV<MySetSize_Factory>(list, pair, key, size, pair);
+			else
+				hm4::insertV<MySetSize_Factory>(list, key, size, pair);
+
+			return result.set(r);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cvpop",	"CVPOP"
 		};
 	};
 
@@ -349,7 +428,7 @@ namespace net::worker::commands::CV{
 				for(auto it = begin; it != end; it += 2){
 					auto const n = from_string<size_type>(*it);
 
-					if (size_cv<T>(val_size) < n)
+					if (len_cv<T>(val_size) < n)
 						continue;
 
 					T const value = from_string<T>(*std::next(it));
@@ -422,7 +501,7 @@ namespace net::worker::commands::CV{
 			const auto n		= from_string<size_type>(p[3]);
 
 			const auto *data = hm4::getPair_(list, key, [n](bool b, auto it) -> const char *{
-				if (b && size_cv<T>(it->getVal()) >= n)
+				if (b && len_cv<T>(it->getVal()) > n)
 					return it->getVal().data();
 				else
 					return nullptr;
@@ -505,12 +584,12 @@ namespace net::worker::commands::CV{
 			const auto *pair = hm4::getPairPtr(list, key);
 
 			if (pair){
-				auto const data_size = pair->getVal().size();
+				auto const size = pair->getVal().size();
 
 				const auto *cv = cast_cv<T>(pair->getVal().data());
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-					if (const auto n = from_string<size_type>(*itk); size_cv<T>(data_size) >= n){
+					if (const auto n = from_string<size_type>(*itk); len_cv<T>(size) > n){
 						auto const x = betoh<T>(cv[n]);
 
 						bcontainer.push_back();
@@ -582,7 +661,7 @@ namespace net::worker::commands::CV{
 
 			const auto val = hm4::getPairVal(list, key);
 
-			return result.set(size_cv<T>(val));
+			return result.set(len_cv<T>(val));
 		}
 
 	private:
@@ -648,6 +727,7 @@ namespace net::worker::commands::CV{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				CVPUSH		,
+				CVPOP		,
 				CVSET		,
 				CVGET		,
 				CVMGET		,
