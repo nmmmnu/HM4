@@ -4,6 +4,7 @@
 #include <cstddef>	// size_t
 #include <cassert>
 #include <type_traits>	// is_pod
+#include <string_view>
 
 #include <cstdio>
 
@@ -16,6 +17,11 @@ public:
 	BlobRef(const void *mem, size_t const size) noexcept :
 				mem_( (const char *) mem ),
 				size_(size){}
+
+	constexpr
+	BlobRef(std::string_view s) noexcept :
+				mem_	(s.data()),
+				size_	(s.size()){}
 
 	template<size_t N>
 	constexpr
@@ -70,6 +76,13 @@ public:
 	}
 
 public:
+	template <class T>
+	const T *asArray(size_t const pos, size_t const elements = 1) const noexcept{
+		static_assert(std::is_pod<T>::value, "T must be POD type");
+
+		return reinterpret_cast<const T *>( safeAccessMemory(pos * sizeof(T), elements * sizeof(T)) );
+	}
+
 	template <class T>
 	const T *as(size_t const pos, size_t const elements = 1) const noexcept{
 		static_assert(std::is_pod<T>::value, "T must be POD type");

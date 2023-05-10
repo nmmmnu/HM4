@@ -2,6 +2,7 @@
 
 #include "smart_memcpy.h"
 #include "pair_vfactory.h"
+#include "blobref.h"
 
 #include <stdexcept>
 
@@ -52,8 +53,16 @@ namespace net::worker::commands::CV{
 		}
 
 		template<typename T>
-		constexpr std::string_view size_fix(std::string_view v){
-			return { v.data(), len_cv<T>(v.size()) * sizeof(T) };
+		constexpr size_t bytes_cv(size_t len){
+			return len * sizeof(T);
+		}
+
+		template<typename T>
+		constexpr std::string_view bytes_fix(std::string_view v){
+			return {
+				v.data(),
+				bytes_cv<T>( len_cv<T>(v.size()) )
+			};
 		}
 
 		template<typename T>
@@ -106,7 +115,7 @@ namespace net::worker::commands::CV{
 
 			const auto *pair = hm4::getPairPtr(list, key);
 
-			auto const &val = pair ? size_fix<T>(pair->getVal()) : "";
+			auto const &val = pair ? bytes_fix<T>(pair->getVal()) : "";
 
 			auto const [ok, n_size] = getNSize_<T>(p, val);
 
@@ -136,7 +145,7 @@ namespace net::worker::commands::CV{
 			bool const ok = len < CV_MAX<T>;
 
 			// max is index, but in this case, we want size
-			return std::make_pair(ok, (len + 1) * sizeof(T) );
+			return std::make_pair(ok, bytes_cv<T>(len + 1) );
 		}
 
 	private:
@@ -189,6 +198,7 @@ namespace net::worker::commands::CV{
 			void add_(Pair *pair) const{
 				using namespace cv_impl_;
 
+				// BlobRef not support write yet
 				auto *cv = cast_cv<T>(pair->getValC());
 
 				size_type len = old_pair ? len_cv<T>(old_pair->getVal()) : 0;
@@ -266,18 +276,20 @@ namespace net::worker::commands::CV{
 			if (len == 0)
 				return result.set_0();
 
-			const auto *cv = cast_cv<T>(pair->getValC());
+			auto br = BlobRef{ pair->getVal() };
 
-			uint64_t const r = betoh<T>(cv[len - 1]);
+			uint64_t const r = betoh<T>(
+						*br.asArray<T>(len - 1)
+			);
 
 			using MySetSize_Factory = hm4::PairFactory::SetSize;
 
-			auto const size = (len - 1) * sizeof(T);
+			auto const bytes = bytes_cv<T>(len - 1);
 
-			if (pair && hm4::canInsertHint(list, pair, size))
-				hm4::proceedInsertHintV<MySetSize_Factory>(list, pair, key, size, pair);
+			if (pair && hm4::canInsertHint(list, pair, bytes))
+				hm4::proceedInsertHintV<MySetSize_Factory>(list, pair, key, bytes, pair);
 			else
-				hm4::insertV<MySetSize_Factory>(list, key, size, pair);
+				hm4::insertV<MySetSize_Factory>(list, key, bytes, pair);
 
 			return result.set(r);
 		}
@@ -371,7 +383,7 @@ namespace net::worker::commands::CV{
 			}
 
 			// max is index, but in this case, we want size
-			return std::make_pair(ok, (max + 1) * sizeof(T) );
+			return std::make_pair(ok, bytes_cv<T>(max + 1) );
 		}
 
 	private:
@@ -433,6 +445,7 @@ namespace net::worker::commands::CV{
 
 					T const value = from_string<T>(*std::next(it));
 
+					// BlobRef not support write yet
 					auto *cv = cast_cv<T>(data);
 
 					cv[n] = htobe<T>(value);
@@ -498,21 +511,19 @@ namespace net::worker::commands::CV{
 		void process_(std::string_view key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cv_impl_;
 
-			const auto n		= from_string<size_type>(p[3]);
+			const auto n	= from_string<size_type>(p[3]);
 
-			const auto *data = hm4::getPair_(list, key, [n](bool b, auto it) -> const char *{
-				if (b && len_cv<T>(it->getVal()) > n)
-					return it->getVal().data();
-				else
-					return nullptr;
-			});
+			auto const val	= hm4::getPairVal(list, key);
+			auto const len	= len_cv<T>(val);
 
-			if (data){
-				const auto *cv = cast_cv<T>(data);
+			if (len > n){
+				auto br = BlobRef{ val };
 
-				uint64_t const x = betoh<T>(cv[n]);
+				uint64_t const r = betoh<T>(
+							*br.asArray<T>(n)
+				);
 
-				return result.set(x);
+				return result.set(r);
 			}else{
 				return result.set_0();
 			}
@@ -584,17 +595,17 @@ namespace net::worker::commands::CV{
 			const auto *pair = hm4::getPairPtr(list, key);
 
 			if (pair){
-				auto const size = pair->getVal().size();
-
-				const auto *cv = cast_cv<T>(pair->getVal().data());
+				auto const len = len_cv<T>(pair);
+				auto br = BlobRef{ pair->getVal() };
+				const auto *cv = br.asArray<T>(0, len);
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-					if (const auto n = from_string<size_type>(*itk); len_cv<T>(size) > n){
-						auto const x = betoh<T>(cv[n]);
+					if (const auto n = from_string<size_type>(*itk); len > n){
+						auto const r = betoh<T>(cv[n]);
 
 						bcontainer.push_back();
 
-						container.push_back( to_string(x, bcontainer.back()) );
+						container.push_back( to_string(r, bcontainer.back()) );
 					}else{
 						container.emplace_back("0");
 					}
@@ -722,7 +733,7 @@ namespace net::worker::commands::CV{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "hll";
+		constexpr inline static std::string_view name	= "cv";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
