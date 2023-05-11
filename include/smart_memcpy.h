@@ -1,21 +1,28 @@
 #ifndef SMART_MEMCPY_H_
 #define SMART_MEMCPY_H_
 
-#include <cassert>
 #include <cstring>
 
 template<bool MC = true, bool MS = true>
 void smart_memcpy(void *dest_v, size_t const dest_size, const void *src, size_t const src_size, char fill = '\0'){
-	assert(src_size <= dest_size);
-
 	char *dest = reinterpret_cast<char *>(dest_v);
 
-	if constexpr(MC){
-		memcpy(dest,		src,	src_size		);
-	}
+	if (src_size <= dest_size){
 
-	if constexpr(MS){
-		memset(dest + src_size, fill,	dest_size - src_size	);
+		if constexpr(MC){
+			memcpy(dest,		src,	src_size		);
+		}
+
+		if constexpr(MS){
+			memset(dest + src_size, fill,	dest_size - src_size	);
+		}
+
+	}else{
+
+		if constexpr(MC){
+			memcpy(dest,		src,	dest_size		);
+		}
+
 	}
 
 	#if 0

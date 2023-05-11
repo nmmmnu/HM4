@@ -26,86 +26,99 @@ namespace net::worker::commands::CV{
 			}
 		}
 
-		template<typename T>
-		constexpr size_t len_cv(size_t const size){
-			return size / sizeof(T);
-		}
-
-		template<typename T>
-		constexpr size_t len_cv(std::string_view s){
-			return len_cv<T>(s.size());
-		}
-
-		template<typename T>
-		constexpr size_t len_cv(const hm4::Pair *p){
-			return p ? len_cv<T>(p->getVal()) : 0;
-		}
-
-		template<typename T>
-		constexpr size_t bytes_cv(size_t len){
-			return len * sizeof(T);
-		}
-
-		template<typename T>
-		constexpr std::string_view bytes_fix(std::string_view v){
-			return {
-				v.data(),
-				bytes_cv<T>( len_cv<T>(v.size()) )
-			};
-		}
-
-		template<typename T>
-		constexpr size_type CV_MAX		= len_cv<T>(hm4::PairConf::MAX_VAL_SIZE);
-
 
 
 		template<typename T>
 		class MyArray{
-			using Void		= std::conditional_t<
-							std::is_const_v<T>,
-							const void,
-							void
-						>;
-
-			T	*ptr_;
-			size_t	size_;
+			T	*p_;
+			size_t	 n_;
 
 			constexpr static bool CHECK_SIZE = true;
 
 		public:
-			constexpr MyArray(Void *ptr, size_t size) :
-					ptr_	(reinterpret_cast<T *>(ptr)	),
-					size_	(size / sizeof(T)			){}
+			constexpr MyArray(void *ptr, size_t size) :
+					p_(reinterpret_cast<T *>(ptr)	),
+					n_(MyArray::size(size)		){}
+
+			constexpr MyArray(const void *ptr, size_t size) :
+					p_(reinterpret_cast<T *>(ptr)	),
+					n_(MyArray::size(size)		){}
 
 			explicit
 			constexpr MyArray(std::string_view s) :
 					MyArray(s.data(), s.size()){}
 
 		public:
+			constexpr static size_t size(size_t size){
+				return size / sizeof(T);
+			}
+
+			constexpr static size_t bytes(size_t n){
+				return n * sizeof(T);
+			}
+
+		public:
 			constexpr size_t size() const{
-				return size_;
+				return n_;
+			}
+
+			constexpr size_t bytes() const{
+				return bytes(n_);
 			}
 
 			constexpr const auto&operator[](size_t i) const{
 				checkSize_(i);
 
-				return ptr_[i];
+				return p_[i];
 			}
 
 			constexpr auto&operator[](size_t i){
 				checkSize_(i);
 
-				return ptr_[i];
+				return p_[i];
 			}
 
 		private:
 			constexpr void checkSize_(size_t i) const{
 				if constexpr(CHECK_SIZE){
-					if (i >= size_)
+					if (i >= n_)
 						throw std::logic_error("MyArray overrun");
 				}
 			}
 		};
+
+
+
+		template<typename T>
+		constexpr size_t size_cv(size_t const size){
+			return MyArray<const T>::size(size);
+		}
+
+		template<typename T>
+		constexpr size_t size_cv(std::string_view s){
+			return size_cv<T>(s.size());
+		}
+
+		template<typename T>
+		constexpr size_t size_cv(const hm4::Pair *p){
+			return p ? size_cv<T>(p->getVal()) : 0;
+		}
+
+		template<typename T>
+		constexpr size_t bytes_cv(size_t n){
+			return MyArray<const T>::bytes(n);
+		}
+
+		template<typename T>
+		constexpr std::string_view bytes_fix(std::string_view v){
+			return {
+				v.data(),
+				bytes_cv<T>( size_cv<T>(v.size()) )
+			};
+		}
+
+		template<typename T>
+		constexpr size_type CV_MAX		= size_cv<T>(hm4::PairConf::MAX_VAL_SIZE);
 	}
 
 
@@ -179,7 +192,7 @@ namespace net::worker::commands::CV{
 
 			auto const varg = 3;
 
-			size_type const len = len_cv<T>(val) - 1 + p.size() - varg;
+			size_type const len = size_cv<T>(val) - 1 + p.size() - varg;
 
 			bool const ok = len < CV_MAX<T>;
 
@@ -239,7 +252,7 @@ namespace net::worker::commands::CV{
 
 				auto br = MyArray<T>(pair->getValC(), pair->getVal().size());
 
-				size_type len = old_pair ? len_cv<T>(old_pair->getVal()) : 0;
+				size_type len = old_pair ? size_cv<T>(old_pair->getVal()) : 0;
 
 				for(auto it = begin; it != end; ++it){
 					T const value = from_string<T>(*it);
@@ -309,7 +322,7 @@ namespace net::worker::commands::CV{
 
 			const auto *pair = hm4::getPairPtr(list, key);
 
-			auto const len = len_cv<T>(pair);
+			auto const len = size_cv<T>(pair);
 
 			if (len == 0)
 				return result.set_0();
@@ -476,7 +489,7 @@ namespace net::worker::commands::CV{
 				for(auto it = begin; it != end; it += 2){
 					auto const n = from_string<size_type>(*it);
 
-					if (len_cv<T>(val_size) < n)
+					if (size_cv<T>(val_size) < n)
 						continue;
 
 					T const value = from_string<T>(*std::next(it));
@@ -549,7 +562,7 @@ namespace net::worker::commands::CV{
 			const auto n	= from_string<size_type>(p[3]);
 
 			auto const val	= hm4::getPairVal(list, key);
-			auto const len	= len_cv<T>(val);
+			auto const len	= size_cv<T>(val);
 
 			if (len > n){
 				auto const br = MyArray<const T>{ val };
@@ -628,7 +641,7 @@ namespace net::worker::commands::CV{
 			const auto *pair = hm4::getPairPtr(list, key);
 
 			if (pair){
-				auto const len = len_cv<T>(pair);
+				auto const len = size_cv<T>(pair);
 				auto const br = MyArray<const T>{ pair->getVal() };
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
@@ -704,7 +717,7 @@ namespace net::worker::commands::CV{
 
 			const auto val = hm4::getPairVal(list, key);
 
-			return result.set(len_cv<T>(val));
+			return result.set(size_cv<T>(val));
 		}
 
 	private:
