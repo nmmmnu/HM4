@@ -59,30 +59,13 @@ namespace net::worker::commands::CV{
 
 
 
-		namespace my_array_impl_{
-
-			template<typename T, bool b>
-			struct TFactory;
-
-			template<typename T>
-			struct TFactory<T, false>{
-				using type	= const T;
-				using type_void	= const void *;
-			};
-
-			template<typename T>
-			struct TFactory<T, true>{
-				using type	= T;
-				using type_void	= void *;
-			};
-		}
-
-		template<typename T_, bool mut = false>
+		template<typename T>
 		class MyArray{
-			using MyTFactory	= my_array_impl_::TFactory<T_, mut>;
-
-			using T			= typename MyTFactory::type;
-			using Void		= typename MyTFactory::type_void;
+			using Void		= std::conditional_t<
+							std::is_const_v<T>,
+							const void,
+							void
+						>;
 
 			T	*ptr_;
 			size_t	size_;
@@ -90,7 +73,7 @@ namespace net::worker::commands::CV{
 			constexpr static bool CHECK_SIZE = true;
 
 		public:
-			constexpr MyArray(Void ptr, size_t size) :
+			constexpr MyArray(Void *ptr, size_t size) :
 					ptr_	(reinterpret_cast<T *>(ptr)	),
 					size_	(size / sizeof(T)			){}
 
@@ -123,9 +106,6 @@ namespace net::worker::commands::CV{
 				}
 			}
 		};
-
-		template<typename T>
-		using MyArrayMutable = MyArray<T, true>;
 	}
 
 
@@ -257,7 +237,7 @@ namespace net::worker::commands::CV{
 			void add_(Pair *pair) const{
 				using namespace cv_impl_;
 
-				auto br = MyArrayMutable<T>(pair->getValC(), pair->getVal().size());
+				auto br = MyArray<T>(pair->getValC(), pair->getVal().size());
 
 				size_type len = old_pair ? len_cv<T>(old_pair->getVal()) : 0;
 
@@ -334,7 +314,7 @@ namespace net::worker::commands::CV{
 			if (len == 0)
 				return result.set_0();
 
-			auto const br = MyArray<T>{ pair->getVal() };
+			auto const br = MyArray<const T>{ pair->getVal() };
 
 			uint64_t const r = betoh<T>( br[len - 1] );
 
@@ -501,7 +481,7 @@ namespace net::worker::commands::CV{
 
 					T const value = from_string<T>(*std::next(it));
 
-					auto br = MyArrayMutable<T>(data, val_size);
+					auto br = MyArray<T>(data, val_size);
 
 					br[n] = htobe<T>(value);
 				}
@@ -572,7 +552,7 @@ namespace net::worker::commands::CV{
 			auto const len	= len_cv<T>(val);
 
 			if (len > n){
-				auto const br = MyArray<T>{ val };
+				auto const br = MyArray<const T>{ val };
 
 				uint64_t const r = betoh<T>( br[n] );
 
@@ -649,7 +629,7 @@ namespace net::worker::commands::CV{
 
 			if (pair){
 				auto const len = len_cv<T>(pair);
-				auto const br = MyArray<T>{ pair->getVal() };
+				auto const br = MyArray<const T>{ pair->getVal() };
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					if (const auto n = from_string<size_type>(*itk); len > n){
