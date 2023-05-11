@@ -2,7 +2,6 @@
 
 #include "smart_memcpy.h"
 #include "pair_vfactory.h"
-#include "blobref.h"
 
 #include <stdexcept>
 
@@ -25,16 +24,6 @@ namespace net::worker::commands::CV{
 			case 64 : return f(type_identity<uint64_t	>{});
 			default : return f(type_identity<std::nullptr_t	>{});
 			}
-		}
-
-		template<typename T>
-		constexpr T *cast_cv(void *p){
-			return reinterpret_cast<T *>(p);
-		}
-
-		template<typename T>
-		constexpr const T *cast_cv(const void *p){
-			return reinterpret_cast<const T *>(p);
 		}
 
 		template<typename T>
@@ -67,6 +56,76 @@ namespace net::worker::commands::CV{
 
 		template<typename T>
 		constexpr size_type CV_MAX		= len_cv<T>(hm4::PairConf::MAX_VAL_SIZE);
+
+
+
+		namespace my_array_impl_{
+
+			template<typename T, bool b>
+			struct TFactory;
+
+			template<typename T>
+			struct TFactory<T, false>{
+				using type	= const T;
+				using type_void	= const void *;
+			};
+
+			template<typename T>
+			struct TFactory<T, true>{
+				using type	= T;
+				using type_void	= void *;
+			};
+		}
+
+		template<typename T_, bool mut = false>
+		class MyArray{
+			using MyTFactory	= my_array_impl_::TFactory<T_, mut>;
+
+			using T			= typename MyTFactory::type;
+			using Void		= typename MyTFactory::type_void;
+
+			T	*ptr_;
+			size_t	size_;
+
+			constexpr static bool CHECK_SIZE = true;
+
+		public:
+			constexpr MyArray(Void ptr, size_t size) :
+					ptr_	(reinterpret_cast<T *>(ptr)	),
+					size_	(size / sizeof(T)			){}
+
+			explicit
+			constexpr MyArray(std::string_view s) :
+					MyArray(s.data(), s.size()){}
+
+		public:
+			constexpr size_t size() const{
+				return size_;
+			}
+
+			constexpr const auto&operator[](size_t i) const{
+				checkSize_(i);
+
+				return ptr_[i];
+			}
+
+			constexpr auto&operator[](size_t i){
+				checkSize_(i);
+
+				return ptr_[i];
+			}
+
+		private:
+			constexpr void checkSize_(size_t i) const{
+				if constexpr(CHECK_SIZE){
+					if (i >= size_)
+						throw std::logic_error("MyArray overrun");
+				}
+			}
+		};
+
+		template<typename T>
+		using MyArrayMutable = MyArray<T, true>;
 	}
 
 
@@ -198,15 +257,14 @@ namespace net::worker::commands::CV{
 			void add_(Pair *pair) const{
 				using namespace cv_impl_;
 
-				// BlobRef not support write yet
-				auto *cv = cast_cv<T>(pair->getValC());
+				auto br = MyArrayMutable<T>(pair->getValC(), pair->getVal().size());
 
 				size_type len = old_pair ? len_cv<T>(old_pair->getVal()) : 0;
 
 				for(auto it = begin; it != end; ++it){
 					T const value = from_string<T>(*it);
 
-					cv[len++] = htobe<T>(value);
+					br[len++] = htobe<T>(value);
 				}
 			}
 
@@ -276,11 +334,9 @@ namespace net::worker::commands::CV{
 			if (len == 0)
 				return result.set_0();
 
-			auto br = BlobRef{ pair->getVal() };
+			auto const br = MyArray<T>{ pair->getVal() };
 
-			uint64_t const r = betoh<T>(
-						*br.asArray<T>(len - 1)
-			);
+			uint64_t const r = betoh<T>( br[len - 1] );
 
 			using MySetSize_Factory = hm4::PairFactory::SetSize;
 
@@ -445,10 +501,9 @@ namespace net::worker::commands::CV{
 
 					T const value = from_string<T>(*std::next(it));
 
-					// BlobRef not support write yet
-					auto *cv = cast_cv<T>(data);
+					auto br = MyArrayMutable<T>(data, val_size);
 
-					cv[n] = htobe<T>(value);
+					br[n] = htobe<T>(value);
 				}
 			}
 
@@ -517,11 +572,9 @@ namespace net::worker::commands::CV{
 			auto const len	= len_cv<T>(val);
 
 			if (len > n){
-				auto br = BlobRef{ val };
+				auto const br = MyArray<T>{ val };
 
-				uint64_t const r = betoh<T>(
-							*br.asArray<T>(n)
-				);
+				uint64_t const r = betoh<T>( br[n] );
 
 				return result.set(r);
 			}else{
@@ -596,12 +649,11 @@ namespace net::worker::commands::CV{
 
 			if (pair){
 				auto const len = len_cv<T>(pair);
-				auto br = BlobRef{ pair->getVal() };
-				const auto *cv = br.asArray<T>(0, len);
+				auto const br = MyArray<T>{ pair->getVal() };
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					if (const auto n = from_string<size_type>(*itk); len > n){
-						auto const r = betoh<T>(cv[n]);
+						auto const r = betoh<T>( br[n] );
 
 						bcontainer.push_back();
 
