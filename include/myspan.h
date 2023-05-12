@@ -179,25 +179,25 @@ struct MySpan<T, MySpanConstructor::EXPLICIT> : public MySpan<T, MySpanConstruct
 
 
 
-template<typename T>
-auto voidAsMySpan(void *ptr, size_t size){
-	return MySpan<T>{
+template<typename T, MySpanConstructor SC = MySpanConstructor::NORMAL>
+auto blobAsMySpan(void *ptr, size_t size){
+	return MySpan<T, SC>{
 		reinterpret_cast<T *>(ptr),
 		size / sizeof(T)
 	};
 }
 
-template<typename T>
-auto voidAsMySpan(const void *ptr, size_t size){
-	return MySpan<const T>{
+template<typename T, MySpanConstructor SC = MySpanConstructor::NORMAL>
+auto blobAsMySpan(const void *ptr, size_t size){
+	return MySpan<const T, SC>{
 		reinterpret_cast<T *>(ptr),
 		size / sizeof(T)
 	};
 }
 
-template<typename T>
-auto voidAsMySpan(std::string_view s){
-	return voidAsMySpan<T>(s.data(), s.size());
+template<typename T, MySpanConstructor SC = MySpanConstructor::NORMAL>
+auto blobAsMySpan(std::string_view s){
+	return blobAsMySpan<T, SC>(s.data(), s.size());
 }
 
 

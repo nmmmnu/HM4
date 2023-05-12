@@ -153,14 +153,14 @@ namespace net::worker::commands::CV{
 			void action(Pair *pair) override{
 				using namespace cv_impl_;
 
-				auto br = voidAsMySpan<T>(pair->getValC(), pair->getVal().size());
+				auto sp = blobAsMySpan<T>(pair->getValC(), pair->getVal().size());
 
 				size_type len = old_pair ? cv_size<T>(old_pair->getVal()) : 0;
 
 				for(auto it = begin; it != end; ++it){
 					T const value = from_string<T>(*it);
 
-					br[len++] = htobe<T>(value);
+					sp[len++] = htobe<T>(value);
 				}
 			}
 
@@ -227,9 +227,9 @@ namespace net::worker::commands::CV{
 			if (len == 0)
 				return result.set_0();
 
-			auto const br = voidAsMySpan<const T>(pair->getVal());
+			auto const sp = blobAsMySpan<const T>(pair->getVal());
 
-			uint64_t const r = betoh<T>( br[len - 1] );
+			uint64_t const r = betoh<T>(sp.back());
 
 			using MySetSize_Factory = hm4::PairFactory::SetSize;
 
@@ -368,9 +368,9 @@ namespace net::worker::commands::CV{
 
 					T const value = from_string<T>(*std::next(it));
 
-					auto br = voidAsMySpan<T>(data, val_size);
+					auto sp = blobAsMySpan<T>(data, val_size);
 
-					br[n] = htobe<T>(value);
+					sp[n] = htobe<T>(value);
 				}
 			}
 
@@ -436,9 +436,9 @@ namespace net::worker::commands::CV{
 			auto const len	= cv_size<T>(val);
 
 			if (len > n){
-				auto const br = voidAsMySpan<const T>(val);
+				auto const sp = blobAsMySpan<const T>(val);
 
-				uint64_t const r = betoh<T>( br[n] );
+				uint64_t const r = betoh<T>(sp[n]);
 
 				return result.set(r);
 			}else{
@@ -513,11 +513,11 @@ namespace net::worker::commands::CV{
 
 			if (pair){
 				auto const len = cv_size<T>(pair);
-				auto const br = voidAsMySpan<const T>(pair->getVal());
+				auto const sp = blobAsMySpan<const T>(pair->getVal());
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					if (const auto n = from_string<size_type>(*itk); len > n){
-						auto const r = betoh<T>( br[n] );
+						auto const r = betoh<T>(sp[n]);
 
 						bcontainer.push_back();
 
