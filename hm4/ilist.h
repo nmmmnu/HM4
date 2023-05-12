@@ -159,8 +159,8 @@ constexpr bool canInsertHint(const List &list, const Pair *pair){
 }
 
 template<class List>
-constexpr bool canInsertHint(const List &list, const Pair *pair, size_t bytes){
-	return canInsertHint(list, pair) && pair->getVal().size() >= bytes;
+constexpr bool canInsertHint(const List &list, const Pair *pair, size_t val_size){
+	return canInsertHint(list, pair) && pair->getVal().size() >= val_size;
 }
 
 // ==============================

@@ -169,7 +169,7 @@ namespace net::worker::commands::CV{
 
 			auto const &val = pair ? bytes_fix<T>(pair->getVal()) : "";
 
-			auto const [ok, n_size] = getNSize_<T>(p, val);
+			auto const [ok, n_size] = getN__<T>(p, val);
 
 			if (!ok)
 				return;
@@ -178,16 +178,16 @@ namespace net::worker::commands::CV{
 
 			auto const varg = 3;
 
-			if (pair && hm4::canInsertHint(list, pair, n_size))
-				hm4::proceedInsertHintV<MyCVPUSH_Factory>(list, pair, key, n_size, std::begin(p) + varg, std::end(p), pair);
-			else
-				hm4::insertV<MyCVPUSH_Factory>(list, key, n_size, std::begin(p) + varg, std::end(p), pair);
+			auto const new_val_size = bytes_cv<T>(n_size);
+
+			// There is no way hint to be used here.
+			hm4::insertV<MyCVPUSH_Factory>(list, key, new_val_size, pair, std::begin(p) + varg, std::end(p));
 
 			return result.set();
 		}
 
 		template<typename T>
-		static auto getNSize_(ParamContainer const &p, std::string_view const val){
+		static auto getN__(ParamContainer const &p, std::string_view val){
 			using namespace cv_impl_;
 
 			auto const varg = 3;
@@ -197,57 +197,21 @@ namespace net::worker::commands::CV{
 			bool const ok = len < CV_MAX<T>;
 
 			// max is index, but in this case, we want size
-			return std::make_pair(ok, bytes_cv<T>(len + 1) );
+			return std::make_pair(ok, len + 1);
 		}
 
 	private:
 		template<typename T, typename It>
-		struct CVPUSH_Factory : hm4::PairFactory::IFactory{
+		struct CVPUSH_Factory : hm4::PairFactory::IFactoryAction<1,0>{
 			using Pair = hm4::Pair;
 
-			CVPUSH_Factory(std::string_view const key, uint64_t val_size, It begin, It end, const Pair *pair) :
-							key		(key		),
-							val_size	(val_size	),
+			CVPUSH_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
+							IFactoryAction	(key, val_size, pair),
 							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *) final{
-				throw std::logic_error("Must not call CVPUSH_Factory::createHint");
-			//	add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
+							end		(end		){}
 
 		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					smart_memcpy<1,0>(data, val_size, old_pair->getVal());
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
+			void action(Pair *pair) override{
 				using namespace cv_impl_;
 
 				auto br = MyArray<T>(pair->getValC(), pair->getVal().size());
@@ -262,11 +226,8 @@ namespace net::worker::commands::CV{
 			}
 
 		private:
-			std::string_view	key;
-			uint64_t		val_size;
 			It			begin;
 			It			end;
-			const Pair		*old_pair;
 		};
 
 	private:
@@ -394,7 +355,7 @@ namespace net::worker::commands::CV{
 		void process_(std::string_view key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cv_impl_;
 
-			auto const [ok, n_size] = getNSize_<T>(p);
+			auto const [ok, n_size] = getN__(p, CV_MAX<T>);
 
 			if (!ok)
 				return;
@@ -405,16 +366,25 @@ namespace net::worker::commands::CV{
 
 			auto const varg = 3;
 
-			if (pair && hm4::canInsertHint(list, pair, n_size))
-				hm4::proceedInsertHintV<MyCVSET_Factory>(list, pair, key, n_size, std::begin(p) + varg, std::end(p), pair);
-			else
-				hm4::insertV<MyCVSET_Factory>(list, key, n_size, std::begin(p) + varg, std::end(p), pair);
+			auto const new_val_size = bytes_cv<T>(n_size);
+
+			if (pair && hm4::canInsertHint(list, pair, new_val_size)){
+				auto const val_size = pair->getVal().size();
+
+				hm4::proceedInsertHintV<MyCVSET_Factory>(list, pair, key, val_size, pair, std::begin(p) + varg, std::end(p));
+			}else{
+				auto const val_size = std::max(
+							new_val_size,
+							pair ? pair->getVal().size() : 0
+				);
+
+				hm4::insertV<MyCVSET_Factory>(list, key, val_size, pair, std::begin(p) + varg, std::end(p));
+			}
 
 			return result.set();
 		}
 
-		template<typename T>
-		static auto getNSize_(ParamContainer const &p){
+		static auto getN__(ParamContainer const &p, cv_impl_::size_type const max_val){
 			using namespace cv_impl_;
 
 			bool ok = false;
@@ -425,63 +395,28 @@ namespace net::worker::commands::CV{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const n = from_string<size_type>(*itk);
 
-				if (n < CV_MAX<T>){
+				if (n < max_val){
 					ok  = true;
 					max = std::max(max, n);
 				}
 			}
 
 			// max is index, but in this case, we want size
-			return std::make_pair(ok, bytes_cv<T>(max + 1) );
+			return std::make_pair(ok, max + 1);
 		}
 
 	private:
 		template<typename T, typename It>
-		struct CVSET_Factory : hm4::PairFactory::IFactory{
+		struct CVSET_Factory : hm4::PairFactory::IFactoryAction<1,0>{
 			using Pair = hm4::Pair;
 
-			CVSET_Factory(std::string_view const key, uint64_t val_size, It begin, It end, const Pair *pair) :
-							key		(key		),
-							val_size	(val_size	),
+			CVSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
+							IFactoryAction	(key, val_size, pair),
 							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *pair) final{
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
+							end		(end		){}
 
 		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					smart_memcpy(data, val_size, old_pair->getVal());
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
+			void action(Pair *pair) override{
 				using namespace cv_impl_;
 
 				char *data = pair->getValC();
@@ -501,11 +436,8 @@ namespace net::worker::commands::CV{
 			}
 
 		private:
-			std::string_view	key;
-			uint64_t		val_size;
 			It			begin;
 			It			end;
-			const Pair		*old_pair;
 		};
 
 	private:

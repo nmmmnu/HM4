@@ -22,7 +22,7 @@ namespace net::worker::commands::BF{
 			for(size_t seed = 0; seed < max_hash; ++seed){
 				auto n = murmur_hash64a(val, seed) % max_bits;
 
-				printf("%zu -> %zu\n", seed, n);
+			//	printf("%zu -> %zu\n", seed, n);
 
 				BitOps{ n }.set(data, 1);
 			}
@@ -85,67 +85,28 @@ namespace net::worker::commands::BF{
 			using MyBFADD_Factory = BFADD_Factory<ParamContainer::iterator>;
 
 			if (pair && hm4::canInsertHint(*db, pair, max_size))
-				hm4::proceedInsertHintV<MyBFADD_Factory>(*db, pair, key, max_bits, max_hash, std::begin(p) + varg, std::end(p), pair);
+				hm4::proceedInsertHintV<MyBFADD_Factory>(*db, pair, key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p));
 			else
-				hm4::insertV<MyBFADD_Factory>(*db, key, max_bits, max_hash, std::begin(p) + varg, std::end(p), pair);
+				hm4::insertV<MyBFADD_Factory>(*db, key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p));
 
 			return result.set();
 		}
 
 	private:
 		template<typename It>
-		struct BFADD_Factory : hm4::PairFactory::IFactory{
+		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1,1>{
 			using Pair   = hm4::Pair;
 			using BitOps = bf_impl_::BitOps;
 
-			BFADD_Factory(std::string_view const key, uint64_t max_bits, size_t max_hash, It begin, It end, const Pair *pair) :
-							key		(key		),
+			BFADD_Factory(std::string_view const key, const Pair *pair, uint64_t max_bits, size_t max_hash, It begin, It end) :
+							IFactoryAction	(key, BitOps::size(max_bits - 1), pair),
 							max_bits	(max_bits	),
 							max_hash	(max_hash	),
 							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *pair) final{
-				if (pair->getVal().size() != val_size){
-					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
-					create_(pair);
-				}
-
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
+							end		(end		){}
 
 		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					memcpy(data, old_pair->getValC(), val_size);
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
+			void action(Pair *pair) override{
 				using namespace bf_impl_;
 
 				char *data = pair->getValC();
@@ -155,13 +116,10 @@ namespace net::worker::commands::BF{
 			}
 
 		private:
-			std::string_view	key;
 			uint64_t		max_bits;
-			uint64_t		val_size = BitOps::size(max_bits - 1);
 			size_t			max_hash;
 			It			begin;
 			It			end;
-			const Pair		*old_pair;
 		};
 
 	private:

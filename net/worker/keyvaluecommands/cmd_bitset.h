@@ -40,7 +40,7 @@ namespace net::worker::commands::BITSET{
 			if (key.empty())
 				return;
 
-			auto const [ok, n_size] = getNSize_(p);
+			auto const [ok, bytes] = getBytes__(p);
 
 			if (!ok)
 				return;
@@ -51,16 +51,26 @@ namespace net::worker::commands::BITSET{
 
 			auto const varg = 2;
 
-			if (pair && hm4::canInsertHint(*db, pair, n_size))
-				hm4::proceedInsertHintV<MyBITSET_Factory>(*db, pair, key, n_size, std::begin(p) + varg, std::end(p), pair);
-			else
-				hm4::insertV<MyBITSET_Factory>(*db, key, n_size, std::begin(p) + varg, std::end(p), pair);
+			auto const new_bytes = bytes;
+
+			if (pair && hm4::canInsertHint(*db, pair, new_bytes)){
+				auto const val_size = pair->getVal().size();
+
+				hm4::proceedInsertHintV<MyBITSET_Factory>(*db, pair, key, val_size, pair, std::begin(p) + varg, std::end(p));
+			}else{
+				auto const val_size = std::max(
+							new_bytes,
+							pair ? pair->getVal().size() : 0
+				);
+
+				hm4::insertV<MyBITSET_Factory>(*db, key, val_size, pair, std::begin(p) + varg, std::end(p));
+			}
 
 			return result.set();
 		}
 
 	private:
-		static auto getNSize_(ParamContainer const &p){
+		static auto getBytes__(ParamContainer const &p){
 			using namespace bit_impl_;
 
 			bool ok = false;
@@ -82,51 +92,16 @@ namespace net::worker::commands::BITSET{
 
 	private:
 		template<typename It>
-		struct BITSET_Factory : hm4::PairFactory::IFactory{
+		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1,0>{
 			using Pair = hm4::Pair;
 
-			BITSET_Factory(std::string_view const key, uint64_t val_size, It begin, It end, const Pair *pair) :
-							key		(key		),
-							val_size	(val_size	),
+			BITSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
+							IFactoryAction	(key, val_size, pair),
 							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *pair) final{
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
+							end		(end		){}
 
 		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					smart_memcpy(data, val_size, old_pair->getVal());
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
+			void action(Pair *pair) override{
 				using namespace bit_impl_;
 
 				char *data = pair->getValC();
@@ -144,11 +119,8 @@ namespace net::worker::commands::BITSET{
 			}
 
 		private:
-			std::string_view	key;
-			uint64_t		val_size;
 			It			begin;
 			It			end;
-			const Pair		*old_pair;
 		};
 			private:
 		constexpr inline static std::string_view cmd[]	= {

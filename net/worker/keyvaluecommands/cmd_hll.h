@@ -112,64 +112,25 @@ namespace net::worker::commands::HLL{
 			using MyHLLADD_Factory = HLLADD_Factory<ParamContainer::iterator>;
 
 			if (pair && hm4::canInsertHint(*db, pair, HLL_M))
-				hm4::proceedInsertHintV<MyHLLADD_Factory>(*db, pair, key, std::begin(p) + varg, std::end(p), pair);
+				hm4::proceedInsertHintV<MyHLLADD_Factory>(*db, pair, key, pair, std::begin(p) + varg, std::end(p));
 			else
-				hm4::insertV<MyHLLADD_Factory>(*db, key, std::begin(p) + varg, std::end(p), pair);
+				hm4::insertV<MyHLLADD_Factory>(*db, key, pair, std::begin(p) + varg, std::end(p));
 
 			return result.set_1();
 		}
 
 	private:
 		template<typename It>
-		struct HLLADD_Factory : hm4::PairFactory::IFactory{
+		struct HLLADD_Factory : hm4::PairFactory::IFactoryAction<1,1>{
 			using Pair = hm4::Pair;
 
-			HLLADD_Factory(std::string_view const key, It begin, It end, const Pair *pair) :
-							key		(key		),
+			HLLADD_Factory(std::string_view const key, const Pair *pair, It begin, It end) :
+							IFactoryAction	(key, hll_impl_::HLL_M, pair),
 							begin		(begin		),
-							end		(end		),
-							old_pair	(pair		){}
-
-			constexpr std::string_view getKey() const final{
-				return key;
-			}
-
-			constexpr uint32_t getCreated() const final{
-				return 0;
-			}
-
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size);
-			}
-
-			void createHint(Pair *pair) final{
-				if (pair->getVal().size() != val_size){
-					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
-					create_(pair);
-				}
-
-				add_(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
-				create_(pair);
-
-				add_(pair);
-			}
+							end		(end		){}
 
 		private:
-			void create_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				if (old_pair){
-					memcpy(data, old_pair->getValC(), val_size);
-				}else{
-					memset(data, '\0', val_size);
-				}
-			}
-
-			void add_(Pair *pair) const{
+			void action(Pair *pair) final{
 				using namespace hll_impl_;
 
 				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
@@ -182,13 +143,8 @@ namespace net::worker::commands::HLL{
 			}
 
 		private:
-			constexpr static auto val_size = hll_impl_::HLL_M;
-
-		private:
-			std::string_view	key;
 			It			begin;
 			It			end;
-			const Pair		*old_pair;
 		};
 
 	private:

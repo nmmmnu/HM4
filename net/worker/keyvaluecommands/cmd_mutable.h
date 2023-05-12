@@ -1,4 +1,5 @@
 #include "base.h"
+#include "pair_vfactory.h"
 #include <stdexcept>
 
 namespace net::worker::commands::Mutable{
@@ -662,13 +663,10 @@ namespace net::worker::commands::Mutable{
 
 			std::string_view const val_old = pair ? pair->getVal() : "";
 
-			// SET
-			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
-
 			// HINT
 			// will not work, but who knows in the future.
 			const auto *hint = pair;
-			hm4::insertHintV<APPEND_Factory>(*db, hint, key, val_old, val_new, exp);
+			hm4::insertHintV<APPEND_Factory>(*db, hint, key, val_old, val_new);
 
 			// return
 
@@ -676,59 +674,23 @@ namespace net::worker::commands::Mutable{
 		}
 
 	private:
-		struct APPEND_Factory : hm4::PairFactory::IFactory{
+		struct APPEND_Factory : hm4::PairFactory::IFactoryAction<0,0>{
 			using Pair = hm4::Pair;
 
 			std::string_view key;
 			std::string_view val1;
 			std::string_view val2;
-			uint32_t expires;
-			uint32_t created;
 
 			constexpr APPEND_Factory(
 				std::string_view const key,
 				std::string_view const val1,
-				std::string_view const val2,
-				uint32_t const expires = 0, uint32_t const created = 0) :
-					key	(key		),
+				std::string_view const val2) :
+					IFactoryAction(key, val1.size() + val2.size()),
 					val1	(val1		),
-					val2	(val2		),
-					expires	(expires	),
-					created	(created	){}
-
-			[[nodiscard]]
-			constexpr std::string_view getKey() const noexcept final{
-				return key;
-			}
-
-			[[nodiscard]]
-			constexpr uint32_t getCreated() const noexcept final{
-				return created;
-			}
-
-			[[nodiscard]]
-			constexpr size_t bytes() const final{
-				return Pair::bytes(key.size(), val_size());
-			}
-
-			void createHint(Pair *) final{
-				throw std::logic_error("Must not call APPEND_Factory::createHint");
-			//	Pair::createInRawMemory<0,0,0,1>(pair, key, val_size(), expires, created);
-			//	val_copy(pair);
-			}
-
-			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size(), expires, created);
-				val_copy(pair);
-			}
+					val2	(val2		){}
 
 		private:
-			[[nodiscard]]
-			constexpr size_t val_size() const{
-				return val1.size() + val2.size();
-			}
-
-			void val_copy(Pair *pair) const{
+			void action(Pair *pair) final{
 				memcpy(pair->getValC() + 0,		val1.data(), val1.size());
 				memcpy(pair->getValC() + val1.size(),	val2.data(), val2.size());
 			}
