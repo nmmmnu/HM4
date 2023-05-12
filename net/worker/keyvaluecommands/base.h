@@ -60,7 +60,7 @@ namespace net::worker::commands{
 		constexpr inline static std::string_view zo_[2]{"0", "1"};
 
 	public:
-		using Container = MySpan<std::string_view, MySpanConstructor::EXPLICIT>;
+		using Container = MySpan<const std::string_view, MySpanConstructor::EXPLICIT>;
 
 		Result(Protocol &protocol, IOBuffer &buffer) :
 						protocol_	(protocol	),
@@ -116,7 +116,7 @@ namespace net::worker::commands{
 			);
 		}
 
-		void set_container(MySpan<std::string_view> const &container){
+		void set_container(MySpan<const std::string_view> const &container){
 			set_status_(Status::OK);
 
 			buffer_.clear();
@@ -152,7 +152,7 @@ namespace net::worker::commands{
 
 
 
-	using ParamContainer  = MySpan<std::string_view>;
+	using ParamContainer  = MySpan<const std::string_view>;
 
 
 

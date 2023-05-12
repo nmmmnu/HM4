@@ -40,7 +40,7 @@ namespace net::worker::commands::HLL{
 		}
 
 		template<class DBAdapter>
-		double hll_op_intersect(MySpan<std::string_view> const &keys, DBAdapter &db){
+		double hll_op_intersect(MySpan<const std::string_view> const &keys, DBAdapter &db){
 			StaticVector<const uint8_t *, 5> b;
 
 			for(auto it = std::begin(keys); it != std::end(keys); ++it)
@@ -217,7 +217,7 @@ namespace net::worker::commands::HLL{
 				if (const auto &key = *itk; key.empty())
 					return;
 
-			MySpan<std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
+			MySpan<const std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
 
 			using namespace hll_impl_;
 

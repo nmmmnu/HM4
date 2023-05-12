@@ -157,7 +157,7 @@ namespace{
 
 
 
-	void renameFiles(MySpan<std::string> const files, std::string_view from, std::string_view to){
+	void renameFiles(MySpan<const std::string> const files, std::string_view from, std::string_view to){
 		std::string buffer;
 
 		for(auto const &file : files){

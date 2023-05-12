@@ -2,6 +2,7 @@
 #define MY_SPAN_VECTOR_H_
 
 #include <initializer_list>
+#include <string_view>
 
 enum class MySpanConstructor{
 	NORMAL		,
@@ -27,11 +28,11 @@ public:
 	using const_iterator	= const T*;
 
 private:
-	const T		*data_;
+	T		*data_;
 	size_type	size_;
 
 public:
-	constexpr MySpan(const T *data, size_type size) : data_(data), size_(size){}
+	constexpr MySpan(T *data, size_type size) : data_(data), size_(size){}
 
 	template<class Container>
 	constexpr MySpan(const Container &v) : MySpan(v.data(), v.size()){}
@@ -56,6 +57,16 @@ public:
 
 	constexpr bool operator!=(const MySpan &other) const noexcept{
 		return ! operator==(other);
+	}
+
+	// ITERATORS
+
+	constexpr iterator begin() noexcept{
+		return data();
+	}
+
+	constexpr iterator end() noexcept{
+		return data() + size();
 	}
 
 	// CONST ITERATORS
@@ -90,11 +101,20 @@ public:
 
 	// DATA
 
+	constexpr value_type *data() noexcept{
+		return data_;
+	}
+
 	constexpr const value_type *data() const noexcept{
 		return data_;
 	}
 
 	// ACCESS WITH RANGE CHECK
+
+	constexpr value_type &at(size_type const index){
+		validateIndex_(index);
+		return data()[index];
+	}
 
 	constexpr const value_type &at(size_type const index) const{
 		validateIndex_(index);
@@ -103,6 +123,11 @@ public:
 
 	// ACCESS DIRECTLY
 
+	constexpr value_type &operator[](size_type const index) noexcept{
+		// see [1] behavior is undefined
+		return data()[index];
+	}
+
 	constexpr const value_type &operator[](size_type const index) const noexcept{
 		// see [1] behavior is undefined
 		return data()[index];
@@ -110,12 +135,22 @@ public:
 
 	// FRONT
 
+	constexpr value_type &front() noexcept{
+		// see [1] behavior is undefined
+		return data()[0];
+	}
+
 	constexpr const value_type &front() const noexcept{
 		// see [1] behavior is undefined
 		return data()[0];
 	}
 
 	// BACK
+
+	constexpr value_type &back() noexcept{
+		// see [1] behavior is undefined
+		return data()[size_ - 1];
+	}
 
 	constexpr const value_type &back() const noexcept{
 		// see [1] behavior is undefined
@@ -141,6 +176,29 @@ struct MySpan<T, MySpanConstructor::EXPLICIT> : public MySpan<T, MySpanConstruct
 	explicit
 	constexpr MySpan(const Container &v) : MySpan<T, MySpanConstructor::NORMAL>(v){}
 };
+
+
+
+template<typename T>
+auto voidAsMySpan(void *ptr, size_t size){
+	return MySpan<T>{
+		reinterpret_cast<T *>(ptr),
+		size / sizeof(T)
+	};
+}
+
+template<typename T>
+auto voidAsMySpan(const void *ptr, size_t size){
+	return MySpan<const T>{
+		reinterpret_cast<T *>(ptr),
+		size / sizeof(T)
+	};
+}
+
+template<typename T>
+auto voidAsMySpan(std::string_view s){
+	return voidAsMySpan<T>(s.data(), s.size());
+}
 
 
 
