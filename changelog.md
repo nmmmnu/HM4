@@ -104,4 +104,5 @@ Changelog
 ### 1.3.2
 
 -	Fix potential buffer overflow with inserting hints in BITSET
+-	refactor insertion, to have simple code
 

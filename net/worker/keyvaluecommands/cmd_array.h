@@ -169,7 +169,7 @@ namespace net::worker::commands::CV{
 
 			auto const &val = pair ? bytes_fix<T>(pair->getVal()) : "";
 
-			auto const [ok, n_size] = getN__<T>(p, val);
+			auto const [ok, n_len] = getN__<T>(p, val);
 
 			if (!ok)
 				return;
@@ -178,7 +178,7 @@ namespace net::worker::commands::CV{
 
 			auto const varg = 3;
 
-			auto const new_val_size = bytes_cv<T>(n_size);
+			auto const new_val_size = bytes_cv<T>(n_len);
 
 			// There is no way hint to be used here.
 			hm4::insertV<MyCVPUSH_Factory>(list, key, new_val_size, pair, std::begin(p) + varg, std::end(p));
@@ -355,7 +355,7 @@ namespace net::worker::commands::CV{
 		void process_(std::string_view key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cv_impl_;
 
-			auto const [ok, n_size] = getN__(p, CV_MAX<T>);
+			auto const [ok, n_len] = getN__(p, CV_MAX<T>);
 
 			if (!ok)
 				return;
@@ -366,7 +366,7 @@ namespace net::worker::commands::CV{
 
 			auto const varg = 3;
 
-			auto const new_val_size = bytes_cv<T>(n_size);
+			auto const new_val_size = bytes_cv<T>(n_len);
 
 			if (pair && hm4::canInsertHint(list, pair, new_val_size)){
 				auto const val_size = pair->getVal().size();
