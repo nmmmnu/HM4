@@ -547,6 +547,98 @@ namespace net::worker::commands::CV{
 
 
 	template<class Protocol, class DBAdapter>
+	struct CVGETRANGE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			// cvgetrange key 32 0 100
+			if (p.size() != 5)
+				return;
+
+			using namespace cv_impl_;
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return;
+
+			auto &container  = blob.container;
+			auto &bcontainer = blob.bcontainer;
+
+			const auto n1	= from_string<size_type>(p[3]);
+			const auto n2	= from_string<size_type>(p[4]);
+
+			if (n1 > n2)
+				return;
+
+			if (container.capacity() < n2 - n1)
+				return;
+
+			container.clear();
+			bcontainer.clear();
+
+			auto const t = from_string<uint8_t>(p[2]);
+
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return; // emit an error
+				}else{
+					return process_<T>(key, *db, result, n1, n2, container, bcontainer);
+				}
+			};
+
+			return type_dispatch(t, f);
+		}
+
+	private:
+		template<typename T, typename Container, typename BContainer>
+		void process_(std::string_view key, typename DBAdapter::List &list, Result<Protocol> &result, cv_impl_::size_type n1, cv_impl_::size_type n2, Container &container, BContainer &bcontainer) const{
+			using namespace cv_impl_;
+
+			const auto *pair = hm4::getPairPtr(list, key);
+
+			if (pair){
+				auto const len = cv_size<T>(pair);
+				auto const sp = blobAsMySpan<const T>(pair->getVal());
+
+				for(auto i = n1; i <= n2; ++i){
+					if (i < len){
+						auto const r = betoh<T>(sp[i]);
+
+						bcontainer.push_back();
+
+						container.push_back( to_string(r, bcontainer.back()) );
+					}else{
+						container.emplace_back("0");
+					}
+				}
+
+				return result.set_container(container);
+			}else{
+				// return zeroes
+				container.assign(n2 - n1, "0");
+
+				return result.set_container(container);
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cvmetrange",	"CVGETRANGE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct CVLEN : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -660,6 +752,7 @@ namespace net::worker::commands::CV{
 				CVSET		,
 				CVGET		,
 				CVMGET		,
+				CVGETRANGE	,
 				CVLEN		,
 				CVMAX
 			>(pack);
