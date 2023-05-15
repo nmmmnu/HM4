@@ -7,7 +7,9 @@
 
 namespace net::worker::commands::CV{
 	namespace cv_impl_{
-		using size_type				= uint64_t;
+		constexpr bool RangeCheck	= true;
+
+		using size_type			= uint64_t;
 
 		template<typename T>
 		struct type_identity{
@@ -153,7 +155,7 @@ namespace net::worker::commands::CV{
 			void action(Pair *pair) override{
 				using namespace cv_impl_;
 
-				auto sp = blobAsMySpan<T>(pair->getValC(), pair->getVal().size());
+				auto sp = blobAsMySpan<T, RangeCheck>(pair->getValC(), pair->getVal().size());
 
 				size_type len = old_pair ? cv_size<T>(old_pair->getVal()) : 0;
 
@@ -368,7 +370,7 @@ namespace net::worker::commands::CV{
 
 					T const value = from_string<T>(*std::next(it));
 
-					auto sp = blobAsMySpan<T>(data, val_size);
+					auto sp = blobAsMySpan<T, RangeCheck>(data, val_size);
 
 					sp[n] = htobe<T>(value);
 				}
