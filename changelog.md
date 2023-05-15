@@ -105,4 +105,6 @@ Changelog
 
 -	Fix potential buffer overflow with inserting hints in BITSET
 -	refactor insertion, to have simple code
+-	array functions - CVPUSH, CVPOP, CVSET, CVGET, CVMGET, CVGETRANGE, CVLEN, CVMAX
+
 
