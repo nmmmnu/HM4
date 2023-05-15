@@ -201,6 +201,7 @@ function getData(){
 		"hll"				=> require "$d/commands_hll.php"		,
 		"bf"				=> require "$d/commands_bf.php"			,
 		"cms"				=> require "$d/commands_cms.php"		,
+		"cv"				=> require "$d/commands_cv.php"			,
 		"murmur"			=> require "$d/commands_murmur.php"		,
 		"info"				=> require "$d/commands_info.php"		,
 		"reload"			=> require "$d/commands_reload.php"		,
