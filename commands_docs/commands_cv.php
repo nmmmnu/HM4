@@ -107,7 +107,7 @@ return array(
 
 			"CVMAX type",
 
-			"Return maximum suported index from arrays of <i>type</i>,<br />" .
+			"Return maximum suported size from arrays of <i>type</i>,<br />" .
 			"it is limited of max value size.<br />" .
 			"Read CompactArray information document.",
 			"string (int)",
