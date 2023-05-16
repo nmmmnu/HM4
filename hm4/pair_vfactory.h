@@ -9,7 +9,7 @@ inline namespace version_4_00_00{
 
 
 
-		template<bool copy_value, bool same_size, typename P>
+		template<bool copy_value, bool same_size, typename Child>
 		struct IFactoryAction : IFactory{
 			constexpr IFactoryAction(std::string_view const key, size_t const val_size, const Pair *old_pair) :
 							key		(key		),
@@ -63,10 +63,17 @@ inline namespace version_4_00_00{
 			}
 
 		private:
-			void action(Pair *pair){
-				auto *self = reinterpret_cast<P *>(this);
+			auto &crpt_(){
+				return *reinterpret_cast<Child *>(this);
+			}
 
-				self->action(pair);
+			const auto &crpt_() const{
+				return *reinterpret_cast<const Child *>(this);
+			}
+
+		private:
+			void action(Pair *pair){
+				crpt_().action(pair);
 			}
 
 		private:
@@ -87,6 +94,7 @@ inline namespace version_4_00_00{
 			size_t			val_size;
 			const Pair		*old_pair;
 		};
+
 
 
 		struct Reserve : IFactoryAction<true, true, Reserve>{
