@@ -109,7 +109,7 @@ namespace net::worker::commands::HLL{
 					return nullptr;
 			});
 
-			using MyHLLADD_Factory = HLLADD_Factory<ParamContainer::iterator>;
+			using MyHLLADD_Factory = PFADD_Factory<ParamContainer::iterator>;
 
 			if (pair && hm4::canInsertHint(*db, pair, HLL_M))
 				hm4::proceedInsertHintV<MyHLLADD_Factory>(*db, pair, key, pair, std::begin(p) + varg, std::end(p));
@@ -121,16 +121,16 @@ namespace net::worker::commands::HLL{
 
 	private:
 		template<typename It>
-		struct HLLADD_Factory : hm4::PairFactory::IFactoryAction<1,1>{
+		struct PFADD_Factory : hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >{
 			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >;
 
-			HLLADD_Factory(std::string_view const key, const Pair *pair, It begin, It end) :
-							IFactoryAction	(key, hll_impl_::HLL_M, pair),
-							begin		(begin		),
-							end		(end		){}
+			PFADD_Factory(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
+							begin				(begin		),
+							end				(end		){}
 
-		private:
-			void action(Pair *pair) final{
+			void action(Pair *pair) const{
 				using namespace hll_impl_;
 
 				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());

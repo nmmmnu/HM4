@@ -7,14 +7,16 @@ namespace hm4{
 inline namespace version_4_00_00{
 	namespace PairFactory{
 
-		template<bool copy_value, bool same_size>
+
+
+		template<bool copy_value, bool same_size, typename P>
 		struct IFactoryAction : IFactory{
-			IFactoryAction(std::string_view const key, size_t const val_size, const Pair *old_pair) :
+			constexpr IFactoryAction(std::string_view const key, size_t const val_size, const Pair *old_pair) :
 							key		(key		),
 							val_size	(val_size	),
 							old_pair	(old_pair	){}
 
-			IFactoryAction(std::string_view const key, size_t const val_size) :
+			constexpr IFactoryAction(std::string_view const key, size_t const val_size) :
 							IFactoryAction(key, val_size, nullptr){}
 
 			[[nodiscard]]
@@ -61,7 +63,11 @@ inline namespace version_4_00_00{
 			}
 
 		private:
-			virtual void action(Pair *pair) = 0;
+			void action(Pair *pair){
+				auto *self = reinterpret_cast<P *>(this);
+
+				self->action(pair);
+			}
 
 		private:
 			void copyPair_(Pair *pair) const{
@@ -83,20 +89,19 @@ inline namespace version_4_00_00{
 		};
 
 
+		struct Reserve : IFactoryAction<true, true, Reserve>{
+			using IFactoryAction<true, true, Reserve>::IFactoryAction;
 
-		struct Reserve : IFactoryAction<true, true>{
-			using IFactoryAction::IFactoryAction;
-
-			void action(Pair *) final{
+			constexpr void action(Pair *) const{
 			}
 		};
 
 
 
-		struct SetSize : IFactoryAction<true, false>{
-			using IFactoryAction::IFactoryAction;
+		struct SetSize : IFactoryAction<true, false, SetSize>{
+			using IFactoryAction<true, false, SetSize>::IFactoryAction;
 
-			void action(Pair *) final{
+			constexpr void action(Pair *) const{
 			}
 		};
 

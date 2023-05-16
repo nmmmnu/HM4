@@ -156,16 +156,17 @@ namespace net::worker::commands::CMS{
 
 	private:
 		template<typename T, typename It>
-		struct CMSADD_Factory : hm4::PairFactory::IFactoryAction<1,1>{
+		struct CMSADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T, It> >{
 			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T, It> >;
 
-			CMSADD_Factory(std::string_view const key, const Pair *pair, Matrix<T> cms, It begin, It end) :
-							IFactoryAction	(key, cms.bytes(), pair),
-							cms		(cms	),
-							begin		(begin	),
-							end		(end	){}
-		private:
-			void action(Pair *pair) override{
+			constexpr CMSADD_Factory(std::string_view const key, const Pair *pair, Matrix<T> cms, It begin, It end) :
+							Base::IFactoryAction	(key, cms.bytes(), pair),
+							cms				(cms	),
+							begin				(begin	),
+							end				(end	){}
+
+			void action(Pair *pair) const{
 				char *data = pair->getValC();
 
 				for(auto itk = begin; itk != end; itk += 2){

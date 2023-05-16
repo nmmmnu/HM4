@@ -674,8 +674,9 @@ namespace net::worker::commands::Mutable{
 		}
 
 	private:
-		struct APPEND_Factory : hm4::PairFactory::IFactoryAction<0,0>{
+		struct APPEND_Factory : hm4::PairFactory::IFactoryAction<0,0,APPEND_Factory>{
 			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<0,0,APPEND_Factory>;
 
 			std::string_view key;
 			std::string_view val1;
@@ -685,12 +686,11 @@ namespace net::worker::commands::Mutable{
 				std::string_view const key,
 				std::string_view const val1,
 				std::string_view const val2) :
-					IFactoryAction(key, val1.size() + val2.size()),
-					val1	(val1		),
-					val2	(val2		){}
+					Base::IFactoryAction	(key, val1.size() + val2.size()),
+					val1				(val1		),
+					val2				(val2		){}
 
-		private:
-			void action(Pair *pair) final{
+			void action(Pair *pair) const{
 				memcpy(pair->getValC() + 0,		val1.data(), val1.size());
 				memcpy(pair->getValC() + val1.size(),	val2.data(), val2.size());
 			}

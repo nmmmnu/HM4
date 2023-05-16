@@ -143,19 +143,21 @@ namespace net::worker::commands::CV{
 
 	private:
 		template<typename T, typename It>
-		struct CVPUSH_Factory : hm4::PairFactory::IFactoryAction<1,0>{
+		struct CVPUSH_Factory : hm4::PairFactory::IFactoryAction<1, 0, CVPUSH_Factory<T, It> >{
 			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1, 0, CVPUSH_Factory<T, It> >;
 
-			CVPUSH_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
-							IFactoryAction	(key, val_size, pair),
-							begin		(begin		),
-							end		(end		){}
+			constexpr CVPUSH_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, val_size, pair),
+							begin				(begin		),
+							end				(end		){}
 
-		private:
-			void action(Pair *pair) override{
+			void action(Pair *pair) const{
 				using namespace cv_impl_;
 
 				auto sp = blobAsMySpan<T, RangeCheck>(pair->getValC(), pair->getVal().size());
+
+				auto &old_pair = this->old_pair;
 
 				size_type len = old_pair ? cv_size<T>(old_pair->getVal()) : 0;
 
@@ -348,22 +350,24 @@ namespace net::worker::commands::CV{
 
 	private:
 		template<typename T, typename It>
-		struct CVSET_Factory : hm4::PairFactory::IFactoryAction<1,0>{
+		struct CVSET_Factory : hm4::PairFactory::IFactoryAction<1, 0, CVSET_Factory<T, It> >{
 			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1, 0, CVSET_Factory<T, It> >;
 
-			CVSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
-							IFactoryAction	(key, val_size, pair),
-							begin		(begin		),
-							end		(end		){}
+			constexpr CVSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, val_size, pair),
+							begin				(begin		),
+							end				(end		){}
 
-		private:
-			void action(Pair *pair) override{
+			void action(Pair *pair) const{
 				using namespace cv_impl_;
 
 				char *data = pair->getValC();
 
 				for(auto it = begin; it != end; it += 2){
 					auto const n = from_string<size_type>(*it);
+
+					auto const val_size = this->val_size;
 
 					if (cv_size<T>(val_size) < n)
 						continue;

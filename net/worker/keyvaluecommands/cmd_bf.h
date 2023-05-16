@@ -94,19 +94,19 @@ namespace net::worker::commands::BF{
 
 	private:
 		template<typename It>
-		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1,1>{
+		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory<It> >{
 			using Pair   = hm4::Pair;
+			using Base   = hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory<It> >;
 			using BitOps = bf_impl_::BitOps;
 
-			BFADD_Factory(std::string_view const key, const Pair *pair, uint64_t max_bits, size_t max_hash, It begin, It end) :
-							IFactoryAction	(key, BitOps::size(max_bits - 1), pair),
-							max_bits	(max_bits	),
-							max_hash	(max_hash	),
-							begin		(begin		),
-							end		(end		){}
+			constexpr BFADD_Factory(std::string_view const key, const Pair *pair, uint64_t max_bits, size_t max_hash, It begin, It end) :
+							Base::IFactoryAction	(key, BitOps::size(max_bits - 1), pair),
+							max_bits			(max_bits	),
+							max_hash			(max_hash	),
+							begin				(begin		),
+							end				(end		){}
 
-		private:
-			void action(Pair *pair) override{
+			void action(Pair *pair) const{
 				using namespace bf_impl_;
 
 				char *data = pair->getValC();

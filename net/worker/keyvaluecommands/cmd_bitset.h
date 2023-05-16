@@ -92,16 +92,16 @@ namespace net::worker::commands::BITSET{
 
 	private:
 		template<typename It>
-		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1,0>{
+		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory<It> >{
 			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory<It> >;
 
-			BITSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
-							IFactoryAction	(key, val_size, pair),
-							begin		(begin		),
-							end		(end		){}
+			constexpr BITSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, val_size, pair),
+							begin				(begin		),
+							end				(end		){}
 
-		private:
-			void action(Pair *pair) override{
+			void action(Pair *pair) const{
 				using namespace bit_impl_;
 
 				char *data = pair->getValC();

@@ -107,4 +107,9 @@ Changelog
 -	refactor insertion, to have simple code
 -	array functions - CVPUSH, CVPOP, CVSET, CVGET, CVMGET, CVGETRANGE, CVLEN, CVMAX
 
+### 1.3.3
+
+-	refactor IFactoryAction to use CRPT
+
+
 
