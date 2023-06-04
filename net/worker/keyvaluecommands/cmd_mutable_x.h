@@ -79,8 +79,8 @@ namespace net::worker::commands::MutableX{
 
 
 
-		template<class Predicate, class List, class Result>
-		void process_x(Predicate &p, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
+		template<bool ResultAsHash, class Predicate, class List, class Result>
+		void process_x_(Predicate &p, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
 			container.clear();
 
 			uint8_t check_passes = 0;
@@ -106,12 +106,34 @@ namespace net::worker::commands::MutableX{
 
 					if (check_passes < PASSES_PROCESS_X)
 						goto start;
-					else
+
+					if constexpr(ResultAsHash){
+						return result.set_0();
+					}else{
 						return scanForLastKey_(list, prefix, key, result);
+					}
 				}
 			}
 
-			return result.set(string_key);
+			if constexpr(ResultAsHash){
+				return result.set_1();
+			}else{
+				return result.set(string_key);
+			}
+		}
+
+
+
+		template<class Predicate, class List, class Result>
+		void process_x(Predicate &p, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
+			return process_x_<0>(p, list, prefix, key, result, container);
+		}
+
+
+
+		template<class Predicate, class List, class Result>
+		void process_h(Predicate &p, List &list, std::string_view prefix, Result &result, ContainerX &container){
+			return process_x_<1>(p, list, prefix, prefix, result, container);
 		}
 
 
@@ -182,8 +204,8 @@ namespace net::worker::commands::MutableX{
 			if (p.size() != 3)
 				return;
 
-			auto const &key    = p[1];
-			auto const &prefix = p[2];
+			auto const &key		= p[1];
+			auto const &prefix	= p[2];
 
 			if (prefix.empty())
 				return;
@@ -197,6 +219,41 @@ namespace net::worker::commands::MutableX{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"delx",		"DELX"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct HDELALL : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 2)
+				return;
+
+			auto const &keyN	= p[1];
+
+			if (keyN.empty())
+				return;
+
+			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+
+			using namespace getx_impl_;
+
+			DeletePredicate<DBAdapter> pred;
+			return process_h(pred, *db, prefix, result, blob.pcontainer);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hdelall",		"HDELALL"
 		};
 	};
 
@@ -237,6 +294,38 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
+	struct HPERSISTALL : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			auto const &keyN	= p[1];
+
+			if (keyN.empty())
+				return;
+
+			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+
+			using namespace getx_impl_;
+
+			PersistPredicate<DBAdapter> pred;
+			return process_h(pred, *db, prefix, result, blob.pcontainer);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hpersistall",		"HPERSISTALL"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct EXPIREX : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -271,6 +360,43 @@ namespace net::worker::commands::MutableX{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct HEXPIREALL : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 3)
+				return;
+
+			auto const &keyN	= p[1];
+
+			if (keyN.empty())
+				return;
+
+			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+
+			auto const exp		= from_string<uint32_t>(p[2]);
+
+			using namespace getx_impl_;
+
+			ExpirePredicate<DBAdapter> pred{exp};
+			return process_h(pred, *db, prefix, result, blob.pcontainer);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hexpireall",		"HEXPIREALL"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "getx";
@@ -278,8 +404,11 @@ namespace net::worker::commands::MutableX{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				DELX		,
+				HDELALL		,
 				PERSISTX	,
-				EXPIREX
+				HPERSISTALL	,
+				EXPIREX		,
+				HEXPIREALL
 			>(pack);
 		}
 	};
