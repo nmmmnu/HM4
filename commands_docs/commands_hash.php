@@ -175,4 +175,61 @@ return array(
 
 			"mutable"
 	),
+
+
+
+	new Cmd(
+			"HDELALL",
+
+			"HDELALL key",
+
+			"Delete up to 10'000 key-value pairs from hash <i>key</i>.<br />" .
+			"Works exactly as Redis DEL [hash key].",
+			"bool",
+			"1 if all keys are removed, 0 if keys remains",
+			"1.3.4",
+			"[number of keys] * WRITE",
+			true,
+			true,
+
+			"mutable_x"
+	),
+
+
+
+	new Cmd(
+			"HPERSISTALL",
+
+			"HPERSISTALL key",
+
+			"PERSIST up to 10'000 key-value pairs from hash <i>key</i>.<br />" .
+			"Works exactly as Redis PERSIST [hash key].",
+			"bool",
+			"1 if all keys are removed, 0 if keys remains",
+			"1.3.4",
+			"[number of keys] * WRITE",
+			true,
+			true,
+
+			"mutable_x"
+	),
+
+
+
+	new Cmd(
+			"HEXPIREALL",
+
+			"HEXPIREALL key",
+
+			"EXPIRE up to 10'000 key-value pairs from hash <i>key</i>.<br />" .
+			"Works exactly as Redis EXPIRE [hash key].",
+			"bool",
+			"1 if all keys are removed, 0 if keys remains",
+			"1.3.4",
+			"[number of keys] * WRITE",
+			true,
+			true,
+
+			"mutable_x"
+	),
 );

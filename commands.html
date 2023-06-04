@@ -172,6 +172,9 @@
 				<li><a href="#HEXISTS">HEXISTS</a></li>
 				<li><a href="#HSET">HSET</a></li>
 				<li><a href="#HDEL">HDEL</a></li>
+				<li><a href="#HDELALL">HDELALL</a></li>
+				<li><a href="#HPERSISTALL">HPERSISTALL</a></li>
+				<li><a href="#HEXPIREALL">HEXPIREALL</a></li>
 				</div>
 			<div>
 			<b>queue.h</b><br />
@@ -1201,6 +1204,69 @@
 			Always return 1
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="HDELALL">
+
+			<h2>HDELALL key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HDELALL</td></tr>
+				<tr><td>Available since		</td><td>1.3.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Delete up to 10'000 key-value pairs from hash <i>key</i>.<br />Works exactly as Redis DEL [hash key].
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			1 if all keys are removed, 0 if keys remains
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HPERSISTALL">
+
+			<h2>HPERSISTALL key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HPERSISTALL</td></tr>
+				<tr><td>Available since		</td><td>1.3.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			PERSIST up to 10'000 key-value pairs from hash <i>key</i>.<br />Works exactly as Redis PERSIST [hash key].
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			1 if all keys are removed, 0 if keys remains
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HEXPIREALL">
+
+			<h2>HEXPIREALL key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HEXPIREALL</td></tr>
+				<tr><td>Available since		</td><td>1.3.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			EXPIRE up to 10'000 key-value pairs from hash <i>key</i>.<br />Works exactly as Redis EXPIRE [hash key].
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			1 if all keys are removed, 0 if keys remains
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="SADD">
 
 			<h2>SADD key val [expiration]</h2>
@@ -1803,7 +1869,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Return maximum suported index from arrays of <i>type</i>,<br />it is limited of max value size.<br />Read CompactArray information document.
+			Return maximum suported size from arrays of <i>type</i>,<br />it is limited of max value size.<br />Read CompactArray information document.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
