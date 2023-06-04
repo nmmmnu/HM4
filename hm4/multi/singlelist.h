@@ -102,6 +102,13 @@ public:
 		return list_->mutable_notify(p, message);
 	}
 
+	constexpr void crontab(){
+		list_->crontab();
+	}
+
+	constexpr void crontab() const{
+		list_->crontab();
+	}
 
 protected:
 	using SingleListBase<List>::list_;

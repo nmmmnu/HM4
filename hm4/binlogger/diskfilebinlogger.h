@@ -38,7 +38,7 @@ public:
 		dataBuilder_(pair);
 
 		if (syncOprions_ == SyncOptions::FSYNC)
-			dataBuilder_.flush();
+			flush();
 	}
 
 	bool clear(){
@@ -55,6 +55,10 @@ public:
 		fileUnlink(disk::filenameData(filename_));
 
 		return true;
+	}
+
+	void flush(){
+		dataBuilder_.flush();
 	}
 
 private:

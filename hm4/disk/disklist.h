@@ -114,6 +114,10 @@ public:
 		return id_;
 	}
 
+
+	constexpr static void crontab(){
+	}
+
 public:
 	random_access_iterator ra_begin() const;
 	random_access_iterator ra_end() const;

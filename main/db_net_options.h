@@ -21,30 +21,33 @@ namespace impl_{
 
 class MyOptions{
 public:
-	uint16_t	immutable		= 1;
+	uint16_t	immutable			= 1;
 	std::string	db_path;
 
 	std::string	binlog_path1;
 	std::string	binlog_path2;
-	uint16_t	binlog_fsync		= 0;
+	uint16_t	binlog_fsync			= 0;
 
-	std::nullptr_t	host			= nullptr;
-	uint16_t	port			= 2000;
-	uint32_t	timeout			= 60 * 5;
+	std::nullptr_t	host				= nullptr;
+	uint16_t	port				= 2000;
+	uint32_t	timeout				= 60 * 5;
 
-	uint16_t	tcp_backlog		= 0;
-	uint16_t	tcp_reuseport		= 0;
+	uint16_t	tcp_backlog			= 0;
+	uint16_t	tcp_reuseport			= 0;
 
-	uint32_t	max_clients		= 512;
-	uint32_t	min_spare_pool		= 32;
-	uint32_t	max_spare_pool		= 64;
+	uint32_t	max_clients			= 512;
+	uint32_t	min_spare_pool			= 32;
+	uint32_t	max_spare_pool			= 64;
 
-	size_t		buffer_capacity		= 4096;
+	size_t		buffer_capacity			= 4096;
 
-	size_t		max_memlist_arena	= 0;
+	size_t		max_memlist_arena		= 0;
 
-	uint32_t	crontab_reload		= 90;
-	uint32_t	crontab_reload_min	= 15;
+	uint32_t	crontab_reload			= 90;
+	uint32_t	crontab_table_maintainance	= 90;
+
+	constexpr static
+	uint32_t	crontab_min_time		= 15;
 
 public:
 	void operator()(std::string_view const name, std::string_view const value){
@@ -73,6 +76,7 @@ public:
 		case hash("max_memlist_arena"		)	: return assign_(max_memlist_arena,		value);
 
 		case hash("crontab_reload"		)	: return assign_(crontab_reload,		value);
+		case hash("crontab_table_maintainance"	)	: return assign_(crontab_table_maintainance,	value);
 
 		default					: return;
 		}
@@ -85,30 +89,31 @@ public:
 	void printOptions() const{
 		using impl_::put;
 
-		put("immutable",		immutable,		"Start mutable = 0, immutable = 1"				);
-		put("db_path",						"Path to database"						);
+		put("immutable",			immutable,			"Start mutable = 0, immutable = 1"					);
+		put("db_path",								"Path to database"							);
 
-	//	put("binlog_path",					"Path to binlog, empty for none"				);
-		put("binlog_path1",					"Path to binlog, empty for none"				);
-		put("binlog_path2",					"Path to binlog, empty for none"				);
-		put("binlog_fsync",		binlog_fsync,		"fsync() binlog - none = 0, yes = 1"				);
+	//	put("binlog_path",							"Path to binlog, empty for none"					);
+		put("binlog_path1",							"Path to binlog, empty for none"					);
+		put("binlog_path2",							"Path to binlog, empty for none"					);
+		put("binlog_fsync",			binlog_fsync,			"fsync() binlog - none = 0, yes = 1"					);
 
-		put("host",						"TCP host to listen (not working)"				);
-		put("port",			port,			"TCP port to listen"						);
-		put("timeout",			timeout,		"Connection timeout in seconds"					);
+		put("host",								"TCP host to listen (not working)"					);
+		put("port",				port,				"TCP port to listen"							);
+		put("timeout",				timeout,			"Connection timeout in seconds"						);
 
-		put("tcp_backlog",		tcp_backlog,		"TCP backlog"							);
-		put("tcp_reuseport",		tcp_reuseport,		"TCP Activate SO_REUSEPORT"					);
+		put("tcp_backlog",			tcp_backlog,			"TCP backlog"								);
+		put("tcp_reuseport",			tcp_reuseport,			"TCP Activate SO_REUSEPORT"						);
 
-		put("max_clients",		max_clients,		"Max Clients"							);
-		put("min_spare_pool",		min_spare_pool,		"Min Spare Pool Buffers"					);
-		put("max_spare_pool",		max_spare_pool,		"Max Spare Pool Buffers"					);
+		put("max_clients",			max_clients,			"Max Clients"								);
+		put("min_spare_pool",			min_spare_pool,			"Min Spare Pool Buffers"						);
+		put("max_spare_pool",			max_spare_pool,			"Max Spare Pool Buffers"						);
 
-		put("buffer_capacity",		buffer_capacity,	"Initial size of Spare Pool Buffers"				);
+		put("buffer_capacity",			buffer_capacity,		"Initial size of Spare Pool Buffers"					);
 
-		put("max_memlist_arena",	max_memlist_arena,	"Max size of memlist AllocatorArena in MB"			);
+		put("max_memlist_arena",		max_memlist_arena,		"Max size of memlist AllocatorArena in MB"				);
 
-		put("crontab_reload",		crontab_reload,		"crontab - reload every XX seconds, 0 disabled, min 15 sec"	);
+		put("crontab_reload",			crontab_reload,			"crontab - reload every XX seconds, 0 disabled, min 15 sec"		);
+		put("crontab_table_maintainance",	crontab_table_maintainance,	"crontab - table maintainance every XX seconds, 0 disabled, min 15 sec"	);
 	}
 
 private:

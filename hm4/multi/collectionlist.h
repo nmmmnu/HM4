@@ -56,6 +56,11 @@ public:
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);
 	}
 
+	void crontab() const{
+		for(auto const &list : *list_)
+			list.crontab();
+	}
+
 private:
 	const StoreContainer	*list_;
 };

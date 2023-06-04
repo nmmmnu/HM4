@@ -53,6 +53,16 @@ public:
 		return list1_->bytes() + list2_->bytes();
 	}
 
+	constexpr void crontab(){
+		list1_->crontab();
+		list2_->crontab();
+	}
+
+	constexpr void crontab() const{
+		list1_->crontab();
+		list2_->crontab();
+	}
+
 public:
 	iterator begin() const{
 		return { *list1_, *list2_, std::true_type{} };

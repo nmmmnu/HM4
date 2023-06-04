@@ -49,6 +49,9 @@ public:
 		return lc_.bytes();
 	}
 
+	constexpr static void crontab(){
+	}
+
 	const Allocator &getAllocator() const{
 		return *allocator_;
 	}

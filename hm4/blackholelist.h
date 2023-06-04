@@ -57,6 +57,9 @@ public:
 		return 0;
 	}
 
+	constexpr static void crontab(){
+	}
+
 public:
 	template<bool B>
 	constexpr static

@@ -302,13 +302,26 @@ namespace{
 			}
 		};
 
+
+		auto cronSet = [min = opt.crontab_min_time](auto x){
+			return x == 0 ? 0 : std::max(x, min);
+		};
+
 		MyTimer timer_reload;
 
-		auto const crontab_reload = opt.crontab_reload == 0 ? 0 : std::min(opt.crontab_reload, opt.crontab_reload_min);
+		auto const crontab_reload		= cronSet(opt.crontab_reload			);
+
+		MyTimer timer_table_maintainance;
+
+		auto const crontab_table_maintainance	= cronSet(opt.crontab_table_maintainance	);
 
 		while( loop.process() && signal_processing(guard()) ){
-			crontab(timer_reload, crontab_reload, [&adapter_factory](){
+			crontab(timer_reload,			crontab_reload,			[&adapter_factory](){
 				adapter_factory().reload();
+			});
+
+			crontab(timer_table_maintainance,	crontab_table_maintainance,	[&adapter_factory](){
+				adapter_factory()->crontab();
 			});
 		}
 

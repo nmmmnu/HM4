@@ -72,6 +72,14 @@ public:
 		return list_->mutable_notify(p, message);
 	}
 
+	constexpr void crontab() const{
+		// no flush while read only
+	}
+
+	void crontab(){
+		binlogger_.flush();
+	}
+
 private:
 	using	multi::SingleList<List>::list_;
 	using	binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>::binlogger_;

@@ -130,18 +130,6 @@ public:
 	}
 
 private:
-/*
-	static void logHint__(const char *msg){
-		log__<LOG_LEVEL>(msg, "Bypassing list");
-	}
-
-	template<typename T>
-	static T logHint__(const char *msg, T t){
-		logHint__(msg);
-		return t;
-	}
-*/
-
 	template<class Command>
 	static bool invokeCommand__(Command *cmd){
 		if constexpr(std::is_same_v<Command,std::nullptr_t>)

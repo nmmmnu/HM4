@@ -110,6 +110,11 @@ Changelog
 ### 1.3.3
 
 -	refactor IFactoryAction to use CRPT
+-
 
+### 1.3.4
+
+-	new commands HDELALL, HPERSISTALL, HEXPIREALL
+-	fsync binloglist with crontab
 
 
