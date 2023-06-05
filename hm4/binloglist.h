@@ -74,10 +74,14 @@ public:
 
 	constexpr void crontab() const{
 		// no flush while read only
+
+		list_->crontab();
 	}
 
 	void crontab(){
 		binlogger_.flush();
+
+		list_->crontab();
 	}
 
 private:

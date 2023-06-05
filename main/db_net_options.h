@@ -9,7 +9,7 @@
 namespace impl_{
 	template <typename Def>
 	void put(std::string_view const name, Def const &def, std::string_view const description){
-		fmt::print("\t{0:25} = {1:>14} ; {2}\n", name, def, description);
+		fmt::print("\t{0:30} = {1:>14} ; {2}\n", name, def, description);
 	}
 
 	inline void put(std::string_view const name, std::string_view const description){
