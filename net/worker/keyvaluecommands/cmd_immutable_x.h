@@ -41,7 +41,7 @@ namespace net::worker::commands::ImmutableX{
 				if (! prefix.empty() && ! same_prefix(prefix, key))
 					break;
 
-				if (! it->isValid(std::true_type()))
+				if (! it->isOK())
 					continue;
 
 				++results;
@@ -73,7 +73,7 @@ namespace net::worker::commands::ImmutableX{
 				if (! prefix.empty() && ! same_prefix(prefix, key))
 					return; // no tail
 
-				if (! it->isValid(std::true_type()))
+				if (! it->isOK())
 					continue;
 
 				if (++results > maxResults)

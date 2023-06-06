@@ -34,8 +34,8 @@ inline namespace version_4_00_00{
 		constexpr uint16_t	MAX_KEY_MASK		= MAX_KEY_SIZE;
 		constexpr uint32_t	MAX_VAL_MASK		= MAX_VAL_SIZE;
 
-		constexpr uint32_t	EXPIRES_TOMBSTONE	= 0xFFFF'FFFF;
-		constexpr uint32_t	EXPIRES_MAX		= EXPIRES_TOMBSTONE - 1;
+		constexpr uint32_t	EXPIRES_TOMBSTONE__	= 0xFFFF'FFFF;
+		constexpr uint32_t	EXPIRES_MAX		= EXPIRES_TOMBSTONE__ - 1;
 
 		constexpr const char	*EMPTY_MESSAGE		= "---pair-is-empty---";
 	}
@@ -280,8 +280,8 @@ inline namespace version_4_00_00{
 
 		[[nodiscard]]
 		bool isTombstone() const noexcept{
-			if (expires > PairConf::EXPIRES_MAX)
-				return true;
+		//	if (expires > PairConf::EXPIRES_MAX)
+		//		return true;
 
 			// big endian 0
 			return (vallen & htobe<uint32_t>(PairConf::MAX_VAL_MASK)) == 0;
@@ -378,32 +378,17 @@ inline namespace version_4_00_00{
 		}
 
 	public:
+		// beware problem 2038 !!!
 		[[nodiscard]]
-		bool isValid(std::false_type) const noexcept{
-			// beware problem 2038 !!!
-			// check if expired.
-			if ( isExpired_() )
-				return false;
-
-			// finally all OK
-			return true;
-		}
+		bool isExpired() const noexcept;
 
 		[[nodiscard]]
-		bool isValid(std::true_type) const noexcept{
+		bool isOK() const noexcept{
 			// check if is tombstone
 			if ( isTombstone() )
 				return false;
 
-			// chaining
-			return isValid(std::false_type{});
-		}
-
-		// ==============================
-
-		[[nodiscard]]
-		bool isValid() const noexcept{
-			return isValid(std::false_type{});
+			return !isExpired();
 		}
 
 		// ==============================
@@ -471,12 +456,6 @@ inline namespace version_4_00_00{
 		size_t getValLen_() const noexcept{
 			return betoh<uint32_t>(vallen) & PairConf::MAX_VAL_MASK;
 		}
-
-	private:
-		// beware problem 2038 !!!
-		[[nodiscard]]
-		bool isExpired_() const noexcept;
-
 	} __attribute__((__packed__));
 
 	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");

@@ -272,7 +272,7 @@ template<typename List, typename Predicate>
 auto getPair_(List const &list, std::string_view key, Predicate p){
 	auto it = list.find(key, std::true_type{});
 
-	bool const b = it != std::end(list) && it->isValid(std::true_type{});
+	bool const b = it != std::end(list) && it->isOK();
 
 	return p(b, it);
 }

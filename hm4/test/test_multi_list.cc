@@ -73,7 +73,7 @@ bool getCheck(List const &list, const char *key){
 
 	return
 		it == et ||
-		! it->isValid(std::true_type{})
+		! it->isOK()
 	;
 }
 

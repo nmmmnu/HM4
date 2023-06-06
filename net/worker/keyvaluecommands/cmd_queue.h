@@ -107,7 +107,7 @@ namespace net::worker::commands::Queue{
 			if (it->getKey() == key){
 				// case 2. there is a control key
 
-				if (it->isValid(std::true_type{})){
+				if (it->isOK()){
 					// case 2.1. control key is valid, go to case 3
 
 					log__<LogLevel::DEBUG>("Control key", key, "is valid");
@@ -155,7 +155,7 @@ namespace net::worker::commands::Queue{
 					return finalizeEnd_(control_key, list, result);
 				}
 
-				if (it->isValid(std::true_type{})){
+				if (it->isOK()){
 					log__<LogLevel::DEBUG>("Valid key, done");
 					auto const &val = it->getVal();
 					return finalizeOK_(control_key, key, val, list, result, iterations);

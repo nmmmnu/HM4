@@ -30,7 +30,7 @@ namespace net::worker::commands::Accumulators{
 				if (! prefix.empty() && ! same_prefix(prefix, key))
 					return accumulator.result();
 
-				if (! it->isValid(std::true_type{}))
+				if (! it->isOK())
 					continue;
 
 				if (++results > maxResults)

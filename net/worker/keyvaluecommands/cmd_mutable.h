@@ -556,7 +556,7 @@ namespace net::worker::commands::Mutable{
 
 			auto it = db->find(key, std::true_type{});
 
-			if (it != std::end(*db) && it->isValid(std::true_type{})){
+			if (it != std::end(*db) && it->isOK()){
 				// seamlessly send value to output buffer...
 				result.set(it->getVal());
 			}else{

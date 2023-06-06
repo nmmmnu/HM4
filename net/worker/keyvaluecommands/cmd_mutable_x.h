@@ -32,7 +32,7 @@ namespace net::worker::commands::MutableX{
 					return key;
 				}
 
-				if (! it->isValid(std::true_type{}))
+				if (! it->isOK())
 					continue;
 
 				// HINT !!!
@@ -66,7 +66,7 @@ namespace net::worker::commands::MutableX{
 					return result.set(key);
 				}
 
-				if (! it->isValid(std::true_type{}))
+				if (! it->isOK())
 					continue;
 
 				return result.set(key);

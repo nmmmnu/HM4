@@ -154,13 +154,7 @@ namespace FileBuilder{
 		}else{
 
 			std::copy_if(first, last, std::back_inserter(builder), [](Pair const &pair){
-				if (!pair.isValid())
-					return false;
-
-				if (pair.isTombstone())
-					return false;
-
-				return true;
+				return pair.isOK();
 			});
 
 		}

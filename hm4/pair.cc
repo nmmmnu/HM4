@@ -27,7 +27,7 @@ void Pair::print() const noexcept{
 
 // ==============================
 
-bool Pair::isExpired_() const noexcept{
+bool Pair::isExpired() const noexcept{
 	// beware problem 2038 !!!
 	return expires &&  mytime::expired( getCreated(), getExpires() );
 }

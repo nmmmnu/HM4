@@ -83,7 +83,7 @@ namespace{
 
 		const Pair *p = raw_memory();
 
-		mytest("valid",		p->isValid()			);
+		mytest("not expired",	!p->isExpired()			);
 
 		mytest("key",		p->getKey() == key		);
 		mytest("val",		p->getVal() == val		);
@@ -98,14 +98,14 @@ namespace{
 
 		const OPair p1 = Pair::create( "key", "val", 1 );
 
-		mytest("not expired",	p1->isValid()				);
+		mytest("not expired",	!p1->isExpired()			);
 
 		puts("sleep for 2 sec...\n");
 		sleep(2);
-		mytest("expired",	! p1->isValid()				);
+		mytest("expired",	p1->isExpired()				);
 
 		const OPair p2 = Pair::create( "key", "val", 1, 3600 * 24 /* 1970-01-02 */ );
-		mytest("expired",		! p2->isValid()			);
+		mytest("expired",		p2->isExpired()			);
 	}
 
 	void pair_test_ctor(){
@@ -152,12 +152,11 @@ namespace{
 		mytest("eq",			p->equals(key)			);
 		mytest("!eq",			! p->equals("something")	);
 
-		mytest("valid",			p->isValid()			);
+		mytest("not expired",		! p->isExpired()		);
 		mytest("valid",			hm4::isValidForReplace(*p, *t)	);
 
-		mytest("valid",			t->isValid()			);
-		mytest("valid",			t->isValid(std::false_type{})	);
-		mytest("valid",			! t->isValid(std::true_type{})	);
+		mytest("not expired",		! t->isExpired()		);
+		mytest("OK",			! t->isOK()			);
 
 		mytest("valid",			! hm4::isValidForReplace(*t, *p));
 	}
