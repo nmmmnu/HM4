@@ -71,7 +71,7 @@ auto VectorList<T_Allocator>::insertLazyPair_(PFactory &factory) -> iterator{
 		}
 
 		// try update pair in place.
-		if (auto const old_bytes = olddata->bytes(); tryInsertHint(*this, olddata, factory)){
+		if (auto const old_bytes = olddata->bytes(); tryInsertHint_(*this, olddata, factory)){
 			// successfully updated.
 
 			lc_.upd(old_bytes, factory.bytes());

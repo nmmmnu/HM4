@@ -205,8 +205,10 @@ auto proceedInsertHintV(List &list, const Pair *pair, Args &&...args){
 
 // ==============================
 
+// To be used only inside Lists
+
 template<class List, class PairFactory>
-constexpr bool tryInsertHint(List &list, const Pair *pair, PairFactory &factory){
+constexpr bool tryInsertHint_(List &list, const Pair *pair, PairFactory &factory){
 	if (! canInsertHint(list, pair, factory.bytes()) )
 		return false;
 
