@@ -116,5 +116,5 @@ Changelog
 
 -	new commands HDELALL, HPERSISTALL, HEXPIREALL
 -	fsync binloglist with crontab
-
+-	implement tombstone via expire (0x0FFFFFFFF), refactor hints
 
