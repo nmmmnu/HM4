@@ -46,7 +46,7 @@ public:
 	}
 
 	template<class PFactory>
-	iterator insertLazyPair_(PFactory &factory);
+	iterator insertF(PFactory &factory);
 
 	auto size() const{
 		return lc_.size();

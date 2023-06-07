@@ -131,9 +131,9 @@ public:
 	}
 
 	template<class PFactory>
-	auto insertLazyPair_(PFactory &factory){
+	auto insertF(PFactory &factory){
 		return fixDualIterator_(
-			list1_->insertLazyPair_(factory)
+			list1_->insertF(factory)
 		);
 	}
 

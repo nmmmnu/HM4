@@ -239,7 +239,7 @@ namespace net::worker::commands::CV{
 
 			auto const bytes = cv_bytes<T>(len - 1);
 
-			if (pair && hm4::canInsertHint(list, pair, bytes))
+			if (pair && hm4::canInsertHintValSize(list, pair, bytes))
 				hm4::proceedInsertHintV<MySetSize_Factory>(list, pair, key, bytes, pair);
 			else
 				hm4::insertV<MySetSize_Factory>(list, key, bytes, pair);
@@ -311,7 +311,7 @@ namespace net::worker::commands::CV{
 
 			auto const new_val_size = cv_bytes<T>(n_len);
 
-			if (pair && hm4::canInsertHint(list, pair, new_val_size)){
+			if (pair && hm4::canInsertHintValSize(list, pair, new_val_size)){
 				auto const val_size = pair->getVal().size();
 
 				hm4::proceedInsertHintV<MyCVSET_Factory>(list, pair, key, val_size, pair, std::begin(p) + varg, std::end(p));

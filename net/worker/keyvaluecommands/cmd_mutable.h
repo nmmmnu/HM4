@@ -166,7 +166,7 @@ namespace net::worker::commands::Mutable{
 				auto const &val = *std::next(itk);
 
 				if (auto *it = hm4::getPairPtr(*db, key); it){
-					if (const auto *hint = & *it; hm4::canInsertHint(*db, hint, val.size())){
+					if (const auto *hint = & *it; hm4::canInsertHintValSize(*db, hint, val.size())){
 						// HINT
 						container.push_back(hint);
 					}else

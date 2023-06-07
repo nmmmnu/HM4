@@ -130,7 +130,7 @@ public:
 	}
 
 	template<class PFactory>
-	iterator insertLazyPair_(PFactory &factory);
+	iterator insertF(PFactory &factory);
 
 	auto size() const{
 		return lc_.size();
@@ -218,7 +218,7 @@ inline auto UnsortedList<T_Allocator>::end() const noexcept -> iterator{
 
 template<class T_Allocator>
 template<class PFactory>
-inline auto UnsortedList<T_Allocator>::insertLazyPair_(PFactory &factory) -> iterator{
+inline auto UnsortedList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 	if (!newdata)

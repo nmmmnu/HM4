@@ -6,6 +6,8 @@
 
 #include "pair.h"
 
+#include "logger.h"
+
 namespace hm4{
 
 namespace config{
@@ -103,7 +105,7 @@ auto insert(List &list, PairFactory &factory) noexcept{
 	static_assert(!std::is_same_v<PairFactory, Pair>);
 	static_assert(!std::is_same_v<PairFactory, std::basic_string_view<char, std::char_traits<char> > const>);
 
-	return list.insertLazyPair_(factory);
+	return list.insertF(factory);
 }
 
 template<class PairFactory, class List, typename ...Args>
@@ -136,8 +138,15 @@ auto insert(List &list, std::string_view const key,
 }
 
 template<class List>
-auto insert(List &list, std::string_view const key) noexcept{
+auto insert(List &list, std::string_view const key, std::nullptr_t = nullptr) noexcept{
 	return insertF<PairFactory::Tombstone>(list, key);
+}
+
+// guard for const char *
+template<class List>
+auto insert(List &list, const char *key_, std::nullptr_t = nullptr) noexcept{
+	std::string_view const key = key_;
+	return insert(list, key, nullptr);
 }
 
 template<class List>
@@ -159,8 +168,13 @@ constexpr bool canInsertHint(const List &list, const Pair *pair){
 }
 
 template<class List>
-constexpr bool canInsertHint(const List &list, const Pair *pair, size_t val_size){
+constexpr bool canInsertHintValSize(const List &list, const Pair *pair, size_t val_size){
 	return canInsertHint(list, pair) && pair->getVal().size() >= val_size;
+}
+
+template<class List, class PairFactory>
+constexpr bool canInsertHintF(const List &list, const Pair *pair, PairFactory const &factory){
+	return canInsertHint(list, pair) && pair->bytes() >= factory.bytes();
 }
 
 // ==============================
@@ -180,6 +194,8 @@ constexpr void proceedInsertHint(List &list, const Pair *pair, PairFactory &fact
 	factory.createHint( const_cast<Pair *>(pair) );
 
 	list.mutable_notify(pair, msg);
+
+	log__<LogLevel::WARNING>("inserting hint for key", factory.getKey());
 }
 
 template<class PairFactory, class List, typename ...Args>
@@ -209,7 +225,7 @@ auto proceedInsertHintV(List &list, const Pair *pair, Args &&...args){
 
 template<class List, class PairFactory>
 constexpr bool tryInsertHint_(List &list, const Pair *pair, PairFactory &factory){
-	if (! canInsertHint(list, pair, factory.bytes()) )
+	if (! canInsertHintF(list, pair, factory) )
 		return false;
 
 	proceedInsertHint(list, pair, factory);
@@ -221,7 +237,7 @@ constexpr bool tryInsertHint_(List &list, const Pair *pair, PairFactory &factory
 
 template<class List, class PairFactory>
 void insertHint(List &list, const Pair *pair, PairFactory &factory){
-	if (canInsertHint(list, pair, factory.bytes()))
+	if (canInsertHintF(list, pair, factory))
 		proceedInsertHint(list, pair, factory);
 	else
 		insert(list, factory);

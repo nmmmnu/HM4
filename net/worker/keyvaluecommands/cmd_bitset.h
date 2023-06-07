@@ -53,7 +53,7 @@ namespace net::worker::commands::BITSET{
 
 			auto const new_bytes = bytes;
 
-			if (pair && hm4::canInsertHint(*db, pair, new_bytes)){
+			if (pair && hm4::canInsertHintValSize(*db, pair, new_bytes)){
 				auto const val_size = pair->getVal().size();
 
 				hm4::proceedInsertHintV<MyBITSET_Factory>(*db, pair, key, val_size, pair, std::begin(p) + varg, std::end(p));

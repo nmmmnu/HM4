@@ -111,7 +111,7 @@ namespace net::worker::commands::HLL{
 
 			using MyHLLADD_Factory = PFADD_Factory<ParamContainer::iterator>;
 
-			if (pair && hm4::canInsertHint(*db, pair, HLL_M))
+			if (pair && hm4::canInsertHintValSize(*db, pair, HLL_M))
 				hm4::proceedInsertHintV<MyHLLADD_Factory>(*db, pair, key, pair, std::begin(p) + varg, std::end(p));
 			else
 				hm4::insertV<MyHLLADD_Factory>(*db, key, pair, std::begin(p) + varg, std::end(p));

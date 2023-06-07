@@ -55,8 +55,8 @@ public:
 	}
 
 	template<class PFactory>
-	auto insertLazyPair_(PFactory &factory){
-		auto it = list_->insertLazyPair_(factory);
+	auto insertF(PFactory &factory){
+		auto it = list_->insertF(factory);
 
 		if (it == std::end(*list_))
 			return it;

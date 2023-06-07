@@ -49,7 +49,7 @@ int listReplay(List &list, InputList const &inputList, size_t const process_step
 	size_t i = 0;
 
 	for(auto const &pair : inputList){
-		if (!pair.empty())
+		if (!pair.isKeyEmpty())
 			insert(list, pair);
 
 		++i;

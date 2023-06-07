@@ -84,7 +84,7 @@ namespace net::worker::commands::BF{
 
 			using MyBFADD_Factory = BFADD_Factory<ParamContainer::iterator>;
 
-			if (pair && hm4::canInsertHint(*db, pair, max_size))
+			if (pair && hm4::canInsertHintValSize(*db, pair, max_size))
 				hm4::proceedInsertHintV<MyBFADD_Factory>(*db, pair, key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p));
 			else
 				hm4::insertV<MyBFADD_Factory>(*db, key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p));

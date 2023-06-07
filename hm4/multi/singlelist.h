@@ -94,8 +94,8 @@ public:
 	}
 
 	template<class PFactory>
-	auto insertLazyPair_(PFactory &factory){
-		return list_->insertLazyPair_(factory);
+	auto insertF(PFactory &factory){
+		return list_->insertF(factory);
 	}
 
 	constexpr void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){

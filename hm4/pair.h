@@ -34,8 +34,8 @@ inline namespace version_4_00_00{
 		constexpr uint16_t	MAX_KEY_MASK		= MAX_KEY_SIZE;
 		constexpr uint32_t	MAX_VAL_MASK		= MAX_VAL_SIZE;
 
-		constexpr uint32_t	EXPIRES_TOMBSTONE__	= 0xFFFF'FFFF;
-		constexpr uint32_t	EXPIRES_MAX		= EXPIRES_TOMBSTONE__ - 1;
+		constexpr uint32_t	EXPIRES_TOMBSTONE	= 0xFFFF'FFFF;
+		constexpr uint32_t	EXPIRES_MAX		= EXPIRES_TOMBSTONE - 1;
 
 		constexpr const char	*EMPTY_MESSAGE		= "---pair-is-empty---";
 	}
@@ -93,15 +93,13 @@ inline namespace version_4_00_00{
 			);
 
 			pair->created	= htobe<uint64_t>(prepareCreateTime(created));
-			pair->expires	= htobe<uint32_t>(std::min(expires, PairConf::EXPIRES_MAX));
-
-		//	if constexpr(copy_key == false && copy_val == false)
-		//		return;
+			pair->expires	= htobe<uint32_t>(expires); // std::min(expires, PairConf::EXPIRES_MAX)
 
 			if constexpr(copy_key || make_key){
 				uint16_t const keylen = static_cast<uint16_t>(key.size() & PairConf::MAX_KEY_MASK);
 				pair->keylen	= htobe<uint16_t>(keylen);
 			}
+
 			if constexpr(copy_val || make_val){
 				uint32_t const vallen = static_cast<uint32_t>(val.size() & PairConf::MAX_VAL_MASK);
 				pair->vallen	= htobe<uint32_t>(vallen);
@@ -252,7 +250,7 @@ inline namespace version_4_00_00{
 	public:
 		[[nodiscard]]
 		constexpr
-		bool empty() const noexcept{
+		bool isKeyEmpty() const noexcept{
 			// big endian 0
 			return (keylen & htobe<uint16_t>(PairConf::MAX_KEY_MASK)) != 0;
 		}
@@ -276,15 +274,6 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		constexpr char *getValC() noexcept{
 			return getVal_();
-		}
-
-		[[nodiscard]]
-		bool isTombstone() const noexcept{
-		//	if (expires > PairConf::EXPIRES_MAX)
-		//		return true;
-
-			// big endian 0
-			return (vallen & htobe<uint32_t>(PairConf::MAX_VAL_MASK)) == 0;
 		}
 
 		[[nodiscard]]
@@ -380,7 +369,18 @@ inline namespace version_4_00_00{
 	public:
 		// beware problem 2038 !!!
 		[[nodiscard]]
-		bool isExpired() const noexcept;
+		bool isExpired() const noexcept{
+			if (expires == PairConf::EXPIRES_TOMBSTONE)
+				return true;
+			else
+				return isExpired_();
+		}
+
+		[[nodiscard]]
+		bool isTombstone() const noexcept{
+			// big endian 0
+			return (vallen & htobe<uint32_t>(PairConf::MAX_VAL_MASK)) == 0;
+		}
 
 		[[nodiscard]]
 		bool isOK() const noexcept{
@@ -388,7 +388,11 @@ inline namespace version_4_00_00{
 			if ( isTombstone() )
 				return false;
 
-			return !isExpired();
+			// check if is expired
+			if ( isExpired() )
+				return false;
+
+			return true;
 		}
 
 		// ==============================
@@ -456,6 +460,10 @@ inline namespace version_4_00_00{
 		size_t getValLen_() const noexcept{
 			return betoh<uint32_t>(vallen) & PairConf::MAX_VAL_MASK;
 		}
+
+		[[nodiscard]]
+		bool isExpired_() const noexcept;
+
 	} __attribute__((__packed__));
 
 	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
@@ -592,7 +600,11 @@ inline namespace version_4_00_00{
 			}
 
 			void createHint(Pair *pair) const{
-				Pair::createInRawMemory<0,1,0,1>(pair, key, Pair::TOMBSTONE, 0, 0);
+				if constexpr(false){
+					Pair::createInRawMemory<0,1,0,1>(pair, key, Pair::TOMBSTONE, 0, 0);
+				}else{
+					Pair::createInRawMemory<0,0,0,0>(pair, key, "", PairConf::EXPIRES_TOMBSTONE, 0);
+				}
 			}
 
 			void create(Pair *pair) const{

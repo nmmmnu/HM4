@@ -398,7 +398,7 @@ namespace{
 			// no need to show messages.
 			// messages will be shown from the builder.
 			for(auto const &pair : input)
-				if (!pair.empty())
+				if (!pair.isKeyEmpty())
 					insert(list, pair);
 
 		} /* d-tor of list kicks here */

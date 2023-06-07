@@ -27,9 +27,9 @@ void Pair::print() const noexcept{
 
 // ==============================
 
-bool Pair::isExpired() const noexcept{
+bool Pair::isExpired_() const noexcept{
 	// beware problem 2038 !!!
-	return expires &&  mytime::expired( getCreated(), getExpires() );
+	return expires && mytime::expired( getCreated(), getExpires() );
 }
 
 uint64_t Pair::prepareCreateTime(uint32_t const created) noexcept{

@@ -12,6 +12,7 @@ MyTest mytest;
 #include "pmallocator.h"
 #include "trackingallocator.h"
 #include "stdallocator.h"
+#include "arenaallocator.h"
 
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;
@@ -83,7 +84,10 @@ bool getCheck(List const &list, const char *key, const char *value, std::bool_co
 	if (value)
 		return iteratorDereference(it, et, value);
 
-	return it == et;
+	if (it == et)
+		return true;
+
+	return ! it->isOK();
 }
 
 // ==============================
@@ -222,6 +226,46 @@ void list_test(List &list){
 	mytest("move c-tor",		mlist.bytes() == bytes				);
 }
 
+template <template<class> class List>
+void list_test_hint(const char *name){
+	mytest.begin(name);
+
+	using Allocator = MyAllocator::ArenaAllocator;
+	Allocator allocator{ 1024 * 1024 };
+
+	List<Allocator> list{ allocator };
+
+	const char *key = "key";
+
+	insert(list, key, "1234567890");
+
+	auto const used = allocator.getUsedMemory();
+
+	auto f = [&](const char *val1, const char *val2){
+
+		auto chk = [&](const char *val){
+			return
+				getCheck(list, key, val, std::true_type{}) &&
+				used == allocator.getUsedMemory();
+		};
+
+		insert(list, key	);	mytest("hint test del",		chk(nullptr	));
+		insert(list, key, val1	);	mytest("hint test set1",	chk(val1	));
+		insert(list, key, val2	);	mytest("hint test set2",	chk(val2	));
+	};
+
+	insert(list, key, "123456789");
+
+	f("12345678"	, "X2345678"	);
+	f("1234567"	, "X234567"	);
+	f("123456"	, "X23456"	);
+	f("12345"	, "X2345"	);
+	f("1234"	, "X234"	);
+	f("123"		, "X23"		);
+	f("12"		, "X2"		);
+	f("1"		, "X"		);
+}
+
 #include "blackholelist.h"
 
 template<>
@@ -319,6 +363,10 @@ int main(){
 	list_test<hm4::SkipList		<Allocator>	>("SkipList"		, allocator	);
 
 //	skiplist_lanes_test();
+
+	list_test_hint<hm4::VectorList	>("VectorList"	);
+	list_test_hint<hm4::LinkList	>("LinkList"	);
+	list_test_hint<hm4::SkipList	>("SkipList"	);
 
 	return mytest.end();
 }

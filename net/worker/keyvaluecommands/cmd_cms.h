@@ -146,7 +146,7 @@ namespace net::worker::commands::CMS{
 
 			using MyCMSADD_Factory = CMSADD_Factory<T, ParamContainer::iterator>;
 
-			if (pair && hm4::canInsertHint(list, pair, cms.bytes()))
+			if (pair && hm4::canInsertHintValSize(list, pair, cms.bytes()))
 				hm4::proceedInsertHintV<MyCMSADD_Factory>(list, pair, key, pair, cms, std::begin(p) + varg, std::end(p));
 			else
 				hm4::insertV<MyCMSADD_Factory>(list, key, pair, cms, std::begin(p) + varg, std::end(p));
