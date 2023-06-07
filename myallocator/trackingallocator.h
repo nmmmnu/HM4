@@ -14,15 +14,16 @@ namespace MyAllocator{
 	template<class Allocator>
 	struct TrackingAllocator{
 		const char *getName() const{
-			return a.getName();
+			return allocator.getName();
 		}
 
 		constexpr static const char *TAG = "[TrackingAllocator]";
 
-		TrackingAllocator() = default;
+		template<class ...Args>
+		TrackingAllocator(Args &&...args) : allocator( std::forward<Args>(args)... ){}
 
 		TrackingAllocator(TrackingAllocator &&other) :
-					a		(std::move(other.a		)),
+					allocator	(std::move(other.allocator	)),
 					allocated	(std::move(other.allocated	)),
 					deallocated	(std::move(other.deallocated	)),
 					allocations	(std::move(other.allocations	)),
@@ -48,7 +49,7 @@ namespace MyAllocator{
 
 		void *xallocate(std::size_t const size) noexcept{
 			++allocations;
-			void *p = a.xallocate(size);
+			void *p = allocator.xallocate(size);
 			allocated += malloc_usable_size__(p);
 
 			fmt::print("{} Allocate {:8} -> {}\n", TAG, size, p);
@@ -59,27 +60,27 @@ namespace MyAllocator{
 			++deallocations;
 			deallocated += malloc_usable_size__(p);
 			fmt::print("{} Deallocate {}\n", TAG, p);
-			return a.xdeallocate(p);
+			return allocator.xdeallocate(p);
 		}
 
 		bool owns(const void *p) const noexcept{
-			return a.owns(p);
+			return allocator.owns(p);
 		}
 
 		bool need_deallocate() const noexcept{
-			return a.need_deallocate();
+			return allocator.need_deallocate();
 		}
 
 		bool knownMemoryUsage() const noexcept{
-			return a.knownMemoryUsage();
+			return allocator.knownMemoryUsage();
 		}
 
 		bool reset() noexcept{
-			return a.reset();
+			return allocator.reset();
 		}
 
 		size_t getFreeMemory() const noexcept{
-			return a.getFreeMemory();
+			return allocator.getFreeMemory();
 		}
 
 		size_t getUsedMemory() const noexcept{
@@ -92,12 +93,12 @@ namespace MyAllocator{
 		}
 
 	private:
-		Allocator a;
-		size_t allocated	= 0;
-		size_t deallocated	= 0;
-		size_t allocations	= 0;
-		size_t deallocations	= 0;
-		bool printSummary	= true;
+		Allocator	allocator;
+		size_t		allocated	= 0;
+		size_t		deallocated	= 0;
+		size_t		allocations	= 0;
+		size_t		deallocations	= 0;
+		bool		printSummary	= true;
 	};
 
 	template<>
