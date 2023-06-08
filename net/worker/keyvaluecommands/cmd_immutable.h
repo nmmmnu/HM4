@@ -147,6 +147,47 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
+	struct DUMP : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 2)
+				return;
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return;
+
+			auto const *pair = hm4::getPairPtrNC(*db, key);
+
+			if (pair){
+				std::string_view const x{
+					reinterpret_cast<const char *>(pair),
+					pair->bytes()
+				};
+
+				return result.set(x);
+			}else{
+				return result.set("");
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"dump",	"DUMP"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct GETRANGE : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -388,6 +429,7 @@ namespace net::worker::commands::Immutable{
 				MGET		,
 				EXISTS		,
 				TTL		,
+				DUMP		,
 				GETRANGE	,
 				STRLEN		,
 				HGET		,
