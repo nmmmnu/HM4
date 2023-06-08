@@ -799,6 +799,48 @@ namespace net::worker::commands::Mutable{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct PERSISTDELETED : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 2)
+				return;
+
+			// GET
+
+			const auto &key = p[1];
+
+			if (key.empty())
+				return;
+
+
+
+			if (auto *it = hm4::getPairPtrNC(*db, key); it){
+				// SET
+
+				const auto *hint = & *it;
+				hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, it->getKey(), it->getVal());
+			}
+
+			return result.set();
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"persistdeleted",	"PERSISTDELETED"	,
+			"persistexpired",	"PERSISTEXPIRED"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mutable";
@@ -820,7 +862,8 @@ namespace net::worker::commands::Mutable{
 				GETDEL		,
 				APPEND		,
 				EXPIRE		,
-				PERSIST
+				PERSIST		,
+				PERSISTDELETED
 			>(pack);
 		}
 	};

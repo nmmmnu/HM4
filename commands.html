@@ -124,6 +124,7 @@
 				<li><a href="#APPEND">APPEND</a></li>
 				<li><a href="#EXPIRE">EXPIRE</a></li>
 				<li><a href="#PERSIST">PERSIST</a></li>
+				<li><a href="#PERSISTDELETED">PERSISTDELETED</a></li>
 				<li><a href="#GETSET">GETSET</a></li>
 				<li><a href="#GETDEL">GETDEL</a></li>
 				<li><a href="#DEL">DEL</a></li>
@@ -719,6 +720,27 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is removed.
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PERSISTDELETED">
+
+			<h2>PERSISTDELETED key / PERSISTEXPIRED key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PERSISTDELETED</td></tr>
+				<tr><td>Available since		</td><td>1.3.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Try to undelete a key <i>key</i> by updating expires time.<br />Note: The command internally GET <i>key</i> first.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETSET">

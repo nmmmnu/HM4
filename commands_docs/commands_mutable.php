@@ -190,6 +190,24 @@ return array(
 	),
 
 	new Cmd(
+			"PERSISTDELETED",
+
+			"PERSISTDELETED key / PERSISTEXPIRED key",
+
+			"Try to undelete a key <i>key</i> by updating expires time.<br />" .
+			"Note: The command internally GET <i>key</i> first.",
+
+			"OK",
+			"OK",
+			"1.3.4",
+			"READ + WRITE",
+			false,
+			true,
+
+			"mutable"
+	),
+
+	new Cmd(
 			"GETSET",
 
 			"GETSET key value [seconds=0]",

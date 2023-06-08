@@ -383,13 +383,21 @@ inline namespace version_4_00_00{
 		}
 
 		[[nodiscard]]
+		bool isTombstone(std::true_type) const noexcept{
+			if (expires == PairConf::EXPIRES_TOMBSTONE)
+				return true;
+			else
+				return isTombstone();
+		}
+
+		[[nodiscard]]
 		bool isOK() const noexcept{
 			// check if is tombstone
-			if ( isTombstone() )
+			if ( isTombstone(std::true_type{}) )
 				return false;
 
 			// check if is expired
-			if ( isExpired() )
+			if ( isExpired_() )
 				return false;
 
 			return true;

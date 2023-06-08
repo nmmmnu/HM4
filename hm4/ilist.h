@@ -284,13 +284,26 @@ auto getIterator(List const &list, std::string_view const key, std::bool_constan
 
 // ==============================
 
-template<typename List, typename Predicate>
+template<bool CheckOK = true, typename List, typename Predicate>
 auto getPair_(List const &list, std::string_view key, Predicate p){
 	auto it = list.find(key, std::true_type{});
 
-	bool const b = it != std::end(list) && it->isOK();
+	if constexpr(CheckOK){
+		bool const b = it != std::end(list) && it->isOK();
 
-	return p(b, it);
+		return p(b, it);
+	}else{
+		bool const b = it != std::end(list);
+
+		return p(b, it);
+	}
+}
+
+template<typename List>
+auto getPairOK(List const &list, std::string_view key){
+	return getPair_(list, key, [](bool b, auto ){
+		return b;
+	});
 }
 
 template<typename List>
@@ -300,18 +313,21 @@ auto getPairVal(List const &list, std::string_view key){
 	});
 }
 
-template<typename List>
-auto getPairPtr(List const &list, std::string_view key){
-	return getPair_(list, key, [](bool b, auto it){
+template<bool B, typename List>
+auto getPairPtr_(List const &list, std::string_view key){
+	return getPair_<B>(list, key, [](bool b, auto it){
 		return b ? & *it : nullptr;
 	});
 }
 
 template<typename List>
-auto getPairOK(List const &list, std::string_view key){
-	return getPair_(list, key, [](bool b, auto ){
-		return b;
-	});
+auto getPairPtr(List const &list, std::string_view key){
+	return getPairPtr_<1>(list, key);
+}
+
+template<typename List>
+auto getPairPtrNC(List const &list, std::string_view key){
+	return getPairPtr_<0>(list, key);
 }
 
 } // namespace
