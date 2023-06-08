@@ -48,6 +48,7 @@ public:
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
 	}
 
+	#if 0
 	size_type mutable_size() const{
 		auto sum = [](size_t const result, List const &list){
 			return result + list.mutable_size();
@@ -55,6 +56,11 @@ public:
 
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
 	}
+	#else
+	constexpr static size_type mutable_size(){
+		return 0;
+	}
+	#endif
 
 	size_t bytes() const{
 		auto sum = [](size_type const result, List const &list){
@@ -64,6 +70,7 @@ public:
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);
 	}
 
+	#if 0
 	size_t mutable_bytes() const{
 		auto sum = [](size_type const result, List const &list){
 			return result + list.mutable_bytes();
@@ -71,6 +78,11 @@ public:
 
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);
 	}
+	#else
+	constexpr static size_type mutable_bytes(){
+		return 0;
+	}
+	#endif
 
 	void crontab() const{
 		for(auto const &list : *list_)
