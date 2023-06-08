@@ -27,7 +27,7 @@ public:
 
 	template<size_t N>
 	std::string_view info(std::array<char, N> &str) const{
-		to_string_buffer_t buffer[8];
+		to_string_buffer_t buffer[9];
 
 		if constexpr(!MUTABLE){
 			int i = 0;
@@ -84,6 +84,7 @@ public:
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
 				"Mutable Keys     : ", to_string(list_.mutable_size()			,	buffer[i++]),	"\n",
+				"Mutable Size     : ", to_string(list_.mutable_bytes()			,	buffer[i++]),	"\n",
 
 			"\n"	"# Allocator"											"\n",
 				"Allocator        : ", list_.getAllocator().getName()			,			"\n",

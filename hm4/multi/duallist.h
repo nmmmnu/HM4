@@ -53,6 +53,10 @@ public:
 		return list1_->bytes() + list2_->bytes();
 	}
 
+	auto mutable_bytes() const{
+		return list1_->mutable_bytes();
+	}
+
 	constexpr void crontab(){
 		list1_->crontab();
 		list2_->crontab();

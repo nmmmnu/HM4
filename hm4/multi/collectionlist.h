@@ -48,9 +48,25 @@ public:
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
 	}
 
+	size_type mutable_size() const{
+		auto sum = [](size_t const result, List const &list){
+			return result + list.mutable_size();
+		};
+
+		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
+	}
+
 	size_t bytes() const{
 		auto sum = [](size_type const result, List const &list){
 			return result + list.bytes();
+		};
+
+		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);
+	}
+
+	size_t mutable_bytes() const{
+		auto sum = [](size_type const result, List const &list){
+			return result + list.mutable_bytes();
 		};
 
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);

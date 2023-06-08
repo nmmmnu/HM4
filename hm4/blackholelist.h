@@ -57,6 +57,11 @@ public:
 		return 0;
 	}
 
+	constexpr static
+	size_t mutable_bytes(){
+		return 0;
+	}
+
 	constexpr static void crontab(){
 	}
 

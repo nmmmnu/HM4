@@ -36,6 +36,10 @@ public:
 		return list_->bytes();
 	}
 
+	size_t mutable_bytes() const{
+		return list_->mutable_bytes();
+	}
+
 public:
 	iterator begin() const{
 		return list_->begin();

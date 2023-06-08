@@ -57,6 +57,10 @@ public:
 		return lc_.bytes();
 	}
 
+	auto mutable_bytes() const{
+		return bytes();
+	}
+
 	constexpr static void crontab(){
 	}
 
