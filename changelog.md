@@ -118,4 +118,4 @@ Changelog
 -	fsync binloglist with crontab
 -	implement tombstone via expire (0x0FFFFFFFF), refactor hints
 -	new commands PERSISTDELETED / PERSISTEXPIRED, DUMP
-
+-	new tool db_compact_tombstone - propose tombstone removal merge - still in test stage

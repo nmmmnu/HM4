@@ -194,18 +194,18 @@ namespace{
 		MyGlob gl;
 		gl.open(opt.db_path);
 
-		for(auto &file : gl){
-			auto const size = getSize(file);
+		for(auto &filename : gl){
+			auto const size = getSize(filename);
 
 			if (size == 0){
 			//	fmt::print("Zero len table: {}\n", file);
 
-				out.zero.push_back(file);
+				out.zero.push_back(filename);
 
 				continue;
 			}
 
-			files.emplace_back(size, file);
+			files.emplace_back(size, filename);
 		}
 
 		std::sort(std::begin(files), std::end(files));

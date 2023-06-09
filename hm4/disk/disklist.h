@@ -122,7 +122,15 @@ public:
 		return id_;
 	}
 
+	auto createdMin() const{
+		return metadata_.createdMin();
+	}
 
+	auto createdMax() const{
+		return metadata_.createdMax();
+	}
+
+public:
 	constexpr static void crontab(){
 	}
 

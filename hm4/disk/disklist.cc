@@ -182,12 +182,12 @@ bool DiskList::openDataOnly_with_bool(std::string_view const filename, bool cons
 
 
 namespace{
-	bool checkMetadata(FileMeta const &metadata_){
-		if (metadata_ == false)
+	bool checkMetadata(FileMeta const &metadata){
+		if (metadata == false)
 			return false;
 
 		// Non sorted files are no longer supported
-		if (metadata_.sorted() == false){
+		if (metadata.sorted() == false){
 			log__<LogLevel::ERROR>("Non sorted files are no longer supported. Please replay the file as binlog.");
 			return false;
 		}

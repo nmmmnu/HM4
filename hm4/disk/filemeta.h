@@ -8,7 +8,6 @@
 
 #include "filemetablob.h"
 
-
 namespace hm4{
 namespace disk{
 
@@ -56,12 +55,20 @@ public:
 		return betoh<uint16_t>(blob.options) & FileMetaBlob::OPTIONS_ALIGNED;
 	}
 
-	uint64_t size() const{
+	auto size() const{
 		return betoh<uint64_t>(blob.size);
 	}
 
-	uint32_t created() const{
+	auto created() const{
 		return betoh<uint32_t>(blob.created);
+	}
+
+	auto createdMin() const{
+		return betoh<uint64_t>(blob.createdMin);
+	}
+
+	auto createdMax() const{
+		return betoh<uint64_t>(blob.createdMin);
 	}
 
 public:
