@@ -11,15 +11,12 @@
 #include <unordered_map>
 #include <algorithm>	// min, find
 
-#include "logger.h"	// LogLevel::WARNING
+#include "logger.h"
 
 namespace net{
 
 template<class Selector, class Worker, class SparePool = NullSparePool>
 class AsyncLoop{
-public:
-	constexpr static auto		MY_LOG_LEVEL		= LogLevel::WARNING;
-
 public:
 	constexpr static uint32_t	MIN_CLIENTS		= 4;
 	constexpr static uint32_t	MAX_CLIENTS		= 32;
@@ -107,7 +104,7 @@ private:
 
 private:
 	void log_(const char *s, int const fd = -1) const{
-		if constexpr(MY_LOG_LEVEL > LogLevel::GlobalLogLevel)
+		if (getLogger().getLevel() >= Logger::NOTICE)
 			return;
 
 		// printf suppose to be faster than std::cout

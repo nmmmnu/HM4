@@ -28,7 +28,7 @@ namespace net::worker::commands::MutableX{
 					return {};
 
 				if (++iterations > ITERATIONS_PROCESS_X){
-					log__<LogLevel::NOTICE>("ProcessX", "iterations", iterations, key);
+					getLogger().debug() << "ProcessX" << "iterations" << iterations << key;
 					return key;
 				}
 
@@ -62,7 +62,7 @@ namespace net::worker::commands::MutableX{
 					return result.set();
 
 				if (++iterations > ITERATIONS_PROCESS_X){
-					log__<LogLevel::NOTICE>("ProcessX", "iterations", iterations, key);
+					getLogger().debug() << "ProcessX" << "iterations" << iterations << key;
 					return result.set(key);
 				}
 
@@ -102,7 +102,7 @@ namespace net::worker::commands::MutableX{
 					// the container contains junk now.
 					++check_passes;
 
-					log__<LogLevel::WARNING>("ProcessX", "Restart because of table flush", check_passes);
+					getLogger().notice() << "ProcessX" << "Restart because of table flush" << check_passes;
 
 					if (check_passes < PASSES_PROCESS_X)
 						goto start;

@@ -12,7 +12,6 @@ struct ListDBAdapter{
 
 	constexpr static bool MUTABLE 			= ! std::is_const_v<List>;
 	constexpr static bool DELETE_USE_TOMBSTONES	= true;
-	constexpr static auto LOG_LEVEL			= LogLevel::NOTICE;
 
 	constexpr static inline std::string_view SEPARATOR = "~";
 

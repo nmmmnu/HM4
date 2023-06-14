@@ -6,8 +6,6 @@
 namespace net::worker::commands::HLL{
 
 	namespace hll_impl_{
-		constexpr auto LL_HLL = LogLevel::WARNING;
-
 		using Pair = hm4::Pair;
 
 		constexpr uint8_t HLL_Bits = 12;
@@ -47,11 +45,10 @@ namespace net::worker::commands::HLL{
 				if (const auto *x = load_ptr(*db, *it); x){
 					b.push_back(x);
 
-					if constexpr(1)
-						log__<LL_HLL>("HLL Operation", "intersect", *it);
+					getLogger().debug() << "HLL Operation" << "intersect" << *it;
 				}
 
-			log__<LL_HLL>("HLL Operation count", b.size());
+			getLogger().debug() << "HLL Operation count" << b.size();
 
 			auto hll_ops = getHLL().getOperations();
 

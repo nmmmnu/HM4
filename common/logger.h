@@ -1,0 +1,118 @@
+#ifndef MY_LOGGER_H_
+#define MY_LOGGER_H_
+
+#include <iostream>
+
+struct Logger{
+	enum Level{
+		FATAL	= 0,
+		ERROR	= 1,
+		WARNING	= 2,
+		NOTICE	= 3,
+		DEBUG	= 4
+	};
+
+	Logger(Level level = DEBUG) : level_(level){}
+
+private:
+	/*
+		Black	\033[30m	\033[40m
+		Red	\033[31m	\033[41m
+		Green	\033[32m	\033[42m
+		Yellow	\033[33m	\033[43m
+		Blue	\033[34m	\033[44m
+		Purple	\033[35m	\033[45m
+		Cyan	\033[36m	\033[46m
+		White	\033[37m	\033[47m
+
+		Bold	\033[1m
+		Reset	\033[0m
+	*/
+
+	constexpr static inline const char *banner[]{
+		"\033[1;37;41m"	"[ FATAL ]"	"\033[0m",
+		"\033[1;31m"	"[ ERROR ]"	"\033[0m",
+		"\033[1;33m"	"[WARNING]"	"\033[0m",
+		"\033[32m"	"[NOTICES]"	"\033[0m",
+		"\033[36m"	"[ DEBUG ]"	"\033[0m"
+	};
+
+public:
+	[[nodiscard]]
+	auto get(Level level) const{
+		bool const writting = level <= level_;
+
+		return LoggerStream(banner[level], writting);
+	}
+
+	[[nodiscard]]
+	auto fatal() const{
+		return get(FATAL	);
+	}
+
+	[[nodiscard]]
+	auto error() const{
+		return get(ERROR	);
+	}
+
+	[[nodiscard]]
+	auto warning() const{
+		return get(WARNING	);
+	}
+
+	[[nodiscard]]
+	auto notice() const{
+		return get(NOTICE	);
+	}
+
+	[[nodiscard]]
+	auto debug() const{
+		return get(DEBUG	);
+	}
+
+	auto getLevel() const{
+		return level_;
+	}
+
+private:
+	struct LoggerStream{
+		LoggerStream(const char *banner, bool writting, std::ostream &os = std::clog) :
+					writting_	(writting	),
+					os_		(os		){
+
+			if (writting_)
+				os_ << banner << ' ';
+		}
+
+		~LoggerStream(){
+			if (writting_)
+				os_ << '\n';
+		}
+
+		template<typename T>
+		auto &operator <<(T const &a) const{
+			if (writting_)
+				os_ << a << ' ';
+
+			return *this;
+		}
+
+	private:
+		bool		writting_;
+		std::ostream	&os_;
+	};
+
+private:
+	Level	level_;
+};
+
+
+
+Logger &getLoggerSingleton();
+
+inline auto const &getLogger(){
+	return getLoggerSingleton();
+}
+
+#endif
+

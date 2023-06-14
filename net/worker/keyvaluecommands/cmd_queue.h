@@ -110,7 +110,7 @@ namespace net::worker::commands::Queue{
 				if (it->isOK()){
 					// case 2.1. control key is valid, go to case 3
 
-					log__<LogLevel::DEBUG>("Control key", key, "is valid");
+					getLogger().debug() << "Control key" << key << "is valid";
 
 					return collect_(
 						key,
@@ -122,7 +122,7 @@ namespace net::worker::commands::Queue{
 				}else{
 					// case 2.2. control key is NOT valid, go to case 3
 
-					log__<LogLevel::DEBUG>("Control key", key, "is NOT valid");
+					getLogger().debug() << "Control key" << key << "is NOT valid";
 
 					++it;
 				}
@@ -130,7 +130,7 @@ namespace net::worker::commands::Queue{
 
 			// case 3, search next keys...
 
-			log__<LogLevel::DEBUG>("Next key for control key", key);
+			getLogger().debug() << "Next key for control key" << key;
 
 			return collect_(
 				key,
@@ -151,18 +151,18 @@ namespace net::worker::commands::Queue{
 				auto const &key = it->getKey();
 
 				if (! same_prefix(control_key, key)){
-					log__<LogLevel::DEBUG>("New prefix, done");
+					getLogger().debug() << "New prefix, done";
 					return finalizeEnd_(control_key, list, result);
 				}
 
 				if (it->isOK()){
-					log__<LogLevel::DEBUG>("Valid key, done");
+					getLogger().debug() << "Valid key, done";
 					auto const &val = it->getVal();
 					return finalizeOK_(control_key, key, val, list, result, iterations);
 				}
 
 				if (++iterations > ITERATIONS){
-					log__<LogLevel::DEBUG>("Lots of iterations, done");
+					getLogger().debug() << "Lots of iterations, done";
 					return finalizeTryAgain_(control_key, key, list, result);
 				}
 			}

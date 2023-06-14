@@ -195,7 +195,7 @@ constexpr void proceedInsertHint(List &list, const Pair *pair, PairFactory &fact
 
 	list.mutable_notify(pair, msg);
 
-	log__<LogLevel::WARNING>("inserting hint for key", factory.getKey());
+	getLogger().debug() << "inserting hint for key" << factory.getKey();
 }
 
 template<class PairFactory, class List, typename ...Args>

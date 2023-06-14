@@ -11,7 +11,7 @@ include Makefile.sub
 all: $(MY_TARGETS)
 
 
-PAIR_OBJ = $(O)pair.o $(O)mytime.o
+PAIR_OBJ = $(O)pair.o $(O)mytime.o $(O)logger.o
 
 
 $(A)test_pair: $(O)test_pair.o $(PAIR_OBJ)

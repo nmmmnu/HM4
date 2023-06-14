@@ -14,7 +14,7 @@ bool DirectoryListLoader::checkIfLoaderNeed(std::string_view const s){
 
 void DirectoryListLoader::checkAndRefresh_(){
 	if (checkIfLoaderNeed(path_) == false){
-		log__<LogLevel::ERROR>("Refusing to open path without wildcard", path_);
+		getLogger().fatal() << "Refusing to open path without wildcard" << path_;
 		exit(1);
 	}
 

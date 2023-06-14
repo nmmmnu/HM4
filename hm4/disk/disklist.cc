@@ -23,10 +23,6 @@ struct SmallNode{
 
 static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 
-constexpr auto LL_OPEN		= LogLevel::WARNING		;
-constexpr auto LL_OPEN_MMAP	= LogLevel::NOTICE		;
-constexpr auto LL_SEARCH	= LogLevel::DEBUG_NOTICE	;
-
 // ==============================
 
 namespace{
@@ -90,7 +86,7 @@ namespace{
 		const auto &[found, it] = binarySearch(nodes, nodesEnd, hkey, comp);
 
 		if (it == nodesEnd){
-			log__<LL_SEARCH>("Not found, in most right pos");
+			getLogger().debug() << "Not found, in most right pos";
 
 			return { false, list.ra_end() };
 		}
@@ -99,17 +95,17 @@ namespace{
 		DiskList::size_type const listPos = betoh<uint64_t>(it->pos);
 
 		if ( listPos >= list.size() ){
-			log__<LogLevel::WARNING>("Hotline corruption detected. Advice Hotline removal.");
+			getLogger().error() << "Hotline corruption detected. Advice Hotline removal.";
 
 			return searchBinary(key, list);
 		}
 
 		if (found == false){
-			log__<LL_SEARCH>(
-				"Not found",
-				"pos", listPos,
-				"key", HPair::toStringView(it->key, std::false_type{})
-			);
+			getLogger().debug()
+				<<	"Not found"
+				<<	"pos" << listPos
+				<<	"key" << HPair::toStringView(it->key, std::false_type{})
+			;
 
 			return { false,  { list, listPos } };
 		}
@@ -122,7 +118,7 @@ namespace{
 			// if key.size() == HPair::HKey,
 			// this does not mean that key is found...
 
-			log__<LL_SEARCH>("Found, direct hit at pos", listPos);
+			getLogger().debug() << "Found, direct hit at pos" << listPos;
 
 			return { true, { list, listPos } };
 		}
@@ -132,7 +128,7 @@ namespace{
 
 			bool const found = list[listPos].equalsX<HPair::N>(key);
 
-			log__<LL_SEARCH>("Probing value at pos", listPos, found ? "Found" : "Not Found");
+			getLogger().debug() << "Probing value at pos" << listPos << (found ? "Found" : "Not Found");
 
 			return { found, { list, listPos } };
 		}
@@ -145,17 +141,17 @@ namespace{
 
 		auto listPosLast = it + 1 == nodesEnd ? list.size() : betoh<uint64_t>( (it + 1)->pos);
 
-		log__<LL_SEARCH>(
-			"Proceed with Binary Search with same prefix", listPos, listPosLast,
-			"Hotline Key prefix", HPair::toStringView(it->key, std::false_type{})
-		);
+		getLogger().debug()
+			<<	"Proceed with Binary Search with same prefix" << listPos << listPosLast
+			<<	"Hotline Key prefix" << HPair::toStringView(it->key, std::false_type{})
+		;
 
 		return searchBinary<HPair::N>(key, list, listPos, listPosLast);
 	}
 
 	[[maybe_unused]]
 	void log__mmap_file__(std::string_view const filename, bool const mmap){
-		log__<LL_OPEN_MMAP>("mmap", filename, mmap ? "Success" : "Error");
+		getLogger().notice() << "mmap" << filename << (mmap ? "Success" : "Error");
 	}
 
 } // anonymous namespace
@@ -172,7 +168,7 @@ bool DiskList::openDataOnly_(std::string_view const filename){
 }
 
 bool DiskList::openDataOnly_with_bool(std::string_view const filename, bool const aligned){
-	log__<LogLevel::WARNING>("Open disktable for repair", filename);
+	getLogger().warning() << "Open disktable for repair" << filename;
 
 	aligned_ = aligned;
 
@@ -188,7 +184,7 @@ namespace{
 
 		// Non sorted files are no longer supported
 		if (metadata.sorted() == false){
-			log__<LogLevel::ERROR>("Non sorted files are no longer supported. Please replay the file as binlog.");
+			getLogger().fatal() << "Non sorted files are no longer supported. Please replay the file as binlog.";
 			return false;
 		}
 
@@ -199,7 +195,7 @@ namespace{
 
 
 bool DiskList::openForward_(std::string_view const filename){
-	log__<LL_OPEN>("Open disktable forward only", filename, "ID", id_);
+	getLogger().notice() << "Open disktable forward only" << filename << "ID" << id_;
 
 	metadata_.open(filenameMeta_string_view(filename));
 
@@ -215,7 +211,7 @@ bool DiskList::openForward_(std::string_view const filename){
 }
 
 bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice const advice){
-	log__<LL_OPEN>("Open disktable", filename, "ID", id_);
+	getLogger().notice() << "Open disktable" << filename << "ID" << id_;
 
 	metadata_.open(filenameMeta_string_view(filename));
 
@@ -245,14 +241,14 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 	if (openMinimal_(filename, advice) == false)
 		return false;
 
-	log__<LL_OPEN>("Open additional files");
+	getLogger().notice() << "Open additional files";
 
 	// ==============================
 
 	mLine_.open(filenameLine(filename));
 
 	if (mLine_.sizeArray<SmallNode>() <= 1){
-		log__<std::min(LogLevel::NOTICE, LL_OPEN)>("Hotline too small. Ignoring.");
+		getLogger().warning() << "Hotline too small. Ignoring.";
 		mLine_.close();
 	}
 
@@ -287,7 +283,7 @@ bool DiskList::open(std::string_view const filename, MMAPFile::Advice const advi
 
 void DiskList::close(){
 	if (mData_)
-		log__<LL_OPEN>("Close disktable", "ID", id_);
+		getLogger().notice() << "Close disktable" << "ID" << id_;
 
 	mIndx_.close();
 	mData_.close();
@@ -393,20 +389,20 @@ auto DiskList::ra_find(std::string_view const key, std::bool_constant<B> const e
 	// made this way to hide BinarySearchResult<iterator> type
 	switch(searchMode_){
 	case SearchMode::BTREE: {
-			log__<LL_SEARCH>("btree");
+			getLogger().debug() << "btree";
 			auto const x = searchBTree(key, *this);
 			return find_fix(x, *this, exact);
 		}
 
 	case SearchMode::HOTLINE: {
-			log__<LL_SEARCH>("hotline");
+			getLogger().debug() << "hotline";
 			auto const x = searchHotLine(key, *this, mLine_);
 			return find_fix(x, *this, exact);
 		}
 
 	default:
 	case SearchMode::BINARY: {
-			log__<LL_SEARCH>("binary");
+			getLogger().debug() << "binary";
 			auto const x = searchBinary(key, *this);
 			return find_fix(x, *this, exact );
 		}
@@ -475,7 +471,7 @@ public:
 		try{
 			return btreeSearch_();
 		}catch(const BTreeAccessError &e){
-			log__<LL_SEARCH>("Problem, switch to binary search (1)");
+			getLogger().debug() << "Problem, switch to binary search (1)";
 			return searchBinary(key_, list_);
 		}
 	}
@@ -491,7 +487,7 @@ private:
 
 		size_t pos = 0;
 
-		log__<LL_SEARCH>("BTREE at ", pos);
+		getLogger().debug() << "BTREE at " << pos;
 
 		while(pos < nodesCount){
 			const auto x = levelOrderBinarySearch_( nodes[pos] );
@@ -507,20 +503,20 @@ private:
 				// Go Right
 				pos = pos * branches + branches;
 
-				log__<LL_SEARCH>("BTREE R:", pos);
+				getLogger().debug() << "BTREE R:" << pos;
 			}else{
 				// Go Left
 				pos = pos * branches + x.node_index + 1;
 
-				log__<LL_SEARCH>("BTREE L:", pos, ", node branch", x.node_index);
+				getLogger().debug() << "BTREE L:" << pos << ", node branch" << x.node_index;
 			}
 		}
 
 		// leaf or similar
 		// fallback to binary search :)
 
-		log__<LL_SEARCH>("BTREE LEAF:", pos);
-		log__<LL_SEARCH>("Fallback to binary search", start, '-', end, ", width", end - start);
+		getLogger().debug() << "BTREE LEAF:" << pos;
+		getLogger().debug() << "Fallback to binary search" << start << '-' << end << ", width" << (end - start);
 
 		return searchBinary(key_, list_, start, end);
 	}
@@ -535,7 +531,7 @@ private:
 		do{
 			const auto x = accessNodeValue_( node.values[node_pos] );
 
-			log__<LL_SEARCH>("\tNode Value", node_pos, "[", ll[node_pos], "], Key:", x.key);
+			getLogger().debug() << "\tNode Value" << node_pos << "[" << ll[node_pos] << "], Key:" << x.key;
 
 			int const cmp = x.key.compare(key_);
 
@@ -551,7 +547,7 @@ private:
 
 				start = x.dataid + 1;
 
-				log__<LL_SEARCH>("\t\tR:", node_pos, "BS:", start, '-', end);
+				getLogger().debug() << "\t\tR:" << node_pos << "BS:" << start << '-' << end;
 			}else if (cmp > 0){
 				node_index = ll[node_pos];
 
@@ -560,11 +556,11 @@ private:
 
 				end = x.dataid;
 
-				log__<LL_SEARCH>("\t\tL:", node_pos, "BS:", start, '-', end);
+				getLogger().debug() << "\t\tL:" << node_pos << "BS:" << start << '-' << end;
 			}else{
 				// found
 
-				log__<LL_SEARCH>("\t\tFound at ", node_pos);
+				getLogger().debug() << "\t\tFound at" << node_pos;
 
 				return { std::true_type{}, x.dataid };
 			}

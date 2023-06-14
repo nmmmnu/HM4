@@ -28,9 +28,13 @@ namespace flushlist_impl_{
 		if constexpr(std::is_same_v<ListLoader, std::nullptr_t>){
 			return true;
 		}else{
-			log__<LogLevel::WARNING>("Reloading data...");
-			if (loader)
+			if (loader){
+				getLogger().notice() << "Reloading data...";
 				loader->refresh();
+			}else{
+				getLogger().notice() << "No need for reloading data...";
+			}
+
 			return true;
 		}
 	}

@@ -46,11 +46,11 @@ public:
 
 	void flush(){
 		if (empty(*list1_)){
-			log__<LogLevel::WARNING>("No data for flushing.");
+			getLogger().notice() << "No data for flushing.";
 			return;
 		}
 
-		log__<LogLevel::WARNING>("Start Flushing data...");
+		getLogger().notice() << "Start Flushing data...";
 
 		// we have to switch lists, so need to join()
 		thread_.join();
@@ -93,11 +93,11 @@ private:
 		[[maybe_unused]]
 		std::string_view const id = fg ? "Foreground" : "Background";
 
-		log__<LogLevel::WARNING>("TH#", id, "Flushing data...", "List record(s): ", list.size(), "List size: ", list.bytes());
+		getLogger().notice() << "TH#" << id << "Flushing data..." << "List record(s): " << list.size() << "List size: " << list.bytes();
 
 		flushlist_impl_::save(list, flusher_);
 
-		log__<LogLevel::WARNING>("TH#", id, "Flushing done");
+		getLogger().notice() << "TH#" << id << "Flushing done";
 	}
 
 private:
