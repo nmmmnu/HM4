@@ -5,11 +5,12 @@
 
 struct Logger{
 	enum Level{
-		FATAL	= 0,
-		ERROR	= 1,
-		WARNING	= 2,
-		NOTICE	= 3,
-		DEBUG	= 4
+		STARTUP	= 0,
+		FATAL	= 1,
+		ERROR	= 2,
+		WARNING	= 3,
+		NOTICE	= 4,
+		DEBUG	= 5
 	};
 
 	Logger(Level level = DEBUG) : level_(level){}
@@ -30,6 +31,7 @@ private:
 	*/
 
 	constexpr static inline const char *banner[]{
+		"\033[1;37;42m"	"[STARTUP]"	"\033[0m",
 		"\033[1;37;41m"	"[ FATAL ]"	"\033[0m",
 		"\033[1;31m"	"[ ERROR ]"	"\033[0m",
 		"\033[1;33m"	"[WARNING]"	"\033[0m",
@@ -43,6 +45,11 @@ public:
 		bool const writting = level <= level_;
 
 		return LoggerStream(banner[level], writting);
+	}
+
+	[[nodiscard]]
+	auto startup() const{
+		return get(STARTUP	);
 	}
 
 	[[nodiscard]]
@@ -80,8 +87,10 @@ private:
 					writting_	(writting	),
 					os_		(os		){
 
-			if (writting_)
-				os_ << banner << ' ';
+			if (writting_){
+				outputTime_();
+				os_ << ' ' << banner << ' ';
+			}
 		}
 
 		~LoggerStream(){
@@ -96,6 +105,9 @@ private:
 
 			return *this;
 		}
+
+	private:
+		void outputTime_();
 
 	private:
 		bool		writting_;

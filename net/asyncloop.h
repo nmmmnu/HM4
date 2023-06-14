@@ -104,15 +104,10 @@ private:
 
 private:
 	void log_(const char *s, int const fd = -1) const{
-		if (getLogger().getLevel() >= Logger::NOTICE)
-			return;
-
-		// printf suppose to be faster than std::cout
-
 		if (fd < 0)
-			fprintf(stderr, "%-40s | clients: %5zu | spare_pool: %5zu \n",		s, connectedClients(), sparePoolSize() );
+			getLogger().debug() << s << '|' << "clients:" << connectedClients() << '|' << "spare pool:" << sparePoolSize();
 		else
-			fprintf(stderr, "%-40s | clients: %5zu | spare_pool: %5zu | fd: %5d\n",	s, connectedClients(), sparePoolSize(), fd);
+			getLogger().debug() << s << '|' << "clients:" << connectedClients() << '|' << "spare pool:" << sparePoolSize() << '|' << "fd:" << fd;
 	}
 
 private:

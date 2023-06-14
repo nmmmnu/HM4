@@ -67,7 +67,7 @@ namespace{
 	}
 
 	void printError(const char *msg){
-		fmt::print(stderr, "{}\n", msg);
+		getLogger().fatal() << msg;
 		exit(1);
 	}
 
@@ -76,26 +76,29 @@ namespace{
 	template<class Factory>
 	int main2(const MyOptions &opt, Factory &&adapter_factory);
 
-
 	template<class Factory, typename ...Args>
-	int fLists(const MyOptions &opt, Factory &&adapter_factory, Args &&... args){
-		fmt::print(std::clog, std::forward<Args>(args)...);
+	int fLists(const MyOptions &opt, Factory &&adapter_factory, Args &&...args){
+		if constexpr(1){
+			auto stream = getLogger().startup();
+
+			( (stream << args), ...);
+		}
+
 		return main2(opt, std::move(adapter_factory));
 	}
 
 	int select_ImmutableLists(const MyOptions &opt){
 		using hm4::listloader::DirectoryListLoader;
 
-		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path))
-			return fLists(
-				opt, DBAdapterFactory::Immutable{ opt.db_path },
-				"Starting immutable server...\n"
+		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path)){
+			return fLists(opt, DBAdapterFactory::Immutable{ opt.db_path },
+					"Starting immutable server..."
 			);
-		else
-			return fLists(
-				opt, DBAdapterFactory::SingleList{ opt.db_path },
-				"Starting singlelist server...\n"
+		}else{
+			return fLists(opt, DBAdapterFactory::SingleList{ opt.db_path },
+					"Starting singlelist server..."
 			);
+		}
 	}
 
 	MyArenaAllocator createAllocator(const MyOptions &opt){
@@ -111,7 +114,7 @@ namespace{
 
 		MyArenaAllocator allocator{ max_memlist_arena * MB };
 
-		fmt::print(std::clog, "Creating {} with size of {} MB\n", allocator.getName(), max_memlist_arena);
+		getLogger().notice() << "Creating" << allocator.getName() << "with size of" << max_memlist_arena << "MB";
 
 		return allocator;
 	}
@@ -146,14 +149,14 @@ namespace{
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator);
 
-				return fLists(
-					opt, DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
-					"Starting {} server with {}...\n", "mutable concurrent binlog", allocatorName
+				return fLists(opt, DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator>{
+								opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
+								"Starting", "mutable concurrent binlog", "server with", allocatorName, "..."
 				);
 			}else{
-				return fLists(
-					opt, DBAdapterFactory::MutableConcurrent<MyArenaAllocator>{   opt.db_path, allocator1, allocator2 },
-					"Starting {} server with {}...\n", "mutable concurrent", allocatorName
+				return fLists(opt, DBAdapterFactory::MutableConcurrent<MyArenaAllocator>{
+								opt.db_path, allocator1, allocator2 },
+								"Starting", "mutable concurrent", "server with", allocatorName, "..."
 				);
 			}
 		}else{
@@ -169,14 +172,12 @@ namespace{
 
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 
-				return fLists(
-					opt, DBAdapterFactory::MutableBinLog<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, syncOprions, allocator },
-					"Starting {} server with {}...\n", "mutable binlog", allocatorName
+				return fLists(opt, DBAdapterFactory::MutableBinLog<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, syncOprions, allocator },
+							"Starting", "mutable binlog", "server with", allocatorName, "..."
 				);
 			}else{
-				return fLists(
-					opt, DBAdapterFactory::Mutable<MyArenaAllocator>{   opt.db_path, allocator },
-					"Starting {} server with {}...\n", "mutable", allocatorName
+				return fLists(opt, DBAdapterFactory::Mutable<MyArenaAllocator>{   opt.db_path, allocator },
+							"Starting", "mutable", "server with", allocatorName, "..."
 				);
 			}
 		}
@@ -261,7 +262,7 @@ namespace{
 			printError("Can not create server socket...");
 
 		if (opt.tcp_reuseport)
-			fmt::print(std::clog, "Warning: Server start with SO_REUSEPORT.\n");
+			getLogger().warning() << "Server start with SO_REUSEPORT.";
 
 		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS		);
 		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
@@ -375,8 +376,7 @@ namespace{
 
 
 	void replayBinlogFile_(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
-
-		fmt::print(std::clog, "Binlog file exists. Trying to replay...\n");
+		getLogger().warning() << "Binlog file exists. Trying to replay...";
 
 		using hm4::disk::DiskList;
 
@@ -385,7 +385,7 @@ namespace{
 		auto const result = input.openDataOnly(file, hm4::Pair::WriteOptions::ALIGNED);
 
 		if (! result){
-			fmt::print(std::clog, "Replay failed.\n");
+			getLogger().error() << "Replay failed.";
 			return;
 		}
 
@@ -403,7 +403,7 @@ namespace{
 
 		} /* d-tor of list kicks here */
 
-		fmt::print(std::clog, "Replay done.\n");
+		getLogger().notice() << "Replay done.";
 	}
 
 	void replayBinlogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){

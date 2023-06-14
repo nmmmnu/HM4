@@ -47,7 +47,7 @@ namespace net::worker{
 		void registerModule(RegisterPack &pack){
 			using M = Module<Protocol, DBAdapter, RegisterPack>;
 
-			getLogger().notice() << "Loading" << M::name << "module...";
+			getLogger().startup() << "Loading" << M::name << "module...";
 			M::load(pack);
 		}
 
