@@ -38,9 +38,10 @@ public:
 					ConcurrentFlushList(list1, list2, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~ConcurrentFlushList(){
-		save_(*list1_);
+		// future improvement
+		thread_.join();
 
-		// ScopedThread joins now.
+		save_(*list1_);
 	}
 
 	void flush(){

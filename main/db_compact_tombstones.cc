@@ -170,7 +170,7 @@ namespace{
 
 
 	auto prepareSmartMergeFileList(MyOptions const &opt){
-		const char *mask = " - {:<5} {:<62} {:>8} | {:>8} | {:>8}\n";
+		const char *mask = " - {:<25} | {:<62} | {:>8} | {:>8} | {:>8}\n";
 
 		constexpr std::string_view filename_none = "n/a";
 
@@ -193,15 +193,20 @@ namespace{
 			auto const [time_min, time_max] = getInfo(filename);
 
 			if (time < time_min){
+				// new segment
 				time = time_max;
 
 				filename_leader = filename;
 
-				fmt::print(mask, "LEAD", filename, x(time_min, buffer[0]), x(time_max, buffer[1]), x(time, buffer[2])	);
+				fmt::print(mask, "New segment / lead",		filename, x(time_min, buffer[0]), x(time_max, buffer[1]), x(time, buffer[2])	);
+			}else if (time > time_max){
+				// past segment skip...
+				fmt::print(mask, "Past segment / skip",		filename, x(time_min, buffer[0]), x(time_max, buffer[1]), x(time, buffer[2])	);
 			}else{
+				// overlapping segment
 				filename_leader = filename_none;
 
-				fmt::print(mask, "RESET", filename, x(time_min, buffer[0]), x(time_max, buffer[1]), x(time, buffer[2])	);
+				fmt::print(mask, "Overlapping segment / reset",	filename, x(time_min, buffer[0]), x(time_max, buffer[1]), x(time, buffer[2])	);
 			}
 		}
 
