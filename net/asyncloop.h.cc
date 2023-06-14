@@ -45,13 +45,16 @@ AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
 
 template<class Selector, class Worker, class SparePool>
 void AsyncLoop<Selector, Worker, SparePool>::print() const{
-	const char *mask = "%-20s = %zu\n";
-	fprintf(stderr, mask, "max clients"		, conf_maxClients_		);
-	fprintf(stderr, mask, "min spare pool"		, conf_minSparePoolSize_	);
-	fprintf(stderr, mask, "max spare pool"		, conf_maxSparePoolSize_	);
-	fprintf(stderr, mask, "timeout"			, conf_connectionTimeout_	);
-	fprintf(stderr, mask, "buffer capacity"		, conf_bufferCapacity_		);
-	fprintf(stderr, mask, "max request size"	, conf_maxRequestSize_		);
+	auto _ = [](auto k, auto v){
+		getLogger().startup().fmt("{:20} = {:12}", k, v);
+	};
+
+	_("max clients"		, conf_maxClients_		);
+	_("min spare pool"	, conf_minSparePoolSize_	);
+	_("max spare pool"	, conf_maxSparePoolSize_	);
+	_("timeout"		, conf_connectionTimeout_	);
+	_("buffer capacity"	, conf_bufferCapacity_		);
+	_("max request size"	, conf_maxRequestSize_		);
 }
 
 // ===========================

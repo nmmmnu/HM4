@@ -13,6 +13,9 @@
 
 #include "logger.h"
 
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
+
 namespace net{
 
 template<class Selector, class Worker, class SparePool = NullSparePool>
@@ -105,9 +108,9 @@ private:
 private:
 	void log_(const char *s, int const fd = -1) const{
 		if (fd < 0)
-			getLogger().debug() << s << '|' << "clients:" << connectedClients() << '|' << "spare pool:" << sparePoolSize();
+			getLogger().debug().fmt("{:40} | clients: {:5} | spare_pool: {:5}",		s, connectedClients(), sparePoolSize()		);
 		else
-			getLogger().debug() << s << '|' << "clients:" << connectedClients() << '|' << "spare pool:" << sparePoolSize() << '|' << "fd:" << fd;
+			getLogger().debug().fmt("{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}",	s, connectedClients(), sparePoolSize(), fd	);
 	}
 
 private:

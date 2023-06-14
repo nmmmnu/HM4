@@ -418,7 +418,7 @@ namespace net::worker::commands::CMS{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "hll";
+		constexpr inline static std::string_view name	= "cms";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,

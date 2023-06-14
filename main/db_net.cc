@@ -78,11 +78,7 @@ namespace{
 
 	template<class Factory, typename ...Args>
 	int fLists(const MyOptions &opt, Factory &&adapter_factory, Args &&...args){
-		if constexpr(1){
-			auto stream = getLogger().startup();
-
-			( (stream << args), ...);
-		}
+		getLogger().startup().fmt(args...);
 
 		return main2(opt, std::move(adapter_factory));
 	}
@@ -92,11 +88,11 @@ namespace{
 
 		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path)){
 			return fLists(opt, DBAdapterFactory::Immutable{ opt.db_path },
-					"Starting immutable server..."
+					"Starting {} server...", "immutable"
 			);
 		}else{
 			return fLists(opt, DBAdapterFactory::SingleList{ opt.db_path },
-					"Starting singlelist server..."
+					"Starting {} server...", "singlelist"
 			);
 		}
 	}
@@ -114,7 +110,7 @@ namespace{
 
 		MyArenaAllocator allocator{ max_memlist_arena * MB };
 
-		getLogger().notice() << "Creating" << allocator.getName() << "with size of" << max_memlist_arena << "MB";
+		getLogger().notice().fmt("Creating {} with size of {} MB", allocator.getName(), max_memlist_arena);
 
 		return allocator;
 	}
@@ -151,12 +147,12 @@ namespace{
 
 				return fLists(opt, DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator>{
 								opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
-								"Starting", "mutable concurrent binlog", "server with", allocatorName, "..."
+								"Starting {} server with {}...", "mutable concurrent binlog", allocatorName
 				);
 			}else{
 				return fLists(opt, DBAdapterFactory::MutableConcurrent<MyArenaAllocator>{
 								opt.db_path, allocator1, allocator2 },
-								"Starting", "mutable concurrent", "server with", allocatorName, "..."
+								"Starting {} server with {}...", "mutable concurrent", allocatorName
 				);
 			}
 		}else{
@@ -173,11 +169,11 @@ namespace{
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 
 				return fLists(opt, DBAdapterFactory::MutableBinLog<MyArenaAllocator>{ opt.db_path, opt.binlog_path1, syncOprions, allocator },
-							"Starting", "mutable binlog", "server with", allocatorName, "..."
+							"Starting {} server with {}...", "mutable binlog", allocatorName
 				);
 			}else{
 				return fLists(opt, DBAdapterFactory::Mutable<MyArenaAllocator>{   opt.db_path, allocator },
-							"Starting", "mutable", "server with", allocatorName, "..."
+							"Starting {} server with {}...", "mutable", allocatorName
 				);
 			}
 		}

@@ -2,6 +2,9 @@
 #define MY_LOGGER_H_
 
 #include <iostream>
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
+#include "fmt/ostream.h"
 
 struct Logger{
 	enum Level{
@@ -104,6 +107,12 @@ private:
 				os_ << a << ' ';
 
 			return *this;
+		}
+
+		template<typename ...Args>
+		void fmt(Args &&...args){
+			if (writting_)
+				fmt::print(os_, args...);
 		}
 
 	private:
