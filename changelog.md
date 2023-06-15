@@ -119,3 +119,7 @@ Changelog
 -	implement tombstone via expire (0x0FFFFFFFF), refactor hints
 -	new commands PERSISTDELETED / PERSISTEXPIRED, DUMP
 -	new tool db_compact_tombstone - propose tombstone removal merge - still in test stage
+-	migrate to new version of format library FMT
+-	new log system
+-	new config options crontab_server_info and log_level
+
