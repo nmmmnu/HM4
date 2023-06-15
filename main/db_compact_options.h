@@ -1,7 +1,7 @@
 #include <cstdint>
 
 #define FMT_HEADER_ONLY
-#include "fmt/printf.h"
+#include "fmt/core.h"
 
 #include "inifile.h"
 #include "mystring.h"

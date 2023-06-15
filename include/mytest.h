@@ -2,7 +2,7 @@
 #define _MY_TEST_H
 
 #define FMT_HEADER_ONLY
-#include "fmt/printf.h"
+#include "fmt/core.h"
 
 #include <cstdlib>	// exit
 

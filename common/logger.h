@@ -3,7 +3,7 @@
 
 #include <iostream>
 #define FMT_HEADER_ONLY
-#include "fmt/printf.h"
+#include "fmt/core.h"
 #include "fmt/ostream.h"
 
 struct Logger{
@@ -15,6 +15,8 @@ struct Logger{
 		NOTICE	= 4,
 		DEBUG	= 5
 	};
+
+	constexpr static Level DEFAULT_LEVEL = NOTICE;
 
 	Logger(Level level = DEBUG) : level_(level){}
 
@@ -80,8 +82,28 @@ public:
 		return get(DEBUG	);
 	}
 
+	[[nodiscard]]
 	auto getLevel() const{
 		return level_;
+	}
+
+	void setLevel(Level level){
+		level_ = level;
+	}
+
+	void setLevel(unsigned level){
+		level_ = [level](){
+			switch(level){
+			case 0:  return STARTUP	;
+			case 1:  return FATAL	;
+			case 2:  return ERROR	;
+			case 3:  return WARNING	;
+			case 4:  return NOTICE	;
+			case 5:  return DEBUG	;
+			};
+
+			return DEFAULT_LEVEL;
+		}();
 	}
 
 private:
@@ -90,10 +112,7 @@ private:
 					writting_	(writting	),
 					os_		(os		){
 
-			if (writting_){
-				outputTime_();
-				os_ << ' ' << banner << ' ';
-			}
+			outputBanner_(banner);
 		}
 
 		~LoggerStream(){
@@ -116,7 +135,7 @@ private:
 		}
 
 	private:
-		void outputTime_();
+		void outputBanner_(const char *banner);
 
 	private:
 		bool		writting_;

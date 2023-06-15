@@ -7,7 +7,7 @@
 #include "stdallocator.h"
 
 #define FMT_HEADER_ONLY
-#include "fmt/printf.h"
+#include "fmt/core.h"
 
 namespace MyAllocator{
 

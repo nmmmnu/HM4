@@ -244,6 +244,17 @@ namespace{
 		using MySparePool	= net::HeapSparePool;
 		using MyLoop		= net::AsyncLoop<MySelector, MyWorker, MySparePool>;
 
+		if (opt.log_level >= 2){
+			getLogger().startup().fmt("Server start with log level {}.", opt.log_level);
+		}else{
+			getLogger().startup().fmt(
+						"Server start with very low log level {}."
+						"You may want to increase it at least to ERROR level.", opt.log_level
+			);
+		}
+
+		getLoggerSingleton().setLevel(opt.log_level);
+
 		if (opt.port == 0)
 			printError("Can not create server socket on port zero...");
 
@@ -312,6 +323,10 @@ namespace{
 
 		auto const crontab_table_maintainance	= cronSet(opt.crontab_table_maintainance	);
 
+		MyTimer timer_server_info;
+
+		auto const crontab_server_info		= cronSet(opt.crontab_server_info		);
+
 		while( loop.process() && signal_processing(guard()) ){
 			crontab(timer_reload,			crontab_reload,			[&adapter_factory](){
 				adapter_factory().reload();
@@ -319,6 +334,10 @@ namespace{
 
 			crontab(timer_table_maintainance,	crontab_table_maintainance,	[&adapter_factory](){
 				adapter_factory()->crontab();
+			});
+
+			crontab(timer_server_info,		crontab_server_info,		[&loop](){
+				loop.printInfo("Server connection info");
 			});
 		}
 

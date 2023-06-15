@@ -14,7 +14,7 @@
 #include "logger.h"
 
 #define FMT_HEADER_ONLY
-#include "fmt/printf.h"
+#include "fmt/core.h"
 
 namespace net{
 
@@ -46,6 +46,10 @@ private:
 
 	using WorkerStatus		= worker::WorkerStatus;
 
+
+	constexpr static const char *FMT_MASK   = "{:40} | clients: {:5} | spare_pool: {:5}"		;
+	constexpr static const char *FMT_MASK_2 = "{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}"	;
+
 public:
 	AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
 				uint32_t conf_maxClients		= MAX_CLIENTS,
@@ -69,6 +73,10 @@ public:
 	}
 
 	void print() const;
+
+	void printInfo(const char *msg) const{
+		getLogger().notice().fmt(FMT_MASK, msg, connectedClients(), sparePoolSize() );
+	}
 
 private:
 	enum class DisconnectStatus{
@@ -106,11 +114,12 @@ private:
 	void expireFD_();
 
 private:
-	void log_(const char *s, int const fd = -1) const{
-		if (fd < 0)
-			getLogger().debug().fmt("{:40} | clients: {:5} | spare_pool: {:5}",		s, connectedClients(), sparePoolSize()		);
-		else
-			getLogger().debug().fmt("{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}",	s, connectedClients(), sparePoolSize(), fd	);
+	void log_(const char *msg) const{
+		getLogger().debug().fmt(FMT_MASK,  msg, connectedClients(), sparePoolSize()		);
+	}
+
+	void log_(const char *msg, int const fd) const{
+		getLogger().debug().fmt(FMT_MASK_2, msg, connectedClients(), sparePoolSize(), fd	);
 	}
 
 private:
