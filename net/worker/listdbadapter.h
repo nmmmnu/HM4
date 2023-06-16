@@ -24,9 +24,14 @@ public:
 public:
 	// System Methods
 
+	void connection_notify(uint64_t conn, uint64_t spare){
+		connections		= conn;
+		connections_spare	= spare;
+	}
+
 	template<size_t N>
 	std::string_view info(std::array<char, N> &str) const{
-		to_string_buffer_t buffer[9];
+		to_string_buffer_t buffer[11];
 
 		if constexpr(!MUTABLE){
 			int i = 0;
@@ -39,6 +44,10 @@ public:
 
 				"# Server"											"\n",
 				"Version          : ", version()					,			"\n",
+
+			"\n"	"# Network"											"\n",
+				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
+				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
 
 			"\n"	"# Pair Limits"											"\n",
 				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[i++]),	"\n",
@@ -73,6 +82,10 @@ public:
 
 				"# Server"											"\n",
 				"Version          : ", version()					,			"\n",
+
+			"\n"	"# Network"											"\n",
+				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
+				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
 
 			"\n"	"# Pair Limits"											"\n",
 				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[i++]),	"\n",
@@ -140,8 +153,11 @@ private:
 
 private:
 	List		&list_;
-	CommandSave	*cmdSave_	= nullptr;
-	CommandReload	*cmdReload_	= nullptr;
+	CommandSave	*cmdSave_		= nullptr;
+	CommandReload	*cmdReload_		= nullptr;
+
+	uint64_t	connections		= 0;
+	uint64_t	connections_spare	= 0;
 };
 
 #endif

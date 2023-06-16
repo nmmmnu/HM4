@@ -93,7 +93,10 @@ private:
 	};
 
 private:
+	template<bool NL = true>
 	bool client_Connect_(int fd);
+
+	template<bool NL = true>
 	void client_Disconnect_(int fd, DisconnectStatus error);
 
 	void client_Read_(int fd);
@@ -108,6 +111,13 @@ private:
 
 	void client_SocketOps_(int fd, ssize_t size);
 
+	void notify_worker_(){
+		worker_.connection_notify(
+			connectedClients(),
+			sparePoolSize()
+		);
+	}
+
 private:
 	bool insertFD_(int fd);
 	void removeFD_(int fd);
@@ -119,7 +129,7 @@ private:
 	}
 
 	void log_(const char *msg, int const fd) const{
-		getLogger().debug().fmt(FMT_MASK_2, msg, connectedClients(), sparePoolSize(), fd	);
+		getLogger().notice().fmt(FMT_MASK_2, msg, connectedClients(), sparePoolSize(), fd	);
 	}
 
 private:

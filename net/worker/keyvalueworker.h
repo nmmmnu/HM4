@@ -154,6 +154,10 @@ namespace net::worker{
 			return translate_(result, buffer);
 		}
 
+		void connection_notify(uint64_t conn, uint64_t spare){
+			db_.connection_notify(conn, spare);
+		}
+
 	private:
 		using MyBase		= commands::Base<Protocol, DBAdapter>;
 		using Storage		= std::vector<std::unique_ptr<MyBase> >;

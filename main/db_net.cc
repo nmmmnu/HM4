@@ -258,7 +258,7 @@ namespace{
 		if (opt.port == 0)
 			printError("Can not create server socket on port zero...");
 
-		net::options_type const socket_options = opt.tcp_reuseport ?
+		auto const socket_options = opt.tcp_reuseport ?
 				net::SOCKET_DEFAULTOPT_TCP_REUSE :
 				net::SOCKET_DEFAULTOPT_TCP
 		;
@@ -310,35 +310,38 @@ namespace{
 			}
 		};
 
-
-		auto cronSet = [min = opt.crontab_min_time](auto x){
-			return x == 0 ? 0 : std::max(x, min);
+		auto crontab_reload = mytime::CrontabControl{
+			opt.crontab_reload,
+			opt.crontab_min_time
 		};
 
-		MyTimer timer_reload;
+		auto crontab_table_maintainance = mytime::CrontabControl{
+			opt.crontab_table_maintainance,
+			opt.crontab_min_time
+		};
 
-		auto const crontab_reload		= cronSet(opt.crontab_reload			);
-
-		MyTimer timer_table_maintainance;
-
-		auto const crontab_table_maintainance	= cronSet(opt.crontab_table_maintainance	);
-
-		MyTimer timer_server_info;
-
-		auto const crontab_server_info		= cronSet(opt.crontab_server_info		);
+		auto crontab_server_info = mytime::CrontabControl{
+			opt.crontab_server_info,
+			opt.crontab_min_time
+		};
 
 		while( loop.process() && signal_processing(guard()) ){
-			crontab(timer_reload,			crontab_reload,			[&adapter_factory](){
-				adapter_factory().reload();
-			});
+			crontab(crontab_reload,	[&adapter_factory](){
+							adapter_factory().reload();
+						}
+			);
 
-			crontab(timer_table_maintainance,	crontab_table_maintainance,	[&adapter_factory](){
-				adapter_factory()->crontab();
-			});
+			crontab(crontab_table_maintainance,
+						[&adapter_factory](){
+							adapter_factory()->crontab();
+						}
+			);
 
-			crontab(timer_server_info,		crontab_server_info,		[&loop](){
-				loop.printInfo("Server connection info");
-			});
+			crontab(crontab_server_info,
+						[&loop](){
+							loop.printInfo("Server connection info");
+						}
+			);
 		}
 
 		return 0;

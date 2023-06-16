@@ -4,8 +4,7 @@
 #include <cstdint>
 #include <array>
 #include <string_view>
-
-
+#include <algorithm>
 
 namespace mytime{
 	// 1980-01-01 00:00:00
@@ -86,10 +85,22 @@ namespace mytime{
 
 
 
+	struct CrontabControl{
+		CrontabControl(uint32_t timeout) : timeout(timeout){}
+
+		CrontabControl(uint32_t timeout, uint32_t timeout_min) :
+					timeout(timeout == 0 ? 0 : std::max(timeout, timeout_min)){}
+
+		MyTimer		timer;
+		uint32_t	timeout;
+	};
+
 	template<class F>
-	void crontab(MyTimer &timer, uint32_t const timeout, F f){
-		if (timeout && timer.expired(timeout)){
-			timer.restart();
+	void crontab(CrontabControl &control, F &&f){
+		auto &c = control;
+
+		if (c.timeout && c.timer.expired(c.timeout)){
+			c.timer.restart();
 			f();
 		}
 	}

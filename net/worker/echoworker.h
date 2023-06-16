@@ -15,6 +15,9 @@ class EchoWorker{
 public:
 	WorkerStatus operator()(IOBuffer &buffer);
 
+	constexpr static void connection_notify(...){
+	}
+
 private:
 	constexpr static std::string_view cmd_hello	= "hello"	"\r\n";
 	constexpr static std::string_view cmd_help	= "help"	"\r\n";

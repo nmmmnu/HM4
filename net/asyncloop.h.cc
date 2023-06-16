@@ -115,6 +115,8 @@ void AsyncLoop<Selector, Worker, SparePool>::idle_loop(){
 	expireFD_();
 
 	sparePool_.balance();
+
+	notify_worker_();
 }
 
 // ===========================
@@ -265,6 +267,7 @@ bool AsyncLoop<Selector, Worker, SparePool>::client_Worker_(int const fd, IOBuff
 }
 
 template<class Selector, class Worker, class SparePool>
+template<bool NL>
 bool AsyncLoop<Selector, Worker, SparePool>::client_Connect_(int const fd){
 	// fd is same as serverFD_
 	int const newFD = socket_accept(fd);
@@ -275,6 +278,9 @@ bool AsyncLoop<Selector, Worker, SparePool>::client_Connect_(int const fd){
 
 	if ( clients_.size() < conf_maxClients_ && insertFD_(newFD) ){
 		// socket_options_setNonBlocking(newFD);
+
+		if constexpr(NL)
+			notify_worker_();
 
 		log_("Connect", newFD);
 	}else{
@@ -287,10 +293,14 @@ bool AsyncLoop<Selector, Worker, SparePool>::client_Connect_(int const fd){
 }
 
 template<class Selector, class Worker, class SparePool>
+template<bool NL>
 void AsyncLoop<Selector, Worker, SparePool>::client_Disconnect_(int const fd, const DisconnectStatus error){
 	removeFD_(fd);
 
 	socket_close(fd);
+
+	if constexpr(NL)
+		notify_worker_();
 
 	switch(error){
 	case DisconnectStatus::NORMAL			: return log_("Normal  Disconnect",				fd);
@@ -364,7 +374,7 @@ template<class Selector, class Worker, class SparePool>
 void AsyncLoop<Selector, Worker, SparePool>::expireFD_(){
 	for(const auto &[fd, c] : clients_){
 		if (c.timer.expired(conf_connectionTimeout_)){
-			client_Disconnect_(fd, DisconnectStatus::TIMEOUT);
+			client_Disconnect_<0>(fd, DisconnectStatus::TIMEOUT);
 			// iterator is invalid now...
 			return;
 		}

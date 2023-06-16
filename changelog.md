@@ -122,4 +122,5 @@ Changelog
 -	migrate to new version of format library FMT
 -	new log system
 -	new config options crontab_server_info and log_level
+-	command INFO now show connected clients
 
