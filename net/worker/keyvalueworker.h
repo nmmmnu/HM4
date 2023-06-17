@@ -47,7 +47,7 @@ namespace net::worker{
 		void registerModule(RegisterPack &pack){
 			using M = Module<Protocol, DBAdapter, RegisterPack>;
 
-			getLogger().startup() << "Loading" << M::name << "module...";
+			logger<Logger::STARTUP>() << "Loading" << M::name << "module...";
 			M::load(pack);
 		}
 
@@ -154,8 +154,9 @@ namespace net::worker{
 			return translate_(result, buffer);
 		}
 
-		void connection_notify(uint64_t conn, uint64_t spare){
-			db_.connection_notify(conn, spare);
+		template<class ...Args>
+		void connection_notify(Args &&...args){
+			db_.connection_notify(std::forward<Args>(args)...);
 		}
 
 	private:

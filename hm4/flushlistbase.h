@@ -29,10 +29,10 @@ namespace flushlist_impl_{
 			return true;
 		}else{
 			if (loader){
-				getLogger().notice() << "Reloading data...";
+				logger<Logger::NOTICE>() << "Reloading data...";
 				loader->refresh();
 			}else{
-				getLogger().notice() << "No need for reloading data...";
+				logger<Logger::NOTICE>() << "No need for reloading data...";
 			}
 
 			return true;

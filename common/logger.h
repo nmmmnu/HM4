@@ -52,6 +52,12 @@ public:
 		return LoggerStream(banner[level], writting);
 	}
 
+	template<Level level>
+	[[nodiscard]]
+	auto get() const{
+		return get(level	);
+	}
+
 	[[nodiscard]]
 	auto startup() const{
 		return get(STARTUP	);
@@ -131,7 +137,7 @@ private:
 		template<typename ...Args>
 		void fmt(Args &&...args){
 			if (writting_)
-				fmt::print(os_, args...);
+				fmt::print(os_, std::forward<Args>(args)...);
 		}
 
 	private:
@@ -148,10 +154,20 @@ private:
 
 
 
+[[nodiscard]]
 Logger &getLoggerSingleton();
 
-inline auto const &getLogger(){
-	return getLoggerSingleton();
+template<Logger::Level level>
+[[nodiscard]]
+auto logger(){
+	auto const &x = getLoggerSingleton();
+
+	return x.get(level);
+}
+
+template<Logger::Level level, typename ...Args>
+void logger_fmt(Args &&...args){
+	return logger<level>().fmt(std::forward<Args>(args)...);
 }
 
 #endif

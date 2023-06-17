@@ -24,9 +24,10 @@ public:
 public:
 	// System Methods
 
-	void connection_notify(uint64_t conn, uint64_t spare){
-		connections		= conn;
-		connections_spare	= spare;
+	template<class Notification>
+	void connection_notify(Notification const &notification){
+		connections		= notification.clients;
+		connections_spare	= notification.spare;
 	}
 
 	template<size_t N>

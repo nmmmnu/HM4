@@ -75,7 +75,7 @@ public:
 	void print() const;
 
 	void printInfo(const char *msg) const{
-		getLogger().notice().fmt(FMT_MASK, msg, connectedClients(), sparePoolSize() );
+		return log_<Logger::NOTICE>(msg);
 	}
 
 private:
@@ -111,10 +111,17 @@ private:
 
 	void client_SocketOps_(int fd, ssize_t size);
 
+	struct ConnectionNotification{
+		uint64_t clients;
+		uint64_t spare;
+	};
+
 	void notify_worker_(){
 		worker_.connection_notify(
-			connectedClients(),
-			sparePoolSize()
+			ConnectionNotification{
+				connectedClients(),
+				sparePoolSize()
+			}
 		);
 	}
 
@@ -124,12 +131,14 @@ private:
 	void expireFD_();
 
 private:
+	template<Logger::Level level = Logger::DEBUG>
 	void log_(const char *msg) const{
-		getLogger().debug().fmt(FMT_MASK,  msg, connectedClients(), sparePoolSize()		);
+		logger_fmt<level>(FMT_MASK,   msg, connectedClients(), sparePoolSize()	);
 	}
 
+	template<Logger::Level level = Logger::NOTICE>
 	void log_(const char *msg, int const fd) const{
-		getLogger().notice().fmt(FMT_MASK_2, msg, connectedClients(), sparePoolSize(), fd	);
+		logger_fmt<level>(FMT_MASK_2, msg, connectedClients(), sparePoolSize(), fd	);
 	}
 
 private:

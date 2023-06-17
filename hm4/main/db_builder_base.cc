@@ -40,7 +40,7 @@ void listInsert(List &list, std::string_view const key, std::string_view const v
 		return;
 
 	if ( it == std::end(list) )
-		getLogger().warning() << "Error insert" << key;
+		logger<Logger::WARNING>() << "Error insert" << key;
 }
 
 

@@ -45,10 +45,10 @@ namespace net::worker::commands::HLL{
 				if (const auto *x = load_ptr(*db, *it); x){
 					b.push_back(x);
 
-					getLogger().debug() << "HLL Operation" << "intersect" << *it;
+					logger<Logger::DEBUG>() << "HLL Operation" << "intersect" << *it;
 				}
 
-			getLogger().debug() << "HLL Operation count" << b.size();
+			logger<Logger::DEBUG>() << "HLL Operation count" << b.size();
 
 			auto hll_ops = getHLL().getOperations();
 

@@ -46,7 +46,7 @@ AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
 template<class Selector, class Worker, class SparePool>
 void AsyncLoop<Selector, Worker, SparePool>::print() const{
 	auto _ = [](auto k, auto v){
-		getLogger().startup().fmt("{:20} = {:12}", k, v);
+		logger_fmt<Logger::STARTUP>("{:20} = {:12}", k, v);
 	};
 
 	_("max clients"		, conf_maxClients_		);

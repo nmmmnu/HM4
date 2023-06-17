@@ -126,7 +126,7 @@ private:
 	constexpr static size_t calc_sstr(std::string_view s);
 
 	static void response_log_(std::string_view const type, size_t const res, size_t const capacity, const void *p){
-		getLogger().debug() << "Responce" << type << "reserve" << res << "capacity" << capacity << "addr" << p;
+		logger<Logger::DEBUG>() << "Responce" << type << "reserve" << res << "capacity" << capacity << "addr" << p;
 	}
 
 private:

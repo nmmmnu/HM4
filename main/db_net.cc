@@ -67,7 +67,7 @@ namespace{
 	}
 
 	void printError(const char *msg){
-		getLogger().fatal() << msg;
+		logger<Logger::FATAL>() << msg;
 		exit(1);
 	}
 
@@ -78,7 +78,7 @@ namespace{
 
 	template<class Factory, typename ...Args>
 	int fLists(const MyOptions &opt, Factory &&adapter_factory, Args &&...args){
-		getLogger().startup().fmt(args...);
+		logger_fmt<Logger::STARTUP>(args...);
 
 		return main2(opt, std::move(adapter_factory));
 	}
@@ -110,7 +110,7 @@ namespace{
 
 		MyArenaAllocator allocator{ max_memlist_arena * MB };
 
-		getLogger().notice().fmt("Creating {} with size of {} MB", allocator.getName(), max_memlist_arena);
+		logger_fmt<Logger::NOTICE>("Creating {} with size of {} MB", allocator.getName(), max_memlist_arena);
 
 		return allocator;
 	}
@@ -245,9 +245,9 @@ namespace{
 		using MyLoop		= net::AsyncLoop<MySelector, MyWorker, MySparePool>;
 
 		if (opt.log_level >= 2){
-			getLogger().startup().fmt("Server start with log level {}.", opt.log_level);
+			logger_fmt<Logger::STARTUP>("Server start with log level {}.", opt.log_level);
 		}else{
-			getLogger().startup().fmt(
+			logger_fmt<Logger::STARTUP>(
 						"Server start with very low log level {}."
 						"You may want to increase it at least to ERROR level.", opt.log_level
 			);
@@ -269,7 +269,7 @@ namespace{
 			printError("Can not create server socket...");
 
 		if (opt.tcp_reuseport)
-			getLogger().warning() << "Server start with SO_REUSEPORT.";
+			logger<Logger::WARNING>() << "Server start with SO_REUSEPORT.";
 
 		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS		);
 		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
@@ -394,7 +394,7 @@ namespace{
 
 
 	void replayBinlogFile_(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
-		getLogger().warning() << "Binlog file exists. Trying to replay...";
+		logger<Logger::WARNING>() << "Binlog file exists. Trying to replay...";
 
 		using hm4::disk::DiskList;
 
@@ -403,7 +403,7 @@ namespace{
 		auto const result = input.openDataOnly(file, hm4::Pair::WriteOptions::ALIGNED);
 
 		if (! result){
-			getLogger().error() << "Replay failed.";
+			logger<Logger::ERROR>() << "Replay failed.";
 			return;
 		}
 
@@ -421,7 +421,7 @@ namespace{
 
 		} /* d-tor of list kicks here */
 
-		getLogger().notice() << "Replay done.";
+		logger<Logger::NOTICE>() << "Replay done.";
 	}
 
 	void replayBinlogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
