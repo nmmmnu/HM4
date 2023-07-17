@@ -57,7 +57,8 @@ namespace net::worker::commands::ImmutableX{
 
 			container.clear();
 
-			auto tail = [&container](auto const &pkey){
+			// capture & instead of &container to silence clang warning.
+			auto tail = [&](auto const &pkey){
 				if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL)
 					container.emplace_back(pkey);
 			};

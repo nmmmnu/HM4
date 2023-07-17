@@ -164,7 +164,7 @@ void AsyncLoop<Selector, Worker, SparePool>::client_Read_(int const fd, std::tru
 		client.buffer.push(std::true_type{}, IO_BUFFER_CAPACITY, [&size, fd](void *buffer){
 			size = ::read(fd, buffer, IO_BUFFER_CAPACITY);
 
-			return size;
+			return (size_t) size;
 		});
 
 		if (size <= 0)

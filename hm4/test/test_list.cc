@@ -231,7 +231,7 @@ void list_test_hint(const char *name){
 	mytest.begin(name);
 
 	using Allocator = MyAllocator::ArenaAllocator;
-	Allocator allocator{ 1024 * 1024 };
+	Allocator allocator{ 1u * 1024 * 1024 };
 
 	List<Allocator> list{ allocator };
 

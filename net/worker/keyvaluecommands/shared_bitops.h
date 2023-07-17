@@ -12,8 +12,8 @@ namespace net::worker::shared::bit{
 		uint8_t const n_mask;
 
 		constexpr BitOps(size_t n) :
-				n_byte(n / 8		),
-				n_mask(1 << (n % 8)	){}
+				n_byte(n / 8			),
+				n_mask(uint8_t( 1 << (n % 8) )	){}
 
 		constexpr size_t size() const{
 			return n_byte + 1;

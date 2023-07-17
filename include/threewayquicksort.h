@@ -138,7 +138,8 @@ namespace three_way_quicksort_implementation_{
 			auto &c = last;
 
 			auto _ = [this, digit](auto x){
-				return charAt(x, digit);
+				// this-> to silence clang warning.
+				return this->charAt(x, digit);
 			};
 
 			auto _a = [](){

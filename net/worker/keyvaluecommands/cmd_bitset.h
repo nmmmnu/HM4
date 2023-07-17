@@ -275,7 +275,7 @@ namespace net::worker::commands::BITSET{
 
 				uint64_t count = 0;
 				for(auto it = bits; it != bits + val.size(); ++it)
-					count += __builtin_popcount(*it);
+					count += (uint64_t) __builtin_popcount(*it);
 
 				return result.set(count);
 			}else{

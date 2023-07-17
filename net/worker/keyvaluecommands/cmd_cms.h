@@ -66,8 +66,8 @@ namespace net::worker::commands::CMS{
 			using type = T;
 		};
 
-		template<typename F, typename... Args>
-		auto type_dispatch(uint8_t const t, F f, Args&&... args){
+		template<typename F>
+		auto type_dispatch(uint8_t const t, F f){
 			switch(t){
 			case  8 : return f(type_identity<uint8_t	>{});
 			case 16 : return f(type_identity<uint16_t	>{});

@@ -20,17 +20,17 @@ inline namespace version_4_00_00{
 							IFactoryAction(key, val_size, nullptr){}
 
 			[[nodiscard]]
-			constexpr std::string_view getKey() const final{
+			std::string_view getKey() const final{
 				return key;
 			}
 
 			[[nodiscard]]
-			constexpr uint32_t getCreated() const final{
+			uint32_t getCreated() const final{
 				return 0;
 			}
 
 			[[nodiscard]]
-			constexpr size_t bytes() const final{
+			size_t bytes() const final{
 				return Pair::bytes(key.size(), val_size);
 			}
 
