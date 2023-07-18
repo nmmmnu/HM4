@@ -4,71 +4,73 @@
 #include "pair_vfactory.h"
 
 namespace net::worker::commands::HLL{
-
 	namespace hll_impl_{
-		using Pair = hm4::Pair;
+		namespace{
 
-		constexpr uint8_t HLL_Bits = 12;
+			using Pair = hm4::Pair;
 
-		constexpr auto getHLL(){
-			return hyperloglog::HyperLogLogRaw{HLL_Bits};
-		}
+			constexpr uint8_t HLL_Bits = 12;
 
-		constexpr uint32_t HLL_M = getHLL().m;
-
-		template<class List>
-		auto store(List &list, std::string_view key, const uint8_t *hll){
-			return hm4::insert( list,
-				key,
-				std::string_view{
-					reinterpret_cast<const char *>(hll),
-					HLL_M
-				}
-			);
-		}
-
-		template<class List>
-		const uint8_t *load_ptr(List &list, std::string_view key){
-			return hm4::getPair_(list, key, [](bool b, auto it) -> const uint8_t *{
-				if (b && it->getVal().size() == HLL_M)
-					return reinterpret_cast<const uint8_t *>(it->getVal().data());
-				else
-					return nullptr;
-			});
-		}
-
-		template<class DBAdapter>
-		double hll_op_intersect(MySpan<const std::string_view> const &keys, DBAdapter &db){
-			StaticVector<const uint8_t *, 5> b;
-
-			for(auto it = std::begin(keys); it != std::end(keys); ++it)
-				if (const auto *x = load_ptr(*db, *it); x){
-					b.push_back(x);
-
-					logger<Logger::DEBUG>() << "HLL Operation" << "intersect" << *it;
-				}
-
-			logger<Logger::DEBUG>() << "HLL Operation count" << b.size();
-
-			auto hll_ops = getHLL().getOperations();
-
-			uint8_t _[HLL_M];
-
-			switch(b.size()){
-			default:
-			case 0: return hll_ops.intersect(_	 				);
-			case 1: return hll_ops.intersect(_, b[0]				);
-			case 2: return hll_ops.intersect(_, b[0], b[1]				);
-			case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
-			case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
-			case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
+			constexpr auto getHLL(){
+				return hyperloglog::HyperLogLogRaw{HLL_Bits};
 			}
-		}
 
-		constexpr uint64_t hll_op_round(double const estimate){
-			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
-		}
-	}
+			constexpr uint32_t HLL_M = getHLL().m;
+
+			template<class List>
+			auto store(List &list, std::string_view key, const uint8_t *hll){
+				return hm4::insert( list,
+					key,
+					std::string_view{
+						reinterpret_cast<const char *>(hll),
+						HLL_M
+					}
+				);
+			}
+
+			template<class List>
+			const uint8_t *load_ptr(List &list, std::string_view key){
+				return hm4::getPair_(list, key, [](bool b, auto it) -> const uint8_t *{
+					if (b && it->getVal().size() == HLL_M)
+						return reinterpret_cast<const uint8_t *>(it->getVal().data());
+					else
+						return nullptr;
+				});
+			}
+
+			template<class DBAdapter>
+			double hll_op_intersect(MySpan<const std::string_view> const &keys, DBAdapter &db){
+				StaticVector<const uint8_t *, 5> b;
+
+				for(auto it = std::begin(keys); it != std::end(keys); ++it)
+					if (const auto *x = load_ptr(*db, *it); x){
+						b.push_back(x);
+
+						logger<Logger::DEBUG>() << "HLL Operation" << "intersect" << *it;
+					}
+
+				logger<Logger::DEBUG>() << "HLL Operation count" << b.size();
+
+				auto hll_ops = getHLL().getOperations();
+
+				uint8_t _[HLL_M];
+
+				switch(b.size()){
+				default:
+				case 0: return hll_ops.intersect(_	 				);
+				case 1: return hll_ops.intersect(_, b[0]				);
+				case 2: return hll_ops.intersect(_, b[0], b[1]				);
+				case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
+				case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
+				case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
+				}
+			}
+
+			constexpr uint64_t hll_op_round(double const estimate){
+				return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
+			}
+		} // namespace
+	} // namespace hll_impl_
 
 
 

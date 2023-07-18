@@ -8,75 +8,78 @@
 #include <type_traits>
 
 namespace net::worker::commands::CMS{
-
 	namespace cms_impl_{
-		using Pair = hm4::Pair;
+		namespace{
 
-		constexpr auto MAX_SIZE = hm4::PairConf::MAX_VAL_SIZE;
+			using Pair = hm4::Pair;
 
-
-
-		template<typename T>
-		void incr(T &a, uint64_t increment){
-			constexpr auto MAX = std::numeric_limits<T>::max();
-
-			auto const x = betoh<T>(a);
-
-			if (increment > MAX || x > MAX - increment){
-				// return max
-				// no need htobe
-				a = MAX;
-
-				return;
-			}else{
-				// cast is safe now.
-				a = htobe<T>(
-					x +
-					static_cast<T>(increment)
-				);
-
-				return;
-			}
-		}
+			constexpr auto MAX_SIZE = hm4::PairConf::MAX_VAL_SIZE;
 
 
 
-		template<typename T>
-		void cms_add(Matrix<T> cms, char *data, std::string_view item, uint64_t const n){
-			for(size_t i = 0; i < cms.getY(); ++i)
-				incr( cms(data, murmur_hash64a(item, i) % cms.getX(), i), n);
-		}
+			template<typename T>
+			void incr(T &a, uint64_t increment){
+				constexpr auto MAX = std::numeric_limits<T>::max();
 
-		template<typename T>
-		uint64_t cms_count(Matrix<T> cms, const char *data, std::string_view item){
-			uint64_t count = std::numeric_limits<uint64_t>::max();
+				auto const x = betoh<T>(a);
 
-			for(size_t i = 0; i < cms.getY(); ++i){
-				auto const &c = cms(data, murmur_hash64a(item, i) % cms.getX(), i);
+				if (increment > MAX || x > MAX - increment){
+					// return max
+					// no need htobe
+					a = MAX;
 
-				count = std::min<uint64_t>(count, betoh<T>(c));
+					return;
+				}else{
+					// cast is safe now.
+					a = htobe<T>(
+						x +
+						static_cast<T>(increment)
+					);
+
+					return;
+				}
 			}
 
-			return count;
-		}
 
-		template<typename T>
-		struct type_identity{
-			// C++20 std::type_identity
-			using type = T;
-		};
 
-		template<typename F>
-		auto type_dispatch(uint8_t const t, F f){
-			switch(t){
-			case  8 : return f(type_identity<uint8_t	>{});
-			case 16 : return f(type_identity<uint16_t	>{});
-			case 32 : return f(type_identity<uint32_t	>{});
-			case 64 : return f(type_identity<uint64_t	>{});
-			default : return f(type_identity<std::nullptr_t	>{});
+			template<typename T>
+			void cms_add(Matrix<T> cms, char *data, std::string_view item, uint64_t const n){
+				for(size_t i = 0; i < cms.getY(); ++i)
+					incr( cms(data, murmur_hash64a(item, i) % cms.getX(), i), n);
 			}
-		}
-	}
+
+			template<typename T>
+			uint64_t cms_count(Matrix<T> cms, const char *data, std::string_view item){
+				uint64_t count = std::numeric_limits<uint64_t>::max();
+
+				for(size_t i = 0; i < cms.getY(); ++i){
+					auto const &c = cms(data, murmur_hash64a(item, i) % cms.getX(), i);
+
+					count = std::min<uint64_t>(count, betoh<T>(c));
+				}
+
+				return count;
+			}
+
+			template<typename T>
+			struct type_identity{
+				// C++20 std::type_identity
+				using type = T;
+			};
+
+			template<typename F>
+			auto type_dispatch(uint8_t const t, F f){
+				switch(t){
+				case  8 : return f(type_identity<uint8_t	>{});
+				case 16 : return f(type_identity<uint16_t	>{});
+				case 32 : return f(type_identity<uint32_t	>{});
+				case 64 : return f(type_identity<uint64_t	>{});
+				default : return f(type_identity<std::nullptr_t	>{});
+				}
+			}
+
+		} // namespace
+	} // namespace cms_impl_
 
 
 

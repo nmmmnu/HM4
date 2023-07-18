@@ -10,79 +10,81 @@
 #include <array>
 
 namespace net::worker::commands::Geo{
-
 	namespace geo_impl_{
-		constexpr static uint32_t ITERATIONS = (OutputBlob::ContainerSize - 1) / 2;
+		namespace {
 
-		auto to_geo(std::string_view s){
-			return to_double_def<3, 10>(s);
-		}
+			constexpr static uint32_t ITERATIONS = (OutputBlob::ContainerSize - 1) / 2;
 
-		// yes, lon 123 is wrong.
-		// +179.0123456789,+123.0123456789,sx8dfgbet3sb
+			auto to_geo(std::string_view s){
+				return to_double_def<3, 10>(s);
+			}
 
-		constexpr size_t buffer_t_size = (15 + 1) * 2 + 12;
+			// yes, lon 123 is wrong.
+			// +179.0123456789,+123.0123456789,sx8dfgbet3sb
 
-		using buffer_t = std::array<char, buffer_t_size>;
+			constexpr size_t buffer_t_size = (15 + 1) * 2 + 12;
 
-		constexpr std::string_view fmt_mask = "{:+.10f},{:+.10f},{}";
+			using buffer_t = std::array<char, buffer_t_size>;
 
-		std::string_view formatLine(double lat, double lon, std::string_view hash, buffer_t &buffer){
-			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, lat, lon, hash);
+			constexpr std::string_view fmt_mask = "{:+.10f},{:+.10f},{}";
 
-			if (result.out == std::end(buffer))
-				return {};
-			else
-				return { buffer.data(), result.size };
-		}
+			std::string_view formatLine(double lat, double lon, std::string_view hash, buffer_t &buffer){
+				auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, lat, lon, hash);
 
-		template<class DBAdapter>
-		constexpr auto getKeySize(DBAdapter &, std::string_view key, std::string_view name){
-			return	key.size()			+
-				DBAdapter::SEPARATOR.size()	+
-				GeoHash::MAX_SIZE		+
-				DBAdapter::SEPARATOR.size()	+
-				name.size()
-			;
-		}
+				if (result.out == std::end(buffer))
+					return {};
+				else
+					return { buffer.data(), result.size };
+			}
 
-		auto tokenizePoint(std::string_view line){
-			StringTokenizer const tok{ line, ',' };
-			auto _ = getForwardTokenizer(tok);
+			template<class DBAdapter>
+			constexpr auto getKeySize(DBAdapter &, std::string_view key, std::string_view name){
+				return	key.size()			+
+					DBAdapter::SEPARATOR.size()	+
+					GeoHash::MAX_SIZE		+
+					DBAdapter::SEPARATOR.size()	+
+					name.size()
+				;
+			}
 
-			auto const lat  = to_geo(_());
-			auto const lon  = to_geo(_());
+			auto tokenizePoint(std::string_view line){
+				StringTokenizer const tok{ line, ',' };
+				auto _ = getForwardTokenizer(tok);
 
-			GeoHash::Point r{ lat, lon };
+				auto const lat  = to_geo(_());
+				auto const lon  = to_geo(_());
 
-		//	(void) _();
+				GeoHash::Point r{ lat, lon };
 
-			return r;
-		}
+			//	(void) _();
 
-		auto tokenizeHash(std::string_view line){
-			StringTokenizer const tok{ line, ',' };
-			auto _ = getBackwardTokenizer(tok);
+				return r;
+			}
 
-			auto const r = _();
-		//	(void) _();
-		//	(void) _();
+			auto tokenizeHash(std::string_view line){
+				StringTokenizer const tok{ line, ',' };
+				auto _ = getBackwardTokenizer(tok);
 
-			return r;
-		}
+				auto const r = _();
+			//	(void) _();
+			//	(void) _();
 
-		template<class DBAdapter>
-		auto tokenizeName(DBAdapter &, std::string_view line){
-			StringTokenizer const tok{ line, DBAdapter::SEPARATOR[0] };
-			auto _ = getBackwardTokenizer(tok);
+				return r;
+			}
 
-			auto const r = _();
-		//	(void) _();
-		//	(void) _();
+			template<class DBAdapter>
+			auto tokenizeName(DBAdapter &, std::string_view line){
+				StringTokenizer const tok{ line, DBAdapter::SEPARATOR[0] };
+				auto _ = getBackwardTokenizer(tok);
 
-			return r;
-		}
-	}
+				auto const r = _();
+			//	(void) _();
+			//	(void) _();
+
+				return r;
+			}
+		} // anonymous namespace
+	} // namespace geo_impl_
 
 
 

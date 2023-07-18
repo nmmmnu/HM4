@@ -6,85 +6,87 @@
 
 
 namespace net::worker::commands::Accumulators{
-
 	namespace acumulators_impl_{
+		namespace{
 
-		constexpr static uint32_t MIN		= 10;
-		constexpr static uint32_t ITERATIONS	= 65'536;
+			constexpr static uint32_t MIN		= 10;
+			constexpr static uint32_t ITERATIONS	= 65'536;
 
 
 
-		template<typename Accumulator, class It>
-		auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit){
-			Accumulator accumulator;
+			template<typename Accumulator, class It>
+			auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit){
+				Accumulator accumulator;
 
-			uint32_t iterations	= 0;
-			uint32_t results	= 0;
+				uint32_t iterations	= 0;
+				uint32_t results	= 0;
 
-			for(;it != eit;++it){
-				auto const key = it->getKey();
+				for(;it != eit;++it){
+					auto const key = it->getKey();
 
-				if (++iterations > ITERATIONS)
-					return accumulator.result(key);
+					if (++iterations > ITERATIONS)
+						return accumulator.result(key);
 
-				if (! prefix.empty() && ! same_prefix(prefix, key))
-					return accumulator.result();
+					if (! prefix.empty() && ! same_prefix(prefix, key))
+						return accumulator.result();
 
-				if (! it->isOK())
-					continue;
+					if (! it->isOK())
+						continue;
 
-				if (++results > maxResults)
-					return accumulator.result(key);
+					if (++results > maxResults)
+						return accumulator.result(key);
 
-				accumulator(key, it->getVal());
+					accumulator(key, it->getVal());
+				}
+
+				return accumulator.result();
 			}
 
-			return accumulator.result();
-		}
+
+
+			template<class Accumulator, class Protocol, class List>
+			void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
+				if (p.size() != 4)
+					return;
 
 
 
-		template<class Accumulator, class Protocol, class List>
-		void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
-			if (p.size() != 4)
-				return;
+				// using uint64_t from the user, allow more user-friendly behavour.
+				// suppose he enters 1'000'000'000.
+				// because this value is great than max uint32_t,
+				// the converted value will go to 0, then to MIN.
+
+				auto myClamp = [](auto a){
+					return static_cast<uint32_t>(
+						std::clamp<uint64_t>(a, MIN, ITERATIONS)
+					);
+				};
 
 
 
-			// using uint64_t from the user, allow more user-friendly behavour.
-			// suppose he enters 1'000'000'000.
-			// because this value is great than max uint32_t,
-			// the converted value will go to 0, then to MIN.
+				auto const &key    = p[1];
+				auto const count   = myClamp( from_string<uint64_t>(p[2]) );
+				auto const &prefix = p[3];
 
-			auto myClamp = [](auto a){
-				return static_cast<uint32_t>(
-					std::clamp<uint64_t>(a, MIN, ITERATIONS)
+				auto const [ number, lastKey ] = accumulateResults<Accumulator>(
+								count					,
+								prefix					,
+								list.find(key, std::false_type{})	,
+								std::end(list)
 				);
-			};
 
+				to_string_buffer_t buffer;
 
+				const std::array<std::string_view, 2> container{
+					to_string(number, buffer),
+					lastKey
+				};
 
-			auto const &key    = p[1];
-			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
-			auto const &prefix = p[3];
+				return result.set_container(container);
+			}
 
-			auto const [ number, lastKey ] = accumulateResults<Accumulator>(
-							count					,
-							prefix					,
-							list.find(key, std::false_type{})	,
-							std::end(list)
-			);
-
-			to_string_buffer_t buffer;
-
-			const std::array<std::string_view, 2> container{
-				to_string(number, buffer),
-				lastKey
-			};
-
-			return result.set_container(container);
-		}
-	} // namespace
+		} // namespace
+	} // namespace acumulators_impl_
 
 
 

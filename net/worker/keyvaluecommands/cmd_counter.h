@@ -7,43 +7,46 @@ namespace net::worker::commands::Counter{
 	constexpr bool MAY_RETURN_STRING = false;
 
 	namespace counter_impl_{
+		namespace{
 
-		template<int Sign, class Protocol, class List>
-		void do_incr_decr(ParamContainer const &p, List &list, Result<Protocol> &result){
-			if (p.size() != 2 && p.size() != 3)
-				return;
+			template<int Sign, class Protocol, class List>
+			void do_incr_decr(ParamContainer const &p, List &list, Result<Protocol> &result){
+				if (p.size() != 2 && p.size() != 3)
+					return;
 
-			const auto &key = p[1];
+				const auto &key = p[1];
 
-			if (key.empty())
-				return;
+				if (key.empty())
+					return;
 
-			int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
+				int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
 
-			if (n == 0)
-				return;
+				if (n == 0)
+					return;
 
 
 
-			if (auto const val = hm4::getPairVal(list, key); !std::empty(val)){
-				n += from_string<int64_t>(val);
+				if (auto const val = hm4::getPairVal(list, key); !std::empty(val)){
+					n += from_string<int64_t>(val);
 
-				if constexpr(MAY_RETURN_STRING){
-					result.set(val);
+					if constexpr(MAY_RETURN_STRING){
+						result.set(val);
+					}else{
+						result.set(n);
+					}
 				}else{
 					result.set(n);
 				}
-			}else{
-				result.set(n);
+
+				to_string_buffer_t buffer;
+
+				auto const val = to_string(n, buffer);
+
+				hm4::insert(list, key, val);
 			}
 
-			to_string_buffer_t buffer;
-
-			auto const val = to_string(n, buffer);
-
-			hm4::insert(list, key, val);
-		}
-	}
+		} // namespace
+	} // namespace counter_impl_
 
 
 

@@ -3,60 +3,61 @@
 
 
 namespace net::worker::commands::Copy{
+	namespace copy_impl_{
+		namespace{
+			enum class CPMVOperation{
+				MV	,
+				MV_NX	,
+				CP	,
+				CP_NX
+			};
 
-	namespace impl_{
-		enum class CPMVOperation{
-			MV	,
-			MV_NX	,
-			CP	,
-			CP_NX
-		};
+			template<CPMVOperation operation, class Protocol, class List>
+			void cpmv(ParamContainer const &p, List &list, Result<Protocol> &result){
+				if (p.size() != 3)
+					return;
 
-		template<CPMVOperation operation, class Protocol, class List>
-		void cpmv(ParamContainer const &p, List &list, Result<Protocol> &result){
-			if (p.size() != 3)
-				return;
+				// GET
 
-			// GET
+				const auto &key = p[1];
 
-			const auto &key = p[1];
+				if (key.empty())
+					return;
 
-			if (key.empty())
-				return;
+				const auto &newkey = p[2];
 
-			const auto &newkey = p[2];
+				if (newkey.empty())
+					return;
 
-			if (newkey.empty())
-				return;
+				if (key == newkey)
+					return;
 
-			if (key == newkey)
-				return;
+				if constexpr(operation == CPMVOperation::CP_NX || operation == CPMVOperation::MV_NX){
 
-			if constexpr(operation == CPMVOperation::CP_NX || operation == CPMVOperation::MV_NX){
-
-				if ( hm4::getPairOK(list, newkey) )
-					return result.set(false);
-			}
-
-			if (auto *it = hm4::getPairPtr(list, key); it){
-
-				// SET
-
-				hm4::insert(list, newkey, it->getVal(), it->getTTL());
-
-				if constexpr(operation == CPMVOperation::MV || operation == CPMVOperation::MV_NX){
-					// DELETE
-
-					hm4::erase(list, key);
+					if ( hm4::getPairOK(list, newkey) )
+						return result.set(false);
 				}
 
-				return result.set(true);
-			}else{
-				return result.set(false);
-			}
-		}
+				if (auto *it = hm4::getPairPtr(list, key); it){
 
-	}
+					// SET
+
+					hm4::insert(list, newkey, it->getVal(), it->getTTL());
+
+					if constexpr(operation == CPMVOperation::MV || operation == CPMVOperation::MV_NX){
+						// DELETE
+
+						hm4::erase(list, key);
+					}
+
+					return result.set(true);
+				}else{
+					return result.set(false);
+				}
+			}
+
+		} // namespace
+	} // namespace copy_impl_
 
 
 
@@ -71,7 +72,7 @@ namespace net::worker::commands::Copy{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace impl_;
+			using namespace copy_impl_;
 			return cpmv<CPMVOperation::MV>(p, *db, result);
 		}
 
@@ -95,7 +96,7 @@ namespace net::worker::commands::Copy{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace impl_;
+			using namespace copy_impl_;
 			return cpmv<CPMVOperation::MV_NX>(p, *db, result);
 		}
 
@@ -119,7 +120,7 @@ namespace net::worker::commands::Copy{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace impl_;
+			using namespace copy_impl_;
 			return cpmv<CPMVOperation::CP>(p, *db, result);
 		}
 
@@ -142,7 +143,7 @@ namespace net::worker::commands::Copy{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace impl_;
+			using namespace copy_impl_;
 			return cpmv<CPMVOperation::CP_NX>(p, *db, result);
 		}
 

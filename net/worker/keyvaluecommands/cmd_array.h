@@ -7,60 +7,64 @@
 
 namespace net::worker::commands::CV{
 	namespace cv_impl_{
-		constexpr bool RangeCheck	= true;
+		namespace{
 
-		using size_type			= uint64_t;
+			constexpr bool RangeCheck	= true;
 
-		template<typename T>
-		struct type_identity{
-			// C++20 std::type_identity
-			using type = T;
-		};
+			using size_type			= uint64_t;
 
-		template<typename F>
-		auto type_dispatch(uint8_t const t, F f){
-			switch(t){
-			case  8 : return f(type_identity<uint8_t	>{});
-			case 16 : return f(type_identity<uint16_t	>{});
-			case 32 : return f(type_identity<uint32_t	>{});
-			case 64 : return f(type_identity<uint64_t	>{});
-			default : return f(type_identity<std::nullptr_t	>{});
-			}
-		}
-
-
-
-		template<typename T>
-		constexpr size_t cv_size(size_t const size){
-			return size / sizeof(T);
-		}
-
-		template<typename T>
-		constexpr size_t cv_size(std::string_view s){
-			return cv_size<T>(s.size());
-		}
-
-		template<typename T>
-		constexpr size_t cv_size(const hm4::Pair *p){
-			return p ? cv_size<T>(p->getVal()) : 0;
-		}
-
-		template<typename T>
-		constexpr size_t cv_bytes(size_t n){
-			return n * sizeof(T);;
-		}
-
-		template<typename T>
-		constexpr std::string_view cv_bytes_fix(std::string_view v){
-			return {
-				v.data(),
-				cv_bytes<T>( cv_size<T>(v.size()) )
+			template<typename T>
+			struct type_identity{
+				// C++20 std::type_identity
+				using type = T;
 			};
-		}
 
-		template<typename T>
-		constexpr size_type CV_MAX		= cv_size<T>(hm4::PairConf::MAX_VAL_SIZE);
-	}
+			template<typename F>
+			auto type_dispatch(uint8_t const t, F f){
+				switch(t){
+				case  8 : return f(type_identity<uint8_t	>{});
+				case 16 : return f(type_identity<uint16_t	>{});
+				case 32 : return f(type_identity<uint32_t	>{});
+				case 64 : return f(type_identity<uint64_t	>{});
+				default : return f(type_identity<std::nullptr_t	>{});
+				}
+			}
+
+
+
+			template<typename T>
+			constexpr size_t cv_size(size_t const size){
+				return size / sizeof(T);
+			}
+
+			template<typename T>
+			constexpr size_t cv_size(std::string_view s){
+				return cv_size<T>(s.size());
+			}
+
+			template<typename T>
+			constexpr size_t cv_size(const hm4::Pair *p){
+				return p ? cv_size<T>(p->getVal()) : 0;
+			}
+
+			template<typename T>
+			constexpr size_t cv_bytes(size_t n){
+				return n * sizeof(T);;
+			}
+
+			template<typename T>
+			constexpr std::string_view cv_bytes_fix(std::string_view v){
+				return {
+					v.data(),
+					cv_bytes<T>( cv_size<T>(v.size()) )
+				};
+			}
+
+			template<typename T>
+			constexpr size_type CV_MAX		= cv_size<T>(hm4::PairConf::MAX_VAL_SIZE);
+
+		} // namespace
+	} // namespace cv_impl_
 
 
 

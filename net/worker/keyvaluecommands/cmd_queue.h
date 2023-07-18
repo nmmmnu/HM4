@@ -4,7 +4,7 @@
 #include "logger.h"
 
 namespace net::worker::commands::Queue{
-	namespace getx_impl_{
+	namespace queue_impl_{
 		constexpr static uint32_t ITERATIONS			= 65'536;
 		constexpr static uint32_t ITERATIONS_UPDATE_CONTROL_KEY	= 10;
 
@@ -23,7 +23,7 @@ namespace net::worker::commands::Queue{
 			return std::end(cmd);
 		};
 
-		using MyIDGenerator = getx_impl_::MyIDGenerator;
+		using MyIDGenerator = queue_impl_::MyIDGenerator;
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
 						- MyIDGenerator::to_string_buffer_t_size
@@ -74,7 +74,7 @@ namespace net::worker::commands::Queue{
 			return std::end(cmd);
 		};
 
-		using MyIDGenerator = getx_impl_::MyIDGenerator;
+		using MyIDGenerator = queue_impl_::MyIDGenerator;
 
 		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
 						- MyIDGenerator::to_string_buffer_t_size
@@ -143,7 +143,7 @@ namespace net::worker::commands::Queue{
 
 	private:
 		void collect_(std::string_view control_key, typename DBAdapter::List::iterator it, typename DBAdapter::List::iterator eit, typename DBAdapter::List &list, Result<Protocol> &result) const{
-			using namespace getx_impl_;
+			using namespace queue_impl_;
 
 			uint32_t iterations = 0;
 
@@ -172,7 +172,7 @@ namespace net::worker::commands::Queue{
 		}
 
 		void finalizeOK_(std::string_view control_key, std::string_view key, std::string_view val, typename DBAdapter::List &list, Result<Protocol> &result, uint32_t const iterations) const{
-			using namespace getx_impl_;
+			using namespace queue_impl_;
 
 			// seamlessly send value to output buffer...
 			result.set(val);

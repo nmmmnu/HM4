@@ -5,184 +5,182 @@
 #include <algorithm>	// std::clamp
 
 namespace net::worker::commands::MutableX{
+	namespace mutablex_impl_{
+		namespace{
+			constexpr static uint32_t ITERATIONS_PROCESS_X	=  OutputBlob::ContainerSize;
+			constexpr static uint32_t PASSES_PROCESS_X	= 3;
+
+			using ContainerX = typename OutputBlob::PairContainer;
 
 
 
-	namespace getx_impl_{
+			template<class Predicate, class List>
+			std::string_view scanKeysAndProcessInPlace_(Predicate &p, List &list, std::string_view prefix, std::string_view key, ContainerX &container){
+				uint32_t iterations = 0;
 
-		constexpr static uint32_t ITERATIONS_PROCESS_X	=  OutputBlob::ContainerSize;
-		constexpr static uint32_t PASSES_PROCESS_X	= 3;
+				for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
+					auto const key = it->getKey();
 
-		using ContainerX = typename OutputBlob::PairContainer;
+					if (! same_prefix(prefix, key))
+						return {};
 
+					if (++iterations > ITERATIONS_PROCESS_X){
+						logger<Logger::DEBUG>() << "ProcessX" << "iterations" << iterations << key;
+						return key;
+					}
 
+					if (! it->isOK())
+						continue;
 
-		template<class Predicate, class List>
-		std::string_view scanKeysAndProcessInPlace_(Predicate &p, List &list, std::string_view prefix, std::string_view key, ContainerX &container){
-			uint32_t iterations = 0;
+					// HINT !!!
 
-			for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
-				auto const key = it->getKey();
-
-				if (! same_prefix(prefix, key))
-					return {};
-
-				if (++iterations > ITERATIONS_PROCESS_X){
-					logger<Logger::DEBUG>() << "ProcessX" << "iterations" << iterations << key;
-					return key;
+					if (const auto *hint = & *it; hm4::canInsertHint(list, hint)){
+						p.processHint(list, hint);
+					}else{
+						container.emplace_back(hint);
+					}
 				}
 
-				if (! it->isOK())
-					continue;
-
-				// HINT !!!
-
-				if (const auto *hint = & *it; hm4::canInsertHint(list, hint)){
-					p.processHint(list, hint);
-				}else{
-					container.emplace_back(hint);
-				}
+				return {};
 			}
 
-			return {};
-		}
 
 
 
 
+			template<class List, class Result>
+			void scanForLastKey_(List &list, std::string_view prefix, std::string_view key, Result &result){
+				uint32_t iterations = 0;
 
-		template<class List, class Result>
-		void scanForLastKey_(List &list, std::string_view prefix, std::string_view key, Result &result){
-			uint32_t iterations = 0;
+				for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
+					auto const key = it->getKey();
 
-			for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
-				auto const key = it->getKey();
+					if (! same_prefix(prefix, key))
+						return result.set();
 
-				if (! same_prefix(prefix, key))
-					return result.set();
+					if (++iterations > ITERATIONS_PROCESS_X){
+						logger<Logger::DEBUG>() << "ProcessX" << "iterations" << iterations << key;
+						return result.set(key);
+					}
 
-				if (++iterations > ITERATIONS_PROCESS_X){
-					logger<Logger::DEBUG>() << "ProcessX" << "iterations" << iterations << key;
+					if (! it->isOK())
+						continue;
+
 					return result.set(key);
 				}
 
-				if (! it->isOK())
-					continue;
-
-				return result.set(key);
+				return result.set();
 			}
 
-			return result.set();
-		}
 
 
 
 
+			template<bool ResultAsHash, class Predicate, class List, class Result>
+			void process_x_(Predicate &p, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
+				container.clear();
 
-		template<bool ResultAsHash, class Predicate, class List, class Result>
-		void process_x_(Predicate &p, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
-			container.clear();
+				uint8_t check_passes = 0;
 
-			uint8_t check_passes = 0;
+			// label for goto
+			start:
+				std::string_view string_key = scanKeysAndProcessInPlace_(p, list, prefix, key, container);
 
-		// label for goto
-		start:
-			std::string_view string_key = scanKeysAndProcessInPlace_(p, list, prefix, key, container);
+				for(auto const &x : container){
+					auto const s1 = list.mutable_size();
 
-			for(auto const &x : container){
-				auto const s1 = list.mutable_size();
+					p.process(list, x);
 
-				p.process(list, x);
+					auto const s2 = list.mutable_size();
 
-				auto const s2 = list.mutable_size();
+					if (s2 < s1){
+						// something hapenned.
+						// list just flushed.
+						// the container contains junk now.
+						++check_passes;
 
-				if (s2 < s1){
-					// something hapenned.
-					// list just flushed.
-					// the container contains junk now.
-					++check_passes;
+						logger<Logger::NOTICE>() << "ProcessX" << "Restart because of table flush" << check_passes;
 
-					logger<Logger::NOTICE>() << "ProcessX" << "Restart because of table flush" << check_passes;
+						if (check_passes < PASSES_PROCESS_X)
+							goto start;
 
-					if (check_passes < PASSES_PROCESS_X)
-						goto start;
-
-					if constexpr(ResultAsHash){
-						return result.set_0();
-					}else{
-						return scanForLastKey_(list, prefix, key, result);
+						if constexpr(ResultAsHash){
+							return result.set_0();
+						}else{
+							return scanForLastKey_(list, prefix, key, result);
+						}
 					}
+				}
+
+				if constexpr(ResultAsHash){
+					return result.set_1();
+				}else{
+					return result.set(string_key);
 				}
 			}
 
-			if constexpr(ResultAsHash){
-				return result.set_1();
-			}else{
-				return result.set(string_key);
-			}
-		}
 
 
-
-		template<class Predicate, class List, class Result>
-		void process_x(Predicate &p, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
-			return process_x_<0>(p, list, prefix, key, result, container);
-		}
-
-
-
-		template<class Predicate, class List, class Result>
-		void process_h(Predicate &p, List &list, std::string_view prefix, Result &result, ContainerX &container){
-			return process_x_<1>(p, list, prefix, prefix, result, container);
-		}
-
-
-
-		template<class DBAdapter>
-		struct DeletePredicate{
-			using List = typename DBAdapter::List;
-
-			static void process(List &list, const hm4::Pair *hint){
-				// put tombstone
-				hm4::insert(list, hint->getKey());
+			template<class Predicate, class List, class Result>
+			void process_x(Predicate &p, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
+				return process_x_<0>(p, list, prefix, key, result, container);
 			}
 
-			static void processHint(List &list, const hm4::Pair *hint){
-				// put tombstone
-				hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
-			}
-		};
 
-		template<class DBAdapter>
-		struct PersistPredicate{
-			using List = typename DBAdapter::List;
 
-			constexpr static uint32_t expires = 0;
-
-			static void process(List &list, const hm4::Pair *hint){
-				hm4::insert(list, hint->getKey(), hint->getVal(), expires);
+			template<class Predicate, class List, class Result>
+			void process_h(Predicate &p, List &list, std::string_view prefix, Result &result, ContainerX &container){
+				return process_x_<1>(p, list, prefix, prefix, result, container);
 			}
 
-			static void processHint(List &list, const hm4::Pair *hint){
-				hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
-			}
-		};
 
-		template<class DBAdapter>
-		struct ExpirePredicate{
-			using List = typename DBAdapter::List;
 
-			uint32_t expires;
+			template<class DBAdapter>
+			struct DeletePredicate{
+				using List = typename DBAdapter::List;
 
-			void process(List &list, const hm4::Pair *hint) const{
-				hm4::insert(list, hint->getKey(), hint->getVal(), expires);
-			}
+				static void process(List &list, const hm4::Pair *hint){
+					// put tombstone
+					hm4::insert(list, hint->getKey());
+				}
 
-			void processHint(List &list, const hm4::Pair *hint) const{
-				hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
-			}
-		};
-	} // namespace
+				static void processHint(List &list, const hm4::Pair *hint){
+					// put tombstone
+					hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
+				}
+			};
+
+			template<class DBAdapter>
+			struct PersistPredicate{
+				using List = typename DBAdapter::List;
+
+				constexpr static uint32_t expires = 0;
+
+				static void process(List &list, const hm4::Pair *hint){
+					hm4::insert(list, hint->getKey(), hint->getVal(), expires);
+				}
+
+				static void processHint(List &list, const hm4::Pair *hint){
+					hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
+				}
+			};
+
+			template<class DBAdapter>
+			struct ExpirePredicate{
+				using List = typename DBAdapter::List;
+
+				uint32_t expires;
+
+				void process(List &list, const hm4::Pair *hint) const{
+					hm4::insert(list, hint->getKey(), hint->getVal(), expires);
+				}
+
+				void processHint(List &list, const hm4::Pair *hint) const{
+					hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
+				}
+			};
+		} // namespace
+	} // namespace mutablex_impl_
 
 
 
@@ -210,7 +208,7 @@ namespace net::worker::commands::MutableX{
 			if (prefix.empty())
 				return;
 
-			using namespace getx_impl_;
+			using namespace mutablex_impl_;
 
 			DeletePredicate<DBAdapter> pred;
 			return process_x(pred, *db, prefix, key, result, blob.pcontainer);
@@ -245,7 +243,7 @@ namespace net::worker::commands::MutableX{
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
-			using namespace getx_impl_;
+			using namespace mutablex_impl_;
 
 			DeletePredicate<DBAdapter> pred;
 			return process_h(pred, *db, prefix, result, blob.pcontainer);
@@ -279,7 +277,7 @@ namespace net::worker::commands::MutableX{
 			if (prefix.empty())
 				return;
 
-			using namespace getx_impl_;
+			using namespace mutablex_impl_;
 
 			PersistPredicate<DBAdapter> pred;
 			return process_x(pred, *db, prefix, key, result, blob.pcontainer);
@@ -311,7 +309,7 @@ namespace net::worker::commands::MutableX{
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
-			using namespace getx_impl_;
+			using namespace mutablex_impl_;
 
 			PersistPredicate<DBAdapter> pred;
 			return process_h(pred, *db, prefix, result, blob.pcontainer);
@@ -346,7 +344,7 @@ namespace net::worker::commands::MutableX{
 			if (prefix.empty())
 				return;
 
-			using namespace getx_impl_;
+			using namespace mutablex_impl_;
 
 			ExpirePredicate<DBAdapter> pred{exp};
 			return process_x(pred, *db, prefix, key, result, blob.pcontainer);
@@ -383,7 +381,7 @@ namespace net::worker::commands::MutableX{
 
 			auto const exp		= from_string<uint32_t>(p[2]);
 
-			using namespace getx_impl_;
+			using namespace mutablex_impl_;
 
 			ExpirePredicate<DBAdapter> pred{exp};
 			return process_h(pred, *db, prefix, result, blob.pcontainer);

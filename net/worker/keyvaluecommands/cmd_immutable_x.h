@@ -5,115 +5,117 @@
 #include <algorithm>	// std::clamp
 
 namespace net::worker::commands::ImmutableX{
+	namespace immutablex_impl_{
+		namespace {
 
-	namespace getx_impl_{
-
-		constexpr static uint32_t MIN			= 10;
-		constexpr static uint32_t ITERATIONS		= (OutputBlob::ContainerSize - 1) / 2;
-
-
-
-		template<class DBAdapter>
-		constexpr static std::size_t MAX_HKEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
+			constexpr static uint32_t MIN			= 10;
+			constexpr static uint32_t ITERATIONS		= (OutputBlob::ContainerSize - 1) / 2;
 
 
 
-		enum class AccumulateOutput{
-			KEYS,
-			VALS,
-			BOTH,
-			BOTH_WITH_TAIL
-		};
+			template<class DBAdapter>
+			constexpr static std::size_t MAX_HKEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
+							- DBAdapter::SEPARATOR.size()
+							- 16;
 
-		template<class It>
-		uint32_t countResults(std::string_view const prefix, It it, It eit){
-			uint32_t iterations	= 0;
-			uint32_t results	= 0;
 
-			for(;it != eit;++it){
-				auto const &key = it->getKey();
 
-				if (++iterations > ITERATIONS)
-					break;
-
-				if (! prefix.empty() && ! same_prefix(prefix, key))
-					break;
-
-				if (! it->isOK())
-					continue;
-
-				++results;
-			}
-
-			return results;
-		}
-
-		template<AccumulateOutput Out, class It, class Container, class ProjectionKey>
-		void accumulateResults_(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container, ProjectionKey projKey){
-			uint32_t iterations	= 0;
-			uint32_t results	= 0;
-
-			container.clear();
-
-			// capture & instead of &container to silence clang warning.
-			auto tail = [&](auto const &pkey){
-				if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL)
-					container.emplace_back(pkey);
+			enum class AccumulateOutput{
+				KEYS,
+				VALS,
+				BOTH,
+				BOTH_WITH_TAIL
 			};
 
-			for(;it != eit;++it){
-				auto const &key = it->getKey();
+			template<class It>
+			uint32_t countResults(std::string_view const prefix, It it, It eit){
+				uint32_t iterations	= 0;
+				uint32_t results	= 0;
 
-				auto pkey = projKey(key);
+				for(;it != eit;++it){
+					auto const &key = it->getKey();
 
-				if (++iterations > ITERATIONS)
-					return tail(pkey);
+					if (++iterations > ITERATIONS)
+						break;
 
-				if (! prefix.empty() && ! same_prefix(prefix, key))
-					return; // no tail
+					if (! prefix.empty() && ! same_prefix(prefix, key))
+						break;
 
-				if (! it->isOK())
-					continue;
+					if (! it->isOK())
+						continue;
 
-				if (++results > maxResults)
-					return tail(pkey);
+					++results;
+				}
 
-				auto const &val = it->getVal();
-
-				if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::BOTH || Out == AccumulateOutput::KEYS)
-					container.emplace_back(pkey);
-
-				if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::BOTH || Out == AccumulateOutput::VALS)
-					container.emplace_back(val);
+				return results;
 			}
-		}
 
-		template<AccumulateOutput Out, class It, class Container>
-		void accumulateResultsX(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
-			auto proj = [](std::string_view x){
-				return x;
-			};
+			template<AccumulateOutput Out, class It, class Container, class ProjectionKey>
+			void accumulateResults_(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container, ProjectionKey projKey){
+				uint32_t iterations	= 0;
+				uint32_t results	= 0;
 
-			return accumulateResults_<Out>(maxResults, prefix, it, eit, container, proj);
-		}
+				container.clear();
 
-		template<AccumulateOutput Out, class It, class Container>
-		void accumulateResultsH(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
-			auto const prefix_size = prefix.size();
+				// capture & instead of &container to silence clang warning.
+				auto tail = [&](auto const &pkey){
+					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL)
+						container.emplace_back(pkey);
+				};
 
-			auto proj = [prefix_size](std::string_view x) -> std::string_view{
-				if (prefix_size <= x.size())
-					return x.substr(prefix_size);
-				else
+				for(;it != eit;++it){
+					auto const &key = it->getKey();
+
+					auto pkey = projKey(key);
+
+					if (++iterations > ITERATIONS)
+						return tail(pkey);
+
+					if (! prefix.empty() && ! same_prefix(prefix, key))
+						return; // no tail
+
+					if (! it->isOK())
+						continue;
+
+					if (++results > maxResults)
+						return tail(pkey);
+
+					auto const &val = it->getVal();
+
+					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::BOTH || Out == AccumulateOutput::KEYS)
+						container.emplace_back(pkey);
+
+					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::BOTH || Out == AccumulateOutput::VALS)
+						container.emplace_back(val);
+				}
+			}
+
+			template<AccumulateOutput Out, class It, class Container>
+			void accumulateResultsX(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
+				auto proj = [](std::string_view x){
 					return x;
-			};
+				};
 
-			return accumulateResults_<Out>(maxResults, prefix, it, eit, container, proj);
-		}
+				return accumulateResults_<Out>(maxResults, prefix, it, eit, container, proj);
+			}
 
-	} // namespace
+			template<AccumulateOutput Out, class It, class Container>
+			void accumulateResultsH(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
+				auto const prefix_size = prefix.size();
+
+				auto proj = [prefix_size](std::string_view x) -> std::string_view{
+					if (prefix_size <= x.size())
+						return x.substr(prefix_size);
+					else
+						return x;
+				};
+
+				return accumulateResults_<Out>(maxResults, prefix, it, eit, container, proj);
+			}
+
+		} // namespace
+
+	} // namespace immutablex_impl_
 
 
 
@@ -133,7 +135,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			using namespace getx_impl_;
+			using namespace immutablex_impl_;
 
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 
@@ -189,7 +191,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			using namespace getx_impl_;
+			using namespace immutablex_impl_;
 
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 
@@ -240,7 +242,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			using namespace getx_impl_;
+			using namespace immutablex_impl_;
 
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 
@@ -291,7 +293,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			using namespace getx_impl_;
+			using namespace immutablex_impl_;
 
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 
@@ -342,7 +344,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			using namespace getx_impl_;
+			using namespace immutablex_impl_;
 
 
 

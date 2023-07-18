@@ -3,7 +3,6 @@
 
 
 namespace net::worker::commands::Compat{
-
 	namespace compat_impl_{
 
 		template<class Protocol, class DBAdapter>

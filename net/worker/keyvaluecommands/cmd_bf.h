@@ -6,41 +6,44 @@
 #include <algorithm>
 
 namespace net::worker::commands::BF{
-
 	namespace bf_impl_{
-		using namespace shared::bit;
+		namespace{
 
-		using Pair = hm4::Pair;
+			using namespace shared::bit;
 
-		constexpr uint64_t	BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
-		constexpr uint64_t	BIT_MIN		= 32;
-		constexpr uint8_t	HASH_MAX	= 16;
+			using Pair = hm4::Pair;
+
+			constexpr uint64_t	BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
+			constexpr uint64_t	BIT_MIN		= 32;
+			constexpr uint8_t	HASH_MAX	= 16;
 
 
 
-		void bf_add(uint64_t max_bits, size_t max_hash, char *data, std::string_view val){
-			for(size_t seed = 0; seed < max_hash; ++seed){
-				auto n = murmur_hash64a(val, seed) % max_bits;
+			void bf_add(uint64_t max_bits, size_t max_hash, char *data, std::string_view val){
+				for(size_t seed = 0; seed < max_hash; ++seed){
+					auto n = murmur_hash64a(val, seed) % max_bits;
 
-			//	printf("%zu -> %zu\n", seed, n);
+				//	printf("%zu -> %zu\n", seed, n);
 
-				BitOps{ n }.set(data, 1);
-			}
-		}
-
-		bool bf_exists(uint64_t max_bits, size_t max_hash, const char *data, std::string_view val){
-			for(size_t seed = 0; seed < max_hash; ++seed){
-				auto n = murmur_hash64a(val, seed) % max_bits;
-
-			//	printf("%zu -> %zu\n", seed, n);
-
-				if (BitOps{ n }.get(data) == false)
-					return false;
+					BitOps{ n }.set(data, 1);
+				}
 			}
 
-			return true;
-		}
-	}
+			bool bf_exists(uint64_t max_bits, size_t max_hash, const char *data, std::string_view val){
+				for(size_t seed = 0; seed < max_hash; ++seed){
+					auto n = murmur_hash64a(val, seed) % max_bits;
+
+				//	printf("%zu -> %zu\n", seed, n);
+
+					if (BitOps{ n }.get(data) == false)
+						return false;
+				}
+
+				return true;
+			}
+
+		} // namespace
+	} // namespace bf_impl_
 
 
 
