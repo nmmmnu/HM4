@@ -103,7 +103,7 @@ Changelog
 
 ### 1.3.2
 
--	Fix potential buffer overflow with inserting hints in BITSET
+-	fix potential buffer overflow with inserting hints in BITSET
 -	refactor insertion, to have simple code
 -	array functions - CVPUSH, CVPOP, CVSET, CVGET, CVMGET, CVGETRANGE, CVLEN, CVMAX
 
@@ -123,4 +123,8 @@ Changelog
 -	new log system
 -	new config options crontab_server_info and log_level
 -	command INFO now show connected clients
+
+### 1.3.4.1
+
+-	fix bug with comparing 8 bytes strings
 

@@ -20,8 +20,9 @@ inline int compare(const char *s1, size_t const size1, const char *s2, size_t co
 	};
 
 	// trick from gperf by comparing first characters
+	// checking sizes is a must
 
-	if (*s1 != *s2)
+	if (size1 && size2 && *s1 != *s2)
 		return sgn(*s1, *s2);
 
 	// First idea was lazy based on LLVM::StringRef
