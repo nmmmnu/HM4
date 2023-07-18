@@ -152,7 +152,9 @@ inline auto getReverseTokenizer(StringTokenizer const &st){
 	};
 }
 
-
+inline auto getBackwardTokenizer(StringTokenizer const &st){
+	return getReverseTokenizer(st);
+}
 
 #endif
 

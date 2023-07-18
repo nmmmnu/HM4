@@ -116,7 +116,7 @@ Changelog
 
 -	new commands HDELALL, HPERSISTALL, HEXPIREALL
 -	fsync binloglist with crontab
--	implement tombstone via expire (0x0FFFFFFFF), refactor hints
+-	implement tombstone via expire (0x0'FFFF'FFFF), refactor hints
 -	new commands PERSISTDELETED / PERSISTEXPIRED, DUMP
 -	new tool db_compact_tombstone - propose tombstone removal merge - still in test stage
 -	migrate to new version of format library FMT
@@ -127,4 +127,10 @@ Changelog
 ### 1.3.4.1
 
 -	fix bug with comparing 8 bytes strings
+
+### 1.3.4.2
+
+-	array functions not compiled by default
+-	geohash functions - GEOADD, GEOREM, GEOGET, GEOMGET, GEORADIUS, GEODIST, GEOENCODE, GEODECODE
+
 
