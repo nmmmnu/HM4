@@ -103,10 +103,10 @@ private:
 	struct NodeLocator;
 
 	template<bool ShortcutEvaluation>
-	NodeLocator locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>);
+	NodeLocator locate_(std::string_view const key);
 
 	template<bool ExactEvaluation>
-	const Node *locateNode_(std::string_view const key, std::bool_constant<ExactEvaluation>) const;
+	const Node *locateNode_(std::string_view const key) const;
 
 	static height_size_type getRandomHeight_();
 };
@@ -151,7 +151,7 @@ private:
 template<class T_Allocator>
 template<bool B>
 inline auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
-	return locateNode_(key, exact);
+	return locateNode_<exact.value>(key);
 }
 
 template<class T_Allocator>

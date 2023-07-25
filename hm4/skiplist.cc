@@ -25,8 +25,8 @@ namespace{
 	#if 0
 
 	template<typename T>
-	constexpr T CLZ(uint64_t x){
-		T result = 1;
+	constexpr T clz(uint64_t x){
+		T result = 0;
 
 		while(x & 1u){
 			++result;
@@ -39,8 +39,8 @@ namespace{
 	#else
 
 	template<typename T>
-	constexpr T CLZ(uint64_t x){
-		return static_cast<T>(__builtin_clzll(x) + 1);
+	constexpr T clz(uint64_t x){
+		return static_cast<T>( __builtin_clzll(x) );
 	}
 
 	#endif
@@ -63,7 +63,7 @@ namespace{
 
 template<class T_Allocator>
 auto SkipList<T_Allocator>::getRandomHeight_() -> height_size_type{
-	height_size_type const x = CLZ<height_size_type>(rand64());
+	height_size_type const x = clz<height_size_type>(rand64()) + 1;
 
 	// keeping this because of clang
 	// don't optimize, it is branchless
@@ -86,9 +86,9 @@ except probably with malloc_usable_size();
 [0]->[0]->[0]->[0]->[0]->[0]->[0]->NULL
 
 Uncommend DEBUG_PRINT_LANES for visualisation.
-
-#define DEBUG_PRINT_LANES
 */
+
+constexpr bool DEBUG_PRINT_LANES = 0;
 
 template<class T_Allocator>
 struct SkipList<T_Allocator>::Node{
@@ -184,7 +184,7 @@ template<class PFactory>
 auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	auto const &key = factory.getKey();
 
-	const auto nl = locate_(key, std::true_type{});
+	const auto nl = locate_<1>(key);
 
 	if (nl.node){
 		// update in place.
@@ -235,6 +235,9 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	size_t const size = newdata->bytes();
 
+	// optimizing case when getRandomHeight_() == 1,
+	// and proceeding like in LinkList,
+	// DOES NOT PAY OFF AT ALL!
 	height_size_type const height = getRandomHeight_();
 
 	using namespace MyAllocator;
@@ -252,8 +255,9 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	newnode->hkey = HPair::SS::create(key);
 	newnode->data = newdata.release();
 
-	/* exchange pointers */
 	{
+		// exchange pointers
+
 		/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
 		// newnode->height = height
 
@@ -261,12 +265,12 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		for(height_size_type i = 0; i < height; ++i)
 			newnode->next[i] = std::exchange(*nl.prev[i], newnode);
 
-	#ifdef DEBUG_PRINT_LANES
-		printf("%3u Lanes-> ", height);
-		for(height_size_type i = 0; i < height; ++i)
-			printf("%p ", (void *) newnode->next[i]);
-		printf("\n");
-	#endif
+		if constexpr(DEBUG_PRINT_LANES){
+			printf("%3u Lanes-> ", height);
+			for(height_size_type i = 0; i < height; ++i)
+				printf("%p ", (void *) newnode->next[i]);
+			printf("\n");
+		}
 
 		/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
 		// newnode->next[i] = NULL;
@@ -282,7 +286,7 @@ bool SkipList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
-	const auto nl = locate_(key, std::false_type{});
+	const auto nl = locate_<0>(key);
 
 	if (nl.node == nullptr)
 		return false;
@@ -367,7 +371,7 @@ void SkipList<T_Allocator>::printLanesSummary() const{
 
 template<class T_Allocator>
 template<bool ShortcutEvaluation>
-auto SkipList<T_Allocator>::locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>) -> NodeLocator{
+auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
@@ -414,7 +418,7 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key, std::bool_consta
 
 template<class T_Allocator>
 template<bool ExactEvaluation>
-auto SkipList<T_Allocator>::locateNode_(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> const Node *{
+auto SkipList<T_Allocator>::locateNode_(std::string_view const key) const -> const Node *{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateNode_" };
@@ -482,15 +486,15 @@ template class SkipList<MyAllocator::STDAllocator>;
 template class SkipList<MyAllocator::ArenaAllocator>;
 template class SkipList<MyAllocator::SimulatedArenaAllocator>;
 
-template auto SkipList<MyAllocator::PMAllocator>		::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
-template auto SkipList<MyAllocator::STDAllocator>		::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
-template auto SkipList<MyAllocator::ArenaAllocator>		::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
+template auto SkipList<MyAllocator::PMAllocator>		::locateNode_<0>(std::string_view const key) const -> const Node *;
+template auto SkipList<MyAllocator::STDAllocator>		::locateNode_<0>(std::string_view const key) const -> const Node *;
+template auto SkipList<MyAllocator::ArenaAllocator>		::locateNode_<0>(std::string_view const key) const -> const Node *;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::locateNode_<0>(std::string_view const key) const -> const Node *;
 
-template auto SkipList<MyAllocator::PMAllocator>		::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
-template auto SkipList<MyAllocator::STDAllocator>		::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
-template auto SkipList<MyAllocator::ArenaAllocator>		::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
+template auto SkipList<MyAllocator::PMAllocator>		::locateNode_<1>(std::string_view const key) const -> const Node *;
+template auto SkipList<MyAllocator::STDAllocator>		::locateNode_<1>(std::string_view const key) const -> const Node *;
+template auto SkipList<MyAllocator::ArenaAllocator>		::locateNode_<1>(std::string_view const key) const -> const Node *;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::locateNode_<1>(std::string_view const key) const -> const Node *;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
