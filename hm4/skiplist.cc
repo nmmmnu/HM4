@@ -413,7 +413,8 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key, std::bool_consta
 }
 
 template<class T_Allocator>
-auto SkipList<T_Allocator>::locateNode_(std::string_view const key, bool const exact) const -> const Node *{
+template<bool ExactEvaluation>
+auto SkipList<T_Allocator>::locateNode_(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> const Node *{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateNode_" };
@@ -450,7 +451,10 @@ auto SkipList<T_Allocator>::locateNode_(std::string_view const key, bool const e
 		}
 	}
 
-	return exact ? nullptr : node;
+	if constexpr(ExactEvaluation)
+		return nullptr;
+	else
+		return node;
 }
 
 
@@ -477,6 +481,16 @@ template class SkipList<MyAllocator::PMAllocator>;
 template class SkipList<MyAllocator::STDAllocator>;
 template class SkipList<MyAllocator::ArenaAllocator>;
 template class SkipList<MyAllocator::SimulatedArenaAllocator>;
+
+template auto SkipList<MyAllocator::PMAllocator>		::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
+template auto SkipList<MyAllocator::STDAllocator>		::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
+template auto SkipList<MyAllocator::ArenaAllocator>		::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::locateNode_(std::string_view const key, std::true_type ) const -> const Node *;
+
+template auto SkipList<MyAllocator::PMAllocator>		::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
+template auto SkipList<MyAllocator::STDAllocator>		::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
+template auto SkipList<MyAllocator::ArenaAllocator>		::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::locateNode_(std::string_view const key, std::false_type) const -> const Node *;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;

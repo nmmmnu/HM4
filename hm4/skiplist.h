@@ -87,7 +87,7 @@ private:
 	struct 			Node;
 
 	template<typename T>
-	using HeightArray	= std::array<T,  MAX_HEIGHT>;
+	using HeightArray	= std::array<T, MAX_HEIGHT>;
 
 	HeightArray<Node *>	heads_;
 
@@ -105,7 +105,8 @@ private:
 	template<bool ShortcutEvaluation>
 	NodeLocator locate_(std::string_view const key, std::bool_constant<ShortcutEvaluation>);
 
-	const Node *locateNode_(std::string_view const key, bool const exact) const;
+	template<bool ExactEvaluation>
+	const Node *locateNode_(std::string_view const key, std::bool_constant<ExactEvaluation>) const;
 
 	static height_size_type getRandomHeight_();
 };
@@ -150,7 +151,7 @@ private:
 template<class T_Allocator>
 template<bool B>
 inline auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
-	return locateNode_(key, exact.value);
+	return locateNode_(key, exact);
 }
 
 template<class T_Allocator>
