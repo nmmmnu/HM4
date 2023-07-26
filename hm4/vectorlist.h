@@ -80,8 +80,8 @@ public:
 	}
 
 public:
-	iterator find(std::string_view key, std::true_type) const noexcept;
-	iterator find(std::string_view key, std::false_type) const noexcept;
+	template<bool B>
+	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
 	iterator begin() const noexcept;
 	iterator end() const noexcept;
 };
