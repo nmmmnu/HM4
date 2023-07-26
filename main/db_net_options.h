@@ -119,7 +119,7 @@ public:
 		put("buffer_capacity",			buffer_capacity,		"Initial size of Spare Pool Buffers"						);
 
 		put("max_memlist_arena",		max_memlist_arena,		"Max size of memlist AllocatorArena in MB"					);
-		put("map_memlist_arena",		max_memlist_arena,		"Map all virtual memory pages used from AllocatorArena (Linux)"			);
+		put("map_memlist_arena",		map_memlist_arena,		"Map all virtual memory pages used from AllocatorArena (Linux)"			);
 
 		put("crontab_reload",			crontab_reload,			"crontab - reload every XX seconds, 0 disabled, min 15 sec"			);
 		put("crontab_table_maintainance",	crontab_table_maintainance,	"crontab - table maintainance every XX seconds, 0 disabled, min 15 sec"		);
