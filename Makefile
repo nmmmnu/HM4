@@ -61,7 +61,7 @@ ifeq ($(UNAME), Linux)
 # add epoll support...
 
 EXTRA_INCL	+= -Iinclude.linux/
-CF_MISC		+= -DSELECTOR_EPOOL
+CF_MISC		+= -DSELECTOR_EPOOL -DMAP_PAGES
 LL_SELECTOR	 = $(O)epollselector.o
 
 else ifeq ($(UNAME), FreeBSD)

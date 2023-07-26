@@ -110,14 +110,19 @@ namespace{
 
 		MyArenaAllocator allocator{ max_memlist_arena * MB };
 
-		logger_fmt<Logger::NOTICE>("Creating {} with size of {} MB", allocator.getName(), max_memlist_arena);
+		logger_fmt<Logger::NOTICE>("{} creating with size of {} MB", allocator.getName(), max_memlist_arena);
+
+		if (opt.map_memlist_arena){
+			logger_fmt<Logger::NOTICE>("{} mapping virtual memory pages to physical/swap memory (may take a while)", allocator.getName());
+			allocator.mapPages();
+		}
 
 		return allocator;
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator);
+	void replayBinlogFile(std::string_view file, std::string_view path, MyArenaAllocator &allocator);
 
-	void checkBinLogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
+	void checkBinLogFile(std::string_view file, std::string_view path, MyArenaAllocator &allocator){
 		if (file.empty())
 			return;
 
@@ -393,7 +398,7 @@ namespace{
 
 
 
-	void replayBinlogFile_(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
+	void replayBinlogFile_(std::string_view file, std::string_view path, MyArenaAllocator &allocator){
 		logger<Logger::WARNING>() << "Binlog file exists. Trying to replay...";
 
 		using hm4::disk::DiskList;
@@ -424,7 +429,7 @@ namespace{
 		logger<Logger::NOTICE>() << "Replay done.";
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, MyAllocator::ArenaAllocator &allocator){
+	void replayBinlogFile(std::string_view file, std::string_view path, MyArenaAllocator &allocator){
 		replayBinlogFile_(file, path, allocator);
 		allocator.reset();
 	}

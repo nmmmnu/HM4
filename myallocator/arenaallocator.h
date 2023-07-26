@@ -4,6 +4,8 @@
 #include "baseallocator.h"
 #include "allocatedbuffer.h"
 
+#include <cstring>
+
 namespace MyAllocator{
 	namespace ArenaAllocatorImpl{
 
@@ -17,6 +19,15 @@ namespace MyAllocator{
 
 			template<typename... Args>
 			ArenaAllocatorBase(Args&&... args) : buffer(std::forward<Args>(args)...){}
+
+			#if MAP_PAGES
+			void mapPages(){
+				memset(buffer.data(), 0, buffer.size());
+			}
+			#else
+			constexpr static void mapPages(){
+			}
+			#endif
 
 			constexpr static std::size_t DEFAULT_ALIGN = sizeof(void *);
 
