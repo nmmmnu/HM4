@@ -393,8 +393,12 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 				int const cmp = node->cmp(hkey, key);
 
 				if (cmp >= 0){
-					if (cmp == 0 && (h == 0 || ShortcutEvaluation)){
+					if (cmp == 0){
 						// found
+
+						// if (cmp == 0 && (h == 0 || ShortcutEvaluation))
+						// lets always update nl.node
+
 						nl.node = node;
 
 						if constexpr(ShortcutEvaluation)
