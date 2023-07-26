@@ -88,7 +88,6 @@ private:
 	struct NodeLocator;
 
 	NodeLocator locate_(std::string_view const key);
-	const Node *locateNode_(std::string_view const key, bool exact) const;
 };
 
 // ==============================
@@ -127,12 +126,6 @@ private:
 };
 
 // ==============================
-
-template<class T_Allocator>
-template<bool B>
-inline auto LinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<B> const exact) const -> iterator{
-	return locateNode_(key, exact.value);
-}
 
 template<class T_Allocator>
 inline auto LinkList<T_Allocator>::begin() const -> iterator{
