@@ -29,28 +29,19 @@ namespace sorted_vector_impl_{
 			pos,
 			(end - pos + 1) * sizeof(T)
 		);
-
 	}
 
 	// ---------------------
 
 	template<typename T>
-	struct construct_none{
-		constexpr construct_none(T const &value) : value(value){}
-
-		constexpr bool operator()(T &x) const{
+	auto construct_none(T const &value){
+		return [value](T &x){
 			x = value;
 			return true;
-		}
-
-	private:
-		T const &value;
+		};
 	};
 
-	struct destruct_none{
-		template<typename T>
-		constexpr void operator()(T &) const{
-		}
+	auto destruct_none = [](auto &){
 	};
 }
 
@@ -163,16 +154,21 @@ public:
 		return buffer_;
 	}
 
-	// ACCESS DIRECTLY
+	// SEARCH
 
 	template<typename Key, class Comp, bool ExactMatch>
-	const_iterator search(Key const &key, Comp comp, std::bool_constant<ExactMatch> exact) const noexcept{
-		return binarySearchFix_(key, comp, exact);
+	const_iterator search(Key const &key, Comp &&comp, std::bool_constant<ExactMatch>) const noexcept{
+		auto const &[found, it] = binarySearch_(key, std::forward<Comp>(comp));
+
+		if constexpr(ExactMatch)
+			return found ? it : end();
+		else
+			return it;
 	}
 
 	template<typename Key, bool ExactMatch>
 	const_iterator search(Key const &key, std::bool_constant<ExactMatch> exact) const noexcept{
-		return binarySearchFix_(key, exact);
+		return search(key, binarySearchCompFn, exact);
 	}
 
 	// OPERATOR []
@@ -244,7 +240,7 @@ public:
 	auto insert(T const &key){
 		using namespace sorted_vector_impl_;
 
-		return insert(key, binarySearchCompFn, construct_none{ key }, destruct_none{});
+		return insert(key, binarySearchCompFn, construct_none(key), destruct_none);
 	}
 
 	template<typename Key, class Comp, class Destruct>
@@ -266,7 +262,7 @@ public:
 	auto erase(T const &key){
 		using namespace sorted_vector_impl_;
 
-		return erase(key, binarySearchCompFn, destruct_none{});
+		return erase(key, binarySearchCompFn, destruct_none);
 	}
 
 public:
@@ -306,51 +302,9 @@ private:
 		return binarySearch(begin(), end(), key, std::forward<Comp>(comp));
 	}
 
-	template<typename Key>
-	auto binarySearch_(Key const &key) noexcept{
-		return binarySearch(begin(), end(), key);
-	}
-
-	// ---------------------
-
 	template<typename Key, class Comp>
 	auto binarySearch_(Key const &key, Comp &&comp) const noexcept{
 		return binarySearch(begin(), end(), key, std::forward<Comp>(comp));
-	}
-
-	template<typename Key>
-	auto binarySearch_(Key const &key) const noexcept{
-		return binarySearch(begin(), end(), key);
-	}
-
-	// ---------------------
-
-	template<bool ExactMatch>
-	constexpr const_iterator binarySearchFixer_(BinarySearchResult<const_iterator> const &bsr, std::bool_constant<ExactMatch>) const noexcept{
-		auto const &[found, it] = bsr;
-
-		if constexpr(ExactMatch)
-			return found ? it : end();
-		else
-			return it;
-	}
-
-	// ---------------------
-
-	template<typename Key, class Comp, bool ExactMatch>
-	auto binarySearchFix_(Key const &key, Comp &&comp, std::bool_constant<ExactMatch> exact) const noexcept{
-		return binarySearchFixer_(
-			binarySearch_(key, std::forward<Comp>(comp)),
-			exact
-		);
-	}
-
-	template<typename Key, bool ExactMatch>
-	auto binarySearchFix_(Key const &key, std::bool_constant<ExactMatch> exact) const noexcept{
-		return binarySearchFixer_(
-			binarySearch_(key),
-			exact
-		);
 	}
 };
 
