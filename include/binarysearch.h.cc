@@ -34,15 +34,14 @@ namespace binary_search_impl_{
 			class Iterator		,
 			class T			,
 			class Comp		,
-			class Prefetch		,
-			class difference_type = typename std::iterator_traits<Iterator>::difference_type
+			class Prefetch
 	>
 	auto binarySearch(
 			Iterator first, Iterator const &last	,
 			T const &key				,
 			Comp &&comp				,
 			Prefetch &&				,
-			difference_type /* minimum_distance */	,
+			typename std::iterator_traits<Iterator>::difference_type /* minimum_distance */	,
 			std::input_iterator_tag
 	){
 		return linearSearch(std::move(first), last, key, std::forward<Comp>(comp));
@@ -56,17 +55,19 @@ namespace binary_search_impl_{
 			class Iterator		,
 			class T			,
 			class Comp		,
-			class Prefetch		,
-			class difference_type = typename std::iterator_traits<Iterator>::difference_type
+			class Prefetch
 	>
 	auto binarySearch(
 			Iterator const &first, Iterator const &last	,
 			T const &key					,
 			Comp &&comp					,
 			Prefetch &&user_prefetch			,
-			difference_type const minimum_distance		,
+			typename std::iterator_traits<Iterator>::difference_type const minimum_distance		,
 			std::random_access_iterator_tag
 	) -> BinarySearchResult<Iterator>{
+
+		using difference_type = typename std::iterator_traits<Iterator>::difference_type;
+
 		/*
 		 * Lazy based from Linux kernel...
 		 * http://lxr.free-electrons.com/source/lib/bsearch.c
