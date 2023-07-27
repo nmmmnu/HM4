@@ -30,11 +30,11 @@ struct BinarySearchResult{
 #include "binarysearch.h.cc"
 
 // version with all available options
-template <typename Iterator, typename T, class Comp, class Prefetch>
+template <typename Iterator, typename TKey, class Comp, class Prefetch>
 auto binarySearchPrefetch(
 		Iterator	first		,
 		Iterator const	&last		,
-		T const		&key		,
+		TKey const	&key		,
 		Comp		&&comp		,
 		Prefetch	&&prefetch	,
 		typename std::iterator_traits<Iterator>::difference_type const minimum_distance	= 5
@@ -52,11 +52,11 @@ auto binarySearchPrefetch(
 }
 
 // version with no prefetch
-template <typename Iterator, typename T, class Comp>
+template <typename Iterator, typename TKey, class Comp>
 auto binarySearch(
 		Iterator	first	,
 		Iterator const	&last	,
-		T const		&key	,
+		TKey const	&key	,
 		Comp		&&comp	,
 		typename std::iterator_traits<Iterator>::difference_type const minimum_distance = 5
 ){
@@ -70,11 +70,11 @@ auto binarySearch(
 }
 
 // version with no comp
-template <typename Iterator, typename T>
+template <typename Iterator, typename TKey>
 auto binarySearch(
 		Iterator	first	,
 		Iterator const	&last	,
-		T const		&key	,
+		TKey const	&key	,
 		typename std::iterator_traits<Iterator>::difference_type const minimum_distance = 5
 ){
 	return binarySearchPrefetch(

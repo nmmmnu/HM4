@@ -2,12 +2,12 @@ namespace binary_search_impl_{
 
 	template <
 			class Iterator		,
-			class T			,
+			class TKey		,
 			class Comp
 	>
 	auto linearSearch(
 			Iterator first, Iterator const &last	,
-			T const &key				,
+			TKey const &key				,
 			Comp &&comp
 	) -> BinarySearchResult<Iterator>{
 		for(; first != last; ++first){
@@ -32,13 +32,13 @@ namespace binary_search_impl_{
 
 	template <
 			class Iterator		,
-			class T			,
+			class TKey		,
 			class Comp		,
 			class Prefetch
 	>
 	auto binarySearch(
 			Iterator first, Iterator const &last	,
-			T const &key				,
+			TKey const &key				,
 			Comp &&comp				,
 			Prefetch &&				,
 			typename std::iterator_traits<Iterator>::difference_type /* minimum_distance */	,
@@ -53,13 +53,13 @@ namespace binary_search_impl_{
 
 	template <
 			class Iterator		,
-			class T			,
+			class TKey		,
 			class Comp		,
 			class Prefetch
 	>
 	auto binarySearch(
 			Iterator const &first, Iterator const &last	,
-			T const &key					,
+			TKey const &key					,
 			Comp &&comp					,
 			Prefetch &&user_prefetch			,
 			typename std::iterator_traits<Iterator>::difference_type const minimum_distance		,
