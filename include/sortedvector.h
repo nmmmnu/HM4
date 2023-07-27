@@ -1,5 +1,5 @@
-#ifndef SORTED_ARRAY_H_
-#define SORTED_ARRAY_H_
+#ifndef SORTED_VECTOR_H_
+#define SORTED_VECTOR_H_
 
 #include <stdexcept>		// std::bad_alloc
 #include <type_traits>
@@ -210,9 +210,9 @@ private:
 	}
 
 public:
-	template<typename Key, class Construct, class Destruct>
-	iterator insert(Key const &key, Construct &&construct, Destruct &&destruct){
-		auto [found, it] = binarySearch_(key);
+	template<typename Key, class Comp, class Construct, class Destruct>
+	iterator insert(Key const &key, Comp &&comp, Construct &&construct, Destruct &&destruct){
+		auto [found, it] = binarySearch_(key, std::forward<Comp>(comp));
 
 		if (found){
 			return replace_(
@@ -232,11 +232,10 @@ public:
 
 			// make space
 			shiftR_(it, end());
-			++size_;
-
-			destruct(*it);
 
 			*it = std::move(x);
+
+			++size_;
 		}
 
 		return it;
@@ -245,14 +244,14 @@ public:
 	auto insert(T const &key){
 		using namespace sorted_vector_impl_;
 
-		return insert(key, construct_none{ key }, destruct_none{});
+		return insert(key, binarySearchCompFn, construct_none{ key }, destruct_none{});
 	}
 
-	template<typename Key, class Destruct>
-	void erase(Key const &key, Destruct &&destruct){
+	template<typename Key, class Comp, class Destruct>
+	void erase(Key const &key, Comp &&comp, Destruct &&destruct){
 		using namespace sorted_vector_impl_;
 
-		auto [found, it] = binarySearch_(key);
+		auto [found, it] = binarySearch_(key, std::forward<Comp>(comp));
 
 		if (!found)
 			return;
@@ -260,13 +259,14 @@ public:
 		destruct(*it);
 
 		shiftL_(it, end());
+
 		--size_;
 	}
 
 	auto erase(T const &key){
 		using namespace sorted_vector_impl_;
 
-		return erase(key, destruct_none{});
+		return erase(key, binarySearchCompFn, destruct_none{});
 	}
 
 public:
@@ -315,7 +315,7 @@ private:
 
 	template<typename Key, class Comp>
 	auto binarySearch_(Key const &key, Comp &&comp) const noexcept{
-		return binarySearch(begin(), end(), key, comp);
+		return binarySearch(begin(), end(), key, std::forward<Comp>(comp));
 	}
 
 	template<typename Key>
@@ -338,9 +338,9 @@ private:
 	// ---------------------
 
 	template<typename Key, class Comp, bool ExactMatch>
-	auto binarySearchFix_(Key const &key, Comp comp, std::bool_constant<ExactMatch> exact) const noexcept{
+	auto binarySearchFix_(Key const &key, Comp &&comp, std::bool_constant<ExactMatch> exact) const noexcept{
 		return binarySearchFixer_(
-			binarySearch(begin(), end(), key, comp),
+			binarySearch_(key, std::forward<Comp>(comp)),
 			exact
 		);
 	}
@@ -348,7 +348,7 @@ private:
 	template<typename Key, bool ExactMatch>
 	auto binarySearchFix_(Key const &key, std::bool_constant<ExactMatch> exact) const noexcept{
 		return binarySearchFixer_(
-			binarySearch(begin(), end(), key),
+			binarySearch_(key),
 			exact
 		);
 	}
