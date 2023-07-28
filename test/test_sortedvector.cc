@@ -76,6 +76,8 @@ void test_sortedvector(){
 	}
 
 	mytest("split size",	v.size()  == 6			);
+
+	v.destruct();
 }
 
 template<typename T>
@@ -177,7 +179,11 @@ void test_sortedvector_res(){
 
 		mytest("split size",	v.size()  == 4			);
 		mytest("split size",	v3.size() == 4			);
+
+		v3.destruct(destruct);
 	}
+
+	v.destruct(destruct);
 }
 
 #include <cstdint>

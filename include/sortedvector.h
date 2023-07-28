@@ -70,6 +70,8 @@ private:
 	T		buffer_[Size]{};
 
 public:
+	// C-TOR
+
 	constexpr SortedVector() = default;
 
 	template<class Iterator>
@@ -84,11 +86,30 @@ public:
 	constexpr SortedVector(std::initializer_list<T> const &container) :
 		SortedVector(std::begin(container), std::end(container)){}
 
+	// (MANUAL) D-TOR
+
+	constexpr static void destruct(){
+	}
+
+	template<class Destruct>
+	constexpr
+	void destruct(Destruct &&destruct){
+		for(auto it = begin(); it != end(); ++it)
+			destruct(*it);
+	}
+
 	// MISC
 
 	constexpr
 	void clear() noexcept{
 		size_ = 0;
+	}
+
+	template<class Destruct>
+	constexpr
+	void clear(Destruct &&destruct) noexcept{
+		size_ = 0;
+		destruct(destruct);
 	}
 
 	// ITERATORS
