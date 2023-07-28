@@ -8,5 +8,5 @@ include Makefile.sub
 
 all:	\
 	$(O)pair.o	\
-	$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o
+	$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o $(O)pairvector.o
 

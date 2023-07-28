@@ -2,7 +2,7 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 EXTRA_INCL += -I$(SRC_DIR)
 
-MY_TARGETS = $(A)test_pair $(A)test_list $(A)test_multi_list $(A)test_file
+MY_TARGETS = $(A)test_pair $(A)test_pairvector $(A)test_list $(A)test_multi_list $(A)test_file
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -15,6 +15,10 @@ PAIR_OBJ = $(O)pair.o $(O)mytime.o $(O)logger.o
 
 
 $(A)test_pair: $(O)test_pair.o $(PAIR_OBJ)
+	$(LINK)
+
+$(A)test_pairvector: $(O)test_pairvector.o $(PAIR_OBJ)		\
+		$(O)test_pairvector.o $(O)pairvector.o
 	$(LINK)
 
 $(A)test_list: $(O)test_list.o $(PAIR_OBJ)			\

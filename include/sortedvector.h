@@ -212,31 +212,21 @@ public:
 
 	// MUTATIONS
 
-private:
-	template<class Construct, class Destruct>
-	iterator replace_(iterator it, Construct &&construct, Destruct &&destruct){
-		T x;
-
-		if (construct(x)){
-			destruct(*it);
-
-			*it = std::move(x);
-		}
-
-		return it;
-	}
-
 public:
 	template<typename Key, class Comp, class Construct, class Destruct>
 	iterator insert(Key const &key, Comp &&comp, Construct &&construct, Destruct &&destruct){
 		auto [found, it] = binarySearch_(key, std::forward<Comp>(comp));
 
 		if (found){
-			return replace_(
-				it,
-				std::forward<Construct	>(construct	),
-				std::forward<Destruct	>(destruct	)
-			);
+			T x;
+
+			if (construct(x)){
+				destruct(*it);
+
+				*it = std::move(x);
+			}
+
+			return it;
 		}
 
 		if (size() == capacity())
