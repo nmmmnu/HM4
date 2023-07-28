@@ -124,8 +124,6 @@ auto LinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (auto const old_bytes = olddata->bytes(); tryInsertHint_(*this, olddata, factory)){
 			// successfully updated.
 
-			lc_.upd(old_bytes, factory.bytes());
-
 			return { loc.node };
 		}
 
