@@ -153,7 +153,7 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 	if (!newdata)
 		return end();
 
-	// make space, exception free.
+	// make space, exception free, so no need to protect with unique_ptr.
 	shiftR_(it, end_());
 
 	lc.inc(newdata->bytes());
