@@ -153,14 +153,14 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 	if (!newdata)
 		return end();
 
-	// make space
+	// make space, exception free.
 	shiftR_(it, end_());
+
+	lc.inc(newdata->bytes());
 
 	*it = newdata.release();
 
 	++size_;
-
-	lc.inc(newdata->bytes());
 
 	return it;
 }
