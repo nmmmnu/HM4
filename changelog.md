@@ -134,4 +134,5 @@ Changelog
 -	new config option map_memlist_arena for map all virtual memory pages to phisical memory used from AllocatorArena.
 	This affect only Linux systems with vm.overcommit_memory turned on.
 -	fix bug with calculating List::bytes() in List::mutable_notify()
+-	Release
 
