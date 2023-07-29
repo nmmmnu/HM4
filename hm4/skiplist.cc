@@ -1,10 +1,12 @@
 #include "skiplist.h"
 
+#include "hpair.h"
+
+#include "ilist_updateinplace.h"
+
 #include <stdexcept>
 #include <random>	// mt19937, bernoulli_distribution
 #include <cassert>
-
-#include "hpair.h"
 
 #include "pmallocator.h"
 #include "stdallocator.h"
@@ -193,15 +195,13 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		// check if we can update
 
-		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
+		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 			if (!isValidForReplace(factory.getCreated(), *olddata))
-				return this->end();
-		}
+				return end();
 
 		// try update pair in place.
-		if (auto const old_bytes = olddata->bytes(); tryInsertHint_(*this, olddata, factory)){
+		if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 			// successfully updated.
-
 			return { nl.node };
 		}
 
@@ -216,9 +216,8 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		nl.node->hkey = HPair::SS::create(key);
 		nl.node->data = newdata.release();
 
-		using namespace MyAllocator;
-
 		// deallocate old pair
+		using namespace MyAllocator;
 		deallocate(allocator_, olddata);
 
 		return { nl.node };

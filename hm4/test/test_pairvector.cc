@@ -33,7 +33,7 @@ template<class V, typename ...Args>
 void insert(V &v, Allocator &allocator, Args &&...args){
 	hm4::PairFactory::Normal f{ std::forward<Args>(args)... };
 
-	v.insertF(f, allocator);
+	v.insertF(f, allocator, nullptr);
 }
 
 template<class V>

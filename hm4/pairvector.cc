@@ -1,10 +1,12 @@
 #include "pairvector.h"
 
+#include "binarysearch.h"
+
+#include "ilist_updateinplace.h"
+
 #include <cassert>
 #include <cstring>		// memmove
 #include <stdexcept>		// std::bad_alloc
-
-#include "binarysearch.h"
 
 #include "pmallocator.h"
 #include "stdallocator.h"
@@ -106,7 +108,7 @@ auto PairVector<T_Allocator>::find(std::string_view const key, std::bool_constan
 
 template<class T_Allocator>
 template<class PFactory>
-auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, ListCounter *lc) -> iterator{
+auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, ListCounter &lc) -> iterator{
 	auto const &key = factory.getKey();
 
 	auto [found, it] = binarySearch(begin_(), end_(), key);
@@ -116,31 +118,13 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 
 		Pair *olddata = *it;
 
-		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
+		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 			if (!isValidForReplace(factory.getCreated(), *olddata))
-				return this->end();
-		}
-
-		struct Adapter_this{
-			constexpr void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &) const{
-			}
-
-			auto &getAllocator() const{
-				return allocator;
-			}
-
-			Allocator &allocator;
-		};
-
-		Adapter_this me{ allocator };
+				return end();
 
 		// try update pair in place.
-		if (auto const old_bytes = olddata->bytes(); tryInsertHint_(me, olddata, factory)){
+		if (tryUpdateInPlaceLC(allocator, olddata, factory, lc)){
 			// successfully updated.
-
-			if (lc)
-				lc->upd(old_bytes, factory.bytes());
-
 			return it;
 		}
 
@@ -149,8 +133,7 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 		if (!newdata)
 			return this->end();
 
-		if (lc)
-			lc->upd(olddata->bytes(), newdata->bytes());
+		lc.upd(olddata->bytes(), newdata->bytes());
 
 		// assign new pair
 		*it = newdata.release();
@@ -177,8 +160,7 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 
 	++size_;
 
-	if (lc)
-		lc->inc(newdata->bytes());
+	lc.inc(newdata->bytes());
 
 	return it;
 }
@@ -222,30 +204,30 @@ template auto PairVector<MyAllocator::STDAllocator>		::find(std::string_view con
 template auto PairVector<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
-template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
+template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
 
-template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
+template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
 
-template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter *lc) -> iterator;
+template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory, Allocator &allocator, ListCounter &lc) -> iterator;
 
-template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
+template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
 
-template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
-template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter *lc) -> iterator;
+template auto PairVector<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
+template auto PairVector<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory, Allocator &allocator, ListCounter &lc) -> iterator;
 
 } // namespace hm4
 

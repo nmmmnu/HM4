@@ -55,7 +55,14 @@ namespace hm4{
 		}
 
 		template<class PFactory>
-		iterator insertF(PFactory &factory, Allocator &allocator, ListCounter *lc = nullptr);
+		iterator insertF(PFactory &factory, Allocator &allocator, ListCounter &lc);
+
+		template<class PFactory>
+		iterator insertF(PFactory &factory, Allocator &allocator, std::nullptr_t){
+			// used for testing
+			ListCounter lc;
+			return insertF(factory, allocator, lc);
+		}
 
 		bool erase_(std::string_view const &key, Allocator &allocator, ListCounter *lc = nullptr);
 

@@ -1,8 +1,10 @@
 #include "linklist.h"
 
-#include <cassert>
-
 #include "hpair.h"
+
+#include "ilist_updateinplace.h"
+
+#include <cassert>
 
 #include "pmallocator.h"
 #include "stdallocator.h"
@@ -106,25 +108,23 @@ template<class PFactory>
 auto LinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	auto const &key = factory.getKey();
 
-	const auto loc = locate_(key);
+	const auto nl = locate_(key);
 
-	if (loc.node){
+	if (nl.node){
 		// update node in place.
 
-		Pair *olddata = loc.node->data;
+		Pair *olddata = nl.node->data;
 
 		// check if we can update
 
-		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
+		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 			if (!isValidForReplace(factory.getCreated(), *olddata))
-				return this->end();
-		}
+				return end();
 
 		// try update pair in place.
-		if (auto const old_bytes = olddata->bytes(); tryInsertHint_(*this, olddata, factory)){
+		if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 			// successfully updated.
-
-			return { loc.node };
+			return { nl.node };
 		}
 
 		auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
@@ -135,15 +135,14 @@ auto LinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
 		// assign new pair
-		loc.node->hkey = HPair::SS::create(key);
-		loc.node->data = newdata.release();
+		nl.node->hkey = HPair::SS::create(key);
+		nl.node->data = newdata.release();
 
 		// deallocate old pair
 		using namespace MyAllocator;
-
 		deallocate(allocator_, olddata);
 
-		return { loc.node };
+		return { nl.node };
 	}
 
 	// create new node
@@ -167,7 +166,7 @@ auto LinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	newnode->hkey = HPair::SS::create(key);
 	newnode->data = newdata.release();
 
-	newnode->next = std::exchange(*loc.prev, newnode);
+	newnode->next = std::exchange(*nl.prev, newnode);
 
 	lc_.inc(size);
 
@@ -179,20 +178,20 @@ bool LinkList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
-	auto loc = locate_(key);
+	auto nl = locate_(key);
 
-	if (loc.node == nullptr)
+	if (nl.node == nullptr)
 		return false;
 
 	if constexpr(corruptionCheck)
-		if (*loc.prev != loc.node)
+		if (*nl.prev != nl.node)
 			corruptionExit();
 
-	*loc.prev = loc.node->next;
+	*nl.prev = nl.node->next;
 
-	lc_.dec( loc.node->data->bytes() );
+	lc_.dec( nl.node->data->bytes() );
 
-	deallocate_(loc.node);
+	deallocate_(nl.node);
 
 	return true;
 }

@@ -34,7 +34,7 @@ namespace net::worker::commands::MutableX{
 
 					// HINT !!!
 
-					if (const auto *hint = & *it; hm4::canInsertHint(list, hint)){
+					if (const auto *hint = & *it; hm4::canInsertHintList(list, hint)){
 						p.processHint(list, hint);
 					}else{
 						container.emplace_back(hint);

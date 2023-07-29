@@ -2,6 +2,8 @@
 
 #include "binarysearch.h"
 
+#include "ilist_updateinplace.h"
+
 #include <algorithm>
 #include <cassert>
 
@@ -59,15 +61,13 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		Pair *olddata = *it;
 
-		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE){
+		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 			if (!isValidForReplace(factory.getCreated(), *olddata))
-				return this->end();
-		}
+				return end();
 
 		// try update pair in place.
-		if (auto const old_bytes = olddata->bytes(); tryInsertHint_(*this, olddata, factory)){
+		if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 			// successfully updated.
-
 			return { it };
 		}
 
@@ -83,7 +83,6 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		// deallocate old pair
 		using namespace MyAllocator;
-
 		deallocate(allocator_, olddata);
 
 		return { it };

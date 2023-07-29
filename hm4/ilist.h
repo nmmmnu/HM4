@@ -1,5 +1,5 @@
-#ifndef MY_LIST_H_
-#define MY_LIST_H_
+#ifndef MY_ILIST_H_
+#define MY_ILIST_H_
 
 #include <cstdint>
 #include <iterator>	// std::distance
@@ -162,40 +162,57 @@ auto insert(List &list, Pair &src) noexcept{
 
 // ==============================
 
-template<class List>
-constexpr bool canInsertHint(const List &list, const Pair *pair){
-	return list.getAllocator().owns(pair);
+template<class Allocator>
+constexpr bool canInsertHintAllocator(Allocator const &allocator, const Pair *pair){
+	return allocator.owns(pair);
 }
 
 template<class List>
-constexpr bool canInsertHintValSize(const List &list, const Pair *pair, size_t val_size){
-	return canInsertHint(list, pair) && pair->getVal().size() >= val_size;
+constexpr bool canInsertHintList(List const &list, const Pair *pair){
+	return canInsertHintAllocator(list.getAllocator(), pair);
 }
 
-template<class List, class PairFactory>
-constexpr bool canInsertHintF(const List &list, const Pair *pair, PairFactory const &factory){
-	return canInsertHint(list, pair) && pair->bytes() >= factory.bytes();
+template<class List>
+constexpr bool canInsertHintValSize(List const &list, const Pair *pair, size_t val_size){
+	return
+		canInsertHintList(list, pair) &&
+		pair->getVal().size() >= val_size
+	;
+}
+
+template<class Allocator, class PairFactory>
+constexpr bool canInsertHintAllocatorF(Allocator const &allocator, const Pair *pair, PairFactory const &factory){
+	return
+		canInsertHintAllocator(allocator, pair) &&
+		pair->bytes() >= factory.bytes()
+	;
 }
 
 // ==============================
 
+// proceedInsertHint:
+// 	Pair is in the memlist,
+// 	data size is already checked and it is safe to be overwitten.
+//
+// 	The create time is not updated, but this is not that important,
+// 	since the Pair is not yet flushed.
+
+template<class PairFactory>
+constexpr void proceedInsertHint_skipMutableNotify(const Pair *pair, PairFactory &factory){
+	factory.createHint( const_cast<Pair *>(pair) );
+
+	logger<Logger::DEBUG>() << "inserting hint for key" << factory.getKey();
+}
+
 template<class List, class PairFactory>
 constexpr void proceedInsertHint(List &list, const Pair *pair, PairFactory &factory){
-	// Pair is in the memlist,
-	// data size is already checked and it is safe to be overwitten.
-	//
-	// The create time is not updated, but this is not that important,
-	// since the Pair is not yet flushed.
-
 	PairFactoryMutableNotifyMessage msg;
 	msg.bytes_old = pair->bytes();
 	msg.bytes_new = factory.bytes();
 
-	factory.createHint( const_cast<Pair *>(pair) );
+	proceedInsertHint_skipMutableNotify(pair, factory);
 
 	list.mutable_notify(pair, msg);
-
-	logger<Logger::DEBUG>() << "inserting hint for key" << factory.getKey();
 }
 
 template<class PairFactory, class List, typename ...Args>
@@ -221,23 +238,11 @@ auto proceedInsertHintV(List &list, const Pair *pair, Args &&...args){
 
 // ==============================
 
-// To be used only inside Lists
-
-template<class List, class PairFactory>
-constexpr bool tryInsertHint_(List &list, const Pair *pair, PairFactory &factory){
-	if (! canInsertHintF(list, pair, factory) )
-		return false;
-
-	proceedInsertHint(list, pair, factory);
-
-	return true;
-}
-
-// ==============================
+// insertHint - standard insert, but uses hint, if possible
 
 template<class List, class PairFactory>
 void insertHint(List &list, const Pair *pair, PairFactory &factory){
-	if (canInsertHintF(list, pair, factory))
+	if (canInsertHintAllocatorF(list.getAllocator(), pair, factory))
 		proceedInsertHint(list, pair, factory);
 	else
 		insert(list, factory);
