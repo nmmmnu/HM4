@@ -155,13 +155,11 @@ bool VectorList::shiftR_(size_type const index){
 	// LLVM static analyzer thinks this is an error,
 	// so I add this unused branch
 	if (buffer_){
-		size_t const size = narrow<size_t>(dataCount_ - index - 1); // 2023-07-27, error, should be +1
-
 		// this is the most slow operation of them all
 		xmemmove(
 			& buffer_[index + 1],
 			& buffer_[index],
-			size * ELEMENT_SIZE
+			(dataCount_ - index - 1) * ELEMENT_SIZE
 		);
 	}
 

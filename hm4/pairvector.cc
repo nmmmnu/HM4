@@ -25,7 +25,7 @@ namespace {
 		xmemmove(
 			pos,
 			pos + 1,
-			(end - pos - 1) * sizeof(T)
+			size_t(end - pos) * sizeof(T)
 		);
 	}
 
@@ -34,7 +34,7 @@ namespace {
 		xmemmove(
 			pos + 1,
 			pos,
-			(end - pos + 1) * sizeof(T)
+			size_t(end - pos) * sizeof(T)
 		);
 	}
 
@@ -54,7 +54,7 @@ namespace {
 template<class T_Allocator>
 bool PairVector<T_Allocator>::destruct(Allocator &allocator) noexcept{
 	if (allocator.reset() == false){
-		for(auto it = begin_(); it != end_(); ++it){
+		for(auto it = ptr_begin(); it != ptr_end(); ++it){
 			using namespace MyAllocator;
 			deallocate(allocator, *it);
 		};
@@ -70,7 +70,7 @@ void PairVector<T_Allocator>::assign_(Pair **first, Pair **last){
 	if (size() + len > capacity())
 		throw std::bad_alloc{};
 
-	std::move(first, last, end_());
+	std::move(first, last, ptr_end());
 
 	size_ += len;
 }
@@ -81,29 +81,45 @@ void PairVector<T_Allocator>::split(PairVector &other){
 
 	auto const len = size_ / 2;
 
-	other.assign_(begin_() + len, end_());
+	other.assign_(ptr_begin() + len, ptr_end());
 
 	size_ -= other.size();
 }
 
 template<class T_Allocator>
 void PairVector<T_Allocator>::merge(PairVector &other){
-	assign_(other.begin_(), other.end_());
+	assign_(other.ptr_begin(), other.ptr_end());
 
 	other.size_ = 0;
 }
 
 template<class T_Allocator>
-template<bool ExactMatch>
-auto PairVector<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const noexcept -> iterator{
+auto PairVector<T_Allocator>::locateC_(std::string_view const key) const noexcept -> LocateResultC{
 	assert(!key.empty());
 
-	auto const &[found, it] = binarySearch(begin_(), end_(), key);
+	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), key);
+
+	return { found, it };
+}
+
+template<class T_Allocator>
+auto PairVector<T_Allocator>::locateM_(std::string_view const key) noexcept -> LocateResultM{
+	assert(!key.empty());
+
+	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), key);
+
+	return { found, it };
+}
+
+template<class T_Allocator>
+template<bool ExactMatch>
+auto PairVector<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const noexcept -> iterator{
+	auto const &[found, it] = locateC_(key);
 
 	if constexpr(ExactMatch)
-		return found ? it : end();
+		return found ? iterator{ it } : end();
 	else
-		return it;
+		return iterator{ it };
 }
 
 template<class T_Allocator>
@@ -111,7 +127,7 @@ template<class PFactory>
 auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, ListCounter &lc) -> iterator{
 	auto const &key = factory.getKey();
 
-	auto [found, it] = binarySearch(begin_(), end_(), key);
+	auto [found, it] = locateM_(key);
 
 	if (found){
 		// key exists, overwrite, do not shift
@@ -125,13 +141,13 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 		// try update pair in place.
 		if (tryUpdateInPlaceLC(allocator, olddata, factory, lc)){
 			// successfully updated.
-			return it;
+			return iterator{ it };
 		}
 
 		auto newdata = Pair::smart_ptr::create(allocator, factory);
 
 		if (!newdata)
-			return this->end();
+			return end();
 
 		lc.upd(olddata->bytes(), newdata->bytes());
 
@@ -142,7 +158,7 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 		using namespace MyAllocator;
 		deallocate(allocator, olddata);
 
-		return it;
+		return iterator{ it };
 	}
 
 	if (size() == capacity())
@@ -154,7 +170,7 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 		return end();
 
 	// make space, exception free, so no need to protect with unique_ptr.
-	shiftR_(it, end_());
+	shiftR_(it, ptr_end());
 
 	lc.inc(newdata->bytes());
 
@@ -162,25 +178,22 @@ auto PairVector<T_Allocator>::insertF(PFactory &factory, Allocator &allocator, L
 
 	++size_;
 
-	return it;
+	return iterator{ it };
 }
 
 template<class T_Allocator>
-bool PairVector<T_Allocator>::erase_(std::string_view const &key, Allocator &allocator, ListCounter *lc){
-	assert(!key.empty());
-
-	auto [found, it] = binarySearch(begin_(), end_(), key);
+bool PairVector<T_Allocator>::erase_(std::string_view const &key, Allocator &allocator, ListCounter &lc){
+	auto [found, it] = locateM_(key);
 
 	if (!found)
 		return false;
 
-	if (lc)
-		lc->dec((*it)->bytes());
+	lc.dec((*it)->bytes());
 
 	using namespace MyAllocator;
 	deallocate(allocator, *it);
 
-	shiftL_(it, end_());
+	shiftL_(it, ptr_end());
 
 	--size_;
 

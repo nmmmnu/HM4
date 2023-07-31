@@ -43,7 +43,7 @@ namespace MyAllocator{
 			fmt::print(mask, TAG, "Deallocated Size",	deallocated			);
 			fmt::print(mask, TAG, "Allocations",		allocations			);
 			fmt::print(mask, TAG, "Dellocations",		deallocations			);
-			fmt::print(mask, TAG, "Lost bytes",		deallocated - deallocated	);
+			fmt::print(mask, TAG, "Lost bytes",		allocated   - deallocated	);
 			fmt::print(mask, TAG, "Lost count",		allocations - deallocations	);
 		}
 

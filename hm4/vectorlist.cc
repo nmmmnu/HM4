@@ -44,9 +44,9 @@ auto VectorList<T_Allocator>::find(std::string_view const key, std::bool_constan
 	const auto &[found, it] = binarySearch(vector_, key);
 
 	if constexpr(ExactEvaluation)
-		return found ? it : end();
+		return found ? iterator{ it } : end();
 	else
-		return it;
+		return iterator{ it };
 }
 
 template<class T_Allocator>
@@ -68,7 +68,7 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		// try update pair in place.
 		if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 			// successfully updated.
-			return { it };
+			return iterator{ it };
 		}
 
 		auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
@@ -85,7 +85,7 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		using namespace MyAllocator;
 		deallocate(allocator_, olddata);
 
-		return { it };
+		return iterator{ it };
 	}
 
 	auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
@@ -102,10 +102,10 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		newdata.release();
 
-		return { it2 };
+		return iterator{ it2 };
 	}catch(...){
 		// newdata will be deallocated...
-		return this->end();
+		return end();
 	}
 }
 

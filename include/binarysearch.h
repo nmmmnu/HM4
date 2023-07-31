@@ -10,11 +10,17 @@
 
 
 
-auto binarySearchCompFn = [](auto const &a, auto const &b){
-	return comparator::comp(a, b);
+struct binarySearchCompFn{
+	template<typename T>
+	auto operator()(T const &a, T const &b) const{
+		return comparator::comp(a, b);
+	}
 };
 
-auto binarySearchPrefetchFn = [](auto const &){
+struct binarySearchPrefetchFn{
+	template<typename T>
+	constexpr void operator()(T const &) const{
+	}
 };
 
 
@@ -64,7 +70,7 @@ auto binarySearch(
 			std::move(first), last		,
 			key				,
 			std::forward<Comp>(comp)	,
-			binarySearchPrefetchFn		,
+			binarySearchPrefetchFn{}	,
 			minimum_distance
 	);
 }
@@ -80,8 +86,8 @@ auto binarySearch(
 	return binarySearchPrefetch(
 			std::move(first), last		,
 			key				,
-			binarySearchCompFn		,
-			binarySearchPrefetchFn		,
+			binarySearchCompFn{}		,
+			binarySearchPrefetchFn{}	,
 			minimum_distance
 	);
 }

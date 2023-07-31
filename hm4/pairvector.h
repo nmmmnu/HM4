@@ -9,7 +9,7 @@ namespace hm4{
 
 	template<class T_Allocator>
 	class PairVector{
-		constexpr static size_t capacity__ = 1024;
+		constexpr static size_t capacity__ = 3;//1024;
 
 	public:
 		using Allocator		= T_Allocator;
@@ -18,19 +18,28 @@ namespace hm4{
 
 		using iterator		= pointer_iterator<const Pair * const *>;
 
+		using iteratorC		= Pair * const *;
+		using iteratorM		= Pair **;
+
 	private:
 		size_type	size_	= 0;
 
 		Pair *		data_[capacity__];
 
 	public:
-		// (MANUAL) D-TOR
+		// (Manual) c-tor
+
+		void construct() noexcept{
+			return zeroing_();
+		}
+
+		// (Manual) d-tor
 
 		bool destruct(Allocator &allocator) noexcept;
 
 		void clear(Allocator &allocator) noexcept{
 			destruct(allocator);
-			size_ = 0;
+			zeroing_();
 		}
 
 	public:
@@ -40,6 +49,10 @@ namespace hm4{
 
 		constexpr size_type capacity() const noexcept{
 			return capacity__;
+		}
+
+		constexpr bool full() const noexcept{
+			return size() == capacity();
 		}
 
 		constexpr Pair const &operator[](size_type const index) const noexcept{
@@ -57,48 +70,75 @@ namespace hm4{
 		template<class PFactory>
 		iterator insertF(PFactory &factory, Allocator &allocator, ListCounter &lc);
 
+		// used for testing
 		template<class PFactory>
 		iterator insertF(PFactory &factory, Allocator &allocator, std::nullptr_t){
-			// used for testing
 			ListCounter lc;
 			return insertF(factory, allocator, lc);
 		}
 
-		bool erase_(std::string_view const &key, Allocator &allocator, ListCounter *lc = nullptr);
+		bool erase_(std::string_view const &key, Allocator &allocator, ListCounter &lc);
+
+		// used for testing
+		bool erase_(std::string_view const &key, Allocator &allocator){
+			ListCounter lc;
+			return erase_(key, allocator, lc);
+		}
 
 		void split(PairVector &other);
 		void merge(PairVector &other);
 
 	public:
+		struct LocateResultC{
+			bool		found;
+			iteratorC	it;
+		};
+
+		iteratorC ptr_begin() const noexcept{
+			return data_;
+		}
+
+		iteratorC ptr_end() const noexcept{
+			return data_ + size_;
+		}
+
+		LocateResultC locateC_(std::string_view const key) const noexcept;
+
+	public:
+		struct LocateResultM{
+			bool		found	= false;
+			iteratorM	it	= nullptr;
+		};
+
+		iteratorM ptr_begin() noexcept{
+			return data_;
+		}
+
+		iteratorM ptr_end() noexcept{
+			return data_ + size_;
+		}
+
+		LocateResultM locateM_(std::string_view const key) noexcept;
+
+	public:
 		template<bool B>
 		iterator find(std::string_view const key, std::bool_constant<B> exact) const noexcept;
 
-		iterator begin() const noexcept{
-			return begin_();
+		constexpr iterator begin() const noexcept{
+			return iterator{ ptr_begin() };
 		}
 
-		iterator end() const noexcept{
-			return end_();
+		constexpr iterator end() const noexcept{
+			return iterator{ ptr_end() };
 		}
 
 	private:
-		Pair **begin_() noexcept{
-			return data_;
-		}
-
-		Pair **end_() noexcept{
-			return data_ + size_;
-		}
-
-		Pair * const *begin_() const noexcept{
-			return data_;
-		}
-
-		Pair * const *end_() const noexcept{
-			return data_ + size_;
-		}
-
 		void assign_(Pair **first, Pair **last);
+
+	private:
+		void zeroing_(){
+			size_ = 0;
+		}
 	};
 
 } // namespace hm4

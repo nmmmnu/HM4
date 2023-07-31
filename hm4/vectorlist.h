@@ -85,11 +85,11 @@ public:
 	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
 
 	iterator begin() const noexcept{
-		return std::begin(vector_);
+		return iterator{ std::begin(vector_) };
 	}
 
 	iterator end() const noexcept{
-		return std::end(vector_);
+		return iterator{ std::end(vector_) };
 	}
 };
 

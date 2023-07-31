@@ -5,6 +5,8 @@
 
 #include "listcounter.h"
 
+#include "pairvector.h"
+
 namespace hm4{
 
 
@@ -24,6 +26,8 @@ public:
 	~LinkList(){
 		clear();
 	}
+
+	void print() const;
 
 public:
 	bool clear();
@@ -83,7 +87,7 @@ private:
 private:
 	void deallocate_(Node *node);
 
-	void clear_();
+	void zeroing_();
 
 	struct NodeLocator;
 
@@ -95,7 +99,10 @@ private:
 template<class T_Allocator>
 class LinkList<T_Allocator>::iterator {
 public:
+	using MyPairVector = PairVector<T_Allocator>;
+
 	constexpr iterator(const Node *node) : node_(node){}
+	constexpr iterator(const Node *node, typename MyPairVector::iterator it) : node_(node), it_(it){}
 
 public:
 	using difference_type = LinkList::difference_type;
@@ -110,7 +117,10 @@ public:
 
 public:
 	bool operator==(iterator const &other) const{
-		return node_ == other.node_;
+		if (node_ != other.node_)
+			return false;
+
+		return node_ ? it_ == other.it_ : true;
 	}
 
 	bool operator!=(iterator const &other) const{
@@ -122,19 +132,15 @@ public:
 	}
 
 private:
-	const Node	*node_;
+	const Node			*node_;
+	typename MyPairVector::iterator	it_{};
 };
 
 // ==============================
 
 template<class T_Allocator>
-inline auto LinkList<T_Allocator>::begin() const -> iterator{
-	return head_;
-}
-
-template<class T_Allocator>
 constexpr auto LinkList<T_Allocator>::end() -> iterator{
-	return nullptr;
+	return { nullptr };
 }
 
 }

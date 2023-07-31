@@ -6,7 +6,9 @@
 template<class OIterator>
 class pointer_iterator{
 public:
-	constexpr pointer_iterator(OIterator it) : ptr(it){}
+	constexpr pointer_iterator() = default;
+
+	explicit constexpr pointer_iterator(OIterator it) : ptr(it){}
 
 public:
 	using difference_type	= typename std::iterator_traits<OIterator>::difference_type;
@@ -65,7 +67,7 @@ public:
 	}
 
 	constexpr pointer_iterator operator -(difference_type const off) const{
-		return { ptr - off };
+		return pointer_iterator{ ptr - off };
 	}
 
 	friend constexpr pointer_iterator operator +(difference_type const  off, pointer_iterator const &it){
@@ -116,8 +118,12 @@ public:
 		return *ptr[off];
 	}
 
+	constexpr auto getPtr() const{
+		return ptr;
+	}
+
 private:
-	OIterator ptr;
+	OIterator ptr{};
 };
 
 #endif

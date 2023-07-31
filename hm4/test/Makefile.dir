@@ -22,7 +22,8 @@ $(A)test_pairvector: $(O)test_pairvector.o $(PAIR_OBJ)		\
 	$(LINK)
 
 $(A)test_list: $(O)test_list.o $(PAIR_OBJ)			\
-		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o
+		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o	\
+		$(O)pairvector.o
 	$(LINK)
 
 $(A)test_multi_list: $(O)test_multi_list.o $(PAIR_OBJ)	\
