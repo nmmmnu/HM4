@@ -352,6 +352,7 @@ static void skiplist_lanes_test(){
 // ==============================
 
 #include "linklist.h"
+#include "unrolledlinklist.h"
 
 int main(){
 	list_test<hm4::BlackHoleList			>("BlackHoleList"			);
@@ -361,6 +362,8 @@ int main(){
 
 	list_test<hm4::LinkList		<Allocator>	>("LinkList"		, allocator	);
 	list_test<hm4::SkipList		<Allocator>	>("SkipList"		, allocator	);
+
+	list_test<hm4::UnrolledLinkList	<Allocator>	>("UnrolledLinkList"	, allocator	);
 
 //	skiplist_lanes_test();
 

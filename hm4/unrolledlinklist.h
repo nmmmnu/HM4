@@ -1,29 +1,36 @@
-#ifndef _LINK_LIST_LIST_H
-#define _LINK_LIST_LIST_H
+#ifndef UNROLLED_LINK_LIST_LIST_H
+#define UNROLLED_LINK_LIST_LIST_H
 
 #include "ilist.h"
 
 #include "listcounter.h"
 
+#include "pairvector.h"
+
 namespace hm4{
 
 
 template<class T_Allocator>
-class LinkList{
+class UnrolledLinkList{
 public:
-	using Allocator		= T_Allocator;
-	using size_type		= config::size_type;
-	using difference_type	= config::difference_type;
+	using Allocator			= T_Allocator;
+	using size_type			= config::size_type;
+	using difference_type		= config::difference_type;
+
+private:
+	using MyPairVector		= PairVector<Allocator, 4096>;
 
 public:
 	class iterator;
 
 public:
-	LinkList(Allocator &allocator);
-	LinkList(LinkList &&other);
-	~LinkList(){
+	UnrolledLinkList(Allocator &allocator);
+	UnrolledLinkList(UnrolledLinkList &&other);
+	~UnrolledLinkList(){
 		clear();
 	}
+
+	void print() const;
 
 public:
 	bool clear();
@@ -83,7 +90,7 @@ private:
 private:
 	void deallocate_(Node *node);
 
-	void clear_();
+	void zeroing_();
 
 	struct NodeLocator;
 
@@ -93,12 +100,16 @@ private:
 // ==============================
 
 template<class T_Allocator>
-class LinkList<T_Allocator>::iterator {
+class UnrolledLinkList<T_Allocator>::iterator {
 public:
+	using MyPairVector		= UnrolledLinkList::MyPairVector;
+	using MyPairVectorIterator	= typename MyPairVector::iterator;
+
 	constexpr iterator(const Node *node) : node_(node){}
+	constexpr iterator(const Node *node, MyPairVectorIterator it) : node_(node), it_(it){}
 
 public:
-	using difference_type = LinkList::difference_type;
+	using difference_type = UnrolledLinkList::difference_type;
 	using value_type = const Pair;
 	using pointer = value_type *;
 	using reference = value_type &;
@@ -110,7 +121,10 @@ public:
 
 public:
 	bool operator==(iterator const &other) const{
-		return node_ == other.node_;
+		if (node_ != other.node_)
+			return false;
+
+		return node_ ? it_ == other.it_ : true;
 	}
 
 	bool operator!=(iterator const &other) const{
@@ -122,19 +136,15 @@ public:
 	}
 
 private:
-	const Node	*node_;
+	const Node		*node_;
+	MyPairVectorIterator	it_{};
 };
 
 // ==============================
 
 template<class T_Allocator>
-inline auto LinkList<T_Allocator>::begin() const -> iterator{
-	return head_;
-}
-
-template<class T_Allocator>
-constexpr auto LinkList<T_Allocator>::end() -> iterator{
-	return nullptr;
+constexpr auto UnrolledLinkList<T_Allocator>::end() -> iterator{
+	return { nullptr };
 }
 
 }
