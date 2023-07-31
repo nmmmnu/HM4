@@ -367,9 +367,10 @@ int main(){
 
 //	skiplist_lanes_test();
 
-	list_test_hint<hm4::VectorList	>("VectorList"	);
-	list_test_hint<hm4::LinkList	>("LinkList"	);
-	list_test_hint<hm4::SkipList	>("SkipList"	);
+	list_test_hint<hm4::VectorList		>("VectorList"		);
+	list_test_hint<hm4::LinkList		>("LinkList"		);
+	list_test_hint<hm4::SkipList		>("SkipList"		);
+	list_test_hint<hm4::UnrolledLinkList	>("UnrolledLinkList"	);
 
 	return mytest.end();
 }

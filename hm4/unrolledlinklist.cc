@@ -30,6 +30,15 @@ struct UnrolledLinkList<T_Allocator>::Node{
 			builtin_prefetch(this->next, 0, 1);
 		}
 	}
+
+	constexpr static auto begin_or_null(const Node *node){
+		using It = typename UnrolledLinkList::MyPairVector::iterator;
+
+		if (node)
+			return node->data.begin();
+		else
+			return It{};
+	}
 };
 
 template<class T_Allocator>
@@ -49,16 +58,6 @@ namespace{
 		fprintf(stderr, "=== Detected UnrolledLinkList corruption ===\n");
 		fprintf(stderr, "====================================\n");
 		exit(100);
-	}
-
-	template<typename Node>
-	auto begin_or_null(Node *node){
-		using T = decltype( node->data.begin() );
-
-		if (node)
-			return node->data.begin();
-		else
-			return T{};
 	}
 }
 
@@ -129,19 +128,25 @@ void UnrolledLinkList<T_Allocator>::print() const{
 }
 
 template<class T_Allocator>
+auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::iterator it) const -> iterator{
+	if (it != node->data.end())
+		return { node, it };
+
+	if (!node->next)
+		return end();
+
+	node = node->next;
+	return { node, node->data.begin() };
+};
+
+template<class T_Allocator>
+auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::const_ptr_iterator it) const -> iterator{
+	return fix_iterator_(node, typename UnrolledLinkList::MyPairVector::iterator(it));
+}
+
+template<class T_Allocator>
 template<class PFactory>
 auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
-	auto fix_iterator = [](Node *node, auto it) -> iterator{
-		if (it != node->data.end())
-			return { node, it };
-
-		if (!node->next)
-			return end();
-
-		node = node->next;
-		return { node, node->data.begin() };
-	};
-
 	auto constructNode = [](auto &allocator) -> Node *{
 		using namespace MyAllocator;
 		Node *newnode = allocate<Node>(allocator);
@@ -164,7 +169,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		auto const it = nl.node->data.insertF(factory, getAllocator(), lc_);
 
-		return fix_iterator(
+		return fix_iterator_(
 			nl.node,
 			it
 		);
@@ -190,7 +195,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
 
-		return fix_iterator(
+		return fix_iterator_(
 			newnode,
 			it
 		);
@@ -220,7 +225,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 			auto const it = node->data.insertF(factory, getAllocator(), lc_);
 
-			return fix_iterator(
+			return fix_iterator_(
 				node,
 				it
 			);
@@ -229,7 +234,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 			auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
 
-			return fix_iterator(
+			return fix_iterator_(
 				newnode,
 				it
 			);
@@ -241,7 +246,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	auto const it = node->data.insertF(factory, getAllocator(), lc_);
 
-	return fix_iterator(
+	return fix_iterator_(
 		node,
 		it
 	);
@@ -333,22 +338,10 @@ auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 	auto const &[found, it] = node->data.locateC_(key);
 
-	using T = typename MyPairVector::iterator;
-
 	if constexpr(ExactMatch)
-		return found ? iterator{ node, T{ it } } : end();
+		return found ? iterator{ node, it } : end();
 
-	if (it != node->data.ptr_end())
-		return { node, T{ it } };
-
-	// we have to return next node.
-
-	node = node->next;
-
-	return {
-		node,
-		begin_or_null(node)
-	};
+	return fix_iterator_(node, it);
 }
 
 // ==============================
@@ -360,7 +353,7 @@ auto UnrolledLinkList<T_Allocator>::iterator::operator++() -> iterator &{
 		return *this;
 
 	node_	= node_->next;
-	it_	= begin_or_null(node_);
+	it_	= Node::begin_or_null(node_);
 
 	return *this;
 }
@@ -372,7 +365,7 @@ const Pair &UnrolledLinkList<T_Allocator>::iterator::operator*() const{
 
 template<class T_Allocator>
 auto UnrolledLinkList<T_Allocator>::begin() const -> iterator{
-	return { head_, begin_or_null(head_) };
+	return { head_, Node::begin_or_null(head_) };
 }
 
 // ==============================

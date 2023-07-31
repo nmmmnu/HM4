@@ -18,7 +18,7 @@ public:
 	using difference_type		= config::difference_type;
 
 private:
-	using MyPairVector		= PairVector<Allocator, 4096>;
+	using MyPairVector		= PairVector<Allocator, 2>;
 
 public:
 	class iterator;
@@ -92,6 +92,9 @@ private:
 
 	void zeroing_();
 
+	iterator fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::iterator           it) const;
+	iterator fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::const_ptr_iterator it) const;
+
 	struct NodeLocator;
 
 	NodeLocator locate_(std::string_view const key);
@@ -104,9 +107,15 @@ class UnrolledLinkList<T_Allocator>::iterator {
 public:
 	using MyPairVector		= UnrolledLinkList::MyPairVector;
 	using MyPairVectorIterator	= typename MyPairVector::iterator;
+	using MyPairVectorIteratorC	= typename MyPairVector::const_ptr_iterator;
 
 	constexpr iterator(const Node *node) : node_(node){}
 	constexpr iterator(const Node *node, MyPairVectorIterator it) : node_(node), it_(it){}
+	explicit constexpr iterator(const Node *node, MyPairVectorIteratorC it) :
+					iterator{
+						node,
+						MyPairVectorIterator{it}
+					}{}
 
 public:
 	using difference_type = UnrolledLinkList::difference_type;

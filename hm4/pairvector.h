@@ -17,8 +17,8 @@ namespace hm4{
 
 		using iterator		= pointer_iterator<const Pair * const *>;
 
-		using iteratorC		= Pair * const *;
-		using iteratorM		= Pair **;
+		using const_ptr_iterator		= Pair * const *;
+		using ptr_iterator		= Pair **;
 
 	private:
 		size_type	size_	= 0;
@@ -88,36 +88,36 @@ namespace hm4{
 		void merge(PairVector &other);
 
 	public:
-		struct LocateResultC{
-			bool		found;
-			iteratorC	it;
+		struct ConstLocateResultPtr{
+			bool			found;
+			const_ptr_iterator	it;
 		};
 
-		iteratorC ptr_begin() const noexcept{
+		const_ptr_iterator ptr_begin() const noexcept{
 			return data_;
 		}
 
-		iteratorC ptr_end() const noexcept{
+		const_ptr_iterator ptr_end() const noexcept{
 			return data_ + size_;
 		}
 
-		LocateResultC locateC_(std::string_view const key) const noexcept;
+		ConstLocateResultPtr locateC_(std::string_view const key) const noexcept;
 
 	public:
-		struct LocateResultM{
-			bool		found	= false;
-			iteratorM	it	= nullptr;
+		struct LocateResultPtr{
+			bool			found;
+			ptr_iterator		it;
 		};
 
-		iteratorM ptr_begin() noexcept{
+		ptr_iterator ptr_begin() noexcept{
 			return data_;
 		}
 
-		iteratorM ptr_end() noexcept{
+		ptr_iterator ptr_end() noexcept{
 			return data_ + size_;
 		}
 
-		LocateResultM locateM_(std::string_view const key) noexcept;
+		LocateResultPtr locateM_(std::string_view const key) noexcept;
 
 	public:
 		template<bool B>

@@ -94,7 +94,7 @@ void PairVector<Allocator,Capacity>::merge(PairVector &other){
 }
 
 template<class Allocator, size_t Capacity>
-auto PairVector<Allocator,Capacity>::locateC_(std::string_view const key) const noexcept -> LocateResultC{
+auto PairVector<Allocator,Capacity>::locateC_(std::string_view const key) const noexcept -> ConstLocateResultPtr{
 	assert(!key.empty());
 
 	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), key);
@@ -103,7 +103,7 @@ auto PairVector<Allocator,Capacity>::locateC_(std::string_view const key) const 
 }
 
 template<class Allocator, size_t Capacity>
-auto PairVector<Allocator,Capacity>::locateM_(std::string_view const key) noexcept -> LocateResultM{
+auto PairVector<Allocator,Capacity>::locateM_(std::string_view const key) noexcept -> LocateResultPtr{
 	assert(!key.empty());
 
 	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), key);
