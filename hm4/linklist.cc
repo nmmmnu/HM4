@@ -17,7 +17,7 @@ namespace hm4{
 
 template<class T_Allocator>
 struct LinkList<T_Allocator>::Node{
-	PairVector<T_Allocator>	data;
+	LinkList::MyPairVector	data;
 	Node			*next = nullptr;
 
 	int cmp(std::string_view const key) const{
@@ -335,13 +335,13 @@ auto LinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 
 	auto const &[found, it] = node->data.locateC_(key);
 
-	using IT = typename iterator::MyPairVector::iterator;
+	using T = typename MyPairVector::iterator;
 
 	if constexpr(ExactMatch)
-		return found ? iterator{ node, IT{ it } } : end();
+		return found ? iterator{ node, T{ it } } : end();
 
 	if (it != node->data.ptr_end())
-		return { node, IT{ it } };
+		return { node, T{ it } };
 
 	// we have to return next node.
 

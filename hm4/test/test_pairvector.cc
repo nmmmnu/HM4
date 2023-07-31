@@ -25,7 +25,7 @@ using Allocator		= Allocator_::type;
 
 
 
-using MyPairVector = hm4::PairVector<Allocator_::type>;
+using MyPairVector = hm4::PairVector<Allocator_::type, 32>;
 
 
 

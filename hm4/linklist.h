@@ -13,9 +13,12 @@ namespace hm4{
 template<class T_Allocator>
 class LinkList{
 public:
-	using Allocator		= T_Allocator;
-	using size_type		= config::size_type;
-	using difference_type	= config::difference_type;
+	using Allocator			= T_Allocator;
+	using size_type			= config::size_type;
+	using difference_type		= config::difference_type;
+
+private:
+	using MyPairVector		= PairVector<Allocator, 2>;
 
 public:
 	class iterator;
@@ -99,10 +102,11 @@ private:
 template<class T_Allocator>
 class LinkList<T_Allocator>::iterator {
 public:
-	using MyPairVector = PairVector<T_Allocator>;
+	using MyPairVector		= LinkList::MyPairVector;
+	using MyPairVectorIterator	= typename MyPairVector::iterator;
 
 	constexpr iterator(const Node *node) : node_(node){}
-	constexpr iterator(const Node *node, typename MyPairVector::iterator it) : node_(node), it_(it){}
+	constexpr iterator(const Node *node, MyPairVectorIterator it) : node_(node), it_(it){}
 
 public:
 	using difference_type = LinkList::difference_type;
@@ -132,8 +136,8 @@ public:
 	}
 
 private:
-	const Node			*node_;
-	typename MyPairVector::iterator	it_{};
+	const Node		*node_;
+	MyPairVectorIterator	it_{};
 };
 
 // ==============================

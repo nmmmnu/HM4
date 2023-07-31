@@ -7,12 +7,11 @@
 
 namespace hm4{
 
-	template<class T_Allocator>
+	template<class Allocator, size_t Capacity = 1024>
 	class PairVector{
-		constexpr static size_t capacity__ = 3;//1024;
+		constexpr static size_t capacity__ = Capacity;
 
 	public:
-		using Allocator		= T_Allocator;
 		using size_type		= config::size_type;
 		using difference_type	= config::difference_type;
 
