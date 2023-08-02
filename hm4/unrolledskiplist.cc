@@ -239,6 +239,20 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		return newnode;
 	};
 
+	auto connectNodeBefore = [](Node *newnode, NodeLocator const &nl, height_size_type const height){
+		/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
+		// newnode->height = height
+
+		for(height_size_type i = 0; i < height; ++i)
+			newnode->next[i] = std::exchange(*nl.prev[i], newnode);
+
+	};
+
+	auto connectNodeAfter = [](Node *newnode, Node *node, NodeLocator const &, height_size_type const height){
+		newnode->next = std::exchange(node->next, newnode);
+	};
+
+
 	auto connectNode = [](Node *newnode, auto &nl, height_size_type const height){
 		/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
 		// newnode->height = height
@@ -465,8 +479,6 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 		throw std::logic_error{ "Key can not be nullptr in UnrolledSkipList::locate_" };
 	}
 
-	NodeLocator nl;
-
 	Node **jtable = heads_.data();
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
@@ -477,14 +489,14 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 			int const cmp = node->cmp(key);
 
 			if (cmp >= 0){
-				if (cmp == 0){
-					// miracle, direct hit
+				if constexpr(ShortcutEvaluation)
+					return { jtable, node, cmp == 0 };
+				else{
+					if (h == 0 && !node->next[0]){
+						// this is the last node
+						return { jtable, node };
+					}
 
-					nl.node  = node;
-					nl.found = true;
-
-					if constexpr(ShortcutEvaluation)
-						return nl;
 				}
 
 				break;

@@ -208,7 +208,7 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 		if (!newdata)
-			return this->end();
+			return end();
 
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
@@ -228,7 +228,7 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 	if (!newdata)
-		return this->end();
+		return end();
 
 	size_t const size = newdata->bytes();
 
@@ -246,7 +246,7 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
-		return this->end();
+		return end();
 	}
 
 	newnode->hkey = HPair::SS::create(key);
