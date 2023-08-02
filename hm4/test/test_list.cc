@@ -329,6 +329,7 @@ void list_test<MySingleList<Allocator> >(const char *name){
 }
 
 #include "skiplist.h"
+#include "unrolledskiplist.h"
 
 [[maybe_unused]]
 static void skiplist_lanes_test(){

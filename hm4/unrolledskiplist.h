@@ -1,34 +1,43 @@
-#ifndef UNROLLED_LINK_LIST_LIST_H
-#define UNROLLED_LINK_LIST_LIST_H
+#ifndef UNROLLED_SKIP_LIST_LIST_H
+#define UNROLLED_SKIP_LIST_LIST_H
 
 #include "ilist.h"
 #include "listcounter.h"
 #include "pairvector.h"
 
+#include <array>
+
 namespace hm4{
 
 
 template<class T_Allocator>
-class UnrolledLinkList{
+class UnrolledSkipList{
 public:
-	using Allocator			= T_Allocator;
-	using size_type			= config::size_type;
-	using difference_type		= config::difference_type;
+	using Allocator		= T_Allocator;
+
+	using size_type		= config::size_type;
+	using difference_type	= config::difference_type;
+
+	using height_size_type = uint8_t;
 
 private:
 	using MyPairVector		= PairVector<Allocator, 2>;
 
 public:
+	constexpr static height_size_type MAX_HEIGHT = sizeof(uint64_t) * 8;
+
 	class iterator;
 
 public:
-	UnrolledLinkList(Allocator &allocator);
-	UnrolledLinkList(UnrolledLinkList &&other);
-	~UnrolledLinkList(){
+	UnrolledSkipList(Allocator &allocator);
+	UnrolledSkipList(UnrolledSkipList &&other);
+	~UnrolledSkipList(){
 		clear();
 	}
 
 	void print() const;
+
+	void swap(UnrolledSkipList &other);
 
 public:
 	bool clear();
@@ -72,18 +81,25 @@ public:
 public:
 	template<bool B>
 	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
-
 	iterator begin() const;
 	static constexpr iterator end();
 
+public:
+	void printLanes() const;
+	void printLane(height_size_type lane) const;
+	void printLanesSummary() const;
+
 private:
-	struct Node;
+	struct 			Node;
 
-	Node		*head_;
+	template<typename T>
+	using HeightArray	= std::array<T, MAX_HEIGHT>;
 
-	ListCounter	lc_;
+	HeightArray<Node *>	heads_;
 
-	Allocator	*allocator_;
+	ListCounter		lc_;
+
+	Allocator		*allocator_;
 
 private:
 	void deallocate_(Node *node);
@@ -95,15 +111,18 @@ private:
 
 	struct NodeLocator;
 
+	template<bool ShortcutEvaluation>
 	NodeLocator locate_(std::string_view const key);
+
+	static height_size_type getRandomHeight_();
 };
 
 // ==============================
 
 template<class T_Allocator>
-class UnrolledLinkList<T_Allocator>::iterator {
+class UnrolledSkipList<T_Allocator>::iterator{
 public:
-	using MyPairVector		= UnrolledLinkList::MyPairVector;
+	using MyPairVector		= UnrolledSkipList::MyPairVector;
 	using MyPairVectorIterator	= typename MyPairVector::iterator;
 	using MyPairVectorIteratorC	= typename MyPairVector::const_ptr_iterator;
 
@@ -116,7 +135,7 @@ public:
 					}{}
 
 public:
-	using difference_type = UnrolledLinkList::difference_type;
+	using difference_type = UnrolledSkipList::difference_type;
 	using value_type = const Pair;
 	using pointer = value_type *;
 	using reference = value_type &;
@@ -150,10 +169,11 @@ private:
 // ==============================
 
 template<class T_Allocator>
-constexpr auto UnrolledLinkList<T_Allocator>::end() -> iterator{
+constexpr auto UnrolledSkipList<T_Allocator>::end() -> iterator{
 	return { nullptr };
 }
 
-}
+} // namespace
 
 #endif
+

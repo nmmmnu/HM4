@@ -291,7 +291,7 @@ bool SkipList<T_Allocator>::erase_(std::string_view const key){
 
 	// *nl.prev[0] is always valid.
 	// it always point to the nl.node
-	// unrolling...
+	// unrolling the loop because in 50% of cases we have just this link...
 
 	/* if constexpr unroll */ {
 		height_size_type const h = 0;

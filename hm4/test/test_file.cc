@@ -48,10 +48,12 @@ namespace{
 		fmt::print(format, 'l', "LinkList"		, "std"		);
 		fmt::print(format, 's', "SkipList"		, "std"		);
 		fmt::print(format, 'i', "UnrolledLinkList"	, "std"		);
+		fmt::print(format, 'z', "UnrolledSkipList"	, "std"		);
 		fmt::print(format, 'V', "VectorList"		, "arena"	);
 		fmt::print(format, 'L', "LinkList"		, "arena"	);
 		fmt::print(format, 'S', "SkipList"		, "arena"	);
 		fmt::print(format, 'I', "UnrolledLinkList"	, "arena"	);
+		fmt::print(format, 'Z', "UnrolledskipList"	, "arena"	);
 
 		return 10;
 	}
@@ -129,6 +131,7 @@ namespace{
 #include "vectorlist.h"
 #include "linklist.h"
 #include "unrolledlinklist.h"
+#include "unrolledskiplist.h"
 
 namespace {
 
@@ -146,11 +149,13 @@ namespace {
 		case 'l':	return listSearchProcess(hm4::LinkList	 	<Allocator>	{ allocator_std   }, reader, key, it);
 		case 's':	return listSearchProcess(hm4::SkipList	 	<Allocator>	{ allocator_std   }, reader, key, it);
 		case 'i':	return listSearchProcess(hm4::UnrolledLinkList	 <Allocator>	{ allocator_std   }, reader, key, it);
+		case 'z':	return listSearchProcess(hm4::UnrolledSkipList	 <Allocator>	{ allocator_std   }, reader, key, it);
 
 		case 'V':	return listSearchProcess(hm4::VectorList	<Allocator>	{ allocator_arena }, reader, key, it);
 		case 'L':	return listSearchProcess(hm4::LinkList		<Allocator>	{ allocator_arena }, reader, key, it);
 		case 'S':	return listSearchProcess(hm4::SkipList		<Allocator>	{ allocator_arena }, reader, key, it);
 		case 'I':	return listSearchProcess(hm4::UnrolledLinkList	<Allocator>	{ allocator_arena }, reader, key, it);
+		case 'Z':	return listSearchProcess(hm4::UnrolledSkipList	<Allocator>	{ allocator_arena }, reader, key, it);
 		}
 	}
 

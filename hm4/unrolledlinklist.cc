@@ -1,7 +1,5 @@
 #include "unrolledlinklist.h"
 
-#include "ilist_updateinplace.h"
-
 #include <cassert>
 
 #include "pmallocator.h"
@@ -16,7 +14,7 @@ namespace hm4{
 template<class T_Allocator>
 struct UnrolledLinkList<T_Allocator>::Node{
 	UnrolledLinkList::MyPairVector	data;
-	Node			*next = nullptr;
+	Node				*next = nullptr;
 
 	int cmp(std::string_view const key) const{
 		return data.back().cmp(key);
@@ -54,9 +52,9 @@ namespace{
 
 	[[maybe_unused]]
 	void corruptionExit(){
-		fprintf(stderr, "====================================\n");
+		fprintf(stderr, "============================================\n");
 		fprintf(stderr, "=== Detected UnrolledLinkList corruption ===\n");
-		fprintf(stderr, "====================================\n");
+		fprintf(stderr, "============================================\n");
 		exit(100);
 	}
 }
@@ -155,7 +153,8 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			return nullptr;
 
 		newnode->data.construct();
-		newnode->next = nullptr;
+		// next is not initialized
+		//newnode->next = nullptr;
 
 		return newnode;
 	};
@@ -179,21 +178,21 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	if (!node){
 		// there is no node, make new one.
-
 		Node *newnode = constructNode(getAllocator());
 
 		if (!newnode)
 			return end();
 
-		// connect node
-		newnode->next = std::exchange(*nl.prev, newnode);
-
-		// These is a small problem here:
-		// If insertF() fails, we will have empty node.
-		// However it will be only one in the list,
-		// so should be OK.
-
 		auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
+
+		if (it == newnode->data.end()){
+			// we can use smart_ptr here...
+			deallocate_(newnode);
+			return end();
+		}
+
+		// connect node after head
+		newnode->next = std::exchange(*nl.prev, newnode);
 
 		return fix_iterator_(
 			newnode,
@@ -204,13 +203,12 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	if (node->data.full()){
 		// current node is full, make new one and split elements.
 
-
 		Node *newnode = constructNode(getAllocator());
 
 		if (!newnode)
 			return end();
 
-		// connect node after
+		// connect node after another node
 		newnode->next = std::exchange(node->next, newnode);
 
 		node->data.split(newnode->data);
