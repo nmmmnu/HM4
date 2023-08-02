@@ -13,8 +13,8 @@ namespace hm4{
 
 template<class T_Allocator>
 struct UnrolledLinkList<T_Allocator>::Node{
-	UnrolledLinkList::MyPairVector	data;
-	Node				*next = nullptr;
+	MyPairVector	data;
+	Node		*next = nullptr;
 
 	int cmp(std::string_view const key) const{
 		return data.back().cmp(key);
@@ -30,7 +30,7 @@ struct UnrolledLinkList<T_Allocator>::Node{
 	}
 
 	constexpr static auto begin_or_null(const Node *node){
-		using It = typename UnrolledLinkList::MyPairVector::iterator;
+		using It = typename MyPairVector::iterator;
 
 		if (node)
 			return node->data.begin();

@@ -77,8 +77,8 @@ constexpr bool DEBUG_PRINT_LANES = 0;
 
 template<class T_Allocator>
 struct UnrolledSkipList<T_Allocator>::Node{
-	UnrolledLinkList::MyPairVector	data;
-	Node				*next[1];	// system dependent, dynamic, at least 1
+	MyPairVector	data;
+	Node		*next[1];	// system dependent, dynamic, at least 1
 
 	constexpr static size_t calcSize(height_size_type const height){
 		return sizeof(Node) + (height - 1) * sizeof(Node *);
@@ -98,7 +98,7 @@ struct UnrolledSkipList<T_Allocator>::Node{
 	}
 
 	constexpr static auto begin_or_null(const Node *node){
-		using It = typename UnrolledLinkList::MyPairVector::iterator;
+		using It = typename MyPairVector::iterator;
 
 		if (node)
 			return node->data.begin();
@@ -189,7 +189,7 @@ template<class T_Allocator>
 void UnrolledSkipList<T_Allocator>::print() const{
 	printf("==begin list==\n");
 
-	for(const Node *node = head_; node; node = node->next[0]){
+	for(const Node *node = heads_[0]; node; node = node->next[0]){
 		printf("Node: %p\n", (void *) node);
 
 		printf("--begin data--\n");
@@ -320,7 +320,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		connectNode(newnode, nl, height);
 
 		// steal data from node to newnode
-		newnode->merge(node);
+		newnode->data.merge(node->data);
 
 		// restore "logical order", newnode is empty now.
 		std::swap(node, newnode);
@@ -374,8 +374,10 @@ bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 	if (nl.node == nullptr)
 		return false;
 
+	// *nl.prev[0] is always valid.
+	// it always point to the nl.node
 	if constexpr(corruptionCheck)
-		if (*nl.prev[h] != nl.node)
+		if (*nl.prev[0] != nl.node)
 			corruptionExit();
 
 	if (!nl.node->data.erase_(key, getAllocator(), lc_))
@@ -386,10 +388,7 @@ bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 
 	// node is zero size, it must be removed
 
-	// *nl.prev[0] is always valid.
-	// it always point to the nl.node
 	// unrolling the loop because in 50% of cases we have just this link...
-
 	/* if constexpr unroll */ {
 		height_size_type const h = 0;
 
@@ -435,7 +434,7 @@ void UnrolledSkipList<T_Allocator>::printLane(height_size_type const lane) const
 	for(const Node *node = heads_[lane]; node; node = node->next[lane]){
 		// no prefetch here.
 
-		hm4::print(*node->data.back());
+		hm4::print(node->data.back());
 
 		if (++i > 10)
 			break;
@@ -470,34 +469,25 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 
 	Node **jtable = heads_.data();
 
-	auto hkey = HPair::SS::create(key);
-
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
 
 			node->prefetch(h);
 
-			// this allows comparisson with single ">", instead of more complicated 3-way.
-			if (node->hkey >= hkey){
-				int const cmp = node->cmp(hkey, key);
+			int const cmp = node->cmp(key);
 
-				if (cmp >= 0){
-					if (cmp == 0){
-						// found
+			if (cmp >= 0){
+				if (cmp == 0){
+					// miracle, direct hit
 
-						// if (cmp == 0 && (h == 0 || ShortcutEvaluation))
-						// lets always update nl.node
+					nl.node  = node;
+					nl.found = true;
 
-						nl.node = node;
-
-						if constexpr(ShortcutEvaluation)
-							return nl;
-					}
-
-					break;
+					if constexpr(ShortcutEvaluation)
+						return nl;
 				}
 
-				// in rare corner case, it might go here.
+				break;
 			}
 
 			jtable = node->next;
@@ -510,8 +500,8 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 }
 
 template<class T_Allocator>
-template<bool ExactEvaluation>
-auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
+template<bool ExactMatch>
+auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in UnrolledSkipList::locateNode_" };
@@ -535,7 +525,7 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 		}
 	}
 
-	:done	// label for goto :)
+	done:	// label for goto :)
 
 	if (!node)
 		return end();
@@ -568,9 +558,12 @@ auto UnrolledSkipList<T_Allocator>::iterator::operator++() -> iterator &{
 
 template<class T_Allocator>
 const Pair &UnrolledSkipList<T_Allocator>::iterator::operator*() const{
-	assert(node_);
+	return *it_;
+}
 
-	return *(node_->data);
+template<class T_Allocator>
+auto UnrolledSkipList<T_Allocator>::begin() const -> iterator{
+	return iterator{ heads_[0], Node::begin_or_null(heads_[0]) };
 }
 
 // ==============================

@@ -106,8 +106,8 @@ private:
 
 	void zeroing_();
 
-	iterator fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::iterator           it) const;
-	iterator fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::const_ptr_iterator it) const;
+	iterator fix_iterator_(const Node *node, typename MyPairVector::iterator           it) const;
+	iterator fix_iterator_(const Node *node, typename MyPairVector::const_ptr_iterator it) const;
 
 	struct NodeLocator;
 

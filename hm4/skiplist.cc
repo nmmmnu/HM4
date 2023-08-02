@@ -418,8 +418,8 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 }
 
 template<class T_Allocator>
-template<bool ExactEvaluation>
-auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
+template<bool ExactMatch>
+auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateNode_" };
@@ -456,7 +456,7 @@ auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 		}
 	}
 
-	if constexpr(ExactEvaluation)
+	if constexpr(ExactMatch)
 		return nullptr;
 	else
 		return node;
