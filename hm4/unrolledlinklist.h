@@ -2,9 +2,7 @@
 #define UNROLLED_LINK_LIST_LIST_H
 
 #include "ilist.h"
-
 #include "listcounter.h"
-
 #include "pairvector.h"
 
 namespace hm4{
