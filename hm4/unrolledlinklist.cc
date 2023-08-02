@@ -13,8 +13,8 @@ namespace hm4{
 
 template<class T_Allocator>
 struct UnrolledLinkList<T_Allocator>::Node{
-	UnrolledLinkList::MyPairVector	data;
-	Node				*next = nullptr;
+	MyPairVector	data;
+	Node		*next = nullptr;
 
 	int cmp(std::string_view const key) const{
 		return data.back().cmp(key);
@@ -30,7 +30,7 @@ struct UnrolledLinkList<T_Allocator>::Node{
 	}
 
 	constexpr static auto begin_or_null(const Node *node){
-		using It = typename UnrolledLinkList::MyPairVector::iterator;
+		using It = typename MyPairVector::iterator;
 
 		if (node)
 			return node->data.begin();
@@ -159,6 +159,14 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		return newnode;
 	};
 
+	auto connectNodeBefore = [](Node *newnode, NodeLocator const &nl){
+		newnode->next = std::exchange(*nl.prev, newnode);
+	};
+
+	auto connectNodeAfter = [](Node *newnode, Node *node, NodeLocator const &){
+		newnode->next = std::exchange(node->next, newnode);
+	};
+
 	auto const &key = factory.getKey();
 
 	const auto nl = locate_(key);
@@ -191,8 +199,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			return end();
 		}
 
-		// connect node after head
-		newnode->next = std::exchange(*nl.prev, newnode);
+		connectNodeBefore(newnode, nl);
 
 		return fix_iterator_(
 			newnode,
@@ -208,8 +215,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (!newnode)
 			return end();
 
-		// connect node after another node
-		newnode->next = std::exchange(node->next, newnode);
+		connectNodeAfter(newnode, node, nl);
 
 		node->data.split(newnode->data);
 
