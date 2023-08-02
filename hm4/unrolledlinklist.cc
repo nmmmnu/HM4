@@ -159,14 +159,6 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		return newnode;
 	};
 
-	auto connectNodeBefore = [](Node *newnode, NodeLocator const &nl){
-		newnode->next = std::exchange(*nl.prev, newnode);
-	};
-
-	auto connectNodeAfter = [](Node *newnode, Node *node, NodeLocator const &){
-		newnode->next = std::exchange(node->next, newnode);
-	};
-
 	auto const &key = factory.getKey();
 
 	const auto nl = locate_(key);
@@ -199,7 +191,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			return end();
 		}
 
-		connectNodeBefore(newnode, nl);
+		newnode->next = std::exchange(*nl.prev, newnode);
 
 		return fix_iterator_(
 			newnode,
@@ -215,7 +207,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (!newnode)
 			return end();
 
-		connectNodeAfter(newnode, node, nl);
+		newnode->next = std::exchange(node->next, newnode);
 
 		node->data.split(newnode->data);
 
@@ -297,14 +289,16 @@ auto UnrolledLinkList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 	for(Node *node = *jtable; node; node = node->next){
 		node->prefetch();
 
-		int cmp = node->cmp(key);
+		if (!node->next){
+			// this is the last node, return
 
-		if (cmp >= 0){
-			return { jtable, node, cmp == 0 };
-		}else if (!node->next){
-			// this is the last node
 			return { jtable, node };
 		}
+
+		int cmp = node->cmp(key);
+
+		if (cmp >= 0)
+			return { jtable, node, cmp == 0 };
 
 		jtable = & node->next;
 	}

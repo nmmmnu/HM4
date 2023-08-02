@@ -21,7 +21,7 @@ public:
 	using height_size_type = uint8_t;
 
 private:
-	using MyPairVector		= PairVector<Allocator, 2>;
+	using MyPairVector		= PairVector<Allocator, 3>;
 
 public:
 	constexpr static height_size_type MAX_HEIGHT = sizeof(uint64_t) * 8;

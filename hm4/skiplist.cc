@@ -382,7 +382,6 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
-
 			node->prefetch(h);
 
 			// this allows comparisson with single ">", instead of more complicated 3-way.

@@ -110,7 +110,7 @@ struct UnrolledSkipList<T_Allocator>::Node{
 template<class T_Allocator>
 struct UnrolledSkipList<T_Allocator>::NodeLocator{
 	HeightArray<Node **>	prev;
-	Node			*node;
+	Node			*node	= nullptr;
 	bool			found	= false;
 };
 
@@ -239,37 +239,12 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		return newnode;
 	};
 
-	auto connectNodeBefore = [](Node *newnode, NodeLocator const &nl, height_size_type const height){
+	auto connectNode = [](Node *newnode, NodeLocator const &nl, height_size_type const height){
 		/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
 		// newnode->height = height
 
 		for(height_size_type i = 0; i < height; ++i)
 			newnode->next[i] = std::exchange(*nl.prev[i], newnode);
-
-	};
-
-	auto connectNodeAfter = [](Node *newnode, Node *node, NodeLocator const &, height_size_type const height){
-		newnode->next = std::exchange(node->next, newnode);
-	};
-
-
-	auto connectNode = [](Node *newnode, auto &nl, height_size_type const height){
-		/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
-		// newnode->height = height
-
-		// place new node where it belongs
-		for(height_size_type i = 0; i < height; ++i)
-			newnode->next[i] = std::exchange(*nl.prev[i], newnode);
-
-		if constexpr(DEBUG_PRINT_LANES){
-			printf("%3u Lanes-> ", height);
-			for(height_size_type i = 0; i < height; ++i)
-				printf("%p ", (void *) newnode->next[i]);
-			printf("\n");
-		}
-
-		/* SEE REMARK ABOUT NEXT[] SIZE AT THE TOP */
-		// newnode->next[i] = NULL;
 	};
 
 	auto const &key = factory.getKey();
@@ -328,16 +303,25 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (!newnode)
 			return end();
 
-		// we can not connect the node after the `node`.
-		// this is why we connect in front of the `node`.
+std::cout << "full " << key << '\n';
+printf("found %d %p\n", (int)nl.found, (void *)nl.node);
+
+		/*
+		// because we do not know `next` height,
+		// we can not do this:
+		// connectNodeAfter(newnode, node, nl, height);
+		// so lets do this instead.
+		{
+			connectNode(newnode, nl, height);
+			newnode->data.merge(node->data);
+
+			using std::swap;
+			swap(newnode, node);
+		}
+		*/
 
 		connectNode(newnode, nl, height);
-
-		// steal data from node to newnode
-		newnode->data.merge(node->data);
-
-		// restore "logical order", newnode is empty now.
-		std::swap(node, newnode);
+print();
 
 		node->data.split(newnode->data);
 
@@ -479,24 +463,38 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 		throw std::logic_error{ "Key can not be nullptr in UnrolledSkipList::locate_" };
 	}
 
+	NodeLocator nl;
+
 	Node **jtable = heads_.data();
+
+	//std::cout << "Begin locate " << key << '\n';
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
-
 			node->prefetch(h);
+
+			if (h == 0 && !node->next[0]){
+				// this is the last node, return
+
+				nl.node  = node;
+
+				return nl;
+			}
 
 			int const cmp = node->cmp(key);
 
 			if (cmp >= 0){
-				if constexpr(ShortcutEvaluation)
-					return { jtable, node, cmp == 0 };
-				else{
-					if (h == 0 && !node->next[0]){
-						// this is the last node
-						return { jtable, node };
+
+				if constexpr(ShortcutEvaluation){
+					if (cmp == 0 || !node->data.full()){
+						nl.found = cmp == 0;
+						nl.node  = node;
+
+						return nl;
 					}
 
+					// else we need complete evaluation,
+					// because we will insert node soon.
 				}
 
 				break;
@@ -507,6 +505,12 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 
 		nl.prev[h] = & jtable[h];
 	}
+
+	//for(height_size_type h = 8; h --> 0;)
+	//	printf("%u | %p\n", h, (void *)*nl.prev[h]);
+	//
+	//std::cout << key;
+	//printf(" complete eval\n");
 
 	return nl;
 }
@@ -563,7 +567,11 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 template<class T_Allocator>
 auto UnrolledSkipList<T_Allocator>::iterator::operator++() -> iterator &{
-	node_ = node_->next[0];
+	if (++it_ != node_->data.end())
+		return *this;
+
+	node_	= node_->next[0];
+	it_	= Node::begin_or_null(node_);
 
 	return *this;
 }
