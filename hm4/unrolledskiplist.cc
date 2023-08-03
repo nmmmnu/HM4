@@ -112,6 +112,14 @@ struct UnrolledSkipList<T_Allocator>::NodeLocator{
 	HeightArray<Node **>	prev;
 	Node			*node	= nullptr;
 	bool			found	= false;
+
+	void print(height_size_type max = MAX_HEIGHT) const{
+		printf("Found: %d\n", (int   ) found	);
+		printf("Node:  %p\n", (void *) node	);
+		printf("Heights from: %u:\n", max);
+		for(height_size_type h = max; h --> 0;)
+			printf("%3u | %p\n", h, (void *)*prev[h]);
+	}
 };
 
 namespace{
@@ -249,7 +257,15 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	auto const &key = factory.getKey();
 
+	static int x = 0;
+//	if (key == "3 city") ++x;
+
+
 	const auto nl = locate_<1>(key);
+
+//std::cout << "=========> " << key << '\n';
+//printf("%d %p\n", (int) nl.found, (void *)nl.node);
+//print();
 
 	if (nl.found){
 		// update pair in place.
@@ -303,35 +319,36 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (!newnode)
 			return end();
 
-std::cout << "full " << key << '\n';
-printf("found %d %p\n", (int)nl.found, (void *)nl.node);
+		connectNode(newnode, nl, height);
 
-		/*
-		// because we do not know `next` height,
-		// we can not do this:
-		// connectNodeAfter(newnode, node, nl, height);
-		// so lets do this instead.
+		// node is connected in front.
+		// must be in the back, but we can not do that.
+		// so we do this instead:
 		{
-			connectNode(newnode, nl, height);
-			newnode->data.merge(node->data);
-
 			using std::swap;
 			swap(newnode, node);
-		}
-		*/
 
-		connectNode(newnode, nl, height);
-print();
+			node->data.merge(newnode->data);
+		}
 
 		node->data.split(newnode->data);
 
 		// is unclear where the pair should go
 		// also we have knowledge how the node is split
 
-		int const cmp = nl.node->cmp(key);
+		int const cmp = node->cmp(key);
+
+if (x == -1){
+	print();
+	std::cout << node->data.back().getKey();
+	printf(" -> %d %p %p\n", cmp, (void *)node, (void *)newnode);
+}
 
 		if (cmp >= 0){
 			// insert in the old node
+
+		//	printf("node");
+		//	for(auto &x : node->data) x.print();
 
 			auto const it = node->data.insertF(factory, getAllocator(), lc_);
 
@@ -341,6 +358,9 @@ print();
 			);
 		}else{
 			// insert in the new node
+
+		//	printf("newnode");
+		//	for(auto &x : newnode->data) x.print();
 
 			auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
 
@@ -460,43 +480,32 @@ template<bool ShortcutEvaluation>
 auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
-		throw std::logic_error{ "Key can not be nullptr in UnrolledSkipList::locate_" };
+		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
 	}
 
 	NodeLocator nl;
 
 	Node **jtable = heads_.data();
 
-	//std::cout << "Begin locate " << key << '\n';
+	static_assert(MAX_HEIGHT > 0);
 
-	for(height_size_type h = MAX_HEIGHT; h --> 0;){
+	for(height_size_type h = MAX_HEIGHT; h --> 1;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
 			node->prefetch(h);
 
-			if (h == 0 && !node->next[0]){
-				// this is the last node, return
-
-				nl.node  = node;
-
-				return nl;
-			}
-
 			int const cmp = node->cmp(key);
 
+		//	printf("-> Loop   height %u   node %p   cmp %d ", h, (void *) node, cmp);
+		//	std::cout << "(" << key << ") vs (" << node->data.back().getKey() << ")" << '\n';
+
 			if (cmp >= 0){
+				nl.node = node;
+				break;
+			}
 
-				if constexpr(ShortcutEvaluation){
-					if (cmp == 0 || !node->data.full()){
-						nl.found = cmp == 0;
-						nl.node  = node;
-
-						return nl;
-					}
-
-					// else we need complete evaluation,
-					// because we will insert node soon.
-				}
-
+			// if is last node, drop down
+			if (!node->next[h] && !node->data.full()){
+				nl.node = node;
 				break;
 			}
 
@@ -506,11 +515,41 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 		nl.prev[h] = & jtable[h];
 	}
 
-	//for(height_size_type h = 8; h --> 0;)
-	//	printf("%u | %p\n", h, (void *)*nl.prev[h]);
-	//
-	//std::cout << key;
-	//printf(" complete eval\n");
+//	printf("here !!!!!!!!!!!!! %p %p %p\n", (void *)nl.node, (void *)jtable[0], (void *)heads_[0]);
+
+	// level 0, like link list
+	/* loop unroll */ {
+		for(Node *node = jtable[0]; node; node = node->next[0]){
+			node->prefetch(0);
+
+		//	node->data.back().print();
+
+		//	printf("p -> %p\n", (void *)node);
+
+
+			if (!node->next[0]){
+				// last node
+				nl.node = node;
+				break;
+			}
+
+			int const cmp = node->cmp(key);
+
+			if (cmp >= 0){
+				// found
+				nl.node  = node;
+				nl.found = cmp == 0;
+				break;
+			}
+
+			jtable = node->next;
+
+		}
+
+		nl.prev[0] = & jtable[0];
+	}
+
+//nl.print(5);
 
 	return nl;
 }
