@@ -29,6 +29,7 @@ Allocator_arena			allocator_arena{ ARENA_SIZE };
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
 
 #include "skiplist.h"
+#include "unrolledskiplist.h"
 
 namespace{
 
@@ -123,6 +124,11 @@ namespace{
 		//	list.printLanesSummary();
 		}
 
+		if constexpr(std::is_same_v<List, hm4::UnrolledSkipList<typename List::Allocator> >){
+		//	list.printLanesSummary();
+		//	list.print();
+		}
+
 		return 0;
 	}
 
@@ -131,7 +137,6 @@ namespace{
 #include "vectorlist.h"
 #include "linklist.h"
 #include "unrolledlinklist.h"
-#include "unrolledskiplist.h"
 
 namespace {
 

@@ -257,15 +257,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	auto const &key = factory.getKey();
 
-	static int x = 0;
-//	if (key == "3 city") ++x;
-
-
 	const auto nl = locate_<1>(key);
-
-//std::cout << "=========> " << key << '\n';
-//printf("%d %p\n", (int) nl.found, (void *)nl.node);
-//print();
 
 	if (nl.found){
 		// update pair in place.
@@ -338,17 +330,8 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		int const cmp = node->cmp(key);
 
-if (x == -1){
-	print();
-	std::cout << node->data.back().getKey();
-	printf(" -> %d %p %p\n", cmp, (void *)node, (void *)newnode);
-}
-
 		if (cmp >= 0){
 			// insert in the old node
-
-		//	printf("node");
-		//	for(auto &x : node->data) x.print();
 
 			auto const it = node->data.insertF(factory, getAllocator(), lc_);
 
@@ -358,9 +341,6 @@ if (x == -1){
 			);
 		}else{
 			// insert in the new node
-
-		//	printf("newnode");
-		//	for(auto &x : newnode->data) x.print();
 
 			auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
 
@@ -495,9 +475,6 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 
 			int const cmp = node->cmp(key);
 
-		//	printf("-> Loop   height %u   node %p   cmp %d ", h, (void *) node, cmp);
-		//	std::cout << "(" << key << ") vs (" << node->data.back().getKey() << ")" << '\n';
-
 			if (cmp >= 0){
 				nl.node = node;
 				break;
@@ -515,17 +492,10 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 		nl.prev[h] = & jtable[h];
 	}
 
-//	printf("here !!!!!!!!!!!!! %p %p %p\n", (void *)nl.node, (void *)jtable[0], (void *)heads_[0]);
-
 	// level 0, like link list
 	/* loop unroll */ {
 		for(Node *node = jtable[0]; node; node = node->next[0]){
 			node->prefetch(0);
-
-		//	node->data.back().print();
-
-		//	printf("p -> %p\n", (void *)node);
-
 
 			if (!node->next[0]){
 				// last node
@@ -549,8 +519,6 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 		nl.prev[0] = & jtable[0];
 	}
 
-//nl.print(5);
-
 	return nl;
 }
 
@@ -567,9 +535,29 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 	const Node *node = nullptr;
 	int cmp = 0;
 
-	for(height_size_type h = MAX_HEIGHT; h --> 0;){
+	static_assert(MAX_HEIGHT > 0);
+
+	for(height_size_type h = MAX_HEIGHT; h --> 1;){
 		for(node = jtable[h]; node; node = node->next[h]){
 			node->prefetch(h);
+
+			cmp = node->cmp(key);
+
+			if (cmp >= 0){
+				if (cmp == 0)
+					goto done;
+				else
+					break;
+			}
+
+			jtable = node->next;
+		}
+	}
+
+	// level 0, like link list
+	/* loop unroll */ {
+		for(node = jtable[0]; node; node = node->next[0]){
+			node->prefetch(0);
 
 			cmp = node->cmp(key);
 
@@ -580,10 +568,10 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 		}
 	}
 
-	done:	// label for goto :)
-
 	if (!node)
 		return end();
+
+	done:	// label for goto
 
 	if (cmp == 0){
 		// miracle, direct hit

@@ -79,8 +79,8 @@ public:
 	}
 
 public:
-	template<bool B>
-	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
+	template<bool ExactMatch>
+	iterator find(std::string_view const key, std::bool_constant<ExactMatch>) const;
 	iterator begin() const;
 	static constexpr iterator end();
 

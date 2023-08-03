@@ -365,6 +365,7 @@ int main(){
 	list_test<hm4::SkipList		<Allocator>	>("SkipList"		, allocator	);
 
 	list_test<hm4::UnrolledLinkList	<Allocator>	>("UnrolledLinkList"	, allocator	);
+	list_test<hm4::UnrolledSkipList	<Allocator>	>("UnrolledSkipList"	, allocator	);
 
 //	skiplist_lanes_test();
 
@@ -372,6 +373,7 @@ int main(){
 	list_test_hint<hm4::LinkList		>("LinkList"		);
 	list_test_hint<hm4::SkipList		>("SkipList"		);
 	list_test_hint<hm4::UnrolledLinkList	>("UnrolledLinkList"	);
+	list_test_hint<hm4::UnrolledSkipList	>("UnrolledSkipList"	);
 
 	return mytest.end();
 }
