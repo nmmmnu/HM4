@@ -13,9 +13,9 @@ public:
 public:
 	using difference_type	= typename std::iterator_traits<OIterator>::difference_type;
 	using value_type_ptr__	= typename std::iterator_traits<OIterator>::value_type;
-	using value_type	= std::remove_pointer_t<value_type_ptr__>;
-	using pointer		= value_type *;
-	using reference		= value_type &;
+//	using value_type	= std::remove_pointer_t<value_type_ptr__>;
+//	using pointer		= value_type *;
+//	using reference		= value_type &;
 	using iterator_category	= std::random_access_iterator_tag;
 
 public:
@@ -106,19 +106,19 @@ public:
 
 public:
 	// dereference
-	constexpr reference operator*() const{
+	constexpr auto &operator*() const{
 		return **ptr;
 	}
 
-	constexpr pointer operator->() const{
+	constexpr auto *operator->() const{
 		return & operator*();
 	}
 
-	constexpr reference operator[](difference_type const off) const{
+	constexpr auto &operator[](difference_type const off) const{
 		return *ptr[off];
 	}
 
-	constexpr auto getPtr() const{
+	constexpr auto *getPtr() const{
 		return ptr;
 	}
 
