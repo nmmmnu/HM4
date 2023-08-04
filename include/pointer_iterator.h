@@ -126,5 +126,18 @@ private:
 	OIterator ptr{};
 };
 
+namespace std {
+	template <class OIterator>
+	struct iterator_traits<pointer_iterator<OIterator> >{
+		using T = pointer_iterator<OIterator>;
+
+		using difference_type	= typename T::difference_type	;
+		using iterator_category	= typename T::iterator_category	;
+	//	using value_type	= typename T::value_type	;
+	//	using pointer		= typename T::pointer		;
+	//	using reference		= typename T::reference		;
+	};
+}
+
 #endif
 
