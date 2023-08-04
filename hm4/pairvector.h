@@ -5,6 +5,8 @@
 #include "listcounter.h"
 #include "pointer_iterator.h"
 
+#include "hpair.h"
+
 namespace hm4{
 
 	template<class Allocator, size_t Capacity = 1024>
@@ -12,18 +14,49 @@ namespace hm4{
 		constexpr static size_t capacity__ = Capacity;
 
 	public:
+		struct KData {
+			HPair::HKey		hkey;
+			std::string_view	key;
+		};
+
+		struct Data{
+			HPair::HKey		hkey	= 0;
+			Pair			*pair	= nullptr;
+
+			constexpr Data() = default;
+
+			Data(Pair *pair) :
+					hkey(HPair::SS::create(pair->getKey())),
+					pair(pair){}
+
+			int cmp(HPair::HKey const hkey, std::string_view const key) const{
+				return HPair::cmp(this->hkey, *this->pair, hkey, key);
+			}
+
+			int cmp(KData const kdata) const{
+				return cmp(kdata.hkey, kdata.key);
+			}
+
+			constexpr Pair const &operator *() const{
+				return *pair;
+			}
+		//	constexpr const Pair *operator ->() const{
+		//		return pair;
+		//	}
+		};
+
+	public:
 		using size_type		= config::size_type;
 		using difference_type	= config::difference_type;
 
-		using iterator		= pointer_iterator<const Pair * const *>;
+		using const_ptr_iterator	= const Data *;
+		using ptr_iterator		= Data *;
 
-		using const_ptr_iterator		= Pair * const *;
-		using ptr_iterator		= Pair **;
+		using iterator			= pointer_iterator<const_ptr_iterator>;
 
 	private:
-		size_type	size_	= 0;
-
-		Pair *		data_[capacity__];
+		size_type	size_			= 0;
+		Data		data_[capacity__];
 
 	public:
 		// (Manual) c-tor
@@ -101,7 +134,11 @@ namespace hm4{
 			return data_ + size_;
 		}
 
-		ConstLocateResultPtr locateC_(std::string_view const key) const noexcept;
+		ConstLocateResultPtr locateC_(HPair::HKey const hkey, std::string_view const key) const noexcept;
+
+		auto locateC_(std::string_view const key) const noexcept{
+			return locateC_(HPair::SS::create(key), key);
+		}
 
 	public:
 		struct LocateResultPtr{
@@ -117,7 +154,11 @@ namespace hm4{
 			return data_ + size_;
 		}
 
-		LocateResultPtr locateM_(std::string_view const key) noexcept;
+		LocateResultPtr locateM_(HPair::HKey const hkey, std::string_view const key) noexcept;
+
+		auto locateM_(std::string_view const key) noexcept{
+			return locateM_(HPair::SS::create(key), key);
+		}
 
 	public:
 		template<bool B>
@@ -132,7 +173,7 @@ namespace hm4{
 		}
 
 	private:
-		void assign_(Pair **first, Pair **last);
+		void assign_(Data *first, Data *last);
 
 	private:
 		void zeroing_(){

@@ -40,14 +40,13 @@ namespace {
 
 	// ---------------------
 
-	template<class It>
-	auto binarySearch(It begin, It end, std::string_view const key){
-
-		auto comp = [](const Pair *p, std::string_view const key){
-			return p->cmp(key);
+	template<class It, class KData>
+	auto binarySearch(It begin, It end, KData const kdata){
+		auto comp = [](auto &d, KData const kdata){
+			return d.cmp(kdata);
 		};
 
-		return ::binarySearch(begin, end, key, comp);
+		return ::binarySearch(begin, end, kdata, comp);
 	}
 } // anonymous namespace
 
@@ -56,7 +55,7 @@ bool PairVector<Allocator,Capacity>::destruct(Allocator &allocator) noexcept{
 	if (allocator.reset() == false){
 		for(auto it = ptr_begin(); it != ptr_end(); ++it){
 			using namespace MyAllocator;
-			deallocate(allocator, *it);
+			deallocate(allocator, it->pair);
 		};
 	}
 
@@ -64,7 +63,7 @@ bool PairVector<Allocator,Capacity>::destruct(Allocator &allocator) noexcept{
 }
 
 template<class Allocator, size_t Capacity>
-void PairVector<Allocator,Capacity>::assign_(Pair **first, Pair **last){
+void PairVector<Allocator,Capacity>::assign_(Data *first, Data *last){
 	auto const len = static_cast<size_type>(last - first);
 
 	if (size() + len > capacity())
@@ -94,19 +93,19 @@ void PairVector<Allocator,Capacity>::merge(PairVector &other){
 }
 
 template<class Allocator, size_t Capacity>
-auto PairVector<Allocator,Capacity>::locateC_(std::string_view const key) const noexcept -> ConstLocateResultPtr{
+auto PairVector<Allocator,Capacity>::locateC_(HPair::HKey const hkey, std::string_view const key) const noexcept -> ConstLocateResultPtr{
 	assert(!key.empty());
 
-	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), key);
+	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), KData{ hkey, key } );
 
 	return { found, it };
 }
 
 template<class Allocator, size_t Capacity>
-auto PairVector<Allocator,Capacity>::locateM_(std::string_view const key) noexcept -> LocateResultPtr{
+auto PairVector<Allocator,Capacity>::locateM_(HPair::HKey const hkey, std::string_view const key) noexcept -> LocateResultPtr{
 	assert(!key.empty());
 
-	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), key);
+	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), KData{ hkey, key } );
 
 	return { found, it };
 }
@@ -132,7 +131,7 @@ auto PairVector<Allocator,Capacity>::insertF(PFactory &factory, Allocator &alloc
 	if (found){
 		// key exists, overwrite, do not shift
 
-		Pair *olddata = *it;
+		Pair *olddata = it->pair;
 
 		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 			if (!isValidForReplace(factory.getCreated(), *olddata))
@@ -152,7 +151,7 @@ auto PairVector<Allocator,Capacity>::insertF(PFactory &factory, Allocator &alloc
 		lc.upd(olddata->bytes(), newdata->bytes());
 
 		// assign new pair
-		*it = newdata.release();
+		it->pair = newdata.release();
 
 		// deallocate old pair
 		using namespace MyAllocator;
@@ -188,10 +187,10 @@ bool PairVector<Allocator,Capacity>::erase_(std::string_view const &key, Allocat
 	if (!found)
 		return false;
 
-	lc.dec((*it)->bytes());
+	lc.dec(it->pair->bytes());
 
 	using namespace MyAllocator;
-	deallocate(allocator, *it);
+	deallocate(allocator, it->pair);
 
 	shiftL_(it, ptr_end());
 
@@ -783,6 +782,8 @@ template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insert
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+
+
 
 } // namespace hm4
 

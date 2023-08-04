@@ -580,7 +580,7 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 	// search inside node
 
-	auto const &[found, it] = node->data.locateC_(key);
+	auto const &[found, it] = node->data.locateC_(HPair::SS::create(key), key);
 
 	if constexpr(ExactMatch)
 		return found ? iterator{ node, it } : end();
