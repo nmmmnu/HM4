@@ -88,7 +88,11 @@ VectorList performance was very good, but worse than SkipList.
 
 LinkedList performance was poor.
 
-Because of C++ classes all VectorList, LinkedList, SkipList are available.
+UnrolledLinkList was made for completeness. It performance is better than LinkedList, but worse than VectorList.
+
+UnrolledSkipList uses 25% less memory compared to SkipList.
+
+Because of C++ classes all VectorList, LinkedList, SkipList, LinkedList, UnrolledSkipList are available.
 
 
 

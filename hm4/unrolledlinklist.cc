@@ -20,6 +20,10 @@ struct UnrolledLinkList<T_Allocator>::Node{
 		return data.back().cmp(key);
 	}
 
+	constexpr auto hkey() const{
+		return data.backData().hkey;
+	}
+
 	constexpr void prefetch() const{
 		constexpr bool use_prefetch = true;
 
@@ -161,12 +165,14 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	auto const &key = factory.getKey();
 
-	const auto nl = locate_(key);
+	auto const hkey = HPair::SS::create(key);
+
+	const auto nl = locate_(hkey, key);
 
 	if (nl.found){
 		// update pair in place.
 
-		auto const it = nl.node->data.insertF(factory, getAllocator(), lc_);
+		auto const it = nl.node->data.insertF(hkey, factory, getAllocator(), lc_);
 
 		return fix_iterator_(
 			nl.node,
@@ -183,7 +189,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (!newnode)
 			return end();
 
-		auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
+		auto const it = newnode->data.insertF(hkey, factory, getAllocator(), lc_);
 
 		if (it == newnode->data.end()){
 			// we can use smart_ptr here...
@@ -219,7 +225,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (cmp >= 0){
 			// insert in the old node
 
-			auto const it = node->data.insertF(factory, getAllocator(), lc_);
+			auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
 
 			return fix_iterator_(
 				node,
@@ -228,7 +234,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		}else{
 			// insert in the new node
 
-			auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
+			auto const it = newnode->data.insertF(hkey, factory, getAllocator(), lc_);
 
 			return fix_iterator_(
 				newnode,
@@ -240,7 +246,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	// insert pair in current node.
 	// TODO: optimize this, currently it do binary search over again.
 
-	auto const it = node->data.insertF(factory, getAllocator(), lc_);
+	auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
 
 	return fix_iterator_(
 		node,
@@ -253,7 +259,9 @@ bool UnrolledLinkList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
-	auto nl = locate_(key);
+	auto const hkey = HPair::SS::create(key);
+
+	auto nl = locate_(hkey, key);
 
 	if (!nl.node)
 		return false;
@@ -262,7 +270,7 @@ bool UnrolledLinkList<T_Allocator>::erase_(std::string_view const key){
 		if (*nl.prev != nl.node)
 			corruptionExit();
 
-	if (!nl.node->data.erase_(key, getAllocator(), lc_))
+	if (!nl.node->data.erase_(hkey, key, getAllocator(), lc_))
 		return false;
 
 	if (nl.node->data.size())
@@ -280,7 +288,12 @@ bool UnrolledLinkList<T_Allocator>::erase_(std::string_view const key){
 // ==============================
 
 template<class T_Allocator>
-auto UnrolledLinkList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
+template<typename HPairHKey>
+auto UnrolledLinkList<T_Allocator>::locate_(HPairHKey const hkey, std::string_view const key) -> NodeLocator{
+	// HPairHKey is hidden HPair::HKey
+
+	static_assert(std::is_same_v<HPairHKey, HPair::HKey>);
+
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -295,10 +308,13 @@ auto UnrolledLinkList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 			return { jtable, node };
 		}
 
-		int cmp = node->cmp(key);
+		// this allows comparisson with single ">", instead of more complicated 3-way.
+		if (node->hkey() >= hkey){
+			int cmp = node->cmp(key);
 
-		if (cmp >= 0)
-			return { jtable, node, cmp == 0 };
+			if (cmp >= 0)
+				return { jtable, node, cmp == 0 };
+		}
 
 		jtable = & node->next;
 	}
@@ -312,16 +328,21 @@ template<bool ExactMatch>
 auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
 	assert(!key.empty());
 
+	auto const hkey = HPair::SS::create(key);
+
 	const Node *node;
 	int cmp = 0;
 
 	for(node = head_; node; node = node->next){
 		node->prefetch();
 
-		cmp = node->cmp(key);
+		// this allows comparisson with single ">", instead of more complicated 3-way.
+		if (node->hkey() >= hkey){
+			cmp = node->cmp(key);
 
-		if (cmp >= 0)
-			break;
+			if (cmp >= 0)
+				break;
+		}
 	}
 
 	if (!node)
@@ -334,7 +355,7 @@ auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 	// search inside node
 
-	auto const &[found, it] = node->data.locateC_(key);
+	auto const &[found, it] = node->data.locateC_(hkey, key);
 
 	if constexpr(ExactMatch)
 		return found ? iterator{ node, it } : end();

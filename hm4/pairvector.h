@@ -91,34 +91,56 @@ namespace hm4{
 			return *data_[index];
 		}
 
+		constexpr Data const &frontData() const noexcept{
+			return data_[0];
+		}
+
+		constexpr Data const &backData() const noexcept{
+			return data_[size_ - 1];
+		}
+
 		constexpr Pair const &front() const noexcept{
-			return *data_[0];
+			return *frontData();
 		}
 
 		constexpr Pair const &back() const noexcept{
-			return *data_[size_ - 1];
+			return *backData();
 		}
 
 		template<class PFactory>
-		iterator insertF(PFactory &factory, Allocator &allocator, ListCounter &lc);
+		iterator insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc);
 
-		// used for testing
-		template<class PFactory>
-		iterator insertF(PFactory &factory, Allocator &allocator, std::nullptr_t){
-			ListCounter lc;
-			return insertF(factory, allocator, lc);
-		}
-
-		bool erase_(std::string_view const &key, Allocator &allocator, ListCounter &lc);
-
-		// used for testing
-		bool erase_(std::string_view const &key, Allocator &allocator){
-			ListCounter lc;
-			return erase_(key, allocator, lc);
-		}
+		bool erase_(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc);
 
 		void split(PairVector &other);
 		void merge(PairVector &other);
+
+	public:
+		// used for testing
+		template<class PFactory>
+		iterator xInsertF(PFactory &factory, Allocator &allocator, ListCounter &lc){
+			auto const hkey = HPair::SS::create(factory.getKey());
+			return insertF(hkey, factory, allocator, lc);
+		}
+
+		// used for testing
+		template<class PFactory>
+		iterator xInsertF(PFactory &factory, Allocator &allocator){
+			ListCounter lc;
+			return xInsertF(factory, allocator, lc);
+		}
+
+		// used for testing
+		bool xErase_(std::string_view const &key, Allocator &allocator, ListCounter &lc){
+			auto const hkey = HPair::SS::create(key);
+			return erase_(hkey, key, allocator, lc);
+		}
+
+		// used for testing
+		bool xErase_(std::string_view const &key, Allocator &allocator){
+			ListCounter lc;
+			return xErase_(key, allocator, lc);
+		}
 
 	public:
 		struct ConstLocateResultPtr{

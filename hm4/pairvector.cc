@@ -123,10 +123,10 @@ auto PairVector<Allocator,Capacity>::find(std::string_view const key, std::bool_
 
 template<class Allocator, size_t Capacity>
 template<class PFactory>
-auto PairVector<Allocator,Capacity>::insertF(PFactory &factory, Allocator &allocator, ListCounter &lc) -> iterator{
+auto PairVector<Allocator,Capacity>::insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc) -> iterator{
 	auto const &key = factory.getKey();
 
-	auto [found, it] = locateM_(key);
+	auto [found, it] = locateM_(hkey, key);
 
 	if (found){
 		// key exists, overwrite, do not shift
@@ -181,8 +181,8 @@ auto PairVector<Allocator,Capacity>::insertF(PFactory &factory, Allocator &alloc
 }
 
 template<class Allocator, size_t Capacity>
-bool PairVector<Allocator,Capacity>::erase_(std::string_view const &key, Allocator &allocator, ListCounter &lc){
-	auto [found, it] = locateM_(key);
+bool PairVector<Allocator,Capacity>::erase_(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc){
+	auto [found, it] = locateM_(hkey, key);
 
 	if (!found)
 		return false;
@@ -204,143 +204,142 @@ bool PairVector<Allocator,Capacity>::erase_(std::string_view const &key, Allocat
 template class PairVector	<MyAllocator::PMAllocator	,    2>;
 template auto PairVector	<MyAllocator::PMAllocator	,    2>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,    2>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-
+template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 template class PairVector	<MyAllocator::PMAllocator	,    3>;
 template auto PairVector	<MyAllocator::PMAllocator	,    3>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,    3>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,    4>;
 template auto PairVector	<MyAllocator::PMAllocator	,    4>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,    4>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,    8>;
 template auto PairVector	<MyAllocator::PMAllocator	,    8>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,    8>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,   16>;
 template auto PairVector	<MyAllocator::PMAllocator	,   16>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,   16>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,   32>;
 template auto PairVector	<MyAllocator::PMAllocator	,   32>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,   32>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,   64>;
 template auto PairVector	<MyAllocator::PMAllocator	,   64>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,   64>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,  128>;
 template auto PairVector	<MyAllocator::PMAllocator	,  128>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,  128>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,  256>;
 template auto PairVector	<MyAllocator::PMAllocator	,  256>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,  256>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	,  512>;
 template auto PairVector	<MyAllocator::PMAllocator	,  512>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	,  512>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	, 1024>;
 template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	, 2048>;
 template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::PMAllocator	, 4096>;
 template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(PairFactory::Expires		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::PMAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
@@ -351,143 +350,143 @@ template auto PairVector	<MyAllocator::PMAllocator	, 4096>		::insertF(PairFactor
 template class PairVector	<MyAllocator::STDAllocator	,    2>;
 template auto PairVector	<MyAllocator::STDAllocator	,    2>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,    2>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,    3>;
 template auto PairVector	<MyAllocator::STDAllocator	,    3>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,    3>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,    4>;
 template auto PairVector	<MyAllocator::STDAllocator	,    4>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,    4>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,    8>;
 template auto PairVector	<MyAllocator::STDAllocator	,    8>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,    8>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,   16>;
 template auto PairVector	<MyAllocator::STDAllocator	,   16>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,   16>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,   32>;
 template auto PairVector	<MyAllocator::STDAllocator	,   32>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,   32>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,   64>;
 template auto PairVector	<MyAllocator::STDAllocator	,   64>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,   64>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,  128>;
 template auto PairVector	<MyAllocator::STDAllocator	,  128>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,  128>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,  256>;
 template auto PairVector	<MyAllocator::STDAllocator	,  256>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,  256>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	,  512>;
 template auto PairVector	<MyAllocator::STDAllocator	,  512>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	,  512>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	, 1024>;
 template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	, 2048>;
 template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::STDAllocator	, 4096>;
 template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(PairFactory::Expires		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::STDAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
@@ -498,143 +497,143 @@ template auto PairVector	<MyAllocator::STDAllocator	, 4096>		::insertF(PairFacto
 template class PairVector	<MyAllocator::ArenaAllocator	,    2>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,    3>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,    4>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,    8>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,   16>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,   32>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,   64>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,  128>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,  256>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	,  512>;
 template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	, 1024>;
 template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	, 2048>;
 template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::ArenaAllocator	, 4096>;
 template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(PairFactory::Expires		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::ArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
@@ -645,143 +644,143 @@ template auto PairVector	<MyAllocator::ArenaAllocator	, 4096>		::insertF(PairFac
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    2>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    3>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    4>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,    8>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   16>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   32>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,   64>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  128>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  256>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	,  512>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 1024>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 2048>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 
 template class PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::find(std::string_view const key, std::true_type	) const -> iterator;
 template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::find(std::string_view const key, std::false_type	) const -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::Expires		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
-template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(PairFactory::IFactory		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Normal		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Expires	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Tombstone	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::Clone		&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
+template auto PairVector	<MyAllocator::SimulatedArenaAllocator	, 4096>		::insertF(HPair::HKey hkey, PairFactory::IFactory	&factory,	MyAllocator::SimulatedArenaAllocator	&allocator, ListCounter &lc	) -> iterator;
 
 
 

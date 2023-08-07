@@ -23,23 +23,6 @@ public:
 private:
 	using MyPairVector		= PairVector<Allocator, 1024>;
 
-	//	speculative tests on 10K
-	//	skip	12.80
-	//
-	//	64	14.83
-	//	128	14.12
-	//	256	12.23
-	//	512	11.98
-	//	1024	12.36
-	//	2048	14.22
-
-	//	speculative tests on 80K
-	//	skip	152.32	151.91
-	//
-	//	256	170.73
-	//	512	163.72	161.99*
-	//	1024	165.87	172.18*
-
 public:
 	constexpr static height_size_type MAX_HEIGHT = sizeof(uint64_t) * 8;
 
@@ -128,8 +111,8 @@ private:
 
 	struct NodeLocator;
 
-	template<bool ShortcutEvaluation>
-	NodeLocator locate_(std::string_view const key);
+	template<bool ShortcutEvaluation, typename HPairHKey>
+	NodeLocator locate_(HPairHKey const hkey, std::string_view const key);
 
 	static height_size_type getRandomHeight_();
 };

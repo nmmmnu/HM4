@@ -33,7 +33,7 @@ template<class V, typename ...Args>
 void insert(V &v, Allocator &allocator, Args &&...args){
 	hm4::PairFactory::Normal f{ std::forward<Args>(args)... };
 
-	v.insertF(f, allocator, nullptr);
+	v.xInsertF(f, allocator);
 }
 
 template<class V>
@@ -82,15 +82,15 @@ void test_pairvector(){
 	mytest("search",	v.find("04",		std::false_type{}	)->getVal() == "1000"	);
 	mytest("search",	v.find("04 zip",	std::true_type{}	)->getVal() == "1000"	);
 
-	v.erase_("04 zip__",	allocator);
-	v.erase_("04 zip",	allocator);
+	v.xErase_("04 zip__",	allocator);
+	v.xErase_("04 zip",	allocator);
 
 	mytest("erase size",	v.size()  == 10				);
 
-	v.erase_("04 zip",	allocator);
-	v.erase_("03 state__",	allocator);
-	v.erase_("03 state",	allocator);
-	v.erase_("03 state",	allocator);
+	v.xErase_("04 zip",	allocator);
+	v.xErase_("03 state__",	allocator);
+	v.xErase_("03 state",	allocator);
+	v.xErase_("03 state",	allocator);
 
 	mytest("erase size",	v.size()  == 9				);
 

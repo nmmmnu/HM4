@@ -1,5 +1,7 @@
 #include "unrolledskiplist.h"
 
+#include "hpair.h"
+
 #include <cassert>
 #include <stdexcept>
 #include <random>	// mt19937, bernoulli_distribution
@@ -86,6 +88,10 @@ struct UnrolledSkipList<T_Allocator>::Node{
 
 	int cmp(std::string_view const key) const{
 		return data.back().cmp(key);
+	}
+
+	constexpr auto hkey() const{
+		return data.backData().hkey;
 	}
 
 	constexpr void prefetch(height_size_type const height) const{
@@ -257,12 +263,14 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	auto const &key = factory.getKey();
 
-	const auto nl = locate_<1>(key);
+	auto const hkey = HPair::SS::create(key);
+
+	const auto nl = locate_<1>(hkey, key);
 
 	if (nl.found){
 		// update pair in place.
 
-		auto const it = nl.node->data.insertF(factory, getAllocator(), lc_);
+		auto const it = nl.node->data.insertF(hkey, factory, getAllocator(), lc_);
 
 		return fix_iterator_(
 			nl.node,
@@ -285,7 +293,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (!newnode)
 			return end();
 
-		auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
+		auto const it = newnode->data.insertF(hkey, factory, getAllocator(), lc_);
 
 		if (it == newnode->data.end()){
 			// we can use smart_ptr here...
@@ -333,7 +341,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (cmp >= 0){
 			// insert in the old node
 
-			auto const it = node->data.insertF(factory, getAllocator(), lc_);
+			auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
 
 			return fix_iterator_(
 				node,
@@ -342,7 +350,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		}else{
 			// insert in the new node
 
-			auto const it = newnode->data.insertF(factory, getAllocator(), lc_);
+			auto const it = newnode->data.insertF(hkey, factory, getAllocator(), lc_);
 
 			return fix_iterator_(
 				newnode,
@@ -354,7 +362,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	// insert pair in current node.
 	// TODO: optimize this, currently it do binary search over again.
 
-	auto const it = node->data.insertF(factory, getAllocator(), lc_);
+	auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
 
 	return fix_iterator_(
 		node,
@@ -367,7 +375,9 @@ bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
-	const auto nl = locate_<0>(key);
+	auto const hkey = HPair::SS::create(key);
+
+	const auto nl = locate_<0>(hkey, key);
 
 	if (nl.node == nullptr)
 		return false;
@@ -378,7 +388,7 @@ bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 		if (*nl.prev[0] != nl.node)
 			corruptionExit();
 
-	if (!nl.node->data.erase_(key, getAllocator(), lc_))
+	if (!nl.node->data.erase_(hkey, key, getAllocator(), lc_))
 		return false;
 
 	if (nl.node->data.size())
@@ -456,8 +466,12 @@ void UnrolledSkipList<T_Allocator>::printLanesSummary() const{
 // ==============================
 
 template<class T_Allocator>
-template<bool ShortcutEvaluation>
-auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
+template<bool ShortcutEvaluation, typename HPairHKey>
+auto UnrolledSkipList<T_Allocator>::locate_(HPairHKey const hkey, std::string_view const key) -> NodeLocator{
+	// HPairHKey is hidden HPair::HKey
+
+	static_assert(std::is_same_v<HPairHKey, HPair::HKey>);
+
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locate_" };
@@ -473,17 +487,20 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 		for(Node *node = jtable[h]; node; node = node->next[h]){
 			node->prefetch(h);
 
-			int const cmp = node->cmp(key);
+			// this allows comparisson with single ">", instead of more complicated 3-way.
+			if (node->hkey() >= hkey){
+				int const cmp = node->cmp(key);
 
-			if (cmp >= 0){
-				nl.node = node;
-				break;
-			}
+				if (cmp >= 0){
+					nl.node = node;
+					break;
+				}
 
-			// if is last node, drop down
-			if (!node->next[h] && !node->data.full()){
-				nl.node = node;
-				break;
+				// if is last node, drop down
+				if (!node->next[h] && !node->data.full()){
+					nl.node = node;
+					break;
+				}
 			}
 
 			jtable = node->next;
@@ -503,13 +520,16 @@ auto UnrolledSkipList<T_Allocator>::locate_(std::string_view const key) -> NodeL
 				break;
 			}
 
-			int const cmp = node->cmp(key);
+			// this allows comparisson with single ">", instead of more complicated 3-way.
+			if (node->hkey() >= hkey){
+				int const cmp = node->cmp(key);
 
-			if (cmp >= 0){
-				// found
-				nl.node  = node;
-				nl.found = cmp == 0;
-				break;
+				if (cmp >= 0){
+					// found
+					nl.node  = node;
+					nl.found = cmp == 0;
+					break;
+				}
 			}
 
 			jtable = node->next;
@@ -530,10 +550,12 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 		throw std::logic_error{ "Key can not be nullptr in UnrolledSkipList::locateNode_" };
 	}
 
+	auto const hkey = HPair::SS::create(key);
+
 	const Node * const *jtable = heads_.data();
 
 	const Node *node = nullptr;
-	int cmp = 0;
+	bool nodeDirectHit = false; // this will simplify direct hit logic
 
 	static_assert(MAX_HEIGHT > 0);
 
@@ -541,13 +563,17 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 		for(node = jtable[h]; node; node = node->next[h]){
 			node->prefetch(h);
 
-			cmp = node->cmp(key);
+			// this allows comparisson with single ">", instead of more complicated 3-way.
+			if (node->hkey() >= hkey){
+				int const cmp = node->cmp(key);
 
-			if (cmp >= 0){
-				if (cmp == 0)
-					goto done;
-				else
-					break;
+				if (cmp >= 0){
+					if (cmp == 0){
+						nodeDirectHit = true;
+						goto done;
+					}else
+						break;
+				}
 			}
 
 			jtable = node->next;
@@ -559,10 +585,15 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 		for(node = jtable[0]; node; node = node->next[0]){
 			node->prefetch(0);
 
-			cmp = node->cmp(key);
+			// this allows comparisson with single ">", instead of more complicated 3-way.
+			if (node->hkey() >= hkey){
+				int const cmp = node->cmp(key);
 
-			if (cmp >= 0)
-				goto done;
+				if (cmp >= 0){
+					nodeDirectHit = cmp == 0;
+					goto done;
+				}
+			}
 
 			jtable = node->next;
 		}
@@ -573,14 +604,14 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 	done:	// label for goto
 
-	if (cmp == 0){
+	if (nodeDirectHit){
 		// miracle, direct hit
 		return { node, node->data.end() - 1 };
 	}
 
 	// search inside node
 
-	auto const &[found, it] = node->data.locateC_(HPair::SS::create(key), key);
+	auto const &[found, it] = node->data.locateC_(hkey, key);
 
 	if constexpr(ExactMatch)
 		return found ? iterator{ node, it } : end();

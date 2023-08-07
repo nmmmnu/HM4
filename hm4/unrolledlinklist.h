@@ -95,7 +95,8 @@ private:
 
 	struct NodeLocator;
 
-	NodeLocator locate_(std::string_view const key);
+	template<typename HPairHKey>
+	NodeLocator locate_(HPairHKey const hkey, std::string_view const key);
 };
 
 // ==============================

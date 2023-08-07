@@ -208,7 +208,6 @@ auto LinkList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 	auto hkey = HPair::SS::create(key);
 
 	for(Node *node = *jtable; node; node = node->next){
-
 		node->prefetch();
 
 		// this allows comparisson with single ">", instead of more complicated 3-way.
@@ -241,7 +240,6 @@ auto LinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 	const Node *node;
 
 	for(node = head_; node; node = node->next){
-
 		node->prefetch();
 
 		// this allows comparisson with single ">", instead of more complicated 3-way.

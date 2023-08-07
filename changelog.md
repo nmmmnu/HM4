@@ -136,3 +136,10 @@ Changelog
 -	fix bug with calculating List::bytes() in List::mutable_notify()
 -	Release
 
+### 1.3.4.3
+
+-	introduce new test data structures - unrolled link list and unrolled skip list, but not using them in production
+
+
+
+
