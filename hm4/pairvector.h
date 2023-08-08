@@ -17,6 +17,7 @@
 namespace hm4{
 
 	namespace pairvector_impl_{
+
 		inline void xmemmove(void *dest, const void *src, size_t size){
 			memmove(dest, src, size);
 		}
@@ -47,9 +48,10 @@ namespace hm4{
 				return d.cmp(kdata);
 			};
 
-			return ::binarySearch(begin, end, kdata, comp);
+			return ::binarySearch(begin, end, kdata, comp, 0u);
 		}
-	} // anonymous namespace
+
+	} // pairvector_impl_
 
 	template<class Allocator, size_t Capacity = 1024>
 	class PairVector{
@@ -201,7 +203,7 @@ namespace hm4{
 			return { found, it };
 		}
 
-		auto locateC_(std::string_view const key) const noexcept{
+		auto xLocateC_(std::string_view const key) const noexcept{
 			return locateC_(HPair::SS::create(key), key);
 		}
 
@@ -231,14 +233,14 @@ namespace hm4{
 			return { found, it };
 		}
 
-		auto locateM_(std::string_view const key) noexcept{
+		auto xLocateM_(std::string_view const key) noexcept{
 			return locateM_(HPair::SS::create(key), key);
 		}
 
 	public:
 		template<bool ExactMatch>
-		iterator find(std::string_view const key, std::bool_constant<ExactMatch>) const noexcept{
-			auto const &[found, it] = locateC_(key);
+		iterator xFind(std::string_view const key, std::bool_constant<ExactMatch>) const noexcept{
+			auto const &[found, it] = xLocateC_(key);
 
 			if constexpr(ExactMatch)
 				return found ? iterator{ it } : end();

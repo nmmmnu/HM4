@@ -23,16 +23,17 @@ namespace hm4{
 					hkey(HPair::SS::create(pair->getKey())),
 					pair(pair){}
 
-			int cmp(HPair::HKey const hkey, std::string_view const key) const{
-				return HPair::cmp(this->hkey, *this->pair, hkey, key);
-			}
-
 			int cmp(KData const kdata) const{
 				return cmp(kdata.hkey, kdata.key);
 			}
 
 			constexpr Pair const &operator *() const{
 				return *pair;
+			}
+
+		private:
+			int cmp(HPair::HKey const hkey, std::string_view const key) const{
+				return HPair::cmp(this->hkey, *this->pair, hkey, key);
 			}
 		};
 

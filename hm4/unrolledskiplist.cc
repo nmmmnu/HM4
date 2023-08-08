@@ -83,7 +83,7 @@ constexpr bool DEBUG_PRINT_LANES = 0;
 
 template<class T_Allocator>
 struct UnrolledSkipList<T_Allocator>::Node{
-	using MyPairVector = PairVector<T_Allocator, 2048>;
+	using MyPairVector = PairVector<T_Allocator, 1024>;
 
 public:
 	MyPairVector	data;

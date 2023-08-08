@@ -52,7 +52,13 @@ In case of power loss or system crash, memtable can re recovered from binlog
 ---
 ### Memtable
 
-Memtable is stored in memory in SkipList. SkipList is very fast O(Log N) structure, very similar to binary tree.
+Memtable is stored in memory in SkipList.
+
+
+---
+### Memtable with Skiplist
+
+SkipList is very fast O(Log N) structure, with performance very similar to binary tree.
 
 It is much faster than a vector O(Amortized Log N), but slower than hashtable O(Amortized 1).
 
@@ -66,6 +72,7 @@ VectorList performance was very good, but worse than SkipList.
 However if you just want to load data, is much faster to use SkipList and sort just before store it on the disk.
 
 VectorList also have much low memory consumption, so you can fit 30-40% more data in same memory.
+For this same reason, at least theoretically, UnrolledSkipList perform less cach misses.
 
 
 
@@ -86,11 +93,10 @@ General speed of hashtables was much faster than skiplists, but there were some 
 
 VectorList performance was very good, but worse than SkipList.
 
-LinkedList performance was poor.
+LinkedList performance was poor. There are no benefits of using it, except testing SkipList algorithm strategies.
 
 UnrolledLinkList was made for completeness. It performance is better than LinkedList, but worse than VectorList.
-
-UnrolledSkipList uses 25% less memory compared to SkipList.
+There are no benefits of using it, except testing UnrolledSkipList algorithm strategies.
 
 Because of C++ classes all VectorList, LinkedList, SkipList, LinkedList, UnrolledSkipList are available.
 

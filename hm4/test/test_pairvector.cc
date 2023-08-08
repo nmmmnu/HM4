@@ -77,9 +77,9 @@ void test_pairvector(){
 	mytest("front",		v.front().getVal() == "Niki"						);
 	mytest("back",		v.back() .getVal()  == "Logitech"					);
 
-	mytest("search",	v.find("04",		std::true_type{}	) == std::end(v)	);
-	mytest("search",	v.find("04",		std::false_type{}	)->getVal() == "1000"	);
-	mytest("search",	v.find("04 zip",	std::true_type{}	)->getVal() == "1000"	);
+	mytest("search",	v.xFind("04",		std::true_type{}	) == std::end(v)	);
+	mytest("search",	v.xFind("04",		std::false_type{}	)->getVal() == "1000"	);
+	mytest("search",	v.xFind("04 zip",	std::true_type{}	)->getVal() == "1000"	);
 
 	v.xErase_("04 zip__",	allocator);
 	v.xErase_("04 zip",	allocator);
