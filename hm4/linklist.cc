@@ -242,9 +242,7 @@ auto LinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 
 		// this allows comparisson with single ">", instead of more complicated 3-way.
 		if (node->hkey >= hkey){
-			int const cmp = node->cmp(hkey, key);
-
-			if (cmp >= 0){
+			if (int const cmp = node->cmp(hkey, key); cmp >= 0){
 				if (cmp == 0){
 					// found
 					return node;
@@ -252,8 +250,6 @@ auto LinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 
 				break;
 			}
-
-			// in rare corner case, it might go here.
 		}
 	}
 

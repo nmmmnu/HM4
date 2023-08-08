@@ -30,6 +30,7 @@ constexpr unsigned int PROCESS_STEP = 1000 * 10;
 
 #include "skiplist.h"
 #include "unrolledskiplist.h"
+#include "unrolledlinklist.h"
 
 namespace{
 
@@ -129,6 +130,10 @@ namespace{
 		//	list.print();
 		}
 
+		if constexpr(std::is_same_v<List, hm4::UnrolledLinkList<typename List::Allocator> >){
+		//	list.print();
+		}
+
 		return 0;
 	}
 
@@ -136,7 +141,6 @@ namespace{
 
 #include "vectorlist.h"
 #include "linklist.h"
-#include "unrolledlinklist.h"
 
 namespace {
 

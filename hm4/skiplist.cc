@@ -386,9 +386,7 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 
 			// this allows comparisson with single ">", instead of more complicated 3-way.
 			if (node->hkey >= hkey){
-				int const cmp = node->cmp(hkey, key);
-
-				if (cmp >= 0){
+				if (int const cmp = node->cmp(hkey, key); cmp >= 0){
 					if (cmp == 0){
 						// found
 
@@ -403,8 +401,6 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 
 					break;
 				}
-
-				// in rare corner case, it might go here.
 			}
 
 			jtable = node->next;
@@ -432,14 +428,11 @@ auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){
-
 			node->prefetch(h);
 
 			// this allows comparisson with single ">", instead of more complicated 3-way.
 			if (node->hkey >= hkey){
-				int const cmp = node->cmp(hkey, key);
-
-				if (cmp >= 0){
+				if (int const cmp = node->cmp(hkey, key); cmp >= 0){
 					if (cmp == 0){
 						// found
 						return node;
@@ -447,8 +440,6 @@ auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 
 					break;
 				}
-
-				// in rare corner case, it might go here.
 			}
 
 			jtable = node->next;

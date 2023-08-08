@@ -17,7 +17,7 @@
 
 namespace hm4{
 
-
+constexpr size_t UnrollingCapacity = 1024;
 
 namespace{
 	std::mt19937_64 rand64{ (uint32_t) time(nullptr) };
@@ -83,7 +83,7 @@ constexpr bool DEBUG_PRINT_LANES = 0;
 
 template<class T_Allocator>
 struct UnrolledSkipList<T_Allocator>::Node{
-	using MyPairVector = PairVector<T_Allocator, 1024>;
+	using MyPairVector = PairVector<T_Allocator, UnrollingCapacity>;
 
 public:
 	MyPairVector	data;
@@ -94,8 +94,8 @@ public:
 		return sizeof(Node) + (height - 1) * sizeof(Node *);
 	}
 
-	int cmp(std::string_view const key) const{
-		return data.back().cmp(key);
+	int cmp(HPair::HKey const hkey, std::string_view const key) const{
+		return HPair::cmp(data.backData().hkey, *data.backData().pair, hkey, key);
 	}
 
 	constexpr auto hkey() const{
@@ -344,9 +344,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		// is unclear where the pair should go
 		// also we have knowledge how the node is split
 
-		int const cmp = node->cmp(key);
-
-		if (cmp >= 0){
+		if (int const cmp = node->cmp(hkey, key); cmp >= 0){
 			// insert in the old node
 
 			auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
@@ -489,24 +487,31 @@ auto UnrolledSkipList<T_Allocator>::locate_(HPairHKey const hkey, std::string_vi
 
 	Node **jtable = heads_.data();
 
-	static_assert(MAX_HEIGHT > 0);
-
-	for(height_size_type h = MAX_HEIGHT; h --> 1;){
+	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
 			node->prefetch(h);
 
+			if (h == 0 && !node->next[0]){
+				// last node
+				nl.node = node;
+				break;
+			}
+
 			// this allows comparisson with single ">", instead of more complicated 3-way.
 			if (node->hkey() >= hkey){
-				int const cmp = node->cmp(key);
-
-				if (cmp >= 0){
+				if (int const cmp = node->cmp(hkey, key); cmp >= 0){
+					// (may be) found
 					nl.node = node;
-					break;
-				}
 
-				// if is last node, drop down
-				if (!node->next[h] && !node->data.full()){
-					nl.node = node;
+					if constexpr(ShortcutEvaluation){
+						if (cmp == 0){
+							// found
+							nl.found = true;
+
+							return nl;
+						}
+					}
+
 					break;
 				}
 			}
@@ -515,36 +520,6 @@ auto UnrolledSkipList<T_Allocator>::locate_(HPairHKey const hkey, std::string_vi
 		}
 
 		nl.prev[h] = & jtable[h];
-	}
-
-	// level 0, like link list
-	/* loop unroll */ {
-		for(Node *node = jtable[0]; node; node = node->next[0]){
-			node->prefetch(0);
-
-			if (!node->next[0]){
-				// last node
-				nl.node = node;
-				break;
-			}
-
-			// this allows comparisson with single ">", instead of more complicated 3-way.
-			if (node->hkey() >= hkey){
-				int const cmp = node->cmp(key);
-
-				if (cmp >= 0){
-					// found
-					nl.node  = node;
-					nl.found = cmp == 0;
-					break;
-				}
-			}
-
-			jtable = node->next;
-
-		}
-
-		nl.prev[0] = & jtable[0];
 	}
 
 	return nl;
@@ -558,48 +533,27 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 		throw std::logic_error{ "Key can not be nullptr in UnrolledSkipList::locateNode_" };
 	}
 
-	auto const hkey = HPair::SS::create(key);
-
 	const Node * const *jtable = heads_.data();
 
 	const Node *node = nullptr;
-	bool nodeDirectHit = false; // this will simplify direct hit logic
+
+	auto const hkey = HPair::SS::create(key);
 
 	static_assert(MAX_HEIGHT > 0);
 
-	for(height_size_type h = MAX_HEIGHT; h --> 1;){
+	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){
 			node->prefetch(h);
 
 			// this allows comparisson with single ">", instead of more complicated 3-way.
 			if (node->hkey() >= hkey){
-				int const cmp = node->cmp(key);
-
-				if (cmp >= 0){
+				if (int const cmp = node->cmp(hkey, key); cmp >= 0){
 					if (cmp == 0){
-						nodeDirectHit = true;
-						goto done;
-					}else
-						break;
-				}
-			}
+						// found
+						return iterator{ node, node->data.end() - 1 };
+					}
 
-			jtable = node->next;
-		}
-	}
-
-	// level 0, like link list
-	/* loop unroll */ {
-		for(node = jtable[0]; node; node = node->next[0]){
-			node->prefetch(0);
-
-			// this allows comparisson with single ">", instead of more complicated 3-way.
-			if (node->hkey() >= hkey){
-				int const cmp = node->cmp(key);
-
-				if (cmp >= 0){
-					nodeDirectHit = cmp == 0;
-					goto done;
+					break;
 				}
 			}
 
@@ -610,21 +564,14 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 	if (!node)
 		return end();
 
-	done:	// label for goto
-
-	if (nodeDirectHit){
-		// miracle, direct hit
-		return iterator{ node, node->data.end() - 1 };
-	}
-
 	// search inside node
 
 	auto const &[found, it] = node->data.locateC_(hkey, key);
 
 	if constexpr(ExactMatch)
 		return found ? iterator{ node, it } : end();
-
-	return fix_iterator_(node, it);
+	else
+		return fix_iterator_(node, it);
 }
 
 

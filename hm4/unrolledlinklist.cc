@@ -13,16 +13,17 @@
 
 namespace hm4{
 
+constexpr size_t UnrollingCapacity = 2048;
+
 template<class T_Allocator>
 struct UnrolledLinkList<T_Allocator>::Node{
-	using MyPairVector = PairVector<T_Allocator, 2048>;
+	using MyPairVector = PairVector<T_Allocator, UnrollingCapacity>;
 
 public:
 	MyPairVector	data;
 	Node		*next = nullptr;
 
 	int cmp(HPair::HKey const hkey, std::string_view const key) const{
-	//	return data.back().cmp(key);
 		return HPair::cmp(data.backData().hkey, *data.backData().pair, hkey, key);
 	}
 
@@ -294,7 +295,6 @@ template<class T_Allocator>
 template<typename HPairHKey>
 auto UnrolledLinkList<T_Allocator>::locate_(HPairHKey const hkey, std::string_view const key) -> NodeLocator{
 	// HPairHKey is hidden HPair::HKey
-
 	static_assert(std::is_same_v<HPairHKey, HPair::HKey>);
 
 	// better Pair::check(key), but might fail because of the caller.
