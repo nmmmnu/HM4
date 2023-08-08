@@ -18,13 +18,12 @@ $(A)test_pair: $(O)test_pair.o $(PAIR_OBJ)
 	$(LINK)
 
 $(A)test_pairvector: $(O)test_pairvector.o $(PAIR_OBJ)		\
-		$(O)test_pairvector.o $(O)pairvector.o
+		$(O)test_pairvector.o
 	$(LINK)
 
 $(A)test_list: $(O)test_list.o $(PAIR_OBJ)			\
 		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o	\
-		$(O)unrolledlinklist.o $(O)unrolledskiplist.o	\
-		$(O)pairvector.o
+		$(O)unrolledlinklist.o $(O)unrolledskiplist.o
 	$(LINK)
 
 $(A)test_multi_list: $(O)test_multi_list.o $(PAIR_OBJ)	\
@@ -34,7 +33,6 @@ $(A)test_multi_list: $(O)test_multi_list.o $(PAIR_OBJ)	\
 $(A)test_file: $(O)test_file.o $(PAIR_OBJ)			\
 		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o	\
 		$(O)unrolledlinklist.o $(O)unrolledskiplist.o	\
-		$(O)pairvector.o				\
 		$(O)filemetablob.o
 	$(LINK)
 

@@ -1,4 +1,3 @@
-#include "pairvector.h"
 #include "ilist.h"
 
 #include "pmallocator.h"
@@ -7,7 +6,7 @@
 
 #include "mytest.h"
 
-
+#include "pairvector.cc.h"
 
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;

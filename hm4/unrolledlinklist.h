@@ -16,7 +16,7 @@ public:
 	using difference_type		= config::difference_type;
 
 private:
-	using MyPairVector		= PairVector<Allocator, 2>;
+	using MyPairVector		= PairVector<Allocator, 1024>;
 
 public:
 	class iterator;

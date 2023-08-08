@@ -9,6 +9,8 @@
 
 #include "software_prefetch.h"
 
+#include "pairvector.cc.h"
+
 namespace hm4{
 
 template<class T_Allocator>
