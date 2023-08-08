@@ -15,6 +15,9 @@ namespace hm4{
 
 template<class T_Allocator>
 struct UnrolledLinkList<T_Allocator>::Node{
+	using MyPairVector = PairVector<T_Allocator, 2048>;
+
+public:
 	MyPairVector	data;
 	Node		*next = nullptr;
 
@@ -36,7 +39,7 @@ struct UnrolledLinkList<T_Allocator>::Node{
 	}
 
 	constexpr static auto begin_or_null(const Node *node){
-		using It = typename MyPairVector::iterator;
+		using It = typename PairVectorConfig::iterator;
 
 		if (node)
 			return node->data.begin();
@@ -132,7 +135,7 @@ void UnrolledLinkList<T_Allocator>::print() const{
 }
 
 template<class T_Allocator>
-auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::iterator it) const -> iterator{
+auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename PairVectorConfig::iterator it) const -> iterator{
 	if (it != node->data.end())
 		return iterator{ node, it };
 
@@ -144,8 +147,8 @@ auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename Unr
 };
 
 template<class T_Allocator>
-auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::const_ptr_iterator it) const -> iterator{
-	return fix_iterator_(node, typename UnrolledLinkList::MyPairVector::iterator(it));
+auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename PairVectorConfig::const_ptr_iterator it) const -> iterator{
+	return fix_iterator_(node, typename PairVectorConfig::iterator(it));
 }
 
 template<class T_Allocator>

@@ -3,7 +3,7 @@
 
 #include "ilist.h"
 #include "listcounter.h"
-#include "pairvector.h"
+#include "pairvectorconfig.h"
 
 namespace hm4{
 
@@ -14,9 +14,6 @@ public:
 	using Allocator			= T_Allocator;
 	using size_type			= config::size_type;
 	using difference_type		= config::difference_type;
-
-private:
-	using MyPairVector		= PairVector<Allocator, 1024>;
 
 public:
 	class iterator;
@@ -90,8 +87,8 @@ private:
 
 	void zeroing_();
 
-	iterator fix_iterator_(const Node *node, typename MyPairVector::iterator           it) const;
-	iterator fix_iterator_(const Node *node, typename MyPairVector::const_ptr_iterator it) const;
+	iterator fix_iterator_(const Node *node, typename PairVectorConfig::iterator           it) const;
+	iterator fix_iterator_(const Node *node, typename PairVectorConfig::const_ptr_iterator it) const;
 
 	struct NodeLocator;
 
@@ -104,9 +101,8 @@ private:
 template<class T_Allocator>
 class UnrolledLinkList<T_Allocator>::iterator {
 public:
-	using MyPairVector		= UnrolledLinkList::MyPairVector;
-	using MyPairVectorIterator	= typename MyPairVector::iterator;
-	using MyPairVectorIteratorC	= typename MyPairVector::const_ptr_iterator;
+	using MyPairVectorIterator	= typename PairVectorConfig::iterator;
+	using MyPairVectorIteratorC	= typename PairVectorConfig::const_ptr_iterator;
 
 	constexpr iterator() = default;
 

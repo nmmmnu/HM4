@@ -17,6 +17,8 @@
 
 namespace hm4{
 
+
+
 namespace{
 	std::mt19937_64 rand64{ (uint32_t) time(nullptr) };
 
@@ -81,9 +83,13 @@ constexpr bool DEBUG_PRINT_LANES = 0;
 
 template<class T_Allocator>
 struct UnrolledSkipList<T_Allocator>::Node{
+	using MyPairVector = PairVector<T_Allocator, 2048>;
+
+public:
 	MyPairVector	data;
 	Node		*next[1];	// system dependent, dynamic, at least 1
 
+public:
 	constexpr static size_t calcSize(height_size_type const height){
 		return sizeof(Node) + (height - 1) * sizeof(Node *);
 	}
@@ -106,7 +112,7 @@ struct UnrolledSkipList<T_Allocator>::Node{
 	}
 
 	constexpr static auto begin_or_null(const Node *node){
-		using It = typename MyPairVector::iterator;
+		using It = typename PairVectorConfig::iterator;
 
 		if (node)
 			return node->data.begin();
@@ -219,7 +225,7 @@ void UnrolledSkipList<T_Allocator>::print() const{
 }
 
 template<class T_Allocator>
-auto UnrolledSkipList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledSkipList::MyPairVector::iterator it) const -> iterator{
+auto UnrolledSkipList<T_Allocator>::fix_iterator_(const Node *node, typename PairVectorConfig::iterator it) const -> iterator{
 	if (it != node->data.end())
 		return iterator{ node, it };
 
@@ -231,8 +237,8 @@ auto UnrolledSkipList<T_Allocator>::fix_iterator_(const Node *node, typename Unr
 };
 
 template<class T_Allocator>
-auto UnrolledSkipList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledSkipList::MyPairVector::const_ptr_iterator it) const -> iterator{
-	return fix_iterator_(node, typename UnrolledSkipList::MyPairVector::iterator(it));
+auto UnrolledSkipList<T_Allocator>::fix_iterator_(const Node *node, typename PairVectorConfig::const_ptr_iterator it) const -> iterator{
+	return fix_iterator_(node, typename PairVectorConfig::iterator(it));
 }
 
 template<class T_Allocator>

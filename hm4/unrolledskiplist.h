@@ -3,12 +3,11 @@
 
 #include "ilist.h"
 #include "listcounter.h"
-#include "pairvector.h"
+#include "pairvectorconfig.h"
 
 #include <array>
 
 namespace hm4{
-
 
 template<class T_Allocator>
 class UnrolledSkipList{
@@ -19,9 +18,6 @@ public:
 	using difference_type	= config::difference_type;
 
 	using height_size_type = uint8_t;
-
-private:
-	using MyPairVector	= PairVector<Allocator, 512>;
 
 public:
 	constexpr static height_size_type MAX_HEIGHT = sizeof(uint64_t) * 8;
@@ -106,8 +102,8 @@ private:
 
 	void zeroing_();
 
-	iterator fix_iterator_(const Node *node, typename MyPairVector::iterator           it) const;
-	iterator fix_iterator_(const Node *node, typename MyPairVector::const_ptr_iterator it) const;
+	iterator fix_iterator_(const Node *node, typename PairVectorConfig::iterator           it) const;
+	iterator fix_iterator_(const Node *node, typename PairVectorConfig::const_ptr_iterator it) const;
 
 	struct NodeLocator;
 
@@ -122,9 +118,8 @@ private:
 template<class T_Allocator>
 class UnrolledSkipList<T_Allocator>::iterator{
 public:
-	using MyPairVector		= UnrolledSkipList::MyPairVector;
-	using MyPairVectorIterator	= typename MyPairVector::iterator;
-	using MyPairVectorIteratorC	= typename MyPairVector::const_ptr_iterator;
+	using MyPairVectorIterator	= PairVectorConfig::iterator;
+	using MyPairVectorIteratorC	= PairVectorConfig::const_ptr_iterator;
 
 	constexpr iterator() = default;
 

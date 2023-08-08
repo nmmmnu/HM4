@@ -96,6 +96,8 @@ template<class Allocator, size_t Capacity>
 auto PairVector<Allocator,Capacity>::locateC_(HPair::HKey const hkey, std::string_view const key) const noexcept -> ConstLocateResultPtr{
 	assert(!key.empty());
 
+	using PairVectorConfig::KData;
+
 	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), KData{ hkey, key } );
 
 	return { found, it };
@@ -104,6 +106,8 @@ auto PairVector<Allocator,Capacity>::locateC_(HPair::HKey const hkey, std::strin
 template<class Allocator, size_t Capacity>
 auto PairVector<Allocator,Capacity>::locateM_(HPair::HKey const hkey, std::string_view const key) noexcept -> LocateResultPtr{
 	assert(!key.empty());
+
+	using PairVectorConfig::KData;
 
 	auto const &[found, it] = binarySearch(ptr_begin(), ptr_end(), KData{ hkey, key } );
 

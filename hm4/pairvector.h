@@ -3,56 +3,24 @@
 
 #include "ilist.h"
 #include "listcounter.h"
-#include "pointer_iterator.h"
 
-#include "hpair.h"
+#include "pairvectorconfig.h"
 
 namespace hm4{
 
 	template<class Allocator, size_t Capacity = 1024>
 	class PairVector{
 		constexpr static size_t capacity__ = Capacity;
-
 	public:
-		struct KData {
-			HPair::HKey		hkey;
-			std::string_view	key;
-		};
+		using size_type			= config::size_type;
+		using difference_type		= config::difference_type;
 
-		struct Data{
-			HPair::HKey		hkey	= 0;
-			Pair			*pair	= nullptr;
+		using const_ptr_iterator	= PairVectorConfig::const_ptr_iterator;
+		using ptr_iterator		= PairVectorConfig::ptr_iterator;
 
-			constexpr Data() = default;
+		using iterator			= PairVectorConfig::iterator;
 
-			Data(Pair *pair) :
-					hkey(HPair::SS::create(pair->getKey())),
-					pair(pair){}
-
-			int cmp(HPair::HKey const hkey, std::string_view const key) const{
-				return HPair::cmp(this->hkey, *this->pair, hkey, key);
-			}
-
-			int cmp(KData const kdata) const{
-				return cmp(kdata.hkey, kdata.key);
-			}
-
-			constexpr Pair const &operator *() const{
-				return *pair;
-			}
-		//	constexpr const Pair *operator ->() const{
-		//		return pair;
-		//	}
-		};
-
-	public:
-		using size_type		= config::size_type;
-		using difference_type	= config::difference_type;
-
-		using const_ptr_iterator	= const Data *;
-		using ptr_iterator		= Data *;
-
-		using iterator			= pointer_iterator<const_ptr_iterator>;
+		using Data			= PairVectorConfig::Data;
 
 	private:
 		size_type	size_			= 0;

@@ -1,5 +1,5 @@
 ### TODO list:
 
-- address problem with canInsertHintValSize
-- make connectNode in unrolledlinklist
+- Fix double work in finding inside PairVector, when we know data is not last element...
+
 
