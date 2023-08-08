@@ -21,8 +21,9 @@ public:
 	MyPairVector	data;
 	Node		*next = nullptr;
 
-	int cmp(std::string_view const key) const{
-		return data.back().cmp(key);
+	int cmp(HPair::HKey const hkey, std::string_view const key) const{
+	//	return data.back().cmp(key);
+		return HPair::cmp(data.backData().hkey, *data.backData().pair, hkey, key);
 	}
 
 	constexpr auto hkey() const{
@@ -142,8 +143,7 @@ auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename Pai
 	if (!node->next)
 		return end();
 
-	node = node->next;
-	return iterator{ node, node->data.begin() };
+	return iterator{ node->next, node->data.begin() };
 };
 
 template<class T_Allocator>
@@ -225,9 +225,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		// is unclear where the pair should go
 		// also we have knowledge how the node is split
 
-		int const cmp = nl.node->cmp(key);
-
-		if (cmp >= 0){
+		if (int const cmp = nl.node->cmp(hkey, key); cmp >= 0){
 			// insert in the old node
 
 			auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
@@ -304,20 +302,19 @@ auto UnrolledLinkList<T_Allocator>::locate_(HPairHKey const hkey, std::string_vi
 
 	Node **jtable = & head_;
 
+	// auto hkey = HPair::SS::create(key);
+
 	for(Node *node = *jtable; node; node = node->next){
 		node->prefetch();
 
 		if (!node->next){
 			// this is the last node, return
-
 			return { jtable, node };
 		}
 
 		// this allows comparisson with single ">", instead of more complicated 3-way.
 		if (node->hkey() >= hkey){
-			int cmp = node->cmp(key);
-
-			if (cmp >= 0)
+			if (int const cmp = node->cmp(hkey, key); cmp >= 0)
 				return { jtable, node, cmp == 0 };
 		}
 
@@ -336,27 +333,25 @@ auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_c
 	auto const hkey = HPair::SS::create(key);
 
 	const Node *node;
-	int cmp = 0;
 
 	for(node = head_; node; node = node->next){
 		node->prefetch();
 
 		// this allows comparisson with single ">", instead of more complicated 3-way.
 		if (node->hkey() >= hkey){
-			cmp = node->cmp(key);
+			if (int const cmp = node->cmp(hkey, key); cmp >= 0){
+				if (cmp == 0){
+					// found
+					return iterator{ node, node->data.end() - 1 };
+				}
 
-			if (cmp >= 0)
 				break;
+			}
 		}
 	}
 
 	if (!node)
 		return end();
-
-	if (cmp == 0){
-		// miracle, direct hit
-		return iterator{ node, node->data.end() - 1 };
-	}
 
 	// search inside node
 
@@ -364,12 +359,11 @@ auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 	if constexpr(ExactMatch)
 		return found ? iterator{ node, it } : end();
-
-	return fix_iterator_(node, it);
+	else
+		return fix_iterator_(node, it);
 }
 
 // ==============================
-
 
 template<class T_Allocator>
 auto UnrolledLinkList<T_Allocator>::iterator::operator++() -> iterator &{
