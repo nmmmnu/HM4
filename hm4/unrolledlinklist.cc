@@ -134,13 +134,13 @@ void UnrolledLinkList<T_Allocator>::print() const{
 template<class T_Allocator>
 auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledLinkList::MyPairVector::iterator it) const -> iterator{
 	if (it != node->data.end())
-		return { node, it };
+		return iterator{ node, it };
 
 	if (!node->next)
 		return end();
 
 	node = node->next;
-	return { node, node->data.begin() };
+	return iterator{ node, node->data.begin() };
 };
 
 template<class T_Allocator>
@@ -352,7 +352,7 @@ auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 	if (cmp == 0){
 		// miracle, direct hit
-		return { node, node->data.end() - 1 };
+		return iterator{ node, node->data.end() - 1 };
 	}
 
 	// search inside node
@@ -386,7 +386,7 @@ const Pair &UnrolledLinkList<T_Allocator>::iterator::operator*() const{
 
 template<class T_Allocator>
 auto UnrolledLinkList<T_Allocator>::begin() const -> iterator{
-	return { head_, Node::begin_or_null(head_) };
+	return iterator{ head_, Node::begin_or_null(head_) };
 }
 
 // ==============================

@@ -221,13 +221,13 @@ void UnrolledSkipList<T_Allocator>::print() const{
 template<class T_Allocator>
 auto UnrolledSkipList<T_Allocator>::fix_iterator_(const Node *node, typename UnrolledSkipList::MyPairVector::iterator it) const -> iterator{
 	if (it != node->data.end())
-		return { node, it };
+		return iterator{ node, it };
 
 	if (!node->next[0])
 		return end();
 
 	node = node->next[0];
-	return { node, node->data.begin() };
+	return iterator{ node, node->data.begin() };
 };
 
 template<class T_Allocator>
@@ -608,7 +608,7 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 
 	if (nodeDirectHit){
 		// miracle, direct hit
-		return { node, node->data.end() - 1 };
+		return iterator{ node, node->data.end() - 1 };
 	}
 
 	// search inside node

@@ -108,8 +108,9 @@ public:
 	using MyPairVectorIterator	= typename MyPairVector::iterator;
 	using MyPairVectorIteratorC	= typename MyPairVector::const_ptr_iterator;
 
-	constexpr iterator(const Node *node) : node_(node){}
-	constexpr iterator(const Node *node, MyPairVectorIterator it) : node_(node), it_(it){}
+	constexpr iterator() = default;
+
+	explicit constexpr iterator(const Node *node, MyPairVectorIterator it) : node_(node), it_(it){}
 	explicit constexpr iterator(const Node *node, MyPairVectorIteratorC it) :
 					iterator{
 						node,
@@ -144,7 +145,7 @@ public:
 	}
 
 private:
-	const Node		*node_;
+	const Node		*node_	= nullptr;
 	MyPairVectorIterator	it_{};
 };
 
@@ -152,7 +153,7 @@ private:
 
 template<class T_Allocator>
 constexpr auto UnrolledLinkList<T_Allocator>::end() -> iterator{
-	return { nullptr };
+	return {};
 }
 
 }
