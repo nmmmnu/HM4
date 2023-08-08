@@ -6,7 +6,7 @@
 
 #include "mytest.h"
 
-#include "pairvector.cc.h"
+#include "pairvector.h"
 
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;

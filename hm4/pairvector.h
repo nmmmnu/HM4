@@ -6,7 +6,50 @@
 
 #include "pairvectorconfig.h"
 
+#include "binarysearch.h"
+
+#include "ilist_updateinplace.h"
+
+#include <cassert>
+#include <cstring>		// memmove
+#include <stdexcept>		// std::bad_alloc
+
 namespace hm4{
+
+	namespace pairvector_impl_{
+		inline void xmemmove(void *dest, const void *src, size_t size){
+			memmove(dest, src, size);
+		}
+
+		template<typename T>
+		void shiftL_(T *pos, T *end){
+			xmemmove(
+				pos,
+				pos + 1,
+				size_t(end - pos) * sizeof(T)
+			);
+		}
+
+		template<typename T>
+		void shiftR_(T *pos, T *end){
+			xmemmove(
+				pos + 1,
+				pos,
+				size_t(end - pos) * sizeof(T)
+			);
+		}
+
+		// ---------------------
+
+		template<class It, class KData>
+		auto myBinarySearch(It begin, It end, KData const kdata){
+			auto comp = [](auto &d, KData const kdata){
+				return d.cmp(kdata);
+			};
+
+			return ::binarySearch(begin, end, kdata, comp);
+		}
+	} // anonymous namespace
 
 	template<class Allocator, size_t Capacity = 1024>
 	class PairVector{
@@ -35,7 +78,16 @@ namespace hm4{
 
 		// (Manual) d-tor
 
-		bool destruct(Allocator &allocator) noexcept;
+		bool destruct(Allocator &allocator) noexcept{
+			if (allocator.reset() == false){
+				for(auto it = ptr_begin(); it != ptr_end(); ++it){
+					using namespace MyAllocator;
+					deallocate(allocator, it->pair);
+				};
+			}
+
+			return true;
+		}
 
 		void clear(Allocator &allocator) noexcept{
 			destruct(allocator);
@@ -80,8 +132,21 @@ namespace hm4{
 
 		bool erase_(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc);
 
-		void split(PairVector &other);
-		void merge(PairVector &other);
+		void split(PairVector &other){
+			assert(other.size() == 0);
+
+			auto const len = size_ / 2;
+
+			other.assign_(ptr_begin() + len, ptr_end());
+
+			size_ -= other.size();
+		}
+
+		void merge(PairVector &other){
+			assign_(other.ptr_begin(), other.ptr_end());
+
+			other.size_ = 0;
+		}
 
 	public:
 		// used for testing
@@ -124,7 +189,17 @@ namespace hm4{
 			return data_ + size_;
 		}
 
-		ConstLocateResultPtr locateC_(HPair::HKey const hkey, std::string_view const key) const noexcept;
+		ConstLocateResultPtr locateC_(HPair::HKey const hkey, std::string_view const key) const noexcept{
+			assert(!key.empty());
+
+			using PairVectorConfig::KData;
+
+			using namespace pairvector_impl_;
+
+			auto const &[found, it] = myBinarySearch(ptr_begin(), ptr_end(), KData{ hkey, key } );
+
+			return { found, it };
+		}
 
 		auto locateC_(std::string_view const key) const noexcept{
 			return locateC_(HPair::SS::create(key), key);
@@ -144,15 +219,32 @@ namespace hm4{
 			return data_ + size_;
 		}
 
-		LocateResultPtr locateM_(HPair::HKey const hkey, std::string_view const key) noexcept;
+		LocateResultPtr locateM_(HPair::HKey const hkey, std::string_view const key) noexcept{
+			assert(!key.empty());
+
+			using PairVectorConfig::KData;
+
+			using namespace pairvector_impl_;
+
+			auto const &[found, it] = myBinarySearch(ptr_begin(), ptr_end(), KData{ hkey, key } );
+
+			return { found, it };
+		}
 
 		auto locateM_(std::string_view const key) noexcept{
 			return locateM_(HPair::SS::create(key), key);
 		}
 
 	public:
-		template<bool B>
-		iterator find(std::string_view const key, std::bool_constant<B> exact) const noexcept;
+		template<bool ExactMatch>
+		iterator find(std::string_view const key, std::bool_constant<ExactMatch>) const noexcept{
+			auto const &[found, it] = locateC_(key);
+
+			if constexpr(ExactMatch)
+				return found ? iterator{ it } : end();
+			else
+				return iterator{ it };
+		}
 
 		constexpr iterator begin() const noexcept{
 			return iterator{ ptr_begin() };
@@ -163,13 +255,104 @@ namespace hm4{
 		}
 
 	private:
-		void assign_(Data *first, Data *last);
+		void assign_(Data *first, Data *last){
+			auto const len = static_cast<size_type>(last - first);
+
+			if (size() + len > capacity())
+				throw std::bad_alloc{};
+
+			std::move(first, last, ptr_end());
+
+			size_ += len;
+		}
 
 	private:
 		void zeroing_(){
 			size_ = 0;
 		}
 	};
+
+
+
+
+
+	template<class Allocator, size_t Capacity>
+	template<class PFactory>
+	auto PairVector<Allocator,Capacity>::insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc) -> iterator{
+		auto const &key = factory.getKey();
+
+		auto [found, it] = locateM_(hkey, key);
+
+		if (found){
+			// key exists, overwrite, do not shift
+
+			Pair *olddata = it->pair;
+
+			if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
+				if (!isValidForReplace(factory.getCreated(), *olddata))
+					return end();
+
+			// try update pair in place.
+			if (tryUpdateInPlaceLC(allocator, olddata, factory, lc)){
+				// successfully updated.
+				return iterator{ it };
+			}
+
+			auto newdata = Pair::smart_ptr::create(allocator, factory);
+
+			if (!newdata)
+				return end();
+
+			lc.upd(olddata->bytes(), newdata->bytes());
+
+			// assign new pair
+			it->pair = newdata.release();
+
+			// deallocate old pair
+			using namespace MyAllocator;
+			deallocate(allocator, olddata);
+
+			return iterator{ it };
+		}
+
+		if (size() == capacity())
+			throw std::bad_alloc{};
+
+		auto newdata = Pair::smart_ptr::create(allocator, factory);
+
+		if (!newdata)
+			return end();
+
+		// make space, exception free, so no need to protect with unique_ptr.
+		pairvector_impl_::shiftR_(it, ptr_end());
+
+		lc.inc(newdata->bytes());
+
+		*it = newdata.release();
+
+		++size_;
+
+		return iterator{ it };
+	}
+
+	template<class Allocator, size_t Capacity>
+	bool PairVector<Allocator,Capacity>::erase_(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc){
+		auto [found, it] = locateM_(hkey, key);
+
+		if (!found)
+			return false;
+
+		lc.dec(it->pair->bytes());
+
+		using namespace MyAllocator;
+		deallocate(allocator, it->pair);
+
+		pairvector_impl_::shiftL_(it, ptr_end());
+
+		--size_;
+
+		return true;
+	}
 
 } // namespace hm4
 

@@ -13,7 +13,7 @@
 
 #include "software_prefetch.h"
 
-#include "pairvector.cc.h"
+#include "pairvector.h"
 
 namespace hm4{
 
