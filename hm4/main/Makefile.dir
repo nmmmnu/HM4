@@ -28,7 +28,7 @@ $(A)db_builder: $(O)db_builder.o	$(DISKLIST_OBJ) $(O)filebuilder.o $(O)idgenerat
 	$(LINK)
 
 $(A)db_builder_concurrent: $(O)db_builder_concurrent.o	\
-					$(DISKLIST_OBJ) $(O)filebuilder.o $(O)idgenerator.o $(O)base64.o $(O)skiplist.o $(O)unrolledskiplist.o
+					$(DISKLIST_OBJ) $(O)filebuilder.o $(O)idgenerator.o $(O)base64.o $(O)skiplist.o $(O)alvlist.o
 	$(LINK)
 
 $(A)db_logger: $(O)db_logger.o		$(DISKLIST_OBJ) $(O)filebuilder.o                                  $(O)base64.o

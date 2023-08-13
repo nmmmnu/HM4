@@ -31,6 +31,7 @@ constexpr unsigned int PROCESS_STEP = 1000 * 10;
 #include "skiplist.h"
 #include "unrolledskiplist.h"
 #include "unrolledlinklist.h"
+#include "avllist.h"
 
 namespace{
 
@@ -51,11 +52,13 @@ namespace{
 		fmt::print(format, 's', "SkipList"		, "std"		);
 		fmt::print(format, 'i', "UnrolledLinkList"	, "std"		);
 		fmt::print(format, 'z', "UnrolledSkipList"	, "std"		);
+		fmt::print(format, 'a', "AVLList"		, "std"		);
 		fmt::print(format, 'V', "VectorList"		, "arena"	);
 		fmt::print(format, 'L', "LinkList"		, "arena"	);
 		fmt::print(format, 'S', "SkipList"		, "arena"	);
 		fmt::print(format, 'I', "UnrolledLinkList"	, "arena"	);
 		fmt::print(format, 'Z', "UnrolledskipList"	, "arena"	);
+		fmt::print(format, 'A', "AVLList"		, "arena"	);
 
 		return 10;
 	}
@@ -134,6 +137,11 @@ namespace{
 		//	list.print();
 		}
 
+		if constexpr(std::is_same_v<List, hm4::AVLList<typename List::Allocator> >){
+			fmt::print("AVL Tree height is {}.\n", list.height());
+		//	list.testALVTreeIntegrity();
+		}
+
 		return 0;
 	}
 
@@ -157,14 +165,16 @@ namespace {
 		case 'v':	return listSearchProcess(hm4::VectorList	<Allocator>	{ allocator_std   }, reader, key, it);
 		case 'l':	return listSearchProcess(hm4::LinkList	 	<Allocator>	{ allocator_std   }, reader, key, it);
 		case 's':	return listSearchProcess(hm4::SkipList	 	<Allocator>	{ allocator_std   }, reader, key, it);
-		case 'i':	return listSearchProcess(hm4::UnrolledLinkList	 <Allocator>	{ allocator_std   }, reader, key, it);
-		case 'z':	return listSearchProcess(hm4::UnrolledSkipList	 <Allocator>	{ allocator_std   }, reader, key, it);
+		case 'i':	return listSearchProcess(hm4::UnrolledLinkList	<Allocator>	{ allocator_std   }, reader, key, it);
+		case 'z':	return listSearchProcess(hm4::UnrolledSkipList	<Allocator>	{ allocator_std   }, reader, key, it);
+		case 'a':	return listSearchProcess(hm4::AVLList		<Allocator>	{ allocator_std   }, reader, key, it);
 
 		case 'V':	return listSearchProcess(hm4::VectorList	<Allocator>	{ allocator_arena }, reader, key, it);
 		case 'L':	return listSearchProcess(hm4::LinkList		<Allocator>	{ allocator_arena }, reader, key, it);
 		case 'S':	return listSearchProcess(hm4::SkipList		<Allocator>	{ allocator_arena }, reader, key, it);
 		case 'I':	return listSearchProcess(hm4::UnrolledLinkList	<Allocator>	{ allocator_arena }, reader, key, it);
 		case 'Z':	return listSearchProcess(hm4::UnrolledSkipList	<Allocator>	{ allocator_arena }, reader, key, it);
+		case 'A':	return listSearchProcess(hm4::AVLList		<Allocator>	{ allocator_arena }, reader, key, it);
 		}
 	}
 

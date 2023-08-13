@@ -90,6 +90,7 @@ public:
 
 public:
 	void testALVTreeIntegrity() const;
+	size_t height() const;
 
 private:
 	template<bool DeallocateTree>

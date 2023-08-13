@@ -82,6 +82,21 @@ auto AVLList<T_Allocator>::findFix__(const Node *node, std::string_view key) -> 
 	return node;
 }
 
+template<class T_Allocator>
+size_t AVLList<T_Allocator>::height() const{
+	size_t height = 0;
+
+	const auto *node = root_;
+
+	while(node){
+		++height;
+
+		node = node->l;
+	}
+
+	return height;
+}
+
 
 
 // ==============================
