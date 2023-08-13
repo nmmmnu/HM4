@@ -72,7 +72,6 @@ VectorList performance was very good, but worse than SkipList.
 However if you just want to load data, is much faster to use SkipList and sort just before store it on the disk.
 
 VectorList also have much low memory consumption, so you can fit 30-40% more data in same memory.
-For this same reason, at least theoretically, UnrolledSkipList perform less cach misses.
 
 
 
@@ -98,7 +97,10 @@ LinkedList performance was poor. There are no benefits of using it, except testi
 UnrolledLinkList was made for completeness. It performance is better than LinkedList, but worse than VectorList.
 There are no benefits of using it, except testing UnrolledSkipList algorithm strategies.
 
-Because of C++ classes all VectorList, LinkedList, SkipList, LinkedList, UnrolledSkipList are available.
+UnrolledSkipList have lower memory consumption than SkipList.
+Theoretically it have less cache misses than SkipList, but it seems to be slower than SkipList.
+
+Because of C++ classes all VectorList, LinkedList, SkipList, UnrolledLinkedList, UnrolledSkipList are available.
 
 
 

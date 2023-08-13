@@ -139,7 +139,7 @@ Changelog
 ### 1.3.4.3
 
 -	introduce new test data structures - unrolled link list and unrolled skip list, but not using them in production
-
+-	MacOS / M1 compilation
 
 
 
