@@ -139,6 +139,12 @@ namespace net::worker::commands{
 			return set_number(number);
 		}
 
+		#ifdef SIZE_T_SEPARATE_FROM_UINT64_T
+		void set(size_t number){
+			return set_number(number);
+		}
+		#endif
+
 	private:
 		template<typename T>
 		void set_number(T number){

@@ -85,7 +85,7 @@ else ifeq ($(UNAME), Darwin)
 ##### MAC OS #####
 
 EXTRA_INCL	+= -Iinclude.darwin/
-CF_MISC		+= -DNOT_HAVE_CHARCONV
+CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T
 
 # add kqueue support...
 
