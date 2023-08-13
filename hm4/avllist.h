@@ -25,7 +25,7 @@ public:
 				lc_		(std::move(other.lc_		)),
 				allocator_	(std::move(other.allocator_	)),
 				root_		(std::move(other.root_		)){
-		other.root_ = nullptr;
+		other.clear_<false>();
 	}
 
 	~AVLList(){
@@ -41,8 +41,7 @@ private:
 
 public:
 	void clear(){
-		deallocateTree_(root_);
-		root_ = nullptr;
+		clear_<true>();
 	}
 
 	template<class PFactory>
@@ -93,6 +92,15 @@ public:
 	void testALVTreeIntegrity() const;
 
 private:
+	template<bool DeallocateTree>
+	void clear_(){
+		if constexpr(DeallocateTree)
+			deallocateTree_(root_);
+
+		lc_.clr();
+		root_ = nullptr;
+	}
+
 	static iterator findFix__(const Node *node, std::string_view const key);
 
 	void deallocate_(Node *node);

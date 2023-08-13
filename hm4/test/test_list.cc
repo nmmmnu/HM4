@@ -354,6 +354,7 @@ static void skiplist_lanes_test(){
 
 #include "linklist.h"
 #include "unrolledlinklist.h"
+#include "avllist.h"
 
 int main(){
 	list_test<hm4::BlackHoleList			>("BlackHoleList"			);
@@ -367,6 +368,8 @@ int main(){
 	list_test<hm4::UnrolledLinkList	<Allocator>	>("UnrolledLinkList"	, allocator	);
 	list_test<hm4::UnrolledSkipList	<Allocator>	>("UnrolledSkipList"	, allocator	);
 
+	list_test<hm4::AVLList		<Allocator>	>("AVLList"		, allocator	);
+
 //	skiplist_lanes_test();
 
 	list_test_hint<hm4::VectorList		>("VectorList"		);
@@ -374,6 +377,7 @@ int main(){
 	list_test_hint<hm4::SkipList		>("SkipList"		);
 	list_test_hint<hm4::UnrolledLinkList	>("UnrolledLinkList"	);
 	list_test_hint<hm4::UnrolledSkipList	>("UnrolledSkipList"	);
+	list_test_hint<hm4::AVLList		>("AVLList"		);
 
 	return mytest.end();
 }

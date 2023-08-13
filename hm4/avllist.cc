@@ -73,7 +73,7 @@ auto AVLList<T_Allocator>::findFix__(const Node *node, std::string_view key) -> 
 	while(node){
 		int const cmp = node->cmp(key);
 
-		if (cmp > 0)
+		if (cmp < 0)
 			node = node->p;
 		else
 			break;
@@ -95,12 +95,12 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 	while(node){
 		int const cmp = node->cmp(key);
 
-		if (cmp < 0){
+		if (cmp > 0){
 			node = node->l;
 			continue;
 		}
 
-		if (cmp > 0){
+		if (cmp < 0){
 			node = node->r;
 			continue;
 		}
@@ -127,8 +127,11 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		child->p = node->p;
 
 		if (!node->p){
+			lc_.dec(node->data->bytes());
 			deallocate_(node);
+
 			this->root_ = child;
+
 			return true;
 		}
 
@@ -136,6 +139,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			parent->l = child;
 			++parent->balance;
 
+			lc_.dec(node->data->bytes());
 			deallocate_(node);
 
 			if (parent->balance == +1){
@@ -148,6 +152,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			parent->r = child;
 			--parent->balance;
 
+			lc_.dec(node->data->bytes());
 			deallocate_(node);
 
 			if (parent->balance == -1){
@@ -162,8 +167,11 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 	// CASE 1: node with no children
 
 	if (!node->p){
+		lc_.dec(node->data->bytes());
 		deallocate_(node);
+
 		this->root_ = nullptr;
+
 		return true;
 	}
 
@@ -171,6 +179,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		parent->l = nullptr;
 		++parent->balance;
 
+		lc_.dec(node->data->bytes());
 		deallocate_(node);
 
 		if (parent->balance == +1){
@@ -183,6 +192,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		parent->r = nullptr;
 		--parent->balance;
 
+		lc_.dec(node->data->bytes());
 		deallocate_(node);
 
 		if (parent->balance == -1){
@@ -246,7 +256,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	while(true){
 		int const cmp = node->cmp(key);
 
-		if (cmp < 0){
+		if (cmp > 0){
 			if (!node->l){
 				auto newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
@@ -264,7 +274,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			}
 		}
 
-		if (cmp > 0){
+		if (cmp < 0){
 			if (!node->r){
 				auto newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
@@ -332,7 +342,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 	while(node){
 		int const cmp = node->cmp(key);
 
-		if (cmp < 0){
+		if (cmp > 0){
 			if constexpr(!ExactEvaluation)
 				if (node->l == nullptr)
 					return findFix__(node, key);
@@ -341,7 +351,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 			continue;
 		}
 
-		if (cmp > 0){
+		if (cmp < 0){
 			if constexpr(!ExactEvaluation)
 				if (node->r == nullptr)
 					return findFix__(node, key);
