@@ -55,6 +55,16 @@ In case of power loss or system crash, memtable can re recovered from binlog
 Memtable is stored in memory in SkipList or AVLList.
 
 
+
+---
+### Memtable with SkipList
+
+SkipList is very fast O(Log N) structure, with performance very similar to binary tree.
+
+It is much faster than a vector O(Amortized Log N), but slower than hashtable O(Amortized 1).
+
+
+
 ---
 ### Memtable with AVLList
 
@@ -64,19 +74,12 @@ It is extremely fast O(Log N) structure, because it is perfectly balanced.
 AVL Tree can be slow when data is deleted, but in our case we have kind of free lunch,
 because instead of deleting the data, we insert tombstones.
 
-Minor problem of AVLList is it requires about 5% more memory compared to SkipList.
+Minor problem of AVLList is it requires about 5% memory compared to SkipList.
+With future development related to putting key/value pair directly into AVLTree node,
+this memory difference was changed down to about 2%.
 
-It is faster than SkipList.
-Performance tests with db_builder_concurrent show AVLList can be up to 33% faster than SkipList.
-
-
-
----
-### Memtable with SkipList
-
-SkipList is very fast O(Log N) structure, with performance very similar to binary tree.
-
-It is much faster than a vector O(Amortized Log N), but slower than hashtable O(Amortized 1).
+AVLList is much faster than SkipList. Performance tests using db_builder_concurrent
+show AVLList can be up to 40% faster than SkipList.
 
 
 

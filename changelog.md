@@ -141,6 +141,13 @@ Changelog
 -	introduce new test data structures - unrolled link list and unrolled skip list, but not using them in production
 -	MacOS / M1 compilation
 -	introduce new test data structure - AVL list, based on non recursive AVL Tree with balance and parent pointer.
+-	make AVL list default data structure in db_net and db_builder_concurrent
 
+### 1.3.4.4
 
+-	Make AVL list intrusive, e.g. store the pair directly inside the node.
+	This allows to save 8 bytes per node + another 8 bytes from hkey.
+	Unfortunately the 7 bytes gap is still inside the node.
+	This structure have memory footprint only 2% more than skip list and
+	in same time is much faster than AVL list with pointer to the pair.
 
