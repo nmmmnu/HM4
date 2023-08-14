@@ -18,7 +18,7 @@ $(A)db_net: $(O)db_net.o	\
 			$(LL_SELECTOR)				\
 			$(O)filebuilder.o			\
 								\
-			$(O)skiplist.o				\
+			$(O)skiplist.o $(O)avllist.o		\
 			$(O)idgenerator.o			\
 								\
 			$(O)directorylistloader.o 		\

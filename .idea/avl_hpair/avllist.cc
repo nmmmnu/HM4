@@ -4,6 +4,8 @@
 #include <cassert>
 #include <algorithm>	// max, swap
 
+#include "hpair.h"
+
 #include "ilist_updateinplace.h"
 
 #include "pmallocator.h"
@@ -19,29 +21,30 @@ template<class T_Allocator>
 struct AVLList<T_Allocator>::Node{
 	using balance_t = int8_t;
 
-	balance_t	balance	= 0;		// 1 + 7!!! gap
+	balance_t	balance	= 0;		// 1 + 3 gap
+	HPair4::HKey	hkey	= 0;		// 4
 	Node		*l	= nullptr;	// 8
 	Node		*r	= nullptr;	// 8
 	Node		*p	= nullptr;	// 8
 	Pair		*data	= nullptr;	// 8
 
-	constexpr Node(Pair *data) :	data(data){}
-
-	template<typename UT>
-	constexpr Node(Pair *data, Node *p) :
-					data(data),
-					p(p){}
+	constexpr void setPair(Pair *pair){
+		hkey	= HPair4::SS::create(pair->getKey());
+		data	= pair;
+	}
 
 	constexpr void clear(Pair *pair, Node *parent){
 		balance	= 0;
 		l	= nullptr;
 		r	= nullptr;
 		p	= parent;
-		data	= pair;
+
+		setPair(pair);
 	}
 
-	int cmp(std::string_view const key) const{
-		return data->cmp(key);
+	int cmp(HPair4::HKey const hkey, std::string_view const key) const{
+	//	return data->cmp(key);
+		return HPair4::cmp(this->hkey, *this->data, hkey, key);
 	}
 };
 
@@ -67,9 +70,9 @@ namespace avl_impl_{
 	}
 
 	template<class Node>
-	const Node *findFix(const Node *node, std::string_view key){
+	const Node *findFix(const Node *node, HPair4::HKey const hkey, std::string_view key){
 		while(node){
-			int const cmp = node->cmp(key);
+			int const cmp = node->cmp(hkey, key);
 
 			if (cmp < 0)
 				node = node->p;
@@ -106,8 +109,10 @@ template<class T_Allocator>
 bool AVLList<T_Allocator>::erase_(std::string_view const key){
 	auto *node = root_;
 
+	auto const hkey = HPair4::SS::create(key);
+
 	while(node){
-		int const cmp = node->cmp(key);
+		int const cmp = node->cmp(hkey, key);
 
 		if (cmp > 0){
 			node = node->l;
@@ -265,10 +270,12 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	auto const &key = factory.getKey();
 
+	auto const hkey = HPair4::SS::create(key);
+
 	Node *node   = root_;
 
 	while(true){
-		int const cmp = node->cmp(key);
+		int const cmp = node->cmp(hkey, key);
 
 		if (cmp > 0){
 			if (!node->l){
@@ -331,7 +338,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			lc_.upd( olddata->bytes(), newdata->bytes() );
 
 			// assign new pair
-			node->data = newdata.release();
+			node->setPair(newdata.release());
 
 			// deallocate old pair
 			using namespace MyAllocator;
@@ -351,17 +358,19 @@ template<bool ExactEvaluation>
 auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
 	assert(!key.empty());
 
+	auto const hkey = HPair4::SS::create(key);
+
 	using avl_impl_::findFix;
 
 	auto *node = root_;
 
 	while(node){
-		int const cmp = node->cmp(key);
+		int const cmp = node->cmp(hkey, key);
 
 		if (cmp > 0){
 			if constexpr(!ExactEvaluation)
 				if (node->l == nullptr)
-					return findFix(node, key);
+					return findFix(node, hkey, key);
 
 			node = node->l;
 			continue;
@@ -370,7 +379,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 		if (cmp < 0){
 			if constexpr(!ExactEvaluation)
 				if (node->r == nullptr)
-					return findFix(node, key);
+					return findFix(node, hkey, key);
 
 			node = node->r;
 			continue;

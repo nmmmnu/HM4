@@ -1,5 +1,5 @@
 #include "mutablebase.h"
-#include "skiplist.h"
+#include "memlist.h"
 #include "arenaallocator.h"
 
 #include "binlogger/diskfilebinlogger.h"
@@ -13,7 +13,7 @@ namespace DBAdapterFactory{
 	struct MutableBinLogConcurrent{
 		using Allocator		= AllocatorX;
 
-		using MemList		= hm4::SkipList<Allocator>;
+		using MemList		= MyMemList<Allocator>;
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ true>;
 

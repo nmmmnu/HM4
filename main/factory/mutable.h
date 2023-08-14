@@ -1,5 +1,5 @@
 #include "mutablebase.h"
-#include "skiplist.h"
+#include "memlist.h"
 #include "arenaallocator.h"
 
 namespace DBAdapterFactory{
@@ -8,7 +8,7 @@ namespace DBAdapterFactory{
 	struct Mutable{
 		using Allocator		= AllocatorX;
 
-		using MemList		= hm4::SkipList<Allocator>;
+		using MemList		= MyMemList<Allocator>;
 
 		using MutableBase_	= MutableBase<MemList, hm4::FlushList>;
 

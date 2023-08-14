@@ -1,7 +1,6 @@
 #ifndef MUTABLE_BASE_H_
 #define MUTABLE_BASE_H_
 
-
 #include "listloader/directorylistloader.h"
 #include "multi/collectionlist.h"
 

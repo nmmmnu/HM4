@@ -40,8 +40,10 @@ private:
 	Node		*root_		= nullptr;
 
 public:
-	void clear(){
+	bool clear(){
 		clear_<true>();
+
+		return true;
 	}
 
 	template<class PFactory>

@@ -140,6 +140,7 @@ Changelog
 
 -	introduce new test data structures - unrolled link list and unrolled skip list, but not using them in production
 -	MacOS / M1 compilation
+-	introduce new test data structure - AVL list, based on non recursive AVL Tree with balance and parent pointer.
 
 
 

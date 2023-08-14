@@ -1,5 +1,5 @@
 #include "mutablebase.h"
-#include "skiplist.h"
+#include "memlist.h"
 #include "arenaallocator.h"
 
 #include "concurrentflushlist.h"
@@ -10,7 +10,7 @@ namespace DBAdapterFactory{
 	struct MutableConcurrent{
 		using Allocator		= AllocatorX;
 
-		using MemList		= hm4::SkipList<Allocator>;
+		using MemList		= MyMemList<Allocator>;
 
 		using MutableBase_	= MutableBase<MemList, hm4::ConcurrentFlushList>;
 
