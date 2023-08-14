@@ -66,20 +66,19 @@ namespace avl_impl_{
 		return node;
 	}
 
-}
+	template<class Node>
+	const Node *findFix(const Node *node, std::string_view key){
+		while(node){
+			int const cmp = node->cmp(key);
 
-template<class T_Allocator>
-auto AVLList<T_Allocator>::findFix__(const Node *node, std::string_view key) -> iterator{
-	while(node){
-		int const cmp = node->cmp(key);
+			if (cmp < 0)
+				node = node->p;
+			else
+				break;
+		}
 
-		if (cmp < 0)
-			node = node->p;
-		else
-			break;
+		return node;
 	}
-
-	return node;
 }
 
 template<class T_Allocator>
@@ -352,6 +351,8 @@ template<bool ExactEvaluation>
 auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
 	assert(!key.empty());
 
+	using avl_impl_::findFix;
+
 	auto *node = root_;
 
 	while(node){
@@ -360,7 +361,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 		if (cmp > 0){
 			if constexpr(!ExactEvaluation)
 				if (node->l == nullptr)
-					return findFix__(node, key);
+					return findFix(node, key);
 
 			node = node->l;
 			continue;
@@ -369,7 +370,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 		if (cmp < 0){
 			if constexpr(!ExactEvaluation)
 				if (node->r == nullptr)
-					return findFix__(node, key);
+					return findFix(node, key);
 
 			node = node->r;
 			continue;
@@ -653,7 +654,18 @@ void AVLList<T_Allocator>::rebalanceAfterErase_(Node *node){
 
 namespace avl_impl_{
 
-	template<typename Node, bool CheckHeight = false>
+	template<typename Node>
+	int testALVTreeIntegrity_height(const Node *node){
+		if (!node)
+			return 0;
+
+		return std::max(
+			testALVTreeIntegrity_height(node->l),
+			testALVTreeIntegrity_height(node->r)
+		) + 1;
+	}
+
+	template<bool CheckHeight = false, typename Node>
 	void testALVTreeIntegrity(const Node *node, const Node *parent = nullptr){
 		// not important, so it stay recursive.
 
@@ -664,30 +676,16 @@ namespace avl_impl_{
 		assert(node->balance >= -1 && node->balance <= +1);
 
 		if constexpr(CheckHeight){
-			auto height = [](const Node *node) -> int{
-				auto _ = [](const auto *node, auto _) -> int{
-					if (!node)
-						return 0;
-
-					return std::max(
-						_(node->l, _),
-						_(node->r, _)
-					) + 1;
-				};
-
-				return _(node, _);
-			};
-
-			auto const balance = height(node->r) - height(node->l);
+			auto const balance = testALVTreeIntegrity_height(node->r) - testALVTreeIntegrity_height(node->l);
 			assert(balance >= -1 && balance <= +1);
 			assert(balance == node->balance);
 		}
 
 		if (node->l)
-			assert(node->l->data < node->data);
+			assert(node->l->data->getKey() < node->data->getKey());
 
 		if (node->r)
-			assert(node->r->data > node->data);
+			assert(node->r->data->getKey() > node->data->getKey());
 
 		testALVTreeIntegrity(node->l, node);
 		testALVTreeIntegrity(node->r, node);
@@ -696,8 +694,13 @@ namespace avl_impl_{
 } // namespace avl_impl_
 
 template<class T_Allocator>
-void AVLList<T_Allocator>::testALVTreeIntegrity() const{
-	return avl_impl_::testALVTreeIntegrity(root_);
+void AVLList<T_Allocator>::testALVTreeIntegrity(std::false_type) const{
+	return avl_impl_::testALVTreeIntegrity<0>(root_);
+}
+
+template<class T_Allocator>
+void AVLList<T_Allocator>::testALVTreeIntegrity(std::true_type) const{
+	return avl_impl_::testALVTreeIntegrity<1>(root_);
 }
 
 

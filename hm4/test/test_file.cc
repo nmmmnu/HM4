@@ -138,8 +138,9 @@ namespace{
 		}
 
 		if constexpr(std::is_same_v<List, hm4::AVLList<typename List::Allocator> >){
+		//	list.testALVTreeIntegrity(std::false_type{});
+		//	list.testALVTreeIntegrity(std::true_type{});
 			fmt::print("AVL Tree height is {}.\n", list.height());
-		//	list.testALVTreeIntegrity();
 		}
 
 		return 0;

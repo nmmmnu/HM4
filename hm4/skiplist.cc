@@ -378,7 +378,7 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 
 	Node **jtable = heads_.data();
 
-	auto hkey = HPair::SS::create(key);
+	auto const hkey = HPair::SS::create(key);
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(Node *node = jtable[h]; node; node = node->next[h]){
@@ -424,7 +424,7 @@ auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 
 	const Node *node = nullptr;
 
-	auto hkey = HPair::SS::create(key);
+	auto const hkey = HPair::SS::create(key);
 
 	for(height_size_type h = MAX_HEIGHT; h --> 0;){
 		for(node = jtable[h]; node; node = node->next[h]){

@@ -89,7 +89,8 @@ public:
 	constexpr static iterator end();
 
 public:
-	void testALVTreeIntegrity() const;
+	void testALVTreeIntegrity(std::false_type) const;
+	void testALVTreeIntegrity(std::true_type) const;
 	size_t height() const;
 
 private:
@@ -101,8 +102,6 @@ private:
 		lc_.clr();
 		root_ = nullptr;
 	}
-
-	static iterator findFix__(const Node *node, std::string_view const key);
 
 	void deallocate_(Node *node);
 	void deallocateTree_(Node *node);

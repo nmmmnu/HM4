@@ -205,7 +205,7 @@ auto LinkList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 
 	Node **jtable = & head_;
 
-	auto hkey = HPair::SS::create(key);
+	auto const hkey = HPair::SS::create(key);
 
 	for(Node *node = *jtable; node; node = node->next){
 		node->prefetch();
@@ -233,7 +233,7 @@ template<bool ExactEvaluation>
 auto LinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
 	assert(!key.empty());
 
-	auto hkey = HPair::SS::create(key);
+	auto const hkey = HPair::SS::create(key);
 
 	const Node *node;
 

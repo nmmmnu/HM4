@@ -1,6 +1,15 @@
 #include "db_builder_base.cc"
 
-#include "avllist.h"
+#if 1
+	#include "avllist.h"
+	template<class Allocator>
+	using MyMemList = hm4::AVLList<Allocator>;
+#else
+	#include "skiplist.h"
+	template<class Allocator>
+	using MyMemList = hm4::SkipList<Allocator>;
+#endif
+
 #include "idgenerator.h"
 #include "flusher/diskfilepredicate.h"
 #include "flusher/diskfileflush.h"
@@ -20,7 +29,7 @@ constexpr size_t MIN_ARENA_SIZE = 128;
 
 
 struct MyListFactory{
-	using MemList		= hm4::AVLList<MyArenaAllocator>;
+	using MemList		= MyMemList<MyArenaAllocator>;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
