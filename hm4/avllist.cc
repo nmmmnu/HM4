@@ -23,25 +23,17 @@ struct AVLList<T_Allocator>::Node{
 	Node		*l	= nullptr;	// 8
 	Node		*r	= nullptr;	// 8
 	Node		*p	= nullptr;	// 8
-	Pair		*data	= nullptr;	// 8
+	Pair		pair;			// multiple
 
-	constexpr Node(Pair *data) :	data(data){}
-
-	template<typename UT>
-	constexpr Node(Pair *data, Node *p) :
-					data(data),
-					p(p){}
-
-	constexpr void clear(Pair *pair, Node *parent){
+	constexpr void clear(Node *parent){
 		balance	= 0;
 		l	= nullptr;
 		r	= nullptr;
 		p	= parent;
-		data	= pair;
 	}
 
 	int cmp(std::string_view const key) const{
-		return data->cmp(key);
+		return pair.cmp(key);
 	}
 };
 
@@ -78,6 +70,34 @@ namespace avl_impl_{
 		}
 
 		return node;
+	}
+
+	template<class Node>
+	void swapLinks(Node *a, Node *b){
+		assert(a);
+		assert(b);
+
+		using std::swap;
+
+		swap(a->balance	, b->balance	);
+		swap(a->l	, b->l		);
+		swap(a->r	, b->r		);
+		swap(a->p	, b->p		);
+
+		// fix parents, easy because we have parent link
+
+		auto fixParent = [](Node *node, const Node *original){
+			if (node){
+				auto *parent = node->p;
+				if (parent->l == original)
+					parent->l = node;
+				else
+					parent->r = node;
+			}
+		};
+
+		fixParent(a, b);
+		fixParent(b, a);
 	}
 }
 
@@ -129,8 +149,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		// CASE 3 - node two children
 		auto *successor = avl_impl_::getMinValueNode(node->r);
 
-		using std::swap;
-		swap(node->data, successor->data);
+		avl_impl_::swapLinks(node, successor);
 
 		// Silently proceed to CASE 2
 		node = successor;
@@ -141,7 +160,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		child->p = node->p;
 
 		if (!node->p){
-			lc_.dec(node->data->bytes());
+			lc_.dec(node->pair.bytes());
 			deallocate_(node);
 
 			this->root_ = child;
@@ -153,7 +172,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			parent->l = child;
 			++parent->balance;
 
-			lc_.dec(node->data->bytes());
+			lc_.dec(node->pair.bytes());
 			deallocate_(node);
 
 			if (parent->balance == +1){
@@ -166,7 +185,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			parent->r = child;
 			--parent->balance;
 
-			lc_.dec(node->data->bytes());
+			lc_.dec(node->pair.bytes());
 			deallocate_(node);
 
 			if (parent->balance == -1){
@@ -181,7 +200,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 	// CASE 1: node with no children
 
 	if (!node->p){
-		lc_.dec(node->data->bytes());
+		lc_.dec(node->pair.bytes());
 		deallocate_(node);
 
 		this->root_ = nullptr;
@@ -193,7 +212,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		parent->l = nullptr;
 		++parent->balance;
 
-		lc_.dec(node->data->bytes());
+		lc_.dec(node->pair.bytes());
 		deallocate_(node);
 
 		if (parent->balance == +1){
@@ -206,7 +225,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		parent->r = nullptr;
 		--parent->balance;
 
-		lc_.dec(node->data->bytes());
+		lc_.dec(node->pair.bytes());
 		deallocate_(node);
 
 		if (parent->balance == -1){
@@ -223,28 +242,25 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 namespace avl_impl_{
 	template<class Node, class T_Allocator, class PFactory>
 	Node *allocateNode(T_Allocator &allocator, PFactory &factory, ListCounter &lc, Node *parent){
-		auto data = Pair::smart_ptr::create(allocator, factory);
-
-		if (!data)
-			return nullptr;
+		size_t const bytes = factory.bytes();
+		size_t const nodeSize = sizeof(Node) - sizeof(Pair) + bytes;
 
 		using namespace MyAllocator;
-		Node *node = allocate<Node>(allocator);
+		Node *node = allocate<Node>(allocator, nodeSize);
 
-		if (node == nullptr){
-			// newdata will be magically destroyed.
+		if (node == nullptr)
 			return nullptr;
-		}
 
-		size_t const size = data->bytes();
+		node->clear(parent);
+
+		factory.create(& node->pair);
+
+		size_t const size = bytes;
 
 		lc.inc(size);
 
-		node->clear(data.release(), parent);
-
 		return node;
 	}
-
 }
 
 template<class T_Allocator>
@@ -272,7 +288,8 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		if (cmp > 0){
 			if (!node->l){
-				auto newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
+				using namespace MyAllocator;
+				Node *newnode = avl_impl_::allocateNode<Node>(getAllocator(), factory, lc_, node);
 
 				if (!newnode)
 					return this->end();
@@ -309,7 +326,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (cmp == 0){
 			// update node in place.
 
-			Pair *olddata = node->data;
+			Pair *olddata = & node->pair;
 
 			// check if we can update
 
@@ -323,21 +340,21 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 				return node;
 			}
 
-			auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
+			// allocate new node and change links
+			Node *newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
-			if (!newdata)
+			if (!newnode)
 				return this->end();
 
-			lc_.upd( olddata->bytes(), newdata->bytes() );
+			avl_impl_::swapLinks(newnode, node);
 
-			// assign new pair
-			node->data = newdata.release();
+			lc_.dec( olddata->bytes() );
 
-			// deallocate old pair
+			// deallocate old node
 			using namespace MyAllocator;
-			deallocate(allocator_, olddata);
+			deallocate(allocator_, node);
 
-			return node;
+			return newnode;
 		}
 	}
 
@@ -394,8 +411,6 @@ inline auto AVLList<T_Allocator>::begin() const -> iterator{
 template<class T_Allocator>
 void AVLList<T_Allocator>::deallocate_(Node *node){
 	using namespace MyAllocator;
-
-	deallocate(allocator_, node->data);
 	deallocate(allocator_, node);
 }
 
@@ -682,10 +697,10 @@ namespace avl_impl_{
 		}
 
 		if (node->l)
-			assert(node->l->data->getKey() < node->data->getKey());
+			assert(node->l->pair.getKey() < node->pair.getKey());
 
 		if (node->r)
-			assert(node->r->data->getKey() > node->data->getKey());
+			assert(node->r->pair.getKey() > node->pair.getKey());
 
 		testALVTreeIntegrity(node->l, node);
 		testALVTreeIntegrity(node->r, node);
@@ -744,7 +759,7 @@ auto AVLList<T_Allocator>::iterator::operator++() -> iterator &{
 
 template<class T_Allocator>
 const Pair &AVLList<T_Allocator>::iterator::operator*() const{
-	return *node->data;
+	return node->pair;
 }
 
 // ==============================
