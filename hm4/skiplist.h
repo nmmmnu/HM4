@@ -34,6 +34,11 @@ public:
 	void swap(SkipList &other);
 
 public:
+	constexpr static const char *getName(){
+		return "SkipList";
+	}
+
+public:
 	bool clear();
 
 	bool erase_(std::string_view const key);

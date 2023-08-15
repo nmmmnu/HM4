@@ -147,6 +147,8 @@ int process(MyListFactory &&factory, const char *filename, bool const base64){
 				hm4::BlackHoleList
 	>;
 
+	logger<Logger::STARTUP>() << "Start building with" << MyListFactory::MemList::getName();
+
 	if (base64)
 		return process<MyReader>(mylist, filename, std::true_type{},  InsertIgnore{});
 	else

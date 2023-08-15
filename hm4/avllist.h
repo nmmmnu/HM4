@@ -40,6 +40,11 @@ private:
 	Node		*root_		= nullptr;
 
 public:
+	constexpr static const char *getName(){
+		return "AVLList";
+	}
+
+public:
 	bool clear(){
 		clear_<true>();
 

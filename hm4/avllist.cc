@@ -23,7 +23,7 @@ struct AVLList<T_Allocator>::Node{
 	Node		*l	= nullptr;	// 8
 	Node		*r	= nullptr;	// 8
 	Node		*p	= nullptr;	// 8
-	Pair		pair;			// multiple
+	Pair		data;			// multiple
 
 	constexpr void clear(Node *parent){
 		balance	= 0;
@@ -33,7 +33,7 @@ struct AVLList<T_Allocator>::Node{
 	}
 
 	int cmp(std::string_view const key) const{
-		return pair.cmp(key);
+		return data.cmp(key);
 	}
 };
 
@@ -160,7 +160,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		child->p = node->p;
 
 		if (!node->p){
-			lc_.dec(node->pair.bytes());
+			lc_.dec(node->data.bytes());
 			deallocate_(node);
 
 			this->root_ = child;
@@ -172,7 +172,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			parent->l = child;
 			++parent->balance;
 
-			lc_.dec(node->pair.bytes());
+			lc_.dec(node->data.bytes());
 			deallocate_(node);
 
 			if (parent->balance == +1){
@@ -185,7 +185,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			parent->r = child;
 			--parent->balance;
 
-			lc_.dec(node->pair.bytes());
+			lc_.dec(node->data.bytes());
 			deallocate_(node);
 
 			if (parent->balance == -1){
@@ -200,7 +200,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 	// CASE 1: node with no children
 
 	if (!node->p){
-		lc_.dec(node->pair.bytes());
+		lc_.dec(node->data.bytes());
 		deallocate_(node);
 
 		this->root_ = nullptr;
@@ -212,7 +212,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		parent->l = nullptr;
 		++parent->balance;
 
-		lc_.dec(node->pair.bytes());
+		lc_.dec(node->data.bytes());
 		deallocate_(node);
 
 		if (parent->balance == +1){
@@ -225,7 +225,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		parent->r = nullptr;
 		--parent->balance;
 
-		lc_.dec(node->pair.bytes());
+		lc_.dec(node->data.bytes());
 		deallocate_(node);
 
 		if (parent->balance == -1){
@@ -253,7 +253,7 @@ namespace avl_impl_{
 
 		node->clear(parent);
 
-		factory.create(& node->pair);
+		factory.create(& node->data);
 
 		size_t const size = bytes;
 
@@ -326,7 +326,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (cmp == 0){
 			// update node in place.
 
-			Pair *olddata = & node->pair;
+			Pair *olddata = & node->data;
 
 			// check if we can update
 
@@ -697,10 +697,10 @@ namespace avl_impl_{
 		}
 
 		if (node->l)
-			assert(node->l->pair.getKey() < node->pair.getKey());
+			assert(node->l->data.getKey() < node->data.getKey());
 
 		if (node->r)
-			assert(node->r->pair.getKey() > node->pair.getKey());
+			assert(node->r->data.getKey() > node->data.getKey());
 
 		testALVTreeIntegrity(node->l, node);
 		testALVTreeIntegrity(node->r, node);
@@ -759,7 +759,7 @@ auto AVLList<T_Allocator>::iterator::operator++() -> iterator &{
 
 template<class T_Allocator>
 const Pair &AVLList<T_Allocator>::iterator::operator*() const{
-	return node->pair;
+	return node->data;
 }
 
 // ==============================

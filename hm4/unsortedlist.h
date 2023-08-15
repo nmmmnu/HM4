@@ -60,6 +60,10 @@ public:
 		clear();
 	}
 
+	constexpr static const char *getName(){
+		return "UnsortedList";
+	}
+
 	void prepareFlush(){
 		if (needSort_ == false)
 			return;

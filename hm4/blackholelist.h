@@ -23,6 +23,11 @@ public:
 	}
 
 public:
+	constexpr static const char *getName(){
+		return "BlackHoleList";
+	}
+
+public:
 	constexpr static
 	bool clear(){
 		return true;
