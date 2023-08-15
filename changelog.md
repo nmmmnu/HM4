@@ -151,3 +151,7 @@ Changelog
 	This structure have memory footprint only 2% more than skip list and
 	in same time is much faster than AVL list with pointer to the pair.
 
+### 1.3.4.5
+
+-	Release
+
