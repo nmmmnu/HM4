@@ -158,6 +158,6 @@ Changelog
 ### 1.3.4.6
 
 -	Fix bug with binlog reload
-
+-	Tool db_logger is removed
 
 

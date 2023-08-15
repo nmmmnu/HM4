@@ -46,7 +46,6 @@ struct AVLList<T_Allocator>::Node{
 namespace avl_impl_{
 
 	// works for const Node * too
-
 	template<class Node>
 	Node *getMinValueNode(Node *node){
 		if (!node)
@@ -56,6 +55,27 @@ namespace avl_impl_{
 			node = node->l;
 
 		return node;
+	}
+
+	// works for const Node * too
+	template<class Node>
+	Node *getSuccessorNode(Node *node){
+		// find node successor
+
+		if (node->r){
+			// go right
+			return getMinValueNode(node->r);
+		}
+
+		// go up
+		Node *parent = node->p;
+
+		while(parent && node == parent->r){
+			node = parent;
+			parent = parent->p;
+		}
+
+		return parent;
 	}
 
 	template<class Node>
@@ -729,36 +749,12 @@ void AVLList<T_Allocator>::testALVTreeIntegrity(std::true_type) const{
 
 template<class T_Allocator>
 auto AVLList<T_Allocator>::iterator::operator++() -> iterator &{
-	// left child should be processed.
-	// node       should be processed.
+	node = avl_impl_::getSuccessorNode(node);
 
-	if (node->r){
-		// go right
-		node = avl_impl_::getMinValueNode(node->r);
-		return *this;
-	}
-
-
-	// go up
-	while(node->p){
-		const auto *copy = node;
-
-		node = node->p;
-
-		if (node->l == copy){
-			// we were in left child
-			// process the node
-			return *this;
-		}else{
-			// we were in right child
-			// go up again
-		}
-	}
-
-	// we are the root node
-	node = nullptr; // std::end()
 	return *this;
 }
+
+
 
 template<class T_Allocator>
 const Pair &AVLList<T_Allocator>::iterator::operator*() const{

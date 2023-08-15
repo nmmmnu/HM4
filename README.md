@@ -177,7 +177,7 @@ Unlike Apache Cassandra, there are a safe way to compact several tables into sin
 - db_compact	- automatic merge DiskTables
 - db_builder	- create DiskTable(s) from tab delimited file
 - db_merge	- merge DiskTable(s)
-- db_logger	- create bin-log from tab delimited file - similar to **db_builder**, but not very usable
+- db_logger	- create bin-log from tab delimited file - similar to **db_builder**, but not very usable - **REMOVED IN 1.3.4.6**
 - db_replay	- create DiskTable(s) from binlog
 - db_mkbtree	- create btree to existing DiskTable for much faster access
 - db_file	- query DiskTable or LSM
