@@ -76,10 +76,7 @@ except probably with malloc_usable_size();
 [1]------>[1]------>[1]----------->NULL
 [0]->[0]->[0]->[0]->[0]->[0]->[0]->NULL
 
-Uncommend DEBUG_PRINT_LANES for visualisation.
 */
-
-constexpr bool DEBUG_PRINT_LANES = 0;
 
 template<class T_Allocator>
 struct UnrolledSkipList<T_Allocator>::Node{

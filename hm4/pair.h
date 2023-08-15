@@ -252,7 +252,7 @@ inline namespace version_4_00_00{
 		constexpr
 		bool isKeyEmpty() const noexcept{
 			// big endian 0
-			return (keylen & htobe<uint16_t>(PairConf::MAX_KEY_MASK)) != 0;
+			return !(keylen & htobe<uint16_t>(PairConf::MAX_KEY_MASK));
 		}
 
 	public:

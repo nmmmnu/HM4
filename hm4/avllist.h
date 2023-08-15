@@ -33,7 +33,7 @@ public:
 	}
 
 private:
-	class Node;
+	struct Node;
 
 	ListCounter	lc_;
 	Allocator	*allocator_;

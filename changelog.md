@@ -155,3 +155,9 @@ Changelog
 
 -	Release
 
+### 1.3.4.6
+
+-	Fix bug with binlog reload
+
+
+

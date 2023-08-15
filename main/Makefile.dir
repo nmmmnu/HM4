@@ -2,7 +2,7 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 #EXTRA_INCL += -I$(SRC_DIR)
 
-EXTRA_CLEAN += $(A)db_net
+EXTRA_CLEAN += $(A)db_net $(A)db_compact $(A)db_compact_tombstones
 
 include Makefile.sub
 

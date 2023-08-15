@@ -110,7 +110,10 @@ size_t AVLList<T_Allocator>::height() const{
 	while(node){
 		++height;
 
-		node = node->l;
+		if (node->balance < 0)
+			node = node->l;
+		else
+			node = node->r;
 	}
 
 	return height;
