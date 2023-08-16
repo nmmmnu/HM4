@@ -80,20 +80,6 @@ namespace avl_impl_{
 	}
 
 	template<class Node>
-	const Node *findFix(const Node *node, std::string_view key){
-		while(node){
-			int const cmp = node->cmp(key);
-
-			if (cmp < 0)
-				node = node->p;
-			else
-				break;
-		}
-
-		return node;
-	}
-
-	template<class Node>
 	void swapLinks(Node *a, Node *b){
 		assert(a);
 		assert(b);
@@ -392,8 +378,6 @@ template<bool ExactEvaluation>
 auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
 	assert(!key.empty());
 
-	using avl_impl_::findFix;
-
 	auto *node = root_;
 
 	while(node){
@@ -401,8 +385,12 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 
 		if (cmp > 0){
 			if constexpr(!ExactEvaluation)
-				if (node->l == nullptr)
-					return findFix(node, key);
+				if (node->l == nullptr){
+					// We need successor of the `key`,
+					// but it should be on the left.
+					// this is why the `node` is the successor.
+					return node;
+				}
 
 			node = node->l;
 			continue;
@@ -410,8 +398,11 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 
 		if (cmp < 0){
 			if constexpr(!ExactEvaluation)
-				if (node->r == nullptr)
-					return findFix(node, key);
+				if (node->r == nullptr){
+					// We need successor of the `key`,
+					// this is why we need the successor of the `node`.
+					return avl_impl_::getSuccessorNode(node);
+				}
 
 			node = node->r;
 			continue;
