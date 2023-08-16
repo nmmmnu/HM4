@@ -26,35 +26,3 @@ my_logger::Logger &getLoggerSingleton(){
 }
 
 
-#if 0
-		[[nodiscard]]
-		auto startup() const{
-			return get(Level::STARTUP	);
-		}
-
-		[[nodiscard]]
-		auto fatal() const{
-			return get(Level::FATAL		);
-		}
-
-		[[nodiscard]]
-		auto error() const{
-			return get(Level::ERROR		);
-		}
-
-		[[nodiscard]]
-		auto warning() const{
-			return get(Level::WARNING	);
-		}
-
-		[[nodiscard]]
-		auto notice() const{
-			return get(Level::NOTICE	);
-		}
-
-		[[nodiscard]]
-		auto debug() const{
-			return get(Level::DEBUG		);
-		}
-#endif
-

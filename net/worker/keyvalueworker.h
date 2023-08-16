@@ -104,6 +104,9 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorker{
+		constexpr static bool LogCommands	= true;
+		constexpr static auto LogCommandsLevel	= Logger::DEBUG;
+
 		KeyValueWorker(DBAdapter &db, size_t output_buffer_reserve) :
 							db_(db),
 							output_buffer_(output_buffer_reserve){
@@ -146,6 +149,10 @@ namespace net::worker{
 
 			if (it == std::end(map_))
 				return error::NotImplemented(protocol_, buffer);
+
+			// LOG command
+			if constexpr(LogCommands)
+				logger<LogCommandsLevel>().range(std::begin(p), std::end(p));
 
 			auto &command = *it->second;
 

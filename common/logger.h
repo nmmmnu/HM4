@@ -96,8 +96,12 @@ namespace my_logger{
 			}
 
 			~LoggerStream(){
-				if (writting_)
+				if (writting_){
 					os_ << '\n';
+
+					if constexpr(FlushLog)
+						os_.flush();
+				}
 			}
 
 			template<typename T>
@@ -114,10 +118,20 @@ namespace my_logger{
 					fmt::print(os_, std::forward<Args>(args)...);
 			}
 
+			template<typename It>
+			void range(It begin, It end, char separator = ',', char quote = '\''){
+				if (writting_){
+					for(auto it = begin; it != end; ++it)
+						os_ << quote << *it << quote << separator;
+				}
+			}
+
 		private:
 			void outputBanner_(const char *banner);
 
 		private:
+			constexpr static bool FlushLog = true;
+
 			bool		writting_;
 			std::ostream	&os_;
 		};

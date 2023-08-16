@@ -48,8 +48,7 @@ namespace avl_impl_{
 	// works for const Node * too
 	template<class Node>
 	Node *getMinValueNode(Node *node){
-		if (!node)
-			return nullptr;
+		assert(node);
 
 		while(node->l)
 			node = node->l;
@@ -60,6 +59,8 @@ namespace avl_impl_{
 	// works for const Node * too
 	template<class Node>
 	Node *getSuccessorNode(Node *node){
+		assert(node);
+
 		// find node successor
 
 		if (node->r){
@@ -425,13 +426,6 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 
 
 template<class T_Allocator>
-inline auto AVLList<T_Allocator>::begin() const -> iterator{
-	return avl_impl_::getMinValueNode(root_);
-}
-
-
-
-template<class T_Allocator>
 void AVLList<T_Allocator>::deallocate_(Node *node){
 	using namespace MyAllocator;
 	deallocate(allocator_, node);
@@ -744,6 +738,16 @@ void AVLList<T_Allocator>::testALVTreeIntegrity(std::true_type) const{
 
 
 // ==============================
+
+
+
+template<class T_Allocator>
+auto AVLList<T_Allocator>::begin() const -> iterator{
+	if (root_)
+		return avl_impl_::getMinValueNode(root_);
+	else
+		return nullptr;
+}
 
 
 
