@@ -98,9 +98,6 @@ namespace my_logger{
 			~LoggerStream(){
 				if (writting_){
 					os_ << '\n';
-
-					if constexpr(FlushLog)
-						os_.flush();
 				}
 			}
 
@@ -130,8 +127,6 @@ namespace my_logger{
 			void outputBanner_(const char *banner);
 
 		private:
-			constexpr static bool FlushLog = true;
-
 			bool		writting_;
 			std::ostream	&os_;
 		};

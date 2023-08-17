@@ -161,4 +161,5 @@ Changelog
 -	Tool db_logger is removed
 -	Make logger accept two iterators to log array-like objects
 -	Possibility to log commands, currently compile time setting
+-	Fix bug with AVL root update
 

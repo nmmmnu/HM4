@@ -79,6 +79,17 @@ namespace avl_impl_{
 		return parent;
 	}
 
+	// fix parents, easy because we have parent link
+	template<class Node>
+	void fixParent_(Node *node, const Node *original){
+		if (auto *parent = node->p; parent){
+			if (parent->l == original)
+				parent->l = node;
+			else
+				parent->r = node;
+		}
+	};
+
 	template<class Node>
 	void swapLinks(Node *a, Node *b){
 		assert(a);
@@ -91,20 +102,23 @@ namespace avl_impl_{
 		swap(a->r	, b->r		);
 		swap(a->p	, b->p		);
 
-		// fix parents, easy because we have parent link
+		fixParent_(a, b);
+		fixParent_(b, a);
+	}
 
-		auto fixParent = [](Node *node, const Node *original){
-			if (node){
-				auto *parent = node->p;
-				if (parent->l == original)
-					parent->l = node;
-				else
-					parent->r = node;
-			}
-		};
+	template<class Node>
+	void copyLinks(Node *a, const Node *b){
+		assert(a);
+		assert(b);
 
-		fixParent(a, b);
-		fixParent(b, a);
+		using std::swap;
+
+		a->balance	= b->balance	;
+		a->l		= b->l		;
+		a->r		= b->r		;
+		a->p		= b->p		;
+
+		fixParent_(a, b);
 	}
 }
 
@@ -265,9 +279,7 @@ namespace avl_impl_{
 
 		factory.create(& node->data);
 
-		size_t const size = bytes;
-
-		lc.inc(size);
+		lc.inc(bytes);
 
 		return node;
 	}
@@ -298,8 +310,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		if (cmp > 0){
 			if (!node->l){
-				using namespace MyAllocator;
-				Node *newnode = avl_impl_::allocateNode<Node>(getAllocator(), factory, lc_, node);
+				auto *newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
 				if (!newnode)
 					return this->end();
@@ -317,7 +328,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		if (cmp < 0){
 			if (!node->r){
-				auto newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
+				auto *newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
 				if (!newnode)
 					return this->end();
@@ -356,7 +367,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			if (!newnode)
 				return this->end();
 
-			avl_impl_::swapLinks(newnode, node);
+			avl_impl_::copyLinks(newnode, node);
 
 			lc_.dec( olddata->bytes() );
 
@@ -387,8 +398,8 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 			if constexpr(!ExactEvaluation)
 				if (node->l == nullptr){
 					// We need successor of the `key`,
-					// but it should be on the left.
-					// this is why the `node` is the successor.
+					// but it should be on the left, but is not there.
+					// this means the `node` is the successor of the `key`.
 					return node;
 				}
 
@@ -400,7 +411,8 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 			if constexpr(!ExactEvaluation)
 				if (node->r == nullptr){
 					// We need successor of the `key`,
-					// this is why we need the successor of the `node`.
+					// this means the successor of the `node`,
+					// is also the successor of the `key`.
 					return avl_impl_::getSuccessorNode(node);
 				}
 

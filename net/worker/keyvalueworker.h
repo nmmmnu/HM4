@@ -104,7 +104,7 @@ namespace net::worker{
 
 	template<class Protocol, class DBAdapter>
 	struct KeyValueWorker{
-		constexpr static bool LogCommands	= true;
+		constexpr static bool LogCommands	= false;
 		constexpr static auto LogCommandsLevel	= Logger::DEBUG;
 
 		KeyValueWorker(DBAdapter &db, size_t output_buffer_reserve) :
