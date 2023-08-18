@@ -10,13 +10,20 @@ public:
 
 	explicit constexpr pointer_iterator(OIterator it) : ptr(it){}
 
+private:
+	using T_ = typename std::iterator_traits<OIterator>;
+
+private:
+	using itt__		= typename std::iterator_traits<OIterator>;
+	using value_type_ptr__	= typename itt__::value_type;
+
 public:
-	using difference_type	= typename std::iterator_traits<OIterator>::difference_type;
-	using value_type_ptr__	= typename std::iterator_traits<OIterator>::value_type;
-//	using value_type	= std::remove_pointer_t<value_type_ptr__>;
-//	using pointer		= value_type *;
-//	using reference		= value_type &;
-	using iterator_category	= std::random_access_iterator_tag;
+	using iterator_category	= typename itt__::iterator_category;
+	using difference_type	= typename itt__::difference_type;
+
+	using value_type	= std::remove_pointer_t<value_type_ptr__>;
+	using pointer		= value_type *;
+	using reference		= value_type &;
 
 public:
 	// increment / decrement
@@ -133,9 +140,9 @@ namespace std {
 
 		using difference_type	= typename T::difference_type	;
 		using iterator_category	= typename T::iterator_category	;
-	//	using value_type	= typename T::value_type	;
-	//	using pointer		= typename T::pointer		;
-	//	using reference		= typename T::reference		;
+		using value_type	= typename T::value_type	;
+		using pointer		= typename T::pointer		;
+		using reference		= typename T::reference		;
 	};
 }
 
