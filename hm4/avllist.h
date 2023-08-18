@@ -93,7 +93,7 @@ public:
 
 	iterator begin() const;
 
-	constexpr static iterator end();
+	constexpr iterator end() const;
 
 public:
 	void testALVTreeIntegrity(std::false_type) const;
@@ -133,18 +133,18 @@ private:
 template<class T_Allocator>
 class AVLList<T_Allocator>::iterator{
 public:
-	constexpr iterator(const Node *node) : node(node){}
+	constexpr iterator(const Node *node, const Node *root) : node(node), root(root){}
 
 public:
 	using difference_type	= std::ptrdiff_t;
 	using value_type	= const Pair;
 	using pointer		= value_type *;
 	using reference		= value_type &;
-	using iterator_category	= std::forward_iterator_tag;
-	// avl tree can support bi-directiona iterator as well
+	using iterator_category	= std::bidirectional_iterator_tag;
 
 public:
 	iterator &operator++();
+	iterator &operator--();
 
 	reference operator*() const;
 
@@ -162,6 +162,7 @@ public:
 
 private:
 	const Node *node;
+	const Node *root;
 };
 
 
@@ -171,8 +172,8 @@ private:
 
 
 template<class T_Allocator>
-constexpr auto AVLList<T_Allocator>::end() -> iterator{
-	return nullptr;
+constexpr auto AVLList<T_Allocator>::end() const -> iterator{
+	return { nullptr, root_ };
 }
 
 

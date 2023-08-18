@@ -47,6 +47,40 @@ namespace avl_impl_{
 
 	// works for const Node * too
 	template<class Node>
+	Node *getMaxValueNode(Node *node){
+		assert(node);
+
+		while(node->r)
+			node = node->r;
+
+		return node;
+	}
+
+	// works for const Node * too
+	template<class Node>
+	Node *getPredecessorNode(Node *node){
+		assert(node);
+
+		// find node successor
+
+		if (node->l){
+			// go right
+			return getMaxValueNode(node->l);
+		}
+
+		// go up
+		Node *parent = node->p;
+
+		while(parent && node == parent->l){
+			node = parent;
+			parent = parent->p;
+		}
+
+		return parent;
+	}
+
+	// works for const Node * too
+	template<class Node>
 	Node *getMinValueNode(Node *node){
 		assert(node);
 
@@ -82,6 +116,9 @@ namespace avl_impl_{
 	// fix parents, easy because we have parent link
 	template<class Node>
 	void fixParent_(Node *node, const Node *original){
+		assert(node);
+		assert(original);
+
 		if (auto *parent = node->p; parent){
 			if (parent->l == original)
 				parent->l = node;
@@ -298,7 +335,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		root_ = newnode;
 
-		return root_;
+		return { root_, root_ };
 	}
 
 	auto const &key = factory.getKey();
@@ -319,7 +356,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 				--node->balance;
 				rebalanceAfterInsert_(node);
 
-				return newnode;
+				return { newnode, root_ };
 			}else{
 				node = node->l;
 				continue;
@@ -337,7 +374,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 				++node->balance;
 				rebalanceAfterInsert_(node);
 
-				return newnode;
+				return { newnode, root_ };
 			}else{
 				node = node->r;
 				continue;
@@ -358,7 +395,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			// try update pair in place.
 			if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 				// successfully updated.
-				return node;
+				return { node, root_ };
 			}
 
 			// allocate new node and change links
@@ -375,7 +412,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			using namespace MyAllocator;
 			deallocate(allocator_, node);
 
-			return newnode;
+			return { newnode, root_ };
 		}
 	}
 
@@ -400,7 +437,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 					// We need successor of the `key`,
 					// but it should be on the left, but is not there.
 					// this means the `node` is the successor of the `key`.
-					return node;
+					return { node, root_ };
 				}
 
 			node = node->l;
@@ -413,7 +450,10 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 					// We need successor of the `key`,
 					// this means the successor of the `node`,
 					// is also the successor of the `key`.
-					return avl_impl_::getSuccessorNode(node);
+					return {
+						avl_impl_::getSuccessorNode(node),
+						root_
+					};
 				}
 
 			node = node->r;
@@ -423,7 +463,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 		break;
 	}
 
-	return node;
+	return { node, root_ };
 }
 
 
@@ -747,9 +787,12 @@ void AVLList<T_Allocator>::testALVTreeIntegrity(std::true_type) const{
 template<class T_Allocator>
 auto AVLList<T_Allocator>::begin() const -> iterator{
 	if (root_)
-		return avl_impl_::getMinValueNode(root_);
+		return {
+			avl_impl_::getMinValueNode(root_),
+			root_
+		};
 	else
-		return nullptr;
+		return { nullptr, root_ };
 }
 
 
@@ -757,6 +800,24 @@ auto AVLList<T_Allocator>::begin() const -> iterator{
 template<class T_Allocator>
 auto AVLList<T_Allocator>::iterator::operator++() -> iterator &{
 	node = avl_impl_::getSuccessorNode(node);
+
+	return *this;
+}
+
+
+
+template<class T_Allocator>
+auto AVLList<T_Allocator>::iterator::operator--() -> iterator &{
+	if (node == nullptr){
+		// standard say, you can not call --it,
+		// without check it != begin
+
+		node = avl_impl_::getMaxValueNode(root);
+
+		return *this;
+	}
+
+	node = avl_impl_::getPredecessorNode(node);
 
 	return *this;
 }

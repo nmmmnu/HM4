@@ -94,7 +94,6 @@ bool getCheck(List const &list, const char *key, const char *value, std::bool_co
 
 template <class List>
 void iterator_test_get(const List &list){
-
 	mytest("it", 			getCheck(list, "1",		"Niki",		std::false_type{}	));
 	mytest("it", 			getCheck(list, "1 firstname",	"Niki",		std::true_type{}	));
 	mytest("it", 			getCheck(list, "2",		"22",		std::false_type{}	));
@@ -129,7 +128,53 @@ void iterator_test(List const &list){
 	mytest("*it end()",		it == et				);
 }
 
+template<class List>
+void iterator_test_empty_it(List const &list){
+	mytest("empty it",	std::begin(list) == std::end(list)	);
+}
+
 // ==============================
+
+#include "avllist.h"
+
+template<typename List, typename Tag>
+constexpr void test_list_reverse_it(List const &, Tag){
+}
+
+template<typename List, typename Tag>
+constexpr void test_list_reverse_emptry_it(List const &, Tag){
+}
+
+template<typename List>
+void test_list_reverse_it(List const &list, std::bidirectional_iterator_tag){
+	auto _ = [](auto it){
+		return std::make_reverse_iterator(it);
+	};
+
+	auto       it = _(std::end(list));
+	auto const et = _(std::begin(list));
+
+	auto advance = [&it, &et](const char *value){
+		mytest("it reverse deref", 	iteratorDereference(it, et, value)	);
+		++it;
+	};
+
+	advance("Linux"	);
+	advance("Sofia"	);
+	advance("22"	);
+	advance("Niki"	);
+
+	mytest("*it reverse end()",	it == et					);
+}
+
+template<typename List>
+constexpr void test_list_reverse_emptry_it(List const &list, std::bidirectional_iterator_tag){
+	auto _ = [](auto it){
+		return std::make_reverse_iterator(it);
+	};
+
+	mytest("empty reverse it",	_(std::end(list)) == _(std::begin(list))	);
+}
 
 template <class List>
 void list_test(List &list){
@@ -215,8 +260,15 @@ void list_test(List &list){
 	iterator_test_get(list);
 
 	list.clear();
-	mytest("empty iterator",	std::begin(list) == std::end(list)		);
+	iterator_test_empty_it(list);
 
+	using ITC = typename std::iterator_traits<typename List::iterator>::iterator_category;
+
+	listPopulate(list);
+	test_list_reverse_it(list, ITC{});
+
+	list.clear();
+	test_list_reverse_emptry_it(list, ITC{});
 
 	// MOVE C-TOR
 
@@ -354,7 +406,6 @@ static void skiplist_lanes_test(){
 
 #include "linklist.h"
 #include "unrolledlinklist.h"
-#include "avllist.h"
 
 int main(){
 	list_test<hm4::BlackHoleList			>("BlackHoleList"			);
