@@ -34,7 +34,7 @@ public:
 	void swap(SkipList &other);
 
 public:
-	constexpr static const char *getName(){
+	constexpr static std::string_view getMutableName(){
 		return "SkipList";
 	}
 

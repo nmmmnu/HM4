@@ -40,7 +40,7 @@ private:
 	Node		*root_		= nullptr;
 
 public:
-	constexpr static const char *getName(){
+	constexpr static std::string_view getMutableName(){
 		return "AVLList";
 	}
 

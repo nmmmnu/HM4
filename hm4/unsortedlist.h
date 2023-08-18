@@ -60,7 +60,7 @@ public:
 		clear();
 	}
 
-	constexpr static const char *getName(){
+	constexpr static std::string_view getMutableName(){
 		return "UnsortedList";
 	}
 

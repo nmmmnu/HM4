@@ -157,7 +157,7 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
 								starting_server_with,
 									"mutable concurrent binlog",
-									MyFactory::MemList::getName(),
+									MyFactory::MemList::getMutableName(),
 									allocatorName
 				);
 			}else{
@@ -166,7 +166,7 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2 },
 								starting_server_with,
 									"mutable concurrent",
-									MyFactory::MemList::getName(),
+									MyFactory::MemList::getMutableName(),
 									allocatorName
 				);
 			}
@@ -188,7 +188,7 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator },
 								starting_server_with,
 									"mutable binlog",
-									MyFactory::MemList::getName(),
+									MyFactory::MemList::getMutableName(),
 									allocatorName
 				);
 			}else{
@@ -197,7 +197,7 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, allocator },
 								starting_server_with,
 									"mutable",
-									MyFactory::MemList::getName(),
+									MyFactory::MemList::getMutableName(),
 									allocatorName
 				);
 			}

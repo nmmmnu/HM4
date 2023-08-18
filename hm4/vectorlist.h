@@ -38,6 +38,11 @@ private:
 	Allocator	*allocator_;
 
 public:
+	constexpr static std::string_view getMutableName(){
+		return "VectorList";
+	}
+
+public:
 	bool clear();
 
 	bool erase_(std::string_view key);

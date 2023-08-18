@@ -112,6 +112,10 @@ public:
 		return list1_->getAllocator();
 	}
 
+	constexpr static std::string_view getMutableName(){
+		return List1::getMutableName();
+	}
+
 	using Base_::DualListBase;
 
 public:
