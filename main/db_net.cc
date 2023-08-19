@@ -46,6 +46,21 @@ using MyProtocol	= net::protocol::RedisProtocol;
 
 using MyArenaAllocator	= MyAllocator::ArenaAllocator;
 
+#if 1
+	#include "avllist.h"
+
+	template<class Allocator>
+	using MyMemList = hm4::AVLList<Allocator>;
+#else
+	#include "skiplist.h"
+
+	template<class Allocator>
+	using MyMemList = hm4::SkipList<Allocator>;
+#endif
+
+constexpr auto memtableName  = MyMemList<MyArenaAllocator>::getMutableName();
+constexpr auto allocatorName = MyArenaAllocator::getName();
+
 // ----------------------------------
 
 constexpr size_t MIN_ARENA_SIZE = (hm4::Pair::maxBytes() / 1024 / 1024 + 1) * 4;
@@ -55,8 +70,6 @@ constexpr size_t MIN_ARENA_SIZE = (hm4::Pair::maxBytes() / 1024 / 1024 + 1) * 4;
 #include "signalguard.h"
 #include "mystring.h"
 #include "db_net_options.h"
-
-#include <iostream>
 
 namespace{
 
@@ -141,8 +154,6 @@ namespace{
 			auto allocator1 = createAllocator(opt);
 			auto allocator2 = createAllocator(opt);
 
-			auto allocatorName = allocator1.getName();
-
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
 				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
@@ -152,22 +163,20 @@ namespace{
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator);
 
-				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator>;
+				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
 								starting_server_with,
 									"mutable concurrent binlog",
-									MyFactory::MemList::getMutableName(),
-									allocatorName
+									memtableName, allocatorName
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::MutableConcurrent<MyArenaAllocator>;
+				using MyFactory = DBAdapterFactory::MutableConcurrent<MyArenaAllocator, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2 },
 								starting_server_with,
 									"mutable concurrent",
-									MyFactory::MemList::getMutableName(),
-									allocatorName
+									memtableName, allocatorName
 				);
 			}
 		}else{
@@ -183,7 +192,7 @@ namespace{
 
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 
-				using MyFactory = DBAdapterFactory::MutableBinLog<MyArenaAllocator>;
+				using MyFactory = DBAdapterFactory::MutableBinLog<MyArenaAllocator, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator },
 								starting_server_with,
@@ -192,7 +201,7 @@ namespace{
 									allocatorName
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::Mutable<MyArenaAllocator>;
+				using MyFactory = DBAdapterFactory::Mutable<MyArenaAllocator, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, allocator },
 								starting_server_with,
@@ -385,8 +394,10 @@ namespace{
 			"db_net version {version}\n"
 			"\n"
 			"Build:\n"
-			"\tSelector"	"\t{selector}\n"
-			"\tConvertion"	"\t{convert}\n"
+			"\tSelector   : {selector}\n"
+			"\tConvertion : {convert}\n"
+			"\tMemtable   : {memtable}\n"
+			"\tAllocator  : {allocator}\n"
 			"\n"
 			"Usage:\n"
 			"\t{cmd} [configuration file] - start server\n"
@@ -397,13 +408,17 @@ namespace{
 			"\t\tPath names must be written with quotes:\n"
 			"\t\t\tExample directory/file.'*'.db\n"
 			"\t\t\tThe '*', will be replaced with ID's\n"
-			"\t\tYou may overcommit memlist arena, if your system supports it.\n"
+			"\t\tYou may overcommit memlist arena, if following conditions are met:\n"
+			"\t\t\t- map_memlist_arena is switched off.\n"
+			"\t\t\t- your system supports overcommit.\n"
 			"\n"
 			,
 
 			fmt::arg("version",	hm4::version::str	),
 			fmt::arg("selector",	MySelector::NAME	),
 			fmt::arg("convert",	convert			),
+			fmt::arg("memtable",	memtableName		),
+			fmt::arg("allocator",	allocatorName		),
 			fmt::arg("cmd",		cmd			)
 		);
 

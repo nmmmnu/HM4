@@ -1,5 +1,4 @@
 #include "mutablebase.h"
-#include "memlist.h"
 #include "arenaallocator.h"
 
 #include "binlogger/diskfilebinlogger.h"
@@ -9,9 +8,9 @@
 
 namespace DBAdapterFactory{
 
-	template<class AllocatorX>
+	template<class TAllocator, template<class> class MyMemList>
 	struct MutableBinLogConcurrent{
-		using Allocator		= AllocatorX;
+		using Allocator		= TAllocator;
 
 		using MemList		= MyMemList<Allocator>;
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;

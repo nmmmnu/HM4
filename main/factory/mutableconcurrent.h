@@ -1,14 +1,13 @@
 #include "mutablebase.h"
-#include "memlist.h"
 #include "arenaallocator.h"
 
 #include "concurrentflushlist.h"
 
 namespace DBAdapterFactory{
 
-	template<class AllocatorX>
+	template<class TAllocator, template<class> class MyMemList>
 	struct MutableConcurrent{
-		using Allocator		= AllocatorX;
+		using Allocator		= TAllocator;
 
 		using MemList		= MyMemList<Allocator>;
 

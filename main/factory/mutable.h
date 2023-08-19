@@ -1,12 +1,11 @@
 #include "mutablebase.h"
-#include "memlist.h"
 #include "arenaallocator.h"
 
 namespace DBAdapterFactory{
 
-	template<class AllocatorX>
+	template<class TAllocator, template<class> class MyMemList>
 	struct Mutable{
-		using Allocator		= AllocatorX;
+		using Allocator		= TAllocator;
 
 		using MemList		= MyMemList<Allocator>;
 

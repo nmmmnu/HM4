@@ -6,11 +6,11 @@
 
 namespace DBAdapterFactory{
 
-	template<class AllocatorX>
+	template<class TAllocator>
 	struct BinLogReplay{
-		using Allocator		= AllocatorX;
+		using Allocator		= TAllocator;
 
-		using MemList		= hm4::UnsortedList<AllocatorX>;
+		using MemList		= hm4::UnsortedList<TAllocator>;
 		using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 		using IDGenerator	= idgenerator::IDGeneratorDate;
 		using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
