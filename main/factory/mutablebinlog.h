@@ -6,11 +6,9 @@
 
 namespace DBAdapterFactory{
 
-	template<class TAllocator, template<class> class MyMemList>
+	template<class MyMemList>
 	struct MutableBinLog{
-		using Allocator		= TAllocator;
-
-		using MemList		= MyMemList<Allocator>;
+		using MemList		= MyMemList;
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ true>;
 
@@ -19,7 +17,7 @@ namespace DBAdapterFactory{
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData, typename UStringPathBinLog>
-		MutableBinLog(UStringPathData &&path_data, UStringPathBinLog &&path_binlog, BinLogger::SyncOptions const syncOprions, Allocator &allocator) :
+		MutableBinLog(UStringPathData &&path_data, UStringPathBinLog &&path_binlog, BinLogger::SyncOptions const syncOprions, typename MemList::Allocator &allocator) :
 					memList_{ allocator },
 					binLogList_{
 						memList_,

@@ -5,18 +5,16 @@
 
 namespace DBAdapterFactory{
 
-	template<class TAllocator, template<class> class MyMemList>
+	template<class MyMemList>
 	struct MutableConcurrent{
-		using Allocator		= TAllocator;
-
-		using MemList		= MyMemList<Allocator>;
+		using MemList		= MyMemList;
 
 		using MutableBase_	= MutableBase<MemList, hm4::ConcurrentFlushList>;
 
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
-		MutableConcurrent(UStringPathData &&path_data, Allocator &allocator1, Allocator &allocator2) :
+		MutableConcurrent(UStringPathData &&path_data, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2) :
 					memList1_{ allocator1 },
 					memList2_{ allocator2 },
 					base_{

@@ -3,18 +3,16 @@
 
 namespace DBAdapterFactory{
 
-	template<class TAllocator, template<class> class MyMemList>
+	template<class MyMemList>
 	struct Mutable{
-		using Allocator		= TAllocator;
-
-		using MemList		= MyMemList<Allocator>;
+		using MemList		= MyMemList;
 
 		using MutableBase_	= MutableBase<MemList, hm4::FlushList>;
 
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
-		Mutable(UStringPathData &&path_data, Allocator &allocator) :
+		Mutable(UStringPathData &&path_data, typename MemList::Allocator &allocator) :
 					memList_{ allocator },
 					base_{
 						std::forward<UStringPathData>(path_data),

@@ -13,21 +13,22 @@ using MyReader = FileReader;
 #include "arenaallocator.h"
 
 // Yay, non virtual :)
-using MyArenaAllocator = MyAllocator::ArenaAllocator;
+using Allocator = MyAllocator::ArenaAllocator;
 
 constexpr size_t MIN_ARENA_SIZE = 128;
 
 
 
-struct MyListFactory{
-	using MemList		= hm4::UnsortedList<MyArenaAllocator>;
+template<class Allocator>
+struct ListFactory{
+	using MemList		= hm4::UnsortedList<Allocator>;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
 	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	MyListFactory(UString &&path, MyArenaAllocator &allocator) :
+	ListFactory(UString &&path, typename MemList::Allocator &allocator) :
 				memlist{ allocator },
 				mylist{
 					memlist,
@@ -56,7 +57,9 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	MyArenaAllocator allocator{ max_memlist_arena * MB };
+	Allocator allocator{ max_memlist_arena * MB };
+
+	using MyListFactory = ListFactory<Allocator>;
 
 	return process<FileReader>(
 			MyListFactory{ path, allocator },

@@ -25,7 +25,7 @@ struct MyListFactory{
 	using MyList		= hm4::FlushList<MemList,Predicate, Flush>;
 
 	template<typename UString>
-	MyListFactory(UString &&path, MyArenaAllocator &allocator) :
+	MyListFactory(UString &&path, MemList::Allocator &allocator) :
 				memlist{ allocator },
 				mylist{
 					memlist,

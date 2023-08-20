@@ -44,22 +44,20 @@ constexpr bool USE_CONCURRENCY = true;
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
-using MyArenaAllocator	= MyAllocator::ArenaAllocator;
+using Allocator		= MyAllocator::ArenaAllocator;
 
 #if 1
 	#include "avllist.h"
 
-	template<class Allocator>
 	using MyMemList = hm4::AVLList<Allocator>;
 #else
 	#include "skiplist.h"
 
-	template<class Allocator>
 	using MyMemList = hm4::SkipList<Allocator>;
 #endif
 
-constexpr auto memtableName  = MyMemList<MyArenaAllocator>::getMutableName();
-constexpr auto allocatorName = MyArenaAllocator::getName();
+constexpr auto memtableName  = MyMemList::getMutableName();
+constexpr auto allocatorName = Allocator::getName();
 
 // ----------------------------------
 
@@ -110,18 +108,15 @@ namespace{
 		}
 	}
 
-	MyArenaAllocator createAllocator(const MyOptions &opt){
+	Allocator createAllocator(const MyOptions &opt){
 		constexpr size_t MB = 1024 * 1024;
 
 		// uncomment for virtual Allocator
-		static_assert(MyArenaAllocator::knownMemoryUsage(), "Allocator must know its memory usage");
-
-		if (!MyArenaAllocator::knownMemoryUsage())
-			printError("Allocator must know its memory usage");
+		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
 		auto const max_memlist_arena = std::max(MIN_ARENA_SIZE, opt.max_memlist_arena);
 
-		MyArenaAllocator allocator{ max_memlist_arena * MB };
+		Allocator allocator{ max_memlist_arena * MB };
 
 		logger_fmt<Logger::NOTICE>("{} creating with size of {} MB", allocator.getName(), max_memlist_arena);
 
@@ -133,9 +128,9 @@ namespace{
 		return allocator;
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, MyArenaAllocator &allocator);
+	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator);
 
-	void checkBinLogFile(std::string_view file, std::string_view path, MyArenaAllocator &allocator){
+	void checkBinLogFile(std::string_view file, std::string_view path, Allocator &allocator){
 		if (file.empty())
 			return;
 
@@ -163,7 +158,7 @@ namespace{
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator);
 
-				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<MyArenaAllocator, MyMemList>;
+				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
 								starting_server_with,
@@ -171,7 +166,7 @@ namespace{
 									memtableName, allocatorName
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::MutableConcurrent<MyArenaAllocator, MyMemList>;
+				using MyFactory = DBAdapterFactory::MutableConcurrent<MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2 },
 								starting_server_with,
@@ -184,15 +179,13 @@ namespace{
 
 			auto allocator = createAllocator(opt);
 
-			auto allocatorName = allocator.getName();
-
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
 				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
 
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 
-				using MyFactory = DBAdapterFactory::MutableBinLog<MyArenaAllocator, MyMemList>;
+				using MyFactory = DBAdapterFactory::MutableBinLog<MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator },
 								starting_server_with,
@@ -201,7 +194,7 @@ namespace{
 									allocatorName
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::Mutable<MyArenaAllocator, MyMemList>;
+				using MyFactory = DBAdapterFactory::Mutable<MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, allocator },
 								starting_server_with,
@@ -433,7 +426,7 @@ namespace{
 
 
 
-	void replayBinlogFile_(std::string_view file, std::string_view path, MyArenaAllocator &allocator){
+	void replayBinlogFile_(std::string_view file, std::string_view path, Allocator &allocator){
 		logger<Logger::WARNING>() << "Binlog file exists. Trying to replay...";
 
 		using hm4::disk::DiskList;
@@ -464,7 +457,7 @@ namespace{
 		logger<Logger::NOTICE>() << "Replay done.";
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, MyArenaAllocator &allocator){
+	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator){
 		replayBinlogFile_(file, path, allocator);
 		allocator.reset();
 	}

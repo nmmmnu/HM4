@@ -1,15 +1,5 @@
 #include "db_builder_base.cc"
 
-#if 1
-	#include "avllist.h"
-	template<class Allocator>
-	using MyMemList = hm4::AVLList<Allocator>;
-#else
-	#include "skiplist.h"
-	template<class Allocator>
-	using MyMemList = hm4::SkipList<Allocator>;
-#endif
-
 #include "idgenerator.h"
 #include "flusher/diskfilepredicate.h"
 #include "flusher/diskfileflush.h"
@@ -22,21 +12,30 @@ using MyReader = FileReader;
 #include "arenaallocator.h"
 
 // Yay, non virtual :)
-using MyArenaAllocator = MyAllocator::ArenaAllocator;
+using Allocator = MyAllocator::ArenaAllocator;
+
+#if 1
+	#include "avllist.h"
+	using MyMemList = hm4::AVLList<Allocator>;
+#else
+	#include "skiplist.h"
+	using MyMemList = hm4::SkipList<Allocator>;
+#endif
 
 constexpr size_t MIN_ARENA_SIZE = 128;
 
 
 
-struct MyListFactory{
-	using MemList		= MyMemList<MyArenaAllocator>;
+template<class MyMemList>
+struct ListFactory{
+	using MemList		= MyMemList;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
 	using MyList		= hm4::ConcurrentFlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	MyListFactory(UString &path, MyArenaAllocator &allocator1, MyArenaAllocator &allocator2) :
+	ListFactory(UString &path, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2) :
 				memlist1{ allocator1 },
 				memlist2{ allocator2 },
 				mylist{
@@ -69,8 +68,10 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	MyArenaAllocator allocator1{ max_memlist_arena * MB };
-	MyArenaAllocator allocator2{ max_memlist_arena * MB };
+	Allocator allocator1{ max_memlist_arena * MB };
+	Allocator allocator2{ max_memlist_arena * MB };
+
+	using MyListFactory = ListFactory<MyMemList>;
 
 	return process<FileReader>(
 			MyListFactory{ path, allocator1, allocator2 },
