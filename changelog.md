@@ -164,4 +164,5 @@ Changelog
 -	Fix bug with AVL root update
 -	Make AVL iterator bidirectional
 -	Show memlist type in INFO command
+-	Show built time in help screeens
 
