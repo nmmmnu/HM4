@@ -102,12 +102,17 @@ namespace{
 		fmt::print(
 			"db_compact version {version}\n"
 			"\n"
+			"Build:\n"
+			"\tDate       : {date} {time}\n"
+			"\n"
 			"Usage:\n"
 			"\t{cmd} [configuration file] - perform smart merge\n"
 			"\n"
 			,
 
 			fmt::arg("version",	hm4::version::str	),
+			fmt::arg("date",	__DATE__		),
+			fmt::arg("time",	__TIME__		),
 			fmt::arg("cmd",		cmd			)
 		);
 

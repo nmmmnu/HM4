@@ -103,22 +103,28 @@ int listLoad(List &list, Reader &reader, size_t const process_step, std::bool_co
 }
 
 int printUsage(std::string_view const cmd, std::string_view const reader_name){
-	fmt::print(	"db_builder version {0}\n"
+	fmt::print(	"db_builder version {version}\n"
 			"\n"
+			"Build:\n"
+			"\tDate   : {date} {time}\n"
+			"\n"
+			"\tReader : {reader_name}\n"
+			"\tBuffer : {buffer_size}\n"
 			"Usage:\n"
-			"\t{1} [file.txt] [lsm_path] [memlist arena in MB] [b = import as base64 blobs] - load file.txt, then create / add to lsm_path\n"
+			"\t{cmd} [file.txt] [lsm_path] [memlist arena in MB] [b = import as base64 blobs] - load file.txt, then create / add to lsm_path\n"
 			"\t\tPath names must be written with quotes:\n"
 			"\t\t\tExample directory/file.'*'.db\n"
 			"\t\t\tThe '*', will be replaced with ID's\n"
 			"\t\tDo not overcommit memlist arena!\n"
-			"\n"
-			"\tReader: {2}\n"
-			"\tBuffer: {3}\n"
 			"\n",
-			hm4::version::str,
-			cmd,
-			reader_name,
-			BUFFER_SIZE
+
+			fmt::arg("version",	hm4::version::str	),
+			fmt::arg("date",	__DATE__		),
+			fmt::arg("time",	__TIME__		),
+			fmt::arg("cmd",		cmd			),
+			fmt::arg("reader_name",	reader_name		),
+			fmt::arg("buffer_size",	BUFFER_SIZE		)
+
 	);
 
 	return 10;

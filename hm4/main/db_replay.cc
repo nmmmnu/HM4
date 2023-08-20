@@ -66,17 +66,22 @@ int listReplay(List &list, InputList const &inputList, size_t const process_step
 namespace{
 
 	int printUsage(const char *cmd){
-	       fmt::print(     "db_replay version {0}\n"
+	       fmt::print(     "db_replay version {version}\n"
 			       "\n"
-			       "Usage:\n"
-			       "\t{1} [file.data] [lsm_path] [memlist arena in MB] [n = import as non aligned] - load file.data, then create / add to lsm_path\n"
-			       "\t\tPath names must be written with quotes:\n"
-			       "\t\t\tExample directory/file.'*'.db\n"
-			       "\t\t\tThe '*', will be replaced with ID's\n"
+				"Build:\n"
+				"\tDate   : {date} {time}\n"
+				"\n"
+				"Usage:\n"
+				"\t{cmd} [file.data] [lsm_path] [memlist arena in MB] [n = import as non aligned] - load file.data, then create / add to lsm_path\n"
+				"\t\tPath names must be written with quotes:\n"
+				"\t\t\tExample directory/file.'*'.db\n"
+				"\t\t\tThe '*', will be replaced with ID's\n"
 				"\t\tDo not overcommit memlist arena!\n"
-			       "\n",
-			       hm4::version::str,
-			       cmd
+				"\n",
+				fmt::arg("version",	hm4::version::str	),
+				fmt::arg("date",	__DATE__		),
+				fmt::arg("time",	__TIME__		),
+				fmt::arg("cmd",		cmd			)
 	       );
 
 	       return 10;

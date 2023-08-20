@@ -12,20 +12,22 @@
 
 #include "version.h"
 
-#include <iostream>
+#define FMT_HEADER_ONLY
+#include "fmt/printf.h"
 
 namespace{
 
 	int printUsage(const char *cmd){
-		std::cout
-			<< "db_file version " << hm4::version::str 							<< '\n'
-			<< '\n'
-			<< "Usage:"	<< '\n'
-			<< "\t"		<< cmd	<< " r [file.db] [key] - load file.db, then search for the key"		<< '\n'
-			<< "\t"		<< cmd	<< " l [file.db] -     - load file.db, then list using iterator"	<< '\n'
-			<< "\t"		<< cmd	<< " l [file.db] [key] - load file.db, then list using iterator"	<< '\n'
-
-			<< '\n';
+		fmt::print(	"db_file version {0}\n"
+				"\n"
+				"Usage:\n"
+				"\t{1} r [file.db] [key] - load file.db, then search for the key\n"
+				"\t{1} l [file.db] -     - load file.db, then list using iterator\n"
+				"\t{1} l [file.db] [key] - load file.db, then list using iterator\n"
+				"\n",
+				hm4::version::str,
+				cmd
+		);
 
 		return 10;
 	}

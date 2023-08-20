@@ -10,15 +10,20 @@
 namespace{
 
 	int printUsage(const char *cmd){
-		fmt::print(	"db_merge version {0} \n"
+		fmt::print(	"db_merge version {version} \n"
+				"\n"
+				"Build:\n"
+				"\tDate   : {date} {time}\n"
 				"\n"
 				"Usage:\n"
-				"\t{1} - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones\n"
-				"\t{1} t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones\n"
+				"\t{cmd} - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones\n"
+				"\t{cmd} t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones\n"
 				"\t\tDo not forget you usually need two input files\n"
 				"\n",
-				hm4::version::str,
-				cmd
+				fmt::arg("version",	hm4::version::str	),
+				fmt::arg("date",	__DATE__		),
+				fmt::arg("time",	__TIME__		),
+				fmt::arg("cmd",		cmd			)
 		);
 
 		return 10;

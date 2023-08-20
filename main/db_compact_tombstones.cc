@@ -82,6 +82,10 @@ namespace{
 	void printUsage(const char *cmd){
 		fmt::print(
 			"db_compact_tombstones version {version}\n"
+			"\tTHIS FILE IS NOT PRODUCTION READY!!!\n"
+			"\n"
+			"Build:\n"
+			"\tDate       : {date} {time}\n"
 			"\n"
 			"Usage:\n"
 			"\t{cmd} [configuration file] - perform smart remove of tombstones\n"
@@ -89,6 +93,8 @@ namespace{
 			,
 
 			fmt::arg("version",	hm4::version::str	),
+			fmt::arg("date",	__DATE__		),
+			fmt::arg("time",	__TIME__		),
 			fmt::arg("cmd",		cmd			)
 		);
 

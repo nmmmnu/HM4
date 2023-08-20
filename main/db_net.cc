@@ -387,6 +387,7 @@ namespace{
 			"db_net version {version}\n"
 			"\n"
 			"Build:\n"
+			"\tDate       : {date} {time}\n"
 			"\tSelector   : {selector}\n"
 			"\tConvertion : {convert}\n"
 			"\tMemtable   : {memtable}\n"
@@ -401,13 +402,13 @@ namespace{
 			"\t\tPath names must be written with quotes:\n"
 			"\t\t\tExample directory/file.'*'.db\n"
 			"\t\t\tThe '*', will be replaced with ID's\n"
-			"\t\tYou may overcommit memlist arena, if following conditions are met:\n"
-			"\t\t\t- map_memlist_arena is switched off.\n"
-			"\t\t\t- your system supports overcommit.\n"
+			"\t\tDo not overcommit memlist arena!\n"
 			"\n"
 			,
 
 			fmt::arg("version",	hm4::version::str	),
+			fmt::arg("date",	__DATE__		),
+			fmt::arg("time",	__TIME__		),
 			fmt::arg("selector",	MySelector::NAME	),
 			fmt::arg("convert",	convert			),
 			fmt::arg("memtable",	memtableName		),
