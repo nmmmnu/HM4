@@ -166,3 +166,7 @@ Changelog
 -	Show memlist type in INFO command
 -	Show built time in help screeens
 
+### 1.3.5
+
+-	Release
+
