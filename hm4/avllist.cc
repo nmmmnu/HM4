@@ -477,15 +477,28 @@ void AVLList<T_Allocator>::deallocate_(Node *node){
 template<class T_Allocator>
 void AVLList<T_Allocator>::deallocateTree_(Node *node){
 	if (allocator_->reset() == false){
-		// seems there is no viable alternative,
-		// but recursion
 
-		if (!node)
-			return;
+		// Morris traversal
+		// https://stackoverflow.com/questions/69777742/how-can-i-delete-a-binary-tree-with-o1-additional-memory
 
-		deallocateTree_(node->l);
-		deallocateTree_(node->r);
-		deallocate_(node);
+		Node *tail = node;
+
+		while (node){
+			// update tail
+			while (tail->l)
+				tail = tail->l;
+
+			// move right to the end of the "list"
+			// needs to happen before retrieving next,
+			// since the node may only have a right subtree
+			tail->l = node->r;
+
+			Node *temp = node->l;
+
+			deallocate_(node);
+
+			node = temp;
+		}
 	}
 }
 

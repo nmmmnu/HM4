@@ -170,3 +170,8 @@ Changelog
 
 -	Release
 
+### 1.3.5.1
+
+-	If Allocator needs deallocation, AVLList deallocate memory in non-recursive way.
+	This does not affect ArenaAllocator.
+
