@@ -118,6 +118,11 @@ private:
 
 	void rebalanceAfterInsert_(Node *node);
 	void rebalanceAfterErase_(Node *node);
+
+private:
+	void swapLinks_(Node *a, Node *b);
+	void copyLinks_(Node *a, const Node *b);
+	void fixParent_(Node *node, const Node *original);
 };
 
 

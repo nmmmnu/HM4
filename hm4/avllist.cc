@@ -112,51 +112,6 @@ namespace avl_impl_{
 
 		return parent;
 	}
-
-	// fix parents, easy because we have parent link
-	template<class Node>
-	void fixParent_(Node *node, const Node *original){
-		assert(node);
-		assert(original);
-
-		if (auto *parent = node->p; parent){
-			if (parent->l == original)
-				parent->l = node;
-			else
-				parent->r = node;
-		}
-	};
-
-	template<class Node>
-	void swapLinks(Node *a, Node *b){
-		assert(a);
-		assert(b);
-
-		using std::swap;
-
-		swap(a->balance	, b->balance	);
-		swap(a->l	, b->l		);
-		swap(a->r	, b->r		);
-		swap(a->p	, b->p		);
-
-		fixParent_(a, b);
-		fixParent_(b, a);
-	}
-
-	template<class Node>
-	void copyLinks(Node *a, const Node *b){
-		assert(a);
-		assert(b);
-
-		using std::swap;
-
-		a->balance	= b->balance	;
-		a->l		= b->l		;
-		a->r		= b->r		;
-		a->p		= b->p		;
-
-		fixParent_(a, b);
-	}
 }
 
 template<class T_Allocator>
@@ -210,7 +165,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		// CASE 3 - node two children
 		auto *successor = avl_impl_::getMinValueNode(node->r);
 
-		avl_impl_::swapLinks(node, successor);
+		swapLinks_(node, successor);
 
 		// Silently proceed to CASE 2
 		node = successor;
@@ -404,7 +359,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			if (!newnode)
 				return this->end();
 
-			avl_impl_::copyLinks(newnode, node);
+			copyLinks_(newnode, node);
 
 			lc_.dec( olddata->bytes() );
 
@@ -525,12 +480,15 @@ void AVLList<T_Allocator>::rotateL_(Node *n){
 
 	r->p = n->p;
 
-	if (!n->p)
-		this->root_ = r;
-	else if (n->p->l == n)
-		n->p->l = r;
-	else
-		n->p->r = r;
+	if constexpr(0){
+		if (!n->p)
+			this->root_ = r;
+		else if (n->p->l == n)
+			n->p->l = r;
+		else
+			n->p->r = r;
+	}else
+		fixParent_(r, n);
 
 	r->l = n;
 	n->p = r;
@@ -555,12 +513,15 @@ void AVLList<T_Allocator>::rotateR_(Node *n){
 
 	l->p = n->p;
 
-	if (!n->p)
-		this->root_ = l;
-	else if (n->p->r == n)
-		n->p->r = l;
-	else
-		n->p->l = l;
+	if constexpr(0){
+		if (!n->p)
+			this->root_ = l;
+		else if (n->p->r == n)
+			n->p->r = l;
+		else
+			n->p->l = l;
+	}else
+		fixParent_(l, n);
 
 	l->r = n;
 	n->p = l;
@@ -577,6 +538,56 @@ void AVLList<T_Allocator>::rotateLR_(Node *node){
 	rotateL_(node->l);
 	rotateR_(node);
 }
+
+template<class T_Allocator>
+void AVLList<T_Allocator>::swapLinks_(Node *a, Node *b){
+	assert(a);
+	assert(b);
+
+	using std::swap;
+
+	swap(a->balance	, b->balance	);
+	swap(a->l	, b->l		);
+	swap(a->r	, b->r		);
+	swap(a->p	, b->p		);
+
+	fixParent_(a, b);
+	fixParent_(b, a);
+}
+
+template<class T_Allocator>
+void AVLList<T_Allocator>::copyLinks_(Node *a, const Node *b){
+	assert(a);
+	assert(b);
+
+	using std::swap;
+
+	a->balance	= b->balance	;
+	a->l		= b->l		;
+	a->r		= b->r		;
+	a->p		= b->p		;
+
+	fixParent_(a, b);
+}
+
+template<class T_Allocator>
+void AVLList<T_Allocator>::fixParent_(Node *node, const Node *original){
+	assert(node);
+	assert(original);
+
+	auto *parent = node->p;
+
+	if (!parent){
+		// update root_
+
+		root_ = node;
+	}else{
+		if (parent->l == original)
+			parent->l = node;
+		else
+			parent->r = node;
+	}
+};
 
 template<class T_Allocator>
 void AVLList<T_Allocator>::rebalanceAfterInsert_(Node *node){
