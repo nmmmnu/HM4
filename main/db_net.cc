@@ -56,9 +56,6 @@ using Allocator		= MyAllocator::ArenaAllocator;
 	using MyMemList = hm4::SkipList<Allocator>;
 #endif
 
-constexpr auto memtableName  = MyMemList::getMutableName();
-constexpr auto allocatorName = Allocator::getName();
-
 // ----------------------------------
 
 constexpr size_t MIN_ARENA_SIZE = (hm4::Pair::maxBytes() / 1024 / 1024 + 1) * 4;
@@ -163,7 +160,8 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
 								starting_server_with,
 									"mutable concurrent binlog",
-									memtableName, allocatorName
+									MyMemList::getName(),
+									Allocator::getName()
 				);
 			}else{
 				using MyFactory = DBAdapterFactory::MutableConcurrent<MyMemList>;
@@ -171,7 +169,8 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2 },
 								starting_server_with,
 									"mutable concurrent",
-									memtableName, allocatorName
+									MyMemList::getName(),
+									Allocator::getName()
 				);
 			}
 		}else{
@@ -190,8 +189,8 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator },
 								starting_server_with,
 									"mutable binlog",
-									MyFactory::MemList::getMutableName(),
-									allocatorName
+									MyMemList::getName(),
+									Allocator::getName()
 				);
 			}else{
 				using MyFactory = DBAdapterFactory::Mutable<MyMemList>;
@@ -199,8 +198,8 @@ namespace{
 				return fLists(opt, MyFactory{	opt.db_path, allocator },
 								starting_server_with,
 									"mutable",
-									MyFactory::MemList::getMutableName(),
-									allocatorName
+									MyMemList::getName(),
+									Allocator::getName()
 				);
 			}
 		}
@@ -390,7 +389,7 @@ namespace{
 			"\tDate       : {date} {time}\n"
 			"\tSelector   : {selector}\n"
 			"\tConvertion : {convert}\n"
-			"\tMemtable   : {memtable}\n"
+			"\tMemlist    : {memlist}\n"
 			"\tAllocator  : {allocator}\n"
 			"\n"
 			"Usage:\n"
@@ -411,8 +410,8 @@ namespace{
 			fmt::arg("time",	__TIME__		),
 			fmt::arg("selector",	MySelector::NAME	),
 			fmt::arg("convert",	convert			),
-			fmt::arg("memtable",	memtableName		),
-			fmt::arg("allocator",	allocatorName		),
+			fmt::arg("memlist",	MyMemList::getName()	),
+			fmt::arg("allocator",	Allocator::getName()	),
 			fmt::arg("cmd",		cmd			)
 		);
 

@@ -22,11 +22,6 @@ public:
 	SingleListBase(List &list) : list_(& list){}
 
 public:
-	constexpr static std::string_view getMutableName(){
-		return List::getMutableName();
-	}
-
-public:
 	// Immutable Methods
 
 	size_type size() const{
@@ -34,7 +29,7 @@ public:
 	}
 
 	auto const &mutable_list() const{
-		return *list_;
+		return list_->mutable_list();
 	}
 
 	size_t bytes() const{

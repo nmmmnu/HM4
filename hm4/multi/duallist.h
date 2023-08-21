@@ -42,7 +42,7 @@ public:
 	}
 
 	auto const &mutable_list() const{
-		return *list1_;
+		return list1_->mutable_list();
 	}
 
 	constexpr void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
@@ -106,10 +106,6 @@ public:
 
 	auto &getAllocator(){
 		return list1_->getAllocator();
-	}
-
-	constexpr static std::string_view getMutableName(){
-		return List1::getMutableName();
 	}
 
 	using Base_::DualListBase;

@@ -38,7 +38,7 @@ private:
 	Allocator	*allocator_;
 
 public:
-	constexpr static std::string_view getMutableName(){
+	constexpr static std::string_view getName(){
 		return "VectorList";
 	}
 
