@@ -41,8 +41,8 @@ public:
 		return list1_->size() + list2_->size();
 	}
 
-	auto mutable_size() const{
-		return list1_->mutable_size();
+	auto const &mutable_list() const{
+		return *list1_;
 	}
 
 	constexpr void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
@@ -51,10 +51,6 @@ public:
 
 	size_t bytes() const{
 		return list1_->bytes() + list2_->bytes();
-	}
-
-	auto mutable_bytes() const{
-		return list1_->mutable_bytes();
 	}
 
 	constexpr void crontab(){

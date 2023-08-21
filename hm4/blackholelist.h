@@ -49,9 +49,8 @@ public:
 		return 0;
 	}
 
-	constexpr static
-	size_type mutable_size(){
-		return 0;
+	auto const &mutable_list() const{
+		return *this;
 	}
 
 	constexpr static void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &){
@@ -59,11 +58,6 @@ public:
 
 	constexpr static
 	size_t bytes(){
-		return 0;
-	}
-
-	constexpr static
-	size_t mutable_bytes(){
 		return 0;
 	}
 

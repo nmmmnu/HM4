@@ -96,8 +96,8 @@ public:
 				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
-				"MemList Keys     : ", to_string(list_.mutable_size()			,	buffer[i++]),	"\n",
-				"MemList Size     : ", to_string(list_.mutable_bytes()			,	buffer[i++]),	"\n",
+				"MemList Keys     : ", to_string(list_.mutable_list().size()		,	buffer[i++]),	"\n",
+				"MemList Size     : ", to_string(list_.mutable_list().bytes()		,	buffer[i++]),	"\n",
 
 			"\n"	"# MemList"											"\n",
 				"MemList          : ", list_.getMutableName()				,			"\n",

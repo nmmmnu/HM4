@@ -102,16 +102,8 @@ public:
 		return metadata_.size();
 	}
 
-	constexpr static size_type mutable_size(){
-		return 0;
-	}
-
 	size_t bytes() const{
 		return mData_.size();
-	}
-
-	constexpr static size_t mutable_bytes(){
-		return 0;
 	}
 
 	bool aligned() const{

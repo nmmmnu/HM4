@@ -60,8 +60,8 @@ public:
 		return lc_.size();
 	}
 
-	auto mutable_size() const{
-		return size();
+	auto const &mutable_list() const{
+		return *this;
 	}
 
 	void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &msg){
@@ -70,10 +70,6 @@ public:
 
 	auto bytes() const{
 		return lc_.bytes();
-	}
-
-	auto mutable_bytes() const{
-		return bytes();
 	}
 
 	constexpr static void crontab(){

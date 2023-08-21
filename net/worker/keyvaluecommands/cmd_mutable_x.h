@@ -87,11 +87,11 @@ namespace net::worker::commands::MutableX{
 				std::string_view string_key = scanKeysAndProcessInPlace_(p, list, prefix, key, container);
 
 				for(auto const &x : container){
-					auto const s1 = list.mutable_size();
+					auto const s1 = list.mutable_list().size();
 
 					p.process(list, x);
 
-					auto const s2 = list.mutable_size();
+					auto const s2 = list.mutable_list().size();
 
 					if (s2 < s1){
 						// something hapenned.

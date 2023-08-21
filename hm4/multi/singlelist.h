@@ -33,16 +33,12 @@ public:
 		return list_->size();
 	}
 
-	auto mutable_size() const{
-		return list_->mutable_size();
+	auto const &mutable_list() const{
+		return *list_;
 	}
 
 	size_t bytes() const{
 		return list_->bytes();
-	}
-
-	size_t mutable_bytes() const{
-		return list_->mutable_bytes();
 	}
 
 public:
