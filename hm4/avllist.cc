@@ -175,6 +175,8 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		// CASE 2: node with only one child
 		child->p = node->p;
 
+		// do not use fixParent_(), because it does more work.
+
 		if (!node->p){
 			lc_.dec(node->data.bytes());
 			deallocate_(node);
@@ -464,31 +466,23 @@ void AVLList<T_Allocator>::deallocateTree_(Node *node){
 template<class T_Allocator>
 void AVLList<T_Allocator>::rotateL_(Node *n){
 	/*
-	 *     n             r
-	 *      \           /
-	 *       r   ==>   n
-	 *      /           \
-	 *     t             t
+	 *   n             r
+	 *    \           /
+	 *     r   ==>   n
+	 *    /           \
+	 *   t*            t*
 	 */
 
 	auto *r = n->r;
 	auto *t = r->l;
-	n->r = t;
 
+	n->r = t;
 	if (t)
 		t->p = n;
 
 	r->p = n->p;
 
-	if constexpr(0){
-		if (!n->p)
-			this->root_ = r;
-		else if (n->p->l == n)
-			n->p->l = r;
-		else
-			n->p->r = r;
-	}else
-		fixParent_(r, n);
+	fixParent_(r, n);
 
 	r->l = n;
 	n->p = r;
@@ -497,31 +491,23 @@ void AVLList<T_Allocator>::rotateL_(Node *n){
 template<class T_Allocator>
 void AVLList<T_Allocator>::rotateR_(Node *n){
 	/*
-	 *     n             l
-	 *    /               \
-	 *   l       ==>       n
-	 *    \               /
-	 *     t             t
+	 *     n         l
+	 *    /           \
+	 *   l     ==>     n
+	 *    \           /
+	 *     t*        t*
 	 */
 
 	auto *l = n->l;
 	auto *t = l->r;
-	n->l = t;
 
+	n->l = t;
 	if (t)
 		t->p = n;
 
 	l->p = n->p;
 
-	if constexpr(0){
-		if (!n->p)
-			this->root_ = l;
-		else if (n->p->r == n)
-			n->p->r = l;
-		else
-			n->p->l = l;
-	}else
-		fixParent_(l, n);
+	fixParent_(l, n);
 
 	l->r = n;
 	n->p = l;
@@ -529,12 +515,36 @@ void AVLList<T_Allocator>::rotateR_(Node *n){
 
 template<class T_Allocator>
 void AVLList<T_Allocator>::rotateRL_(Node *node){
+	/*
+	 *     A           A             a                 c
+	 *      \           \             \              /   \
+	 *       b   Rb      c             c     La     /     \
+	 *      /    ==>    / \    ==>    / \    ==>   a       B
+	 *     c           E*  b         e*  B          \     /
+	 *    / \             /             /            e*  D*
+	 *   E*  d*          d*            D*
+	 */
+
+	// no performance benefit if manually inlined
+
 	rotateR_(node->r);
 	rotateL_(node);
 }
 
 template<class T_Allocator>
 void AVLList<T_Allocator>::rotateLR_(Node *node){
+	/*
+	 *     A               A             a             c
+	 *    /               /             /            /   \
+	 *   b       Lb      c             c     Ra     /     \
+	 *    \      ==>    / \    ==>    / \    ==>   B       a
+	 *     c           b   E*        B   e*         \     /
+	 *    / \           \             \              D*  e*
+	 *   d*  E*          d*            D*
+	 */
+
+	// no performance benefit if manually inlined
+
 	rotateL_(node->l);
 	rotateR_(node);
 }
@@ -556,18 +566,26 @@ void AVLList<T_Allocator>::swapLinks_(Node *a, Node *b){
 }
 
 template<class T_Allocator>
-void AVLList<T_Allocator>::copyLinks_(Node *a, const Node *b){
+void AVLList<T_Allocator>::copyLinks_(Node *a, Node *b){
 	assert(a);
 	assert(b);
 
-	using std::swap;
+	// std::move shows intention
 
-	a->balance	= b->balance	;
-	a->l		= b->l		;
-	a->r		= b->r		;
-	a->p		= b->p		;
+	a->balance	= std::move(b->balance	);
+	a->l		= std::move(b->l	);
+	a->r		= std::move(b->r	);
+	a->p		= std::move(b->p	);
 
 	fixParent_(a, b);
+
+	// clear other, because if ArenaAllocator is used,
+	// pointers may still be valid
+	if constexpr(1){
+		b->l		= nullptr;
+		b->r		= nullptr;
+		b->p		= nullptr;
+	}
 }
 
 template<class T_Allocator>
