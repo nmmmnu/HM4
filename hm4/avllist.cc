@@ -175,7 +175,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		// CASE 2: node with only one child
 		child->p = node->p;
 
-		// do not use fixParent_(), because it does more work.
+		// do not use fixParentAndChildren_(), because it does more work.
 
 		if (!node->p){
 			lc_.dec(node->data.bytes());
@@ -480,12 +480,10 @@ void AVLList<T_Allocator>::rotateL_(Node *n){
 	if (t)
 		t->p = n;
 
+	r->l = n;
 	r->p = n->p;
 
-	fixParent_(r, n);
-
-	r->l = n;
-	n->p = r;
+	fixParentAndChildren_<1,0>(r, n);
 }
 
 template<class T_Allocator>
@@ -505,12 +503,10 @@ void AVLList<T_Allocator>::rotateR_(Node *n){
 	if (t)
 		t->p = n;
 
+	l->r = n;
 	l->p = n->p;
 
-	fixParent_(l, n);
-
-	l->r = n;
-	n->p = l;
+	fixParentAndChildren_<0,1>(l, n);
 }
 
 template<class T_Allocator>
@@ -561,8 +557,8 @@ void AVLList<T_Allocator>::swapLinks_(Node *a, Node *b){
 	swap(a->r	, b->r		);
 	swap(a->p	, b->p		);
 
-	fixParent_(a, b);
-	fixParent_(b, a);
+	fixParentAndChildren_<1,1>(a, b);
+	fixParentAndChildren_<1,1>(b, a);
 }
 
 template<class T_Allocator>
@@ -577,7 +573,7 @@ void AVLList<T_Allocator>::copyLinks_(Node *a, Node *b){
 	a->r		= std::move(b->r	);
 	a->p		= std::move(b->p	);
 
-	fixParent_(a, b);
+	fixParentAndChildren_<1,1>(a, b);
 
 	// clear other, because if ArenaAllocator is used,
 	// pointers may still be valid
@@ -589,13 +585,12 @@ void AVLList<T_Allocator>::copyLinks_(Node *a, Node *b){
 }
 
 template<class T_Allocator>
-void AVLList<T_Allocator>::fixParent_(Node *node, const Node *original){
+template<bool FixL, bool FixR>
+void AVLList<T_Allocator>::fixParentAndChildren_(Node *node, const Node *original){
 	assert(node);
 	assert(original);
 
-	auto *parent = node->p;
-
-	if (!parent){
+	if (auto *parent = node->p; !parent){
 		// update root_
 
 		root_ = node;
@@ -604,6 +599,16 @@ void AVLList<T_Allocator>::fixParent_(Node *node, const Node *original){
 			parent->l = node;
 		else
 			parent->r = node;
+	}
+
+	if constexpr(FixL){
+		if (auto *child = node->l; child)
+			child->p = node;
+	}
+
+	if constexpr(FixR){
+		if (auto *child = node->r; child)
+			child->p = node;
 	}
 };
 

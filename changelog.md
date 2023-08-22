@@ -175,4 +175,5 @@ Changelog
 -	If Allocator needs deallocation, AVLList deallocate memory in non-recursive way.
 	This does not affect ArenaAllocator.
 -	Fix bug with change AVLList::root_ in swapLinks / copyLinks
+-	Fix bug with (not) updating the child parent in AVLList::fixParentAndChildren_
 

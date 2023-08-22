@@ -122,7 +122,9 @@ private:
 private:
 	void swapLinks_(Node *a, Node *b);
 	void copyLinks_(Node *a, Node *b);
-	void fixParent_(Node *node, const Node *original);
+
+	template<bool FixL, bool FixR>
+	void fixParentAndChildren_(Node *node, const Node *original);
 };
 
 
