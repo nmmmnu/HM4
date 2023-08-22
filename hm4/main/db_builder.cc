@@ -47,8 +47,10 @@ private:
 
 
 int main(int argc, char **argv){
+	using MyListFactory = ListFactory<Allocator>;
+
 	if (argc <= 3)
-		return printUsage<FileReader>(argv[0]);
+		return printUsage<FileReader, MyListFactory::MemList, Allocator>(argv[0]);
 
 	const char *filename	= argv[1];
 	const char *path	= argv[2];
@@ -58,8 +60,6 @@ int main(int argc, char **argv){
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
 	Allocator allocator{ max_memlist_arena * MB };
-
-	using MyListFactory = ListFactory<Allocator>;
 
 	return process<FileReader>(
 			MyListFactory{ path, allocator },

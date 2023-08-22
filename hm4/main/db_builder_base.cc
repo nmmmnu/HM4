@@ -102,14 +102,17 @@ int listLoad(List &list, Reader &reader, size_t const process_step, std::bool_co
 	return 0;
 }
 
-int printUsage(std::string_view const cmd, std::string_view const reader_name){
+template<class MyReader, class MemList, class Allocator>
+int printUsage(std::string_view const cmd){
 	fmt::print(	"db_builder version {version}\n"
 			"\n"
 			"Build:\n"
-			"\tDate   : {date} {time}\n"
+			"\tDate      : {date} {time}\n"
+			"\tReader    : {reader_name}\n"
+			"\tBuffer    : {buffer_size}\n"
+			"\tMemlist   : {memlist}\n"
+			"\tAllocator : {allocator}\n"
 			"\n"
-			"\tReader : {reader_name}\n"
-			"\tBuffer : {buffer_size}\n"
 			"Usage:\n"
 			"\t{cmd} [file.txt] [lsm_path] [memlist arena in MB] [b = import as base64 blobs] - load file.txt, then create / add to lsm_path\n"
 			"\t\tPath names must be written with quotes:\n"
@@ -122,17 +125,13 @@ int printUsage(std::string_view const cmd, std::string_view const reader_name){
 			fmt::arg("date",	__DATE__		),
 			fmt::arg("time",	__TIME__		),
 			fmt::arg("cmd",		cmd			),
-			fmt::arg("reader_name",	reader_name		),
-			fmt::arg("buffer_size",	BUFFER_SIZE		)
-
+			fmt::arg("reader_name",	MyReader::name()	),
+			fmt::arg("buffer_size",	BUFFER_SIZE		),
+			fmt::arg("memlist",	MemList::getName()	),
+			fmt::arg("allocator",	Allocator::getName()	)
 	);
 
 	return 10;
-}
-
-template<class MyReader>
-int printUsage(std::string_view const cmd){
-	return printUsage(cmd, MyReader::name());
 }
 
 template<class MyReader, class List, bool Base64, bool InsertIgnore>
