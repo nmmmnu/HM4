@@ -1,15 +1,20 @@
 #ifndef DISK_FILE_PREDICATE_H_
 #define DISK_FILE_PREDICATE_H_
 
-namespace hm4{
-namespace flusher{
+namespace hm4::flusher{
 
 
 
 struct DiskFileAllocatorPredicate{
 	template<class List>
+	[[deprecated]]
 	bool operator()(List const &list) const{
 		return list.getAllocator().getFreeMemory() < minBytes;
+	}
+
+	template<class List>
+	bool operator()(List const &list, size_t const bytes) const{
+		return list.getAllocator().getFreeMemory() < bytes;
 	}
 
 private:
@@ -17,25 +22,8 @@ private:
 };
 
 
-#if 0
-struct DiskFilePredicate : DiskFileAllocatorPredicate{
-	DiskFilePredicate(size_t const maxSize) : maxSize_(maxSize){}
 
-	template<class List>
-	bool operator()(List const &list) const{
-		return	DiskFileAllocatorPredicate::operator()(list)	||
-			list.bytes() > maxSize_
-		;
-	}
-
-private:
-	size_t maxSize_;
-};
-#endif
-
-
-} // namespace flusher
-} // namespace
+} // hm4::flusher
 
 #endif
 

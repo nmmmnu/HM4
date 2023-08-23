@@ -178,5 +178,11 @@ Changelog
 -	Fix bug with (not) updating the child parent in AVLList::fixParentAndChildren_
 -	Show memory list type in help screeens
 -	new command TEST
+-	Release
 
+### 1.3.5.2
+
+-	Refactor DiskFileAllocatorPredicate to check and flush before insert.
+	This fixing logical error with iterators,
+	also make use of all available memory in the ArenaAllocator.
 

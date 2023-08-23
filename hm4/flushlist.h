@@ -49,12 +49,13 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		auto it = list_->insertF(factory);
-
-		if (predicate_(*list_))
+		if (predicate_(*list_, factory.bytes()))
 			flush();
 
-		return it;
+		// this is also more correct,
+		// because in the old case,
+		// the iterator is invalid.
+		return list_->insertF(factory);
 	}
 
 private:

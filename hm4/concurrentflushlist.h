@@ -78,14 +78,17 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		auto it = this->fixDualIterator_(
-			list1_->insertF(factory)
-		);
-
-		if (predicate_(*list1_))
+		if (predicate_(*list1_, factory.bytes()))
 			flush();
 
-		return it;
+		// this is also more correct,
+		// because in the old case,
+		// the iterator is invalid.
+
+		// this-> helps the template instantiation
+		return this->fixDualIterator_(
+			list1_->insertF(factory)
+		);
 	}
 
 private:
