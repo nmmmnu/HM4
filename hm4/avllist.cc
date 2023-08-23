@@ -165,6 +165,8 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		// CASE 3 - node two children
 		auto *successor = avl_impl_::getMinValueNode(node->r);
 
+		// I know successor left child is nullptr
+		// but erase is slow and not really used anyway
 		swapLinks_(node, successor);
 
 		// Silently proceed to CASE 2

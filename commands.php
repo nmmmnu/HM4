@@ -207,6 +207,7 @@ function getData(){
 		"reload"			=> require "$d/commands_reload.php"		,
 		"compat"			=> require "$d/commands_compat.php"		,
 		"system" 			=> require "$d/commands_system.php"		,
+		"test" 				=> require "$d/commands_test.php"		,
 	);
 }
 

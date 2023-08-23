@@ -177,5 +177,6 @@ Changelog
 -	Fix bug with change AVLList::root_ in swapLinks / copyLinks
 -	Fix bug with (not) updating the child parent in AVLList::fixParentAndChildren_
 -	Show memory list type in help screeens
+-	new command TEST
 
 

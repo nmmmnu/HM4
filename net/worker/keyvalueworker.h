@@ -31,6 +31,8 @@
 #include "keyvaluecommands/cmd_reload.h"	// SAVE, RELOAD
 #include "keyvaluecommands/cmd_system.h"	// EXIT, SHUTDOWN
 
+#include "keyvaluecommands/cmd_test.h"		// TEST
+
 #include "protocol/protocoldefs.h"
 
 #include <memory>
@@ -95,7 +97,9 @@ namespace net::worker{
 				Compat		::RegisterModule,
 
 				Reload		::RegisterModule,
-				System		::RegisterModule
+				System		::RegisterModule,
+
+				Test		::RegisterModule
 			>(pack);
 		}
 	}
