@@ -14,7 +14,7 @@ struct DiskFileAllocatorPredicate{
 
 	template<class List>
 	bool operator()(List const &list, size_t const bytes) const{
-		return list.getAllocator().getFreeMemory() < bytes;
+		return list.getAllocator().getFreeMemory() < bytes + 1024u;
 	}
 
 private:
