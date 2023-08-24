@@ -7,18 +7,15 @@ namespace hm4::flusher{
 
 struct DiskFileAllocatorPredicate{
 	template<class List>
-	[[deprecated]]
-	bool operator()(List const &list) const{
-		return list.getAllocator().getFreeMemory() < minBytes;
-	}
-
-	template<class List>
 	bool operator()(List const &list, size_t const bytes) const{
-		return list.getAllocator().getFreeMemory() < bytes + 1024u;
-	}
+		auto const minBytes =
+				bytes +
+				list.mutable_list().INTERNAL_NODE_SIZE +
+				8u
+		;
 
-private:
-	constexpr static size_t minBytes = Pair::maxBytes() + 1024u;
+		return list.getAllocator().getFreeMemory() <  minBytes;
+	}
 };
 
 

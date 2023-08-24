@@ -132,7 +132,8 @@ size_t AVLList<T_Allocator>::height() const{
 	return height;
 }
 
-
+template<class T_Allocator>
+size_t const AVLList<T_Allocator>::INTERNAL_NODE_SIZE = sizeof(Node) - sizeof(Pair);
 
 // ==============================
 

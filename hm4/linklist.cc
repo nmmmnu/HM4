@@ -41,6 +41,9 @@ struct LinkList<T_Allocator>::NodeLocator{
 	Node *node;
 };
 
+template<class T_Allocator>
+size_t const LinkList<T_Allocator>::INTERNAL_NODE_SIZE = sizeof(Node);
+
 namespace{
 	// we not really need to check the integrity of the list
 	constexpr bool corruptionCheck = false;

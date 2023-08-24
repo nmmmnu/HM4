@@ -40,6 +40,9 @@ private:
 	Node		*root_		= nullptr;
 
 public:
+	static size_t const INTERNAL_NODE_SIZE;
+
+public:
 	constexpr static std::string_view getName(){
 		return "AVLList";
 	}

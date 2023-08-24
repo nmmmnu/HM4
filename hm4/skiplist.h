@@ -96,6 +96,9 @@ private:
 
 	Allocator		*allocator_;
 
+public:
+	static size_t const INTERNAL_NODE_SIZE;
+
 private:
 	void deallocate_(Node *node);
 

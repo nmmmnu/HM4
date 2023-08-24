@@ -120,6 +120,9 @@ private:
 	Allocator	*allocator_;
 
 public:
+	static size_t const INTERNAL_NODE_SIZE = 0;
+
+public:
 	bool clear(){
 		if (allocator_->reset() == false){
 			std::for_each(std::begin(vector_), std::end(vector_), [this](void *p){
