@@ -137,7 +137,7 @@ public:
 	}
 
 	template<class PFactory>
-	iterator insertF(PFactory &factory);
+	InsertResult insertF(PFactory &factory);
 
 	auto size() const{
 		return lc_.size();
@@ -225,11 +225,11 @@ inline auto UnsortedList<T_Allocator>::end() const noexcept -> iterator{
 
 template<class T_Allocator>
 template<class PFactory>
-inline auto UnsortedList<T_Allocator>::insertF(PFactory &factory) -> iterator{
+inline auto UnsortedList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 	auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 	if (!newdata)
-		return this->end();
+		return InsertResult::errorNoMemory();
 
 	try{
 		vector_.push_back(newdata.get());
@@ -240,10 +240,10 @@ inline auto UnsortedList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		needSort_ = true;
 
-		return { std::prev(std::end(vector_)) };
+		return InsertResult::inserted( *std::prev(std::end(vector_)) );
 	}catch(...){
 		// newdata will be deallocated...
-		return this->end();
+		return InsertResult::error();
 	}
 }
 

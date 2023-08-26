@@ -44,11 +44,7 @@ public:
 	bool erase_(std::string_view const key);
 
 	template<class PFactory>
-	iterator insertF(PFactory &factory);
-
-	auto size() const{
-		return lc_.size();
-	}
+	InsertResult insertF(PFactory &factory);
 
 	auto const &mutable_list() const{
 		return *this;
@@ -56,6 +52,10 @@ public:
 
 	void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &msg){
 		lc_.upd(msg.bytes_old, msg.bytes_new);
+	}
+
+	auto size() const{
+		return lc_.size();
 	}
 
 	auto bytes() const{

@@ -121,20 +121,16 @@ public:
 	bool erase_(std::string_view const key){
 		assert(!key.empty());
 
-		if constexpr (EraseType == DualListEraseType::NORMAL){
+		if constexpr (EraseType == DualListEraseType::NORMAL)
 			return hm4::erase(*list1_, key);
-		}
 
-		if constexpr (EraseType == DualListEraseType::TOMBSTONE){
-			return hm4::insert(*list1_, key) != std::end(*list1_);
-		}
+		if constexpr (EraseType == DualListEraseType::TOMBSTONE)
+			return hm4::insert(*list1_, key).ok;
 	}
 
 	template<class PFactory>
-	auto insertF(PFactory &factory){
-		return fixDualIterator_(
-			list1_->insertF(factory)
-		);
+	InsertResult insertF(PFactory &factory){
+		return list1_->insertF(factory);
 	}
 
 protected:

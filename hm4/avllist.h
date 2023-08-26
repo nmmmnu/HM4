@@ -55,7 +55,7 @@ public:
 	}
 
 	template<class PFactory>
-	iterator insertF(PFactory &factory);
+	InsertResult insertF(PFactory &factory);
 
 	bool erase_(std::string_view const key);
 

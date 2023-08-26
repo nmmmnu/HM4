@@ -86,9 +86,16 @@ public:
 		// the iterator is invalid.
 
 		// this-> helps the template instantiation
-		return this->fixDualIterator_(
-			list1_->insertF(factory)
-		);
+		auto const result = list1_->insertF(factory);
+
+		if (result.status == result.ERROR_NO_MEMORY){
+			// must never come here
+			flush();
+			// try insert again
+			return list1_->insertF(factory);
+		}
+
+		return result;
 	}
 
 private:

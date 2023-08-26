@@ -130,7 +130,7 @@ namespace hm4{
 		}
 
 		template<class PFactory>
-		iterator insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc);
+		InsertResult insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc);
 
 		bool erase_(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc);
 
@@ -153,14 +153,14 @@ namespace hm4{
 	public:
 		// used for testing
 		template<class PFactory>
-		iterator xInsertF(PFactory &factory, Allocator &allocator, ListCounter &lc){
+		InsertResult xInsertF(PFactory &factory, Allocator &allocator, ListCounter &lc){
 			auto const hkey = HPair::SS::create(factory.getKey());
 			return insertF(hkey, factory, allocator, lc);
 		}
 
 		// used for testing
 		template<class PFactory>
-		iterator xInsertF(PFactory &factory, Allocator &allocator){
+		InsertResult xInsertF(PFactory &factory, Allocator &allocator){
 			ListCounter lc;
 			return xInsertF(factory, allocator, lc);
 		}
@@ -280,7 +280,7 @@ namespace hm4{
 
 	template<class Allocator, size_t Capacity>
 	template<class PFactory>
-	auto PairVector<Allocator,Capacity>::insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc) -> iterator{
+	auto PairVector<Allocator,Capacity>::insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc) -> InsertResult{
 		auto const &key = factory.getKey();
 
 		auto [found, it] = locateM_(hkey, key);
@@ -292,18 +292,18 @@ namespace hm4{
 
 			if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 				if (!isValidForReplace(factory.getCreated(), *olddata))
-					return end();
+					return InsertResult::skipInserted();
 
 			// try update pair in place.
 			if (tryUpdateInPlaceLC(allocator, olddata, factory, lc)){
 				// successfully updated.
-				return iterator{ it };
+				return InsertResult::updatedInPlace(olddata);
 			}
 
 			auto newdata = Pair::smart_ptr::create(allocator, factory);
 
 			if (!newdata)
-				return end();
+				return InsertResult::errorNoMemory();
 
 			lc.upd(olddata->bytes(), newdata->bytes());
 
@@ -314,7 +314,7 @@ namespace hm4{
 			using namespace MyAllocator;
 			deallocate(allocator, olddata);
 
-			return iterator{ it };
+			return InsertResult::replaced(it->pair);
 		}
 
 		if (size() == capacity())
@@ -323,7 +323,7 @@ namespace hm4{
 		auto newdata = Pair::smart_ptr::create(allocator, factory);
 
 		if (!newdata)
-			return end();
+			return InsertResult::errorNoMemory();
 
 		// make space, exception free, so no need to protect with unique_ptr.
 		pairvector_impl_::shiftR_(it, ptr_end());
@@ -334,7 +334,7 @@ namespace hm4{
 
 		++size_;
 
-		return iterator{ it };
+		return InsertResult::inserted(it->pair);
 	}
 
 	template<class Allocator, size_t Capacity>

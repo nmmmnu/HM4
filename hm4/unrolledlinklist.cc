@@ -154,7 +154,7 @@ auto UnrolledLinkList<T_Allocator>::fix_iterator_(const Node *node, typename Pai
 
 template<class T_Allocator>
 template<class PFactory>
-auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
+auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 	auto constructNode = [](auto &allocator) -> Node *{
 		using namespace MyAllocator;
 		Node *newnode = allocate<Node>(allocator);
@@ -178,12 +178,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	if (nl.found){
 		// update pair in place.
 
-		auto const it = nl.node->data.insertF(hkey, factory, getAllocator(), lc_);
-
-		return fix_iterator_(
-			nl.node,
-			it
-		);
+		return nl.node->data.insertF(hkey, factory, getAllocator(), lc_);
 	}
 
 	Node *node = nl.node;
@@ -193,22 +188,19 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		Node *newnode = constructNode(getAllocator());
 
 		if (!newnode)
-			return end();
+			return InsertResult::errorNoMemory();
 
-		auto const it = newnode->data.insertF(hkey, factory, getAllocator(), lc_);
+		auto const result = newnode->data.insertF(hkey, factory, getAllocator(), lc_);
 
-		if (it == newnode->data.end()){
+		if (!result.ok){
 			// we can use smart_ptr here...
 			deallocate_(newnode);
-			return end();
+			return result;
 		}
 
 		newnode->next = std::exchange(*nl.prev, newnode);
 
-		return fix_iterator_(
-			newnode,
-			it
-		);
+		return result;
 	}
 
 	if (node->data.full()){
@@ -217,7 +209,7 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		Node *newnode = constructNode(getAllocator());
 
 		if (!newnode)
-			return end();
+			return InsertResult::errorNoMemory();
 
 		newnode->next = std::exchange(node->next, newnode);
 
@@ -229,33 +221,18 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		if (int const cmp = nl.node->cmp(hkey, key); cmp >= 0){
 			// insert in the old node
 
-			auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
-
-			return fix_iterator_(
-				node,
-				it
-			);
+			return node->data.insertF(hkey, factory, getAllocator(), lc_);
 		}else{
 			// insert in the new node
 
-			auto const it = newnode->data.insertF(hkey, factory, getAllocator(), lc_);
-
-			return fix_iterator_(
-				newnode,
-				it
-			);
+			return newnode->data.insertF(hkey, factory, getAllocator(), lc_);
 		}
 	}
 
 	// insert pair in current node.
 	// TODO: optimize this, currently it do binary search over again.
 
-	auto const it = node->data.insertF(hkey, factory, getAllocator(), lc_);
-
-	return fix_iterator_(
-		node,
-		it
-	);
+	return node->data.insertF(hkey, factory, getAllocator(), lc_);
 }
 
 template<class T_Allocator>
@@ -403,30 +380,30 @@ template auto UnrolledLinkList<MyAllocator::STDAllocator>		::find(std::string_vi
 template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
-template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> iterator;
+template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> InsertResult;
 
-template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> iterator;
+template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> InsertResult;
 
-template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> iterator;
+template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 
-template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> iterator;
+template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> InsertResult;
 
-template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> iterator;
+template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 
 } // namespace
 

@@ -186,7 +186,7 @@ bool SkipList<T_Allocator>::clear(){
 
 template<class T_Allocator>
 template<class PFactory>
-auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
+auto SkipList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 	auto const &key = factory.getKey();
 
 	const auto nl = locate_<1>(key);
@@ -200,18 +200,18 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 			if (!isValidForReplace(factory.getCreated(), *olddata))
-				return end();
+				return InsertResult::skipInserted();
 
 		// try update pair in place.
 		if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 			// successfully updated.
-			return { nl.node };
+			return InsertResult::updatedInPlace(olddata);
 		}
 
 		auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 		if (!newdata)
-			return end();
+			return InsertResult::errorNoMemory();
 
 		lc_.upd( olddata->bytes(), newdata->bytes() );
 
@@ -223,7 +223,7 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		using namespace MyAllocator;
 		deallocate(allocator_, olddata);
 
-		return { nl.node };
+		return InsertResult::replaced(nl.node->data);
 	}
 
 	// create new node
@@ -231,7 +231,7 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 	auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 	if (!newdata)
-		return end();
+		return InsertResult::errorNoMemory();
 
 	size_t const size = newdata->bytes();
 
@@ -249,7 +249,7 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	if (newnode == nullptr){
 		// newdata will be magically destroyed.
-		return end();
+		return InsertResult::errorNoMemory();
 	}
 
 	newnode->hkey = HPair::SS::create(key);
@@ -278,7 +278,7 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 	lc_.inc(size);
 
-	return { newnode };
+	return InsertResult::inserted(newnode->data);
 }
 
 template<class T_Allocator>
@@ -490,30 +490,30 @@ template auto SkipList<MyAllocator::STDAllocator>		::find(std::string_view const
 template auto SkipList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> InsertResult;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> InsertResult;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> InsertResult;
 
-template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> iterator;
+template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 
 } // namespace
 

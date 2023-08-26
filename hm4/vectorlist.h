@@ -52,7 +52,7 @@ public:
 	}
 
 	template<class PFactory>
-	iterator insertF(PFactory &factory);
+	InsertResult insertF(PFactory &factory);
 
 	auto size() const{
 		return lc_.size();

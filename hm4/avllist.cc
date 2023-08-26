@@ -284,18 +284,18 @@ namespace avl_impl_{
 
 template<class T_Allocator>
 template<class PFactory>
-auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
+auto AVLList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 	if (!root_){
 		// tree is empty.
 		// insert, no balance.
 		auto *newnode = avl_impl_::allocateNode<Node>(getAllocator(), factory, lc_, nullptr);
 
 		if (!newnode)
-			return this->end();
+			return InsertResult::errorNoMemory();
 
 		root_ = newnode;
 
-		return { root_, root_ };
+		return InsertResult::inserted( & newnode->data );
 	}
 
 	auto const &key = factory.getKey();
@@ -310,13 +310,13 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 				auto *newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
 				if (!newnode)
-					return this->end();
+					return InsertResult::errorNoMemory();
 
 				node->l = newnode;
 				--node->balance;
 				rebalanceAfterInsert_(node);
 
-				return { newnode, root_ };
+				return InsertResult::inserted( & newnode->data );
 			}else{
 				node = node->l;
 				continue;
@@ -328,13 +328,13 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 				auto *newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
 				if (!newnode)
-					return this->end();
+					return InsertResult::errorNoMemory();
 
 				node->r = newnode;
 				++node->balance;
 				rebalanceAfterInsert_(node);
 
-				return { newnode, root_ };
+				return InsertResult::inserted( & newnode->data );
 			}else{
 				node = node->r;
 				continue;
@@ -350,19 +350,19 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 			if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 				if (!isValidForReplace(factory.getCreated(), *olddata))
-					return this->end();
+					return InsertResult::skipInserted();
 
 			// try update pair in place.
 			if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 				// successfully updated.
-				return { node, root_ };
+				return InsertResult::updatedInPlace(olddata);
 			}
 
 			// allocate new node and change links
 			Node *newnode = avl_impl_::allocateNode(getAllocator(), factory, lc_, node);
 
 			if (!newnode)
-				return this->end();
+				return InsertResult::errorNoMemory();
 
 			copyLinks_(newnode, node);
 
@@ -372,7 +372,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 			using namespace MyAllocator;
 			deallocate(allocator_, node);
 
-			return { newnode, root_ };
+			return InsertResult::replaced( & newnode->data );
 		}
 	}
 
@@ -896,30 +896,30 @@ template auto AVLList<MyAllocator::STDAllocator>		::find(std::string_view const 
 template auto AVLList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
-template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> iterator;
+template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> InsertResult;
 
-template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> iterator;
+template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> InsertResult;
 
-template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> iterator;
+template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 
-template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> iterator;
+template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> InsertResult;
 
-template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> iterator;
+template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 
 } // namespace hm4
 

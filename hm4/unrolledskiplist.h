@@ -41,7 +41,7 @@ public:
 	bool erase_(std::string_view const key);
 
 	template<class PFactory>
-	iterator insertF(PFactory &factory);
+	InsertResult insertF(PFactory &factory);
 
 	auto size() const{
 		return lc_.size();

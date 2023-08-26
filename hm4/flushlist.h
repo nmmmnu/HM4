@@ -55,7 +55,16 @@ public:
 		// this is also more correct,
 		// because in the old case,
 		// the iterator is invalid.
-		return list_->insertF(factory);
+		auto const result = list_->insertF(factory);
+
+		if (result.status == result.ERROR_NO_MEMORY){
+			// must never come here
+			flush();
+			// try insert again
+			return list_->insertF(factory);
+		}
+
+		return result;
 	}
 
 private:

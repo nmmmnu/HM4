@@ -51,7 +51,7 @@ auto VectorList<T_Allocator>::find(std::string_view const key, std::bool_constan
 
 template<class T_Allocator>
 template<class PFactory>
-auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
+auto VectorList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 	auto const &key = factory.getKey();
 
 	const auto &[found, it] = binarySearch(vector_, key);
@@ -63,18 +63,18 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		if constexpr(config::LIST_CHECK_PAIR_FOR_REPLACE)
 			if (!isValidForReplace(factory.getCreated(), *olddata))
-				return end();
+				return InsertResult::skipInserted();
 
 		// try update pair in place.
 		if (tryUpdateInPlaceLC(getAllocator(), olddata, factory, lc_)){
 			// successfully updated.
-			return iterator{ it };
+			return InsertResult::updatedInPlace(olddata);
 		}
 
 		auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 		if (!newdata)
-			return this->end();
+			return InsertResult::errorNoMemory();
 
 		lc_.upd(olddata->bytes(), newdata->bytes());
 
@@ -85,13 +85,13 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 		using namespace MyAllocator;
 		deallocate(allocator_, olddata);
 
-		return iterator{ it };
+		return InsertResult::replaced(*it);
 	}
 
 	auto newdata = Pair::smart_ptr::create(getAllocator(), factory);
 
 	if (!newdata)
-		return this->end();
+		return InsertResult::errorNoMemory();
 
 	// key not exists, shift, then add
 
@@ -102,10 +102,10 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> iterator{
 
 		newdata.release();
 
-		return iterator{ it2 };
+		return InsertResult::inserted(*it2);
 	}catch(...){
 		// newdata will be deallocated...
-		return end();
+		return InsertResult::error();
 	}
 }
 
@@ -162,30 +162,30 @@ template auto VectorList<MyAllocator::STDAllocator>		::find(std::string_view con
 template auto VectorList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
-template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> iterator;
+template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> InsertResult;
 
-template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> iterator;
+template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> InsertResult;
 
-template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> iterator;
+template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 
-template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> iterator;
+template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> InsertResult;
 
-template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> iterator;
+template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 
 } // namespace
 

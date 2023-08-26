@@ -56,14 +56,15 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		auto it = list_->insertF(factory);
+		auto const result = list_->insertF(factory);
 
-		if (it == std::end(*list_))
-			return it;
+		// if (!result.ok)
+		// 	return result;
 
-		binlogger_(*it);
+		if (result.pair)
+			binlogger_(*result.pair);
 
-		return it;
+		return result;
 	}
 
 	void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){

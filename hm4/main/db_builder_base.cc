@@ -34,12 +34,12 @@ auto listInsert(List &list, std::string_view const key, std::string_view const v
 
 template <class List, bool Base64, bool InsertIgnore>
 void listInsert(List &list, std::string_view const key, std::string_view const val, std::bool_constant<Base64> base64, std::bool_constant<InsertIgnore>){
-	auto it = listInsert(list, key, val, base64);
+	auto const result = listInsert(list, key, val, base64);
 
 	if constexpr(InsertIgnore)
 		return;
 
-	if ( it == std::end(list) )
+	if (!result.ok)
 		logger<Logger::WARNING>() << "Error insert" << key;
 }
 

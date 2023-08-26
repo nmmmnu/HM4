@@ -34,11 +34,11 @@ Allocator_::v allocator;
 
 template <class List>
 size_t listInsert(List &list, const char *key, const char *value){
-	auto it = insert(list, key, value);
+	auto const &[ok, status, pair] = insert(list, key, value);
 
 	// collect size, but via iterator...
-	if (it != std::end(list))
-		return it->bytes();
+	if (ok)
+		return pair->bytes();
 	else
 		return 0;
 
@@ -208,7 +208,11 @@ void list_test(List &list){
 
 	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
+for(auto &x :list) x.print();
+
 	insert(list, key_over, "original", 0, 1	);
+
+for(auto &x :list) x.print();
 
 	mytest("overwrite 2",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
@@ -322,7 +326,7 @@ void list_test(hm4::BlackHoleList &list){
 	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0	);
 	mytest("sizeof",		list.bytes() == 0					);
 
-	mytest("put",			insert(list, "key", "val") == std::end(list)		);
+	mytest("put",			insert(list, "key", "val").ok				);
 	mytest("find",			list.find("key", std::false_type{}) == std::end(list)	);
 	mytest("find",			list.find("key", std::true_type{} ) == std::end(list)	);
 	mytest("remove",		erase(list, "key")					);

@@ -22,6 +22,58 @@ namespace config{
 	constexpr bool		LIST_CHECK_PAIR_FOR_REPLACE	= true;
 }
 
+struct InsertResult{
+	enum class Status{
+		INSERTED		,
+		UPDATED_IN_PLACE	,
+		REPLACED		,
+		SKIP_INSERTED		,
+		ERROR_NO_MEMORY		,
+		ERROR			,
+	};
+
+	bool		ok;
+	Status		status;
+	const Pair	*pair	= nullptr;
+
+	constexpr static auto INSERTED		=  Status::INSERTED		;
+	constexpr static auto UPDATED_IN_PLACE	=  Status::UPDATED_IN_PLACE	;
+	constexpr static auto REPLACED		=  Status::REPLACED		;
+	constexpr static auto SKIP_INSERTED	=  Status::SKIP_INSERTED	;
+	constexpr static auto ERROR_NO_MEMORY	=  Status::ERROR_NO_MEMORY	;
+	constexpr static auto ERROR		=  Status::ERROR		;
+
+	[[nodiscard]]
+	constexpr static auto inserted(const Pair *pair){
+		return InsertResult{ true, InsertResult::INSERTED, pair };
+	}
+
+	[[nodiscard]]
+	constexpr static auto updatedInPlace(const Pair *pair){
+		return InsertResult{ true, InsertResult::UPDATED_IN_PLACE, pair };
+	}
+
+	[[nodiscard]]
+	constexpr static auto replaced(const Pair *pair){
+		return InsertResult{ true, InsertResult::REPLACED, pair };
+	}
+
+	[[nodiscard]]
+	constexpr static auto skipInserted(){
+		return InsertResult{ true, InsertResult::SKIP_INSERTED };
+	}
+
+	[[nodiscard]]
+	constexpr static auto errorNoMemory(){
+		return InsertResult{ false, InsertResult::ERROR_NO_MEMORY };
+	}
+
+	[[nodiscard]]
+	constexpr static auto error(){
+		return InsertResult{ false, InsertResult::ERROR };
+	}
+};
+
 // ==============================
 
 template<class List>

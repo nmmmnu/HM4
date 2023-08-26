@@ -39,14 +39,8 @@ public:
 	}
 
 	template<class PFactory>
-	iterator insertF(PFactory &){
-		return nullptr;
-	}
-
-
-	constexpr static
-	size_type size(){
-		return 0;
+	InsertResult insertF(PFactory &){
+		return InsertResult::skipInserted();
 	}
 
 	auto const &mutable_list() const{
@@ -54,6 +48,11 @@ public:
 	}
 
 	constexpr static void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &){
+	}
+
+	constexpr static
+	size_type size(){
+		return 0;
 	}
 
 	constexpr static
