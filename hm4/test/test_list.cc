@@ -208,11 +208,7 @@ void list_test(List &list){
 
 	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 
-for(auto &x :list) x.print();
-
 	insert(list, key_over, "original", 0, 1	);
-
-for(auto &x :list) x.print();
 
 	mytest("overwrite 2",		getCheck(list, key_over,	val_over,	std::true_type{}	));
 

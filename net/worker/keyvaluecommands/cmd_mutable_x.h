@@ -18,7 +18,7 @@ namespace net::worker::commands::MutableX{
 			std::string_view scanKeysAndProcessInPlace_(Predicate &p, List &list, std::string_view prefix, std::string_view key, ContainerX &container){
 				uint32_t iterations = 0;
 
-				for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
+				for(auto it = list.find(key, std::false_type{}); it != std::end(list); ++it){
 					auto const key = it->getKey();
 
 					if (! same_prefix(prefix, key))
@@ -52,7 +52,7 @@ namespace net::worker::commands::MutableX{
 			void scanForLastKey_(List &list, std::string_view prefix, std::string_view key, Result &result){
 				uint32_t iterations = 0;
 
-				for(auto it = list.find(key, std::false_type{});it != std::end(list);++it){
+				for(auto it = list.find(key, std::false_type{}); it != std::end(list); ++it){
 					auto const key = it->getKey();
 
 					if (! same_prefix(prefix, key))
@@ -84,7 +84,9 @@ namespace net::worker::commands::MutableX{
 
 			// label for goto
 			start:
-				std::string_view string_key = scanKeysAndProcessInPlace_(p, list, prefix, key, container);
+				std::string_view last_key = scanKeysAndProcessInPlace_(p, list, prefix, key, container);
+
+				// update by insert
 
 				for(auto const &x : container){
 					auto const s1 = list.mutable_list().size();
@@ -104,19 +106,17 @@ namespace net::worker::commands::MutableX{
 						if (check_passes < PASSES_PROCESS_X)
 							goto start;
 
-						if constexpr(ResultAsHash){
+						if constexpr(ResultAsHash)
 							return result.set_0();
-						}else{
+						else
 							return scanForLastKey_(list, prefix, key, result);
-						}
 					}
 				}
 
-				if constexpr(ResultAsHash){
+				if constexpr(ResultAsHash)
 					return result.set_1();
-				}else{
-					return result.set(string_key);
-				}
+				else
+					return result.set(last_key);
 			}
 
 
