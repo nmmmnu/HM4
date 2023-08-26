@@ -185,4 +185,6 @@ Changelog
 -	Refactor DiskFileAllocatorPredicate to check and flush before insert.
 	This fixing logical error with iterators,
 	also make use of all available memory in the ArenaAllocator.
+-	Prevent data loss in case there is not enought memory,
+	by refactor List::insertF return type and DiskFileAllocatorPredicate.
 
