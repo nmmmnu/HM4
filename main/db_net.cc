@@ -25,7 +25,51 @@
 // ----------------------------------
 
 #define MEMLIST_AVL
+//#define MEMLIST_SKIP
+
 #define REPLAYLIST_AVL
+//#define REPLAYLIST_SKIP
+//#define REPLAYLIST_UNSORTED
+
+constexpr bool USE_CONCURRENCY = true;
+
+using MyProtocol	= net::protocol::RedisProtocol;
+
+using Allocator		= MyAllocator::ArenaAllocator;
+
+// ----------------------------------
+
+#if defined MEMLIST_AVL
+	#include "avllist.h"
+
+	using MyDBNetMemList = hm4::AVLList<Allocator>;
+#elif defined MEMLIST_SKIP
+	#include "skiplist.h"
+
+	using MyDBNetMemList = hm4::SkipList<Allocator>;
+#else
+	#error "No net::memlist selected!"
+#endif
+
+// ----------------------------------
+
+#if defined REPLAYLIST_AVL
+	#include "avllist.h"
+
+	using MyReplayList = hm4::AVLList<Allocator>;
+#elif defined MEMLIST_SKIP
+	#include "skiplist.h"
+
+	using MyReplayList = hm4::SkipList<Allocator>;
+#elif defined MEMLIST_UNSORTED
+	#include "unsortedlist.h"
+
+	using MyReplayList = hm4::UnsortedList<Allocator>;
+#else
+	#error "No net::replaylist selected!"
+#endif
+
+// ----------------------------------
 
 #if defined SELECTOR_EPOOL
 	#include "selector/epollselector.h"
@@ -41,32 +85,6 @@
 	using MySelector	= net::selector::PollSelector;
 #else
 	#error "No net::selector selected!"
-#endif
-
-constexpr bool USE_CONCURRENCY = true;
-
-using MyProtocol	= net::protocol::RedisProtocol;
-
-using Allocator		= MyAllocator::ArenaAllocator;
-
-#if defined MEMLIST_AVL
-	#include "avllist.h"
-
-	using MyDBNetMemList = hm4::AVLList<Allocator>;
-#else
-	#include "skiplist.h"
-
-	using MyDBNetMemList = hm4::SkipList<Allocator>;
-#endif
-
-#if defined REPLAYLIST_AVL
-	#include "avllist.h"
-
-	using MyReplayList = hm4::AVLList<Allocator>;
-#else
-	#include "unsortedlist.h"
-
-	using MyReplayList = hm4::UnsortedList<Allocator>;
 #endif
 
 // ----------------------------------
