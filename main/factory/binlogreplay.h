@@ -1,14 +1,25 @@
 #ifndef BIN_LOG_REPLAY_H_
 #define BIN_LOG_REPLAY_H_
 
-#include "unsortedlist.h"
 #include "arenaallocator.h"
+
+#if 1
+	#include "avllist.h"
+
+	template<class Allocator>
+	using MyMemList_BinLogReplay = hm4::AVLList<Allocator>;
+#else
+	#include "skiplist.h"
+
+	template<class Allocator>
+	using MyMemList_BinLogReplay = hm4::SkipList<Allocator>;
+#endif
 
 namespace DBAdapterFactory{
 
 	template<class Allocator>
 	struct BinLogReplay{
-		using MemList		= hm4::UnsortedList<Allocator>;
+		using MemList		= MyMemList_BinLogReplay<Allocator>;
 		using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 		using IDGenerator	= idgenerator::IDGeneratorDate;
 		using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;

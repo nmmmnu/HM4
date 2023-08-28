@@ -187,4 +187,5 @@ Changelog
 	also make use of all available memory in the ArenaAllocator.
 -	Prevent data loss in case there is not enought memory,
 	by refactor List::insertF return type and DiskFileAllocatorPredicate.
+-	Change list used in db_net's replayBinlogFile_() from UnsortedList to AVLList
 

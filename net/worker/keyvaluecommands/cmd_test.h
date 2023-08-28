@@ -17,25 +17,10 @@ namespace net::worker::commands::Test{
 		};
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			[[maybe_unused]]
 			auto const &list = db->mutable_list();
 
-			size_t size = 0;
-			for(auto it = std::begin(list); it != std::end(list); ++it){
-				logger<Logger::DEBUG>() << "TEST:" << it->getKey();
-
-				++size;
-				if (size > list.size()){
-					logger<Logger::DEBUG>() << "TEST: something is wrong";
-					for(size_t i = 0; i < 100; ++i){
-						logger<Logger::DEBUG>() << "TEST:" << it->getKey();
-						++it;
-					}
-
-					break;
-				}
-			}
-
-			logger<Logger::DEBUG>() << "TEST: OK, SIZE: " << size;
+			logger<Logger::DEBUG>() << "TEST: OK";
 
 			return result.set();
 		}

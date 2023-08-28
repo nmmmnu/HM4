@@ -49,11 +49,11 @@ using Allocator		= MyAllocator::ArenaAllocator;
 #if 1
 	#include "avllist.h"
 
-	using MyMemList = hm4::AVLList<Allocator>;
+	using MyMemList_DB_NET = hm4::AVLList<Allocator>;
 #else
 	#include "skiplist.h"
 
-	using MyMemList = hm4::SkipList<Allocator>;
+	using MyMemList_DB_NET = hm4::SkipList<Allocator>;
 #endif
 
 // ----------------------------------
@@ -139,6 +139,8 @@ namespace{
 
 	int select_MutableLists(const MyOptions &opt){
 		constexpr std::string_view starting_server_with = "Starting {} server with {} and {}...";
+
+		using MyMemList = MyMemList_DB_NET;
 
 		if constexpr(USE_CONCURRENCY){
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
@@ -381,6 +383,8 @@ namespace{
 		#else
 		const char *convert = "charconv";
 		#endif
+
+		using MyMemList = MyMemList_DB_NET;
 
 		fmt::print(
 			"db_net version {version}\n"
