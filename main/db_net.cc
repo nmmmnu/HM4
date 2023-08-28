@@ -24,6 +24,9 @@
 
 // ----------------------------------
 
+#define MEMLIST_AVL
+#define REPLAYLIST_AVL
+
 #if defined SELECTOR_EPOOL
 	#include "selector/epollselector.h"
 
@@ -46,14 +49,24 @@ using MyProtocol	= net::protocol::RedisProtocol;
 
 using Allocator		= MyAllocator::ArenaAllocator;
 
-#if 1
+#if defined MEMLIST_AVL
 	#include "avllist.h"
 
-	using MyMemList_DB_NET = hm4::AVLList<Allocator>;
+	using MyDBNetMemList = hm4::AVLList<Allocator>;
 #else
 	#include "skiplist.h"
 
-	using MyMemList_DB_NET = hm4::SkipList<Allocator>;
+	using MyDBNetMemList = hm4::SkipList<Allocator>;
+#endif
+
+#if defined REPLAYLIST_AVL
+	#include "avllist.h"
+
+	using MyReplayList = hm4::AVLList<Allocator>;
+#else
+	#include "unsortedlist.h"
+
+	using MyReplayList = hm4::UnsortedList<Allocator>;
 #endif
 
 // ----------------------------------
@@ -140,7 +153,7 @@ namespace{
 	int select_MutableLists(const MyOptions &opt){
 		constexpr std::string_view starting_server_with = "Starting {} server with {} and {}...";
 
-		using MyMemList = MyMemList_DB_NET;
+		using MyMemList = MyDBNetMemList;
 
 		if constexpr(USE_CONCURRENCY){
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
@@ -152,10 +165,11 @@ namespace{
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
 				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
 
-				auto &allocator = allocator1;
+				// can be done in parallel,
+				// but then it will make preasure to the disk
 
-				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
-				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator);
+				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator1);
+				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator2);
 
 				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<MyMemList>;
 
@@ -384,7 +398,7 @@ namespace{
 		const char *convert = "charconv";
 		#endif
 
-		using MyMemList = MyMemList_DB_NET;
+		using MyMemList = MyDBNetMemList;
 
 		fmt::print(
 			"db_net version {version}\n"
@@ -446,7 +460,7 @@ namespace{
 
 		/* nested scope for the d-tor */
 		{
-			DBAdapterFactory::BinLogReplay factory{ path, allocator };
+			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ path, allocator };
 
 			auto &list = factory();
 
