@@ -127,7 +127,9 @@ struct SkipList<T_Allocator>::NodeLocator{
 // ==============================
 
 template<class T_Allocator>
-size_t const SkipList<T_Allocator>::INTERNAL_NODE_SIZE = sizeof(Node) + sizeof(Node *) * (MAX_HEIGHT - 1);
+size_t const SkipList<T_Allocator>::INTERNAL_NODE_SIZE = checkInternalNodeSize<
+					sizeof(Node) + sizeof(Node *) * (MAX_HEIGHT - 1)
+				>();
 
 template<class T_Allocator>
 SkipList<T_Allocator>::SkipList(Allocator &allocator) : allocator_(& allocator){

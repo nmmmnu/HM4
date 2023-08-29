@@ -55,6 +55,26 @@ namespace flushlist_impl_{
 		list.clear();
 		notifyLoader(loader);
 	}
+
+	template<class FlushList, class InsertList, class Predicate, class PFactory>
+	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory){
+		if (predicate(insertList, factory.bytes()))
+			flushList.flush();
+
+		// this is also more correct,
+		// because in the old case,
+		// the iterator is invalid.
+
+		// this-> helps the template instantiation
+		if (auto const result = insertList.insertF(factory); result.status != result.ERROR_NO_MEMORY)
+			return result;
+
+		// result.status == result.ERROR_NO_MEMORY, must never come here
+		flushList.flush();
+
+		// try insert again
+		return insertList.insertF(factory);
+	}
 }
 
 

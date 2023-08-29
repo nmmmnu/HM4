@@ -89,7 +89,10 @@ using Allocator		= MyAllocator::ArenaAllocator;
 
 // ----------------------------------
 
-constexpr size_t MIN_ARENA_SIZE = (hm4::Pair::maxBytes() / 1024 / 1024 + 1) * 2;
+constexpr size_t MIN_ARENA_SIZE_BYTES	= 1024 + hm4::Pair::maxBytes() +
+					hm4::config::MAX_INTERNAL_NODE_SIZE;
+
+constexpr size_t MIN_ARENA_SIZE		= MIN_ARENA_SIZE_BYTES / 1024 / 1024;
 
 // ----------------------------------
 

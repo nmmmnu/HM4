@@ -120,7 +120,7 @@ private:
 	Allocator	*allocator_;
 
 public:
-	static size_t const INTERNAL_NODE_SIZE = 0;
+	constexpr static size_t INTERNAL_NODE_SIZE = 0;
 
 public:
 	bool clear(){

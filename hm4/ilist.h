@@ -20,6 +20,15 @@ namespace config{
 	constexpr size_type	LIST_PRINT_COUNT		= 10;
 
 	constexpr bool		LIST_CHECK_PAIR_FOR_REPLACE	= true;
+
+	constexpr auto		MAX_INTERNAL_NODE_SIZE		= 528; // skiplist
+}
+
+template<size_t size>
+constexpr size_t checkInternalNodeSize(){
+	static_assert(config::MAX_INTERNAL_NODE_SIZE >= size);
+
+	return size;
 }
 
 struct InsertResult{

@@ -78,24 +78,7 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		if (predicate_(*list1_, factory.bytes()))
-			flush();
-
-		// this is also more correct,
-		// because in the old case,
-		// the iterator is invalid.
-
-		// this-> helps the template instantiation
-		auto const result = list1_->insertF(factory);
-
-		if (result.status == result.ERROR_NO_MEMORY){
-			// must never come here
-			flush();
-			// try insert again
-			return list1_->insertF(factory);
-		}
-
-		return result;
+		return flushlist_impl_::insertF(*this, *list1_, predicate_, factory);
 	}
 
 private:

@@ -42,7 +42,9 @@ struct LinkList<T_Allocator>::NodeLocator{
 };
 
 template<class T_Allocator>
-size_t const LinkList<T_Allocator>::INTERNAL_NODE_SIZE = sizeof(Node);
+size_t const LinkList<T_Allocator>::INTERNAL_NODE_SIZE = checkInternalNodeSize<
+								sizeof(Node)
+							>();
 
 namespace{
 	// we not really need to check the integrity of the list
