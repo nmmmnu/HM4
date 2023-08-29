@@ -7,6 +7,31 @@ namespace net::worker::commands::Reload{
 
 
 	template<class Protocol, class DBAdapter>
+	struct LISTMAINTAINANCE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 1)
+				return;
+
+			db->crontab();
+
+			return result.set();
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"listmaintainance",		"LISTMAINTAINANCE"
+		};
+	};
+
+	template<class Protocol, class DBAdapter>
 	struct SAVE : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -65,7 +90,8 @@ namespace net::worker::commands::Reload{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				SAVE	,
+				LISTMAINTAINANCE	,
+				SAVE			,
 				RELOAD
 			>(pack);
 		}

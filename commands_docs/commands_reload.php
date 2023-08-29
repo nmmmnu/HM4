@@ -1,6 +1,24 @@
 <?php
 return array(
 	new Cmd(
+			"LISTMAINTAINANCE",
+
+			"LISTMAINTAINANCE",
+
+			"Run crontab list maintainance. " .
+			"For example, may fsync binlogs.<br />" .
+			"Very useful if crontab list maintainance is disabled. " ,
+			"OK",
+			"OK",
+			"1.0.0",
+			"n/a",
+			false,
+			null,
+
+			"reload"
+	),
+
+	new Cmd(
 			"SAVE",
 
 			"SAVE / BGSAVE",

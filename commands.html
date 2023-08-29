@@ -259,7 +259,8 @@
 			<b>reload.h</b><br />
 			&nbsp;
 
-					<li><a href="#SAVE">SAVE</a></li>
+					<li><a href="#LISTMAINTAINANCE">LISTMAINTAINANCE</a></li>
+				<li><a href="#SAVE">SAVE</a></li>
 				<li><a href="#RELOAD">RELOAD</a></li>
 				</div>
 			<div>
@@ -2092,6 +2093,27 @@
 			string
 			<h3>Return value:</h3>
 			the message
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="LISTMAINTAINANCE">
+
+			<h2>LISTMAINTAINANCE</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>LISTMAINTAINANCE</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>reload.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Run crontab list maintainance. For example, may fsync binlogs.<br />Very useful if crontab list maintainance is disabled. 
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SAVE">
