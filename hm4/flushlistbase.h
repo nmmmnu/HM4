@@ -61,19 +61,18 @@ namespace flushlist_impl_{
 		if (predicate(insertList, factory.bytes()))
 			flushList.flush();
 
-		// this is also more correct,
-		// because in the old case,
-		// the iterator is invalid.
+		auto const result = insertList.insertF(factory);
 
-		// this-> helps the template instantiation
-		if (auto const result = insertList.insertF(factory); result.status != result.ERROR_NO_MEMORY)
+		switch(result.status){
+		case result.ERROR_NO_MEMORY:
+			flushList.flush();
+
+			// try insert again
+			return insertList.insertF(factory);
+
+		default:
 			return result;
-
-		// result.status == result.ERROR_NO_MEMORY, must never come here
-		flushList.flush();
-
-		// try insert again
-		return insertList.insertF(factory);
+		}
 	}
 }
 
