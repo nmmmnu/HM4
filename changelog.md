@@ -192,4 +192,7 @@ Changelog
 ### 1.3.5.3
 
 -	new command LISTMAINTAINANCE
+-	make sure flushlist do not flush twice (should never happen).
+	if this ever happens, data is lost as it was in previous version.
+
 

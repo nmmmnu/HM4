@@ -6,8 +6,8 @@ return array(
 			"LISTMAINTAINANCE",
 
 			"Run crontab list maintainance. " .
-			"For example, may fsync binlogs.<br />" .
-			"Very useful if crontab list maintainance is disabled. " ,
+			"For example, crontab list maintainance may fsync binlogs.<br />" .
+			"Very useful if crontab list maintainance is disabled." ,
 			"OK",
 			"OK",
 			"1.0.0",

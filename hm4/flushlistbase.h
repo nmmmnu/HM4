@@ -58,8 +58,10 @@ namespace flushlist_impl_{
 
 	template<class FlushList, class InsertList, class Predicate, class PFactory>
 	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory){
-		if (predicate(insertList, factory.bytes()))
+		if (predicate(insertList, factory.bytes())){
 			flushList.flush();
+			return insertList.insertF(factory);
+		}
 
 		auto const result = insertList.insertF(factory);
 
