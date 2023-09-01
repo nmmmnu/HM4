@@ -9,10 +9,10 @@
 
 using MyReader = FileReader;
 
-#include "arenaallocator.h"
+#include "mmaparenaallocator.h"
 
-// Yay, non virtual :)
-using Allocator = MyAllocator::ArenaAllocator;
+using MMapAllocator = MyAllocator::MMapAllocator;
+using Allocator     = MyAllocator::MMapArenaAllocator;
 
 #if 1
 	#include "avllist.h"
@@ -70,8 +70,10 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	Allocator allocator1{ max_memlist_arena * MB };
-	Allocator allocator2{ max_memlist_arena * MB };
+	MMapAllocator mmap_allocator{ max_memlist_arena * MB };
+
+	Allocator allocator1{ mmap_allocator.size(), mmap_allocator };
+	Allocator allocator2{ mmap_allocator.size(), mmap_allocator };
 
 	return process<FileReader>(
 			MyListFactory{ path, allocator1, allocator2 },

@@ -8,17 +8,17 @@
 
 #include "disk/disklist.h"
 
-#include "arenaallocator.h"
+#include "mmaparenaallocator.h"
 
-// Yay, non virtual :)
-using MyArenaAllocator = MyAllocator::ArenaAllocator;
+using MMapAllocator = MyAllocator::MMapAllocator;
+using Allocator     = MyAllocator::MMapArenaAllocator;
 
 constexpr size_t	MIN_ARENA_SIZE		= 128;
 
 
 
 struct MyListFactory{
-	using MemList		= hm4::UnsortedList<MyArenaAllocator>;
+	using MemList		= hm4::UnsortedList<Allocator>;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
@@ -102,7 +102,9 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	MyArenaAllocator allocator{ max_memlist_arena * MB };
+	MMapAllocator mmap_allocator{ max_memlist_arena * MB };
+
+	Allocator allocator{ mmap_allocator.size(), mmap_allocator };
 
 	MyListFactory factory{ path, allocator };
 

@@ -45,17 +45,17 @@ public:
 
 				"# Server"											"\n",
 				"Version          : ", version()					,			"\n",
-
-			"\n"	"# Network"											"\n",
-				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
-				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
+				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 
 			"\n"	"# Pair Limits"											"\n",
 				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[i++]),	"\n",
 				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[i++]),	"\n",
 
+			"\n"	"# Network"											"\n",
+				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
+				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
+
 			"\n"	"# Keys"											"\n",
-				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
 
@@ -83,17 +83,17 @@ public:
 
 				"# Server"											"\n",
 				"Version          : ", version()					,			"\n",
-
-			"\n"	"# Network"											"\n",
-				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
-				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
+				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 
 			"\n"	"# Pair Limits"											"\n",
 				"Max Key Size     : ", to_string(hm4::PairConf::MAX_KEY_SIZE		,	buffer[i++]),	"\n",
 				"Max Val Size     : ", to_string(hm4::PairConf::MAX_VAL_SIZE		,	buffer[i++]),	"\n",
 
+			"\n"	"# Network"											"\n",
+				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
+				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
+
 			"\n"	"# Keys"											"\n",
-				"Mutable          : ", MUTABLE ? "Yes" : "No"				,			"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
 

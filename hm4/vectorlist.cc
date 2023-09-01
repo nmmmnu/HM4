@@ -9,7 +9,7 @@
 
 #include "pmallocator.h"
 #include "stdallocator.h"
-#include "arenaallocator.h"
+#include "mmaparenaallocator.h"
 #include "simulatedarenaallocator.h"
 
 namespace hm4{
@@ -150,41 +150,49 @@ bool VectorList<T_Allocator>::clear(){
 template class VectorList<MyAllocator::PMAllocator>;
 template class VectorList<MyAllocator::STDAllocator>;
 template class VectorList<MyAllocator::ArenaAllocator>;
+template class VectorList<MyAllocator::MMapArenaAllocator>;
 template class VectorList<MyAllocator::SimulatedArenaAllocator>;
 
 template auto VectorList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
 template auto VectorList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
 template auto VectorList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
+template auto VectorList<MyAllocator::MMapArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
 
 template auto VectorList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto VectorList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto VectorList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
+template auto VectorList<MyAllocator::MMapArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
 template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::MMapArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> InsertResult;
 
 template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::MMapArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> InsertResult;
 
 template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
+template auto VectorList<MyAllocator::MMapArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 
 template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::MMapArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> InsertResult;
 
 template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
+template auto VectorList<MyAllocator::MMapArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 
 } // namespace

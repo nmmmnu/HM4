@@ -191,8 +191,13 @@ Changelog
 
 ### 1.3.5.3
 
--	new command LISTMAINTAINANCE
--	make sure flushlist do not flush twice (should never happen).
-	if this ever happens, data is lost as it was in previous version.
+-	New command LISTMAINTAINANCE
+-	Make sure flushlist do not flush twice (should never happen).
+	If this ever happens, data is lost as it was in previous version.
+-	Introduce MMapAllocator with Linux HugeTLB support.
+	Support is automatic as long as vm.nr_hugepages are allowed.
 
+### 1.3.6
+
+-	Release
 

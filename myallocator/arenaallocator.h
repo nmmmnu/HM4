@@ -2,14 +2,16 @@
 #define MY_ARENA_ALLOCATOR
 
 #include "baseallocator.h"
+#include "mybuffer.h"
 #include "allocatedbuffer.h"
 
 #include <cstring>
+#include <cstdint>
 
 namespace MyAllocator{
 	namespace ArenaAllocatorImpl{
 
-		using PtrType = std::byte;
+		using PtrType = std::uint8_t;
 
 		template<class Buffer>
 		struct ArenaAllocatorBase{
@@ -20,7 +22,7 @@ namespace MyAllocator{
 			template<typename... Args>
 			ArenaAllocatorBase(Args&&... args) : buffer(std::forward<Args>(args)...){}
 
-			#if MAP_PAGES
+			#if USE_MAP_PAGES
 			void mapPages(){
 				memset(buffer.data(), 0, buffer.size());
 			}
@@ -103,11 +105,20 @@ namespace MyAllocator{
 
 		template<class Allocator = std::nullptr_t>
 		using AllocatedByteBuffer	= MyBuffer::AllocatedBuffer<PtrType, Allocator>;
+
+		template<class Allocator = std::nullptr_t>
+		using AllocatedByteBufferLinked	= MyBuffer::AllocatedBufferLinked<PtrType, Allocator>;
 	} // ArenaAllocatorImpl
 
 	using ArenaAllocatorRaw		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::LinkedBuffer>;
 
 	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::AllocatedByteBuffer<> >;
+
+	template<class TAllocator>
+	using ArenaAllocatorT		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::AllocatedByteBuffer<TAllocator> >;
+
+	template<class TAllocator>
+	using ArenaAllocatorLinked	= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::AllocatedByteBufferLinked<TAllocator> >;
 
 	template<std::size_t Size>
 	using ArenaAllocatorStatic	= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::StaticBuffer<Size> >;

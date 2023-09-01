@@ -95,6 +95,31 @@ VectorList also have much low memory consumption, so you can fit 30-40% more dat
 
 
 ---
+### HugeTLB support
+
+If you are running Linux, you can automatically use huge memory pages for memtable.
+
+All you need to do is to enable it.
+
+Suppose you need 4 GB for the memtable. This means system needs to allocate 2 x 4 GB = 8 GB.
+
+Since standard Linux huge page is 2 MB, you will need 8192 MB / 2 MB = 4096 pages.
+
+All you need to do is following:
+
+	sudo sysctl vm.nr_hugepages=4096
+
+Also you will need to make sure this settings is kept after reboot.
+
+Following command will show HugeTLB information:
+
+	grep -i huge /proc/meminfo
+
+If HugeTLB support is turned off or there is no enough pages, system will use conventional memory.
+
+
+
+---
 ### Testing memtable with other structures
 
 Prior SkipList we tested with hashtables, VectorList (dynamic array with shifting) and LinkedList.

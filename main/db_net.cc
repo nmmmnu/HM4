@@ -9,7 +9,7 @@
 #include "factory/mutablebinlogcurrent.h"
 #include "factory/binlogreplay.h"
 
-#include "arenaallocator.h"
+#include "mmaparenaallocator.h"
 
 #include "version.h"
 #include "myfs.h"
@@ -35,7 +35,8 @@ constexpr bool USE_CONCURRENCY = true;
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
-using Allocator		= MyAllocator::ArenaAllocator;
+using MMapAllocator	= MyAllocator::MMapAllocator;
+using Allocator		= MyAllocator::MMapArenaAllocator;
 
 // ----------------------------------
 
@@ -139,17 +140,19 @@ namespace{
 		}
 	}
 
-	Allocator createAllocator(const MyOptions &opt){
+	size_t calcAllocatorSize(const MyOptions &opt){
 		constexpr size_t MB = 1024 * 1024;
 
+		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena * MB);
+	}
+
+	Allocator createAllocator(const MyOptions &opt, MMapAllocator &mmap_allocator){
 		// uncomment for virtual Allocator
 		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
-		auto const max_memlist_arena = std::max(MIN_ARENA_SIZE, opt.max_memlist_arena);
+		Allocator allocator{ mmap_allocator.size(), mmap_allocator };
 
-		Allocator allocator{ max_memlist_arena * MB };
-
-		logger_fmt<Logger::NOTICE>("{} creating with size of {} MB", allocator.getName(), max_memlist_arena);
+		logger_fmt<Logger::NOTICE>("{} creating with size of {} bytes", allocator.getName(), mmap_allocator.size());
 
 		if (opt.map_memlist_arena){
 			logger_fmt<Logger::NOTICE>("{} mapping virtual memory pages to physical/swap memory (may take a while)", allocator.getName());
@@ -176,11 +179,13 @@ namespace{
 
 		using MyMemList = MyDBNetMemList;
 
+		MyAllocator::MMapAllocator mmap_allocator{ calcAllocatorSize(opt) };
+
 		if constexpr(USE_CONCURRENCY){
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
 
-			auto allocator1 = createAllocator(opt);
-			auto allocator2 = createAllocator(opt);
+			auto allocator1 = createAllocator(opt, mmap_allocator);
+			auto allocator2 = createAllocator(opt, mmap_allocator);
 
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
@@ -213,7 +218,7 @@ namespace{
 		}else{
 			bool const have_binlog = ! opt.binlog_path1.empty();
 
-			auto allocator = createAllocator(opt);
+			auto allocator = createAllocator(opt, mmap_allocator);
 
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;

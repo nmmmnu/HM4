@@ -10,21 +10,19 @@
 #include "pmallocator.h"
 #include "stdallocator.h"
 #include "trackingallocator.h"
-#include "arenaallocator.h"
+#include "mmaparenaallocator.h"
 
-constexpr size_t ARENA_SIZE = 6 * 1ULL * 1024 * 1024 * 1024;
+constexpr size_t ARENA_SIZE = 1ULL * 1024 * 1024 * 1024 * 6;
 
-using Allocator_std0	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-using Allocator_std1	= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
-using Allocator_std	= Allocator_std0;
-using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
-template<size_t Size>
-using Allocator_arenaSt	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocatorStatic<Size> >;
+using Allocator_std0		= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_std1		= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+using Allocator_std		= Allocator_std0;
+
+using Allocator_arenaMMAP	= MyAllocator::PMOwnerAllocator<MyAllocator::MMapArenaAllocatorInplace>;
 
 
 Allocator_std			allocator_std;
-Allocator_arena			allocator_arena{ ARENA_SIZE };
-//Allocator_arenaSt<ARENA_SIZE>	allocator_arena;
+Allocator_arenaMMAP		allocator_arena{ ARENA_SIZE, ARENA_SIZE };
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
 
@@ -45,7 +43,7 @@ namespace{
 				cmd
 		);
 
-		const char *format = "\t{} - {:10} {}\n";
+		const char *format = "\t{} - {:20} {}\n";
 
 		fmt::print(format, 'v', "VectorList"		, "std"		);
 		fmt::print(format, 'l', "LinkList"		, "std"		);
@@ -53,12 +51,12 @@ namespace{
 		fmt::print(format, 'i', "UnrolledLinkList"	, "std"		);
 		fmt::print(format, 'z', "UnrolledSkipList"	, "std"		);
 		fmt::print(format, 'a', "AVLList"		, "std"		);
-		fmt::print(format, 'V', "VectorList"		, "arena"	);
-		fmt::print(format, 'L', "LinkList"		, "arena"	);
-		fmt::print(format, 'S', "SkipList"		, "arena"	);
-		fmt::print(format, 'I', "UnrolledLinkList"	, "arena"	);
-		fmt::print(format, 'Z', "UnrolledskipList"	, "arena"	);
-		fmt::print(format, 'A', "AVLList"		, "arena"	);
+		fmt::print(format, 'V', "VectorList"		, "mmap arena"	);
+		fmt::print(format, 'L', "LinkList"		, "mmap arena"	);
+		fmt::print(format, 'S', "SkipList"		, "mmap arena"	);
+		fmt::print(format, 'I', "UnrolledLinkList"	, "mmap arena"	);
+		fmt::print(format, 'Z', "UnrolledskipList"	, "mmap arena"	);
+		fmt::print(format, 'A', "AVLList"		, "mmap arena"	);
 
 		return 10;
 	}

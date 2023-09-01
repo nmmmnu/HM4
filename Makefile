@@ -59,9 +59,11 @@ ifeq ($(UNAME), Linux)
 #CF_MISC	+= -DNOT_HAVE_CHARCONV
 
 # add epoll support...
+# add commit support...
+# add hugetlb support...
 
 EXTRA_INCL	+= -Iinclude.linux/
-CF_MISC		+= -DSELECTOR_EPOOL -DMAP_PAGES
+CF_MISC		+= -DSELECTOR_EPOOL -DUSE_MAP_PAGES -DUSE_HUGETLB
 LL_SELECTOR	 = $(O)epollselector.o
 
 else ifeq ($(UNAME), FreeBSD)

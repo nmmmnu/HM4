@@ -2,9 +2,22 @@
 #define MY_ALLOCATED_BUFFER
 
 #include "baseallocator.h"
-#include "mybuffer.h"
 
 namespace MyBuffer{
+	namespace allocated_buffer_impl_{
+		template<typename T, class Allocator>
+		auto allocate(Allocator &allocator, std::size_t size){
+			auto result = MyAllocator::wrapInSmartPtr(
+					allocator,
+					MyAllocator::allocate<T>(allocator, size)
+			);
+
+			if (result == nullptr)
+				throw std::bad_alloc{};
+
+			return result;
+		}
+	}
 
 	template<typename T, class Allocator = std::nullptr_t>
 	struct AllocatedBuffer{
@@ -14,11 +27,7 @@ namespace MyBuffer{
 		template<class ...Args>
 		AllocatedBuffer(size_type const size, Args &&...args) :
 					allocator_	(std::forward<Args>(args)...	),
-					size_		(size				){
-
-			if (data_ == nullptr)
-				throw std::bad_alloc{};
-		}
+					size_		(size				){}
 
 		value_type *data() noexcept{
 			return data_.get();
@@ -35,17 +44,40 @@ namespace MyBuffer{
 	private:
 		using SmartPtrType = MyAllocator::SmartPtrType<value_type,Allocator>;
 
-		static SmartPtrType allocate__(Allocator allocator, size_type size){
-			return MyAllocator::wrapInSmartPtr(
-					allocator,
-					MyAllocator::allocate<value_type>(allocator, size)
-			);
+		Allocator	allocator_;
+		size_type	size_;
+		SmartPtrType	data_	= allocated_buffer_impl_::allocate<value_type>(allocator_, size_);
+	};
+
+
+
+	template<typename T, class Allocator>
+	struct AllocatedBufferLinked{
+		using value_type	= T;
+		using size_type		= std::size_t;
+
+		AllocatedBufferLinked(size_type const size, Allocator &allocator) :
+					allocator_	(& allocator	),
+					size_		(size		){}
+
+		value_type *data() noexcept{
+			return data_.get();
+		}
+
+		const value_type *data() const noexcept{
+			return data_.get();
+		}
+
+		auto size() const noexcept{
+			return size_;
 		}
 
 	private:
-		Allocator	allocator_;
+		using SmartPtrType = MyAllocator::SmartPtrType<value_type,Allocator>;
+
+		Allocator	*allocator_;
 		size_type	size_;
-		SmartPtrType	data_	= allocate__(allocator_, size_);
+		SmartPtrType	data_	= allocated_buffer_impl_::allocate<value_type>(*allocator_, size_);
 	};
 
 } // namespace MyBuffer

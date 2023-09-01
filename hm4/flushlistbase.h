@@ -58,22 +58,21 @@ namespace flushlist_impl_{
 
 	template<class FlushList, class InsertList, class Predicate, class PFactory>
 	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory){
-		if (predicate(insertList, factory.bytes())){
+		auto flushThenInsert = [&](){
 			flushList.flush();
 			return insertList.insertF(factory);
-		}
+		};
+
+		// ---
+
+		if (predicate(insertList, factory.bytes()))
+			return flushThenInsert();
 
 		auto const result = insertList.insertF(factory);
 
 		switch(result.status){
-		case result.ERROR_NO_MEMORY:
-			flushList.flush();
-
-			// try insert again
-			return insertList.insertF(factory);
-
-		default:
-			return result;
+		case result.ERROR_NO_MEMORY:	return flushThenInsert();	// try insert again
+		default:			return result;
 		}
 	}
 }
