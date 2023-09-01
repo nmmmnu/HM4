@@ -75,8 +75,8 @@ AVL Tree can be slow when data is deleted, but in our case we have kind of free 
 because instead of deleting the data, we insert tombstones.
 
 Minor problem of AVLList is it requires about 5% memory compared to SkipList.
-With future development related to putting key/value pair directly into AVLTree node,
-this memory difference was changed down to about 2%.
+However our implementation put the key/value pair directly into AVLTree node and
+memory difference was changed down to about 2%.
 
 AVLList is much faster than SkipList. Performance tests using db_builder_concurrent
 show AVLList can be up to 40% faster than SkipList.

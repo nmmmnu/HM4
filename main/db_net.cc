@@ -143,7 +143,7 @@ namespace{
 	size_t calcAllocatorSize(const MyOptions &opt){
 		constexpr size_t MB = 1024 * 1024;
 
-		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena * MB);
+		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena) * MB;
 	}
 
 	Allocator createAllocator(const MyOptions &opt, MMapAllocator &mmap_allocator){

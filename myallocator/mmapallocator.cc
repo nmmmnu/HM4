@@ -1,5 +1,7 @@
 #include "mmapallocator.h"
 
+#include "logger.h"
+
 #include <sys/mman.h>
 #include <cassert>
 #include <cstdio>
@@ -23,15 +25,23 @@ namespace MyAllocator{
 		#ifdef USE_HUGETLB
 
 		void *mmapHugeTLB(std::size_t const size) noexcept{
+			constexpr std::string_view mask = "MMapAllocator allocating {} bytes with {} mmap.";
+
 			auto const options = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
 
 			void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, options, -1, 0);
 
 			if (p == MAP_FAILED){
-			//	fprintf(stderr, "Allocate HUGETLB fail, going back to conventional memory...\n");
+				logger<Logger::WARNING>() << "MMapAllocator allocating HUGETLB fail, going back to conventional memory.";
+
+				logger_fmt<Logger::NOTICE>(mask, size, "conventional");
+
 				return mmapNormal_(size);
-			}else
+			}else{
+				logger_fmt<Logger::NOTICE>(mask, size, "HugeTLB");
+
 				return p;
+			}
 		}
 
 		#endif
