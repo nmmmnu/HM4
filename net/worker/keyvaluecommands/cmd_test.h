@@ -35,7 +35,7 @@ namespace net::worker::commands::Test{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "info";
+		constexpr inline static std::string_view name	= "test";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
