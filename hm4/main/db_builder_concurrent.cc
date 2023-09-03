@@ -13,8 +13,7 @@ using MyReader = FileReader;
 #include "mmapallocator.h"
 #include "allocatedbuffer.h"
 
-using MMapAllocator	= MyAllocator::MMapAllocator<2>;
-using ArenaBuffer	= MyBuffer::AllocatedBufferLinked<std::uint8_t, MMapAllocator>;
+using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
 using Allocator		= MyAllocator::ArenaAllocator;
 
 #if 1
@@ -73,10 +72,8 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	MMapAllocator mmapAllocator;
-
-	ArenaBuffer buffer1{ max_memlist_arena * MB, mmapAllocator };
-	ArenaBuffer buffer2{ max_memlist_arena * MB, mmapAllocator };
+	ArenaBuffer buffer1{ max_memlist_arena * MB };
+	ArenaBuffer buffer2{ max_memlist_arena * MB };
 
 	Allocator	allocator1{ buffer1 };
 	Allocator	allocator2{ buffer2 };

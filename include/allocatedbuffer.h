@@ -19,6 +19,8 @@ namespace MyBuffer{
 		}
 	}
 
+
+
 	template<typename T, class Allocator = std::nullptr_t>
 	struct AllocatedBufferOwned{
 		using value_type	= T;
@@ -52,6 +54,9 @@ namespace MyBuffer{
 		size_type	size_;
 		SmartPtrType	data_	= allocated_buffer_impl_::allocate<value_type>(allocator_, size_);
 	};
+
+	template<class Allocator = std::nullptr_t>
+	using AllocatedByteBufferOwned = AllocatedBufferOwned<std::uint8_t, Allocator>;
 
 
 
@@ -87,6 +92,9 @@ namespace MyBuffer{
 		size_type	size_;
 		SmartPtrType	data_	= allocated_buffer_impl_::allocate<value_type>(*allocator_, size_);
 	};
+
+	template<class Allocator = std::nullptr_t>
+	using AllocatedByteBufferLinked = AllocatedBufferLinked<std::uint8_t, Allocator>;
 
 } // namespace MyBuffer
 

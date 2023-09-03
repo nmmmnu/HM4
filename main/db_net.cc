@@ -37,8 +37,7 @@ constexpr bool USE_CONCURRENCY = true;
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
-using MMapAllocator	= MyAllocator::MMapAllocator<2>;
-using ArenaBuffer	= MyBuffer::AllocatedBufferLinked<std::uint8_t, MMapAllocator>;
+using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
 using Allocator		= MyAllocator::ArenaAllocator;
 
 // ----------------------------------
@@ -182,13 +181,11 @@ namespace{
 
 		using MyMemList = MyDBNetMemList;
 
-		MMapAllocator mmapAllocator;
-
 		auto const allocatorSize = calcAllocatorSize(opt);
 
 		if constexpr(USE_CONCURRENCY){
-			ArenaBuffer buffer1{ allocatorSize, mmapAllocator };
-			ArenaBuffer buffer2{ allocatorSize, mmapAllocator };
+			ArenaBuffer buffer1{ allocatorSize };
+			ArenaBuffer buffer2{ allocatorSize };
 
 			auto allocator1 = createAllocator(opt, buffer1);
 			auto allocator2 = createAllocator(opt, buffer2);
@@ -224,7 +221,7 @@ namespace{
 				);
 			}
 		}else{
-			ArenaBuffer buffer{ allocatorSize, mmapAllocator };
+			ArenaBuffer buffer{ allocatorSize };
 
 			auto allocator = createAllocator(opt, buffer);
 

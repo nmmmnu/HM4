@@ -26,7 +26,7 @@ Allocator_std		allocator_std;
 
 
 
-using ArenaBuffer	= MyBuffer::AllocatedBufferOwned<std::uint8_t, MyAllocator::MMapAllocator<1> >;
+using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
 using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
 
 ArenaBuffer		arena_buffer{ ARENA_SIZE };

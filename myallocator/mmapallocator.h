@@ -3,7 +3,7 @@
 
 #include "baseallocator.h"
 
-#include <algorithm>
+#include <cassert>
 
 namespace MyAllocator{
 
@@ -15,40 +15,33 @@ namespace MyAllocator{
 		void destroy(void *p, std::size_t size_) noexcept;
 	};
 
-	template<size_t Size>
 	struct MMapAllocator{
 		constexpr static const char *getName(){
 			return "MMapAllocator";
 		}
 
 		void *xallocate(std::size_t const size) noexcept{
-			auto it = std::find_if(std::begin(data_), std::end(data_), [](auto &x){
-				return !x.ptr;
-			});
+			assert(size_ == 0);
 
-			if (it == std::end(data_))
-				return nullptr;
+			void *p = (
+				#ifdef USE_HUGETLB
+					mmapallocator_impl_::createHugeTLB(size)
+				#else
+					mmapallocator_impl_::createNormal(size)
+				#endif
+			);
 
-			#ifdef USE_HUGETLB
-				void *p = mmapallocator_impl_::createHugeTLB(size);
-			#else
-				void *p = mmapallocator_impl_::createNormal(size);
-			#endif
-
-			*it = { p, size };
+			size_ = size;
 
 			return p;
 		}
 
 		void xdeallocate(void *p) noexcept{
-			auto it = std::find_if(std::begin(data_), std::end(data_), [p](auto &x){
-				return x.ptr == p;
-			});
+			assert(size_);
 
-			if (it != std::end(data_)){
-				mmapallocator_impl_::destroy(p, it->size);
-				*it = VS{};
-			}
+			mmapallocator_impl_::destroy(p, size_);
+
+			size_ = 0;
 		}
 
 		constexpr static bool owns(const void *) noexcept{
@@ -76,12 +69,7 @@ namespace MyAllocator{
 		}
 
 	private:
-		struct VS{
-			void	*ptr	= nullptr;
-			size_t	size	= 0;
-		};
-
-		VS data_[Size];
+		std::size_t size_ = 0;
 	};
 
 } // namespace MyAllocator
