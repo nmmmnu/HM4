@@ -22,16 +22,10 @@ using Allocator_std0	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
 using Allocator_std1	= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
 using Allocator_std	= Allocator_std0;
 
-Allocator_std		allocator_std;
-
 
 
 using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
 using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
-
-ArenaBuffer		arena_buffer{ ARENA_SIZE };
-
-Allocator_arena		allocator_arena{ arena_buffer };
 
 
 
@@ -162,7 +156,8 @@ namespace{
 
 namespace {
 
-	int file_search(char const type, std::string_view const filename, std::string_view const key, bool const it){
+	template<class TAllocator>
+	int file_search(char const type, std::string_view const filename, std::string_view const key, bool const it, TAllocator &allocator){
 		const size_t buffer_size = 4096;
 
 		char buffer[buffer_size];
@@ -172,19 +167,52 @@ namespace {
 
 		switch(type){
 		default:
-		case 'v':	return listSearchProcess(hm4::VectorList	<Allocator>	{ allocator_std   }, reader, key, it);
-		case 'l':	return listSearchProcess(hm4::LinkList	 	<Allocator>	{ allocator_std   }, reader, key, it);
-		case 's':	return listSearchProcess(hm4::SkipList	 	<Allocator>	{ allocator_std   }, reader, key, it);
-		case 'i':	return listSearchProcess(hm4::UnrolledLinkList	<Allocator>	{ allocator_std   }, reader, key, it);
-		case 'z':	return listSearchProcess(hm4::UnrolledSkipList	<Allocator>	{ allocator_std   }, reader, key, it);
-		case 'a':	return listSearchProcess(hm4::AVLList		<Allocator>	{ allocator_std   }, reader, key, it);
+		case 'v':
+		case 'V':	return listSearchProcess(hm4::VectorList	<Allocator>	{ allocator }, reader, key, it);
 
-		case 'V':	return listSearchProcess(hm4::VectorList	<Allocator>	{ allocator_arena }, reader, key, it);
-		case 'L':	return listSearchProcess(hm4::LinkList		<Allocator>	{ allocator_arena }, reader, key, it);
-		case 'S':	return listSearchProcess(hm4::SkipList		<Allocator>	{ allocator_arena }, reader, key, it);
-		case 'I':	return listSearchProcess(hm4::UnrolledLinkList	<Allocator>	{ allocator_arena }, reader, key, it);
-		case 'Z':	return listSearchProcess(hm4::UnrolledSkipList	<Allocator>	{ allocator_arena }, reader, key, it);
-		case 'A':	return listSearchProcess(hm4::AVLList		<Allocator>	{ allocator_arena }, reader, key, it);
+		case 'l':
+		case 'L':	return listSearchProcess(hm4::LinkList		<Allocator>	{ allocator }, reader, key, it);
+
+		case 's':
+		case 'S':	return listSearchProcess(hm4::SkipList		<Allocator>	{ allocator }, reader, key, it);
+
+		case 'i':
+		case 'I':	return listSearchProcess(hm4::UnrolledLinkList	<Allocator>	{ allocator }, reader, key, it);
+
+		case 'z':
+		case 'Z':	return listSearchProcess(hm4::UnrolledSkipList	<Allocator>	{ allocator }, reader, key, it);
+
+		case 'a':
+		case 'A':	return listSearchProcess(hm4::AVLList		<Allocator>	{ allocator }, reader, key, it);
+		}
+	}
+
+	int file_search(char const type, std::string_view const filename, std::string_view const key, bool const it){
+
+		switch(type){
+		default:
+		case 'v':
+		case 'l':
+		case 's':
+		case 'i':
+		case 'z':
+		case 'a': {
+				Allocator_std	allocator;
+
+				return file_search(type, filename, key, it, allocator);
+			}
+
+		case 'V':
+		case 'L':
+		case 'S':
+		case 'I':
+		case 'Z':
+		case 'A': {
+				ArenaBuffer	arena_buffer{ ARENA_SIZE };
+				Allocator_arena	allocator{ arena_buffer };
+
+				return file_search(type, filename, key, it, allocator);
+			}
 		}
 	}
 

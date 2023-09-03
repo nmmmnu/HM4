@@ -54,11 +54,11 @@ namespace my_logger{
 			return LoggerStream(banner[static_cast<unsigned>(level)], writting);
 		}
 
-		template<Level level>
-		[[nodiscard]]
-		auto get() const{
-			return get(level	);
-		}
+	//	template<Level level>
+	//	[[nodiscard]]
+	//	auto get() const{
+	//		return get(level);
+	//	}
 
 		[[nodiscard]]
 		auto getLevel() const{
