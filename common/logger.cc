@@ -4,7 +4,6 @@
 
 
 namespace my_logger{
-	Logger g_log;
 
 	void Logger::LoggerStream::outputBanner_(const char *banner){
 		if (writting_){
@@ -22,7 +21,10 @@ namespace my_logger{
 }
 
 my_logger::Logger &getLoggerSingleton(){
-	return my_logger::g_log;
+	// avoid initialization order fiasco
+	static my_logger::Logger g_log;
+
+	return g_log;
 }
 
 

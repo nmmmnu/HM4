@@ -16,18 +16,12 @@
 
 constexpr size_t ARENA_SIZE = 1ULL * 1024 * 1024 * 1024 * 6;
 
-
-
 using Allocator_std0	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
 using Allocator_std1	= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
 using Allocator_std	= Allocator_std0;
 
-
-
 using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
 using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
-
-
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
 
