@@ -3,7 +3,6 @@
 
 #include "baseallocator.h"
 #include "mybuffer.h"
-#include "allocatedbuffer.h"
 
 #include <cstring>
 #include <cstdint>
@@ -99,29 +98,18 @@ namespace MyAllocator{
 
 
 		using LinkedBuffer		= MyBuffer::LinkedBuffer<PtrType>;
+		using ArenaAllocator		= ArenaAllocatorBase<LinkedBuffer>;
 
 		template<std::size_t Size>
-		using  StaticBuffer		= MyBuffer::StaticBuffer<PtrType, Size>;
-
-		template<class Allocator = std::nullptr_t>
-		using AllocatedByteBuffer	= MyBuffer::AllocatedBuffer<PtrType, Allocator>;
-
-		template<class Allocator = std::nullptr_t>
-		using AllocatedByteBufferLinked	= MyBuffer::AllocatedBufferLinked<PtrType, Allocator>;
+		using StaticBuffer		= MyBuffer::StaticBuffer<PtrType, Size>;
+		template<std::size_t Size>
+		using ArenaAllocatorStatic	= ArenaAllocatorBase<StaticBuffer<Size> >;
 	} // ArenaAllocatorImpl
 
-	using ArenaAllocatorRaw		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::LinkedBuffer>;
-
-	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::AllocatedByteBuffer<> >;
-
-	template<class TAllocator>
-	using ArenaAllocatorT		= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::AllocatedByteBuffer<TAllocator> >;
-
-	template<class TAllocator>
-	using ArenaAllocatorLinked	= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::AllocatedByteBufferLinked<TAllocator> >;
+	using ArenaAllocator		= ArenaAllocatorImpl::ArenaAllocator;
 
 	template<std::size_t Size>
-	using ArenaAllocatorStatic	= ArenaAllocatorImpl::ArenaAllocatorBase<ArenaAllocatorImpl::StaticBuffer<Size> >;
+	using ArenaAllocatorStatic	= ArenaAllocatorImpl::ArenaAllocatorStatic<Size>;
 
 } // namespace MyAllocator
 

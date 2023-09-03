@@ -9,10 +9,13 @@
 
 using MyReader = FileReader;
 
-#include "mmaparenaallocator.h"
+#include "arenaallocator.h"
+#include "mmapallocator.h"
+#include "allocatedbuffer.h"
 
-using MMapAllocator = MyAllocator::MMapAllocator;
-using Allocator     = MyAllocator::MMapArenaAllocator;
+using MMapAllocator	= MyAllocator::MMapAllocator<2>;
+using ArenaBuffer	= MyBuffer::AllocatedBufferLinked<std::uint8_t, MMapAllocator>;
+using Allocator		= MyAllocator::ArenaAllocator;
 
 #if 1
 	#include "avllist.h"
@@ -70,10 +73,13 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	MMapAllocator mmap_allocator{ max_memlist_arena * MB };
+	MMapAllocator mmapAllocator;
 
-	Allocator allocator1{ mmap_allocator.size(), mmap_allocator };
-	Allocator allocator2{ mmap_allocator.size(), mmap_allocator };
+	ArenaBuffer buffer1{ max_memlist_arena * MB, mmapAllocator };
+	ArenaBuffer buffer2{ max_memlist_arena * MB, mmapAllocator };
+
+	Allocator	allocator1{ buffer1 };
+	Allocator	allocator2{ buffer2 };
 
 	return process<FileReader>(
 			MyListFactory{ path, allocator1, allocator2 },

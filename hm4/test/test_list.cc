@@ -12,7 +12,6 @@ MyTest mytest;
 #include "pmallocator.h"
 #include "trackingallocator.h"
 #include "stdallocator.h"
-#include "arenaallocator.h"
 
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;
@@ -274,8 +273,7 @@ template <template<class> class List>
 void list_test_hint(const char *name){
 	mytest.begin(name);
 
-	using Allocator = MyAllocator::ArenaAllocator;
-	Allocator allocator{ 1u * 1024 * 1024 };
+	Allocator_::v allocator;
 
 	List<Allocator> list{ allocator };
 

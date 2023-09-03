@@ -10,7 +10,7 @@
 
 #include "pmallocator.h"
 #include "stdallocator.h"
-#include "mmaparenaallocator.h"
+#include "arenaallocator.h"
 #include "simulatedarenaallocator.h"
 
 #include "software_prefetch.h"
@@ -480,49 +480,41 @@ const Pair &SkipList<T_Allocator>::iterator::operator*() const{
 template class SkipList<MyAllocator::PMAllocator>;
 template class SkipList<MyAllocator::STDAllocator>;
 template class SkipList<MyAllocator::ArenaAllocator>;
-template class SkipList<MyAllocator::MMapArenaAllocator>;
 template class SkipList<MyAllocator::SimulatedArenaAllocator>;
 
 template auto SkipList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
 template auto SkipList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
 template auto SkipList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto SkipList<MyAllocator::MMapArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
 
 template auto SkipList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto SkipList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto SkipList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto SkipList<MyAllocator::MMapArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
-template auto SkipList<MyAllocator::MMapArenaAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Normal		&factory) -> InsertResult;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
-template auto SkipList<MyAllocator::MMapArenaAllocator>		::insertF(PairFactory::Expires		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Expires		&factory) -> InsertResult;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
-template auto SkipList<MyAllocator::MMapArenaAllocator>		::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Tombstone	&factory) -> InsertResult;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
-template auto SkipList<MyAllocator::MMapArenaAllocator>		::insertF(PairFactory::Clone		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::Clone		&factory) -> InsertResult;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::ArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
-template auto SkipList<MyAllocator::MMapArenaAllocator>		::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::insertF(PairFactory::IFactory		&factory) -> InsertResult;
 
 } // namespace

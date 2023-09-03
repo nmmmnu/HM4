@@ -20,14 +20,18 @@ namespace MyBuffer{
 	}
 
 	template<typename T, class Allocator = std::nullptr_t>
-	struct AllocatedBuffer{
+	struct AllocatedBufferOwned{
 		using value_type	= T;
 		using size_type		= std::size_t;
 
 		template<class ...Args>
-		AllocatedBuffer(size_type const size, Args &&...args) :
+		AllocatedBufferOwned(size_type const size, Args &&...args) :
 					allocator_	(std::forward<Args>(args)...	),
 					size_		(size				){}
+
+		AllocatedBufferOwned(size_type const size, std::nullptr_t allocator) :
+					allocator_	(allocator	),
+					size_		(size		){}
 
 		value_type *data() noexcept{
 			return data_.get();
@@ -51,13 +55,17 @@ namespace MyBuffer{
 
 
 
-	template<typename T, class Allocator>
+	template<typename T, class Allocator = std::nullptr_t>
 	struct AllocatedBufferLinked{
 		using value_type	= T;
 		using size_type		= std::size_t;
 
 		AllocatedBufferLinked(size_type const size, Allocator &allocator) :
 					allocator_	(& allocator	),
+					size_		(size		){}
+
+		AllocatedBufferLinked(size_type const size, std::nullptr_t allocator) :
+					allocator_	(allocator	),
 					size_		(size		){}
 
 		value_type *data() noexcept{

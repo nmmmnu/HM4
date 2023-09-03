@@ -201,3 +201,8 @@ Changelog
 
 -	Release
 
+### 1.3.6.1
+
+-	Refactor arena allocator
+
+

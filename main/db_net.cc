@@ -9,7 +9,9 @@
 #include "factory/mutablebinlogcurrent.h"
 #include "factory/binlogreplay.h"
 
-#include "mmaparenaallocator.h"
+#include "arenaallocator.h"
+#include "mmapallocator.h"
+#include "allocatedbuffer.h"
 
 #include "version.h"
 #include "myfs.h"
@@ -35,8 +37,9 @@ constexpr bool USE_CONCURRENCY = true;
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
-using MMapAllocator	= MyAllocator::MMapAllocator;
-using Allocator		= MyAllocator::MMapArenaAllocator;
+using MMapAllocator	= MyAllocator::MMapAllocator<2>;
+using ArenaBuffer	= MyBuffer::AllocatedBufferLinked<std::uint8_t, MMapAllocator>;
+using Allocator		= MyAllocator::ArenaAllocator;
 
 // ----------------------------------
 
@@ -146,13 +149,13 @@ namespace{
 		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena) * MB;
 	}
 
-	Allocator createAllocator(const MyOptions &opt, MMapAllocator &mmap_allocator){
+	Allocator createAllocator(const MyOptions &opt, ArenaBuffer &buffer){
 		// uncomment for virtual Allocator
 		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
-		Allocator allocator{ mmap_allocator.size(), mmap_allocator };
+		Allocator allocator{ buffer };
 
-		logger_fmt<Logger::NOTICE>("{} creating with size of {} bytes", allocator.getName(), mmap_allocator.size());
+		logger_fmt<Logger::NOTICE>("{} creating with size of {} bytes", allocator.getName(), buffer.size());
 
 		if (opt.map_memlist_arena){
 			logger_fmt<Logger::NOTICE>("{} mapping virtual memory pages to physical/swap memory (may take a while)", allocator.getName());
@@ -179,13 +182,18 @@ namespace{
 
 		using MyMemList = MyDBNetMemList;
 
-		MyAllocator::MMapAllocator mmap_allocator{ calcAllocatorSize(opt) };
+		MMapAllocator mmapAllocator;
+
+		auto const allocatorSize = calcAllocatorSize(opt);
 
 		if constexpr(USE_CONCURRENCY){
-			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
+			ArenaBuffer buffer1{ allocatorSize, mmapAllocator };
+			ArenaBuffer buffer2{ allocatorSize, mmapAllocator };
 
-			auto allocator1 = createAllocator(opt, mmap_allocator);
-			auto allocator2 = createAllocator(opt, mmap_allocator);
+			auto allocator1 = createAllocator(opt, buffer1);
+			auto allocator2 = createAllocator(opt, buffer2);
+
+			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
 
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
@@ -216,9 +224,11 @@ namespace{
 				);
 			}
 		}else{
-			bool const have_binlog = ! opt.binlog_path1.empty();
+			ArenaBuffer buffer{ allocatorSize, mmapAllocator };
 
-			auto allocator = createAllocator(opt, mmap_allocator);
+			auto allocator = createAllocator(opt, buffer);
+
+			bool const have_binlog = ! opt.binlog_path1.empty();
 
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;

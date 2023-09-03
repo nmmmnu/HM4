@@ -10,19 +10,30 @@
 #include "pmallocator.h"
 #include "stdallocator.h"
 #include "trackingallocator.h"
-#include "mmaparenaallocator.h"
+#include "arenaallocator.h"
+#include "mmapallocator.h"
+#include "allocatedbuffer.h"
 
 constexpr size_t ARENA_SIZE = 1ULL * 1024 * 1024 * 1024 * 6;
 
-using Allocator_std0		= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
-using Allocator_std1		= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
-using Allocator_std		= Allocator_std0;
-
-using Allocator_arenaMMAP	= MyAllocator::PMOwnerAllocator<MyAllocator::MMapArenaAllocatorInplace>;
 
 
-Allocator_std			allocator_std;
-Allocator_arenaMMAP		allocator_arena{ ARENA_SIZE, ARENA_SIZE };
+using Allocator_std0	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
+using Allocator_std1	= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
+using Allocator_std	= Allocator_std0;
+
+Allocator_std		allocator_std;
+
+
+
+using ArenaBuffer	= MyBuffer::AllocatedBufferOwned<std::uint8_t, MyAllocator::MMapAllocator<1> >;
+using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
+
+ArenaBuffer		arena_buffer{ ARENA_SIZE };
+
+Allocator_arena		allocator_arena{ arena_buffer };
+
+
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
 

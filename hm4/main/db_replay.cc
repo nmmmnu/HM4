@@ -8,10 +8,12 @@
 
 #include "disk/disklist.h"
 
-#include "mmaparenaallocator.h"
+#include "arenaallocator.h"
+#include "mmapallocator.h"
+#include "allocatedbuffer.h"
 
-using MMapAllocator = MyAllocator::MMapAllocator;
-using Allocator     = MyAllocator::MMapArenaAllocator;
+using ArenaBuffer	= MyBuffer::AllocatedBufferOwned<std::uint8_t, MyAllocator::MMapAllocator<1> >;
+using Allocator		= MyAllocator::ArenaAllocator;
 
 constexpr size_t	MIN_ARENA_SIZE		= 128;
 
@@ -102,9 +104,9 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	MMapAllocator mmap_allocator{ max_memlist_arena * MB };
+	ArenaBuffer	buffer{ max_memlist_arena * MB };
 
-	Allocator allocator{ mmap_allocator.size(), mmap_allocator };
+	Allocator	allocator{ buffer };
 
 	MyListFactory factory{ path, allocator };
 

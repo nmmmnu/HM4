@@ -3,14 +3,12 @@
 #include "logger.h"
 
 #include <sys/mman.h>
-#include <cassert>
-#include <cstdio>
 
 namespace MyAllocator{
-	namespace{
+	namespace mmapallocator_impl_{
 		// duplicate, but with template looks very bad.
 
-		void *mmapNormal_(std::size_t const size) noexcept{
+		void *createNormal(std::size_t const size) noexcept{
 			auto const options = MAP_PRIVATE | MAP_ANONYMOUS;
 
 			void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, options, -1, 0);
@@ -24,44 +22,37 @@ namespace MyAllocator{
 
 		#ifdef USE_HUGETLB
 
-		void *mmapHugeTLB(std::size_t const size) noexcept{
+		void *createHugeTLB(std::size_t const size) noexcept{
 			constexpr std::string_view mask = "MMapAllocator allocating {} bytes with {} mmap.";
 
 			auto const options = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
 
 			void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, options, -1, 0);
 
-			if (p == MAP_FAILED){
-				logger<Logger::WARNING>() << "MMapAllocator allocating HUGETLB fail, going back to conventional memory.";
-
-				logger_fmt<Logger::NOTICE>(mask, size, "conventional");
-
-				return mmapNormal_(size);
-			}else{
+			if (p != MAP_FAILED){
 				logger_fmt<Logger::NOTICE>(mask, size, "HugeTLB");
 
 				return p;
 			}
+
+			logger<Logger::WARNING>() << "MMapAllocator allocating with HugeTLB mmap fail, going back to conventional memory.";
+
+			logger_fmt<Logger::NOTICE>(mask, size, "conventional");
+
+			return createNormal(size);
 		}
 
 		#endif
-	}
 
-	void *MMapAllocator::xallocate(std::size_t const size) noexcept{
-		assert(size == size_);
+		void destroy(void *p, std::size_t size) noexcept{
+			constexpr std::string_view mask = "MMapAllocator deallocating {} bytes with mmap.";
 
-		#ifdef USE_HUGETLB
-			return mmapHugeTLB(size_);
-		#else
-			return mmapNormal_(size_);
-		#endif
-	}
+			logger_fmt<Logger::NOTICE>(mask, size);
 
-	void MMapAllocator::xdeallocate(void *p) noexcept{
-		munmap(p, size_);
-	}
+			munmap(p, size);
+		}
 
-
-} // namespace MyAllocator::hugetlb_impl_
+	} // namespace mmapallocator_impl_
+} // namespace MyAllocator
 
 
