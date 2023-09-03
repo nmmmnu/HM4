@@ -48,7 +48,7 @@ namespace MyAllocator{
 
 
 	template<typename T, class Allocator>
-	inline auto wrapInSmartPtr(Allocator &allocator, T *p) noexcept{
+	auto wrapInSmartPtr(Allocator &allocator, T *p) noexcept{
 		auto deleter = [&](void *p){
 			allocator.xdeallocate(p);
 		};
