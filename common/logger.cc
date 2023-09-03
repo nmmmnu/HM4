@@ -1,8 +1,6 @@
 #include "logger.h"
 #include "mytime.h"
 
-
-
 namespace my_logger{
 
 	void Logger::LoggerStream::outputBanner_(const char *banner){
@@ -18,13 +16,11 @@ namespace my_logger{
 		}
 	}
 
+	Logger g_log;
 }
 
 my_logger::Logger &getLoggerSingleton(){
-	// avoid initialization order fiasco
-	static my_logger::Logger g_log;
-
-	return g_log;
+	return my_logger::g_log;
 }
 
 

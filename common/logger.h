@@ -20,7 +20,8 @@ namespace my_logger{
 
 		constexpr static auto DEFAULT_LEVEL = Level::NOTICE;
 
-		Logger(Level level = DEFAULT_LEVEL) : level_(level){}
+		// constexpr avoids initialization order fiasco
+		constexpr Logger(Level level = DEFAULT_LEVEL) : level_(level){}
 
 	private:
 		/*
