@@ -24,7 +24,7 @@ namespace net::worker::commands::CAS{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			const auto &old_val = p[2];
@@ -80,7 +80,7 @@ namespace net::worker::commands::CAS{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			const auto &old_val = p[2];

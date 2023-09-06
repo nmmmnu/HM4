@@ -22,7 +22,7 @@ namespace net::worker::commands::Mutable{
 
 			auto const &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const &val = p[2];
@@ -60,7 +60,7 @@ namespace net::worker::commands::Mutable{
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -100,7 +100,7 @@ namespace net::worker::commands::Mutable{
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			// check if any key exists
@@ -149,7 +149,7 @@ namespace net::worker::commands::Mutable{
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			auto &container = blob.pcontainer;
@@ -224,7 +224,7 @@ namespace net::worker::commands::Mutable{
 
 			auto const &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const &val = p[3];
@@ -366,7 +366,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			if ( hm4::getPairOK(*db, key) ){
@@ -409,7 +409,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 
@@ -455,7 +455,7 @@ namespace net::worker::commands::Mutable{
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
@@ -548,7 +548,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			// because old_value may be overwritten,
@@ -603,7 +603,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 
@@ -654,7 +654,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			std::string_view const val_new = p[2];
@@ -722,7 +722,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 
@@ -767,7 +767,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 
@@ -817,7 +817,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 

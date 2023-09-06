@@ -16,7 +16,7 @@ namespace net::worker::commands::Counter{
 
 				const auto &key = p[1];
 
-				if (key.empty())
+				if (!hm4::Pair::isKeyValid(key))
 					return;
 
 				int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;

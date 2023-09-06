@@ -171,8 +171,7 @@ inline namespace version_4_00_00{
 		template<class Allocator, class Factory>
 		[[nodiscard]]
 		static Pair *create__(Allocator &allocator, Factory &factory) noexcept{
-
-			if ( bool const ok = factory.getKey().size() > 0 && factory.getKey().size() <= PairConf::MAX_KEY_SIZE; ! ok )
+			if ( isKeyValid(factory.getKey()) )
 				return nullptr;
 
 			if ( factory.bytes() > maxBytes() )
@@ -441,6 +440,15 @@ inline namespace version_4_00_00{
 			return bytes(PairConf::MAX_KEY_SIZE, PairConf::MAX_VAL_SIZE);
 		}
 
+		[[nodiscard]]
+		constexpr
+		static bool isKeyValid(std::string_view key) noexcept{
+			return
+				key.size() > 0 &&
+				key.size() <= PairConf::MAX_KEY_SIZE
+			;
+		}
+
 	private:
 		[[nodiscard]]
 		constexpr const char *getKey_() const noexcept{
@@ -541,7 +549,7 @@ inline namespace version_4_00_00{
 			[[nodiscard]]
 			constexpr bool valid() const{
 				return
-					key.size() <= PairConf::MAX_KEY_SIZE &&
+					Pair::isKeyValid(key) &&
 					val.size() <= PairConf::MAX_VAL_SIZE
 				;
 			}
@@ -588,7 +596,7 @@ inline namespace version_4_00_00{
 			[[nodiscard]]
 			constexpr bool valid() const{
 				return
-					key.size() <= PairConf::MAX_KEY_SIZE &&
+					Pair::isKeyValid(key) &&
 					val.size() <= PairConf::MAX_VAL_SIZE
 				;
 			}
@@ -625,9 +633,7 @@ inline namespace version_4_00_00{
 
 			[[nodiscard]]
 			constexpr bool valid() const{
-				return
-					key.size() <= PairConf::MAX_KEY_SIZE
-				;
+				return Pair::isKeyValid(key);
 			}
 
 			void createHint(Pair *pair) const{

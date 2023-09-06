@@ -65,7 +65,7 @@ namespace net::worker::commands::BF{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);
@@ -149,7 +149,7 @@ namespace net::worker::commands::BF{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			using namespace bf_impl_;
@@ -189,7 +189,7 @@ namespace net::worker::commands::BF{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);
@@ -236,7 +236,7 @@ namespace net::worker::commands::BF{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);

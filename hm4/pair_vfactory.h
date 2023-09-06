@@ -37,7 +37,7 @@ inline namespace version_4_00_00{
 			[[nodiscard]]
 			constexpr bool valid() const final{
 				return
-					key.size() <= PairConf::MAX_KEY_SIZE &&
+					Pair::isKeyValid(key) &&
 					val_size   <= PairConf::MAX_VAL_SIZE
 				;
 			}

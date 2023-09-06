@@ -90,7 +90,7 @@ namespace net::worker::commands::HLL{
 
 			auto const &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const varg = 2;
@@ -171,7 +171,7 @@ namespace net::worker::commands::HLL{
 
 			auto const &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			using namespace hll_impl_;
@@ -213,7 +213,7 @@ namespace net::worker::commands::HLL{
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			MySpan<const std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
@@ -258,7 +258,7 @@ namespace net::worker::commands::HLL{
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			using namespace hll_impl_;
@@ -306,13 +306,13 @@ namespace net::worker::commands::HLL{
 
 			const auto &dest_key = p[1];
 
-			if (dest_key.empty())
+			if (!hm4::Pair::isKeyValid(dest_key))
 				return;
 
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			using namespace hll_impl_;

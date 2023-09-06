@@ -21,12 +21,12 @@ namespace net::worker::commands::Copy{
 
 				const auto &key = p[1];
 
-				if (key.empty())
+				if (!hm4::Pair::isKeyValid(key))
 					return;
 
 				const auto &newkey = p[2];
 
-				if (newkey.empty())
+				if (!hm4::Pair::isKeyValid(newkey))
 					return;
 
 				if (key == newkey)

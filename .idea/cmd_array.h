@@ -87,7 +87,7 @@ namespace net::worker::commands::CV{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!Pair::isKeyValid(key))
 				return;
 
 			auto const t		= from_string<uint8_t>(p[2]);
@@ -205,7 +205,7 @@ namespace net::worker::commands::CV{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!Pair::isKeyValid(key))
 				return;
 
 			auto const t		= from_string<uint8_t>(p[2]);
@@ -279,7 +279,7 @@ namespace net::worker::commands::CV{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!Pair::isKeyValid(key))
 				return;
 
 			auto const t		= from_string<uint8_t>(p[2]);
@@ -417,7 +417,7 @@ namespace net::worker::commands::CV{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!Pair::isKeyValid(key))
 				return;
 
 			auto const t		= from_string<uint8_t>(p[2]);
@@ -483,7 +483,7 @@ namespace net::worker::commands::CV{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!Pair::isKeyValid(key))
 				return;
 
 			auto &container  = blob.container;
@@ -573,7 +573,7 @@ namespace net::worker::commands::CV{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!Pair::isKeyValid(key))
 				return;
 
 			auto &container  = blob.container;
@@ -665,7 +665,7 @@ namespace net::worker::commands::CV{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!Pair::isKeyValid(key))
 				return;
 
 			auto const t = from_string<uint8_t>(p[2]);

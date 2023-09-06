@@ -101,7 +101,7 @@ namespace net::worker::commands::CMS{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const w = from_string<uint64_t>(p[2]);
@@ -216,7 +216,7 @@ namespace net::worker::commands::CMS{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);
@@ -280,7 +280,7 @@ namespace net::worker::commands::CMS{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);
@@ -351,7 +351,7 @@ namespace net::worker::commands::CMS{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);

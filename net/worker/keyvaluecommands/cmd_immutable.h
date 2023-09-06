@@ -23,7 +23,7 @@ namespace net::worker::commands::Immutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			return result.set(
@@ -61,7 +61,7 @@ namespace net::worker::commands::Immutable{
 				return;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; key.empty())
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return;
 
 			container.clear();
@@ -97,7 +97,7 @@ namespace net::worker::commands::Immutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			return result.set(
@@ -128,7 +128,7 @@ namespace net::worker::commands::Immutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			uint64_t const ttl = hm4::getPair_(*db, key, [](bool b, auto it){
@@ -162,7 +162,7 @@ namespace net::worker::commands::Immutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const *pair = hm4::getPairPtrNC(*db, key);
@@ -205,7 +205,7 @@ namespace net::worker::commands::Immutable{
 			auto const start  = from_string<uint64_t>(p[2]);
 			auto const finish = from_string<uint64_t>(p[3]);
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			if (finish < start)
@@ -245,7 +245,7 @@ namespace net::worker::commands::Immutable{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			return result.set(

@@ -37,7 +37,7 @@ namespace net::worker::commands::BITSET{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const [ok, bytes] = getBytes__(p);
@@ -150,7 +150,7 @@ namespace net::worker::commands::BITSET{
 
 			const auto &key		= p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			const auto n     	= from_string<size_type>(p[2]);
@@ -200,7 +200,7 @@ namespace net::worker::commands::BITSET{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto &container = blob.container;
@@ -263,7 +263,7 @@ namespace net::worker::commands::BITSET{
 
 			const auto &key = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 
