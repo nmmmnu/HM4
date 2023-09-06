@@ -204,5 +204,7 @@ Changelog
 ### 1.3.6.1
 
 -	Refactor arena allocator
-
+-	Fix potencial bug with clients who try to set data over the value limit.
+	In such cases the server will disconnect the client, since the client will not check the error message and will continue to push the data.
+	HM4 currently 256 MB, Redis support 512 MB.
 

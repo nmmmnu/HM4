@@ -31,8 +31,7 @@ namespace MyAllocator{
 				#endif
 			);
 
-			if (p)
-				size_ = size;
+			size_ = p ? size : 0;
 
 			return p;
 		}

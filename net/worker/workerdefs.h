@@ -27,17 +27,22 @@ namespace error{
 
 	template<class Protocol, class Buffer>
 	WorkerStatus NotImplemented(Protocol &protocol, Buffer &buffer){
-		return error_(protocol, buffer,"Not Implemented");
+		return error_(protocol, buffer, "Not Implemented");
 	}
 
 	template<class Protocol, class Buffer>
 	WorkerStatus BadRequest(Protocol &protocol, Buffer &buffer){
-		return error_(protocol, buffer,"Not Implemented");
+		return error_(protocol, buffer, "Not Implemented");
 	}
 
 	template<class Protocol, class Buffer>
-	WorkerStatus InternalError(Protocol &protocol, Buffer &buffer){
-		return error_(protocol, buffer,"Internal Error");
+	WorkerStatus InternalError(Protocol &, Buffer &){
+	//	return error_(protocol, buffer, "Internal Error");
+
+		// here we should disconnect,
+		// because the client is already broken and
+		// will continue to push data
+		return WorkerStatus::DISCONNECT_ERROR;
 	}
 }
 

@@ -40,3 +40,20 @@ Changelog
 
 -	fix bug with calculating List::bytes() in List::mutable_notify()
 
+### 1.3.4.6
+
+-	Fix bug with binlog reload
+-	Fix bug with AVL root update
+
+### 1.3.5.1
+
+-	Fix bug with change AVLList::root_ in swapLinks / copyLinks
+-	Fix bug with (not) updating the child parent in AVLList::fixParentAndChildren_
+
+### 1.3.6.1
+
+-	Fix potencial bug with clients who try to set data over the value limit.
+	In such cases the server will disconnect the client, since the client will not check the error message and will continue to push the data.
+	HM4 currently 256 MB, Redis support 512 MB.
+
+
