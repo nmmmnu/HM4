@@ -171,7 +171,7 @@ inline namespace version_4_00_00{
 		template<class Allocator, class Factory>
 		[[nodiscard]]
 		static Pair *create__(Allocator &allocator, Factory &factory) noexcept{
-			if ( isKeyValid(factory.getKey()) )
+			if ( !isKeyValid(factory.getKey()) )
 				return nullptr;
 
 			if ( factory.bytes() > maxBytes() )
