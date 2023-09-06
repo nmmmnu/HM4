@@ -21,11 +21,13 @@ namespace net::worker::commands::Mutable{
 				return;
 
 			auto const &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const &val = p[2];
+			if (!hm4::Pair::isValValid(val))
+				return;
+
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			hm4::insert(*db, key, val, exp);
@@ -59,9 +61,13 @@ namespace net::worker::commands::Mutable{
 
 			auto const varg = 1;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
 					return;
+
+				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
+					return;
+			}
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &key = *itk;
@@ -99,9 +105,13 @@ namespace net::worker::commands::Mutable{
 
 			auto const varg = 1;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
 					return;
+
+				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
+					return;
+			}
 
 			// check if any key exists
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -148,9 +158,13 @@ namespace net::worker::commands::Mutable{
 
 			auto const varg = 1;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
+				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
 					return;
+
+				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
+					return;
+			}
 
 			auto &container = blob.pcontainer;
 
@@ -223,11 +237,13 @@ namespace net::worker::commands::Mutable{
 				return;
 
 			auto const &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			auto const &val = p[3];
+			if (!hm4::Pair::isValValid(val))
+				return;
+
 			auto const exp  = from_string<uint32_t>(p[2]);
 
 			hm4::insert(*db, key, val, exp);
@@ -275,7 +291,11 @@ namespace net::worker::commands::Mutable{
 				return;
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
+
 			auto const &val = p[3];
+			if (!hm4::Pair::isValValid(val))
+				return;
+
 			auto const exp  = p.size() == 5 ? from_string<uint32_t>(p[4]) : 0;
 
 			hm4::insert(*db, key, val, exp);
@@ -326,6 +346,9 @@ namespace net::worker::commands::Mutable{
 
 				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
 					return;
+
+				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
+					return;
 			}
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -365,8 +388,11 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
+				return;
+
+			const auto &val = p[2];
+			if (!hm4::Pair::isValValid(val))
 				return;
 
 			if ( hm4::getPairOK(*db, key) ){
@@ -374,7 +400,6 @@ namespace net::worker::commands::Mutable{
 			}else{
 				// SET
 
-				const auto &val = p[2];
 				const auto exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 				hm4::insert(*db, key, val, exp);
@@ -408,16 +433,16 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
 
-
+			const auto &val = p[2];
+			if (!hm4::Pair::isValValid(val))
+				return;
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
 
-				const auto &val = p[2];
 				const auto exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 				// HINT
@@ -547,9 +572,13 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
+
+			const auto &val = p[2];
+			if (!hm4::Pair::isValValid(val))
+				return;
+
 
 			// because old_value may be overwritten,
 			// we had to make a copy.
@@ -565,7 +594,6 @@ namespace net::worker::commands::Mutable{
 
 			// SET
 
-			const auto &val = p[2];
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			// HINT
@@ -602,11 +630,8 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
-
-
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// seamlessly send value to output buffer...
@@ -653,11 +678,12 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
 
 			std::string_view const val_new = p[2];
+			if (!hm4::Pair::isValValid(val_new))
+				return;
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
@@ -721,11 +747,8 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
-
-
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
@@ -766,11 +789,8 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
-
-
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
@@ -816,11 +836,8 @@ namespace net::worker::commands::Mutable{
 			// GET
 
 			const auto &key = p[1];
-
 			if (!hm4::Pair::isKeyValid(key))
 				return;
-
-
 
 			if (auto *it = hm4::getPairPtrNC(*db, key); it){
 				// SET

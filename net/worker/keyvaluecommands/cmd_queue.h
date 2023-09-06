@@ -43,6 +43,10 @@ namespace net::worker::commands::Queue{
 				return;
 
 			auto const &val = p[2];
+
+			if (!hm4::Pair::isValValid(val))
+				return;
+
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			MyIDGenerator::to_string_buffer_t buffer;

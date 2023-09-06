@@ -449,6 +449,12 @@ inline namespace version_4_00_00{
 			;
 		}
 
+		[[nodiscard]]
+		constexpr
+		static bool isValValid(std::string_view val) noexcept{
+			return	val.size() <= PairConf::MAX_VAL_SIZE;
+		}
+
 	private:
 		[[nodiscard]]
 		constexpr const char *getKey_() const noexcept{
