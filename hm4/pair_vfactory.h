@@ -20,18 +20,26 @@ inline namespace version_4_00_00{
 							IFactoryAction(key, val_size, nullptr){}
 
 			[[nodiscard]]
-			std::string_view getKey() const final{
+			constexpr std::string_view getKey() const final{
 				return key;
 			}
 
 			[[nodiscard]]
-			uint32_t getCreated() const final{
+			constexpr uint32_t getCreated() const final{
 				return 0;
 			}
 
 			[[nodiscard]]
-			size_t bytes() const final{
+			constexpr size_t bytes() const final{
 				return Pair::bytes(key.size(), val_size);
+			}
+
+			[[nodiscard]]
+			constexpr bool valid() const final{
+				return
+					key.size() <= PairConf::MAX_KEY_SIZE &&
+					val_size   <= PairConf::MAX_VAL_SIZE
+				;
 			}
 
 			void createHint(Pair *pair) final{

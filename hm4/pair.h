@@ -538,6 +538,14 @@ inline namespace version_4_00_00{
 				return Pair::bytes(key.size(), val.size());
 			}
 
+			[[nodiscard]]
+			constexpr bool valid() const{
+				return
+					key.size() <= PairConf::MAX_KEY_SIZE &&
+					val.size() <= PairConf::MAX_VAL_SIZE
+				;
+			}
+
 			void createHint(Pair *pair) const{
 				Pair::createInRawMemory<0,1,0,1>(pair, key, val, expires, created);
 			}
@@ -577,6 +585,14 @@ inline namespace version_4_00_00{
 				return Pair::bytes(key.size(), val.size());
 			}
 
+			[[nodiscard]]
+			constexpr bool valid() const{
+				return
+					key.size() <= PairConf::MAX_KEY_SIZE &&
+					val.size() <= PairConf::MAX_VAL_SIZE
+				;
+			}
+
 			void createHint(Pair *pair) const{
 				Pair::createInRawMemory<0,0,0,0>(pair, key, val, expires, created);
 			}
@@ -605,6 +621,13 @@ inline namespace version_4_00_00{
 			[[nodiscard]]
 			constexpr size_t bytes() const{
 				return Pair::bytes(key.size(), Pair::TOMBSTONE.size());
+			}
+
+			[[nodiscard]]
+			constexpr bool valid() const{
+				return
+					key.size() <= PairConf::MAX_KEY_SIZE
+				;
 			}
 
 			void createHint(Pair *pair) const{
@@ -644,6 +667,11 @@ inline namespace version_4_00_00{
 				return src->bytes();
 			}
 
+			[[nodiscard]]
+			constexpr static bool valid(){
+				return true;
+			}
+
 			void createHint(Pair *pair) const{
 				Pair::cloneInRawMemory(pair, *src);
 			}
@@ -659,6 +687,7 @@ inline namespace version_4_00_00{
 			virtual std::string_view getKey() const = 0;
 			virtual uint32_t getCreated() const = 0;
 			virtual size_t bytes() const = 0;
+			virtual bool valid() const = 0;
 
 			virtual void createHint(Pair *pair) = 0;
 			virtual void create(Pair *pair) = 0;

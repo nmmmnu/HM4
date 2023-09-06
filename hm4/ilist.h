@@ -38,7 +38,8 @@ struct InsertResult{
 		REPLACED		,
 		SKIP_INSERTED		,
 		ERROR_NO_MEMORY		,
-		ERROR			,
+		ERROR_INVALID		,
+		ERROR
 	};
 
 	bool		ok;
@@ -50,6 +51,7 @@ struct InsertResult{
 	constexpr static auto REPLACED		=  Status::REPLACED		;
 	constexpr static auto SKIP_INSERTED	=  Status::SKIP_INSERTED	;
 	constexpr static auto ERROR_NO_MEMORY	=  Status::ERROR_NO_MEMORY	;
+	constexpr static auto ERROR_INVALID	=  Status::ERROR_INVALID	;
 	constexpr static auto ERROR		=  Status::ERROR		;
 
 	[[nodiscard]]
@@ -75,6 +77,11 @@ struct InsertResult{
 	[[nodiscard]]
 	constexpr static auto errorNoMemory(){
 		return InsertResult{ false, InsertResult::ERROR_NO_MEMORY };
+	}
+
+	[[nodiscard]]
+	constexpr static auto errorInvalid(){
+		return InsertResult{ false, InsertResult::ERROR_INVALID };
 	}
 
 	[[nodiscard]]
@@ -162,9 +169,12 @@ bool erase(List &list, std::string_view const key){
 }
 
 template<class List, class PairFactory>
-auto insert(List &list, PairFactory &factory) noexcept{
+InsertResult insert(List &list, PairFactory &factory) noexcept{
 	static_assert(!std::is_same_v<PairFactory, Pair>);
 	static_assert(!std::is_same_v<PairFactory, std::basic_string_view<char, std::char_traits<char> > const>);
+
+	if (!factory.valid())
+		return InsertResult::errorInvalid();
 
 	return list.insertF(factory);
 }
