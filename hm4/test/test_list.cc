@@ -36,7 +36,7 @@ size_t listInsert(List &list, const char *key, const char *value){
 	auto const &[ok, status, pair] = insert(list, key, value);
 
 	// collect size, but via iterator...
-	if (ok)
+	if (pair)
 		return pair->bytes();
 	else
 		return 0;

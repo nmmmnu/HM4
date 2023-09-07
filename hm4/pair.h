@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <cassert>
 
 #include <ostream>
 #include <memory>
@@ -426,6 +427,8 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		constexpr
 		static size_t bytes(size_t const keyLen, size_t const valLen) noexcept{
+			assert(isKeyValid(keyLen));
+			assert(isValValid(valLen));
 			return sizeof(Pair) + keyLen + valLen;
 		}
 
