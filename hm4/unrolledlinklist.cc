@@ -169,6 +169,9 @@ auto UnrolledLinkList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 		return newnode;
 	};
 
+	if (!factory.valid())
+		return InsertResult::errorInvalid();
+
 	auto const &key = factory.getKey();
 
 	auto const hkey = HPair::SS::create(key);

@@ -189,6 +189,9 @@ bool SkipList<T_Allocator>::clear(){
 template<class T_Allocator>
 template<class PFactory>
 auto SkipList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
+	if (!factory.valid())
+		return InsertResult::errorInvalid();
+
 	auto const &key = factory.getKey();
 
 	const auto nl = locate_<1>(key);

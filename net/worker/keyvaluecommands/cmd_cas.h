@@ -34,10 +34,8 @@ namespace net::worker::commands::CAS{
 
 			const auto &val = p[3];
 
-			if (val.empty())
+			if (val.empty() || !hm4::Pair::isValValid(val))
 				return;
-
-
 
 			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){
 				// SET

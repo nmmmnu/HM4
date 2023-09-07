@@ -171,11 +171,12 @@ inline namespace version_4_00_00{
 		template<class Allocator, class Factory>
 		[[nodiscard]]
 		static Pair *create__(Allocator &allocator, Factory &factory) noexcept{
-			if ( !isKeyValid(factory.getKey()) )
+			if ( !factory.valid() )
 				return nullptr;
 
-			if ( factory.bytes() > maxBytes() )
-				return nullptr;
+			// if valid, this is also OK
+			//if ( factory.bytes() > maxBytes() )
+			//	return nullptr;
 
 			using namespace MyAllocator;
 
@@ -442,17 +443,26 @@ inline namespace version_4_00_00{
 
 		[[nodiscard]]
 		constexpr
+		static bool isKeyValid(size_t size) noexcept{
+			return size > 0 && size <= PairConf::MAX_KEY_SIZE;
+		}
+
+		[[nodiscard]]
+		constexpr
 		static bool isKeyValid(std::string_view key) noexcept{
-			return
-				key.size() > 0 &&
-				key.size() <= PairConf::MAX_KEY_SIZE
-			;
+			return isKeyValid(key.size());
+		}
+
+		[[nodiscard]]
+		constexpr
+		static bool isValValid(size_t size) noexcept{
+			return	size <= PairConf::MAX_VAL_SIZE;
 		}
 
 		[[nodiscard]]
 		constexpr
 		static bool isValValid(std::string_view val) noexcept{
-			return	val.size() <= PairConf::MAX_VAL_SIZE;
+			return	isValValid(val.size());
 		}
 
 	private:
@@ -556,7 +566,7 @@ inline namespace version_4_00_00{
 			constexpr bool valid() const{
 				return
 					Pair::isKeyValid(key) &&
-					val.size() <= PairConf::MAX_VAL_SIZE
+					Pair::isValValid(val)
 				;
 			}
 
@@ -603,7 +613,7 @@ inline namespace version_4_00_00{
 			constexpr bool valid() const{
 				return
 					Pair::isKeyValid(key) &&
-					val.size() <= PairConf::MAX_VAL_SIZE
+					Pair::isValValid(val)
 				;
 			}
 

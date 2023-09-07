@@ -265,6 +265,9 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 namespace avl_impl_{
 	template<class Node, class T_Allocator, class PFactory>
 	Node *allocateNode(T_Allocator &allocator, PFactory &factory, ListCounter &lc, Node *parent){
+		if (!factory.valid())
+			return nullptr;
+
 		size_t const bytes = factory.bytes();
 		size_t const nodeSize = sizeof(Node) - sizeof(Pair) + bytes;
 
@@ -287,6 +290,9 @@ namespace avl_impl_{
 template<class T_Allocator>
 template<class PFactory>
 auto AVLList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
+	if (!factory.valid())
+		return InsertResult::errorInvalid();
+
 	if (!root_){
 		// tree is empty.
 		// insert, no balance.

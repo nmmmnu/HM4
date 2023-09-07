@@ -173,9 +173,6 @@ InsertResult insert(List &list, PairFactory &factory) noexcept{
 	static_assert(!std::is_same_v<PairFactory, Pair>);
 	static_assert(!std::is_same_v<PairFactory, std::basic_string_view<char, std::char_traits<char> > const>);
 
-	if (!factory.valid())
-		return InsertResult::errorInvalid();
-
 	return list.insertF(factory);
 }
 

@@ -266,6 +266,9 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 			newnode->next[i] = std::exchange(*nl.prev[i], newnode);
 	};
 
+	if (!factory.valid())
+		return InsertResult::errorInvalid();
+
 	auto const &key = factory.getKey();
 
 	auto const hkey = HPair::SS::create(key);

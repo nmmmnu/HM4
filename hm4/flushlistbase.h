@@ -65,6 +65,11 @@ namespace flushlist_impl_{
 
 		// ---
 
+		if (!factory.valid())
+			return InsertResult::errorInvalid();
+
+		// ---
+
 		if (predicate(insertList, factory.bytes()))
 			return flushThenInsert();
 

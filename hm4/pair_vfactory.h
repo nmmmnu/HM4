@@ -38,7 +38,7 @@ inline namespace version_4_00_00{
 			constexpr bool valid() const final{
 				return
 					Pair::isKeyValid(key) &&
-					val_size   <= PairConf::MAX_VAL_SIZE
+					Pair::isValValid(val_size)
 				;
 			}
 

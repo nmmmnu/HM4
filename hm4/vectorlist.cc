@@ -52,6 +52,9 @@ auto VectorList<T_Allocator>::find(std::string_view const key, std::bool_constan
 template<class T_Allocator>
 template<class PFactory>
 auto VectorList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
+	if (!factory.valid())
+		return InsertResult::errorInvalid();
+
 	auto const &key = factory.getKey();
 
 	const auto &[found, it] = binarySearch(vector_, key);
