@@ -443,7 +443,7 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		constexpr
 		static size_t maxBytes() noexcept{
-			return bytes(PairConf::MAX_KEY_SIZE, PairConf::MAX_VAL_SIZE);
+			return bytes_(PairConf::MAX_KEY_SIZE, PairConf::MAX_VAL_SIZE);
 		}
 
 		[[nodiscard]]
