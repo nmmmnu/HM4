@@ -408,7 +408,7 @@ inline namespace version_4_00_00{
 
 		[[nodiscard]]
 		constexpr size_t bytes() const noexcept{
-			return bytes(getKeyLen_(), getValLen_());
+			return bytes_(getKeyLen_(), getValLen_());
 		}
 
 		// ==============================
@@ -429,13 +429,15 @@ inline namespace version_4_00_00{
 		static size_t bytes(size_t const keyLen, size_t const valLen) noexcept{
 			assert(isKeyValid(keyLen));
 			assert(isValValid(valLen));
-			return sizeof(Pair) + keyLen + valLen;
+			return bytes_(keyLen, valLen);
 		}
 
 		[[nodiscard]]
 		constexpr
 		static size_t bytes(std::string_view const key, std::string_view const val) noexcept{
-			return bytes(key.size(), val.size());
+			assert(isKeyValid(key));
+			assert(isValValid(val));
+			return bytes_(key.size(), val.size());
 		}
 
 		[[nodiscard]]
@@ -469,6 +471,12 @@ inline namespace version_4_00_00{
 		}
 
 	private:
+		[[nodiscard]]
+		constexpr
+		static size_t bytes_(size_t const keyLen, size_t const valLen) noexcept{
+			return sizeof(Pair) + keyLen + valLen;
+		}
+
 		[[nodiscard]]
 		constexpr const char *getKey_() const noexcept{
 			return buffer;
