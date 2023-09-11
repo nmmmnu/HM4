@@ -11,34 +11,29 @@ namespace MyAllocator{
 		constexpr std::string_view maskAllocate   = "MMapAllocator allocating {} bytes with {} mmap.";
 		constexpr std::string_view maskDeallocate = "MMapAllocator deallocating {} bytes with mmap.";
 
+		void *mmap_(std::size_t const size, int options = 0){
+			return mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | options, -1, 0);
+		}
+
 		void *createNormal(std::size_t const size) noexcept{
-			auto const options = MAP_PRIVATE | MAP_ANONYMOUS;
+			if (void *p = mmap_(size); p != MAP_FAILED){
+				logger_fmt<Logger::NOTICE>(maskAllocate, size, "conventional");
+				return p;
+			}
 
-			void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, options, -1, 0);
-
-			if (p == MAP_FAILED)
-				return nullptr;
-
-			logger_fmt<Logger::NOTICE>(maskAllocate, size, "conventional");
-			return p;
+			return nullptr;
 		}
 
 
 		#ifdef USE_HUGETLB
 
 		void *createHugeTLB(std::size_t const size) noexcept{
-			auto const options = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
-
-			void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, options, -1, 0);
-
-			if (p != MAP_FAILED){
+			if (void *p = mmap_(size, MAP_HUGETLB); p != MAP_FAILED){
 				logger_fmt<Logger::NOTICE>(maskAllocate, size, "HugeTLB");
-
 				return p;
 			}
 
 			logger<Logger::WARNING>() << "MMapAllocator allocating with HugeTLB mmap fail, going back to conventional memory.";
-
 			return createNormal(size);
 		}
 

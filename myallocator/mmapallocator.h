@@ -53,7 +53,7 @@ namespace MyAllocator{
 		}
 
 		constexpr static bool knownMemoryUsage() noexcept{
-			return false;
+			return true;
 		}
 
 		constexpr static bool reset() noexcept{
@@ -64,8 +64,8 @@ namespace MyAllocator{
 			return std::numeric_limits<std::size_t>::max();
 		}
 
-		constexpr static std::size_t getUsedMemory() noexcept{
-			return std::numeric_limits<std::size_t>::max();
+		constexpr std::size_t getUsedMemory() noexcept{
+			return size_;
 		}
 
 	private:
