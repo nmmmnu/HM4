@@ -11,7 +11,7 @@ namespace MyAllocator{
 		constexpr std::string_view maskAllocate   = "MMapAllocator allocating {} bytes with {} mmap.";
 		constexpr std::string_view maskDeallocate = "MMapAllocator deallocating {} bytes with mmap.";
 
-		void *mmap_(std::size_t const size, int options = 0){
+		inline void *mmap_(std::size_t const size, int options = 0){
 			return mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | options, -1, 0);
 		}
 
