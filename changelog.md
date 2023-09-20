@@ -208,3 +208,9 @@ Changelog
 	In such cases the server will disconnect the client, since the client will not check the error message and will continue to push the data.
 	HM4 currently 256 MB, Redis support 512 MB.
 	This is the same way Redis handle the same problem.
+-	Add reverse iterator to AVLList and VectorList
+
+### 1.3.7
+
+-	Release
+
