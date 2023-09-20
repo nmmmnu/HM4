@@ -50,6 +50,32 @@ public:
 		return list_->find(key, exact);
 	}
 
+public:
+	template<
+		typename T1 = List,
+		decltype(std::declval<T1>().rbegin(), 0) = 0
+	>
+	auto rbegin() const{
+		return list_->rbegin();
+	}
+
+	template<
+		typename T1 = List,
+		decltype(std::declval<T1>().rend(), 0) = 0
+	>
+	auto rend() const{
+		return list_->rend();
+	}
+
+	template<
+		bool B,
+		typename T1 = List,
+		decltype(std::declval<T1>().rfind("", std::bool_constant<B>{}), 0) = 0
+	>
+	auto rfind(std::string_view const key, std::bool_constant<B> const exact) const{
+		return list_->rfind(key, exact);
+	}
+
 protected:
 	List	*list_;
 };

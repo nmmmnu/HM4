@@ -9,6 +9,7 @@
 #include "mynarrow.h"
 
 #include <vector>
+#include <iterator>
 
 namespace hm4{
 
@@ -22,7 +23,8 @@ public:
 	using difference_type	= config::difference_type;
 
 public:
-	using iterator = pointer_iterator<OVector::const_iterator>;
+	using iterator		= pointer_iterator<OVector::const_iterator>;
+	using reverse_iterator	= std::reverse_iterator<iterator>;
 
 public:
 	VectorList(Allocator &allocator) : allocator_(& allocator){}
@@ -91,6 +93,23 @@ public:
 
 	iterator end() const noexcept{
 		return iterator{ std::end(vector_) };
+	}
+
+public:
+	template<bool B>
+	reverse_iterator rfind(std::string_view const key, std::bool_constant<B> exact) const{
+		if (auto it = find(key, exact); it != end())
+			return std::make_reverse_iterator(++it);
+		else
+			return rend();
+	}
+
+	reverse_iterator rbegin() const noexcept{
+		return std::make_reverse_iterator( end() );
+	}
+
+	reverse_iterator rend() const noexcept{
+		return std::make_reverse_iterator( begin() );
 	}
 };
 

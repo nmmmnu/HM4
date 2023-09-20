@@ -111,64 +111,81 @@ void iterator_test_get(const List &list){
 
 // ==============================
 
-template <class List>
-void iterator_test(List const &list, std::forward_iterator_tag){
-	auto       it = std::begin(list);
-	auto const et = std::end(list);
+template<bool Reverse, typename It>
+void iterator_test_(It it, It const et){
+	const char *label_it_deref;
+	const char *label_it_end;
 
-	auto advance = [&it, &et](const char *value){
-		mytest("it deref", 	iteratorDereference(it, et, value)	);
+	if constexpr(!Reverse){
+		label_it_deref	= "it deref";
+		label_it_end	= "*it end()";
+	}else{
+		label_it_deref	= "it reverse deref";
+		label_it_end	= "*it reverse end()";
+	}
+
+	auto advance = [&it, &et, label_it_deref](const char *value){
+		mytest(label_it_deref, 	iteratorDereference(it, et, value)	);
+
 		++it;
 	};
 
-	advance("Niki"	);
-	advance("22"	);
-	advance("Sofia"	);
-	advance("Linux"	);
+	if constexpr(!Reverse){
+		advance("Niki"	);
+		advance("22"	);
+		advance("Sofia"	);
+		advance("Linux"	);
+	}else{
+		advance("Linux"	);
+		advance("Sofia"	);
+		advance("22"	);
+		advance("Niki"	);
+	}
 
-	mytest("*it end()",		it == et				);
+	mytest(label_it_end,		it == et				);
 }
 
-template<typename List>
-void iterator_test(List const &list, std::bidirectional_iterator_tag){
-	iterator_test(list, std::forward_iterator_tag{});
+template <class List>
+void iterator_test(List const &list){
+	using ITC = typename std::iterator_traits<typename List::iterator>::iterator_category;
 
-	auto _ = [](auto it){
-		return std::make_reverse_iterator(it);
-	};
+	if constexpr(true){ // for symetry
+		iterator_test_<0>(
+			std::begin(list),
+			std::end(list)
+		);
+	}
 
-	auto       it = _(std::end(list));
-	auto const et = _(std::begin(list));
+	if constexpr(std::is_same_v<ITC, std::bidirectional_iterator_tag>){
+		iterator_test_<1>(
+			std::make_reverse_iterator(std::end(list)),
+			std::make_reverse_iterator(std::begin(list))
+		);
 
-	auto advance = [&it, &et](const char *value){
-		mytest("it reverse deref", 	iteratorDereference(it, et, value)	);
-		++it;
-	};
-
-	advance("Linux"	);
-	advance("Sofia"	);
-	advance("22"	);
-	advance("Niki"	);
-
-	mytest("*it reverse end()",	it == et					);
+		iterator_test_<1>(
+			std::rbegin(list),
+			std::rend(list)
+		);
+	}
 }
 
 // ==============================
 
 template<class List>
-void iterator_test_empty_it(List const &list, std::forward_iterator_tag){
-	mytest("empty it",	std::begin(list) == std::end(list)	);
-}
+void iterator_test_empty_it(List const &list){
+	using ITC = typename std::iterator_traits<typename List::iterator>::iterator_category;
 
-template<typename List>
-constexpr void iterator_test_empty_it(List const &list, std::bidirectional_iterator_tag){
-	iterator_test_empty_it(list, std::forward_iterator_tag{});
+	if constexpr(std::is_same_v<ITC, std::forward_iterator_tag>){ // for symetry
+		mytest("empty it",		std::begin(list) == std::end(list)		);
+	}
 
-	auto _ = [](auto it){
-		return std::make_reverse_iterator(it);
-	};
+	if constexpr(std::is_same_v<ITC, std::bidirectional_iterator_tag>){
+		auto _ = [](auto it){
+			return std::make_reverse_iterator(it);
+		};
 
-	mytest("empty reverse it",	_(std::end(list)) == _(std::begin(list))	);
+		mytest("empty reverse it",	_(std::end(list)) == _(std::begin(list))	);
+	}
 }
 
 // ==============================
@@ -251,15 +268,13 @@ void list_test(List &list){
 
 	// ITERATOR
 
-	using ITC = typename std::iterator_traits<typename List::iterator>::iterator_category;
-
 	listPopulate(list);
 
-	iterator_test(list, ITC{});
+	iterator_test(list);
 	iterator_test_get(list);
 
 	list.clear();
-	iterator_test_empty_it(list, ITC{});
+	iterator_test_empty_it(list);
 
 	// MOVE C-TOR
 

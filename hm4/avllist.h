@@ -4,6 +4,8 @@
 #include "ilist.h"
 #include "listcounter.h"
 
+#include <iterator>
+
 
 
 namespace hm4{
@@ -17,6 +19,7 @@ public:
 
 public:
 	class iterator;
+	using reverse_iterator	= std::reverse_iterator<iterator>;
 
 public:
 	AVLList(Allocator &allocator) : allocator_(& allocator){}
@@ -93,6 +96,23 @@ public:
 	iterator begin() const;
 
 	constexpr iterator end() const;
+
+public:
+	template<bool B>
+	reverse_iterator rfind(std::string_view const key, std::bool_constant<B> exact) const{
+		if (auto it = find(key, exact); it != end())
+			return std::make_reverse_iterator(++it);
+		else
+			return rend();
+	}
+
+	reverse_iterator rbegin() const noexcept{
+		return std::make_reverse_iterator( end() );
+	}
+
+	reverse_iterator rend() const noexcept{
+		return std::make_reverse_iterator( begin() );
+	}
 
 public:
 	void testALVTreeIntegrity(std::false_type) const;
