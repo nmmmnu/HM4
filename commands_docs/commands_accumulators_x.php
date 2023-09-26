@@ -19,7 +19,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set dom:google:google.com  some_data<br />" .
 			"set dom:google:youtube.com some_data<br />" .
@@ -50,7 +50,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set dom:google:google.com  some_data<br />" .
 			"set dom:google:youtube.com some_data<br />" .
@@ -80,7 +80,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set visits:20200101 123<br />" .
 			"set visits:20200102 263<br />" .
@@ -113,7 +113,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set visits:20200101 123<br />" .
 			"set visits:20200102 263<br />" .
@@ -143,7 +143,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set visits:20200101 123<br />" .
 			"set visits:20200102 263<br />" .
@@ -176,7 +176,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set visits:20200101 123<br />" .
 			"set visits:20200102 263<br />" .
@@ -206,7 +206,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set visits:20200101 123<br />" .
 			"set visits:20200102 263<br />" .
@@ -239,7 +239,7 @@ return array(
 			false,
 			false,
 
-			"accumulators",
+			"accumulators_x",
 
 			"<pre>set visits:20200101 123<br />" .
 			"set visits:20200102 263<br />" .

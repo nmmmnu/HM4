@@ -198,7 +198,7 @@ function getData(){
 	return array(
 		"immutable"			=> require "$d/commands_immutable.php"		,
 		"immutable_x"			=> require "$d/commands_immutable_x.php"	,
-		"accumulators"			=> require "$d/commands_accumulators.php"	,
+		"accumulators_x"		=> require "$d/commands_accumulators_x.php"	,
 		"mutable"			=> require "$d/commands_mutable.php"		,
 		"mutable_x"			=> require "$d/commands_mutable_x.php"		,
 		"cas"				=> require "$d/commands_cas.php"		,
