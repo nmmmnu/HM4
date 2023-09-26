@@ -14,8 +14,8 @@ namespace net::worker::commands::Accumulators{
 
 
 
-			template<typename Accumulator, class It>
-			auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit){
+			template<class Accumulator, class It, class StopPredicate>
+			auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit, StopPredicate stop){
 				Accumulator accumulator;
 
 				uint32_t iterations	= 0;
@@ -27,7 +27,7 @@ namespace net::worker::commands::Accumulators{
 					if (++iterations > ITERATIONS)
 						return accumulator.result(key);
 
-					if (! prefix.empty() && ! same_prefix(prefix, key))
+					if (! prefix.empty() && stop(prefix, key))
 						return accumulator.result();
 
 					if (! it->isOK())
@@ -44,12 +44,10 @@ namespace net::worker::commands::Accumulators{
 
 
 
-			template<class Accumulator, class Protocol, class List>
-			void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
+			template<class Accumulator, class StopPredicate, class Protocol, class List>
+			void execCommand(ParamContainer const &p, StopPredicate stop, List &list, Result<Protocol> &result){
 				if (p.size() != 4)
 					return;
-
-
 
 				// using uint64_t from the user, allow more user-friendly behavour.
 				// suppose he enters 1'000'000'000.
@@ -72,7 +70,8 @@ namespace net::worker::commands::Accumulators{
 								count					,
 								prefix					,
 								list.find(key, std::false_type{})	,
-								std::end(list)
+								std::end(list)				,
+								stop
 				);
 
 				to_string_buffer_t buffer;
@@ -85,27 +84,26 @@ namespace net::worker::commands::Accumulators{
 				return result.set_container(container);
 			}
 
-		} // namespace
-	} // namespace acumulators_impl_
+
+
+			// making it class, makes later code prettier.
+			struct StopPrefixPredicate{
+				bool operator()(std::string_view prefix, std::string_view key) const{
+					return ! same_prefix(prefix, key);
+				}
+			};
+
+			struct StopRangePredicate{
+				bool operator()(std::string_view prefix, std::string_view key) const{
+					return prefix < key;
+				}
+			};
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct COUNT : BaseRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
+			struct COUNTPredicate{
+				using T = int64_t;
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace acumulators_impl_;
-
-			using T = int64_t;
-
-			struct COUNT_{
 				T data = 0;
 
 				auto operator()(std::string_view, std::string_view){
@@ -117,33 +115,9 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<COUNT_>(params, *db, result);
-		}
+			struct SUMPredicate{
+				using T = int64_t;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"count",	"COUNT"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct SUM : BaseRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace acumulators_impl_;
-
-			using T = int64_t;
-
-			struct SUM_{
 				T data = 0;
 
 				auto operator()(std::string_view, std::string_view val){
@@ -155,33 +129,9 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<SUM_>(params, *db, result);
-		}
+			struct MINPredicate{
+				using T = int64_t;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"sum",		"SUM"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct MIN : BaseRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace acumulators_impl_;
-
-			using T = int64_t;
-
-			struct MIN_{
 				T data = std::numeric_limits<T>::max();
 
 				auto operator()(std::string_view, std::string_view val){
@@ -196,33 +146,9 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MIN_>(params, *db, result);
-		}
+			struct MAXPredicate{
+				using T = int64_t;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"min",		"MIN"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct MAX : BaseRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace acumulators_impl_;
-
-			using T = int64_t;
-
-			struct MAX_{
 				T data = std::numeric_limits<T>::min();
 
 				auto operator()(std::string_view, std::string_view val){
@@ -237,12 +163,209 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			return execCommand<MAX_>(params, *db, result);
+		} // namespace
+	} // namespace acumulators_impl_
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct COUNTX : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopPrefixPredicate stop;
+			return execCommand<COUNTPredicate>(params, stop, *db, result);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"max",		"MAX"
+			"count",	"COUNT"		,
+			"countx",	"COUNTX"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct COUNTXR : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopRangePredicate stop;
+			return execCommand<COUNTPredicate>(params, stop, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"countxr",	"COUNTXR"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct SUMX : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopPrefixPredicate stop;
+			return execCommand<SUMPredicate>(params, stop, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"sum",		"SUM"	,
+			"sumx",		"SUMX"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct SUMXR : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopRangePredicate stop;
+			return execCommand<SUMPredicate>(params, stop, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"sumxr",	"SUMXR"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MINX : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopPrefixPredicate stop;
+			return execCommand<MINPredicate>(params, stop, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"min",		"MIN"	,
+			"minx",		"MINX"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MINXR : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopRangePredicate stop;
+			return execCommand<MINPredicate>(params, stop, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"minxr",	"MINXR"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MAXX : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopPrefixPredicate stop;
+			return execCommand<MAXPredicate>(params, stop, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"maxx",		"MAXX"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MAXXR : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			StopRangePredicate stop;
+			return execCommand<MAXPredicate>(params, stop, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"maxxr",	"MAXXR"
 		};
 	};
 
@@ -254,10 +377,17 @@ namespace net::worker::commands::Accumulators{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				COUNT	,
-				SUM	,
-				MIN	,
-				MAX
+				COUNTX	,
+				COUNTXR	,
+
+				SUMX	,
+				SUMXR	,
+
+				MINX	,
+				MINXR	,
+
+				MAXX	,
+				MAXXR
 			>(pack);
 		}
 	};

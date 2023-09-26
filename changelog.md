@@ -214,3 +214,12 @@ Changelog
 
 -	Release
 
+### 1.3.7.1
+
+-	new utility db_compact_tombstones
+-	rename commands COUNT, SUM, MIN, MAX to COUNTX, SUMX, MINX, MAXX
+-	new timeseries commands GETXR
+-	new timeseries commands COUNTXR, SUMXR, MINXR, MAXXR
+-	new timeseries commands DELXR, PERSISTXR, EXPIREXR
+
+
