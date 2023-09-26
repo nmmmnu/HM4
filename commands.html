@@ -101,15 +101,20 @@
 			&nbsp;
 
 					<li><a href="#GETX">GETX</a></li>
+				<li><a href="#GETXR">GETXR</a></li>
 				</div>
 			<div>
 			<b>accumulators.h</b><br />
 			&nbsp;
 
-					<li><a href="#COUNT">COUNT</a></li>
-				<li><a href="#SUM">SUM</a></li>
-				<li><a href="#MIN">MIN</a></li>
-				<li><a href="#MAX">MAX</a></li>
+					<li><a href="#COUNTX / COUNT">COUNTX / COUNT</a></li>
+				<li><a href="#COUNTXR">COUNTXR</a></li>
+				<li><a href="#SUMX / SUM">SUMX / SUM</a></li>
+				<li><a href="#SUMXR">SUMXR</a></li>
+				<li><a href="#MINX / MIN">MINX / MIN</a></li>
+				<li><a href="#MINXR">MINXR</a></li>
+				<li><a href="#MAXX / MAX">MAXX / MAX</a></li>
+				<li><a href="#MAXXR">MAXXR</a></li>
 				</div>
 			<div>
 			<b>mutable.h</b><br />
@@ -135,8 +140,11 @@
 			&nbsp;
 
 					<li><a href="#DELX">DELX</a></li>
+				<li><a href="#DELXR">DELXR</a></li>
 				<li><a href="#PERSISTX">PERSISTX</a></li>
+				<li><a href="#PERSISTXR">PERSISTXR</a></li>
 				<li><a href="#EXPIREX">EXPIREX</a></li>
+				<li><a href="#EXPIREXR">EXPIREXR</a></li>
 				</div>
 			<div>
 			<b>cas.h</b><br />
@@ -308,6 +316,7 @@
 			string
 			<h3>Return value:</h3>
 			Value of the key or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MGET">
@@ -329,6 +338,7 @@
 			array
 			<h3>Return value:</h3>
 			Value of the key or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXISTS">
@@ -350,6 +360,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TTL">
@@ -371,6 +382,7 @@
 			int
 			<h3>Return value:</h3>
 			Value of the TTL or 0 if there is no expiration set.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="DUMP">
@@ -392,6 +404,7 @@
 			string
 			<h3>Return value:</h3>
 			internal <i>key</i> representation
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETRANGE">
@@ -413,6 +426,7 @@
 			string
 			<h3>Return value:</h3>
 			substring of the value or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="STRLEN">
@@ -434,6 +448,7 @@
 			int
 			<h3>Return value:</h3>
 			Size of the value.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETX">
@@ -450,19 +465,44 @@
 			</table>
 
 			<h3>Description:</h3>
-			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Returns up to 1'000 elements.<br /><br /><u>Example:</u><br /><br /><pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br />getx u:001: 1000 u:001:</pre>
+			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Returns up to 1'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx u:001: 1000 u:001:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="COUNT">
+				<div class="cmd" id="GETXR">
 
-			<h2>COUNT key number prefix</h2>
+			<h2>GETXR key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>COUNT</td></tr>
+				<tr><td>Command			</td><td>GETXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.<br />Returns up to 1'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr price:2010-02 1000 price:2010-04</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="COUNTX / COUNT">
+
+			<h2>COUNTX key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>COUNTX / COUNT</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -475,15 +515,40 @@
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
-			First element  - count of valid elements.<br />Second element - last key, if there is second page.<br /><br /><u>Example:</u><br /><br /><pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br />count dom:google: 10000 dom:google:</pre>
+			First element  - count of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />getx   dom:google:  1000 dom:google:<br />countx dom:google:       dom:google:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="SUM">
+				<div class="cmd" id="COUNTXR">
 
-			<h2>SUM key number prefix</h2>
+			<h2>COUNTXR key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>SUM</td></tr>
+				<tr><td>Command			</td><td>COUNTXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - count of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />getxr   dom:google:  1000 dom:google:blogger.com<br />countxr dom:google:       dom:google:blogger.com</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SUMX / SUM">
+
+			<h2>SUMX key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SUMX / SUM</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -492,19 +557,44 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.<br /><br /><u>Example:</u><br /><br /><pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br />sum visits:202001 10000 visits:202001<br />sum visits:2020   10000 visits:2020</pre>
+			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001  1000 visits:202001<br />sumx visits:202001       visits:202001<br /><br />getx visits:2020    1000 visits:2020<br />sumx visits:2020         visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MIN">
+				<div class="cmd" id="SUMXR">
 
-			<h2>MIN key number prefix</h2>
+			<h2>SUMXR key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MIN</td></tr>
+				<tr><td>Command			</td><td>SUMXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />sumxr visits:202001       visits:202003</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MINX / MIN">
+
+			<h2>MINX key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MINX / MIN</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -513,19 +603,44 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.
+			Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001  1000 visits:202001<br />minx visits:202001       visits:202001<br /><br />getx visits:2020    1000 visits:2020<br />minx visits:2020         visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MAX">
+				<div class="cmd" id="MINXR">
 
-			<h2>MAX key number prefix</h2>
+			<h2>MINXR key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MAX</td></tr>
+				<tr><td>Command			</td><td>MINXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - min of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />minxr visits:202001       visits:202003</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MAXX / MAX">
+
+			<h2>MAXX key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MAXX / MAX</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -534,11 +649,36 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />See COUNT for details.
+			Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001  1000 visits:202001<br />maxx visits:202001       visits:202001<br /><br />getx visits:2020    1000 visits:2020<br />maxx visits:2020         visits:2020</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MAXXR">
+
+			<h2>MAXXR key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MAXXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - max of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />maxxr visits:202001       visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SET">
@@ -560,6 +700,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MSET">
@@ -581,6 +722,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MSETNX">
@@ -602,6 +744,7 @@
 			int
 			<h3>Return value:</h3>
 			0 if some of the key value pair exists.<br />1 if none of the key value pair do not exists and keys are set.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MSETXX">
@@ -623,6 +766,7 @@
 			int
 			<h3>Return value:</h3>
 			0 if some of the key value pair does not exists.<br />1 if none of the key value pair exists and keys are set.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SETEX">
@@ -644,6 +788,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SETNX">
@@ -665,6 +810,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair exists.<br />1 if the key value pair do not exists and is set.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SETXX">
@@ -686,6 +832,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair exists and is set.<br />1 if the key value pair do not exists.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="APPEND">
@@ -707,6 +854,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXPIRE">
@@ -728,6 +876,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is set.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PERSIST">
@@ -749,6 +898,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is removed.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PERSISTDELETED">
@@ -770,6 +920,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETSET">
@@ -791,6 +942,7 @@
 			string
 			<h3>Return value:</h3>
 			Value of the key or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETDEL">
@@ -812,6 +964,7 @@
 			string
 			<h3>Return value:</h3>
 			Value of the key or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="DEL">
@@ -833,6 +986,7 @@
 			bool
 			<h3>Return value:</h3>
 			Always return 1
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="DELX">
@@ -849,11 +1003,36 @@
 			</table>
 
 			<h3>Description:</h3>
-			Delete up to 10'000 key-value pairs after <i>key</i>.<br />Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br /><br /><u>Example:</u><br /><br /><pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br />getx u:001: 1000 u:001:<br />delx u:001:      u:001:</pre>
+			Delete up to 10'000 key-value pairs after <i>key</i>.<br />Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx u:001: 1000 u:001:<br />delx u:001:      u:001:</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="DELXR">
+
+			<h2>DELXR key range_end</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>DELXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Delete up to 10'000 key-value pairs after <i>key</i>.<br />Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr price:2010-02 1000 price:2010-04<br />delxr price:2010-02      price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PERSISTX">
@@ -870,11 +1049,36 @@
 			</table>
 
 			<h3>Description:</h3>
-			PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />PERSIST ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br /><br /><u>Example:</u><br /><br /><pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br />getx u:001: 1000 u:001:<br />persistx u:001: u:001:</pre>
+			PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />PERSIST ONLY valid pairs, and only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx     u:001: 1000 u:001:<br />persistx u:001:      u:001:</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PERSISTXR">
+
+			<h2>PERSISTXR key prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PERSISTXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr     price:2010-02 1000 price:2010-04<br />persistxr price:2010-02      price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXPIREX">
@@ -891,11 +1095,36 @@
 			</table>
 
 			<h3>Description:</h3>
-			EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br /><br /><u>Example:</u><br /><br /><pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br />expires u:001: 90 u:001:</pre>
+			EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx    u:001: 1000 u:001:<br />expirex u:001:   90 u:001:</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="EXPIREXR">
+
+			<h2>EXPIREX key expiration prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>EXPIREXR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr   price:2010-02 1000 price:2010-04<br />expirex price:2010-02   90 price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CAS">
@@ -917,6 +1146,7 @@
 			bool
 			<h3>Return value:</h3>
 			if the key value is set or not
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CAD">
@@ -938,6 +1168,7 @@
 			bool
 			<h3>Return value:</h3>
 			if the key is removed or not
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="COPY">
@@ -959,6 +1190,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="COPYNX">
@@ -980,6 +1212,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="RENAME">
@@ -1001,6 +1234,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="RENAMENX">
@@ -1022,6 +1256,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INCR">
@@ -1043,6 +1278,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			New increased value.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="DECR">
@@ -1064,6 +1300,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			New decrease value.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGETALL">
@@ -1085,6 +1322,7 @@
 			array
 			<h3>Return value:</h3>
 			array of subkey and values from key hash
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGETKEYS">
@@ -1106,6 +1344,7 @@
 			array
 			<h3>Return value:</h3>
 			array of subkey from key hash
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGETVALS">
@@ -1127,6 +1366,7 @@
 			array
 			<h3>Return value:</h3>
 			array of values from key hash
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HLEN">
@@ -1148,6 +1388,7 @@
 			int
 			<h3>Return value:</h3>
 			number of elements in key hash
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGET">
@@ -1169,6 +1410,7 @@
 			string
 			<h3>Return value:</h3>
 			Value of the key -> subkey hash or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HMGET">
@@ -1190,6 +1432,7 @@
 			array
 			<h3>Return value:</h3>
 			Value of the key -> subkey hash or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HEXISTS">
@@ -1211,6 +1454,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key -> subkey hash do not exists.<br />1 if the key -> subkey hash exists.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HSET">
@@ -1232,6 +1476,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HDEL">
@@ -1253,6 +1498,7 @@
 			bool
 			<h3>Return value:</h3>
 			Always return 1
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HDELALL">
@@ -1274,6 +1520,7 @@
 			bool
 			<h3>Return value:</h3>
 			1 if all keys are removed, 0 if keys remains
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HPERSISTALL">
@@ -1295,6 +1542,7 @@
 			bool
 			<h3>Return value:</h3>
 			1 if all keys are removed, 0 if keys remains
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HEXPIREALL">
@@ -1316,6 +1564,7 @@
 			bool
 			<h3>Return value:</h3>
 			1 if all keys are removed, 0 if keys remains
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SADD">
@@ -1337,6 +1586,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SPOP">
@@ -1358,6 +1608,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			Value of the removed element or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITSET">
@@ -1379,6 +1630,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITGET">
@@ -1400,6 +1652,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			0 / 1
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITMGET">
@@ -1421,6 +1674,7 @@
 			array
 			<h3>Return value:</h3>
 			0 / 1
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITCOUNT">
@@ -1442,6 +1696,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			bitcount
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITMAX">
@@ -1463,6 +1718,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			Maximum suported index.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFADD">
@@ -1484,6 +1740,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			always returns 1
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFRESERVE">
@@ -1505,6 +1762,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFCOUNT">
@@ -1526,6 +1784,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			estimated count
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFINTERSECT">
@@ -1547,6 +1806,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			estimated count of intersection
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFMERGE">
@@ -1568,6 +1828,7 @@
 			OK
 			<h3>Return value:</h3>
 			Value of the removed element or empty string.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFBITS">
@@ -1589,6 +1850,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			HLL bits
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFERROR">
@@ -1610,6 +1872,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			HLL error rate as percent, but multiplied to 1'00'00
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BFADD">
@@ -1631,6 +1894,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BFRESERVE">
@@ -1652,6 +1916,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BFEXISTS">
@@ -1673,6 +1938,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if value is not present<br />1 if value is MAY BE present
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BFMEXISTS">
@@ -1694,6 +1960,7 @@
 			array
 			<h3>Return value:</h3>
 			array of bools0 if value is not present<br />1 if value is MAY BE present
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CMSADD">
@@ -1715,6 +1982,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CMSRESERVE">
@@ -1736,6 +2004,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CMSCOUNT">
@@ -1757,6 +2026,7 @@
 			int
 			<h3>Return value:</h3>
 			estimated count
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CMSMCOUNT">
@@ -1778,6 +2048,7 @@
 			array
 			<h3>Return value:</h3>
 			array of estimated counts
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CVPUSH">
@@ -1799,6 +2070,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CVPOP">
@@ -1820,6 +2092,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			value of the element
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CVGET">
@@ -1841,6 +2114,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			value of the element
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CVMGET">
@@ -1862,6 +2136,7 @@
 			array
 			<h3>Return value:</h3>
 			values of the elements
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CVGETRANGE">
@@ -1883,6 +2158,7 @@
 			array
 			<h3>Return value:</h3>
 			values of the elements
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CVLEN">
@@ -1904,6 +2180,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			size of the array
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CVMAX">
@@ -1925,6 +2202,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			maximum suported size of the array
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MURMUR">
@@ -1946,6 +2224,7 @@
 			string
 			<h3>Return value:</h3>
 			Returns murmur_hash64a from value with specific seed and specific modulo.<br />e.g. murmur_hash64a(value, seed) % modulo<br />Very useful for debugging.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INFO">
@@ -1967,6 +2246,7 @@
 			string
 			<h3>Return value:</h3>
 			Server information.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="DBSIZE">
@@ -1988,6 +2268,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			number of keys
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="VERSION">
@@ -2009,6 +2290,7 @@
 			string
 			<h3>Return value:</h3>
 			Server version.
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MAXKEYSIZE">
@@ -2030,6 +2312,7 @@
 			int
 			<h3>Return value:</h3>
 			max key size
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MAXVALSIZE">
@@ -2051,6 +2334,7 @@
 			int
 			<h3>Return value:</h3>
 			max value size
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PING">
@@ -2072,6 +2356,7 @@
 			string
 			<h3>Return value:</h3>
 			pong
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="ECHO">
@@ -2093,6 +2378,7 @@
 			string
 			<h3>Return value:</h3>
 			the message
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="LISTMAINTAINANCE">
@@ -2109,11 +2395,12 @@
 			</table>
 
 			<h3>Description:</h3>
-			Run crontab list maintainance. For example, may fsync binlogs.<br />Very useful if crontab list maintainance is disabled. 
+			Run crontab list maintainance. For example, crontab list maintainance may fsync binlogs.<br />Very useful if crontab list maintainance is disabled.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SAVE">
@@ -2135,6 +2422,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="RELOAD">
@@ -2156,6 +2444,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SELECT">
@@ -2177,6 +2466,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="RESET">
@@ -2198,6 +2488,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TYPE">
@@ -2219,6 +2510,7 @@
 			string
 			<h3>Return value:</h3>
 			Always return 'string'
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TOUCH">
@@ -2240,6 +2532,7 @@
 			string
 			<h3>Return value:</h3>
 			Always return '1'
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXIT">
@@ -2261,6 +2554,7 @@
 			n/a
 			<h3>Return value:</h3>
 			n/a
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SHUTDOWN">
@@ -2282,6 +2576,7 @@
 			n/a
 			<h3>Return value:</h3>
 			n/a
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TEST">
@@ -2303,6 +2598,7 @@
 			n/a
 			<h3>Return value:</h3>
 			n/a
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 		

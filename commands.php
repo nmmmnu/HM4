@@ -10,9 +10,11 @@ class Cmd{
 	private $complexity	;
 	private $compatible	;
 	private $mutable	;
-	private $module	;
+	private $module		;
 
-	function __construct($id, $name, $description, $value_type, $value, $version, $complexity, $compatible, $mutable, $module){
+	private $example	;
+
+	function __construct($id, $name, $description, $value_type, $value, $version, $complexity, $compatible, $mutable, $module, $example = false){
 		$this->id		= $id			;
 		$this->name		= $name			;
 		$this->description	= $description		;
@@ -24,6 +26,8 @@ class Cmd{
 		$this->compatible	= $compatible		;
 		$this->mutable		= $mutable		;
 		$this->module		= "$module.h"		;
+
+		$this->example		= "$example"		;
 	}
 
 	static function yn($b){
@@ -56,6 +60,11 @@ class Cmd{
 
 			<h3>Return value:</h3>
 			<?=$this->value ?>
+
+			<?php if ($this->example) : ?>
+			<h3>Example:</h3>
+			<?=$this->example ?>
+			<?php endif ?>
 
 			<p class="top"><a href="#top">top</a></p>
 		</div>
