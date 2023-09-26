@@ -71,7 +71,7 @@ return array(
 	new Cmd(
 			"CVGETRANGE",
 
-			"CVMGET key type index-start index-end",
+			"CVGETRANGE key type index-start index-end",
 
 			"Get elements with indexes from <i>index-start</i> to <i>index-end</i> from the array <i>key</i> of <i>type</i>.<br />" .
 			"Read Bitset information document.",
@@ -88,7 +88,7 @@ return array(
 	new Cmd(
 			"CVLEN",
 
-			"CVLEN key",
+			"CVLEN key type",
 
 			"Get number of elements from the array <i>key</i> of <i>type</i>.<br />" .
 			"Read CompactArray information document.",

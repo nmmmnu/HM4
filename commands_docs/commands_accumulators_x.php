@@ -1,9 +1,9 @@
 <?php
 return array(
 	new Cmd(
-			"COUNTX / COUNT",
+			"COUNTX",
 
-			"COUNTX key number prefix",
+			"COUNTX / COUNT key number prefix",
 
 			"Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -63,9 +63,9 @@ return array(
 	),
 
 	new Cmd(
-			"SUMX / SUM",
+			"SUMX",
 
-			"SUMX key number prefix",
+			"SUMX / SUM key number prefix",
 
 			"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -126,9 +126,9 @@ return array(
 	),
 
 	new Cmd(
-			"MINX / MIN",
+			"MINX",
 
-			"MINX key number prefix",
+			"MINX / MIN key number prefix",
 
 			"Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -189,9 +189,9 @@ return array(
 	),
 
 	new Cmd(
-			"MAXX / MAX",
+			"MAXX",
 
-			"MAXX key number prefix",
+			"MAXX / MAX key number prefix",
 
 			"Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .

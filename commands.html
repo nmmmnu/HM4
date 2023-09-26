@@ -107,13 +107,13 @@
 			<b>accumulators_x.h</b><br />
 			&nbsp;
 
-					<li><a href="#COUNTX / COUNT">COUNTX / COUNT</a></li>
+					<li><a href="#COUNTX">COUNTX</a></li>
 				<li><a href="#COUNTXR">COUNTXR</a></li>
-				<li><a href="#SUMX / SUM">SUMX / SUM</a></li>
+				<li><a href="#SUMX">SUMX</a></li>
 				<li><a href="#SUMXR">SUMXR</a></li>
-				<li><a href="#MINX / MIN">MINX / MIN</a></li>
+				<li><a href="#MINX">MINX</a></li>
 				<li><a href="#MINXR">MINXR</a></li>
-				<li><a href="#MAXX / MAX">MAXX / MAX</a></li>
+				<li><a href="#MAXX">MAXX</a></li>
 				<li><a href="#MAXXR">MAXXR</a></li>
 				</div>
 			<div>
@@ -232,18 +232,6 @@
 				<li><a href="#CMSRESERVE">CMSRESERVE</a></li>
 				<li><a href="#CMSCOUNT">CMSCOUNT</a></li>
 				<li><a href="#CMSMCOUNT">CMSMCOUNT</a></li>
-				</div>
-			<div>
-			<b>cv.h</b><br />
-			&nbsp;
-
-					<li><a href="#CVPUSH">CVPUSH</a></li>
-				<li><a href="#CVPOP">CVPOP</a></li>
-				<li><a href="#CVGET">CVGET</a></li>
-				<li><a href="#CVMGET">CVMGET</a></li>
-				<li><a href="#CVGETRANGE">CVGETRANGE</a></li>
-				<li><a href="#CVLEN">CVLEN</a></li>
-				<li><a href="#CVMAX">CVMAX</a></li>
 				</div>
 			<div>
 			<b>murmur.h</b><br />
@@ -497,12 +485,12 @@
 			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr price:2010-02 1000 price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="COUNTX / COUNT">
+				<div class="cmd" id="COUNTX">
 
-			<h2>COUNTX key number prefix</h2>
+			<h2>COUNTX / COUNT key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>COUNTX / COUNT</td></tr>
+				<tr><td>Command			</td><td>COUNTX</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -543,12 +531,12 @@
 			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />getxr   dom:google:  1000 dom:google:blogger.com<br />countxr dom:google:       dom:google:blogger.com</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="SUMX / SUM">
+				<div class="cmd" id="SUMX">
 
-			<h2>SUMX key number prefix</h2>
+			<h2>SUMX / SUM key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>SUMX / SUM</td></tr>
+				<tr><td>Command			</td><td>SUMX</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -589,12 +577,12 @@
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />sumxr visits:202001       visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MINX / MIN">
+				<div class="cmd" id="MINX">
 
-			<h2>MINX key number prefix</h2>
+			<h2>MINX / MIN key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MINX / MIN</td></tr>
+				<tr><td>Command			</td><td>MINX</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -635,12 +623,12 @@
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />minxr visits:202001       visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MAXX / MAX">
+				<div class="cmd" id="MAXX">
 
-			<h2>MAXX key number prefix</h2>
+			<h2>MAXX / MAX key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MAXX / MAX</td></tr>
+				<tr><td>Command			</td><td>MAXX</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -2048,160 +2036,6 @@
 			array
 			<h3>Return value:</h3>
 			array of estimated counts
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="CVPUSH">
-
-			<h2>CVPUSH key type value [index] [value]</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>CVPUSH</td></tr>
-				<tr><td>Available since		</td><td>1.3.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cv.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			CVPUSH <i>value</i> at the end of the array <i>key</i> of <i>type</i>.<br />Read CompactArray information document.
-			<h3>Return type:</h3>
-			OK
-			<h3>Return value:</h3>
-			OK
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="CVPOP">
-
-			<h2>CVPOP key type</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>CVPOP</td></tr>
-				<tr><td>Available since		</td><td>1.3.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>cv.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Remove last element from the array <i>key</i> of <i>type</i>.<br />Read CompactArray information document.
-			<h3>Return type:</h3>
-			string (int)
-			<h3>Return value:</h3>
-			value of the element
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="CVGET">
-
-			<h2>CVGET key type index</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>CVGET</td></tr>
-				<tr><td>Available since		</td><td>1.3.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cv.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Get element with <i>index</i> from the array <i>key</i> of <i>type</i>.<br />Read CompactArray information document.
-			<h3>Return type:</h3>
-			string (int)
-			<h3>Return value:</h3>
-			value of the element
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="CVMGET">
-
-			<h2>CVMGET key type index [index1]</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>CVMGET</td></tr>
-				<tr><td>Available since		</td><td>1.3.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cv.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Get elements with <i>index</i>, <i>index1</i>... from the array <i>key</i> of <i>type</i>.<br />Read Bitset information document.
-			<h3>Return type:</h3>
-			array
-			<h3>Return value:</h3>
-			values of the elements
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="CVGETRANGE">
-
-			<h2>CVMGET key type index-start index-end</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>CVGETRANGE</td></tr>
-				<tr><td>Available since		</td><td>1.3.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cv.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Get elements with indexes from <i>index-start</i> to <i>index-end</i> from the array <i>key</i> of <i>type</i>.<br />Read Bitset information document.
-			<h3>Return type:</h3>
-			array
-			<h3>Return value:</h3>
-			values of the elements
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="CVLEN">
-
-			<h2>CVLEN key</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>CVLEN</td></tr>
-				<tr><td>Available since		</td><td>1.3.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>cv.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Get number of elements from the array <i>key</i> of <i>type</i>.<br />Read CompactArray information document.
-			<h3>Return type:</h3>
-			string (int)
-			<h3>Return value:</h3>
-			size of the array
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="CVMAX">
-
-			<h2>CVMAX type</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>CVMAX</td></tr>
-				<tr><td>Available since		</td><td>1.3.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>cv.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Return maximum suported size from arrays of <i>type</i>,<br />it is limited of max value size.<br />Read CompactArray information document.
-			<h3>Return type:</h3>
-			string (int)
-			<h3>Return value:</h3>
-			maximum suported size of the array
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
