@@ -15,7 +15,7 @@ namespace net::worker::commands::Accumulators{
 
 
 			template<class Accumulator, class It, class StopPredicate>
-			auto accumulateResults(uint32_t const maxResults, std::string_view const prefix, It it, It eit, StopPredicate stop){
+			auto accumulateResults(uint32_t const maxResults, StopPredicate stop, It it, It eit){
 				Accumulator accumulator;
 
 				uint32_t iterations	= 0;
@@ -27,7 +27,7 @@ namespace net::worker::commands::Accumulators{
 					if (++iterations > ITERATIONS)
 						return accumulator.result(key);
 
-					if (! prefix.empty() && stop(prefix, key))
+					if (stop(key))
 						return accumulator.result();
 
 					if (! it->isOK())
@@ -45,7 +45,7 @@ namespace net::worker::commands::Accumulators{
 
 
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
-			void execCommand(ParamContainer const &p, StopPredicate stop, List &list, Result<Protocol> &result){
+			void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
 				if (p.size() != 4)
 					return;
 
@@ -66,12 +66,13 @@ namespace net::worker::commands::Accumulators{
 				auto const count   = myClamp( from_string<uint64_t>(p[2]) );
 				auto const &prefix = p[3];
 
+				StopPredicate stop{ prefix };
+
 				auto const [ number, lastKey ] = accumulateResults<Accumulator>(
 								count					,
-								prefix					,
+								stop					,
 								list.find(key, std::false_type{})	,
-								std::end(list)				,
-								stop
+								std::end(list)
 				);
 
 				to_string_buffer_t buffer;
@@ -88,14 +89,24 @@ namespace net::worker::commands::Accumulators{
 
 			// making it class, makes later code prettier.
 			struct StopPrefixPredicate{
-				bool operator()(std::string_view prefix, std::string_view key) const{
-					return ! same_prefix(prefix, key);
+				std::string_view prefix;
+
+				bool operator()(std::string_view key) const{
+					if (prefix.empty())
+						return false;
+					else
+						return ! same_prefix(prefix, key);
 				}
 			};
 
 			struct StopRangePredicate{
-				bool operator()(std::string_view prefix, std::string_view key) const{
-					return prefix < key;
+				std::string_view end;
+
+				constexpr bool operator()(std::string_view key) const{
+					if (end.empty())
+						return false;
+					else
+						return end < key;
 				}
 			};
 
@@ -181,8 +192,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopPrefixPredicate stop;
-			return execCommand<COUNTPredicate>(params, stop, *db, result);
+			return execCommand<COUNTPredicate, StopPrefixPredicate>(params, *db, result);
 		}
 
 	private:
@@ -207,8 +217,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopRangePredicate stop;
-			return execCommand<COUNTPredicate>(params, stop, *db, result);
+			return execCommand<COUNTPredicate, StopRangePredicate>(params, *db, result);
 		}
 
 	private:
@@ -232,8 +241,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopPrefixPredicate stop;
-			return execCommand<SUMPredicate>(params, stop, *db, result);
+			return execCommand<SUMPredicate, StopPrefixPredicate>(params, *db, result);
 		}
 
 	private:
@@ -258,8 +266,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopRangePredicate stop;
-			return execCommand<SUMPredicate>(params, stop, *db, result);
+			return execCommand<SUMPredicate, StopRangePredicate>(params, *db, result);
 		}
 
 	private:
@@ -283,8 +290,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopPrefixPredicate stop;
-			return execCommand<MINPredicate>(params, stop, *db, result);
+			return execCommand<MINPredicate, StopPrefixPredicate>(params, *db, result);
 		}
 
 	private:
@@ -309,8 +315,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopRangePredicate stop;
-			return execCommand<MINPredicate>(params, stop, *db, result);
+			return execCommand<MINPredicate, StopRangePredicate>(params, *db, result);
 		}
 
 	private:
@@ -334,8 +339,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopPrefixPredicate stop;
-			return execCommand<MAXPredicate>(params, stop, *db, result);
+			return execCommand<MAXPredicate, StopPrefixPredicate>(params, *db, result);
 		}
 
 	private:
@@ -359,8 +363,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			StopRangePredicate stop;
-			return execCommand<MAXPredicate>(params, stop, *db, result);
+			return execCommand<MAXPredicate, StopRangePredicate>(params, *db, result);
 		}
 
 	private:

@@ -15,13 +15,13 @@ namespace net::worker::commands::MutableX{
 
 
 			template<class Predicate, class StopPredicate, class List>
-			std::string_view scanKeysAndProcessInPlace_(Predicate p, StopPredicate stop, List &list, std::string_view prefix, std::string_view key, ContainerX &container){
+			std::string_view scanKeysAndProcessInPlace_(Predicate p, StopPredicate stop, List &list, std::string_view key, ContainerX &container){
 				uint32_t iterations = 0;
 
 				for(auto it = list.find(key, std::false_type{}); it != std::end(list); ++it){
 					auto const key = it->getKey();
 
-					if (stop(prefix, key))
+					if (stop(key))
 						return {};
 
 					if (++iterations > ITERATIONS_PROCESS_X){
@@ -49,13 +49,13 @@ namespace net::worker::commands::MutableX{
 
 
 			template<class StopPredicate, class List, class Result>
-			void scanForLastKey_(StopPredicate stop, List &list, std::string_view prefix, std::string_view key, Result &result){
+			void scanForLastKey_(StopPredicate stop, List &list, std::string_view key, Result &result){
 				uint32_t iterations = 0;
 
 				for(auto it = list.find(key, std::false_type{}); it != std::end(list); ++it){
 					auto const key = it->getKey();
 
-					if (stop(prefix, key))
+					if (stop(key))
 						return result.set();
 
 					if (++iterations > ITERATIONS_PROCESS_X){
@@ -77,14 +77,14 @@ namespace net::worker::commands::MutableX{
 
 
 			template<bool ResultAsHash, class Predicate, class StopPredicate, class List, class Result>
-			void process_x_(Predicate p, StopPredicate stop, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
+			void process_x_(Predicate p, StopPredicate stop, List &list, std::string_view key, Result &result, ContainerX &container){
 				container.clear();
 
 				uint8_t check_passes = 0;
 
 			// label for goto
 			start:
-				std::string_view last_key = scanKeysAndProcessInPlace_(p, stop, list, prefix, key, container);
+				std::string_view last_key = scanKeysAndProcessInPlace_(p, stop, list, key, container);
 
 				// update by insert
 
@@ -109,7 +109,7 @@ namespace net::worker::commands::MutableX{
 						if constexpr(ResultAsHash)
 							return result.set_0();
 						else
-							return scanForLastKey_(stop, list, prefix, key, result);
+							return scanForLastKey_(stop, list, key, result);
 					}
 				}
 
@@ -122,8 +122,8 @@ namespace net::worker::commands::MutableX{
 
 
 			template<class Predicate, class StopPredicate, class List, class Result>
-			void process_x(Predicate p, StopPredicate stop, List &list, std::string_view prefix, std::string_view key, Result &result, ContainerX &container){
-				return process_x_<0>(p, stop, list, prefix, key, result, container);
+			void process_x(Predicate p, StopPredicate stop, List &list, std::string_view key, Result &result, ContainerX &container){
+				return process_x_<0>(p, stop, list, key, result, container);
 			}
 
 
@@ -133,21 +133,31 @@ namespace net::worker::commands::MutableX{
 			template<class Predicate, class List, class Result>
 			void process_h(Predicate p, List &list, std::string_view prefix, Result &result, ContainerX &container){
 				StopRangePredicate stop;
-				return process_x_<1>(p, stop, list, prefix, prefix, result, container);
+				return process_x_<1>(p, stop, list, prefix, result, container);
 			}
 
 
 
 			// making it class, makes later code prettier.
 			struct StopPrefixPredicate{
-				bool operator()(std::string_view prefix, std::string_view key) const{
-					return ! same_prefix(prefix, key);
+				std::string_view prefix;
+
+				bool operator()(std::string_view key) const{
+					if (prefix.empty())
+						return false;
+					else
+						return ! same_prefix(prefix, key);
 				}
 			};
 
 			struct StopRangePredicate{
-				bool operator()(std::string_view prefix, std::string_view key) const{
-					return prefix < key;
+				std::string_view end;
+
+				constexpr bool operator()(std::string_view key) const{
+					if (end.empty())
+						return false;
+					else
+						return end < key;
 				}
 			};
 
@@ -229,8 +239,8 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			DeletePredicate<DBAdapter>	pred;
-			StopPrefixPredicate		stop;
-			return process_x(pred, stop, *db, prefix, key, result, blob.pcontainer);
+			StopPrefixPredicate		stop{ prefix };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
 	private:
@@ -256,16 +266,16 @@ namespace net::worker::commands::MutableX{
 				return;
 
 			auto const &key		= p[1];
-			auto const &eof		= p[2];
+			auto const &end		= p[2];
 
-			if (eof.empty())
+			if (end.empty())
 				return;
 
 			using namespace mutablex_impl_;
 
 			DeletePredicate<DBAdapter>	pred;
-			StopRangePredicate		stop;
-			return process_x(pred, stop, *db, eof, key, result, blob.pcontainer);
+			StopRangePredicate		stop{ end };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
 	private:
@@ -334,8 +344,8 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			PersistPredicate<DBAdapter>	pred;
-			StopPrefixPredicate		stop;
-			return process_x(pred, stop, *db, prefix, key, result, blob.pcontainer);
+			StopPrefixPredicate		stop{ prefix };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
 	private:
@@ -361,16 +371,16 @@ namespace net::worker::commands::MutableX{
 				return;
 
 			auto const &key		= p[1];
-			auto const &prefix	= p[2];
+			auto const &end		= p[2];
 
-			if (prefix.empty())
+			if (end.empty())
 				return;
 
 			using namespace mutablex_impl_;
 
 			PersistPredicate<DBAdapter>	pred;
-			StopRangePredicate		stop;
-			return process_x(pred, stop, *db, prefix, key, result, blob.pcontainer);
+			StopRangePredicate		stop{ end };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
 	private:
@@ -437,8 +447,8 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
-			StopPrefixPredicate		stop;
-			return process_x(pred, stop, *db, prefix, key, result, blob.pcontainer);
+			StopPrefixPredicate		stop{ prefix };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
 	private:
@@ -465,16 +475,16 @@ namespace net::worker::commands::MutableX{
 
 			auto const &key		= p[1];
 			auto const exp		= from_string<uint32_t>(p[2]);
-			auto const &prefix	= p[3];
+			auto const &end		= p[3];
 
-			if (prefix.empty())
+			if (end.empty())
 				return;
 
 			using namespace mutablex_impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
-			StopRangePredicate		stop;
-			return process_x(pred, stop, *db, prefix, key, result, blob.pcontainer);
+			StopRangePredicate		stop{ end };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
 	private:

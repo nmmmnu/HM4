@@ -34,7 +34,7 @@ namespace net::worker::commands::ImmutableX{
 				uint32_t iterations	= 0;
 				uint32_t results	= 0;
 
-				StopPrefixPredicate stop;
+				StopPrefixPredicate stop{ prefix };
 
 				for(;it != eit;++it){
 					auto const &key = it->getKey();
@@ -42,7 +42,7 @@ namespace net::worker::commands::ImmutableX{
 					if (++iterations > ITERATIONS)
 						break;
 
-					if (! prefix.empty() && stop(prefix, key))
+					if (stop(key))
 						break;
 
 					if (! it->isOK())
@@ -54,8 +54,8 @@ namespace net::worker::commands::ImmutableX{
 				return results;
 			}
 
-			template<AccumulateOutput Out, class It, class Container, class ProjectionKey, class StopPredicate>
-			void accumulateResults_(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container, ProjectionKey projKey, StopPredicate stop){
+			template<AccumulateOutput Out, class StopPredicate, class It, class Container, class ProjectionKey>
+			void accumulateResults_(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container, ProjectionKey projKey){
 				uint32_t iterations	= 0;
 				uint32_t results	= 0;
 
@@ -75,7 +75,7 @@ namespace net::worker::commands::ImmutableX{
 					if (++iterations > ITERATIONS)
 						return tail(pkey);
 
-					if (! prefix.empty() && stop(prefix, key))
+					if (stop(key))
 						return; // no tail
 
 					if (! it->isOK())
@@ -94,13 +94,13 @@ namespace net::worker::commands::ImmutableX{
 				}
 			}
 
-			template<AccumulateOutput Out, class It, class Container, class StopPredicate>
-			void accumulateResultsX(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container, StopPredicate stop){
+			template<AccumulateOutput Out, class StopPredicate, class It, class Container>
+			void accumulateResultsX(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container){
 				auto proj = [](std::string_view x){
 					return x;
 				};
 
-				return accumulateResults_<Out>(maxResults, prefix, it, eit, container, proj, stop);
+				return accumulateResults_<Out>(maxResults, stop, it, eit, container, proj);
 			}
 
 			template<AccumulateOutput Out, class It, class Container>
@@ -114,21 +114,37 @@ namespace net::worker::commands::ImmutableX{
 						return x;
 				};
 
-				StopPrefixPredicate stop;
+				StopPrefixPredicate stop{ prefix };
 
-				return accumulateResults_<Out>(maxResults, prefix, it, eit, container, proj, stop);
+				return accumulateResults_<Out>(maxResults, stop, it, eit, container, proj);
 			}
 
 			// making it class, makes later code prettier.
 			struct StopPrefixPredicate{
-				bool operator()(std::string_view prefix, std::string_view key) const{
-					return ! same_prefix(prefix, key);
+				std::string_view prefix;
+
+				bool operator()(std::string_view key) const{
+					if (prefix.empty())
+						return false;
+					else
+						return ! same_prefix(prefix, key);
 				}
 			};
 
 			struct StopRangePredicate{
-				bool operator()(std::string_view prefix, std::string_view key) const{
-					return prefix < key;
+				std::string_view end;
+
+				constexpr bool operator()(std::string_view key) const{
+					if (end.empty())
+						return false;
+					else
+						return end < key;
+				}
+			};
+
+			struct StopUnboundPredicate{
+				constexpr bool operator()(std::string_view) const{
+					return false;
 				}
 			};
 
@@ -175,15 +191,14 @@ namespace net::worker::commands::ImmutableX{
 			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
 			auto const &prefix = p[3];
 
-			StopPrefixPredicate stop;
+			StopPrefixPredicate stop{ prefix };
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count					,
-				prefix					,
+				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container				,
-				stop
+				blob.container
 			);
 
 			return result.set_container(blob.container);
@@ -233,17 +248,16 @@ namespace net::worker::commands::ImmutableX{
 
 			auto const &key    = p[1];
 			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
-			auto const &prefix = p[3];
+			auto const &end    = p[3];
 
-			StopRangePredicate stop;
+			StopRangePredicate stop{ end };
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count					,
-				prefix					,
+				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container				,
-				stop
+				blob.container
 			);
 
 			return result.set_container(blob.container);
@@ -252,6 +266,63 @@ namespace net::worker::commands::ImmutableX{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"xrget",	"XRGET"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct XUGET : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 3)
+				return;
+
+
+
+			using namespace immutablex_impl_;
+
+			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
+
+			// using uint64_t from the user, allow more user-friendly behavour.
+			// suppose he / she enters 1'000'000'000.
+			// because this value is great than max uint32_t,
+			// the converted value will go to 0, then to MIN.
+
+			auto myClamp = [](auto a){
+				return static_cast<uint32_t>(
+					std::clamp<uint64_t>(a, MIN, ITERATIONS)
+				);
+			};
+
+
+
+			auto const &key    = p[1];
+			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
+
+			StopUnboundPredicate stop;
+
+			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
+				count					,
+				stop					,
+				db->find(key, std::false_type{})	,
+				std::end(*db)				,
+				blob.container
+			);
+
+			return result.set_container(blob.container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xuget",	"XUGET"
 		};
 	};
 
@@ -465,6 +536,7 @@ namespace net::worker::commands::ImmutableX{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				XNGET		,
 				XRGET		,
+				XUGET		,
 
 				HGETALL		,
 				HGETKEYS	,

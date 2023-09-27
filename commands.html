@@ -102,6 +102,7 @@
 
 					<li><a href="#XNGET">XNGET</a></li>
 				<li><a href="#XRGET">XRGET</a></li>
+				<li><a href="#XUGET">XUGET</a></li>
 				</div>
 			<div>
 			<b>accumulators_x.h</b><br />
@@ -483,6 +484,29 @@
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget price:2010-02 1000 price:2010-04</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XUGET">
+
+			<h2>XUGET key number</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XUGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />Useful for database dump.<br />Returns up to 1'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>xrget '' 1000</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNCOUNT">

@@ -57,5 +57,29 @@ return array(
 			"xrget price:2010-02 1000 price:2010-04</pre>"
 
 	),
+	new Cmd(
+			"XUGET",
+
+			"XUGET key number",
+
+			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
+			"Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />" .
+			"Useful for database dump.<br />" .
+			"Returns up to 1'000 elements.",
+
+			"array",
+			"First group of element         - array of key and values.<br />" .
+			"Second group of single element - Last key, if there is second page.",
+
+			"1.3.7.1",
+			"READ",
+			false,
+			false,
+
+			"immutable_x",
+
+			"<pre>xrget '' 1000</pre>"
+
+	),
 );
 
