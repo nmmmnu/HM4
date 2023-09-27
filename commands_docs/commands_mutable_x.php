@@ -1,9 +1,9 @@
 <?php
 return array(
 	new Cmd(
-			"DELX",
+			"XNDEL",
 
-			"DELX key prefix",
+			"XNDEL key prefix",
 
 			"Delete up to 10'000 key-value pairs after <i>key</i>.<br />" .
 			"Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
@@ -23,16 +23,16 @@ return array(
 			"set u:001:state CA<br />" .
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
-			"getx u:001: 1000 u:001:<br />" .
-			"delx u:001:      u:001:</pre>"
+			"xnget u:001: 1000 u:001:<br />" .
+			"xndel u:001:      u:001:</pre>"
 	),
 
 
 
 	new Cmd(
-			"DELXR",
+			"XRDEL",
 
-			"DELXR key range_end",
+			"XRDEL key range_end",
 
 			"Delete up to 10'000 key-value pairs after <i>key</i>.<br />" .
 			"Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.",
@@ -53,19 +53,19 @@ return array(
 			"set price:2010-04 16<br />" .
 			"set price:2010-05 22<br />" .
 			"<br />" .
-			"getxr price:2010-02 1000 price:2010-04<br />" .
-			"delxr price:2010-02      price:2010-04</pre>"
+			"xrget price:2010-02 1000 price:2010-04<br />" .
+			"xrdel price:2010-02      price:2010-04</pre>"
 	),
 
 
 
 	new Cmd(
-			"PERSISTX",
+			"XNPERSIST",
 
-			"PERSISTX key prefix",
+			"XNPERSIST key prefix",
 
-			"PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"PERSIST ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
+			"Persist up to 10'000 key-value pairs after <i>key</i>.<br />" .
+			"Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
 
 			"string",
 			"Last key, if there is second page.",
@@ -82,16 +82,16 @@ return array(
 			"set u:001:state CA<br />" .
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
-			"getx     u:001: 1000 u:001:<br />" .
-			"persistx u:001:      u:001:</pre>"
+			"xnget     u:001: 1000 u:001:<br />" .
+			"xnpersist u:001:      u:001:</pre>"
 	),
 
 
 
 	new Cmd(
-			"PERSISTXR",
+			"XRPERSIST",
 
-			"PERSISTXR key prefix",
+			"XRPERSIST key prefix",
 
 			"PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />" .
 			"PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.",
@@ -112,16 +112,16 @@ return array(
 			"set price:2010-04 16<br />" .
 			"set price:2010-05 22<br />" .
 			"<br />" .
-			"getxr     price:2010-02 1000 price:2010-04<br />" .
-			"persistxr price:2010-02      price:2010-04</pre>"
+			"xnget     price:2010-02 1000 price:2010-04<br />" .
+			"xnpersist price:2010-02      price:2010-04</pre>"
 	),
 
 
 
 	new Cmd(
-			"EXPIREX",
+			"XNEXPIRE",
 
-			"EXPIREX key expiration prefix",
+			"XNEXPIRE key expiration prefix",
 
 			"EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />" .
 			"EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
@@ -141,16 +141,16 @@ return array(
 			"set u:001:state CA<br />" .
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
-			"getx    u:001: 1000 u:001:<br />" .
-			"expirex u:001:   90 u:001:</pre>"
+			"xnget    u:001: 1000 u:001:<br />" .
+			"xnexpire u:001:   90 u:001:</pre>"
 	),
 
 
 
 	new Cmd(
-			"EXPIREXR",
+			"XREXPIRE",
 
-			"EXPIREX key expiration prefix",
+			"XREXPIRE key expiration prefix",
 
 			"EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />" .
 			"EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.",
@@ -171,8 +171,8 @@ return array(
 			"set price:2010-04 16<br />" .
 			"set price:2010-05 22<br />" .
 			"<br />" .
-			"getxr   price:2010-02 1000 price:2010-04<br />" .
-			"expirex price:2010-02   90 price:2010-04</pre>"
+			"xrget    price:2010-02 1000 price:2010-04<br />" .
+			"xrexpire price:2010-02   90 price:2010-04</pre>"
 	),
 );
 

@@ -100,21 +100,21 @@
 			<b>immutable_x.h</b><br />
 			&nbsp;
 
-					<li><a href="#GETX">GETX</a></li>
-				<li><a href="#GETXR">GETXR</a></li>
+					<li><a href="#XNGET">XNGET</a></li>
+				<li><a href="#XRGET">XRGET</a></li>
 				</div>
 			<div>
 			<b>accumulators_x.h</b><br />
 			&nbsp;
 
-					<li><a href="#COUNTX">COUNTX</a></li>
-				<li><a href="#COUNTXR">COUNTXR</a></li>
-				<li><a href="#SUMX">SUMX</a></li>
-				<li><a href="#SUMXR">SUMXR</a></li>
-				<li><a href="#MINX">MINX</a></li>
-				<li><a href="#MINXR">MINXR</a></li>
-				<li><a href="#MAXX">MAXX</a></li>
-				<li><a href="#MAXXR">MAXXR</a></li>
+					<li><a href="#XNCOUNT">XNCOUNT</a></li>
+				<li><a href="#XRCOUNT">XRCOUNT</a></li>
+				<li><a href="#XNSUM">XNSUM</a></li>
+				<li><a href="#XRSUM">XRSUM</a></li>
+				<li><a href="#XNMIN">XNMIN</a></li>
+				<li><a href="#XRMIN">XRMIN</a></li>
+				<li><a href="#XNMAX">XNMAX</a></li>
+				<li><a href="#XRMAX">XRMAX</a></li>
 				</div>
 			<div>
 			<b>mutable.h</b><br />
@@ -139,12 +139,12 @@
 			<b>mutable_x.h</b><br />
 			&nbsp;
 
-					<li><a href="#DELX">DELX</a></li>
-				<li><a href="#DELXR">DELXR</a></li>
-				<li><a href="#PERSISTX">PERSISTX</a></li>
-				<li><a href="#PERSISTXR">PERSISTXR</a></li>
-				<li><a href="#EXPIREX">EXPIREX</a></li>
-				<li><a href="#EXPIREXR">EXPIREXR</a></li>
+					<li><a href="#XNDEL">XNDEL</a></li>
+				<li><a href="#XRDEL">XRDEL</a></li>
+				<li><a href="#XNPERSIST">XNPERSIST</a></li>
+				<li><a href="#XRPERSIST">XRPERSIST</a></li>
+				<li><a href="#XNEXPIRE">XNEXPIRE</a></li>
+				<li><a href="#XREXPIRE">XREXPIRE</a></li>
 				</div>
 			<div>
 			<b>cas.h</b><br />
@@ -439,12 +439,12 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="GETX">
+				<div class="cmd" id="XNGET">
 
-			<h2>GETX key number prefix</h2>
+			<h2>XNGET / GETX key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>GETX</td></tr>
+				<tr><td>Command			</td><td>XNGET</td></tr>
 				<tr><td>Available since		</td><td>1.0.0</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -459,15 +459,15 @@
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx u:001: 1000 u:001:</pre>			
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget u:001: 1000 u:001:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="GETXR">
+				<div class="cmd" id="XRGET">
 
-			<h2>GETXR key number range_end</h2>
+			<h2>XRGET key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>GETXR</td></tr>
+				<tr><td>Command			</td><td>XRGET</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -482,15 +482,15 @@
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr price:2010-02 1000 price:2010-04</pre>			
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget price:2010-02 1000 price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="COUNTX">
+				<div class="cmd" id="XNCOUNT">
 
-			<h2>COUNTX / COUNT key number prefix</h2>
+			<h2>XNCOUNT / COUNT key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>COUNTX</td></tr>
+				<tr><td>Command			</td><td>XNCOUNT</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -505,15 +505,15 @@
 			<h3>Return value:</h3>
 			First element  - count of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />getx   dom:google:  1000 dom:google:<br />countx dom:google:       dom:google:</pre>			
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xnget   dom:google:  1000 dom:google:<br />xncount dom:google:       dom:google:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="COUNTXR">
+				<div class="cmd" id="XRCOUNT">
 
-			<h2>COUNTXR key number range_end</h2>
+			<h2>XRCOUNT key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>COUNTXR</td></tr>
+				<tr><td>Command			</td><td>XRCOUNT</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -528,15 +528,15 @@
 			<h3>Return value:</h3>
 			First element  - count of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />getxr   dom:google:  1000 dom:google:blogger.com<br />countxr dom:google:       dom:google:blogger.com</pre>			
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xrget   dom:google:  1000 dom:google:blogger.com<br />xrcount dom:google:       dom:google:blogger.com</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="SUMX">
+				<div class="cmd" id="XNSUM">
 
-			<h2>SUMX / SUM key number prefix</h2>
+			<h2>XNSUM / SUM key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>SUMX</td></tr>
+				<tr><td>Command			</td><td>XNSUM</td></tr>
 				<tr><td>Available since		</td><td>1.2.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -551,15 +551,15 @@
 			<h3>Return value:</h3>
 			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001  1000 visits:202001<br />sumx visits:202001       visits:202001<br /><br />getx visits:2020    1000 visits:2020<br />sumx visits:2020         visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001  1000 visits:202001<br />xnsum visits:202001       visits:202001<br /><br />xnget visits:2020    1000 visits:2020<br />xnsum visits:2020         visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="SUMXR">
+				<div class="cmd" id="XRSUM">
 
-			<h2>SUMXR key number range_end</h2>
+			<h2>XRSUM key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>SUMXR</td></tr>
+				<tr><td>Command			</td><td>XRSUM</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -574,15 +574,15 @@
 			<h3>Return value:</h3>
 			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />sumxr visits:202001       visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001  1000 visits:202003<br />xrsum visits:202001       visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MINX">
+				<div class="cmd" id="XNMIN">
 
-			<h2>MINX / MIN key number prefix</h2>
+			<h2>XNMIN / MIN key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MINX</td></tr>
+				<tr><td>Command			</td><td>XNMIN</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -597,15 +597,15 @@
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001  1000 visits:202001<br />minx visits:202001       visits:202001<br /><br />getx visits:2020    1000 visits:2020<br />minx visits:2020         visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001  1000 visits:202001<br />xnmin visits:202001       visits:202001<br /><br />xnget visits:2020    1000 visits:2020<br />xnmin visits:2020         visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MINXR">
+				<div class="cmd" id="XRMIN">
 
-			<h2>MINXR key number range_end</h2>
+			<h2>XRMIN key number range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MINXR</td></tr>
+				<tr><td>Command			</td><td>XRMIN</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -620,15 +620,15 @@
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />minxr visits:202001       visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001  1000 visits:202003<br />xrmin visits:202001       visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MAXX">
+				<div class="cmd" id="XNMAX">
 
-			<h2>MAXX / MAX key number prefix</h2>
+			<h2>XNMAX / MAX key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MAXX</td></tr>
+				<tr><td>Command			</td><td>XNMAX</td></tr>
 				<tr><td>Available since		</td><td>1.2.5</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -643,15 +643,15 @@
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001  1000 visits:202001<br />maxx visits:202001       visits:202001<br /><br />getx visits:2020    1000 visits:2020<br />maxx visits:2020         visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001  1000 visits:202001<br />xnmax visits:202001       visits:202001<br /><br />xnget visits:2020    1000 visits:2020<br />xnmax visits:2020         visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MAXXR">
+				<div class="cmd" id="XRMAX">
 
-			<h2>MAXXR key number prefix</h2>
+			<h2>XRMAX key number prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MAXXR</td></tr>
+				<tr><td>Command			</td><td>XRMAX</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -666,7 +666,7 @@
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getxr visits:202001  1000 visits:202003<br />maxxr visits:202001       visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001  1000 visits:202003<br />xrmax visits:202001       visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SET">
@@ -977,12 +977,12 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="DELX">
+				<div class="cmd" id="XNDEL">
 
-			<h2>DELX key prefix</h2>
+			<h2>XNDEL key prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>DELX</td></tr>
+				<tr><td>Command			</td><td>XNDEL</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -997,15 +997,15 @@
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx u:001: 1000 u:001:<br />delx u:001:      u:001:</pre>			
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget u:001: 1000 u:001:<br />xndel u:001:      u:001:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="DELXR">
+				<div class="cmd" id="XRDEL">
 
-			<h2>DELXR key range_end</h2>
+			<h2>XRDEL key range_end</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>DELXR</td></tr>
+				<tr><td>Command			</td><td>XRDEL</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -1020,15 +1020,15 @@
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr price:2010-02 1000 price:2010-04<br />delxr price:2010-02      price:2010-04</pre>			
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget price:2010-02 1000 price:2010-04<br />xrdel price:2010-02      price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="PERSISTX">
+				<div class="cmd" id="XNPERSIST">
 
-			<h2>PERSISTX key prefix</h2>
+			<h2>XNPERSIST key prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>PERSISTX</td></tr>
+				<tr><td>Command			</td><td>XNPERSIST</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -1037,21 +1037,21 @@
 			</table>
 
 			<h3>Description:</h3>
-			PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />PERSIST ONLY valid pairs, and only if they are matching the <i>prefix</i>.
+			Persist up to 10'000 key-value pairs after <i>key</i>.<br />Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx     u:001: 1000 u:001:<br />persistx u:001:      u:001:</pre>			
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget     u:001: 1000 u:001:<br />xnpersist u:001:      u:001:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="PERSISTXR">
+				<div class="cmd" id="XRPERSIST">
 
-			<h2>PERSISTXR key prefix</h2>
+			<h2>XRPERSIST key prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>PERSISTXR</td></tr>
+				<tr><td>Command			</td><td>XRPERSIST</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -1066,15 +1066,15 @@
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr     price:2010-02 1000 price:2010-04<br />persistxr price:2010-02      price:2010-04</pre>			
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xnget     price:2010-02 1000 price:2010-04<br />xnpersist price:2010-02      price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="EXPIREX">
+				<div class="cmd" id="XNEXPIRE">
 
-			<h2>EXPIREX key expiration prefix</h2>
+			<h2>XNEXPIRE key expiration prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>EXPIREX</td></tr>
+				<tr><td>Command			</td><td>XNEXPIRE</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -1089,15 +1089,15 @@
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />getx    u:001: 1000 u:001:<br />expirex u:001:   90 u:001:</pre>			
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget    u:001: 1000 u:001:<br />xnexpire u:001:   90 u:001:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="EXPIREXR">
+				<div class="cmd" id="XREXPIRE">
 
-			<h2>EXPIREX key expiration prefix</h2>
+			<h2>XREXPIRE key expiration prefix</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>EXPIREXR</td></tr>
+				<tr><td>Command			</td><td>XREXPIRE</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -1112,7 +1112,7 @@
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />getxr   price:2010-02 1000 price:2010-04<br />expirex price:2010-02   90 price:2010-04</pre>			
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget    price:2010-02 1000 price:2010-04<br />xrexpire price:2010-02   90 price:2010-04</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CAS">

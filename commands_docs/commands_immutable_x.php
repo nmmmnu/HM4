@@ -1,9 +1,9 @@
 <?php
 return array(
 	new Cmd(
-			"GETX",
+			"XNGET",
 
-			"GETX key number prefix",
+			"XNGET / GETX key number prefix",
 
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -25,13 +25,13 @@ return array(
 			"set u:001:state CA<br />" .
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
-			"getx u:001: 1000 u:001:</pre>"
+			"xnget u:001: 1000 u:001:</pre>"
 
 	),
 	new Cmd(
-			"GETXR",
+			"XRGET",
 
-			"GETXR key number range_end",
+			"XRGET key number range_end",
 
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.<br />" .
@@ -54,7 +54,7 @@ return array(
 			"set price:2010-04 16<br />" .
 			"set price:2010-05 22<br />" .
 			"<br />" .
-			"getxr price:2010-02 1000 price:2010-04</pre>"
+			"xrget price:2010-02 1000 price:2010-04</pre>"
 
 	),
 );

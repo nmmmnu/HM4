@@ -169,7 +169,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct COUNTX : BaseRO<Protocol,DBAdapter>{
+	struct XNCOUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -188,14 +188,14 @@ namespace net::worker::commands::Accumulators{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"count",	"COUNT"		,
-			"countx",	"COUNTX"
+			"xncount",	"XNCOUNT"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct COUNTXR : BaseRO<Protocol,DBAdapter>{
+	struct XRCOUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -213,14 +213,14 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"countxr",	"COUNTXR"
+			"xrcount",	"XRCOUNT"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct SUMX : BaseRO<Protocol,DBAdapter>{
+	struct XNSUM : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -239,14 +239,14 @@ namespace net::worker::commands::Accumulators{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"sum",		"SUM"	,
-			"sumx",		"SUMX"
+			"xnsum",	"XNSUM"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct SUMXR : BaseRO<Protocol,DBAdapter>{
+	struct XRSUM : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -264,14 +264,14 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"sumxr",	"SUMXR"
+			"xrsum",	"XRSUM"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MINX : BaseRO<Protocol,DBAdapter>{
+	struct XNMIN : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -290,14 +290,14 @@ namespace net::worker::commands::Accumulators{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"min",		"MIN"	,
-			"minx",		"MINX"
+			"xnmin",	"XNMIN"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MINXR : BaseRO<Protocol,DBAdapter>{
+	struct XRMIN : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -315,14 +315,14 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"minxr",	"MINXR"
+			"xrmin",	"XRMIN"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MAXX : BaseRO<Protocol,DBAdapter>{
+	struct XNMAX : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -340,14 +340,14 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"maxx",		"MAXX"
+			"xnmax",	"XNMAX"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MAXXR : BaseRO<Protocol,DBAdapter>{
+	struct XRMAX : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -365,7 +365,7 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"maxxr",	"MAXXR"
+			"xrmax",	"XRMAX"
 		};
 	};
 
@@ -377,17 +377,17 @@ namespace net::worker::commands::Accumulators{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				COUNTX	,
-				COUNTXR	,
+				XNCOUNT	,
+				XRCOUNT	,
 
-				SUMX	,
-				SUMXR	,
+				XNSUM	,
+				XRSUM	,
 
-				MINX	,
-				MINXR	,
+				XNMIN	,
+				XRMIN	,
 
-				MAXX	,
-				MAXXR
+				XNMAX	,
+				XRMAX
 			>(pack);
 		}
 	};

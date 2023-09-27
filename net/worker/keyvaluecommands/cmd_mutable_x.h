@@ -207,7 +207,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DELX : BaseRW<Protocol,DBAdapter>{
+	struct XNDEL : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -235,14 +235,14 @@ namespace net::worker::commands::MutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"delx",		"DELX"
+			"xndel",	"XNDEL"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct DELXR : BaseRW<Protocol,DBAdapter>{
+	struct XRDEL : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -270,7 +270,7 @@ namespace net::worker::commands::MutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"delxr",	"DELXR"
+			"xrdel",	"XRDEL"
 		};
 	};
 
@@ -312,7 +312,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PERSISTX : BaseRW<Protocol,DBAdapter>{
+	struct XNPERSIST : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -340,14 +340,14 @@ namespace net::worker::commands::MutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"persistx",		"PERSISTX"
+			"xnpersist",		"XNPERSIST"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct PERSISTXR : BaseRW<Protocol,DBAdapter>{
+	struct XRPERSIST : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -375,7 +375,7 @@ namespace net::worker::commands::MutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"persistxr",		"PERSISTXR"
+			"xrpersist",		"XRPERSIST"
 		};
 	};
 
@@ -414,7 +414,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXPIREX : BaseRW<Protocol,DBAdapter>{
+	struct XNEXPIRE : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -443,14 +443,14 @@ namespace net::worker::commands::MutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"expirex",		"EXPIREX"
+			"xnexpire",		"XNEXPIRE"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXPIREXR : BaseRW<Protocol,DBAdapter>{
+	struct XREXPIRE : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -479,7 +479,7 @@ namespace net::worker::commands::MutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"expirexr",		"EXPIREXR"
+			"xrexpire",		"XREXPIRE"
 		};
 	};
 
@@ -528,16 +528,16 @@ namespace net::worker::commands::MutableX{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				DELX		,
-				DELXR		,
+				XNDEL		,
+				XRDEL		,
 				HDELALL		,
 
-				PERSISTX	,
-				PERSISTXR	,
+				XNPERSIST	,
+				XRPERSIST	,
 				HPERSISTALL	,
 
-				EXPIREX		,
-				EXPIREXR	,
+				XNEXPIRE	,
+				XREXPIRE	,
 				HEXPIREALL
 			>(pack);
 		}

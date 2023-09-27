@@ -217,9 +217,10 @@ Changelog
 ### 1.3.7.1
 
 -	new utility db_compact_tombstones
--	rename commands COUNT, SUM, MIN, MAX to COUNTX, SUMX, MINX, MAXX
--	new range commands GETXR
--	new range commands COUNTXR, SUMXR, MINXR, MAXXR
--	new range commands DELXR, PERSISTXR, EXPIREXR
+-	rename commands COUNT, SUM, MIN, MAX to XNCOUNT, XNSUM, XNMIN, XNMAX
+-	add alias commands GETX -> XNGET
+-	new range commands XRGET
+-	new range commands XRCOUNT, XRSUM, XRMIN, XRMAX
+-	new range commands XRDEL, XRPERSIST, XREXPIRE
 
 

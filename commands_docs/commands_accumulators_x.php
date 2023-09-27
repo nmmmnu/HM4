@@ -1,9 +1,9 @@
 <?php
 return array(
 	new Cmd(
-			"COUNTX",
+			"XNCOUNT",
 
-			"COUNTX / COUNT key number prefix",
+			"XNCOUNT / COUNT key number prefix",
 
 			"Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -27,15 +27,15 @@ return array(
 			"set dom:google:blogger.com some_data<br />" .
 			"set dom:google:abc.xyz     some_data<br />" .
 			"<br />" .
-			"getx   dom:google:  1000 dom:google:<br />" .
-			"countx dom:google:       dom:google:</pre>"
+			"xnget   dom:google:  1000 dom:google:<br />" .
+			"xncount dom:google:       dom:google:</pre>"
 
 	),
 
 	new Cmd(
-			"COUNTXR",
+			"XRCOUNT",
 
-			"COUNTXR key number range_end",
+			"XRCOUNT key number range_end",
 
 			"Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
@@ -58,14 +58,14 @@ return array(
 			"set dom:google:blogger.com some_data<br />" .
 			"set dom:google:abc.xyz     some_data<br />" .
 			"<br />" .
-			"getxr   dom:google:  1000 dom:google:blogger.com<br />" .
-			"countxr dom:google:       dom:google:blogger.com</pre>"
+			"xrget   dom:google:  1000 dom:google:blogger.com<br />" .
+			"xrcount dom:google:       dom:google:blogger.com</pre>"
 	),
 
 	new Cmd(
-			"SUMX",
+			"XNSUM",
 
-			"SUMX / SUM key number prefix",
+			"XNSUM / SUM key number prefix",
 
 			"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -88,17 +88,17 @@ return array(
 			"set visits:20200104 420<br />" .
 			"set visits:20200105 345<br />" .
 			"<br />" .
-			"getx visits:202001  1000 visits:202001<br />" .
-			"sumx visits:202001       visits:202001<br />" .
+			"xnget visits:202001  1000 visits:202001<br />" .
+			"xnsum visits:202001       visits:202001<br />" .
 			"<br />" .
-			"getx visits:2020    1000 visits:2020<br />" .
-			"sumx visits:2020         visits:2020</pre>"
+			"xnget visits:2020    1000 visits:2020<br />" .
+			"xnsum visits:2020         visits:2020</pre>"
 	),
 
 	new Cmd(
-			"SUMXR",
+			"XRSUM",
 
-			"SUMXR key number range_end",
+			"XRSUM key number range_end",
 
 			"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
@@ -121,14 +121,14 @@ return array(
 			"set visits:20200104 420<br />" .
 			"set visits:20200105 345<br />" .
 			"<br />" .
-			"getxr visits:202001  1000 visits:202003<br />" .
-			"sumxr visits:202001       visits:202003</pre>"
+			"xrget visits:202001  1000 visits:202003<br />" .
+			"xrsum visits:202001       visits:202003</pre>"
 	),
 
 	new Cmd(
-			"MINX",
+			"XNMIN",
 
-			"MINX / MIN key number prefix",
+			"XNMIN / MIN key number prefix",
 
 			"Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -151,17 +151,17 @@ return array(
 			"set visits:20200104 420<br />" .
 			"set visits:20200105 345<br />" .
 			"<br />" .
-			"getx visits:202001  1000 visits:202001<br />" .
-			"minx visits:202001       visits:202001<br />" .
+			"xnget visits:202001  1000 visits:202001<br />" .
+			"xnmin visits:202001       visits:202001<br />" .
 			"<br />" .
-			"getx visits:2020    1000 visits:2020<br />" .
-			"minx visits:2020         visits:2020</pre>"
+			"xnget visits:2020    1000 visits:2020<br />" .
+			"xnmin visits:2020         visits:2020</pre>"
 	),
 
 	new Cmd(
-			"MINXR",
+			"XRMIN",
 
-			"MINXR key number range_end",
+			"XRMIN key number range_end",
 
 			"Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
@@ -184,14 +184,14 @@ return array(
 			"set visits:20200104 420<br />" .
 			"set visits:20200105 345<br />" .
 			"<br />" .
-			"getxr visits:202001  1000 visits:202003<br />" .
-			"minxr visits:202001       visits:202003</pre>"
+			"xrget visits:202001  1000 visits:202003<br />" .
+			"xrmin visits:202001       visits:202003</pre>"
 	),
 
 	new Cmd(
-			"MAXX",
+			"XNMAX",
 
-			"MAXX / MAX key number prefix",
+			"XNMAX / MAX key number prefix",
 
 			"Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
@@ -214,17 +214,17 @@ return array(
 			"set visits:20200104 420<br />" .
 			"set visits:20200105 345<br />" .
 			"<br />" .
-			"getx visits:202001  1000 visits:202001<br />" .
-			"maxx visits:202001       visits:202001<br />" .
+			"xnget visits:202001  1000 visits:202001<br />" .
+			"xnmax visits:202001       visits:202001<br />" .
 			"<br />" .
-			"getx visits:2020    1000 visits:2020<br />" .
-			"maxx visits:2020         visits:2020</pre>"
+			"xnget visits:2020    1000 visits:2020<br />" .
+			"xnmax visits:2020         visits:2020</pre>"
 	),
 
 	new Cmd(
-			"MAXXR",
+			"XRMAX",
 
-			"MAXXR key number prefix",
+			"XRMAX key number prefix",
 
 			"Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
@@ -247,7 +247,7 @@ return array(
 			"set visits:20200104 420<br />" .
 			"set visits:20200105 345<br />" .
 			"<br />" .
-			"getxr visits:202001  1000 visits:202003<br />" .
-			"maxxr visits:202001       visits:202003</pre>"
+			"xrget visits:202001  1000 visits:202003<br />" .
+			"xrmax visits:202001       visits:202003</pre>"
 	),
 );

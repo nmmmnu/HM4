@@ -139,7 +139,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETX : BaseRO<Protocol,DBAdapter>{
+	struct XNGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -191,6 +191,7 @@ namespace net::worker::commands::ImmutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
+			"xnget",	"XNGET",
 			"getx",		"GETX"
 		};
 	};
@@ -198,7 +199,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETXR : BaseRO<Protocol,DBAdapter>{
+	struct XRGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -250,7 +251,7 @@ namespace net::worker::commands::ImmutableX{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"getxr",	"GETXR"
+			"xrget",	"XRGET"
 		};
 	};
 
@@ -462,8 +463,8 @@ namespace net::worker::commands::ImmutableX{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				GETX		,
-				GETXR		,
+				XNGET		,
+				XRGET		,
 
 				HGETALL		,
 				HGETKEYS	,
