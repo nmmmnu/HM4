@@ -124,10 +124,7 @@ namespace net::worker::commands::ImmutableX{
 				std::string_view prefix;
 
 				bool operator()(std::string_view key) const{
-					if (prefix.empty())
-						return false;
-					else
-						return ! same_prefix(prefix, key);
+					return ! same_prefix(prefix, key);
 				}
 			};
 
@@ -135,10 +132,7 @@ namespace net::worker::commands::ImmutableX{
 				std::string_view end;
 
 				constexpr bool operator()(std::string_view key) const{
-					if (end.empty())
-						return false;
-					else
-						return end < key;
+					return end < key;
 				}
 			};
 
@@ -190,6 +184,9 @@ namespace net::worker::commands::ImmutableX{
 			auto const &key    = p[1];
 			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
 			auto const &prefix = p[3];
+
+			if (prefix.empty())
+				return;
 
 			StopPrefixPredicate stop{ prefix };
 
@@ -249,6 +246,9 @@ namespace net::worker::commands::ImmutableX{
 			auto const &key    = p[1];
 			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
 			auto const &end    = p[3];
+
+			if (end.empty())
+				return;
 
 			StopRangePredicate stop{ end };
 

@@ -222,5 +222,5 @@ Changelog
 -	new range commands XRGET, XUGET
 -	new range commands XRCOUNT, XRSUM, XRMIN, XRMAX
 -	new range commands XRDEL, XRPERSIST, XREXPIRE
-
+-	XN / XR commands no longer accept empty prefix / range_end
 
