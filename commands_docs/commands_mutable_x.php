@@ -6,7 +6,10 @@ return array(
 			"XNDEL key prefix",
 
 			"Delete up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
+			"Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>delete from table where key >= [key] and key like '[key]%' limit 10'000</pre>",
 
 			"string",
 			"Last key, if there is second page.",
@@ -35,7 +38,10 @@ return array(
 			"XRDEL key range_end",
 
 			"Delete up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.",
+			"Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>delete from table where key >= [key] and key < [range_end] limit 10'000</pre>",
 
 			"string",
 			"Last key, if there is second page.",
@@ -65,7 +71,10 @@ return array(
 			"XNPERSIST key prefix",
 
 			"Persist up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
+			"Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>update table set expire = 0 where key >= [key] and key like '[key]%' limit 10'000</pre>",
 
 			"string",
 			"Last key, if there is second page.",
@@ -94,7 +103,10 @@ return array(
 			"XRPERSIST key prefix",
 
 			"PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.",
+			"PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>update table set expire = 0 where key >= [key] and key < [range_end] limit 10'000</pre>",
 
 			"string",
 			"Last key, if there is second page.",
@@ -124,7 +136,10 @@ return array(
 			"XNEXPIRE key expiration prefix",
 
 			"EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
+			"EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>update table set expire = [expiration] where key >= [key] and key like '[key]%' limit 10'000</pre>",
 
 			"string",
 			"Last key, if there is second page.",
@@ -153,7 +168,10 @@ return array(
 			"XREXPIRE key expiration prefix",
 
 			"EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.",
+			"EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>update table set expire = [expiration] where key >= [key] and key < [range_end] limit 10'000</pre>",
 
 			"string",
 			"Last key, if there is second page.",

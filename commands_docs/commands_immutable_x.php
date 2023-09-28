@@ -7,7 +7,10 @@ return array(
 
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-			"Returns up to 1'000 elements.",
+			"Returns up to 1'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select key, val from table where key >= [key] and key like '[key]%' limit [number]</pre>",
 
 			"array",
 			"First group of element         - array of key and values.<br />" .
@@ -35,7 +38,10 @@ return array(
 
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.<br />" .
-			"Returns up to 1'000 elements.",
+			"Returns up to 1'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select key, val from table where key >= [key] and key < [range_end] limit [number]</pre>",
 
 			"array",
 			"First group of element         - array of key and values.<br />" .
@@ -65,7 +71,10 @@ return array(
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />" .
 			"Useful for database dump.<br />" .
-			"Returns up to 1'000 elements.",
+			"Returns up to 1'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select key, val from table where key >= [key] limit [number]</pre>",
 
 			"array",
 			"First group of element         - array of key and values.<br />" .

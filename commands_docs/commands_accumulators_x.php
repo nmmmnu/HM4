@@ -7,7 +7,10 @@ return array(
 
 			"Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select count(*) from table where key >= [key] and key like '[key]%' limit [number]</pre>",
 
 
 			"array",
@@ -39,7 +42,10 @@ return array(
 
 			"Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select count(*) from table where key >= [key] and key < [range_end] limit [number]</pre>",
 
 			"array",
 			"First element  - count of valid elements.<br />" .
@@ -69,7 +75,10 @@ return array(
 
 			"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select sum(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>",
 
 			"array",
 			"First element  - sum of valid elements.<br />" .
@@ -102,7 +111,10 @@ return array(
 
 			"Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select sum(val) from table where key >= [key] and key < [range_end] limit [number]</pre>",
 
 			"array",
 			"First element  - sum of valid elements.<br />" .
@@ -132,7 +144,10 @@ return array(
 
 			"Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select min(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>",
 
 			"array",
 			"First element  - min of valid elements.<br />" .
@@ -165,7 +180,10 @@ return array(
 
 			"Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select min(val) from table where key >= [key] and key < [range_end] limit [number]</pre>",
 
 			"array",
 			"First element  - min of valid elements.<br />" .
@@ -195,7 +213,10 @@ return array(
 
 			"Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select max(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>",
 
 			"array",
 			"First element  - max of valid elements.<br />" .
@@ -228,7 +249,10 @@ return array(
 
 			"Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />" .
-			"Accumulate up to 10'000 elements.",
+			"Accumulate up to 10'000 elements.<br />" .
+			"<br />" .
+			"<b>This command is similar to following MySQL statement:</b><br />" .
+			"<pre>select max(val) from table where key >= [key] and key < [range_end] limit [number]</pre>",
 
 			"array",
 			"First element  - max of valid elements.<br />" .
