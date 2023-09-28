@@ -116,6 +116,8 @@
 				<li><a href="#XRMIN">XRMIN</a></li>
 				<li><a href="#XNMAX">XNMAX</a></li>
 				<li><a href="#XRMAX">XRMAX</a></li>
+				<li><a href="#XNAVG">XNAVG</a></li>
+				<li><a href="#XRAVG">XRAVG</a></li>
 				</div>
 			<div>
 			<b>mutable.h</b><br />
@@ -529,7 +531,7 @@
 			<h3>Return value:</h3>
 			First element  - count of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xnget   dom:google:  1000 dom:google:<br />xncount dom:google:       dom:google:</pre>			
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xnget   dom:google: 1000 dom:google:<br />xncount dom:google: 1000 dom:google:</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRCOUNT">
@@ -552,7 +554,7 @@
 			<h3>Return value:</h3>
 			First element  - count of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xrget   dom:google:  1000 dom:google:blogger.com<br />xrcount dom:google:       dom:google:blogger.com</pre>			
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xrget   dom:google: 1000 dom:google:blogger.com<br />xrcount dom:google: 1000 dom:google:blogger.com</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNSUM">
@@ -575,7 +577,7 @@
 			<h3>Return value:</h3>
 			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001  1000 visits:202001<br />xnsum visits:202001       visits:202001<br /><br />xnget visits:2020    1000 visits:2020<br />xnsum visits:2020         visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnsum visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnsum visits:2020   1000 visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRSUM">
@@ -598,12 +600,12 @@
 			<h3>Return value:</h3>
 			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001  1000 visits:202003<br />xrsum visits:202001       visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrsum visits:202001 1000 visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNMIN">
 
-			<h2>XNMIN / MIN key number prefix</h2>
+			<h2>XNMIN key number prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XNMIN</td></tr>
@@ -621,7 +623,7 @@
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001  1000 visits:202001<br />xnmin visits:202001       visits:202001<br /><br />xnget visits:2020    1000 visits:2020<br />xnmin visits:2020         visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmin visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmin visits:2020   1000 visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRMIN">
@@ -644,12 +646,12 @@
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001  1000 visits:202003<br />xrmin visits:202001       visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmin visits:202001 1000 visits:202003</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNMAX">
 
-			<h2>XNMAX / MAX key number prefix</h2>
+			<h2>XNMAX key number prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XNMAX</td></tr>
@@ -667,7 +669,7 @@
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001  1000 visits:202001<br />xnmax visits:202001       visits:202001<br /><br />xnget visits:2020    1000 visits:2020<br />xnmax visits:2020         visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmax visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmax visits:2020   1000 visits:2020</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRMAX">
@@ -690,7 +692,53 @@
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001  1000 visits:202003<br />xrmax visits:202001       visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001 1000 visits:202003</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XNAVG">
+
+			<h2>XNAVG key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XNAVG</td></tr>
+				<tr><td>Available since		</td><td>1.2.5</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using <b>*fake*</b> AVG <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.<br /><br />Since average is not a monoid, XNAVG / XRAVG will return correct result, only when all information is accumulated at once.<br />if it go to next 'pages', result will be incorrect, but still kind of useful.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select avg(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>(Note MySQL still will do fake avegare if it uses fhis statement)
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - max of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnavg visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnavg visits:2020   1000 visits:2020</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XRAVG">
+
+			<h2>XRAVG key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XRAVG</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using <b>*fake*</b> AVG <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.<br /><br />Since average is not a monoid, XNAVG / XRAVG will return correct result, only when all information is accumulated at once.<br />if it go to next 'pages', result will be incorrect, but still kind of useful.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select avg(val) from table where key >= [key] and key < [range_end] limit [number]</pre>Second element - last key, if there is second page.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - max of valid elements.<br />
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001 1000 visits:202003</pre>(Note MySQL still will do fake avegare if it uses fhis statement)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SET">
@@ -1521,7 +1569,7 @@
 				<tr><td>Command			</td><td>HDELALL</td></tr>
 				<tr><td>Available since		</td><td>1.3.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
 			</table>
@@ -1543,7 +1591,7 @@
 				<tr><td>Command			</td><td>HPERSISTALL</td></tr>
 				<tr><td>Available since		</td><td>1.3.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
 			</table>
@@ -1565,7 +1613,7 @@
 				<tr><td>Command			</td><td>HEXPIREALL</td></tr>
 				<tr><td>Available since		</td><td>1.3.4</td></tr>
 				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
 			</table>

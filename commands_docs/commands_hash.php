@@ -189,7 +189,7 @@ return array(
 			"1 if all keys are removed, 0 if keys remains",
 			"1.3.4",
 			"[number of keys] * WRITE",
-			true,
+			false,
 			true,
 
 			"mutable_x"
@@ -208,7 +208,7 @@ return array(
 			"1 if all keys are removed, 0 if keys remains",
 			"1.3.4",
 			"[number of keys] * WRITE",
-			true,
+			false,
 			true,
 
 			"mutable_x"
@@ -227,7 +227,7 @@ return array(
 			"1 if all keys are removed, 0 if keys remains",
 			"1.3.4",
 			"[number of keys] * WRITE",
-			true,
+			false,
 			true,
 
 			"mutable_x"

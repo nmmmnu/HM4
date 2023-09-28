@@ -36,7 +36,7 @@ namespace net::worker::commands::Accumulators{
 					if (++results > maxResults)
 						return accumulator.result(key);
 
-					accumulator(key, it->getVal());
+					accumulator(it->getVal());
 				}
 
 				return accumulator.result();
@@ -114,7 +114,7 @@ namespace net::worker::commands::Accumulators{
 
 				T data = 0;
 
-				auto operator()(std::string_view, std::string_view){
+				auto operator()(std::string_view){
 					++data;
 				}
 
@@ -128,7 +128,7 @@ namespace net::worker::commands::Accumulators{
 
 				T data = 0;
 
-				auto operator()(std::string_view, std::string_view val){
+				auto operator()(std::string_view val){
 					data += from_string<T>(val);
 				}
 
@@ -142,7 +142,7 @@ namespace net::worker::commands::Accumulators{
 
 				T data = std::numeric_limits<T>::max();
 
-				auto operator()(std::string_view, std::string_view val){
+				auto operator()(std::string_view val){
 					auto x = from_string<T>(val);
 
 					if (x < data)
@@ -159,7 +159,7 @@ namespace net::worker::commands::Accumulators{
 
 				T data = std::numeric_limits<T>::min();
 
-				auto operator()(std::string_view, std::string_view val){
+				auto operator()(std::string_view val){
 					auto x = from_string<T>(val);
 
 					if (x > data)
@@ -168,6 +168,22 @@ namespace net::worker::commands::Accumulators{
 
 				auto result(std::string_view key = "") const{
 					return std::make_pair(data, key);
+				}
+			};
+
+			struct AVGPredicate{
+				using T = int64_t;
+
+				T sum   = 0;
+				T count = 0;
+
+				auto operator()(std::string_view val){
+					sum += from_string<T>(val);
+					++count;
+				}
+
+				auto result(std::string_view key = "") const{
+					return std::make_pair(sum / count, key);
 				}
 			};
 
@@ -292,7 +308,6 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"min",		"MIN"	,
 			"xnmin",	"XNMIN"
 		};
 	};
@@ -371,6 +386,54 @@ namespace net::worker::commands::Accumulators{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct XNAVG : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommand<AVGPredicate, StopPrefixPredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xnavg",	"XNAVG"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct XRAVG : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommand<AVGPredicate, StopRangePredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xravg",	"XRAVG"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "accumulators";
@@ -387,7 +450,10 @@ namespace net::worker::commands::Accumulators{
 				XRMIN	,
 
 				XNMAX	,
-				XRMAX
+				XRMAX	,
+
+				XNAVG	,
+				XRAVG
 			>(pack);
 		}
 	};
