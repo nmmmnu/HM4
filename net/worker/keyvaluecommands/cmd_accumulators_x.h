@@ -61,26 +61,41 @@ namespace net::worker::commands::Accumulators{
 
 
 
+			template<class Protocol>
+			void execCommandSet_(Result<Protocol> &result, std::string_view data, std::string_view lastKey){
+				const std::array<std::string_view, 2> container{
+					data,
+					lastKey
+				};
+
+				return result.set_container(container);
+			}
+
+			template<class Protocol, class Int>
+			void execCommandSet_(Result<Protocol> &result, Int data, std::string_view lastKey){
+				to_string_buffer_t buffer;
+
+				const std::array<std::string_view, 2> container{
+					to_string(data, buffer),
+					lastKey
+				};
+
+				return result.set_container(container);
+			}
+
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
 			void execCommand_(std::string_view key, uint32_t count, std::string_view prefix, List &list, Result<Protocol> &result){
 
 				StopPredicate stop{ prefix };
 
-				auto const [ number, lastKey ] = accumulateResults<Accumulator>(
+				auto const [ data, lastKey ] = accumulateResults<Accumulator>(
 								count					,
 								stop					,
 								list.find(key, std::false_type{})	,
 								std::end(list)
 				);
 
-				to_string_buffer_t buffer;
-
-				const std::array<std::string_view, 2> container{
-					to_string(number, buffer),
-					lastKey
-				};
-
-				return result.set_container(container);
+				return execCommandSet_(result, data, lastKey);
 			}
 
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
@@ -188,6 +203,20 @@ namespace net::worker::commands::Accumulators{
 
 					if (x > data)
 						data = x;
+				}
+
+				auto result(std::string_view key = "") const{
+					return std::make_pair(data, key);
+				}
+			};
+
+			struct LASTPredicate{
+				using T = std::string_view;
+
+				T data;
+
+				auto operator()(std::string_view val){
+					data = val;
 				}
 
 				auto result(std::string_view key = "") const{
@@ -457,6 +486,54 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
+	struct XNLAST : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommand<LASTPredicate, StopPrefixPredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xnlast",	"XNLAST"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct XRLAST : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommand<LASTPredicate, StopRangePredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xrlast",	"XRLAST"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct XNAVG : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -524,6 +601,9 @@ namespace net::worker::commands::Accumulators{
 
 				XNMAX	,
 				XRMAX	,
+
+				XNLAST	,
+				XRLAST	,
 
 				XNAVG	,
 				XRAVG
