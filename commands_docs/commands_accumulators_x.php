@@ -427,7 +427,7 @@ return array(
 			"xnavg visits:2020        visits:2020</pre>",
 
 			"<pre>select avg(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
-			"(Note MySQL also will do fake avegare if it uses fhis statement)"
+			"(Note MySQL also will do fake avegare if fhis statement is used)"
 	),
 
 	new Cmd(
@@ -462,7 +462,7 @@ return array(
 			"xrmax visits:202001      visits:202003</pre>",
 
 			"<pre>select avg(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>" .
-			"(Note MySQL also will do fake avegare if it uses fhis statement)"
+			"(Note MySQL also will do fake avegare if fhis statement is used)"
 	),
 );
 
