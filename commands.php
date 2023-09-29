@@ -14,7 +14,7 @@ class Cmd{
 
 	private $example	;
 
-	function __construct($id, $name, $description, $value_type, $value, $version, $complexity, $compatible, $mutable, $module, $example = false){
+	function __construct($id, $name, $description, $value_type, $value, $version, $complexity, $compatible, $mutable, $module, $example = false, $sql = false){
 		$this->id		= $id			;
 		$this->name		= $name			;
 		$this->description	= $description		;
@@ -28,6 +28,7 @@ class Cmd{
 		$this->module		= "$module.h"		;
 
 		$this->example		= "$example"		;
+		$this->sql		= "$sql"		;
 	}
 
 	static function yn($b){
@@ -64,6 +65,11 @@ class Cmd{
 			<?php if ($this->example) : ?>
 			<h3>Example:</h3>
 			<?=$this->example ?>
+			<?php endif ?>
+
+			<?php if ($this->sql) : ?>
+			<h3>MySQL Rosetta:</h3>
+			<?=$this->sql ?>
 			<?php endif ?>
 
 			<p class="top"><a href="#top">top</a></p>

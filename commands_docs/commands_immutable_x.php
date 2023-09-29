@@ -7,10 +7,7 @@ return array(
 
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />" .
-			"Returns up to 1'000 elements.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>select key, val from table where key >= [key] and key like '[key]%' limit [number]</pre>",
+			"Returns up to ~32'000 elements.",
 
 			"array",
 			"First group of element         - array of key and values.<br />" .
@@ -28,8 +25,9 @@ return array(
 			"set u:001:state CA<br />" .
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
-			"xnget u:001: 1000 u:001:</pre>"
+			"xnget u:001: 1000 u:001:</pre>",
 
+			"<pre>select key, val from table where key >= [key] and key like '[key]%' limit [number]</pre>"
 	),
 	new Cmd(
 			"XRGET",
@@ -38,10 +36,7 @@ return array(
 
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.<br />" .
-			"Returns up to 1'000 elements.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>select key, val from table where key >= [key] and key < [range_end] limit [number]</pre>",
+			"Returns up to ~32'000 elements.",
 
 			"array",
 			"First group of element         - array of key and values.<br />" .
@@ -54,14 +49,15 @@ return array(
 
 			"immutable_x",
 
-			"<pre>set price:2010-01 5<br />" .
-			"set price:2010-02 6<br />" .
+			"<pre>set price:2010-01  5<br />" .
+			"set price:2010-02  6<br />" .
 			"set price:2010-03 10<br />" .
 			"set price:2010-04 16<br />" .
 			"set price:2010-05 22<br />" .
 			"<br />" .
-			"xrget price:2010-02 1000 price:2010-04</pre>"
+			"xrget price:2010-02 1000 price:2010-04</pre>",
 
+			"<pre>select key, val from table where key >= [key] and key < [range_end] limit [number]</pre>"
 	),
 	new Cmd(
 			"XUGET",
@@ -71,10 +67,7 @@ return array(
 			"Gets <i>number</i> of key-value pairs after <i>key</i>.<br />" .
 			"Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />" .
 			"Useful for database dump.<br />" .
-			"Returns up to 1'000 elements.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>select key, val from table where key >= [key] limit [number]</pre>",
+			"Returns up to ~32'000 elements.",
 
 			"array",
 			"First group of element         - array of key and values.<br />" .
@@ -87,8 +80,9 @@ return array(
 
 			"immutable_x",
 
-			"<pre>xrget '' 1000</pre>"
+			"<pre>xrget '' 1000</pre>",
 
+			"<pre>select key, val from table where key >= [key] limit [number]</pre>"
 	),
 );
 

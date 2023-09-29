@@ -5,11 +5,8 @@ return array(
 
 			"XNDEL key prefix",
 
-			"Delete up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>delete from table where key >= [key] and key like '[key]%' limit 10'000</pre>",
+			"Delete up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
 
 			"string",
 			"Last key, if there is second page.",
@@ -27,7 +24,9 @@ return array(
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
 			"xnget u:001: 1000 u:001:<br />" .
-			"xndel u:001:      u:001:</pre>"
+			"xndel u:001:      u:001:</pre>",
+
+			"<pre>delete from table where key >= [key] and key like '[key]%' limit 65'536</pre>"
 	),
 
 
@@ -37,11 +36,8 @@ return array(
 
 			"XRDEL key range_end",
 
-			"Delete up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>delete from table where key >= [key] and key < [range_end] limit 10'000</pre>",
+			"Delete up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.",
 
 			"string",
 			"Last key, if there is second page.",
@@ -60,7 +56,9 @@ return array(
 			"set price:2010-05 22<br />" .
 			"<br />" .
 			"xrget price:2010-02 1000 price:2010-04<br />" .
-			"xrdel price:2010-02      price:2010-04</pre>"
+			"xrdel price:2010-02      price:2010-04</pre>",
+
+			"<pre>delete from table where key >= [key] and key < [range_end] limit 65'536</pre>"
 	),
 
 
@@ -70,11 +68,8 @@ return array(
 
 			"XNPERSIST key prefix",
 
-			"Persist up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>update table set expire = 0 where key >= [key] and key like '[key]%' limit 10'000</pre>",
+			"Persist up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
 
 			"string",
 			"Last key, if there is second page.",
@@ -92,7 +87,9 @@ return array(
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
 			"xnget     u:001: 1000 u:001:<br />" .
-			"xnpersist u:001:      u:001:</pre>"
+			"xnpersist u:001:      u:001:</pre>",
+
+			"<pre>update table set expire = 0 where key >= [key] and key like '[key]%' limit 65'536</pre>"
 	),
 
 
@@ -102,11 +99,8 @@ return array(
 
 			"XRPERSIST key prefix",
 
-			"PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>update table set expire = 0 where key >= [key] and key < [range_end] limit 10'000</pre>",
+			"PERSIST up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.",
 
 			"string",
 			"Last key, if there is second page.",
@@ -125,7 +119,9 @@ return array(
 			"set price:2010-05 22<br />" .
 			"<br />" .
 			"xnget     price:2010-02 1000 price:2010-04<br />" .
-			"xnpersist price:2010-02      price:2010-04</pre>"
+			"xnpersist price:2010-02      price:2010-04</pre>",
+
+			"<pre>update table set expire = 0 where key >= [key] and key < [range_end] limit 65'536</pre>"
 	),
 
 
@@ -135,11 +131,8 @@ return array(
 
 			"XNEXPIRE key expiration prefix",
 
-			"EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>update table set expire = [expiration] where key >= [key] and key like '[key]%' limit 10'000</pre>",
+			"EXPIRE up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.",
 
 			"string",
 			"Last key, if there is second page.",
@@ -157,7 +150,9 @@ return array(
 			"set u:001:phone 1.800.12345678<br />" .
 			"<br />" .
 			"xnget    u:001: 1000 u:001:<br />" .
-			"xnexpire u:001:   90 u:001:</pre>"
+			"xnexpire u:001:   90 u:001:</pre>",
+
+			"<pre>update table set expire = [expiration] where key >= [key] and key like '[key]%' limit 65'536</pre>"
 	),
 
 
@@ -167,11 +162,8 @@ return array(
 
 			"XREXPIRE key expiration prefix",
 
-			"EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />" .
-			"EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.<br />" .
-			"<br />" .
-			"<b>This command is similar to following MySQL statement:</b><br />" .
-			"<pre>update table set expire = [expiration] where key >= [key] and key < [range_end] limit 10'000</pre>",
+			"EXPIRE up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.",
 
 			"string",
 			"Last key, if there is second page.",
@@ -190,7 +182,9 @@ return array(
 			"set price:2010-05 22<br />" .
 			"<br />" .
 			"xrget    price:2010-02 1000 price:2010-04<br />" .
-			"xrexpire price:2010-02   90 price:2010-04</pre>"
+			"xrexpire price:2010-02   90 price:2010-04</pre>",
+
+			"<pre>update table set expire = [expiration] where key >= [key] and key < [range_end] limit 65'536</pre>"
 	),
 );
 

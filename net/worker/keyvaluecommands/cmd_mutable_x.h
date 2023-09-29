@@ -7,7 +7,7 @@
 namespace net::worker::commands::MutableX{
 	namespace mutablex_impl_{
 		namespace{
-			constexpr static uint32_t ITERATIONS_PROCESS_X	=  OutputBlob::ContainerSize;
+			constexpr static uint32_t ITERATIONS_PROCESS_X	= OutputBlob::ContainerSize;
 			constexpr static uint32_t PASSES_PROCESS_X	= 3;
 
 			using ContainerX = typename OutputBlob::PairContainer;

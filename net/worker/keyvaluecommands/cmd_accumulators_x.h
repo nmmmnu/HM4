@@ -9,8 +9,25 @@ namespace net::worker::commands::Accumulators{
 	namespace acumulators_impl_{
 		namespace{
 
-			constexpr static uint32_t MIN		= 10;
-			constexpr static uint32_t ITERATIONS	= 65'536;
+			constexpr static uint32_t MIN_ITERATIONS	= 10;
+			// this has nothing to do with the container size,
+			// but to be unified with cmd_mutable.h
+			constexpr static uint32_t ITERATIONS		= OutputBlob::ContainerSize; // 0xFFFF
+
+
+
+			auto myClamp(std::string_view p){
+				// using uint64_t from the user, allow more user-friendly behavour.
+				// suppose he / she enters 1'000'000'000.
+				// because this value is great than max uint32_t,
+				// the converted value will go to 0, then to MIN.
+
+				auto const a = from_string<uint64_t>(p);
+
+				return static_cast<uint32_t>(
+					std::clamp<uint64_t>(a, MIN_ITERATIONS, ITERATIONS)
+				);
+			};
 
 
 
@@ -45,29 +62,7 @@ namespace net::worker::commands::Accumulators{
 
 
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
-			void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
-				if (p.size() != 4)
-					return;
-
-				// using uint64_t from the user, allow more user-friendly behavour.
-				// suppose he enters 1'000'000'000.
-				// because this value is great than max uint32_t,
-				// the converted value will go to 0, then to MIN.
-
-				auto myClamp = [](auto a){
-					return static_cast<uint32_t>(
-						std::clamp<uint64_t>(a, MIN, ITERATIONS)
-					);
-				};
-
-
-
-				auto const &key    = p[1];
-				auto const count   = myClamp( from_string<uint64_t>(p[2]) );
-				auto const &prefix = p[3];
-
-				if (prefix.empty())
-					return;
+			void execCommand_(std::string_view key, uint32_t count, std::string_view prefix, List &list, Result<Protocol> &result){
 
 				StopPredicate stop{ prefix };
 
@@ -86,6 +81,35 @@ namespace net::worker::commands::Accumulators{
 				};
 
 				return result.set_container(container);
+			}
+
+			template<class Accumulator, class StopPredicate, class Protocol, class List>
+			void execCommandLimit(ParamContainer const &p, List &list, Result<Protocol> &result){
+				if (p.size() != 4)
+					return;
+
+				auto const key    = p[1];
+				auto const count  = myClamp(p[2]);
+				auto const prefix = p[3];
+
+				if (prefix.empty())
+					return;
+
+				return execCommand_<Accumulator, StopPredicate>(key, count, prefix, list, result);
+			}
+
+			template<class Accumulator, class StopPredicate, class Protocol, class List>
+			void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
+				if (p.size() != 3)
+					return;
+
+				auto const key    = p[1];
+				auto const prefix = p[2];
+
+				if (prefix.empty())
+					return;
+
+				return execCommand_<Accumulator, StopPredicate>(key, ITERATIONS, prefix, list, result);
 			}
 
 
@@ -193,6 +217,54 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
+	struct COUNT : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommandLimit<COUNTPredicate, StopPrefixPredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"count",	"COUNT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct SUM : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommandLimit<SUMPredicate, StopPrefixPredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"sum",		"SUM"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct XNCOUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -210,7 +282,6 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"count",	"COUNT"		,
 			"xncount",	"XNCOUNT"
 		};
 	};
@@ -259,7 +330,6 @@ namespace net::worker::commands::Accumulators{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"sum",		"SUM"	,
 			"xnsum",	"XNSUM"
 		};
 	};
@@ -440,6 +510,9 @@ namespace net::worker::commands::Accumulators{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
+				COUNT	,
+				SUM	,
+
 				XNCOUNT	,
 				XRCOUNT	,
 

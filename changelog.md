@@ -224,4 +224,5 @@ Changelog
 -	new range commands XRDEL, XRPERSIST, XREXPIRE
 -	XN / XR commands no longer accept empty prefix / range_end
 -	new range commands XRAVG, XRAVG
+-	refactor XN / XR accumulators to accept only 2 arguments, but keep COUNT and SUM to accept traditional 3 arguments
 

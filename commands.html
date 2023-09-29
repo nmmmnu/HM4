@@ -108,7 +108,9 @@
 			<b>accumulators_x.h</b><br />
 			&nbsp;
 
-					<li><a href="#XNCOUNT">XNCOUNT</a></li>
+					<li><a href="#COUNT">COUNT</a></li>
+				<li><a href="#SUM">SUM</a></li>
+				<li><a href="#XNCOUNT">XNCOUNT</a></li>
 				<li><a href="#XRCOUNT">XRCOUNT</a></li>
 				<li><a href="#XNSUM">XNSUM</a></li>
 				<li><a href="#XRSUM">XRSUM</a></li>
@@ -308,6 +310,7 @@
 			<h3>Return value:</h3>
 			Value of the key or empty string.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MGET">
@@ -329,6 +332,7 @@
 			array
 			<h3>Return value:</h3>
 			Value of the key or empty string.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -352,6 +356,7 @@
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TTL">
@@ -373,6 +378,7 @@
 			int
 			<h3>Return value:</h3>
 			Value of the TTL or 0 if there is no expiration set.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -396,6 +402,7 @@
 			<h3>Return value:</h3>
 			internal <i>key</i> representation
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETRANGE">
@@ -417,6 +424,7 @@
 			string
 			<h3>Return value:</h3>
 			substring of the value or empty string.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -440,6 +448,7 @@
 			<h3>Return value:</h3>
 			Size of the value.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNGET">
@@ -456,13 +465,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Returns up to 1'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select key, val from table where key >= [key] and key like '[key]%' limit [number]</pre>
+			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Returns up to ~32'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget u:001: 1000 u:001:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where key >= [key] and key like '[key]%' limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRGET">
@@ -479,13 +490,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.<br />Returns up to 1'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select key, val from table where key >= [key] and key < [range_end] limit [number]</pre>
+			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.<br />Returns up to ~32'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget price:2010-02 1000 price:2010-04</pre>			
+			<pre>set price:2010-01  5<br />set price:2010-02  6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget price:2010-02 1000 price:2010-04</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where key >= [key] and key < [range_end] limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XUGET">
@@ -502,18 +515,70 @@
 			</table>
 
 			<h3>Description:</h3>
-			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />Useful for database dump.<br />Returns up to 1'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select key, val from table where key >= [key] limit [number]</pre>
+			Gets <i>number</i> of key-value pairs after <i>key</i>.<br />Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />Useful for database dump.<br />Returns up to ~32'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>xrget '' 1000</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where key >= [key] limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="COUNT">
+
+			<h2>COUNT key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>COUNT</td></tr>
+				<tr><td>Available since		</td><td>1.2.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 65'536 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - count of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />getx    dom:google: 1000 dom:google:<br />count   dom:google: 1000 dom:google:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select count(*) from table where key >= [key] and key like '[key]%' limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="SUM">
+
+			<h2>SUM key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>SUM</td></tr>
+				<tr><td>Available since		</td><td>1.2.4</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>accumulators_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 65'536 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001 1000 visits:202001<br />sum  visits:202001 1000 visits:202001<br /><br />getx visits:2020   1000 visits:2020<br />sum  visits:2020   1000 visits:2020</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select sum(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNCOUNT">
 
-			<h2>XNCOUNT / COUNT key number prefix</h2>
+			<h2>XNCOUNT key prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XNCOUNT</td></tr>
@@ -525,18 +590,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select count(*) from table where key >= [key] and key like '[key]%' limit [number]</pre>
+			Accumulate using COUNT up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - count of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xnget   dom:google: 1000 dom:google:<br />xncount dom:google: 1000 dom:google:</pre>			
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xnget   dom:google: 1000 dom:google:<br />xncount dom:google:      dom:google:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select count(*) from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRCOUNT">
 
-			<h2>XRCOUNT key number range_end</h2>
+			<h2>XRCOUNT key range_end</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XRCOUNT</td></tr>
@@ -548,18 +615,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using COUNT <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select count(*) from table where key >= [key] and key < [range_end] limit [number]</pre>
+			Accumulate using COUNT up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - count of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xrget   dom:google: 1000 dom:google:blogger.com<br />xrcount dom:google: 1000 dom:google:blogger.com</pre>			
+			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />xrget   dom:google: 1000 dom:google:blogger.com<br />xrcount dom:google:      dom:google:blogger.com</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select count(*) from table where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNSUM">
 
-			<h2>XNSUM / SUM key number prefix</h2>
+			<h2>XNSUM key prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XNSUM</td></tr>
@@ -571,18 +640,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select sum(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>
+			Accumulate using SUM up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnsum visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnsum visits:2020   1000 visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnsum visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnsum visits:2020        visits:2020</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select sum(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRSUM">
 
-			<h2>XRSUM key number range_end</h2>
+			<h2>XRSUM key range_end</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XRSUM</td></tr>
@@ -594,18 +665,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using SUM <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select sum(val) from table where key >= [key] and key < [range_end] limit [number]</pre>
+			Accumulate using SUM up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - sum of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrsum visits:202001 1000 visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrsum visits:202001      visits:202003</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select sum(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNMIN">
 
-			<h2>XNMIN key number prefix</h2>
+			<h2>XNMIN key prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XNMIN</td></tr>
@@ -617,18 +690,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select min(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>
+			Accumulate using MIN up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmin visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmin visits:2020   1000 visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmin visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmin visits:2020        visits:2020</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select min(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRMIN">
 
-			<h2>XRMIN key number range_end</h2>
+			<h2>XRMIN key range_end</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XRMIN</td></tr>
@@ -640,18 +715,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using MIN <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select min(val) from table where key >= [key] and key < [range_end] limit [number]</pre>
+			Accumulate using MIN up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - min of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmin visits:202001 1000 visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmin visits:202001      visits:202003</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select min(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNMAX">
 
-			<h2>XNMAX key number prefix</h2>
+			<h2>XNMAX key prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XNMAX</td></tr>
@@ -663,18 +740,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select max(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>
+			Accumulate using MAX up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmax visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmax visits:2020   1000 visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmax visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmax visits:2020        visits:2020</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select max(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRMAX">
 
-			<h2>XRMAX key number prefix</h2>
+			<h2>XRMAX key prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XRMAX</td></tr>
@@ -686,18 +765,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using MAX <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select max(val) from table where key >= [key] and key < [range_end] limit [number]</pre>
+			Accumulate using MAX up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001 1000 visits:202003</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001      visits:202003</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select max(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNAVG">
 
-			<h2>XNAVG key number prefix</h2>
+			<h2>XNAVG key prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XNAVG</td></tr>
@@ -709,18 +790,20 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using <b>*fake*</b> AVG <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br />Accumulate up to 10'000 elements.<br /><br />Since average is not a monoid, XNAVG / XRAVG will return correct result, only when all information is accumulated at once.<br />if it go to next 'pages', result will be incorrect, but still kind of useful.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select avg(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>(Note MySQL still will do fake avegare if it uses fhis statement)
+			Accumulate using <b>*fake*</b> AVG up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.<br /><br />Since average is not a monoid, XNAVG / XRAVG will return correct result, only when all information is accumulated at once.<br />if it go to next 'pages', result will be incorrect, but still kind of useful.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnavg visits:202001 1000 visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnavg visits:2020   1000 visits:2020</pre>			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnavg visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnavg visits:2020        visits:2020</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select avg(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>(Note MySQL also will do fake avegare if it uses fhis statement)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRAVG">
 
-			<h2>XRAVG key number prefix</h2>
+			<h2>XRAVG key prefix</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>XRAVG</td></tr>
@@ -732,13 +815,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			Accumulate using <b>*fake*</b> AVG <i>number</i> key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br />Accumulate up to 10'000 elements.<br /><br />Since average is not a monoid, XNAVG / XRAVG will return correct result, only when all information is accumulated at once.<br />if it go to next 'pages', result will be incorrect, but still kind of useful.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>select avg(val) from table where key >= [key] and key < [range_end] limit [number]</pre>Second element - last key, if there is second page.
+			Accumulate using <b>*fake*</b> AVG up to 65'536 key-value pairs after <i>key</i>.<br />Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.<br /><br />Since average is not a monoid, XNAVG / XRAVG will return correct result, only when all information is accumulated at once.<br />if it go to next 'pages', result will be incorrect, but still kind of useful.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
-			First element  - max of valid elements.<br />
+			First element  - max of valid elements.<br />Second element - last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001 1000 visits:202003</pre>(Note MySQL still will do fake avegare if it uses fhis statement)			
+			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001      visits:202003</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select avg(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>(Note MySQL also will do fake avegare if it uses fhis statement)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SET">
@@ -760,6 +845,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -783,6 +869,7 @@
 			<h3>Return value:</h3>
 			OK
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MSETNX">
@@ -804,6 +891,7 @@
 			int
 			<h3>Return value:</h3>
 			0 if some of the key value pair exists.<br />1 if none of the key value pair do not exists and keys are set.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -827,6 +915,7 @@
 			<h3>Return value:</h3>
 			0 if some of the key value pair does not exists.<br />1 if none of the key value pair exists and keys are set.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SETEX">
@@ -848,6 +937,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -871,6 +961,7 @@
 			<h3>Return value:</h3>
 			0 if the key value pair exists.<br />1 if the key value pair do not exists and is set.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SETXX">
@@ -892,6 +983,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair exists and is set.<br />1 if the key value pair do not exists.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -915,6 +1007,7 @@
 			<h3>Return value:</h3>
 			OK
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="EXPIRE">
@@ -936,6 +1029,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is set.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -959,6 +1053,7 @@
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is removed.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PERSISTDELETED">
@@ -980,6 +1075,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1003,6 +1099,7 @@
 			<h3>Return value:</h3>
 			Value of the key or empty string.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="GETDEL">
@@ -1024,6 +1121,7 @@
 			string
 			<h3>Return value:</h3>
 			Value of the key or empty string.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1047,6 +1145,7 @@
 			<h3>Return value:</h3>
 			Always return 1
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNDEL">
@@ -1063,13 +1162,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			Delete up to 10'000 key-value pairs after <i>key</i>.<br />Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>delete from table where key >= [key] and key like '[key]%' limit 10'000</pre>
+			Delete up to 65'536 key-value pairs after <i>key</i>.<br />Delete ONLY valid pairs, and only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget u:001: 1000 u:001:<br />xndel u:001:      u:001:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>delete from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRDEL">
@@ -1086,13 +1187,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			Delete up to 10'000 key-value pairs after <i>key</i>.<br />Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>delete from table where key >= [key] and key < [range_end] limit 10'000</pre>
+			Delete up to 65'536 key-value pairs after <i>key</i>.<br />Delete ONLY valid pairs, and only if they are less than or equal <i>range_end</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget price:2010-02 1000 price:2010-04<br />xrdel price:2010-02      price:2010-04</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>delete from table where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNPERSIST">
@@ -1109,13 +1212,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			Persist up to 10'000 key-value pairs after <i>key</i>.<br />Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>update table set expire = 0 where key >= [key] and key like '[key]%' limit 10'000</pre>
+			Persist up to 65'536 key-value pairs after <i>key</i>.<br />Persist ONLY valid pairs, and only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget     u:001: 1000 u:001:<br />xnpersist u:001:      u:001:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>update table set expire = 0 where key >= [key] and key like '[key]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRPERSIST">
@@ -1132,13 +1237,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			PERSIST up to 10'000 key-value pairs after <i>key</i>.<br />PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>update table set expire = 0 where key >= [key] and key < [range_end] limit 10'000</pre>
+			PERSIST up to 65'536 key-value pairs after <i>key</i>.<br />PERSIST ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xnget     price:2010-02 1000 price:2010-04<br />xnpersist price:2010-02      price:2010-04</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>update table set expire = 0 where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNEXPIRE">
@@ -1155,13 +1262,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>update table set expire = [expiration] where key >= [key] and key like '[key]%' limit 10'000</pre>
+			EXPIRE up to 65'536 key-value pairs after <i>key</i>.<br />EXPIRE ONLY valid pairs, and only if they are matching the <i>prefix</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget    u:001: 1000 u:001:<br />xnexpire u:001:   90 u:001:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>update table set expire = [expiration] where key >= [key] and key like '[key]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XREXPIRE">
@@ -1178,13 +1287,15 @@
 			</table>
 
 			<h3>Description:</h3>
-			EXPIRE up to 10'000 key-value pairs after <i>key</i>.<br />EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.<br /><br /><b>This command is similar to following MySQL statement:</b><br /><pre>update table set expire = [expiration] where key >= [key] and key < [range_end] limit 10'000</pre>
+			EXPIRE up to 65'536 key-value pairs after <i>key</i>.<br />EXPIRE ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
 			Last key, if there is second page.
 						<h3>Example:</h3>
 			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget    price:2010-02 1000 price:2010-04<br />xrexpire price:2010-02   90 price:2010-04</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>update table set expire = [expiration] where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CAS">
@@ -1206,6 +1317,7 @@
 			bool
 			<h3>Return value:</h3>
 			if the key value is set or not
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1229,6 +1341,7 @@
 			<h3>Return value:</h3>
 			if the key is removed or not
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="COPY">
@@ -1250,6 +1363,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1273,6 +1387,7 @@
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="RENAME">
@@ -1294,6 +1409,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1317,6 +1433,7 @@
 			<h3>Return value:</h3>
 			0 if the key value pair do not exists.<br />1 if the key value pair exists and name is changed.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="INCR">
@@ -1338,6 +1455,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			New increased value.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1361,6 +1479,7 @@
 			<h3>Return value:</h3>
 			New decrease value.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGETALL">
@@ -1382,6 +1501,7 @@
 			array
 			<h3>Return value:</h3>
 			array of subkey and values from key hash
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1405,6 +1525,7 @@
 			<h3>Return value:</h3>
 			array of subkey from key hash
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGETVALS">
@@ -1426,6 +1547,7 @@
 			array
 			<h3>Return value:</h3>
 			array of values from key hash
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1449,6 +1571,7 @@
 			<h3>Return value:</h3>
 			number of elements in key hash
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HGET">
@@ -1470,6 +1593,7 @@
 			string
 			<h3>Return value:</h3>
 			Value of the key -> subkey hash or empty string.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1493,6 +1617,7 @@
 			<h3>Return value:</h3>
 			Value of the key -> subkey hash or empty string.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HEXISTS">
@@ -1514,6 +1639,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if the key -> subkey hash do not exists.<br />1 if the key -> subkey hash exists.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1537,6 +1663,7 @@
 			<h3>Return value:</h3>
 			OK
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HDEL">
@@ -1558,6 +1685,7 @@
 			bool
 			<h3>Return value:</h3>
 			Always return 1
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1581,6 +1709,7 @@
 			<h3>Return value:</h3>
 			1 if all keys are removed, 0 if keys remains
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="HPERSISTALL">
@@ -1602,6 +1731,7 @@
 			bool
 			<h3>Return value:</h3>
 			1 if all keys are removed, 0 if keys remains
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1625,6 +1755,7 @@
 			<h3>Return value:</h3>
 			1 if all keys are removed, 0 if keys remains
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SADD">
@@ -1646,6 +1777,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1669,6 +1801,7 @@
 			<h3>Return value:</h3>
 			Value of the removed element or empty string.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITSET">
@@ -1690,6 +1823,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1713,6 +1847,7 @@
 			<h3>Return value:</h3>
 			0 / 1
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITMGET">
@@ -1734,6 +1869,7 @@
 			array
 			<h3>Return value:</h3>
 			0 / 1
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1757,6 +1893,7 @@
 			<h3>Return value:</h3>
 			bitcount
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BITMAX">
@@ -1778,6 +1915,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			Maximum suported index.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1801,6 +1939,7 @@
 			<h3>Return value:</h3>
 			always returns 1
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFRESERVE">
@@ -1822,6 +1961,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1845,6 +1985,7 @@
 			<h3>Return value:</h3>
 			estimated count
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFINTERSECT">
@@ -1866,6 +2007,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			estimated count of intersection
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1889,6 +2031,7 @@
 			<h3>Return value:</h3>
 			Value of the removed element or empty string.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PFBITS">
@@ -1910,6 +2053,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			HLL bits
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1933,6 +2077,7 @@
 			<h3>Return value:</h3>
 			HLL error rate as percent, but multiplied to 1'00'00
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BFADD">
@@ -1954,6 +2099,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -1977,6 +2123,7 @@
 			<h3>Return value:</h3>
 			OK
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="BFEXISTS">
@@ -1998,6 +2145,7 @@
 			bool
 			<h3>Return value:</h3>
 			0 if value is not present<br />1 if value is MAY BE present
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2021,6 +2169,7 @@
 			<h3>Return value:</h3>
 			array of bools0 if value is not present<br />1 if value is MAY BE present
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CMSADD">
@@ -2042,6 +2191,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2065,6 +2215,7 @@
 			<h3>Return value:</h3>
 			OK
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CMSCOUNT">
@@ -2086,6 +2237,7 @@
 			int
 			<h3>Return value:</h3>
 			estimated count
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2109,6 +2261,7 @@
 			<h3>Return value:</h3>
 			array of estimated counts
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MURMUR">
@@ -2130,6 +2283,7 @@
 			string
 			<h3>Return value:</h3>
 			Returns murmur_hash64a from value with specific seed and specific modulo.<br />e.g. murmur_hash64a(value, seed) % modulo<br />Very useful for debugging.
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2153,6 +2307,7 @@
 			<h3>Return value:</h3>
 			Server information.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="DBSIZE">
@@ -2174,6 +2329,7 @@
 			string (int)
 			<h3>Return value:</h3>
 			number of keys
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2197,6 +2353,7 @@
 			<h3>Return value:</h3>
 			Server version.
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MAXKEYSIZE">
@@ -2218,6 +2375,7 @@
 			int
 			<h3>Return value:</h3>
 			max key size
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2241,6 +2399,7 @@
 			<h3>Return value:</h3>
 			max value size
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="PING">
@@ -2262,6 +2421,7 @@
 			string
 			<h3>Return value:</h3>
 			pong
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2285,6 +2445,7 @@
 			<h3>Return value:</h3>
 			the message
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="LISTMAINTAINANCE">
@@ -2306,6 +2467,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2329,6 +2491,7 @@
 			<h3>Return value:</h3>
 			OK
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="RELOAD">
@@ -2350,6 +2513,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2373,6 +2537,7 @@
 			<h3>Return value:</h3>
 			OK
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="RESET">
@@ -2394,6 +2559,7 @@
 			OK
 			<h3>Return value:</h3>
 			OK
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2417,6 +2583,7 @@
 			<h3>Return value:</h3>
 			Always return 'string'
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TOUCH">
@@ -2438,6 +2605,7 @@
 			string
 			<h3>Return value:</h3>
 			Always return '1'
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2461,6 +2629,7 @@
 			<h3>Return value:</h3>
 			n/a
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SHUTDOWN">
@@ -2483,6 +2652,7 @@
 			<h3>Return value:</h3>
 			n/a
 			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="TEST">
@@ -2504,6 +2674,7 @@
 			n/a
 			<h3>Return value:</h3>
 			n/a
+			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>

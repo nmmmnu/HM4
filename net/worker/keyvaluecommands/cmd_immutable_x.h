@@ -8,8 +8,23 @@ namespace net::worker::commands::ImmutableX{
 	namespace immutablex_impl_{
 		namespace {
 
-			constexpr static uint32_t MIN			= 10;
+			constexpr static uint32_t MIN_ITERATIONS	= 10;
 			constexpr static uint32_t ITERATIONS		= (OutputBlob::ContainerSize - 1) / 2;
+
+
+
+			auto myClamp(std::string_view p){
+				// using uint64_t from the user, allow more user-friendly behavour.
+				// suppose he / she enters 1'000'000'000.
+				// because this value is great than max uint32_t,
+				// the converted value will go to 0, then to MIN.
+
+				auto const a = from_string<uint64_t>(p);
+
+				return static_cast<uint32_t>(
+					std::clamp<uint64_t>(a, MIN_ITERATIONS, ITERATIONS)
+				);
+			};
 
 
 
@@ -168,22 +183,11 @@ namespace net::worker::commands::ImmutableX{
 
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 
-			// using uint64_t from the user, allow more user-friendly behavour.
-			// suppose he / she enters 1'000'000'000.
-			// because this value is great than max uint32_t,
-			// the converted value will go to 0, then to MIN.
-
-			auto myClamp = [](auto a){
-				return static_cast<uint32_t>(
-					std::clamp<uint64_t>(a, MIN, ITERATIONS)
-				);
-			};
 
 
-
-			auto const &key    = p[1];
-			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
-			auto const &prefix = p[3];
+			auto const key    = p[1];
+			auto const count  = myClamp(p[2]);
+			auto const prefix = p[3];
 
 			if (prefix.empty())
 				return;
@@ -230,22 +234,11 @@ namespace net::worker::commands::ImmutableX{
 
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 
-			// using uint64_t from the user, allow more user-friendly behavour.
-			// suppose he / she enters 1'000'000'000.
-			// because this value is great than max uint32_t,
-			// the converted value will go to 0, then to MIN.
-
-			auto myClamp = [](auto a){
-				return static_cast<uint32_t>(
-					std::clamp<uint64_t>(a, MIN, ITERATIONS)
-				);
-			};
 
 
-
-			auto const &key    = p[1];
-			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
-			auto const &end    = p[3];
+			auto const key   = p[1];
+			auto const count = myClamp(p[2]);
+			auto const end   = p[3];
 
 			if (end.empty())
 				return;
@@ -291,21 +284,10 @@ namespace net::worker::commands::ImmutableX{
 
 			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
 
-			// using uint64_t from the user, allow more user-friendly behavour.
-			// suppose he / she enters 1'000'000'000.
-			// because this value is great than max uint32_t,
-			// the converted value will go to 0, then to MIN.
-
-			auto myClamp = [](auto a){
-				return static_cast<uint32_t>(
-					std::clamp<uint64_t>(a, MIN, ITERATIONS)
-				);
-			};
 
 
-
-			auto const &key    = p[1];
-			auto const count   = myClamp( from_string<uint64_t>(p[2]) );
+			auto const key	 = p[1];
+			auto const count = myClamp(p[2]);
 
 			StopUnboundPredicate stop;
 
@@ -350,7 +332,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			auto const &keyN = p[1];
+			auto const keyN = p[1];
 
 			if (keyN.empty())
 				return;
@@ -401,7 +383,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			auto const &keyN = p[1];
+			auto const keyN = p[1];
 
 			if (keyN.empty())
 				return;
@@ -452,7 +434,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			auto const &keyN = p[1];
+			auto const keyN = p[1];
 
 			if (keyN.empty())
 				return;
@@ -501,7 +483,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			auto const &keyN = p[1];
+			auto const keyN = p[1];
 
 			if (keyN.empty())
 				return;
