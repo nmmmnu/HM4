@@ -151,7 +151,7 @@ namespace net::worker::commands::MutableX{
 
 			template<class Predicate, class List, class Result>
 			void process_h(Predicate p, List &list, std::string_view prefix, Result &result, ContainerX &container){
-				StopRangePredicate stop;
+				StopPrefixPredicate stop{ prefix };
 				return process_x_<1>(p, stop, list, prefix, result, container);
 			}
 
@@ -396,6 +396,9 @@ namespace net::worker::commands::MutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 2)
+				return;
+
 			auto const &keyN	= p[1];
 
 			if (keyN.empty())
