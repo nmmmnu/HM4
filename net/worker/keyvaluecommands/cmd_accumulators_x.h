@@ -54,6 +54,9 @@ namespace net::worker::commands::Accumulators{
 						return accumulator.result(key);
 
 					accumulator(it->getVal());
+
+					if constexpr(Accumulator::ONCE)
+						return accumulator.result();
 				}
 
 				return accumulator.result();
@@ -149,6 +152,8 @@ namespace net::worker::commands::Accumulators{
 
 
 			struct COUNTPredicate{
+				constexpr static bool ONCE = false;
+
 				using T = int64_t;
 
 				T data = 0;
@@ -163,6 +168,8 @@ namespace net::worker::commands::Accumulators{
 			};
 
 			struct SUMPredicate{
+				constexpr static bool ONCE = false;
+
 				using T = int64_t;
 
 				T data = 0;
@@ -177,6 +184,8 @@ namespace net::worker::commands::Accumulators{
 			};
 
 			struct MINPredicate{
+				constexpr static bool ONCE = false;
+
 				using T = int64_t;
 
 				T data = std::numeric_limits<T>::max();
@@ -194,6 +203,8 @@ namespace net::worker::commands::Accumulators{
 			};
 
 			struct MAXPredicate{
+				constexpr static bool ONCE = false;
+
 				using T = int64_t;
 
 				T data = std::numeric_limits<T>::min();
@@ -210,7 +221,10 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
-			struct LASTPredicate{
+			template<bool B>
+			struct FirstLastPredicate_{
+				constexpr static bool ONCE = B;
+
 				using T = std::string_view;
 
 				T data;
@@ -224,7 +238,12 @@ namespace net::worker::commands::Accumulators{
 				}
 			};
 
+			using FirstPredicate = FirstLastPredicate_<1>;
+			using LastPredicate = FirstLastPredicate_<0>;
+
 			struct AVGPredicate{
+				constexpr static bool ONCE = false;
+
 				using T = int64_t;
 
 				T sum   = 0;
@@ -486,6 +505,54 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
+	struct XNFIRST : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommand<FirstPredicate, StopPrefixPredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xnfirst",	"XNFIRST"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct XRFIRST : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace acumulators_impl_;
+
+			return execCommand<FirstPredicate, StopRangePredicate>(params, *db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xrfirst",	"XRFIRST"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct XNLAST : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -498,7 +565,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			return execCommand<LASTPredicate, StopPrefixPredicate>(params, *db, result);
+			return execCommand<LastPredicate, StopPrefixPredicate>(params, *db, result);
 		}
 
 	private:
@@ -522,7 +589,7 @@ namespace net::worker::commands::Accumulators{
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace acumulators_impl_;
 
-			return execCommand<LASTPredicate, StopRangePredicate>(params, *db, result);
+			return execCommand<LastPredicate, StopRangePredicate>(params, *db, result);
 		}
 
 	private:
@@ -601,6 +668,9 @@ namespace net::worker::commands::Accumulators{
 
 				XNMAX	,
 				XRMAX	,
+
+				XNFIRST	,
+				XRFIRST	,
 
 				XNLAST	,
 				XRLAST	,

@@ -128,16 +128,7 @@ namespace net::worker::commands::MutableX{
 
 
 
-			struct StopRangePredicate;
-
-			template<class Predicate, class List, class Result>
-			void process_h(Predicate p, List &list, std::string_view prefix, Result &result, ContainerX &container){
-				StopRangePredicate stop;
-				return process_x_<1>(p, stop, list, prefix, result, container);
-			}
-
-
-
+			// moved for clang
 			// making it class, makes later code prettier.
 			struct StopPrefixPredicate{
 				std::string_view prefix;
@@ -154,6 +145,15 @@ namespace net::worker::commands::MutableX{
 					return end < key;
 				}
 			};
+
+
+
+
+			template<class Predicate, class List, class Result>
+			void process_h(Predicate p, List &list, std::string_view prefix, Result &result, ContainerX &container){
+				StopRangePredicate stop;
+				return process_x_<1>(p, stop, list, prefix, result, container);
+			}
 
 
 

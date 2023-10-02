@@ -35,14 +35,38 @@ namespace net::worker::commands::ImmutableX{
 
 
 
+			// moved here for clang
+			// making it class, makes later code prettier.
+			struct StopPrefixPredicate{
+				std::string_view prefix;
+
+				bool operator()(std::string_view key) const{
+					return ! same_prefix(prefix, key);
+				}
+			};
+
+			struct StopRangePredicate{
+				std::string_view end;
+
+				constexpr bool operator()(std::string_view key) const{
+					return end < key;
+				}
+			};
+
+			struct StopUnboundPredicate{
+				constexpr bool operator()(std::string_view) const{
+					return false;
+				}
+			};
+
+
+
 			enum class AccumulateOutput{
 				KEYS,
 				VALS,
 				BOTH,
 				BOTH_WITH_TAIL
 			};
-
-			struct StopPrefixPredicate;
 
 			template<class It>
 			uint32_t countResultsH(std::string_view const prefix, It it, It eit){
@@ -133,29 +157,6 @@ namespace net::worker::commands::ImmutableX{
 
 				return accumulateResults_<Out>(maxResults, stop, it, eit, container, proj);
 			}
-
-			// making it class, makes later code prettier.
-			struct StopPrefixPredicate{
-				std::string_view prefix;
-
-				bool operator()(std::string_view key) const{
-					return ! same_prefix(prefix, key);
-				}
-			};
-
-			struct StopRangePredicate{
-				std::string_view end;
-
-				constexpr bool operator()(std::string_view key) const{
-					return end < key;
-				}
-			};
-
-			struct StopUnboundPredicate{
-				constexpr bool operator()(std::string_view) const{
-					return false;
-				}
-			};
 
 		} // namespace
 

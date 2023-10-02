@@ -326,6 +326,73 @@ return array(
 	),
 
 	new Cmd(
+			"XNFIRST",
+
+			"XNFIRST key prefix",
+
+			"Accumulate using FIRST up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"Accumulate ONLY valid pairs, but only if they are matching the <i>prefix</i>.",
+
+			"array",
+			"First element  - max of valid elements.<br />" .
+			"Second element - last key, if there is second page.",
+
+			"1.2.5",
+			"READ",
+			false,
+			false,
+
+			"accumulators_x",
+
+			"<pre>set visits:20200101 123<br />" .
+			"set visits:20200102 263<br />" .
+			"set visits:20200103 173<br />" .
+			"set visits:20200104 420<br />" .
+			"set visits:20200105 345<br />" .
+			"<br />" .
+			"xnget   visits:202001 1000 visits:202001<br />" .
+			"xnfirst visits:202001      visits:202001<br />" .
+			"<br />" .
+			"xnget   visits:2020   1000 visits:2020<br />" .
+			"xnfirst visits:2020        visits:2020</pre>",
+
+			"<pre>select first(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
+			"(Note MySQL does not support first(), but PostgreSQL does)"
+	),
+
+	new Cmd(
+			"XRFIRST",
+
+			"XRFIRST key prefix",
+
+			"Accumulate using FIRST up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.",
+
+			"array",
+			"First element  - max of valid elements.<br />" .
+			"Second element - last key, if there is second page.",
+
+			"1.3.7.1",
+			"READ",
+			false,
+			false,
+
+			"accumulators_x",
+
+			"<pre>set visits:20200101 123<br />" .
+			"set visits:20200102 263<br />" .
+			"set visits:20200103 173<br />" .
+			"set visits:20200104 420<br />" .
+			"set visits:20200105 345<br />" .
+			"<br />" .
+			"xrget visits:202001 1000 visits:202003<br />" .
+			"xrmax visits:202001      visits:202003</pre>",
+
+			"<pre>select first(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
+			"(Note MySQL does not support first(), but PostgreSQL does)"
+	),
+
+	new Cmd(
 			"XNLAST",
 
 			"XNLAST key prefix",
@@ -357,7 +424,7 @@ return array(
 			"xnlast visits:2020        visits:2020</pre>",
 
 			"<pre>select last(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
-			"(Note MySQL does not support last)"
+			"(Note MySQL does not support last(), but PostgreSQL does)"
 	),
 
 	new Cmd(
@@ -365,7 +432,7 @@ return array(
 
 			"XRLAST key prefix",
 
-			"Accumulate using MAX up to 65'536 key-value pairs after <i>key</i>.<br />" .
+			"Accumulate using LAST up to 65'536 key-value pairs after <i>key</i>.<br />" .
 			"Accumulate ONLY valid pairs, but only if they are less than or equal the <i>range_end</i>.",
 
 			"array",
@@ -389,7 +456,7 @@ return array(
 			"xrmax visits:202001      visits:202003</pre>",
 
 			"<pre>select last(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
-			"(Note MySQL does not support last)"
+			"(Note MySQL does not support last(), but PostgreSQL does)"
 	),
 
 	new Cmd(
@@ -427,7 +494,7 @@ return array(
 			"xnavg visits:2020        visits:2020</pre>",
 
 			"<pre>select avg(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
-			"(Note MySQL also will do fake avegare if fhis statement is used)"
+			"(Note MySQL also will do fake average, if fhis statement is used)"
 	),
 
 	new Cmd(
@@ -462,7 +529,7 @@ return array(
 			"xrmax visits:202001      visits:202003</pre>",
 
 			"<pre>select avg(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>" .
-			"(Note MySQL also will do fake avegare if fhis statement is used)"
+			"(Note MySQL also will do fake average, if fhis statement is used)"
 	),
 );
 

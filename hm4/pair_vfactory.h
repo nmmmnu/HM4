@@ -3,6 +3,12 @@
 
 #include "smart_memcpy.h"
 
+#if defined(__clang__)
+	#define constexpr_virtual /* constexpr */
+#else
+	#define constexpr_virtual constexpr
+#endif
+
 namespace hm4{
 inline namespace version_4_00_00{
 	namespace PairFactory{
@@ -20,22 +26,22 @@ inline namespace version_4_00_00{
 							IFactoryAction(key, val_size, nullptr){}
 
 			[[nodiscard]]
-			constexpr std::string_view getKey() const final{
+			constexpr_virtual std::string_view getKey() const final{
 				return key;
 			}
 
 			[[nodiscard]]
-			constexpr uint32_t getCreated() const final{
+			constexpr_virtual uint32_t getCreated() const final{
 				return 0;
 			}
 
 			[[nodiscard]]
-			constexpr size_t bytes() const final{
+			constexpr_virtual size_t bytes() const final{
 				return Pair::bytes(key.size(), val_size);
 			}
 
 			[[nodiscard]]
-			constexpr bool valid() const final{
+			constexpr_virtual bool valid() const final{
 				return
 					Pair::isKeyValid(key) &&
 					Pair::isValValid(val_size)
