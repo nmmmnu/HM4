@@ -4,8 +4,13 @@
 
 #include <algorithm>	// std::clamp
 
+#include "shared_stoppredicate.h"
+
 namespace net::worker::commands::MutableX{
 	namespace mutablex_impl_{
+
+		using namespace net::worker::shared::stop_predicate;
+
 		namespace{
 			constexpr static uint32_t ITERATIONS_PROCESS_X	= OutputBlob::ContainerSize;
 			constexpr static uint32_t PASSES_PROCESS_X	= 3;
@@ -125,27 +130,6 @@ namespace net::worker::commands::MutableX{
 			void process_x(Predicate p, StopPredicate stop, List &list, std::string_view key, Result &result, ContainerX &container){
 				return process_x_<0>(p, stop, list, key, result, container);
 			}
-
-
-
-			// moved for clang
-			// making it class, makes later code prettier.
-			struct StopPrefixPredicate{
-				std::string_view prefix;
-
-				bool operator()(std::string_view key) const{
-					return ! same_prefix(prefix, key);
-				}
-			};
-
-			struct StopRangePredicate{
-				std::string_view end;
-
-				constexpr bool operator()(std::string_view key) const{
-					return end < key;
-				}
-			};
-
 
 
 

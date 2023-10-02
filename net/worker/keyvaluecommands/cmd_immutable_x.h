@@ -4,8 +4,13 @@
 
 #include <algorithm>	// std::clamp
 
+#include "shared_stoppredicate.h"
+
 namespace net::worker::commands::ImmutableX{
 	namespace immutablex_impl_{
+
+		using namespace net::worker::shared::stop_predicate;
+
 		namespace {
 
 			constexpr static uint32_t MIN_ITERATIONS	= 10;
@@ -32,32 +37,6 @@ namespace net::worker::commands::ImmutableX{
 			constexpr static std::size_t MAX_HKEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
 							- DBAdapter::SEPARATOR.size()
 							- 16;
-
-
-
-			// moved here for clang
-			// making it class, makes later code prettier.
-			struct StopPrefixPredicate{
-				std::string_view prefix;
-
-				bool operator()(std::string_view key) const{
-					return ! same_prefix(prefix, key);
-				}
-			};
-
-			struct StopRangePredicate{
-				std::string_view end;
-
-				constexpr bool operator()(std::string_view key) const{
-					return end < key;
-				}
-			};
-
-			struct StopUnboundPredicate{
-				constexpr bool operator()(std::string_view) const{
-					return false;
-				}
-			};
 
 
 

@@ -3,10 +3,13 @@
 #include <limits>
 #include <algorithm>
 
-
+#include "shared_stoppredicate.h"
 
 namespace net::worker::commands::Accumulators{
 	namespace acumulators_impl_{
+
+		using namespace net::worker::shared::stop_predicate;
+
 		namespace{
 
 			constexpr static uint32_t MIN_ITERATIONS	= 10;
@@ -129,25 +132,6 @@ namespace net::worker::commands::Accumulators{
 
 				return execCommand_<Accumulator, StopPredicate>(key, ITERATIONS, prefix, list, result);
 			}
-
-
-
-			// making it class, makes later code prettier.
-			struct StopPrefixPredicate{
-				std::string_view prefix;
-
-				bool operator()(std::string_view key) const{
-					return ! same_prefix(prefix, key);
-				}
-			};
-
-			struct StopRangePredicate{
-				std::string_view end;
-
-				constexpr bool operator()(std::string_view key) const{
-					return end < key;
-				}
-			};
 
 
 
