@@ -226,4 +226,7 @@ Changelog
 -	new range commands XRAVG, XRAVG
 -	refactor XN / XR accumulators to accept only 2 arguments, but keep COUNT and SUM to accept traditional 3 arguments
 -	new range commands XNFIRST, XRFIRST, XNLAST, XRLAST
+-	clang / Apple silicon build
+
+
 
