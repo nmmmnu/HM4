@@ -47,7 +47,11 @@ bool socket_options_setReuseAddr(int const fd) noexcept{
 }
 
 bool socket_options_setReusePort(int const fd) noexcept{
+	#ifdef SO_REUSEPORT
 	return socket_setOption_<SOL_SOCKET, SO_REUSEPORT>(fd);
+	#else
+	return false;
+	#endif
 }
 
 bool socket_options_setTCPNoDelay(int const fd) noexcept{

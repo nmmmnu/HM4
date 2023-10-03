@@ -74,7 +74,7 @@ using Allocator		= MyAllocator::ArenaAllocator;
 
 // ----------------------------------
 
-#if defined SELECTOR_EPOOL
+#if defined SELECTOR_EPOLL
 	#include "selector/epollselector.h"
 
 	using MySelector	= net::selector::EPollSelector;
@@ -82,7 +82,7 @@ using Allocator		= MyAllocator::ArenaAllocator;
 	#include "selector/kqueueselector.h"
 
 	using MySelector	= net::selector::KQueueSelector;
-#elif defined SELECTOR_POOL
+#elif defined SELECTOR_POLL
 	#include "selector/pollselector.h"
 
 	using MySelector	= net::selector::PollSelector;

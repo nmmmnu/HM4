@@ -1,7 +1,7 @@
 #include "pair.h"
 #include "ilist.h"
 
-#include <unistd.h> 	// usleep
+#include <unistd.h> 	// sleep
 
 #include <iostream>
 
@@ -13,7 +13,7 @@ using hm4::OPair;
 MyTest mytest;
 
 inline void sleep(){
-	usleep(100);
+	sleep(1);
 }
 
 
