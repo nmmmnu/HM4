@@ -36,21 +36,25 @@ public:
 	RedisProtocolParser(std::string_view const src, StringVector &params) : src(src), params(params){}
 
 	Status operator()(){
+		if (pos + 2 > src.size()){
+			// buffer is definitely not read,
+			// should be at least *1
+			return Status::BUFFER_NOT_READ;
+		}
+
+		// pos = 0;
+
 		if (src[pos] != STAR)
 			return errStatus_(Error::NO_STAR);
 
 		++pos;
 
-		if (pos + 1 > src.size())
-			// at least one character for parameter count
-			return Status::BUFFER_NOT_READ;
-
 		size_t const paramsCount = static_cast<size_t>(readInt_());
-
-		params.clear();
 
 		if (paramsCount == 0 || paramsCount > MAX_PARAMS)
 			return errStatus_(Error::PARAM_COUNT);
+
+		params.clear();
 
 		{
 			const Status stat = readLn_();
@@ -93,7 +97,7 @@ private:
 	}
 
 	Status readLn_(){
-		if (pos + 1 > src.size())
+		if (pos + 2 > src.size())
 			return Status::BUFFER_NOT_READ;
 
 		if (src[pos] == '\r' && src[pos + 1] == '\n'){
@@ -104,28 +108,29 @@ private:
 		return errStatus_(Error::NO_CRLF);
 	}
 
-
 	std::pair<Status, std::string_view> readParam_(){
-		if (pos + 1 > src.size())
+		if (pos + 2 > src.size()){
+			// buffer is definitely not read,
+			// should be at least $0
 			return statusPair_(Status::BUFFER_NOT_READ);
+		}
 
 		if (src[pos] != DOLLAR)
 			return errPair_(Error::NO_DOLLAR);
 
 		++pos;
 
-		if (pos + 1 > src.size())
-			return statusPair_(Status::BUFFER_NOT_READ);
-
 		const size_t size = static_cast<size_t>(readInt_());
+
 		if (/* size < 0 || */ size > MAX_PARAM_SIZE)
 			return errPair_(Error::PARAM_SIZE);
 
-		{
-			const Status stat = readLn_();
-			if ( stat != Status::OK )
-				return statusPair_(stat);
-		}
+
+
+		if (auto const stat = readLn_(); stat != Status::OK )
+			return statusPair_(stat);
+
+
 
 		const auto pos_save = pos;
 
@@ -137,11 +142,12 @@ private:
 		if (pos > src.size())
 			return statusPair_(Status::BUFFER_NOT_READ);
 
-		{
-			const Status stat = readLn_();
-			if ( stat != Status::OK )
-				return statusPair_(stat);
-		}
+
+
+		if (auto const stat = readLn_(); stat != Status::OK )
+			return statusPair_(stat);
+
+
 
 		return { Status::OK, std::string_view( & src[pos_save], size) };
 	}

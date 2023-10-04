@@ -56,4 +56,7 @@ Changelog
 	In such cases the server will disconnect the client, since the client will not check the error message and will continue to push the data.
 	HM4 currently 256 MB, Redis support 512 MB.
 
+### 1.3.7.2
+
+-	bugfix on redis parser when CRLF is not read in full.
 

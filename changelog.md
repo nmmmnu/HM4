@@ -228,5 +228,9 @@ Changelog
 -	new range commands XNFIRST, XRFIRST, XNLAST, XRLAST
 -	clang / Apple silicon build
 
+### 1.3.7.2
+
+-	bugfix on redis parser when CRLF is not read in full.
+
 
 
