@@ -827,7 +827,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001      visits:202003</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select first(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>(Note MySQL does not support first(), but PostgreSQL does)			
+			<pre>select first(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>(Note MySQL does not support first(), but PostgreSQL does)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNLAST">
@@ -877,7 +877,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xrget visits:202001 1000 visits:202003<br />xrmax visits:202001      visits:202003</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select last(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>(Note MySQL does not support last(), but PostgreSQL does)			
+			<pre>select last(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>(Note MySQL does not support last(), but PostgreSQL does)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNAVG">

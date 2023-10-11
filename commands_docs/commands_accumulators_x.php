@@ -388,7 +388,7 @@ return array(
 			"xrget visits:202001 1000 visits:202003<br />" .
 			"xrmax visits:202001      visits:202003</pre>",
 
-			"<pre>select first(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
+			"<pre>select first(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>" .
 			"(Note MySQL does not support first(), but PostgreSQL does)"
 	),
 
@@ -455,7 +455,7 @@ return array(
 			"xrget visits:202001 1000 visits:202003<br />" .
 			"xrmax visits:202001      visits:202003</pre>",
 
-			"<pre>select last(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
+			"<pre>select last(val) from table where key >= [key] and key < [range_end] limit 65'536</pre>" .
 			"(Note MySQL does not support last(), but PostgreSQL does)"
 	),
 
