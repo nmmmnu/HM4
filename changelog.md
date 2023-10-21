@@ -233,5 +233,8 @@ Changelog
 -	bugfix on redis parser when CRLF is not read in full.
 -	Release
 
+### 1.3.7.3
+-	new range commands XUGETKEYS, XNGETKEYS, XRGETKEYS
+-	PreRelease
 
 
