@@ -25,9 +25,9 @@ function process($redis_helper, $prefix, $pattern, $count){
 
 	$f = function($key) use ($redis_helper, $prefix, $count){
 		if ($prefix)
-			return $redis_helper->xnget($key, $count, $prefix);
+			return $redis_helper->xngetkeys($key, $count, $prefix);
 		else
-			return $redis_helper->xuget($key, $count);
+			return $redis_helper->xugetkeys($key, $count);
 	};
 
 	$key = $prefix ? $prefix : "";

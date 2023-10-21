@@ -79,6 +79,14 @@ class HM4Helper{
 		return $this->collect_("xuget", $key, $row_count);
 	}
 
+	function xngetkeys($key, $row_count, $prefix){
+		return $this->collect_("xngetkeys", $key, $row_count, $prefix);
+	}
+
+	function xugetkeys($key, $row_count){
+		return $this->collect_("xugetkeys", $key, $row_count);
+	}
+
 	private function collect_(){
 		$args = func_get_args();
 
