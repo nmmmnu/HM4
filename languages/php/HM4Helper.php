@@ -1,9 +1,12 @@
 <?php
 /*
- * Redis Helper for PHP
+ * HM4 Helper for PHP
  *
  * Version	: 1.2.5
  * Date		: 2020-05-26
+ *
+ * Version	: 1.3.0
+ * Date		: 2023-10-21
  *
  * It allows:
  * - Isolate $redis->rawCommand / $redis->executeRaw from underline redis class.
@@ -18,9 +21,7 @@
  *
  */
 
-namespace AppBundle\AppBundle\Helper;
-
-class RedisHelperGETX{
+class HM4Helper{
 	private $redis;
 
 	const MAX_ACCUMULATE = 10000;
@@ -66,13 +67,27 @@ class RedisHelperGETX{
 		}
 	}
 
-	function getx($key, $page, $prefix = NULL){
-		if (! $prefix)
-			$prefix = $key;
+	function getx($key, $row_count, $prefix = NULL){
+		return $this->collect_("getx", $key, $row_count, $prefix ? $prefix : $key);
+	}
 
-		$data = $this->rawCommand("getx", $key, $page, $prefix);
+	function xnget($key, $row_count, $prefix){
+		return $this->collect_("xnget", $key, $row_count, $prefix);
+	}
 
-		return [ self::transformData($data, 1), end($data) ];
+	function xuget($key, $row_count){
+		return $this->collect_("xuget", $key, $row_count);
+	}
+
+	private function collect_(){
+		$args = func_get_args();
+
+		$data = call_user_func_array( [ $this, "rawCommand" ], $args );
+
+		$diff = count($data) % 2 ? 1 : 0;
+		$last = count($data) % 2 ? end($data) : false;
+
+		return [ self::transformData($data, $diff), $last ];
 	}
 
 	function count($prefix, $iterations){
@@ -81,14 +96,6 @@ class RedisHelperGETX{
 
 	function sum($prefix, $iterations){
 		return $this->accumulate_("sum",   $prefix, $iterations);
-	}
-
-	function min($prefix, $iterations){
-		return $this->accumulate_("min",   $prefix, $iterations);
-	}
-
-	function max($prefix, $iterations){
-		return $this->accumulate_("max",   $prefix, $iterations);
 	}
 
 	private function accumulate_($func, $prefix, $iterations){

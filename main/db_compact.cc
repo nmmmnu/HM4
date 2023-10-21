@@ -233,18 +233,21 @@ namespace{
 		size_t total = 0;
 
 		for(auto &[size, filename] : files){
+			// add first file...
 			if (path.size() == 0){
 				total = size;
 				path.emplace_back(filename);
 				continue;
 			}
 
+			// add small file...
 			if (opt.compaction_min_records && size <= opt.compaction_min_records){
 				total += size;
 				path.emplace_back(filename);
 				continue;
 			}
 
+			// add next file...
 			if (auto const total_m = static_cast<size_t>(
 					static_cast<double>(total) *
 					( path.size() == 1 ? 1.25 : 1.00 )
@@ -293,6 +296,10 @@ namespace{
 		while(true){
 			auto const out = prepareSmartMergeFileList(opt);
 
+			// rename zero sized tables.
+			// those suppose to be broken files.
+			// node if a table is in process of creating,
+			// it wont be recognized as zero sized.
 			renameFiles(out.zero, opt.rename_from, opt.rename_to);
 
 			auto &path = out.path;
