@@ -235,6 +235,6 @@ Changelog
 
 ### 1.3.7.4
 -	new range commands XUGETKEYS, XNGETKEYS, XRGETKEYS
--	PreRelease
+-	Release
 
 
