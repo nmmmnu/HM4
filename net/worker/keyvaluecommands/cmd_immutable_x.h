@@ -81,7 +81,7 @@ namespace net::worker::commands::ImmutableX{
 				container.clear();
 
 				// capture & instead of &container to silence clang warning.
-				auto tail = [&](auto const &pkey){
+				auto tail = [&](std::string_view const pkey = ""){
 					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::KEYS_WITH_TAIL)
 						container.emplace_back(pkey);
 				};
@@ -114,6 +114,8 @@ namespace net::worker::commands::ImmutableX{
 					if constexpr(Out == AccumulateOutput::KEYS_WITH_TAIL)
 						container.emplace_back("1");
 				}
+
+				return tail();
 			}
 
 			template<AccumulateOutput Out, class StopPredicate, class It, class Container>

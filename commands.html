@@ -103,6 +103,9 @@
 					<li><a href="#XNGET">XNGET</a></li>
 				<li><a href="#XRGET">XRGET</a></li>
 				<li><a href="#XUGET">XUGET</a></li>
+				<li><a href="#XNGETKEYS">XNGETKEYS</a></li>
+				<li><a href="#XRGETKEYS">XRGETKEYS</a></li>
+				<li><a href="#XUGETKEYS">XUGETKEYS</a></li>
 				</div>
 			<div>
 			<b>accumulators_x.h</b><br />
@@ -528,6 +531,75 @@
 			<pre>xrget '' 1000</pre>			
 						<h3>MySQL Rosetta:</h3>
 			<pre>select key, val from table where key >= [key] limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XNGETKEYS">
+
+			<h2>XNGETKEYS key number prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XNGETKEYS</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Same as XNGET, but instead of values, return 1.<br>1 is returned because some languages similar to php, may skip the values.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XRGETKEYS">
+
+			<h2>XRGETKEYS key number range_end</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XRGETKEYS</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Same as XRGET, but instead of values, return 1.<br>1 is returned because some languages similar to php, may skip the values.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XUGETKEYS">
+
+			<h2>XUGETKEYS key number</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XUGETKEYS</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Same as XUGET, but instead of values, return 1.<br>1 is returned because some languages similar to php, may skip the values.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="COUNT">

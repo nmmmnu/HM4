@@ -84,5 +84,65 @@ return array(
 
 			"<pre>select key, val from table where key >= [key] limit [number]</pre>"
 	),
+
+
+
+	new Cmd(
+			"XNGETKEYS",
+
+			"XNGETKEYS key number prefix",
+
+			"Same as XNGET, but instead of values, return 1.<br>" .
+			"1 is returned because some languages similar to php, may skip the values.",
+
+			"array",
+			"First group of element         - array of key and values.<br />" .
+			"Second group of single element - Last key, if there is second page.",
+
+			"1.0.0",
+			"READ",
+			false,
+			false,
+
+			"immutable_x"
+	),
+	new Cmd(
+			"XRGETKEYS",
+
+			"XRGETKEYS key number range_end",
+
+			"Same as XRGET, but instead of values, return 1.<br>" .
+			"1 is returned because some languages similar to php, may skip the values.",
+
+			"array",
+			"First group of element         - array of key and values.<br />" .
+			"Second group of single element - Last key, if there is second page.",
+
+			"1.3.7.1",
+			"READ",
+			false,
+			false,
+
+			"immutable_x"
+	),
+	new Cmd(
+			"XUGETKEYS",
+
+			"XUGETKEYS key number",
+
+			"Same as XUGET, but instead of values, return 1.<br>" .
+			"1 is returned because some languages similar to php, may skip the values.",
+
+			"array",
+			"First group of element         - array of key and values.<br />" .
+			"Second group of single element - Last key, if there is second page.",
+
+			"1.3.7.1",
+			"READ",
+			false,
+			false,
+
+			"immutable_x"
+	),
 );
 

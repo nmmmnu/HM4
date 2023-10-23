@@ -30,16 +30,50 @@ class HM4Helper{
 		$this->redis = $redis;
 	}
 
-	static function transformData(array & $data, $decr = 0){
-		$result = array();
+	function rawCommand(){
+		$args = func_get_args();
 
-		$size = count($data) - $decr;
-
-		for ($i = 0; $i < $size; ++$i)
-			$result[$data[$i]] = $data[++$i];
-
-		return $result;
+		switch( get_class($this->redis) ){
+		case "Predis\Client"	: return $this->rawCommand_Predis($args);
+		case "Redis"		: return $this->rawCommand_PHPRedis($args);
+		case "TinyRedisClient"	:
+		default			: return $this->rawCommand_MagicMethod($args);
+		}
 	}
+
+	// ==================
+
+	function getx($key, $row_count, $prefix = NULL){
+		return $this->collectKeyValues_("getx", $key, $row_count, $prefix ? $prefix : $key);
+	}
+
+	function xnget($key, $row_count, $prefix){
+		return $this->collectKeyValues_("xnget", $key, $row_count, $prefix);
+	}
+
+	function xuget($key, $row_count){
+		return $this->collectKeyValues_("xuget", $key, $row_count);
+	}
+
+	function xngetkeys($key, $row_count, $prefix){
+		return $this->collectKeyValues_("xngetkeys", $key, $row_count, $prefix);
+	}
+
+	function xugetkeys($key, $row_count){
+		return $this->collectKeyValues_("xugetkeys", $key, $row_count);
+	}
+
+	// ==================
+
+	function count($prefix, $iterations){
+		return $this->accumulate_("count", $prefix, $iterations);
+	}
+
+	function sum($prefix, $iterations){
+		return $this->accumulate_("sum",   $prefix, $iterations);
+	}
+
+	// ==================
 
 	private function rawCommand_Predis($args){
 		return $this->redis->executeRaw($args);
@@ -56,55 +90,32 @@ class HM4Helper{
 		return call_user_func_array( [ $this->redis, $cmd ], $args );
 	}
 
-	function rawCommand(){
-		$args = func_get_args();
+	// ==================
 
-		switch( get_class($this->redis) ){
-		case "Predis\Client"	: return $this->rawCommand_Predis($args);
-		case "Redis"		: return $this->rawCommand_PHPRedis($args);
-		case "TinyRedisClient"	:
-		default			: return $this->rawCommand_MagicMethod($args);
-		}
+	private static function transformKeyValues__(array & $data){
+		$result = array();
+
+		// requires 1.3.7.5 where last key is always present!!!
+
+		$size = count($data) - 1;
+
+		for ($i = 0; $i < $size; ++$i)
+			$result[$data[$i]] = $data[++$i];
+
+		return $result;
 	}
 
-	function getx($key, $row_count, $prefix = NULL){
-		return $this->collect_("getx", $key, $row_count, $prefix ? $prefix : $key);
-	}
-
-	function xnget($key, $row_count, $prefix){
-		return $this->collect_("xnget", $key, $row_count, $prefix);
-	}
-
-	function xuget($key, $row_count){
-		return $this->collect_("xuget", $key, $row_count);
-	}
-
-	function xngetkeys($key, $row_count, $prefix){
-		return $this->collect_("xngetkeys", $key, $row_count, $prefix);
-	}
-
-	function xugetkeys($key, $row_count){
-		return $this->collect_("xugetkeys", $key, $row_count);
-	}
-
-	private function collect_(){
+	private function collectKeyValues_(){
 		$args = func_get_args();
 
 		$data = call_user_func_array( [ $this, "rawCommand" ], $args );
 
-		$diff = count($data) % 2 ? 1 : 0;
-		$last = count($data) % 2 ? end($data) : false;
+		// requires 1.3.7.5 where last key is always present!!!
 
-		return [ self::transformData($data, $diff), $last ];
+		return [ self::transformKeyValues__($data), end($data) ];
 	}
 
-	function count($prefix, $iterations){
-		return $this->accumulate_("count", $prefix, $iterations);
-	}
-
-	function sum($prefix, $iterations){
-		return $this->accumulate_("sum",   $prefix, $iterations);
-	}
+	// ==================
 
 	private function accumulate_($func, $prefix, $iterations){
 		$i = 0;
@@ -114,9 +125,9 @@ class HM4Helper{
 		$acc = 0;
 
 		while($key){
-			$data = $this->rawCommand($func, $key, self::MAX_ACCUMULATE, $prefix);
-			$acc += $data[0];
-			$key  = $data[1];
+			list($value, $last) = $this->rawCommand($func, $key, self::MAX_ACCUMULATE, $prefix);
+			$acc += $value;
+			$key  = $last;
 
 			if ($iterations && ++$i >= $iterations)
 				break;
