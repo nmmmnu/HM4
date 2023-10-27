@@ -653,7 +653,7 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "getx";
+		constexpr inline static std::string_view name	= "immutable_x";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,

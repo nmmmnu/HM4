@@ -142,6 +142,7 @@
 				<li><a href="#SETXX">SETXX</a></li>
 				<li><a href="#APPEND">APPEND</a></li>
 				<li><a href="#EXPIRE">EXPIRE</a></li>
+				<li><a href="#EXPIREAT">EXPIREAT</a></li>
 				<li><a href="#PERSIST">PERSIST</a></li>
 				<li><a href="#PERSISTDELETED">PERSISTDELETED</a></li>
 				<li><a href="#GETSET">GETSET</a></li>
@@ -158,6 +159,8 @@
 				<li><a href="#XRPERSIST">XRPERSIST</a></li>
 				<li><a href="#XNEXPIRE">XNEXPIRE</a></li>
 				<li><a href="#XREXPIRE">XREXPIRE</a></li>
+				<li><a href="#XNEXPIREAT">XNEXPIREAT</a></li>
+				<li><a href="#XREXPIREAT">XREXPIREAT</a></li>
 				</div>
 			<div>
 			<b>cas.h</b><br />
@@ -198,6 +201,7 @@
 				<li><a href="#HDELALL">HDELALL</a></li>
 				<li><a href="#HPERSISTALL">HPERSISTALL</a></li>
 				<li><a href="#HEXPIREALL">HEXPIREALL</a></li>
+				<li><a href="#HEXPIREATALL">HEXPIREATALL</a></li>
 				</div>
 			<div>
 			<b>queue.h</b><br />
@@ -428,7 +432,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get internal <i>key</i> representation. Exact match.<br />Works on deleted and expired keys too.<br />.Not compatible with Redis
+			Get internal <i>key</i> representation. Exact match.<br />Works on deleted and expired keys too.<br />Not compatible with Redis
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
@@ -1234,6 +1238,29 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="EXPIREAT">
+
+			<h2>EXPIREAT key timestamp</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>EXPIREAT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.5</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically Change the expiration of the <i>key</i> so <i>key</i> expire at specific timestamp.<br />If timestamp is in the past, the <i>key</i> is deleted.<br />Note: The command internally GET <i>key</i> first.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the key value pair do not exists.<br />1 if the key value pair exists and expiration is set.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="PERSIST">
 
 			<h2>PERSIST key seconds</h2>
@@ -1497,6 +1524,56 @@
 			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget    price:2010-02 1000 price:2010-04<br />xrexpire price:2010-02   90 price:2010-04</pre>			
 						<h3>MySQL Rosetta:</h3>
 			<pre>update table set expire = [expiration] where key >= [key] and key < [range_end] limit 65'536</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XNEXPIREAT">
+
+			<h2>XNEXPIREAT key timestamp prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XNEXPIREAT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.5</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			EXPIREAT up to 65'536 key-value pairs after <i>key</i>.<br />EXPIREAT ONLY valid pairs, and only if they are matching the <i>prefix</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget      u:001:       1000 u:001:<br />xnexpireat u:001: 1830290400 u:001:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>update table set expire_at = [expiration] where key >= [key] and key like '[key]%' limit 65'536</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XREXPIREAT">
+
+			<h2>XREXPIREAT key timestamp prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XREXPIREAT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.5</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			EXPIREAT up to 65'536 key-value pairs after <i>key</i>.<br />EXPIREAT ONLY valid pairs, and only if they are less than or equal the <i>range_end</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set price:2010-01 5<br />set price:2010-02 6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget      price:2010-02       1000 price:2010-04<br />xrexpireat price:2010-02 1830290400 price:2010-04</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>update table set expire_at = [expiration] where key >= [key] and key < [range_end] limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="CAS">
@@ -1951,6 +2028,29 @@
 
 			<h3>Description:</h3>
 			EXPIRE up to 10'000 key-value pairs from hash <i>key</i>.<br />Works exactly as Redis EXPIRE [hash key].
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			1 if all keys are removed, 0 if keys remains
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HEXPIREATALL">
+
+			<h2>HEXPIREATALL key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HEXPIREATALL</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.5</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			EXPIREAT up to 10'000 key-value pairs from hash <i>key</i>.<br />Works exactly as Redis EXPIREAT [hash key].
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>

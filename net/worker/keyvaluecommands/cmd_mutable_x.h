@@ -185,6 +185,35 @@ namespace net::worker::commands::MutableX{
 					hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
 				}
 			};
+
+			template<class DBAdapter>
+			struct ExpireAtPredicate{
+				using List = typename DBAdapter::List;
+
+				uint32_t time;
+
+				void process(List &list, const hm4::Pair *hint) const{
+					if (auto const now = mytime::now32(); now >= time){
+						hm4::erase(list, hint->getKey());
+					}else{
+						// this will not overflow
+						auto const expires = time - mytime::now32();
+
+						hm4::insert(list, hint->getKey(), hint->getVal(), expires);
+					}
+				}
+
+				void processHint(List &list, const hm4::Pair *hint) const{
+					if (auto const now = mytime::now32(); now >= time){
+						hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
+					}else{
+						// this will not overflow
+						auto const expires = time - mytime::now32();
+
+						hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
+					}
+				}
+			};
 		} // namespace
 	} // namespace mutablex_impl_
 
@@ -513,9 +542,118 @@ namespace net::worker::commands::MutableX{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct XNEXPIREAT : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 4)
+				return;
+
+			auto const &key		= p[1];
+			auto const time		= from_string<uint32_t>(p[2]);
+			auto const &prefix	= p[3];
+
+			if (prefix.empty())
+				return;
+
+			using namespace mutablex_impl_;
+
+			ExpireAtPredicate<DBAdapter>	pred{time};
+			StopPrefixPredicate		stop{ prefix };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xnexpireat",		"XNEXPIREAT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct XREXPIREAT : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 4)
+				return;
+
+			auto const &key		= p[1];
+			auto const time		= from_string<uint32_t>(p[2]);
+			auto const &end		= p[3];
+
+			if (end.empty())
+				return;
+
+			using namespace mutablex_impl_;
+
+			ExpireAtPredicate<DBAdapter>	pred{time};
+			StopRangePredicate		stop{ end };
+			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xrexpireay",		"XREXPIREAT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct HEXPIREATALL : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 3)
+				return;
+
+			auto const &keyN	= p[1];
+
+			if (keyN.empty())
+				return;
+
+			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+
+			auto const time		= from_string<uint32_t>(p[2]);
+
+			using namespace mutablex_impl_;
+
+			ExpireAtPredicate<DBAdapter>	pred{time};
+			return process_h(pred, *db, prefix, result, blob.pcontainer);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hexpireatall",		"HEXPIREATALL"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "getx";
+		constexpr inline static std::string_view name	= "mutable_x";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
@@ -529,7 +667,11 @@ namespace net::worker::commands::MutableX{
 
 				XNEXPIRE	,
 				XREXPIRE	,
-				HEXPIREALL
+				HEXPIREALL	,
+
+				XNEXPIREAT	,
+				XREXPIREAT	,
+				HEXPIREATALL
 			>(pack);
 		}
 	};

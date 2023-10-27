@@ -176,6 +176,7 @@ return array(
 			"EXPIREAT key timestamp",
 
 			"Atomically Change the expiration of the <i>key</i> so <i>key</i> expire at specific timestamp.<br />" .
+			"If timestamp is in the past, the <i>key</i> is deleted.<br />" .
 			"Note: The command internally GET <i>key</i> first.",
 
 			"bool",

@@ -232,4 +232,23 @@ return array(
 
 			"mutable_x"
 	),
+
+
+
+	new Cmd(
+			"HEXPIREATALL",
+
+			"HEXPIREATALL key",
+
+			"EXPIREAT up to 10'000 key-value pairs from hash <i>key</i>.<br />" .
+			"Works exactly as Redis EXPIREAT [hash key].",
+			"bool",
+			"1 if all keys are removed, 0 if keys remains",
+			"1.3.7.5",
+			"[number of keys] * WRITE",
+			false,
+			true,
+
+			"mutable_x"
+	),
 );

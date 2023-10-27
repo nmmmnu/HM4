@@ -241,4 +241,5 @@ Changelog
 -	make GETX, XNGET, XRGET, XUGET, XUGETKEYS, XNGETKEYS, XRGETKEYS always return next key.
 -	new command TIME
 -	new command EXPIRETIME, EXPIREAT
+-	new command XNEXPIREAT, XREXPIREAT, HEXPIREATALL
 
