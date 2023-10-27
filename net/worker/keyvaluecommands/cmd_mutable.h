@@ -1,6 +1,6 @@
 #include "base.h"
 #include "pair_vfactory.h"
-#include <stdexcept>
+#include "mytime.h"
 
 namespace net::worker::commands::Mutable{
 
@@ -773,6 +773,60 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
+	struct EXPIREAT : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 3)
+				return;
+
+			// GET
+
+			const auto &key = p[1];
+			if (!hm4::Pair::isKeyValid(key))
+				return;
+
+			if (auto *it = hm4::getPairPtr(*db, key); it){
+				// SET
+				auto const time = from_string<uint32_t>(p[2]);
+				auto const now  = mytime::now32();
+
+				if (now >= time){
+					// HINT
+					const auto *hint = & *it;
+					hm4::insertHintF<hm4::PairFactory::Tombstone>(*db, hint, key);
+
+					return result.set(true);
+				}else{
+					// this will not overflow
+					auto const exp = time - mytime::now32();
+
+					// HINT
+					const auto *hint = & *it;
+					hm4::insertHintF<hm4::PairFactory::Expires>(*db, hint, key, hint->getVal(), exp);
+
+					return result.set(true);
+				}
+			}else{
+				return result.set(false);
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"expireat",	"EXPIREAT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct PERSIST : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -879,6 +933,7 @@ namespace net::worker::commands::Mutable{
 				GETDEL		,
 				APPEND		,
 				EXPIRE		,
+				EXPIREAT	,
 				PERSIST		,
 				PERSISTDELETED
 			>(pack);

@@ -171,6 +171,25 @@ return array(
 	),
 
 	new Cmd(
+			"EXPIREAT",
+
+			"EXPIREAT key timestamp",
+
+			"Atomically Change the expiration of the <i>key</i> so <i>key</i> expire at specific timestamp.<br />" .
+			"Note: The command internally GET <i>key</i> first.",
+
+			"bool",
+			"0 if the key value pair do not exists.<br />" .
+			"1 if the key value pair exists and expiration is set.",
+			"1.3.7.5",
+			"READ + WRITE",
+			true,
+			true,
+
+			"mutable"
+	),
+
+	new Cmd(
 			"PERSIST",
 
 			"PERSIST key seconds",

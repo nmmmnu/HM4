@@ -96,7 +96,7 @@ return array(
 			"DUMP key",
 
 			"Get internal <i>key</i> representation. Exact match.<br />" .
-			"Works on deleted and expired keys too.<br />." .
+			"Works on deleted and expired keys too.<br />" .
 			"Not compatible with Redis",
 
 			"string",
