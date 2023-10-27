@@ -240,4 +240,5 @@ Changelog
 ### 1.3.7.5
 -	make GETX, XNGET, XRGET, XUGET, XUGETKEYS, XNGETKEYS, XRGETKEYS always return next key.
 -	new command TIME
+-	new command EXPIRETIME
 

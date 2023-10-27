@@ -92,6 +92,7 @@
 				<li><a href="#MGET">MGET</a></li>
 				<li><a href="#EXISTS">EXISTS</a></li>
 				<li><a href="#TTL">TTL</a></li>
+				<li><a href="#EXPIRETIME">EXPIRETIME</a></li>
 				<li><a href="#DUMP">DUMP</a></li>
 				<li><a href="#GETRANGE">GETRANGE</a></li>
 				<li><a href="#STRLEN">STRLEN</a></li>
@@ -385,7 +386,30 @@
 			<h3>Return type:</h3>
 			int
 			<h3>Return value:</h3>
-			Value of the TTL or 0 if there is no expiration set.
+			Value of the TTL or 0, if there is no expiration set.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="EXPIRETIME">
+
+			<h2>EXPIRETIME key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>EXPIRETIME</td></tr>
+				<tr><td>Available since		</td><td>1.2.11</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get timestamp when  <i>key</i> will expire. Exact match.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			Timestamp or 0, if there is no expiration set.
 			
 			
 			<p class="top"><a href="#top">top</a></p>

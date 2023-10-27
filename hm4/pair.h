@@ -290,6 +290,9 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		uint32_t getTTL() const noexcept;
 
+		[[nodiscard]]
+		uint32_t getExpiresAt() const noexcept;
+
 	public:
 		[[nodiscard]]
 		int cmp(std::string_view const key) const noexcept{

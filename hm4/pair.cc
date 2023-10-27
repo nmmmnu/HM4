@@ -53,6 +53,17 @@ uint32_t Pair::getTTL() const noexcept{
 	return endTime64 < now64 ? 0 : mytime::to32(endTime64 - now64);
 }
 
+uint32_t Pair::getExpiresAt() const noexcept{
+	if (!expires)
+		return 0;
+
+	uint32_t const exp = getExpires();
+
+	uint32_t const created = mytime::to32(getCreated());
+
+	return created + exp;
+}
+
 
 } // anonymous namespace
 } // namespace

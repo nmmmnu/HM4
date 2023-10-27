@@ -62,7 +62,25 @@ return array(
 			"Get TTL value of the <i>key</i>. Exact match.",
 
 			"int",
-			"Value of the TTL or 0 if there is no expiration set.",
+			"Value of the TTL or 0, if there is no expiration set.",
+
+			"1.2.11",
+			"READ",
+			true,
+			false,
+
+			"immutable"
+	),
+
+	new Cmd(
+			"EXPIRETIME",
+
+			"EXPIRETIME key",
+
+			"Get timestamp when  <i>key</i> will expire. Exact match.",
+
+			"int",
+			"Timestamp or 0, if there is no expiration set.",
 
 			"1.2.11",
 			"READ",

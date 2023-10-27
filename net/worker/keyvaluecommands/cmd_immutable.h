@@ -112,6 +112,7 @@ namespace net::worker::commands::Immutable{
 	};
 
 
+
 	template<class Protocol, class DBAdapter>
 	struct TTL : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
@@ -141,6 +142,40 @@ namespace net::worker::commands::Immutable{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"ttl",	"TTL"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct EXPIRETIME : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 2)
+				return;
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return;
+
+			uint64_t const time = hm4::getPair_(*db, key, [](bool b, auto it){
+				return b ? it->getExpiresAt() : 0;
+			});
+
+			return result.set(time);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"expireat",	"EXPIRETIME"
 		};
 	};
 
@@ -429,6 +464,7 @@ namespace net::worker::commands::Immutable{
 				MGET		,
 				EXISTS		,
 				TTL		,
+				EXPIRETIME	,
 				DUMP		,
 				GETRANGE	,
 				STRLEN		,
