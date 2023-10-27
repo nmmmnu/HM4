@@ -10,7 +10,7 @@ return array(
 			"Very useful if crontab list maintainance is disabled." ,
 			"OK",
 			"OK",
-			"1.0.0",
+			"1.3.5.3",
 			"n/a",
 			false,
 			null,

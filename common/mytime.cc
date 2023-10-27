@@ -14,6 +14,19 @@ namespace mytime{
 		return (uint32_t) sec.count();
 	}
 
+	std::array<uint32_t,2> nowMix() noexcept{
+		// thanks to Howard Hinnant for this
+		const auto now = std::chrono::system_clock::now().time_since_epoch();
+
+		const auto sec = std::chrono::duration_cast<std::chrono::seconds>(now);
+		const auto mil = std::chrono::duration_cast<std::chrono::microseconds>(now - sec);
+
+		return std::array<uint32_t,2>{
+			(uint32_t) sec.count(),
+			(uint32_t)mil.count()
+		};
+	}
+
 	uint64_t now64() noexcept{
 		// thanks to Howard Hinnant for this
 		const auto now = std::chrono::system_clock::now().time_since_epoch();

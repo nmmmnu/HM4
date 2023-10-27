@@ -24,6 +24,8 @@ namespace mytime{
 		return now64();
 	}
 
+	std::array<uint32_t,2> nowMix() noexcept;
+
 	constexpr uint64_t to64(uint32_t const sec, uint32_t const usec = 0) noexcept{
 		return uint64_t{sec} << 32 | usec;
 	}
@@ -86,9 +88,9 @@ namespace mytime{
 
 
 	struct CrontabControl{
-		CrontabControl(uint32_t timeout) : timeout(timeout){}
+		constexpr CrontabControl(uint32_t timeout) : timeout(timeout){}
 
-		CrontabControl(uint32_t timeout, uint32_t timeout_min) :
+		constexpr CrontabControl(uint32_t timeout, uint32_t timeout_min) :
 					timeout(timeout == 0 ? 0 : std::max(timeout, timeout_min)){}
 
 		MyTimer		timer;

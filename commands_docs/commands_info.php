@@ -111,4 +111,20 @@ return array(
 
 			"info"
 	),
+
+	new Cmd(
+			"TIME",
+
+			"TIME",
+
+			"Returns current time as timestamp, redis style.",
+			"array",
+			"first element - current timestamp. second element current microseconds",
+			"1.3.7.5",
+			"n/a",
+			true,
+			null,
+
+			"info"
+	),
 );

@@ -191,7 +191,7 @@ Changelog
 
 ### 1.3.5.3
 
--	New command LISTMAINTAINANCE
+-	new command LISTMAINTAINANCE
 -	Make sure flushlist do not flush twice (should never happen).
 	If this ever happens, data is lost as it was in previous version.
 -	Introduce MMapAllocator with Linux HugeTLB support.
@@ -237,4 +237,7 @@ Changelog
 -	new range commands XUGETKEYS, XNGETKEYS, XRGETKEYS
 -	Release
 
+### 1.3.7.5
+-	make GETX, XNGET, XRGET, XUGET, XUGETKEYS, XNGETKEYS, XRGETKEYS always return next key.
+-	new command TIME
 
