@@ -7,7 +7,9 @@
 							// HGETALL, HGETKEYS, HGETVALS
 #include "keyvaluecommands/cmd_accumulators_x.h"	// COUNTX, COUNTXR, SUMX, SUMXR, MINX, MINXR, MAXX, MAXXR
 
-#include "keyvaluecommands/cmd_mutable.h"		// SET, SETEX, SETNX, SETXX, APPEND, EXPIRE, PERSIST, GETSET, GETDEL, DEL
+#include "keyvaluecommands/cmd_mutable_get.h"		// GETSET, GETDEL
+
+#include "keyvaluecommands/cmd_mutable.h"		// SET, SETEX, SETNX, SETXX, APPEND, EXPIRE, PERSIST, DEL
 							// HSET, HDEL
 #include "keyvaluecommands/cmd_mutable_x.h"		// DELX, DELXR, EXPIREX, EXPIREXR, PERSISTX, PERSISTXR
 							// HDELALL, HPERSISTALL, HEXPIREALL
@@ -79,6 +81,7 @@ namespace net::worker{
 				Accumulators	::RegisterModule,
 
 				Mutable		::RegisterModule,
+				MutableGET		::RegisterModule,
 				MutableX	::RegisterModule,
 				CAS		::RegisterModule,
 				Copy		::RegisterModule,

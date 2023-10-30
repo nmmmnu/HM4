@@ -145,9 +145,17 @@
 				<li><a href="#EXPIREAT">EXPIREAT</a></li>
 				<li><a href="#PERSIST">PERSIST</a></li>
 				<li><a href="#PERSISTDELETED">PERSISTDELETED</a></li>
-				<li><a href="#GETSET">GETSET</a></li>
-				<li><a href="#GETDEL">GETDEL</a></li>
 				<li><a href="#DEL">DEL</a></li>
+				</div>
+			<div>
+			<b>mutable_get.h</b><br />
+			&nbsp;
+
+					<li><a href="#GETSET">GETSET</a></li>
+				<li><a href="#GETDEL">GETDEL</a></li>
+				<li><a href="#GETEX">GETEX</a></li>
+				<li><a href="#GETEXAT">GETEXAT</a></li>
+				<li><a href="#GETPERSIST">GETPERSIST</a></li>
 				</div>
 			<div>
 			<b>mutable_x.h</b><br />
@@ -1252,7 +1260,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Atomically Change the expiration of the <i>key</i> so <i>key</i> expire at specific timestamp.<br />If timestamp is in the past, the <i>key</i> is deleted.<br />Note: The command internally GET <i>key</i> first.
+			Atomically Change the expiration of the <i>key</i>, so <i>key</i> expire at specific timestamp.<br />If timestamp is in the past, the <i>key</i> is deleted.<br />Note: The command internally GET <i>key</i> first.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -1307,6 +1315,29 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="DEL">
+
+			<h2>DEL key [key2]... / UNLINK key [key2]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>DEL</td></tr>
+				<tr><td>Available since		</td><td>1.0.0</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>key</i>, <i>key2</i>...
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="GETSET">
 
 			<h2>GETSET key value [seconds=0]</h2>
@@ -1317,7 +1348,7 @@
 				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable_get.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -1340,7 +1371,7 @@
 				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable_get.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -1353,25 +1384,71 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="DEL">
+				<div class="cmd" id="GETEX">
 
-			<h2>DEL key [key2]... / UNLINK key [key2]...</h2>
+			<h2>GETEX key seconds</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>DEL</td></tr>
-				<tr><td>Available since		</td><td>1.0.0</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE</td></tr>
-				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Command			</td><td>GETEX</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mutable.h</td></tr>
+				<tr><td>Module			</td><td>mutable_get.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Removes <i>key</i>, <i>key2</i>...
+			Gets the value of the <i>key</i>. Exact match.<br />Then atomically Change the expiration of the <i>key</i> to <i>seconds</i> seconds.
 			<h3>Return type:</h3>
-			bool
+			string
 			<h3>Return value:</h3>
-			Always return 1
+			Value of the key or empty string.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GETEXAT">
+
+			<h2>GETEXAT key timestamp</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GETEXAT</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_get.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets the value of the <i>key</i>. Exact match.<br />Then atomically Change the expiration of the <i>key</i>, so <i>key</i> expire at specific timestamp.<br />If timestamp is in the past, the <i>key</i> is deleted.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Value of the key or empty string.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GETPERSIST">
+
+			<h2>GETPERSIST key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GETPERSIST</td></tr>
+				<tr><td>Available since		</td><td>1.2.16</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable_get.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets the value of the <i>key</i>. Exact match.<br />Then atomically remove the expiration of the <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			Value of the key or empty string.
 			
 			
 			<p class="top"><a href="#top">top</a></p>

@@ -243,3 +243,7 @@ Changelog
 -	new command EXPIRETIME, EXPIREAT
 -	new command XNEXPIREAT, XREXPIREAT, HEXPIREATALL
 
+### 1.3.7.6
+-	new module mutable_get
+-	new command GETEX, GETEXAT, GETPERSIST
+

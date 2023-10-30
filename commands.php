@@ -206,6 +206,7 @@ function getData(){
 		"immutable_x"			=> require "$d/commands_immutable_x.php"	,
 		"accumulators_x"		=> require "$d/commands_accumulators_x.php"	,
 		"mutable"			=> require "$d/commands_mutable.php"		,
+		"mutable_get"			=> require "$d/commands_mutable_get.php"	,
 		"mutable_x"			=> require "$d/commands_mutable_x.php"		,
 		"cas"				=> require "$d/commands_cas.php"		,
 		"copy"				=> require "$d/commands_copy.php"		,

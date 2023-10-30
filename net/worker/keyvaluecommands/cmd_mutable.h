@@ -556,112 +556,6 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETSET : BaseRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() != 3 && p.size() != 4)
-				return;
-
-			// GET
-
-			const auto &key = p[1];
-			if (!hm4::Pair::isKeyValid(key))
-				return;
-
-			const auto &val = p[2];
-			if (!hm4::Pair::isValValid(val))
-				return;
-
-
-			// because old_value may be overwritten,
-			// we had to make a copy.
-
-			auto it = db->find(key, std::true_type{});
-
-			if (it != std::end(*db) && it->isOK()){
-				// seamlessly send value to output buffer...
-				result.set(it->getVal());
-			}else{
-				result.set("");
-			}
-
-			// SET
-
-			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
-
-			// HINT
-			const auto *hint = & *it;
-			hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, key, val, exp);
-
-			// return
-
-			return;
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"getset",	"GETSET"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct GETDEL : BaseRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			if (p.size() != 2)
-				return;
-
-			// GET
-
-			const auto &key = p[1];
-			if (!hm4::Pair::isKeyValid(key))
-				return;
-
-			if (auto *it = hm4::getPairPtr(*db, key); it){
-				// seamlessly send value to output buffer...
-
-				result.set(it->getVal());
-
-				// DEL
-
-				// HINT
-				const auto *hint = & *it;
-				// put tombstone
-				hm4::insertHintF<hm4::PairFactory::Tombstone>(*db, hint, key);
-
-				// return
-
-				return;
-			}else{
-				return result.set("");
-			}
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"getdel",	"GETDEL"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
 	struct APPEND : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -929,8 +823,6 @@ namespace net::worker::commands::Mutable{
 				SETXX		,
 				DEL		,
 				HDEL		,
-				GETSET		,
-				GETDEL		,
 				APPEND		,
 				EXPIRE		,
 				EXPIREAT	,
@@ -939,7 +831,6 @@ namespace net::worker::commands::Mutable{
 			>(pack);
 		}
 	};
-
 
 } // namespace
 
