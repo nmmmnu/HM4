@@ -110,7 +110,7 @@ namespace ilist_impl_{
 
 	template<class List>
 	struct size_estimated<List, std::void_t<typename List::estimated_size> >: std::true_type{};
-} // namespace ilist_impl
+}
 
 // ==============================
 

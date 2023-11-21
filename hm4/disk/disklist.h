@@ -8,8 +8,7 @@
 
 #include <type_traits>
 
-namespace hm4{
-namespace disk{
+namespace hm4::disk{
 
 namespace fd_impl_{
 	using config::size_type;
@@ -102,6 +101,8 @@ public:
 		return metadata_.size();
 	}
 
+	using always_empty	= std::true_type;
+
 	constexpr bool empty() const{
 		return false;
 	}
@@ -190,7 +191,6 @@ private:
 
 
 } // namespace disk
-} // namespace
 
 
 
@@ -198,41 +198,35 @@ private:
 
 
 
-namespace hm4{
-namespace disk{
+namespace hm4::disk{
 
+	inline auto DiskList::ra_begin() const -> random_access_iterator{
+		return { *this, difference_type{ 0 } };
+	}
 
+	inline auto DiskList::ra_end() const -> random_access_iterator{
+		return { *this, size() };
+	}
 
-inline auto DiskList::ra_begin() const -> random_access_iterator{
-	return { *this, difference_type{ 0 } };
-}
+	inline auto DiskList::make_forward_iterator_(const Pair *pair) const -> forward_iterator{
+		return forward_iterator(*mData_, pair, aligned());
+	}
 
-inline auto DiskList::ra_end() const -> random_access_iterator{
-	return { *this, size() };
-}
+	inline auto DiskList::begin() const -> forward_iterator{
+		return make_forward_iterator_( fdGetFirst_() );
+	}
 
-inline auto DiskList::make_forward_iterator_(const Pair *pair) const -> forward_iterator{
-	return forward_iterator(*mData_, pair, aligned());
-}
+	constexpr inline auto DiskList::end() const -> forward_iterator{
+		return {};
+	}
 
-inline auto DiskList::begin() const -> forward_iterator{
-	return make_forward_iterator_( fdGetFirst_() );
-}
-
-constexpr inline auto DiskList::end() const -> forward_iterator{
-	return {};
-}
-
-template<bool B>
-auto DiskList::find(std::string_view const key, std::bool_constant<B> const exact) const -> forward_iterator{
-	// gcc error if "forward_iterator" ommited
-	return forward_iterator{ ra_find(key, exact) };
-}
-
-
+	template<bool B>
+	auto DiskList::find(std::string_view const key, std::bool_constant<B> const exact) const -> forward_iterator{
+		// gcc error if "forward_iterator" ommited
+		return forward_iterator{ ra_find(key, exact) };
+	}
 
 } // namespace disk
-} // namespace
 
 #endif
 

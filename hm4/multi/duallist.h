@@ -42,10 +42,11 @@ public:
 	}
 
 	auto empty() const{
-		if (!list1_->empty())
-			return true;
-		else
-			return list2_->empty();
+		// unlike CollectionList,
+		// if list2_->empty() is constexpr,
+		// the optimizer will remove it
+
+		return list1_->empty() && list2_->empty();
 	}
 
 	auto const &mutable_list() const{

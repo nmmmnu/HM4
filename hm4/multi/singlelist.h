@@ -28,7 +28,11 @@ public:
 		return list_->size();
 	}
 
-	auto empty() const{
+	constexpr auto empty() const{
+		// unlike CollectionList,
+		// if list_->empty() is constexpr,
+		// the optimizer will remove it
+
 		return list_->empty();
 	}
 

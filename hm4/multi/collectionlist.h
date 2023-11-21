@@ -7,8 +7,17 @@
 
 #include <numeric>	// std::accumulate
 
-namespace hm4{
-namespace multi{
+namespace hm4::multi{
+
+namespace collectionlist_impl_{
+	template<class List, class = void>
+	struct always_empty : std::false_type{};
+
+	template<class List>
+	struct always_empty<List, std::void_t<typename List::always_empty> >: std::true_type{};
+}
+
+
 
 
 template <class StoreContainer, class Projection = std::nullptr_t>
@@ -48,12 +57,10 @@ public:
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
 	}
 
-	auto empty() const{
-		auto f = [](List const &list){
-			return !list.empty();
-		};
+	bool empty() const{
+		using always_empty = collectionlist_impl_::always_empty<List>;
 
-		return std::find_if(std::begin(*list_), std::end(*list_), f) == std::end(*list_);
+		return empty_(always_empty{});
 	}
 
 	size_t bytes() const{
@@ -70,12 +77,25 @@ public:
 	}
 
 private:
+	auto empty_(std::true_type) const{
+		return list_->size() == 0;
+	}
+
+	auto empty_(std::false_type) const{
+		auto f = [](List const &list){
+			return !list.empty();
+		};
+
+		return std::find_if(std::begin(*list_), std::end(*list_), f) == std::end(*list_);
+	}
+
+private:
 	const StoreContainer	*list_;
 };
 
 
+
 } // namespace multi
-} // namespace
 
 #endif
 
