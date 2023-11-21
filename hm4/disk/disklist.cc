@@ -188,8 +188,10 @@ namespace{
 			return false;
 		}
 
-		if (metadata.size() == 0)
+		if (metadata.size() == 0){
+			logger<Logger::WARNING>() << "Skipping empty disktable.";
 			return false;
+		}
 
 		return true;
 	}
