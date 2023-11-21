@@ -102,6 +102,10 @@ public:
 		return metadata_.size();
 	}
 
+	constexpr bool empty() const{
+		return false;
+	}
+
 	size_t bytes() const{
 		return mData_.size();
 	}

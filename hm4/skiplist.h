@@ -58,6 +58,10 @@ public:
 		return lc_.size();
 	}
 
+	auto empty() const{
+		return size() == 0;
+	}
+
 	auto bytes() const{
 		return lc_.bytes();
 	}

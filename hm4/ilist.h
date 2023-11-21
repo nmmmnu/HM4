@@ -135,10 +135,12 @@ auto size(List const &list){
 
 // ==============================
 
-template<class List>
-bool empty(List const &list){
-	return size(list, std::false_type{}) == 0;
-}
+// template<class List>
+// bool empty(List const &list){
+// 	return size(list, std::false_type{}) == 0;
+// }
+
+using std::empty;
 
 // ==============================
 

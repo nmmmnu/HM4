@@ -28,6 +28,10 @@ public:
 		return list_->size();
 	}
 
+	auto empty() const{
+		return list_->empty();
+	}
+
 	auto const &mutable_list() const{
 		return list_->mutable_list();
 	}

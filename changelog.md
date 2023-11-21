@@ -246,4 +246,6 @@ Changelog
 ### 1.3.7.6
 -	new module mutable_get
 -	new command GETEX, GETEXAT, GETPERSIST
+-	make DiskList not open empty files
+-	add List::empty() for future development
 

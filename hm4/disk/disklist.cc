@@ -188,6 +188,9 @@ namespace{
 			return false;
 		}
 
+		if (metadata.size() == 0)
+			return false;
+
 		return true;
 	}
 }

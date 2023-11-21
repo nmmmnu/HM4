@@ -56,6 +56,11 @@ public:
 	}
 
 	constexpr static
+	bool empty(){
+		return true;
+	}
+
+	constexpr static
 	size_t bytes(){
 		return 0;
 	}

@@ -48,6 +48,14 @@ public:
 		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
 	}
 
+	auto empty() const{
+		auto f = [](List const &list){
+			return !list.empty();
+		};
+
+		return std::find_if(std::begin(*list_), std::end(*list_), f) == std::end(*list_);
+	}
+
 	size_t bytes() const{
 		auto sum = [](size_type const result, List const &list){
 			return result + list.bytes();

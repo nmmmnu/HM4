@@ -41,6 +41,13 @@ public:
 		return list1_->size() + list2_->size();
 	}
 
+	auto empty() const{
+		if (!list1_->empty())
+			return true;
+		else
+			return list2_->empty();
+	}
+
 	auto const &mutable_list() const{
 		return list1_->mutable_list();
 	}

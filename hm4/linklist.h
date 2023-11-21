@@ -37,6 +37,10 @@ public:
 		return lc_.size();
 	}
 
+	auto empty() const{
+		return size() == 0;
+	}
+
 	auto const &mutable_list() const{
 		return *this;
 	}

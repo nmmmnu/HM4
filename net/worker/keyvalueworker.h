@@ -81,7 +81,7 @@ namespace net::worker{
 				Accumulators	::RegisterModule,
 
 				Mutable		::RegisterModule,
-				MutableGET		::RegisterModule,
+				MutableGET	::RegisterModule,
 				MutableX	::RegisterModule,
 				CAS		::RegisterModule,
 				Copy		::RegisterModule,
