@@ -26,7 +26,7 @@ public:
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
-	using estimated_size	= std::true_type;
+	using conf_estimated_size	= std::true_type;
 
 public:
 	DualListBase(List1 &list1, List2 &list2) :

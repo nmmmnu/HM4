@@ -11,26 +11,31 @@ namespace hm4::multi{
 
 namespace collectionlist_impl_{
 	template<class List, class = void>
-	struct always_empty : std::false_type{};
+	struct conf_always_non_empty : std::false_type{};
 
 	template<class List>
-	struct always_empty<List, std::void_t<typename List::always_empty> >: std::true_type{};
-}
+	struct conf_always_non_empty<List, std::void_t<typename List::conf_always_non_empty> >: std::true_type{};
 
+	template<class List, class = void>
+	struct conf_no_crontab : std::false_type{};
+
+	template<class List>
+	struct conf_no_crontab<List, std::void_t<typename List::conf_no_crontab> >: std::true_type{};
+}
 
 
 
 template <class StoreContainer, class Projection = std::nullptr_t>
 class CollectionList{
 public:
-	using List		= typename StoreContainer::value_type;
+	using List			= typename StoreContainer::value_type;
 
-	using size_type		= typename List::size_type;
-	using difference_type	= typename List::difference_type;
+	using size_type			= typename List::size_type;
+	using difference_type		= typename List::difference_type;
 
-	using iterator		= CollectionIterator<typename List::iterator, Projection>;
+	using iterator			= CollectionIterator<typename List::iterator, Projection>;
 
-	using estimated_size	= std::true_type;
+	using conf_estimated_size	= std::true_type;
 
 public:
 	CollectionList(const StoreContainer &list) : list_	(&list){}
@@ -50,30 +55,35 @@ public:
 
 public:
 	size_type size() const{
-		auto sum = [](size_t const result, List const &list){
+		using T = size_type;
+
+		auto sum = [](T const result, List const &list){
 			return result + list.size();
 		};
 
-		return std::accumulate(std::begin(*list_), std::end(*list_), size_t{ 0 }, sum);
+		return std::accumulate(std::begin(*list_), std::end(*list_), T{ 0 }, sum);
 	}
 
 	bool empty() const{
-		using always_empty = collectionlist_impl_::always_empty<List>;
+		using tag = collectionlist_impl_::conf_always_non_empty<List>;
 
-		return empty_(always_empty{});
+		return empty_(tag{});
 	}
 
 	size_t bytes() const{
-		auto sum = [](size_type const result, List const &list){
+		using T = size_t;
+
+		auto sum = [](T const result, List const &list){
 			return result + list.bytes();
 		};
 
-		return std::accumulate(std::begin(*list_), std::end(*list_), size_type{ 0 }, sum);
+		return std::accumulate(std::begin(*list_), std::end(*list_), T{ 0 }, sum);
 	}
 
-	void crontab() const{
-		for(auto const &list : *list_)
-			list.crontab();
+	constexpr void crontab() const{
+		using tag = collectionlist_impl_::conf_no_crontab<List>;
+
+		return crontab_(tag{});
 	}
 
 private:
@@ -87,6 +97,15 @@ private:
 		};
 
 		return std::find_if(std::begin(*list_), std::end(*list_), f) == std::end(*list_);
+	}
+
+private:
+	constexpr static void crontab_(std::true_type){
+	}
+
+	void crontab_(std::false_type) const{
+		for(auto const &list : *list_)
+			list.crontab();
 	}
 
 private:

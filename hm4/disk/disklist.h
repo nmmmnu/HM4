@@ -101,7 +101,7 @@ public:
 		return metadata_.size();
 	}
 
-	using always_empty	= std::true_type;
+	using conf_always_non_empty	= std::true_type;
 
 	constexpr bool empty() const{
 		return false;
@@ -128,6 +128,8 @@ public:
 	}
 
 public:
+	using conf_no_crontab	= std::true_type;
+
 	constexpr static void crontab(){
 	}
 

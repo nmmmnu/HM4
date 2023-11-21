@@ -106,10 +106,10 @@ void print(List const &list, typename List::size_type count = config::LIST_PRINT
 
 namespace ilist_impl_{
 	template<class List, class = void>
-	struct size_estimated : std::false_type{};
+	struct conf_estimated_size : std::false_type{};
 
 	template<class List>
-	struct size_estimated<List, std::void_t<typename List::estimated_size> >: std::true_type{};
+	struct conf_estimated_size<List, std::void_t<typename List::conf_estimated_size> >: std::true_type{};
 }
 
 // ==============================
@@ -128,9 +128,9 @@ auto size(List const &list, std::true_type){
 
 template<class List>
 auto size(List const &list){
-	using size_estimated = ilist_impl_::size_estimated<List>;
+	using tag = ilist_impl_::conf_estimated_size<List>;
 
-	return size(list, size_estimated{});
+	return size(list, tag{});
 }
 
 // ==============================
