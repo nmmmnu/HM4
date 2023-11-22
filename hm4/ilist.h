@@ -207,16 +207,10 @@ auto insert(List &list, std::string_view const key,
 	return insertF<PairFactory::Normal>(list, key, val, expires, created);
 }
 
+// used in DualList only
 template<class List>
-auto insert(List &list, std::string_view const key, std::nullptr_t = nullptr) noexcept{
+auto insertTS(List &list, std::string_view const key) noexcept{
 	return insertF<PairFactory::Tombstone>(list, key);
-}
-
-// guard for const char *
-template<class List>
-auto insert(List &list, const char *key_, std::nullptr_t = nullptr) noexcept{
-	std::string_view const key = key_;
-	return insert(list, key, nullptr);
 }
 
 template<class List>

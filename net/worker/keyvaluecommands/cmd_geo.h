@@ -164,7 +164,7 @@ namespace net::worker::commands::Geo{
 						// control key will be overwritten soon
 
 						logger<Logger::DEBUG>() << "GeoHash DEL hash key" << key_hash;
-						insert(*db, key_hash);
+						erase(*db, key_hash);
 					}
 				}
 
@@ -252,10 +252,10 @@ namespace net::worker::commands::Geo{
 					);
 
 					logger<Logger::DEBUG>() << "GeoHash DEL ctrl key" << key;
-					insert(*db, key);
+					erase(*db, key);
 
 					logger<Logger::DEBUG>() << "GeoHash DEL hash key" << key_hash;
-					insert(*db, key_hash);
+					erase(*db, key_hash);
 				}
 			}
 

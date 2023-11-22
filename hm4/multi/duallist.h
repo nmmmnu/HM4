@@ -11,11 +11,12 @@ namespace hm4{
 namespace multi{
 
 enum class DualListEraseType{
-	NORMAL,
-	TOMBSTONE
+	NORMAL		,
+	TOMBSTONE	,
+	NONE
 };
 
-template <class List1, class List2, DualListEraseType EraseType>
+template <class List1, class List2>
 class DualListBase{
 public:
 	using iterator		= DualIterator<
@@ -92,18 +93,18 @@ protected:
 
 
 
-template<class List1, class List2, DualListEraseType EraseType, class = std::void_t<> >
-class DualList : public DualListBase<List1, List2, EraseType>{
-public:
-	using DualListBase<List1, List2, EraseType>::DualListBase;
+template<class List1, class List2, DualListEraseType = DualListEraseType::NONE, class = std::void_t<> >
+struct DualList : public DualListBase<List1, List2>{
+	using DualListBase<List1, List2>::DualListBase;
 };
 
 
 
 template<class List1, class List2, DualListEraseType EraseType>
-class DualList<List1, List2, EraseType, std::void_t<typename List1::Allocator> > : public DualListBase<List1, List2, EraseType>{
+class DualList<List1, List2, EraseType, std::void_t<typename List1::Allocator> > : public DualListBase<List1, List2>{
+	static_assert(EraseType != DualListEraseType::NONE);
 public:
-	using Base_ = DualListBase<List1, List2, EraseType>;
+	using Base_ = DualListBase<List1, List2>;
 	using iterator  = typename Base_::iterator;
 
 	using Allocator = typename List1::Allocator;
@@ -133,7 +134,7 @@ public:
 			return hm4::erase(*list1_, key);
 
 		if constexpr (EraseType == DualListEraseType::TOMBSTONE)
-			return hm4::insert(*list1_, key).ok;
+			return hm4::insertTS(*list1_, key).ok;
 	}
 
 	template<class PFactory>

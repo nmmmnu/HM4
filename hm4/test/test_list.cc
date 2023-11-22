@@ -306,7 +306,7 @@ void list_test_hint(const char *name){
 				used == allocator.getUsedMemory();
 		};
 
-		insert(list, key	);	mytest("hint test del",		chk(nullptr	));
+		erase (list, key	);	mytest("hint test del",		chk(nullptr	));
 		insert(list, key, val1	);	mytest("hint test set1",	chk(val1	));
 		insert(list, key, val2	);	mytest("hint test set2",	chk(val2	));
 	};

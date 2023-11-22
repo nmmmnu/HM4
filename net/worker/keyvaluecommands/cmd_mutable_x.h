@@ -146,8 +146,8 @@ namespace net::worker::commands::MutableX{
 				using List = typename DBAdapter::List;
 
 				static void process(List &list, const hm4::Pair *hint){
-					// put tombstone
-					hm4::insert(list, hint->getKey());
+					// erase
+					hm4::erase(list, hint->getKey());
 				}
 
 				static void processHint(List &list, const hm4::Pair *hint){
