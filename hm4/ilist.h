@@ -109,7 +109,7 @@ namespace ilist_impl_{
 	struct conf_estimated_size : std::false_type{};
 
 	template<class List>
-	struct conf_estimated_size<List, std::void_t<typename List::conf_estimated_size> >: std::true_type{};
+	struct conf_estimated_size<List, std::void_t<decltype(List::conf_estimated_size)> >: std::bool_constant<List::conf_estimated_size>{};
 }
 
 // ==============================

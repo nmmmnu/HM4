@@ -7,8 +7,7 @@
 #include <cassert>
 #include <type_traits>
 
-namespace hm4{
-namespace multi{
+namespace hm4::multi{
 
 enum class DualListEraseType{
 	NORMAL		,
@@ -27,7 +26,8 @@ public:
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
 
-	using conf_estimated_size	= std::true_type;
+public:
+	constexpr static bool conf_estimated_size	= true;
 
 public:
 	DualListBase(List1 &list1, List2 &list2) :
@@ -157,7 +157,6 @@ protected:
 
 
 
-} // multi
 } // namespace
 
 

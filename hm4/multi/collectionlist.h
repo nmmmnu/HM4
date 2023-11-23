@@ -14,13 +14,15 @@ namespace collectionlist_impl_{
 	struct conf_always_non_empty : std::false_type{};
 
 	template<class List>
-	struct conf_always_non_empty<List, std::void_t<typename List::conf_always_non_empty> >: std::true_type{};
+	struct conf_always_non_empty<List, std::void_t<decltype(List::conf_always_non_empty)> >: std::bool_constant<List::conf_always_non_empty>{};
+
+	// -------
 
 	template<class List, class = void>
 	struct conf_no_crontab : std::false_type{};
 
 	template<class List>
-	struct conf_no_crontab<List, std::void_t<typename List::conf_no_crontab> >: std::true_type{};
+	struct conf_no_crontab<List, std::void_t<decltype(List::conf_no_crontab)> >: std::bool_constant<List::conf_no_crontab>{};
 }
 
 
@@ -35,7 +37,7 @@ public:
 
 	using iterator			= CollectionIterator<typename List::iterator, Projection>;
 
-	using conf_estimated_size	= std::true_type;
+	constexpr static bool conf_estimated_size	= true;
 
 public:
 	CollectionList(const StoreContainer &list) : list_	(&list){}

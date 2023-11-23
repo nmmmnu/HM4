@@ -55,10 +55,6 @@ public:
 		return lc_.size();
 	}
 
-	auto mutable_size() const{
-		return size();
-	}
-
 	void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &msg){
 		lc_.upd(msg.bytes_old, msg.bytes_new);
 	}

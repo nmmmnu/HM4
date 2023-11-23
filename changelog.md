@@ -249,4 +249,5 @@ Changelog
 -	make DiskList not open empty files
 -	add List::empty() for future development
 -	differentiate hm4::insert from hm4::insertTS and hm4::erase
+-	new command DBSIZEMUTABLE
 

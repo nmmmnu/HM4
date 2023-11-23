@@ -58,6 +58,29 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
+	struct DBSIZEMUTABLE : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return result.set(
+				db->mutable_list().size()
+			);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"dbsizemutable",	"DBSIZEMUTABLE"
+		};
+	};
+
+
+	template<class Protocol, class DBAdapter>
 	struct VERSION : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -216,6 +239,7 @@ namespace net::worker::commands::Info{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				INFO		,
 				DBSIZE		,
+				DBSIZEMUTABLE	,
 				VERSION		,
 				MAXKEYSIZE	,
 				MAXVALSIZE	,
