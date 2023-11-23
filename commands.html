@@ -270,6 +270,7 @@
 
 					<li><a href="#INFO">INFO</a></li>
 				<li><a href="#DBSIZE">DBSIZE</a></li>
+				<li><a href="#DBSIZEMUTABLE">DBSIZEMUTABLE</a></li>
 				<li><a href="#VERSION">VERSION</a></li>
 				<li><a href="#MAXKEYSIZE">MAXKEYSIZE</a></li>
 				<li><a href="#MAXVALSIZE">MAXVALSIZE</a></li>
@@ -2697,12 +2698,35 @@
 				<tr><td>Available since		</td><td>1.2.18</td></tr>
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
-				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>info.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
 			Returns number of keys.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			number of keys
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="DBSIZEMUTABLE">
+
+			<h2>DBSIZEMUTABLE</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>DBSIZEMUTABLE</td></tr>
+				<tr><td>Available since		</td><td>1.2.18</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>info.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns number of mutable keys.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>

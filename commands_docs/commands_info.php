@@ -27,7 +27,23 @@ return array(
 			"1.2.18",
 			"n/a",
 			true,
-			null,
+			false,
+
+			"info"
+	),
+
+	new Cmd(
+			"DBSIZEMUTABLE",
+
+			"DBSIZEMUTABLE",
+
+			"Returns number of mutable keys.",
+			"string (int)",
+			"number of keys",
+			"1.2.18",
+			"n/a",
+			false,
+			true,
 
 			"info"
 	),
