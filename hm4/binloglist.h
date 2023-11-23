@@ -43,7 +43,7 @@ public:
 	bool erase_(std::string_view const key){
 		assert(!key.empty());
 
-		return insert(*this, key) != std::end(*list_);
+		return insertTS(*this, key).ok;
 	}
 
 	bool clear(){
