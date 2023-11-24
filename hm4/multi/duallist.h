@@ -12,7 +12,7 @@ namespace hm4::multi{
 enum class DualListEraseType{
 	NORMAL		,
 	TOMBSTONE	,
-//	SMART_TOMBSTONE	,
+	SMART_TOMBSTONE	,
 	NONE
 };
 
@@ -141,19 +141,15 @@ public:
 		if constexpr (EraseType == DualListEraseType::TOMBSTONE)
 			return hm4::insertTS(*list1_, key);
 
-
-		// this does not play well with binlog.
-		// in order to enter in the log, there must be a pair.
-		// this means all the benefits are lost.
-		// if constexpr (EraseType == DualListEraseType::SMART_TOMBSTONE){
-		// 	if (list2_->empty()){
-		// 		printf("SMART_TOMBSTONE: erase\n");
-		// 		return hm4::erase(*list1_, key);
-		// 	}else{
-		// 		printf("SMART_TOMBSTONE: insertTS\n");
-		// 		return hm4::insertTS(*list1_, key).ok;
-		// 	}
-		// }
+		if constexpr (EraseType == DualListEraseType::SMART_TOMBSTONE){
+			if (list2_->empty()){
+				printf("SMART_TOMBSTONE: erase\n");
+				return hm4::erase(*list1_, key);
+			}else{
+				printf("SMART_TOMBSTONE: insertTS\n");
+				return hm4::insertTS(*list1_, key);
+			}
+		}
 	}
 
 	template<class PFactory>

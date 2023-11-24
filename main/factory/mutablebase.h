@@ -31,7 +31,7 @@ namespace DBAdapterFactory{
 		using DList			= hm4::multi::DualList<
 							MutableFlushList,
 							ListLoader::List,
-							hm4::multi::DualListEraseType::TOMBSTONE
+							hm4::multi::DualListEraseType::SMART_TOMBSTONE
 						>;
 
 		using CommandSaveObject		= MutableFlushList;

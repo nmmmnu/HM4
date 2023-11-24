@@ -172,6 +172,9 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 	mytest.begin(name);
 
 	{
+		list1.clear();
+		list2.clear();
+
 		insert(list2, "a",	"2"	);
 		sleep();
 		insert(list1, "a",	"1"	);
@@ -190,6 +193,9 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 	// --------
 
 	{
+		list1.clear();
+		list2.clear();
+
 		insert(list2, "a",	"2"	);
 		sleep();
 		insert(list1, "a",	"1"	);
@@ -203,6 +209,49 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 		erase(listM, "a");
 
 		mytest("get erased T2",			getCheck(listM, "a"					));
+	}
+
+	// --------
+
+	{
+		list1.clear();
+		list2.clear();
+
+		insert(list2, "a",	"2"	);
+		sleep();
+		insert(list1, "a",	"1"	);
+
+		using MyMultiList = hm4::multi::DualList<List, List, hm4::multi::DualListEraseType::SMART_TOMBSTONE>;
+
+		MyMultiList listM{ list1, list2 };
+
+		mytest("get erased T1",			getCheck(listM, "a",		"1", std::true_type{}	));
+
+		erase(listM, "a");
+
+		mytest("get erased T2",			getCheck(listM, "a"					));
+	}
+
+	// --------
+
+	{
+		list1.clear();
+		list2.clear();
+
+		using MyMultiList = hm4::multi::DualList<List, List, hm4::multi::DualListEraseType::SMART_TOMBSTONE>;
+
+		MyMultiList listM{ list1, list2 };
+
+		insert(listM, "a",	"1"	);
+		erase (listM, "a"		);
+
+		mytest("smart tombstone missing",	list1.empty()						);
+
+		insert(list2, "a",	"2"	);
+		insert(listM, "a",	"1"	);
+		erase (listM, "a"		);
+
+		mytest("smart tombstone exists",	!list1.empty()						);
 	}
 
 }

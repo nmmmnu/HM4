@@ -451,6 +451,12 @@ inline namespace version_4_00_00{
 
 		[[nodiscard]]
 		constexpr
+		static size_t maxBytesTombstone() noexcept{
+			return bytes_(PairConf::MAX_KEY_SIZE, 0);
+		}
+
+		[[nodiscard]]
+		constexpr
 		static bool isKeyValid(size_t size) noexcept{
 			return size > 0 && size <= PairConf::MAX_KEY_SIZE;
 		}

@@ -40,12 +40,6 @@ public:
 					multi::SingleList<List>(list),
 					binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>(std::forward<UBinLogger>(binlogger)){}
 
-	InsertResult erase_(std::string_view const key){
-		assert(!key.empty());
-
-		return insertTS(*this, key);
-	}
-
 	bool clear(){
 		bool const result = list_->clear();
 
@@ -67,6 +61,24 @@ public:
 		return result;
 	}
 
+	InsertResult erase_(std::string_view const key){
+		assert(!key.empty());
+
+		auto result = list_->erase_(key);
+
+		if (result.status == result.DELETED){
+			tombstone_buffer_t buffer;
+
+			auto &pair = createTombstone__(key, buffer);
+
+			binlogger_(pair);
+		}else if (result.pair){
+			binlogger_(*result.pair);
+		}
+
+		return result;
+	}
+
 	void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
 		binlogger_(*p);
 
@@ -83,6 +95,22 @@ public:
 		binlogger_.flush();
 
 		list_->crontab();
+	}
+
+private:
+	// this will be on the stack, so need to be small-ish.
+	static_assert(Pair::maxBytesTombstone() < 2048);
+
+	using tombstone_buffer_t = std::array<char, Pair::maxBytesTombstone()>;
+
+	static const Pair &createTombstone__(std::string_view const key, tombstone_buffer_t &buffer){
+		Pair *pair = reinterpret_cast<Pair *>(buffer.data());
+
+		auto const factory = PairFactory::Tombstone{ key };
+
+		factory.create(pair);
+
+		return *pair;
 	}
 
 private:

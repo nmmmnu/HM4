@@ -12,7 +12,7 @@ namespace hm4{
 
 
 template <class List>
-using ConcurrentFlushListBase = multi::DualList<List, List, hm4::multi::DualListEraseType::TOMBSTONE>;
+using ConcurrentFlushListBase = multi::DualList<List, List, hm4::multi::DualListEraseType::SMART_TOMBSTONE>;
 
 
 
