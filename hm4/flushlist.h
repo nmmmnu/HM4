@@ -44,7 +44,9 @@ public:
 
 	// Command pattern
 	bool command(){
-		return flush();
+		flush();
+
+		return true;
 	}
 
 	template<class PFactory>

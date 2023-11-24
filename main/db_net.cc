@@ -1,13 +1,16 @@
+#define MEMLIST_AVL
+//#define MEMLIST_SKIP
+
+#define REPLAYLIST_AVL
+//#define REPLAYLIST_SKIP
+//#define REPLAYLIST_UNSORTED
+
+#define USE_CONCURRENCY
+
+// ----------------------------------
+
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
-
-#include "factory/singlelist.h"
-#include "factory/immutable.h"
-#include "factory/mutable.h"
-#include "factory/mutablebinlog.h"
-#include "factory/mutableconcurrent.h"
-#include "factory/mutablebinlogcurrent.h"
-#include "factory/binlogreplay.h"
 
 #include "arenaallocator.h"
 #include "mmapallocator.h"
@@ -26,19 +29,35 @@
 
 // ----------------------------------
 
-#define MEMLIST_AVL
-//#define MEMLIST_SKIP
-
-#define REPLAYLIST_AVL
-//#define REPLAYLIST_SKIP
-//#define REPLAYLIST_UNSORTED
-
-constexpr bool USE_CONCURRENCY = true;
+#define ERASE_WITH_SMART_TOMBSTONE
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
 using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
 using Allocator		= MyAllocator::ArenaAllocator;
+
+// ----------------------------------
+
+#include "factory/singlelist.h"
+#include "factory/immutable.h"
+
+#ifndef USE_CONCURRENCY
+	#include "factory/mutable.h"
+	#include "factory/mutablebinlog.h"
+#else
+	#include "factory/mutableconcurrent.h"
+	#include "factory/mutablebinlogcurrent.h"
+#endif
+
+#include "factory/binlogreplay.h"
+
+// ----------------------------------
+
+#ifdef ERASE_WITH_SMART_TOMBSTONE
+	constexpr auto ET = hm4::multi::DualListEraseType::SMART_TOMBSTONE;
+#else
+	constexpr auto ET = hm4::multi::DualListEraseType::TOMBSTONE;
+#endif
 
 // ----------------------------------
 
@@ -183,7 +202,8 @@ namespace{
 
 		auto const allocatorSize = calcAllocatorSize(opt);
 
-		if constexpr(USE_CONCURRENCY){
+		#ifdef USE_CONCURRENCY
+
 			ArenaBuffer buffer1{ allocatorSize };
 			ArenaBuffer buffer2{ allocatorSize };
 
@@ -202,7 +222,7 @@ namespace{
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator1);
 				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator2);
 
-				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<MyMemList>;
+				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<ET, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2 },
 								starting_server_with,
@@ -211,7 +231,7 @@ namespace{
 									Allocator::getName()
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::MutableConcurrent<MyMemList>;
+				using MyFactory = DBAdapterFactory::MutableConcurrent<ET, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2 },
 								starting_server_with,
@@ -220,7 +240,9 @@ namespace{
 									Allocator::getName()
 				);
 			}
-		}else{
+
+		#else
+
 			ArenaBuffer buffer{ allocatorSize };
 
 			auto allocator = createAllocator(opt, buffer);
@@ -233,7 +255,7 @@ namespace{
 
 				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator);
 
-				using MyFactory = DBAdapterFactory::MutableBinLog<MyMemList>;
+				using MyFactory = DBAdapterFactory::MutableBinLog<ET, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator },
 								starting_server_with,
@@ -242,7 +264,7 @@ namespace{
 									Allocator::getName()
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::Mutable<MyMemList>;
+				using MyFactory = DBAdapterFactory::Mutable<ET, MyMemList>;
 
 				return fLists(opt, MyFactory{	opt.db_path, allocator },
 								starting_server_with,
@@ -251,7 +273,8 @@ namespace{
 									Allocator::getName()
 				);
 			}
-		}
+
+		#endif
 	}
 
 	int select_List(const MyOptions &opt){

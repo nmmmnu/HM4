@@ -3,11 +3,11 @@
 
 namespace DBAdapterFactory{
 
-	template<class MyMemList>
+	template<DualListEraseType ET, class MyMemList>
 	struct Mutable{
 		using MemList		= MyMemList;
 
-		using MutableBase_	= MutableBase<MemList, hm4::FlushList>;
+		using MutableBase_	= MutableBase<ET, MemList, hm4::FlushList>;
 
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 

@@ -26,15 +26,18 @@ using Allocator		= MyAllocator::ArenaAllocator;
 
 constexpr size_t MIN_ARENA_SIZE = 128;
 
-
-
 template<class MyMemList>
 struct ListFactory{
 	using MemList		= MyMemList;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-	using MyList		= hm4::ConcurrentFlushList<MemList,Predicate,Flush>;
+	using MyList		= hm4::ConcurrentFlushList<
+					hm4::multi::DualListEraseType::TOMBSTONE,
+					MemList,
+					Predicate,
+					Flush
+				>;
 
 	template<typename UString>
 	ListFactory(UString &path, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2) :

@@ -1,6 +1,10 @@
 #ifndef _KEY_VALUE_WORKER_H
 #define _KEY_VALUE_WORKER_H
 
+#include "ilist.h"
+
+
+
 #include "keyvaluecommands/cmd_immutable.h"		// GET, MGET, EXISTS, TTL, STRLEN, GETRANGE
 							// HGET, HEXISTS
 #include "keyvaluecommands/cmd_immutable_x.h"		// GETX, GETXR

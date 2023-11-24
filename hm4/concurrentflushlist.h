@@ -11,23 +11,24 @@ namespace hm4{
 
 
 
-template <class List>
-using ConcurrentFlushListBase = multi::DualList<List, List, hm4::multi::DualListEraseType::SMART_TOMBSTONE>;
+template <hm4::multi::DualListEraseType ET, class List>
+using ConcurrentFlushListBase = multi::DualList<List, List, ET>;
 
 
 
-template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
-class ConcurrentFlushList : public ConcurrentFlushListBase<List>{
+template <hm4::multi::DualListEraseType ET, class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
+class ConcurrentFlushList : public ConcurrentFlushListBase<ET, List>{
 private:
 	template <class UPredicate, class UFlusher>
 	ConcurrentFlushList(List &list1, List &list2, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
-					ConcurrentFlushListBase<List>(list1, list2),
+					ConcurrentFlushListBase<ET, List>(list1, list2),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
 						loader_		(loader					){}
 
 public:
-	using Allocator = typename ConcurrentFlushListBase<List>::Allocator;
+	using Base = ConcurrentFlushListBase<ET, List>;
+	using Allocator = typename Base::Allocator;
 
 	template <class UPredicate, class UFlusher>
 	ConcurrentFlushList(List &list1, List &list2, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
@@ -94,8 +95,8 @@ private:
 	}
 
 private:
-	using		ConcurrentFlushListBase<List>::list1_;
-	using		ConcurrentFlushListBase<List>::list2_;
+	using		Base::list1_;
+	using		Base::list2_;
 
 	Predicate	predicate_;
 	Flusher		flusher_;

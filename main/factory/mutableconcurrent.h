@@ -5,11 +5,11 @@
 
 namespace DBAdapterFactory{
 
-	template<class MyMemList>
+	template<DualListEraseType ET, class MyMemList>
 	struct MutableConcurrent{
 		using MemList		= MyMemList;
 
-		using MutableBase_	= MutableBase<MemList, hm4::ConcurrentFlushList>;
+		using MutableBase_	= MutableBase<ET, MemList, hm4::ConcurrentFlushList>;
 
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 

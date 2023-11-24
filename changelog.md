@@ -250,4 +250,6 @@ Changelog
 -	add List::empty() for future development
 -	differentiate hm4::insert from hm4::insertTS and hm4::erase
 -	new command DBSIZEMUTABLE
--	add new delete method in DualList DualListEraseType::SMART_TOMBSTONE
+-	add new erase method in DualList DualListEraseType::SMART_TOMBSTONE
+-	compile time setting for using DualListEraseType::TOMBSTONE or DualListEraseType::SMART_TOMBSTONE
+

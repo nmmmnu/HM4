@@ -15,10 +15,21 @@
 
 namespace DBAdapterFactory{
 
+	using hm4::multi::DualListEraseType;
+
+#ifndef USE_CONCURRENCY
 	template<
+		DualListEraseType ET,
 		class MemListType,
-		template<class, class, class, class> class MutableFlushListType
+		template<                   class, class, class, class> class MutableFlushListType
 	>
+#else
+	template<
+		DualListEraseType ET,
+		class MemListType,
+		template<DualListEraseType, class, class, class, class> class MutableFlushListType
+	>
+#endif
 	struct MutableBase{
 		using ListLoader		= hm4::listloader::DirectoryListLoader;
 
@@ -26,12 +37,17 @@ namespace DBAdapterFactory{
 		using Predicate			= hm4::flusher::DiskFileAllocatorPredicate;
 		using IDGenerator		= idgenerator::IDGeneratorDate;
 		using Flush			= hm4::flusher::DiskFileFlush<IDGenerator>;
-		using MutableFlushList		= MutableFlushListType<MemList, Predicate, Flush, ListLoader>;
+
+		#ifndef USE_CONCURRENCY
+		using MutableFlushList		= MutableFlushListType<    MemList, Predicate, Flush, ListLoader>;
+		#else
+		using MutableFlushList		= MutableFlushListType<ET, MemList, Predicate, Flush, ListLoader>;
+		#endif
 
 		using DList			= hm4::multi::DualList<
 							MutableFlushList,
 							ListLoader::List,
-							hm4::multi::DualListEraseType::SMART_TOMBSTONE
+							ET
 						>;
 
 		using CommandSaveObject		= MutableFlushList;

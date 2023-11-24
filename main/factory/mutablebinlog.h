@@ -6,13 +6,13 @@
 
 namespace DBAdapterFactory{
 
-	template<class MyMemList>
+	template<DualListEraseType ET, class MyMemList>
 	struct MutableBinLog{
 		using MemList		= MyMemList;
 		using BinLogger		= hm4::binlogger::DiskFileBinLogger;
 		using BinLogList	= hm4::BinLogList<MemList,BinLogger,/* unlink */ true>;
 
-		using MutableBase_	= MutableBase<BinLogList, hm4::FlushList>;
+		using MutableBase_	= MutableBase<ET, BinLogList, hm4::FlushList>;
 
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
