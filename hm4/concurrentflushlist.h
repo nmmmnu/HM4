@@ -45,6 +45,10 @@ public:
 		save_(*list1_);
 	}
 
+	auto mutable_version() const{
+		return version_;
+	}
+
 	void flush(){
 		if (empty(*list1_)){
 			logger<Logger::NOTICE>() << "No data for flushing.";
@@ -68,6 +72,8 @@ public:
 			// this also notifiying the loader...
 			flushlist_impl_::clear(*list1_, loader_);
 		}
+
+		++version_;
 	}
 
 	// Command pattern
@@ -103,6 +109,8 @@ private:
 	ListLoader	*loader_;
 
 	ScopedThread	thread_;
+
+	uint64_t	version_ = 0;
 };
 
 

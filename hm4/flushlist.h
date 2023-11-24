@@ -34,12 +34,16 @@ public:
 		save_();
 	}
 
+	auto mutable_version() const{
+		return version_;
+	}
+
 	void flush(){
 		save_();
 
 		flushlist_impl_::clear(*list_, loader_);
 
-	//	return true;
+		++version_;
 	}
 
 	// Command pattern
@@ -69,6 +73,8 @@ private:
 	Predicate	predicate_;
 	Flusher		flusher_;
 	ListLoader	*loader_;
+
+	uint64_t	version_ = 0;
 };
 
 

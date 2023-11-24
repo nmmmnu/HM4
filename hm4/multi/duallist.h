@@ -55,6 +55,10 @@ public:
 		return list1_->mutable_list();
 	}
 
+	constexpr uint64_t mutable_version() const{
+		return list1_->mutable_version();
+	}
+
 	constexpr void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
 		return list1_->mutable_notify(p, message);
 	}
@@ -143,10 +147,10 @@ public:
 
 		if constexpr (EraseType == DualListEraseType::SMART_TOMBSTONE){
 			if (list2_->empty()){
-				printf("SMART_TOMBSTONE: erase\n");
+				logger<Logger::DEBUG>() << "SMART_TOMBSTONE: erase" << key;
 				return hm4::erase(*list1_, key);
 			}else{
-				printf("SMART_TOMBSTONE: insertTS\n");
+				logger<Logger::DEBUG>() << "SMART_TOMBSTONE: insertTS" << key;
 				return hm4::insertTS(*list1_, key);
 			}
 		}

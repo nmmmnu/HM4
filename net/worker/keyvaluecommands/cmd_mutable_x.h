@@ -94,15 +94,15 @@ namespace net::worker::commands::MutableX{
 				// update by insert
 
 				for(auto const &x : container){
-					auto const s1 = list.mutable_list().size();
+					auto const v1 = list.mutable_version();
 
 					p.process(list, x);
 
-					auto const s2 = list.mutable_list().size();
+					auto const v2 = list.mutable_version();
 
-					if (s2 < s1){
-						// something hapenned.
-						// list just flushed.
+					if (v1 != v2){
+						// The list version is different.
+						// It means the list just flushed and
 						// the container contains junk now.
 						++check_passes;
 

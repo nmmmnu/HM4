@@ -68,6 +68,12 @@ public:
 		return *this;
 	}
 
+	// some tests uses VectorList without FlushList:
+
+	constexpr static uint64_t mutable_version(){
+		return 0;
+	}
+
 	void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &msg){
 		lc_.upd(msg.bytes_old, msg.bytes_new);
 	}

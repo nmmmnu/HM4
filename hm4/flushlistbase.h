@@ -13,13 +13,13 @@ namespace hm4{
 namespace flushlist_impl_{
 
 	template <typename, typename = void>
-	class HasPrepareFlush : public std::false_type {};
+	struct HasPrepareFlush : std::false_type {};
 
 	template <typename List>
-	class HasPrepareFlush<
+	struct HasPrepareFlush<
 				List,
 				std::void_t<decltype(std::declval<List>().prepareFlush() )>
-			> : public std::true_type{};
+			> : std::true_type{};
 
 
 
@@ -80,7 +80,7 @@ namespace flushlist_impl_{
 		default:			return result;
 		}
 	}
-}
+} // namespace
 
 
 
