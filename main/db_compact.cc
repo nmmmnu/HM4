@@ -61,7 +61,7 @@ struct MergeListFactory_2{
 	}
 
 private:
-	using MyDualList = hm4::multi::DualList<const DiskList, const DiskList, hm4::multi::DualListEraseType::NORMAL>;
+	using MyDualList = hm4::multi::DualList<const DiskList, const DiskList, hm4::multi::DualListEraseType::NONE>;
 
 	DiskList	table1_;
 	DiskList	table2_;
