@@ -40,10 +40,10 @@ public:
 					multi::SingleList<List>(list),
 					binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>(std::forward<UBinLogger>(binlogger)){}
 
-	bool erase_(std::string_view const key){
+	InsertResult erase_(std::string_view const key){
 		assert(!key.empty());
 
-		return insertTS(*this, key).ok;
+		return insertTS(*this, key);
 	}
 
 	bool clear(){

@@ -120,7 +120,7 @@ public:
 		return list_->clear();
 	}
 
-	bool erase_(std::string_view const key){
+	auto erase_(std::string_view const key){
 		// better Pair::check(key), but might fail because of the caller.
 		assert(!key.empty());
 

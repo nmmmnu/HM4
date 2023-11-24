@@ -34,9 +34,11 @@ constexpr size_t checkInternalNodeSize(){
 struct InsertResult{
 	enum class Status{
 		INSERTED		,
+		DELETED			,
 		UPDATED_IN_PLACE	,
 		REPLACED		,
 		SKIP_INSERTED		,
+		SKIP_DELETED		,
 		ERROR_NO_MEMORY		,
 		ERROR_INVALID		,
 		ERROR
@@ -47,9 +49,11 @@ struct InsertResult{
 	const Pair	*pair	= nullptr;
 
 	constexpr static auto INSERTED		=  Status::INSERTED		;
+	constexpr static auto DELETED		=  Status::DELETED		;
 	constexpr static auto UPDATED_IN_PLACE	=  Status::UPDATED_IN_PLACE	;
 	constexpr static auto REPLACED		=  Status::REPLACED		;
 	constexpr static auto SKIP_INSERTED	=  Status::SKIP_INSERTED	;
+	constexpr static auto SKIP_DELETED	=  Status::SKIP_DELETED		;
 	constexpr static auto ERROR_NO_MEMORY	=  Status::ERROR_NO_MEMORY	;
 	constexpr static auto ERROR_INVALID	=  Status::ERROR_INVALID	;
 	constexpr static auto ERROR		=  Status::ERROR		;
@@ -57,6 +61,11 @@ struct InsertResult{
 	[[nodiscard]]
 	constexpr static auto inserted(const Pair *pair){
 		return InsertResult{ true, InsertResult::INSERTED, pair };
+	}
+
+	[[nodiscard]]
+	constexpr static auto deleted(){
+		return InsertResult{ true, InsertResult::DELETED };
 	}
 
 	[[nodiscard]]
@@ -72,6 +81,11 @@ struct InsertResult{
 	[[nodiscard]]
 	constexpr static auto skipInserted(){
 		return InsertResult{ true, InsertResult::SKIP_INSERTED };
+	}
+
+	[[nodiscard]]
+	constexpr static auto skipDeleted(){
+		return InsertResult{ false, InsertResult::SKIP_DELETED };
 	}
 
 	[[nodiscard]]
@@ -166,7 +180,7 @@ using PairFactoryMutableNotifyMessage = PairFactory::MutableNotifyMessage;
 // ==============================
 
 template<class List>
-bool erase(List &list, std::string_view const key){
+InsertResult erase(List &list, std::string_view const key){
 	return list.erase_(key);
 }
 

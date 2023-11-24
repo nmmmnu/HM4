@@ -113,7 +113,7 @@ auto VectorList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 }
 
 template<class T_Allocator>
-bool VectorList<T_Allocator>::erase_(std::string_view const key){
+InsertResult VectorList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -121,7 +121,7 @@ bool VectorList<T_Allocator>::erase_(std::string_view const key){
 
 	if (! found){
 		// the key does not exists in the vector.
-		return false;
+		return InsertResult::skipDeleted();
 	}
 
 	lc_.dec((*it)->bytes());
@@ -131,7 +131,7 @@ bool VectorList<T_Allocator>::erase_(std::string_view const key){
 
 	vector_.erase(it);
 
-	return true;
+	return InsertResult::deleted();
 }
 
 template<class T_Allocator>

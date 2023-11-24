@@ -60,7 +60,7 @@ public:
 	template<class PFactory>
 	InsertResult insertF(PFactory &factory);
 
-	bool erase_(std::string_view const key);
+	InsertResult erase_(std::string_view const key);
 
 	auto size() const{
 		return lc_.size();

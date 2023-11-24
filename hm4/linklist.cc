@@ -182,14 +182,14 @@ auto LinkList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 }
 
 template<class T_Allocator>
-bool LinkList<T_Allocator>::erase_(std::string_view const key){
+InsertResult LinkList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
 	auto nl = locate_(key);
 
 	if (nl.node == nullptr)
-		return false;
+		return InsertResult::skipDeleted();
 
 	if constexpr(corruptionCheck)
 		if (*nl.prev != nl.node)
@@ -201,7 +201,7 @@ bool LinkList<T_Allocator>::erase_(std::string_view const key){
 
 	deallocate_(nl.node);
 
-	return true;
+	return InsertResult::deleted();
 }
 
 // ==============================

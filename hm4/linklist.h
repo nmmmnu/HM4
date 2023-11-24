@@ -28,7 +28,7 @@ public:
 public:
 	bool clear();
 
-	bool erase_(std::string_view const key);
+	InsertResult erase_(std::string_view const key);
 
 	template<class PFactory>
 	InsertResult insertF(PFactory &factory);

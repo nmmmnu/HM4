@@ -287,14 +287,14 @@ auto SkipList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 }
 
 template<class T_Allocator>
-bool SkipList<T_Allocator>::erase_(std::string_view const key){
+InsertResult SkipList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
 	const auto nl = locate_<0>(key);
 
 	if (nl.node == nullptr)
-		return false;
+		return InsertResult::skipDeleted();
 
 
 	// *nl.prev[0] is always valid.
@@ -332,7 +332,7 @@ bool SkipList<T_Allocator>::erase_(std::string_view const key){
 
 	deallocate_(nl.node);
 
-	return true;
+	return InsertResult::deleted();
 }
 
 // ==============================

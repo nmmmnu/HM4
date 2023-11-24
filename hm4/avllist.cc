@@ -142,7 +142,7 @@ size_t const AVLList<T_Allocator>::INTERNAL_NODE_SIZE = checkInternalNodeSize<
 
 
 template<class T_Allocator>
-bool AVLList<T_Allocator>::erase_(std::string_view const key){
+InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 	auto *node = root_;
 
 	while(node){
@@ -162,7 +162,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 	}
 
 	if (!node)
-		return false;
+		return InsertResult::skipDeleted();
 
 	if (node->l && node->r){
 		// CASE 3 - node two children
@@ -188,7 +188,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 
 			this->root_ = child;
 
-			return true;
+			return InsertResult::deleted();
 		}
 
 		if (auto *parent = node->p; node == parent->l){
@@ -199,10 +199,10 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			deallocate_(node);
 
 			if (parent->balance == +1){
-				return true;
+				return InsertResult::deleted();
 			}else{
 				rebalanceAfterErase_(parent);
-				return true;
+				return InsertResult::deleted();
 			}
 		}else{ // node == parent->r
 			parent->r = child;
@@ -212,10 +212,10 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 			deallocate_(node);
 
 			if (parent->balance == -1){
-				return true;
+				return InsertResult::deleted();
 			}else{
 				rebalanceAfterErase_(parent);
-				return true;
+				return InsertResult::deleted();
 			}
 		}
 	}
@@ -228,7 +228,7 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 
 		this->root_ = nullptr;
 
-		return true;
+		return InsertResult::deleted();
 	}
 
 	if (auto *parent = node->p; node == parent->l){
@@ -239,10 +239,10 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		deallocate_(node);
 
 		if (parent->balance == +1){
-			return true;
+			return InsertResult::deleted();
 		}else{
 			rebalanceAfterErase_(parent);
-			return true;
+			return InsertResult::deleted();
 		}
 	}else{ // node == parent->r
 		parent->r = nullptr;
@@ -252,10 +252,10 @@ bool AVLList<T_Allocator>::erase_(std::string_view const key){
 		deallocate_(node);
 
 		if (parent->balance == -1){
-			return true;
+			return InsertResult::deleted();
 		}else{
 			rebalanceAfterErase_(parent);
-			return true;
+			return InsertResult::deleted();
 		}
 	}
 }

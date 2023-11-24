@@ -128,18 +128,18 @@ public:
 		return list1_->clear();
 	}
 
-	bool erase_(std::string_view const key){
+	InsertResult erase_(std::string_view const key){
 		assert(!key.empty());
 
 		// will never come here.
 		if constexpr (EraseType == DualListEraseType::NONE)
-			return false;
+			return InsertResult::skipDeleted();
 
 		if constexpr (EraseType == DualListEraseType::NORMAL)
 			return hm4::erase(*list1_, key);
 
 		if constexpr (EraseType == DualListEraseType::TOMBSTONE)
-			return hm4::insertTS(*list1_, key).ok;
+			return hm4::insertTS(*list1_, key);
 
 
 		// this does not play well with binlog.

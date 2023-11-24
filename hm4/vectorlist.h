@@ -47,7 +47,7 @@ public:
 public:
 	bool clear();
 
-	bool erase_(std::string_view key);
+	InsertResult erase_(std::string_view key);
 
 	Pair const &operator[](size_type const index) const{
 		return *vector_[index];

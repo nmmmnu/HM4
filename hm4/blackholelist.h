@@ -34,8 +34,8 @@ public:
 	}
 
 	constexpr static
-	bool erase_(std::string_view ){
-		return true;
+	InsertResult erase_(std::string_view ){
+		return InsertResult::skipDeleted();
 	}
 
 	template<class PFactory>

@@ -329,16 +329,16 @@ template<>
 void list_test(hm4::BlackHoleList &list){
 	listPopulate(list);
 
-	mytest("size estimated",	list.size() == 0					);
-	mytest("size exact",		size(list) == 0						);
-	mytest("size empty",		empty(list)						);
-	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0	);
-	mytest("sizeof",		list.bytes() == 0					);
+	mytest("size estimated",	list.size() == 0						);
+	mytest("size exact",		size(list) == 0							);
+	mytest("size empty",		empty(list)							);
+	mytest("size std::distance",	std::distance(std::begin(list), std::end(list)) == 0		);
+	mytest("sizeof",		list.bytes() == 0						);
 
-	mytest("put",			insert(list, "key", "val").ok				);
-	mytest("find",			list.find("key", std::false_type{}) == std::end(list)	);
-	mytest("find",			list.find("key", std::true_type{} ) == std::end(list)	);
-	mytest("remove",		erase(list, "key")					);
+	mytest("put",			insert(list, "key", "val").ok					);
+	mytest("find",			list.find("key", std::false_type{}) == std::end(list)		);
+	mytest("find",			list.find("key", std::true_type{} ) == std::end(list)		);
+	mytest("remove",		erase(list, "key").status == hm4::InsertResult::SKIP_DELETED	);
 }
 
 template <class List>

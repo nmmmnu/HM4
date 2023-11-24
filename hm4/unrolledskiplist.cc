@@ -354,7 +354,7 @@ auto UnrolledSkipList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 }
 
 template<class T_Allocator>
-bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
+InsertResult UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -363,7 +363,7 @@ bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 	const auto nl = locate_<0>(hkey, key);
 
 	if (nl.node == nullptr)
-		return false;
+		return InsertResult::skipDeleted();
 
 	// *nl.prev[0] is always valid.
 	// it always point to the nl.node
@@ -372,10 +372,10 @@ bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 			corruptionExit();
 
 	if (!nl.node->data.erase_(hkey, key, getAllocator(), lc_))
-		return false;
+		return InsertResult::skipDeleted();
 
 	if (nl.node->data.size())
-		return true;
+		return InsertResult::deleted();
 
 	// node is zero size, it must be removed
 
@@ -406,7 +406,7 @@ bool UnrolledSkipList<T_Allocator>::erase_(std::string_view const key){
 
 	deallocate_(nl.node);
 
-	return true;
+	return InsertResult::deleted();
 }
 
 // ==============================
