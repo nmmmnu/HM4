@@ -60,3 +60,6 @@ Changelog
 
 -	bugfix on redis parser when CRLF is not read in full.
 
+### 1.3.7.6
+-	fix bug with PERSIST when TTL is under 1 sec
+

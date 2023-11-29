@@ -288,6 +288,11 @@ inline namespace version_4_00_00{
 		}
 
 		[[nodiscard]]
+		bool isExpiresSet() const noexcept{
+			return expires;
+		}
+
+		[[nodiscard]]
 		uint32_t getTTL() const noexcept;
 
 		[[nodiscard]]

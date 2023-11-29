@@ -743,7 +743,8 @@ namespace net::worker::commands::Mutable{
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
 
-				if (it->getTTL() > 0){
+				// pair is already checked for validity.
+				if (it->isExpiresSet()){
 					uint32_t const exp = 0;
 
 					// HINT
@@ -755,8 +756,6 @@ namespace net::worker::commands::Mutable{
 			}else{
 				return result.set(false);
 			}
-
-
 		}
 
 	private:
