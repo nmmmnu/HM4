@@ -34,7 +34,7 @@ $redis->connect("127.0.0.1");
 $dir = __DIR__ . "/tests/*.php";
 
 foreach (glob($dir) as $filename){
-	$cmd = basename($filename, ".php");
+	$cmd = "cmd_" . basename($filename, ".php");
 
 	require_once $filename;
 

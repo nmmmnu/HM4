@@ -1,6 +1,6 @@
 <?php
 
-function MUTABLE($redis){
+function cmd_MUTABLE($redis){
 	expect("SET",		true		);
 
 	// ------------------
@@ -49,11 +49,14 @@ function MUTABLE($redis){
 
 	$redis->setex("a", 1, 5);
 	$redis->expire("b", 1);
+	$redis->expire("c", 1);
+	$redis->persist("c");
 
 	pause(2);
 
 	expect("SETEX",		$redis->exists("a") == false		);
 	expect("EXPIRE",	$redis->exists("b") == false		);
+	expect("PERSIST",	$redis->exists("c")			);
 
 	// ------------------
 
@@ -65,6 +68,7 @@ function MUTABLE($redis){
 	expect("SETNX",		$redis->get("b") == 2			);
 
 	// ------------------
+
 	$redis->del("a");
 	$redis->set("b", 2);
 	rawCommand($redis, "setxx", "a", 10);
@@ -82,28 +86,10 @@ function MUTABLE($redis){
 
 	// ------------------
 
-	$redis->set("c", 1);
-	echo ">>>" . $redis->get("c") . "<<<\n";
-	$redis->expire("c", 1);
-	echo ">>>" . $redis->get("c") . "<<<\n";
-	$redis->persist("c");
-	echo ">>>" . $redis->get("c") . "<<<\n";
-	pause(2);
-	echo ">>>" . $redis->get("c") . "<<<\n";
-	expect("PERSIST",	$redis->exists("c")			);
-
-	// ------------------
-	// ------------------
-	// ------------------
-
 	expect("DEL",		true		);
 
 	// ------------------
 
-	$redis->del("a");
-	$redis->del("b");
-//	$redis->del("c");
-	$redis->del("d");
-	$redis->del("e");
+	$redis->del(["a", "b", "c", "d", "e"]);
 }
 

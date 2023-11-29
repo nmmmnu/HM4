@@ -1,6 +1,6 @@
 <?php
 
-function IMMUTABLE($redis){
+function cmd_IMMUTABLE($redis){
 	$redis->set("a", 1);
 	$redis->set("b", 2);
 	$redis->del("c");
