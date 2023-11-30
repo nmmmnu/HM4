@@ -31,18 +31,20 @@ namespace redis_protocol_impl_{
 		return 1;
 	}
 
-	constexpr size_t fast_digit_estimation(uint64_t const a){
+	constexpr size_t calc_size_int(uint64_t = 0){
+		return to_string_buffer_t_size;
+	}
+
+	constexpr size_t calc_size_str(std::string_view s){
+		constexpr char			DOLLAR	= '$';
+		constexpr std::string_view	ENDLN	= "\r\n";
+
 		return
-			(a < 10llu				)	?  1	:
-			(a < 100llu				)	?  2	:
-			(a < 1000llu				)	?  3	:
-			(a < 10000llu				)	?  4	:
-
-			(a < 10000'00llu			)	?  6	:
-
-			(a < 10000'0000llu			)	?  8	:
-			(a < 10000'00000'00000'00llu		)	? 16	:
-			24
+			calc_size(DOLLAR	)	+
+			calc_size_int(s.size()	)	+
+			calc_size(ENDLN		)	+
+			calc_size(s		)	+
+			calc_size(ENDLN		)
 		;
 	}
 }
@@ -126,8 +128,6 @@ private:
 		// if we change uint64_t to template, std::string will come here.
 		return response_string(buffer, std::to_string(msg));
 	}
-
-	constexpr static size_t calc_sstr(std::string_view s);
 
 	static void response_log_(std::string_view const type, size_t const res, size_t const capacity, const void *p){
 		logger<Logger::DEBUG>() << "Responce" << type << "reserve" << res << "capacity" << capacity << "addr" << p;
@@ -229,9 +229,15 @@ void RedisProtocol::response_number(Buffer &buffer, T const n){
 		true
 	);
 
+	using namespace redis_protocol_impl_;
+
 	to_string_buffer_t std_buffer;
 
-	constexpr auto res = to_string_buffer_t_size;
+	constexpr auto res =
+			calc_size(COLON	)	+
+			calc_size_int()		+
+			calc_size(ENDLN	)
+	;
 
 	buffer.reserve(res);
 
@@ -242,21 +248,11 @@ void RedisProtocol::response_number(Buffer &buffer, T const n){
 	response_log_("number", res, buffer.capacity(), buffer.data());
 }
 
-constexpr size_t RedisProtocol::calc_sstr(std::string_view s){
-	using namespace redis_protocol_impl_;
-
-	return
-		calc_size(DOLLAR		)	+
-		fast_digit_estimation(s.size()	)	+
-		calc_size(ENDLN			)	+
-		calc_size(s			)	+
-		calc_size(ENDLN			)
-	;
-}
-
 template<class Buffer>
 void RedisProtocol::response_string(Buffer &buffer, std::string_view const msg){
-	const size_t res = calc_sstr(msg);
+	using namespace redis_protocol_impl_;
+
+	auto const res = calc_size_str(msg);
 
 	buffer.reserve(res);
 
@@ -270,12 +266,12 @@ void RedisProtocol::response_strings(Buffer &buffer, MySpan<const std::string_vi
 	using namespace redis_protocol_impl_;
 
 	const size_t res =
-		calc_size(STAR				)	+
-		fast_digit_estimation(list.size()	)	+
-		calc_size(ENDLN				)	+
+		calc_size(STAR			)	+
+		calc_size_int(list.size()	)	+
+		calc_size(ENDLN			)	+
 
 		std::accumulate(std::begin(list), std::end(list), size_t{ 0 }, [](size_t sum, std::string_view s){
-			return sum + calc_sstr(s);
+			return sum + calc_size_str(s);
 		})
 	;
 
