@@ -254,4 +254,5 @@ Changelog
 -	compile time setting for using DualListEraseType::TOMBSTONE or DualListEraseType::SMART_TOMBSTONE
 -	introduce FlushList::mutable_version() in order to detect flushes more correct and easily
 -	fix bug with PERSIST when TTL is under 1 sec
+-	fix incompatibility with PHPRedis when using functions returning INT such TTL, INCR, DECR, STRLEN etc.
 

@@ -57,8 +57,6 @@ namespace net::worker::commands{
 
 		Status          status  = Status::OK;
 
-		constexpr inline static std::string_view zo_[2]{"0", "1"};
-
 	public:
 		using Container = MySpan<const std::string_view, MySpanConstructor::EXPLICIT>;
 
@@ -124,11 +122,11 @@ namespace net::worker::commands{
 		}
 
 		void set_0(){
-			return set(zo_[0]);
+			return set_number<uint64_t>(0);
 		}
 
 		void set_1(){
-			return set(zo_[1]);
+			return set_number<uint64_t>(1);
 		}
 
 		void set(int64_t number){
@@ -141,18 +139,17 @@ namespace net::worker::commands{
 
 		#ifdef SIZE_T_SEPARATE_FROM_UINT64_T
 		void set(size_t number){
-			return set_number(number);
+			return set_number<uint64_t>(number);
 		}
 		#endif
 
 	private:
 		template<typename T>
 		void set_number(T number){
-			to_string_buffer_t std_buffer;
+			set_status_(Status::OK);
 
-			std::string_view const val = to_string(number, std_buffer);
-
-			return set(val);
+			buffer_.clear();
+			protocol_.response_number(buffer_, number);
 		}
 	};
 

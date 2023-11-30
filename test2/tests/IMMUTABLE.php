@@ -27,19 +27,13 @@ function cmd_IMMUTABLE($redis){
 
 	// ------------------
 
-	// following can not be tested because phpredis is too strict...
-	expect("TTL",		true					);
 	expect("EXPIRETIME",	true					);
 
-	/*
 	$redis->expire("a", 100);
 
-	echo ">>>", $redis->ttl("a") . "<<<\n";
-
-	expect("TTL",		$redis->ttl("a") > 95			);
-	expect("TTL",		$redis->ttl("b") == 0			);
-	expect("TTL",		$redis->ttl("c") == 0			);
-	*/
+	expect("TTL",		$redis->ttl("a") > 98	);
+	expect("TTL",		$redis->ttl("b") == 0	);
+	expect("TTL",		$redis->ttl("c") == 0	);
 
 	// ------------------
 
@@ -51,10 +45,7 @@ function cmd_IMMUTABLE($redis){
 
 	// ------------------
 
-	// following can not be tested because phpredis is too strict...
-	expect("STRLEN",	true					);
-
-	//expect("STRLEN",	$redis->strlen("a") == strlen($s)	);
+	expect("STRLEN",	$redis->strlen("a") == strlen($s)	);
 
 	// ------------------
 

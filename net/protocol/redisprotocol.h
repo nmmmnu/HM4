@@ -53,6 +53,7 @@ class RedisProtocol{
 public:
 	constexpr static inline char			STAR		= '*';
 	constexpr static inline char			DOLLAR		= '$';
+	constexpr static inline char			COLON		= ':';
 
 	constexpr static inline std::string_view	ENDLN		= "\r\n";
 
@@ -109,6 +110,9 @@ public:
 
 	template<class Buffer>
 	static void response_string(Buffer &buffer, std::string_view msg);
+
+	template<class Buffer, typename T>
+	static void response_number(Buffer &buffer, T n);
 
 	template<class Buffer>
 	static void response_strings(Buffer &buffer, MySpan<const std::string_view> const &list);
@@ -178,7 +182,6 @@ void RedisProtocol::response_bool(Buffer &buffer, bool const b){
 
 	buffer.reserve(res);
 
-
 	buffer.push(b ? TRUE : FALSE);
 	buffer.push(ENDLN);
 
@@ -199,7 +202,6 @@ void RedisProtocol::response_error(Buffer &buffer, std::string_view const msg){
 
 	buffer.reserve(res);
 
-
 	buffer.push(ERR);
 	buffer.push(msg);
 	buffer.push(ENDLN);
@@ -217,6 +219,27 @@ void RedisProtocol::response_string_nr(Buffer &buffer, std::string_view const ms
 
 	buffer.push(msg);
 	buffer.push(ENDLN);
+}
+
+template<class Buffer, typename T>
+void RedisProtocol::response_number(Buffer &buffer, T const n){
+	static_assert(
+		std::is_same_v<T, uint64_t	> ||
+		std::is_same_v<T, int64_t	> ||
+		true
+	);
+
+	to_string_buffer_t std_buffer;
+
+	constexpr auto res = to_string_buffer_t_size;
+
+	buffer.reserve(res);
+
+	buffer.push(COLON);
+	buffer.push(to_string(n, std_buffer));
+	buffer.push(ENDLN);
+
+	response_log_("number", res, buffer.capacity(), buffer.data());
 }
 
 constexpr size_t RedisProtocol::calc_sstr(std::string_view s){
@@ -257,7 +280,6 @@ void RedisProtocol::response_strings(Buffer &buffer, MySpan<const std::string_vi
 	;
 
 	buffer.reserve(res);
-
 
 	to_string_buffer_t std_buffer;
 
