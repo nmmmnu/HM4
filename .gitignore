@@ -28,4 +28,3 @@ cachegrind.out.*
 bin
 obj
 
-php/hm_test.php
