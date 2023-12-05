@@ -159,7 +159,7 @@ namespace net::worker::commands::Info{
 		};
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			return result.set("pong");
+			return result.set_simple_string("pong");
 		}
 
 	private:

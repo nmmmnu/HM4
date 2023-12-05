@@ -12,13 +12,21 @@ namespace net::worker::commands::Compat{
 			}
 		};
 
-		template<class Protocol, class DBAdapter, typename T>
+		enum class ResultType{
+			NORMAL		,
+			SIMPLE_STRING
+		};
+
+		template<class Protocol, class DBAdapter, typename T, ResultType RT = ResultType::NORMAL>
 		struct VAL : BaseRO<Protocol,DBAdapter>{
 			constexpr VAL(T const &n) : n(n){
 			}
 
 			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-				return result.set(n);
+				if constexpr(RT == ResultType::SIMPLE_STRING)
+					return result.set_simple_string(n);
+				else
+					return result.set(n);
 			}
 		private:
 			T n;
@@ -60,7 +68,7 @@ namespace net::worker::commands::Compat{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct TYPE : compat_impl_::VAL<Protocol,DBAdapter,std::string_view>{
+	struct TYPE : compat_impl_::VAL<Protocol,DBAdapter,std::string_view, compat_impl_::ResultType::SIMPLE_STRING>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -69,7 +77,7 @@ namespace net::worker::commands::Compat{
 			return std::end(cmd);
 		};
 
-		constexpr TYPE() : compat_impl_::VAL<Protocol,DBAdapter,std::string_view>("string"){
+		constexpr TYPE() : compat_impl_::VAL<Protocol,DBAdapter,std::string_view, compat_impl_::ResultType::SIMPLE_STRING>("string"){
 		}
 
 	private:

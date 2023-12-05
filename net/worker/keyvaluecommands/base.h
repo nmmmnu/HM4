@@ -114,6 +114,13 @@ namespace net::worker::commands{
 			);
 		}
 
+		void set_simple_string(std::string_view s){
+			set_status_(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_simple_string(buffer_, s);
+		}
+
 		void set_container(MySpan<const std::string_view> const &container){
 			set_status_(Status::OK);
 

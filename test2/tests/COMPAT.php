@@ -5,15 +5,10 @@ function cmd_COMPAT($redis){
 	$redis->reset();
 	$redis->touch("a");
 
-	expect("COMPAT",	true	);
-
-	// var_dump($redis->type("a"));
-	// var_dump( Redis::REDIS_STRING );
+	expect("COMPAT",	true					);
 
 	// this does not work and this time is PHPRedis fault :)
 	// it needs simple string responce, e.g. +string
-	// expect("TYPE",		$redis->type("a") == Redis::REDIS_STRING	);
-
-	expect("MURMUR",	rawCommand($redis, "type", "a"		) == "string"	);
+	expect("TYPE",	$redis->type("a") == Redis::REDIS_STRING	);
 }
 

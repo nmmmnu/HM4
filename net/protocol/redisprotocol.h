@@ -56,6 +56,7 @@ public:
 	constexpr static inline char			STAR		= '*';
 	constexpr static inline char			DOLLAR		= '$';
 	constexpr static inline char			COLON		= ':';
+	constexpr static inline char			PLUS		= '+';
 
 	constexpr static inline std::string_view	ENDLN		= "\r\n";
 
@@ -112,6 +113,9 @@ public:
 
 	template<class Buffer>
 	static void response_string(Buffer &buffer, std::string_view msg);
+
+	template<class Buffer>
+	static void response_simple_string(Buffer &buffer, std::string_view msg);
 
 	template<class Buffer, typename T>
 	static void response_number(Buffer &buffer, T n);
@@ -259,6 +263,25 @@ void RedisProtocol::response_string(Buffer &buffer, std::string_view const msg){
 	response_string_nr(buffer, msg);
 
 	response_log_("string<1>", res, buffer.capacity(), buffer.data());
+}
+
+template<class Buffer>
+void RedisProtocol::response_simple_string(Buffer &buffer, std::string_view const msg){
+	using namespace redis_protocol_impl_;
+
+	auto const res =
+			calc_size(PLUS	)	+
+			msg.size()		+
+			calc_size(ENDLN	)
+	;
+
+	buffer.reserve(res);
+
+	buffer.push(PLUS);
+	buffer.push(msg);
+	buffer.push(ENDLN);
+
+	response_log_("simple string", res, buffer.capacity(), buffer.data());
 }
 
 template<class Buffer>
