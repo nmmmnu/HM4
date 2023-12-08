@@ -173,7 +173,10 @@ InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 		swapLinks_(node, successor);
 
 		// Silently proceed to CASE 2
-		node = successor;
+
+		// counter intuitive, but we do not need this line,
+		// since successor is now in the place of node.
+		// node = successor;
 	}
 
 	if (auto *child = node->l ? node->l : node->r; child){
@@ -558,8 +561,18 @@ void AVLList<T_Allocator>::rotateLR_(Node *node){
 
 template<class T_Allocator>
 void AVLList<T_Allocator>::swapLinksRelative_(Node *a, Node *b){
-	// a is parent of b:
-	// [a->p] -> [a] -> [b] -> [children]
+	// a is parent of b
+
+	/*
+	 *     p*           p*
+	 *      \            \
+	 *       a            b
+	 *      / \   ==>    / \
+	 *     b   c*       a   c*
+	 *    / \          / \
+	 *   d*  e*       d*  e*
+	 */
+
 
 	assert(a->l == b || a->r == b);
 	assert(b->p == a);
@@ -571,24 +584,18 @@ void AVLList<T_Allocator>::swapLinksRelative_(Node *a, Node *b){
 	swap(a->r	, b->r		);
 	swap(a->p	, b->p		);
 
-	// now it should be like this:
-	// [a->p] -> [b] -> [a] -> [children]
-
-	// fix the parent of b (which was parent of a)
 	fixParentAndChildren_<1,0,0>(b, a);
+	fixParentAndChildren_<0,1,1>(a);
+
+	a->p = b;
 
 	if (b->l == b){
 		b->l = a;
-
-		fixParentAndChildren_<0,0,1>(b, a);
+		fixParentAndChildren_<0,0,1>(b);
 	}else{ // b->r == b
+		fixParentAndChildren_<0,1,0>(b);
 		b->r = a;
-
-		fixParentAndChildren_<0,1,0>(b, a);
 	}
-
-	// fix children of a (which were children of b)
-	fixParentAndChildren_<0,1,1>(a);
 }
 
 template<class T_Allocator>
@@ -609,11 +616,11 @@ void AVLList<T_Allocator>::swapLinks_(Node *a, Node *b){
 	assert(a);
 	assert(b);
 
-	if (a->p == b)
-		return swapLinksRelative_(a, b);
-
 	if (b->p == a)
 		return swapLinksRelative_(a, b);
+
+	if (a->p == b)
+		return swapLinksRelative_(b, a);
 
 	return swapLinksNormal_(a, b);
 }
@@ -759,6 +766,8 @@ void AVLList<T_Allocator>::rebalanceAfterErase_(Node *node){
 				node->r->balance = -1;
 
 				rotateL_(node);
+
+				return;
 			}else{ // node->r->balance == -1
 				auto const rlBalance = node->r->l->balance;
 
@@ -775,8 +784,6 @@ void AVLList<T_Allocator>::rebalanceAfterErase_(Node *node){
 			}
 
 			node = node->p;
-
-			return;
 		}else
 		if (node->balance == -2){
 			// left heavy
@@ -791,6 +798,8 @@ void AVLList<T_Allocator>::rebalanceAfterErase_(Node *node){
 				node->l->balance = +1;
 
 				rotateR_(node);
+
+				return;
 			}else{ // node->l->balance == +1
 				auto const lrBalance = node->l->r->balance;
 
@@ -807,8 +816,6 @@ void AVLList<T_Allocator>::rebalanceAfterErase_(Node *node){
 			}
 
 			node = node->p;
-
-			return;
 		}
 
 		auto *parent = node->p;
@@ -859,10 +866,16 @@ namespace avl_impl_{
 			return;
 
 		assert(node->p == parent);
+
 		assert(node->balance >= -1 && node->balance <= +1);
 
 		if constexpr(CheckHeight){
 			auto const balance = testALVTreeIntegrity_height(node->r) - testALVTreeIntegrity_height(node->l);
+
+			if (balance != node->balance){
+				printf("here %d\n", (int) node->balance);
+			}
+
 			assert(balance >= -1 && balance <= +1);
 			assert(balance == node->balance);
 		}

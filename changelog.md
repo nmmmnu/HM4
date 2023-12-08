@@ -259,4 +259,5 @@ Changelog
 -	add RedisProtocol simple string responce.
 -	fix incompatibility with PHPRedis when using functions returning TYPE
 -	fix bug in AVLList with AVLList::erase_, affecting only the development version.
+-	fix bug in AVLList with AVLList::rebalanceAfterErase_, affecting only the development version.
 

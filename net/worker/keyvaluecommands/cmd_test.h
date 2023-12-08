@@ -20,7 +20,8 @@ namespace net::worker::commands::Test{
 			[[maybe_unused]]
 			auto const &list = db->mutable_list();
 
-			logger<Logger::DEBUG>() << "TEST: OK";
+		//	list.testIntegrity(std::false_type{});
+		//	list.testIntegrity(std::true_type{});
 
 			return result.set();
 		}
