@@ -32,6 +32,11 @@ struct AVLList<T_Allocator>::Node{
 		p	= parent;
 	}
 
+	constexpr void clearDebug(){
+		if constexpr(0)
+			clear(nullptr);
+	}
+
 	int cmp(std::string_view const key) const{
 		return data.cmp(key);
 	}
@@ -145,6 +150,8 @@ template<class T_Allocator>
 InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 	auto *node = root_;
 
+	bool const b = (key == "a~106");
+
 	while(node){
 		int const cmp = node->cmp(key);
 
@@ -165,6 +172,11 @@ InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 		return InsertResult::skipDeleted();
 
 	if (node->l && node->r){
+		if (b){
+			printf("BBB : CASE3\n");
+			testALVTreeIntegrity(std::true_type{});
+		}
+
 		// CASE 3 - node two children
 		auto *successor = avl_impl_::getMinValueNode(node->r);
 
@@ -172,11 +184,22 @@ InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 		// but erase is slow and not really used anyway
 		swapLinks_(node, successor);
 
+		if (b){
+			printf("BBB : CASE3 test\n");
+			testALVTreeIntegrity(std::true_type{});
+			printf("BBB : CASE3 test done\n");
+		}
+
 		// Silently proceed to CASE 2
 		node = successor;
 	}
 
+	if (b)
+		testALVTreeIntegrity(std::true_type{});
+
 	if (auto *child = node->l ? node->l : node->r; child){
+		if (b) printf("BBB : CASE2\n");
+
 		// CASE 2: node with only one child
 		child->p = node->p;
 
@@ -222,7 +245,11 @@ InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 
 	// CASE 1: node with no children
 
+	if (b) printf("BBB : CASE1\n");
+
 	if (!node->p){
+		if (b) printf("BBB : CASE1 NO CHILDREN\n");
+
 		lc_.dec(node->data.bytes());
 		deallocate_(node);
 
@@ -232,6 +259,8 @@ InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 	}
 
 	if (auto *parent = node->p; node == parent->l){
+		if (b) printf("BBB : CASE1 L\n");
+
 		parent->l = nullptr;
 		++parent->balance;
 
@@ -245,6 +274,8 @@ InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
 			return InsertResult::deleted();
 		}
 	}else{ // node == parent->r
+		if (b) printf("BBB : CASE1 R\n");
+
 		parent->r = nullptr;
 		--parent->balance;
 
@@ -438,6 +469,8 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 
 template<class T_Allocator>
 void AVLList<T_Allocator>::deallocate_(Node *node){
+	node->clearDebug();
+
 	using namespace MyAllocator;
 	deallocate(allocator_, node);
 }
@@ -494,7 +527,7 @@ void AVLList<T_Allocator>::rotateL_(Node *n){
 	r->l = n;
 	r->p = n->p;
 
-	fixParentAndChildren_<1,1,0>(r, n);
+	fixParentAndChildren_<1,0>(r, n);
 }
 
 template<class T_Allocator>
@@ -517,7 +550,7 @@ void AVLList<T_Allocator>::rotateR_(Node *n){
 	l->r = n;
 	l->p = n->p;
 
-	fixParentAndChildren_<1,0,1>(l, n);
+	fixParentAndChildren_<0,1>(l, n);
 }
 
 template<class T_Allocator>
@@ -557,65 +590,59 @@ void AVLList<T_Allocator>::rotateLR_(Node *node){
 }
 
 template<class T_Allocator>
-void AVLList<T_Allocator>::swapLinksRelative_(Node *a, Node *b){
-	// a is parent of b:
-	// [a->p] -> [a] -> [b] -> [children]
-
-	assert(a->l == b || a->r == b);
-	assert(b->p == a);
-
-	using std::swap;
-
-	swap(a->balance	, b->balance	);
-	swap(a->l	, b->l		);
-	swap(a->r	, b->r		);
-	swap(a->p	, b->p		);
-
-	// now it should be like this:
-	// [a->p] -> [b] -> [a] -> [children]
-
-	// fix the parent of b (which was parent of a)
-	fixParentAndChildren_<1,0,0>(b, a);
-
-	if (b->l == b){
-		b->l = a;
-
-		fixParentAndChildren_<0,0,1>(b, a);
-	}else{ // b->r == b
-		b->r = a;
-
-		fixParentAndChildren_<0,1,0>(b, a);
-	}
-
-	// fix children of a (which were children of b)
-	fixParentAndChildren_<0,1,1>(a);
-}
-
-template<class T_Allocator>
-void AVLList<T_Allocator>::swapLinksNormal_(Node *a, Node *b){
-	using std::swap;
-
-	swap(a->balance	, b->balance	);
-	swap(a->l	, b->l		);
-	swap(a->r	, b->r		);
-	swap(a->p	, b->p		);
-
-	fixParentAndChildren_<1,1,1>(a, b);
-	fixParentAndChildren_<1,1,1>(b, a);
-}
-
-template<class T_Allocator>
 void AVLList<T_Allocator>::swapLinks_(Node *a, Node *b){
 	assert(a);
 	assert(b);
 
-	if (a->p == b)
-		return swapLinksRelative_(a, b);
+	auto const parentAndChild = (a->p == b || b->p == a);
 
-	if (b->p == a)
-		return swapLinksRelative_(a, b);
+	using std::swap;
 
-	return swapLinksNormal_(a, b);
+	swap(a->balance	, b->balance	);
+	swap(a->l	, b->l		);
+	swap(a->r	, b->r		);
+	swap(a->p	, b->p		);
+
+	// normal case
+	if (!parentAndChild){
+		fixParentAndChildren_<1,1>(a, b);
+		fixParentAndChildren_<1,1>(b, a);
+
+		return;
+	}
+
+	// special case
+	// [a] -> [b]
+	// or
+	// [b] -> [a]
+
+	if (a->p == a){
+		// [a] was parent of [b]
+		// [b] is  parent of [a] now.
+
+		a->p = b;
+
+		if (b->l == b){
+			fixParentAndChildren_<0,1>(b, a);
+			b->l = a;
+		}else{
+			fixParentAndChildren_<1,0>(b, a);
+			b->r = a;
+		}
+	}else{ // b->p == b
+		// [b] was parent of [a]
+		// [a] is  parent of [b] now.
+
+		b->p = a;
+
+		if (a->l == a){
+			fixParentAndChildren_<0,1>(a, b);
+			a->l = b;
+		}else{
+			fixParentAndChildren_<1,0>(a, b);
+			a->r = b;
+		}
+	}
 }
 
 template<class T_Allocator>
@@ -630,7 +657,7 @@ void AVLList<T_Allocator>::copyLinks_(Node *a, Node *b){
 	a->r		= std::move(b->r	);
 	a->p		= std::move(b->p	);
 
-	fixParentAndChildren_<1,1,1>(a, b);
+	fixParentAndChildren_<1,1>(a, b);
 
 	// clear other, because if ArenaAllocator is used,
 	// pointers may still be valid
@@ -642,33 +669,42 @@ void AVLList<T_Allocator>::copyLinks_(Node *a, Node *b){
 }
 
 template<class T_Allocator>
-template<bool FixP, bool FixL, bool FixR>
-void AVLList<T_Allocator>::fixParentAndChildren_(Node *node, const Node *originalParent){
+template<bool FixL, bool FixR>
+void AVLList<T_Allocator>::fixParentAndChildren_(Node *node, const Node *original){
 	assert(node);
+	assert(original);
 
-	if constexpr(FixP){
-		assert(originalParent);
+	if (auto *parent = node->p; !parent){
+		// update root_
 
-		if (auto *parent = node->p; !parent){
-			// update root_
-
-			root_ = node;
-		}else{
-			if (parent->l == originalParent)
-				parent->l = node;
-			else
-				parent->r = node;
+		root_ = node;
+	}else{
+		if (parent->l != original && parent->r != original){
+			printf("%p %p %p\n", (void *)original, (void *)parent->l, (void *)parent->r);
 		}
+
+		if (parent->l == original)
+			parent->l = node;
+		else
+			parent->r = node;
 	}
 
 	if constexpr(FixL){
-		if (auto *child = node->l; child)
+		if (auto *child = node->l; child){
+			if (child->p != original)
+				printf("%p %p\n", (void *)child->p, (void *)original);
+
 			child->p = node;
+		}
 	}
 
 	if constexpr(FixR){
-		if (auto *child = node->r; child)
+		if (auto *child = node->r; child){
+			if (child->p != original)
+				printf("%p %p\n", (void *)child->p, (void *)original);
+
 			child->p = node;
+		}
 	}
 };
 
@@ -746,6 +782,11 @@ void AVLList<T_Allocator>::rebalanceAfterErase_(Node *node){
 	assert(node);
 
 	while(true){
+		if (node->l == nullptr && node->r == nullptr && node->p == nullptr){
+			printf("BBB we are here\n");
+			node->data.print();
+		}
+
 		if (node->balance == +2){
 			// right heavy
 

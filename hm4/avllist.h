@@ -148,10 +148,13 @@ private:
 
 private:
 	void swapLinks_(Node *a, Node *b);
+	void swapLinksRelative_(Node *a, Node *b);
+	void swapLinksNormal_(Node *a, Node *b);
+
 	void copyLinks_(Node *a, Node *b);
 
-	template<bool FixL, bool FixR>
-	void fixParentAndChildren_(Node *node, const Node *original);
+	template<bool FixP, bool FixL, bool FixR>
+	void fixParentAndChildren_(Node *node, const Node *original = nullptr);
 };
 
 
