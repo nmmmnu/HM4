@@ -880,12 +880,12 @@ namespace avl_impl_{
 } // namespace avl_impl_
 
 template<class T_Allocator>
-void AVLList<T_Allocator>::testALVTreeIntegrity(std::false_type) const{
+void AVLList<T_Allocator>::testIntegrity(std::false_type) const{
 	return avl_impl_::testALVTreeIntegrity<0>(root_);
 }
 
 template<class T_Allocator>
-void AVLList<T_Allocator>::testALVTreeIntegrity(std::true_type) const{
+void AVLList<T_Allocator>::testIntegrity(std::true_type) const{
 	return avl_impl_::testALVTreeIntegrity<1>(root_);
 }
 

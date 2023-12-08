@@ -93,6 +93,10 @@ public:
 		return *allocator_;
 	}
 
+	template<bool B>
+	static constexpr void testIntegrity(std::bool_constant<B>){
+	}
+
 public:
 	template<bool B>
 	iterator find(std::string_view const key, std::bool_constant<B> exact) const;

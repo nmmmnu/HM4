@@ -119,8 +119,8 @@ public:
 	}
 
 public:
-	void testALVTreeIntegrity(std::false_type) const;
-	void testALVTreeIntegrity(std::true_type) const;
+	void testIntegrity(std::false_type) const;
+	void testIntegrity(std::true_type) const;
 	size_t height() const;
 
 private:
