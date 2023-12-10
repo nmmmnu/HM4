@@ -19,7 +19,9 @@ namespace hm4{
 
 		proceedInsertHint_skipMutableNotify(pair, factory);
 
-		lc.upd(old_bytes, factory.bytes());
+		auto const new_bytes = pair->bytes();
+
+		lc.upd(old_bytes, new_bytes);
 
 		return true;
 	}

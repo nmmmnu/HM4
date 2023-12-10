@@ -260,4 +260,5 @@ Changelog
 -	fix incompatibility with PHPRedis when using functions returning TYPE
 -	fix bug in AVLList with AVLList::erase_, affecting only the development version.
 -	fix bug in AVLList with AVLList::rebalanceAfterErase_, affecting only the development version.
-
+-	update software prefetch
+-	fix bug with misscalculation of bytes in INFO command

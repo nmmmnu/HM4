@@ -286,9 +286,10 @@ template<class List, class PairFactory>
 constexpr void proceedInsertHint(List &list, const Pair *pair, PairFactory &factory){
 	PairFactoryMutableNotifyMessage msg;
 	msg.bytes_old = pair->bytes();
-	msg.bytes_new = factory.bytes();
 
 	proceedInsertHint_skipMutableNotify(pair, factory);
+
+	msg.bytes_new = pair->bytes();
 
 	list.mutable_notify(pair, msg);
 }
