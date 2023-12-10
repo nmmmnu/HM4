@@ -29,8 +29,8 @@ struct LinkList<T_Allocator>::Node{
 		constexpr bool use_prefetch = true;
 
 		if constexpr(use_prefetch){
-			builtin_prefetch(this->data, 0, 1);
-			builtin_prefetch(this->next, 0, 1);
+			builtin_prefetch(this->data);
+			builtin_prefetch(this->next);
 		}
 	}
 };

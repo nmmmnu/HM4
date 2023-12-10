@@ -29,7 +29,7 @@ namespace{
 			constexpr bool use_prefetch = true;
 
 			if constexpr(use_prefetch)
-				builtin_prefetch(p, 0, 1);
+				builtin_prefetch(p);
 		};
 
 		return ::binarySearchPrefetch(std::begin(v), std::end(v), key, comp, prefetch);

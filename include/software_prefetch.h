@@ -5,19 +5,20 @@ namespace builtin_prefetch_config{
 		constexpr bool USE_PREFETCH = true;
 }
 
-
 	#ifndef __clang__
 
-		template<typename ...Ts>
-		constexpr void builtin_prefetch(const void *addr, Ts ...ts){
+		constexpr void builtin_prefetch(const void *addr){
 			if constexpr(builtin_prefetch_config::USE_PREFETCH){
-				__builtin_prefetch(addr, std::forward<Ts>(ts)...);
+				__builtin_prefetch(addr, 0, 1);
 			}
 		}
 
 	#else
-		// clang have problem with forwarding parameters to __builtin_prefetch
-		constexpr void builtin_prefetch(const void *, ...){
+
+		inline void builtin_prefetch(const void *addr){
+			if constexpr(builtin_prefetch_config::USE_PREFETCH){
+				__builtin_prefetch(addr, 0, 1);
+			}
 		}
 
 	#endif

@@ -103,8 +103,8 @@ public:
 		constexpr bool use_prefetch = true;
 
 		if constexpr(use_prefetch){
-			builtin_prefetch(& this->data.back(), 0, 1);
-			builtin_prefetch(this->next[height], 0, 1);
+			builtin_prefetch(& this->data.back());
+			builtin_prefetch(this->next[height]);
 		}
 	}
 

@@ -85,8 +85,8 @@ namespace binary_search_impl_{
 				auto const start1 = mid + 1;
 				auto const end1 = mid;
 
-				builtin_prefetch( & array[ start1 + ((end  - start1) >> 1) ], 0, 1);
-				builtin_prefetch( & array[ start  + ((end1 - start ) >> 1) ], 0, 1);
+				builtin_prefetch( & array[ start1 + ((end  - start1) >> 1) ]);
+				builtin_prefetch( & array[ start  + ((end1 - start ) >> 1) ]);
 
 				user_prefetch(      array[ start1 + ((end  - start1) >> 1) ] );
 				user_prefetch(      array[ start1 + ((end  - start1) >> 1) ] );
