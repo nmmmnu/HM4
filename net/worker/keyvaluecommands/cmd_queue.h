@@ -114,7 +114,7 @@ namespace net::worker::commands::Queue{
 				if (it->isOK()){
 					// case 2.1. control key is valid, go to case 3
 
-					logger<Logger::DEBUG>() << "Control key" << key << "is valid";
+					logger<Logger::DEBUG>() << "SPOP: Control key" << key << "is valid";
 
 					return collect_(
 						key,
@@ -126,7 +126,7 @@ namespace net::worker::commands::Queue{
 				}else{
 					// case 2.2. control key is NOT valid, go to case 3
 
-					logger<Logger::DEBUG>() << "Control key" << key << "is NOT valid";
+					logger<Logger::DEBUG>() << "SPOP: Control key" << key << "is NOT valid";
 
 					++it;
 				}
@@ -134,7 +134,7 @@ namespace net::worker::commands::Queue{
 
 			// case 3, search next keys...
 
-			logger<Logger::DEBUG>() << "Next key for control key" << key;
+			logger<Logger::DEBUG>() << "SPOP: Next key for control key" << key;
 
 			return collect_(
 				key,
@@ -155,18 +155,18 @@ namespace net::worker::commands::Queue{
 				auto const &key = it->getKey();
 
 				if (! same_prefix(control_key, key)){
-					logger<Logger::DEBUG>() << "New prefix, done";
+					logger<Logger::DEBUG>() << "SPOP: New prefix, done";
 					return finalizeEnd_(control_key, list, result);
 				}
 
 				if (it->isOK()){
-					logger<Logger::DEBUG>() << "Valid key, done";
+					logger<Logger::DEBUG>() << "SPOP: Valid key, done";
 					auto const &val = it->getVal();
 					return finalizeOK_(control_key, key, val, list, result, iterations);
 				}
 
 				if (++iterations > ITERATIONS){
-					logger<Logger::DEBUG>() << "Lots of iterations, done";
+					logger<Logger::DEBUG>() << "SPOP: Lots of iterations, done";
 					return finalizeTryAgain_(control_key, key, list, result);
 				}
 			}
@@ -183,6 +183,7 @@ namespace net::worker::commands::Queue{
 
 			if (iterations > ITERATIONS_UPDATE_CONTROL_KEY){
 				// update control key...
+				logger<Logger::DEBUG>() << "SPOP: Update control key" << control_key << "to" << key;
 				hm4::insert(list, control_key, key);
 			}
 
@@ -194,6 +195,7 @@ namespace net::worker::commands::Queue{
 
 		void finalizeTryAgain_(std::string_view control_key, std::string_view key, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			// update control key...
+			logger<Logger::DEBUG>() << "SPOP: Update control key" << control_key << "to" << key;
 			hm4::insert(list, control_key, key);
 
 			// there is no valid data key.
@@ -205,6 +207,7 @@ namespace net::worker::commands::Queue{
 			// delete control key...
 			// better don't, because else there will be lots of syncs if new data come.
 			if constexpr(0){
+				logger<Logger::DEBUG>() << "SPOP: Remove control key" << control_key;
 				hm4::erase(list, control_key);
 			}
 

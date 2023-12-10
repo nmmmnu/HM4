@@ -25,6 +25,13 @@ function rawCommand(){
 	return call_user_func_array( [ $redis, "rawCommand" ], $args );
 }
 
+function prefixCleanup_($redis, $prefix){
+	$last = "$prefix";
+	while ($last = rawCommand($redis, "xndel", $last, $prefix)){
+	//	echo "last: $last\n";
+	}
+}
+
 
 
 $redis = new Redis();
