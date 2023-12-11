@@ -379,6 +379,14 @@ namespace net::worker::commands::CMS{
 		void process_(std::string_view key, ParamContainer const &p, Matrix<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob) const{
 			using namespace cms_impl_;
 
+			auto const varg = 5;
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto const &val = *itk;
+
+				if (val.empty())
+					return;
+			}
+
 			const auto *pair = hm4::getPair_(list, key, [max_size = cms.bytes()](bool b, auto it) -> const hm4::Pair *{
 				if (b && it->getVal().size() == max_size)
 					return & *it;
@@ -386,25 +394,31 @@ namespace net::worker::commands::CMS{
 					return nullptr;
 			});
 
-			if (! pair)
-				return result.set_0();
-
 			auto &container  = blob.container;
-			auto &bcontainer = blob.bcontainer;
+
+			if (container.capacity() < p.size() - varg)
+				return;
 
 			container.clear();
-			bcontainer.clear();
 
-			auto const varg = 5;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &item = *itk;
+			if (! pair){
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+					container.push_back("0");
+				}
+			}else{
+				auto &bcontainer = blob.bcontainer;
+				bcontainer.clear();
 
-				auto const n = cms_count(cms, pair->getValC(), item);
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+					auto const &item = *itk;
 
-				bcontainer.push_back();
+					auto const n = cms_count(cms, pair->getValC(), item);
 
-				container.push_back( to_string(n, bcontainer.back()) );
+					bcontainer.push_back();
+
+					container.push_back( to_string(n, bcontainer.back()) );
+				}
 			}
 
 			return result.set_container(container);

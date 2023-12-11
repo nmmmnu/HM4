@@ -38,7 +38,7 @@ return array(
 	new Cmd(
 			"CMSCOUNT",
 
-			"BFEXISTS key key W_width D_depth integer_size value",
+			"CMSCOUNT key key W_width D_depth integer_size value",
 
 			"Check estimated count of <i>value</i> that may be present into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />" .
 			"Read CMS information document.",

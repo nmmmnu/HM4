@@ -15,8 +15,6 @@ function cmd_QUEUE($redis){
 			expect("SPOP", false);
 	}
 
-	$redis->del("a");
-
 	expect("SPOP", true);
 
 	prefixCleanup_($redis, "a~");

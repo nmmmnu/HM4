@@ -252,11 +252,6 @@ namespace net::worker::commands::BF{
 
 			auto data = hm4::getPairVal(*db, key);
 
-			if (data.empty())
-				return result.set_0();
-
-
-
 			auto &container = blob.container;
 
 			if (container.capacity() < p.size() - varg)
@@ -264,12 +259,19 @@ namespace net::worker::commands::BF{
 
 			container.clear();
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &val = *itk;
+			if (data.empty()){
+				// no set-size yet :)
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+					container.emplace_back("0");
+				}
+			}else{
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+					auto const &val = *itk;
 
-				bool const b = bf_exists(max_bits, max_hash, data.data(), val);
+					bool const b = bf_exists(max_bits, max_hash, data.data(), val);
 
-				container.emplace_back(b ? "1" : "0");
+					container.emplace_back(b ? "1" : "0");
+				}
 			}
 
 			return result.set_container(container);

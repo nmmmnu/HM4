@@ -2,6 +2,7 @@
 
 function cmd_BITSET($redis){
 	$redis->del("a");
+	$redis->del("b");
 
 	expect("BITGET",	$redis->getbit("a", 5		) == 0		);
 
@@ -25,6 +26,10 @@ function cmd_BITSET($redis){
 	$x = rawCommand($redis, "bitmget", "a", 1, 5, 6);
 
 	expect("BITMGET",	$x[0] == 0 && $x[1] == 1 && $x[2] == 1		);
+
+	$x = rawCommand($redis, "bitmget", "b", 1, 5, 6);
+
+	expect("BITMGET",	$x[0] == 0 && $x[1] == 0 && $x[2] == 0		);
 
 	expect("BITSET",	true	);
 	expect("BITMSET",	true	);

@@ -262,3 +262,5 @@ Changelog
 -	fix bug in AVLList with AVLList::rebalanceAfterErase_, affecting only the development version.
 -	update software prefetch
 -	fix bug with misscalculation of bytes in INFO command
+-	fix bug with BFMEXISTS, CMSMCOUNT when accessing empty key.
+
