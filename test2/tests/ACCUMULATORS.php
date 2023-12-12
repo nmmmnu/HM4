@@ -12,8 +12,6 @@ function cmd_ACCUMULATORS_testXN($redis, $cmd, $key, $prefix, $result){
 function cmd_ACCUMULATORS_testXR($redis, $cmd, $key, $prefix, $result){
 	$x = rawCommand($redis, $cmd, $key, $prefix);
 
-	print_r($x);
-
 	expect("$cmd count",	count($x) == 2				);
 	expect("$cmd result",	$x[0] == $result			);
 	expect("$cmd next",	$x[1] == ''				);
