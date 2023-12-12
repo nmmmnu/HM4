@@ -27,7 +27,7 @@ return array(
 			"<br />" .
 			"xnget u:001: 1000 u:001:</pre>",
 
-			"<pre>select key, val from table where key >= [key] and key like '[key]%' limit [number]</pre>"
+			"<pre>select key, val from table where key >= [key] and key like '[prefix]%' limit [number]</pre>"
 	),
 	new Cmd(
 			"XRGET",

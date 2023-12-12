@@ -30,7 +30,7 @@ return array(
 			"getx    dom:google: 1000 dom:google:<br />" .
 			"count   dom:google: 1000 dom:google:</pre>",
 
-			"<pre>select count(*) from table where key >= [key] and key like '[key]%' limit [number]</pre>"
+			"<pre>select count(*) from table where key >= [key] and key like '[prefix]%' limit [number]</pre>"
 	),
 
 	new Cmd(
@@ -65,7 +65,7 @@ return array(
 			"getx visits:2020   1000 visits:2020<br />" .
 			"sum  visits:2020   1000 visits:2020</pre>",
 
-			"<pre>select sum(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>"
+			"<pre>select sum(val) from table where key >= [key] and key like '[prefix]%' limit [number]</pre>"
 	),
 
 	new Cmd(
@@ -161,7 +161,7 @@ return array(
 			"xnget visits:2020   1000 visits:2020<br />" .
 			"xnsum visits:2020        visits:2020</pre>",
 
-			"<pre>select sum(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>"
+			"<pre>select sum(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>"
 	),
 
 	new Cmd(
@@ -226,7 +226,7 @@ return array(
 			"xnget visits:2020   1000 visits:2020<br />" .
 			"xnmin visits:2020        visits:2020</pre>",
 
-			"<pre>select min(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>"
+			"<pre>select min(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>"
 	),
 
 	new Cmd(
@@ -291,7 +291,7 @@ return array(
 			"xnget visits:2020   1000 visits:2020<br />" .
 			"xnmax visits:2020        visits:2020</pre>",
 
-			"<pre>select max(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>"
+			"<pre>select max(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>"
 	),
 
 	new Cmd(
@@ -356,7 +356,7 @@ return array(
 			"xnget   visits:2020   1000 visits:2020<br />" .
 			"xnfirst visits:2020        visits:2020</pre>",
 
-			"<pre>select first(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
+			"<pre>select first(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>" .
 			"(Note MySQL does not support first(), but PostgreSQL does)"
 	),
 
@@ -423,7 +423,7 @@ return array(
 			"xnget  visits:2020   1000 visits:2020<br />" .
 			"xnlast visits:2020        visits:2020</pre>",
 
-			"<pre>select last(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
+			"<pre>select last(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>" .
 			"(Note MySQL does not support last(), but PostgreSQL does)"
 	),
 
@@ -493,7 +493,7 @@ return array(
 			"xnget visits:2020   1000 visits:2020<br />" .
 			"xnavg visits:2020        visits:2020</pre>",
 
-			"<pre>select avg(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>" .
+			"<pre>select avg(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>" .
 			"(Note MySQL also will do fake average, if fhis statement is used)"
 	),
 

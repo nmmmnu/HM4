@@ -518,7 +518,7 @@
 						<h3>Example:</h3>
 			<pre>set u:001:name  John<br />set u:001:city  LA<br />set u:001:state CA<br />set u:001:phone 1.800.12345678<br /><br />xnget u:001: 1000 u:001:</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select key, val from table where key >= [key] and key like '[key]%' limit [number]</pre>			
+			<pre>select key, val from table where key >= [key] and key like '[prefix]%' limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRGET">
@@ -662,7 +662,7 @@
 						<h3>Example:</h3>
 			<pre>set dom:google:google.com  some_data<br />set dom:google:youtube.com some_data<br />set dom:google:gmail.com   some_data<br />set dom:google:blogger.com some_data<br />set dom:google:abc.xyz     some_data<br /><br />getx    dom:google: 1000 dom:google:<br />count   dom:google: 1000 dom:google:</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select count(*) from table where key >= [key] and key like '[key]%' limit [number]</pre>			
+			<pre>select count(*) from table where key >= [key] and key like '[prefix]%' limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="SUM">
@@ -687,7 +687,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />getx visits:202001 1000 visits:202001<br />sum  visits:202001 1000 visits:202001<br /><br />getx visits:2020   1000 visits:2020<br />sum  visits:2020   1000 visits:2020</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select sum(val) from table where key >= [key] and key like '[key]%' limit [number]</pre>			
+			<pre>select sum(val) from table where key >= [key] and key like '[prefix]%' limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XNCOUNT">
@@ -762,7 +762,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnsum visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnsum visits:2020        visits:2020</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select sum(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
+			<pre>select sum(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRSUM">
@@ -812,7 +812,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmin visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmin visits:2020        visits:2020</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select min(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
+			<pre>select min(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRMIN">
@@ -862,7 +862,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnmax visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnmax visits:2020        visits:2020</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select max(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>			
+			<pre>select max(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRMAX">
@@ -912,7 +912,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget   visits:202001 1000 visits:202001<br />xnfirst visits:202001      visits:202001<br /><br />xnget   visits:2020   1000 visits:2020<br />xnfirst visits:2020        visits:2020</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select first(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>(Note MySQL does not support first(), but PostgreSQL does)			
+			<pre>select first(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>(Note MySQL does not support first(), but PostgreSQL does)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRFIRST">
@@ -962,7 +962,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget  visits:202001 1000 visits:202001<br />xnlast visits:202001      visits:202001<br /><br />xnget  visits:2020   1000 visits:2020<br />xnlast visits:2020        visits:2020</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select last(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>(Note MySQL does not support last(), but PostgreSQL does)			
+			<pre>select last(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>(Note MySQL does not support last(), but PostgreSQL does)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRLAST">
@@ -1012,7 +1012,7 @@
 						<h3>Example:</h3>
 			<pre>set visits:20200101 123<br />set visits:20200102 263<br />set visits:20200103 173<br />set visits:20200104 420<br />set visits:20200105 345<br /><br />xnget visits:202001 1000 visits:202001<br />xnavg visits:202001      visits:202001<br /><br />xnget visits:2020   1000 visits:2020<br />xnavg visits:2020        visits:2020</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select avg(val) from table where key >= [key] and key like '[key]%' limit 65'536</pre>(Note MySQL also will do fake average, if fhis statement is used)			
+			<pre>select avg(val) from table where key >= [key] and key like '[prefix]%' limit 65'536</pre>(Note MySQL also will do fake average, if fhis statement is used)			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XRAVG">
