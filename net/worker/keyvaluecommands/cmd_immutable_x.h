@@ -95,7 +95,7 @@ namespace net::worker::commands::ImmutableX{
 						return tail(pkey);
 
 					if (stop(key))
-						return; // no tail
+						return tail(); // no tail
 
 					if (! it->isOK())
 						continue;
