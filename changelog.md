@@ -264,3 +264,5 @@ Changelog
 -	fix bug with misscalculation of bytes in INFO command
 -	fix bug with BFMEXISTS, CMSMCOUNT when accessing empty key.
 -	fix feature with XNGET / XRGET where result have no "tail"
+-	increase Redis param buffer to 256
+

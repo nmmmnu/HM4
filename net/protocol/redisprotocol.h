@@ -61,7 +61,7 @@ public:
 	constexpr static inline std::string_view	ENDLN		= "\r\n";
 
 public:
-	constexpr static inline size_t			MAX_PARAMS	= 25;
+	constexpr static inline size_t			MAX_PARAMS	= 256;
 
 	static_assert(MAX_PARAMS >= 7, "7 params is the minimum - pfmerge dest a b c d e");
 
@@ -74,6 +74,7 @@ public:
 	//
 	// changed to 25, because redis on the web, have similar limit.
 	// del a b c...
+	// changed to 128, because of geoadd.
 
 public:
 	using Status = ProtocolStatus;
