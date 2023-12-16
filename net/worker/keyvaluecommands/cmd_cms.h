@@ -380,12 +380,9 @@ namespace net::worker::commands::CMS{
 			using namespace cms_impl_;
 
 			auto const varg = 5;
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &val = *itk;
-
-				if (val.empty())
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
-			}
 
 			const auto *pair = hm4::getPair_(list, key, [max_size = cms.bytes()](bool b, auto it) -> const hm4::Pair *{
 				if (b && it->getVal().size() == max_size)

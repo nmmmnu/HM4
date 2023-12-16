@@ -5,6 +5,7 @@
 #include <algorithm>	// std::clamp
 
 #include "shared_stoppredicate.h"
+#include "shared_hash.h"
 
 namespace net::worker::commands::ImmutableX{
 	namespace immutablex_impl_{
@@ -30,13 +31,6 @@ namespace net::worker::commands::ImmutableX{
 					std::clamp<uint64_t>(a, MIN_ITERATIONS, ITERATIONS)
 				);
 			};
-
-
-
-			template<class DBAdapter>
-			constexpr static std::size_t MAX_HKEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-							- DBAdapter::SEPARATOR.size()
-							- 16;
 
 
 
@@ -231,14 +225,14 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			auto const key   = p[1];
-			auto const count = myClamp(p[2]);
-			auto const end   = p[3];
+			auto const key		= p[1];
+			auto const count	= myClamp(p[2]);
+			auto const keyEnd	= p[3];
 
-			if (end.empty())
+			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
-			StopRangePredicate stop{ end };
+			StopRangePredicate stop{ keyEnd };
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count					,
@@ -377,14 +371,14 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			auto const key   = p[1];
-			auto const count = myClamp(p[2]);
-			auto const end   = p[3];
+			auto const key		= p[1];
+			auto const count	= myClamp(p[2]);
+			auto const keyEnd	= p[3];
 
-			if (end.empty())
+			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
-			StopRangePredicate stop{ end };
+			StopRangePredicate stop{ keyEnd };
 
 			accumulateResultsXKeys<AccumulateOutput::KEYS_WITH_TAIL>(
 				count					,
@@ -478,7 +472,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
+			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
@@ -529,7 +523,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
+			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
@@ -580,7 +574,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
+			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
@@ -629,7 +623,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
+			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);

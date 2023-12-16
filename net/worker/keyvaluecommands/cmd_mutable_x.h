@@ -273,15 +273,15 @@ namespace net::worker::commands::MutableX{
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &key		= p[1];
-			auto const &end		= p[2];
+			auto const &keyEnd	= p[2];
 
-			if (end.empty())
+			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			using namespace mutablex_impl_;
 
 			DeletePredicate<DBAdapter>	pred;
-			StopRangePredicate		stop{ end };
+			StopRangePredicate		stop{ keyEnd };
 			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
@@ -311,6 +311,10 @@ namespace net::worker::commands::MutableX{
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!hm4::isHKeyValid(keyN))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -378,15 +382,15 @@ namespace net::worker::commands::MutableX{
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &key		= p[1];
-			auto const &end		= p[2];
+			auto const &keyEnd	= p[2];
 
-			if (end.empty())
+			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			using namespace mutablex_impl_;
 
 			PersistPredicate<DBAdapter>	pred;
-			StopRangePredicate		stop{ end };
+			StopRangePredicate		stop{ keyEnd };
 			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
@@ -416,6 +420,9 @@ namespace net::worker::commands::MutableX{
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!hm4::isHKeyValid(keyN))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -485,15 +492,15 @@ namespace net::worker::commands::MutableX{
 
 			auto const &key		= p[1];
 			auto const exp		= from_string<uint32_t>(p[2]);
-			auto const &end		= p[3];
+			auto const &keyEnd	= p[3];
 
-			if (end.empty())
+			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			using namespace mutablex_impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
-			StopRangePredicate		stop{ end };
+			StopRangePredicate		stop{ keyEnd };
 			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
@@ -523,6 +530,9 @@ namespace net::worker::commands::MutableX{
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!hm4::isHKeyValid(keyN))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -594,15 +604,15 @@ namespace net::worker::commands::MutableX{
 
 			auto const &key		= p[1];
 			auto const time		= from_string<uint32_t>(p[2]);
-			auto const &end		= p[3];
+			auto const &keyEnd	= p[3];
 
-			if (end.empty())
+			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			using namespace mutablex_impl_;
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
-			StopRangePredicate		stop{ end };
+			StopRangePredicate		stop{ keyEnd };
 			return process_x(pred, stop, *db, key, result, blob.pcontainer);
 		}
 
@@ -632,6 +642,9 @@ namespace net::worker::commands::MutableX{
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!hm4::isHKeyValid(keyN))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 

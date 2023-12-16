@@ -2,6 +2,8 @@
 #include "pair_vfactory.h"
 #include "mytime.h"
 
+#include "shared_hash.h"
+
 namespace net::worker::commands::Mutable{
 
 
@@ -269,10 +271,6 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
@@ -287,7 +285,7 @@ namespace net::worker::commands::Mutable{
 			if (subN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+			if (!hm4::isHKeyValid(keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
@@ -321,10 +319,6 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			// should be even number arguments
 			// mset a sub1 5 sub2 6
@@ -333,7 +327,7 @@ namespace net::worker::commands::Mutable{
 
 			const auto &keyN = p[1];
 
-			if (keyN.empty())
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const varg = 2;
@@ -344,10 +338,10 @@ namespace net::worker::commands::Mutable{
 				if (subN.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+				if (!hm4::isHKeyValid(keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
+				if (auto const &val = *std::next(itk); !hm4::Pair::isValValid(val))
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
@@ -511,10 +505,6 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
@@ -532,7 +522,7 @@ namespace net::worker::commands::Mutable{
 				if (subN.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+				if (!hm4::isHKeyValid(keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 

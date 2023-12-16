@@ -1,7 +1,7 @@
 #include "base.h"
 #include "mystring.h"
 
-
+#include "shared_hash.h"
 
 namespace net::worker::commands::Immutable{
 
@@ -309,25 +309,21 @@ namespace net::worker::commands::Immutable{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
-			const auto &keyN = p[1];
+			auto const &keyN = p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			const auto &subN = p[2];
+			auto const &subN = p[2];
 
 			if (subN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+			if (!hm4::isHKeyValid(keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
@@ -355,10 +351,6 @@ namespace net::worker::commands::Immutable{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
@@ -373,7 +365,7 @@ namespace net::worker::commands::Immutable{
 			auto const varg = 2;
 
 			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
@@ -381,7 +373,7 @@ namespace net::worker::commands::Immutable{
 				if (subN.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+				if (!hm4::isHKeyValid(keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -418,10 +410,6 @@ namespace net::worker::commands::Immutable{
 			return std::end(cmd);
 		};
 
-		constexpr static std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- DBAdapter::SEPARATOR.size()
-						- 16;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -436,7 +424,7 @@ namespace net::worker::commands::Immutable{
 			if (subN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
+			if (!hm4::isHKeyValid(keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);

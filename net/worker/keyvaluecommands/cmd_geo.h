@@ -112,6 +112,16 @@ namespace net::worker::commands::Geo{
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 3){
+				auto const &name = *(itk + 2);
+
+				if (name.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_NAME);
+
+				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			}
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 3){
 				auto const lat = to_geo(*(itk + 0));
 				auto const lon = to_geo(*(itk + 1));
 
@@ -125,8 +135,7 @@ namespace net::worker::commands::Geo{
 
 				auto const &name = *(itk + 2);
 
-				if (getKeySize(db, keyN, name) > hm4::PairConf::MAX_KEY_SIZE)
-					continue;
+				// The size is lreay checked
 
 				auto const key = concatenateBuffer(blob.buffer_key,
 								keyN			,
@@ -224,10 +233,19 @@ namespace net::worker::commands::Geo{
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto const &name = *(itk + 2);
+
+				if (name.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_NAME);
+
+				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			}
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
-				if (getKeySize(db, keyN, name) > hm4::PairConf::MAX_KEY_SIZE)
-					continue;
+				// The size is lreay checked
 
 				auto const key = concatenateBuffer(blob.buffer_key,
 								keyN			,
@@ -294,8 +312,11 @@ namespace net::worker::commands::Geo{
 
 			auto const &name = p[2];
 
-			if (getKeySize(db, keyN, name) > hm4::PairConf::MAX_KEY_SIZE)
-				return result.set("");
+			if (name.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_NAME);
+
+			if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key,
 							keyN			,
@@ -343,6 +364,16 @@ namespace net::worker::commands::Geo{
 
 			auto const varg = 2;
 
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto const &name = *itk;
+
+				if (name.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_NAME);
+
+				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			}
+
 			if (container.capacity() < p.size() - varg)
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
@@ -351,10 +382,7 @@ namespace net::worker::commands::Geo{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
-				if (getKeySize(db, keyN, name) > hm4::PairConf::MAX_KEY_SIZE){
-					container.emplace_back();
-					continue;
-				}
+				// The size is lreay checked
 
 				auto const key = concatenateBuffer(blob.buffer_key,
 								keyN			,
@@ -403,6 +431,13 @@ namespace net::worker::commands::Geo{
 
 			if (getKeySize(db, keyN, "") > hm4::PairConf::MAX_KEY_SIZE)
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+			{
+				constexpr std::string_view name = "";
+
+				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			}
 
 			GeoHash::Point me{
 					to_geo(p[2]),
@@ -491,7 +526,7 @@ namespace net::worker::commands::Geo{
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
-			auto const &keyN  = p[1];
+			auto const &keyN = p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
@@ -500,13 +535,27 @@ namespace net::worker::commands::Geo{
 
 			auto const &name1 = p[2];
 
-			if (name1.empty() || getKeySize(db, keyN, name1) > hm4::PairConf::MAX_KEY_SIZE)
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			{
+				auto const &name = name1;
+
+				if (name.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_NAME);
+
+				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			}
 
 			auto const &name2 = p[3];
 
-			if (name2.empty() || getKeySize(db, keyN, name2) > hm4::PairConf::MAX_KEY_SIZE)
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			{
+				auto const &name = name2;
+
+				if (name.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_NAME);
+
+				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			}
 
 			// ---
 
@@ -521,7 +570,7 @@ namespace net::worker::commands::Geo{
 			auto line = hm4::getPairVal(*db, key);
 
 			if (line.empty())
-				return result.set("-1");
+				return result.set(int64_t{-1});
 
 			auto const p1 = tokenizePoint(line);
 
@@ -538,7 +587,7 @@ namespace net::worker::commands::Geo{
 			line = hm4::getPairVal(*db, key);
 
 			if (line.empty())
-				return result.set("-1");
+				return result.set(int64_t{-1});
 
 			auto const p2 = tokenizePoint(line);
 

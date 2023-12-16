@@ -91,7 +91,6 @@ namespace net::worker::commands::Accumulators{
 
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
 			void execCommand_(std::string_view key, uint32_t count, std::string_view prefix, List &list, Result<Protocol> &result){
-
 				StopPredicate stop{ prefix };
 
 				auto const [ data, lastKey ] = accumulateResults<Accumulator>(

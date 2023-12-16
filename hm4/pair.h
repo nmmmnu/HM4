@@ -475,13 +475,25 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		constexpr
 		static bool isValValid(size_t size) noexcept{
-			return	size <= PairConf::MAX_VAL_SIZE;
+			return size <= PairConf::MAX_VAL_SIZE;
 		}
 
 		[[nodiscard]]
 		constexpr
 		static bool isValValid(std::string_view val) noexcept{
-			return	isValValid(val.size());
+			return isValValid(val.size());
+		}
+
+		[[nodiscard]]
+		constexpr
+		static bool isValValidNZ(size_t size) noexcept{
+			return size > 0 && size <= PairConf::MAX_VAL_SIZE;
+		}
+
+		[[nodiscard]]
+		constexpr
+		static bool isValValidNZ(std::string_view val) noexcept{
+			return isValValidNZ(val.size());
 		}
 
 	private:

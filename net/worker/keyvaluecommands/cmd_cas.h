@@ -30,12 +30,12 @@ namespace net::worker::commands::CAS{
 
 			const auto &old_val = p[2];
 
-			if (old_val.empty())
+			if (!hm4::Pair::isValValidNZ(old_val))
 				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			const auto &val = p[3];
 
-			if (val.empty() || !hm4::Pair::isValValid(val))
+			if (!hm4::Pair::isValValidNZ(val))
 				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){
@@ -84,7 +84,7 @@ namespace net::worker::commands::CAS{
 
 			const auto &old_val = p[2];
 
-			if (old_val.empty())
+			if (!hm4::Pair::isValValidNZ(old_val))
 				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){

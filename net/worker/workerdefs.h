@@ -52,6 +52,7 @@ struct ResultErrorMessages_EN{
 
 	constexpr static std::string_view EMPTY_KEY		= "The key can not be empty";
 	constexpr static std::string_view EMPTY_VAL		= "The value can not be empty";
+	constexpr static std::string_view EMPTY_NAME		= "The name can not be empty";
 	constexpr static std::string_view EMPTY_PREFIX		= "The prefix can not be empty";
 	constexpr static std::string_view EMPTY_ENDCOND		= "The end condition can not be empty";
 

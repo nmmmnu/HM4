@@ -243,12 +243,9 @@ namespace net::worker::commands::BF{
 			auto const max_hash = std::clamp<size_t		>(from_string<size_t	>(p[3]), 1,		HASH_MAX	);
 
 			auto const varg = 4;
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &val = *itk;
-
-				if (val.empty())
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
-			}
 
 			auto data = hm4::getPairVal(*db, key);
 
