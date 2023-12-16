@@ -18,7 +18,7 @@ namespace net::worker::commands::Reload{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
 			db->crontab();
 
@@ -43,7 +43,7 @@ namespace net::worker::commands::Reload{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
 			db.save();
 
@@ -69,7 +69,7 @@ namespace net::worker::commands::Reload{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
 			db.reload();
 

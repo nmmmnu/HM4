@@ -48,8 +48,6 @@ namespace net::worker::commands{
 		BufferContainer	bcontainer;
 	};
 
-
-
 	template<class Protocol>
 	class Result{
 		Protocol	&protocol_;
@@ -85,6 +83,14 @@ namespace net::worker::commands{
 			protocol_.response_ok(buffer_);
 		}
 
+		void set_error(std::string_view errorMessage){
+			assert(!errorMessage.empty());
+
+			set_status_(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_error(buffer_, errorMessage);
+		}
 
 		void set(){
 			set_status_(Status::OK);

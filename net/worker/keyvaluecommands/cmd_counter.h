@@ -12,17 +12,17 @@ namespace net::worker::commands::Counter{
 			template<int Sign, class Protocol, class List>
 			void do_incr_decr(ParamContainer const &p, List &list, Result<Protocol> &result){
 				if (p.size() != 2 && p.size() != 3)
-					return;
+					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_12);
 
 				const auto &key = p[1];
 
 				if (!hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
 
 				if (n == 0)
-					return;
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 
 

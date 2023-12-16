@@ -170,7 +170,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
@@ -185,7 +185,7 @@ namespace net::worker::commands::ImmutableX{
 			auto const prefix = p[3];
 
 			if (prefix.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			StopPrefixPredicate stop{ prefix };
 
@@ -221,7 +221,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
@@ -236,7 +236,7 @@ namespace net::worker::commands::ImmutableX{
 			auto const end   = p[3];
 
 			if (end.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			StopRangePredicate stop{ end };
 
@@ -271,7 +271,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 
 
@@ -317,7 +317,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
@@ -332,7 +332,7 @@ namespace net::worker::commands::ImmutableX{
 			auto const prefix = p[3];
 
 			if (prefix.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			StopPrefixPredicate stop{ prefix };
 
@@ -367,7 +367,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
@@ -382,7 +382,7 @@ namespace net::worker::commands::ImmutableX{
 			auto const end   = p[3];
 
 			if (end.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			StopRangePredicate stop{ end };
 
@@ -417,7 +417,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 
 
@@ -463,7 +463,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 
 
@@ -476,10 +476,10 @@ namespace net::worker::commands::ImmutableX{
 			auto const keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -514,7 +514,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 
 
@@ -527,10 +527,10 @@ namespace net::worker::commands::ImmutableX{
 			auto const keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -565,7 +565,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 
 
@@ -578,10 +578,10 @@ namespace net::worker::commands::ImmutableX{
 			auto const keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -616,7 +616,7 @@ namespace net::worker::commands::ImmutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 
 
@@ -627,10 +627,10 @@ namespace net::worker::commands::ImmutableX{
 			auto const keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() > MAX_HKEY_SIZE<DBAdapter>)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 

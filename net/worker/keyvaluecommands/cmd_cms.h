@@ -97,25 +97,25 @@ namespace net::worker::commands::CMS{
 			using namespace cms_impl_;
 
 			if (p.size() < 7 || p.size() % 2 == 0)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const w = from_string<uint64_t>(p[2]);
 			auto const d = from_string<uint64_t>(p[3]);
 			auto const t = from_string<uint8_t>(p[4]);
 
 			if (w == 0 || d == 0)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto f = [&](auto x) {
 				using T = typename decltype(x)::type;
 
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
-					return; // emit an error
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
 					return process_(key, p, Matrix<T>(w, d), *db, result);
 				}
@@ -131,14 +131,14 @@ namespace net::worker::commands::CMS{
 
 			if (cms.bytes() > MAX_SIZE){
 				// emit an error
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
 
 			auto const varg = 5;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
 				if (const auto &val = *itk; val.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			const auto *pair = hm4::getPair_(list, key, [max_size = cms.bytes()](bool b, auto it) -> const hm4::Pair *{
 				if (b && it->getVal().size() == max_size)
@@ -212,25 +212,25 @@ namespace net::worker::commands::CMS{
 			using namespace cms_impl_;
 
 			if (p.size() != 5)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);
 			auto const d = std::max<uint64_t>(from_string<uint64_t>(p[3]), 1);
 			auto const t = from_string<uint8_t>(p[4]);
 
 			if (w == 0 || d == 0)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto f = [&](auto x) {
 				using T = typename decltype(x)::type;
 
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
-					return; // emit an error
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
 					return process_(key, Matrix<T>(w, d), *db, result);
 				}
@@ -246,7 +246,7 @@ namespace net::worker::commands::CMS{
 
 			if (cms.bytes() > MAX_SIZE){
 				// emit an error
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
 
 			hm4::insertV<hm4::PairFactory::Reserve>(list, key, cms.bytes());
@@ -276,19 +276,19 @@ namespace net::worker::commands::CMS{
 			using namespace cms_impl_;
 
 			if (p.size() != 6)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);
 			auto const d = std::max<uint64_t>(from_string<uint64_t>(p[3]), 1);
 			auto const t = from_string<uint8_t>(p[4]);
 
 			if (w == 0 || d == 0)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			const auto &val = p[5];
 
@@ -296,7 +296,7 @@ namespace net::worker::commands::CMS{
 				using T = typename decltype(x)::type;
 
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
-					return; // emit an error
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
 					return process_(key, val, Matrix<T>(w, d), *db, result);
 				}
@@ -347,25 +347,25 @@ namespace net::worker::commands::CMS{
 			using namespace cms_impl_;
 
 			if (p.size() < 6)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);
 			auto const d = std::max<uint64_t>(from_string<uint64_t>(p[3]), 1);
 			auto const t = from_string<uint8_t>(p[4]);
 
 			if (w == 0 || d == 0)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto f = [&](auto x) {
 				using T = typename decltype(x)::type;
 
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
-					return; // emit an error
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
 					return process_(key, p, Matrix<T>(w, d), *db, result, blob);
 				}
@@ -384,7 +384,7 @@ namespace net::worker::commands::CMS{
 				auto const &val = *itk;
 
 				if (val.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
 			const auto *pair = hm4::getPair_(list, key, [max_size = cms.bytes()](bool b, auto it) -> const hm4::Pair *{
@@ -397,7 +397,7 @@ namespace net::worker::commands::CMS{
 			auto &container  = blob.container;
 
 			if (container.capacity() < p.size() - varg)
-				return;
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			container.clear();
 

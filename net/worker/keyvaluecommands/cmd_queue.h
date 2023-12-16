@@ -32,20 +32,20 @@ namespace net::worker::commands::Queue{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3 && p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() > MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const &val = p[2];
 
 			if (!hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
@@ -87,16 +87,16 @@ namespace net::worker::commands::Queue{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			// GET
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() > MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -189,8 +189,6 @@ namespace net::worker::commands::Queue{
 
 			// delete data key...
 			hm4::erase(list, key);
-
-			return;
 		}
 
 		void finalizeTryAgain_(std::string_view control_key, std::string_view key, typename DBAdapter::List &list, Result<Protocol> &result) const{

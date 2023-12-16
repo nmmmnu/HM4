@@ -18,24 +18,25 @@ namespace net::worker::commands::CAS{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4 && p.size() != 5)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
+
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &old_val = p[2];
 
 			if (old_val.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			const auto &val = p[3];
 
 			if (val.empty() || !hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){
 				// SET
@@ -72,19 +73,19 @@ namespace net::worker::commands::CAS{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			// GET
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &old_val = p[2];
 
 			if (old_val.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it && it->getVal() == old_val){
 				// DEL

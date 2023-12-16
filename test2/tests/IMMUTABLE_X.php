@@ -1,5 +1,5 @@
 <?php
-require_once("sample_data.php");
+require_once(__DIR__ . "/../sample_data.php");
 
 function cmd_IMMUTABLE_X($redis){
 	sampleData_insert($redis);

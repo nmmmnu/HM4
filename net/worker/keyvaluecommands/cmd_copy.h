@@ -15,22 +15,22 @@ namespace net::worker::commands::Copy{
 			template<CPMVOperation operation, class Protocol, class List>
 			void cpmv(ParamContainer const &p, List &list, Result<Protocol> &result){
 				if (p.size() != 3)
-					return;
+					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 				// GET
 
 				const auto &key = p[1];
 
 				if (!hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				const auto &newkey = p[2];
 
 				if (!hm4::Pair::isKeyValid(newkey))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (key == newkey)
-					return;
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 				if constexpr(operation == CPMVOperation::CP_NX || operation == CPMVOperation::MV_NX){
 

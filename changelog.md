@@ -265,4 +265,4 @@ Changelog
 -	fix bug with BFMEXISTS, CMSMCOUNT when accessing empty key.
 -	fix feature with XNGET / XRGET where result have no "tail"
 -	increase Redis param buffer to 256
-
+-	add Redis user readable error messages

@@ -146,21 +146,21 @@ namespace net::worker{
 			// ERROR
 
 			if (status == Status::ERROR)
-				return error::InternalError(protocol_, buffer);
+				return emitInternalError(protocol_, buffer);
 
 			// FETCH command
 
 			const auto &p = protocol_.getParams();
 
 			if (p.empty())
-				return error::BadRequest(protocol_, buffer);
+				return emitError(protocol_, buffer, ResultErrorMessages::SYS_PROTOCOL_BREAK);
 
 			// EXEC command
 
 			auto it = map_.find(p.front());
 
 			if (it == std::end(map_))
-				return error::NotImplemented(protocol_, buffer);
+				return emitError(protocol_, buffer, ResultErrorMessages::SYS_NOT_IMPLEMENTED);
 
 			// LOG command
 			if constexpr(LogCommands)
@@ -189,7 +189,7 @@ namespace net::worker{
 			using cs = commands::Status;
 
 			if (output_buffer_.size() == 0){
-				return error::BadRequest(protocol_, buffer);
+				return emitError(protocol_, buffer, ResultErrorMessages::SYS_UNHANDLED);
 			}
 
 			switch(result.getStatus()){

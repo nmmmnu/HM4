@@ -235,13 +235,13 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &key		= p[1];
 			auto const &prefix	= p[2];
 
 			if (prefix.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			using namespace mutablex_impl_;
 
@@ -270,13 +270,13 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &key		= p[1];
 			auto const &end		= p[2];
 
 			if (end.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			using namespace mutablex_impl_;
 
@@ -305,12 +305,12 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			auto const &keyN	= p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -340,13 +340,13 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &key		= p[1];
 			auto const &prefix	= p[2];
 
 			if (prefix.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			using namespace mutablex_impl_;
 
@@ -375,13 +375,13 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &key		= p[1];
 			auto const &end		= p[2];
 
 			if (end.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			using namespace mutablex_impl_;
 
@@ -410,12 +410,12 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			auto const &keyN	= p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -445,14 +445,14 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &key		= p[1];
 			auto const exp		= from_string<uint32_t>(p[2]);
 			auto const &prefix	= p[3];
 
 			if (prefix.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			using namespace mutablex_impl_;
 
@@ -481,14 +481,14 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &key		= p[1];
 			auto const exp		= from_string<uint32_t>(p[2]);
 			auto const &end		= p[3];
 
 			if (end.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			using namespace mutablex_impl_;
 
@@ -517,12 +517,12 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &keyN	= p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
@@ -554,14 +554,14 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &key		= p[1];
 			auto const time		= from_string<uint32_t>(p[2]);
 			auto const &prefix	= p[3];
 
 			if (prefix.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 			using namespace mutablex_impl_;
 
@@ -590,14 +590,14 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &key		= p[1];
 			auto const time		= from_string<uint32_t>(p[2]);
 			auto const &end		= p[3];
 
 			if (end.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
 			using namespace mutablex_impl_;
 
@@ -626,12 +626,12 @@ namespace net::worker::commands::MutableX{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &keyN	= p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 

@@ -107,14 +107,14 @@ namespace net::worker::commands::Accumulators{
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
 			void execCommandLimit(ParamContainer const &p, List &list, Result<Protocol> &result){
 				if (p.size() != 4)
-					return;
+					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 				auto const key    = p[1];
 				auto const count  = myClamp(p[2]);
 				auto const prefix = p[3];
 
 				if (prefix.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 				return execCommand_<Accumulator, StopPredicate>(key, count, prefix, list, result);
 			}
@@ -122,13 +122,13 @@ namespace net::worker::commands::Accumulators{
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
 			void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
 				if (p.size() != 3)
-					return;
+					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 				auto const key    = p[1];
 				auto const prefix = p[2];
 
 				if (prefix.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
 				return execCommand_<Accumulator, StopPredicate>(key, ITERATIONS, prefix, list, result);
 			}

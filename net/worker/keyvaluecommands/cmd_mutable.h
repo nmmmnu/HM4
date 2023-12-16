@@ -18,15 +18,15 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
 			auto const &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const &val = p[2];
 			if (!hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
@@ -57,16 +57,16 @@ namespace net::worker::commands::Mutable{
 			// should be odd number arguments
 			// mset a 5 b 6
 			if (p.size() < 3 || p.size() % 2 == 0)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -101,16 +101,16 @@ namespace net::worker::commands::Mutable{
 			// should be odd number arguments
 			// mset a 5 b 6
 			if (p.size() < 3 || p.size() % 2 == 0)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
 			// check if any key exists
@@ -154,23 +154,23 @@ namespace net::worker::commands::Mutable{
 			// should be odd number arguments
 			// mset a 5 b 6
 			if (p.size() < 3 || p.size() % 2 == 0)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
 			auto &container = blob.pcontainer;
 
 			// theoretically can happen
 			if (p.size() / 2 > container.capacity())
-				return;
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			container.clear();
 
@@ -234,15 +234,15 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const &val = p[3];
 			if (!hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			auto const exp  = from_string<uint32_t>(p[2]);
 
@@ -275,26 +275,26 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4 && p.size() != 5)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &subN = p[2];
 
 			if (subN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
 			auto const &val = p[3];
 			if (!hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			auto const exp  = p.size() == 5 ? from_string<uint32_t>(p[4]) : 0;
 
@@ -329,12 +329,12 @@ namespace net::worker::commands::Mutable{
 			// should be even number arguments
 			// mset a sub1 5 sub2 6
 			if (p.size() < 3 || p.size() % 2 != 0)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const varg = 2;
 
@@ -342,13 +342,13 @@ namespace net::worker::commands::Mutable{
 				auto const &subN = *itk;
 
 				if (subN.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
-					return;
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -383,17 +383,17 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
 			// GET
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &val = p[2];
 			if (!hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			if ( hm4::getPairOK(*db, key) ){
 				return result.set(false);
@@ -428,17 +428,17 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
 			// GET
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &val = p[2];
 			if (!hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
@@ -475,13 +475,13 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &key = *itk;
@@ -517,12 +517,12 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const varg = 2;
 
@@ -530,10 +530,10 @@ namespace net::worker::commands::Mutable{
 				const auto &subN = *itk;
 
 				if (subN.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
-					return;
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
@@ -567,17 +567,17 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			// GET
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			std::string_view const val_new = p[2];
 			if (!hm4::Pair::isValValid(val_new))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
@@ -636,13 +636,13 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			// GET
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
@@ -678,13 +678,13 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			// GET
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
@@ -732,13 +732,13 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			// GET
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// SET
@@ -778,13 +778,13 @@ namespace net::worker::commands::Mutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			// GET
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (auto *it = hm4::getPairPtrNC(*db, key); it){
 				// SET

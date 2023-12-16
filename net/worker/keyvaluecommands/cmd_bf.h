@@ -59,14 +59,14 @@ namespace net::worker::commands::BF{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 5)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
 			using namespace bf_impl_;
 
 			const auto &key		= p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);
 			auto const max_hash = std::clamp<size_t		>(from_string<size_t	>(p[3]), 1,		HASH_MAX	);
@@ -76,7 +76,7 @@ namespace net::worker::commands::BF{
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &val = *itk; val.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			const auto *pair = hm4::getPair_(*db, key, [max_size](bool b, auto it) -> const hm4::Pair *{
 				if (b && it->getVal().size() == max_size)
@@ -145,12 +145,12 @@ namespace net::worker::commands::BF{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			const auto &key		= p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace bf_impl_;
 
@@ -183,14 +183,14 @@ namespace net::worker::commands::BF{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 5)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
 			using namespace bf_impl_;
 
 			const auto &key		= p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);
 			auto const max_hash = std::clamp<size_t		>(from_string<size_t	>(p[3]), 1,		HASH_MAX	);
@@ -198,7 +198,7 @@ namespace net::worker::commands::BF{
 			const auto &val		= p[4];
 
 			if (val.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			auto data = hm4::getPairVal(*db, key);
 
@@ -230,14 +230,14 @@ namespace net::worker::commands::BF{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 5)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
 			using namespace bf_impl_;
 
 			const auto &key		= p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);
 			auto const max_hash = std::clamp<size_t		>(from_string<size_t	>(p[3]), 1,		HASH_MAX	);
@@ -247,7 +247,7 @@ namespace net::worker::commands::BF{
 				auto const &val = *itk;
 
 				if (val.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
 			auto data = hm4::getPairVal(*db, key);
@@ -255,7 +255,7 @@ namespace net::worker::commands::BF{
 			auto &container = blob.container;
 
 			if (container.capacity() < p.size() - varg)
-				return;
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			container.clear();
 

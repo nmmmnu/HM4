@@ -19,7 +19,7 @@ namespace net::worker::commands::Murmur{
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2 || p.size() > 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_234);
 
 			auto const &val = p[1];
 

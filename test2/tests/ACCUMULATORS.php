@@ -1,5 +1,5 @@
 <?php
-require_once("sample_data.php");
+require_once(__DIR__ . "/../sample_data.php");
 
 function cmd_ACCUMULATORS_testXN($redis, $cmd, $key, $prefix, $result){
 	$x = rawCommand($redis, $cmd, $key, $prefix);

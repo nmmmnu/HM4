@@ -115,15 +115,15 @@ namespace net::worker::commands::MutableGET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &val = p[2];
 			if (!hm4::Pair::isValValid(val))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			using namespace mutable_get_impl_;
 
@@ -152,11 +152,11 @@ namespace net::worker::commands::MutableGET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace mutable_get_impl_;
 
@@ -185,11 +185,11 @@ namespace net::worker::commands::MutableGET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const exp		= from_string<uint32_t>(p[2]);
 
@@ -220,11 +220,11 @@ namespace net::worker::commands::MutableGET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const time		= from_string<uint32_t>(p[2]);
 
@@ -255,11 +255,11 @@ namespace net::worker::commands::MutableGET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace mutable_get_impl_;
 

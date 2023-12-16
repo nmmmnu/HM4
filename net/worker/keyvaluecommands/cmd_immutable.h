@@ -19,12 +19,12 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			return result.set(
 				hm4::getPairVal(*db, key)
@@ -51,18 +51,18 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
 			auto &container = blob.container;
 
 			auto const varg = 1;
 
 			if (container.capacity() < p.size() - varg)
-				return;
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			container.clear();
 
@@ -93,12 +93,12 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			return result.set(
 				hm4::getPairOK(*db, key)
@@ -125,12 +125,12 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			uint64_t const ttl = hm4::getPair_(*db, key, [](bool b, auto it){
 				return b ? it->getTTL() : 0;
@@ -159,12 +159,12 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			uint64_t const time = hm4::getPair_(*db, key, [](bool b, auto it){
 				return b ? it->getExpiresAt() : 0;
@@ -193,12 +193,12 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const *pair = hm4::getPairPtrNC(*db, key);
 
@@ -234,14 +234,14 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			const auto &key   = p[1];
 			auto const start  = from_string<uint64_t>(p[2]);
 			auto const finish = from_string<uint64_t>(p[3]);
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (finish < start)
 				return result.set("");
@@ -276,12 +276,12 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			return result.set(
 				hm4::getPair_(*db, key, [](bool b, auto it) -> uint64_t{
@@ -315,20 +315,20 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &subN = p[2];
 
 			if (subN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 
@@ -361,28 +361,28 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto &container = blob.container;
 
 			auto const varg = 2;
 
 			if (container.capacity() < p.size() - varg)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
 				if (subN.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (keyN.size() + subN.size() > MAX_KEY_SIZE)
-					return;
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
 			container.clear();
@@ -424,20 +424,20 @@ namespace net::worker::commands::Immutable{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto &subN = p[2];
 
 			if (subN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (keyN.size() + subN.size() > MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
 

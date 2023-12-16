@@ -100,12 +100,12 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 5 || p.size() % 3 != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
 
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace geo_impl_;
 
@@ -212,12 +212,12 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace geo_impl_;
 
@@ -283,12 +283,12 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace geo_impl_;
 
@@ -330,12 +330,12 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace geo_impl_;
 
@@ -344,7 +344,7 @@ namespace net::worker::commands::Geo{
 			auto const varg = 2;
 
 			if (container.capacity() < p.size() - varg)
-				return;
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			container.clear();
 
@@ -392,17 +392,17 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 5)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
 			auto const &keyN = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace geo_impl_;
 
 			if (getKeySize(db, keyN, "") > hm4::PairConf::MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			GeoHash::Point me{
 					to_geo(p[2]),
@@ -489,24 +489,24 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &keyN  = p[1];
 
 			if (keyN.empty())
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace geo_impl_;
 
 			auto const &name1 = p[2];
 
 			if (name1.empty() || getKeySize(db, keyN, name1) > hm4::PairConf::MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const &name2 = p[3];
 
 			if (name2.empty() || getKeySize(db, keyN, name2) > hm4::PairConf::MAX_KEY_SIZE)
-				return;
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			// ---
 
@@ -575,7 +575,7 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			using namespace geo_impl_;
 
@@ -614,7 +614,7 @@ namespace net::worker::commands::Geo{
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			using namespace geo_impl_;
 

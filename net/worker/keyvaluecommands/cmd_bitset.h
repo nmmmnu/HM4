@@ -31,19 +31,19 @@ namespace net::worker::commands::BITSET{
 			// should be even number arguments
 			// bitset key 5 1 6 0
 			if (p.size() < 4 || p.size() % 2 == 1)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
 
 			using namespace bit_impl_;
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const [ok, bytes] = getBytes__(p);
 
 			if (!ok)
-				return;
+				return result.set_error(ResultErrorMessages::INTERNAL_ERROR);
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
@@ -144,14 +144,14 @@ namespace net::worker::commands::BITSET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			using namespace bit_impl_;
 
 			const auto &key		= p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto n     	= from_string<size_type>(p[2]);
 
@@ -194,21 +194,21 @@ namespace net::worker::commands::BITSET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
 			using namespace bit_impl_;
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto &container = blob.container;
 
 			auto const varg = 2;
 
 			if (container.capacity() < p.size() - varg)
-				return;
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			const char *data = hm4::getPair_(*db, key, [](bool b, auto it) -> const char *{
 				if (b)
@@ -259,12 +259,12 @@ namespace net::worker::commands::BITSET{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 			const auto &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 
 

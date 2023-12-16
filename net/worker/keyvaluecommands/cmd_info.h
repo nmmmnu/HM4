@@ -182,9 +182,9 @@ namespace net::worker::commands::Info{
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
-			auto const&message = p[1];
+			auto const &message = p[1];
 
 			// message seamlessly, go to output buffer,
 			// without interfering the input buffer.

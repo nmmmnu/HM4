@@ -86,18 +86,18 @@ namespace net::worker::commands::HLL{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
 			auto const &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &val = *itk; val.empty())
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			using namespace hll_impl_;
 
@@ -167,12 +167,12 @@ namespace net::worker::commands::HLL{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
 			auto const &key = p[1];
 
 			if (!hm4::Pair::isKeyValid(key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace hll_impl_;
 
@@ -208,13 +208,13 @@ namespace net::worker::commands::HLL{
 
 			// we support intersect of up to 5 sets
 			if (p.size() > 6)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_LESS_PARAMS_5);
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			MySpan<const std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
 
@@ -253,13 +253,13 @@ namespace net::worker::commands::HLL{
 				return result.set_0();
 
 		//	if (p.size() < 2)
-		//		return;
+		//		return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
 			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace hll_impl_;
 
@@ -302,18 +302,18 @@ namespace net::worker::commands::HLL{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
-				return;
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
 			const auto &dest_key = p[1];
 
 			if (!hm4::Pair::isKeyValid(dest_key))
-				return;
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return;
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace hll_impl_;
 
