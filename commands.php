@@ -214,6 +214,7 @@ function getData(){
 		"(collection module) hash"	=> require "$d/commands_hash.php"		,
 		"queue"				=> require "$d/commands_queue.php"		,
 		"bitset"			=> require "$d/commands_bitset.php"		,
+		"geo"				=> require "$d/commands_geo.php"		,
 		"hll"				=> require "$d/commands_hll.php"		,
 		"bf"				=> require "$d/commands_bf.php"			,
 		"cms"				=> require "$d/commands_cms.php"		,

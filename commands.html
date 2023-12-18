@@ -229,6 +229,19 @@
 				<li><a href="#BITMAX">BITMAX</a></li>
 				</div>
 			<div>
+			<b>geo.h</b><br />
+			&nbsp;
+
+					<li><a href="#GEOADD">GEOADD</a></li>
+				<li><a href="#GEOREM">GEOREM</a></li>
+				<li><a href="#GEOGET">GEOGET</a></li>
+				<li><a href="#GEOMGET">GEOMGET</a></li>
+				<li><a href="#GEORADIUS">GEORADIUS</a></li>
+				<li><a href="#GEODIST">GEODIST</a></li>
+				<li><a href="#GEOENCODE">GEOENCODE</a></li>
+				<li><a href="#GEODECODE">GEODECODE</a></li>
+				</div>
+			<div>
 			<b>hll.h</b><br />
 			&nbsp;
 
@@ -2295,6 +2308,198 @@
 			<h3>Return value:</h3>
 			Maximum suported index.
 			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEOADD">
+
+			<h2>GEOADD key latitude longitude name [latitude longitude name]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEOADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Adds the specified geospatial items (<i>latitude</i>, <i>longitude</i>, <i>name</i>) to the specified <i>key</i>.<br />Command is not Redis compatible, because <i>latitude</i> and <i>longitude</i> are not in the same order as in Redis.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+						<h3>Example:</h3>
+			<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />xnget  places 1000 places</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEOREM">
+
+			<h2>GEOREM / GEOREMOVE / GEODEL key name [name]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEOREM</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes the specified geospatial items (<i>name</i>) from the specified <i>key</i>.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+						<h3>Example:</h3>
+			<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />xnget  places 1000 places<br />georem places Chevermeto<br />xnget  places 1000 places</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEOGET">
+
+			<h2>GEOGET key name</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEOGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Retrieve the specified geospatial item (<i>name</i>) from the specified <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			[latitude],[longitude],[geohash]
+						<h3>Example:</h3>
+			<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />geoget places Boho<br />geoget places Chevermeto</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEOMGET">
+
+			<h2>GEOMGET key name [name]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEOMGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Retrieve the specified geospatial items (<i>name</i>) from the specified <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array
+						<h3>Example:</h3>
+			<pre>geoadd  places 42.69174997126510 23.32100561258516 Boho<br />geoadd  places 42.68342508736217 23.31633975360111 Chevermeto<br />geomget places Boho Chevermeto NonExistent</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEORADIUS">
+
+			<h2>GEORADIUS / GEORADIUS_RO key latitude longitude radius</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEORADIUS</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 9, 6, 4, 2 }</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Retrieve all geospatial items from the specified <i>key</i> that are within <i>radius</i> <b>meters</b> from specific <i>latitude</i> <i>longitude</i> position.<br />Unlike Redis, this works only in meters.<br />Similar to Redis this works only on planet Earth :)
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array
+						<h3>Example:</h3>
+			<pre>geoadd    places 42.69174997126510 23.32100561258516 Boho<br />geoadd    places 42.68342508736217 23.31633975360111 Chevermeto<br />georadius places 42.69209558730095 23.32479448130661 450</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEODIST">
+
+			<h2>GEODIST key name1 name2</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEODIST</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Return the distance between two members (<i>name1</i> and <i>name2</i>) from the <i>key</i><br />Unlike Redis, this works only in meters.<br />Similar to Redis this works only on planet Earth :)
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array
+						<h3>Example:</h3>
+			<pre>geoadd  places 42.69174997126510 23.32100561258516 Boho<br />geoadd  places 42.68342508736217 23.31633975360111 Chevermeto<br />geodist places Boho Chevermeto</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEOENCODE">
+
+			<h2>GEOENCODE latitude longitude</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEOENCODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N/A</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Encode <i>latitude</i> and <i>longitude</i> into geohash
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			[latitude],[longitude],[geohash]
+						<h3>Example:</h3>
+			<pre>geoencode 42.69174997126510 23.32100561258516</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEODECODE">
+
+			<h2>GEODECODE geohash</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEODECODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N/A</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Encode <i>geohash</i> into latitude and longitude.<br />Note if you encode coordinates into geohash and then decode the hash, result may be slightly different coordinates
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			[latitude],[longitude],[geohash]
+						<h3>Example:</h3>
+			<pre>geodecode sx8dfevc6z40</pre>			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
