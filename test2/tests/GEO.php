@@ -90,6 +90,7 @@ function cmd_GEO($redis){
 		"Level Up",		7,
 		"Luchiano",		31,
 		"Umamido",		66,
+		"Ceiba",		82,
 	];
 
 	expect("GEORADIUS", $x == $e );
