@@ -267,4 +267,5 @@ Changelog
 -	increase Redis param buffer to 256
 -	add Redis user readable error messages
 -	fix error with GEORADIUS cells enumeration
+-	Release
 
