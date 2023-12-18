@@ -266,3 +266,5 @@ Changelog
 -	fix feature with XNGET / XRGET where result have no "tail"
 -	increase Redis param buffer to 256
 -	add Redis user readable error messages
+-	fix error with GEORADIUS cells enumeration
+

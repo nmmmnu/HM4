@@ -37,14 +37,14 @@ namespace net::worker::commands::Geo{
 					return { buffer.data(), result.size };
 			}
 
-			template<class DBAdapter>
-			constexpr auto getKeySize(DBAdapter &, std::string_view key, std::string_view name){
-				return	key.size()			+
-					DBAdapter::SEPARATOR.size()	+
-					GeoHash::MAX_SIZE		+
-					DBAdapter::SEPARATOR.size()	+
+			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name = ""){
+				return hm4::Pair::isKeyValid(
+					key.size()		+
+					1			+
+					GeoHash::MAX_SIZE	+
+					1			+
 					name.size()
-				;
+				);
 			}
 
 			auto tokenizePoint(std::string_view line){
@@ -117,7 +117,7 @@ namespace net::worker::commands::Geo{
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+				if (!isGeoKeyValid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -233,12 +233,12 @@ namespace net::worker::commands::Geo{
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &name = *(itk + 2);
+				auto const &name = *itk;
 
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+				if (!isGeoKeyValid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -283,7 +283,8 @@ namespace net::worker::commands::Geo{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"georem",	"GEOREM"	,
-			"georemove",	"GEOREMOVE"
+			"georemove",	"GEOREMOVE"	,
+			"geodel",	"GEODEL"
 		};
 	};
 
@@ -315,7 +316,7 @@ namespace net::worker::commands::Geo{
 			if (name.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-			if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+			if (!isGeoKeyValid(keyN, name))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const key = concatenateBuffer(blob.buffer_key,
@@ -370,7 +371,7 @@ namespace net::worker::commands::Geo{
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+				if (!isGeoKeyValid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -429,13 +430,13 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
-			if (getKeySize(db, keyN, "") > hm4::PairConf::MAX_KEY_SIZE)
+			if (!isGeoKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			{
 				constexpr std::string_view name = "";
 
-				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+				if (!isGeoKeyValid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -454,6 +455,9 @@ namespace net::worker::commands::Geo{
 
 			auto const cells = GeoHash::nearbyCells(me, radius, sphere);
 
+		//	logger<Logger::DEBUG>() << "GeoHash searching" << me.lon << me.lat << radius;
+		//	logger<Logger::DEBUG>().range(std::begin(cells), std::end(cells));
+
 			uint32_t iterations = 0;
 
 			for(auto &hash : cells){
@@ -463,15 +467,18 @@ namespace net::worker::commands::Geo{
 								hash
 				);
 
-				logger<Logger::DEBUG>() << "GeoHash searching cell" << hash << prefix;
+				logger<Logger::DEBUG>() << "GeoHash searching cell" << hash << "prefix" << prefix;
 
 				// send query to DB
 				for(auto it = db->find(prefix, std::false_type{}); it != std::end(*db); ++it){
 					if (auto const &k = it->getKey(); ! same_prefix(prefix, k))
-						goto out;
+						break;
 
 					if (++iterations > ITERATIONS)
-						goto out;
+						return result.set_container(container);
+
+					if (!it->isOK())
+						continue;
 
 					auto const t_point = tokenizePoint(it->getVal());
 
@@ -494,9 +501,6 @@ namespace net::worker::commands::Geo{
 					}
 				}
 			}
-
-		// label for goto :)
-		out:
 
 			return result.set_container(container);
 		}
@@ -541,7 +545,7 @@ namespace net::worker::commands::Geo{
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+				if (!isGeoKeyValid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -553,7 +557,7 @@ namespace net::worker::commands::Geo{
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!hm4::Pair::isKeyValid(getKeySize(db, keyN, name)))
+				if (!isGeoKeyValid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 

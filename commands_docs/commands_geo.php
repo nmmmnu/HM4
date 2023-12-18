@@ -95,7 +95,7 @@ return array(
 			"array",
 			"array",
 			"1.3.4.2",
-			"N * READ, were N &isin; { 9, 6, 4, 2 }",
+			"N * READ, were N &isin; { 9, 6, 4, 2, 1 }",
 			false,
 			false,
 
