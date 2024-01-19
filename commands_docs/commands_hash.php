@@ -160,6 +160,25 @@ return array(
 
 
 	new Cmd(
+			"HMSET",
+
+			"HMSET key subkey value [subkey2] [value2]...",
+
+			"Set <i>key</i> -> <i>subkey</i> -> <i>value</i>, <i>key</i> -> <i>subkey2</i> -> <i>value2</i> hash.<br />" .
+			"Works exactly as Redis HMSET, except internally set key for each value.",
+			"OK",
+			"OK",
+			"1.2.17",
+			"WRITE",
+			true,
+			true,
+
+			"mutable"
+	),
+
+
+
+	new Cmd(
 			"HDEL",
 
 			"HDEL key subkey [subkey2]...",

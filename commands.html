@@ -205,6 +205,7 @@
 				<li><a href="#HMGET">HMGET</a></li>
 				<li><a href="#HEXISTS">HEXISTS</a></li>
 				<li><a href="#HSET">HSET</a></li>
+				<li><a href="#HMSET">HMSET</a></li>
 				<li><a href="#HDEL">HDEL</a></li>
 				<li><a href="#HDELALL">HDELALL</a></li>
 				<li><a href="#HPERSISTALL">HPERSISTALL</a></li>
@@ -2027,6 +2028,29 @@
 
 			<h3>Description:</h3>
 			Set <i>key</i> -> <i>subkey</i> -> <i>value</i> hash, with optional expiration of <i>seconds</i> seconds.<br />Works exactly as Redis HSET, except internally set key for each value.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HMSET">
+
+			<h2>HMSET key subkey value [subkey2] [value2]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HMSET</td></tr>
+				<tr><td>Available since		</td><td>1.2.17</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mutable.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>key</i> -> <i>subkey</i> -> <i>value</i>, <i>key</i> -> <i>subkey2</i> -> <i>value2</i> hash.<br />Works exactly as Redis HMSET, except internally set key for each value.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>

@@ -6,9 +6,15 @@
 
 namespace net::worker::commands::MortonCurve{
 	namespace morton_curve_impl_{
-		constexpr size_t subNSize = 8 * 2; // uint64_t as hex
+		using MC2Buffer = to_string_buffer_t;
 
-		using MC2Buffer = std::array<char, subNSize>;
+		constexpr size_t subNSize		= 8 * 2 + 1;	// uint64_t as hex + '\0'
+		constexpr size_t decryptedKeySize	= 10 + 2;	// 2 x uint32_t as dec + ',' + '\0'
+
+		static_assert(
+			to_string_buffer_t_size >= subNSize &&
+			to_string_buffer_t_size >= decryptedKeySize
+		);
 
 		constexpr bool isMC2KeyValid(std::string_view key){
 			return hm4::Pair::isKeyValid(key.size() + subNSize + 1 + 16);
