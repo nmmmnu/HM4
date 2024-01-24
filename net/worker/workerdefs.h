@@ -31,11 +31,12 @@ struct ResultErrorMessages_EN{
 	constexpr static std::string_view NEED_EXACT_PARAMS_2	= "The command needs exactly 2 parameters";
 	constexpr static std::string_view NEED_EXACT_PARAMS_3	= "The command needs exactly 3 parameters";
 	constexpr static std::string_view NEED_EXACT_PARAMS_4	= "The command needs exactly 4 parameters";
-	constexpr static std::string_view NEED_EXACT_PARAMS_5	= "The command needs exactly 4 parameters";
+	constexpr static std::string_view NEED_EXACT_PARAMS_5	= "The command needs exactly 5 parameters";
 
 	constexpr static std::string_view NEED_EXACT_PARAMS_12	= "The command needs exactly 1 or 2 parameters";
 	constexpr static std::string_view NEED_EXACT_PARAMS_23	= "The command needs exactly 2 or 3 parameters";
 	constexpr static std::string_view NEED_EXACT_PARAMS_34	= "The command needs exactly 3 or 4 parameters";
+	constexpr static std::string_view NEED_EXACT_PARAMS_67	= "The command needs exactly 6 or 7 parameters";
 	constexpr static std::string_view NEED_EXACT_PARAMS_234	= "The command needs exactly 2, 3 or 4 parameters";
 
 	constexpr static std::string_view NEED_MORE_PARAMS_1	= "The command needs 1 or more parameters";
