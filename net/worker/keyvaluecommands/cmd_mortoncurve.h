@@ -579,6 +579,80 @@ namespace net::worker::commands::MortonCurve{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct MC2ENCODE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			using namespace morton_curve_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			auto const &x = p[1];
+			auto const &y = p[2];
+
+			MC2Buffer buffer;
+
+			auto const hex = toHex(x, y, buffer);
+
+			return result.set(hex);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"mc2encode",	"MC2ENCODE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MC2DECODE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			using namespace morton_curve_impl_;
+
+			if (p.size() != 2)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
+
+			auto const &hex = p[1];
+
+			auto const z = hex_convert::fromHex<uint64_t>(hex);
+
+			auto const [x, y] = morton_curve::fromMorton2D(z);
+
+			MC2Buffer buffer[2];
+
+			const std::array<std::string_view, 2> container{
+				to_string(x, buffer[0]),
+				to_string(y, buffer[2])
+			};
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"mc2decode",	"MC2DECODE"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "morton_curve";
@@ -591,7 +665,9 @@ namespace net::worker::commands::MortonCurve{
 				MC2SET		,
 				MC2DEL		,
 				MC2XNGETNAIVE	,
-				MC2XNGET
+				MC2XNGET	,
+				MC2ENCODE	,
+				MC2DECODE
 			>(pack);
 		}
 	};
