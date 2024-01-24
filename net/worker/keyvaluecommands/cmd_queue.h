@@ -3,10 +3,10 @@
 #include "mystring.h"
 #include "logger.h"
 
+
 namespace net::worker::commands::Queue{
 	namespace queue_impl_{
-		constexpr static uint32_t ITERATIONS			= 65'536;
-		constexpr static uint32_t ITERATIONS_UPDATE_CONTROL_KEY	= 10;
+		using namespace net::worker::shared::config;
 
 		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
 	} // namespace
@@ -165,7 +165,7 @@ namespace net::worker::commands::Queue{
 					return finalizeOK_(control_key, key, val, list, result, iterations);
 				}
 
-				if (++iterations > ITERATIONS){
+				if (++iterations > ITERATIONS_LOOPS){
 					logger<Logger::DEBUG>() << "SPOP: Lots of iterations, done";
 					return finalizeTryAgain_(control_key, key, list, result);
 				}
@@ -181,7 +181,7 @@ namespace net::worker::commands::Queue{
 			// seamlessly send value to output buffer...
 			result.set(val);
 
-			if (iterations > ITERATIONS_UPDATE_CONTROL_KEY){
+			if (iterations > ITERATIONS_IDLE){
 				// update control key...
 				logger<Logger::DEBUG>() << "SPOP: Update control key" << control_key << "to" << key;
 				hm4::insert(list, control_key, key);

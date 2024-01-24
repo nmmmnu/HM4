@@ -6,10 +6,10 @@
 #include <string>
 #include <string_view>
 #include <array>	// buffer for to_chars
+#include <algorithm>	// clamp, copy_n for NOT_HAVE_CHARCONV
 
 #ifdef NOT_HAVE_CHARCONV
 #include <sstream>
-#include <algorithm>	// copy_n
 #else
 #include <charconv>	// to_chars
 #endif
@@ -204,6 +204,32 @@ using to_string_buffer_t = std::array<char, to_string_buffer_t_size>;
 	}
 
 #endif
+
+
+
+template<typename T>
+auto myClamp(std::string_view p, uint64_t min, uint64_t max){
+	// I already have trait for this,
+	// but I do not want to include it here.
+
+        static_assert(
+            std::is_same_v<T, uint8_t > ||
+            std::is_same_v<T, uint16_t> ||
+            std::is_same_v<T, uint32_t> ||
+            std::is_same_v<T, uint64_t>
+        );
+
+	// Using uint64_t from the user, allow more user-friendly behavour.
+	// Suppose he / she enters 1'000'000'000.
+	// Because this value is great than max uint32_t,
+	// The converted value will go to 0, then to MIN.
+
+	auto const a = from_string<uint64_t>(p);
+
+	return static_cast<T>(
+		std::clamp<uint64_t>(a, min, max)
+	);
+};
 
 
 

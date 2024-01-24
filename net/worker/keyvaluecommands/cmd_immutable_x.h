@@ -6,33 +6,15 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_hash.h"
+#include "shared_iterations.h"
 
 namespace net::worker::commands::ImmutableX{
 	namespace immutablex_impl_{
 
 		using namespace net::worker::shared::stop_predicate;
+		using namespace net::worker::shared::config;
 
 		namespace {
-
-			constexpr static uint32_t MIN_ITERATIONS	= 10;
-			constexpr static uint32_t ITERATIONS		= (OutputBlob::ContainerSize - 1) / 2;
-
-
-
-			auto myClamp(std::string_view p){
-				// using uint64_t from the user, allow more user-friendly behavour.
-				// suppose he / she enters 1'000'000'000.
-				// because this value is great than max uint32_t,
-				// the converted value will go to 0, then to MIN.
-
-				auto const a = from_string<uint64_t>(p);
-
-				return static_cast<uint32_t>(
-					std::clamp<uint64_t>(a, MIN_ITERATIONS, ITERATIONS)
-				);
-			};
-
-
 
 			enum class AccumulateOutput{
 				KEYS,
@@ -52,7 +34,9 @@ namespace net::worker::commands::ImmutableX{
 				for(;it != eit;++it){
 					auto const &key = it->getKey();
 
-					if (++iterations > ITERATIONS)
+					// should be ITERATIONS_LOOPS,
+					// but we use ITERATIONS_RESULTS to be same as if accumulated
+					if (++iterations > ITERATIONS_RESULTS)
 						break;
 
 					if (stop(key))
@@ -85,7 +69,7 @@ namespace net::worker::commands::ImmutableX{
 
 					auto pkey = projKey(key);
 
-					if (++iterations > ITERATIONS)
+					if (++iterations > ITERATIONS_RESULTS)
 						return tail(pkey);
 
 					if (stop(key))
@@ -163,19 +147,15 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace immutablex_impl_;
+
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
-			using namespace immutablex_impl_;
-
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-
-
-
 			auto const key    = p[1];
-			auto const count  = myClamp(p[2]);
+			auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
 			auto const prefix = p[3];
 
 			if (prefix.empty())
@@ -214,19 +194,15 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace immutablex_impl_;
+
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
-			using namespace immutablex_impl_;
-
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-
-
-
 			auto const key		= p[1];
-			auto const count	= myClamp(p[2]);
+			auto const count	= myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
 			auto const keyEnd	= p[3];
 
 			if (!hm4::Pair::isKeyValid(keyEnd))
@@ -264,19 +240,15 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace immutablex_impl_;
+
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 
 
-			using namespace immutablex_impl_;
-
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-
-
-
 			auto const key	 = p[1];
-			auto const count = myClamp(p[2]);
+			auto const count = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
 
 			StopUnboundPredicate stop;
 
@@ -310,19 +282,15 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace immutablex_impl_;
+
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
-			using namespace immutablex_impl_;
-
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-
-
-
 			auto const key    = p[1];
-			auto const count  = myClamp(p[2]);
+			auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
 			auto const prefix = p[3];
 
 			if (prefix.empty())
@@ -360,19 +328,15 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace immutablex_impl_;
+
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 
 
-			using namespace immutablex_impl_;
-
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-
-
-
 			auto const key		= p[1];
-			auto const count	= myClamp(p[2]);
+			auto const count	= myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
 			auto const keyEnd	= p[3];
 
 			if (!hm4::Pair::isKeyValid(keyEnd))
@@ -410,19 +374,15 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace immutablex_impl_;
+
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 
 
-			using namespace immutablex_impl_;
-
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
-
-
-
 			auto const key	 = p[1];
-			auto const count = myClamp(p[2]);
+			auto const count = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
 
 			StopUnboundPredicate stop;
 
@@ -456,14 +416,10 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			if (p.size() != 2)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
-
-
-
 			using namespace immutablex_impl_;
 
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
+			if (p.size() != 2)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 
 
@@ -478,7 +434,7 @@ namespace net::worker::commands::ImmutableX{
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::BOTH>(
-				ITERATIONS				,
+				ITERATIONS_RESULTS			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
@@ -507,14 +463,10 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			if (p.size() != 2)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
-
-
-
 			using namespace immutablex_impl_;
 
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
+			if (p.size() != 2)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 
 
@@ -529,7 +481,7 @@ namespace net::worker::commands::ImmutableX{
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::KEYS>(
-				ITERATIONS				,
+				ITERATIONS_RESULTS			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
@@ -558,14 +510,10 @@ namespace net::worker::commands::ImmutableX{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			if (p.size() != 2)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
-
-
-
 			using namespace immutablex_impl_;
 
-			static_assert(OutputBlob::ContainerSize >= 2 * ITERATIONS + 1);
+			if (p.size() != 2)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
 
 
@@ -580,7 +528,7 @@ namespace net::worker::commands::ImmutableX{
 			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::VALS>(
-				ITERATIONS				,
+				ITERATIONS_RESULTS			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,

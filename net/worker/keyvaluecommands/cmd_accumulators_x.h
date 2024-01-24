@@ -9,30 +9,9 @@ namespace net::worker::commands::Accumulators{
 	namespace acumulators_impl_{
 
 		using namespace net::worker::shared::stop_predicate;
+		using namespace net::worker::shared::config;
 
 		namespace{
-
-			constexpr static uint32_t MIN_ITERATIONS	= 10;
-			// this has nothing to do with the container size,
-			// but to be unified with cmd_mutable.h
-			constexpr static uint32_t ITERATIONS		= OutputBlob::ContainerSize; // 0xFFFF
-
-
-
-			auto myClamp(std::string_view p){
-				// using uint64_t from the user, allow more user-friendly behavour.
-				// suppose he / she enters 1'000'000'000.
-				// because this value is great than max uint32_t,
-				// the converted value will go to 0, then to MIN.
-
-				auto const a = from_string<uint64_t>(p);
-
-				return static_cast<uint32_t>(
-					std::clamp<uint64_t>(a, MIN_ITERATIONS, ITERATIONS)
-				);
-			};
-
-
 
 			template<class Accumulator, class It, class StopPredicate>
 			auto accumulateResults(uint32_t const maxResults, StopPredicate stop, It it, It eit){
@@ -44,7 +23,7 @@ namespace net::worker::commands::Accumulators{
 				for(;it != eit;++it){
 					auto const key = it->getKey();
 
-					if (++iterations > ITERATIONS)
+					if (++iterations > ITERATIONS_LOOPS)
 						return accumulator.result(key);
 
 					if (stop(key))
@@ -109,7 +88,7 @@ namespace net::worker::commands::Accumulators{
 					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 				auto const key    = p[1];
-				auto const count  = myClamp(p[2]);
+				auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_LOOPS);
 				auto const prefix = p[3];
 
 				if (prefix.empty())
@@ -129,7 +108,7 @@ namespace net::worker::commands::Accumulators{
 				if (prefix.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
-				return execCommand_<Accumulator, StopPredicate>(key, ITERATIONS, prefix, list, result);
+				return execCommand_<Accumulator, StopPredicate>(key, ITERATIONS_LOOPS, prefix, list, result);
 			}
 
 
