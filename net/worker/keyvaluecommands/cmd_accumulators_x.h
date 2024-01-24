@@ -23,7 +23,7 @@ namespace net::worker::commands::Accumulators{
 				for(;it != eit;++it){
 					auto const key = it->getKey();
 
-					if (++iterations > ITERATIONS_LOOPS)
+					if (++iterations > ITERATIONS_LOOPS_MAX)
 						return accumulator.result(key);
 
 					if (stop(key))
@@ -88,7 +88,7 @@ namespace net::worker::commands::Accumulators{
 					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 				auto const key    = p[1];
-				auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_LOOPS);
+				auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_LOOPS_MIN, ITERATIONS_LOOPS_MAX);
 				auto const prefix = p[3];
 
 				if (prefix.empty())
@@ -108,7 +108,7 @@ namespace net::worker::commands::Accumulators{
 				if (prefix.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
-				return execCommand_<Accumulator, StopPredicate>(key, ITERATIONS_LOOPS, prefix, list, result);
+				return execCommand_<Accumulator, StopPredicate>(key, ITERATIONS_LOOPS_MAX, prefix, list, result);
 			}
 
 

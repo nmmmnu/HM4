@@ -326,7 +326,7 @@ namespace net::worker::commands::Immutable{
 			if (!hm4::isHKeyValid(keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
 
 			return result.set(
 				hm4::getPairVal(*db, key)
@@ -382,7 +382,7 @@ namespace net::worker::commands::Immutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
-				auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
+				auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
 
 				container.emplace_back(
 					hm4::getPairVal(*db, key)
@@ -427,7 +427,7 @@ namespace net::worker::commands::Immutable{
 			if (!hm4::isHKeyValid(keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
 
 			return result.set(
 				hm4::getPairOK(*db, key)

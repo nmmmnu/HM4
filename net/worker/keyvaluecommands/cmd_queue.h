@@ -53,7 +53,7 @@ namespace net::worker::commands::Queue{
 
 			auto const &id = MyIDGenerator{}(buffer);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, id);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, id);
 
 			hm4::insert(*db, key, val, exp);
 
@@ -98,7 +98,7 @@ namespace net::worker::commands::Queue{
 			if (keyN.size() > MAX_KEY_SIZE)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			auto it = db->find(key, std::false_type{});
 
@@ -165,7 +165,7 @@ namespace net::worker::commands::Queue{
 					return finalizeOK_(control_key, key, val, list, result, iterations);
 				}
 
-				if (++iterations > ITERATIONS_LOOPS){
+				if (++iterations > ITERATIONS_LOOPS_MAX){
 					logger<Logger::DEBUG>() << "SPOP: Lots of iterations, done";
 					return finalizeTryAgain_(control_key, key, list, result);
 				}

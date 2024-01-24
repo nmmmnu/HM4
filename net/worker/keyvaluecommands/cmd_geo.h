@@ -137,7 +137,7 @@ namespace net::worker::commands::Geo{
 
 				// The size is lreay checked
 
-				auto const key = concatenateBuffer(blob.buffer_key,
+				auto const key = concatenateBuffer(blob.buffer_key[0],
 								keyN			,
 								DBAdapter::SEPARATOR	,
 							//	hash			,
@@ -161,7 +161,7 @@ namespace net::worker::commands::Geo{
 						logger<Logger::DEBUG>() << "GeoHash SKIP DEL key";
 					}else{
 						// using buffer_val in order to preserve buffer_key
-						auto const key_hash = concatenateBuffer(blob.buffer_val,
+						auto const key_hash = concatenateBuffer(blob.buffer_val[0],
 									keyN			,
 									DBAdapter::SEPARATOR	,
 									t_hash			,
@@ -184,7 +184,7 @@ namespace net::worker::commands::Geo{
 				logger<Logger::DEBUG>() << "GeoHash SET ctrl key" << key;
 				insert(*db, key, line);
 
-				auto const key_hash = concatenateBuffer(blob.buffer_key,
+				auto const key_hash = concatenateBuffer(blob.buffer_key[0],
 								keyN			,
 								DBAdapter::SEPARATOR	,
 								hash			,
@@ -247,7 +247,7 @@ namespace net::worker::commands::Geo{
 
 				// The size is lreay checked
 
-				auto const key = concatenateBuffer(blob.buffer_key,
+				auto const key = concatenateBuffer(blob.buffer_key[0],
 								keyN			,
 								DBAdapter::SEPARATOR	,
 							//	hash			,
@@ -261,7 +261,7 @@ namespace net::worker::commands::Geo{
 					auto const t_hash = tokenizeHash(val);
 
 					// using buffer_val in order to preserve buffer_key
-					auto const key_hash = concatenateBuffer(blob.buffer_val,
+					auto const key_hash = concatenateBuffer(blob.buffer_val[0],
 								keyN			,
 								DBAdapter::SEPARATOR	,
 								t_hash			,
@@ -319,7 +319,7 @@ namespace net::worker::commands::Geo{
 			if (!isGeoKeyValid(keyN, name))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key,
+			auto const key = concatenateBuffer(blob.buffer_key[0],
 							keyN			,
 							DBAdapter::SEPARATOR	,
 						//	hash			,
@@ -385,7 +385,7 @@ namespace net::worker::commands::Geo{
 
 				// The size is lreay checked
 
-				auto const key = concatenateBuffer(blob.buffer_key,
+				auto const key = concatenateBuffer(blob.buffer_key[0],
 								keyN			,
 								DBAdapter::SEPARATOR	,
 							//	hash			,
@@ -461,7 +461,7 @@ namespace net::worker::commands::Geo{
 			uint32_t iterations = 0;
 
 			for(auto &hash : cells){
-				auto const prefix = concatenateBuffer(blob.buffer_key,
+				auto const prefix = concatenateBuffer(blob.buffer_key[0],
 								keyN			,
 								DBAdapter::SEPARATOR	,
 								hash
@@ -563,7 +563,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto key = concatenateBuffer(blob.buffer_key,
+			auto key = concatenateBuffer(blob.buffer_key[0],
 							keyN			,
 							DBAdapter::SEPARATOR	,
 						//	hash			,
@@ -580,7 +580,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			key = concatenateBuffer(blob.buffer_key,
+			key = concatenateBuffer(blob.buffer_key[0],
 							keyN			,
 							DBAdapter::SEPARATOR	,
 						//	hash			,

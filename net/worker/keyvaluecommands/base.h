@@ -41,11 +41,11 @@ namespace net::worker::commands{
 			bcontainer.reserve(ContainerSize);
 		}
 
-		BufferKey	buffer_key;
-		BufferVal	buffer_val;
-		Container	container;
-		PairContainer	pcontainer;
-		BufferContainer	bcontainer;
+		std::array<BufferKey, 2>	buffer_key;
+		std::array<BufferVal, 1>	buffer_val;
+		Container			container;
+		PairContainer			pcontainer;
+		BufferContainer			bcontainer;
 	};
 
 	template<class Protocol>

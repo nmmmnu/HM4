@@ -288,7 +288,7 @@ namespace net::worker::commands::Mutable{
 			if (!hm4::isHKeyValid(keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
 
 			auto const &val = p[3];
 			if (!hm4::Pair::isValValid(val))
@@ -348,7 +348,7 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &subN = *itk;
 
-				auto const &key  = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
+				auto const &key  = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
 				auto const &val  = *std::next(itk);
 
 				hm4::insert(*db, key, val);
@@ -529,7 +529,7 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
-				auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR, subN);
+				auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
 
 				hm4::erase(*db, key);
 			}

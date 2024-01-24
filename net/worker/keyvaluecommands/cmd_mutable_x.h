@@ -316,7 +316,7 @@ namespace net::worker::commands::MutableX{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 
-			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const &prefix	= concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			using namespace mutablex_impl_;
 
@@ -424,7 +424,7 @@ namespace net::worker::commands::MutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const &prefix	= concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			using namespace mutablex_impl_;
 
@@ -534,7 +534,7 @@ namespace net::worker::commands::MutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const &prefix	= concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			auto const exp		= from_string<uint32_t>(p[2]);
 
@@ -646,7 +646,7 @@ namespace net::worker::commands::MutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const &prefix	= concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const &prefix	= concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			auto const time		= from_string<uint32_t>(p[2]);
 

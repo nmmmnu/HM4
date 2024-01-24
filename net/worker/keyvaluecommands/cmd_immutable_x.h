@@ -36,7 +36,7 @@ namespace net::worker::commands::ImmutableX{
 
 					// should be ITERATIONS_LOOPS,
 					// but we use ITERATIONS_RESULTS to be same as if accumulated
-					if (++iterations > ITERATIONS_RESULTS)
+					if (++iterations > ITERATIONS_RESULTS_MAX)
 						break;
 
 					if (stop(key))
@@ -69,7 +69,7 @@ namespace net::worker::commands::ImmutableX{
 
 					auto pkey = projKey(key);
 
-					if (++iterations > ITERATIONS_RESULTS)
+					if (++iterations > ITERATIONS_RESULTS_MAX)
 						return tail(pkey);
 
 					if (stop(key))
@@ -155,7 +155,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 			auto const key    = p[1];
-			auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
+			auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const prefix = p[3];
 
 			if (prefix.empty())
@@ -202,7 +202,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 			auto const key		= p[1];
-			auto const count	= myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
+			auto const count	= myClamp<uint32_t>(p[2], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyEnd	= p[3];
 
 			if (!hm4::Pair::isKeyValid(keyEnd))
@@ -248,7 +248,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 			auto const key	 = p[1];
-			auto const count = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
+			auto const count = myClamp<uint32_t>(p[2], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 
 			StopUnboundPredicate stop;
 
@@ -290,7 +290,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 			auto const key    = p[1];
-			auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
+			auto const count  = myClamp<uint32_t>(p[2], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const prefix = p[3];
 
 			if (prefix.empty())
@@ -336,7 +336,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 			auto const key		= p[1];
-			auto const count	= myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
+			auto const count	= myClamp<uint32_t>(p[2], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyEnd	= p[3];
 
 			if (!hm4::Pair::isKeyValid(keyEnd))
@@ -382,7 +382,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 			auto const key	 = p[1];
-			auto const count = myClamp<uint32_t>(p[2], ITERATIONS_MIN, ITERATIONS_RESULTS);
+			auto const count = myClamp<uint32_t>(p[2], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 
 			StopUnboundPredicate stop;
 
@@ -431,10 +431,10 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::BOTH>(
-				ITERATIONS_RESULTS			,
+				ITERATIONS_RESULTS_MAX			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
@@ -478,10 +478,10 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::KEYS>(
-				ITERATIONS_RESULTS			,
+				ITERATIONS_RESULTS_MAX			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
@@ -525,10 +525,10 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::VALS>(
-				ITERATIONS_RESULTS			,
+				ITERATIONS_RESULTS_MAX			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
@@ -574,7 +574,7 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key, keyN, DBAdapter::SEPARATOR);
+			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
 
 			auto const n = countResultsH(
 				key					,
