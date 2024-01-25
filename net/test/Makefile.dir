@@ -41,7 +41,7 @@ endif
 # ===========================================================
 
 SOCK_OBJ = $(O)sockets.o $(O)mytime.o $(O)logger.o
-LIST_OBJ = $(O)vectorlist.o $(O)pair.o		$(O)myprocess.o $(O)idgenerator.o	$(O)hyperloglog.o $(O)murmur_hash_64a.o $(O)geohash.o
+LIST_OBJ = $(O)vectorlist.o $(O)pair.o		$(O)myprocess.o $(O)idgenerator.o	$(O)hyperloglog.o $(O)murmur_hash_64a.o $(O)geohash.o $(O)mortoncurve.o
 
 
 
