@@ -3,7 +3,6 @@
 
 namespace net::worker::shared::stop_predicate{
 
-	// making it class, makes later code prettier.
 	struct StopPrefixPredicate{
 		std::string_view prefix;
 
@@ -24,7 +23,7 @@ namespace net::worker::shared::stop_predicate{
 		}
 
 		constexpr bool operator()(std::string_view key) const{
-			return end < key;
+			return key > end;
 		}
 	};
 

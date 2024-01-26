@@ -20,14 +20,14 @@ $redis->connect("127.0.0.1");
 
 $results = 64000;
 
-$cmd = true ? "MC2XNGET" : "MC2XNGETNAIVE";
+$cmd = true ? "MC2RANGEBYRECT" : "MC2RANGEBYRECTNAIVE";
 
 $next = "";
 
 $id = 0;
 
 do{
-	$x = rawCommand($redis, $cmd, "morton", 30, 40, 500, 800, $results, $next);
+	$x = rawCommand($redis, $cmd, "morton", 30, 40, 50, 60, $results, $next);
 
 	for($i = 0; $i < count($x) - 1; $i+=2){
 		$k = $x[$i + 0];

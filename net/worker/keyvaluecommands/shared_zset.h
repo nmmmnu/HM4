@@ -1,6 +1,8 @@
 #ifndef SHARED_ZSET_H_
 #define SHARED_ZSET_H_
 
+#include "mystring.h"
+
 namespace net::worker::shared::zset{
 
 	constexpr bool isZKeyValid(std::string_view keyN, std::string_view subKey, size_t score_size){
@@ -118,7 +120,7 @@ namespace net::worker::shared::zset{
 	}
 
 	template<typename DBAdapter, typename BufferKey>
-	std::string_view zGet(DBAdapter &db,
+	const hm4::Pair *zGetPair(DBAdapter &db,
 			std::string_view keyN, std::string_view subKey,
 			BufferKey &buffer_key_ctrl){
 
@@ -137,19 +139,39 @@ namespace net::worker::shared::zset{
 			if (same_prefix(keyN, keyHash)){
 				logger<Logger::DEBUG>() << "ZSet GET hash key" << keyHash;
 
-				return hm4::getPairVal(*db, keyHash);
+				return hm4::getPairPtr(*db, keyHash);
 			}else{
 				logger<Logger::DEBUG>() << "ZSet skip GET old hash key, different prefix" << keyHash;
 
-				return "";
+				return nullptr;
 			}
 		}else{
 			// Case 2: no ctrl key
 
 			logger<Logger::DEBUG>() << "ZSet no ctrl key";
 
-			return "";
+			return nullptr;
 		}
+	}
+
+	template<typename DBAdapter, typename BufferKey>
+	std::string_view zGet(DBAdapter &db,
+			std::string_view keyN, std::string_view subKey,
+			BufferKey &buffer_key){
+
+		const auto *p = zGetPair(db, keyN, subKey, buffer_key);
+
+		return p ? p->getVal() : "";
+	}
+
+	template<typename DBAdapter, typename BufferKey>
+	bool zExists(DBAdapter &db,
+			std::string_view keyN, std::string_view subKey,
+			BufferKey &buffer_key){
+
+		const auto *p = zGetPair(db, keyN, subKey, buffer_key);
+
+		return p ? p->isOK() : false;
 	}
 
 } // net::worker::shared::zset
