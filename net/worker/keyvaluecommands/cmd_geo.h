@@ -7,6 +7,8 @@
 #include "fmt/format.h"
 
 #include "shared_zset.h"
+#include "shared_iterations.h"
+
 #include "stringtokenizer.h"
 
 #include <array>
@@ -14,9 +16,6 @@
 namespace net::worker::commands::Geo{
 	namespace geo_impl_{
 		namespace {
-
-			constexpr static uint32_t ITERATIONS = (OutputBlob::ContainerSize - 1) / 2;
-
 			auto to_geo(std::string_view s){
 				return to_double_def<3, 10>(s);
 			}
@@ -334,6 +333,7 @@ namespace net::worker::commands::Geo{
 		//	logger<Logger::DEBUG>().range(std::begin(cells), std::end(cells));
 
 			uint32_t iterations = 0;
+			uint32_t results    = 0;
 
 			for(auto &hash : cells){
 				auto const prefix = concatenateBuffer(blob.buffer_key[0],
@@ -349,7 +349,7 @@ namespace net::worker::commands::Geo{
 					if (auto const &k = it->getKey(); ! same_prefix(prefix, k))
 						break;
 
-					if (++iterations > ITERATIONS)
+					if (++iterations > shared::config::ITERATIONS_LOOPS_MAX)
 						return result.set_container(container);
 
 					if (!it->isOK())
@@ -360,6 +360,9 @@ namespace net::worker::commands::Geo{
 					auto const dist = distance(me, t_point, sphere);
 
 					if (dist <  radius){
+						if (++results > shared::config::ITERATIONS_RESULTS_MAX)
+							return result.set_container(container);
+
 						auto const place = tokenizeName(
 								db,
 								it->getKey()
