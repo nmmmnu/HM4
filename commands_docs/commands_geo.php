@@ -10,7 +10,7 @@ return array(
 			"OK",
 			"OK",
 			"1.3.4.2",
-			"READ + 2 * WRITE",
+			"[number of keys] * (READ + 3 * WRITE)",
 			false,
 			true,
 
@@ -30,7 +30,7 @@ return array(
 			"OK",
 			"OK",
 			"1.3.4.2",
-			"READ + 2 * WRITE",
+			"[number of keys] * (READ + 2 * WRITE)",
 			false,
 			true,
 
@@ -52,7 +52,7 @@ return array(
 			"string",
 			"[latitude],[longitude],[geohash]",
 			"1.3.4.2",
-			"READ",
+			"2 * READ",
 			false,
 			false,
 
@@ -73,7 +73,7 @@ return array(
 			"array",
 			"array",
 			"1.3.4.2",
-			"READ",
+			"[number of keys] * 2 * READ",
 			false,
 			false,
 

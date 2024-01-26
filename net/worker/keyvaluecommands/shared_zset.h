@@ -1,9 +1,6 @@
 #ifndef SHARED_ZSET_H_
 #define SHARED_ZSET_H_
 
-//#include "hexconvert.h"
-//#include "stringtokenizer.h"
-
 namespace net::worker::shared::zset{
 
 	constexpr bool isZKeyValid(std::string_view keyN, std::string_view subKey, size_t score_size){
@@ -50,9 +47,13 @@ namespace net::worker::shared::zset{
 			if (keyHashOld != keyHash){
 				// Case 1.1: ctrl key has to be updated
 
-				logger<Logger::DEBUG>() << "ZSet DEL old hash key" << keyHashOld;
+				if (same_prefix(keyN, keyHashOld)){
+					logger<Logger::DEBUG>() << "ZSet DEL old hash key" << keyHashOld;
 
-				erase(*db, keyHashOld);
+					erase(*db, keyHashOld);
+				}else{
+					logger<Logger::DEBUG>() << "ZSet skip DEL old hash key, different prefix" << keyHashOld;
+				}
 
 				// keyHashOld may be dangled now,
 				// but we do not need it anymore
@@ -95,9 +96,13 @@ namespace net::worker::shared::zset{
 		if (auto const keyHash = hm4::getPairVal(*db, keyCtrl); !keyHash.empty()){
 			// Case 1: ctrl key is set
 
-			logger<Logger::DEBUG>() << "ZSet DEL hash key" << keyHash;
+			if (same_prefix(keyN, keyHash)){
+				logger<Logger::DEBUG>() << "ZSet DEL hash key" << keyHash;
 
-			erase(*db, keyHash);
+				erase(*db, keyHash);
+			}else{
+				logger<Logger::DEBUG>() << "ZSet skip DEL hash key, different prefix" << keyHash;
+			}
 
 			// keyHash may be dangled now,
 			// but we do not need it anymore
@@ -129,9 +134,15 @@ namespace net::worker::shared::zset{
 		if (auto const keyHash = hm4::getPairVal(*db, keyCtrl); !keyHash.empty()){
 			// Case 1: ctrl key is set
 
-			logger<Logger::DEBUG>() << "ZSet GET hash key" << keyHash;
+			if (same_prefix(keyN, keyHash)){
+				logger<Logger::DEBUG>() << "ZSet GET hash key" << keyHash;
 
-			return hm4::getPairVal(*db, keyHash);
+				return hm4::getPairVal(*db, keyHash);
+			}else{
+				logger<Logger::DEBUG>() << "ZSet skip GET old hash key, different prefix" << keyHash;
+
+				return "";
+			}
 		}else{
 			// Case 2: no ctrl key
 
