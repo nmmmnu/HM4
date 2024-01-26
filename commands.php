@@ -97,6 +97,10 @@ class Cmd{
 		padding:	10px;
 	}
 
+	pre i {
+		color:		#A00;
+	}
+
 	a {
 		font-weight:	bold;
 		text-decoration: none;
@@ -123,7 +127,7 @@ class Cmd{
 		padding-bottom:	10px;
 	}
 
-	div.cmd i {
+	div.cmd > i {
 		background-color: #ddd;
 		padding-left:	10px;
 		padding-right:	10px;
@@ -218,6 +222,7 @@ function getData(){
 		"hll"				=> require "$d/commands_hll.php"		,
 		"bf"				=> require "$d/commands_bf.php"			,
 		"cms"				=> require "$d/commands_cms.php"		,
+		"mortoncurve"			=> require "$d/commands_mortoncurve.php"	,
 	//	"cv"				=> require "$d/commands_cv.php"			,
 		"murmur"			=> require "$d/commands_murmur.php"		,
 		"info"				=> require "$d/commands_info.php"		,

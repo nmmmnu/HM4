@@ -54,7 +54,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 
-			struct MortonSquare{
+			struct MortonRectangle{
 				uint32_t x1;
 				uint32_t x2;
 				uint32_t y1;
@@ -63,7 +63,7 @@ namespace net::worker::commands::MortonCurve{
 				uint64_t z_min = morton_curve::toMorton2D(x1, y1);
 				uint64_t z_max = morton_curve::toMorton2D(x2, y2);
 
-				constexpr MortonSquare(uint32_t x1, uint32_t x2, uint32_t y1, uint32_t y2) :
+				constexpr MortonRectangle(uint32_t x1, uint32_t x2, uint32_t y1, uint32_t y2) :
 						x1(x1), x2(x2),
 						y1(y1), y2(y2){}
 
@@ -94,7 +94,7 @@ namespace net::worker::commands::MortonCurve{
 					DBAdapter &db, OutputBlob::Container &container,
 					BufferKeyArray &bufferKey,
 					std::string_view keyN, uint32_t count,
-					MortonSquare const &square, std::string_view startKey){
+					MortonRectangle const &square, std::string_view startKey){
 
 				constexpr uint32_t MAX_RETRIES = 9;
 
@@ -493,7 +493,7 @@ namespace net::worker::commands::MortonCurve{
 			if (!isMC2KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			MortonSquare const square{
+			MortonRectangle const square{
 				from_string<uint32_t>(p[2]),
 				from_string<uint32_t>(p[3]),
 
@@ -548,7 +548,7 @@ namespace net::worker::commands::MortonCurve{
 			if (!isMC2KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			MortonSquare const square{
+			MortonRectangle const square{
 				from_string<uint32_t>(p[2]),
 				from_string<uint32_t>(p[3]),
 
