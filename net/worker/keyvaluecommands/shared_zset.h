@@ -22,25 +22,27 @@ namespace net::worker::shared::zset{
 
 
 
-	template<typename DBAdapter, typename BufferKey, typename BufferKey2>
+	template<typename DBAdapter, typename BufferKey>
 	void zAdd(DBAdapter &db,
 			std::string_view keyN, std::string_view subKey, std::string_view score, std::string_view value,
-			BufferKey &buffer_key_ctrl, BufferKey2 &buffer_key_score){
+			BufferKey &buffer_key_ctrl, BufferKey &buffer_key_hash){
 
-		auto makeKey = [&](auto &buffer, std::string_view score = ""){
-			return concatenateBuffer(buffer,
-							keyN			,
-							DBAdapter::SEPARATOR	,
-							score			,
-							DBAdapter::SEPARATOR	,
-							subKey
-			);
-		};
+		auto const keyCtrl = concatenateBuffer(buffer_key_ctrl,
+					keyN			,
+					DBAdapter::SEPARATOR	,
+					DBAdapter::SEPARATOR	,
+					subKey
+		);
 
-		auto const keyCtrl = makeKey(buffer_key_ctrl);
-		auto const keyHash = makeKey(buffer_key_score, score);
+		auto const keyHash = concatenateBuffer(buffer_key_hash,
+					keyN			,
+					DBAdapter::SEPARATOR	,
+					score			,
+					DBAdapter::SEPARATOR	,
+					subKey
+		);
 
-		logger<Logger::DEBUG>() << "ZSet ctrl key" << keyCtrl << "ZSet hash key" << keyHash;
+		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
 		if (auto const keyHashOld = hm4::getPairVal(*db, keyCtrl); !keyHashOld.empty()){
 			// Case 1: ctrl key is set
@@ -81,28 +83,27 @@ namespace net::worker::shared::zset{
 			std::string_view keyN, std::string_view subKey,
 			BufferKey &buffer_key_ctrl){
 
-		auto makeKey = [&](auto &buffer, std::string_view score = ""){
-			return concatenateBuffer(buffer,
-							keyN			,
-							DBAdapter::SEPARATOR	,
-							score			,
-							DBAdapter::SEPARATOR	,
-							subKey
-			);
-		};
-
-		auto const keyCtrl = makeKey(buffer_key_ctrl);
+		auto const keyCtrl = concatenateBuffer(buffer_key_ctrl,
+					keyN			,
+					DBAdapter::SEPARATOR	,
+					DBAdapter::SEPARATOR	,
+					subKey
+		);
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
 		if (auto const keyHash = hm4::getPairVal(*db, keyCtrl); !keyHash.empty()){
 			// Case 1: ctrl key is set
 
-			// delete first, because keyHash might be invalid after this.
 			logger<Logger::DEBUG>() << "ZSet DEL hash key" << keyHash;
+
 			erase(*db, keyHash);
 
+			// keyHash may be dangled now,
+			// but we do not need it anymore
+
 			logger<Logger::DEBUG>() << "ZSet DEL ctrl key" << keyCtrl;
+
 			erase(*db, keyCtrl);
 		}else{
 			// Case 2: no ctrl key
@@ -114,18 +115,14 @@ namespace net::worker::shared::zset{
 	template<typename DBAdapter, typename BufferKey>
 	std::string_view zGet(DBAdapter &db,
 			std::string_view keyN, std::string_view subKey,
-			BufferKey &buffer_key){
+			BufferKey &buffer_key_ctrl){
 
-		auto makeKey = [&](BufferKey &buffer){
-			return concatenateBuffer(buffer,
-							keyN			,
-							DBAdapter::SEPARATOR	,
-							DBAdapter::SEPARATOR	,
-							subKey
-			);
-		};
-
-		auto const keyCtrl = makeKey(buffer_key);
+		auto const keyCtrl = concatenateBuffer(buffer_key_ctrl,
+					keyN			,
+					DBAdapter::SEPARATOR	,
+					DBAdapter::SEPARATOR	,
+					subKey
+		);
 
 		logger<Logger::DEBUG>() << "ZSet ctrl key" << keyCtrl;
 
