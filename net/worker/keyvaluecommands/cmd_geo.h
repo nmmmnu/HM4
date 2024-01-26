@@ -2,10 +2,12 @@
 
 #include "geohash.h"
 #include "to_fp.h"
-#include "stringtokenizer.h"
 #include "logger.h"
 
 #include "fmt/format.h"
+
+#include "shared_zset.h"
+#include "stringtokenizer.h"
 
 #include <array>
 
@@ -37,16 +39,6 @@ namespace net::worker::commands::Geo{
 					return { buffer.data(), result.size };
 			}
 
-			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name = ""){
-				return hm4::Pair::isKeyValid(
-					key.size()		+
-					1			+
-					GeoHash::MAX_SIZE	+
-					1			+
-					name.size()
-				);
-			}
-
 			auto tokenizePoint(std::string_view line){
 				StringTokenizer const tok{ line, ',' };
 				auto _ = getForwardTokenizer(tok);
@@ -55,19 +47,6 @@ namespace net::worker::commands::Geo{
 				auto const lon  = to_geo(_());
 
 				GeoHash::Point r{ lat, lon };
-
-			//	(void) _();
-
-				return r;
-			}
-
-			auto tokenizeHash(std::string_view line){
-				StringTokenizer const tok{ line, ',' };
-				auto _ = getBackwardTokenizer(tok);
-
-				auto const r = _();
-			//	(void) _();
-			//	(void) _();
 
 				return r;
 			}
@@ -78,11 +57,14 @@ namespace net::worker::commands::Geo{
 				auto _ = getBackwardTokenizer(tok);
 
 				auto const r = _();
-			//	(void) _();
-			//	(void) _();
 
 				return r;
 			}
+
+			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name = ""){
+				return shared::zset::isZKeyValid(key, name, GeoHash::MAX_SIZE);
+			}
+
 		} // anonymous namespace
 	} // namespace geo_impl_
 
@@ -135,67 +117,7 @@ namespace net::worker::commands::Geo{
 
 				auto const &name = *(itk + 2);
 
-				// The size is lreay checked
-
-				auto const key = concatenateBuffer(blob.buffer_key,
-								keyN			,
-								DBAdapter::SEPARATOR	,
-							//	hash			,
-								DBAdapter::SEPARATOR	,
-								name
-				);
-
-				logger<Logger::DEBUG>() << "GeoHash GEL ctrl key" << key;
-
-				if (auto const val = hm4::getPairVal(*db, key); !val.empty()){
-					// check if by chance value is the same,
-					// still good, because we will skip 3 disk operations
-					if (val == line){
-						// same data inserted already
-						logger<Logger::DEBUG>() << "GeoHash SKIP SET key";
-						continue;
-					}
-
-					if (auto const t_hash = tokenizeHash(val); hash == t_hash){
-						// same geohash cell
-						logger<Logger::DEBUG>() << "GeoHash SKIP DEL key";
-					}else{
-						// using buffer_val in order to preserve buffer_key
-						auto const key_hash = concatenateBuffer(blob.buffer_val,
-									keyN			,
-									DBAdapter::SEPARATOR	,
-									t_hash			,
-									DBAdapter::SEPARATOR	,
-									name
-						);
-
-						// remove old hash key,
-						// control key will be overwritten soon
-
-						logger<Logger::DEBUG>() << "GeoHash DEL hash key" << key_hash;
-						erase(*db, key_hash);
-					}
-				}
-
-				// key may not be valid now.
-
-				// insert control key
-
-				logger<Logger::DEBUG>() << "GeoHash SET ctrl key" << key;
-				insert(*db, key, line);
-
-				auto const key_hash = concatenateBuffer(blob.buffer_key,
-								keyN			,
-								DBAdapter::SEPARATOR	,
-								hash			,
-								DBAdapter::SEPARATOR	,
-								name
-				);
-
-				// insert geo hash key
-
-				logger<Logger::DEBUG>() << "GeoHash SET hash key" << key_hash;
-				insert(*db, key_hash, line);
+				shared::zset::zAdd(db, keyN, name, hash, line, blob.buffer_key, blob.buffer_val);
 			}
 
 			return result.set();
@@ -245,36 +167,7 @@ namespace net::worker::commands::Geo{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
-				// The size is lreay checked
-
-				auto const key = concatenateBuffer(blob.buffer_key,
-								keyN			,
-								DBAdapter::SEPARATOR	,
-							//	hash			,
-								DBAdapter::SEPARATOR	,
-								name
-				);
-
-				logger<Logger::DEBUG>() << "GeoHash GEL ctrl key" << key;
-
-				if (auto val = hm4::getPairVal(*db, key); !val.empty()){
-					auto const t_hash = tokenizeHash(val);
-
-					// using buffer_val in order to preserve buffer_key
-					auto const key_hash = concatenateBuffer(blob.buffer_val,
-								keyN			,
-								DBAdapter::SEPARATOR	,
-								t_hash			,
-								DBAdapter::SEPARATOR	,
-								name
-					);
-
-					logger<Logger::DEBUG>() << "GeoHash DEL ctrl key" << key;
-					erase(*db, key);
-
-					logger<Logger::DEBUG>() << "GeoHash DEL hash key" << key_hash;
-					erase(*db, key_hash);
-				}
+				shared::zset::zRem(db, keyN, name, blob.buffer_key);
 			}
 
 			return result.set();
@@ -319,16 +212,8 @@ namespace net::worker::commands::Geo{
 			if (!isGeoKeyValid(keyN, name))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key,
-							keyN			,
-							DBAdapter::SEPARATOR	,
-						//	hash			,
-							DBAdapter::SEPARATOR	,
-							name
-			);
-
 			return result.set(
-				hm4::getPairVal(*db, key)
+				shared::zset::zGet(db, keyN, name, blob.buffer_key)
 			);
 		}
 
@@ -383,18 +268,8 @@ namespace net::worker::commands::Geo{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
-				// The size is lreay checked
-
-				auto const key = concatenateBuffer(blob.buffer_key,
-								keyN			,
-								DBAdapter::SEPARATOR	,
-							//	hash			,
-								DBAdapter::SEPARATOR	,
-								name
-				);
-
 				container.emplace_back(
-					hm4::getPairVal(*db, key)
+					shared::zset::zGet(db, keyN, name, blob.buffer_key)
 				);
 			}
 
