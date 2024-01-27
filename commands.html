@@ -237,10 +237,10 @@
 			<b>geo.h</b><br />
 			&nbsp;
 
-					<li><a href="#GEOADD">GEOADD</a></li>
-				<li><a href="#GEOREM">GEOREM</a></li>
-				<li><a href="#GEOGET">GEOGET</a></li>
+					<li><a href="#GEOGET">GEOGET</a></li>
 				<li><a href="#GEOMGET">GEOMGET</a></li>
+				<li><a href="#GEOADD">GEOADD</a></li>
+				<li><a href="#GEOREM">GEOREM</a></li>
 				<li><a href="#GEORADIUS">GEORADIUS</a></li>
 				<li><a href="#GEODIST">GEODIST</a></li>
 				<li><a href="#GEOENCODE">GEOENCODE</a></li>
@@ -285,8 +285,11 @@
 				<li><a href="#MC2EXISTS">MC2EXISTS</a></li>
 				<li><a href="#MC2SET">MC2SET</a></li>
 				<li><a href="#MC2DEL">MC2DEL</a></li>
-				<li><a href="#MC2XNGET">MC2XNGET</a></li>
-				<li><a href="#MC2XNGETNAIVE">MC2XNGETNAIVE</a></li>
+				<li><a href="#MC2GETPOINT">MC2GETPOINT</a></li>
+				<li><a href="#MC2GETRANGE">MC2GETRANGE</a></li>
+				<li><a href="#MC2GETRANGENAIVE">MC2GETRANGENAIVE</a></li>
+				<li><a href="#MC2ENCODE">MC2ENCODE</a></li>
+				<li><a href="#MC2DECODE">MC2DECODE</a></li>
 				</div>
 			<div>
 			<b>murmur.h</b><br />
@@ -2351,54 +2354,6 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="GEOADD">
-
-			<h2>GEOADD key latitude longitude name [latitude longitude name]...</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>GEOADD</td></tr>
-				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 3 * WRITE)</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>geo.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Adds the specified geospatial items (<i>latitude</i>, <i>longitude</i>, <i>name</i>) to the specified <i>key</i>.<br />Command is not Redis compatible, because <i>latitude</i> and <i>longitude</i> are not in the same order as in Redis.
-			<h3>Return type:</h3>
-			OK
-			<h3>Return value:</h3>
-			OK
-						<h3>Example:</h3>
-			<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />xnget  places 1000 places</pre>			
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="GEOREM">
-
-			<h2>GEOREM / GEOREMOVE / GEODEL key name [name]...</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>GEOREM</td></tr>
-				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 2 * WRITE)</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>geo.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Removes the specified geospatial items (<i>name</i>) from the specified <i>key</i>.
-			<h3>Return type:</h3>
-			OK
-			<h3>Return value:</h3>
-			OK
-						<h3>Example:</h3>
-			<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />xnget  places 1000 places<br />georem places Chevermeto<br />xnget  places 1000 places</pre>			
-			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
 				<div class="cmd" id="GEOGET">
 
 			<h2>GEOGET key name</h2>
@@ -2444,6 +2399,54 @@
 			array
 						<h3>Example:</h3>
 			<pre>geoadd  places 42.69174997126510 23.32100561258516 Boho<br />geoadd  places 42.68342508736217 23.31633975360111 Chevermeto<br />geomget places Boho Chevermeto NonExistent</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEOADD">
+
+			<h2>GEOADD key latitude longitude name [latitude longitude name]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEOADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 3 * WRITE)</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Adds the specified geospatial items (<i>latitude</i>, <i>longitude</i>, <i>name</i>) to the specified <i>key</i>.<br />Command is not Redis compatible, because <i>latitude</i> and <i>longitude</i> are not in the same order as in Redis.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+						<h3>Example:</h3>
+			<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />xnget  places 1000 places</pre>			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="GEOREM">
+
+			<h2>GEOREM / GEOREMOVE / GEODEL key name [name]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>GEOREM</td></tr>
+				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 2 * WRITE)</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>geo.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes the specified geospatial items (<i>name</i>) from the specified <i>key</i>.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+						<h3>Example:</h3>
+			<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />xnget  places 1000 places<br />georem places Chevermeto<br />xnget  places 1000 places</pre>			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
@@ -2890,42 +2893,42 @@
 		</div>
 				<div class="cmd" id="MC2GET">
 
-			<h2>MC2GET key x y</h2>
+			<h2>MC2GET key subkey</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2GET</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Get value of the item stored in <i>key</i> with 2D coordinates <i>x</i> and <i>y</i>.<br />Uses <b>uint32_t</b> for coordinates.
+			Get value of the <i>subkey</i> stored in <i>key</i>.
 			<h3>Return type:</h3>
 			string
 			<h3>Return value:</h3>
-			value of the item
+			value of the subkey
 			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MC2MGET">
 
-			<h2>MC2MGET key x y [x1 y1]...</h2>
+			<h2>MC2MGET key subkey0 [subkey1]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2MGET</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * READ</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Get values of the items stored in <i>key</i> with 2D coordinates <i>x</i> and <i>y</i>, <i>x1</i> and <i>y1</i>...<br />Uses <b>uint32_t</b> for coordinates.
+			Get values of the <i>subkey0</i>, <i>subkey1</i>... stored in <i>key</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
@@ -2936,19 +2939,19 @@
 		</div>
 				<div class="cmd" id="MC2EXISTS">
 
-			<h2>MC2EXISTS key x y</h2>
+			<h2>MC2EXISTS key subkey</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2EXISTS</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Check if item stored in <i>key</i> with 2D coordinates <i>x</i> and <i>y</i> exists.<br />Uses <b>uint32_t</b> for coordinates.
+			Check if <i>subkey</i> stored in <i>key</i>.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -2959,19 +2962,19 @@
 		</div>
 				<div class="cmd" id="MC2SET">
 
-			<h2>MC2GET key x y value [x1 y1 value1]...</h2>
+			<h2>MC2SET subKey0 x0 y0 value0 [subKey1 x1 y1 value1]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2SET</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE)</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Set <i>value</i> of the item stored in <i>key</i> with 2D coordinates <i>x</i> and <i>y</i>.<br />Can set multiple values at once.<br />Uses <b>uint32_t</b> for coordinates.
+			Set <i>subkey0</i> with 2D coordinates <i>x0</i> and <i>y0</i> and <i>value0</i>, <i>subkey1</i> with 2D coordinates <i>x1</i> and <i>y1</i> and <i>value1</i>... in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
@@ -2982,19 +2985,19 @@
 		</div>
 				<div class="cmd" id="MC2DEL">
 
-			<h2>MC2DEL key x y [x1 y1]...</h2>
+			<h2>MC2DEL key subkey0 [subkey1]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2DEL</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE)</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Removes items stored in <i>key</i> with 2D coordinates <i>x</i> and <i>y</i>, <i>x1</i> and <i>y1</i>...<br />Uses <b>uint32_t</b> for coordinates.
+			Removes <i>subkey0</i>, <i>subkey1</i>... stored in <i>key</i>.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -3003,37 +3006,12 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MC2XNGET">
+				<div class="cmd" id="MC2GETPOINT">
 
-			<h2>MC2XNGET key x_min x_max y_min y_max number [start]</h2>
-
-			<table border="1">
-				<tr><td>Command			</td><td>MC2XNGET</td></tr>
-				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 1 .. 9 }</td></tr>
-				<tr><td>Redis compatible	</td><td>No</td></tr>
-				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
-			</table>
-
-			<h3>Description:</h3>
-			Gets a 'rectangle' with 2D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i>.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET.<br />Return ONLY items from valid pairs.<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
-			<h3>Return type:</h3>
-			array
-			<h3>Return value:</h3>
-			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
-						<h3>Example:</h3>
-			<pre><i>Suppose we have a company with two offices in LA and NYC.</i><br /><i>Each office have just two people - sales representative and support representative.</i><br /><i>Lets define coordinates x=1/2 means sales / support representatives and  y=1/2 means LA / NYC offices</i><br /><i>Note the combinations are distinct. There can be only one item on each coordinate.</i><br /><br />mc2set users 1 1 john@example.com,peter@example.com   <i>adds sales   from LA, two people, so we fit them in single item</i><br />mc2set users 2 1 jill@example.com                     <i>adds support from LA</i><br />mc2set users 1 2 robert@example.com                   <i>adds sales   from NYC</i><br />mc2set users 2 2 pola@example.com                     <i>adds support from NYC</i><br />MC2GET users 1 1                                      <i>gets sales from LA</i><br />MC2XNGET users 1 1 1 1 10000                          <i>gets sales from LA - same as previous</i><br />MC2XNGET users 1 1 1 2 10000                          <i>gets sales from LA and NYC</i><br />MC2XNGET users 1 2 1 1 10000                          <i>gets sales and support from LA</i><br />MC2XNGET users 1 2 1 2 10000                          <i>gets sales and support from LA and NYC</i><br /><br />xnget users~ 1000 users~</pre>			
-						<h3>MySQL Rosetta:</h3>
-			<pre>select key, val from table where x between [x_min] and [x_max] and y between [y_min] and [y_max] limit [number]</pre>			
-			<p class="top"><a href="#top">top</a></p>
-		</div>
-				<div class="cmd" id="MC2XNGETNAIVE">
-
-			<h2>MC2XNGETNAIVE key x_min x_max y_min y_max number [start]</h2>
+			<h2>MC2GETPOINT key x y number [start]</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MC2XNGETNAIVE</td></tr>
+				<tr><td>Command			</td><td>MC2GETPOINT</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
@@ -3042,11 +3020,107 @@
 			</table>
 
 			<h3>Description:</h3>
-			Naive, non performant version of MC2XNGET. Made for small datasets and for testing.<br />See MC2XNGET for more information.<br />Uses <b>uint32_t</b> for coordinates.<br />Technically the data lookup complexity is single READ, but on large datasets, it might need to read complete dataset.
+			Gets all subkeys stored in 'point' with 2D coordinates <i>x</i> and <i>y</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET.<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br /><br />mc2set users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />mc2set users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />mc2set users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />mc2set users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />mc2getpoint users 2 2 10000      <i>gets all support from LA               (pola, pepe)</i><br /><br />xnget users~ 1000 users~</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where x = [x] and y between [y] limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC2GETRANGE">
+
+			<h2>MC2GETRANGE key x_min x_max y_min y_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC2GETRANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 1 .. 9 }</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'rectangle' with 2D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET.<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br /><br />mc2set users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />mc2set users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />mc2set users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />mc2set users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />mc2getpoint users 2 2 10000      <i>gets all support from LA               (pola, pepe)</i><br />mc2getrange users 2 2 2 2 10000  <i>gets all support from LA               (pola, pepe) - same as previous, but slower.</i><br />mc2getrange users 2 2 1 2 10000  <i>gets support from LA and NYC           (jill, pola, pepe)</i><br />mc2getrange users 1 2 2 2 10000  <i>gets sales and support from LA         (robert, pola, pepe)</i><br />mc2getrange users 1 2 1 2 10000  <i>gets sales and support from LA and NYC (all)</i><br /><br />xnget users~ 1000 users~</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where x >= [x_min] and x <= [x_max] and y >= [y_min] and y <= [y_max] limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC2GETRANGENAIVE">
+
+			<h2>MC2GETRANGENAIVE key x_min x_max y_min y_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC2GETRANGENAIVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Naive, non performant version of MC2XNGET. Made for small datasets and for testing.<br />See MC2GETRANGE for more information.<br />Uses <b>uint32_t</b> for coordinates.<br />Technically the data lookup complexity is single READ, but on large datasets, it might need to read complete dataset.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
 			results
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC2ENCODE">
+
+			<h2>MC2ENCODE x y</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC2ENCODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Encode <i>x</i> and <i>y</i> to morton code hex string.<br />Uses <b>uint32_t</b> for coordinates.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			morton code hex string
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC2DECODE">
+
+			<h2>MC2DECODE hex</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC2DECODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Decode <i>morton code hex string</i> to x, y.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x and y
 			
 			
 			<p class="top"><a href="#top">top</a></p>

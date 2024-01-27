@@ -1,6 +1,47 @@
 <?php
 return array(
 	new Cmd(
+			"GEOGET",
+
+			"GEOGET key name",
+
+			"Retrieve the specified geospatial item (<i>name</i>) from the specified <i>key</i>.",
+			"string",
+			"[latitude],[longitude],[geohash]",
+			"1.3.4.2",
+			"2 * READ",
+			false,
+			false,
+
+			"geo",
+
+			"<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />" .
+			"geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />" .
+			"geoget places Boho<br />" .
+			"geoget places Chevermeto</pre>"
+	),
+
+	new Cmd(
+			"GEOMGET",
+
+			"GEOMGET key name [name]...",
+
+			"Retrieve the specified geospatial items (<i>name</i>) from the specified <i>key</i>.",
+			"array",
+			"array",
+			"1.3.4.2",
+			"[number of keys] * 2 * READ",
+			false,
+			false,
+
+			"geo",
+
+			"<pre>geoadd  places 42.69174997126510 23.32100561258516 Boho<br />" .
+			"geoadd  places 42.68342508736217 23.31633975360111 Chevermeto<br />" .
+			"geomget places Boho Chevermeto NonExistent</pre>"
+	),
+
+	new Cmd(
 			"GEOADD",
 
 			"GEOADD key latitude longitude name [latitude longitude name]...",
@@ -41,47 +82,6 @@ return array(
 			"xnget  places 1000 places<br />" .
 			"georem places Chevermeto<br />" .
 			"xnget  places 1000 places</pre>"
-	),
-
-	new Cmd(
-			"GEOGET",
-
-			"GEOGET key name",
-
-			"Retrieve the specified geospatial item (<i>name</i>) from the specified <i>key</i>.",
-			"string",
-			"[latitude],[longitude],[geohash]",
-			"1.3.4.2",
-			"2 * READ",
-			false,
-			false,
-
-			"geo",
-
-			"<pre>geoadd places 42.69174997126510 23.32100561258516 Boho<br />" .
-			"geoadd places 42.68342508736217 23.31633975360111 Chevermeto<br />" .
-			"geoget places Boho<br />" .
-			"geoget places Chevermeto</pre>"
-	),
-
-	new Cmd(
-			"GEOMGET",
-
-			"GEOMGET key name [name]...",
-
-			"Retrieve the specified geospatial items (<i>name</i>) from the specified <i>key</i>.",
-			"array",
-			"array",
-			"1.3.4.2",
-			"[number of keys] * 2 * READ",
-			false,
-			false,
-
-			"geo",
-
-			"<pre>geoadd  places 42.69174997126510 23.32100561258516 Boho<br />" .
-			"geoadd  places 42.68342508736217 23.31633975360111 Chevermeto<br />" .
-			"geomget places Boho Chevermeto NonExistent</pre>"
 	),
 
 	new Cmd(
@@ -164,6 +164,5 @@ return array(
 
 			"<pre>geodecode sx8dfevc6z40</pre>"
 	),
-
 
 );
