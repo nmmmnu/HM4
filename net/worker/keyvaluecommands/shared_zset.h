@@ -174,6 +174,41 @@ namespace net::worker::shared::zset{
 		return p ? p->isOK() : false;
 	}
 
+	constexpr std::string_view zExtractScore(std::string_view key, size_t keyNSize, size_t scoreSize){
+		if (key.size() > keyNSize)
+			return key.substr(keyNSize + 1, scoreSize);
+		else
+			return key;
+	};
+
+	constexpr std::string_view zExtractScore(std::string_view key, std::string_view keyN, size_t scoreSize){
+		return zExtractScore(key, keyN.size(), scoreSize);
+	};
+
+	template<typename DBAdapter, typename BufferKey>
+	std::string_view zScore(DBAdapter &db,
+			std::string_view keyN, std::string_view subKey, size_t scoreSize,
+			BufferKey &buffer_key){
+
+		auto const keyCtrl = concatenateBuffer(buffer_key,
+					keyN			,
+					DBAdapter::SEPARATOR	,
+					DBAdapter::SEPARATOR	,
+					subKey
+		);
+
+		logger<Logger::DEBUG>() << "ZScore ctrl key" << keyCtrl;
+
+		if (auto const keyHash = hm4::getPairVal(*db, keyCtrl); !keyHash.empty()){
+			auto const score = zExtractScore(keyHash, keyN, scoreSize);
+
+		//	logger<Logger::DEBUG>() << "ZScore score" << score;
+
+			return score;
+		}else
+			return "";
+	}
+
 } // net::worker::shared::zset
 
 #endif

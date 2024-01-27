@@ -116,18 +116,11 @@ namespace net::worker::commands::MortonCurve{
 
 
 		template<class DBAdapter, class BufferKeyArray>
-		void mortonSearchPix(
+		void mortonSearchPoint(
 				DBAdapter &db, OutputBlob::Container &container,
 				BufferKeyArray &bufferKey,
 				std::string_view keyN, uint32_t count,
 				MortonPoint const &point, std::string_view startKey){
-
-			auto projKey = [prefix_size = keyN.size()](std::string_view x) -> std::string_view{
-				if (prefix_size <= x.size())
-					return x.substr(prefix_size + 1, scoreSize);
-				else
-					return x;
-			};
 
 			auto const prefix = [&](){
 				if (!startKey.empty())
@@ -164,7 +157,7 @@ namespace net::worker::commands::MortonCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = projKey(key);
+				auto const hex = shared::zset::zExtractScore(key, keyN, scoreSize);
 
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
@@ -202,13 +195,6 @@ namespace net::worker::commands::MortonCurve{
 				MortonRectangle const &rect, std::string_view startKey){
 
 			constexpr uint32_t MAX_RETRIES = 9;
-
-			auto projKey = [prefix_size = keyN.size()](std::string_view x) -> std::string_view{
-				if (prefix_size <= x.size())
-					return x.substr(prefix_size + 1, scoreSize);
-				else
-					return x;
-			};
 
 			auto createKey = [keyN](OutputBlob::BufferKey &bufferKey, uint64_t z){
 				to_string_buffer_t z_buffer;
@@ -252,7 +238,7 @@ namespace net::worker::commands::MortonCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = projKey(key);
+				auto const hex = shared::zset::zExtractScore(key, keyN, scoreSize);
 
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
@@ -452,6 +438,60 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
+	struct MC2SCORE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// MC2SCORE key subkey
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace morton_curve_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			auto const &keyN   = p[1];
+			auto const &subKey = p[2];
+
+			if (keyN.empty() || subKey.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!isMC2KeyValid(keyN, subKey))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+			if (auto const hex = shared::zset::zScore(db, keyN, subKey, scoreSize, blob.buffer_key[0]); !hex.empty()){
+				auto const z = hex_convert::fromHex<uint64_t>(hex);
+
+				auto const [x, y] = morton_curve::fromMorton2D(z);
+
+				to_string_buffer_t buffer[2];
+
+				return result.set_dual(
+					to_string(x, buffer[0]),
+					to_string(y, buffer[1])
+				);
+			}else{
+				return result.set_dual(
+					"",
+					""
+				);
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"mc2score",	"MC2SCORE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct MC2SET : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -602,7 +642,7 @@ namespace net::worker::commands::MortonCurve{
 
 			blob.container.clear();
 
-			mortonSearchPix(
+			mortonSearchPoint(
 				db, blob.container, blob.buffer_key,
 				keyN, count,
 				point,
@@ -817,6 +857,7 @@ namespace net::worker::commands::MortonCurve{
 				MC2GET			,
 				MC2MGET			,
 				MC2EXISTS		,
+				MC2SCORE		,
 				MC2SET			,
 				MC2DEL			,
 				MC2GETPOINT		,
