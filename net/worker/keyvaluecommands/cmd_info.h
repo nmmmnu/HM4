@@ -215,12 +215,10 @@ namespace net::worker::commands::Info{
 
 			auto const time = mytime::nowMix();
 
-			const std::array<std::string_view, 2> container{
+			return result.set_dual(
 				to_string(time[0], buffer[0]),
 				to_string(time[1], buffer[1])
-			};
-
-			return result.set_container(container);
+			);
 		}
 
 	private:

@@ -134,6 +134,15 @@ namespace net::worker::commands{
 			protocol_.response_strings(buffer_, container);
 		}
 
+		void set_dual(std::string_view s0, std::string_view s1){
+			std::array<std::string_view, 2> const container{ s0, s1 };
+
+			set_status_(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_strings(buffer_, container);
+		}
+
 		void set_0(){
 			return set_number<uint64_t>(0);
 		}

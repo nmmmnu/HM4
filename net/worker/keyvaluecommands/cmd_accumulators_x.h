@@ -48,24 +48,20 @@ namespace net::worker::commands::Accumulators{
 
 			template<class Protocol>
 			void execCommandSet_(Result<Protocol> &result, std::string_view data, std::string_view lastKey){
-				const std::array<std::string_view, 2> container{
+				return result.set_dual(
 					data,
 					lastKey
-				};
-
-				return result.set_container(container);
+				);
 			}
 
 			template<class Protocol, class Int>
 			void execCommandSet_(Result<Protocol> &result, Int data, std::string_view lastKey){
 				to_string_buffer_t buffer;
 
-				const std::array<std::string_view, 2> container{
+				return result.set_dual(
 					to_string(data, buffer),
 					lastKey
-				};
-
-				return result.set_container(container);
+				);
 			}
 
 			template<class Accumulator, class StopPredicate, class Protocol, class List>
