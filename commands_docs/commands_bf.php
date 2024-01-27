@@ -3,7 +3,7 @@ return array(
 	new Cmd(
 			"BFADD",
 
-			"BFADD / BFMADD key bits hash value [value]",
+			"BFADD / BFMADD key bits hash value [value]...",
 
 			"Add (insert) <i>value</i>'s into the bloom filter with size <i>bits</i> and number of <i>hash</i> functions.<br />" .
 			"Read BF information document.",
@@ -56,7 +56,7 @@ return array(
 	new Cmd(
 			"BFMEXISTS",
 
-			"BFMEXISTS key bits hash value [value]",
+			"BFMEXISTS key bits hash value [value]...",
 
 			"Check if <i>value</i>'s are present in the bloom filter with size <i>bits</i> number of <i>hash</i> functions.<br />" .
 			"Read Bitset information document.",

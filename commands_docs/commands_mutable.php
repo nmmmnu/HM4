@@ -20,7 +20,7 @@ return array(
 	new Cmd(
 			"MSET",
 
-			"MSET key value [key2] [val2]",
+			"MSET key value [key value]...",
 
 			"Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />" .
 			"Operation is atomic, so all given keys are set at once.",
@@ -38,7 +38,7 @@ return array(
 	new Cmd(
 			"MSETNX",
 
-			"MSETNX key value [key2] [val2]",
+			"MSETNX key value [key value]...",
 
 			"Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />" .
 			"No keys will set, if just a single key already exists.<br />" .
@@ -58,7 +58,7 @@ return array(
 	new Cmd(
 			"MSETXX",
 
-			"MSETXX key value [key2] [val2]",
+			"MSETXX key value [key value]...",
 
 			"Set multiple <i>key</i> -> <i>value</i> pairs at once.<br />" .
 			"No keys will set, if just a single key does not exists.<br />" .
@@ -230,9 +230,9 @@ return array(
 	new Cmd(
 			"DEL",
 
-			"DEL key [key2]... / UNLINK key [key2]...",
+			"DEL / UNLINK key [key]...",
 
-			"Removes <i>key</i>, <i>key2</i>...",
+			"Removes <i>key</i>",
 			"bool",
 			"Always return 1",
 			"1.0.0",

@@ -283,6 +283,7 @@
 					<li><a href="#MC2GET">MC2GET</a></li>
 				<li><a href="#MC2MGET">MC2MGET</a></li>
 				<li><a href="#MC2EXISTS">MC2EXISTS</a></li>
+				<li><a href="#MC2SCORE">MC2SCORE</a></li>
 				<li><a href="#MC2SET">MC2SET</a></li>
 				<li><a href="#MC2DEL">MC2DEL</a></li>
 				<li><a href="#MC2GETPOINT">MC2GETPOINT</a></li>
@@ -370,7 +371,7 @@
 		</div>
 				<div class="cmd" id="MGET">
 
-			<h2>MGET key1 [key2]...</h2>
+			<h2>MGET key [key]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MGET</td></tr>
@@ -382,7 +383,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get value of the <i>key1</i>, <i>key2</i>... Exact match.<br />Same as GET but array responce.
+			Get value of the <i>key</i>. Exact match.<br />Same as GET but array responce.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
@@ -1098,7 +1099,7 @@
 		</div>
 				<div class="cmd" id="MSET">
 
-			<h2>MSET key value [key2] [val2]</h2>
+			<h2>MSET key value [key value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MSET</td></tr>
@@ -1121,7 +1122,7 @@
 		</div>
 				<div class="cmd" id="MSETNX">
 
-			<h2>MSETNX key value [key2] [val2]</h2>
+			<h2>MSETNX key value [key value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MSETNX</td></tr>
@@ -1144,7 +1145,7 @@
 		</div>
 				<div class="cmd" id="MSETXX">
 
-			<h2>MSETXX key value [key2] [val2]</h2>
+			<h2>MSETXX key value [key value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MSETXX</td></tr>
@@ -1351,7 +1352,7 @@
 		</div>
 				<div class="cmd" id="DEL">
 
-			<h2>DEL key [key2]... / UNLINK key [key2]...</h2>
+			<h2>DEL / UNLINK key [key]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>DEL</td></tr>
@@ -1363,7 +1364,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Removes <i>key</i>, <i>key2</i>...
+			Removes <i>key</i>
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -1988,7 +1989,7 @@
 		</div>
 				<div class="cmd" id="HMGET">
 
-			<h2>HMGET key subkey [subkey1]...</h2>
+			<h2>HMGET key subkey [subkey]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>HMGET</td></tr>
@@ -2000,7 +2001,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get <i>key</i> -> <i>subkey</i>, <i>subkey1</i>... hash.<br />Works exactly as Redis HMGET, except internally set key for each value.<br />If you can, use HGETALL it is much faster.
+			Get <i>key</i> -> <i>subkey</i> hash.<br />Works exactly as Redis HMGET, except internally set key for each value.<br />If you can, use HGETALL it is much faster.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
@@ -2057,7 +2058,7 @@
 		</div>
 				<div class="cmd" id="HMSET">
 
-			<h2>HMSET key subkey value [subkey2] [value2]...</h2>
+			<h2>HMSET key subkey value [subkey value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>HMSET</td></tr>
@@ -2069,7 +2070,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Set <i>key</i> -> <i>subkey</i> -> <i>value</i>, <i>key</i> -> <i>subkey2</i> -> <i>value2</i> hash.<br />Works exactly as Redis HMSET, except internally set key for each value.
+			Set <i>key</i> -> <i>subkey</i> -> <i>value</i> hash.<br />Works exactly as Redis HMSET, except internally set key for each value.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
@@ -2080,7 +2081,7 @@
 		</div>
 				<div class="cmd" id="HDEL">
 
-			<h2>HDEL key subkey [subkey2]...</h2>
+			<h2>HDEL key subkey [subkey]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>HDEL</td></tr>
@@ -2092,7 +2093,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Removes <i>key</i> -> <i>subkey</i>, <i>key</i> -> <i>subkey2</i>... hash.<br />Works exactly as Redis HSET, except internally set key for each value.
+			Removes <i>key</i> -> <i>subkey</i> hash.<br />Works exactly as Redis HSET, except internally set key for each value.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -2241,7 +2242,7 @@
 		</div>
 				<div class="cmd" id="BITSET">
 
-			<h2>BITSET / BITMSET / SETBIT key index value [index] [value]</h2>
+			<h2>BITSET / BITMSET / SETBIT key index value [index value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>BITSET</td></tr>
@@ -2287,7 +2288,7 @@
 		</div>
 				<div class="cmd" id="BITMGET">
 
-			<h2>BITMGET key index [index1]</h2>
+			<h2>BITMGET key index [index]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>BITMGET</td></tr>
@@ -2299,7 +2300,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />Read Bitset information document.
+			Get bit(s) of the <i>key</i> with <i>index</i><br />Read Bitset information document.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
@@ -2548,7 +2549,7 @@
 		</div>
 				<div class="cmd" id="PFADD">
 
-			<h2>PFADD / HLLADD key value [value2]...</h2>
+			<h2>PFADD / HLLADD key value [value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>PFADD</td></tr>
@@ -2560,7 +2561,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Add <i>value</i>, <i>value2</i>... into HLL <i>key</i>.<br />Read HLL information document.
+			Add <i>value</i> into HLL <i>key</i>.<br />Read HLL information document.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
@@ -2594,7 +2595,7 @@
 		</div>
 				<div class="cmd" id="PFCOUNT">
 
-			<h2>PFCOUNT / HLLCOUNT [key] [key2]...</h2>
+			<h2>PFCOUNT / HLLCOUNT [key]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>PFCOUNT</td></tr>
@@ -2606,7 +2607,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Estimate count of HLL union of provided keys.<br />Works with single key too, but returns standard estimation.<br />Works without key too, but returns 0.<br />Read HLL information document.
+			Estimate count of HLL union of provided <i>key</i>.<br />Works with single key too, but returns standard estimation.<br />Works without key too, but returns 0.<br />Read HLL information document.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
@@ -2709,7 +2710,7 @@
 		</div>
 				<div class="cmd" id="BFADD">
 
-			<h2>BFADD / BFMADD key bits hash value [value]</h2>
+			<h2>BFADD / BFMADD key bits hash value [value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>BFADD</td></tr>
@@ -2778,7 +2779,7 @@
 		</div>
 				<div class="cmd" id="BFMEXISTS">
 
-			<h2>BFMEXISTS key bits hash value [value]</h2>
+			<h2>BFMEXISTS key bits hash value [value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>BFMEXISTS</td></tr>
@@ -2801,7 +2802,7 @@
 		</div>
 				<div class="cmd" id="CMSADD">
 
-			<h2>CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value inc [value] [inc]</h2>
+			<h2>CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value inc [value inc]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>CMSADD</td></tr>
@@ -2813,7 +2814,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Add (insert) <i>value</i>'s into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CMS information document.
+			Add (insert) <i>value</i> into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CMS information document.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
@@ -2870,7 +2871,7 @@
 		</div>
 				<div class="cmd" id="CMSMCOUNT">
 
-			<h2>CMSMCOUNT / CMSQUERY key W_width D_depth integer_size value [value]</h2>
+			<h2>CMSMCOUNT / CMSQUERY key W_width D_depth integer_size value [value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>CMSMCOUNT</td></tr>
@@ -2916,7 +2917,7 @@
 		</div>
 				<div class="cmd" id="MC2MGET">
 
-			<h2>MC2MGET key subkey0 [subkey1]...</h2>
+			<h2>MC2MGET key subkey [subkey]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2MGET</td></tr>
@@ -2928,7 +2929,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Get values of the <i>subkey0</i>, <i>subkey1</i>... stored in <i>key</i>.
+			Get values of the <i>subkey</i> stored in <i>key</i>.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
@@ -2960,9 +2961,32 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="MC2SCORE">
+
+			<h2>MC2SCORE key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC2SCORE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get score of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x and y
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="MC2SET">
 
-			<h2>MC2SET subKey0 x0 y0 value0 [subKey1 x1 y1 value1]...</h2>
+			<h2>MC2SET subKey x y value [subKey x y value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2SET</td></tr>
@@ -2974,7 +2998,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Set <i>subkey0</i> with 2D coordinates <i>x0</i> and <i>y0</i> and <i>value0</i>, <i>subkey1</i> with 2D coordinates <i>x1</i> and <i>y1</i> and <i>value1</i>... in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
+			Set <i>subkey</i> with 2D coordinates <i>x</i> and <i>y</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
@@ -2985,7 +3009,7 @@
 		</div>
 				<div class="cmd" id="MC2DEL">
 
-			<h2>MC2DEL key subkey0 [subkey1]...</h2>
+			<h2>MC2DEL key subkey [subkey]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2DEL</td></tr>
@@ -2997,7 +3021,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Removes <i>subkey0</i>, <i>subkey1</i>... stored in <i>key</i>.
+			Removes <i>subkey</i> stored in <i>key</i>.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -3020,7 +3044,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Gets all subkeys stored in 'point' with 2D coordinates <i>x</i> and <i>y</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET.<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			Gets all subkeys stored in 'point' with 2D coordinates <i>x</i> and <i>y</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
@@ -3028,7 +3052,7 @@
 						<h3>Example:</h3>
 			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br /><br />mc2set users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />mc2set users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />mc2set users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />mc2set users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />mc2getpoint users 2 2 10000      <i>gets all support from LA               (pola, pepe)</i><br /><br />xnget users~ 1000 users~</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select key, val from table where x = [x] and y between [y] limit [number]</pre>			
+			<pre>select key, val from table where x = [x] and y = [y] limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MC2GETRANGE">
@@ -3045,7 +3069,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Gets all subkeys stored in 'rectangle' with 2D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET.<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
+			Gets all subkeys stored in 'rectangle' with 2D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>

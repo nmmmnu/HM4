@@ -3,9 +3,9 @@ return array(
 	new Cmd(
 			"CMSADD",
 
-			"CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value inc [value] [inc]",
+			"CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value inc [value inc]...",
 
-			"Add (insert) <i>value</i>'s into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />" .
+			"Add (insert) <i>value</i> into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />" .
 			"<i>inc</i> specify how many times you want to add it / how much to increase it.<br />" .
 			"Read CMS information document.",
 			"OK",
@@ -55,7 +55,7 @@ return array(
 	new Cmd(
 			"CMSMCOUNT",
 
-			"CMSMCOUNT / CMSQUERY key W_width D_depth integer_size value [value]",
+			"CMSMCOUNT / CMSQUERY key W_width D_depth integer_size value [value]...",
 
 			"Check estimated count of <i>value</i> that may be present into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />" .
 			"Read CMS information document.",

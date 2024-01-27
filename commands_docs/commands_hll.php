@@ -3,9 +3,9 @@ return array(
 	new Cmd(
 			"PFADD",
 
-			"PFADD / HLLADD key value [value2]...",
+			"PFADD / HLLADD key value [value]...",
 
-			"Add <i>value</i>, <i>value2</i>... into HLL <i>key</i>.<br />" .
+			"Add <i>value</i> into HLL <i>key</i>.<br />" .
 			"Read HLL information document.",
 			"string (int)",
 			"always returns 1",
@@ -37,9 +37,9 @@ return array(
 	new Cmd(
 			"PFCOUNT",
 
-			"PFCOUNT / HLLCOUNT [key] [key2]...",
+			"PFCOUNT / HLLCOUNT [key]...",
 
-			"Estimate count of HLL union of provided keys.<br />" .
+			"Estimate count of HLL union of provided <i>key</i>.<br />" .
 			"Works with single key too, but returns standard estimation.<br />" .
 			"Works without key too, but returns 0.<br />" .
 			"Read HLL information document.",

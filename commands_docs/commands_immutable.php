@@ -20,9 +20,9 @@ return array(
 	new Cmd(
 			"MGET",
 
-			"MGET key1 [key2]...",
+			"MGET key [key]...",
 
-			"Get value of the <i>key1</i>, <i>key2</i>... Exact match.<br />" .
+			"Get value of the <i>key</i>. Exact match.<br />" .
 			"Same as GET but array responce.",
 
 			"array",

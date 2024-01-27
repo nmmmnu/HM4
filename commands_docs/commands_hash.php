@@ -102,9 +102,9 @@ return array(
 	new Cmd(
 			"HMGET",
 
-			"HMGET key subkey [subkey1]...",
+			"HMGET key subkey [subkey]...",
 
-			"Get <i>key</i> -> <i>subkey</i>, <i>subkey1</i>... hash.<br />" .
+			"Get <i>key</i> -> <i>subkey</i> hash.<br />" .
 			"Works exactly as Redis HMGET, except internally set key for each value.<br />" .
 			"If you can, use HGETALL it is much faster.",
 			"array",
@@ -162,9 +162,9 @@ return array(
 	new Cmd(
 			"HMSET",
 
-			"HMSET key subkey value [subkey2] [value2]...",
+			"HMSET key subkey value [subkey value]...",
 
-			"Set <i>key</i> -> <i>subkey</i> -> <i>value</i>, <i>key</i> -> <i>subkey2</i> -> <i>value2</i> hash.<br />" .
+			"Set <i>key</i> -> <i>subkey</i> -> <i>value</i> hash.<br />" .
 			"Works exactly as Redis HMSET, except internally set key for each value.",
 			"OK",
 			"OK",
@@ -181,9 +181,9 @@ return array(
 	new Cmd(
 			"HDEL",
 
-			"HDEL key subkey [subkey2]...",
+			"HDEL key subkey [subkey]...",
 
-			"Removes <i>key</i> -> <i>subkey</i>, <i>key</i> -> <i>subkey2</i>... hash.<br />" .
+			"Removes <i>key</i> -> <i>subkey</i> hash.<br />" .
 			"Works exactly as Redis HSET, except internally set key for each value.",
 			"bool",
 			"Always return 1",

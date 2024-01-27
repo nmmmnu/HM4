@@ -19,9 +19,9 @@ return array(
 	new Cmd(
 			"MC2MGET",
 
-			"MC2MGET key subkey0 [subkey1]...",
+			"MC2MGET key subkey [subkey]...",
 
-			"Get values of the <i>subkey0</i>, <i>subkey1</i>... stored in <i>key</i>.",
+			"Get values of the <i>subkey</i> stored in <i>key</i>.",
 			"array",
 			"values of the items",
 			"1.3.7.7",
@@ -50,13 +50,28 @@ return array(
 	),
 
 	new Cmd(
+			"MC2SCORE",
+
+			"MC2SCORE key subkey",
+
+			"Get score of the <i>subkey</i> stored in <i>key</i>.",
+			"array",
+			"x and y",
+			"1.3.7.7",
+			"READ",
+			false,
+			false,
+
+			"mortoncurve"
+	),
+
+	new Cmd(
 			"MC2SET",
 
-			"MC2SET subKey0 x0 y0 value0 [subKey1 x1 y1 value1]...",
+			"MC2SET subKey x y value [subKey x y value]...",
 
 			"Set " .
-			"<i>subkey0</i> with 2D coordinates <i>x0</i> and <i>y0</i> and <i>value0</i>, " .
-			"<i>subkey1</i> with 2D coordinates <i>x1</i> and <i>y1</i> and <i>value1</i>... in <i>key</i>.<br />" .
+			"<i>subkey</i> with 2D coordinates <i>x</i> and <i>y</i> and <i>value</i> in <i>key</i>.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.",
 			"OK",
 			"OK",
@@ -71,9 +86,9 @@ return array(
 	new Cmd(
 			"MC2DEL",
 
-			"MC2DEL key subkey0 [subkey1]...",
+			"MC2DEL key subkey [subkey]...",
 
-			"Removes <i>subkey0</i>, <i>subkey1</i>... stored in <i>key</i>.",
+			"Removes <i>subkey</i> stored in <i>key</i>.",
 			"bool",
 			"Always return 1",
 			"1.3.7.7",
@@ -91,7 +106,7 @@ return array(
 
 			"Gets all subkeys stored in 'point' with 2D coordinates <i>x</i> and <i>y</i>.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.<br />" .
-			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET.<br />" .
+			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />" .
 			"Return up to <i>number</i> of pairs.<br />" .
 			"Returns up to ~32'000 elements.",
 
@@ -122,7 +137,7 @@ return array(
 			"<br />" .
 			"xnget users~ 1000 users~</pre>",
 
-			"<pre>select key, val from table where x = [x] and y between [y] limit [number]</pre>"
+			"<pre>select key, val from table where x = [x] and y = [y] limit [number]</pre>"
 	),
 
 	new Cmd(
@@ -132,7 +147,7 @@ return array(
 
 			"Gets all subkeys stored in 'rectangle' with 2D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i>.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.<br />" .
-			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET.<br />" .
+			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />" .
 			"Return up to <i>number</i> of pairs.<br />" .
 			"Returns up to ~32'000 elements.<br />" .
 			"Note this command is useful only on very large datasets.",

@@ -3,7 +3,7 @@ return array(
 	new Cmd(
 			"BITSET",
 
-			"BITSET / BITMSET / SETBIT key index value [index] [value]",
+			"BITSET / BITMSET / SETBIT key index value [index value]...",
 
 			"Set bit(s) of the <i>key</i> with <i>index</i> to <i>value</i> (0/1).<br />" .
 			"Read Bitset information document.",
@@ -37,9 +37,9 @@ return array(
 	new Cmd(
 			"BITMGET",
 
-			"BITMGET key index [index1]",
+			"BITMGET key index [index]...",
 
-			"Get bit(s) of the <i>key</i> with <i>index</i>, <i>index1</i>...<br />" .
+			"Get bit(s) of the <i>key</i> with <i>index</i><br />" .
 			"Read Bitset information document.",
 			"array",
 			"0 / 1",
