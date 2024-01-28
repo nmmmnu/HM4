@@ -21,7 +21,7 @@ namespace net::worker::commands::MortonCurve{
 		static_assert(to_string_buffer_t_size >= scoreSize);
 
 		constexpr bool isMC2KeyValid(std::string_view keyN, std::string_view subKey){
-			return shared::zset::isZKeyValid(keyN, subKey, scoreSize);
+			return shared::zset::isKeyValid(keyN, subKey, scoreSize);
 		}
 
 		constexpr std::string_view toHex(uint64_t const z, MC2Buffer &buffer){
@@ -157,7 +157,7 @@ namespace net::worker::commands::MortonCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = shared::zset::zExtractScore(key, keyN, scoreSize);
+				auto const hex = shared::zset::extractScore(key, keyN, scoreSize);
 
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
@@ -238,7 +238,7 @@ namespace net::worker::commands::MortonCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = shared::zset::zExtractScore(key, keyN, scoreSize);
+				auto const hex = shared::zset::extractScore(key, keyN, scoreSize);
 
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
@@ -324,7 +324,7 @@ namespace net::worker::commands::MortonCurve{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zset::zGet(db, keyN, subKey, blob.buffer_key[0])
+				shared::zset::get(db, keyN, subKey, blob.buffer_key[0])
 			);
 		}
 
@@ -382,7 +382,7 @@ namespace net::worker::commands::MortonCurve{
 				auto const &subKey = *itk;
 
 				container.emplace_back(
-					shared::zset::zGet(db, keyN, subKey, blob.buffer_key[0])
+					shared::zset::get(db, keyN, subKey, blob.buffer_key[0])
 				);
 			}
 
@@ -425,7 +425,7 @@ namespace net::worker::commands::MortonCurve{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zset::zExists(db, keyN, subKey, blob.buffer_key[0])
+				shared::zset::exists(db, keyN, subKey, blob.buffer_key[0])
 			);
 		}
 
@@ -464,7 +464,7 @@ namespace net::worker::commands::MortonCurve{
 			if (!isMC2KeyValid(keyN, subKey))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			if (auto const hex = shared::zset::zScore(db, keyN, subKey, scoreSize, blob.buffer_key[0]); !hex.empty()){
+			if (auto const hex = shared::zset::score(db, keyN, subKey, blob.buffer_key[0]); !hex.empty()){
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
 				auto const [x, y] = morton_curve::fromMorton2D(z);
@@ -492,7 +492,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2SET : BaseRW<Protocol,DBAdapter>{
+	struct MC2ADD : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -539,7 +539,7 @@ namespace net::worker::commands::MortonCurve{
 
 				auto const score	= toHex(x, y, buffer);
 
-				shared::zset::zAdd(
+				shared::zset::add(
 						db,
 						keyN, subKey, score, value,
 						blob.buffer_key[0], blob.buffer_key[1]
@@ -551,6 +551,7 @@ namespace net::worker::commands::MortonCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
+			"mc2add",		"MC2ADD"	,
 			"mc2set",		"MC2SET"	,
 			"mc2mset",		"MC2MSET"
 		};
@@ -559,7 +560,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2DEL : BaseRW<Protocol,DBAdapter>{
+	struct MC2REM : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -591,7 +592,7 @@ namespace net::worker::commands::MortonCurve{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &subKey = *itk;
 
-				shared::zset::zRem(db, keyN, subKey, blob.buffer_key[0]);
+				shared::zset::rem(db, keyN, subKey, blob.buffer_key[0], blob.buffer_key[1]);
 			}
 
 			return result.set_1();
@@ -599,7 +600,7 @@ namespace net::worker::commands::MortonCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2del",		"MC2DEL"
+			"mc2rem",		"MC2REM"
 		};
 	};
 
@@ -858,8 +859,8 @@ namespace net::worker::commands::MortonCurve{
 				MC2MGET			,
 				MC2EXISTS		,
 				MC2SCORE		,
-				MC2SET			,
-				MC2DEL			,
+				MC2ADD			,
+				MC2REM			,
 				MC2GETPOINT		,
 				MC2GETRANGENAIVE	,
 				MC2GETRANGE		,

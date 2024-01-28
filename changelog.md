@@ -269,3 +269,10 @@ Changelog
 -	fix error with GEORADIUS cells enumeration
 -	Release
 
+### 1.3.7.7
+-	pull zset-like functions from geo module
+-	new command alias GEOSCORE -> GEOGET
+-	new module morton curve: MC2GET, MC2MGET, MC2EXISTS, MC2SCORE,
+	MC2ADD, MC2REM, MC2GETPOINT, MC2GETRANGENAIVE, MC2GETRANGE, MC2ENCODE, MC2DECODE
+
+

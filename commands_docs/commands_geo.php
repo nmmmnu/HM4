@@ -3,7 +3,7 @@ return array(
 	new Cmd(
 			"GEOGET",
 
-			"GEOGET key name",
+			"GEOGET / GEOSCORE key name",
 
 			"Retrieve the specified geospatial item (<i>name</i>) from the specified <i>key</i>.",
 			"string",

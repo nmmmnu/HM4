@@ -61,7 +61,7 @@ namespace net::worker::commands::Geo{
 			}
 
 			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name = ""){
-				return shared::zset::isZKeyValid(key, name, GeoHash::MAX_SIZE);
+				return shared::zset::isKeyValid(key, name, GeoHash::MAX_SIZE);
 			}
 
 		} // anonymous namespace
@@ -116,7 +116,7 @@ namespace net::worker::commands::Geo{
 
 				auto const &name = *(itk + 2);
 
-				shared::zset::zAdd(db, keyN, name, hash, line, blob.buffer_key[0], blob.buffer_key[1]);
+				shared::zset::add(db, keyN, name, hash, line, blob.buffer_key[0], blob.buffer_key[1]);
 			}
 
 			return result.set();
@@ -166,7 +166,7 @@ namespace net::worker::commands::Geo{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
-				shared::zset::zRem(db, keyN, name, blob.buffer_key[0]);
+				shared::zset::rem(db, keyN, name, blob.buffer_key[0], blob.buffer_key[1]);
 			}
 
 			return result.set();
@@ -212,13 +212,14 @@ namespace net::worker::commands::Geo{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zset::zGet(db, keyN, name, blob.buffer_key[0])
+				shared::zset::get(db, keyN, name, blob.buffer_key[0])
 			);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"geoget",	"GEOGET"
+			"geoget",	"GEOGET"	,
+			"geoscore",	"GEOSCORE"
 		};
 	};
 
@@ -268,7 +269,7 @@ namespace net::worker::commands::Geo{
 				auto const &name = *itk;
 
 				container.emplace_back(
-					shared::zset::zGet(db, keyN, name, blob.buffer_key[0])
+					shared::zset::get(db, keyN, name, blob.buffer_key[0])
 				);
 			}
 
@@ -441,37 +442,21 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto key = concatenateBuffer(blob.buffer_key[0],
-							keyN			,
-							DBAdapter::SEPARATOR	,
-						//	hash			,
-							DBAdapter::SEPARATOR	,
-							name1
-			);
+			auto const line1 = shared::zset::get(db, keyN, name1, blob.buffer_key[0]);
 
-			auto line = hm4::getPairVal(*db, key);
-
-			if (line.empty())
+			if (line1.empty())
 				return result.set(int64_t{-1});
 
-			auto const p1 = tokenizePoint(line);
+			auto const p1 = tokenizePoint(line1);
 
 			// ---
 
-			key = concatenateBuffer(blob.buffer_key[0],
-							keyN			,
-							DBAdapter::SEPARATOR	,
-						//	hash			,
-							DBAdapter::SEPARATOR	,
-							name2
-			);
+			auto const line2 = shared::zset::get(db, keyN, name2, blob.buffer_key[0]);
 
-			line = hm4::getPairVal(*db, key);
-
-			if (line.empty())
+			if (line2.empty())
 				return result.set(int64_t{-1});
 
-			auto const p2 = tokenizePoint(line);
+			auto const p2 = tokenizePoint(line2);
 
 			// ---
 
