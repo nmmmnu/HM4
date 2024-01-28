@@ -66,9 +66,9 @@ return array(
 	),
 
 	new Cmd(
-			"MC2SET",
+			"MC2ADD",
 
-			"MC2SET subKey x y value [subKey x y value]...",
+			"MC2ADD subKey x y value [subKey x y value]...",
 
 			"Set " .
 			"<i>subkey</i> with 2D coordinates <i>x</i> and <i>y</i> and <i>value</i> in <i>key</i>.<br />" .
@@ -84,9 +84,9 @@ return array(
 	),
 
 	new Cmd(
-			"MC2DEL",
+			"MC2REM",
 
-			"MC2DEL key subkey [subkey]...",
+			"MC2REM key subkey [subkey]...",
 
 			"Removes <i>subkey</i> stored in <i>key</i>.",
 			"bool",
@@ -100,9 +100,9 @@ return array(
 	),
 
 	new Cmd(
-			"MC2GETPOINT",
+			"MC2POINT",
 
-			"MC2GETPOINT key x y number [start]",
+			"MC2POINT key x y number [start]",
 
 			"Gets all subkeys stored in 'point' with 2D coordinates <i>x</i> and <i>y</i>.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.<br />" .
@@ -133,7 +133,7 @@ return array(
 			"mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />" .
 			"mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />" .
 
-			"mc2getpoint users 2 2 10000      <i>gets all support from LA               (pola, pepe)</i><br />" .
+			"mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br />" .
 			"<br />" .
 			"xnget users~ 1000 users~</pre>",
 
@@ -141,9 +141,9 @@ return array(
 	),
 
 	new Cmd(
-			"MC2GETRANGE",
+			"MC2RANGE",
 
-			"MC2GETRANGE key x_min x_max y_min y_max number [start]",
+			"MC2RANGE key x_min x_max y_min y_max number [start]",
 
 			"Gets all subkeys stored in 'rectangle' with 2D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i>.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.<br />" .
@@ -175,12 +175,12 @@ return array(
 			"mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />" .
 			"mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />" .
 
-			"mc2getpoint users 2 2 10000      <i>gets all support from LA               (pola, pepe)</i><br />" .
-			"mc2getrange users 2 2 2 2 10000  <i>gets all support from LA               (pola, pepe) - same as previous, but slower.</i><br />" .
+			"mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br />" .
+			"mc2range users 2 2 2 2 10000     <i>gets all support from LA               (pola, pepe) - same as previous, but slower.</i><br />" .
 
-			"mc2getrange users 2 2 1 2 10000  <i>gets support from LA and NYC           (jill, pola, pepe)</i><br />" .
-			"mc2getrange users 1 2 2 2 10000  <i>gets sales and support from LA         (robert, pola, pepe)</i><br />" .
-			"mc2getrange users 1 2 1 2 10000  <i>gets sales and support from LA and NYC (all)</i><br />" .
+			"mc2range users 2 2 1 2 10000     <i>gets support from LA and NYC           (jill, pola, pepe)</i><br />" .
+			"mc2range users 1 2 2 2 10000     <i>gets sales and support from LA         (robert, pola, pepe)</i><br />" .
+			"mc2range users 1 2 1 2 10000     <i>gets sales and support from LA and NYC (all)</i><br />" .
 			"<br />" .
 			"xnget users~ 1000 users~</pre>",
 
@@ -188,12 +188,12 @@ return array(
 	),
 
 	new Cmd(
-			"MC2GETRANGENAIVE",
+			"MC2RANGENAIVE",
 
-			"MC2GETRANGENAIVE key x_min x_max y_min y_max number [start]",
+			"MC2RANGENAIVE key x_min x_max y_min y_max number [start]",
 
 			"Naive, non performant version of MC2XNGET. Made for small datasets and for testing.<br />" .
-			"See MC2GETRANGE for more information.<br />" .
+			"See MC2RANGE for more information.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.<br />" .
 			"Technically the data lookup complexity is single READ, but on large datasets, it might need to read complete dataset.",
 			"array",

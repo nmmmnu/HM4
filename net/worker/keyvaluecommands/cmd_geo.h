@@ -50,9 +50,8 @@ namespace net::worker::commands::Geo{
 				return r;
 			}
 
-			template<class DBAdapter>
-			auto tokenizeName(DBAdapter &, std::string_view line){
-				StringTokenizer const tok{ line, DBAdapter::SEPARATOR[0] };
+			auto tokenizeName(char delimiter, std::string_view line){
+				StringTokenizer const tok{ line, delimiter };
 				auto _ = getBackwardTokenizer(tok);
 
 				auto const r = _();
@@ -60,11 +59,34 @@ namespace net::worker::commands::Geo{
 				return r;
 			}
 
+			template<class DBAdapter>
+			auto tokenizeName(DBAdapter &, std::string_view line){
+				return tokenizeName(DBAdapter::SEPARATOR[0], line);
+			}
+
 			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name = ""){
 				return shared::zset::isKeyValid(key, name, GeoHash::MAX_SIZE);
 			}
 
 		} // anonymous namespace
+
+		template<class DBAdapter>
+		struct GeoScoreController{
+			constexpr static bool canExtractValue = true;
+
+			constexpr static std::string_view decode(std::string_view score){
+				return tokenizeName(DBAdapter::SEPARATOR[0], score);
+			}
+
+			constexpr static std::string_view encode(std::string_view, std::string_view value){
+				return value;
+			}
+
+			constexpr static std::string_view getValue(std::string_view score){
+				return score;
+			}
+		};
+
 	} // namespace geo_impl_
 
 
@@ -116,7 +138,9 @@ namespace net::worker::commands::Geo{
 
 				auto const &name = *(itk + 2);
 
-				shared::zset::add(db, keyN, name, hash, line, blob.buffer_key[0], blob.buffer_key[1]);
+				using GSC = GeoScoreController<DBAdapter>;
+
+				shared::zset::add<GSC>(db, keyN, name, hash, line, blob.buffer_key[0], blob.buffer_key[1]);
 			}
 
 			return result.set();
@@ -166,7 +190,9 @@ namespace net::worker::commands::Geo{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
-				shared::zset::rem(db, keyN, name, blob.buffer_key[0], blob.buffer_key[1]);
+				using GSC = GeoScoreController<DBAdapter>;
+
+				shared::zset::rem<GSC>(db, keyN, name, blob.buffer_key[0], blob.buffer_key[1]);
 			}
 
 			return result.set();
@@ -211,8 +237,10 @@ namespace net::worker::commands::Geo{
 			if (!isGeoKeyValid(keyN, name))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
+			using GSC = GeoScoreController<DBAdapter>;
+
 			return result.set(
-				shared::zset::get(db, keyN, name, blob.buffer_key[0])
+				shared::zset::get<GSC>(db, keyN, name, blob.buffer_key[0])
 			);
 		}
 
@@ -268,8 +296,10 @@ namespace net::worker::commands::Geo{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
+				using GSC = GeoScoreController<DBAdapter>;
+
 				container.emplace_back(
-					shared::zset::get(db, keyN, name, blob.buffer_key[0])
+					shared::zset::get<GSC>(db, keyN, name, blob.buffer_key[0])
 				);
 			}
 
@@ -442,7 +472,9 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line1 = shared::zset::get(db, keyN, name1, blob.buffer_key[0]);
+			using GSC = GeoScoreController<DBAdapter>;
+
+			auto const line1 = shared::zset::get<GSC>(db, keyN, name1, blob.buffer_key[0]);
 
 			if (line1.empty())
 				return result.set(int64_t{-1});
@@ -451,7 +483,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line2 = shared::zset::get(db, keyN, name2, blob.buffer_key[0]);
+			auto const line2 = shared::zset::get<GSC>(db, keyN, name2, blob.buffer_key[0]);
 
 			if (line2.empty())
 				return result.set(int64_t{-1});

@@ -551,9 +551,7 @@ namespace net::worker::commands::MortonCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2add",		"MC2ADD"	,
-			"mc2set",		"MC2SET"	,
-			"mc2mset",		"MC2MSET"
+			"mc2add",		"MC2ADD"
 		};
 	};
 
@@ -607,7 +605,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2GETPOINT : BaseRO<Protocol,DBAdapter>{
+	struct MC2POINT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -616,7 +614,7 @@ namespace net::worker::commands::MortonCurve{
 			return std::end(cmd);
 		};
 
-		// MC2GETPOINT morton 10 10 10000 [key]
+		// MC2POINT morton 10 10 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
@@ -655,14 +653,14 @@ namespace net::worker::commands::MortonCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2getpoint",	"MC2GETPOINT"
+			"mc2point",	"MC2POINT"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2GETRANGENAIVE : BaseRO<Protocol,DBAdapter>{
+	struct MC2RANGENAIVE : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -671,7 +669,7 @@ namespace net::worker::commands::MortonCurve{
 			return std::end(cmd);
 		};
 
-		// MC2GETRANGENAIVE morton 10 10 10 10 10000 [key]
+		// MC2RANGENAIVE morton 10 10 10 10 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
@@ -712,14 +710,14 @@ namespace net::worker::commands::MortonCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2getrangenaive",	"MC2GETRANGENAIVE"
+			"mc2rangenaive",	"MC2RANGENAIVE"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2GETRANGE : BaseRO<Protocol,DBAdapter>{
+	struct MC2RANGE : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -728,7 +726,7 @@ namespace net::worker::commands::MortonCurve{
 			return std::end(cmd);
 		};
 
-		// MC2GETRANGE morton 10 10 10 10 10000 [key]
+		// MC2RANGE morton 10 10 10 10 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
@@ -769,7 +767,7 @@ namespace net::worker::commands::MortonCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2getrange",	"MC2GETRANGE"
+			"mc2range",	"MC2RANGE"
 		};
 	};
 
@@ -861,9 +859,9 @@ namespace net::worker::commands::MortonCurve{
 				MC2SCORE		,
 				MC2ADD			,
 				MC2REM			,
-				MC2GETPOINT		,
-				MC2GETRANGENAIVE	,
-				MC2GETRANGE		,
+				MC2POINT		,
+				MC2RANGENAIVE	,
+				MC2RANGE		,
 				MC2ENCODE		,
 				MC2DECODE
 			>(pack);
