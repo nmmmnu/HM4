@@ -270,9 +270,10 @@ Changelog
 -	Release
 
 ### 1.3.7.7
--	pull zset-like functions from geo module
--	new command alias GEOSCORE -> GEOGET
+-	pull zset-like functions from geo module.
 -	new module morton curve: MC2GET, MC2MGET, MC2EXISTS, MC2SCORE,
 	MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
+-	make zset-like functions to use ScoreController,
+	in order geo functions to avoid additional key retreaval.
 
 

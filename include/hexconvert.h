@@ -49,7 +49,7 @@ namespace hex_convert{
 	constexpr std::string_view toHex(T const number, std::array<char, N> &buffer){
 		static_assert( is_any_v<T, uint8_t, uint16_t, uint32_t, uint64_t> );
 
-		static_assert(N > sizeof(T) * 2 + (opt & options::terminate ? 1 : 0));
+		static_assert(N >= sizeof(T) * 2 + (opt & options::terminate ? 1 : 0));
 
 		return toHex<T, opt>(number, buffer.data());
 	}

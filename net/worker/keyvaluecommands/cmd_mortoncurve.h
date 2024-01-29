@@ -833,7 +833,7 @@ namespace net::worker::commands::MortonCurve{
 
 			const std::array<std::string_view, 2> container{
 				to_string(x, buffer[0]),
-				to_string(y, buffer[2])
+				to_string(y, buffer[1])
 			};
 
 			return result.set_container(container);
@@ -860,7 +860,7 @@ namespace net::worker::commands::MortonCurve{
 				MC2ADD			,
 				MC2REM			,
 				MC2POINT		,
-				MC2RANGENAIVE	,
+				MC2RANGENAIVE		,
 				MC2RANGE		,
 				MC2ENCODE		,
 				MC2DECODE

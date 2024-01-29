@@ -9,7 +9,7 @@ return array(
 			"string",
 			"[latitude],[longitude],[geohash]",
 			"1.3.4.2",
-			"2 * READ",
+			"READ",
 			false,
 			false,
 
@@ -30,7 +30,7 @@ return array(
 			"array",
 			"array",
 			"1.3.4.2",
-			"[number of keys] * 2 * READ",
+			"[number of keys] * READ",
 			false,
 			false,
 

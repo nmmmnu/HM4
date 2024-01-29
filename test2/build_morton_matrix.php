@@ -23,10 +23,10 @@ $max = 1000;
 for($y = 0; $y < $max; ++$y){
 	for($x = 0; $x < $max; ++$x){
 		$sub = "aaa.$x.$y";
-		rawCommand($redis, "MC2SET", "morton", $sub, $x, $y, $sub);
+		rawCommand($redis, "MC2ADD", "morton", $sub, $x, $y, $sub);
 
 		$sub = "bbb.$x.$y";
-		rawCommand($redis, "MC2SET", "morton", $sub, $x, $y, $sub);
+		rawCommand($redis, "MC2ADD", "morton", $sub, $x, $y, $sub);
 	}
 
 	printf("%5d of %5d\n", $y, $max);

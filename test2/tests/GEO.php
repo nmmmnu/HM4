@@ -4,7 +4,14 @@ function cmd_GEO($redis){
 	// clean up.
 	rawCommand($redis, "xndel", "places", "places");
 
-
+	// add some restaurants to be overwritten
+	$redis->geoadd(
+		"places",
+		11, 11, "Level Up"		,
+		22, 22, "Luchiano"		,
+		33, 33, "Bohemian Hall"		,
+		44, 44, "Boho"
+	);
 
 	// add restaurants in Sofia
 	$redis->geoadd(
