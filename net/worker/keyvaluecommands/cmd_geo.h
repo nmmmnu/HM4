@@ -27,9 +27,9 @@ namespace net::worker::commands::Geo{
 
 			using buffer_t = std::array<char, buffer_t_size>;
 
-			constexpr std::string_view fmt_mask = "{:+.10f},{:+.10f},{}";
-
 			std::string_view formatLine(double lat, double lon, std::string_view hash, buffer_t &buffer){
+				constexpr static std::string_view fmt_mask = "{:+.10f},{:+.10f},{}";
+
 				auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, lat, lon, hash);
 
 				if (result.out == std::end(buffer))
@@ -102,7 +102,10 @@ namespace net::worker::commands::Geo{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			if (p.size() < 5 || p.size() % 3 != 2)
+			auto const varg  = 2;
+			auto const vstep = 3;
+
+			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
 
 			auto const &keyN = p[1];
@@ -112,9 +115,7 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
-			auto const varg = 2;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 3){
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const &name = *(itk + 2);
 
 				if (name.empty())
@@ -124,7 +125,7 @@ namespace net::worker::commands::Geo{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 3){
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const lat = to_geo(*(itk + 0));
 				auto const lon = to_geo(*(itk + 1));
 
@@ -165,37 +166,11 @@ namespace net::worker::commands::Geo{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			if (p.size() < 3)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
-
-			auto const &keyN = p[1];
-
-			if (keyN.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
 			using namespace geo_impl_;
 
-			auto const varg = 2;
+			using GSC = GeoScoreController<DBAdapter>;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &name = *itk;
-
-				if (name.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_NAME);
-
-				if (!isGeoKeyValid(keyN, name))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &name = *itk;
-
-				using GSC = GeoScoreController<DBAdapter>;
-
-				shared::zset::rem<GSC>(db, keyN, name, blob.buffer_key[0], blob.buffer_key[1]);
-			}
-
-			return result.set();
+			return shared::zset::cmdProcessRem<GSC>(p, db, result, blob, GeoHash::MAX_SIZE);
 		}
 
 	private:

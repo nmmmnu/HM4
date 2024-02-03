@@ -229,6 +229,36 @@ namespace net::worker::shared::zset{
 			return "";
 	}
 
+
+
+	template<typename SC = impl_::StandardScoreController, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
+	void cmdProcessRem(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &blob, size_t scoreSize){
+		// REM key subkey0 subkey1 ...
+
+		if (p.size() < 3)
+			return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
+
+		const auto &keyN = p[1];
+
+		if (keyN.empty())
+			return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+		auto const varg = 2;
+
+		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+			if (auto const &subKey = *itk; !isKeyValid(keyN, subKey, scoreSize))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+		}
+
+		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+			auto const &subKey = *itk;
+
+			rem<SC>(db, keyN, subKey, blob.buffer_key[0], blob.buffer_key[1]);
+		}
+
+		return result.set_1();
+	}
+
 } // net::worker::shared::zset
 
 #endif

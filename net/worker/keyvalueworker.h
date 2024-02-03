@@ -28,7 +28,8 @@
 #include "keyvaluecommands/cmd_cms.h"			// CMSADD, CMSRESERVE, CMSCOUNT, CMSMCOUNT
 //#include "keyvaluecommands/cmd_array.h"		// CVSET, CVGET, CVMGET, CVMAX
 #include "keyvaluecommands/cmd_geo.h"			// GEOADD, GEOREM, GEOGET, GEOMGET, GEOENCODE, GEODECODE
-#include "keyvaluecommands/cmd_mortoncurve.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SET, MC2DEL
+#include "keyvaluecommands/cmd_mortoncurve.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
+#include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1EXISTS, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
 
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
@@ -100,6 +101,7 @@ namespace net::worker{
 			//	CV		::RegisterModule,
 				Geo		::RegisterModule,
 				MortonCurve	::RegisterModule,
+				LinearCurve	::RegisterModule,
 
 				Murmur		::RegisterModule,
 
