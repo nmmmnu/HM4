@@ -275,5 +275,6 @@ Changelog
 	MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
 -	make zset-like functions to use ScoreController,
 	in order geo functions to avoid additional key retreaval.
-
+-	new module linear curve: MC1GET, MC1MGET, MC1EXISTS, MC1SCORE,
+	MC1ADD, MC1REM, MC1POINT, MC1RANGE
 

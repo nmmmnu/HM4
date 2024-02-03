@@ -232,6 +232,27 @@ namespace net::worker::shared::zset{
 
 
 	template<typename SC = impl_::StandardScoreController, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
+	void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &blob, size_t scoreSize){
+		// EXISTS key subkey0
+
+		if (p.size() != 3)
+			return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+		auto const &keyN   = p[1];
+		auto const &subKey = p[2];
+
+		if (keyN.empty() || subKey.empty())
+			return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+		if (!isKeyValid(keyN, subKey, scoreSize))
+			return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+		return result.set(
+			exists(db, keyN, subKey, blob.buffer_key[0])
+		);
+	}
+
+	template<typename SC = impl_::StandardScoreController, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
 	void cmdProcessRem(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &blob, size_t scoreSize){
 		// REM key subkey0 subkey1 ...
 

@@ -303,21 +303,7 @@ namespace net::worker::commands::LinearCurve{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace linear_curve_impl_;
 
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
-
-			auto const &keyN   = p[1];
-			auto const &subKey = p[2];
-
-			if (keyN.empty() || subKey.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!isMC1KeyValid(keyN, subKey))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			return result.set(
-				shared::zset::exists(db, keyN, subKey, blob.buffer_key[0])
-			);
+			return shared::zset::cmdProcessExists(p, db, result, blob, scoreSize);
 		}
 
 	private:
