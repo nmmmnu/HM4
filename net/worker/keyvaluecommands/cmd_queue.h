@@ -30,7 +30,7 @@ namespace net::worker::commands::Queue{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
@@ -53,7 +53,8 @@ namespace net::worker::commands::Queue{
 
 			auto const &id = MyIDGenerator{}(buffer);
 
-			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, id);
+			hm4::PairBufferKey bufferKey;
+			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, id);
 
 			hm4::insert(*db, key, val, exp);
 
@@ -85,7 +86,7 @@ namespace net::worker::commands::Queue{
 						- DBAdapter::SEPARATOR.size()
 						- 16;
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -98,7 +99,8 @@ namespace net::worker::commands::Queue{
 			if (keyN.size() > MAX_KEY_SIZE)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
+			hm4::PairBufferKey bufferKey;
+			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
 			auto it = db->find(key, std::false_type{});
 

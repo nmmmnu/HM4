@@ -24,19 +24,11 @@ namespace net::worker::commands{
 
 
 	struct OutputBlob{
-		template<size_t size>
-		using CharArray = std::array<char, size>;
 
 		// largest uint64_t is 20 digits.
 		// we hope to be able to store 3 x 20 + 2 delimiters = 64 characters
 		constexpr static size_t BUFFER_LABEL_SIZE	= 64;
-		using BufferLabel = CharArray<BUFFER_LABEL_SIZE>;
-
-		constexpr static size_t BUFFER_KEY_SIZE		= hm4::PairConf::MAX_KEY_SIZE + 16;
-		using BufferKey = CharArray<BUFFER_KEY_SIZE>;
-
-		constexpr static size_t BUFFER_VAL_SIZE		= hm4::PairConf::MAX_VAL_SIZE + 16;
-		using BufferVal = CharArray<BUFFER_VAL_SIZE>;
+		using BufferLabel = std::array<char, BUFFER_LABEL_SIZE>;
 
 		constexpr static size_t ContainerSize	= 0xFFFF;
 		using Container		= StaticVector<std::string_view		,ContainerSize>;
@@ -49,14 +41,9 @@ namespace net::worker::commands{
 			bcontainer.reserve(ContainerSize);
 		}
 
-		std::array<BufferKey, 2>	buffer_key;	// 1024 KB ~
 		Container			container;	// 1024 KB, if string_view is 16 bytes
 		PairContainer			pcontainer;	//  514 KB
 		BufferContainer			bcontainer;	// 4096 KB
-
-		// move at the end for cache friendly-ness
-		// current implementation does not using this.
-	//	std::array<BufferVal, 1>	buffer_val;	//  256 MB ~
 
 		static_assert(BUFFER_LABEL_SIZE >= to_string_buffer_t_size);
 	};

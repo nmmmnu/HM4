@@ -101,7 +101,7 @@ namespace net::worker::commands::Geo{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			auto const varg  = 2;
 			auto const vstep = 3;
 
@@ -141,7 +141,7 @@ namespace net::worker::commands::Geo{
 
 				using GSC = GeoScoreController<DBAdapter>;
 
-				shared::zset::add<GSC>(db, keyN, name, hash, line, blob.buffer_key[0], blob.buffer_key[1]);
+				shared::zset::add<GSC>(db, keyN, name, hash, line);
 			}
 
 			return result.set();
@@ -193,7 +193,7 @@ namespace net::worker::commands::Geo{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -215,7 +215,7 @@ namespace net::worker::commands::Geo{
 			using GSC = GeoScoreController<DBAdapter>;
 
 			return result.set(
-				shared::zset::get<GSC>(db, keyN, name, blob.buffer_key[0])
+				shared::zset::get<GSC>(db, keyN, name)
 			);
 		}
 
@@ -274,7 +274,7 @@ namespace net::worker::commands::Geo{
 				using GSC = GeoScoreController<DBAdapter>;
 
 				container.emplace_back(
-					shared::zset::get<GSC>(db, keyN, name, blob.buffer_key[0])
+					shared::zset::get<GSC>(db, keyN, name)
 				);
 			}
 
@@ -342,7 +342,9 @@ namespace net::worker::commands::Geo{
 			uint32_t results    = 0;
 
 			for(auto &hash : cells){
-				auto const prefix = concatenateBuffer(blob.buffer_key[0],
+				hm4::PairBufferKey bufferKey;
+
+				auto const prefix = concatenateBuffer(bufferKey,
 								keyN			,
 								DBAdapter::SEPARATOR	,
 								hash
@@ -410,7 +412,7 @@ namespace net::worker::commands::Geo{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -449,7 +451,7 @@ namespace net::worker::commands::Geo{
 
 			using GSC = GeoScoreController<DBAdapter>;
 
-			auto const line1 = shared::zset::get<GSC>(db, keyN, name1, blob.buffer_key[0]);
+			auto const line1 = shared::zset::get<GSC>(db, keyN, name1);
 
 			if (line1.empty())
 				return result.set(int64_t{-1});
@@ -458,7 +460,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line2 = shared::zset::get<GSC>(db, keyN, name2, blob.buffer_key[0]);
+			auto const line2 = shared::zset::get<GSC>(db, keyN, name2);
 
 			if (line2.empty())
 				return result.set(int64_t{-1});

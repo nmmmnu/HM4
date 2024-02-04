@@ -431,7 +431,8 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
+			hm4::PairBufferKey bufferKey;
+			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::BOTH>(
 				ITERATIONS_RESULTS_MAX			,
@@ -478,7 +479,8 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
+			hm4::PairBufferKey bufferKey;
+			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::KEYS>(
 				ITERATIONS_RESULTS_MAX			,
@@ -525,7 +527,8 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
+			hm4::PairBufferKey bufferKey;
+			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
 			accumulateResultsH<AccumulateOutput::VALS>(
 				ITERATIONS_RESULTS_MAX			,
@@ -556,7 +559,7 @@ namespace net::worker::commands::ImmutableX{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -574,7 +577,8 @@ namespace net::worker::commands::ImmutableX{
 			if (!hm4::isHKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR);
+			hm4::PairBufferKey bufferKey;
+			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
 			auto const n = countResultsH(
 				key					,

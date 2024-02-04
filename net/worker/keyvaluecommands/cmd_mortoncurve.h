@@ -17,8 +17,8 @@ namespace net::worker::commands::MortonCurve{
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC2Buffer = std::array<char, scoreSize>;
 
-		constexpr bool isMC2KeyValid(std::string_view keyN, std::string_view subKey){
-			return shared::zset::isKeyValid(keyN, subKey, scoreSize);
+		constexpr bool isMC2KeyValid(std::string_view keyN, std::string_view keySub){
+			return shared::zset::isKeyValid(keyN, keySub, scoreSize);
 		}
 
 		constexpr std::string_view toHex(uint64_t const z, MC2Buffer &buffer){
@@ -107,9 +107,11 @@ namespace net::worker::commands::MortonCurve{
 		void mortonSearchPoint(
 				DBAdapter &db,
 				OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &bufferKey,
+				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				MortonPoint const &point, std::string_view startKey){
+
+			hm4::PairBufferKey bufferKeyPrefix;
 
 			auto const prefix = [&](){
 				if (!startKey.empty())
@@ -117,7 +119,7 @@ namespace net::worker::commands::MortonCurve{
 
 				MC2Buffer buffer;
 
-				return concatenateBuffer(bufferKey[0],
+				return concatenateBuffer(bufferKeyPrefix,
 						keyN,
 						DBAdapter::SEPARATOR,
 						toHex(point.x, point.y, buffer),
@@ -183,16 +185,18 @@ namespace net::worker::commands::MortonCurve{
 		template<bool bigmin_optimized, class DBAdapter, class BufferKeyArray>
 		void mortonSearch(
 				DBAdapter &db, OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &bufferKey,
+				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				MortonRectangle const &rect, std::string_view startKey){
 
 			constexpr uint32_t MAX_RETRIES = 9;
 
-			auto createKey = [keyN](OutputBlob::BufferKey &bufferKey, uint64_t z){
+			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t z){
 				MC2Buffer z_buffer;
 				return concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, toHex(z, z_buffer), DBAdapter::SEPARATOR);
 			};
+
+			hm4::PairBufferKey bufferKey[2];
 
 			auto       key_min = 	! startKey.empty() ? startKey :
 						createKey(bufferKey[0], rect.z_min );
@@ -305,23 +309,23 @@ namespace net::worker::commands::MortonCurve{
 
 		// MC2GET key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &keyN   = p[1];
-			auto const &subKey = p[2];
+			auto const &keySub = p[2];
 
-			if (keyN.empty() || subKey.empty())
+			if (keyN.empty() || keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN, subKey))
+			if (!isMC2KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zset::get(db, keyN, subKey, blob.buffer_key[0])
+				shared::zset::get(db, keyN, keySub)
 			);
 		}
 
@@ -359,12 +363,12 @@ namespace net::worker::commands::MortonCurve{
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &subKey = *itk;
+				auto const &keySub = *itk;
 
-				if (subKey.empty())
+				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!isMC2KeyValid(keyN, subKey))
+				if (!isMC2KeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -376,10 +380,10 @@ namespace net::worker::commands::MortonCurve{
 
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &subKey = *itk;
+				auto const &keySub = *itk;
 
 				container.emplace_back(
-					shared::zset::get(db, keyN, subKey, blob.buffer_key[0])
+					shared::zset::get(db, keyN, keySub)
 				);
 			}
 
@@ -432,22 +436,22 @@ namespace net::worker::commands::MortonCurve{
 
 		// MC2SCORE key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &keyN   = p[1];
-			auto const &subKey = p[2];
+			auto const &keySub = p[2];
 
-			if (keyN.empty() || subKey.empty())
+			if (keyN.empty() || keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN, subKey))
+			if (!isMC2KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			if (auto const hex = shared::zset::score(db, keyN, subKey, blob.buffer_key[0]); !hex.empty()){
+			if (auto const hex = shared::zset::score(db, keyN, keySub); !hex.empty()){
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
 				auto const [x, y] = morton_curve::fromMorton2D(z);
@@ -484,9 +488,9 @@ namespace net::worker::commands::MortonCurve{
 			return std::end(cmd);
 		};
 
-		// MC2SET a subKey0 x0 y0 val0 subKey1 x1 y1 val1 ...
+		// MC2SET a keySub0 x0 y0 val0 keySub1 x1 y1 val1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
 
 			auto const varg  = 2;
@@ -501,12 +505,12 @@ namespace net::worker::commands::MortonCurve{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const &subKey	= *(itk + 0);
+				auto const &keySub	= *(itk + 0);
 			//	auto const &x		= *(itk + 1);
 			//	auto const &y		= *(itk + 2);
 				auto const &value	= *(itk + 3);
 
-				if (!isMC2KeyValid(keyN, subKey))
+				if (!isMC2KeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 				if (!hm4::Pair::isValValid(value))
@@ -514,7 +518,7 @@ namespace net::worker::commands::MortonCurve{
 			}
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const &subKey	= *(itk + 0);
+				auto const &keySub	= *(itk + 0);
 				auto const &x		= *(itk + 1);
 				auto const &y		= *(itk + 2);
 				auto const &value	= *(itk + 3);
@@ -525,8 +529,7 @@ namespace net::worker::commands::MortonCurve{
 
 				shared::zset::add(
 						db,
-						keyN, subKey, score, value,
-						blob.buffer_key[0], blob.buffer_key[1]
+						keyN, keySub, score, value
 				);
 			}
 
@@ -604,10 +607,12 @@ namespace net::worker::commands::MortonCurve{
 
 			blob.container.clear();
 
+			hm4::PairBufferKey bufferKey;
+
 			mortonSearchPoint(
 				db,
 				blob.container, blob.bcontainer,
-				blob.buffer_key,
+				bufferKey,
 				keyN, count,
 				point,
 				startKey
@@ -665,10 +670,12 @@ namespace net::worker::commands::MortonCurve{
 			blob.container.clear();
 			blob.bcontainer.clear();
 
+			hm4::PairBufferKey bufferKey;
+
 			mortonSearch<false>(
 				db,
 				blob.container, blob.bcontainer,
-				blob.buffer_key,
+				bufferKey,
 				keyN, count,
 				rect, startKey
 			);
@@ -725,8 +732,10 @@ namespace net::worker::commands::MortonCurve{
 			blob.container.clear();
 			blob.bcontainer.clear();
 
+			hm4::PairBufferKey bufferKey;
+
 			mortonSearch<true>(
-				db, blob.container, blob.bcontainer, blob.buffer_key,
+				db, blob.container, blob.bcontainer, bufferKey,
 				keyN, count,
 				rect, startKey
 			);

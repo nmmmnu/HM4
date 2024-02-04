@@ -16,8 +16,8 @@ namespace net::worker::commands::LinearCurve{
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC1Buffer = std::array<char, scoreSize>;
 
-		constexpr bool isMC1KeyValid(std::string_view keyN, std::string_view subKey){
-			return shared::zset::isKeyValid(keyN, subKey, scoreSize);
+		constexpr bool isMC1KeyValid(std::string_view keyN, std::string_view keySub){
+			return shared::zset::isKeyValid(keyN, keySub, scoreSize);
 		}
 
 		constexpr std::string_view toHex(uint64_t const x, MC1Buffer &buffer){
@@ -56,9 +56,11 @@ namespace net::worker::commands::LinearCurve{
 		void linearSearchPoint(
 				DBAdapter &db,
 				OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &bufferKey,
+				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				uint64_t x, std::string_view startKey){
+
+			hm4::PairBufferKey bufferKeyPrefix;
 
 			auto const prefix = [&](){
 				if (!startKey.empty())
@@ -66,7 +68,7 @@ namespace net::worker::commands::LinearCurve{
 
 				MC1Buffer buffer;
 
-				return concatenateBuffer(bufferKey[0],
+				return concatenateBuffer(bufferKeyPrefix,
 						keyN,
 						DBAdapter::SEPARATOR,
 						toHex(x, buffer),
@@ -126,14 +128,16 @@ namespace net::worker::commands::LinearCurve{
 		template<class DBAdapter, class BufferKeyArray>
 		void linearSearch(
 				DBAdapter &db, OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &bufferKey,
+				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				uint64_t x_min, uint64_t x_max, std::string_view startKey){
 
-			auto createKey = [keyN](OutputBlob::BufferKey &bufferKey, uint64_t z){
+			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t z){
 				MC1Buffer z_buffer;
 				return concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, toHex(z, z_buffer), DBAdapter::SEPARATOR);
 			};
+
+			hm4::PairBufferKey bufferKey[2];
 
 			auto       key_min = 	! startKey.empty() ? startKey :
 						createKey(bufferKey[0], x_min );
@@ -199,23 +203,23 @@ namespace net::worker::commands::LinearCurve{
 
 		// MC1GET key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace linear_curve_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &keyN   = p[1];
-			auto const &subKey = p[2];
+			auto const &keySub = p[2];
 
-			if (keyN.empty() || subKey.empty())
+			if (keyN.empty() || keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC1KeyValid(keyN, subKey))
+			if (!isMC1KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zset::get(db, keyN, subKey, blob.buffer_key[0])
+				shared::zset::get(db, keyN, keySub)
 			);
 		}
 
@@ -253,12 +257,12 @@ namespace net::worker::commands::LinearCurve{
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &subKey = *itk;
+				auto const &keySub = *itk;
 
-				if (subKey.empty())
+				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!isMC1KeyValid(keyN, subKey))
+				if (!isMC1KeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -270,10 +274,10 @@ namespace net::worker::commands::LinearCurve{
 
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &subKey = *itk;
+				auto const &keySub = *itk;
 
 				container.emplace_back(
-					shared::zset::get(db, keyN, subKey, blob.buffer_key[0])
+					shared::zset::get(db, keyN, keySub)
 				);
 			}
 
@@ -326,22 +330,22 @@ namespace net::worker::commands::LinearCurve{
 
 		// MC1SCORE key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace linear_curve_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
 			auto const &keyN   = p[1];
-			auto const &subKey = p[2];
+			auto const &keySub = p[2];
 
-			if (keyN.empty() || subKey.empty())
+			if (keyN.empty() || keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC1KeyValid(keyN, subKey))
+			if (!isMC1KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			if (auto const hex = shared::zset::score(db, keyN, subKey, blob.buffer_key[0]); !hex.empty()){
+			if (auto const hex = shared::zset::score(db, keyN, keySub); !hex.empty()){
 				auto const x = hex_convert::fromHex<uint64_t>(hex);
 
 				to_string_buffer_t buffer;
@@ -376,9 +380,9 @@ namespace net::worker::commands::LinearCurve{
 			return std::end(cmd);
 		};
 
-		// MC1SET a subKey0 x0 val0 subKey1 x1 val1 ...
+		// MC1SET a keySub0 x0 val0 keySub1 x1 val1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace linear_curve_impl_;
 
 			auto const varg  = 2;
@@ -393,11 +397,11 @@ namespace net::worker::commands::LinearCurve{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const &subKey	= *(itk + 0);
+				auto const &keySub	= *(itk + 0);
 			//	auto const &x		= *(itk + 1);
 				auto const &value	= *(itk + 2);
 
-				if (!isMC1KeyValid(keyN, subKey))
+				if (!isMC1KeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 				if (!hm4::Pair::isValValid(value))
@@ -405,7 +409,7 @@ namespace net::worker::commands::LinearCurve{
 			}
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const &subKey	= *(itk + 0);
+				auto const &keySub	= *(itk + 0);
 				auto const &x		= *(itk + 1);
 				auto const &value	= *(itk + 2);
 
@@ -415,8 +419,7 @@ namespace net::worker::commands::LinearCurve{
 
 				shared::zset::add(
 						db,
-						keyN, subKey, score, value,
-						blob.buffer_key[0], blob.buffer_key[1]
+						keyN, keySub, score, value
 				);
 			}
 
@@ -491,10 +494,12 @@ namespace net::worker::commands::LinearCurve{
 
 			blob.container.clear();
 
+			hm4::PairBufferKey bufferKey;
+
 			linearSearchPoint(
 				db,
 				blob.container, blob.bcontainer,
-				blob.buffer_key,
+				bufferKey,
 				keyN, count,
 				x,
 				startKey
@@ -547,8 +552,10 @@ namespace net::worker::commands::LinearCurve{
 			blob.container.clear();
 			blob.bcontainer.clear();
 
+			hm4::PairBufferKey bufferKey;
+
 			linearSearch(
-				db, blob.container, blob.bcontainer, blob.buffer_key,
+				db, blob.container, blob.bcontainer, bufferKey,
 				keyN, count,
 				x_min, x_max,
 				startKey

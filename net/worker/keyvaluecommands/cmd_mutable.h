@@ -271,7 +271,7 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
@@ -288,7 +288,8 @@ namespace net::worker::commands::Mutable{
 			if (!hm4::isHKeyValid(keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
+			hm4::PairBufferKey bufferKey;
+			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, subN);
 
 			auto const &val = p[3];
 			if (!hm4::Pair::isValValid(val))
@@ -319,7 +320,7 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			// should be even number arguments
 			// mset a sub1 5 sub2 6
 			if (p.size() < 3 || p.size() % 2 != 0)
@@ -348,7 +349,8 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &subN = *itk;
 
-				auto const &key  = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
+				hm4::PairBufferKey bufferKey;
+				auto const &key  = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, subN);
 				auto const &val  = *std::next(itk);
 
 				hm4::insert(*db, key, val);
@@ -505,7 +507,7 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -529,7 +531,8 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
-				auto const key = concatenateBuffer(blob.buffer_key[0], keyN, DBAdapter::SEPARATOR, subN);
+				hm4::PairBufferKey bufferKey;
+				auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, subN);
 
 				hm4::erase(*db, key);
 			}

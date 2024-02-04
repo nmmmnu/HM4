@@ -43,6 +43,11 @@ inline namespace version_4_00_00{
 
 
 
+	using PairBufferKey = std::array<char, PairConf::MAX_KEY_SIZE + 16>;
+	using PairBufferVal = std::array<char, PairConf::MAX_VAL_SIZE + 16>;
+
+
+
 	struct Pair{
 		uint64_t	created;	// 8
 		uint32_t	expires;	// 4, 136 years, not that bad. but beware for problem 2038-01-19
