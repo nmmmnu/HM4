@@ -564,7 +564,10 @@ namespace net::worker::commands::MortonCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2rem",		"MC2REM"
+			"mc2rem",		"MC2REM"	,
+			"mc2remove",		"MC2REMOVE"	,
+			"mc2del",		"MC2DEL"
+
 		};
 	};
 

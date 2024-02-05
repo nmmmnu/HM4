@@ -454,7 +454,9 @@ namespace net::worker::commands::LinearCurve{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc1rem",		"MC1REM"
+			"mc1rem",		"MC1REM"	,
+			"mc1remove",		"MC1REMOVE"	,
+			"mc1del",		"MC1DEL"
 		};
 	};
 
@@ -542,10 +544,10 @@ namespace net::worker::commands::LinearCurve{
 			if (!isMC1KeyValid(keyN, ""))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const x_min = from_string<uint32_t>(p[2]);
-			auto const x_max = from_string<uint32_t>(p[3]);
+			auto const x_min	= from_string<uint32_t>(p[2]);
+			auto const x_max	= from_string<uint32_t>(p[3]);
 
-			auto const count	= myClamp<uint32_t>(p[6], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 
 			auto const startKey	= p.size() == 6 ? p[5] : "";
 

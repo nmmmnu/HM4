@@ -299,7 +299,7 @@ namespace net::worker::shared::zset{
 
 
 
-	template<typename SC = impl_::StandardScoreController, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
+	template<typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
 	void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &, size_t scoreSize){
 		// EXISTS key subkey0
 
