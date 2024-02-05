@@ -65,8 +65,8 @@ namespace net::worker::shared::zset{
 
 
 
-		template<typename SC = StandardScoreController, typename DBAdapter>
-		std::string_view getControlKeyNoCheck(DBAdapter &db, std::string_view keyCtrl){
+		template<typename SC, typename DBAdapter>
+		std::string_view getScoreFromControlKey(DBAdapter &db, std::string_view keyCtrl){
 			return SC::decode( hm4::getPairVal(*db, keyCtrl) );
 		}
 	} // namespace impl_
@@ -79,43 +79,52 @@ namespace net::worker::shared::zset{
 
 		using namespace impl_;
 
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKey(db, keyN, keySub, bufferKeyCtrl);
+		{
+			// Update control key and delete hash key if any
 
-		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
+			hm4::PairBufferKey bufferKeyCtrl;
+			auto const keyCtrl = makeKey(db, keyN, keySub, bufferKeyCtrl);
 
-		if (auto const scoreOld = getControlKeyNoCheck<SC>(db, keyCtrl); !scoreOld.empty()){
-			// Case 1: ctrl key is set
+			logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
-			if (!isKeyValid(keyN, keySub, scoreOld)){
-				// Case 1.0: invalid ctrl key, probable attack.
-				logger<Logger::DEBUG>() << "ZSet INVALID SET ctrl key" << keyCtrl;
+			if (const auto *pair = hm4::getPairPtr(*db, keyCtrl); pair){
+				// Case 1: ctrl key is set
 
-				insert(*db, keyCtrl, SC::encode(score, value));
-			}else if (scoreOld == score){
-				// Case 1.1: ctrl key is same, no need to be updated.
+				if (auto const scoreOld = SC::decode(pair->getVal()); !isKeyValid(keyN, keySub, scoreOld)){
+					// Case 1.0: invalid ctrl key, probable attack.
 
-				logger<Logger::DEBUG>() << "ZSet SKIP SET ctrl key";
+					logger<Logger::DEBUG>() << "ZSet INVALID SET ctrl key" << keyCtrl;
+
+					// HINT
+					const auto *hint = pair;
+					hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, keyCtrl, SC::encode(score, value));
+				}else if (scoreOld == score){
+					// Case 1.1: ctrl key is same, no need to be updated.
+
+					logger<Logger::DEBUG>() << "ZSet SKIP SET ctrl key";
+				}else{
+					// Case 1.2: old ctrl key has to be updated
+
+					hm4::PairBufferKey bufferKeyHashOld;
+					auto const keyHashOld = makeKey(db, keyN, keySub, scoreOld, bufferKeyHashOld);
+
+					logger<Logger::DEBUG>() << "ZSet SET ctrl key" << keyCtrl;
+
+					// HINT
+					const auto *hint = pair;
+					hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, keyCtrl, SC::encode(score, value));
+
+					logger<Logger::DEBUG>() << "ZSet DEL old hash key" << keyHashOld;
+
+					erase(*db, keyHashOld);
+				}
 			}else{
-				// Case 1.2: old ctrl key has to be updated
-
-				hm4::PairBufferKey bufferKeyHashOld;
-				auto const keyHashOld = makeKey(db, keyN, keySub, scoreOld, bufferKeyHashOld);
-
-				logger<Logger::DEBUG>() << "ZSet DEL old hash key" << keyHashOld;
-
-				erase(*db, keyHashOld);
+				// Case 2: no ctrl key
 
 				logger<Logger::DEBUG>() << "ZSet SET ctrl key" << keyCtrl;
 
 				insert(*db, keyCtrl, SC::encode(score, value));
 			}
-		}else{
-			// Case 2: no ctrl key
-
-			logger<Logger::DEBUG>() << "ZSet SET ctrl key" << keyCtrl;
-
-			insert(*db, keyCtrl, SC::encode(score, value));
 		}
 
 		hm4::PairBufferKey bufferKeyHash;
@@ -137,14 +146,17 @@ namespace net::worker::shared::zset{
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
-		if (auto const score = getControlKeyNoCheck<SC>(db, keyCtrl); !score.empty()){
+		if (const auto *pair = hm4::getPairPtr(*db, keyCtrl); pair){
 			// Case 1: ctrl key is set
 
-			if (!isKeyValid(keyN, keySub, score)){
+			if (auto const score = SC::decode(pair->getVal()); !isKeyValid(keyN, keySub, score)){
 				// Case 1.0: invalid ctrl key, probable attack.
-				logger<Logger::DEBUG>() << "ZSet INVALID ctrl key" << keyCtrl;
 
-				erase(*db, keyCtrl);
+				logger<Logger::DEBUG>() << "ZSet INVALID SET ctrl key" << keyCtrl;
+
+				// HINT
+				const auto *hint = pair;
+				hm4::insertHintF<hm4::PairFactory::Tombstone>(*db, hint, keyCtrl);
 			}else{
 				// Case 1.1: ctrl key has to be removed
 
@@ -153,7 +165,9 @@ namespace net::worker::shared::zset{
 
 				logger<Logger::DEBUG>() << "ZSet DEL ctrl key" << keyCtrl;
 
-				erase(*db, keyCtrl);
+				// HINT
+				const auto *hint = pair;
+				hm4::insertHintF<hm4::PairFactory::Tombstone>(*db, hint, keyCtrl);
 
 				logger<Logger::DEBUG>() << "ZSet DEL hash key" << keyHash;
 
@@ -177,7 +191,7 @@ namespace net::worker::shared::zset{
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
-		if (auto const score = getControlKeyNoCheck<SC>(db, keyCtrl); !score.empty()){
+		if (auto const score = getScoreFromControlKey<SC>(db, keyCtrl); !score.empty()){
 			// Case 1: ctrl key is set
 
 			if (!isKeyValid(keyN, keySub, score)){
@@ -221,7 +235,7 @@ namespace net::worker::shared::zset{
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
-		if (auto const score = getControlKeyNoCheck<SC>(db, keyCtrl); !score.empty()){
+		if (auto const score = getScoreFromControlKey<SC>(db, keyCtrl); !score.empty()){
 			// Case 1: ctrl key is set
 
 			if (!isKeyValid(keyN, keySub, score)){
@@ -265,7 +279,7 @@ namespace net::worker::shared::zset{
 
 		logger<Logger::DEBUG>() << "ZScore GET ctrl key" << keyCtrl;
 
-		if (auto const score = getControlKeyNoCheck<SC>(db, keyCtrl); !score.empty()){
+		if (auto const score = getScoreFromControlKey<SC>(db, keyCtrl); !score.empty()){
 			// Case 1: ctrl key is set
 
 			if (!isKeyValid(keyN, keySub, score)){
