@@ -14,13 +14,14 @@ namespace DBAdapterFactory{
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
-		MutableConcurrent(UStringPathData &&path_data, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2) :
+		MutableConcurrent(UStringPathData &&path_data, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2, hm4::PairBuffer &pairBuffer) :
 					memList1_{ allocator1 },
 					memList2_{ allocator2 },
 					base_{
 						std::forward<UStringPathData>(path_data),
 						memList1_,
-						memList2_
+						memList2_,
+						pairBuffer
 					}{}
 
 		auto &operator()(){

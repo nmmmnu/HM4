@@ -30,10 +30,11 @@ struct ListFactory{
 	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	ListFactory(UString &&path, typename MemList::Allocator &allocator) :
+	ListFactory(UString &&path, typename MemList::Allocator &allocator, hm4::PairBuffer &pairBuffer) :
 				memlist{ allocator },
 				mylist{
 					memlist,
+					pairBuffer,
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -65,8 +66,10 @@ int main(int argc, char **argv){
 
 	Allocator	allocator{ buffer };
 
+	auto pairBuffer = std::make_unique<hm4::PairBuffer>();
+
 	return process<FileReader>(
-			MyListFactory{ path, allocator },
+			MyListFactory{ path, allocator, *pairBuffer },
 			filename,
 			blob
 	);

@@ -27,10 +27,11 @@ struct MyListFactory{
 	using MyList		= hm4::FlushList<MemList,Predicate, Flush>;
 
 	template<typename UString>
-	MyListFactory(UString &&path, MemList::Allocator &allocator) :
+	MyListFactory(UString &&path, MemList::Allocator &allocator, hm4::PairBuffer &pairBuffer) :
 				memlist{ allocator },
 				mylist{
 					memlist,
+					pairBuffer,
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -108,7 +109,9 @@ int main(int argc, char **argv){
 
 	Allocator	allocator{ buffer };
 
-	MyListFactory factory{ path, allocator };
+	auto pairBuffer = std::make_unique<hm4::PairBuffer>();
+
+	MyListFactory factory{ path, allocator, *pairBuffer };
 
 	auto &mylist = factory();
 

@@ -19,7 +19,7 @@ namespace DBAdapterFactory{
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData, typename UStringPathBinLog1, typename UStringPathBinLog2>
-		MutableBinLogConcurrent(UStringPathData &&path_data, UStringPathBinLog1 &&path_binlog1, UStringPathBinLog2 &&path_binlog2, BinLogger::SyncOptions const syncOprions, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2) :
+		MutableBinLogConcurrent(UStringPathData &&path_data, UStringPathBinLog1 &&path_binlog1, UStringPathBinLog2 &&path_binlog2, BinLogger::SyncOptions const syncOprions, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2, hm4::PairBuffer &pairBuffer) :
 					memList1_{ allocator1 },
 					binLogList1_{
 						memList1_,
@@ -41,7 +41,8 @@ namespace DBAdapterFactory{
 					base_{
 						std::forward<UStringPathData>(path_data),
 						binLogList1_,
-						binLogList2_
+						binLogList2_,
+						pairBuffer
 					}{}
 
 		auto &operator()(){

@@ -40,12 +40,13 @@ struct ListFactory{
 				>;
 
 	template<typename UString>
-	ListFactory(UString &path, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2) :
+	ListFactory(UString &path, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2, hm4::PairBuffer &pairBuffer) :
 				memlist1{ allocator1 },
 				memlist2{ allocator2 },
 				mylist{
 					memlist1,
 					memlist2,
+					pairBuffer,
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -81,8 +82,10 @@ int main(int argc, char **argv){
 	Allocator	allocator1{ buffer1 };
 	Allocator	allocator2{ buffer2 };
 
+	auto pairBuffer = std::make_unique<hm4::PairBuffer>();
+
 	return process<FileReader>(
-			MyListFactory{ path, allocator1, allocator2 },
+			MyListFactory{ path, allocator1, allocator2, *pairBuffer },
 			filename,
 			blob
 	);

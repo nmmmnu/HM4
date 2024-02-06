@@ -1,8 +1,6 @@
 #ifndef CONCURREN_FLUSH_LIST_H_
 #define CONCURREN_FLUSH_LIST_H_
 
-#include <memory>	// unique_ptr
-
 #include "multi/duallist.h"
 
 #include "scopedthread.h"
@@ -22,23 +20,24 @@ template <hm4::multi::DualListEraseType ET, class List, class Predicate, class F
 class ConcurrentFlushList : public ConcurrentFlushListBase<ET, List>{
 private:
 	template <class UPredicate, class UFlusher>
-	ConcurrentFlushList(List &list1, List &list2, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
+	ConcurrentFlushList(List &list1, List &list2, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
 					ConcurrentFlushListBase<ET, List>(list1, list2),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
-						loader_		(loader					){}
+						loader_		(loader					),
+						pairBuffer_	(& pairBuffer				){}
 
 public:
 	using Base = ConcurrentFlushListBase<ET, List>;
 	using Allocator = typename Base::Allocator;
 
 	template <class UPredicate, class UFlusher>
-	ConcurrentFlushList(List &list1, List &list2, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
-					ConcurrentFlushList(list1, list2, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
+	ConcurrentFlushList(List &list1, List &list2, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
+					ConcurrentFlushList(list1, list2, pairBuffer, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
 
 	template <class UPredicate, class UFlusher>
-	ConcurrentFlushList(List &list1, List &list2, UPredicate &&predicate, UFlusher &&flusher) :
-					ConcurrentFlushList(list1, list2, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
+	ConcurrentFlushList(List &list1, List &list2, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher) :
+					ConcurrentFlushList(list1, list2, pairBuffer, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~ConcurrentFlushList(){
 		// future improvement
@@ -87,7 +86,7 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		return flushlist_impl_::insertF(*this, *list1_, predicate_, factory, *pairBuffer);
+		return flushlist_impl_::insertF(*this, *list1_, predicate_, factory, *pairBuffer_);
 	}
 
 	template<class PFactory>
@@ -119,7 +118,7 @@ private:
 
 	uint64_t	version_ = 0;
 
-	std::unique_ptr<PairBuffer>	pairBuffer = std::make_unique<PairBuffer>();
+	PairBuffer	*pairBuffer_;
 };
 
 

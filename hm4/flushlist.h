@@ -1,8 +1,6 @@
 #ifndef FLUSH_LIST_H_
 #define FLUSH_LIST_H_
 
-#include <memory>	// unique_ptr
-
 #include "multi/singlelist.h"
 
 #include "flushlistbase.h"
@@ -15,22 +13,23 @@ template <class List, class Predicate, class Flusher, class ListLoader = std::nu
 class FlushList : public multi::SingleList<List>{
 private:
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
+	FlushList(List &list, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
 					multi::SingleList<List>(list),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
-						loader_		(loader					){}
+						loader_		(loader					),
+						pairBuffer_	(& pairBuffer				){}
 
 public:
 	using Allocator = typename multi::SingleList<List>::Allocator;
 
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
-					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
+	FlushList(List &list, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
+					FlushList(list, pairBuffer, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
 
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, UPredicate &&predicate, UFlusher &&flusher) :
-					FlushList(list, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
+	FlushList(List &list, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher) :
+					FlushList(list, pairBuffer, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~FlushList(){
 		save_();
@@ -57,7 +56,7 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, *pairBuffer);
+		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, *pairBuffer_);
 	}
 
 	template<class PFactory>
@@ -83,7 +82,7 @@ private:
 
 	uint64_t	version_ = 0;
 
-	std::unique_ptr<PairBuffer>	pairBuffer = std::make_unique<PairBuffer>();
+	PairBuffer	*pairBuffer_;
 };
 
 
