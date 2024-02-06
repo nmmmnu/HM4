@@ -576,6 +576,9 @@ namespace net::worker::commands::Mutable{
 
 			std::string_view const val_old = pair ? pair->getVal() : "";
 
+			if (!hm4::Pair::isValValid(val_new.size() + val_old.size()))
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
 			// HINT
 			// will not work, but who knows in the future.
 			const auto *hint = pair;

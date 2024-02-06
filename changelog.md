@@ -277,4 +277,5 @@ Changelog
 	in order geo functions to avoid additional key retreaval.
 -	new module linear curve: MC1GET, MC1MGET, MC1EXISTS, MC1SCORE,
 	MC1ADD, MC1REM, MC1POINT, MC1RANGE
+-	fix bug with checking value size in APPEND
 

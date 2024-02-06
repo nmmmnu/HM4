@@ -63,4 +63,4 @@ Changelog
 ### 1.3.7.6
 -	fix bug with PERSIST when TTL is under 1 sec
 -	fix incompatibility with PHPRedis when using functions returning INT such TTL, INCR, DECR, STRLEN etc.
-
+-	fix bug with checking value size in APPEND
