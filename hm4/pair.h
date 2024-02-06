@@ -761,6 +761,11 @@ inline namespace version_4_00_00{
 
 
 
+	using PairBufferTombstone = std::array<char, Pair::maxBytesTombstone()>;
+	using PairBuffer          = std::array<char, Pair::maxBytes()>;
+
+
+
 	template<class Allocator>
 	[[nodiscard]]
 	MyAllocator::SmartPtrType<Pair, Allocator> Pair::smart_ptr::create(

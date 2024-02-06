@@ -1,6 +1,8 @@
 #ifndef FLUSH_LIST_H_
 #define FLUSH_LIST_H_
 
+#include <memory>	// unique_ptr
+
 #include "multi/singlelist.h"
 
 #include "flushlistbase.h"
@@ -55,7 +57,12 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		return flushlist_impl_::insertF(*this, *list_, predicate_, factory);
+		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, *pairBuffer);
+	}
+
+	template<class PFactory>
+	auto insertF_NoFlush(PFactory &factory){
+		return list_->insertF(factory);
 	}
 
 private:
@@ -75,6 +82,8 @@ private:
 	ListLoader	*loader_;
 
 	uint64_t	version_ = 0;
+
+	std::unique_ptr<PairBuffer>	pairBuffer = std::make_unique<PairBuffer>();
 };
 
 

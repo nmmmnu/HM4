@@ -67,7 +67,7 @@ public:
 		auto result = list_->erase_(key);
 
 		if (result.status == result.DELETED){
-			tombstone_buffer_t buffer;
+			PairBufferTombstone buffer;
 
 			auto &pair = createTombstone__(key, buffer);
 
@@ -99,11 +99,9 @@ public:
 
 private:
 	// this will be on the stack, so need to be small-ish.
-	static_assert(Pair::maxBytesTombstone() < 2048);
+	static_assert(sizeof(PairBufferTombstone) < 2048);
 
-	using tombstone_buffer_t = std::array<char, Pair::maxBytesTombstone()>;
-
-	static const Pair &createTombstone__(std::string_view const key, tombstone_buffer_t &buffer){
+	static const Pair &createTombstone__(std::string_view const key, PairBufferTombstone &buffer){
 		Pair *pair = reinterpret_cast<Pair *>(buffer.data());
 
 		auto const factory = PairFactory::Tombstone{ key };

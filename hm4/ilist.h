@@ -235,7 +235,8 @@ auto insert(List &list, Pair const &src) noexcept{
 // if not present, insert(list, Factory) will be called.
 template<class List>
 auto insert(List &list, Pair &src) noexcept{
-	return insertF<PairFactory::Clone>(list, & src);
+	Pair const &srcc = src;
+	return insert(list, srcc);
 }
 
 // ==============================

@@ -207,12 +207,7 @@ namespace net::worker::commands::Queue{
 			// seamlessly send value to output buffer...
 			result.set(val);
 
-			// save the key because it comes from a pair
-			hm4::PairBufferKey bufferKey;
-			auto const keySave = concatenateBuffer(bufferKey, key);
-
-			// score is stable because come from keySave
-			auto const score = getScore_(keyControl, keySave);
+			auto const score = getScore_(keyControl, key);
 
 			if (iterations > ITERATIONS_IDLE){
 				// update control key...
@@ -225,15 +220,11 @@ namespace net::worker::commands::Queue{
 			}
 
 			// delete data key...
-			hm4::erase(list, keySave);
+			hm4::erase(list, key);
 		}
 
 		static void finalizeTryAgain_(std::string_view keyControl, std::string_view key, typename DBAdapter::List &list, Result<Protocol> &result){
-			// extract and save score, because it comes from a pair
-			MyIDGenerator::to_string_buffer_t buffer;
-			auto const score = concatenateBuffer(buffer,
-							getScore_(keyControl, key)
-			);
+			auto const score = getScore_(keyControl, key);
 
 			// update control key...
 			logger<Logger::DEBUG>() << "SPOP: Update control key" << keyControl << "to" << key;

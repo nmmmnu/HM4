@@ -56,30 +56,52 @@ namespace flushlist_impl_{
 		notifyLoader(loader);
 	}
 
+	template<class FlushList, class PFactory>
+	auto  flushThenInsert(FlushList &flushList, PFactory &factory, PairBuffer &buffer){
+		Pair *pair = reinterpret_cast<Pair *>(buffer.data());
+
+		factory.create(pair);
+
+		logger<Logger::NOTICE>() << "Save referenced data in the pair."
+			//	<< "key:" << pair->getKey()
+				<< "Pair size:" << pair->bytes();
+
+		flushList.flush();
+
+		logger<Logger::NOTICE>() << "Clone saved pair.";
+
+		PairFactory::Clone cloneFactory{ pair };
+
+		return flushList.insertF_NoFlush(cloneFactory);
+	}
+
 	template<class FlushList, class InsertList, class Predicate, class PFactory>
-	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory){
-		auto flushThenInsert = [&](){
-			flushList.flush();
-			return insertList.insertF(factory);
-		};
-
-		// ---
-
+	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory, PairBuffer &buffer){
 		if (!factory.valid())
 			return InsertResult::errorInvalid();
 
-		// ---
-
 		if (predicate(insertList, factory.bytes()))
-			return flushThenInsert();
+			return flushThenInsert(flushList, factory, buffer);
 
-		auto const result = insertList.insertF(factory);
+		auto const result = flushList.insertF_NoFlush(factory);
 
 		switch(result.status){
-		case result.ERROR_NO_MEMORY:	return flushThenInsert();	// try insert again
+		case result.ERROR_NO_MEMORY:	return flushThenInsert(flushList, factory, buffer);	// try insert again
 		default:			return result;
 		}
 	}
+
+//	template<class InsertList, class Predicate, class PFactory>
+//	auto insertF_NoFlush(InsertList &insertList, Predicate &predicate, PFactory &factory, PairBuffer &buffer){
+//		if (!factory.valid())
+//			return InsertResult::errorInvalid();
+//
+//		if (predicate(insertList, factory.bytes()))
+//			return InsertResult::errorNoMemory();
+//
+//		return insertList.insertF(factory);
+//	}
+
 } // namespace
 
 
