@@ -144,11 +144,11 @@ namespace net::worker::commands{
 		}
 
 		void set_0(){
-			return set_number<uint64_t>(0);
+			return set_number_sv("0");
 		}
 
 		void set_1(){
-			return set_number<uint64_t>(1);
+			return set_number_sv("1");
 		}
 
 		void set(int64_t number){
@@ -164,6 +164,13 @@ namespace net::worker::commands{
 			return set_number<uint64_t>(number);
 		}
 		#endif
+
+		void set_number_sv(std::string_view number){
+			set_status_(Status::OK);
+
+			buffer_.clear();
+			protocol_.response_number_sv(buffer_, number);
+		}
 
 	private:
 		template<typename T>

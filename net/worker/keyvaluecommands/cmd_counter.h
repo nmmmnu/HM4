@@ -31,10 +31,11 @@ namespace net::worker::commands::Counter{
 
 					n += nval;
 
-					result.set(n);
 
 					to_string_buffer_t buffer;
 					auto const val = to_string(n, buffer);
+
+					result.set_number_sv(val);
 
 					auto *hint = it;
 
@@ -43,10 +44,10 @@ namespace net::worker::commands::Counter{
 				}else{
 					// Case 2: Old data does not exists
 
-					result.set(n);
-
 					to_string_buffer_t buffer;
 					auto const val = to_string(n, buffer);
+
+					result.set_number_sv(val);
 
 					hm4::insert(list, key, val);
 				}
@@ -71,13 +72,15 @@ namespace net::worker::commands::Counter{
 				if (auto *it = hm4::getPairPtr(list, key); it){
 					// Case 1: Old data exists
 
-					if (int64_t const nval = from_string<int64_t>(it->getVal()); comp(n, nval)){
-						// Case 1.1: Comp is satisfied, so update
+					auto const val = it->getVal();
 
-						result.set(n);
+					if (int64_t const nval = from_string<int64_t>(val); comp(n, nval)){
+						// Case 1.1: Comp is satisfied, so update
 
 						to_string_buffer_t buffer;
 						auto const val = to_string(n, buffer);
+
+						result.set_number_sv(val);
 
 						auto *hint = it;
 
@@ -85,15 +88,15 @@ namespace net::worker::commands::Counter{
 					}else{
 						// Case 1.2: no need to update
 
-						result.set(nval);
+						result.set_number_sv(val);
 					}
 				}else{
 					// Case 2: Old data does not exists
 
-					result.set(n);
-
 					to_string_buffer_t buffer;
 					auto const val = to_string(n, buffer);
+
+					result.set_number_sv(val);
 
 					hm4::insert(list, key, val);
 				}

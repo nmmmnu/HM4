@@ -122,6 +122,9 @@ public:
 	static void response_number(Buffer &buffer, T n);
 
 	template<class Buffer>
+	static void response_number_sv(Buffer &buffer, std::string_view n);
+
+	template<class Buffer>
 	static void response_strings(Buffer &buffer, MySpan<const std::string_view> const &list);
 
 private:
@@ -226,6 +229,25 @@ void RedisProtocol::response_string_nr(Buffer &buffer, std::string_view const ms
 	buffer.push(ENDLN);
 }
 
+template<class Buffer>
+void RedisProtocol::response_number_sv(Buffer &buffer, std::string_view n){
+	using namespace redis_protocol_impl_;
+
+	const auto res =
+			calc_size(COLON	)	+
+			calc_size(n)		+
+			calc_size(ENDLN	)
+	;
+
+	buffer.reserve(res);
+
+	buffer.push(COLON);
+	buffer.push(n);
+	buffer.push(ENDLN);
+
+	response_log_("number", res, buffer.capacity(), buffer.data());
+}
+
 template<class Buffer, typename T>
 void RedisProtocol::response_number(Buffer &buffer, T const n){
 	static_assert(
@@ -234,23 +256,9 @@ void RedisProtocol::response_number(Buffer &buffer, T const n){
 		true
 	);
 
-	using namespace redis_protocol_impl_;
-
 	to_string_buffer_t std_buffer;
 
-	constexpr auto res =
-			calc_size(COLON	)	+
-			calc_size_int()		+
-			calc_size(ENDLN	)
-	;
-
-	buffer.reserve(res);
-
-	buffer.push(COLON);
-	buffer.push(to_string(n, std_buffer));
-	buffer.push(ENDLN);
-
-	response_log_("number", res, buffer.capacity(), buffer.data());
+	return response_number_sv(buffer, to_string(n, std_buffer));
 }
 
 template<class Buffer>
