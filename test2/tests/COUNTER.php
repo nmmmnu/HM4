@@ -58,5 +58,28 @@ function cmd_COUNTER($redis){
 	// ------------------
 
 	$redis->del(["a"]);
+
+	// ------------------
+
+	expect("INCRTO",	rawCommand($redis, "incrto", "a", 100	) == 100	);
+	expect("INCRTO",	rawCommand($redis, "incrto", "a", 105	) == 105	);
+	expect("INCRTO",	rawCommand($redis, "incrto", "a", 115	) == 115	);
+	expect("INCRTO",	rawCommand($redis, "incrto", "a", 110	) == 115	);
+	expect("INCRTO",	rawCommand($redis, "incrto", "a", 100	) == 115	);
+	expect("INCRTO",	rawCommand($redis, "incrto", "a", 200	) == 200	);
+
+	$redis->del(["a"]);
+
+	expect("DECRTO",	rawCommand($redis, "decrto", "a", 900	) == 900	);
+	expect("DECRTO",	rawCommand($redis, "decrto", "a", 150	) == 150	);
+	expect("DECRTO",	rawCommand($redis, "decrto", "a", 130	) == 130	);
+	expect("DECRTO",	rawCommand($redis, "decrto", "a", 100	) == 100	);
+	expect("DECRTO",	rawCommand($redis, "decrto", "a", 150	) == 100	);
+	expect("DECRTO",	rawCommand($redis, "decrto", "a", 130	) == 100	);
+
+
+	// ------------------
+
+	$redis->del(["a"]);
 }
 

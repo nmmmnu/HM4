@@ -1,10 +1,8 @@
 #include "base.h"
 
-
+#include <functional>
 
 namespace net::worker::commands::Counter{
-
-	constexpr bool MAY_RETURN_STRING = false;
 
 	namespace counter_impl_{
 		namespace{
@@ -26,23 +24,79 @@ namespace net::worker::commands::Counter{
 
 
 
-				if (auto const val = hm4::getPairVal(list, key); !std::empty(val)){
-					n += from_string<int64_t>(val);
+				if (auto *it = hm4::getPairPtr(list, key); it){
+					// Case 1: Old data exists
 
-					if constexpr(MAY_RETURN_STRING){
-						result.set(val);
-					}else{
+					int64_t const nval = from_string<int64_t>(it->getVal());
+
+					n += nval;
+
+					result.set(n);
+
+					to_string_buffer_t buffer;
+					auto const val = to_string(n, buffer);
+
+					auto *hint = it;
+
+					hm4::insertHintF<hm4::PairFactory::Normal>(list, hint, key, val);
+
+				}else{
+					// Case 2: Old data does not exists
+
+					result.set(n);
+
+					to_string_buffer_t buffer;
+					auto const val = to_string(n, buffer);
+
+					hm4::insert(list, key, val);
+				}
+			}
+
+
+
+			template<class Protocol, class List, class Comp>
+			void do_incr_to(ParamContainer const &p, List &list, Result<Protocol> &result, Comp comp){
+				if (p.size() != 3)
+					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+				const auto &key = p[1];
+
+				if (!hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+				int64_t const n = from_string<int64_t>(p[2]);
+
+
+
+				if (auto *it = hm4::getPairPtr(list, key); it){
+					// Case 1: Old data exists
+
+					if (int64_t const nval = from_string<int64_t>(it->getVal()); comp(n, nval)){
+						// Case 1.1: Comp is satisfied, so update
+
 						result.set(n);
+
+						to_string_buffer_t buffer;
+						auto const val = to_string(n, buffer);
+
+						auto *hint = it;
+
+						hm4::insertHintF<hm4::PairFactory::Normal>(list, hint, key, val);
+					}else{
+						// Case 1.2: no need to update
+
+						result.set(nval);
 					}
 				}else{
+					// Case 2: Old data does not exists
+
 					result.set(n);
+
+					to_string_buffer_t buffer;
+					auto const val = to_string(n, buffer);
+
+					hm4::insert(list, key, val);
 				}
-
-				to_string_buffer_t buffer;
-
-				auto const val = to_string(n, buffer);
-
-				hm4::insert(list, key, val);
 			}
 
 		} // namespace
@@ -100,6 +154,54 @@ namespace net::worker::commands::Counter{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct INCRTO : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace counter_impl_;
+
+			return do_incr_to(params, *db, result, std::greater{});
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"incrto",	"INCRTO"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct DECRTO : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace counter_impl_;
+
+			return do_incr_to(params, *db, result, std::less{});
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"decrto",	"DECRTO"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "counters";
@@ -107,7 +209,9 @@ namespace net::worker::commands::Counter{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				INCR	,
-				DECR
+				DECR	,
+				INCRTO	,
+				DECRTO
 			>(pack);
 		}
 	};

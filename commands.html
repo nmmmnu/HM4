@@ -196,6 +196,8 @@
 
 					<li><a href="#INCR">INCR</a></li>
 				<li><a href="#DECR">DECR</a></li>
+				<li><a href="#INCRTO">INCRTO</a></li>
+				<li><a href="#DECRTO">DECRTO</a></li>
 				</div>
 			<div>
 			<b>(collection module) hash.h</b><br />
@@ -1868,6 +1870,52 @@
 			string (int)
 			<h3>Return value:</h3>
 			New decrease value.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="INCRTO">
+
+			<h2>INCRTO key value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>INCRTO</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>counter.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically increase numerical value of the <i>key</i> to <i>value</i>, but only if new value is greater than old value.<br />Uses <b>int64_t</b> as a number type.<br />Useful for single heavy hitter.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			New increased value.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="DECRTO">
+
+			<h2>DECRTO key value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>DECRTO</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>counter.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Atomically decrease numerical value of the <i>key</i> to <i>value</i>, but only if new value is less than old value.<br />Uses <b>int64_t</b> as a number type.<br />Useful for single heavy hitter.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			New increased value.
 			
 			
 			<p class="top"><a href="#top">top</a></p>

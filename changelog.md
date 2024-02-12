@@ -279,4 +279,6 @@ Changelog
 	MC1ADD, MC1REM, MC1POINT, MC1RANGE
 -	fix bug with checking value size in APPEND
 -	refactor flushing, so references to old data stay stable until data is inserted
+-	refactor INCR / DECR in order to use hints if possible
+-	new commands INCRTO / DECRTO
 
