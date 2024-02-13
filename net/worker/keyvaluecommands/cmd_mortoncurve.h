@@ -103,11 +103,10 @@ namespace net::worker::commands::MortonCurve{
 
 
 
-		template<class DBAdapter, class BufferKeyArray>
+		template<class DBAdapter>
 		void mortonSearchPoint(
 				DBAdapter &db,
 				OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				MortonPoint const &point, std::string_view startKey){
 
@@ -182,10 +181,9 @@ namespace net::worker::commands::MortonCurve{
 			#pragma GCC diagnostic ignored "-Wunused-label"
 		#endif
 
-		template<bool bigmin_optimized, class DBAdapter, class BufferKeyArray>
+		template<bool bigmin_optimized, class DBAdapter>
 		void mortonSearch(
 				DBAdapter &db, OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				MortonRectangle const &rect, std::string_view startKey){
 
@@ -374,8 +372,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 
-			auto &container = blob.container;
-			container.clear();
+			auto &container = blob.container();
 
 
 
@@ -608,20 +605,18 @@ namespace net::worker::commands::MortonCurve{
 
 			auto const startKey	= p.size() == 6 ? p[5] : "";
 
-			blob.container.clear();
-
-			hm4::PairBufferKey bufferKey;
+			auto &container = blob.container();
+			auto &bcontainer = blob.bcontainer();
 
 			mortonSearchPoint(
 				db,
-				blob.container, blob.bcontainer,
-				bufferKey,
+				container, bcontainer,
 				keyN, count,
 				point,
 				startKey
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -670,20 +665,17 @@ namespace net::worker::commands::MortonCurve{
 
 			auto const startKey	= p.size() == 8 ? p[7] : "";
 
-			blob.container.clear();
-			blob.bcontainer.clear();
-
-			hm4::PairBufferKey bufferKey;
+			auto &container = blob.container();
+			auto &bcontainer = blob.bcontainer();
 
 			mortonSearch<false>(
 				db,
-				blob.container, blob.bcontainer,
-				bufferKey,
+				container, bcontainer,
 				keyN, count,
 				rect, startKey
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -732,18 +724,16 @@ namespace net::worker::commands::MortonCurve{
 
 			auto const startKey	= p.size() == 8 ? p[7] : "";
 
-			blob.container.clear();
-			blob.bcontainer.clear();
-
-			hm4::PairBufferKey bufferKey;
+			auto &container = blob.container();
+			auto &bcontainer = blob.bcontainer();
 
 			mortonSearch<true>(
-				db, blob.container, blob.bcontainer, bufferKey,
+				db, container, bcontainer,
 				keyN, count,
 				rect, startKey
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:

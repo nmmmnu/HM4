@@ -249,12 +249,10 @@ namespace net::worker::commands::BF{
 
 			auto data = hm4::getPairVal(*db, key);
 
-			auto &container = blob.container;
+			auto &container = blob.container();
 
 			if (container.capacity() < p.size() - varg)
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
-
-			container.clear();
 
 			if (data.empty()){
 				// no set-size yet :)

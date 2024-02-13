@@ -391,21 +391,17 @@ namespace net::worker::commands::CMS{
 					return nullptr;
 			});
 
-			auto &container  = blob.container;
+			auto &container  = blob.container();
 
 			if (container.capacity() < p.size() - varg)
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
-
-			container.clear();
-
 
 			if (! pair){
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					container.push_back("0");
 				}
 			}else{
-				auto &bcontainer = blob.bcontainer;
-				bcontainer.clear();
+				auto &bcontainer = blob.bcontainer();
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const &item = *itk;

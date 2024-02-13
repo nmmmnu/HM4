@@ -168,13 +168,11 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
-			auto &container = blob.pcontainer;
+			auto &pcontainer = blob.pcontainer();
 
 			// theoretically can happen
-			if (p.size() / 2 > container.capacity())
+			if (p.size() / 2 > pcontainer.capacity())
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
-
-			container.clear();
 
 			// check if any key NOT exists
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -184,16 +182,16 @@ namespace net::worker::commands::Mutable{
 				if (auto *it = hm4::getPairPtr(*db, key); it){
 					if (const auto *hint = & *it; hm4::canInsertHintValSize(*db, hint, val.size())){
 						// HINT
-						container.push_back(hint);
+						pcontainer.push_back(hint);
 					}else
-						container.push_back(nullptr);
+						pcontainer.push_back(nullptr);
 				}else
 					return result.set_0();
 			}
 
 			// HINT
-			for(size_t i = 0; i < container.size(); ++i){
-				if (const auto *hint = container[i]; hint){
+			for(size_t i = 0; i < pcontainer.size(); ++i){
+				if (const auto *hint = pcontainer[i]; hint){
 					auto const &key = p[varg + i * 2 + 0];
 					auto const &val = p[varg + i * 2 + 1];
 
@@ -204,8 +202,8 @@ namespace net::worker::commands::Mutable{
 			}
 
 			// NORMAL
-			for(size_t i = 0; i < container.size(); ++i){
-				if (const auto *hint = container[i]; !hint){
+			for(size_t i = 0; i < pcontainer.size(); ++i){
+				if (const auto *hint = pcontainer[i]; !hint){
 					auto const &key = p[varg + i * 2 + 0];
 					auto const &val = p[varg + i * 2 + 1];
 

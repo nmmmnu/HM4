@@ -203,7 +203,7 @@ namespace net::worker::commands::BITSET{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.container;
+			auto &container = blob.container();
 
 			auto const varg = 2;
 
@@ -216,8 +216,6 @@ namespace net::worker::commands::BITSET{
 				else
 					return nullptr;
 			});
-
-			container.clear();
 
 			if (data){
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){

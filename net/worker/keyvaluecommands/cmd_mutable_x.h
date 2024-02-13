@@ -83,7 +83,6 @@ namespace net::worker::commands::MutableX{
 
 			template<bool ResultAsHash, class Predicate, class StopPredicate, class List, class Result>
 			void process_x_(Predicate p, StopPredicate stop, List &list, std::string_view key, Result &result, ContainerX &container){
-				container.clear();
 
 				uint8_t check_passes = 0;
 
@@ -247,7 +246,8 @@ namespace net::worker::commands::MutableX{
 
 			DeletePredicate<DBAdapter>	pred;
 			StopPrefixPredicate		stop{ prefix };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -282,7 +282,8 @@ namespace net::worker::commands::MutableX{
 
 			DeletePredicate<DBAdapter>	pred;
 			StopRangePredicate		stop{ keyEnd };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -321,7 +322,8 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			DeletePredicate<DBAdapter>	pred;
-			return process_h(pred, *db, prefix, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
 	private:
@@ -356,7 +358,8 @@ namespace net::worker::commands::MutableX{
 
 			PersistPredicate<DBAdapter>	pred;
 			StopPrefixPredicate		stop{ prefix };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -391,7 +394,8 @@ namespace net::worker::commands::MutableX{
 
 			PersistPredicate<DBAdapter>	pred;
 			StopRangePredicate		stop{ keyEnd };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -430,7 +434,8 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			PersistPredicate<DBAdapter>	pred;
-			return process_h(pred, *db, prefix, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
 	private:
@@ -466,7 +471,8 @@ namespace net::worker::commands::MutableX{
 
 			ExpirePredicate<DBAdapter>	pred{exp};
 			StopPrefixPredicate		stop{ prefix };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -502,7 +508,8 @@ namespace net::worker::commands::MutableX{
 
 			ExpirePredicate<DBAdapter>	pred{exp};
 			StopRangePredicate		stop{ keyEnd };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -543,7 +550,8 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
-			return process_h(pred, *db, prefix, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
 	private:
@@ -579,7 +587,8 @@ namespace net::worker::commands::MutableX{
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
 			StopPrefixPredicate		stop{ prefix };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -615,7 +624,8 @@ namespace net::worker::commands::MutableX{
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
 			StopRangePredicate		stop{ keyEnd };
-			return process_x(pred, stop, *db, key, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
 	private:
@@ -656,7 +666,8 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
-			return process_h(pred, *db, prefix, result, blob.pcontainer);
+			auto &pcontainer = blob.pcontainer();
+			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
 	private:

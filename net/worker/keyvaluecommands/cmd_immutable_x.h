@@ -56,8 +56,6 @@ namespace net::worker::commands::ImmutableX{
 				uint32_t iterations	= 0;
 				uint32_t results	= 0;
 
-				container.clear();
-
 				// capture & instead of &container to silence clang warning.
 				auto tail = [&](std::string_view const pkey = ""){
 					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::KEYS_WITH_TAIL)
@@ -163,15 +161,17 @@ namespace net::worker::commands::ImmutableX{
 
 			StopPrefixPredicate stop{ prefix };
 
+			auto &container = blob.container();
+
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -210,15 +210,17 @@ namespace net::worker::commands::ImmutableX{
 
 			StopRangePredicate stop{ keyEnd };
 
+			auto &container = blob.container();
+
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -252,15 +254,17 @@ namespace net::worker::commands::ImmutableX{
 
 			StopUnboundPredicate stop;
 
+			auto &container = blob.container();
+
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -298,15 +302,17 @@ namespace net::worker::commands::ImmutableX{
 
 			StopPrefixPredicate stop{ prefix };
 
+			auto &container = blob.container();
+
 			accumulateResultsXKeys<AccumulateOutput::KEYS_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -344,15 +350,17 @@ namespace net::worker::commands::ImmutableX{
 
 			StopRangePredicate stop{ keyEnd };
 
+			auto &container = blob.container();
+
 			accumulateResultsXKeys<AccumulateOutput::KEYS_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -386,15 +394,17 @@ namespace net::worker::commands::ImmutableX{
 
 			StopUnboundPredicate stop;
 
+			auto &container = blob.container();
+
 			accumulateResultsXKeys<AccumulateOutput::KEYS_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -434,15 +444,17 @@ namespace net::worker::commands::ImmutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
+			auto &container = blob.container();
+
 			accumulateResultsH<AccumulateOutput::BOTH>(
 				ITERATIONS_RESULTS_MAX			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -482,15 +494,17 @@ namespace net::worker::commands::ImmutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
+			auto &container = blob.container();
+
 			accumulateResultsH<AccumulateOutput::KEYS>(
 				ITERATIONS_RESULTS_MAX			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -530,15 +544,17 @@ namespace net::worker::commands::ImmutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
+			auto &container = blob.container();
+
 			accumulateResultsH<AccumulateOutput::VALS>(
 				ITERATIONS_RESULTS_MAX			,
 				key					,
 				db->find(key, std::false_type{})	,
 				std::end(*db)				,
-				blob.container
+				container
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:

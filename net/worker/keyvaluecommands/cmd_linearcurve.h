@@ -52,11 +52,10 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-		template<class DBAdapter, class BufferKeyArray>
+		template<class DBAdapter>
 		void linearSearchPoint(
 				DBAdapter &db,
 				OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				uint64_t x, std::string_view startKey){
 
@@ -125,10 +124,9 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-		template<class DBAdapter, class BufferKeyArray>
+		template<class DBAdapter>
 		void linearSearch(
 				DBAdapter &db, OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
-				BufferKeyArray &,
 				std::string_view keyN, uint32_t count,
 				uint64_t x_min, uint64_t x_max, std::string_view startKey){
 
@@ -268,8 +266,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-			auto &container = blob.container;
-			container.clear();
+			auto &container = blob.container();
 
 
 
@@ -494,20 +491,18 @@ namespace net::worker::commands::LinearCurve{
 
 			auto const startKey	= p.size() == 5 ? p[4] : "";
 
-			blob.container.clear();
-
-			hm4::PairBufferKey bufferKey;
+			auto &container = blob.container();
+			auto &bcontainer = blob.bcontainer();
 
 			linearSearchPoint(
 				db,
-				blob.container, blob.bcontainer,
-				bufferKey,
+				container, bcontainer,
 				keyN, count,
 				x,
 				startKey
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:
@@ -551,19 +546,17 @@ namespace net::worker::commands::LinearCurve{
 
 			auto const startKey	= p.size() == 6 ? p[5] : "";
 
-			blob.container.clear();
-			blob.bcontainer.clear();
-
-			hm4::PairBufferKey bufferKey;
+			auto &container = blob.container();
+			auto &bcontainer = blob.bcontainer();
 
 			linearSearch(
-				db, blob.container, blob.bcontainer, bufferKey,
+				db, container, bcontainer,
 				keyN, count,
 				x_min, x_max,
 				startKey
 			);
 
-			return result.set_container(blob.container);
+			return result.set_container(container);
 		}
 
 	private:

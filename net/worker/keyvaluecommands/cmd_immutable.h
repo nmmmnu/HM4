@@ -53,7 +53,7 @@ namespace net::worker::commands::Immutable{
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
-			auto &container = blob.container;
+			auto &container = blob.container();
 
 			auto const varg = 1;
 
@@ -63,8 +63,6 @@ namespace net::worker::commands::Immutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			container.clear();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				container.emplace_back(
@@ -361,7 +359,7 @@ namespace net::worker::commands::Immutable{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.container;
+			auto &container = blob.container();
 
 			auto const varg = 2;
 
@@ -377,8 +375,6 @@ namespace net::worker::commands::Immutable{
 				if (!hm4::isHKeyValid(keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
-
-			container.clear();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;

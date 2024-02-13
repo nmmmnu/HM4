@@ -249,7 +249,7 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
-			auto &container = blob.container;
+			auto &container = blob.container();
 
 			auto const varg = 2;
 
@@ -265,8 +265,6 @@ namespace net::worker::commands::Geo{
 
 			if (container.capacity() < p.size() - varg)
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
-
-			container.clear();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
@@ -327,11 +325,8 @@ namespace net::worker::commands::Geo{
 
 			auto const radius = to_double_def(p[4]);
 
-			auto &container  = blob.container;
-			auto &bcontainer = blob.bcontainer;
-
-			container.clear();
-			bcontainer.clear();
+			auto &container  = blob.container();
+			auto &bcontainer = blob.bcontainer();
 
 			auto const cells = GeoHash::nearbyCells(me, radius, sphere);
 

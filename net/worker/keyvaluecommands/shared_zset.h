@@ -268,6 +268,17 @@ namespace net::worker::shared::zset{
 		return extractScore(key, keyN.size(), scoreSize);
 	};
 
+	constexpr std::string_view extractKeySub(std::string_view key, size_t keyNSize, size_t scoreSize){
+		if (key.size() > keyNSize)
+			return key.substr(keyNSize + 1 + scoreSize + 1);
+		else
+			return key;
+	};
+
+	constexpr std::string_view extractKeySub(std::string_view key, std::string_view keyN, size_t scoreSize){
+		return extractKeySub(key, keyN.size(), scoreSize);
+	};
+
 	template<typename SC = impl_::StandardScoreController, typename DBAdapter>
 	std::string_view score(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){

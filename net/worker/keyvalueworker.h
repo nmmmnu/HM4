@@ -44,7 +44,6 @@
 
 #include "protocol/protocoldefs.h"
 
-#include <memory>
 #include <vector>
 #include <unordered_map>
 
@@ -174,7 +173,9 @@ namespace net::worker{
 
 			commands::Result<Protocol> result{ protocol_, output_buffer_ };
 
-			command(protocol_.getParams(), db_, result, *output_);
+			output_.resetAllocator();
+
+			command(protocol_.getParams(), db_, result, output_);
 
 			return translate_(result, buffer);
 		}
@@ -209,15 +210,15 @@ namespace net::worker{
 		}
 
 	private:
-		Protocol				protocol_	;
-		DBAdapter				&db_		;
+		Protocol		protocol_	;
+		DBAdapter		&db_		;
 
-		Storage					storage_	;
-		Map					map_		;
+		Storage			storage_	;
+		Map			map_		;
 
-		std::unique_ptr<commands::OutputBlob>	output_ = std::make_unique<commands::OutputBlob>();
+		commands::OutputBlob	output_		;
 
-		IOBuffer				output_buffer_	;
+		IOBuffer		output_buffer_	;
 	};
 
 

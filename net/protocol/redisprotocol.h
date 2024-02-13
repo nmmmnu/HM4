@@ -161,7 +161,7 @@ void RedisProtocol::response_ok(Buffer &buffer){
 
 	constexpr std::string_view OK = "+OK";
 
-	constexpr size_t res =
+	constexpr auto res =
 		calc_size(OK		)	+
 		calc_size(ENDLN		)
 	;
@@ -183,7 +183,7 @@ void RedisProtocol::response_bool(Buffer &buffer, bool const b){
 
 	static_assert(TRUE.size() == FALSE.size());
 
-	constexpr size_t res =
+	constexpr auto res =
 		calc_size(TRUE	)	+
 		calc_size(ENDLN	)
 	;
@@ -202,7 +202,7 @@ void RedisProtocol::response_error(Buffer &buffer, std::string_view const msg){
 
 	constexpr std::string_view ERR = "-ERR ";
 
-	const size_t res =
+	auto const res =
 		calc_size(ERR		)	+
 		calc_size(msg		)	+
 		calc_size(ENDLN		)
@@ -233,7 +233,7 @@ template<class Buffer>
 void RedisProtocol::response_number_sv(Buffer &buffer, std::string_view n){
 	using namespace redis_protocol_impl_;
 
-	const auto res =
+	auto const res =
 			calc_size(COLON	)	+
 			calc_size(n)		+
 			calc_size(ENDLN	)

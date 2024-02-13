@@ -85,7 +85,8 @@ namespace hex_convert{
 		for(auto const &c : hex){
 			T const nibble = _(c);
 
-			val = (val << 4) | nibble;
+			// cast added for silence the clang warning
+			val = T(val << 4) | nibble;
 		}
 
 		return val;

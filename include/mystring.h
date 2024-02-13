@@ -52,6 +52,24 @@ constexpr bool same_prefix(std::string_view const prefix, std::string_view const
 
 
 
+template<typename... Args>
+std::string_view concatenateRawBuffer_(char *buffer, Args &&... args){
+	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
+
+	size_t pos = 0;
+
+	auto append = [&pos, &buffer](std::string_view x){
+		memcpy(buffer + pos, x.data(), x.size());
+		pos += x.size();
+	};
+
+	(append(std::forward<Args>(args)), ...);
+
+	return std::string_view{ buffer, pos };
+}
+
+
+
 template<size_t N, typename... Args>
 std::string_view concatenateBuffer(std::array<char, N> &buffer, Args &&... args){
 	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
@@ -61,16 +79,7 @@ std::string_view concatenateBuffer(std::array<char, N> &buffer, Args &&... args)
 	if (reserve_size > buffer.size())
 		return "";
 
-	size_t pos = 0;
-
-	auto append = [&pos, &buffer](std::string_view x){
-		memcpy(buffer.data() + pos, x.data(), x.size());
-		pos += x.size();
-	};
-
-	(append(std::forward<Args>(args)), ...);
-
-	return std::string_view{ buffer.data(), reserve_size };
+	return concatenateRawBuffer_(buffer.data(), std::forward<Args>(args)...);
 }
 
 

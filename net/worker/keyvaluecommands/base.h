@@ -10,6 +10,8 @@
 
 #include "logger.h"
 
+#include <memory>
+
 namespace net::worker::commands{
 
 
@@ -24,29 +26,45 @@ namespace net::worker::commands{
 
 
 	struct OutputBlob{
-
-		// largest uint64_t is 20 digits.
-		// we hope to be able to store 3 x 20 + 2 delimiters = 64 characters
-		constexpr static size_t BUFFER_LABEL_SIZE	= 64;
-		using BufferLabel = std::array<char, BUFFER_LABEL_SIZE>;
-
 		constexpr static size_t ContainerSize	= 0xFFFF;
-		using Container		= StaticVector<std::string_view		,ContainerSize>;
-		using PairContainer	= StaticVector<const hm4::Pair *	,ContainerSize>;
-		using BufferContainer	= StaticVector<BufferLabel		,ContainerSize>;
 
-		OutputBlob(){
-			container.reserve(ContainerSize);
-			pcontainer.reserve(ContainerSize);
-			bcontainer.reserve(ContainerSize);
+		using Container		= StaticVector<std::string_view		, ContainerSize>;	// 1024 KB, if string_view is 16 bytes
+		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	//  514 KB
+		using BufferContainer	= StaticVector<to_string_buffer_t	, ContainerSize>;	// 4096 KB
+
+		constexpr static void resetAllocator(){
 		}
 
-		Container			container;	// 1024 KB, if string_view is 16 bytes
-		PairContainer			pcontainer;	//  514 KB
-		BufferContainer			bcontainer;	// 4096 KB
+		auto &container(){
+			return clear_(pack->container);
+		}
 
-		static_assert(BUFFER_LABEL_SIZE >= to_string_buffer_t_size);
+		auto &pcontainer(){
+			return clear_(pack->pcontainer);
+		}
+
+		auto &bcontainer(){
+			return clear_(pack->bcontainer);
+		}
+
+	private:
+		template<class Container>
+		static Container &clear_(Container &container){
+			container.clear();
+			return container;
+		}
+
+	private:
+		struct Pack{
+			Container	container;
+			PairContainer	pcontainer;
+			BufferContainer	bcontainer;
+		};
+
+		std::unique_ptr<Pack> pack = std::make_unique<Pack>();
 	};
+
+
 
 	template<class Protocol>
 	class Result{
