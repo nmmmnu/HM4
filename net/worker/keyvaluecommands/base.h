@@ -36,20 +36,20 @@ namespace net::worker::commands{
 		}
 
 		auto &container(){
-			return clear_(pack->container);
+			return getClean__(pack->container);
 		}
 
 		auto &pcontainer(){
-			return clear_(pack->pcontainer);
+			return getClean__(pack->pcontainer);
 		}
 
 		auto &bcontainer(){
-			return clear_(pack->bcontainer);
+			return getClean__(pack->bcontainer);
 		}
 
 	private:
-		template<class Container>
-		static Container &clear_(Container &container){
+		template<class T>
+		static T &getClean__(T &container){
 			container.clear();
 			return container;
 		}

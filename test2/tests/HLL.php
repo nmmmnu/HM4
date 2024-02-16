@@ -16,6 +16,8 @@ function cmd_HLL($redis){
 	$redis->pfadd("a", ["Sofia"] );
 	expect("PFCOUNT",	$redis->pfcount("a") == 1		);
 
+	rawCommand($redis, "PFRESERVE", "a");
+
 	$redis->pfadd("a", ["Varna"] );
 	expect("PFCOUNT",	$redis->pfcount("a") == 2		);
 

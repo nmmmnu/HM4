@@ -16,6 +16,8 @@ function cmd_CMS($redis){
 
 		expect("CMSADD $is",		true				);
 
+		rawCommand($redis, "CMSRESERVE $is", "a", $w, $d, $is);
+
 		expect("CMSCOUNT $is",	rawCommand($redis, "CMSCOUNT", "a", $w, $d, $is, "Sofia"	) == 10	);
 		expect("CMSCOUNT $is",	rawCommand($redis, "CMSCOUNT", "a", $w, $d, $is, "New York"	) == 5	);
 		expect("CMSCOUNT $is",	rawCommand($redis, "CMSCOUNT", "a", $w, $d, $is, "Rome"		) == 0	);

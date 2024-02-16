@@ -78,7 +78,7 @@ inline namespace version_4_00_00{
 		static uint64_t prepareCreateTimeSimulate(uint32_t created) noexcept;
 
 	public:
-		template<bool copy_key, bool copy_val,bool make_key, bool make_val>
+		template<bool copy_key, bool copy_val, bool make_key, bool make_val>
 		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
 			static_assert(
 				(make_key == 0			) ||
@@ -136,7 +136,7 @@ inline namespace version_4_00_00{
 			#pragma GCC diagnostic pop
 		}
 
-		template<bool copy_key, bool copy_val,bool make_key, bool make_val>
+		template<bool copy_key, bool copy_val, bool make_key, bool make_val>
 		static void createInRawMemory(Pair *pair, std::string_view const key, size_t const val_size, uint32_t const expires, uint32_t const created){
 			static_assert(copy_val == false, "When you pass null value, don't break the rules!");
 

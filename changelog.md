@@ -281,4 +281,4 @@ Changelog
 -	refactor flushing, so references to old data stay stable until data is inserted
 -	refactor INCR / DECR in order to use hints if possible
 -	new commands INCRTO / DECRTO
-
+-	fix BFRESERVE, CMSRESERVE, HLLRESERVE behavour

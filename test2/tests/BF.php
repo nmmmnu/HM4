@@ -15,6 +15,8 @@ function cmd_BF($redis){
 
 	expect("BFADD",		true				);
 
+	rawCommand($redis, "BFRESERVE", "a", $bits, $hf);
+
 	expect("BFEXISTS",	rawCommand($redis, "BFEXISTS", "a", $bits, $hf, "Sofia") == true	);
 	expect("BFEXISTS",	rawCommand($redis, "BFEXISTS", "a", $bits, $hf, "Rome" ) == false	);
 	expect("BFEXISTS",	rawCommand($redis, "BFEXISTS", "b", $bits, $hf, "Rome" ) == false	);

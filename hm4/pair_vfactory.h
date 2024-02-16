@@ -53,18 +53,19 @@ inline namespace version_4_00_00{
 					// Same Size
 
 					if (pair->getVal().size() == val_size){
-						Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
-					}else{
 						// size OK, but init create + expire
 						Pair::createInRawMemory<0,0,0,0>(pair, key, val_size, 0, 0);
+					}else{
+						Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
+						copyPair_(pair);
 					}
 				}else{
-					// Standard
-
-					Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
+					{
+						// Standard
+						Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
+						copyPair_(pair);
+					}
 				}
-
-				copyPair_(pair);
 
 				return action(pair);
 			}
@@ -121,12 +122,12 @@ inline namespace version_4_00_00{
 
 
 
-		struct SetSize : IFactoryAction<true, false, SetSize>{
-			using IFactoryAction<true, false, SetSize>::IFactoryAction;
-
-			constexpr void action(Pair *) const{
-			}
-		};
+	//	struct SetSize : IFactoryAction<true, false, SetSize>{
+	//		using IFactoryAction<true, false, SetSize>::IFactoryAction;
+	//
+	//		constexpr void action(Pair *) const{
+	//		}
+	//	};
 
 	} // namespace PairFactory
 } // anonymous namespace
