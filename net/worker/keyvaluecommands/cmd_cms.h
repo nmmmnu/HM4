@@ -165,9 +165,9 @@ namespace net::worker::commands::CMS{
 
 			constexpr CMSADD_Factory(std::string_view const key, const Pair *pair, Matrix<T> cms, It begin, It end) :
 							Base::IFactoryAction	(key, cms.bytes(), pair),
-							cms				(cms	),
-							begin				(begin	),
-							end				(end	){}
+							cms			(cms	),
+							begin			(begin	),
+							end			(end	){}
 
 			void action(Pair *pair) const{
 				char *data = pair->getValC();

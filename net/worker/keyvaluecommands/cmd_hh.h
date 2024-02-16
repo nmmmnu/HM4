@@ -27,13 +27,13 @@ namespace net::worker::commands::HH{
 
 		using MyRawHeavyHitter = heavy_hitter::RawHeavyHitter<hh_impl_::HH_KEY_SIZE>;
 
-		// HHADD key slots item score
+		// HHADD key slots item score item score
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hh_impl_;
 
-			if (p.size() != 5)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
+			if (p.size() < 5 || p.size() % 2 == 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
 
 			auto const &key  = p[1];
 
@@ -45,15 +45,11 @@ namespace net::worker::commands::HH{
 			if (slots < MIN_SLOTS || slots > MAX_SLOTS)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const &item = p[3];
+			auto const varg = 3;
 
-			if (item.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const score = from_string<uint64_t	>(p[4]);
-
-			if (score == 0)
-				return result.set_1();
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+				if (const auto &item = *itk; item.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			MyRawHeavyHitter const hh{ slots };
 
@@ -64,24 +60,27 @@ namespace net::worker::commands::HH{
 					return nullptr;
 			});
 
+			using MyHHADD_Factory = HHADD_Factory<ParamContainer::iterator>;
+
 			if (pair && hm4::canInsertHintValSize(*db, pair, hh.bytes()))
-				hm4::proceedInsertHintV<HHADD_Factory>(*db, pair, key, pair, hh, item, score);
+				hm4::proceedInsertHintV<MyHHADD_Factory>(*db, pair, key, pair, hh, std::begin(p) + varg, std::end(p));
 			else
-				hm4::insertV<HHADD_Factory>(*db, key, pair, hh, item, score);
+				hm4::insertV<MyHHADD_Factory>(*db, key, pair, hh, std::begin(p) + varg, std::end(p));
 
 			return result.set_1();
 		}
 
 	private:
-		struct HHADD_Factory : hm4::PairFactory::IFactoryAction<1,1,HHADD_Factory>{
+		template<typename It>
+		struct HHADD_Factory : hm4::PairFactory::IFactoryAction<1,1,HHADD_Factory<It> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,HHADD_Factory>;
 
-			HHADD_Factory(std::string_view const key, const Pair *pair, MyRawHeavyHitter const &hh, std::string_view const keySub, uint64_t const score) :
+			HHADD_Factory(std::string_view const key, const Pair *pair, MyRawHeavyHitter const &hh, It begin, It end) :
 							Base::IFactoryAction	(key, hh.bytes(), pair),
 							hh			(hh	),
-							keySub			(keySub	),
-							score			(score	){}
+							begin			(begin	),
+							end			(end	){}
 
 			void action(Pair *pair) const{
 				using namespace hh_impl_;
@@ -90,13 +89,19 @@ namespace net::worker::commands::HH{
 
 				Item *hh_data = reinterpret_cast<Item *>(pair->getValC());
 
-				hh.add(hh_data, keySub, score);
+				for(auto itk = begin; itk != end; itk += 2){
+					auto const &item = *itk;
+					auto const score = from_string<uint64_t	>(*std::next(itk));
+
+					if (score)
+						hh.add(hh_data, item, score);
+				}
 			}
 
 		private:
 			MyRawHeavyHitter const	&hh;
-			std::string_view	keySub;
-			uint64_t		score;
+			It			begin;
+			It			end;
 		};
 
 
