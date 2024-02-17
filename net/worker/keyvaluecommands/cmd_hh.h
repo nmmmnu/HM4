@@ -11,6 +11,14 @@ namespace net::worker::commands::HH{
 
 		constexpr uint8_t MIN_SLOTS	=   1;
 		constexpr uint8_t MAX_SLOTS	= 100;
+
+		constexpr bool isSlotsValid(uint8_t slots){
+			return slots >= MIN_SLOTS && slots <= MAX_SLOTS;
+		}
+
+		constexpr bool isItemValid(std::string_view item){
+			return item.size() >=1 && item.size() <= 63;
+		}
 	} // namespace linear_curve_impl_
 
 
@@ -37,18 +45,18 @@ namespace net::worker::commands::HH{
 
 			auto const &key  = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const slots = from_string<uint8_t	>(p[2]);
 
-			if (slots < MIN_SLOTS || slots > MAX_SLOTS)
+			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const varg = 3;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &item = *itk; item.empty())
+				if (const auto &item = *itk; !isItemValid(item))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			MyRawHeavyHitter const hh{ slots };
@@ -135,12 +143,12 @@ namespace net::worker::commands::HH{
 
 			auto const &key  = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const slots = from_string<uint8_t	>(p[2]);
 
-			if (slots < MIN_SLOTS || slots > MAX_SLOTS)
+			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			MyRawHeavyHitter const hh{ slots };
@@ -180,12 +188,12 @@ namespace net::worker::commands::HH{
 
 			auto const &key  = p[1];
 
-			if (key.empty())
+			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const slots = from_string<uint8_t	>(p[2]);
 
-			if (slots < MIN_SLOTS || slots > MAX_SLOTS)
+			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			MyRawHeavyHitter const hh{ slots };

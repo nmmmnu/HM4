@@ -313,7 +313,7 @@ namespace net::worker::commands::MutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -425,7 +425,7 @@ namespace net::worker::commands::MutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -539,7 +539,7 @@ namespace net::worker::commands::MutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -655,7 +655,7 @@ namespace net::worker::commands::MutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;

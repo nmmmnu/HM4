@@ -2,8 +2,6 @@
 #include "pair_vfactory.h"
 #include "mytime.h"
 
-#include "shared_hash.h"
-
 namespace net::worker::commands::Mutable{
 
 
@@ -283,7 +281,7 @@ namespace net::worker::commands::Mutable{
 			if (subN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN, subN))
+			if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -337,7 +335,7 @@ namespace net::worker::commands::Mutable{
 				if (subN.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!hm4::isHKeyValid(keyN, subN))
+				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 				if (auto const &val = *std::next(itk); !hm4::Pair::isValValid(val))
@@ -522,7 +520,7 @@ namespace net::worker::commands::Mutable{
 				if (subN.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!hm4::isHKeyValid(keyN, subN))
+				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 

@@ -6,17 +6,11 @@
 namespace net::worker::shared::zset{
 
 	constexpr bool isKeyValid(std::string_view keyN, std::string_view keySub, size_t score_size){
-		return hm4::Pair::isKeyValid(
-			keyN.size()		+
-			1			+
-			keySub.size()		+
-			1			+
-			score_size
-		);
+		return hm4::Pair::isCompositeKeyValid(keyN, keySub, 1 + 1 + score_size);
 	}
 
 	constexpr bool isKeyValid(std::string_view keyN, std::string_view keySub, std::string_view score){
-		return isKeyValid(keyN, keySub, score.size());
+		return hm4::Pair::isCompositeKeyValid(keyN, keySub, score, 1 + 1);
 	}
 
 

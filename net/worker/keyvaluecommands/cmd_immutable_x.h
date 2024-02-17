@@ -5,7 +5,6 @@
 #include <algorithm>	// std::clamp
 
 #include "shared_stoppredicate.h"
-#include "shared_hash.h"
 #include "shared_iterations.h"
 
 namespace net::worker::commands::ImmutableX{
@@ -438,7 +437,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -488,7 +487,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -538,7 +537,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -590,7 +589,7 @@ namespace net::worker::commands::ImmutableX{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN))
+			if (!hm4::Pair::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;

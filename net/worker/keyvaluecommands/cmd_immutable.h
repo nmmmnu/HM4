@@ -1,8 +1,6 @@
 #include "base.h"
 #include "mystring.h"
 
-#include "shared_hash.h"
-
 namespace net::worker::commands::Immutable{
 
 
@@ -321,7 +319,7 @@ namespace net::worker::commands::Immutable{
 			if (subN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN, subN))
+			if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -372,7 +370,7 @@ namespace net::worker::commands::Immutable{
 				if (subN.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!hm4::isHKeyValid(keyN, subN))
+				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -422,7 +420,7 @@ namespace net::worker::commands::Immutable{
 			if (subN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!hm4::isHKeyValid(keyN, subN))
+			if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
