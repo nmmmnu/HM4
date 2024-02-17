@@ -143,8 +143,12 @@ namespace heavy_hitter{
 					continue;
 				}
 
-				if (item == x.getItem())
-					return hitItem_(M[i], score, comp);
+				if (item == x.getItem()){
+					if (auto const x_score = x.getScore(); comp(score, x_score))
+						return insertItem_(M[i], score);
+					else
+						return false;
+				}
 
 				if (auto const x_score = x.getScore(); comp(minScore, x_score)){
 					indexMinScore = i;
@@ -157,28 +161,23 @@ namespace heavy_hitter{
 
 			// insert into empty slot
 			if (indexEmptySlot != NOT_FOUND)
-				return insertItem_(M[indexEmptySlot], score, item, comp);
+				return insertItem_(M[indexEmptySlot], score, item);
 
 			// overwrite smallest slot, if compare is OK.
 			if (indexMinScore != NOT_FOUND && comp(score, minScore))
-				return insertItem_(M[indexMinScore], score, item, comp);
+				return insertItem_(M[indexMinScore], score, item);
 
 			return false;
 		}
 
 	private:
-		template<bool Up>
-		static bool hitItem_(Item &item, int64_t score, Comparator<Up> const &comp){
-			if (comp(item.getScore(), score))
-				return false;
-
+		static bool insertItem_(Item &item, int64_t score){
 			item.setScore(score);
 
 			return true;
 		}
 
-		template<bool Up>
-		static bool insertItem_(Item &item, int64_t score, std::string_view itemName, Comparator<Up> const &){
+		static bool insertItem_(Item &item, int64_t score, std::string_view itemName){
 			item.set(score, itemName);
 
 			return true;
