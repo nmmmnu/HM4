@@ -64,3 +64,8 @@ Changelog
 -	fix bug with PERSIST when TTL is under 1 sec
 -	fix incompatibility with PHPRedis when using functions returning INT such TTL, INCR, DECR, STRLEN etc.
 -	fix bug with checking value size in APPEND
+
+### 1.3.7.7
+-	fix use after remove in BF, CMS, HLL, HH and possibly other commands that use IFactoryAction with same_size
+
+

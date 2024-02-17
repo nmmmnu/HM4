@@ -52,7 +52,7 @@ inline namespace version_4_00_00{
 				if constexpr(same_size){
 					// Same Size
 
-					if (pair->getVal().size() == val_size){
+					if (pair->isOK() && pair->getVal().size() == val_size){
 						// size OK, but init create + expire
 						Pair::createInRawMemory<0,0,0,0>(pair, key, val_size, 0, 0);
 					}else{

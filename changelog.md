@@ -282,3 +282,5 @@ Changelog
 -	refactor INCR / DECR in order to use hints if possible
 -	new commands INCRTO / DECRTO
 -	fix BFRESERVE, CMSRESERVE, HLLRESERVE behavour
+-	fix bug with use after remove in BF, CMS, HLL, HH
+
