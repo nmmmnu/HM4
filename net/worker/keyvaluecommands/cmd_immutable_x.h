@@ -586,9 +586,6 @@ namespace net::worker::commands::ImmutableX{
 
 			auto const keyN = p[1];
 
-			if (keyN.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
 			if (!hm4::Pair::Pair::isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 

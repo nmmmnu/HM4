@@ -17,6 +17,10 @@ namespace net::worker::commands::MortonCurve{
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC2Buffer = std::array<char, scoreSize>;
 
+		constexpr bool isMC2KeyValid(std::string_view keyN){
+			return shared::zset::isKeyValid(keyN, scoreSize);
+		}
+
 		constexpr bool isMC2KeyValid(std::string_view keyN, std::string_view keySub){
 			return shared::zset::isKeyValid(keyN, keySub, scoreSize);
 		}
@@ -593,7 +597,7 @@ namespace net::worker::commands::MortonCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN, ""))
+			if (!isMC2KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			MortonPoint const point{
@@ -650,7 +654,7 @@ namespace net::worker::commands::MortonCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN, ""))
+			if (!isMC2KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			MortonRectangle const rect{
@@ -709,7 +713,7 @@ namespace net::worker::commands::MortonCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN, ""))
+			if (!isMC2KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			MortonRectangle const rect{

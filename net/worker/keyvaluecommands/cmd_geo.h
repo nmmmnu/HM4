@@ -64,7 +64,11 @@ namespace net::worker::commands::Geo{
 				return tokenizeName(DBAdapter::SEPARATOR[0], line);
 			}
 
-			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name = ""){
+			constexpr bool isGeoKeyValid(std::string_view key){
+				return shared::zset::isKeyValid(key, GeoHash::MAX_SIZE);
+			}
+
+			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name){
 				return shared::zset::isKeyValid(key, name, GeoHash::MAX_SIZE);
 			}
 
@@ -310,13 +314,6 @@ namespace net::worker::commands::Geo{
 
 			if (!isGeoKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			{
-				constexpr std::string_view name = "";
-
-				if (!isGeoKeyValid(keyN, name))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			GeoHash::Point me{
 					to_geo(p[2]),

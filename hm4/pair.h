@@ -480,19 +480,34 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		constexpr
 		static bool isCompositeKeyValid(std::string_view key1, size_t more = 0) noexcept{
-			return isKeyValid(more + key1.size());
+			return	!key1.empty() &&
+				isKeyValid(more +
+						key1.size()
+				);
 		}
 
 		[[nodiscard]]
 		constexpr
 		static bool isCompositeKeyValid(std::string_view key1, std::string_view key2, size_t more = 0) noexcept{
-			return isKeyValid(more + key1.size() + key2.size());
+			return	!key1.empty() &&
+				!key2.empty() &&
+				isKeyValid(more +
+						key1.size() +
+						key2.size()
+				);
 		}
 
 		[[nodiscard]]
 		constexpr
 		static bool isCompositeKeyValid(std::string_view key1, std::string_view key2, std::string_view key3, size_t more = 0) noexcept{
-			return isKeyValid(more + key1.size() + key2.size() + key3.size());
+			return	!key1.empty() &&
+				!key2.empty() &&
+				!key3.empty() &&
+				isKeyValid(more +
+						key1.size() +
+						key2.size() +
+						key3.size()
+				);
 		}
 
 		[[nodiscard]]

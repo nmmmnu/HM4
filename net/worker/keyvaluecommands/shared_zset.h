@@ -9,8 +9,16 @@ namespace net::worker::shared::zset{
 		return hm4::Pair::isCompositeKeyValid(keyN, keySub, 1 + 1 + score_size);
 	}
 
+	constexpr bool isKeyValid(std::string_view keyN, size_t score_size){
+		return hm4::Pair::isCompositeKeyValid(keyN,         1 + 1 + score_size);
+	}
+
 	constexpr bool isKeyValid(std::string_view keyN, std::string_view keySub, std::string_view score){
 		return hm4::Pair::isCompositeKeyValid(keyN, keySub, score, 1 + 1);
+	}
+
+	constexpr bool isKeyValid(std::string_view keyN, std::string_view score){
+		return hm4::Pair::isCompositeKeyValid(keyN,         score, 1 + 1);
 	}
 
 

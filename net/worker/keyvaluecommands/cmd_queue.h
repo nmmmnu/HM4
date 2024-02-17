@@ -10,10 +10,9 @@ namespace net::worker::commands::Queue{
 
 		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
 
-		constexpr std::size_t MAX_KEY_SIZE = hm4::PairConf::MAX_KEY_SIZE
-						- MyIDGenerator::to_string_buffer_t_size
-						- 1 // DBAdapter::SEPARATOR.size()
-						- 16;
+		constexpr bool isKeyValid(std::string_view keyN){
+			return hm4::Pair::isCompositeKeyValid(keyN, MyIDGenerator::to_string_buffer_t_size + 1);
+		}
 
 	} // namespace
 
@@ -39,10 +38,7 @@ namespace net::worker::commands::Queue{
 
 			auto const &keyN = p[1];
 
-			if (keyN.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (keyN.size() > MAX_KEY_SIZE)
+			if (!isKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const &val = p[2];
@@ -92,11 +88,8 @@ namespace net::worker::commands::Queue{
 			// GET
 			const auto &keyN = p[1];
 
-			if (keyN.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (keyN.size() > MAX_KEY_SIZE)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			if (!isKeyValid(keyN))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
 			auto const keyControl = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);

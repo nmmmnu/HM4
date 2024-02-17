@@ -16,6 +16,10 @@ namespace net::worker::commands::LinearCurve{
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC1Buffer = std::array<char, scoreSize>;
 
+		constexpr bool isMC1KeyValid(std::string_view keyN){
+			return shared::zset::isKeyValid(keyN, scoreSize);
+		}
+
 		constexpr bool isMC1KeyValid(std::string_view keyN, std::string_view keySub){
 			return shared::zset::isKeyValid(keyN, keySub, scoreSize);
 		}
@@ -482,7 +486,7 @@ namespace net::worker::commands::LinearCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC1KeyValid(keyN, ""))
+			if (!isMC1KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const x = from_string<uint32_t>(p[2]);
@@ -536,7 +540,7 @@ namespace net::worker::commands::LinearCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC1KeyValid(keyN, ""))
+			if (!isMC1KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const x_min	= from_string<uint32_t>(p[2]);

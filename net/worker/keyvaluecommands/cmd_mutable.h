@@ -272,14 +272,7 @@ namespace net::worker::commands::Mutable{
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
 			const auto &keyN = p[1];
-
-			if (keyN.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
 			const auto &subN = p[2];
-
-			if (subN.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
@@ -324,16 +317,13 @@ namespace net::worker::commands::Mutable{
 
 			const auto &keyN = p[1];
 
-			if (!hm4::Pair::isKeyValid(keyN))
+			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &subN = *itk;
-
-				if (subN.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
@@ -516,9 +506,6 @@ namespace net::worker::commands::Mutable{
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
-
-				if (subN.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
