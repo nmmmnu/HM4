@@ -601,6 +601,15 @@ inline namespace version_4_00_00{
 
 
 
+	inline void print(const Pair *pair){
+		if (pair)
+			pair->print();
+		else
+			printf("%s\n", PairConf::EMPTY_MESSAGE);
+	}
+
+
+
 	namespace PairFactory{
 		struct MutableNotifyMessage{
 			size_t bytes_old = 0;

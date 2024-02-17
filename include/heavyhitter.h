@@ -8,33 +8,91 @@
 #include <limits>
 
 #include "myendian.h"
-//#include "logger.h"
 
 namespace heavy_hitter{
+	namespace heavy_hitter_impl_{
+		template<bool>
+		struct Comparator;
+
+		template<>
+		struct Comparator<true>{
+			constexpr static int64_t start = std::numeric_limits<int64_t>::max();
+
+			constexpr bool operator()(int64_t a, int64_t b) const{
+				return a > b;
+			}
+		};
+
+		template<>
+		struct Comparator<false>{
+			constexpr static int64_t start = std::numeric_limits<int64_t>::min();
+
+			constexpr bool operator()(int64_t a, int64_t b) const{
+				return a < b;
+			}
+		};
+
+	} // namespace heavy_hitter_impl_
 
 	template<uint8_t MAX_ITEM_SIZE>
 	struct RawHeavyHitter{
+
+		template<bool Up>
+		using Comparator = heavy_hitter_impl_::Comparator<Up>;
+
 		struct Item{
 			uint64_t score;			//  8
 			uint8_t  size;			//  1
-			char key[MAX_ITEM_SIZE];	// 63, 127...
+			char item[MAX_ITEM_SIZE];	// 63, 127...
 
-			constexpr std::string_view getItem() const{
-				return std::string_view{ key, size };
+			// -----
+
+			constexpr bool valid() const{
+				return size;
 			}
 
-			void setItem(std::string_view s){
-				assert(s.size() <= MAX_ITEM_SIZE);
+			// -----
 
-				size = static_cast<uint8_t>(s.size());
+			constexpr int64_t getScore() const{
+				return static_cast<int64_t>(
+					betoh(score)
+				);
+			}
 
-				memcpy(key, s.data(), s.size());
+			void setScore(int64_t score){
+				this->score = htobe(
+					static_cast<uint64_t>(score)
+				);
+			}
+
+			// -----
+
+			constexpr auto getItem() const{
+				return std::string_view{
+						item,
+						size
+				};
+			}
+
+			void setItem(std::string_view item){
+				assert(item.size() <= MAX_ITEM_SIZE);
+
+				size = static_cast<uint8_t>(item.size());
+
+				memcpy(this->item, item.data(), item.size());
+			}
+
+			// -----
+
+			void set(int64_t score, std::string_view item){
+				setScore(score);
+				setItem(item);
 			}
 
 		} __attribute__((__packed__));
 
-		static_assert( sizeof(Item) == sizeof(uint64_t) + MAX_ITEM_SIZE + 1 );
-		static_assert( sizeof(Item[10]) % sizeof(uint64_t) == 0 );
+		static_assert( sizeof(Item) == sizeof(int64_t) + MAX_ITEM_SIZE + 1 );
+		static_assert( sizeof(Item[10]) % sizeof(int64_t) == 0 );
 
 		// --------------------------
 
@@ -68,8 +126,11 @@ namespace heavy_hitter{
 
 		// --------------------------
 
-		bool add(Item *M, std::string_view item, uint64_t score) const{
-			uint64_t minScore       = std::numeric_limits<uint64_t>::max();
+		template<bool Up>
+		bool add(Item *M, std::string_view item, int64_t score) const{
+			Comparator<Up> const comp;
+
+			int64_t minScore       = comp.start;
 
 			size_t   indexMinScore  = NOT_FOUND;
 			size_t   indexEmptySlot = NOT_FOUND;
@@ -77,17 +138,15 @@ namespace heavy_hitter{
 			for(size_t i = 0; i < size(); ++i){
 				auto const &x = M[i];
 
-				if (!x.score){
+				if (!x.valid()){
 					indexEmptySlot = i;
 					continue;
 				}
 
 				if (item == x.getItem())
-					return hitItem_(M[i], score, M);
+					return hitItem_(M[i], score, comp);
 
-				auto const x_score = betoh(x.score);
-
-				if (minScore > x_score){
+				if (auto const x_score = x.getScore(); comp(minScore, x_score)){
 					indexMinScore = i;
 					minScore = x_score;
 					continue;
@@ -98,56 +157,29 @@ namespace heavy_hitter{
 
 			// insert into empty slot
 			if (indexEmptySlot != NOT_FOUND)
-				return replaceItem_(M[indexEmptySlot], score, item, M);
+				return insertItem_(M[indexEmptySlot], score, item, comp);
 
-			// overwrite smallest slot
-			if (indexMinScore != NOT_FOUND && score > minScore)
-				return replaceItem_(M[indexMinScore], score, item, M);
+			// overwrite smallest slot, if compare is OK.
+			if (indexMinScore != NOT_FOUND && comp(score, minScore))
+				return insertItem_(M[indexMinScore], score, item, comp);
 
 			return false;
 		}
 
-		void print(const Item *M) const{
-			logger<Logger::DEBUG>() << "HH Dump";
-
-			for(size_t i = 0; i < size(); ++i){
-				auto const &x = M[i];
-
-				if (!x.score){
-					logger<Logger::DEBUG>()
-						<< "id" << i
-						<< "(empty)"
-					;
-				}else{
-					logger<Logger::DEBUG>()
-						<< "id" << i
-						<< "score" << betoh(x.score)
-						<< "item" << x.getItem()
-					;
-				}
-			}
-		}
-
 	private:
-		bool hitItem_(Item &item, uint64_t score, const Item *) const{
-			if (score <= betoh(item.score))
+		template<bool Up>
+		static bool hitItem_(Item &item, int64_t score, Comparator<Up> const &comp){
+			if (comp(item.getScore(), score))
 				return false;
 
-			item.score = htobe(score);
-
-		//	print(all);
+			item.setScore(score);
 
 			return true;
 		}
 
-		bool replaceItem_(Item &item, uint64_t score, std::string_view itemName, const Item *) const{
-			if (score <= betoh(item.score))
-				return false;
-
-			item.score = htobe(score);
-			item.setItem(itemName);
-
-		//	print(all);
+		template<bool Up>
+		static bool insertItem_(Item &item, int64_t score, std::string_view itemName, Comparator<Up> const &){
+			item.set(score, itemName);
 
 			return true;
 		}
@@ -166,4 +198,31 @@ namespace heavy_hitter{
 } // namespace heavy_hitter
 
 #endif
+
+
+#if 0
+
+		void print(const Item *M) const{
+			logger<Logger::DEBUG>() << "HH Dump";
+
+			for(size_t i = 0; i < size(); ++i){
+				auto const &x = M[i];
+
+				if (!x.valid()){
+					logger<Logger::DEBUG>()
+						<< "id" << i
+						<< "(empty)"
+					;
+				}else{
+					logger<Logger::DEBUG>()
+						<< "id" << i
+						<< "score" << x.getScore()
+						<< "item" << x.getItem()
+					;
+				}
+			}
+		}
+
+#endif
+
 

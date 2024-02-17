@@ -19,27 +19,47 @@ namespace net::worker::commands::HH{
 		constexpr bool isItemValid(std::string_view item){
 			return item.size() >=1 && item.size() <= 63;
 		}
-	} // namespace linear_curve_impl_
 
 
-
-	template<class Protocol, class DBAdapter>
-	struct HHADD : BaseRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
 
 		using MyRawHeavyHitter = heavy_hitter::RawHeavyHitter<hh_impl_::HH_KEY_SIZE>;
 
-		// HHADD key slots item score item score
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace hh_impl_;
 
+		template<typename It, bool Up>
+		struct HHADDFactory : hm4::PairFactory::IFactoryAction<1,1,HHADDFactory<It, Up> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,HHADDFactory>;
+
+			HHADDFactory(std::string_view const key, const Pair *pair, MyRawHeavyHitter hh, It begin, It end) :
+							Base::IFactoryAction	(key, hh.bytes(), pair),
+							hh			(hh	),
+							begin			(begin	),
+							end			(end	){}
+
+			void action(Pair *pair) const{
+				using Item = MyRawHeavyHitter::Item;
+
+				Item *hh_data = reinterpret_cast<Item *>(pair->getValC());
+
+				for(auto itk = begin; itk != end; itk += 2){
+					auto const &item = *itk;
+					auto const score = from_string<int64_t>(*std::next(itk));
+
+					hh.add<Up>(hh_data, item, score);
+				}
+			}
+
+		private:
+			MyRawHeavyHitter	hh;
+			It			begin;
+			It			end;
+		};
+
+
+
+		template<class Protocol, class DBAdapter, bool Up>
+		void do_hh_incr_decr(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, std::bool_constant<Up>){
 			if (p.size() < 5 || p.size() % 2 == 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
 
@@ -48,7 +68,7 @@ namespace net::worker::commands::HH{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const slots = from_string<uint8_t	>(p[2]);
+			auto const slots = from_string<uint8_t>(p[2]);
 
 			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -68,54 +88,67 @@ namespace net::worker::commands::HH{
 					return nullptr;
 			});
 
-			using MyHHADD_Factory = HHADD_Factory<ParamContainer::iterator>;
+			using MyHHADDFactory = HHADDFactory<ParamContainer::iterator, Up>;
 
 			if (pair && hm4::canInsertHintValSize(*db, pair, hh.bytes()))
-				hm4::proceedInsertHintV<MyHHADD_Factory>(*db, pair, key, pair, hh, std::begin(p) + varg, std::end(p));
+				hm4::proceedInsertHintV<MyHHADDFactory>(*db, pair,	key, pair, hh, std::begin(p) + varg, std::end(p));
 			else
-				hm4::insertV<MyHHADD_Factory>(*db, key, pair, hh, std::begin(p) + varg, std::end(p));
+				hm4::insertV<MyHHADDFactory>(*db,			key, pair, hh, std::begin(p) + varg, std::end(p));
 
 			return result.set_1();
 		}
 
-	private:
-		template<typename It>
-		struct HHADD_Factory : hm4::PairFactory::IFactoryAction<1,1,HHADD_Factory<It> >{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,HHADD_Factory>;
+	} // namespace hh_impl_
 
-			HHADD_Factory(std::string_view const key, const Pair *pair, MyRawHeavyHitter const &hh, It begin, It end) :
-							Base::IFactoryAction	(key, hh.bytes(), pair),
-							hh			(hh	),
-							begin			(begin	),
-							end			(end	){}
 
-			void action(Pair *pair) const{
-				using namespace hh_impl_;
 
-				using Item = MyRawHeavyHitter::Item;
-
-				Item *hh_data = reinterpret_cast<Item *>(pair->getValC());
-
-				for(auto itk = begin; itk != end; itk += 2){
-					auto const &item = *itk;
-					auto const score = from_string<uint64_t	>(*std::next(itk));
-
-					if (score)
-						hh.add(hh_data, item, score);
-				}
-			}
-
-		private:
-			MyRawHeavyHitter const	&hh;
-			It			begin;
-			It			end;
+	template<class Protocol, class DBAdapter>
+	struct HHINCR : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
 		};
 
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// HHADD key slots item score item score
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace hh_impl_;
+
+			return do_hh_incr_decr(p, db, result, std::true_type{});
+		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"hhadd",	"HHADD"
+			"hhincr",	"HHINCR"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct HHDECR : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// HHADD key slots item score item score
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace hh_impl_;
+
+			return do_hh_incr_decr(p, db, result, std::false_type{});
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"hhdecr",	"HHDECR"
 		};
 	};
 
@@ -218,15 +251,13 @@ namespace net::worker::commands::HH{
 			for(size_t i = 0; i < hh.size(); ++i){
 				auto const &x = hh_data[i];
 
-				if (!x.score)
+				if (!x.valid())
 					continue;
-
-				auto const x_score = betoh(x.score);
 
 				bcontainer.push_back();
 
 				auto const item  = x.getItem();
-				auto const score = to_string(x_score, bcontainer.back());
+				auto const score = to_string(x.getScore(), bcontainer.back());
 
 				container.push_back(item);
 				container.push_back(score);
@@ -249,7 +280,8 @@ namespace net::worker::commands::HH{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				HHADD		,
+				HHINCR		,
+				HHDECR		,
 				HHRESERVE	,
 				HHGET
 			>(pack);
