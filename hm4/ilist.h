@@ -411,6 +411,16 @@ auto getPairPtr(List const &list, std::string_view key){
 }
 
 template<typename List>
+auto getPairPtrWithSize(List const &list, std::string_view key, size_t size){
+	return hm4::getPair_(list, key, [size](bool b, auto it) -> const hm4::Pair *{
+		if (b && it->getVal().size() == size)
+			return & *it;
+		else
+			return nullptr;
+	});
+}
+
+template<typename List>
 auto getPairPtrNC(List const &list, std::string_view key){
 	return getPairPtr_<0>(list, key);
 }

@@ -140,12 +140,7 @@ namespace net::worker::commands::CMS{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			const auto *pair = hm4::getPair_(list, key, [max_size = cms.bytes()](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == max_size)
-					return & *it;
-				else
-					return nullptr;
-			});
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
 
 			using MyCMSADD_Factory = CMSADD_Factory<T, ParamContainer::iterator>;
 
@@ -310,12 +305,7 @@ namespace net::worker::commands::CMS{
 		void process_(std::string_view key, std::string_view item, Matrix<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cms_impl_;
 
-			const auto *pair = hm4::getPair_(list, key, [max_size = cms.bytes()](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == max_size)
-					return & *it;
-				else
-					return nullptr;
-			});
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
 
 			if (! pair)
 				return result.set_0();
@@ -384,12 +374,7 @@ namespace net::worker::commands::CMS{
 				if (auto const &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			const auto *pair = hm4::getPair_(list, key, [max_size = cms.bytes()](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == max_size)
-					return & *it;
-				else
-					return nullptr;
-			});
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
 
 			auto &container  = blob.container();
 

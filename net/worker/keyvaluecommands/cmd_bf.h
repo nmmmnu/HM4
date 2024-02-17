@@ -78,12 +78,7 @@ namespace net::worker::commands::BF{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			const auto *pair = hm4::getPair_(*db, key, [max_size](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == max_size)
-					return & *it;
-				else
-					return nullptr;
-			});
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, max_size);
 
 			using MyBFADD_Factory = BFADD_Factory<ParamContainer::iterator>;
 

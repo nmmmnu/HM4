@@ -84,9 +84,17 @@ namespace heavy_hitter{
 
 			// -----
 
-			void set(int64_t score, std::string_view item){
+			void set(int64_t score){
 				setScore(score);
+			}
+
+			void set(std::string_view item){
 				setItem(item);
+			}
+
+			void set(int64_t score, std::string_view item){
+				set(score);
+				set(item);
 			}
 
 		} __attribute__((__packed__));
@@ -172,7 +180,7 @@ namespace heavy_hitter{
 
 	private:
 		static bool insertItem_(Item &item, int64_t score){
-			item.setScore(score);
+			item.set(score);
 
 			return true;
 		}

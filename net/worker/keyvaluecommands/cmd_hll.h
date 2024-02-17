@@ -101,12 +101,7 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			const auto *pair = hm4::getPair_(*db, key, [](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == HLL_M)
-					return & *it;
-				else
-					return nullptr;
-			});
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
 			using MyHLLADD_Factory = PFADD_Factory<ParamContainer::iterator>;
 

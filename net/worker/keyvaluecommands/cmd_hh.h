@@ -81,12 +81,7 @@ namespace net::worker::commands::HH{
 
 			MyRawHeavyHitter const hh{ slots };
 
-			const auto *pair = hm4::getPair_(*db, key, [&hh](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == hh.bytes())
-					return & *it;
-				else
-					return nullptr;
-			});
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
 
 			using MyHHADDFactory = HHADDFactory<ParamContainer::iterator, Up>;
 
@@ -231,18 +226,14 @@ namespace net::worker::commands::HH{
 
 			MyRawHeavyHitter const hh{ slots };
 
-			const auto *pair = hm4::getPair_(*db, key, [&hh](bool b, auto it) -> const hm4::Pair *{
-				if (b && it->getVal().size() == hh.bytes())
-					return & *it;
-				else
-					return nullptr;
-			});
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
 
 			auto &container  = blob.container();
-			auto &bcontainer = blob.bcontainer();
 
 			if (pair == nullptr)
 				return result.set_container(container);
+
+			auto &bcontainer = blob.bcontainer();
 
 			using Item = MyRawHeavyHitter::Item;
 
