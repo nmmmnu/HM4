@@ -53,13 +53,13 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
+		// MSET a 5 b 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			// should be odd number arguments
-			// mset a 5 b 6
-			if (p.size() < 3 || p.size() % 2 == 0)
+			auto const varg = 1;
+
+			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
-			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
@@ -97,13 +97,13 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
+		// MSET a 5 b 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			// should be odd number arguments
-			// mset a 5 b 6
-			if (p.size() < 3 || p.size() % 2 == 0)
+			auto const varg = 1;
+
+			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
-			auto const varg = 1;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
@@ -150,13 +150,12 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
+		// MSETXX a 5 b 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			// should be odd number arguments
-			// mset a 5 b 6
-			if (p.size() < 3 || p.size() % 2 == 0)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
-
 			auto const varg = 1;
+
+			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
@@ -309,18 +308,17 @@ namespace net::worker::commands::Mutable{
 			return std::end(cmd);
 		};
 
+		// HMSET a sub1 5 sub2 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			// should be even number arguments
-			// mset a sub1 5 sub2 6
-			if (p.size() < 3 || p.size() % 2 != 0)
+			auto const varg = 2;
+
+			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
 			const auto &keyN = p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &subN = *itk;

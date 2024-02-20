@@ -27,10 +27,10 @@ namespace net::worker::commands::BITSET{
 			return std::end(cmd);
 		};
 
+		// BITSET key 5 1 6 0
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			// should be even number arguments
-			// bitset key 5 1 6 0
-			if (p.size() < 4 || p.size() % 2 == 1)
+			auto const varg = 2;
+			if (p.size() < 4 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
 
 			using namespace bit_impl_;
@@ -48,8 +48,6 @@ namespace net::worker::commands::BITSET{
 			const auto *pair = hm4::getPairPtr(*db, key);
 
 			using MyBITSET_Factory = BITSET_Factory<ParamContainer::iterator>;
-
-			auto const varg = 2;
 
 			auto const new_bytes = bytes;
 

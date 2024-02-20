@@ -15,9 +15,7 @@ function cmd_MUTABLE($redis){
 
 	// ------------------
 
-	$redis->del("c");
-	$redis->del("d");
-	$redis->del("e");
+	$redis->del("c", "d", "e");
 
 	$redis->msetnx([
 		"c"	=> 1,

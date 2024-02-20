@@ -350,11 +350,10 @@ namespace net::worker::commands::MortonCurve{
 		};
 
 		// MC2GET key subkey0 subkey1 ...
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
-			if (p.size() < 3 && p.size() % 2 != 0)
+			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
 
 			const auto &keyN = p[1];

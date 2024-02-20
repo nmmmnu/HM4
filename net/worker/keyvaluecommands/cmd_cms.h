@@ -96,7 +96,9 @@ namespace net::worker::commands::CMS{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
 
-			if (p.size() < 7 || p.size() % 2 == 0)
+			auto const varg = 5;
+
+			if (p.size() < 7 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
 
 			const auto &key = p[1];

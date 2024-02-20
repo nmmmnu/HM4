@@ -6,6 +6,7 @@ function cmd_CMS($redis){
 
 	$w	= 4096;
 	$d	= 4;
+
 	foreach([8, 16, 32, 64] as $is){
 		rawCommand($redis, "CMSRESERVE $is", "a", $w, $d, $is);
 
