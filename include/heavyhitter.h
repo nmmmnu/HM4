@@ -32,19 +32,13 @@ namespace heavy_hitter{
 			}
 		};
 
-	} // namespace heavy_hitter_impl_
-
-	template<size_t MAX_ITEM_SIZE>
-	struct RawHeavyHitter{
-		static_assert(MAX_ITEM_SIZE < 256);
-
-		template<bool Up>
-		using Comparator = heavy_hitter_impl_::Comparator<Up>;
-
+		template<size_t MaxItemSize>
 		struct Item{
-			uint64_t score;			//  8
-			uint8_t  size;			//  1
-			char item[MAX_ITEM_SIZE];	// 63, 127...
+			static_assert(MaxItemSize <= std::numeric_limits<uint8_t>::max() );
+
+			uint64_t	score;			//  8
+			uint8_t		size;			//  1
+			char		item[MaxItemSize];	// 63, 127...
 
 			// -----
 
@@ -76,7 +70,7 @@ namespace heavy_hitter{
 			}
 
 			void setItem(std::string_view item){
-				assert(item.size() <= MAX_ITEM_SIZE);
+				assert(item.size() <= MaxItemSize);
 
 				size = static_cast<uint8_t>(item.size());
 
@@ -97,22 +91,29 @@ namespace heavy_hitter{
 				set(score);
 				set(item);
 			}
-
 		} __attribute__((__packed__));
 
-		static_assert( sizeof(Item) == sizeof(int64_t) + MAX_ITEM_SIZE + 1 );
+	} // namespace heavy_hitter_impl_
+
+	template<size_t MaxItemSize>
+	struct RawHeavyHitter{
+		template<bool Up>
+		using Comparator	= heavy_hitter_impl_::Comparator<Up>;
+		using Item		= heavy_hitter_impl_::Item<MaxItemSize>;
+
+		static_assert( sizeof(Item) == sizeof(int64_t) + MaxItemSize + 1 );
 		static_assert( sizeof(Item[10]) % sizeof(int64_t) == 0 );
 
 		// --------------------------
 
-		constexpr RawHeavyHitter(uint8_t size) : size_(size){
+		constexpr RawHeavyHitter(size_t size) : size_(size){
 			assert(size != NOT_FOUND);
 		}
 
 		// --------------------------
 
 		constexpr static bool isItemValid(std::string_view item){
-			return item.size() >= 1 && item.size() <= MAX_ITEM_SIZE;
+			return item.size() >= 1 && item.size() <= MaxItemSize;
 		}
 
 		// --------------------------
@@ -145,7 +146,7 @@ namespace heavy_hitter{
 		bool add(Item *M, std::string_view item, int64_t score) const{
 			Comparator<Up> const comp;
 
-			int64_t minScore       = comp.start;
+			int64_t  minScore       = comp.start;
 
 			size_t   indexMinScore  = NOT_FOUND;
 			size_t   indexEmptySlot = NOT_FOUND;
@@ -199,9 +200,9 @@ namespace heavy_hitter{
 		}
 
 	private:
-		constexpr static uint8_t NOT_FOUND = std::numeric_limits<uint8_t>::max();
+		constexpr static size_t NOT_FOUND = std::numeric_limits<size_t>::max();
 
-		uint8_t	size_;
+		size_t	size_;
 	};
 
 
