@@ -199,8 +199,10 @@ namespace heavy_hitter{
 
 
 
-	using RawHeavyHitter64  = RawHeavyHitter< 64 - 1>;
-	using RawHeavyHitter128 = RawHeavyHitter<128 - 1>;
+	using RawHeavyHitter32  = RawHeavyHitter< 32 - 1>; //  4 x 8
+	using RawHeavyHitter40  = RawHeavyHitter< 40 - 1>; //  5 x 8, IP6
+	using RawHeavyHitter64  = RawHeavyHitter< 64 - 1>; //  8 x 8
+	using RawHeavyHitter128 = RawHeavyHitter<128 - 1>; // 16 x 8
 
 } // namespace heavy_hitter
 

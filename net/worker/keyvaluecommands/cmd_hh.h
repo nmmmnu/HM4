@@ -7,8 +7,6 @@ namespace net::worker::commands::HH{
 	namespace hh_impl_{
 		constexpr char   DELIMITER	= ',';
 
-		constexpr size_t  HH_KEY_SIZE	=  63;
-
 		constexpr uint8_t MIN_SLOTS	=   1;
 		constexpr uint8_t MAX_SLOTS	= 100;
 
@@ -22,12 +20,29 @@ namespace net::worker::commands::HH{
 
 
 
-		using MyRawHeavyHitter = heavy_hitter::RawHeavyHitter<hh_impl_::HH_KEY_SIZE>;
+		template<typename T>
+		struct type_identity{
+			// C++20 std::type_identity
+			using type = T;
+		};
+
+		template<typename F>
+		auto type_dispatch(uint8_t const t, F f){
+			using namespace heavy_hitter;
+
+			switch(t){
+			case  32 : return f(type_identity<RawHeavyHitter32	>{});
+			case  40 : return f(type_identity<RawHeavyHitter40	>{});
+			case  64 : return f(type_identity<RawHeavyHitter64	>{});
+			case 128 : return f(type_identity<RawHeavyHitter128	>{});
+			default  : return f(type_identity<std::nullptr_t	>{});
+			}
+		}
 
 
 
-		template<typename It, bool Up>
-		struct HHADDFactory : hm4::PairFactory::IFactoryAction<1,1,HHADDFactory<It, Up> >{
+		template<typename It, bool Up, class MyRawHeavyHitter>
+		struct HHADDFactory : hm4::PairFactory::IFactoryAction<1,1,HHADDFactory<It, Up, MyRawHeavyHitter> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,HHADDFactory>;
 
@@ -38,7 +53,7 @@ namespace net::worker::commands::HH{
 							end			(end	){}
 
 			void action(Pair *pair) const{
-				using Item = MyRawHeavyHitter::Item;
+				using Item = typename MyRawHeavyHitter::Item;
 
 				Item *hh_data = reinterpret_cast<Item *>(pair->getValC());
 
@@ -46,7 +61,7 @@ namespace net::worker::commands::HH{
 					auto const &item = *itk;
 					auto const score = from_string<int64_t>(*std::next(itk));
 
-					hh.add<Up>(hh_data, item, score);
+					hh. template add<Up>(hh_data, item, score);
 				}
 			}
 
@@ -60,8 +75,10 @@ namespace net::worker::commands::HH{
 
 		template<class Protocol, class DBAdapter, bool Up>
 		void do_hh_incr_decr(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, std::bool_constant<Up>){
-			if (p.size() < 5 || p.size() % 2 == 0)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
+			auto const varg = 4;
+
+			if (p.size() < 6 || (p.size() - varg) % 2 != 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
 
 			auto const &key  = p[1];
 
@@ -73,24 +90,36 @@ namespace net::worker::commands::HH{
 			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const varg = 3;
-
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
 				if (const auto &item = *itk; !isItemValid(item))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			MyRawHeavyHitter const hh{ slots };
+			auto const bytes = from_string<uint8_t	>(p[3]);
 
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
 
-			using MyHHADDFactory = HHADDFactory<ParamContainer::iterator, Up>;
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
+				}else{
+					using MyRawHeavyHitter = T;
 
-			if (pair && hm4::canInsertHintValSize(*db, pair, hh.bytes()))
-				hm4::proceedInsertHintV<MyHHADDFactory>(*db, pair,	key, pair, hh, std::begin(p) + varg, std::end(p));
-			else
-				hm4::insertV<MyHHADDFactory>(*db,			key, pair, hh, std::begin(p) + varg, std::end(p));
+					MyRawHeavyHitter const hh{ slots };
 
-			return result.set_1();
+					const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
+
+					using MyHHADDFactory = HHADDFactory<ParamContainer::iterator, Up, MyRawHeavyHitter>;
+
+					if (pair && hm4::canInsertHintValSize(*db, pair, hh.bytes()))
+						hm4::proceedInsertHintV<MyHHADDFactory>(*db, pair,	key, pair, hh, std::begin(p) + varg, std::end(p));
+					else
+						hm4::insertV<MyHHADDFactory>(*db,			key, pair, hh, std::begin(p) + varg, std::end(p));
+
+					return result.set_1();
+				}
+			};
+
+			return type_dispatch(bytes, f);
 		}
 
 	} // namespace hh_impl_
@@ -159,15 +188,13 @@ namespace net::worker::commands::HH{
 			return std::end(cmd);
 		};
 
-		using MyRawHeavyHitter = heavy_hitter::RawHeavyHitter<hh_impl_::HH_KEY_SIZE>;
-
 		// HHRESERVE key slots
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hh_impl_;
 
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &key  = p[1];
 
@@ -179,11 +206,25 @@ namespace net::worker::commands::HH{
 			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			MyRawHeavyHitter const hh{ slots };
+			auto const bytes = from_string<uint8_t	>(p[3]);
 
-			hm4::insertV<hm4::PairFactory::Reserve>(*db, key, hh.bytes());
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
 
-			return result.set_1();
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
+				}else{
+					using MyRawHeavyHitter = T;
+
+					MyRawHeavyHitter const hh{ slots };
+
+					hm4::insertV<hm4::PairFactory::Reserve>(*db, key, hh.bytes());
+
+					return result.set_1();
+				}
+			};
+
+			return type_dispatch(bytes, f);
 		}
 
 	private:
@@ -204,15 +245,13 @@ namespace net::worker::commands::HH{
 			return std::end(cmd);
 		};
 
-		using MyRawHeavyHitter = heavy_hitter::RawHeavyHitter<hh_impl_::HH_KEY_SIZE>;
-
 		// HHGET key slots
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace hh_impl_;
 
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &key  = p[1];
 
@@ -224,20 +263,40 @@ namespace net::worker::commands::HH{
 			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			MyRawHeavyHitter const hh{ slots };
+			auto const bytes = from_string<uint8_t	>(p[3]);
 
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
 
-			auto &container  = blob.container();
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
+				}else{
+					using MyRawHeavyHitter = T;
+
+					MyRawHeavyHitter const hh{ slots };
+
+					const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
+
+					return process_(hh, pair, result, blob);
+				}
+			};
+
+			return type_dispatch(bytes, f);
+		}
+
+	private:
+		template<class MyRawHeavyHitter>
+		void process_(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
+			auto &container = blob.container();
 
 			if (pair == nullptr)
 				return result.set_container(container);
 
 			auto &bcontainer = blob.bcontainer();
 
-			using Item = MyRawHeavyHitter::Item;
+			using Item = typename MyRawHeavyHitter::Item;
 
-			const Item *hh_data = reinterpret_cast<const Item *>(pair->getValC());
+			const auto *hh_data = reinterpret_cast<const Item *>(pair->getValC());
 
 			for(size_t i = 0; i < hh.size(); ++i){
 				auto const &x = hh_data[i];
