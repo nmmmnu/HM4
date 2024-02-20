@@ -34,8 +34,9 @@ namespace heavy_hitter{
 
 	} // namespace heavy_hitter_impl_
 
-	template<uint8_t MAX_ITEM_SIZE>
+	template<size_t MAX_ITEM_SIZE>
 	struct RawHeavyHitter{
+		static_assert(MAX_ITEM_SIZE < 256);
 
 		template<bool Up>
 		using Comparator = heavy_hitter_impl_::Comparator<Up>;
@@ -106,6 +107,12 @@ namespace heavy_hitter{
 
 		constexpr RawHeavyHitter(uint8_t size) : size_(size){
 			assert(size != NOT_FOUND);
+		}
+
+		// --------------------------
+
+		constexpr static bool isItemValid(std::string_view item){
+			return item.size() >= 1 && item.size() <= MAX_ITEM_SIZE;
 		}
 
 		// --------------------------
@@ -200,9 +207,10 @@ namespace heavy_hitter{
 
 
 	using RawHeavyHitter32  = RawHeavyHitter< 32 - 1>; //  4 x 8
-	using RawHeavyHitter40  = RawHeavyHitter< 40 - 1>; //  5 x 8, IP6
+	using RawHeavyHitter40  = RawHeavyHitter< 40 - 1>; //  5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
 	using RawHeavyHitter64  = RawHeavyHitter< 64 - 1>; //  8 x 8
 	using RawHeavyHitter128 = RawHeavyHitter<128 - 1>; // 16 x 8
+	using RawHeavyHitter256 = RawHeavyHitter<256 - 1>; // 32 x 8
 
 } // namespace heavy_hitter
 

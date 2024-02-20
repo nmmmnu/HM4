@@ -14,10 +14,6 @@ namespace net::worker::commands::HH{
 			return slots >= MIN_SLOTS && slots <= MAX_SLOTS;
 		}
 
-		constexpr bool isItemValid(std::string_view item){
-			return item.size() >=1 && item.size() <= 63;
-		}
-
 
 
 		template<typename T>
@@ -27,7 +23,7 @@ namespace net::worker::commands::HH{
 		};
 
 		template<typename F>
-		auto type_dispatch(uint8_t const t, F f){
+		auto type_dispatch(size_t const t, F f){
 			using namespace heavy_hitter;
 
 			switch(t){
@@ -35,6 +31,7 @@ namespace net::worker::commands::HH{
 			case  40 : return f(type_identity<RawHeavyHitter40	>{});
 			case  64 : return f(type_identity<RawHeavyHitter64	>{});
 			case 128 : return f(type_identity<RawHeavyHitter128	>{});
+			case 256 : return f(type_identity<RawHeavyHitter256	>{});
 			default  : return f(type_identity<std::nullptr_t	>{});
 			}
 		}
@@ -90,11 +87,7 @@ namespace net::worker::commands::HH{
 			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &item = *itk; !isItemValid(item))
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const bytes = from_string<uint8_t	>(p[3]);
+			auto const bytes = from_string<size_t	>(p[3]);
 
 			auto f = [&](auto x) {
 				using T = typename decltype(x)::type;
@@ -105,6 +98,10 @@ namespace net::worker::commands::HH{
 					using MyRawHeavyHitter = T;
 
 					MyRawHeavyHitter const hh{ slots };
+
+					for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+						if (const auto &item = *itk; !hh.isItemValid(item))
+							return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 					const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
 
@@ -206,7 +203,7 @@ namespace net::worker::commands::HH{
 			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const bytes = from_string<uint8_t	>(p[3]);
+			auto const bytes = from_string<size_t	>(p[3]);
 
 			auto f = [&](auto x) {
 				using T = typename decltype(x)::type;
@@ -263,7 +260,7 @@ namespace net::worker::commands::HH{
 			if (!isSlotsValid(slots))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const bytes = from_string<uint8_t	>(p[3]);
+			auto const bytes = from_string<size_t	>(p[3]);
 
 			auto f = [&](auto x) {
 				using T = typename decltype(x)::type;

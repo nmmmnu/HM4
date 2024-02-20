@@ -19,7 +19,7 @@ function hh_sort($data){
 function cmd_HH($redis){
 	$redis->del("a");
 
-	foreach([32, 40, 64, 128] as $bytes){
+	foreach([32, 40, 64, 128, 256] as $bytes){
 		rawCommand($redis, "hhincr", "a", 4, $bytes,
 					"London"	,	20,
 					"Sofia"		,	15,
@@ -52,7 +52,7 @@ function cmd_HH($redis){
 
 	//	print_r($_);
 
-		expect("HHINCR",	$_ == $result		);
+		expect("HHINCR$bytes",	$_ == $result		);
 
 
 
@@ -90,7 +90,7 @@ function cmd_HH($redis){
 
 	//	print_r($_);
 
-		expect("HHDECR",	$_ == $result		);
+		expect("HHDECR$bytes",	$_ == $result		);
 	}
 
 
