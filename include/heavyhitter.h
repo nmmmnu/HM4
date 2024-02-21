@@ -42,6 +42,12 @@ namespace heavy_hitter{
 
 			// -----
 
+			constexpr static bool isItemValid(std::string_view item){
+				return item.size() >= 1 && item.size() <= MaxItemSize;
+			}
+
+			// -----
+
 			constexpr bool valid() const{
 				return size;
 			}
@@ -113,7 +119,7 @@ namespace heavy_hitter{
 		// --------------------------
 
 		constexpr static bool isItemValid(std::string_view item){
-			return item.size() >= 1 && item.size() <= MaxItemSize;
+			return Item::isItemValid(item);
 		}
 
 		// --------------------------
