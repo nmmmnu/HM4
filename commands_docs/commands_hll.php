@@ -46,7 +46,25 @@ return array(
 			"string (int)",
 			"estimated count",
 			"1.2.17",
-			"[number of keys] * READ",
+			"READ",
+			true,
+			false,
+
+			"hll"
+	),
+
+	new Cmd(
+			"PFADDCOUNT",
+
+			"PFADDCOUNT / HLLADDCOUNT key value [value]...",
+
+			"Add <i>value</i> into HLL <i>key</i>, " .
+			"then wstimate count of HLL union of provided <i>key</i>.<br />" .
+			"Read HLL information document.",
+			"string (int)",
+			"estimated count",
+			"1.3.7.7",
+			"READ + WRITE",
 			true,
 			false,
 

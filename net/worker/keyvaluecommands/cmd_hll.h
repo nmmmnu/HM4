@@ -68,12 +68,15 @@ namespace net::worker::commands::HLL{
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
 		}
 
-		template<typename It>
-		struct PFADD_Factory : hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >;
 
-			PFADD_Factory(std::string_view const key, const Pair *pair, It begin, It end) :
+
+		#if 0
+		template<typename It>
+		struct PFADDFactory : hm4::PairFactory::IFactoryAction<1,1,PFADDFactory<It> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactory<It> >;
+
+			PFADDFactory(std::string_view const key, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
 							begin			(begin		),
 							end			(end		){}
@@ -83,26 +86,21 @@ namespace net::worker::commands::HLL{
 
 				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
 
-				this->result = false;
+				this->bits = false;
 
 				for(auto itk = begin; itk != end; ++itk){
 					const auto &val = *itk;
 
-					if (getHLL().add(hll_data, val))
-						this->result = true;
+					[[maybe_unused]]
+					auto bits = getHLL().add(hll_data, val);
 				}
-			}
-
-			constexpr bool getResult() const{
-				return result;
 			}
 
 		private:
 			It	begin;
 			It	end;
-
-			bool	result = false;
 		};
+		#endif
 
 	} // namespace hll_impl_
 
@@ -137,7 +135,7 @@ namespace net::worker::commands::HLL{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
-			using MyHLLADD_Factory = PFADD_Factory<ParamContainer::iterator>;
+			using MyHLLADD_Factory = PFADDFactoryBits<ParamContainer::iterator>;
 
 			MyHLLADD_Factory factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
@@ -151,8 +149,49 @@ namespace net::worker::commands::HLL{
 			else
 				hm4::insert(*db, vbase);
 
-			return result.set(factory.getResult());
+			return result.set(factory.getBits());
 		}
+
+	private:
+		// mostly copy of PFADDFactory but add some operations
+		template<typename It>
+		struct PFADDFactoryBits : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits<It> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits<It> >;
+
+			PFADDFactoryBits(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
+							begin			(begin		),
+							end			(end		){}
+
+			void action(Pair *pair){
+				using namespace hll_impl_;
+
+				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
+
+				this->bits = false;
+
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
+
+					[[maybe_unused]]
+					auto bits = getHLL().add(hll_data, val);
+
+					if (bits)
+						this->bits = true;
+				}
+			}
+
+			constexpr auto getBits() const{
+				return bits;
+			}
+
+		private:
+			It	begin;
+			It	end;
+
+			bool	bits = false;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -232,7 +271,7 @@ namespace net::worker::commands::HLL{
 						hll_op_intersect(keys, db)
 			);
 
-			return result.set( n );
+			return result.set(n);
 		}
 
 	private:
@@ -293,6 +332,103 @@ namespace net::worker::commands::HLL{
 		constexpr inline static std::string_view cmd[]	= {
 			"pfcount",	"PFCOUNT"		,
 			"hllcount",	"HLLCOUNT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct PFADDCOUNT : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() < 3)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+
+			auto const &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &val = *itk; val.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
+			using namespace hll_impl_;
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
+
+			using MyHLLADD_Factory = PFADDFactoryCount<ParamContainer::iterator>;
+
+			MyHLLADD_Factory factory{ key, pair, std::begin(p) + varg, std::end(p) };
+
+			using VBase = hm4::PairFactory::IFactory;
+
+			// lost the type
+			VBase &vbase = factory;
+
+			if (pair && hm4::canInsertHintValSize(*db, pair, HLL_M))
+				hm4::proceedInsertHint(*db, pair, vbase);
+			else
+				hm4::insert(*db, vbase);
+
+			uint64_t const n = hll_op_round(
+						factory.getCount()
+			);
+
+			return result.set(n);
+		}
+
+	private:
+		// mostly copy of PFADDFactory but add some operations
+		template<typename It>
+		struct PFADDFactoryCount : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount<It> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount<It> >;
+
+			PFADDFactoryCount(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
+							begin			(begin		),
+							end			(end		){}
+
+			void action(Pair *pair){
+				using namespace hll_impl_;
+
+				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
+
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
+
+					[[maybe_unused]]
+					auto bits = getHLL().add(hll_data, val);
+				}
+
+				this->count = getHLL().estimate(hll_data);
+			}
+
+			constexpr auto getCount() const{
+				return count;
+			}
+
+		private:
+			It	begin;
+			It	end;
+
+			double	count = 0;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"pfaddcount",	"PFADDCOUNT"		,
+			"hlladdcount",	"HLLADDCOUNT"
 		};
 	};
 
@@ -417,6 +553,7 @@ namespace net::worker::commands::HLL{
 				PFADD		,
 				PFRESERVE	,
 				PFCOUNT		,
+				PFADDCOUNT	,
 				PFINTERSECT	,
 				PFMERGE		,
 				PFBITS		,
