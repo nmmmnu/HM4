@@ -5,71 +5,105 @@
 
 namespace net::worker::commands::HLL{
 	namespace hll_impl_{
-		namespace{
+		using Pair = hm4::Pair;
 
+		constexpr uint8_t HLL_Bits = 12;
+
+		constexpr auto getHLL(){
+			return hyperloglog::HyperLogLogRaw{HLL_Bits};
+		}
+
+		constexpr uint32_t HLL_M = getHLL().m;
+
+		template<class List>
+		auto store(List &list, std::string_view key, const uint8_t *hll){
+			return hm4::insert( list,
+				key,
+				std::string_view{
+					reinterpret_cast<const char *>(hll),
+					HLL_M
+				}
+			);
+		}
+
+		template<class List>
+		const uint8_t *load_ptr(List &list, std::string_view key){
+			return hm4::getPair_(list, key, [](bool b, auto it) -> const uint8_t *{
+				if (b && it->getVal().size() == HLL_M)
+					return reinterpret_cast<const uint8_t *>(it->getVal().data());
+				else
+					return nullptr;
+			});
+		}
+
+		template<class DBAdapter>
+		double hll_op_intersect(MySpan<const std::string_view> const &keys, DBAdapter &db){
+			StaticVector<const uint8_t *, 5> b;
+
+			for(auto it = std::begin(keys); it != std::end(keys); ++it)
+				if (const auto *x = load_ptr(*db, *it); x){
+					b.push_back(x);
+
+					logger<Logger::DEBUG>() << "HLL Operation" << "intersect" << *it;
+				}
+
+			logger<Logger::DEBUG>() << "HLL Operation count" << b.size();
+
+			auto hll_ops = getHLL().getOperations();
+
+			uint8_t _[HLL_M];
+
+			switch(b.size()){
+			default:
+			case 0: return hll_ops.intersect(_	 				);
+			case 1: return hll_ops.intersect(_, b[0]				);
+			case 2: return hll_ops.intersect(_, b[0], b[1]				);
+			case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
+			case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
+			case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
+			}
+		}
+
+		constexpr uint64_t hll_op_round(double const estimate){
+			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
+		}
+
+		template<typename It>
+		struct PFADD_Factory : hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >{
 			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >;
 
-			constexpr uint8_t HLL_Bits = 12;
+			PFADD_Factory(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
+							begin			(begin		),
+							end			(end		){}
 
-			constexpr auto getHLL(){
-				return hyperloglog::HyperLogLogRaw{HLL_Bits};
-			}
+			void action(Pair *pair){
+				using namespace hll_impl_;
 
-			constexpr uint32_t HLL_M = getHLL().m;
+				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
 
-			template<class List>
-			auto store(List &list, std::string_view key, const uint8_t *hll){
-				return hm4::insert( list,
-					key,
-					std::string_view{
-						reinterpret_cast<const char *>(hll),
-						HLL_M
-					}
-				);
-			}
+				this->result = false;
 
-			template<class List>
-			const uint8_t *load_ptr(List &list, std::string_view key){
-				return hm4::getPair_(list, key, [](bool b, auto it) -> const uint8_t *{
-					if (b && it->getVal().size() == HLL_M)
-						return reinterpret_cast<const uint8_t *>(it->getVal().data());
-					else
-						return nullptr;
-				});
-			}
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
 
-			template<class DBAdapter>
-			double hll_op_intersect(MySpan<const std::string_view> const &keys, DBAdapter &db){
-				StaticVector<const uint8_t *, 5> b;
-
-				for(auto it = std::begin(keys); it != std::end(keys); ++it)
-					if (const auto *x = load_ptr(*db, *it); x){
-						b.push_back(x);
-
-						logger<Logger::DEBUG>() << "HLL Operation" << "intersect" << *it;
-					}
-
-				logger<Logger::DEBUG>() << "HLL Operation count" << b.size();
-
-				auto hll_ops = getHLL().getOperations();
-
-				uint8_t _[HLL_M];
-
-				switch(b.size()){
-				default:
-				case 0: return hll_ops.intersect(_	 				);
-				case 1: return hll_ops.intersect(_, b[0]				);
-				case 2: return hll_ops.intersect(_, b[0], b[1]				);
-				case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
-				case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
-				case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
+					if (getHLL().add(hll_data, val))
+						this->result = true;
 				}
 			}
 
-			constexpr uint64_t hll_op_round(double const estimate){
-				return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
+			constexpr bool getResult() const{
+				return result;
 			}
-		} // namespace
+
+		private:
+			It	begin;
+			It	end;
+
+			bool	result = false;
+		};
+
 	} // namespace hll_impl_
 
 
@@ -105,41 +139,20 @@ namespace net::worker::commands::HLL{
 
 			using MyHLLADD_Factory = PFADD_Factory<ParamContainer::iterator>;
 
+			MyHLLADD_Factory factory{ key, pair, std::begin(p) + varg, std::end(p) };
+
+			using VBase = hm4::PairFactory::IFactory;
+
+			// lost the type
+			VBase &vbase = factory;
+
 			if (pair && hm4::canInsertHintValSize(*db, pair, HLL_M))
-				hm4::proceedInsertHintV<MyHLLADD_Factory>(*db, pair, key, pair, std::begin(p) + varg, std::end(p));
+				hm4::proceedInsertHint(*db, pair, vbase);
 			else
-				hm4::insertV<MyHLLADD_Factory>(*db, key, pair, std::begin(p) + varg, std::end(p));
+				hm4::insert(*db, vbase);
 
-			return result.set_1();
+			return result.set(factory.getResult());
 		}
-
-	private:
-		template<typename It>
-		struct PFADD_Factory : hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADD_Factory<It> >;
-
-			PFADD_Factory(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
-							begin			(begin		),
-							end			(end		){}
-
-			void action(Pair *pair) const{
-				using namespace hll_impl_;
-
-				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
-
-				for(auto itk = begin; itk != end; ++itk){
-					const auto &val = *itk;
-
-					getHLL().add(hll_data, val);
-				}
-			}
-
-		private:
-			It	begin;
-			It	end;
-		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

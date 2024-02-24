@@ -63,17 +63,25 @@ namespace hyperloglog{
 
 		// --------------------------
 
-		void add(uint8_t *M, const char *s, size_t size) const{
+		[[nodiscard]]
+		bool add(uint8_t *M, const char *s, size_t size) const{
 			auto const &[index, rank] = hyperloglog_implementation::calcAdd(s, size, bits);
 
-			M[index] = std::max(M[index], rank);
+			if (M[index] >= rank)
+				return false;
+
+			M[index] = rank;
+
+			return true;
 		}
 
-		auto add(uint8_t *M, std::string_view s) const{
+		[[nodiscard]]
+		bool add(uint8_t *M, std::string_view s) const{
 			return add(M, s.data(), s.size());
 		}
 
-		auto add(uint8_t *M, const void *s, size_t size) const{
+		[[nodiscard]]
+		bool add(uint8_t *M, const void *s, size_t size) const{
 			return add(M, static_cast<const char *>(s), size);
 		}
 

@@ -284,4 +284,5 @@ Changelog
 -	fix BFRESERVE, CMSRESERVE, HLLRESERVE behavour
 -	fix bug with use after remove in BF, CMS, HLL
 -	new module heavy hitter: HHINCR, HHDECR, HHRESERVE, HHGET
+-	make PFADD result redis compatible
 

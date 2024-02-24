@@ -8,7 +8,7 @@ return array(
 			"Add <i>value</i> into HLL <i>key</i>.<br />" .
 			"Read HLL information document.",
 			"string (int)",
-			"always returns 1",
+			"0 = count is unchanged, 1 = count is increased",
 			"1.2.17",
 			"READ + [number of keys] * WRITE",
 			true,
