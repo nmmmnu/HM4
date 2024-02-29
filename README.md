@@ -520,12 +520,12 @@ Instead of using a heap, it is implemented as flat array. This was made, because
 #### HH Value Size
 
 | Config | Max size | Comment       |
+|   ---: |     ---: |  :---         |
 |     32 |       31 |               |
 |     40 |       39 | IP6           |
 |     64 |       63 |               |
 |    128 |      127 |               |
 |    256 |      255 | Pascal string |
-
 
 #### Example usage
 
