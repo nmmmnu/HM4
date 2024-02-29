@@ -22,6 +22,7 @@ Goals of the project are.
 -   HyperLogLog
 -   Bloom Filters
 -   Count Min Sketch
+-   Heavy Hitters
 
 
 
@@ -501,6 +502,67 @@ You need to provide same config values on each CMS command.
 Notice how "max" was increased three times, with 100 each.
 
 However, because **8 bit** counter can not hold value more than 255, final result instead of 300, is 255.
+
+
+
+---
+### Heavy Hitters (HH)
+
+Heavy Hitter can be used to find most frequent elements in a stream. For example what are top 50 IP addresses that visited a website.
+
+Instead of using a heap, it is implemented as flat array. This was made, because if you adding new value to specific item, you need to scan the whole heap anyway.
+
+#### Configuration of a HH
+
+- **hh_count** - count of the heavy hitters items. For the example with the IP addresses, if we want to know the top 25 addresses, it has to be set to 25.
+- **hh_value_size** - size of fixed lenght string. See table. For the example with the IP addresses, 40 is best, which will give you size of 39 characters. IP6 is exactly 39 characters.
+
+#### HH Value Size
+
+| Config | Max size | Comment       |
+|     32 |       31 |               |
+|     40 |       39 | IP6           |
+|     64 |       63 |               |
+|    128 |      127 |               |
+|    256 |      255 | Pascal string |
+
+
+#### Example usage
+
+      127.0.0.1:6379> incr ip:192.168.0.1
+      (integer) 1
+      127.0.0.1:6379> hhincr visits 25 40 192.168.0.1 1
+      (integer) 1
+      127.0.0.1:6379> incr ip:192.168.0.1
+      (integer) 2
+      127.0.0.1:6379> hhincr visits 25 40 192.168.0.1 2
+      (integer) 1
+      127.0.0.1:6379> incr ip:192.168.0.5
+      (integer) 1
+      127.0.0.1:6379> hhincr visits 25 40 192.168.0.15 1
+      (integer) 1
+      127.0.0.1:6379> incr ip:192.168.0.5
+      (integer) 2
+      127.0.0.1:6379> hhincr visits 25 40 192.168.0.15 2
+      (integer) 1
+      127.0.0.1:6379> incr ip:192.168.0.5
+      (integer) 3
+      127.0.0.1:6379> hhincr visits 25 40 192.168.0.15 3
+      (integer) 1
+      127.0.0.1:6379> hhget visits
+      (error) ERR The command needs exactly 3 parameters
+      127.0.0.1:6379> hhget visits 25 40
+      1) "192.168.0.15"
+      2) "3"
+      3) "192.168.0.1"
+      4) "2"
+
+- Instead of <i>INCR</i> you can use count min sketch or some sensor reading.
+- Note how the result is **not** sorted.
+- If you need to only top heavy hitter without value, you can probably use <i>INCRTO</i> command.
+
+
+
 
 
 

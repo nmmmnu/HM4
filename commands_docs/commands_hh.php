@@ -7,7 +7,7 @@ return array(
 
 			"Add (insert) <i>value</i>'s into the heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />" .
 			"Bigger values are 'better'<br />" .
-			"<i>hhcount</i> can be from 1 to 100. But for value of 1, you can use <i>INCRTO</i> command.<br />" .
+			"<i>hhcount</i> can be from 1 to 100.<br />" .
 			"Supported sizes are:<br />".
 			"-  32 (gives you string size of  31)<br />".
 			"-  40 (gives you string size of  39) - IP6 compatible<br />".
@@ -32,7 +32,7 @@ return array(
 
 			"Add (insert) <i>value</i>'s into the heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />" .
 			"Smaller values are 'better'<br />" .
-			"<i>hhcount</i> can be from 1 to 100. But for value of 1, you can use <i>DECRTO</i> command.<br />" .
+			"<i>hhcount</i> can be from 1 to 100.<br />" .
 			"Check <i>HHINCR</i> for supported sizes.<br />".
 			"Read HH information document.",
 			"int",
