@@ -286,3 +286,4 @@ Changelog
 -	new module heavy hitter: HHINCR, HHDECR, HHRESERVE, HHGET
 -	make PFADD result redis compatible
 -	new command PFADDCOUNT
+-	Release
