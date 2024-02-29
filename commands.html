@@ -255,6 +255,7 @@
 					<li><a href="#PFADD">PFADD</a></li>
 				<li><a href="#PFRESERVE">PFRESERVE</a></li>
 				<li><a href="#PFCOUNT">PFCOUNT</a></li>
+				<li><a href="#PFADDCOUNT">PFADDCOUNT</a></li>
 				<li><a href="#PFINTERSECT">PFINTERSECT</a></li>
 				<li><a href="#PFMERGE">PFMERGE</a></li>
 				<li><a href="#PFBITS">PFBITS</a></li>
@@ -293,6 +294,15 @@
 				<li><a href="#MC2RANGENAIVE">MC2RANGENAIVE</a></li>
 				<li><a href="#MC2ENCODE">MC2ENCODE</a></li>
 				<li><a href="#MC2DECODE">MC2DECODE</a></li>
+				</div>
+			<div>
+			<b>hh.h</b><br />
+			&nbsp;
+
+					<li><a href="#HHINCR">HHINCR</a></li>
+				<li><a href="#HHDECR">HHDECR</a></li>
+				<li><a href="#HHRESERVE">HHRESERVE</a></li>
+				<li><a href="#HHGET">HHGET</a></li>
 				</div>
 			<div>
 			<b>murmur.h</b><br />
@@ -2648,7 +2658,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>PFCOUNT</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
 				<tr><td>Module			</td><td>hll.h</td></tr>
@@ -2656,6 +2666,29 @@
 
 			<h3>Description:</h3>
 			Estimate count of HLL union of provided <i>key</i>.<br />Works with single key too, but returns standard estimation.<br />Works without key too, but returns 0.<br />Read HLL information document.
+			<h3>Return type:</h3>
+			string (int)
+			<h3>Return value:</h3>
+			estimated count
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFADDCOUNT">
+
+			<h2>PFADDCOUNT / HLLADDCOUNT key value [value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFADDCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>Yes</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>value</i> into HLL <i>key</i>, then wstimate count of HLL union of provided <i>key</i>.<br />Read HLL information document.
 			<h3>Return type:</h3>
 			string (int)
 			<h3>Return value:</h3>
@@ -3193,6 +3226,98 @@
 			array
 			<h3>Return value:</h3>
 			x and y
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HHINCR">
+
+			<h2>HHINCR key hh_count hh_value_size value count</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HHINCR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hh.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i>'s into the heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />Bigger values are 'better'<br /><i>hhcount</i> can be from 1 to 100. But for value of 1, you can use <i>INCRTO</i> command.<br />Supported sizes are:<br />-  32 (gives you string size of  31)<br />-  40 (gives you string size of  39) - IP6 compatible<br />-  64 (gives you string size of  63)<br />- 128 (gives you string size of 127)<br />- 256 (gives you string size of 255) - Pascal string compatible :)<br />Read HH information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HHDECR">
+
+			<h2>HHDECR key hh_count hh_value_size value count</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HHDECR</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hh.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i>'s into the heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />Smaller values are 'better'<br /><i>hhcount</i> can be from 1 to 100. But for value of 1, you can use <i>DECRTO</i> command.<br />Check <i>HHINCR</i> for supported sizes.<br />Read HH information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HHRESERVE">
+
+			<h2>HHRESERVE key hh_count hh_value_size</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HHRESERVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hh.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Create new, empty heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br /><i>hhcount</i> can be from 1 to 100. But for value of 1, you can use <i>DECRTO</i> command.<br />Check <i>HHINCR</i> for supported sizes.<br />Read HH information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="HHGET">
+
+			<h2>HHGET key hh_count hh_value_size</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>HHGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>bf.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br /><i>hhcount</i> can be from 1 to 100.<br />Check <i>HHINCR</i> for supported sizes.<br />Note values are returned nonsorted. You will need to sort values yourself.<br />Read HH information document.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			key => count in a way similar to <i>HGETALL</i>
 			
 			
 			<p class="top"><a href="#top">top</a></p>
