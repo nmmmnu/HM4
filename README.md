@@ -522,6 +522,7 @@ Instead of using a heap, it is implemented as flat array. This was made, because
 
 | Config | Max size | Comment       |
 |   ---: |     ---: |  :---         |
+|     16 |       15 |               |
 |     32 |       31 |               |
 |     40 |       39 | IP6           |
 |     64 |       63 |               |
@@ -581,6 +582,7 @@ They are implemented as flat array in a way similar to Heavy Hitters (HH).
 
 | Config | Max size | Comment       |
 |   ---: |     ---: |  :---         |
+|     16 |       15 |               |
 |     32 |       31 |               |
 |     40 |       39 | IP6           |
 |     64 |       63 |               |

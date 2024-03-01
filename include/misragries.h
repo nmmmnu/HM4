@@ -174,6 +174,7 @@ namespace misra_gries{
 
 
 
+	using RawMisraGries16  = RawMisraGries< 16 - 1>; //  2 x 8
 	using RawMisraGries32  = RawMisraGries< 32 - 1>; //  4 x 8
 	using RawMisraGries40  = RawMisraGries< 40 - 1>; //  5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
 	using RawMisraGries64  = RawMisraGries< 64 - 1>; //  8 x 8

@@ -292,3 +292,4 @@ Changelog
 -	fix return type of HHINCR, HHDECR.
 -	refactor HHINCR, HHDECR, PFADD, PFADDCOUNT
 -	new module Misra-Gries: MRADD, MRRESERVE, MRGET
+-	increase limits on HH

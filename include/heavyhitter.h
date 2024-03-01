@@ -213,6 +213,7 @@ namespace heavy_hitter{
 
 
 
+	using RawHeavyHitter16  = RawHeavyHitter< 16 - 1>; //  2 x 8
 	using RawHeavyHitter32  = RawHeavyHitter< 32 - 1>; //  4 x 8
 	using RawHeavyHitter40  = RawHeavyHitter< 40 - 1>; //  5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
 	using RawHeavyHitter64  = RawHeavyHitter< 64 - 1>; //  8 x 8

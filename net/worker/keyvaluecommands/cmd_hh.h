@@ -28,6 +28,7 @@ namespace net::worker::commands::HH{
 			using namespace heavy_hitter;
 
 			switch(t){
+			case  16 : return f(type_identity<RawHeavyHitter16	>{});
 			case  32 : return f(type_identity<RawHeavyHitter32	>{});
 			case  40 : return f(type_identity<RawHeavyHitter40	>{});
 			case  64 : return f(type_identity<RawHeavyHitter64	>{});

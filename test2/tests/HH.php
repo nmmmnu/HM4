@@ -19,7 +19,7 @@ function hh_sort($data){
 function cmd_HH($redis){
 	$redis->del("a");
 
-	foreach([32, 40, 64, 128, 256] as $bytes){
+	foreach([16, 32, 40, 64, 128, 256] as $bytes){
 		rawCommand($redis, "hhincr", "a", 4, $bytes,
 					"London"	,	20,
 					"Sofia"		,	15,

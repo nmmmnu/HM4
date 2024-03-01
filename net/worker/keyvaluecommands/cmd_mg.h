@@ -28,6 +28,7 @@ namespace net::worker::commands::MG{
 			using namespace misra_gries;
 
 			switch(t){
+			case  16 : return f(type_identity<RawMisraGries16	>{});
 			case  32 : return f(type_identity<RawMisraGries32	>{});
 			case  40 : return f(type_identity<RawMisraGries40	>{});
 			case  64 : return f(type_identity<RawMisraGries64	>{});
