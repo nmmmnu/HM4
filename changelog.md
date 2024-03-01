@@ -291,4 +291,4 @@ Changelog
 ### 1.3.7.8
 -	fix return type of HHINCR, HHDECR.
 -	refactor HHINCR, HHDECR, PFADD, PFADDCOUNT
-
+-	new module Misra-Gries: MRADD, MRRESERVE, MRGET

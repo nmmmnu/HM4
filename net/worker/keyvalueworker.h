@@ -26,7 +26,8 @@
 #include "keyvaluecommands/cmd_hll.h"			// PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS, PFERROR
 #include "keyvaluecommands/cmd_bf.h"			// BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
 #include "keyvaluecommands/cmd_cms.h"			// CMSADD, CMSRESERVE, CMSCOUNT, CMSMCOUNT
-#include "keyvaluecommands/cmd_hh.h"			// HHADD, HHRESERVE, HHGET
+#include "keyvaluecommands/cmd_hh.h"			// HHINCR, HHDECR, HHRESERVE, HHGET
+#include "keyvaluecommands/cmd_mg.h"			// MGADD, MGRESERVE, MGGET
 #include "keyvaluecommands/cmd_geo.h"			// GEOADD, GEOREM, GEOGET, GEOMGET, GEOENCODE, GEODECODE
 #include "keyvaluecommands/cmd_mortoncurve.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
 #include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1EXISTS, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
@@ -98,6 +99,7 @@ namespace net::worker{
 				BF		::RegisterModule,
 				CMS		::RegisterModule,
 				HH		::RegisterModule,
+				MG		::RegisterModule,
 				Geo		::RegisterModule,
 				MortonCurve	::RegisterModule,
 				LinearCurve	::RegisterModule,

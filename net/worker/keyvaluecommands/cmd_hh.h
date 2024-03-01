@@ -9,7 +9,7 @@ namespace net::worker::commands::HH{
 		constexpr char   DELIMITER	= ',';
 
 		constexpr uint8_t MIN_SLOTS	=   1;
-		constexpr uint8_t MAX_SLOTS	= 100;
+		constexpr uint8_t MAX_SLOTS	= 200;
 
 		constexpr bool isSlotsValid(uint8_t slots){
 			return slots >= MIN_SLOTS && slots <= MAX_SLOTS;
@@ -175,7 +175,7 @@ namespace net::worker::commands::HH{
 			return std::end(cmd);
 		};
 
-		// HHADD key slots item score item score
+		// HHADD key slots bytes item score item score
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hh_impl_;
@@ -201,7 +201,7 @@ namespace net::worker::commands::HH{
 			return std::end(cmd);
 		};
 
-		// HHRESERVE key slots
+		// HHRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hh_impl_;
@@ -258,7 +258,7 @@ namespace net::worker::commands::HH{
 			return std::end(cmd);
 		};
 
-		// HHGET key slots
+		// HHGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace hh_impl_;
