@@ -30,12 +30,14 @@ function cmd_HH($redis){
 		);
 
 		rawCommand($redis, "hhreserve", "a", 4, $bytes);
-
-		rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5);
-		rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5);
-		rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia", 25);
-		rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia", 25);
-		rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia", 38);
+var_dump(
+	rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5) == 0
+);
+		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5) == 0);
+		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5) == 0);
+		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia", 25) == 1);
+		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia", 25) == 0);
+		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia", 38) == 1);
 
 		rawCommand($redis, "hhincr", "a", 4, $bytes, "London", 25);
 
@@ -69,11 +71,11 @@ function cmd_HH($redis){
 
 		rawCommand($redis, "hhreserve", "a", 4, $bytes);
 
-		rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia", 10);
-		rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia", 10);
-		rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia",  8);
-		rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia",  3);
-		rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia",  0);
+		expect("HHINCR$bytes", rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia", 10) == 1);
+		expect("HHINCR$bytes", rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia", 10) == 0);
+		expect("HHINCR$bytes", rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia",  8) == 1);
+		expect("HHINCR$bytes", rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia",  3) == 1);
+		expect("HHINCR$bytes", rawCommand($redis, "hhdecr", "a", 4, $bytes, "Sofia",  0) == 1);
 
 		rawCommand($redis, "hhdecr", "a", 4, $bytes, "London", 12);
 

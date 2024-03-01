@@ -2,6 +2,7 @@
 #include "hyperloglog.h"
 #include "logger.h"
 #include "pair_vfactory.h"
+#include "shared_hint.h"
 
 namespace net::worker::commands::HLL{
 	namespace hll_impl_{
@@ -70,38 +71,6 @@ namespace net::worker::commands::HLL{
 
 
 
-		#if 0
-		template<typename It>
-		struct PFADDFactory : hm4::PairFactory::IFactoryAction<1,1,PFADDFactory<It> >{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactory<It> >;
-
-			PFADDFactory(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
-							begin			(begin		),
-							end			(end		){}
-
-			void action(Pair *pair){
-				using namespace hll_impl_;
-
-				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
-
-				this->bits = false;
-
-				for(auto itk = begin; itk != end; ++itk){
-					const auto &val = *itk;
-
-					[[maybe_unused]]
-					auto bits = getHLL().add(hll_data, val);
-				}
-			}
-
-		private:
-			It	begin;
-			It	end;
-		};
-		#endif
-
 	} // namespace hll_impl_
 
 
@@ -139,15 +108,7 @@ namespace net::worker::commands::HLL{
 
 			MyHLLADD_Factory factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
-			using VBase = hm4::PairFactory::IFactory;
-
-			// lost the type
-			VBase &vbase = factory;
-
-			if (pair && hm4::canInsertHintValSize(*db, pair, HLL_M))
-				hm4::proceedInsertHint(*db, pair, vbase);
-			else
-				hm4::insert(*db, vbase);
+			insertHintVFactory(pair, *db, factory);
 
 			return result.set(factory.getBits());
 		}
@@ -165,25 +126,28 @@ namespace net::worker::commands::HLL{
 							end			(end		){}
 
 			void action(Pair *pair){
-				using namespace hll_impl_;
-
-				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
-
-				this->bits = false;
-
-				for(auto itk = begin; itk != end; ++itk){
-					const auto &val = *itk;
-
-					[[maybe_unused]]
-					auto bits = getHLL().add(hll_data, val);
-
-					if (bits)
-						this->bits = true;
-				}
+				bits = action_(pair);;
 			}
 
 			constexpr auto getBits() const{
 				return bits;
+			}
+
+		private:
+			bool action_(Pair *pair) const{
+				using namespace hll_impl_;
+
+				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
+
+				bool result = false;
+
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
+
+					result |= getHLL().add(hll_data, val);
+				}
+
+				return result;
 			}
 
 		private:
@@ -370,15 +334,7 @@ namespace net::worker::commands::HLL{
 
 			MyHLLADD_Factory factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
-			using VBase = hm4::PairFactory::IFactory;
-
-			// lost the type
-			VBase &vbase = factory;
-
-			if (pair && hm4::canInsertHintValSize(*db, pair, HLL_M))
-				hm4::proceedInsertHint(*db, pair, vbase);
-			else
-				hm4::insert(*db, vbase);
+			insertHintVFactory(pair, *db, factory);
 
 			uint64_t const n = hll_op_round(
 						factory.getCount()
@@ -400,6 +356,15 @@ namespace net::worker::commands::HLL{
 							end			(end		){}
 
 			void action(Pair *pair){
+				this->count = action_(pair);
+			}
+
+			constexpr auto getCount() const{
+				return count;
+			}
+
+		private:
+			double action_(Pair *pair) const{
 				using namespace hll_impl_;
 
 				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
@@ -411,11 +376,7 @@ namespace net::worker::commands::HLL{
 					auto bits = getHLL().add(hll_data, val);
 				}
 
-				this->count = getHLL().estimate(hll_data);
-			}
-
-			constexpr auto getCount() const{
-				return count;
+				return getHLL().estimate(hll_data);
 			}
 
 		private:

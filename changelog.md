@@ -287,3 +287,8 @@ Changelog
 -	make PFADD result redis compatible
 -	new command PFADDCOUNT
 -	Release
+
+### 1.3.7.8
+-	fix return type of HHINCR, HHDECR.
+-	refactor HHINCR, HHDECR, PFADD, PFADDCOUNT
+

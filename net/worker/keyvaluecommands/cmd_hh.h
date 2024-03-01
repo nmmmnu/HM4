@@ -2,6 +2,7 @@
 #include "heavyhitter.h"
 #include "logger.h"
 #include "pair_vfactory.h"
+#include "shared_hint.h"
 
 namespace net::worker::commands::HH{
 	namespace hh_impl_{
@@ -49,23 +50,37 @@ namespace net::worker::commands::HH{
 							begin			(begin	),
 							end			(end	){}
 
-			void action(Pair *pair) const{
+			void action(Pair *pair){
+				this->result = action_(pair);
+			}
+
+			constexpr bool getResult() const{
+				return result;
+			}
+
+		private:
+			bool action_(Pair *pair) const{
 				using Item = typename MyRawHeavyHitter::Item;
 
 				Item *hh_data = reinterpret_cast<Item *>(pair->getValC());
+
+				bool result = false;
 
 				for(auto itk = begin; itk != end; itk += 2){
 					auto const &item = *itk;
 					auto const score = from_string<int64_t>(*std::next(itk));
 
-					hh. template add<Up>(hh_data, item, score);
+					result |= hh. template add<Up>(hh_data, item, score);
 				}
+
+				return result;
 			}
 
 		private:
 			MyRawHeavyHitter	hh;
 			It			begin;
 			It			end;
+			bool			result = false;
 		};
 
 
@@ -107,12 +122,13 @@ namespace net::worker::commands::HH{
 
 					using MyHHADDFactory = HHADDFactory<ParamContainer::iterator, Up, MyRawHeavyHitter>;
 
-					if (pair && hm4::canInsertHintValSize(*db, pair, hh.bytes()))
-						hm4::proceedInsertHintV<MyHHADDFactory>(*db, pair,	key, pair, hh, std::begin(p) + varg, std::end(p));
-					else
-						hm4::insertV<MyHHADDFactory>(*db,			key, pair, hh, std::begin(p) + varg, std::end(p));
+					MyHHADDFactory factory{ key, pair, hh, std::begin(p) + varg, std::end(p) };
 
-					return result.set_1();
+					insertHintVFactory(pair, *db, factory);
+
+					return result.set(
+						factory.getResult()
+					);
 				}
 			};
 
