@@ -19,7 +19,9 @@ namespace misra_gries{
 			uint8_t		size;			//  1
 			char		item[MaxItemSize];	// 63, 127...
 
-			constexpr static uint64_t ONE = htobe( uint64_t{1} );
+			constexpr static uint64_t ZERO = htobe( uint64_t{0} );
+			constexpr static uint64_t ONE  = htobe( uint64_t{1} );
+			constexpr static uint64_t MAX  = htobe( std::numeric_limits<uint64_t>::max() );
 
 			// -----
 
@@ -52,7 +54,7 @@ namespace misra_gries{
 				};
 			}
 
-			void setItem(std::string_view item){
+			uint64_t setItem(std::string_view item){
 				assert(item.size() <= MaxItemSize);
 
 				score = ONE;
@@ -60,18 +62,28 @@ namespace misra_gries{
 				size  = static_cast<uint8_t>(item.size());
 
 				memcpy(this->item, item.data(), item.size());
+
+				return 1;
 			}
 
 			// -----
 
-			void incr(){
-				auto const s = getScore();
-				setScore(s + 1);
+			uint64_t incr(){
+				switch(score){
+				case MAX:
+					return std::numeric_limits<uint64_t>::max();
+
+				default:
+					auto const s = getScore() + 1;
+					setScore(s);
+					return s;
+				}
 			}
 
 			void decr(){
 				switch(score){
-				case 0:  return;
+				case ZERO:
+					return;
 
 				case ONE:
 					score = 0;
@@ -132,7 +144,7 @@ namespace misra_gries{
 
 		// --------------------------
 
-		bool add(Item *M, std::string_view item) const{
+		uint64_t add(Item *M, std::string_view item) const{
 			size_t indexEmptySlot = NOT_FOUND;
 
 			for(size_t i = 0; i < size(); ++i){
@@ -143,10 +155,8 @@ namespace misra_gries{
 					continue;
 				}
 
-				if (item == x.getItem()){
-					x.incr();
-					return true;
-				}
+				if (item == x.getItem())
+					return x.incr();
 			}
 
 			// if we are here, item is not found in the array
@@ -154,8 +164,7 @@ namespace misra_gries{
 			// insert into empty slot
 			if (indexEmptySlot != NOT_FOUND){
 				auto &x = M[indexEmptySlot];
-				x.setItem(item);
-				return true;
+				return x.setItem(item);
 			}
 
 			for(size_t i = 0; i < size(); ++i){
@@ -163,7 +172,7 @@ namespace misra_gries{
 				x.decr();
 			}
 
-			return false;
+			return 0;
 		}
 
 	private:

@@ -16,8 +16,8 @@ return array(
 			"- 256 (gives you string size of 255) - Pascal string compatible :)<br />".
 			"Read HH information document.",
 			"bool",
-			"0 if the items is not inside the HH<br />" .
-			"1 if the items is inside the HH",
+			"0 if all the items is not qualified for insert<br />" .
+			"1 if at least one item is qualified for insert",
 			"1.3.7.7",
 			"READ + WRITE",
 			false,
@@ -37,8 +37,8 @@ return array(
 			"Check <i>HHINCR</i> for supported sizes.<br />".
 			"Read HH information document.",
 			"bool",
-			"0 if the items is not inside the HH<br />" .
-			"1 if the items is inside the HH",
+			"0 if all the items is not qualified for insert<br />" .
+			"1 if at least one item is qualified for insert",
 			"1.3.7.7",
 			"READ + WRITE",
 			false,

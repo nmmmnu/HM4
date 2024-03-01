@@ -150,7 +150,7 @@ namespace net::worker::commands::HH{
 			return std::end(cmd);
 		};
 
-		// HHADD key slots item score item score
+		// HHADD key slots bytes item score item score
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hh_impl_;
