@@ -152,8 +152,11 @@ namespace misra_gries{
 			// if we are here, item is not found in the array
 
 			// insert into empty slot
-			if (indexEmptySlot != NOT_FOUND)
-				return insertItem_(M[indexEmptySlot], item);
+			if (indexEmptySlot != NOT_FOUND){
+				auto &x = M[indexEmptySlot];
+				x.setItem(item);
+				return true;
+			}
 
 			for(size_t i = 0; i < size(); ++i){
 				auto &x = M[i];
@@ -161,13 +164,6 @@ namespace misra_gries{
 			}
 
 			return false;
-		}
-
-	private:
-		static bool insertItem_(Item &item, std::string_view itemName){
-			item.setItem(itemName);
-
-			return true;
 		}
 
 	private:

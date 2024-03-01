@@ -3,11 +3,11 @@ return array(
 	new Cmd(
 			"HHINCR",
 
-			"HHINCR key hh_count hh_value_size value count",
+			"HHINCR key hh_count hh_value_size value count [value count]...",
 
-			"Add (insert) <i>value</i>'s into the heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />" .
+			"Add (insert) <i>value</i>'s into the heavy hitter with size <i>hh_count</i> and fixed value size of <i>hh_value_size</i>.<br />" .
 			"Bigger values are 'better'<br />" .
-			"<i>hhcount</i> can be from 1 to 100.<br />" .
+			"<i>hh_count</i> can be from 1 to 200.<br />" .
 			"Supported sizes are:<br />".
 			"-  32 (gives you string size of  31)<br />".
 			"-  40 (gives you string size of  39) - IP6 compatible<br />".
@@ -15,12 +15,13 @@ return array(
 			"- 128 (gives you string size of 127)<br />".
 			"- 256 (gives you string size of 255) - Pascal string compatible :)<br />".
 			"Read HH information document.",
-			"int",
-			"always return 1",
+			"bool",
+			"0 if the items is not inside the HH<br />" .
+			"1 if the items is inside the HH",
 			"1.3.7.7",
 			"READ + WRITE",
 			false,
-			false,
+			true,
 
 			"hh"
 	),
@@ -28,19 +29,20 @@ return array(
 	new Cmd(
 			"HHDECR",
 
-			"HHDECR key hh_count hh_value_size value count",
+			"HHDECR key hh_count hh_value_size value count [value count]...",
 
-			"Add (insert) <i>value</i>'s into the heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />" .
+			"Add (insert) <i>value</i>'s into the heavy hitter with size <i>hh_count</i> and fixed value size of <i>hh_value_size</i>.<br />" .
 			"Smaller values are 'better'<br />" .
-			"<i>hhcount</i> can be from 1 to 100.<br />" .
+			"<i>hh_count</i> can be from 1 to 200.<br />" .
 			"Check <i>HHINCR</i> for supported sizes.<br />".
 			"Read HH information document.",
-			"int",
-			"always return 1",
+			"bool",
+			"0 if the items is not inside the HH<br />" .
+			"1 if the items is inside the HH",
 			"1.3.7.7",
 			"READ + WRITE",
 			false,
-			false,
+			true,
 
 			"hh"
 	),
@@ -50,8 +52,8 @@ return array(
 
 			"HHRESERVE key hh_count hh_value_size",
 
-			"Create new, empty heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />" .
-			"<i>hhcount</i> can be from 1 to 100. But for value of 1, you can use <i>DECRTO</i> command.<br />" .
+			"Create new, empty heavy hitter with size <i>hh_count</i> and fixed value size of <i>hh_value_size</i>.<br />" .
+			"<i>hh_count</i> can be from 1 to 200.<br />" .
 			"Check <i>HHINCR</i> for supported sizes.<br />".
 			"Read HH information document.",
 			"int",
@@ -59,7 +61,7 @@ return array(
 			"1.3.1",
 			"READ + WRITE",
 			false,
-			false,
+			true,
 
 			"hh"
 	),
@@ -69,8 +71,8 @@ return array(
 
 			"HHGET key hh_count hh_value_size",
 
-			"Get heavy hitter with size <i>hhcount</i> and fixed value size of <i>hh_value_size</i>.<br />" .
-			"<i>hhcount</i> can be from 1 to 100.<br />" .
+			"Get heavy hitter with size <i>hh_count</i> and fixed value size of <i>hh_value_size</i>.<br />" .
+			"<i>hh_count</i> can be from 1 to 200.<br />" .
 			"Check <i>HHINCR</i> for supported sizes.<br />".
 			"Note values are returned nonsorted. You will need to sort values yourself.<br />".
 			"Read HH information document.",
@@ -79,9 +81,9 @@ return array(
 			"1.3.1",
 			"READ",
 			false,
-			true,
+			false,
 
-			"bf"
+			"hh"
 	),
 
 );

@@ -23,6 +23,7 @@ Goals of the project are.
 -   Bloom Filters
 -   Count Min Sketch
 -   Heavy Hitters
+-   Misra Gries Heavy Hitters
 
 
 
@@ -549,8 +550,6 @@ Instead of using a heap, it is implemented as flat array. This was made, because
       (integer) 3
       127.0.0.1:6379> hhincr visits 25 40 192.168.0.15 3
       (integer) 1
-      127.0.0.1:6379> hhget visits
-      (error) ERR The command needs exactly 3 parameters
       127.0.0.1:6379> hhget visits 25 40
       1) "192.168.0.15"
       2) "3"
@@ -560,6 +559,54 @@ Instead of using a heap, it is implemented as flat array. This was made, because
 - Instead of <i>INCR</i> you can use count min sketch or some sensor reading.
 - Note how the result is **not** sorted.
 - If you need to only top heavy hitter without value, you can probably use <i>INCRTO</i> command.
+
+
+
+---
+### Misra Gries Heavy Hitters (MG)
+
+Misra Gries Heavy Hitters or Misra Gries Summary can be used to find most frequent elements in a stream. For example what are top 50 IP addresses that visited a website.
+
+Unlike normal Heavy Hitters (HH), they does not requre the count of the counted elements, however they does not give you correct count, because the count decay over time.
+However they can find abnormalities in the stream.
+
+They are implemented as flat array in a way similar to Heavy Hitters (HH).
+
+#### Configuration of a MG
+
+- **mg_count** - count of the Misra Gries heavy hitters items. For the example with the IP addresses, if we want to know the top 25 addresses, it has to be set to 25.
+- **mg_value_size** - size of fixed lenght string. See table. For the example with the IP addresses, 40 is best, which will give you size of 39 characters. IP6 is exactly 39 characters.
+
+#### HH Value Size
+
+| Config | Max size | Comment       |
+|   ---: |     ---: |  :---         |
+|     32 |       31 |               |
+|     40 |       39 | IP6           |
+|     64 |       63 |               |
+|    128 |      127 |               |
+|    256 |      255 | Pascal string |
+
+#### Example usage
+
+      127.0.0.1:6379> mgadd visits 25 40 192.168.0.1
+      (integer) 1
+      127.0.0.1:6379> mgadd visits 25 40 192.168.0.1
+      (integer) 1
+      127.0.0.1:6379> mgadd visits 25 40 192.168.0.15
+      (integer) 1
+      127.0.0.1:6379> mgadd visits 25 40 192.168.0.15
+      (integer) 1
+      127.0.0.1:6379> mgadd visits 25 40 192.168.0.15
+      (integer) 1
+      127.0.0.1:6379> mgget visits 25 40
+      1) "192.168.0.15"
+      2) "3"
+      3) "192.168.0.1"
+      4) "2"
+
+- Note because we add just 2 elements out of 25, the counts never decayed and counters are still correct.
+- Note how the result is **not** sorted.
 
 
 
