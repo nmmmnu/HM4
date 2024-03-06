@@ -97,7 +97,7 @@ return array(
 			"Read CMS information document.",
 			"int",
 			"estimated count",
-			"1.3.1",
+			"1.3.7.7",
 			"READ + WRITE",
 			false,
 			true,
