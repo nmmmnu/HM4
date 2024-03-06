@@ -18,25 +18,24 @@ namespace net::worker::commands::CMS{
 
 
 			template<typename T>
-			void incr(T &a, uint64_t increment){
-				constexpr auto MAX = std::numeric_limits<T>::max();
+			T incr(T &a, uint64_t increment){
+				constexpr auto MAX    = std::numeric_limits<T>::max();
+				constexpr auto MAX_BE = htobe(MAX);
 
 				auto const x = betoh<T>(a);
 
 				if (increment > MAX || x > MAX - increment){
 					// return max
-					// no need htobe
-					a = MAX;
+					a = MAX_BE;
 
-					return;
+					return MAX;
 				}else{
-					// cast is safe now.
-					a = htobe<T>(
-						x +
-						static_cast<T>(increment)
-					);
+					// cast is safe now
+					T const c = x + static_cast<T>(increment);
 
-					return;
+					a = htobe<T>(c);
+
+					return c;
 				}
 			}
 
@@ -49,13 +48,26 @@ namespace net::worker::commands::CMS{
 			}
 
 			template<typename T>
+			uint64_t cms_add_count(Matrix<T> cms, char *data, std::string_view item, uint64_t const n){
+				uint64_t count = std::numeric_limits<uint64_t>::max();
+
+				for(size_t i = 0; i < cms.getY(); ++i){
+					auto const x = incr( cms(data, murmur_hash64a(item, i) % cms.getX(), i), n);
+
+					count = std::min<uint64_t>(count, x);
+				}
+
+				return count;
+			}
+
+			template<typename T>
 			uint64_t cms_count(Matrix<T> cms, const char *data, std::string_view item){
 				uint64_t count = std::numeric_limits<uint64_t>::max();
 
 				for(size_t i = 0; i < cms.getY(); ++i){
-					auto const &c = cms(data, murmur_hash64a(item, i) % cms.getX(), i);
+					auto const x = cms(data, murmur_hash64a(item, i) % cms.getX(), i);
 
-					count = std::min<uint64_t>(count, betoh<T>(c));
+					count = std::min<uint64_t>(count, betoh<T>(x));
 				}
 
 				return count;
@@ -87,11 +99,11 @@ namespace net::worker::commands::CMS{
 	struct CMSADD : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
-		};
+		}
 
 		const std::string_view *end()   const final{
 			return std::end(cmd);
-		};
+		}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -180,9 +192,9 @@ namespace net::worker::commands::CMS{
 			}
 
 		private:
-			Matrix<T>		cms;
-			It			begin;
-			It			end;
+			Matrix<T>	cms;
+			It		begin;
+			It		end;
 		};
 
 	private:
@@ -190,6 +202,120 @@ namespace net::worker::commands::CMS{
 			"cmsadd",	"CMSADD",
 			"cmsincr",	"CMSINCR",
 			"cmsincrby",	"CMSINCRBY"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct CMSADDCOUNT : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		}
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace cms_impl_;
+
+			if (p.size() != 7)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const w = from_string<uint64_t>(p[2]);
+			auto const d = from_string<uint64_t>(p[3]);
+			auto const t = from_string<uint8_t>(p[4]);
+
+			const auto &item = p[5];
+
+			if (w == 0 || d == 0 || item.empty())
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto f = [&](auto x) {
+				using T = typename decltype(x)::type;
+
+				if constexpr(std::is_same_v<T, std::nullptr_t>){
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
+				}else if (auto const itemCount = from_string<T>(p[6]); itemCount == 0){
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+				}else{
+					return process_(key, item, itemCount, Matrix<T>(w, d), *db, result);
+				}
+			};
+
+			return type_dispatch(t, f);
+		}
+
+	private:
+		template<typename T>
+		void process_(std::string_view key, std::string_view const item, T const itemCount, Matrix<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			using namespace cms_impl_;
+
+			if (cms.bytes() > MAX_SIZE){
+				// emit an error
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
+
+			using MyCMSADD_Factory = CMSADDCOUNT_Factory<T>;
+
+			MyCMSADD_Factory factory{ key, pair, cms, item, itemCount };
+
+			insertHintVFactory(pair, list, factory);
+
+			return result.set(
+				factory.getScore()
+			);
+		}
+
+	private:
+		template<typename T>
+		struct CMSADDCOUNT_Factory : hm4::PairFactory::IFactoryAction<1,1, CMSADDCOUNT_Factory<T> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, CMSADDCOUNT_Factory<T> >;
+
+			constexpr CMSADDCOUNT_Factory(std::string_view const key, const Pair *pair, Matrix<T> cms, std::string_view const item, T const itemCount) :
+							Base::IFactoryAction	(key, cms.bytes(), pair),
+							cms			(cms		),
+							item			(item		),
+							itemCount		(itemCount	){}
+
+			void action(Pair *pair){
+				this->score = action_(pair);
+			}
+
+			constexpr uint64_t getScore() const{
+				return score;
+			}
+
+		private:
+			uint64_t action_(Pair *pair) const{
+				char *data = pair->getValC();
+
+				using namespace cms_impl_;
+
+				cms_add(cms, data, item, itemCount);
+
+				return cms_count(cms, data, item);
+			}
+
+		private:
+			Matrix<T>		cms;
+			std::string_view	item;
+			T			itemCount;
+			uint64_t		score = 0;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cmsaddcount",	"CMSADDCOUNT"
 		};
 	};
 
@@ -420,6 +546,7 @@ namespace net::worker::commands::CMS{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				CMSADD		,
+				CMSADDCOUNT	,
 				CMSRESERVE	,
 				CMSCOUNT	,
 				CMSMCOUNT
@@ -432,35 +559,4 @@ namespace net::worker::commands::CMS{
 } // namespace
 
 
-
-#if 0
-	constexpr static size_t calcW(size_t number_of_elements){
-		// "standard" calculation
-		//	w = ceil(exp(1) / epsilon)
-		//	d = ceil(log(1 / delta))
-		//
-		// redis calculation
-		//	w = ceil(2 / epsilon)
-		//	d = ceil(log10(delta) / log10(0.5))
-
-		// avoiding math
-		double const e_c = 2.71828 * 0.1;
-
-		return static_cast<size_t>(
-				e_c * static_cast<double>(number_of_elements)
-		);
-	}
-
-	constexpr static size_t calcD(double){
-		// 5 always good, no, really :)
-		return 5;
-	}
-
-	static_assert(
-		std::is_same_v<T,  uint8_t> ||
-		std::is_same_v<T, uint16_t> ||
-		std::is_same_v<T, uint32_t> ||
-		std::is_same_v<T, uint64_t>, "Please check counter type"
-	);
-#endif
 

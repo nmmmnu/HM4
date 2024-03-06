@@ -293,3 +293,5 @@ Changelog
 -	refactor HHINCR, HHDECR, PFADD, PFADDCOUNT
 -	new module Misra-Gries: MRADD, MRADDGET, MRRESERVE, MRGET
 -	increase limits on HH
+-	new command CMSADDCOUNT
+

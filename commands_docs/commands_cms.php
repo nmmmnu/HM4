@@ -68,4 +68,40 @@ return array(
 
 			"cms"
 	),
+
+	new Cmd(
+			"CMSADDCOUNT",
+
+			"CMSADDCOUNT key W_width D_depth integer_size value inc",
+
+			"Add (insert) <i>value</i> into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />" .
+			"<i>inc</i> specify how many times you want to add it / how much to increase it.<br />" .
+			"Read CMS information document.",
+			"int",
+			"estimated count",
+			"1.3.1",
+			"READ + WRITE",
+			false,
+			true,
+
+			"cms"
+	),
+
+	new Cmd(
+			"CMSADDCOUNT",
+
+			"CMSADDCOUNT key W_width D_depth integer_size value inc",
+
+			"Add (insert) <i>value</i> into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br />" .
+			"<i>inc</i> specify how many times you want to add it / how much to increase it.<br />" .
+			"Read CMS information document.",
+			"int",
+			"estimated count",
+			"1.3.1",
+			"READ + WRITE",
+			false,
+			true,
+
+			"cms"
+	),
 );

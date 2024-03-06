@@ -278,6 +278,8 @@
 				<li><a href="#CMSRESERVE">CMSRESERVE</a></li>
 				<li><a href="#CMSCOUNT">CMSCOUNT</a></li>
 				<li><a href="#CMSMCOUNT">CMSMCOUNT</a></li>
+				<li><a href="#CMSADDCOUNT">CMSADDCOUNT</a></li>
+				<li><a href="#CMSADDCOUNT">CMSADDCOUNT</a></li>
 				</div>
 			<div>
 			<b>mortoncurve.h</b><br />
@@ -2978,6 +2980,52 @@
 			array
 			<h3>Return value:</h3>
 			array of estimated counts
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CMSADDCOUNT">
+
+			<h2>CMSADDCOUNT key W_width D_depth integer_size value inc</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSADDCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i> into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CMS information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CMSADDCOUNT">
+
+			<h2>CMSADDCOUNT key W_width D_depth integer_size value inc</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSADDCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i> into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CMS information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
 			
 			
 			<p class="top"><a href="#top">top</a></p>
