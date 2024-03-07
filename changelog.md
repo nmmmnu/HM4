@@ -294,4 +294,5 @@ Changelog
 -	new module Misra-Gries: MRADD, MRADDGET, MRRESERVE, MRGET
 -	increase limits on HH
 -	new command CMSADDCOUNT
+-	bugfix on mutable_x when table is flushed during commands like DELX.
 

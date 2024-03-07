@@ -21,6 +21,8 @@ namespace net::worker::commands::MutableX{
 
 			template<class Predicate, class StopPredicate, class List>
 			std::string_view scanKeysAndProcessInPlace_(Predicate p, StopPredicate stop, List &list, std::string_view key, ContainerX &container){
+				container.clear();
+
 				uint32_t iterations = 0;
 
 				for(auto it = list.find(key, std::false_type{}); it != std::end(list); ++it){

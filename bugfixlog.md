@@ -68,4 +68,6 @@ Changelog
 ### 1.3.7.7
 -	fix use after remove in BF, CMS, HLL, HH and possibly other commands that use IFactoryAction with same_size
 
+### 1.3.7.8
+-	bugfix on mutable_x when table is flushed during commands like DELX.
 
