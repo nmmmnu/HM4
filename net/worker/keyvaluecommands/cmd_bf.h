@@ -7,42 +7,40 @@
 
 namespace net::worker::commands::BF{
 	namespace bf_impl_{
-		namespace{
 
-			using namespace shared::bit;
+		using namespace shared::bit;
 
-			using Pair = hm4::Pair;
+		using Pair = hm4::Pair;
 
-			constexpr uint64_t	BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
-			constexpr uint64_t	BIT_MIN		= 32;
-			constexpr uint8_t	HASH_MAX	= 16;
-
+		constexpr uint64_t	BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
+		constexpr uint64_t	BIT_MIN		= 32;
+		constexpr uint8_t	HASH_MAX	= 16;
 
 
-			void bf_add(uint64_t max_bits, size_t max_hash, char *data, std::string_view val){
-				for(size_t seed = 0; seed < max_hash; ++seed){
-					auto n = murmur_hash64a(val, seed) % max_bits;
 
-				//	printf("%zu -> %zu\n", seed, n);
+		void bf_add(uint64_t max_bits, size_t max_hash, char *data, std::string_view val){
+			for(size_t seed = 0; seed < max_hash; ++seed){
+				auto n = murmur_hash64a(val, seed) % max_bits;
 
-					BitOps{ n }.set(data, 1);
-				}
+			//	printf("%zu -> %zu\n", seed, n);
+
+				BitOps{ n }.set(data, 1);
+			}
+		}
+
+		bool bf_exists(uint64_t max_bits, size_t max_hash, const char *data, std::string_view val){
+			for(size_t seed = 0; seed < max_hash; ++seed){
+				auto n = murmur_hash64a(val, seed) % max_bits;
+
+			//	printf("%zu -> %zu\n", seed, n);
+
+				if (BitOps{ n }.get(data) == false)
+					return false;
 			}
 
-			bool bf_exists(uint64_t max_bits, size_t max_hash, const char *data, std::string_view val){
-				for(size_t seed = 0; seed < max_hash; ++seed){
-					auto n = murmur_hash64a(val, seed) % max_bits;
+			return true;
+		}
 
-				//	printf("%zu -> %zu\n", seed, n);
-
-					if (BitOps{ n }.get(data) == false)
-						return false;
-				}
-
-				return true;
-			}
-
-		} // namespace
 	} // namespace bf_impl_
 
 
@@ -82,10 +80,9 @@ namespace net::worker::commands::BF{
 
 			using MyBFADD_Factory = BFADD_Factory<ParamContainer::iterator>;
 
-			if (pair && hm4::canInsertHintValSize(*db, pair, max_size))
-				hm4::proceedInsertHintV<MyBFADD_Factory>(*db, pair, key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p));
-			else
-				hm4::insertV<MyBFADD_Factory>(*db, key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p));
+			MyBFADD_Factory factory{ key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p) };
+
+			insertHintVFactory(pair, *db, factory);
 
 			return result.set();
 		}

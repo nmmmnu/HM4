@@ -25,7 +25,8 @@
 #include "keyvaluecommands/cmd_bitset.h"		// SETBIT, GETBIT, BITCOUNT, BITMAX
 #include "keyvaluecommands/cmd_hll.h"			// PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS, PFERROR
 #include "keyvaluecommands/cmd_bf.h"			// BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
-#include "keyvaluecommands/cmd_cms.h"			// CMSADD, CMSRESERVE, CMSCOUNT, CMSMCOUNT
+#include "keyvaluecommands/cmd_cbf.h"			// CBFADD, CBFADDCOUNT, CBFRESERVE, CBFCOUNT, CBFMCOUNT
+#include "keyvaluecommands/cmd_cms.h"			// CMSADD, CMSADDCOUNT, CMSRESERVE, CMSCOUNT, CMSMCOUNT
 #include "keyvaluecommands/cmd_hh.h"			// HHINCR, HHDECR, HHRESERVE, HHGET
 #include "keyvaluecommands/cmd_mg.h"			// MGADD, MGRESERVE, MGGET
 #include "keyvaluecommands/cmd_geo.h"			// GEOADD, GEOREM, GEOGET, GEOMGET, GEOENCODE, GEODECODE
@@ -97,6 +98,7 @@ namespace net::worker{
 				BITSET		::RegisterModule,
 				HLL		::RegisterModule,
 				BF		::RegisterModule,
+				CBF		::RegisterModule,
 				CMS		::RegisterModule,
 				HH		::RegisterModule,
 				MG		::RegisterModule,

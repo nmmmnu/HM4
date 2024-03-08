@@ -2,14 +2,13 @@
 #include "murmur_hash_64a.h"
 #include "pair_vfactory.h"
 #include "shared_incr.h"
-#include "matrix.h"
 
 #include <algorithm>
 #include <limits>
 #include <type_traits>
 
-namespace net::worker::commands::CMS{
-	namespace cms_impl_{
+namespace net::worker::commands::CBF{
+	namespace cbf_impl_{
 
 		using Pair = hm4::Pair;
 
@@ -18,26 +17,30 @@ namespace net::worker::commands::CMS{
 
 
 		template<typename T>
-		struct CMS{
-			constexpr CMS(uint64_t w, uint64_t d) : m(w, d){}
+		struct CBF{
+			constexpr CBF(uint64_t width, size_t countHF) : width(width), countHF(countHF){}
 
 			constexpr auto bytes() const{
-				return m.bytes();
+				return width * sizeof(T);
 			}
 
 			void add(char *data, std::string_view item, uint64_t const n) const{
-				for(size_t i = 0; i < m.getY(); ++i){
+				T *m = reinterpret_cast<T *>(data);
+
+				for(size_t i = 0; i < countHF; ++i){
 					using namespace shared::incr;
-					incr( m(data, murmur_hash64a(item, i) % m.getX(), i), n);
+					incr( m[murmur_hash64a(item, i) % width], n);
 				}
 			}
 
 			uint64_t add_count(char *data, std::string_view item, uint64_t const n) const{
+				T *m = reinterpret_cast<T *>(data);
+
 				uint64_t count = std::numeric_limits<uint64_t>::max();
 
-				for(size_t i = 0; i < m.getY(); ++i){
+				for(size_t i = 0; i < countHF; ++i){
 					using namespace shared::incr;
-					auto const x = incr( m(data, murmur_hash64a(item, i) % m.getX(), i), n);
+					auto const x = incr( m[murmur_hash64a(item, i) % width], n);
 
 					count = std::min<uint64_t>(count, x);
 				}
@@ -46,10 +49,12 @@ namespace net::worker::commands::CMS{
 			}
 
 			uint64_t count(const char *data, std::string_view item) const{
+				const T *m = reinterpret_cast<const T *>(data);
+
 				uint64_t count = std::numeric_limits<uint64_t>::max();
 
-				for(size_t i = 0; i < m.getY(); ++i){
-					auto const x = m(data, murmur_hash64a(item, i) % m.getX(), i);
+				for(size_t i = 0; i < countHF; ++i){
+					auto const x = m[murmur_hash64a(item, i) % width];
 
 					count = std::min<uint64_t>(count, betoh<T>(x));
 				}
@@ -58,7 +63,8 @@ namespace net::worker::commands::CMS{
 			}
 
 		private:
-			Matrix<T> m;
+			uint64_t	width;
+			size_t		countHF;
 		};
 
 
@@ -80,12 +86,12 @@ namespace net::worker::commands::CMS{
 			}
 		}
 
-	} // namespace cms_impl_
+	} // namespace cbf_impl_
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSADD : BaseRW<Protocol,DBAdapter>{
+	struct CBFADD : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -95,7 +101,7 @@ namespace net::worker::commands::CMS{
 		}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace cms_impl_;
+			using namespace cbf_impl_;
 
 			auto const varg = 5;
 
@@ -108,7 +114,7 @@ namespace net::worker::commands::CMS{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const w = from_string<uint64_t	>(p[2]);
-			auto const d = from_string<uint64_t	>(p[3]);
+			auto const d = from_string<size_t	>(p[3]);
 			auto const t = from_string<uint8_t	>(p[4]);
 
 			if (w == 0 || d == 0)
@@ -120,7 +126,7 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, p, CMS<T>{ w, d }, *db, result);
+					return process_(key, p, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
@@ -129,10 +135,10 @@ namespace net::worker::commands::CMS{
 
 	private:
 		template<typename T>
-		void process_(std::string_view key, ParamContainer const &p, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
-			using namespace cms_impl_;
+		void process_(std::string_view key, ParamContainer const &p, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			using namespace cbf_impl_;
 
-			if (cms.bytes() > MAX_SIZE){
+			if (cbf.bytes() > MAX_SIZE){
 				// emit an error
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -143,11 +149,11 @@ namespace net::worker::commands::CMS{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
-			using MyCMSADD_Factory = CMSADD_Factory<T, ParamContainer::iterator>;
+			using MyCBFADD_Factory = CBFADD_Factory<T, ParamContainer::iterator>;
 
-			MyCMSADD_Factory factory{ key, pair, cms, std::begin(p) + varg, std::end(p) };
+			MyCBFADD_Factory factory{ key, pair, cbf, std::begin(p) + varg, std::end(p) };
 
 			insertHintVFactory(pair, list, factory);
 
@@ -156,15 +162,15 @@ namespace net::worker::commands::CMS{
 
 	private:
 		template<typename T, typename It>
-		struct CMSADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T, It> >{
+		struct CBFADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T, It> >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >;
 
-			using CMST = cms_impl_::CMS<T>;
+			using CBFT = cbf_impl_::CBF<T>;
 
-			constexpr CMSADD_Factory(std::string_view const key, const Pair *pair, CMST cms, It begin, It end) :
-							Base::IFactoryAction	(key, cms.bytes(), pair),
-							cms			(cms	),
+			constexpr CBFADD_Factory(std::string_view const key, const Pair *pair, CBFT cbf, It begin, It end) :
+							Base::IFactoryAction	(key, cbf.bytes(), pair),
+							cbf			(cbf	),
 							begin			(begin	),
 							end			(end	){}
 
@@ -175,30 +181,26 @@ namespace net::worker::commands::CMS{
 					auto const &val = *itk;
 					auto const n    = std::max<uint64_t>( from_string<uint64_t>( *std::next(itk) ), 1);
 
-					using namespace cms_impl_;
-
-					cms.add(data, val, n);
+					cbf.add(data, val, n);
 				}
 			}
 
 		private:
-			CMST	cms;
+			CBFT	cbf;
 			It	begin;
 			It	end;
 		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"cmsadd",	"CMSADD",
-			"cmsincr",	"CMSINCR",
-			"cmsincrby",	"CMSINCRBY"
+			"cbfadd",	"CBFADD"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSADDCOUNT : BaseRW<Protocol,DBAdapter>{
+	struct CBFADDCOUNT : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -208,10 +210,10 @@ namespace net::worker::commands::CMS{
 		}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace cms_impl_;
+			using namespace cbf_impl_;
 
 			if (p.size() != 7)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
 
 			const auto &key = p[1];
 
@@ -219,12 +221,12 @@ namespace net::worker::commands::CMS{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const w = from_string<uint64_t	>(p[2]);
-			auto const d = from_string<uint64_t	>(p[3]);
+			auto const d = from_string<size_t	>(p[3]);
 			auto const t = from_string<uint8_t	>(p[4]);
 
 			const auto &item = p[5];
 
-			if (w == 0 || d == 0 || item.empty())
+			if (w == 0 || d == 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto f = [&](auto x) {
@@ -235,7 +237,7 @@ namespace net::worker::commands::CMS{
 				}else if (auto const itemCount = from_string<T>(p[6]); itemCount == 0){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 				}else{
-					return process_(key, item, itemCount, CMS<T>{ w, d }, *db, result);
+					return process_(key, item, itemCount, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
@@ -244,19 +246,19 @@ namespace net::worker::commands::CMS{
 
 	private:
 		template<typename T>
-		void process_(std::string_view key, std::string_view const item, T const itemCount, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
-			using namespace cms_impl_;
+		void process_(std::string_view key, std::string_view const item, T const itemCount, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			using namespace cbf_impl_;
 
-			if (cms.bytes() > MAX_SIZE){
+			if (cbf.bytes() > MAX_SIZE){
 				// emit an error
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
 
-			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
-			using MyCMSADD_Factory = CMSADDCOUNT_Factory<T>;
+			using MyCBFADDCOUNT_Factory = CBFADDCOUNT_Factory<T, ParamContainer::iterator>;
 
-			MyCMSADD_Factory factory{ key, pair, cms, item, itemCount };
+			MyCBFADDCOUNT_Factory factory{ key, pair, cbf, item, itemCount };
 
 			insertHintVFactory(pair, list, factory);
 
@@ -266,16 +268,16 @@ namespace net::worker::commands::CMS{
 		}
 
 	private:
-		template<typename T>
-		struct CMSADDCOUNT_Factory : hm4::PairFactory::IFactoryAction<1,1, CMSADDCOUNT_Factory<T> >{
+		template<typename T, typename It>
+		struct CBFADDCOUNT_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1, CMSADDCOUNT_Factory<T> >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >;
 
-			using CMST = cms_impl_::CMS<T>;
+			using CBFT = cbf_impl_::CBF<T>;
 
-			constexpr CMSADDCOUNT_Factory(std::string_view const key, const Pair *pair, CMST cms, std::string_view const item, T const itemCount) :
-							Base::IFactoryAction	(key, cms.bytes(), pair),
-							cms			(cms		),
+			constexpr CBFADDCOUNT_Factory(std::string_view const key, const Pair *pair, CBFT cbf, std::string_view const item, T const itemCount) :
+							Base::IFactoryAction	(key, cbf.bytes(), pair),
+							cbf			(cbf		),
 							item			(item		),
 							itemCount		(itemCount	){}
 
@@ -291,13 +293,11 @@ namespace net::worker::commands::CMS{
 			uint64_t action_(Pair *pair) const{
 				char *data = pair->getValC();
 
-				using namespace cms_impl_;
-
-				return cms.add_count(data, item, itemCount);
+				return cbf.add_count(data, item, itemCount);
 			}
 
 		private:
-			CMST			cms;
+			CBFT			cbf;
 			std::string_view	item;
 			T			itemCount;
 			uint64_t		score = 0;
@@ -305,14 +305,15 @@ namespace net::worker::commands::CMS{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"cmsaddcount",	"CMSADDCOUNT"
+			"cbfaddcount",	"CBFADDCOUNT"
 		};
 	};
 
 
 
+
 	template<class Protocol, class DBAdapter>
-	struct CMSRESERVE : BaseRW<Protocol,DBAdapter>{
+	struct CBFRESERVE : BaseRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -322,7 +323,7 @@ namespace net::worker::commands::CMS{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace cms_impl_;
+			using namespace cbf_impl_;
 
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
@@ -332,9 +333,9 @@ namespace net::worker::commands::CMS{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);
-			auto const d = std::max<uint64_t>(from_string<uint64_t>(p[3]), 1);
-			auto const t = from_string<uint8_t>(p[4]);
+			auto const w = from_string<uint64_t	>(p[2]);
+			auto const d = from_string<size_t	>(p[3]);
+			auto const t = from_string<uint8_t	>(p[4]);
 
 			if (w == 0 || d == 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -345,7 +346,7 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, CMS<T>{ w, d }, *db, result);
+					return process_(key, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
@@ -354,29 +355,29 @@ namespace net::worker::commands::CMS{
 
 	private:
 		template<typename T>
-		void process_(std::string_view key, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
-			using namespace cms_impl_;
+		void process_(std::string_view key, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			using namespace cbf_impl_;
 
-			if (cms.bytes() > MAX_SIZE){
+			if (cbf.bytes() > MAX_SIZE){
 				// emit an error
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
 
-			hm4::insertV<hm4::PairFactory::Reserve>(list, key, cms.bytes());
+			hm4::insertV<hm4::PairFactory::Reserve>(list, key, cbf.bytes());
 
 			return result.set_1();
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"cmsreserve",	"CMSRESERVE"
+			"cbfreserve",	"CBFRESERVE"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct CBFCOUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -386,7 +387,7 @@ namespace net::worker::commands::CMS{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace cms_impl_;
+			using namespace cbf_impl_;
 
 			if (p.size() != 6)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
@@ -396,9 +397,9 @@ namespace net::worker::commands::CMS{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const w = std::max<uint64_t>(from_string<uint64_t>(p[2]), 1);
-			auto const d = std::max<uint64_t>(from_string<uint64_t>(p[3]), 1);
-			auto const t = from_string<uint8_t>(p[4]);
+			auto const w = std::max<uint64_t	>(from_string<uint64_t>(p[2]), 1);
+			auto const d = std::max<uint64_t	>(from_string<uint64_t>(p[3]), 1);
+			auto const t = from_string<uint8_t	>(p[4]);
 
 			if (w == 0 || d == 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -411,7 +412,7 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, val, CMS<T>{ w, d }, *db, result);
+					return process_<T>(key, val, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
@@ -420,29 +421,29 @@ namespace net::worker::commands::CMS{
 
 	private:
 		template<typename T>
-		void process_(std::string_view key, std::string_view item, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
-			using namespace cms_impl_;
+		void process_(std::string_view key, std::string_view item, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			using namespace cbf_impl_;
 
-			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
 			if (! pair)
 				return result.set_0();
 
-			auto const count = cms.count(pair->getValC(), item);
+			auto const count = cbf.count(pair->getValC(), item);
 
 			return result.set( count );
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"cmscount",	"CMSCOUNT"
+			"cbfcount",	"CBFCOUNT"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSMCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct CBFMCOUNT : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -452,7 +453,7 @@ namespace net::worker::commands::CMS{
 		};
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace cms_impl_;
+			using namespace cbf_impl_;
 
 			if (p.size() < 6)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
@@ -475,7 +476,7 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, p, CMS<T>{ w, d }, *db, result, blob);
+					return process_<T>(key, p, CBF<T>{ w, d }, *db, result, blob);
 				}
 			};
 
@@ -484,15 +485,15 @@ namespace net::worker::commands::CMS{
 
 	private:
 		template<typename T>
-		void process_(std::string_view key, ParamContainer const &p, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob) const{
-			using namespace cms_impl_;
+		void process_(std::string_view key, ParamContainer const &p, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob) const{
+			using namespace cbf_impl_;
 
 			auto const varg = 5;
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (auto const &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
+			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
 			auto &container  = blob.container();
 
@@ -509,7 +510,7 @@ namespace net::worker::commands::CMS{
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const &item = *itk;
 
-					auto const n = cms.count(pair->getValC(), item);
+					auto const n = cbf.count(pair->getValC(), item);
 
 					bcontainer.push_back();
 
@@ -522,8 +523,7 @@ namespace net::worker::commands::CMS{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"cmsmcount",	"CMSMCOUNT",
-			"cmsquery",	"CMSQUERY",
+			"cbfmcount",	"CBFMCOUNT"
 		};
 	};
 
@@ -531,15 +531,15 @@ namespace net::worker::commands::CMS{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "cms";
+		constexpr inline static std::string_view name	= "cbf";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				CMSADD		,
-				CMSADDCOUNT	,
-				CMSRESERVE	,
-				CMSCOUNT	,
-				CMSMCOUNT
+				CBFADD		,
+				CBFADDCOUNT	,
+				CBFRESERVE	,
+				CBFCOUNT	,
+				CBFMCOUNT
 			>(pack);
 		}
 	};
