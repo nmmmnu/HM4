@@ -4,7 +4,6 @@
 #include "shared_incr.h"
 
 #include <algorithm>
-#include <limits>
 #include <type_traits>
 
 namespace net::worker::commands::CBF{
@@ -24,23 +23,25 @@ namespace net::worker::commands::CBF{
 				return width * sizeof(T);
 			}
 
+			template<bool Sign>
 			void add(char *data, std::string_view item, uint64_t const n) const{
-				T *m = reinterpret_cast<T *>(data);
+				auto *m = cast__(data);
 
 				for(size_t i = 0; i < countHF; ++i){
 					using namespace shared::incr;
-					incr( m[murmur_hash64a(item, i) % width], n);
+					incr<Sign>( m[murmur_hash64a(item, i) % width], n);
 				}
 			}
 
+			template<bool Sign>
 			uint64_t add_count(char *data, std::string_view item, uint64_t const n) const{
-				T *m = reinterpret_cast<T *>(data);
+				auto *m = cast__(data);
 
 				uint64_t count = std::numeric_limits<uint64_t>::max();
 
 				for(size_t i = 0; i < countHF; ++i){
 					using namespace shared::incr;
-					auto const x = incr( m[murmur_hash64a(item, i) % width], n);
+					auto const x = incr<Sign>( m[murmur_hash64a(item, i) % width], n);
 
 					count = std::min<uint64_t>(count, x);
 				}
@@ -49,7 +50,7 @@ namespace net::worker::commands::CBF{
 			}
 
 			uint64_t count(const char *data, std::string_view item) const{
-				const T *m = reinterpret_cast<const T *>(data);
+				const auto *m = cast__(data);
 
 				uint64_t count = std::numeric_limits<uint64_t>::max();
 
@@ -60,6 +61,15 @@ namespace net::worker::commands::CBF{
 				}
 
 				return count;
+			}
+
+		private:
+			constexpr static const auto *cast__(const char *data){
+				return reinterpret_cast<const T *>(data);
+			}
+
+			constexpr static auto *cast__(char *data){
+				return reinterpret_cast<T *>(data);
 			}
 
 		private:
@@ -86,6 +96,197 @@ namespace net::worker::commands::CBF{
 			}
 		}
 
+
+
+		template<class Protocol, class DBAdapter, bool Sign>
+		struct CBFMutate{
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+				auto const varg = 5;
+
+				if (p.size() < 7 || (p.size() - varg) % 2 != 0)
+					return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
+
+				const auto &key = p[1];
+
+				if (!hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+				auto const w = from_string<uint64_t	>(p[2]);
+				auto const d = from_string<size_t	>(p[3]);
+				auto const t = from_string<uint8_t	>(p[4]);
+
+				if (w == 0 || d == 0)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+				auto f = [&](auto x) {
+					using T = typename decltype(x)::type;
+
+					if constexpr(std::is_same_v<T, std::nullptr_t>){
+						return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
+					}else{
+						return process_(key, p, CBF<T>{ w, d }, *db, result);
+					}
+				};
+
+				return type_dispatch(t, f);
+			}
+
+		private:
+			template<typename T>
+			void process_(std::string_view key, ParamContainer const &p, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+				using namespace cbf_impl_;
+
+				if (cbf.bytes() > MAX_SIZE){
+					// emit an error
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+				}
+
+				auto const varg = 5;
+
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+					if (const auto &val = *itk; val.empty())
+						return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
+				const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
+
+				using MyCBFADD_Factory = CBFADD_Factory<T, ParamContainer::iterator>;
+
+				MyCBFADD_Factory factory{ key, pair, cbf, std::begin(p) + varg, std::end(p) };
+
+				insertHintVFactory(pair, list, factory);
+
+				return result.set();
+			}
+
+		private:
+			template<typename T, typename It>
+			struct CBFADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >{
+				using Pair = hm4::Pair;
+				using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >;
+
+				using CBFT = cbf_impl_::CBF<T>;
+
+				constexpr CBFADD_Factory(std::string_view const key, const Pair *pair, CBFT cbf, It begin, It end) :
+								Base::IFactoryAction	(key, cbf.bytes(), pair),
+								cbf			(cbf	),
+								begin			(begin	),
+								end			(end	){}
+
+				void action(Pair *pair) const{
+					char *data = pair->getValC();
+
+					for(auto itk = begin; itk != end; itk += 2){
+						auto const &val = *itk;
+						auto const n    = std::max<uint64_t>( from_string<uint64_t>( *std::next(itk) ), 1);
+
+						cbf. template add<Sign>(data, val, n);
+					}
+				}
+
+			private:
+				CBFT	cbf;
+				It	begin;
+				It	end;
+			};
+		};
+
+
+
+		template<class Protocol, class DBAdapter, bool Sign>
+		struct CBFMutateCount{
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+				if (p.size() != 7)
+					return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
+
+				const auto &key = p[1];
+
+				if (!hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+				auto const w = from_string<uint64_t	>(p[2]);
+				auto const d = from_string<size_t	>(p[3]);
+				auto const t = from_string<uint8_t	>(p[4]);
+
+				const auto &item = p[5];
+
+				if (w == 0 || d == 0)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+				auto f = [&](auto x) {
+					using T = typename decltype(x)::type;
+
+					if constexpr(std::is_same_v<T, std::nullptr_t>){
+						return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
+					}else if (auto const itemCount = from_string<T>(p[6]); itemCount == 0){
+						return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+					}else{
+						return process_(key, item, itemCount, CBF<T>{ w, d }, *db, result);
+					}
+				};
+
+				return type_dispatch(t, f);
+			}
+
+		private:
+			template<typename T>
+			void process_(std::string_view key, std::string_view const item, T const itemCount, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+				using namespace cbf_impl_;
+
+				if (cbf.bytes() > MAX_SIZE){
+					// emit an error
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+				}
+
+				const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
+
+				using MyCBFADDCOUNT_Factory = CBFADDCOUNT_Factory<T, ParamContainer::iterator>;
+
+				MyCBFADDCOUNT_Factory factory{ key, pair, cbf, item, itemCount };
+
+				insertHintVFactory(pair, list, factory);
+
+				return result.set(
+					factory.getScore()
+				);
+			}
+
+		private:
+			template<typename T, typename It>
+			struct CBFADDCOUNT_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >{
+				using Pair = hm4::Pair;
+				using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >;
+
+				using CBFT = cbf_impl_::CBF<T>;
+
+				constexpr CBFADDCOUNT_Factory(std::string_view const key, const Pair *pair, CBFT cbf, std::string_view const item, T const itemCount) :
+								Base::IFactoryAction	(key, cbf.bytes(), pair),
+								cbf			(cbf		),
+								item			(item		),
+								itemCount		(itemCount	){}
+
+				void action(Pair *pair){
+					this->score = action_(pair);
+				}
+
+				constexpr uint64_t getScore() const{
+					return score;
+				}
+
+			private:
+				uint64_t action_(Pair *pair) const{
+					char *data = pair->getValC();
+
+					return cbf. template add_count<Sign>(data, item, itemCount);
+				}
+
+			private:
+				CBFT			cbf;
+				std::string_view	item;
+				T			itemCount;
+				uint64_t		score = 0;
+			};
+		};
+
 	} // namespace cbf_impl_
 
 
@@ -103,97 +304,44 @@ namespace net::worker::commands::CBF{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
 
-			auto const varg = 5;
+			CBFMutate<Protocol, DBAdapter, true> mut;
 
-			if (p.size() < 7 || (p.size() - varg) % 2 != 0)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
-
-			const auto &key = p[1];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const w = from_string<uint64_t	>(p[2]);
-			auto const d = from_string<size_t	>(p[3]);
-			auto const t = from_string<uint8_t	>(p[4]);
-
-			if (w == 0 || d == 0)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			auto f = [&](auto x) {
-				using T = typename decltype(x)::type;
-
-				if constexpr(std::is_same_v<T, std::nullptr_t>){
-					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
-				}else{
-					return process_(key, p, CBF<T>{ w, d }, *db, result);
-				}
-			};
-
-			return type_dispatch(t, f);
+			return mut(p, db, result);
 		}
-
-	private:
-		template<typename T>
-		void process_(std::string_view key, ParamContainer const &p, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
-			using namespace cbf_impl_;
-
-			if (cbf.bytes() > MAX_SIZE){
-				// emit an error
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-			}
-
-			auto const varg = 5;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-				if (const auto &val = *itk; val.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_VAL);
-
-			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
-
-			using MyCBFADD_Factory = CBFADD_Factory<T, ParamContainer::iterator>;
-
-			MyCBFADD_Factory factory{ key, pair, cbf, std::begin(p) + varg, std::end(p) };
-
-			insertHintVFactory(pair, list, factory);
-
-			return result.set();
-		}
-
-	private:
-		template<typename T, typename It>
-		struct CBFADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >;
-
-			using CBFT = cbf_impl_::CBF<T>;
-
-			constexpr CBFADD_Factory(std::string_view const key, const Pair *pair, CBFT cbf, It begin, It end) :
-							Base::IFactoryAction	(key, cbf.bytes(), pair),
-							cbf			(cbf	),
-							begin			(begin	),
-							end			(end	){}
-
-			void action(Pair *pair) const{
-				char *data = pair->getValC();
-
-				for(auto itk = begin; itk != end; itk += 2){
-					auto const &val = *itk;
-					auto const n    = std::max<uint64_t>( from_string<uint64_t>( *std::next(itk) ), 1);
-
-					cbf.add(data, val, n);
-				}
-			}
-
-		private:
-			CBFT	cbf;
-			It	begin;
-			It	end;
-		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"cbfadd",	"CBFADD"
+			"cbfadd",	"CBFADD"	,
+			"cbfincr",	"CBFINCR"	,
+			"cbfincrby",	"CBFINCRBY"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct CBFREM : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		}
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace cbf_impl_;
+
+			CBFMutate<Protocol, DBAdapter, false> mut;
+
+			return mut(p, db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cbfrem",	"CBFREM"	,
+			"cbfdecr",	"CBFDECR"	,
+			"cbfdecrby",	"CBFDECRBY"
 		};
 	};
 
@@ -212,96 +360,10 @@ namespace net::worker::commands::CBF{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
 
-			if (p.size() != 7)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
+			CBFMutateCount<Protocol, DBAdapter, true> mut;
 
-			const auto &key = p[1];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const w = from_string<uint64_t	>(p[2]);
-			auto const d = from_string<size_t	>(p[3]);
-			auto const t = from_string<uint8_t	>(p[4]);
-
-			const auto &item = p[5];
-
-			if (w == 0 || d == 0)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			auto f = [&](auto x) {
-				using T = typename decltype(x)::type;
-
-				if constexpr(std::is_same_v<T, std::nullptr_t>){
-					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
-				}else if (auto const itemCount = from_string<T>(p[6]); itemCount == 0){
-					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-				}else{
-					return process_(key, item, itemCount, CBF<T>{ w, d }, *db, result);
-				}
-			};
-
-			return type_dispatch(t, f);
+			return mut(p, db, result);
 		}
-
-	private:
-		template<typename T>
-		void process_(std::string_view key, std::string_view const item, T const itemCount, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
-			using namespace cbf_impl_;
-
-			if (cbf.bytes() > MAX_SIZE){
-				// emit an error
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-			}
-
-			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
-
-			using MyCBFADDCOUNT_Factory = CBFADDCOUNT_Factory<T, ParamContainer::iterator>;
-
-			MyCBFADDCOUNT_Factory factory{ key, pair, cbf, item, itemCount };
-
-			insertHintVFactory(pair, list, factory);
-
-			return result.set(
-				factory.getScore()
-			);
-		}
-
-	private:
-		template<typename T, typename It>
-		struct CBFADDCOUNT_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >;
-
-			using CBFT = cbf_impl_::CBF<T>;
-
-			constexpr CBFADDCOUNT_Factory(std::string_view const key, const Pair *pair, CBFT cbf, std::string_view const item, T const itemCount) :
-							Base::IFactoryAction	(key, cbf.bytes(), pair),
-							cbf			(cbf		),
-							item			(item		),
-							itemCount		(itemCount	){}
-
-			void action(Pair *pair){
-				this->score = action_(pair);
-			}
-
-			constexpr uint64_t getScore() const{
-				return score;
-			}
-
-		private:
-			uint64_t action_(Pair *pair) const{
-				char *data = pair->getValC();
-
-				return cbf.add_count(data, item, itemCount);
-			}
-
-		private:
-			CBFT			cbf;
-			std::string_view	item;
-			T			itemCount;
-			uint64_t		score = 0;
-		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -309,6 +371,31 @@ namespace net::worker::commands::CBF{
 		};
 	};
 
+
+
+	template<class Protocol, class DBAdapter>
+	struct CBFREMCOUNT : BaseRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		}
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace cbf_impl_;
+
+			CBFMutateCount<Protocol, DBAdapter, false> mut;
+
+			return mut(p, db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"cbfremcount",	"CBFREMCOUNT"
+		};
+	};
 
 
 
@@ -536,7 +623,9 @@ namespace net::worker::commands::CBF{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				CBFADD		,
+				CBFREM		,
 				CBFADDCOUNT	,
+				CBFREMCOUNT	,
 				CBFRESERVE	,
 				CBFCOUNT	,
 				CBFMCOUNT

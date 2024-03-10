@@ -271,14 +271,29 @@
 				<li><a href="#BFMEXISTS">BFMEXISTS</a></li>
 				</div>
 			<div>
+			<b>cbf.h</b><br />
+			&nbsp;
+
+					<li><a href="#CBFADD">CBFADD</a></li>
+				<li><a href="#CBFREM">CBFREM</a></li>
+				<li><a href="#CBFRESERVE">CBFRESERVE</a></li>
+				<li><a href="#CBFCOUNT">CBFCOUNT</a></li>
+				<li><a href="#CBFMCOUNT">CBFMCOUNT</a></li>
+				<li><a href="#CBFADDCOUNT">CBFADDCOUNT</a></li>
+				<li><a href="#CBFREMCOUNT">CBFREMCOUNT</a></li>
+				<li><a href="#CBFADDCOUNT">CBFADDCOUNT</a></li>
+				</div>
+			<div>
 			<b>cms.h</b><br />
 			&nbsp;
 
 					<li><a href="#CMSADD">CMSADD</a></li>
+				<li><a href="#CMSREM">CMSREM</a></li>
 				<li><a href="#CMSRESERVE">CMSRESERVE</a></li>
 				<li><a href="#CMSCOUNT">CMSCOUNT</a></li>
 				<li><a href="#CMSMCOUNT">CMSMCOUNT</a></li>
 				<li><a href="#CMSADDCOUNT">CMSADDCOUNT</a></li>
+				<li><a href="#CMSREMCOUNT">CMSREMCOUNT</a></li>
 				<li><a href="#CMSADDCOUNT">CMSADDCOUNT</a></li>
 				</div>
 			<div>
@@ -2892,6 +2907,190 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="CBFADD">
+
+			<h2>CBFADD / CBFINCR / CBFINCRBY key width hash integer_size value inc [value inc]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i> into the counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CBFREM">
+
+			<h2>CBFREM / CBFDECR / CBFDECRBY key width hash integer_size value inc [value inc]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFREM</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Remove (insert) <i>value</i> from the counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to remove it / how much to decrease it.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CBFRESERVE">
+
+			<h2>CBFRESERVE key key width hash integer_size</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFRESERVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Create new, empty counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CBFCOUNT">
+
+			<h2>CBFCOUNT key key width hash integer_size value</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check estimated count of <i>value</i> that may be present into the counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CBFMCOUNT">
+
+			<h2>CBFMCOUNT key width hash integer_size value [value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFMCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check estimated count of <i>value</i> that may be present into the counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array of estimated counts
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CBFADDCOUNT">
+
+			<h2>CBFADDCOUNT key width hash integer_size value inc</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFADDCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i> into the counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CBFREMCOUNT">
+
+			<h2>CBFREMCOUNT key width hash integer_size value inc</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFREMCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Remove (insert) <i>value</i> from the counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to remove it / how much to decrease it.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CBFADDCOUNT">
+
+			<h2>CBFADDCOUNT key width hash integer_size value inc</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CBFADDCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add (insert) <i>value</i> into the counting bloom filter with size <i>width</i> and number of <i>hash</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CBF information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="CMSADD">
 
 			<h2>CMSADD / CMSINCR / CMSINCRBY key W_width D_depth integer_size value inc [value inc]...</h2>
@@ -2907,6 +3106,29 @@
 
 			<h3>Description:</h3>
 			Add (insert) <i>value</i> into the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to add it / how much to increase it.<br />Read CMS information document.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="CMSREM">
+
+			<h2>CMSREM / CMSDECR / CMSDECRBY key W_width D_depth integer_size value inc [value inc]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSREM</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Remove (insert) <i>value</i> from the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to remove it / how much to decrease it.<br />Read CMS information document.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
@@ -2963,7 +3185,7 @@
 		</div>
 				<div class="cmd" id="CMSMCOUNT">
 
-			<h2>CMSMCOUNT / CMSQUERY key W_width D_depth integer_size value [value]...</h2>
+			<h2>CMSMCOUNT key W_width D_depth integer_size value [value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>CMSMCOUNT</td></tr>
@@ -3007,13 +3229,36 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="CMSREMCOUNT">
+
+			<h2>CMSREMCOUNT key W_width D_depth integer_size value inc</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>CMSREMCOUNT</td></tr>
+				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>cms.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Remove (insert) <i>value</i> from the count min sketch with size <i>W_width</i> x <i>D_depth</i> and <i>integer_size</i> integers.<br /><i>inc</i> specify how many times you want to remove it / how much to decrease it.<br />Read CMS information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			estimated count
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="CMSADDCOUNT">
 
 			<h2>CMSADDCOUNT key W_width D_depth integer_size value inc</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>CMSADDCOUNT</td></tr>
-				<tr><td>Available since		</td><td>1.3.1</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>

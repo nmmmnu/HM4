@@ -221,6 +221,7 @@ function getData(){
 		"geo"				=> require "$d/commands_geo.php"		,
 		"hll"				=> require "$d/commands_hll.php"		,
 		"bf"				=> require "$d/commands_bf.php"			,
+		"cbf"				=> require "$d/commands_cbf.php"		,
 		"cms"				=> require "$d/commands_cms.php"		,
 		"mortoncurve"			=> require "$d/commands_mortoncurve.php"	,
 		"hh"				=> require "$d/commands_hh.php"			,

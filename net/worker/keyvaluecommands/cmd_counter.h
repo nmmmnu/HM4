@@ -1,6 +1,5 @@
 #include "base.h"
-
-#include <functional>
+#include "checkoverflow.h"
 
 namespace net::worker::commands::Counter{
 
@@ -17,7 +16,9 @@ namespace net::worker::commands::Counter{
 				if (!hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				int64_t n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
+				using T = int64_t;
+
+				T const n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
 
 				if (n == 0)
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -27,13 +28,13 @@ namespace net::worker::commands::Counter{
 				if (auto *it = hm4::getPairPtr(list, key); it){
 					// Case 1: Old data exists
 
-					int64_t const nval = from_string<int64_t>(it->getVal());
+					T const n1 = n;
+					T const n2 = from_string<T>(it->getVal());
 
-					n += nval;
-
+					T const nResult = safe_overflow::incr(n1, n2);
 
 					to_string_buffer_t buffer;
-					auto const val = to_string(n, buffer);
+					auto const val = to_string(nResult, buffer);
 
 					result.set_number_sv(val);
 

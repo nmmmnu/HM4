@@ -21,6 +21,7 @@ Goals of the project are.
 -   Atomic queues
 -   HyperLogLog
 -   Bloom Filters
+-   Counting Bloom Filters
 -   Count Min Sketch
 -   Heavy Hitters
 -   Misra Gries Heavy Hitters
@@ -341,12 +342,12 @@ BF store just elements "fingerprints", so is GDPR friendly :)
 
 #### Configuration of a BF
 
-- **count of bits**
-- **count of the hash functions**
+- **number of bits**
+- **number of the hash functions**
 
 These are derived constants from the configuration options:
 
-- **elements until BF is saturated** - derived from **count of bits** and **count of the hash functions** - If a BF is saturated, it will almost always return "maybe a member".
+- **elements until BF is saturated** - derived from **number of bits** and **number of the hash functions** - If a BF is saturated, it will almost always return "maybe a member".
 - **error rate** - derived only from **count of the hash functions**
 
 These can be calculated using of of many "Bloom Filter Calculators".
@@ -390,6 +391,82 @@ You need to provide same config values on each BF command.
 
 
 ---
+### Counting Bloom filters
+
+Counting Bloom filter (CBF) is a probabilistic algorithm for checking if unique elements are members of a set, in a constant space.
+It also supports removing an elements.
+
+- If the element is not member of the set, BF will return "definitely not a member" and count of zero.
+- If the element is a member of the set, BF will return "maybe a member" and count of non zero. This is so called false positive.
+
+CBF store just elements "fingerprints", so is GDPR friendly :)
+
+[Counting_Bloom_filter] at Wikipedia.
+
+#### Configuration of a CBF
+
+- **number of counters**
+- **number of the hash functions** - e.g.count of the hash functions
+- **counter type**
+
+#### Counter types
+
+| Bits          | C/C++ name | Memory per counter | Max value                  |
+|          ---: | :---       |               ---: |                       ---: |
+|             4 | n/a        |           1/2 byte |                         16 |
+|             8 | uint8_t    |             1 byte |                        255 |
+|            16 | uint16_t   |            2 bytes |                     65,535 |
+|            32 | uint32_t   |            4 bytes |              4,294,967,295 |
+|            64 | uint64_t   |            8 bytes | 18,446,744,073,709,551,615 |
+
+When counter increases to the max value, it does not reset to zero, instead it stay at max values.
+
+4 bit counters are under development.
+
+#### Implementation:
+
+The implementation is not Redis compatible.
+
+There are no fancy encoding, the implementation uses array of integer counters.
+
+#### How it works:
+
+- Value can be added using **CBFADD**. If the key does not exists or contains different information, it is overwritten.
+- Value can be removed using **CBFREM**.
+- Membershib can be check using **CBFCOUNT**.
+
+      redis> cbfadd a 2097152 7 8 john 1
+      OK
+      redis> cbfadd a 2097152 7 8 steven 1
+      OK
+      redis> cbfadd a 2097152 7 8 bob 1
+      OK
+      redis> cbfmcount a 2097152 7 8 john steven bob peter
+      1) "1"
+      2) "1"
+      3) "1"
+      4) "0"
+      redis> cbfrem a 2097152 7 8 bob 1
+      OK
+      redis> cbfmcount a 2097152 7 8 john steven bob peter
+      1) "1"
+      2) "1"
+      3) "0"
+      4) "0"
+      redis> cbfaddcount a 2097152 7 8 john 1
+      (integer) 2
+
+The numbers 2097152 and 7 and 8 are the CBF configuration options:
+
+- 2097152 is number of counters.
+- 7 is number of the hash functions.
+- 8 is bits per counter.
+
+You need to provide same config values on each BF command.
+
+
+
+---
 ### Count Min Sketch
 
 Count min sketch (CMS) is a probabilistic algorithm for counting several unique elements that are members of a set, in a constant space.
@@ -422,13 +499,9 @@ These are derived constants from the configuration options:
 |            32 | uint32_t   |            4 bytes |              4,294,967,295 |
 |            64 | uint64_t   |            8 bytes | 18,446,744,073,709,551,615 |
 
-When counter increases, it does not reset to zero, instead it stay at max values.
-
-Most of the cases 8 or 16 bit counters are enough.
+When counter increases to the max value, it does not reset to zero, instead it stay at max values.
 
 4 bit counters are under development.
-
-You definitely do not want 64 counters.
 
 #### Calculation of CMS configuration options
 
@@ -450,7 +523,7 @@ Number 5 is always a good value here. Seriously :)
 
 The implementation is not Redis compatible.
 
-There are no fancy encoding, the implementation uses standard bitfield, same as in BITSET / BITGET.
+There are no fancy encoding, the implementation uses array of integer counters.
 
 #### How it works:
 
@@ -620,5 +693,6 @@ They are implemented as flat array in a way similar to Heavy Hitters (HH).
 [commands]: https://htmlpreview.github.io/?https://raw.githubusercontent.com/nmmmnu/HM4/master/commands.html
 [HyperLogLog]: https://en.wikipedia.org/wiki/HyperLogLog
 [Bloom_filter]: https://en.wikipedia.org/wiki/Bloom_filter
+[Counting_Bloom_filter]: https://en.wikipedia.org/wiki/Bloom_filter
 [bloom_filter_calc]: https://github.com/nmmmnu/HM4/blob/master/bloom_filter.md
 [Count–min sketch]: https://en.wikipedia.org/wiki/Count%E2%80%93min_sketch

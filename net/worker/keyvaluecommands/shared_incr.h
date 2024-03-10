@@ -1,28 +1,23 @@
 #ifndef SHARED_INCR_H_
 #define SHARED_INCR_H_
 
+#include "checkoverflow.h"
+
 namespace net::worker::shared::incr{
 
-	template<typename T>
-	T incr(T &a, uint64_t increment){
-		constexpr auto MAX    = std::numeric_limits<T>::max();
-		constexpr auto MAX_BE = htobe(MAX);
+	template<bool Sign, typename T>
+	constexpr T incr(T &val, uint64_t inc){
+		T a = betoh<T>(val);
+		T const x = static_cast<T>(inc);
 
-		auto const x = betoh<T>(a);
+		if constexpr(Sign)
+			a = safe_overflow::incr(a, x);
+		else
+			a = safe_overflow::decr(a, x);
 
-		if (increment > MAX || x > MAX - increment){
-			// return max
-			a = MAX_BE;
+		val = htobe<T>(a);
 
-			return MAX;
-		}else{
-			// cast is safe now
-			T const c = x + static_cast<T>(increment);
-
-			a = htobe<T>(c);
-
-			return c;
-		}
+		return a;
 	}
 
 }

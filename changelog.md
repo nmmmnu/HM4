@@ -297,3 +297,7 @@ Changelog
 -	bugfix on mutable_x when table is flushed during commands like DELX.
 -	new module counting bloom filter: CBFADD, CBFADDCOUNT, CBFRESERVE, CBFCOUNT, CBFMCOUNT
 -	refactor count min sketch
+-	new commands CMSREM, CMSREMCOUNT
+-	new commands CBFREM, CBFREMCOUNT
+-	INCR / DECR does not overflow
+

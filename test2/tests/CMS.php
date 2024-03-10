@@ -10,10 +10,15 @@ function cmd_CMS($redis){
 	foreach([8, 16, 32, 64] as $is){
 		rawCommand($redis, "CMSRESERVE $is", "a", $w, $d, $is);
 
-		rawCommand($redis, "CMSADD", "a", $w, $d, $is, "Sofia", 1);
-		rawCommand($redis, "CMSADD", "a", $w, $d, $is, "Sofia", 4);
+		expect("CMSADDCOUNT $is", rawCommand($redis, "CMSADDCOUNT", "a", $w, $d, $is, "Sofia", 1) == 1 );
+		expect("CMSADDCOUNT $is", rawCommand($redis, "CMSADDCOUNT", "a", $w, $d, $is, "Sofia", 4) == 5 );
+
+		rawCommand($redis, "CMSREM", "a", $w, $d, $is, "Sofia", 1);
+
+		expect("CMSREMCOUNT $is", rawCommand($redis, "CMSREMCOUNT", "a", $w, $d, $is, "Sofia", 1) == 3 );
+
 		rawCommand($redis, "CMSADD", "a", $w, $d, $is, "New York", 4);
-		rawCommand($redis, "CMSADD", "a", $w, $d, $is, "New York", 1, "London", 1, "Kiev", 1, "Los Angeles", 44, "Sofia", 5);
+		rawCommand($redis, "CMSADD", "a", $w, $d, $is, "New York", 1, "London", 1, "Kiev", 1, "Los Angeles", 44, "Sofia", 7);
 
 		expect("CMSADD $is",		true				);
 
