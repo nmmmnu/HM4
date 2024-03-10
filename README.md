@@ -394,10 +394,10 @@ You need to provide same config values on each BF command.
 ### Counting Bloom filters
 
 Counting Bloom filter (CBF) is a probabilistic algorithm for checking if unique elements are members of a set, in a constant space.
-It also supports removing an elements.
+It also supports removing elements.
 
-- If the element is not member of the set, BF will return "definitely not a member" and count of zero.
-- If the element is a member of the set, BF will return "maybe a member" and count of non zero. This is so called false positive.
+- If the element is not member of the set, CBF will return "definitely not a member" and count of zero.
+- If the element is a member of the set, CBF will return "maybe a member" and count of non zero. This is so called false positive.
 
 CBF store just elements "fingerprints", so is GDPR friendly :)
 
@@ -406,7 +406,7 @@ CBF store just elements "fingerprints", so is GDPR friendly :)
 #### Configuration of a CBF
 
 - **number of counters**
-- **number of the hash functions** - e.g.count of the hash functions
+- **number of the hash functions**
 - **counter type**
 
 #### Counter types
@@ -424,8 +424,6 @@ When counter increases to the max value, it does not reset to zero, instead it s
 4 bit counters are under development.
 
 #### Implementation:
-
-The implementation is not Redis compatible.
 
 There are no fancy encoding, the implementation uses array of integer counters.
 
@@ -462,7 +460,7 @@ The numbers 2097152 and 7 and 8 are the CBF configuration options:
 - 7 is number of the hash functions.
 - 8 is bits per counter.
 
-You need to provide same config values on each BF command.
+You need to provide same config values on each CBF command.
 
 
 
