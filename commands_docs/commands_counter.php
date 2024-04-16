@@ -49,7 +49,18 @@ return array(
 			true,
 			true,
 
-			"counter"
+			"counter",
+
+			"<pre>set a 100<br />" .
+			"OK<br />" .
+			"incrto a 50<br />" .
+			"(integer) 100<br />" .
+			"get a<br />" .
+			"100<br />" .
+			"incrto a 150<br />" .
+			"(integer) 150<br />" .
+			"get a<br />" .
+			"150</pre>"
 	),
 
 	new Cmd(
@@ -67,6 +78,17 @@ return array(
 			true,
 			true,
 
-			"counter"
+			"counter",
+
+			"<pre>set a 100<br />" .
+			"OK<br />" .
+			"decrto a 150<br />" .
+			"(integer) 100<br />" .
+			"get a<br />" .
+			"100<br />" .
+			"decrto a 50<br />" .
+			"(integer) 50<br />" .
+			"get a<br />" .
+			"50</pre>"
 	),
 );
