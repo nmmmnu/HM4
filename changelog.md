@@ -300,4 +300,5 @@ Changelog
 -	new commands CMSREM, CMSREMCOUNT
 -	new commands CBFREM, CBFREMCOUNT
 -	INCR / DECR does not overflow
+-	new commands INCRLIMIT / DECRLIMIT
 
