@@ -17,10 +17,16 @@ namespace net::worker::commands::Counter{
 
 			using T = int64_t;
 
-			T const n = p.size() == 3 ? Sign * from_string<int64_t>(p[2]) : Sign;
+			T const nx = p.size() == 3 ? from_string<int64_t>(p[2]) : 1;
 
-			if (n == 0)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			if constexpr(false){
+				// Redis compatibility
+
+				if (nx <= 0)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+
+			T const n = Sign * nx;
 
 
 
@@ -82,7 +88,16 @@ namespace net::worker::commands::Counter{
 
 			using T = int64_t;
 
-			T const n = Sign * from_string<int64_t>(p[2]);
+			T const nx = from_string<int64_t>(p[2]);
+
+			if constexpr(true){
+				if (nx <= 0)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+
+			T const n = Sign * nx;
+
+
 
 			if (n == 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);

@@ -1926,7 +1926,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Atomically increase numerical value of the <i>key</i> with <i>increase_value</i>, but only if new value is less or equal <i>limit</i>.<br />Uses <b>int64_t</b> as a number type.<br />Useful for financial operations.
+			Atomically increase numerical value of the <i>key</i> with <i>increase_value</i>, but only if new value is less or equal <i>limit</i>.<br />Uses <b>int64_t</b> as a number type.<br /><i>increase_value</i> can not be negative.<br />Useful for financial operations.
 			<h3>Return type:</h3>
 			bool (int)
 			<h3>Return value:</h3>
@@ -1950,7 +1950,7 @@
 			</table>
 
 			<h3>Description:</h3>
-			Atomically decrease numerical value of the <i>key</i> with <i>decrease_value</i>, but only if new value is greather or equal <i>limit</i>.<br />Uses <b>int64_t</b> as a number type.<br />Useful for financial operations.
+			Atomically decrease numerical value of the <i>key</i> with <i>decrease_value</i>, but only if new value is greather or equal <i>limit</i>.<br />Uses <b>int64_t</b> as a number type.<br /><i>decrease_value</i> can not be negative.<br />Useful for financial operations.
 			<h3>Return type:</h3>
 			bool (int)
 			<h3>Return value:</h3>

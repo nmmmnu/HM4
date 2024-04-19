@@ -41,6 +41,7 @@ return array(
 
 			"Atomically increase numerical value of the <i>key</i> with <i>increase_value</i>, but only if new value is less or equal <i>limit</i>.<br />" .
 			"Uses <b>int64_t</b> as a number type.<br />" .
+			"<i>increase_value</i> can not be negative.<br />" .
 			"Useful for financial operations.",
 			"bool (int)",
 			"1 if limit check is OK, 0 otherwise",
@@ -70,6 +71,7 @@ return array(
 
 			"Atomically decrease numerical value of the <i>key</i> with <i>decrease_value</i>, but only if new value is greather or equal <i>limit</i>.<br />" .
 			"Uses <b>int64_t</b> as a number type.<br />" .
+			"<i>decrease_value</i> can not be negative.<br />" .
 			"Useful for financial operations.",
 			"bool (int)",
 			"1 if limit check is OK, 0 otherwise",

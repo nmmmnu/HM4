@@ -301,4 +301,4 @@ Changelog
 -	new commands CBFREM, CBFREMCOUNT
 -	INCR / DECR does not overflow
 -	new commands INCRLIMIT / DECRLIMIT
-
+-	disable negative increace_val/decrease_val in INCRLIMIT / DECRLIMIT
