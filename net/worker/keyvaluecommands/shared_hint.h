@@ -11,7 +11,7 @@ namespace hm4{
 		VBase &vbase = factory;
 
 		if (pair && canInsertHintValSize(list, pair, factory.bytes() ))
-			proceedInsertHint(list, pair, vbase);
+			proceedInsertHint(list, const_cast<Pair *>(pair), vbase);
 		else
 			insert(list, vbase);
 	}

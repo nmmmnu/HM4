@@ -152,16 +152,18 @@ namespace net::worker::commands::Mutable{
 
 		// MSETXX a 5 b 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using hm4::Pair;
+
 			auto const varg = 1;
 
 			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
-				if (const auto &key = *itk;            !hm4::Pair::isKeyValid(key))
+				if (const auto &key = *itk;            !Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
+				if (const auto &val = *std::next(itk); !Pair::isValValid(val))
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
@@ -194,7 +196,7 @@ namespace net::worker::commands::Mutable{
 
 					assert(key == hint->getKey());
 
-					hm4::proceedInsertHintF<hm4::PairFactory::Normal>(*db, hint, key, val);
+					hm4::proceedInsertHintF<hm4::PairFactory::Normal>(*db, const_cast<Pair *>(hint), key, val);
 				}
 			}
 

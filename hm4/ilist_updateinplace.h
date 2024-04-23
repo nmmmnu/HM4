@@ -17,7 +17,7 @@ namespace hm4{
 
 		auto const old_bytes = pair->bytes();
 
-		proceedInsertHint_skipMutableNotify(pair, factory);
+		proceedInsertHint_skipMutableNotify(const_cast<Pair *>(pair), factory);
 
 		auto const new_bytes = pair->bytes();
 

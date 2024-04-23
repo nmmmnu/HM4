@@ -277,14 +277,14 @@ constexpr bool canInsertHintAllocatorF(Allocator const &allocator, const Pair *p
 // 	since the Pair is not yet flushed.
 
 template<class PairFactory>
-constexpr void proceedInsertHint_skipMutableNotify(const Pair *pair, PairFactory &factory){
-	factory.createHint( const_cast<Pair *>(pair) );
+constexpr void proceedInsertHint_skipMutableNotify(Pair *pair, PairFactory &factory){
+	factory.createHint(pair);
 
 	logger<Logger::DEBUG>() << "inserting hint for key" << factory.getKey();
 }
 
 template<class List, class PairFactory>
-constexpr void proceedInsertHint(List &list, const Pair *pair, PairFactory &factory){
+constexpr void proceedInsertHint(List &list, Pair *pair, PairFactory &factory){
 	PairFactoryMutableNotifyMessage msg;
 	msg.bytes_old = pair->bytes();
 
@@ -296,14 +296,14 @@ constexpr void proceedInsertHint(List &list, const Pair *pair, PairFactory &fact
 }
 
 template<class PairFactory, class List, typename ...Args>
-auto proceedInsertHintF(List &list, const Pair *pair, Args &&...args){
+auto proceedInsertHintF(List &list, Pair *pair, Args &&...args){
 	PairFactory factory{ std::forward<Args>(args)... };
 
 	return proceedInsertHint(list, pair, factory);
 }
 
 template<class VPairFactory, class List, typename ...Args>
-auto proceedInsertHintV(List &list, const Pair *pair, Args &&...args){
+auto proceedInsertHintV(List &list, Pair *pair, Args &&...args){
 	using VBase = PairFactory::IFactory;
 
 	static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from PairFactory::IFactory");
@@ -323,7 +323,7 @@ auto proceedInsertHintV(List &list, const Pair *pair, Args &&...args){
 template<class List, class PairFactory>
 void insertHint(List &list, const Pair *pair, PairFactory &factory){
 	if (canInsertHintAllocatorF(list.getAllocator(), pair, factory))
-		proceedInsertHint(list, pair, factory);
+		proceedInsertHint(list, const_cast<Pair *>(pair), factory);
 	else
 		insert(list, factory);
 }

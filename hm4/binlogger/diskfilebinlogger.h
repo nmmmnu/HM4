@@ -51,9 +51,7 @@ public:
 	bool unlinkFile(){
 		dataBuilder_.close();
 		// file is sync to disk.
-
 		fileUnlink(disk::filenameData(filename_));
-
 		return true;
 	}
 
