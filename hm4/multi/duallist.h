@@ -59,8 +59,8 @@ public:
 		return list1_->mutable_version();
 	}
 
-	constexpr void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
-		return list1_->mutable_notify(p, message);
+	constexpr void mutable_notify( PairFactoryMutableNotifyMessage const &message){
+		return list1_->mutable_notify(message);
 	}
 
 	size_t bytes() const{

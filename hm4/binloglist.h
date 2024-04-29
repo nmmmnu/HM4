@@ -79,10 +79,10 @@ public:
 		return result;
 	}
 
-	void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
-		binlogger_(*p);
+	void mutable_notify(PairFactoryMutableNotifyMessage const &message){
+		binlogger_(*message.pair);
 
-		return list_->mutable_notify(p, message);
+		return list_->mutable_notify(message);
 	}
 
 	constexpr void crontab() const{

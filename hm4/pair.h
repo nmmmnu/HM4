@@ -604,6 +604,7 @@ inline namespace version_4_00_00{
 
 	namespace PairFactory{
 		struct MutableNotifyMessage{
+			Pair *pair;
 			size_t bytes_old = 0;
 			size_t bytes_new = 0;
 		};

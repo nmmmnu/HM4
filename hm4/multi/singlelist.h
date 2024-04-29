@@ -132,8 +132,8 @@ public:
 		return list_->insertF(factory);
 	}
 
-	constexpr void mutable_notify(const Pair *p, PairFactoryMutableNotifyMessage const &message){
-		return list_->mutable_notify(p, message);
+	constexpr void mutable_notify( PairFactoryMutableNotifyMessage const &message){
+		return list_->mutable_notify(message);
 	}
 
 	constexpr void crontab(){

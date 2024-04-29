@@ -74,7 +74,7 @@ public:
 		return 0;
 	}
 
-	void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &msg){
+	void mutable_notify(PairFactoryMutableNotifyMessage const &msg){
 		lc_.upd(msg.bytes_old, msg.bytes_new);
 	}
 

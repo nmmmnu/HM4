@@ -151,7 +151,7 @@ public:
 		return *this;
 	}
 
-	constexpr static void mutable_notify(const Pair *, PairFactoryMutableNotifyMessage const &){
+	constexpr static void mutable_notify(PairFactoryMutableNotifyMessage const &){
 	}
 
 	auto bytes() const{
