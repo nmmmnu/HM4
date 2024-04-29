@@ -246,14 +246,6 @@ inline namespace version_4_00_00{
 		};
 
 	public:
-		template<class Allocator, class PairFactory>
-		[[nodiscard]]
-		static auto create(PairFactory &factory) noexcept{
-			std::nullptr_t allocator;
-			return smart_ptr::create(allocator, factory);
-		}
-
-	public:
 		[[nodiscard]]
 		constexpr
 		bool isKeyEmpty() const noexcept{
