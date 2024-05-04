@@ -65,11 +65,8 @@ public:
 		// if (!result.ok)
 		// 	return result;
 
-		if (result.pair){
-			result.pair->setTXBit(tx_);
-
+		if (result.pair)
 			binlogger_(*result.pair);
-		}
 
 		return result;
 	}
@@ -87,12 +84,8 @@ public:
 
 			auto *pair = makePairTombstone(key, buffer);
 
-			pair->setTXBit(tx_);
-
 			binlogger_(pair);
 		}else if (result.pair){
-			result.pair->setTXBit(tx_);
-
 			binlogger_(result.pair);
 		}
 
@@ -100,24 +93,18 @@ public:
 	}
 
 	void mutable_notify(PairFactoryMutableNotifyMessage const &message){
-		message.pair->setTXBit(tx_);
-
 		binlogger_(message.pair);
 
 		return list_->mutable_notify(message);
 	}
 
 	constexpr void beginTX(){
-		tx_ = 1;
-
 		binlogger_(binloglist_impl::pair_begin);
 
 		list_->beginTX();
 	}
 
 	constexpr void endTX(){
-		tx_ = 0;
-
 		binlogger_(binloglist_impl::pair_end);
 
 		list_->endTX();
@@ -138,8 +125,6 @@ public:
 private:
 	using	multi::SingleList<List>::list_;
 	using	binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>::binlogger_;
-
-	uint8_t tx_ = 0;
 };
 
 

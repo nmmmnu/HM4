@@ -44,9 +44,9 @@ struct InsertResult{
 		ERROR
 	};
 
-	bool	ok;
-	Status	status;
-	Pair	*pair	= nullptr;
+	bool		ok;
+	Status		status;
+	const Pair	*pair	= nullptr;
 
 	constexpr static auto INSERTED		=  Status::INSERTED		;
 	constexpr static auto DELETED		=  Status::DELETED		;
@@ -59,7 +59,7 @@ struct InsertResult{
 	constexpr static auto ERROR		=  Status::ERROR		;
 
 	[[nodiscard]]
-	constexpr static auto inserted(Pair *pair){
+	constexpr static auto inserted(const Pair *pair){
 		return InsertResult{ true, InsertResult::INSERTED, pair };
 	}
 

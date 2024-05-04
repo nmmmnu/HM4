@@ -27,7 +27,6 @@ inline namespace version_4_00_00{
 
 		constexpr uint16_t	MAX_KEY_SIZE	= 0b0'0000'0000'0000'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
 		constexpr uint32_t	MAX_VAL_SIZE	= 0b0'0000'1111'1111'1111'1111'1111'1111'1111;	// 256 MB
-		constexpr uint32_t	TX_VAL_BIT	= 0b0'1000'0000'0000'0000'0000'0000'0000'0000;
 
 		constexpr auto		TX_KEY_BEGIN	= std::string_view{ "\0\0" "TX_B", 6 };
 		constexpr auto		TX_KEY_END	= std::string_view{ "\0\0" "TX_E", 6 };
@@ -415,20 +414,6 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		int cmpWithTime(Pair const &pair) const noexcept{
 			return cmpWithTime(pair, std::true_type{});
-		}
-
-	public:
-		constexpr bool getTXBit() const noexcept{
-			return vallen & htobe(PairConf::TX_VAL_BIT);
-		}
-
-		constexpr void setTXBit(bool bit) noexcept{
-			constexpr uint32_t mask = htobe<uint32_t>(PairConf::TX_VAL_BIT);
-
-			if (bit)
-				vallen |=  mask;
-			else
-				vallen &= ~mask;
 		}
 
 	public:
