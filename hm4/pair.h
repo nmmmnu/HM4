@@ -21,12 +21,16 @@ namespace hm4{
 inline namespace version_4_00_00{
 
 	namespace PairConf{
-		constexpr uint32_t	VERSION			= 4'00'00;
+		constexpr uint32_t	VERSION		= 4'00'00;
 
-		constexpr size_t	ALIGN			= sizeof(void *);
+		constexpr size_t	ALIGN		= sizeof(void *);
 
-		constexpr uint16_t	MAX_KEY_SIZE		= 0b0'0000'0000'0000'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
-		constexpr uint32_t	MAX_VAL_SIZE		= 0b0'0000'1111'1111'1111'1111'1111'1111'1111;	// 256 MB
+		constexpr uint16_t	MAX_KEY_SIZE	= 0b0'0000'0000'0000'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
+		constexpr uint32_t	MAX_VAL_SIZE	= 0b0'0000'1111'1111'1111'1111'1111'1111'1111;	// 256 MB
+		constexpr uint32_t	TX_VAL_BIT	= 0b0'1000'0000'0000'0000'0000'0000'0000'0000;
+
+		constexpr auto		TX_KEY_BEGIN	= std::string_view{ "\0\0" "TX_B", 6 };
+		constexpr auto		TX_KEY_END	= std::string_view{ "\0\0" "TX_E", 6 };
 
 		// Note, in net/protocol/redisprotocol.cc,
 		// there is seemingly unrelated value MAX_PARAM_SIZE
@@ -78,35 +82,40 @@ inline namespace version_4_00_00{
 		static uint64_t prepareCreateTimeSimulate(uint32_t created) noexcept;
 
 	public:
-		template<bool copy_key, bool copy_val, bool make_key, bool make_val>
-		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
+		enum class CopyKey : bool{ Y, N };
+		enum class CopyVal : bool{ Y, N };
+		enum class MakeKey : bool{ Y, N };
+		enum class MakeVal : bool{ Y, N };
+
+		template<CopyKey copy_key, CopyVal copy_val, MakeKey make_key, MakeVal make_val>
+		static void createInRawMemory_(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint64_t const created){
 			static_assert(
-				(make_key == 0			) ||
-				(make_key == 1 && make_val == 1	) ||
+				(make_key == MakeKey::N					) ||
+				(make_key == MakeKey::Y && make_val == MakeVal::Y	) ||
 				false
 			);
 
 			static_assert(
-				(copy_key == 0			) ||
-				(copy_key == 1 && make_key == 1	) ||
+				(copy_key == CopyKey::N					) ||
+				(copy_key == CopyKey::Y && make_key == MakeKey::Y	) ||
 				false
 			);
 
 			static_assert(
-				(copy_val == 0			) ||
-				(copy_val == 1 && make_val == 1	) ||
+				(copy_val == CopyVal::N					) ||
+				(copy_val == CopyVal::Y && make_val == MakeVal::Y	) ||
 				false
 			);
 
-			pair->created	= htobe<uint64_t>(prepareCreateTime(created));
+			pair->created	= htobe<uint64_t>(created);
 			pair->expires	= htobe<uint32_t>(expires); // std::min(expires, PairConf::EXPIRES_MAX)
 
-			if constexpr(copy_key || make_key){
+			if constexpr(copy_key == CopyKey::Y || make_key == MakeKey::Y){
 				uint16_t const keylen = static_cast<uint16_t>(key.size() & PairConf::MAX_KEY_MASK);
 				pair->keylen	= htobe<uint16_t>(keylen);
 			}
 
-			if constexpr(copy_val || make_val){
+			if constexpr(copy_val == CopyVal::Y || make_val == MakeVal::Y){
 				uint32_t const vallen = static_cast<uint32_t>(val.size() & PairConf::MAX_VAL_MASK);
 				pair->vallen	= htobe<uint32_t>(vallen);
 			}
@@ -115,30 +124,49 @@ inline namespace version_4_00_00{
 			#pragma GCC diagnostic ignored "-Warray-bounds"
 			#pragma GCC diagnostic ignored "-Wstringop-overflow"
 
-			if constexpr(copy_key){
+			if constexpr(copy_key == CopyKey::Y){
 				memcpy(& pair->buffer[0],		key.data(), key.size());
 			}
 
-			if constexpr(copy_key || make_key){
+			if constexpr(copy_key == CopyKey::Y || make_key == MakeKey::Y){
 				pair->buffer[key.size()] = '\0';
 			}
 
 
-			if constexpr(copy_val){
+			if constexpr(copy_val == CopyVal::Y){
 				// this is safe with NULL pointer.
 				memcpy(& pair->buffer[key.size() + 1],	val.data(), val.size());
 			}
 
-			if constexpr(copy_val || make_val){
+			if constexpr(copy_val == CopyVal::Y || make_val == MakeVal::Y){
 				pair->buffer[key.size() + 1 + val.size()] = '\0';
 			}
 
 			#pragma GCC diagnostic pop
 		}
 
-		template<bool copy_key, bool copy_val, bool make_key, bool make_val>
+		template<CopyKey copy_key, CopyVal copy_val, MakeKey make_key, MakeVal make_val>
+		static void createInRawMemory(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
+			uint64_t const created64 = prepareCreateTime(created);
+
+			return createInRawMemory_<copy_key, copy_val, make_key, make_val>(pair, key, val, expires, created64);
+		}
+
+		static void createInRawMemoryFull(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
+			return createInRawMemory<CopyKey::Y,CopyVal::Y,MakeKey::Y,MakeVal::Y>(pair, key, val, expires, created);
+		}
+
+		static void createInRawMemoryFullVal(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
+			return createInRawMemory<CopyKey::N,CopyVal::Y,MakeKey::N,MakeVal::Y>(pair, key, val, expires, created);
+		}
+
+		static void createInRawMemoryNone(Pair *pair, std::string_view const key, std::string_view const val, uint32_t const expires, uint32_t const created){
+			return createInRawMemory<CopyKey::N,CopyVal::N,MakeKey::N,MakeVal::N>(pair, key, val, expires, created);
+		}
+
+		template<CopyKey copy_key, CopyVal copy_val, MakeKey make_key, MakeVal make_val>
 		static void createInRawMemory(Pair *pair, std::string_view const key, size_t const val_size, uint32_t const expires, uint32_t const created){
-			static_assert(copy_val == false, "When you pass null value, don't break the rules!");
+			static_assert(copy_val == CopyVal::N, "When you pass null value, don't break the rules!");
 
 			// now break the rules
 			const char *val_str = nullptr;
@@ -147,8 +175,25 @@ inline namespace version_4_00_00{
 			return createInRawMemory<copy_key, copy_val, make_key, make_val>(pair, key, val, expires, created);
 		}
 
+		static void createInRawMemoryNone(Pair *pair, std::string_view const key, size_t const val_size, uint32_t const expires, uint32_t const created){
+			return createInRawMemory<CopyKey::N,CopyVal::N,MakeKey::N,MakeVal::N>(pair, key, val_size, expires, created);
+		}
+
 		static void cloneInRawMemory(Pair *pair, const Pair &src) noexcept{
 			memcpy(static_cast<void *>(pair), & src, src.bytes());
+		}
+
+		static void createSystemPairInRawMemory(Pair *pair, std::string_view const key){
+			pair->created	= 0;
+			pair->expires	= PairConf::EXPIRES_TOMBSTONE;
+
+			uint16_t const keylen = static_cast<uint16_t>(key.size() & PairConf::MAX_KEY_MASK);
+			pair->keylen	= htobe<uint16_t>(keylen);
+			pair->vallen	= 0;
+
+			memcpy(& pair->buffer[0],		key.data(), key.size());
+			pair->buffer[key.size()] = '\0';
+			pair->buffer[key.size() + 1] = '\0';
 		}
 
 	public:
@@ -373,6 +418,20 @@ inline namespace version_4_00_00{
 		}
 
 	public:
+		constexpr bool getTXBit() const noexcept{
+			return vallen & htobe(PairConf::TX_VAL_BIT);
+		}
+
+		constexpr void setTXBit(bool bit) noexcept{
+			constexpr uint32_t mask = htobe<uint32_t>(PairConf::TX_VAL_BIT);
+
+			if (bit)
+				vallen |=  mask;
+			else
+				vallen &= ~mask;
+		}
+
+	public:
 		// beware problem 2038 !!!
 		[[nodiscard]]
 		bool isExpired() const noexcept{
@@ -383,23 +442,23 @@ inline namespace version_4_00_00{
 		}
 
 		[[nodiscard]]
-		bool isTombstone() const noexcept{
+		constexpr bool isTombstone() const noexcept{
+			if (expires == PairConf::EXPIRES_TOMBSTONE)
+				return true;
+
 			// big endian 0
 			return (vallen & htobe<uint32_t>(PairConf::MAX_VAL_MASK)) == 0;
 		}
 
 		[[nodiscard]]
-		bool isTombstone(std::true_type) const noexcept{
-			if (expires == PairConf::EXPIRES_TOMBSTONE)
-				return true;
-			else
-				return isTombstone();
+		constexpr bool isSystemPair() const noexcept{
+			return expires == PairConf::EXPIRES_TOMBSTONE && created == 0 && vallen == 0;
 		}
 
 		[[nodiscard]]
 		bool isOK() const noexcept{
 			// check if is tombstone
-			if ( isTombstone(std::true_type{}) )
+			if ( isTombstone() )
 				return false;
 
 			// check if is expired
@@ -473,7 +532,7 @@ inline namespace version_4_00_00{
 		constexpr
 		static bool isCompositeKeyValid(std::string_view key1, size_t more = 0) noexcept{
 			return	!key1.empty() &&
-				isKeyValid(more +
+				isKeyValid(	more +
 						key1.size()
 				);
 		}
@@ -483,7 +542,7 @@ inline namespace version_4_00_00{
 		static bool isCompositeKeyValid(std::string_view key1, std::string_view key2, size_t more = 0) noexcept{
 			return	!key1.empty() &&
 				!key2.empty() &&
-				isKeyValid(more +
+				isKeyValid	(more +
 						key1.size() +
 						key2.size()
 				);
@@ -495,7 +554,7 @@ inline namespace version_4_00_00{
 			return	!key1.empty() &&
 				!key2.empty() &&
 				!key3.empty() &&
-				isKeyValid(more +
+				isKeyValid(	more +
 						key1.size() +
 						key2.size() +
 						key3.size()
@@ -604,9 +663,9 @@ inline namespace version_4_00_00{
 
 	namespace PairFactory{
 		struct MutableNotifyMessage{
-			Pair *pair;
-			size_t bytes_old = 0;
-			size_t bytes_new = 0;
+			Pair	*pair;
+			size_t	bytes_old;
+			size_t	bytes_new;
 		};
 
 		struct Normal{
@@ -648,13 +707,21 @@ inline namespace version_4_00_00{
 			}
 
 			void createHint(Pair *pair) const{
-				Pair::createInRawMemory<0,1,0,1>(pair, key, val, expires, created);
+				Pair::createInRawMemoryFullVal(pair, key, val, expires, created);
 			}
 
 			void create(Pair *pair) const{
-				Pair::createInRawMemory<1,1,1,1>(pair, key, val, expires, created);
+				Pair::createInRawMemoryFull(pair, key, val, expires, created);
 			}
 		};
+
+#if 0
+		struct Tombstone : Normal{
+			constexpr Tombstone(std::string_view const key,
+					uint32_t const created = 0) :
+					Normal(key, Pair::TOMBSTONE, 0, created){}
+		};
+#endif
 
 		struct Expires{
 			std::string_view key;
@@ -695,19 +762,22 @@ inline namespace version_4_00_00{
 			}
 
 			void createHint(Pair *pair) const{
-				Pair::createInRawMemory<0,0,0,0>(pair, key, val, expires, created);
+				Pair::createInRawMemoryNone(pair, key, val, expires, created);
 			}
 
 			void create(Pair *pair) const{
-				Pair::createInRawMemory<1,1,1,1>(pair, key, val, expires, created);
+				Pair::createInRawMemoryFull(pair, key, val, expires, created);
 			}
 		};
 
 		struct Tombstone{
 			std::string_view key;
+			uint32_t created;
 
-			constexpr Tombstone(std::string_view const key) :
-					key(key){}
+			constexpr Tombstone(std::string_view const key,
+					uint32_t const created = 0) :
+					key	(key		),
+					created	(created	){}
 
 			[[nodiscard]]
 			constexpr std::string_view getKey() const noexcept{
@@ -716,7 +786,7 @@ inline namespace version_4_00_00{
 
 			[[nodiscard]]
 			constexpr uint32_t getCreated() const noexcept{
-				return 0;
+				return created;
 			}
 
 			[[nodiscard]]
@@ -730,15 +800,11 @@ inline namespace version_4_00_00{
 			}
 
 			void createHint(Pair *pair) const{
-				if constexpr(false){
-					Pair::createInRawMemory<0,1,0,1>(pair, key, Pair::TOMBSTONE, 0, 0);
-				}else{
-					Pair::createInRawMemory<0,0,0,0>(pair, key, "", PairConf::EXPIRES_TOMBSTONE, 0);
-				}
+				Pair::createInRawMemoryNone(pair, key, Pair::TOMBSTONE, PairConf::EXPIRES_TOMBSTONE, created);
 			}
 
 			void create(Pair *pair) const{
-				Pair::createInRawMemory<1,1,1,1>(pair, key, Pair::TOMBSTONE, 0, 0);
+				Pair::createInRawMemoryFull(pair, key, Pair::TOMBSTONE, 0, created);
 			}
 		};
 

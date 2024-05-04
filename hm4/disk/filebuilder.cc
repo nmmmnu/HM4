@@ -77,7 +77,7 @@ namespace FileBuilder{
 		if (created > maxCreated)
 			maxCreated = created;
 
-		if (pair.isTombstone(std::true_type{}))
+		if (pair.isTombstone())
 			++tombstones;
 
 		++count;

@@ -23,7 +23,7 @@ namespace net::worker::shared::bit{
 			uint8_t *bits = reinterpret_cast<uint8_t *>(buffer);
 
 			if (bit)
-				bits[n_byte] |= n_mask;
+				bits[n_byte] |=  n_mask;
 			else
 				bits[n_byte] &= ~n_mask;
 		}

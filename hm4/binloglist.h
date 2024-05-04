@@ -3,6 +3,9 @@
 
 #include "multi/singlelist.h"
 
+#include "ilist/makepair.h"
+#include "ilist/txguard.h"
+
 
 namespace hm4{
 
@@ -28,7 +31,14 @@ namespace binloglist_impl{
 		}
 	};
 
+	PairBufferTombstone buffer[2];
+
+	const auto *pair_begin = makePairSystem( PairConf::TX_KEY_BEGIN, buffer[0] );
+	const auto *pair_end   = makePairSystem( PairConf::TX_KEY_END,   buffer[1] );
+
 } // namespace binloglist_impl
+
+
 
 template <class List, class BinLogger, bool UnlinkFile>
 class BinLogList : public multi::SingleList<List>, binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>{
@@ -55,8 +65,11 @@ public:
 		// if (!result.ok)
 		// 	return result;
 
-		if (result.pair)
+		if (result.pair){
+			result.pair->setTXBit(tx_);
+
 			binlogger_(*result.pair);
+		}
 
 		return result;
 	}
@@ -67,22 +80,47 @@ public:
 		auto result = list_->erase_(key);
 
 		if (result.status == result.DELETED){
+			// this will be on the stack, so need to be small-ish.
+			static_assert(sizeof(PairBufferTombstone) < 2048);
+
 			PairBufferTombstone buffer;
 
-			auto &pair = createTombstone__(key, buffer);
+			auto *pair = makePairTombstone(key, buffer);
+
+			pair->setTXBit(tx_);
 
 			binlogger_(pair);
 		}else if (result.pair){
-			binlogger_(*result.pair);
+			result.pair->setTXBit(tx_);
+
+			binlogger_(result.pair);
 		}
 
 		return result;
 	}
 
 	void mutable_notify(PairFactoryMutableNotifyMessage const &message){
-		binlogger_(*message.pair);
+		message.pair->setTXBit(tx_);
+
+		binlogger_(message.pair);
 
 		return list_->mutable_notify(message);
+	}
+
+	constexpr void beginTX(){
+		tx_ = 1;
+
+		binlogger_(binloglist_impl::pair_begin);
+
+		list_->beginTX();
+	}
+
+	constexpr void endTX(){
+		tx_ = 0;
+
+		binlogger_(binloglist_impl::pair_end);
+
+		list_->endTX();
 	}
 
 	constexpr void crontab() const{
@@ -98,22 +136,10 @@ public:
 	}
 
 private:
-	// this will be on the stack, so need to be small-ish.
-	static_assert(sizeof(PairBufferTombstone) < 2048);
-
-	static const Pair &createTombstone__(std::string_view const key, PairBufferTombstone &buffer){
-		Pair *pair = reinterpret_cast<Pair *>(buffer.data());
-
-		auto const factory = PairFactory::Tombstone{ key };
-
-		factory.create(pair);
-
-		return *pair;
-	}
-
-private:
 	using	multi::SingleList<List>::list_;
 	using	binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>::binlogger_;
+
+	uint8_t tx_ = 0;
 };
 
 

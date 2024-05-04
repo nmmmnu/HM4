@@ -1,5 +1,5 @@
 #include "base.h"
-
+#include "ilist/txguard.h"
 
 
 namespace net::worker::commands::Test{
@@ -17,11 +17,11 @@ namespace net::worker::commands::Test{
 		};
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			[[maybe_unused]]
-			auto const &list = db->mutable_list();
+			hm4::TXGuard guard{ *db };
 
-		//	list.testIntegrity(std::false_type{});
-		//	list.testIntegrity(std::true_type{});
+			hm4::insert(*db, "test_a", "a"	);
+			hm4::insert(*db, "test_b", "b"	);
+			hm4::erase (*db, "test_c"	);
 
 			return result.set();
 		}

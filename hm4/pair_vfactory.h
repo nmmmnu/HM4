@@ -54,15 +54,15 @@ inline namespace version_4_00_00{
 
 					if (pair->isOK() && pair->getVal().size() == val_size){
 						// size OK, but init create + expire
-						Pair::createInRawMemory<0,0,0,0>(pair, key, val_size, 0, 0);
+						Pair::createInRawMemoryNone(pair, key, val_size, 0, 0);
 					}else{
-						Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
+						Pair::createInRawMemory<Pair::CopyKey::N,Pair::CopyVal::N,Pair::MakeKey::N,Pair::MakeVal::Y>(pair, key, val_size, 0, 0);
 						copyPair_(pair);
 					}
 				}else{
 					{
 						// Standard
-						Pair::createInRawMemory<0,0,0,1>(pair, key, val_size, 0, 0);
+						Pair::createInRawMemory<Pair::CopyKey::N,Pair::CopyVal::N,Pair::MakeKey::N,Pair::MakeVal::Y>(pair, key, val_size, 0, 0);
 						copyPair_(pair);
 					}
 				}
@@ -71,7 +71,7 @@ inline namespace version_4_00_00{
 			}
 
 			void create(Pair *pair) final{
-				Pair::createInRawMemory<1,0,1,1>(pair, key, val_size, 0, 0);
+				Pair::createInRawMemory<Pair::CopyKey::Y,Pair::CopyVal::N,Pair::MakeKey::Y,Pair::MakeVal::Y>(pair, key, val_size, 0, 0);
 
 				copyPair_(pair);
 

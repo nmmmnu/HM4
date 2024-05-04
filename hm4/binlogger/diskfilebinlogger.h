@@ -41,6 +41,10 @@ public:
 			flush();
 	}
 
+	void operator()(Pair const *pair){
+		return operator()(*pair);
+	}
+
 	bool clear(){
 		dataBuilder_.close();
 		// file is sync to disk.

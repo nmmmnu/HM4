@@ -63,6 +63,14 @@ public:
 		return list1_->mutable_notify(message);
 	}
 
+	constexpr void beginTX(){
+		return list1_->beginTX();
+	}
+
+	constexpr void endTX(){
+		return list1_->endTX();
+	}
+
 	size_t bytes() const{
 		return list1_->bytes() + list2_->bytes();
 	}

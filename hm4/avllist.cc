@@ -4,7 +4,7 @@
 #include <cassert>
 #include <algorithm>	// max, swap
 
-#include "ilist_updateinplace.h"
+#include "ilist/updateinplace.h"
 
 #include "pmallocator.h"
 #include "stdallocator.h"

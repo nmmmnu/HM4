@@ -2,7 +2,7 @@
 
 #include "binarysearch.h"
 
-#include "ilist_updateinplace.h"
+#include "ilist/updateinplace.h"
 
 #include <algorithm>
 #include <cassert>

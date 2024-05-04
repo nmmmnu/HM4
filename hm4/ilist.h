@@ -44,9 +44,9 @@ struct InsertResult{
 		ERROR
 	};
 
-	bool		ok;
-	Status		status;
-	const Pair	*pair	= nullptr;
+	bool	ok;
+	Status	status;
+	Pair	*pair	= nullptr;
 
 	constexpr static auto INSERTED		=  Status::INSERTED		;
 	constexpr static auto DELETED		=  Status::DELETED		;
@@ -59,7 +59,7 @@ struct InsertResult{
 	constexpr static auto ERROR		=  Status::ERROR		;
 
 	[[nodiscard]]
-	constexpr static auto inserted(const Pair *pair){
+	constexpr static auto inserted(Pair *pair){
 		return InsertResult{ true, InsertResult::INSERTED, pair };
 	}
 
@@ -69,12 +69,12 @@ struct InsertResult{
 	}
 
 	[[nodiscard]]
-	constexpr static auto updatedInPlace(const Pair *pair){
+	constexpr static auto updatedInPlace(Pair *pair){
 		return InsertResult{ true, InsertResult::UPDATED_IN_PLACE, pair };
 	}
 
 	[[nodiscard]]
-	constexpr static auto replaced(const Pair *pair){
+	constexpr static auto replaced(Pair *pair){
 		return InsertResult{ true, InsertResult::REPLACED, pair };
 	}
 
@@ -285,11 +285,11 @@ constexpr void proceedInsertHint_skipMutableNotify(Pair *pair, PairFactory &fact
 
 template<class List, class PairFactory>
 constexpr void proceedInsertHint(List &list, Pair *pair, PairFactory &factory){
-	PairFactoryMutableNotifyMessage msg;
-	msg.bytes_old = pair->bytes();
-	msg.pair = pair;
+	auto const bytes_old = pair->bytes();
 
 	proceedInsertHint_skipMutableNotify(pair, factory);
+
+	PairFactoryMutableNotifyMessage msg{ pair, bytes_old, pair->bytes() };
 
 	msg.bytes_new = pair->bytes();
 

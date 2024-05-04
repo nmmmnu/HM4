@@ -2,7 +2,7 @@
 
 #include "hpair.h"
 
-#include "ilist_updateinplace.h"
+#include "ilist/updateinplace.h"
 
 #include <stdexcept>
 #include <random>	// mt19937, bernoulli_distribution
