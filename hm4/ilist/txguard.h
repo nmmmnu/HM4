@@ -20,6 +20,10 @@ namespace hm4{
 				list.endTX();
 		}
 
+		constexpr void boom_(){
+			moved = true;
+		}
+
 	private:
 		List &list;
 		bool moved = false;

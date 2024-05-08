@@ -31,10 +31,11 @@ namespace binloglist_impl{
 		}
 	};
 
-	PairBufferTombstone buffer[2];
+	alignas(Pair) char buffer_begin[ Pair::bytes(PairConf::TX_KEY_BEGIN, Pair::TOMBSTONE) ];
+	alignas(Pair) char buffer_end  [ Pair::bytes(PairConf::TX_KEY_END,   Pair::TOMBSTONE) ];
 
-	const auto *pair_begin = makePairSystem( PairConf::TX_KEY_BEGIN, buffer[0] );
-	const auto *pair_end   = makePairSystem( PairConf::TX_KEY_END,   buffer[1] );
+	const Pair *pair_begin = makePairSystem( PairConf::TX_KEY_BEGIN, buffer_begin );
+	const Pair *pair_end   = makePairSystem( PairConf::TX_KEY_END,   buffer_end );
 
 } // namespace binloglist_impl
 

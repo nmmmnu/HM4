@@ -121,6 +121,7 @@ constexpr size_t MIN_ARENA_SIZE		= MIN_ARENA_SIZE_BYTES / 1024 / 1024;
 #include "signalguard.h"
 #include "mystring.h"
 #include "db_net_options.h"
+#include "binlogreplay.h"
 
 namespace{
 
@@ -526,9 +527,7 @@ namespace{
 
 			// no need to show messages.
 			// messages will be shown from the builder.
-			for(auto const &pair : input)
-				if (!pair.isKeyEmpty())
-					insert(list, pair);
+			binlogFileReplay(list, input);
 
 		} /* d-tor of list kicks here */
 

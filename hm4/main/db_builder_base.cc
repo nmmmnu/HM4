@@ -45,31 +45,32 @@ void listInsert(List &list, std::string_view const key, std::string_view const v
 
 
 
-template <bool InsertIgnore, class List>
-void printStats(List &list, size_t const count){
-	auto const used = list.getAllocator().getUsedMemory();
+void printCount(size_t const count){
+	fmt::print(stderr, "Processed {:15} records.\n", count);
+}
 
+template <bool InsertIgnore, class List>
+void printStats(List const &list, size_t const count){
 	if constexpr(InsertIgnore){
-		fmt::print(stderr,
-			"Processed {:15} records.\n",
-			count
-		);
-	}else if (used != std::numeric_limits<decltype(used)>::max()){
-		fmt::print(stderr,
-			"Processed {:15} records. "
-			"In memory {:15} records, {:15} bytes. "
-			"Allocator {:15} bytes.\n",
-			count,
-			list.size(), list.bytes(),
-			used
-		);
+		printCount(count);
 	}else{
-		fmt::print(stderr,
-			"Processed {:15} records. "
-			"In memory {:15} records, {:15} bytes.\n",
-			count,
-			list.size(), list.bytes()
-		);
+		if (auto const used = list.getAllocator().getUsedMemory(); used != std::numeric_limits<decltype(used)>::max()){
+			fmt::print(stderr,
+				"Processed {:15} records. "
+				"In memory {:15} records, {:15} bytes. "
+				"Allocator {:15} bytes.\n",
+				count,
+				list.size(), list.bytes(),
+				used
+			);
+		}else{
+			fmt::print(stderr,
+				"Processed {:15} records. "
+				"In memory {:15} records, {:15} bytes.\n",
+				count,
+				list.size(), list.bytes()
+			);
+		}
 	}
 }
 

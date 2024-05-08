@@ -12,6 +12,8 @@
 #include "mmapallocator.h"
 #include "allocatedbuffer.h"
 
+#include "binlogreplay.h"
+
 using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
 using Allocator		= MyAllocator::ArenaAllocator;
 
@@ -44,25 +46,6 @@ private:
 	MemList	memlist;
 	MyList	mylist;
 };
-
-
-
-template <class List, class InputList>
-int listReplay(List &list, InputList const &inputList, size_t const process_step){
-	size_t i = 0;
-
-	for(auto const &pair : inputList){
-		if (!pair.isKeyEmpty())
-			insert(list, pair);
-
-		++i;
-
-		if (i % process_step == 0)
-			printStats<false>(list, i);
-	}
-
-	return 0;
-}
 
 
 
@@ -126,7 +109,7 @@ int main(int argc, char **argv){
 		return 2;
 	}
 
-	return listReplay(mylist, input, PROCESS_STEP);
+	hm4::binlogFileReplay(mylist, input);
 }
 
 
