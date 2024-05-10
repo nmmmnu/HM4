@@ -7,6 +7,8 @@
 #include "shared_iterations.h"
 #include "shared_zset.h"
 
+#include "ilist/txguard.h"
+
 namespace net::worker::commands::LinearCurve{
 	namespace linear_curve_impl_{
 
@@ -380,7 +382,7 @@ namespace net::worker::commands::LinearCurve{
 			return std::end(cmd);
 		};
 
-		// MC1SET a keySub0 x0 val0 keySub1 x1 val1 ...
+		// MC1ADD a keySub0 x0 val0 keySub1 x1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace linear_curve_impl_;
@@ -407,6 +409,8 @@ namespace net::worker::commands::LinearCurve{
 				if (!hm4::Pair::isValValid(value))
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
+
+			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const &keySub	= *(itk + 0);
@@ -448,6 +452,8 @@ namespace net::worker::commands::LinearCurve{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace linear_curve_impl_;
+
+			hm4::TXGuard guard{ *db };
 
 			return shared::zset::cmdProcessRem(p, db, result, blob, scoreSize);
 		}

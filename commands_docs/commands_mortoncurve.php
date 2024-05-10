@@ -76,7 +76,7 @@ return array(
 			"OK",
 			"OK",
 			"1.3.7.7",
-			"[number of items] * (READ + 3 * WRITE)",
+			"[number of items] * (READ + 3 * WRITE) + TX",
 			false,
 			true,
 
@@ -92,7 +92,7 @@ return array(
 			"bool",
 			"Always return 1",
 			"1.3.7.7",
-			"[number of items] * (READ + 2 * WRITE)",
+			"[number of items] * (READ + 2 * WRITE) + TX",
 			false,
 			true,
 

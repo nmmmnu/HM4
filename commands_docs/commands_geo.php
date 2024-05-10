@@ -51,7 +51,7 @@ return array(
 			"OK",
 			"OK",
 			"1.3.4.2",
-			"[number of keys] * (READ + 3 * WRITE)",
+			"[number of keys] * (READ + 3 * WRITE) + TX",
 			false,
 			true,
 
@@ -71,7 +71,7 @@ return array(
 			"OK",
 			"OK",
 			"1.3.4.2",
-			"[number of keys] * (READ + 2 * WRITE)",
+			"[number of keys] * (READ + 2 * WRITE) + TX",
 			false,
 			true,
 

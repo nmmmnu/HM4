@@ -1,6 +1,7 @@
 #include "base.h"
 #include "pair_vfactory.h"
 #include "mytime.h"
+#include "ilist/txguard.h"
 
 namespace net::worker::commands::Mutable{
 
@@ -69,6 +70,8 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			hm4::TXGuard guard{ *db };
+
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &key = *itk;
 				auto const &val = *std::next(itk);
@@ -112,6 +115,8 @@ namespace net::worker::commands::Mutable{
 				if (const auto &val = *std::next(itk); !hm4::Pair::isValValid(val))
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
+
+			hm4::TXGuard guard{ *db };
 
 			// check if any key exists
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -187,6 +192,8 @@ namespace net::worker::commands::Mutable{
 				}else
 					return result.set_0();
 			}
+
+			hm4::TXGuard guard{ *db };
 
 			// HINT
 			for(size_t i = 0; i < pcontainer.size(); ++i){
@@ -332,6 +339,8 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			hm4::TXGuard guard{ *db };
+
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &subN = *itk;
 
@@ -465,6 +474,8 @@ namespace net::worker::commands::Mutable{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			hm4::TXGuard guard{ *db };
+
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &key = *itk;
 
@@ -510,6 +521,8 @@ namespace net::worker::commands::Mutable{
 				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
+
+			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;

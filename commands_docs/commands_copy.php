@@ -50,7 +50,7 @@ return array(
 			"0 if the key value pair do not exists.<br />" .
 			"1 if the key value pair exists and name is changed.",
 			"1.2.16",
-			"READ + WRITE",
+			"READ + 2 * WRITE + TX",
 			true,
 			true,
 
@@ -69,7 +69,7 @@ return array(
 			"0 if the key value pair do not exists.<br />" .
 			"1 if the key value pair exists and name is changed.",
 			"1.2.16",
-			"2 * READ + WRITE",
+			"2 * READ + 2 * WRITE + TX",
 			true,
 			true,
 

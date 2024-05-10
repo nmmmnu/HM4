@@ -70,4 +70,5 @@ Changelog
 
 ### 1.3.7.8
 -	bugfix on mutable_x when table is flushed during commands like DELX.
+-	bugfix with removing key in GEOREM
 

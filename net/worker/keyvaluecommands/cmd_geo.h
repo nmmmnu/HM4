@@ -9,6 +9,8 @@
 #include "shared_zset.h"
 #include "shared_iterations.h"
 
+#include "ilist/txguard.h"
+
 #include "stringtokenizer.h"
 
 #include <array>
@@ -25,6 +27,8 @@ namespace net::worker::commands::Geo{
 
 			constexpr size_t buffer_t_size = (15 + 1) * 2 + 12;
 
+			constexpr char POINT_SEPARATOR = ',';
+
 			using buffer_t = std::array<char, buffer_t_size>;
 
 			std::string_view formatLine(double lat, double lon, std::string_view hash, buffer_t &buffer){
@@ -38,8 +42,8 @@ namespace net::worker::commands::Geo{
 					return { buffer.data(), result.size };
 			}
 
-			auto tokenizePoint(std::string_view line){
-				StringTokenizer const tok{ line, ',' };
+			auto extractPoint(std::string_view line){
+				StringTokenizer const tok{ line, POINT_SEPARATOR };
 				auto _ = getForwardTokenizer(tok);
 
 				auto const lat  = to_geo(_());
@@ -50,8 +54,8 @@ namespace net::worker::commands::Geo{
 				return r;
 			}
 
-			auto tokenizeName(char delimiter, std::string_view line){
-				StringTokenizer const tok{ line, delimiter };
+			auto extractGeoHash(std::string_view line){
+				StringTokenizer const tok{ line, POINT_SEPARATOR };
 				auto _ = getBackwardTokenizer(tok);
 
 				auto const r = _();
@@ -59,9 +63,13 @@ namespace net::worker::commands::Geo{
 				return r;
 			}
 
-			template<class DBAdapter>
-			auto tokenizeName(DBAdapter &, std::string_view line){
-				return tokenizeName(DBAdapter::SEPARATOR[0], line);
+			auto extractName(char delimiter, std::string_view line){
+				StringTokenizer const tok{ line, delimiter };
+				auto _ = getBackwardTokenizer(tok);
+
+				auto const r = _();
+
+				return r;
 			}
 
 			constexpr bool isGeoKeyValid(std::string_view key){
@@ -79,7 +87,7 @@ namespace net::worker::commands::Geo{
 			constexpr static bool canExtractValue = true;
 
 			constexpr static std::string_view decode(std::string_view score){
-				return tokenizeName(DBAdapter::SEPARATOR[0], score);
+				return extractGeoHash(score);
 			}
 
 			constexpr static std::string_view encode(std::string_view, std::string_view value){
@@ -129,6 +137,8 @@ namespace net::worker::commands::Geo{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
+			hm4::TXGuard guard{ *db };
+
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const lat = to_geo(*(itk + 0));
 				auto const lon = to_geo(*(itk + 1));
@@ -173,6 +183,8 @@ namespace net::worker::commands::Geo{
 			using namespace geo_impl_;
 
 			using GSC = GeoScoreController<DBAdapter>;
+
+			hm4::TXGuard guard{ *db };
 
 			return shared::zset::cmdProcessRem<GSC>(p, db, result, blob, GeoHash::MAX_SIZE);
 		}
@@ -355,7 +367,7 @@ namespace net::worker::commands::Geo{
 					if (!it->isOK())
 						continue;
 
-					auto const t_point = tokenizePoint(it->getVal());
+					auto const t_point = extractPoint(it->getVal());
 
 					auto const dist = distance(me, t_point, sphere);
 
@@ -363,10 +375,7 @@ namespace net::worker::commands::Geo{
 						if (++results > shared::config::ITERATIONS_RESULTS_MAX)
 							return result.set_container(container);
 
-						auto const place = tokenizeName(
-								db,
-								it->getKey()
-						);
+						auto const place = extractName( db.SEPARATOR[0], it->getKey() );
 
 						bcontainer.push_back();
 
@@ -448,7 +457,7 @@ namespace net::worker::commands::Geo{
 			if (line1.empty())
 				return result.set(int64_t{-1});
 
-			auto const p1 = tokenizePoint(line1);
+			auto const p1 = extractPoint(line1);
 
 			// ---
 
@@ -457,7 +466,7 @@ namespace net::worker::commands::Geo{
 			if (line2.empty())
 				return result.set(int64_t{-1});
 
-			auto const p2 = tokenizePoint(line2);
+			auto const p2 = extractPoint(line2);
 
 			// ---
 

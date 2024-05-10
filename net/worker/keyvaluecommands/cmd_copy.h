@@ -1,5 +1,5 @@
 #include "base.h"
-
+#include "ilist/txguard.h"
 
 
 namespace net::worker::commands::Copy{
@@ -40,14 +40,17 @@ namespace net::worker::commands::Copy{
 
 				if (auto *it = hm4::getPairPtr(list, key); it){
 
-					// SET
-
-					hm4::insert(list, newkey, it->getVal(), it->getTTL());
-
 					if constexpr(operation == CPMVOperation::MV || operation == CPMVOperation::MV_NX){
-						// DELETE
+						// Move  operation
 
+						hm4::TXGuard guard{ list };
+
+						hm4::insert(list, newkey, it->getVal(), it->getTTL());
 						hm4::erase(list, key);
+					}else{
+						// Copy operation
+
+						hm4::insert(list, newkey, it->getVal(), it->getTTL());
 					}
 
 					return result.set(true);

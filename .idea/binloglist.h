@@ -21,6 +21,7 @@ namespace binloglist_impl{
 		BinLogger	binlogger_;
 	};
 
+
 	template <class BinLogger>
 	struct BinLogListBase<BinLogger, true> : public BinLogListBase<BinLogger, false>{
 		using BinLogListBase<BinLogger, false>::BinLogListBase;
@@ -55,6 +56,8 @@ public:
 
 		binlogger_.clear();
 
+		tx_ = TX::NONE;
+
 		return result;
 	}
 
@@ -65,8 +68,11 @@ public:
 		// if (!result.ok)
 		// 	return result;
 
-		if (result.pair)
+		if (result.pair){
+			lazyEmitTX_();
+
 			binlogger_(*result.pair);
+		}
 
 		return result;
 	}
@@ -75,6 +81,8 @@ public:
 		assert(!key.empty());
 
 		auto result = list_->erase_(key);
+
+		lazyEmitTX_();
 
 		if (result.status == result.DELETED){
 			// this will be on the stack, so need to be small-ish.
@@ -93,19 +101,24 @@ public:
 	}
 
 	void mutable_notify(PairFactoryMutableNotifyMessage const &message){
+		lazyEmitTX_();
+
 		binlogger_(message.pair);
 
 		return list_->mutable_notify(message);
 	}
 
 	constexpr void beginTX(){
-		binlogger_(binloglist_impl::pair_begin);
+		tx_ = TX::BEGIN_LAZY;
 
 		list_->beginTX();
 	}
 
 	constexpr void endTX(){
-		binlogger_(binloglist_impl::pair_end);
+		if (tx_ == TX::BEGIN_EMIT)
+			binlogger_(binloglist_impl::pair_end);
+
+		tx_ = TX::NONE;
 
 		list_->endTX();
 	}
@@ -123,6 +136,22 @@ public:
 	}
 
 private:
+	void lazyEmitTX_(){
+		if (tx_ == TX::BEGIN_LAZY){
+			binlogger_(binloglist_impl::pair_begin);
+			tx_ = TX::BEGIN_EMIT;
+		}
+	}
+
+private:
+	enum class TX{
+		NONE,
+		BEGIN_LAZY,
+		BEGIN_EMIT
+	};
+
+	TX tx_ = TX::NONE;
+
 	using	multi::SingleList<List>::list_;
 	using	binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>::binlogger_;
 };

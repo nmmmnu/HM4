@@ -5,28 +5,27 @@ namespace hm4{
 
 	template<typename List>
 	struct TXGuard{
-		constexpr TXGuard(List &list) : list(list){
-			list.beginTX();
+		constexpr TXGuard(List &list) : list(&list){
+			list->beginTX();
 		}
 
 		TXGuard(TXGuard const &other) = delete;
 
 		constexpr TXGuard(TXGuard &&other) : list(other.list){
-			other.moved = true;
+			other.list = nullptr;
 		};
 
 		~TXGuard(){
-			if (!moved)
-				list.endTX();
+			if (list)
+				list->endTX();
 		}
 
 		constexpr void boom_(){
-			moved = true;
+			list = nullptr;
 		}
 
 	private:
-		List &list;
-		bool moved = false;
+		List *list;
 	};
 
 } // namespace hm4

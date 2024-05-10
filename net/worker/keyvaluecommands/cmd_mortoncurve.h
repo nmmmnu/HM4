@@ -8,6 +8,8 @@
 #include "shared_iterations.h"
 #include "shared_zset.h"
 
+#include "ilist/txguard.h"
+
 namespace net::worker::commands::MortonCurve{
 	namespace morton_curve_impl_{
 
@@ -517,6 +519,8 @@ namespace net::worker::commands::MortonCurve{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			hm4::TXGuard guard{ *db };
+
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const &keySub	= *(itk + 0);
 				auto const &x		= *(itk + 1);
@@ -558,6 +562,8 @@ namespace net::worker::commands::MortonCurve{
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
+
+			hm4::TXGuard guard{ *db };
 
 			return shared::zset::cmdProcessRem(p, db, result, blob, scoreSize);
 		}

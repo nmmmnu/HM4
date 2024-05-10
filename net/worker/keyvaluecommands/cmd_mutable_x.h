@@ -6,6 +6,8 @@
 
 #include "shared_stoppredicate.h"
 
+#include "ilist/txguard.h"
+
 namespace net::worker::commands::MutableX{
 	namespace mutablex_impl_{
 
@@ -85,6 +87,7 @@ namespace net::worker::commands::MutableX{
 
 			template<bool ResultAsHash, class Predicate, class StopPredicate, class List, class Result>
 			void process_x_(Predicate p, StopPredicate stop, List &list, std::string_view key, Result &result, ContainerX &container){
+				hm4::TXGuard guard{ list };
 
 				uint8_t check_passes = 0;
 

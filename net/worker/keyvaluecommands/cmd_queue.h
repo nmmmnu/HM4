@@ -2,6 +2,7 @@
 #include "idgenerator.h"
 #include "mystring.h"
 #include "logger.h"
+#include "ilist/txguard.h"
 
 
 namespace net::worker::commands::Queue{
@@ -206,14 +207,19 @@ namespace net::worker::commands::Queue{
 				// update control key...
 				logger<Logger::DEBUG>() << "SPOP: Update control key" << keyControl << "to" << score;
 
+				hm4::TXGuard guard{ list };
+
 				if (score.empty())
 					hm4::erase(list, keyControl);
 				else
 					hm4::insert(list, keyControl, score);
-			}
 
-			// delete data key...
-			hm4::erase(list, key);
+				// delete data key...
+				hm4::erase(list, key);
+			}else{
+				// delete data key...
+				hm4::erase(list, key);
+			}
 		}
 
 		static void finalizeTryAgain_(std::string_view keyControl, std::string_view key, typename DBAdapter::List &list, Result<Protocol> &result){
