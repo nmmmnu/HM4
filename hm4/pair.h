@@ -28,9 +28,6 @@ inline namespace version_4_00_00{
 		constexpr uint16_t	MAX_KEY_SIZE	= 0b0'0000'0000'0000'0000'0000'0011'1111'1111;	// 1023, MySQL is 1000
 		constexpr uint32_t	MAX_VAL_SIZE	= 0b0'0000'1111'1111'1111'1111'1111'1111'1111;	// 256 MB
 
-		constexpr auto		TX_KEY_BEGIN	= std::string_view{ "\0\0" "TX_B", 6 };
-		constexpr auto		TX_KEY_END	= std::string_view{ "\0\0" "TX_E", 6 };
-
 		// Note, in net/protocol/redisprotocol.cc,
 		// there is seemingly unrelated value MAX_PARAM_SIZE
 		// You need to set it manually to MAX_VAL_SIZE or larger

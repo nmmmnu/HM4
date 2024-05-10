@@ -16,27 +16,7 @@ namespace net::worker::commands::Test{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			if constexpr(0){
-				hm4::TXGuard guard{ *db };
-
-				hm4::insert(*db, "test_a1", "a"	);
-				hm4::insert(*db, "test_b1", "b"	);
-				hm4::erase (*db, "test_c1"	);
-
-			//	guard.boom_();
-			}
-
-			if constexpr(0){
-				hm4::TXGuard guard{ *db };
-
-				hm4::insert(*db, "test_a2", "a"	);
-				hm4::insert(*db, "test_b2", "b"	);
-				hm4::erase (*db, "test_c2"	);
-
-				guard.boom_();
-			}
-
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set();
 		}
 

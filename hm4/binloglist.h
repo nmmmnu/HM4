@@ -30,12 +30,6 @@ namespace binloglist_impl{
 		}
 	};
 
-	alignas(Pair) char buffer_begin[ Pair::bytes(PairConf::TX_KEY_BEGIN, Pair::TOMBSTONE) ];
-	alignas(Pair) char buffer_end  [ Pair::bytes(PairConf::TX_KEY_END,   Pair::TOMBSTONE) ];
-
-	const Pair *pair_begin = makePairSystem( PairConf::TX_KEY_BEGIN, buffer_begin );
-	const Pair *pair_end   = makePairSystem( PairConf::TX_KEY_END,   buffer_end );
-
 } // namespace binloglist_impl
 
 
@@ -96,18 +90,6 @@ public:
 		binlogger_(message.pair);
 
 		return list_->mutable_notify(message);
-	}
-
-	constexpr void beginTX(){
-		binlogger_(binloglist_impl::pair_begin);
-
-		list_->beginTX();
-	}
-
-	constexpr void endTX(){
-		binlogger_(binloglist_impl::pair_end);
-
-		list_->endTX();
 	}
 
 	constexpr void crontab() const{

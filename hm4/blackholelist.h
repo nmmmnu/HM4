@@ -50,12 +50,6 @@ public:
 	constexpr static void mutable_notify(PairFactoryMutableNotifyMessage const &){
 	}
 
-	constexpr static void beginTX(){
-	}
-
-	constexpr static void endTX(){
-	}
-
 	constexpr static
 	size_type size(){
 		return 0;

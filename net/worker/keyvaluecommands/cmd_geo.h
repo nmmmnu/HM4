@@ -84,7 +84,7 @@ namespace net::worker::commands::Geo{
 
 		template<class DBAdapter>
 		struct GeoScoreController{
-			constexpr static bool canExtractValue = true;
+			constexpr static bool canGetValue = true;
 
 			constexpr static std::string_view decode(std::string_view score){
 				return extractGeoHash(score);

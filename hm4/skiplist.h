@@ -54,12 +54,6 @@ public:
 		lc_.upd(msg.bytes_old, msg.bytes_new);
 	}
 
-	constexpr static void beginTX(){
-	}
-
-	constexpr static void endTX(){
-	}
-
 	auto size() const{
 		return lc_.size();
 	}

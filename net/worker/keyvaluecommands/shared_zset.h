@@ -54,7 +54,7 @@ namespace net::worker::shared::zset{
 
 
 		struct StandardScoreController{
-			constexpr static bool canExtractValue = false;
+			constexpr static bool canGetValue = false;
 
 			constexpr static std::string_view decode(std::string_view score){
 				return score;
@@ -71,6 +71,14 @@ namespace net::worker::shared::zset{
 		std::string_view getScoreFromControlKey(DBAdapter &db, std::string_view keyCtrl){
 			return SC::decode( hm4::getPairVal(*db, keyCtrl) );
 		}
+
+		template<typename SC, typename DBAdapter>
+		std::string_view getValueFromControlKey(DBAdapter &db, std::string_view keyCtrl){
+			static_assert(SC::canGetValue);
+
+			return SC::getValue( hm4::getPairVal(*db, keyCtrl) );
+		}
+
 	} // namespace impl_
 
 
@@ -193,37 +201,47 @@ namespace net::worker::shared::zset{
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
-		if (auto const score = getScoreFromControlKey<SC>(db, keyCtrl); !score.empty()){
-			// Case 1: ctrl key is set
+		if constexpr(SC::canGetValue){
+			// Shortcut procedure
 
-			if (!isKeyValid(keyN, keySub, score)){
-				// Case 1.0: invalid ctrl key, probable attack.
+			if (auto const value = getValueFromControlKey<SC>(db, keyCtrl); !value.empty()){
+				// Case 1: ctrl key is set
+				return value;
+			}else{
+				// Case 2: no ctrl key
 				logger<Logger::DEBUG>() << "ZSet INVALID ctrl key" << keyCtrl;
 
 				return "";
 			}
+		}else{
+			// standard procedure
 
-			// Case 1.1: valid ctrl key.
+			if (auto const score = getScoreFromControlKey<SC>(db, keyCtrl); !score.empty()){
+				// Case 1: ctrl key is set
 
-			if constexpr(SC::canExtractValue){
-				logger<Logger::DEBUG>() << "ZSet SKIP hash key by smart controller";
+				if (!isKeyValid(keyN, keySub, score)){
+					// Case 1.0: invalid ctrl key, probable attack.
+					logger<Logger::DEBUG>() << "ZSet INVALID ctrl key" << keyCtrl;
 
-				return SC::getValue(score);
-			}else{
+					return "";
+				}
+
+				// Case 1.1: valid ctrl key.
+
 				hm4::PairBufferKey bufferKeyHash;
 				auto const keyHash = makeKey(db, keyN, keySub, score, bufferKeyHash);
 
 				logger<Logger::DEBUG>() << "ZSet GET hash key" << keyHash;
 
 				return hm4::getPairVal(*db, keyHash);
+			}else{
+				// Case 2: no ctrl key
+
+				logger<Logger::DEBUG>() << "ZSet no ctrl key";
+
+				return "";
 			}
-		}else{
-			// Case 2: no ctrl key
-
-			logger<Logger::DEBUG>() << "ZSet no ctrl key";
-
-			return "";
-		}
+		} // if constexpr
 	}
 
 	template<typename SC = impl_::StandardScoreController, typename DBAdapter>

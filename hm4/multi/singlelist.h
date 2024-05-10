@@ -136,14 +136,6 @@ public:
 		return list_->mutable_notify(message);
 	}
 
-	constexpr void beginTX(){
-		return list_->beginTX();
-	}
-
-	constexpr void endTX(){
-		return list_->endTX();
-	}
-
 	constexpr void crontab(){
 		list_->crontab();
 	}
