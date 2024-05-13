@@ -27,7 +27,7 @@ return array(
 			"string (int)",
 			"Value of the removed element or empty string.",
 			"1.2.16",
-			"READ + 2 * WRITE + TX",
+			"READ + 2 * WRITE, TX",
 			true,
 			true,
 

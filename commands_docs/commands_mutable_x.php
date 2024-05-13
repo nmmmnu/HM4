@@ -12,7 +12,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.2.17",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 
@@ -43,7 +43,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.3.7.1",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 
@@ -75,7 +75,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.2.17",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 
@@ -106,7 +106,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.3.7.1",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 
@@ -138,7 +138,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.2.17",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 
@@ -169,7 +169,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.3.7.1",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 
@@ -201,7 +201,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.3.7.5",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 
@@ -232,7 +232,7 @@ return array(
 			"Last key, if there is second page.",
 
 			"1.3.7.5",
-			"READ + [number of keys] * WRITE + TX",
+			"READ + [number of keys] * WRITE, TX",
 			false,
 			true,
 

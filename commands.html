@@ -299,6 +299,19 @@
 				<li><a href="#CMSADDCOUNT">CMSADDCOUNT</a></li>
 				</div>
 			<div>
+			<b>linearcurve.h</b><br />
+			&nbsp;
+
+					<li><a href="#MC1GET">MC1GET</a></li>
+				<li><a href="#MC1MGET">MC1MGET</a></li>
+				<li><a href="#MC1EXISTS">MC1EXISTS</a></li>
+				<li><a href="#MC1SCORE">MC1SCORE</a></li>
+				<li><a href="#MC1ADD">MC1ADD</a></li>
+				<li><a href="#MC1REM">MC1REM</a></li>
+				<li><a href="#MC1POINT">MC1POINT</a></li>
+				<li><a href="#MC1RANGE">MC1RANGE</a></li>
+				</div>
+			<div>
 			<b>mortoncurve.h</b><br />
 			&nbsp;
 
@@ -1535,7 +1548,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XNDEL</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1560,7 +1573,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XRDEL</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1585,7 +1598,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XNPERSIST</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1610,7 +1623,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XRPERSIST</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1635,7 +1648,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XNEXPIRE</td></tr>
 				<tr><td>Available since		</td><td>1.2.17</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1660,7 +1673,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XREXPIRE</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.1</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1685,7 +1698,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XNEXPIREAT</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.5</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1710,7 +1723,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>XREXPIREAT</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.5</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + [number of keys] * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mutable_x.h</td></tr>
@@ -1827,7 +1840,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RENAME</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
@@ -1850,7 +1863,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>RENAMENX</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ + WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ + 2 * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>copy.h</td></tr>
@@ -2360,7 +2373,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>SPOP</td></tr>
 				<tr><td>Available since		</td><td>1.2.16</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * WRITE, TX</td></tr>
 				<tr><td>Redis compatible	</td><td>Yes</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>queue.h</td></tr>
@@ -2546,7 +2559,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GEOADD</td></tr>
 				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 3 * WRITE)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 3 * WRITE), TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>geo.h</td></tr>
@@ -2570,7 +2583,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>GEOREM</td></tr>
 				<tr><td>Available since		</td><td>1.3.4.2</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 2 * WRITE)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * (READ + 2 * WRITE), TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>geo.h</td></tr>
@@ -3327,6 +3340,194 @@
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="MC1GET">
+
+			<h2>MC1GET key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1GET</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get value of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			value of the subkey
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC1MGET">
+
+			<h2>MC1MGET key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1MGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get values of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			values of the items
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC1EXISTS">
+
+			<h2>MC1EXISTS key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1EXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check if <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the item do not exists.<br />1 if the item exists.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC1SCORE">
+
+			<h2>MC1SCORE key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1SCORE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get score of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC1ADD">
+
+			<h2>MC1ADD key subKey x value [subKey x value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with 1D coordinate <i>x</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC1REM">
+
+			<h2>MC1REM key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1REM</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC1POINT">
+
+			<h2>MC1POINT key x number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1POINT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'point' with 1D coordinate <i>x</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><br />mc1add users 0 1 john          <i>adds user_id 0, john,   LA</i><br />mc1add users 1 1 peter         <i>adds user_id 1, peter,  LA</i><br />mc1add users 2 1 jill          <i>adds user_id 2, jill,   LA</i><br />mc1add users 3 2 robert        <i>adds user_id 3, robert, NYC</i><br />mc1add users 4 2 pola          <i>adds user_id 4, pola,   NYC</i><br />mc1add users 5 2 pepe          <i>adds user_id 5, pepe,   NYC</i><br />mc1point users 2 10000         <i>gets all from LA        (robert, pola, pepe)</i><br /><br />xnget users~ 1000 users~</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where x = [x] limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC1RANGE">
+
+			<h2>MC1RANGE key x_min x_max_min y_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC1RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>linearcurve.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'rectangle' with 1D coordinate <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><br />mc1add users 0 1 john          <i>adds user_id 0, john,   LA</i><br />mc1add users 1 1 peter         <i>adds user_id 1, peter,  LA</i><br />mc1add users 2 1 jill          <i>adds user_id 2, jill,   LA</i><br />mc1add users 3 2 robert        <i>adds user_id 3, robert, NYC</i><br />mc1add users 4 2 pola          <i>adds user_id 4, pola,   NYC</i><br />mc1add users 5 2 pepe          <i>adds user_id 5, pepe,   NYC</i><br />mc1point users 2   10000       <i>gets all from LA        (robert, pola, pepe)</i><br />mc1range users 2 2 10000       <i>gets all from LA        (robert, pola, pepe) - same as previous, same speed.</i><br /><br />xnget users~ 1000 users~</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where x >= [x_min] and x <= [x_max] limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="MC2GET">
 
 			<h2>MC2GET key subkey</h2>
@@ -3421,12 +3622,12 @@
 		</div>
 				<div class="cmd" id="MC2ADD">
 
-			<h2>MC2ADD subKey x y value [subKey x y value]...</h2>
+			<h2>MC2ADD key subKey x y value [subKey x y value]...</h2>
 
 			<table border="1">
 				<tr><td>Command			</td><td>MC2ADD</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
@@ -3449,7 +3650,7 @@
 			<table border="1">
 				<tr><td>Command			</td><td>MC2REM</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE)</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
 				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
@@ -3485,7 +3686,7 @@
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br /><br />mc2set users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />mc2set users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />mc2set users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />mc2set users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br /><br />xnget users~ 1000 users~</pre>			
+			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br /><br />mc2add users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />mc2add users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />mc2add users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />mc2add users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />mc2add users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />mc2add users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br /><br />xnget users~ 1000 users~</pre>			
 						<h3>MySQL Rosetta:</h3>
 			<pre>select key, val from table where x = [x] and y = [y] limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
@@ -3510,7 +3711,7 @@
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br /><br />mc2set users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />mc2set users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />mc2set users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />mc2set users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br />mc2range users 2 2 2 2 10000     <i>gets all support from LA               (pola, pepe) - same as previous, but slower.</i><br />mc2range users 2 2 1 2 10000     <i>gets support from LA and NYC           (jill, pola, pepe)</i><br />mc2range users 1 2 2 2 10000     <i>gets sales and support from LA         (robert, pola, pepe)</i><br />mc2range users 1 2 1 2 10000     <i>gets sales and support from LA and NYC (all)</i><br /><br />xnget users~ 1000 users~</pre>			
+			<pre><i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br /><i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br /><br />mc2add users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />mc2add users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />mc2add users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />mc2add users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />mc2add users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />mc2add users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br />mc2range users 2 2 2 2 10000     <i>gets all support from LA               (pola, pepe) - same as previous, but slower.</i><br />mc2range users 2 2 1 2 10000     <i>gets support from LA and NYC           (jill, pola, pepe)</i><br />mc2range users 1 2 2 2 10000     <i>gets sales and support from LA         (robert, pola, pepe)</i><br />mc2range users 1 2 1 2 10000     <i>gets sales and support from LA and NYC (all)</i><br /><br />xnget users~ 1000 users~</pre>			
 						<h3>MySQL Rosetta:</h3>
 			<pre>select key, val from table where x >= [x_min] and x <= [x_max] and y >= [y_min] and y <= [y_max] limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>

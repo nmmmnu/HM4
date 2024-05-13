@@ -68,15 +68,14 @@ return array(
 	new Cmd(
 			"MC2ADD",
 
-			"MC2ADD subKey x y value [subKey x y value]...",
+			"MC2ADD key subKey x y value [subKey x y value]...",
 
-			"Set " .
-			"<i>subkey</i> with 2D coordinates <i>x</i> and <i>y</i> and <i>value</i> in <i>key</i>.<br />" .
+			"Set <i>subkey</i> with 2D coordinates <i>x</i> and <i>y</i> and <i>value</i> in <i>key</i>.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.",
 			"OK",
 			"OK",
 			"1.3.7.7",
-			"[number of items] * (READ + 3 * WRITE) + TX",
+			"[number of items] * (READ + 3 * WRITE), TX",
 			false,
 			true,
 
@@ -92,7 +91,7 @@ return array(
 			"bool",
 			"Always return 1",
 			"1.3.7.7",
-			"[number of items] * (READ + 2 * WRITE) + TX",
+			"[number of items] * (READ + 2 * WRITE), TX",
 			false,
 			true,
 
@@ -125,13 +124,13 @@ return array(
 			"<i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br />" .
 			"<i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br />" .
 			"<br />" .
-			"mc2set users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />" .
-			"mc2set users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />" .
-			"mc2set users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />" .
+			"mc2add users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />" .
+			"mc2add users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />" .
+			"mc2add users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />" .
 
-			"mc2set users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />" .
-			"mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />" .
-			"mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />" .
+			"mc2add users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />" .
+			"mc2add users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />" .
+			"mc2add users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />" .
 
 			"mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br />" .
 			"<br />" .
@@ -167,13 +166,13 @@ return array(
 			"<i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br />" .
 			"<i>Each office have two kind of employees - sales and support (sales=1 and support=2).</i><br />" .
 			"<br />" .
-			"mc2set users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />" .
-			"mc2set users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />" .
-			"mc2set users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />" .
+			"mc2add users 0 1 1 john          <i>adds user_id 0, john,   sales,   LA</i><br />" .
+			"mc2add users 1 1 1 peter         <i>adds user_id 1, peter,  sales,   LA</i><br />" .
+			"mc2add users 2 2 1 jill          <i>adds user_id 2, jill,   support, LA</i><br />" .
 
-			"mc2set users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />" .
-			"mc2set users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />" .
-			"mc2set users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />" .
+			"mc2add users 3 1 2 robert        <i>adds user_id 3, robert, sales,   NYC</i><br />" .
+			"mc2add users 4 2 2 pola          <i>adds user_id 4, pola,   support, NYC</i><br />" .
+			"mc2add users 5 2 2 pepe          <i>adds user_id 5, pepe,   support, NYC</i><br />" .
 
 			"mc2point users 2 2 10000         <i>gets all support from LA               (pola, pepe)</i><br />" .
 			"mc2range users 2 2 2 2 10000     <i>gets all support from LA               (pola, pepe) - same as previous, but slower.</i><br />" .
