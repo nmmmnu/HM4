@@ -174,7 +174,7 @@ namespace{
 			for(std::string_view const file1 : gl){
 				std::string const file2 = StringReplace::replaceByCopy(file1, from, to);
 
-				fmt::print(" -{:<60} -> {}\n", file1, file2);
+				fmt::print(" - {:<60} -> {}\n", file1, file2);
 
 				rename(file1.data(), file2.data());
 			}
@@ -223,7 +223,7 @@ namespace{
 			fmt::print("Sorted file list to consider:\n");
 
 			for(auto &[size, filename] : files)
-				fmt::print(" - {:<62} {:>8}\n", filename, size);
+				fmt::print(" - {:<62} {:>12}\n", filename, size);
 
 			fmt::print("\n");
 		}
