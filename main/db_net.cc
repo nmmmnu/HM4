@@ -183,6 +183,10 @@ namespace{
 		return allocator;
 	}
 
+	auto createPairBuffer(){
+		return MyBuffer::MMapBuffer<hm4::PairBuffer>{};
+	}
+
 	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, hm4::PairBuffer &pairBuffer);
 
 	void checkBinLogFile(std::string_view file, std::string_view path, Allocator &allocator, hm4::PairBuffer &pairBuffer){
@@ -210,7 +214,7 @@ namespace{
 			auto allocator1 = createAllocator(opt, buffer1);
 			auto allocator2 = createAllocator(opt, buffer2);
 
-			auto pairBuffer = std::make_unique<hm4::PairBuffer>();
+			auto allocatedPairBuffer = createPairBuffer();
 
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
 
@@ -221,12 +225,12 @@ namespace{
 				// can be done in parallel,
 				// but then it will make preasure to the disk
 
-				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator1, *pairBuffer);
-				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator2, *pairBuffer);
+				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator1, *allocatedPairBuffer);
+				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator2, *allocatedPairBuffer);
 
 				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2, *pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2, *allocatedPairBuffer },
 								starting_server_with,
 									"mutable concurrent binlog",
 									MyMemList::getName(),
@@ -235,7 +239,7 @@ namespace{
 			}else{
 				using MyFactory = DBAdapterFactory::MutableConcurrent<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2, *pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2, *allocatedPairBuffer },
 								starting_server_with,
 									"mutable concurrent",
 									MyMemList::getName(),
@@ -249,7 +253,7 @@ namespace{
 
 			auto allocator = createAllocator(opt, buffer);
 
-			auto pairBuffer = std::make_unique<hm4::PairBuffer>();
+			auto allocatedPairBuffer = createPairBuffer();
 
 			bool const have_binlog = ! opt.binlog_path1.empty();
 
@@ -261,7 +265,7 @@ namespace{
 
 				using MyFactory = DBAdapterFactory::MutableBinLog<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator, *pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator, *allocatedPairBuffer },
 								starting_server_with,
 									"mutable binlog",
 									MyMemList::getName(),
@@ -270,7 +274,7 @@ namespace{
 			}else{
 				using MyFactory = DBAdapterFactory::Mutable<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, allocator, *pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, allocator, *allocatedPairBuffer },
 								starting_server_with,
 									"mutable",
 									MyMemList::getName(),

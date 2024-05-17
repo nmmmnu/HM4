@@ -36,6 +36,14 @@ namespace MyBuffer{
 			return data_;
 		}
 
+		value_type &operator*() noexcept{
+			return *data_;
+		}
+
+		value_type const &operator*() const noexcept{
+			return *data_;
+		}
+
 		auto size() const noexcept{
 			return size_;
 		}

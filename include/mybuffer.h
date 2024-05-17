@@ -27,6 +27,15 @@ namespace MyBuffer{
 			return data_;
 		}
 
+		constexpr
+		value_type &operator*() noexcept{
+			return *data_;
+		}
+
+		constexpr value_type const &operator*() const noexcept{
+			return *data_;
+		}
+
 		constexpr auto size() const noexcept{
 			return size_;
 		}
@@ -52,6 +61,15 @@ namespace MyBuffer{
 
 		constexpr const value_type *data() const noexcept{
 			return data_;
+		}
+
+		constexpr
+		value_type &operator*() noexcept{
+			return *data_;
+		}
+
+		constexpr value_type const &operator*() const noexcept{
+			return *data_;
 		}
 
 		constexpr static auto size() noexcept{
