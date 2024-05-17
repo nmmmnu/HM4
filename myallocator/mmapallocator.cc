@@ -45,6 +45,14 @@ namespace MyAllocator{
 			munmap(p, size);
 		}
 
+		void allocatePages(void *p, std::size_t size) noexcept{
+			madvise(p, size, MADV_WILLNEED);
+		}
+
+		void feeePages(void *p, std::size_t size) noexcept{
+			madvise(p, size, MADV_DONTNEED);
+		}
+
 	} // namespace mmapallocator_impl_
 } // namespace MyAllocator
 

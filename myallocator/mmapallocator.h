@@ -13,6 +13,9 @@ namespace MyAllocator{
 		void *createHugeTLB(std::size_t size) noexcept;
 		#endif
 		void destroy(void *p, std::size_t size_) noexcept;
+
+		void allocatePages(void *p, std::size_t size) noexcept;
+		void feeePages(void *p, std::size_t size) noexcept;
 	};
 
 	struct MMapAllocator{
