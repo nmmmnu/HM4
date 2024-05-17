@@ -184,7 +184,8 @@ namespace{
 	}
 
 	auto createPairBuffer(){
-		return MyBuffer::MMapBuffer<hm4::PairBuffer>{};
+	//	return MyBuffer::MMapBuffer<hm4::PairBuffer>{};
+		return std::make_unique<hm4::PairBuffer>();
 	}
 
 	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, hm4::PairBuffer &pairBuffer);
