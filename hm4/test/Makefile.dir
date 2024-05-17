@@ -32,7 +32,7 @@ $(A)test_multi_list: $(O)test_multi_list.o $(PAIR_OBJ)	\
 	$(LINK)
 
 $(A)test_file: $(O)test_file.o $(PAIR_OBJ)			\
-		$(O)mmapallocator.o				\
+		$(O)mmapbuffer.o				\
 		$(O)vectorlist.o $(O)linklist.o $(O)skiplist.o	\
 		$(O)unrolledlinklist.o $(O)unrolledskiplist.o	\
 		$(O)avllist.o					\

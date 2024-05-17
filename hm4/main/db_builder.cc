@@ -11,10 +11,9 @@
 using MyReader = FileReader;
 
 #include "arenaallocator.h"
-#include "mmapallocator.h"
-#include "allocatedbuffer.h"
+#include "mmapbuffer.h"
 
-using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
+using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator		= MyAllocator::ArenaAllocator;
 
 constexpr size_t MIN_ARENA_SIZE = 128;

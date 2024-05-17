@@ -1,11 +1,11 @@
-#include "mmapallocator.h"
+#include "mmapbuffer.h"
 
 #include "logger.h"
 
 #include <sys/mman.h>
 
-namespace MyAllocator{
-	namespace mmapallocator_impl_{
+namespace MyBuffer{
+	namespace mmapbuffer_impl_{
 		// duplicate, but with template looks very bad.
 
 		constexpr std::string_view maskAllocate   = "MMapAllocator allocating {} bytes with {} mmap.";

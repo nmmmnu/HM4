@@ -11,8 +11,7 @@
 #include "stdallocator.h"
 #include "trackingallocator.h"
 #include "arenaallocator.h"
-#include "mmapallocator.h"
-#include "allocatedbuffer.h"
+#include "mmapbuffer.h"
 
 constexpr size_t ARENA_SIZE = 1ULL * 1024 * 1024 * 1024 * 6;
 
@@ -20,7 +19,7 @@ using Allocator_std0	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
 using Allocator_std1	= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
 using Allocator_std	= Allocator_std0;
 
-using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
+using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;
@@ -220,6 +219,11 @@ int main(int argc, char **argv){
 	const char *type	= argv[2];
 	const char *filename	= argv[3];
 	const char *key		= argv[4];
+
+	if (key[0] == '\0'){
+		fmt::print("Key can not be empty.\n");
+		return -100;
+	}
 
 	switch(op[0]){
 	case 's': return file_search( type[0], filename, key, false	);

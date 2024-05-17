@@ -1,0 +1,68 @@
+#ifndef MY_MMAP_BUFFER_
+#define MY_MMAP_BUFFER_
+
+#include <cassert>
+#include <cstdint>
+
+namespace MyBuffer{
+
+	namespace mmapbuffer_impl_{
+		void *createNormal(std::size_t size) noexcept;
+		#ifdef USE_HUGETLB
+		void *createHugeTLB(std::size_t size) noexcept;
+		#endif
+		void destroy(void *p, std::size_t size) noexcept;
+
+		void allocatePages(void *p, std::size_t size) noexcept;
+		void feeePages(void *p, std::size_t size) noexcept;
+	};
+
+	template<typename T>
+	struct MMapBuffer{
+		using value_type	= T;
+		using size_type		= std::size_t;
+
+		MMapBuffer(size_type size = 1) : size_(size){}
+
+		~MMapBuffer(){
+			mmapbuffer_impl_::destroy(data_, bytes());
+		}
+
+		value_type *data() noexcept{
+			return data_;
+		}
+
+		const value_type *data() const noexcept{
+			return data_;
+		}
+
+		auto size() const noexcept{
+			return size_;
+		}
+
+		auto bytes() const noexcept{
+			return sizeof(T) * size_;
+		}
+
+	private:
+		static value_type *allocate__(size_type size){
+			return reinterpret_cast<value_type *>(
+				#ifdef USE_HUGETLB
+					mmapbuffer_impl_::createHugeTLB(size)
+				#else
+					mmapbuffer_impl_::createNormal(size)
+				#endif
+			);
+		}
+
+	private:
+		size_type	size_;
+		value_type	*data_ = allocate__(sizeof(T) * size_);
+	};
+
+	using ByteMMapBuffer = MMapBuffer<std::uint8_t>;
+
+} // namespace MyBuffer
+
+#endif
+

@@ -1,5 +1,5 @@
 
-SUBDIRS = test common myallocator	\
+SUBDIRS = test common	\
 		hm4					\
 			hm4/disk			\
 			hm4/listloader			\

@@ -13,8 +13,7 @@
 #include "fmt/printf.h"
 
 #include "arenaallocator.h"
-#include "mmapallocator.h"
-#include "allocatedbuffer.h"
+#include "mmapbuffer.h"
 
 #include "version.h"
 #include "myfs.h"
@@ -33,7 +32,7 @@
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
-using ArenaBuffer	= MyBuffer::AllocatedByteBufferOwned<MyAllocator::MMapAllocator>;
+using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator		= MyAllocator::ArenaAllocator;
 
 // ----------------------------------
