@@ -21,13 +21,15 @@ namespace DBAdapterFactory{
 	template<
 		DualListEraseType ET,
 		class MemListType,
-		template<                   class, class, class, class> class MutableFlushListType
+		class MyPairBuffer,
+		template<                   class, class, class, class, class> class MutableFlushListType
 	>
 #else
 	template<
 		DualListEraseType ET,
 		class MemListType,
-		template<DualListEraseType, class, class, class, class> class MutableFlushListType
+		class MyPairBuffer,
+		template<DualListEraseType, class, class, class, class, class> class MutableFlushListType
 	>
 #endif
 	struct MutableBase{
@@ -39,9 +41,9 @@ namespace DBAdapterFactory{
 		using Flush			= hm4::flusher::DiskFileFlush<IDGenerator>;
 
 		#ifndef USE_CONCURRENCY
-		using MutableFlushList		= MutableFlushListType<    MemList, Predicate, Flush, ListLoader>;
+		using MutableFlushList		= MutableFlushListType<    MemList, MyPairBuffer, Predicate, Flush, ListLoader>;
 		#else
-		using MutableFlushList		= MutableFlushListType<ET, MemList, Predicate, Flush, ListLoader>;
+		using MutableFlushList		= MutableFlushListType<ET, MemList, MyPairBuffer, Predicate, Flush, ListLoader>;
 		#endif
 
 		using DList			= hm4::multi::DualList<

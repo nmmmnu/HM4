@@ -57,7 +57,7 @@ namespace flushlist_impl_{
 	}
 
 	template<class FlushList, class PFactory>
-	auto  flushThenInsert(FlushList &flushList, PFactory &factory, PairBuffer &buffer){
+	auto flushThenInsert(FlushList &flushList, PFactory &factory, PairBuffer &buffer){
 		Pair *pair = reinterpret_cast<Pair *>(buffer.data());
 
 		factory.create(pair);

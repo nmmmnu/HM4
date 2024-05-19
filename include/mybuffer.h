@@ -36,6 +36,15 @@ namespace MyBuffer{
 			return *data_;
 		}
 
+		constexpr const value_type *operator->() const noexcept{
+			return data_;
+		}
+
+		constexpr
+		value_type *operator->() noexcept{
+			return data_;
+		}
+
 		constexpr auto size() const noexcept{
 			return size_;
 		}
@@ -72,6 +81,15 @@ namespace MyBuffer{
 			return *data_;
 		}
 
+		constexpr const value_type *operator->() const noexcept{
+			return data_;
+		}
+
+		constexpr
+		value_type *operator->() noexcept{
+			return data_;
+		}
+
 		constexpr static auto size() noexcept{
 			return Size;
 		}
@@ -82,7 +100,6 @@ namespace MyBuffer{
 
 	template<std::size_t Size>
 	using StaticByteBuffer = StaticBuffer<std::uint8_t, Size>;
-
 
 } // namespace MyBuffer
 

@@ -1,6 +1,9 @@
+#define REPLAYLIST_AVL
+//#define REPLAYLIST_SKIP
+//#define REPLAYLIST_UNSORTED
+
 #include "db_builder_base.cc"
 
-#include "unsortedlist.h"
 #include "idgenerator.h"
 #include "flusher/diskfilepredicate.h"
 #include "flusher/diskfileflush.h"
@@ -16,19 +19,40 @@
 using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator		= MyAllocator::ArenaAllocator;
 
+using MyPairBuffer	= MyBuffer::MMapBuffer<hm4::PairBuffer>;
+
 constexpr size_t	MIN_ARENA_SIZE		= 128;
 
+#if defined REPLAYLIST_AVL
+	#include "avllist.h"
+
+	using MyReplayList = hm4::AVLList<Allocator>;
+#elif defined MEMLIST_SKIP
+	#include "skiplist.h"
+
+	using MyReplayList = hm4::SkipList<Allocator>;
+#elif defined MEMLIST_UNSORTED
+	#include "unsortedlist.h"
+
+	using MyReplayList = hm4::UnsortedList<Allocator>;
+#else
+	#error "No net::replaylist selected!"
+#endif
 
 
-struct MyListFactory{
-	using MemList		= hm4::UnsortedList<Allocator>;
+
+// same as in db_net
+
+template<class MyMemList, class MyPairBuffer>
+struct BinLogReplay{
+	using MemList		= MyMemList;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-	using MyList		= hm4::FlushList<MemList,Predicate, Flush>;
+	using MyList		= hm4::FlushList<MemList,MyPairBuffer,Predicate, Flush>;
 
 	template<typename UString>
-	MyListFactory(UString &&path, MemList::Allocator &allocator, hm4::PairBuffer &pairBuffer) :
+	BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyPairBuffer &pairBuffer) :
 				memlist{ allocator },
 				mylist{
 					memlist,
@@ -45,6 +69,9 @@ private:
 	MemList	memlist;
 	MyList	mylist;
 };
+
+template<class MyMemList, class MyPairBuffer>
+using MyListFactory = BinLogReplay<MyMemList,MyPairBuffer>;
 
 
 
@@ -91,9 +118,9 @@ int main(int argc, char **argv){
 
 	Allocator	allocator{ buffer };
 
-	auto pairBuffer = std::make_unique<hm4::PairBuffer>();
+	MyPairBuffer	pairBuffer;
 
-	MyListFactory factory{ path, allocator, *pairBuffer };
+	MyListFactory<MyReplayList,MyPairBuffer> factory{ path, allocator, pairBuffer };
 
 	auto &mylist = factory();
 

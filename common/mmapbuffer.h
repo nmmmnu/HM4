@@ -13,8 +13,8 @@ namespace MyBuffer{
 		#endif
 		void destroy(void *p, std::size_t size) noexcept;
 
-		void allocatePages(void *p, std::size_t size) noexcept;
-		void feeePages(void *p, std::size_t size) noexcept;
+		void adviceNeed(void *p, std::size_t size) noexcept;
+		void adviceFree(void *p, std::size_t size) noexcept;
 	};
 
 	template<typename T>
@@ -44,6 +44,14 @@ namespace MyBuffer{
 			return *data_;
 		}
 
+		const value_type *operator->() const noexcept{
+			return data_;
+		}
+
+		value_type *operator->() noexcept{
+			return data_;
+		}
+
 		auto size() const noexcept{
 			return size_;
 		}
@@ -69,6 +77,14 @@ namespace MyBuffer{
 	};
 
 	using ByteMMapBuffer = MMapBuffer<std::uint8_t>;
+
+	template<typename T>
+	void advice(MMapBuffer<T> &buffer, bool b){
+		if (b)
+			mmapbuffer_impl_::adviceNeed(buffer.data(), buffer.size());
+		else
+			mmapbuffer_impl_::adviceFree(buffer.data(), buffer.size());
+	}
 
 } // namespace MyBuffer
 

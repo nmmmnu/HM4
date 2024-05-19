@@ -16,20 +16,22 @@ using MyReader = FileReader;
 using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator		= MyAllocator::ArenaAllocator;
 
+using MyPairBuffer	= MyBuffer::MMapBuffer<hm4::PairBuffer>;
+
 constexpr size_t MIN_ARENA_SIZE = 128;
 
 
 
-template<class Allocator>
+template<class Allocato, class MyPairBufferr>
 struct ListFactory{
 	using MemList		= hm4::UnsortedList<Allocator>;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
+	using MyList		= hm4::FlushList<MemList,MyPairBuffer,Predicate,Flush>;
 
 	template<typename UString>
-	ListFactory(UString &&path, typename MemList::Allocator &allocator, hm4::PairBuffer &pairBuffer) :
+	ListFactory(UString &&path, typename MemList::Allocator &allocator, MyPairBuffer &pairBuffer) :
 				memlist{ allocator },
 				mylist{
 					memlist,
@@ -49,7 +51,7 @@ private:
 
 
 int main(int argc, char **argv){
-	using MyListFactory = ListFactory<Allocator>;
+	using MyListFactory = ListFactory<Allocator,MyPairBuffer>;
 
 	if (argc <= 3)
 		return printUsage<FileReader, MyListFactory::MemList, Allocator>(argv[0]);
@@ -65,10 +67,10 @@ int main(int argc, char **argv){
 
 	Allocator	allocator{ buffer };
 
-	auto pairBuffer = std::make_unique<hm4::PairBuffer>();
+	MyPairBuffer	pairBuffer;
 
 	return process<FileReader>(
-			MyListFactory{ path, allocator, *pairBuffer },
+			MyListFactory{ path, allocator, pairBuffer },
 			filename,
 			blob
 	);

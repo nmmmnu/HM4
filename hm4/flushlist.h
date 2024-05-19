@@ -9,11 +9,11 @@ namespace hm4{
 
 
 
-template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
+template <class List, class MyPairBuffer, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
 class FlushList : public multi::SingleList<List>{
 private:
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
+	FlushList(List &list, MyPairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
 					multi::SingleList<List>(list),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
@@ -24,11 +24,11 @@ public:
 	using Allocator = typename multi::SingleList<List>::Allocator;
 
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
+	FlushList(List &list, MyPairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
 					FlushList(list, pairBuffer, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
 
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, PairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher) :
+	FlushList(List &list, MyPairBuffer &pairBuffer, UPredicate &&predicate, UFlusher &&flusher) :
 					FlushList(list, pairBuffer, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~FlushList(){
@@ -56,7 +56,7 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, *pairBuffer_);
+		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, **pairBuffer_);
 	}
 
 	template<class PFactory>
@@ -82,7 +82,7 @@ private:
 
 	uint64_t	version_ = 0;
 
-	PairBuffer	*pairBuffer_;
+	MyPairBuffer	*pairBuffer_;
 };
 
 
