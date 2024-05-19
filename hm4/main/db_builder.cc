@@ -18,7 +18,9 @@ using Allocator		= MyAllocator::ArenaAllocator;
 
 using MyPairBuffer	= MyBuffer::MMapBuffer<hm4::PairBuffer>;
 
-constexpr size_t MIN_ARENA_SIZE = 128;
+constexpr size_t	MIN_ARENA_SIZE		= 264;
+
+static_assert(MIN_ARENA_SIZE * 1024 * 1024 > hm4::Pair::maxBytes());
 
 
 

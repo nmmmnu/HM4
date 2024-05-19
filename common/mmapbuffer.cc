@@ -8,8 +8,8 @@ namespace MyBuffer{
 	namespace mmapbuffer_impl_{
 		// duplicate, but with template looks very bad.
 
-		constexpr std::string_view maskAllocate   = "MMapAllocator allocating {} bytes with {} mmap.";
-		constexpr std::string_view maskDeallocate = "MMapAllocator deallocating {} bytes with mmap.";
+		constexpr std::string_view maskAllocate   = "MMapBuffer allocating {} bytes with {} mmap.";
+		constexpr std::string_view maskDeallocate = "MMapBuffer deallocating {} bytes with mmap.";
 
 		inline void *mmap_(std::size_t const size, int options = 0){
 			return mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | options, -1, 0);
@@ -33,7 +33,7 @@ namespace MyBuffer{
 				return p;
 			}
 
-			logger<Logger::WARNING>() << "MMapAllocator allocating with HugeTLB mmap fail, going back to conventional memory.";
+			logger<Logger::WARNING>() << "MMapBuffer allocating with HugeTLB mmap fail, going back to conventional memory.";
 			return createNormal(size);
 		}
 
