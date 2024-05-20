@@ -3,8 +3,8 @@
 
 namespace MyBuffer{
 
-	template<typename Buffer, typename Advice>
-	constexpr void adviceNeeded(Buffer const &, Buffer const &){
+	template<typename Buffer>
+	constexpr void adviceNeeded(Buffer const &, bool){
 	}
 
 	template<typename Buffer>
