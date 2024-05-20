@@ -79,7 +79,7 @@ namespace MyBuffer{
 	using ByteMMapBuffer = MMapBuffer<std::uint8_t>;
 
 	template<typename T>
-	void advice(MMapBuffer<T> &buffer, bool b){
+	void adviceNeeded(MMapBuffer<T> &buffer, bool b){
 		if (b)
 			mmapbuffer_impl_::adviceNeed(buffer.data(), buffer.size());
 		else

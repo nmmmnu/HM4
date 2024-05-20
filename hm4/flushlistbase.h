@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <algorithm>
 
+#include "mybufferadvice.h"
+
 #include "logger.h"
 
 namespace hm4{
@@ -56,9 +58,11 @@ namespace flushlist_impl_{
 		notifyLoader(loader);
 	}
 
-	template<class FlushList, class PFactory>
-	auto flushThenInsert(FlushList &flushList, PFactory &factory, PairBuffer &buffer){
-		Pair *pair = reinterpret_cast<Pair *>(buffer.data());
+	template<class FlushList, class PFactory, class MyPairBuffer>
+	auto flushThenInsert(FlushList &flushList, PFactory &factory, MyPairBuffer &pairBuffer){
+		MyBuffer::AdviceNeededGuard guard(pairBuffer);
+
+		Pair *pair = reinterpret_cast<Pair *>(pairBuffer->data());
 
 		factory.create(pair);
 
@@ -75,32 +79,21 @@ namespace flushlist_impl_{
 		return flushList.insertF_NoFlush(cloneFactory);
 	}
 
-	template<class FlushList, class InsertList, class Predicate, class PFactory>
-	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory, PairBuffer &buffer){
+	template<class FlushList, class InsertList, class Predicate, class PFactory, class MyPairBuffer>
+	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory, MyPairBuffer &pairBuffer){
 		if (!factory.valid())
 			return InsertResult::errorInvalid();
 
 		if (predicate(insertList, factory.bytes()))
-			return flushThenInsert(flushList, factory, buffer);
+			return flushThenInsert(flushList, factory, pairBuffer);
 
 		auto const result = flushList.insertF_NoFlush(factory);
 
 		switch(result.status){
-		case result.ERROR_NO_MEMORY:	return flushThenInsert(flushList, factory, buffer);	// try insert again
+		case result.ERROR_NO_MEMORY:	return flushThenInsert(flushList, factory, pairBuffer);	// try insert again
 		default:			return result;
 		}
 	}
-
-//	template<class InsertList, class Predicate, class PFactory>
-//	auto insertF_NoFlush(InsertList &insertList, Predicate &predicate, PFactory &factory, PairBuffer &buffer){
-//		if (!factory.valid())
-//			return InsertResult::errorInvalid();
-//
-//		if (predicate(insertList, factory.bytes()))
-//			return InsertResult::errorNoMemory();
-//
-//		return insertList.insertF(factory);
-//	}
 
 } // namespace
 

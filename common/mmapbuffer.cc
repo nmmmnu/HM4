@@ -46,10 +46,12 @@ namespace MyBuffer{
 		}
 
 		void adviceNeed(void *p, std::size_t size) noexcept{
+			logger<Logger::NOTICE>() << "MMapBuffer advising MADV_WILLNEED.";
 			madvise(p, size, MADV_WILLNEED);
 		}
 
 		void adviceFree(void *p, std::size_t size) noexcept{
+			logger<Logger::NOTICE>() << "MMapBuffer advising MADV_DONTNEED.";
 			madvise(p, size, MADV_DONTNEED);
 		}
 

@@ -4,8 +4,22 @@
 namespace MyBuffer{
 
 	template<typename Buffer, typename Advice>
-	constexpr void advice(Buffer const &, Buffer const &){
+	constexpr void adviceNeeded(Buffer const &, Buffer const &){
 	}
+
+	template<typename Buffer>
+	struct AdviceNeededGuard{
+		constexpr AdviceNeededGuard(Buffer &buffer) : buffer(buffer){
+			adviceNeeded(buffer, true);
+		}
+
+		~AdviceNeededGuard(){
+			adviceNeeded(buffer, false);
+		}
+
+	private:
+		Buffer &buffer;
+	};
 
 } // namespace MyBuffer
 

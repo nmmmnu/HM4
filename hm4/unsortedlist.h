@@ -17,7 +17,7 @@ namespace hm4{
 
 namespace unsorted_list_impl_{
 	template<typename It, typename Comp, typename SubComp>
-	static It special_unique(It first, It last, Comp comp, SubComp scomp){
+	It special_unique(It first, It last, Comp comp, SubComp scomp){
 		if (first == last)
 			return last;
 

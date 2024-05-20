@@ -56,7 +56,7 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, **pairBuffer_);
+		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, *pairBuffer_);
 	}
 
 	template<class PFactory>
