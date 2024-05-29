@@ -57,7 +57,7 @@ return array(
 			"<br />" .
 			"xrget price:2010-02 1000 price:2010-04</pre>",
 
-			"<pre>select key, val from table where key >= [key] and key < [range_end] limit [number]</pre>"
+			"<pre>select key, val from table where key >= [key] and key <= [range_end] limit [number]</pre>"
 	),
 	new Cmd(
 			"XUGET",
@@ -80,7 +80,7 @@ return array(
 
 			"immutable_x",
 
-			"<pre>xrget '' 1000</pre>",
+			"<pre>xuget '' 1000</pre>",
 
 			"<pre>select key, val from table where key >= [key] limit [number]</pre>"
 	),
@@ -143,6 +143,89 @@ return array(
 			false,
 
 			"immutable_x"
+	),
+
+
+
+	new Cmd(
+			"XNNEXT",
+
+			"XNNEXT key prefix",
+
+			"Gets one key-value pair after <i>key</i>.<br />" .
+			"Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.",
+
+			"array",
+			"key or empty<br />" .
+			"value or last key, if there is second page.",
+
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"immutable_x",
+
+			"<pre>set a:2001  20<br />" .
+			"set a:2002  30<br />" .
+			"set a:2003  10<br />" .
+			"set a:2004  50<br />" .
+			"<br />" .
+			"xnnext a: a:</pre>",
+
+			"<pre>select key, val from table where key > [key] and key like '[prefix]%' limit 1</pre>"
+	),
+	new Cmd(
+			"XRNEXT",
+
+			"XRNEXT key range_end",
+
+			"Gets one key-value pair after <i>key</i>.<br />" .
+			"Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.",
+
+			"array",
+			"key or empty<br />" .
+			"value or last key, if there is second page.",
+
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"immutable_x",
+
+			"<pre>set a:2001  20<br />" .
+			"set a:2002  30<br />" .
+			"set a:2003  10<br />" .
+			"set a:2004  50<br />" .
+			"<br />" .
+			"xnnext a: a:2002</pre>",
+
+			"<pre>select key, val from table where key > [key] and key <= [range_end] limit 1</pre>"
+	),
+	new Cmd(
+			"XUNEXT",
+
+			"XUNEXT key",
+
+			"Gets one key-value pair after <i>key</i>.<br />" .
+			"Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />" .
+			"For database dump use XUGET.",
+
+			"array",
+			"key or empty<br />" .
+			"value or last key, if there is second page.",
+
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"immutable_x",
+
+			"<pre>xunext ''</pre>",
+
+			"<pre>select key, val from table where key > [key] limit 1</pre>"
 	),
 );
 

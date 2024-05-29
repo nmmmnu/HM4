@@ -1,6 +1,7 @@
 #include "base.h"
 #include "mystring.h"
 #include "logger.h"
+#include "my_type_traits.h"
 
 #include <algorithm>	// std::clamp
 
@@ -57,7 +58,7 @@ namespace net::worker::commands::ImmutableX{
 
 				// capture & instead of &container to silence clang warning.
 				auto tail = [&](std::string_view const pkey = ""){
-					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::KEYS_WITH_TAIL)
+					if constexpr(is_any_of(Out, AccumulateOutput::BOTH_WITH_TAIL, AccumulateOutput::KEYS_WITH_TAIL))
 						container.emplace_back(pkey);
 				};
 
@@ -80,14 +81,48 @@ namespace net::worker::commands::ImmutableX{
 
 					auto const &val = it->getVal();
 
-					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::BOTH || Out == AccumulateOutput::KEYS || Out == AccumulateOutput::KEYS_WITH_TAIL)
+					if constexpr(is_any_of(Out, AccumulateOutput::BOTH_WITH_TAIL, AccumulateOutput::BOTH, AccumulateOutput::KEYS, AccumulateOutput::KEYS_WITH_TAIL))
 						container.emplace_back(pkey);
 
-					if constexpr(Out == AccumulateOutput::BOTH_WITH_TAIL || Out == AccumulateOutput::BOTH || Out == AccumulateOutput::VALS)
+					if constexpr(is_any_of(Out, AccumulateOutput::BOTH_WITH_TAIL, AccumulateOutput::BOTH, AccumulateOutput::VALS))
 						container.emplace_back(val);
 
 					if constexpr(Out == AccumulateOutput::KEYS_WITH_TAIL)
 						container.emplace_back("1");
+				}
+
+				return tail();
+			}
+
+			template<class StopPredicate, class It>
+			void accumulateResultsNext(std::string_view firstKey, StopPredicate stop, It it, It eit, std::array<std::string_view, 2> &container){
+				uint32_t iterations	= 0;
+
+				// capture & instead of &container to silence clang warning.
+				auto tail = [&](std::string_view const pkey = ""){
+						container = { "", pkey };
+				};
+
+				for(;it != eit;++it){
+					auto const &key = it->getKey();
+
+					if (++iterations > ITERATIONS_RESULTS_MAX)
+						return tail(key);
+
+					if (stop(key))
+						return tail(); // no tail
+
+					if (! it->isOK())
+						continue;
+
+					if (key == firstKey) // skip first
+						continue;
+
+					auto const &val = it->getVal();
+
+					container = { key, val };
+
+					return;
 				}
 
 				return tail();
@@ -183,6 +218,53 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
+	struct XNNEXT : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace immutablex_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+
+
+			auto const key    = p[1];
+			auto const prefix = p[2];
+
+			if (prefix.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
+
+			StopPrefixPredicate stop{ prefix };
+
+			std::array<std::string_view, 2> container;
+
+			accumulateResultsNext(
+				key					,
+				stop					,
+				db->find(key, std::false_type{})	,
+				std::end(*db)				,
+				container
+			);
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xnnext",	"XNNEXT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct XRGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -231,6 +313,53 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
+	struct XRNEXT : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace immutablex_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+
+
+			auto const key    = p[1];
+			auto const keyEnd = p[2];
+
+			if (!hm4::Pair::isKeyValid(keyEnd))
+				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
+
+			StopRangePredicate stop{ keyEnd };
+
+			std::array<std::string_view, 2> container;
+
+			accumulateResultsNext(
+				key					,
+				stop					,
+				db->find(key, std::false_type{})	,
+				std::end(*db)				,
+				container
+			);
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xrnext",	"XRNEXT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct XUGET : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -269,6 +398,49 @@ namespace net::worker::commands::ImmutableX{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"xuget",	"XUGET"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct XUNEXT : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace immutablex_impl_;
+
+			if (p.size() != 2)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
+
+
+
+			auto const key    = p[1];
+
+			StopUnboundPredicate stop;
+
+			std::array<std::string_view, 2> container;
+
+			accumulateResultsNext(
+				key					,
+				stop					,
+				db->find(key, std::false_type{})	,
+				std::end(*db)				,
+				container
+			);
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"xunext",	"XUNEXT"
 		};
 	};
 
@@ -622,6 +794,10 @@ namespace net::worker::commands::ImmutableX{
 				XNGETKEYS	,
 				XRGETKEYS	,
 				XUGETKEYS	,
+
+				XNNEXT		,
+				XRNEXT		,
+				XUNEXT		,
 
 				HGETALL		,
 				HGETKEYS	,

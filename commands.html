@@ -111,6 +111,9 @@
 				<li><a href="#XNGETKEYS">XNGETKEYS</a></li>
 				<li><a href="#XRGETKEYS">XRGETKEYS</a></li>
 				<li><a href="#XUGETKEYS">XUGETKEYS</a></li>
+				<li><a href="#XNNEXT">XNNEXT</a></li>
+				<li><a href="#XRNEXT">XRNEXT</a></li>
+				<li><a href="#XUNEXT">XUNEXT</a></li>
 				</div>
 			<div>
 			<b>accumulators_x.h</b><br />
@@ -630,7 +633,7 @@
 						<h3>Example:</h3>
 			<pre>set price:2010-01  5<br />set price:2010-02  6<br />set price:2010-03 10<br />set price:2010-04 16<br />set price:2010-05 22<br /><br />xrget price:2010-02 1000 price:2010-04</pre>			
 						<h3>MySQL Rosetta:</h3>
-			<pre>select key, val from table where key >= [key] and key < [range_end] limit [number]</pre>			
+			<pre>select key, val from table where key >= [key] and key <= [range_end] limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="XUGET">
@@ -653,7 +656,7 @@
 			<h3>Return value:</h3>
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 						<h3>Example:</h3>
-			<pre>xrget '' 1000</pre>			
+			<pre>xuget '' 1000</pre>			
 						<h3>MySQL Rosetta:</h3>
 			<pre>select key, val from table where key >= [key] limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
@@ -725,6 +728,81 @@
 			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
 			
 			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XNNEXT">
+
+			<h2>XNNEXT key prefix</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XNNEXT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets one key-value pair after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are matching the <i>prefix</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			key or empty<br />value or last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set a:2001  20<br />set a:2002  30<br />set a:2003  10<br />set a:2004  50<br /><br />xnnext a: a:</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where key > [key] and key like '[prefix]%' limit 1</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XRNEXT">
+
+			<h2>XRNEXT key range_end</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XRNEXT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets one key-value pair after <i>key</i>.<br />Returns ONLY valid pairs, but only if they are less than or equal <i>range_end</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			key or empty<br />value or last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>set a:2001  20<br />set a:2002  30<br />set a:2003  10<br />set a:2004  50<br /><br />xnnext a: a:2002</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where key > [key] and key <= [range_end] limit 1</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XUNEXT">
+
+			<h2>XUNEXT key</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XUNEXT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>immutable_x.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets one key-value pair after <i>key</i>.<br />Returns ONLY valid pairs, but unlike XNGET and XRGET range is unbounded.<br />For database dump use XUGET.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			key or empty<br />value or last key, if there is second page.
+						<h3>Example:</h3>
+			<pre>xunext ''</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table where key > [key] limit 1</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="COUNT">

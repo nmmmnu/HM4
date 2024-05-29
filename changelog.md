@@ -304,4 +304,5 @@ Changelog
 -	disable negative increace_val/decrease_val in INCRLIMIT / DECRLIMIT
 -	bugfix with removing key in GEOREM
 -	return ~256 MB memory (1 pair) to OS after doing flush
+-	new commands XNNEXT, XRNEXT, XUNEXT
 
