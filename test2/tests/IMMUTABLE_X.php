@@ -36,6 +36,16 @@ function cmd_IMMUTABLE_X($redis){
 			expect("XUGETKEYS data",	$x[0] == "a~1984" && $x[1] == 1	);
 			expect("XUGETKEYS data",	$x[2] == "a~1985" && $x[3] == 1	);
 		}
+
+		if (true){
+			$x0 = rawCommand($redis, "xunext", "a~"		);
+			$x1 = rawCommand($redis, "xunext", "a~1974"	);
+			$x2 = rawCommand($redis, "xunext", "a~2023"	);
+
+			expect("XUNEXT",		$x0 == ["a~1969",  35]		);
+			expect("XUNEXT",		$x1 == ["a~1975", 140]		);
+			expect("XUNEXT",		$x2[0] == ""			);
+		}
 	}
 
 	if (true){
@@ -86,6 +96,18 @@ function cmd_IMMUTABLE_X($redis){
 			expect("XNGETKEYS data",	$x[2] == "a~2021" && $x[3] == 1	);
 
 		}
+
+		if (true){
+			$x0 = rawCommand($redis, "xnnext", "a~",	"a~"	);
+			$x1 = rawCommand($redis, "xnnext", "a~1974",	"a~"	);
+			$x2 = rawCommand($redis, "xnnext", "a~2023",	"a~"	);
+			$x3 = rawCommand($redis, "xnnext", "a~9999",	"a~"	);
+
+			expect("XNNEXT",		$x0 == ["a~1969",  35]		);
+			expect("XNNEXT",		$x1 == ["a~1975", 140]		);
+			expect("XNNEXT",		$x2 == ["", ""]			);
+			expect("XNNEXT",		$x3 == ["", ""]			);
+		}
 	}
 
 	if (true){
@@ -133,6 +155,18 @@ function cmd_IMMUTABLE_X($redis){
 			expect("XRGETKEYS end",		end($x)   == ""			);
 			expect("XRGETKEYS data",	$x[0] == "a~2020" && $x[1] == 1	);
 			expect("XRGETKEYS data",	$x[2] == "a~2021" && $x[3] == 1	);
+		}
+
+		if (true){
+			$x0 = rawCommand($redis, "xrnext", "a~",	"a~2023"	);
+			$x1 = rawCommand($redis, "xrnext", "a~1974",	"a~2023"	);
+			$x2 = rawCommand($redis, "xrnext", "a~2023",	"a~2023"	);
+			$x3 = rawCommand($redis, "xrnext", "a~9999",	"a~2023"	);
+
+			expect("XRNEXT",		$x0 == ["a~1969",  35]		);
+			expect("XRNEXT",		$x1 == ["a~1975", 140]		);
+			expect("XRNEXT",		$x2 == ["", ""]			);
+			expect("XRNEXT",		$x3 == ["", ""]			);
 		}
 	}
 

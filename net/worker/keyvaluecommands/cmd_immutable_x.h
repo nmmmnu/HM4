@@ -62,7 +62,7 @@ namespace net::worker::commands::ImmutableX{
 						container.emplace_back(pkey);
 				};
 
-				for(;it != eit;++it){
+				for(;it != eit; ++it){
 					auto const &key = it->getKey();
 
 					auto pkey = projKey(key);
@@ -100,10 +100,10 @@ namespace net::worker::commands::ImmutableX{
 
 				// capture & instead of &container to silence clang warning.
 				auto tail = [&](std::string_view const pkey = ""){
-						container = { "", pkey };
+					container = { "", pkey };
 				};
 
-				for(;it != eit;++it){
+				for(;it != eit; ++it){
 					auto const &key = it->getKey();
 
 					if (++iterations > ITERATIONS_RESULTS_MAX)
