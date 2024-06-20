@@ -31,7 +31,7 @@ namespace misra_gries{
 
 			// -----
 
-			constexpr bool valid() const{
+			constexpr operator bool() const{
 				return score;
 			}
 
@@ -52,6 +52,10 @@ namespace misra_gries{
 						item,
 						size
 				};
+			}
+
+			constexpr bool cmpItem(std::string_view s) const{
+				return s == getItem();
 			}
 
 			uint64_t setItem(std::string_view item){
@@ -150,12 +154,12 @@ namespace misra_gries{
 			for(size_t i = 0; i < size(); ++i){
 				auto &x = M[i];
 
-				if (!x.valid()){
+				if (!x){
 					indexEmptySlot = i;
 					continue;
 				}
 
-				if (item == x.getItem())
+				if (x.cmpItem(item))
 					return x.incr();
 			}
 

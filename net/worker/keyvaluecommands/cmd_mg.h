@@ -395,20 +395,16 @@ namespace net::worker::commands::MG{
 
 			const auto *mg_data = reinterpret_cast<const Item *>(pair->getValC());
 
-			for(size_t i = 0; i < mg.size(); ++i){
-				auto const &x = mg_data[i];
+			for(size_t i = 0; i < mg.size(); ++i)
+				if (auto const &x = mg_data[i]; x){
+					bcontainer.push_back();
 
-				if (!x.valid())
-					continue;
+					auto const item  = x.getItem();
+					auto const score = to_string(x.getScore(), bcontainer.back());
 
-				bcontainer.push_back();
-
-				auto const item  = x.getItem();
-				auto const score = to_string(x.getScore(), bcontainer.back());
-
-				container.push_back(item);
-				container.push_back(score);
-			}
+					container.push_back(item);
+					container.push_back(score);
+				}
 
 			return result.set_container(container);
 		}

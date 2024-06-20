@@ -48,7 +48,7 @@ namespace heavy_hitter{
 
 			// -----
 
-			constexpr bool valid() const{
+			constexpr operator bool() const{
 				return size;
 			}
 
@@ -73,6 +73,10 @@ namespace heavy_hitter{
 						item,
 						size
 				};
+			}
+
+			constexpr bool cmpItem(std::string_view s) const{
+				return s == getItem();
 			}
 
 			void setItem(std::string_view item){
@@ -160,12 +164,12 @@ namespace heavy_hitter{
 			for(size_t i = 0; i < size(); ++i){
 				auto const &x = M[i];
 
-				if (!x.valid()){
+				if (!x){
 					indexEmptySlot = i;
 					continue;
 				}
 
-				if (item == x.getItem()){
+				if (x.cmpItem(item)){
 					if (auto const x_score = x.getScore(); comp(score, x_score))
 						return insertItem_(M[i], score);
 					else
@@ -223,31 +227,3 @@ namespace heavy_hitter{
 } // namespace heavy_hitter
 
 #endif
-
-
-#if 0
-
-		void print(const Item *M) const{
-			logger<Logger::DEBUG>() << "HH Dump";
-
-			for(size_t i = 0; i < size(); ++i){
-				auto const &x = M[i];
-
-				if (!x.valid()){
-					logger<Logger::DEBUG>()
-						<< "id" << i
-						<< "(empty)"
-					;
-				}else{
-					logger<Logger::DEBUG>()
-						<< "id" << i
-						<< "score" << x.getScore()
-						<< "item" << x.getItem()
-					;
-				}
-			}
-		}
-
-#endif
-
-

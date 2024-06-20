@@ -305,4 +305,5 @@ Changelog
 -	bugfix with removing key in GEOREM
 -	return ~256 MB memory (1 pair) to OS after doing flush
 -	new commands XNNEXT, XRNEXT, XUNEXT
+-	new module reservoir sampling: RSADD, RSRESERVE, RSGET, RSGETCOUNT
 

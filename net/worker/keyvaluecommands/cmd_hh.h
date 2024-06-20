@@ -312,20 +312,16 @@ namespace net::worker::commands::HH{
 
 			const auto *hh_data = reinterpret_cast<const Item *>(pair->getValC());
 
-			for(size_t i = 0; i < hh.size(); ++i){
-				auto const &x = hh_data[i];
+			for(size_t i = 0; i < hh.size(); ++i)
+				if(auto const &x = hh_data[i]; x){
+					bcontainer.push_back();
 
-				if (!x.valid())
-					continue;
+					auto const item  = x.getItem();
+					auto const score = to_string(x.getScore(), bcontainer.back());
 
-				bcontainer.push_back();
-
-				auto const item  = x.getItem();
-				auto const score = to_string(x.getScore(), bcontainer.back());
-
-				container.push_back(item);
-				container.push_back(score);
-			}
+					container.push_back(item);
+					container.push_back(score);
+				}
 
 			return result.set_container(container);
 		}
