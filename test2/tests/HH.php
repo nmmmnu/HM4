@@ -30,9 +30,7 @@ function cmd_HH($redis){
 		);
 
 		rawCommand($redis, "hhreserve", "a", 4, $bytes);
-var_dump(
-	rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5) == 0
-);
+
 		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5) == 0);
 		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia",  5) == 0);
 		expect("HHINCR$bytes", rawCommand($redis, "hhincr", "a", 4, $bytes, "Sofia", 25) == 1);
