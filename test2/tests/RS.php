@@ -9,7 +9,7 @@ function rs_fill($redis, $count, $bytes, $distinct_items){
 	}
 }
 
-function rs_makeModelArray($count, $distinct_items){
+function rs_makeIdealArray($count, $distinct_items){
 	$x = [];
 
 	for($i = 0; $i < $distinct_items; ++$i)
@@ -22,39 +22,37 @@ function cmd_RS($redis){
 	$redis->del("a");
 
 	$count		= 100;
-	$max_tries	= 10;
+	$max_tries	= 20;
 	$distinct_items	= 25;
 
-	$modelArray	= rs_makeModelArray($count, $distinct_items);
+	$idealArray	= rs_makeIdealArray($count, $distinct_items);
 
 	foreach([16, 32, 40, 64, 128, 256] as $bytes){
-		rawCommand($redis, "rsreserve", "a", $count, $bytes);
+		$tries = 0;
 
-		rs_fill($redis, $count, $bytes, $distinct_items);
-
-		rawCommand($redis, "rsreserve", "a", $count, $bytes);
-
-		// var $ok
+	// label for goto
+	again:
 		$ok = true;
 
-		for($tries = 0; $tries < $max_tries; ++$tries){
-			$ok = true;
+		rawCommand($redis, "rsreserve", "a", $count, $bytes);
+		rs_fill($redis, $count, $bytes, $distinct_items);
+		rawCommand($redis, "rsreserve", "a", $count, $bytes);
 
-			$x = rawCommand($redis, "rsget", "a", $count, $bytes);
-			$x = array_unique($x);
-			$x = sort($x);
+		$x = rawCommand($redis, "rsget", "a", $count, $bytes);
+		$x = array_unique($x);
+		sort($x);
 
-			if ($x == $modelArray){
-				expect("RS$bytes", true);
-				break;
+	//	print_r($x);
+
+		if ($x != $idealArray)
+			if (++$tries < $max_tries){
+				printf("RS %3d distribution not ideal, will try again...\n", $bytes);
+				goto again;
 			}else{
-				printf("RS %3d %5d distribution strange, will try again...\n", $bytes, $i);
-				$ok = false;
+				expect("RS$bytes", false);
 			}
-		}
 
-		if (!$ok)
-			expect("RS$bytes", false);
+		expect("RS$bytes", true);
 	}
 
 	$redis->del("a");
