@@ -282,7 +282,7 @@ namespace net::worker::commands::Mutable{
 			const auto &keyN = p[1];
 			const auto &subN = p[2];
 
-			if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
+			if (!hm4::Pair::isCompositeKeyValid(1, keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -332,7 +332,7 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const &subN = *itk;
 
-				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
+				if (!hm4::Pair::isCompositeKeyValid(1, keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 				if (auto const &val = *std::next(itk); !hm4::Pair::isValValid(val))
@@ -518,7 +518,7 @@ namespace net::worker::commands::Mutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
-				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
+				if (!hm4::Pair::isCompositeKeyValid(1, keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 

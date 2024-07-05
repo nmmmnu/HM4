@@ -510,37 +510,47 @@ inline namespace version_4_00_00{
 			return isKeyValid(key.size());
 		}
 
+	private:
+		template<typename ...Args>
 		[[nodiscard]]
 		constexpr
-		static bool isCompositeKeyValid(std::string_view key1, size_t more = 0) noexcept{
-			return	!key1.empty() &&
+		static bool isCompositeKeyValid__(size_t more, Args ...args) noexcept{
+			return
+				(!args.empty() && ...) &&
 				isKeyValid(	more +
-						key1.size()
-				);
+					(args.size() + ...)
+			);
+		}
+
+	public:
+		[[nodiscard]]
+		constexpr
+		static bool isCompositeKeyValid(size_t more, std::string_view key1) noexcept{
+			return	isCompositeKeyValid__(more, key1);
 		}
 
 		[[nodiscard]]
 		constexpr
-		static bool isCompositeKeyValid(std::string_view key1, std::string_view key2, size_t more = 0) noexcept{
-			return	!key1.empty() &&
-				!key2.empty() &&
-				isKeyValid	(more +
-						key1.size() +
-						key2.size()
-				);
+		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2) noexcept{
+			return	isCompositeKeyValid__(more, key1, key2);
 		}
 
 		[[nodiscard]]
 		constexpr
-		static bool isCompositeKeyValid(std::string_view key1, std::string_view key2, std::string_view key3, size_t more = 0) noexcept{
-			return	!key1.empty() &&
-				!key2.empty() &&
-				!key3.empty() &&
-				isKeyValid(	more +
-						key1.size() +
-						key2.size() +
-						key3.size()
-				);
+		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3) noexcept{
+			return	isCompositeKeyValid__(more, key1, key2, key3);
+		}
+
+		[[nodiscard]]
+		constexpr
+		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3, std::string_view key4) noexcept{
+			return	isCompositeKeyValid__(more, key1, key2, key3, key4);
+		}
+
+		[[nodiscard]]
+		constexpr
+		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3, std::string_view key4, std::string_view key5) noexcept{
+			return	isCompositeKeyValid__(more, key1, key2, key3, key4, key5);
 		}
 
 		[[nodiscard]]

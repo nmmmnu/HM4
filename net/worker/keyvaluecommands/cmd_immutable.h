@@ -312,7 +312,7 @@ namespace net::worker::commands::Immutable{
 			auto const &keyN = p[1];
 			auto const &subN = p[2];
 
-			if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
+			if (!hm4::Pair::isCompositeKeyValid(1, keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
@@ -360,7 +360,7 @@ namespace net::worker::commands::Immutable{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
 
-				if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
+				if (!hm4::Pair::isCompositeKeyValid(1, keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -403,7 +403,7 @@ namespace net::worker::commands::Immutable{
 			const auto &keyN = p[1];
 			const auto &subN = p[2];
 
-			if (!hm4::Pair::isCompositeKeyValid(keyN, subN, 1))
+			if (!hm4::Pair::isCompositeKeyValid(1, keyN, subN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;

@@ -12,7 +12,7 @@ namespace net::worker::commands::Queue{
 		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
 
 		constexpr bool isKeyValid(std::string_view keyN){
-			return hm4::Pair::isCompositeKeyValid(keyN, MyIDGenerator::to_string_buffer_t_size + 1);
+			return hm4::Pair::isCompositeKeyValid(MyIDGenerator::to_string_buffer_t_size + 1, keyN);
 		}
 
 	} // namespace
