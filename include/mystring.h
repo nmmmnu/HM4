@@ -40,7 +40,9 @@ constexpr bool equals(const char *s1, size_t const size1, const char *s2, size_t
 
 	// Idea based on LLVM::StringRef
 	// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
-	return size1 == size2 && *s1 == *s2 && memcmp(s1, s2, size1) == 0;
+
+	// if size == 0, *s1 == *s2 is invalid...
+	return size1 == size2 && memcmp(s1, s2, size1) == 0;
 }
 
 constexpr bool same_prefix(std::string_view const prefix, std::string_view const s) noexcept{

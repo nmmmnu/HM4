@@ -306,4 +306,5 @@ Changelog
 -	return ~256 MB memory (1 pair) to OS after doing flush
 -	new commands XNNEXT, XRNEXT, XUNEXT
 -	new module reservoir sampling: RSADD, RSRESERVE, RSGET, RSGETCOUNT
+-	bugfix on searching disktable keys with size 8 characters
 
