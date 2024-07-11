@@ -50,7 +50,7 @@ namespace net::worker::commands::Queue{
 			auto const exp  = p.size() == 4 ? from_string<uint32_t>(p[3]) : 0;
 
 			MyIDGenerator::to_string_buffer_t buffer;
-			auto const &id = MyIDGenerator{}(buffer);
+			auto const id = MyIDGenerator{}(buffer);
 
 			hm4::PairBufferKey bufferKey;
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, id);
