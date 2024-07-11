@@ -24,29 +24,27 @@ namespace net::worker::shared::zset{
 
 
 	namespace impl_{
-		template<typename DBAdapter>
-		std::string_view makeKey(DBAdapter &,
+		std::string_view makeKey(std::string_view separator,
 				std::string_view keyN, std::string_view keySub, std::string_view score,
 				hm4::PairBufferKey &bufferKey){
 
 			return concatenateBuffer(bufferKey,
-						keyN			,
-						DBAdapter::SEPARATOR	,
-						score			,
-						DBAdapter::SEPARATOR	,
+						keyN		,
+						separator	,
+						score		,
+						separator	,
 						keySub
 			);
 		}
 
-		template<typename DBAdapter>
-		std::string_view makeKey(DBAdapter &,
+		std::string_view makeKey(std::string_view separator,
 				std::string_view keyN, std::string_view keySub,
 				hm4::PairBufferKey &bufferKey){
 
 			return concatenateBuffer(bufferKey,
-						keyN			,
-						DBAdapter::SEPARATOR	,
-						DBAdapter::SEPARATOR	,
+						keyN		,
+						separator	,
+						separator	,
 						keySub
 			);
 		}
@@ -93,7 +91,7 @@ namespace net::worker::shared::zset{
 			// Update control key and delete hash key if any
 
 			hm4::PairBufferKey bufferKeyCtrl;
-			auto const keyCtrl = makeKey(db, keyN, keySub, bufferKeyCtrl);
+			auto const keyCtrl = makeKey(DBAdapter::SEPARATOR, keyN, keySub, bufferKeyCtrl);
 
 			logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
@@ -116,7 +114,7 @@ namespace net::worker::shared::zset{
 					// Case 1.2: old ctrl key has to be updated
 
 					hm4::PairBufferKey bufferKeyHashOld;
-					auto const keyHashOld = makeKey(db, keyN, keySub, scoreOld, bufferKeyHashOld);
+					auto const keyHashOld = makeKey(DBAdapter::SEPARATOR, keyN, keySub, scoreOld, bufferKeyHashOld);
 
 					logger<Logger::DEBUG>() << "ZSet SET ctrl key" << keyCtrl;
 
@@ -138,7 +136,7 @@ namespace net::worker::shared::zset{
 		}
 
 		hm4::PairBufferKey bufferKeyHash;
-		auto const keyHash = makeKey(db, keyN, keySub, score, bufferKeyHash);
+		auto const keyHash = makeKey(DBAdapter::SEPARATOR, keyN, keySub, score, bufferKeyHash);
 
 		logger<Logger::DEBUG>() << "ZSet SET hash key" << keyHash;
 
@@ -152,7 +150,7 @@ namespace net::worker::shared::zset{
 		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKey(db, keyN, keySub, bufferKeyCtrl);
+		auto const keyCtrl = makeKey(DBAdapter::SEPARATOR, keyN, keySub, bufferKeyCtrl);
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
@@ -171,7 +169,7 @@ namespace net::worker::shared::zset{
 				// Case 1.1: ctrl key has to be removed
 
 				hm4::PairBufferKey bufferKeyHash;
-				auto const keyHash = makeKey(db, keyN, keySub, score, bufferKeyHash);
+				auto const keyHash = makeKey(DBAdapter::SEPARATOR, keyN, keySub, score, bufferKeyHash);
 
 				logger<Logger::DEBUG>() << "ZSet DEL ctrl key" << keyCtrl;
 
@@ -197,7 +195,7 @@ namespace net::worker::shared::zset{
 		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKey(db, keyN, keySub, bufferKeyCtrl);
+		auto const keyCtrl = makeKey(DBAdapter::SEPARATOR, keyN, keySub, bufferKeyCtrl);
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
@@ -229,7 +227,7 @@ namespace net::worker::shared::zset{
 				// Case 1.1: valid ctrl key.
 
 				hm4::PairBufferKey bufferKeyHash;
-				auto const keyHash = makeKey(db, keyN, keySub, score, bufferKeyHash);
+				auto const keyHash = makeKey(DBAdapter::SEPARATOR, keyN, keySub, score, bufferKeyHash);
 
 				logger<Logger::DEBUG>() << "ZSet GET hash key" << keyHash;
 
@@ -251,7 +249,7 @@ namespace net::worker::shared::zset{
 		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKey(db, keyN, keySub, bufferKeyCtrl);
+		auto const keyCtrl = makeKey(DBAdapter::SEPARATOR, keyN, keySub, bufferKeyCtrl);
 
 		logger<Logger::DEBUG>() << "ZSet GET ctrl key" << keyCtrl;
 
@@ -306,7 +304,7 @@ namespace net::worker::shared::zset{
 		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKey(db, keyN, keySub, bufferKeyCtrl);
+		auto const keyCtrl = makeKey(DBAdapter::SEPARATOR, keyN, keySub, bufferKeyCtrl);
 
 		logger<Logger::DEBUG>() << "ZScore GET ctrl key" << keyCtrl;
 
