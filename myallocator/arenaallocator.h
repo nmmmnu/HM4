@@ -48,6 +48,7 @@ namespace MyAllocator{
 
 		bool owns(const void *p) const{
 			return
+				p &&
 				p >= buffer.data() &&
 				p <  buffer.data() + buffer.size()
 			;

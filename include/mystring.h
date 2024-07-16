@@ -52,6 +52,15 @@ constexpr bool same_prefix(std::string_view const prefix, std::string_view const
 	return size1 <= size2 && equals(prefix.data(), size1, s.data(), size1);
 }
 
+inline std::string_view after_prefix(std::string_view const prefix, std::string_view const s) noexcept{
+	auto const prefix_size = prefix.size();
+
+	if (prefix_size <= s.size())
+		return s.substr(prefix_size);
+	else
+		return s;
+}
+
 
 
 template<typename... Args>

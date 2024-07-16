@@ -148,13 +148,9 @@ namespace net::worker::commands::ImmutableX{
 
 			template<AccumulateOutput Out, class It, class Container>
 			void accumulateResultsH(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
-				auto const prefix_size = prefix.size();
 
-				auto proj = [prefix_size](std::string_view x) -> std::string_view{
-					if (prefix_size <= x.size())
-						return x.substr(prefix_size);
-					else
-						return x;
+				auto proj = [prefix](std::string_view x) -> std::string_view{
+					return after_prefix(prefix, x);
 				};
 
 				StopPrefixPredicate stop{ prefix };

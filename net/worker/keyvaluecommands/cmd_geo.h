@@ -6,7 +6,7 @@
 
 #include "fmt/format.h"
 
-#include "shared_zset.h"
+#include "shared_zset_multi.h"
 #include "shared_iterations.h"
 
 #include "ilist/txguard.h"
@@ -72,14 +72,6 @@ namespace net::worker::commands::Geo{
 				return r;
 			}
 
-			constexpr bool isGeoKeyValid(std::string_view key){
-				return shared::zset::isKeyValid(key, GeoHash::MAX_SIZE);
-			}
-
-			constexpr bool isGeoKeyValid(std::string_view key, std::string_view name){
-				return shared::zset::isKeyValid(key, name, GeoHash::MAX_SIZE);
-			}
-
 		} // anonymous namespace
 
 		template<class DBAdapter>
@@ -127,13 +119,15 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
+			using P = net::worker::shared::zsetmulti::Permutation1;
+
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const &name = *(itk + 2);
 
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!isGeoKeyValid(keyN, name))
+				if (!P::valid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -153,9 +147,7 @@ namespace net::worker::commands::Geo{
 
 				auto const &name = *(itk + 2);
 
-				using GSC = GeoScoreController<DBAdapter>;
-
-				shared::zset::add<GSC>(db, keyN, name, hash, line);
+				shared::zsetmulti::add<P>(db, keyN, name, { hash }, line);
 			}
 
 			return result.set();
@@ -182,11 +174,11 @@ namespace net::worker::commands::Geo{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace geo_impl_;
 
-			using GSC = GeoScoreController<DBAdapter>;
-
 			hm4::TXGuard guard{ *db };
 
-			return shared::zset::cmdProcessRem<GSC>(p, db, result, blob, GeoHash::MAX_SIZE);
+			using P = net::worker::shared::zsetmulti::Permutation1;
+
+			return shared::zsetmulti::cmdProcessRem<P>(p, db, result, blob);
 		}
 
 	private:
@@ -220,18 +212,18 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
+			using P = net::worker::shared::zsetmulti::Permutation1;
+
 			auto const &name = p[2];
 
 			if (name.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-			if (!isGeoKeyValid(keyN, name))
+			if (!P::valid(keyN, name))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			using GSC = GeoScoreController<DBAdapter>;
-
 			return result.set(
-				shared::zset::get<GSC>(db, keyN, name)
+				shared::zsetmulti::get<P>(db, keyN, name)
 			);
 		}
 
@@ -265,6 +257,8 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
+			using P = net::worker::shared::zsetmulti::Permutation1;
+
 			auto &container = blob.container();
 
 			auto const varg = 2;
@@ -275,7 +269,7 @@ namespace net::worker::commands::Geo{
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!isGeoKeyValid(keyN, name))
+				if (!P::valid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -285,10 +279,8 @@ namespace net::worker::commands::Geo{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;
 
-				using GSC = GeoScoreController<DBAdapter>;
-
 				container.emplace_back(
-					shared::zset::get<GSC>(db, keyN, name)
+					shared::zsetmulti::get<P>(db, keyN, name)
 				);
 			}
 
@@ -324,7 +316,9 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
-			if (!isGeoKeyValid(keyN))
+			using P = net::worker::shared::zsetmulti::Permutation1;
+
+			if (!P::valid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			GeoHash::Point me{
@@ -348,8 +342,12 @@ namespace net::worker::commands::Geo{
 			for(auto &hash : cells){
 				hm4::PairBufferKey bufferKey;
 
+				constexpr std::string_view index = "A";
+
 				auto const prefix = concatenateBuffer(bufferKey,
 								keyN			,
+								DBAdapter::SEPARATOR	,
+								index			,
 								DBAdapter::SEPARATOR	,
 								hash
 				);
@@ -424,6 +422,8 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
+			using P = net::worker::shared::zsetmulti::Permutation1;
+
 			auto const &name1 = p[2];
 
 			{
@@ -432,7 +432,7 @@ namespace net::worker::commands::Geo{
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!isGeoKeyValid(keyN, name))
+				if (!P::valid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -444,15 +444,13 @@ namespace net::worker::commands::Geo{
 				if (name.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_NAME);
 
-				if (!isGeoKeyValid(keyN, name))
+				if (!P::valid(keyN, name))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
 			// ---
 
-			using GSC = GeoScoreController<DBAdapter>;
-
-			auto const line1 = shared::zset::get<GSC>(db, keyN, name1);
+			auto const line1 = shared::zsetmulti::get<P>(db, keyN, name1);
 
 			if (line1.empty())
 				return result.set(int64_t{-1});
@@ -461,7 +459,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line2 = shared::zset::get<GSC>(db, keyN, name2);
+			auto const line2 = shared::zsetmulti::get<P>(db, keyN, name2);
 
 			if (line2.empty())
 				return result.set(int64_t{-1});
