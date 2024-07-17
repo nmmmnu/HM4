@@ -5,7 +5,7 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_iterations.h"
-#include "shared_zset.h"
+#include "shared_zset_multi.h"
 
 #include "ilist/txguard.h"
 
@@ -17,14 +17,6 @@ namespace net::worker::commands::LinearCurve{
 
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC1Buffer = std::array<char, scoreSize>;
-
-		constexpr bool isMC1KeyValid(std::string_view keyN){
-			return shared::zset::isKeyValid(keyN, scoreSize);
-		}
-
-		constexpr bool isMC1KeyValid(std::string_view keyN, std::string_view keySub){
-			return shared::zset::isKeyValid(keyN, keySub, scoreSize);
-		}
 
 		constexpr std::string_view toHex(uint64_t const x, MC1Buffer &buffer){
 			using namespace hex_convert;
@@ -56,7 +48,11 @@ namespace net::worker::commands::LinearCurve{
 				return { buffer.data(), result.size };
 		}
 
+		using P1 = net::worker::shared::zsetmulti::Permutation1;
 
+		constexpr bool isMC1KeyValid(std::string_view keyN, std::string_view keySub){
+			return P1::valid(keyN, keySub, scoreSize);
+		}
 
 		template<class DBAdapter>
 		void linearSearchPoint(
@@ -73,11 +69,10 @@ namespace net::worker::commands::LinearCurve{
 
 				MC1Buffer buffer;
 
-				return concatenateBuffer(bufferKeyPrefix,
+				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN,
-						DBAdapter::SEPARATOR,
-						toHex(x, buffer),
-						DBAdapter::SEPARATOR
+						"A",
+						toHex(x, buffer)
 				);
 			}();
 
@@ -106,10 +101,6 @@ namespace net::worker::commands::LinearCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = shared::zset::extractScore(key, keyN, scoreSize);
-
-				auto const x = hex_convert::fromHex<uint64_t>(hex);
-
 				// because of the prefix check in StopPrefixPredicate,
 				// the point is always correct (inside).
 
@@ -136,9 +127,13 @@ namespace net::worker::commands::LinearCurve{
 				std::string_view keyN, uint32_t count,
 				uint64_t x_min, uint64_t x_max, std::string_view startKey){
 
-			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t z){
-				MC1Buffer z_buffer;
-				return concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, toHex(z, z_buffer), DBAdapter::SEPARATOR);
+			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t x){
+				MC1Buffer buffer;
+				return P1::makeKey(bufferKey, DBAdapter::SEPARATOR,
+						keyN,
+						"A",
+						toHex(x, buffer)
+				);
 			};
 
 			hm4::PairBufferKey bufferKey[2];
@@ -169,9 +164,12 @@ namespace net::worker::commands::LinearCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = shared::zset::extractScore(key, keyN, scoreSize);
+				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
+							after_prefix(shared::zsetmulti::prefixSize(keyN, "A"), key));
 
-				auto const x = hex_convert::fromHex<uint64_t>(hex);
+				auto const hex  = hexA[0];
+
+				auto const x    = hex_convert::fromHex<uint64_t>(hex);
 
 				// because of the prefix check in StopPrefixPredicate,
 				// the point is always correct (inside).
@@ -223,7 +221,7 @@ namespace net::worker::commands::LinearCurve{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zset::get(db, keyN, keySub)
+				shared::zsetmulti::get<P1>(db, keyN, keySub)
 			);
 		}
 
@@ -279,7 +277,7 @@ namespace net::worker::commands::LinearCurve{
 				auto const &keySub = *itk;
 
 				container.emplace_back(
-					shared::zset::get(db, keyN, keySub)
+					shared::zsetmulti::get<P1>(db, keyN, keySub)
 				);
 			}
 
@@ -309,7 +307,7 @@ namespace net::worker::commands::LinearCurve{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace linear_curve_impl_;
 
-			return shared::zset::cmdProcessExists(p, db, result, blob, scoreSize);
+			return shared::zsetmulti::cmdProcessExists<P1>(p, db, result, blob);
 		}
 
 	private:
@@ -347,21 +345,9 @@ namespace net::worker::commands::LinearCurve{
 			if (!isMC1KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			if (auto const hex = shared::zset::score(db, keyN, keySub); !hex.empty()){
-				auto const x = hex_convert::fromHex<uint64_t>(hex);
-
-				to_string_buffer_t buffer;
-
-				std::array<std::string_view, 1> const container{
-					to_string(x, buffer)
-				};
-
-				return result.set_container(container);
-			}else{
-				constexpr std::array<std::string_view, 1> const container{""};
-
-				return result.set_container(container);
-			}
+			return result.set_container(
+				shared::zsetmulti::getIndexes<P1>(db, keyN, keySub)
+			);
 		}
 
 	private:
@@ -421,9 +407,9 @@ namespace net::worker::commands::LinearCurve{
 
 				auto const score	= toHex(x, buffer);
 
-				shared::zset::add(
+				shared::zsetmulti::add<P1>(
 						db,
-						keyN, keySub, score, value
+						keyN, keySub, { score }, value
 				);
 			}
 
@@ -455,7 +441,7 @@ namespace net::worker::commands::LinearCurve{
 
 			hm4::TXGuard guard{ *db };
 
-			return shared::zset::cmdProcessRem(p, db, result, blob, scoreSize);
+			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
 	private:
@@ -491,10 +477,10 @@ namespace net::worker::commands::LinearCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC1KeyValid(keyN))
+			if (!isMC1KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			auto const x = from_string<uint32_t>(p[2]);
+			auto const x		= from_string<uint32_t>(p[2]);
 
 			auto const count	= myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 
@@ -545,7 +531,7 @@ namespace net::worker::commands::LinearCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC1KeyValid(keyN))
+			if (!isMC1KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const x_min	= from_string<uint32_t>(p[2]);

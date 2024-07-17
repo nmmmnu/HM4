@@ -428,20 +428,13 @@ auto getPairPtrNC(List const &list, std::string_view key){
 
 // ==============================
 
-template<bool CheckOK = true, typename List, typename Predicate>
+template<typename List, typename Predicate>
 auto getPairByPrefix_(List const &list, std::string_view key, Predicate p){
 	auto it = list.find(key, std::false_type{});
 
-	if constexpr(CheckOK){
-		bool const b = it != std::end(list) && it->isOK() && same_prefix(key, it->getKey());
+	bool const b = it != std::end(list) && it->isOK() && same_prefix(key, it->getKey());
 
-		return p(b, it);
-	}else{
-		bool const b = it != std::end(list) && same_prefix(key, it->getKey());
-
-		return p(b, it);
-	}
-
+	return p(b, it);
 }
 
 template<typename List>
