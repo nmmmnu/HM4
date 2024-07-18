@@ -388,7 +388,7 @@ namespace net::worker::shared::zsetmulti{
 			std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes, std::string_view value){
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKey(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, "", keySub);
+		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::ADD: ctrl key" << keyCtrl;
 
@@ -456,7 +456,7 @@ namespace net::worker::shared::zsetmulti{
 			std::string_view keyN, std::string_view keySub){
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKey(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, "", keySub);
+		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::REM: ctrl key" << keyCtrl;
 
@@ -512,7 +512,7 @@ namespace net::worker::shared::zsetmulti{
 			std::string_view keyN, std::string_view keySub){
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKey(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, "", keySub);
+		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::GET: ctrl key" << keyCtrl;
 
@@ -540,18 +540,15 @@ namespace net::worker::shared::zsetmulti{
 	std::array<std::string_view, Permutation::N> getIndexes(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){
 
-		hm4::PairBufferKey bufferKeyPrefix;
-		auto const keyPrefix = Permutation::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR, keyN, "", keySub);
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
-		logger<Logger::DEBUG>() << "ZSetMulti::GET_INDEX: prefix key" << keyPrefix;
+		logger<Logger::DEBUG>() << "ZSetMulti::GET_INDEX: ctrl key" << keyCtrl;
 
-		if (const auto *pair = hm4::getPairPtr/*ByPrefix*/(*db, keyPrefix); pair){
+		if (auto const encodedValue = hm4::getPairVal(*db, keyCtrl); !encodedValue.empty()){
 			// Case 1: ctrl key is set
 
-			auto const keyCtrl = pair->getKey();
-
-			auto const ixKey = after_prefix(keyPrefix, keyCtrl);
-			return Permutation::decodeIndex(DBAdapter::SEPARATOR, ixKey);
+			return Permutation::decodeIndex(DBAdapter::SEPARATOR, encodedValue);
 		}
 
 		return {};
@@ -563,12 +560,12 @@ namespace net::worker::shared::zsetmulti{
 	bool exists(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){
 
-		hm4::PairBufferKey bufferKeyPrefix;
-		auto const keyPrefix = Permutation::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR, keyN, "", keySub);
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
-		logger<Logger::DEBUG>() << "ZSetMulti::EXISTS: prefix key" << keyPrefix;
+		logger<Logger::DEBUG>() << "ZSetMulti::EXISTS: ctrl key" << keyCtrl;
 
-		return hm4::getPairOK/*ByPrefix*/(*db, keyPrefix);
+		return hm4::getPairOK(*db, keyCtrl);
 	}
 
 
