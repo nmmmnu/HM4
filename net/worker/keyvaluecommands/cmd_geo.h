@@ -65,7 +65,7 @@ namespace net::worker::commands::Geo{
 
 		} // anonymous namespace
 
-		using P1 = net::worker::shared::zsetmulti::Permutation1;
+		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
 		constexpr bool isGeoKeyValid(std::string_view key, std::string_view name){
 			return P1::valid(key, name, GeoHash::MAX_SIZE);
@@ -337,11 +337,9 @@ namespace net::worker::commands::Geo{
 			for(auto &hash : cells){
 				hm4::PairBufferKey bufferKey;
 
-				constexpr std::string_view txt = "A";
-
-				auto const prefix = P1::makeKeyNoSeparator(bufferKey, DBAdapter::SEPARATOR,
+				auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR,
 								keyN	,
-								txt	,
+								"X"	,	// old style not supports txt
 								hash
 				);
 

@@ -19,7 +19,7 @@ namespace net::worker::commands::MortonCurve{
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC2Buffer = std::array<char, scoreSize>;
 
-		using P1 = net::worker::shared::zsetmulti::Permutation1;
+		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
 		constexpr bool isMC2KeyValid(std::string_view keyN, std::string_view keySub){
 			return P1::valid(keyN, keySub, scoreSize);
@@ -122,13 +122,10 @@ namespace net::worker::commands::MortonCurve{
 
 				MC2Buffer buffer;
 
-				return concatenateBuffer(bufferKeyPrefix,
-						keyN,
-						DBAdapter::SEPARATOR,
-						"A",
-						DBAdapter::SEPARATOR,
-						toHex(point.x, point.y, buffer),
-						DBAdapter::SEPARATOR
+				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
+						keyN			,
+						"X"			,	// old style not supports txt
+						toHex(point.x, point.y, buffer)
 				);
 			}();
 
@@ -155,7 +152,7 @@ namespace net::worker::commands::MortonCurve{
 					continue;
 
 				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
-							after_prefix(shared::zsetmulti::prefixSize(keyN, "A"), key));
+							after_prefix(P1::sizeKey(keyN), key));
 
 				auto const hex  = hexA[0];
 
@@ -201,13 +198,10 @@ namespace net::worker::commands::MortonCurve{
 			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t z){
 				MC2Buffer z_buffer;
 
-				return concatenateBuffer(bufferKey,
-						keyN,
-						DBAdapter::SEPARATOR,
-						"A",
-						DBAdapter::SEPARATOR,
-						toHex(z, z_buffer),
-						DBAdapter::SEPARATOR
+				return P1::makeKey(bufferKey, DBAdapter::SEPARATOR,
+						keyN			,
+						"X"			,	// old style not supports txt
+						toHex(z, z_buffer)
 				);
 			};
 
@@ -253,7 +247,7 @@ namespace net::worker::commands::MortonCurve{
 					continue;
 
 				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
-							after_prefix(shared::zsetmulti::prefixSize(keyN, "A"), key));
+							after_prefix(P1::sizeKey(keyN), key));
 
 				auto const hex  = hexA[0];
 

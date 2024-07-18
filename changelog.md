@@ -308,3 +308,6 @@ Changelog
 -	new module reservoir sampling: RSADD, RSRESERVE, RSGET, RSGETCOUNT
 -	bugfix on searching disktable keys with size 8 characters
 
+### 1.3.8
+-	refactor geo, linear curve, morton curve modules. This change is NOT breaking with previous versions.
+

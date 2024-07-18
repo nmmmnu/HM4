@@ -55,10 +55,120 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	constexpr size_t prefixSize(std::string_view keyN, std::string_view txt){
-		// keyN~_~A~, 3 * ~ + keyN + _
-		return 3 * 1 + keyN.size() + txt.size();
+	std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
+				std::string_view keyN,
+				std::string_view keySub){
+
+		return concatenateBuffer(bufferKey,
+				keyN		,	separator	,
+							separator	,
+				keySub
+		);
 	}
+
+
+
+	struct Permutation1NoIndex{
+		constexpr static size_t N = 1;
+
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
+			// keyN~A~keySub, 2 * ~ + 0 * _
+			return hm4::Pair::isCompositeKeyValid(2 * 1 + 0 * 1 + more, keyN, keySub);
+		}
+
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
+			// keyN~A~keySub, 2 * ~ + 0 * _
+			return hm4::Pair::isCompositeKeyValid(2 * 1 + 0 * 1 + more, keyN, keySub, indexes[0]);
+		}
+
+		static auto encodeIndex(std::string_view /* separator */, std::array<std::string_view, N> const &indexes, hm4::PairBufferKey bufferKey){
+			// no need to copy, but lets do it anyway, because the caller expects it.
+			return concatenateBuffer(bufferKey,
+						indexes[0]
+			);
+		}
+
+		static auto decodeIndex(std::string_view separator, std::string_view s){
+			StringTokenizer const tok{ s, separator[0] };
+			auto _ = getForwardTokenizer(tok);
+
+			return std::array<std::string_view, N>{ _() };
+		}
+
+		constexpr static size_t sizeKey(std::string_view keyN){
+			// keyN~, 1 * ~ + keyN
+			return 1 * 1 + keyN.size();
+		}
+
+		template<bool LAST_SEPARATOR = true>
+		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view key,
+					std::string_view /* txt */,
+					std::string_view a = "", std::string_view b = ""){
+
+			auto const separator_last = [separator](){
+				if constexpr(LAST_SEPARATOR)
+					return separator;
+				else
+					return "";
+			}();
+
+			uint64_t const x =
+				(a.empty() ? 0x00 : 0xA0) |
+				(b.empty() ? 0x00 : 0x0B) |
+				0;
+
+			switch(x){
+			default:
+			case 0x00:
+				return concatenateBuffer(bufferKey,
+						key	,	separator
+				);
+
+			case 0xA0:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						a	,	separator_last
+				);
+
+			case 0xAB:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						a	,	separator	,
+						b
+				);
+			}
+		}
+
+		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return concatenateBuffer(bufferKey,
+					keyN		,	separator	,
+					indexes[0]	,	separator	,
+					keySub
+			);
+		}
+
+		template<typename F>
+		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
+			auto const S = keySub;
+			auto const A = indexes[0];
+
+			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b){
+				hm4::PairBufferKey bufferKey;
+
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b);
+
+				f(key);
+			};
+
+			// old style not supports txt
+			ff("X", A, S);
+		}
+	};
 
 
 
@@ -122,52 +232,6 @@ namespace net::worker::shared::zsetmulti{
 						b
 				);
 			}
-		}
-
-		static std::string_view makeKeyNoSeparator(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view key,
-					std::string_view txt,
-					std::string_view a = "", std::string_view b = ""){
-
-			uint64_t const x =
-				(a.empty() ? 0x00 : 0xA0) |
-				(b.empty() ? 0x00 : 0x0B) |
-				0;
-
-			switch(x){
-			default:
-			case 0x00:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator
-				);
-
-			case 0xA0:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a
-				);
-
-			case 0xAB:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b
-				);
-			}
-		}
-
-		static std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub){
-
-			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-								separator	,
-					keySub
-			);
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -273,62 +337,6 @@ namespace net::worker::shared::zsetmulti{
 						c
 				);
 			}
-		}
-
-		static std::string_view makeKeyNoSeparator(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view key,
-					std::string_view txt,
-					std::string_view a = "", std::string_view b = "", std::string_view c = ""){
-
-			uint64_t const x =
-				(a.empty() ? 0x000 : 0xA00) |
-				(b.empty() ? 0x000 : 0x0B0) |
-				(c.empty() ? 0x000 : 0x00C) |
-				0;
-
-			switch(x){
-			default:
-			case 0x000:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator
-				);
-
-			case 0xA00:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a
-				);
-
-			case 0xAB0:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b
-				);
-
-			case 0xABC:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator	,
-						c
-				);
-			}
-		}
-
-		static std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub){
-
-			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-								separator	,
-					keySub
-			);
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -451,73 +459,6 @@ namespace net::worker::shared::zsetmulti{
 			}
 		}
 
-		static std::string_view makeKeyNoSeparator(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view key,
-					std::string_view txt,
-					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = ""){
-
-			uint64_t const x =
-				(a.empty() ? 0x0000 : 0xA000) |
-				(b.empty() ? 0x0000 : 0x0B00) |
-				(c.empty() ? 0x0000 : 0x00C0) |
-				(d.empty() ? 0x0000 : 0x000D) |
-				0;
-
-			switch(x){
-			default:
-			case 0x0000:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator
-				);
-
-			case 0xA000:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a
-				);
-
-			case 0xAB00:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b
-				);
-
-			case 0xABC0:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator	,
-						c
-				);
-
-			case 0xABCD:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator	,
-						c	,	separator	,
-						d
-				);
-			}
-		}
-
-		static std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub){
-
-			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-								separator	,
-					keySub
-			);
-		}
-
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
@@ -567,7 +508,7 @@ namespace net::worker::shared::zsetmulti{
 		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::ADD: ctrl key" << keyCtrl;
 
@@ -637,7 +578,7 @@ namespace net::worker::shared::zsetmulti{
 		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::REM: ctrl key" << keyCtrl;
 
@@ -693,7 +634,7 @@ namespace net::worker::shared::zsetmulti{
 			std::string_view keyN, std::string_view keySub){
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::GET: ctrl key" << keyCtrl;
 
@@ -729,7 +670,7 @@ namespace net::worker::shared::zsetmulti{
 			std::string_view keyN, std::string_view keySub){
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::GET_INDEX: ctrl key" << keyCtrl;
 
@@ -754,7 +695,7 @@ namespace net::worker::shared::zsetmulti{
 			std::string_view keyN, std::string_view keySub){
 
 		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::EXISTS: ctrl key" << keyCtrl;
 

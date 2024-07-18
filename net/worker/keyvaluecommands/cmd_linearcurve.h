@@ -48,7 +48,7 @@ namespace net::worker::commands::LinearCurve{
 				return { buffer.data(), result.size };
 		}
 
-		using P1 = net::worker::shared::zsetmulti::Permutation1;
+		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
 		constexpr bool isMC1KeyValid(std::string_view keyN, std::string_view keySub){
 			return P1::valid(keyN, keySub, scoreSize);
@@ -70,8 +70,8 @@ namespace net::worker::commands::LinearCurve{
 				MC1Buffer buffer;
 
 				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
-						keyN,
-						"A",
+						keyN	,
+						"X"	,	// old style not supports txt
 						toHex(x, buffer)
 				);
 			}();
@@ -130,8 +130,8 @@ namespace net::worker::commands::LinearCurve{
 			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t x){
 				MC1Buffer buffer;
 				return P1::makeKey(bufferKey, DBAdapter::SEPARATOR,
-						keyN,
-						"A",
+						keyN	,
+						"X"	,	// old style not supports txt
 						toHex(x, buffer)
 				);
 			};
@@ -165,7 +165,7 @@ namespace net::worker::commands::LinearCurve{
 					continue;
 
 				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
-							after_prefix(shared::zsetmulti::prefixSize(keyN, "A"), key));
+							after_prefix(P1::sizeKey(keyN), key));
 
 				auto const hex  = hexA[0];
 
