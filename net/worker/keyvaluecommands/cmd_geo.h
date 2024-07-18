@@ -71,6 +71,31 @@ namespace net::worker::commands::Geo{
 			return P1::valid(key, name, GeoHash::MAX_SIZE);
 		}
 
+		struct GeoIndexController{
+			constexpr static std::string_view encode(std::string_view value){
+				return value;
+			}
+
+			template<size_t N>
+			static std::array<std::string_view, N> decode(std::string_view value){
+				static_assert(N == 1);
+
+				// this looks same as extractName,
+				// but it do completly different job.
+
+				StringTokenizer const tok{ value, POINT_SEPARATOR };
+				auto _ = getBackwardTokenizer(tok);
+
+				auto const r = _();
+
+				return { r };
+			}
+
+			constexpr static std::string_view decodeValue(std::string_view value){
+				return value;
+			}
+		};
+
 	} // namespace geo_impl_
 
 
@@ -125,7 +150,7 @@ namespace net::worker::commands::Geo{
 
 				auto const &name = *(itk + 2);
 
-				shared::zsetmulti::add<P1>(db, keyN, name, { hash }, line);
+				shared::zsetmulti::add<P1, GeoIndexController>(db, keyN, name, { hash }, line);
 			}
 
 			return result.set();
@@ -154,7 +179,7 @@ namespace net::worker::commands::Geo{
 
 			hm4::TXGuard guard{ *db };
 
-			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
+			return shared::zsetmulti::cmdProcessRem<P1, GeoIndexController>(p, db, result, blob);
 		}
 
 	private:
@@ -197,7 +222,7 @@ namespace net::worker::commands::Geo{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zsetmulti::get<P1>(db, keyN, name)
+				shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name)
 			);
 		}
 
@@ -252,7 +277,7 @@ namespace net::worker::commands::Geo{
 				auto const &name = *itk;
 
 				container.emplace_back(
-					shared::zsetmulti::get<P1>(db, keyN, name)
+					shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name)
 				);
 			}
 
@@ -416,7 +441,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line1 = shared::zsetmulti::get<P1>(db, keyN, name1);
+			auto const line1 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name1);
 
 			if (line1.empty())
 				return result.set(int64_t{-1});
@@ -425,7 +450,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line2 = shared::zsetmulti::get<P1>(db, keyN, name2);
+			auto const line2 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name2);
 
 			if (line2.empty())
 				return result.set(int64_t{-1});

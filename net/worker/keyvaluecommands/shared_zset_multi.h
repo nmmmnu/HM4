@@ -5,34 +5,62 @@
 #include "stringtokenizer.h"
 
 namespace net::worker::shared::zsetmulti{
-	template<size_t N>
-	bool valid(std::array<std::string_view, N> const &indexes){
-		for(auto const &x : indexes)
-			if (x.empty())
-				return false;
+	namespace impl_{
+		template<size_t N>
+		bool valid(std::array<std::string_view, N> const &indexes){
+			for(auto const &x : indexes)
+				if (x.empty())
+					return false;
 
-		return true;
-	}
+			return true;
+		}
 
-	template<size_t N>
-	auto makeACopy(std::array<std::string_view, N> const &src){
-		struct Storage{
-			std::array<std::string_view,   N> copy;
-			std::array<hm4::PairBufferKey, N> buffer;
-		};
+		template<size_t N>
+		auto makeACopy(std::array<std::string_view, N> const &src){
+			struct Storage{
+				std::array<std::string_view,   N> copy;
+				std::array<hm4::PairBufferKey, N> buffer;
+			};
 
-		Storage x;
+			Storage x;
 
-		for(size_t i = 0; i < N; ++i)
-			x.copy[i] = concatenateBuffer(x.buffer[i], src[i]);
+			for(size_t i = 0; i < N; ++i)
+				x.copy[i] = concatenateBuffer(x.buffer[i], src[i]);
 
-		return x;
-	}
+			return x;
+		}
+
+		template<typename Permutation, typename IndexController>
+		std::string_view encodeIndex(std::string_view separator, std::array<std::string_view, Permutation::N> const &indexes, hm4::PairBufferKey bufferVal,
+							std::string_view value){
+			if constexpr(std::is_same_v<IndexController, std::nullptr_t>){
+				return Permutation::encodeIndex(separator, indexes, bufferVal);
+			}else{
+				logger<Logger::DEBUG>() << "Using IndexController to encode";
+				return IndexController::encode(value);
+			}
+		}
+
+		template<typename Permutation, typename IndexController>
+		std::array<std::string_view, Permutation::N> decodeIndex(std::string_view separator, std::string_view value){
+			if constexpr(std::is_same_v<IndexController, std::nullptr_t>){
+				return Permutation::decodeIndex(separator, value);
+			}else{
+				logger<Logger::DEBUG>() << "Using IndexController to decode";
+				return IndexController::template decode<Permutation::N>(value);
+			}
+		}
+
+	} // namespace impl_
+
+
 
 	constexpr size_t prefixSize(std::string_view keyN, std::string_view txt){
 		// keyN~_~A~, 3 * ~ + keyN + _
 		return 3 * 1 + keyN.size() + txt.size();
 	}
+
+
 
 	struct Permutation1{
 		constexpr static size_t N = 1;
@@ -176,16 +204,15 @@ namespace net::worker::shared::zsetmulti{
 
 	struct Permutation2{
 		constexpr static size_t N = 2;
-		constexpr static inline std::string_view MAIN_INDEX = "AB";
 
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub){
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~AB~A~B~keySub, 4 * ~ + AB
-			return hm4::Pair::isCompositeKeyValid(4 * 1 + 2, keyN, keySub);
+			return hm4::Pair::isCompositeKeyValid(4 * 1 + 2 + more, keyN, keySub);
 		}
 
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes){
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~AB~A~B~keySub, 4 * ~ + AB
-			return hm4::Pair::isCompositeKeyValid(4 * 1 + 2, keyN, keySub, indexes[0], indexes[1]);
+			return hm4::Pair::isCompositeKeyValid(4 * 1 + 2 + more, keyN, keySub, indexes[0], indexes[1]);
 		}
 
 		static auto encodeIndex(std::string_view separator, std::array<std::string_view, N> const &indexes, hm4::PairBufferKey bufferKey){
@@ -248,6 +275,76 @@ namespace net::worker::shared::zsetmulti{
 			}
 		}
 
+		static std::string_view makeKeyNoSeparator(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view key,
+					std::string_view txt,
+					std::string_view a = "", std::string_view b = "", std::string_view c = ""){
+
+			uint64_t const x =
+				(a.empty() ? 0x000 : 0xA00) |
+				(b.empty() ? 0x000 : 0x0B0) |
+				(c.empty() ? 0x000 : 0x00C) |
+				0;
+
+			switch(x){
+			default:
+			case 0x000:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator
+				);
+
+			case 0xA00:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a
+				);
+
+			case 0xAB0:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b
+				);
+
+			case 0xABC:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator	,
+						c
+				);
+			}
+		}
+
+		static std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub){
+
+			return concatenateBuffer(bufferKey,
+					keyN		,	separator	,
+								separator	,
+					keySub
+			);
+		}
+
+		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return concatenateBuffer(bufferKey,
+					keyN		,	separator	,
+					"AB"		,	separator	,
+					indexes[0]	,	separator	,
+					indexes[1]	,	separator	,
+					keySub
+			);
+		}
+
 		template<typename F>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
 			auto const S = keySub;
@@ -262,7 +359,6 @@ namespace net::worker::shared::zsetmulti{
 				f(key);
 			};
 
-			ff("",   S, A, B);
 			ff("AB", A, B, S);
 			ff("BA", B, A, S);
 		}
@@ -272,16 +368,15 @@ namespace net::worker::shared::zsetmulti{
 
 	struct Permutation3{
 		constexpr static size_t N = 3;
-		constexpr static inline std::string_view MAIN_INDEX = "ABC";
 
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub){
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~ABC~A~B~C~keySub, 5 * ~ + ABC
-			return hm4::Pair::isCompositeKeyValid(5 * 1 + 3, keyN, keySub);
+			return hm4::Pair::isCompositeKeyValid(5 * 1 + 3 + more, keyN, keySub);
 		}
 
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes){
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~ABC~A~B~C~keySub, 5 * ~ + ABC
-			return hm4::Pair::isCompositeKeyValid(5 * 1 + 3, keyN, keySub, indexes[0], indexes[1], indexes[2]);
+			return hm4::Pair::isCompositeKeyValid(5 * 1 + 3 + more, keyN, keySub, indexes[0], indexes[1], indexes[2]);
 		}
 
 		static auto encodeIndex(std::string_view separator, std::array<std::string_view, N> const &indexes, hm4::PairBufferKey bufferKey){
@@ -356,6 +451,88 @@ namespace net::worker::shared::zsetmulti{
 			}
 		}
 
+		static std::string_view makeKeyNoSeparator(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view key,
+					std::string_view txt,
+					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = ""){
+
+			uint64_t const x =
+				(a.empty() ? 0x0000 : 0xA000) |
+				(b.empty() ? 0x0000 : 0x0B00) |
+				(c.empty() ? 0x0000 : 0x00C0) |
+				(d.empty() ? 0x0000 : 0x000D) |
+				0;
+
+			switch(x){
+			default:
+			case 0x0000:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator
+				);
+
+			case 0xA000:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a
+				);
+
+			case 0xAB00:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b
+				);
+
+			case 0xABC0:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator	,
+						c
+				);
+
+			case 0xABCD:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator	,
+						c	,	separator	,
+						d
+				);
+			}
+		}
+
+		static std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub){
+
+			return concatenateBuffer(bufferKey,
+					keyN		,	separator	,
+								separator	,
+					keySub
+			);
+		}
+
+		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return concatenateBuffer(bufferKey,
+					keyN		,	separator	,
+					"ABC"		,	separator	,
+					indexes[0]	,	separator	,
+					indexes[1]	,	separator	,
+					indexes[2]	,	separator	,
+					keySub
+			);
+		}
+
 		template<typename F>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
 			auto const S = keySub;
@@ -383,9 +560,11 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	template<typename Permutation, typename DBAdapter>
+	template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
 	void add(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes, std::string_view value){
+
+		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
@@ -398,7 +577,7 @@ namespace net::worker::shared::zsetmulti{
 			if (auto const pair = hm4::getPairPtr(*db, keyCtrl); pair){
 				// Case 1: ctrl key is set
 
-				auto const indexesOld = Permutation::decodeIndex(DBAdapter::SEPARATOR, pair->getVal());
+				auto const indexesOld = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, pair->getVal());
 
 				if (!valid(indexesOld)){
 					// Case 1.0: invalid ctrl key, probable attack.
@@ -443,17 +622,19 @@ namespace net::worker::shared::zsetmulti{
 		logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET ctrl key" << keyCtrl;
 
 		hm4::PairBufferKey bufferVal;
-		auto const encodedValue =  Permutation::encodeIndex(DBAdapter::SEPARATOR, indexes, bufferVal);
+
+		auto const encodedValue = encodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, indexes, bufferVal, value);
 
 		insert(*db, keyCtrl, encodedValue);
-
 	}
 
 
 
-	template<typename Permutation, typename DBAdapter>
+	template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
 	void rem(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){
+
+		using namespace impl_;
 
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = Permutation::makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
@@ -463,7 +644,7 @@ namespace net::worker::shared::zsetmulti{
 		if (auto const pair = hm4::getPairPtr(*db, keyCtrl); pair){
 			// Case 1: ctrl key is set
 
-			auto const indexesOld = Permutation::decodeIndex(DBAdapter::SEPARATOR, pair->getVal());
+			auto const indexesOld = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, pair->getVal());
 
 			if (!valid(indexesOld)){
 				// Case 1.0: invalid ctrl key, probable attack.
@@ -507,7 +688,7 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	template<typename Permutation, typename DBAdapter>
+	template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
 	std::string_view get(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){
 
@@ -519,15 +700,22 @@ namespace net::worker::shared::zsetmulti{
 		if (auto const encodedValue = hm4::getPairVal(*db, keyCtrl); !encodedValue.empty()){
 			// Case 1: ctrl key is set
 
-			auto const indexes = Permutation::decodeIndex(DBAdapter::SEPARATOR, encodedValue);
+			if constexpr(std::is_same_v<IndexController, std::nullptr_t>){
+				using namespace impl_;
 
-			if (Permutation::valid(keyN, keySub, indexes)){
-				hm4::PairBufferKey bufferKeyData;
-				auto const keyData = Permutation::makeKeyData(bufferKeyData, DBAdapter::SEPARATOR, keyN, keySub, indexes);
+				auto const indexes = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, encodedValue);
 
-				logger<Logger::DEBUG>() << "ZSetMulti::GET: data key" << keyData;
+				if (Permutation::valid(keyN, keySub, indexes)){
+					hm4::PairBufferKey bufferKeyData;
+					auto const keyData = Permutation::makeKeyData(bufferKeyData, DBAdapter::SEPARATOR, keyN, keySub, indexes);
 
-				return hm4::getPairVal(*db, keyData);
+					logger<Logger::DEBUG>() << "ZSetMulti::GET: data key" << keyData;
+
+					return hm4::getPairVal(*db, keyData);
+				}
+			}else{
+				logger<Logger::DEBUG>() << "Using IndexController to get data";
+				return IndexController::decodeValue(encodedValue);
 			}
 		}
 
@@ -536,7 +724,7 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	template<typename Permutation, typename DBAdapter>
+	template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
 	std::array<std::string_view, Permutation::N> getIndexes(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){
 
@@ -548,7 +736,9 @@ namespace net::worker::shared::zsetmulti{
 		if (auto const encodedValue = hm4::getPairVal(*db, keyCtrl); !encodedValue.empty()){
 			// Case 1: ctrl key is set
 
-			auto const indexes = Permutation::decodeIndex(DBAdapter::SEPARATOR, encodedValue);
+			using namespace impl_;
+
+			auto const indexes = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, encodedValue);
 
 			if (Permutation::valid(keyN, keySub, indexes))
 				return indexes;
@@ -596,7 +786,7 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	template<typename Permutation, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
+	template<typename Permutation, typename IndexController = std::nullptr_t, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
 	void cmdProcessRem(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){
 		// REM key subkey0 subkey1 ...
 
@@ -618,7 +808,7 @@ namespace net::worker::shared::zsetmulti{
 		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 			auto const &keySub = *itk;
 
-			rem<Permutation>(db, keyN, keySub);
+			rem<Permutation, IndexController>(db, keyN, keySub);
 		}
 
 		return result.set_1();
