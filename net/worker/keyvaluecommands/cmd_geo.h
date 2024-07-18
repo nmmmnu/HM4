@@ -312,11 +312,11 @@ namespace net::worker::commands::Geo{
 			for(auto &hash : cells){
 				hm4::PairBufferKey bufferKey;
 
-				constexpr std::string_view index = "A";
+				constexpr std::string_view txt = "A";
 
-				auto const prefix = P1::makeKeyNC(bufferKey, DBAdapter::SEPARATOR,
+				auto const prefix = P1::makeKeyNoSeparator(bufferKey, DBAdapter::SEPARATOR,
 								keyN	,
-								index	,
+								txt	,
 								hash
 				);
 

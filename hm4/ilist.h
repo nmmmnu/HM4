@@ -428,6 +428,8 @@ auto getPairPtrNC(List const &list, std::string_view key){
 
 // ==============================
 
+#if 0
+
 template<typename List, typename Predicate>
 auto getPairByPrefix_(List const &list, std::string_view key, Predicate p){
 	auto it = list.find(key, std::false_type{});
@@ -457,6 +459,8 @@ auto getPairPtrByPrefix(List const &list, std::string_view key){
 		return b ? & *it : nullptr;
 	});
 }
+
+#endif
 
 } // namespace
 
