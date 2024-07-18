@@ -548,7 +548,10 @@ namespace net::worker::shared::zsetmulti{
 		if (auto const encodedValue = hm4::getPairVal(*db, keyCtrl); !encodedValue.empty()){
 			// Case 1: ctrl key is set
 
-			return Permutation::decodeIndex(DBAdapter::SEPARATOR, encodedValue);
+			auto const indexes = Permutation::decodeIndex(DBAdapter::SEPARATOR, encodedValue);
+
+			if (Permutation::valid(keyN, keySub, indexes))
+				return indexes;
 		}
 
 		return {};
@@ -590,6 +593,8 @@ namespace net::worker::shared::zsetmulti{
 			exists<Permutation>(db, keyN, keySub)
 		);
 	}
+
+
 
 	template<typename Permutation, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
 	void cmdProcessRem(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){

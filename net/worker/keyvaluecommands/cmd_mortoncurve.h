@@ -6,7 +6,7 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_iterations.h"
-#include "shared_zset.h"
+#include "shared_zset_multi.h"
 
 #include "ilist/txguard.h"
 
@@ -19,12 +19,10 @@ namespace net::worker::commands::MortonCurve{
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC2Buffer = std::array<char, scoreSize>;
 
-		constexpr bool isMC2KeyValid(std::string_view keyN){
-			return shared::zset::isKeyValid(keyN, scoreSize);
-		}
+		using P1 = net::worker::shared::zsetmulti::Permutation1;
 
 		constexpr bool isMC2KeyValid(std::string_view keyN, std::string_view keySub){
-			return shared::zset::isKeyValid(keyN, keySub, scoreSize);
+			return P1::valid(keyN, keySub, scoreSize);
 		}
 
 		constexpr std::string_view toHex(uint64_t const z, MC2Buffer &buffer){
@@ -127,6 +125,8 @@ namespace net::worker::commands::MortonCurve{
 				return concatenateBuffer(bufferKeyPrefix,
 						keyN,
 						DBAdapter::SEPARATOR,
+						"A",
+						DBAdapter::SEPARATOR,
 						toHex(point.x, point.y, buffer),
 						DBAdapter::SEPARATOR
 				);
@@ -154,7 +154,10 @@ namespace net::worker::commands::MortonCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = shared::zset::extractScore(key, keyN, scoreSize);
+				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
+							after_prefix(shared::zsetmulti::prefixSize(keyN, "A"), key));
+
+				auto const hex  = hexA[0];
 
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
@@ -197,7 +200,15 @@ namespace net::worker::commands::MortonCurve{
 
 			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t z){
 				MC2Buffer z_buffer;
-				return concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR, toHex(z, z_buffer), DBAdapter::SEPARATOR);
+
+				return concatenateBuffer(bufferKey,
+						keyN,
+						DBAdapter::SEPARATOR,
+						"A",
+						DBAdapter::SEPARATOR,
+						toHex(z, z_buffer),
+						DBAdapter::SEPARATOR
+				);
 			};
 
 			hm4::PairBufferKey bufferKey[2];
@@ -241,7 +252,10 @@ namespace net::worker::commands::MortonCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hex = shared::zset::extractScore(key, keyN, scoreSize);
+				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
+							after_prefix(shared::zsetmulti::prefixSize(keyN, "A"), key));
+
+				auto const hex  = hexA[0];
 
 				auto const z = hex_convert::fromHex<uint64_t>(hex);
 
@@ -329,7 +343,7 @@ namespace net::worker::commands::MortonCurve{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zset::get(db, keyN, keySub)
+				shared::zsetmulti::get<P1>(db, keyN, keySub)
 			);
 		}
 
@@ -385,7 +399,7 @@ namespace net::worker::commands::MortonCurve{
 				auto const &keySub = *itk;
 
 				container.emplace_back(
-					shared::zset::get(db, keyN, keySub)
+					shared::zsetmulti::get<P1>(db, keyN, keySub)
 				);
 			}
 
@@ -415,7 +429,7 @@ namespace net::worker::commands::MortonCurve{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
-			return shared::zset::cmdProcessExists(p, db, result, blob, scoreSize);
+			return shared::zsetmulti::cmdProcessExists<P1>(p, db, result, blob);
 		}
 
 	private:
@@ -453,8 +467,11 @@ namespace net::worker::commands::MortonCurve{
 			if (!isMC2KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			if (auto const hex = shared::zset::score(db, keyN, keySub); !hex.empty()){
-				auto const z = hex_convert::fromHex<uint64_t>(hex);
+			if (auto const hexA = shared::zsetmulti::getIndexes<P1>(db, keyN, keySub); !hexA[0].empty()){
+
+				auto const hex = hexA[0];
+
+				auto const z   = hex_convert::fromHex<uint64_t>(hex);
 
 				auto const [x, y] = morton_curve::fromMorton2D(z);
 
@@ -531,9 +548,9 @@ namespace net::worker::commands::MortonCurve{
 
 				auto const score	= toHex(x, y, buffer);
 
-				shared::zset::add(
+				shared::zsetmulti::add<P1>(
 						db,
-						keyN, keySub, score, value
+						keyN, keySub, { score }, value
 				);
 			}
 
@@ -565,7 +582,7 @@ namespace net::worker::commands::MortonCurve{
 
 			hm4::TXGuard guard{ *db };
 
-			return shared::zset::cmdProcessRem(p, db, result, blob, scoreSize);
+			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
 	private:
@@ -602,7 +619,7 @@ namespace net::worker::commands::MortonCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN))
+			if (!isMC2KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			MortonPoint const point{
@@ -659,7 +676,7 @@ namespace net::worker::commands::MortonCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN))
+			if (!isMC2KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			MortonRectangle const rect{
@@ -718,7 +735,7 @@ namespace net::worker::commands::MortonCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC2KeyValid(keyN))
+			if (!isMC2KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			MortonRectangle const rect{
