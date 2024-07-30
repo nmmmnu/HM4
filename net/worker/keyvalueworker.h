@@ -34,6 +34,8 @@
 #include "keyvaluecommands/cmd_mortoncurve.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
 #include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1EXISTS, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
 
+#include "keyvaluecommands/cmd_index.h"
+
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
 #include "keyvaluecommands/cmd_compat.h"		// SELECT, TYPE, TOUCH
@@ -107,6 +109,8 @@ namespace net::worker{
 				Geo		::RegisterModule,
 				MortonCurve	::RegisterModule,
 				LinearCurve	::RegisterModule,
+
+				Index		::RegisterModule,
 
 				Murmur		::RegisterModule,
 
