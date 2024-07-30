@@ -136,20 +136,23 @@ namespace net::worker::commands::Index{
 	template<int N, class Protocol, class DBAdapter>
 	struct IX_EXISTS : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
-			return std::begin(cmd[N-1]);
+		//	return std::begin(cmd[N-1]);
+			return std::begin(cmd);
 		};
 
 		const std::string_view *end()   const final{
-			return std::end(cmd[N-1]);
+		//	return std::end(cmd[N-1]);
+			return std::end(cmd);
 		};
 
 		// IXGET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::zsetmulti::cmdProcessExists<PN>(p, db, result, blob);
+			return shared::zsetmulti::cmdProcessExists/*<PN>*/(p, db, result, blob);
 		}
 
 	private:
+		/*
 		static_assert(impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
@@ -158,6 +161,13 @@ namespace net::worker::commands::Index{
 			{	"ix1exists",	"IX1EXISTS"	},
 			{	"ix2exists",	"IX2EXISTS"	},
 			{	"ix3exists",	"IX3EXISTS"	}
+		};
+		*/
+
+		constexpr inline static std::string_view cmd[] = {
+				"ix1exists",	"IX1EXISTS",
+				"ix2exists",	"IX2EXISTS",
+				"ix3exists",	"IX3EXISTS"
 		};
 	};
 

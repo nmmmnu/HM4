@@ -307,7 +307,7 @@ namespace net::worker::commands::LinearCurve{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace linear_curve_impl_;
 
-			return shared::zsetmulti::cmdProcessExists<P1>(p, db, result, blob);
+			return shared::zsetmulti::cmdProcessExists(p, db, result, blob);
 		}
 
 	private:

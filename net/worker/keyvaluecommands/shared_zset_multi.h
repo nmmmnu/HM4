@@ -743,7 +743,7 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	template<typename Permutation, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
+	template<typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
 	void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){
 		// EXISTS key subkey0
 
@@ -756,7 +756,7 @@ namespace net::worker::shared::zsetmulti{
 		if (keyN.empty() || keySub.empty())
 			return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-		if (!Permutation::valid(keyN, keySub))
+		if (!Permutation<1>::valid(keyN, keySub))
 			return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 		return result.set(

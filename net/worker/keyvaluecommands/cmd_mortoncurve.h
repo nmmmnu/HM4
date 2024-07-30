@@ -423,7 +423,7 @@ namespace net::worker::commands::MortonCurve{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
-			return shared::zsetmulti::cmdProcessExists<P1>(p, db, result, blob);
+			return shared::zsetmulti::cmdProcessExists(p, db, result, blob);
 		}
 
 	private:
