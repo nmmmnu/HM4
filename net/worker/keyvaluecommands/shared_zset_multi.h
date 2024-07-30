@@ -760,7 +760,7 @@ namespace net::worker::shared::zsetmulti{
 			return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 		return result.set(
-			exists /*<Permutation>*/ (db, keyN, keySub)
+			exists(db, keyN, keySub)
 		);
 	}
 

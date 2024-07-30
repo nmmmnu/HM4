@@ -12,7 +12,19 @@ namespace net::worker::commands::Index{
 		constexpr bool assertN(int n){
 			return n > 0 && n <= 3;
 		}
-	}
+
+		template<template<int, class, class> class Cmd>
+		struct LH{
+			template<class Protocol, class DBAdapter>
+			using cmd1 = Cmd<1, Protocol, DBAdapter>;
+
+			template<class Protocol, class DBAdapter>
+			using cmd2 = Cmd<2, Protocol, DBAdapter>;
+
+			template<class Protocol, class DBAdapter>
+			using cmd3 = Cmd<3, Protocol, DBAdapter>;
+		};
+	} // namespace impl_
 
 
 
@@ -59,10 +71,6 @@ namespace net::worker::commands::Index{
 
 
 	};
-
-	template<class Protocol, class DBAdapter>	using IX1GET = IX_GET<1, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX2GET = IX_GET<2, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX3GET = IX_GET<3, Protocol, DBAdapter>;
 
 
 
@@ -127,10 +135,6 @@ namespace net::worker::commands::Index{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>	using IX1MGET = IX_MGET<1, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX2MGET = IX_MGET<2, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX3MGET = IX_MGET<3, Protocol, DBAdapter>;
-
 
 
 	template<int N, class Protocol, class DBAdapter>
@@ -148,7 +152,7 @@ namespace net::worker::commands::Index{
 		// IXGET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::zsetmulti::cmdProcessExists/*<PN>*/(p, db, result, blob);
+			return shared::zsetmulti::cmdProcessExists(p, db, result, blob);
 		}
 
 	private:
@@ -170,10 +174,6 @@ namespace net::worker::commands::Index{
 				"ix3exists",	"IX3EXISTS"
 		};
 	};
-
-	template<class Protocol, class DBAdapter>	using IX1EXISTS = IX_EXISTS<1, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX2EXISTS = IX_EXISTS<2, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX3EXISTS = IX_EXISTS<3, Protocol, DBAdapter>;
 
 
 
@@ -218,10 +218,6 @@ namespace net::worker::commands::Index{
 			{	"ix3getindexes",	"IX3GETIXES"	}
 		};
 	};
-
-	template<class Protocol, class DBAdapter>	using IX1GETINDEXES = IX_GETINDEXES<1, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX2GETINDEXES = IX_GETINDEXES<2, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX3GETINDEXES = IX_GETINDEXES<3, Protocol, DBAdapter>;
 
 
 
@@ -326,10 +322,6 @@ namespace net::worker::commands::Index{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>	using IX1ADD = IX_ADD<1, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX2ADD = IX_ADD<2, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX3ADD = IX_ADD<3, Protocol, DBAdapter>;
-
 
 
 	template<int N, class Protocol, class DBAdapter>
@@ -362,10 +354,6 @@ namespace net::worker::commands::Index{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>	using IX1REM = IX_REM<1, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX2REM = IX_REM<2, Protocol, DBAdapter>;
-	template<class Protocol, class DBAdapter>	using IX3REM = IX_REM<3, Protocol, DBAdapter>;
-
 
 
 
@@ -375,27 +363,29 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view name	= "index";
 
 		static void load(RegisterPack &pack){
+			using namespace impl_;
+
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				IX1GET		,
-				IX1MGET		,
-				IX1EXISTS	,
-				IX1GETINDEXES	,
-				IX1ADD		,
-				IX1REM		,
+				LH<IX_GET		>::cmd1	,
+				LH<IX_MGET		>::cmd1	,
+				LH<IX_EXISTS		>::cmd1	,
+				LH<IX_GETINDEXES	>::cmd1	,
+				LH<IX_ADD		>::cmd1	,
+				LH<IX_REM		>::cmd1	,
 
-				IX2GET		,
-				IX2MGET		,
-				IX2EXISTS	,
-				IX2GETINDEXES	,
-				IX2ADD		,
-				IX2REM		,
+				LH<IX_GET		>::cmd2	,
+				LH<IX_MGET		>::cmd2	,
+				LH<IX_EXISTS		>::cmd2	,
+				LH<IX_GETINDEXES	>::cmd2	,
+				LH<IX_ADD		>::cmd2	,
+				LH<IX_REM		>::cmd2	,
 
-				IX3GET		,
-				IX3MGET		,
-				IX3EXISTS	,
-				IX3GETINDEXES	,
-				IX3ADD		,
-				IX3REM
+				LH<IX_GET		>::cmd3	,
+				LH<IX_MGET		>::cmd3	,
+				LH<IX_EXISTS		>::cmd3	,
+				LH<IX_GETINDEXES	>::cmd3	,
+				LH<IX_ADD		>::cmd3	,
+				LH<IX_REM       	>::cmd3
 			>(pack);
 		}
 	};
