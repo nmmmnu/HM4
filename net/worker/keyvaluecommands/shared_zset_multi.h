@@ -270,6 +270,13 @@ namespace net::worker::shared::zsetmulti{
 
 			ff("A", A, S);
 		}
+
+		static bool validateIndex(std::string_view s){
+			if (s.size() != 1)
+				return false;
+
+			return s[0] == 'a' || s[0] == 'A';
+		}
 	};
 
 
@@ -377,6 +384,28 @@ namespace net::worker::shared::zsetmulti{
 
 			ff("AB", A, B, S);
 			ff("BA", B, A, S);
+		}
+
+	private:
+		constexpr static uint16_t s2u(std::string_view s){
+			using T = uint16_t;
+
+			return
+				(T(s[0]) << 8 * 0) |
+				(T(s[1]) << 8 * 1) ;
+		}
+
+	public:
+		static bool validateIndex(std::string_view s){
+			if (s.size() != 2)
+				return false;
+
+			switch( s2u(s) ){
+			case s2u("ab") : case s2u("AB") :
+			case s2u("ba") : case s2u("BA") :	return true;
+			default:
+				return false;
+			}
 		}
 	};
 
@@ -506,6 +535,33 @@ namespace net::worker::shared::zsetmulti{
 			ff("CAB", C, A, B, S);
 			ff("CBA", C, B, A, S);
 
+		}
+
+	private:
+		constexpr static uint32_t s2u(std::string_view s){
+			using T = uint32_t;
+
+			return
+				(T(s[0]) << 8 * 0) |
+				(T(s[1]) << 8 * 1) |
+				(T(s[2]) << 8 * 2) ;
+		}
+
+	public:
+		static bool validateIndex(std::string_view s){
+			if (s.size() != 3)
+				return false;
+
+			switch( s2u(s) ){
+			case s2u("abc") : case s2u("ABC") :
+			case s2u("acb") : case s2u("ACB") :
+			case s2u("bac") : case s2u("BAC") :
+			case s2u("bca") : case s2u("BCA") :
+			case s2u("cab") : case s2u("CAB") :
+			case s2u("cba") : case s2u("CBA") :	return true;
+			default:
+				return false;
+			}
 		}
 	};
 

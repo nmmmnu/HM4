@@ -137,7 +137,7 @@ namespace net::worker::commands::Index{
 
 
 
-	template<int N, class Protocol, class DBAdapter>
+	template<class Protocol, class DBAdapter>
 	struct IX_EXISTS : BaseRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 		//	return std::begin(cmd[N-1]);
@@ -368,24 +368,23 @@ namespace net::worker::commands::Index{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				LH<IX_GET		>::cmd1	,
 				LH<IX_MGET		>::cmd1	,
-				LH<IX_EXISTS		>::cmd1	,
 				LH<IX_GETINDEXES	>::cmd1	,
 				LH<IX_ADD		>::cmd1	,
 				LH<IX_REM		>::cmd1	,
 
 				LH<IX_GET		>::cmd2	,
 				LH<IX_MGET		>::cmd2	,
-				LH<IX_EXISTS		>::cmd2	,
 				LH<IX_GETINDEXES	>::cmd2	,
 				LH<IX_ADD		>::cmd2	,
 				LH<IX_REM		>::cmd2	,
 
 				LH<IX_GET		>::cmd3	,
 				LH<IX_MGET		>::cmd3	,
-				LH<IX_EXISTS		>::cmd3	,
 				LH<IX_GETINDEXES	>::cmd3	,
 				LH<IX_ADD		>::cmd3	,
-				LH<IX_REM       	>::cmd3
+				LH<IX_REM		>::cmd3	,
+
+				IX_EXISTS
 			>(pack);
 		}
 	};
