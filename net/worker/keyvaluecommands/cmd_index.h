@@ -9,7 +9,7 @@
 #include "ilist/txguard.h"
 
 namespace net::worker::commands::Index{
-	namespace impl_{
+	namespace index_impl_{
 		using namespace net::worker::shared::accumulate_results;
 		using namespace net::worker::shared::config;
 
@@ -57,7 +57,7 @@ namespace net::worker::commands::Index{
 			template<class Protocol, class DBAdapter>
 			using cmd3 = Cmd<3, Protocol, DBAdapter>;
 		};
-	} // namespace impl_
+	} // namespace index_impl_
 
 
 
@@ -92,7 +92,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(impl_::assertN(N));
+		static_assert(index_impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -101,8 +101,6 @@ namespace net::worker::commands::Index{
 			{	"ix2get",	"IX2GET"	},
 			{	"ix3get",	"IX3GET"	}
 		};
-
-
 	};
 
 
@@ -157,7 +155,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(impl_::assertN(N));
+		static_assert(index_impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -190,7 +188,7 @@ namespace net::worker::commands::Index{
 
 	private:
 		#if 0
-		static_assert(impl_::assertN(N));
+		static_assert(index_impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -241,7 +239,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(impl_::assertN(N));
+		static_assert(index_impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -270,14 +268,8 @@ namespace net::worker::commands::Index{
 			auto const varg  = 2;
 			auto const vstep = 2 + N;
 
-			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0){
-				switch(N){
-				default:
-				case 1: return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
-				case 2: return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
-				case 3: return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
-				}
-			}
+			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS[3 + N]);
 
 			const auto &keyN = p[1];
 
@@ -320,32 +312,30 @@ namespace net::worker::commands::Index{
 				auto const &keySub	= *(itk + 0);
 				auto const &value	= *(itk + X);
 
-				{
-					if constexpr(N == 1)
-						shared::zsetmulti::add<PN>(
-								db,
-								keyN, keySub, { *(itk + 1) }, value
-						);
+				if constexpr(N == 1)
+					shared::zsetmulti::add<PN>(
+							db,
+							keyN, keySub, { *(itk + 1) }, value
+					);
 
-					if constexpr(N == 2)
-						shared::zsetmulti::add<PN>(
-								db,
-								keyN, keySub, { *(itk + 1), *(itk + 2) }, value
-						);
+				if constexpr(N == 2)
+					shared::zsetmulti::add<PN>(
+							db,
+							keyN, keySub, { *(itk + 1), *(itk + 2) }, value
+					);
 
-					if constexpr(N == 3)
-						shared::zsetmulti::add<PN>(
-								db,
-								keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3) }, value
-						);
-				}
+				if constexpr(N == 3)
+					shared::zsetmulti::add<PN>(
+							db,
+							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3) }, value
+					);
 			}
 
 			return result.set();
 		}
 
 	private:
-		static_assert(impl_::assertN(N));
+		static_assert(index_impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -377,7 +367,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(impl_::assertN(N));
+		static_assert(index_impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -406,18 +396,10 @@ namespace net::worker::commands::Index{
 		// IX_RANGE key ABC '' '' '' count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace impl_;
+			using namespace index_impl_;
 
-			if (p.size() != 1 + 2 + N + 2){
-				switch(N){
-				default:
-				case 1: return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
-				case 2: return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
-				case 3: return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_7);
-				}
-			}
-
-
+			if (p.size() != 1 + 2 + N + 2)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS[4 + N]);
 
 			auto const keyN     = p[1];
 			auto const index    = p[2];
@@ -427,8 +409,6 @@ namespace net::worker::commands::Index{
 
 			auto const count    = myClamp<uint32_t>(p[2 + N + 1], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart = p[2 + N + 2];
-
-			logger<Logger::DEBUG>() << keyN << index << p[2 + 1] << p[2 + 2] << p[2 + 3];
 
 			{
 				auto size = [&p](){
@@ -461,6 +441,8 @@ namespace net::worker::commands::Index{
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
 
+			logger<Logger::DEBUG>() << "IX_RANGE" << "prefix" << prefix;
+
 			auto &container = blob.container();
 
 			accumulateResultsIX_<N, AccumulateOutput::BOTH_WITH_TAIL>(
@@ -476,7 +458,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(impl_::assertN(N));
+		static_assert(index_impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -496,7 +478,7 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view name	= "index";
 
 		static void load(RegisterPack &pack){
-			using namespace impl_;
+			using namespace index_impl_;
 
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				LH<IX_GET		>::cmd1	,
