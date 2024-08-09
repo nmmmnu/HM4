@@ -6,6 +6,7 @@
 namespace net::worker::shared::accumulate_results{
 
 	using namespace net::worker::shared::config;
+	using namespace net::worker::shared::stop_predicate;
 
 	enum class AccumulateOutput{
 		KEYS,
@@ -91,7 +92,6 @@ namespace net::worker::shared::accumulate_results{
 
 		return tail();
 	}
-
 
 } // namespace net::worker::shared::accumulate_results
 

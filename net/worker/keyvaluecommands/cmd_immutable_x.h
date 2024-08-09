@@ -7,75 +7,64 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_accumulateresults.h"
-#include "shared_iterations.h"
 
 namespace net::worker::commands::ImmutableX{
 	namespace immutablex_impl_{
 
-		using namespace net::worker::shared::stop_predicate;
 		using namespace net::worker::shared::accumulate_results;
 		using namespace net::worker::shared::config;
 
-		namespace {
 
-			template<class It>
-			uint32_t countResultsH(std::string_view const prefix, It it, It eit){
-				uint32_t iterations	= 0;
-				uint32_t results	= 0;
 
-				StopPrefixPredicate stop{ prefix };
+		template<AccumulateOutput Out, class StopPredicate, class It, class Container>
+		void accumulateResultsX(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container){
+			auto proj = [](std::string_view x){
+				return x;
+			};
 
-				for(;it != eit;++it){
-					auto const &key = it->getKey();
+			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
+		}
 
-					// should be ITERATIONS_LOOPS,
-					// but we use ITERATIONS_RESULTS to be same as if accumulated
-					if (++iterations > ITERATIONS_RESULTS_MAX)
-						break;
+		template<AccumulateOutput Out, class It, class Container>
+		void accumulateResultsH(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
 
-					if (stop(key))
-						break;
+			auto proj = [prefix](std::string_view x) -> std::string_view{
+				return after_prefix(prefix, x);
+			};
 
-					if (! it->isOK())
-						continue;
+			StopPrefixPredicate stop{ prefix };
 
-					++results;
-				}
+			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
+		}
 
-				return results;
+
+
+		template<class It>
+		uint32_t countResultsH(std::string_view const prefix, It it, It eit){
+			uint32_t iterations	= 0;
+			uint32_t results	= 0;
+
+			StopPrefixPredicate stop{ prefix };
+
+			for(;it != eit;++it){
+				auto const &key = it->getKey();
+
+				// should be ITERATIONS_LOOPS,
+				// but we use ITERATIONS_RESULTS to be same as if accumulated
+				if (++iterations > ITERATIONS_RESULTS_MAX)
+					break;
+
+				if (stop(key))
+					break;
+
+				if (! it->isOK())
+					continue;
+
+				++results;
 			}
 
-			template<AccumulateOutput Out, class StopPredicate, class It, class Container>
-			void accumulateResultsX(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container){
-				auto proj = [](std::string_view x){
-					return x;
-				};
-
-				return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
-			}
-
-			template<AccumulateOutput Out, class StopPredicate, class It, class Container>
-			void accumulateResultsXKeys(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container){
-				auto proj = [](std::string_view x){
-					return x;
-				};
-
-				return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
-			}
-
-			template<AccumulateOutput Out, class It, class Container>
-			void accumulateResultsH(uint32_t const maxResults, std::string_view const prefix, It it, It eit, Container &container){
-
-				auto proj = [prefix](std::string_view x) -> std::string_view{
-					return after_prefix(prefix, x);
-				};
-
-				StopPrefixPredicate stop{ prefix };
-
-				return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
-			}
-
-		} // namespace
+			return results;
+		}
 
 	} // namespace immutablex_impl_
 
@@ -388,7 +377,7 @@ namespace net::worker::commands::ImmutableX{
 
 			auto &container = blob.container();
 
-			accumulateResultsXKeys<AccumulateOutput::KEYS_WITH_TAIL>(
+			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
@@ -436,7 +425,7 @@ namespace net::worker::commands::ImmutableX{
 
 			auto &container = blob.container();
 
-			accumulateResultsXKeys<AccumulateOutput::KEYS_WITH_TAIL>(
+			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
@@ -480,7 +469,7 @@ namespace net::worker::commands::ImmutableX{
 
 			auto &container = blob.container();
 
-			accumulateResultsXKeys<AccumulateOutput::KEYS_WITH_TAIL>(
+			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
 				count					,
 				stop					,
 				db->find(key, std::false_type{})	,
