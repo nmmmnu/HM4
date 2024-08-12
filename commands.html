@@ -302,6 +302,22 @@
 				<li><a href="#CMSADDCOUNT">CMSADDCOUNT</a></li>
 				</div>
 			<div>
+			<b>index.h</b><br />
+			&nbsp;
+
+					<li><a href="#IX*GET">IX*GET</a></li>
+				<li><a href="#IX*MGET">IX*MGET</a></li>
+				<li><a href="#IX*EXISTS">IX*EXISTS</a></li>
+				<li><a href="#IX*GETINDEXES">IX*GETINDEXES</a></li>
+				<li><a href="#IX1ADD">IX1ADD</a></li>
+				<li><a href="#IX2ADD">IX2ADD</a></li>
+				<li><a href="#IX3ADD">IX3ADD</a></li>
+				<li><a href="#IX*REM">IX*REM</a></li>
+				<li><a href="#IX1RANGE">IX1RANGE</a></li>
+				<li><a href="#IX2RANGE">IX2RANGE</a></li>
+				<li><a href="#IX3RANGE">IX3RANGE</a></li>
+				</div>
+			<div>
 			<b>linearcurve.h</b><br />
 			&nbsp;
 
@@ -3425,6 +3441,265 @@
 			estimated count
 			
 			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX*GET">
+
+			<h2>IX1GET / IX2GET / IX3GET key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX*GET</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get value of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			value of the subkey
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX*MGET">
+
+			<h2>IX1MGET / IX2MGET / IX3MGET key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX*MGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get values of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			values of the items
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX*EXISTS">
+
+			<h2>IX1EXISTS / IX2EXISTS / IX3EXISTS key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX*EXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check if <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the item do not exists.<br />1 if the item exists.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX*GETINDEXES">
+
+			<h2>IX1GETINDEXES / IX2GETINDEXES / IX3GETINDEXES key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX*GETINDEXES</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get index values (score) of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			index values
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX1ADD">
+
+			<h2>IX1ADD key subKey index_value1 value [subKey index_value1 value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX1ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with index values <i>index_value1</i> and <i>value</i> in <i>key</i>.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX2ADD">
+
+			<h2>IX2ADD key subKey index_value1 index_value2 value [subKey index_value1 index_value2 value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX2ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 5 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with index values <i>index_value1, index_value2</i> and <i>value</i> in <i>key</i>.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX3ADD">
+
+			<h2>IX3ADD key subKey index_value1 index_value2 index_value3 value [subKey index_value1 index_value2 index_value3 value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX3ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 13 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3</i> and <i>value</i> in <i>key</i>.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX*REM">
+
+			<h2>IX1REM / IX2REM / IX3REM key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX*REM</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + {2, 3 or 7} * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX1RANGE">
+
+			<h2>IX1RANGE key index_name index_value1 number start</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX1RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i>.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br /><i>index_name</i> is always "A".<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre><i>Suppose we have a company with two offices in LA and NYC.</i><br /><br />ix1add users1 john   LA data_for_john   <br />ix1add users1 peter  LA data_for_peter  <br />ix1add users1 jill   LA data_for_jill   <br />ix1add users1 robert NY data_for_robert <br />ix1add users1 pola   NY data_for_pola   <br />ix1add users1 pepe   NY data_for_pepe   <br />ix1range users1 A '' 1000 ''            <i>get all users.</i><br />ix1range users1 A 'LA' 1000 ''          <i>get all users from LA (john, peter, jill).</i><br /><br />xnget users1~ 1000 users1~</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table using index A                                     order by index1 limit [number]<br />...or...<br />select key, val from table using index A where index_field1 = 'index_value1' order by index1 limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX2RANGE">
+
+			<h2>IX2RANGE key index_name index_value1 index_value2 number start</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX2RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i> and <i>index_value2</i>.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br /><i>index_name</i> is "AB" or "BA".<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre><i>Suppose we have a company with two offices in LA and NYC. Each employee is either sales or support.</i><br /><br />ix2add users2 john   LA sales   data_for_john   <br />ix2add users2 peter  LA sales   data_for_peter  <br />ix2add users2 jill   LA support data_for_jill   <br />ix2add users2 robert NY sales   data_for_robert <br />ix2add users2 pola   NY support data_for_pola   <br />ix2add users2 pepe   NY support data_for_pepe   <br />ix2range users2 AB ''      ''      1000 ''      <i>get all users sorted by city,department.</i><br />ix2range users2 AB LA      ''      1000 ''      <i>get all users from LA (john, peter, jill).</i><br />ix2range users2 AB LA      support 1000 ''      <i>get all users from LA, department support (jill).</i><br />ix2range users2 BA ''      ''      1000 ''      <i>get all users sorted by department,city.</i><br />ix2range users2 BA support ''      1000 ''      <i>get all users from department support (jill, pepe, pola).</i><br />ix2range users2 BA support LA      1000 ''      <i>get all users from department support, from LA (jill).</i><br /><br />xnget users2~ 1000 users2~</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table using index AB                                                                       order by index_field1, index_field2 limit [number]<br />...or...<br />select key, val from table using index AB where index_field1 = 'index_value1'                                   order by index_field1, index_field2 limit [number]<br />...or...<br />select key, val from table using index AB where index_field1 = 'index_value1' and index_field2 = 'index_value2' order by index_field1, index_field2 limit [number]</pre>			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="IX3RANGE">
+
+			<h2>IX3RANGE key index_name index_value1 index_value2 index_value3 number start</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>IX3RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>index.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i>, <i>index_value2</i> and <i>index_value3</i>.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br /><i>index_name</i> is "ABC", "ACB", "BAC", "BCA", "CAB", "CBA".<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+						<h3>Example:</h3>
+			<pre><i>Suppose we have a company with two offices in LA and NYC. Each employee is either sales or support. Each employee also can be senior or junior</i><br /><br />ix3add users3 john   LA sales   senior data_for_john   <br />ix3add users3 peter  LA sales   junior data_for_peter  <br />ix3add users3 jill   LA support senior data_for_jill   <br />ix3add users3 robert NY sales   senior data_for_robert <br />ix3add users3 pola   NY support senior data_for_pola   <br />ix3add users3 pepe   NY support junior data_for_pepe   <br />ix3range users3 ABC ''      ''      ''      1000 ''      <i>get all users sorted by city,department,senior.</i><br />ix3range users3 ABC LA      ''      ''      1000 ''      <i>get all users from LA (john, peter, jill).</i><br />ix3range users3 ABC LA      support ''      1000 ''      <i>get all users from LA, department support (jill).</i><br />ix3range users3 ABC LA      support senior  1000 ''      <i>get all users from LA, department support, senior employees (jill).</i><br />ix3range users3 BAC ''      ''      ''      1000 ''      <i>get all users sorted by department,city,senior.</i><br />ix3range users3 BAC support ''      ''      1000 ''      <i>get all users from department support (jill, pepe, pola).</i><br />ix3range users3 BAC support LA      ''      1000 ''      <i>get all users from department support, from LA (jill).</i><br />ix3range users3 BAC support LA      senior  1000 ''      <i>get all users from department support, from LA, who are senior (jill).</i><br />ix3range users3 CAB ''      ''      ''      1000 ''      <i>get all users sorted by senior,city,department.</i><br />ix3range users3 CAB senior  ''      ''      1000 ''      <i>get all users who are senior (john, jill, robert, pola).</i><br />ix3range users3 CAB senior  LA      ''      1000 ''      <i>get all users who are senior, from LA (john, jill).</i><br />ix3range users3 CAB senior  LA      support 1000 ''      <i>get all users who are senior, from LA, from department support (jill).</i><br /><br />xnget users3~ 1000 users3~</pre>			
+						<h3>MySQL Rosetta:</h3>
+			<pre>select key, val from table using index ABC                                                                                                         order by index_field1, index_field2, index_field3 limit [number]<br />...or...<br />select key, val from table using index ABC where index_field1 = 'index_value1' and index_field2 = 'index_value2'                                   order by index_field1, index_field2, index_field3 limit [number]<br />...or...<br />select key, val from table using index ABC where index_field1 = 'index_value1' and index_field2 = 'index_value2' and index_field3 = 'index_value3' order by index_field1, index_field2, index_field3 limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
 				<div class="cmd" id="MC1GET">

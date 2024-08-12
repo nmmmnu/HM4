@@ -223,6 +223,7 @@ function getData(){
 		"bf"				=> require "$d/commands_bf.php"			,
 		"cbf"				=> require "$d/commands_cbf.php"		,
 		"cms"				=> require "$d/commands_cms.php"		,
+		"index"				=> require "$d/commands_index.php"		,
 		"linearcurve"			=> require "$d/commands_linearcurve.php"	,
 		"mortoncurve"			=> require "$d/commands_mortoncurve.php"	,
 		"hh"				=> require "$d/commands_hh.php"			,
