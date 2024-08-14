@@ -3,7 +3,7 @@ return array(
 	new Cmd(
 			"IX*GET",
 
-			"IX1GET / IX2GET / IX3GET key subkey",
+			"IX1GET / IX2GET / IX3GET / IX4GET key subkey",
 
 			"Get value of the <i>subkey</i> stored in <i>key</i>.",
 			"string",
@@ -19,7 +19,7 @@ return array(
 	new Cmd(
 			"IX*MGET",
 
-			"IX1MGET / IX2MGET / IX3MGET key subkey [subkey]...",
+			"IX1MGET / IX2MGET / IX3MGET / IX4MGET key subkey [subkey]...",
 
 			"Get values of the <i>subkey</i> stored in <i>key</i>.",
 			"array",
@@ -35,7 +35,7 @@ return array(
 	new Cmd(
 			"IX*EXISTS",
 
-			"IX1EXISTS / IX2EXISTS / IX3EXISTS key subkey",
+			"IX1EXISTS / IX2EXISTS / IX3EXISTS / IX4EXISTS key subkey",
 
 			"Check if <i>subkey</i> stored in <i>key</i>.",
 			"bool",
@@ -52,7 +52,7 @@ return array(
 	new Cmd(
 			"IX*GETINDEXES",
 
-			"IX1GETINDEXES / IX2GETINDEXES / IX3GETINDEXES key subkey",
+			"IX1GETINDEXES / IX2GETINDEXES / IX3GETINDEXES / IX4GETINDEXES key subkey",
 
 			"Get index values (score) of the <i>subkey</i> stored in <i>key</i>.",
 			"array",
@@ -74,7 +74,7 @@ return array(
 			"OK",
 			"OK",
 			"1.3.8",
-			"[number of items] * (READ + 3 * WRITE), TX",
+			"[number of items] * (READ + (1 + 2 * 1) * WRITE), TX",
 			false,
 			true,
 
@@ -90,7 +90,7 @@ return array(
 			"OK",
 			"OK",
 			"1.3.8",
-			"[number of items] * (READ + 5 * WRITE), TX",
+			"[number of items] * (READ + (1 + 2 * 2) * WRITE), TX",
 			false,
 			true,
 
@@ -106,7 +106,23 @@ return array(
 			"OK",
 			"OK",
 			"1.3.8",
-			"[number of items] * (READ + 13 * WRITE), TX",
+			"[number of items] * (READ + (1 + 2 * 6) * WRITE), TX",
+			false,
+			true,
+
+			"index"
+	),
+
+	new Cmd(
+			"IX4ADD",
+
+			"IX4ADD key subKey index_value1 index_value2 index_value3 index_value4 value [subKey index_value1 index_value2 index_value3 index_value4 value]...",
+
+			"Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3</i> and <i>value</i> in <i>key</i>.",
+			"OK",
+			"OK",
+			"1.3.8",
+			"[number of items] * (READ + (1 + 2 * 24) * WRITE), TX",
 			false,
 			true,
 
@@ -116,13 +132,15 @@ return array(
 	new Cmd(
 			"IX*REM",
 
-			"IX1REM / IX2REM / IX3REM key subkey [subkey]...",
+			"IX1REM / IX2REM / IX3REM / IX4REM key subkey [subkey]...<br />" .
+			"IX1REMOVE / IX2REMOVE / IX3REMOVE / IX4REMOVE key subkey [subkey]...<br />" .
+			"IX1DEL / IX2DEL / IX3DEL / IX4DEL key subkey [subkey]...",
 
 			"Removes <i>subkey</i> stored in <i>key</i>.",
 			"bool",
 			"Always return 1",
 			"1.3.8",
-			"[number of items] * (READ + {2, 3 or 7} * WRITE), TX",
+			"[number of items] * (READ + {2, 3, 7 or 25} * WRITE), TX",
 			false,
 			true,
 
@@ -168,9 +186,9 @@ return array(
 			"xnget users1~ 1000 users1~</pre>",
 
 			"<pre>" .
-			"select key, val from table using index A                                     order by index1 limit [number]<br />" .
+			"select key, val from table using index A                           order by ix_fld1 limit [number]<br />" .
 			"...or...<br />" .
-			"select key, val from table using index A where index_field1 = 'index_value1' order by index1 limit [number]</pre>"
+			"select key, val from table using index A where ix_fld1 = 'ix_val1' order by ix_fld1 limit [number]</pre>"
 	),
 
 	new Cmd(
@@ -180,7 +198,7 @@ return array(
 
 			"Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i> and <i>index_value2</i>.<br />" .
 			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />" .
-			"<i>index_name</i> is \"AB\" or \"BA\".<br />" .
+			"<i>index_name</i> are the permutations of 2 elements, e.g. \"AB\" or \"BA\".<br />" .
 			"Return up to <i>number</i> of pairs.<br />" .
 			"Returns up to ~32'000 elements.",
 
@@ -218,11 +236,11 @@ return array(
 			"xnget users2~ 1000 users2~</pre>",
 
 			"<pre>" .
-			"select key, val from table using index AB                                                                       order by index_field1, index_field2 limit [number]<br />" .
+			"select key, val from table using index AB                                                   order by ix_fld1, ix_fld2 limit [number]<br />" .
 			"...or...<br />" .
-			"select key, val from table using index AB where index_field1 = 'index_value1'                                   order by index_field1, index_field2 limit [number]<br />" .
+			"select key, val from table using index AB where ix_fld1 = 'ix_val1'                         order by ix_fld1, ix_fld2 limit [number]<br />" .
 			"...or...<br />" .
-			"select key, val from table using index AB where index_field1 = 'index_value1' and index_field2 = 'index_value2' order by index_field1, index_field2 limit [number]</pre>"
+			"select key, val from table using index AB where ix_fld1 = 'ix_val1' and ix_fld2 = 'ix_val2' order by ix_fld1, ix_fld2 limit [number]</pre>"
 	),
 
 	new Cmd(
@@ -232,7 +250,7 @@ return array(
 
 			"Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i>, <i>index_value2</i> and <i>index_value3</i>.<br />" .
 			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />" .
-			"<i>index_name</i> is \"ABC\", \"ACB\", \"BAC\", \"BCA\", \"CAB\", \"CBA\".<br />" .
+			"<i>index_name</i> are the permutations of 3 elements, e.g. \"ABC\", \"ACB\", \"BAC\", \"BCA\", \"CAB\", \"CBA\".<br />" .
 			"Return up to <i>number</i> of pairs.<br />" .
 			"Returns up to ~32'000 elements.",
 
@@ -277,11 +295,65 @@ return array(
 			"xnget users3~ 1000 users3~</pre>",
 
 			"<pre>" .
-			"select key, val from table using index ABC                                                                                                         order by index_field1, index_field2, index_field3 limit [number]<br />" .
+			"select key, val from table using index ABC                                                                           order by ix_fld1, ix_fld2, ix_fld3 limit [number]<br />" .
 			"...or...<br />" .
-			"select key, val from table using index ABC where index_field1 = 'index_value1' and index_field2 = 'index_value2'                                   order by index_field1, index_field2, index_field3 limit [number]<br />" .
+			"select key, val from table using index ABC where ix_fld1 = 'ix_val1' and ix_fld2 = 'ix_val2'                         order by ix_fld1, ix_fld2, ix_fld3 limit [number]<br />" .
 			"...or...<br />" .
-			"select key, val from table using index ABC where index_field1 = 'index_value1' and index_field2 = 'index_value2' and index_field3 = 'index_value3' order by index_field1, index_field2, index_field3 limit [number]</pre>"
+			"select key, val from table using index ABC where ix_fld1 = 'ix_val1' and ix_fld2 = 'ix_val2' and ix_fld3 = 'ix_val3' order by ix_fld1, ix_fld2, ix_fld3 limit [number]</pre>"
 	),
 
+	new Cmd(
+			"IX4RANGE",
+
+			"IX4RANGE key index_name index_value1 index_value2 index_value3 index_value4 number start",
+
+			"Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i>, <i>index_value2</i> and <i>index_value3</i>.<br />" .
+			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />" .
+			"<i>index_name</i> are the permutations of 4 elements, e.g. \"ABCD\", \"ABDC\", \"ACBD\", \"ACDB\", \"ADBC\", \"ADCB\" ...<br />" .
+			"Return up to <i>number</i> of pairs.<br />" .
+			"Returns up to ~32'000 elements.",
+
+			"array",
+			"First group of element         - array of key and values.<br />" .
+			"Second group of single element - Last key, if there is second page.",
+
+			"1.3.8",
+			"READ",
+			false,
+			false,
+
+			"index",
+
+			"<pre>" .
+			"<i>Suppose we are selling laptops</i><br />" .
+			"<br />" .
+			"ix4add stock zen    ASUS 13 16 1 'Asus Zenbook,  Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+
+			"ix4add stock xps13  DELL 13 16 1 'Dell XPS13 13, Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+
+			"ix4add stock xps15  DELL 15 16 1 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+			"ix4add stock xps15b DELL 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 1 TB SSD' <br />" .
+			"ix4add stock xps15c DELL 15 16 2 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 2 TB SSD' <br />" .
+			"ix4add stock xps15d DELL 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 2 TB SSD' <br />" .
+
+			"ix4add stock xps17  DELL 17 32 2 'Dell XPS17 17, Intel i7, 17 inch display, 32 GB RAM, 2 TB SSD' <br />" .
+
+			"ix4range stock ABCD ''   '' '' '' 1000 ''      <i>get all laptops sorted by brand, screen size, RAM, disk size.</i><br />" .
+			"ix4range stock ABCD DELL '' '' '' 1000 ''      <i>get all laptops from DELL.</i><br />" .
+			"ix4range stock ABCD DELL 15 '' '' 1000 ''      <i>get all laptops from DELL, 15 inch display.</i><br />" .
+			"ix4range stock ABCD DELL 15 16 '' 1000 ''      <i>get all laptops from DELL, 15 inch display, 16 GB RAM.</i><br />" .
+			"ix4range stock ABCD DELL 15 16 2  1000 ''      <i>get all laptops from DELL, 15 inch display, 16 GB RAM, 2 TB SSD.</i><br />" .
+
+			"<br />" .
+			"xnget stock~ 1000 stock~</pre>",
+
+			"<pre>" .
+			"select key, val from table using index ABCD                                                                                                       order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]<br />" .
+			"...or...<br />" .
+			"select key, val from table using index ABCD where ix_fld1 = 'ix_val1' and ix_fld2 = 'index_val2'                                                  order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]<br />" .
+			"...or...<br />" .
+			"select key, val from table using index ABCD where ix_fld1 = 'ix_val1' and ix_fld2 = 'index_val2'and ix_fld3 = 'ix_value3'                         order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]<br />" .
+			"...or...<br />" .
+			"select key, val from table using index ABCD where ix_fld1 = 'ix_val1' and ix_fld2 = 'index_val2'and ix_fld3 = 'ix_value3' and ix_fld4 = 'ix_val4' order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]</pre>"
+	),
 );

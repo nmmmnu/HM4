@@ -251,10 +251,10 @@ namespace net::worker::commands::Index{
 		using PN = shared::zsetmulti::Permutation<N>;
 
 		constexpr inline static std::string_view cmd[][2] = {
-			{	"ix1getindexes",	"IX1GETIXES"	},
-			{	"ix2getindexes",	"IX2GETIXES"	},
-			{	"ix3getindexes",	"IX3GETIXES"	},
-			{	"ix4getindexes",	"IX4GETIXES"	}
+			{	"ix1getindexes",	"IX1GETINDEXES"	},
+			{	"ix2getindexes",	"IX2GETINDEXES"	},
+			{	"ix3getindexes",	"IX3GETINDEXES"	},
+			{	"ix4getindexes",	"IX4GETINDEXES"	}
 		};
 	};
 
