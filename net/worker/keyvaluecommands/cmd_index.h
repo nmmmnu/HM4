@@ -43,7 +43,7 @@ namespace net::worker::commands::Index{
 
 
 		constexpr bool assertN(int n){
-			return n > 0 && n <= 3;
+			return n > 0 && n <= 4;
 		}
 
 		template<template<int, class, class> class Cmd>
@@ -56,6 +56,9 @@ namespace net::worker::commands::Index{
 
 			template<class Protocol, class DBAdapter>
 			using cmd3 = Cmd<3, Protocol, DBAdapter>;
+
+			template<class Protocol, class DBAdapter>
+			using cmd4 = Cmd<4, Protocol, DBAdapter>;
 		};
 	} // namespace index_impl_
 
@@ -99,7 +102,8 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view cmd[][2] = {
 			{	"ix1get",	"IX1GET"	},
 			{	"ix2get",	"IX2GET"	},
-			{	"ix3get",	"IX3GET"	}
+			{	"ix3get",	"IX3GET"	},
+			{	"ix4get",	"IX4GET"	}
 		};
 	};
 
@@ -162,7 +166,8 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view cmd[][2] = {
 			{	"ix1mget",	"IX1MGET"	},
 			{	"ix2mget",	"IX2MGET"	},
-			{	"ix3mget",	"IX3MGET"	}
+			{	"ix3mget",	"IX3MGET"	},
+			{	"ix4mget",	"IX4MGET"	}
 		};
 	};
 
@@ -195,14 +200,16 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view cmd[][2] = {
 			{	"ix1exists",	"IX1EXISTS"	},
 			{	"ix2exists",	"IX2EXISTS"	},
-			{	"ix3exists",	"IX3EXISTS"	}
+			{	"ix3exists",	"IX3EXISTS"	},
+			{	"ix4exists",	"IX4EXISTS"	}
 		};
 		#endif
 
 		constexpr inline static std::string_view cmd[] = {
 				"ix1exists",	"IX1EXISTS",
 				"ix2exists",	"IX2EXISTS",
-				"ix3exists",	"IX3EXISTS"
+				"ix3exists",	"IX3EXISTS",
+				"ix4exists",	"IX4EXISTS"
 		};
 	};
 
@@ -246,7 +253,8 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view cmd[][2] = {
 			{	"ix1getindexes",	"IX1GETIXES"	},
 			{	"ix2getindexes",	"IX2GETIXES"	},
-			{	"ix3getindexes",	"IX3GETIXES"	}
+			{	"ix3getindexes",	"IX3GETIXES"	},
+			{	"ix4getindexes",	"IX4GETIXES"	}
 		};
 	};
 
@@ -298,6 +306,10 @@ namespace net::worker::commands::Index{
 					if constexpr(N == 3)
 						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3) }))
 							return e();
+
+					if constexpr(N == 4)
+						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3), *(itk + 4) }))
+							return e();
 				}
 
 				if (!hm4::Pair::isValValid(value))
@@ -329,6 +341,12 @@ namespace net::worker::commands::Index{
 							db,
 							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3) }, value
 					);
+
+				if constexpr(N == 4)
+					shared::zsetmulti::add<PN>(
+							db,
+							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3), *(itk + 4) }, value
+					);
 			}
 
 			return result.set();
@@ -342,7 +360,8 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view cmd[][2] = {
 			{	"ix1add",	"IX1ADD"	},
 			{	"ix2add",	"IX2ADD"	},
-			{	"ix3add",	"IX3ADD"	}
+			{	"ix3add",	"IX3ADD"	},
+			{	"ix4add",	"IX4ADD"	}
 		};
 	};
 
@@ -374,7 +393,8 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view cmd[][6] = {
 			{	"ix1rem",	"IX1REM",	"ix1remove",	"IX1REMOVE",	"ix1del",	"IX1DEL"	},
 			{	"ix2rem",	"IX2REM",	"ix2remove",	"IX2REMOVE",	"ix2del",	"IX2DEL"	},
-			{	"ix3rem",	"IX3REM",	"ix3remove",	"IX3REMOVE",	"ix3del",	"IX3DEL"	}
+			{	"ix3rem",	"IX3REM",	"ix3remove",	"IX3REMOVE",	"ix3del",	"IX3DEL"	},
+			{	"ix4rem",	"IX4REM",	"ix4remove",	"IX4REMOVE",	"ix4del",	"IX4DEL"	}
 		};
 	};
 
@@ -407,19 +427,24 @@ namespace net::worker::commands::Index{
 			if (keyN.empty() || index.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const count    = myClamp<uint32_t>(p[2 + N + 1], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
-			auto const keyStart = p[2 + N + 2];
+			auto const varg = 2;
+
+			auto const count    = myClamp<uint32_t>(p[varg + N + 1], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const keyStart = p[varg + N + 2];
 
 			{
 				auto size = [&p](){
 					if constexpr(N == 1)
-						return p[2 + 1].size();
+						return p[varg + 1].size();
 
 					if constexpr(N == 2)
-						return p[2 + 1].size() + p[2 + 2].size();
+						return p[varg + 1].size() + p[varg + 2].size();
 
 					if constexpr(N == 3)
-						return p[2 + 1].size() + p[2 + 2].size() + p[2 + 3].size();
+						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size();
+
+					if constexpr(N == 4)
+						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size() + p[varg + 4].size();
 				};
 
 				if (!PN::valid(keyN, index, size() ))
@@ -430,13 +455,16 @@ namespace net::worker::commands::Index{
 
 			auto const prefix = [&](){
 				if constexpr(N == 1)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[2 + 1]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1]);
 
 				if constexpr(N == 2)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[2 + 1], p[2 + 2]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2]);
 
 				if constexpr(N == 3)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[2 + 1], p[2 + 2], p[2 + 3]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3]);
+
+				if constexpr(N == 4)
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3], p[varg + 4]);
 			}();
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
@@ -465,7 +493,8 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view cmd[][2] = {
 			{	"ix1range",	"IX1RANGE"	},
 			{	"ix2range",	"IX2RANGE"	},
-			{	"ix3range",	"IX3RANGE"	}
+			{	"ix3range",	"IX3RANGE"	},
+			{	"ix4range",	"IX4RANGE"	}
 		};
 	};
 
@@ -501,6 +530,13 @@ namespace net::worker::commands::Index{
 				LH<IX_ADD		>::cmd3	,
 				LH<IX_REM		>::cmd3	,
 				LH<IX_RANGE		>::cmd3	,
+
+				LH<IX_GET		>::cmd4	,
+				LH<IX_MGET		>::cmd4	,
+				LH<IX_GETINDEXES	>::cmd4	,
+				LH<IX_ADD		>::cmd4	,
+				LH<IX_REM		>::cmd4	,
+				LH<IX_RANGE		>::cmd4	,
 
 				IX_EXISTS
 			>(pack);

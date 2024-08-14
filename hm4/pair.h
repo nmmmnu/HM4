@@ -555,6 +555,12 @@ inline namespace version_4_00_00{
 
 		[[nodiscard]]
 		constexpr
+		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3, std::string_view key4, std::string_view key5, std::string_view key6) noexcept{
+			return	isCompositeKeyValid__(more, key1, key2, key3, key4, key5, key6);
+		}
+
+		[[nodiscard]]
+		constexpr
 		static bool isValValid(size_t size) noexcept{
 			return size <= PairConf::MAX_VAL_SIZE;
 		}
