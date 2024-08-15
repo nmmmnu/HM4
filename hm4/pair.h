@@ -510,53 +510,16 @@ inline namespace version_4_00_00{
 			return isKeyValid(key.size());
 		}
 
-	private:
+	public:
 		template<typename ...Args>
 		[[nodiscard]]
 		constexpr
-		static bool isCompositeKeyValid__(size_t more, Args ...args) noexcept{
+		static bool isCompositeKeyValid(size_t more, Args ...args) noexcept{
 			return
 				(!args.empty() && ...) &&
 				isKeyValid(	more +
-					(args.size() + ...)
+					(std::string_view{ args }.size() + ...)
 				);
-		}
-
-	public:
-		[[nodiscard]]
-		constexpr
-		static bool isCompositeKeyValid(size_t more, std::string_view key1) noexcept{
-			return	isCompositeKeyValid__(more, key1);
-		}
-
-		[[nodiscard]]
-		constexpr
-		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2) noexcept{
-			return	isCompositeKeyValid__(more, key1, key2);
-		}
-
-		[[nodiscard]]
-		constexpr
-		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3) noexcept{
-			return	isCompositeKeyValid__(more, key1, key2, key3);
-		}
-
-		[[nodiscard]]
-		constexpr
-		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3, std::string_view key4) noexcept{
-			return	isCompositeKeyValid__(more, key1, key2, key3, key4);
-		}
-
-		[[nodiscard]]
-		constexpr
-		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3, std::string_view key4, std::string_view key5) noexcept{
-			return	isCompositeKeyValid__(more, key1, key2, key3, key4, key5);
-		}
-
-		[[nodiscard]]
-		constexpr
-		static bool isCompositeKeyValid(size_t more, std::string_view key1, std::string_view key2, std::string_view key3, std::string_view key4, std::string_view key5, std::string_view key6) noexcept{
-			return	isCompositeKeyValid__(more, key1, key2, key3, key4, key5, key6);
 		}
 
 		[[nodiscard]]
