@@ -517,9 +517,7 @@ inline namespace version_4_00_00{
 		static bool isCompositeKeyValid(size_t more, Args ...args) noexcept{
 			return
 				(!args.empty() && ...) &&
-				isKeyValid(	more +
-					(std::string_view{ args }.size() + ...)
-				);
+				isKeyValid( more + concatenateBufferSize(std::forward<Args>(args)...) );
 		}
 
 		[[nodiscard]]

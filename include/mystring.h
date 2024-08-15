@@ -83,11 +83,20 @@ std::string_view concatenateRawBuffer_(char *buffer, Args &&... args){
 
 
 
+template<typename... Args>
+size_t concatenateBufferSize(Args &&... args){
+	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
+
+	return (std::string_view{ args }.size() + ...);
+}
+
+
+
 template<size_t N, typename... Args>
 std::string_view concatenateBuffer(std::array<char, N> &buffer, Args &&... args){
 	static_assert((std::is_constructible_v<std::string_view, Args> && ...));
 
-	size_t const reserve_size = (std::string_view{ args }.size() + ...);
+	size_t const reserve_size = concatenateBufferSize(std::forward<Args>(args)...);
 
 	if (reserve_size > buffer.size())
 		return "";
@@ -104,7 +113,7 @@ std::string_view concatenateBuffer(std::string &buffer, Args &&... args){
 	// super cheap concatenation,
 	// sometimes without allocation
 
-	size_t const reserve_size = (std::string_view{ args }.size() + ...);
+	size_t const reserve_size = concatenateBufferSize(std::forward<Args>(args)...);
 
 	buffer.clear();
 
