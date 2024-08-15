@@ -86,7 +86,7 @@ return array(
 
 			"IX2ADD key subKey index_value1 index_value2 value [subKey index_value1 index_value2 value]...",
 
-			"Set <i>subkey</i> with index values <i>index_value1, index_value2</i> and <i>value</i> in <i>key</i>.",
+			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i> and <i>value</i> in <i>key</i>.",
 			"OK",
 			"OK",
 			"1.3.8",
@@ -102,7 +102,7 @@ return array(
 
 			"IX3ADD key subKey index_value1 index_value2 index_value3 value [subKey index_value1 index_value2 index_value3 value]...",
 
-			"Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3</i> and <i>value</i> in <i>key</i>.",
+			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i> and <i>value</i> in <i>key</i>.",
 			"OK",
 			"OK",
 			"1.3.8",
@@ -118,7 +118,7 @@ return array(
 
 			"IX4ADD key subKey index_value1 index_value2 index_value3 index_value4 value [subKey index_value1 index_value2 index_value3 index_value4 value]...",
 
-			"Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3, index_value4</i> and <i>value</i> in <i>key</i>.",
+			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i>, <i>index_value4</i> and <i>value</i> in <i>key</i>.",
 			"OK",
 			"OK",
 			"1.3.8",
@@ -134,7 +134,7 @@ return array(
 
 			"IX5ADD key subKey index_value1 index_value2 index_value3 index_value4 value [subKey index_value1 index_value2 index_value3 index_value4 index_value5 value]...",
 
-			"Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3, index_value4, index_value5</i> and <i>value</i> in <i>key</i>.",
+			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i>, <i>index_value4</i>, <i>index_value5</i> and <i>value</i> in <i>key</i>.",
 			"OK",
 			"OK",
 			"1.3.8",
