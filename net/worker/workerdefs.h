@@ -35,7 +35,8 @@ namespace net::worker{
 			"The command needs exactly 5 parameters",
 			"The command needs exactly 6 parameters",
 			"The command needs exactly 7 parameters",
-			"The command needs exactly 8 parameters"
+			"The command needs exactly 8 parameters",
+			"The command needs exactly 9 parameters"
 		};
 
 		constexpr static std::string_view NEED_EXACT_PARAMS_0	= NEED_EXACT_PARAMS[0];
@@ -47,6 +48,7 @@ namespace net::worker{
 		constexpr static std::string_view NEED_EXACT_PARAMS_6	= NEED_EXACT_PARAMS[6];
 		constexpr static std::string_view NEED_EXACT_PARAMS_7	= NEED_EXACT_PARAMS[7];
 		constexpr static std::string_view NEED_EXACT_PARAMS_8	= NEED_EXACT_PARAMS[8];
+		constexpr static std::string_view NEED_EXACT_PARAMS_9	= NEED_EXACT_PARAMS[9];
 
 
 
@@ -73,7 +75,9 @@ namespace net::worker{
 			"The command needs 3 or more parameters in groups",
 			"The command needs 4 or more parameters in groups",
 			"The command needs 5 or more parameters in groups",
-			"The command needs 6 or more parameters in groups"
+			"The command needs 6 or more parameters in groups",
+			"The command needs 7 or more parameters in groups",
+			"The command needs 8 or more parameters in groups"
 		};
 
 		constexpr static std::string_view NEED_GROUP_PARAMS_2	= NEED_GROUP_PARAMS[2];
@@ -81,6 +85,8 @@ namespace net::worker{
 		constexpr static std::string_view NEED_GROUP_PARAMS_4	= NEED_GROUP_PARAMS[4];
 		constexpr static std::string_view NEED_GROUP_PARAMS_5	= NEED_GROUP_PARAMS[5];
 		constexpr static std::string_view NEED_GROUP_PARAMS_6	= NEED_GROUP_PARAMS[6];
+		constexpr static std::string_view NEED_GROUP_PARAMS_7	= NEED_GROUP_PARAMS[7];
+		constexpr static std::string_view NEED_GROUP_PARAMS_8	= NEED_GROUP_PARAMS[8];
 
 
 

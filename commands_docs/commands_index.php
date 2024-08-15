@@ -3,7 +3,7 @@ return array(
 	new Cmd(
 			"IX*GET",
 
-			"IX1GET / IX2GET / IX3GET / IX4GET key subkey",
+			"IX1GET / IX2GET / IX3GET / IX4GET / IX5GET key subkey",
 
 			"Get value of the <i>subkey</i> stored in <i>key</i>.",
 			"string",
@@ -19,7 +19,7 @@ return array(
 	new Cmd(
 			"IX*MGET",
 
-			"IX1MGET / IX2MGET / IX3MGET / IX4MGET key subkey [subkey]...",
+			"IX1MGET / IX2MGET / IX3MGET / IX4MGET / IX5MGET key subkey [subkey]...",
 
 			"Get values of the <i>subkey</i> stored in <i>key</i>.",
 			"array",
@@ -35,7 +35,7 @@ return array(
 	new Cmd(
 			"IX*EXISTS",
 
-			"IX1EXISTS / IX2EXISTS / IX3EXISTS / IX4EXISTS key subkey",
+			"IX1EXISTS / IX2EXISTS / IX3EXISTS / IX4EXISTS / IX5EXISTS key subkey",
 
 			"Check if <i>subkey</i> stored in <i>key</i>.",
 			"bool",
@@ -52,7 +52,7 @@ return array(
 	new Cmd(
 			"IX*GETINDEXES",
 
-			"IX1GETINDEXES / IX2GETINDEXES / IX3GETINDEXES / IX4GETINDEXES key subkey",
+			"IX1GETINDEXES / IX2GETINDEXES / IX3GETINDEXES / IX4GETINDEXES / IX5GETINDEXES key subkey",
 
 			"Get index values (score) of the <i>subkey</i> stored in <i>key</i>.",
 			"array",
@@ -118,7 +118,7 @@ return array(
 
 			"IX4ADD key subKey index_value1 index_value2 index_value3 index_value4 value [subKey index_value1 index_value2 index_value3 index_value4 value]...",
 
-			"Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3</i> and <i>value</i> in <i>key</i>.",
+			"Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3, index_value4</i> and <i>value</i> in <i>key</i>.",
 			"OK",
 			"OK",
 			"1.3.8",
@@ -130,17 +130,33 @@ return array(
 	),
 
 	new Cmd(
+			"IX5ADD",
+
+			"IX5ADD key subKey index_value1 index_value2 index_value3 index_value4 value [subKey index_value1 index_value2 index_value3 index_value4 index_value5 value]...",
+
+			"Set <i>subkey</i> with index values <i>index_value1, index_value2, index_value3, index_value4, index_value5</i> and <i>value</i> in <i>key</i>.",
+			"OK",
+			"OK",
+			"1.3.8",
+			"[number of items] * (READ + (1 + 2 * 120) * WRITE), TX",
+			false,
+			true,
+
+			"index"
+	),
+
+	new Cmd(
 			"IX*REM",
 
-			"IX1REM / IX2REM / IX3REM / IX4REM key subkey [subkey]...<br />" .
-			"IX1REMOVE / IX2REMOVE / IX3REMOVE / IX4REMOVE key subkey [subkey]...<br />" .
-			"IX1DEL / IX2DEL / IX3DEL / IX4DEL key subkey [subkey]...",
+			"IX1REM / IX2REM / IX3REM / IX4REM / IX5REM key subkey [subkey]...<br />" .
+			"IX1REMOVE / IX2REMOVE / IX3REMOVE / IX4REMOVE / IX5REMOVE key subkey [subkey]...<br />" .
+			"IX1DEL / IX2DEL / IX3DEL / IX4DEL / IX5DEL key subkey [subkey]...",
 
 			"Removes <i>subkey</i> stored in <i>key</i>.",
 			"bool",
 			"Always return 1",
 			"1.3.8",
-			"[number of items] * (READ + {2, 3, 7 or 25} * WRITE), TX",
+			"[number of items] * (READ + {1+1, 1+2, 1+6, 1+24 or 1+120} * WRITE), TX",
 			false,
 			true,
 
@@ -186,9 +202,23 @@ return array(
 			"xnget users1~ 1000 users1~</pre>",
 
 			"<pre>" .
-			"select key, val from table using index A                           order by ix_fld1 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index A where ix_fld1 = 'ix_val1' order by ix_fld1 limit [number]</pre>"
+"select key, val
+from table
+using index A
+order by
+   index_field1
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index A
+where
+   index_field1 = 'index_value1'
+order by
+   index_field1
+limit [number]</pre>"
 	),
 
 	new Cmd(
@@ -236,11 +266,39 @@ return array(
 			"xnget users2~ 1000 users2~</pre>",
 
 			"<pre>" .
-			"select key, val from table using index AB                                                   order by ix_fld1, ix_fld2 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index AB where ix_fld1 = 'ix_val1'                         order by ix_fld1, ix_fld2 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index AB where ix_fld1 = 'ix_val1' and ix_fld2 = 'ix_val2' order by ix_fld1, ix_fld2 limit [number]</pre>"
+"select key, val
+from table
+using index AB
+order by
+   index_field1,
+   index_field2
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index AB
+where
+   index_field1 = 'index_value1'
+order by
+   index_field1,
+   index_field2
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index AB
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2'
+order by
+   index_field1,
+   index_field2
+limit [number]
+</pre>"
 	),
 
 	new Cmd(
@@ -295,11 +353,57 @@ return array(
 			"xnget users3~ 1000 users3~</pre>",
 
 			"<pre>" .
-			"select key, val from table using index ABC                                                                           order by ix_fld1, ix_fld2, ix_fld3 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index ABC where ix_fld1 = 'ix_val1' and ix_fld2 = 'ix_val2'                         order by ix_fld1, ix_fld2, ix_fld3 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index ABC where ix_fld1 = 'ix_val1' and ix_fld2 = 'ix_val2' and ix_fld3 = 'ix_val3' order by ix_fld1, ix_fld2, ix_fld3 limit [number]</pre>"
+"select key, val
+from table
+using index ABC
+order by
+order by
+   index_field1,
+   index_field2,
+   index_field3
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABC
+where
+   index_field1 = 'index_value1'
+order by
+   index_field1,
+   index_field2,
+   index_field3
+[number]
+
+...or...
+
+select key, val
+from table
+using index ABC
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2'
+order by
+   index_field1,
+   index_field2,
+   index_field3
+[number]
+
+...or...
+
+select key, val
+from table
+using index ABC
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2' and
+   index_field3 = 'index_value3'
+order by
+   index_field1,
+   index_field2,
+   index_field3
+limit [number]</pre>"
 	),
 
 	new Cmd(
@@ -307,7 +411,7 @@ return array(
 
 			"IX4RANGE key index_name index_value1 index_value2 index_value3 index_value4 number start",
 
-			"Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i>, <i>index_value2</i> and <i>index_value3</i>.<br />" .
+			"Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i> and <i>index_value4</i>.<br />" .
 			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />" .
 			"<i>index_name</i> are the permutations of 4 elements, e.g. \"ABCD\", \"ABDC\", \"ACBD\", \"ACDB\", \"ADBC\", \"ADCB\" ...<br />" .
 			"Return up to <i>number</i> of pairs.<br />" .
@@ -327,33 +431,227 @@ return array(
 			"<pre>" .
 			"<i>Suppose we are selling laptops</i><br />" .
 			"<br />" .
-			"ix4add stock zen    ASUS 13 16 1 'Asus Zenbook,  Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+			"ix4add stock4 zen    ASUS 13 16 1 'Asus Zenbook,  Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
 
-			"ix4add stock xps13  DELL 13 16 1 'Dell XPS13 13, Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+			"ix4add stock4 xps13  DELL 13 16 1 'Dell XPS13 13, Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
 
-			"ix4add stock xps15  DELL 15 16 1 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 1 TB SSD' <br />" .
-			"ix4add stock xps15b DELL 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 1 TB SSD' <br />" .
-			"ix4add stock xps15c DELL 15 16 2 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 2 TB SSD' <br />" .
-			"ix4add stock xps15d DELL 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 2 TB SSD' <br />" .
+			"ix4add stock4 xps15  DELL 15 16 1 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+			"ix4add stock4 xps15b DELL 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 1 TB SSD' <br />" .
+			"ix4add stock4 xps15c DELL 15 16 2 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 2 TB SSD' <br />" .
+			"ix4add stock4 xps15d DELL 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 2 TB SSD' <br />" .
 
-			"ix4add stock xps17  DELL 17 32 2 'Dell XPS17 17, Intel i7, 17 inch display, 32 GB RAM, 2 TB SSD' <br />" .
+			"ix4add stock4 xps17  DELL 17 32 2 'Dell XPS17 17, Intel i7, 17 inch display, 32 GB RAM, 2 TB SSD' <br />" .
 
-			"ix4range stock ABCD ''   '' '' '' 1000 ''      <i>get all laptops sorted by brand, screen size, RAM, disk size.</i><br />" .
-			"ix4range stock ABCD DELL '' '' '' 1000 ''      <i>get all laptops from DELL.</i><br />" .
-			"ix4range stock ABCD DELL 15 '' '' 1000 ''      <i>get all laptops from DELL, 15 inch display.</i><br />" .
-			"ix4range stock ABCD DELL 15 16 '' 1000 ''      <i>get all laptops from DELL, 15 inch display, 16 GB RAM.</i><br />" .
-			"ix4range stock ABCD DELL 15 16 2  1000 ''      <i>get all laptops from DELL, 15 inch display, 16 GB RAM, 2 TB SSD.</i><br />" .
+			"ix4range stock4 ABCD ''   '' '' '' 1000 ''      <i>get all laptops sorted by brand, screen size, RAM, disk size.</i><br />" .
+			"ix4range stock4 ABCD DELL '' '' '' 1000 ''      <i>get all laptops from DELL.</i><br />" .
+			"ix4range stock4 ABCD DELL 15 '' '' 1000 ''      <i>get all laptops from DELL, 15 inch display.</i><br />" .
+			"ix4range stock4 ABCD DELL 15 16 '' 1000 ''      <i>get all laptops from DELL, 15 inch display, 16 GB RAM.</i><br />" .
+			"ix4range stock4 ABCD DELL 15 16 2  1000 ''      <i>get all laptops from DELL, 15 inch display, 16 GB RAM, 2 TB SSD.</i><br />" .
 
 			"<br />" .
-			"xnget stock~ 1000 stock~</pre>",
+			"xnget stock4~ 1000 stock4~</pre>",
 
 			"<pre>" .
-			"select key, val from table using index ABCD                                                                                                       order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index ABCD where ix_fld1 = 'ix_val1' and ix_fld2 = 'index_val2'                                                  order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index ABCD where ix_fld1 = 'ix_val1' and ix_fld2 = 'index_val2'and ix_fld3 = 'ix_value3'                         order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]<br />" .
-			"...or...<br />" .
-			"select key, val from table using index ABCD where ix_fld1 = 'ix_val1' and ix_fld2 = 'index_val2'and ix_fld3 = 'ix_value3' and ix_fld4 = 'ix_val4' order by ix_fld1, ix_fld2, ix_fld3, ix_fld4 limit [number]</pre>"
+"select key, val
+from table
+using index ABCD
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABCD
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABCD
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2' and
+   index_field3 = 'index_value3'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABCD
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2' and
+   index_field3 = 'index_value3' and
+   index_field4 = 'index_value4'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4
+limit [number]</pre>"
+	),
+
+	new Cmd(
+			"IX5RANGE",
+
+			"IX5RANGE key index_name index_value1 index_value2 index_value3 index_value4 index_value5 number start",
+
+			"Gets all subkeys stored in the <i>index_name</i> with value <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i>, <i>index_value4</i> and <i>index_value5</i>.<br />" .
+			"<i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />" .
+			"<i>index_name</i> are the permutations of 5 elements, e.g. \"ABCDE\", \"ABDCE\", \"ACBDE\", \"ACDBE\", \"ADBCE\", \"ADCBE\" ...<br />" .
+			"Return up to <i>number</i> of pairs.<br />" .
+			"Returns up to ~32'000 elements.",
+
+			"array",
+			"First group of element         - array of key and values.<br />" .
+			"Second group of single element - Last key, if there is second page.",
+
+			"1.3.8",
+			"READ",
+			false,
+			false,
+
+			"index",
+
+			"<pre>" .
+			"<i>Suppose we are selling laptops</i><br />" .
+			"<br />" .
+			"ix5add stock5 zen    ASUS i5 13 16 1 'Asus Zenbook,  Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+
+			"ix5add stock5 xps13  DELL i7 13 16 1 'Dell XPS13 13, Intel i7, 13 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+
+			"ix5add stock5 xps15  DELL i5 15 16 1 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 1 TB SSD' <br />" .
+			"ix5add stock5 xps15b DELL i7 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 1 TB SSD' <br />" .
+			"ix5add stock5 xps15c DELL i7 15 16 2 'Dell XPS15 15, Intel i7, 15 inch display, 16 GB RAM, 2 TB SSD' <br />" .
+			"ix5add stock5 xps15d DELL i9 15 32 2 'Dell XPS15 15, Intel i7, 15 inch display, 32 GB RAM, 2 TB SSD' <br />" .
+
+			"ix5add stock5 xps17  DELL i9 17 32 2 'Dell XPS17 17, Intel i7, 17 inch display, 32 GB RAM, 2 TB SSD' <br />" .
+
+			"ix5range stock5 ABCDE ''   '' '' '' '' 1000 ''      <i>get all laptops sorted by brand, cpu, screen size, RAM, disk size.</i><br />" .
+			"ix5range stock5 ABCDE DELL '' '' '' '' 1000 ''      <i>get all laptops from DELL.</i><br />" .
+			"ix5range stock5 ABCDE DELL i7 '' '' '' 1000 ''      <i>get all laptops from DELL, CPU i7, 15 inch display.</i><br />" .
+			"ix5range stock5 ABCDE DELL i7 15 '' '' 1000 ''      <i>get all laptops from DELL, CPU i7, 15 inch display.</i><br />" .
+			"ix5range stock5 ABCDE DELL i7 15 16 '' 1000 ''      <i>get all laptops from DELL, CPU i7, 15 inch display, 16 GB RAM.</i><br />" .
+			"ix5range stock5 ABCDE DELL i7 15 16 2  1000 ''      <i>get all laptops from DELL, CPU i7, 15 inch display, 16 GB RAM, 2 TB SSD.</i><br />" .
+
+			"<br />" .
+			"xnget stock5~ 1000 stock5~</pre>",
+
+			"<pre>" .
+"select key, val
+from table
+using index ABCDE
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4,
+   index_field5
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABCDE
+where
+   index_field1 = 'index_value1'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4,
+   index_field5
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABCDE
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4,
+   index_field5
+limit [number]
+
+...or...
+
+select key, val
+from table using
+index ABCDE
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2' and
+   index_field3 = 'index_value3'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4,
+   index_field5
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABCDE
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2' and
+   index_field3 = 'index_value3' and
+   index_field4 = 'index_value4'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4,
+   index_field5
+limit [number]
+
+...or...
+
+select key, val
+from table
+using index ABCDE
+where
+   index_field1 = 'index_value1' and
+   index_field2 = 'index_value2' and
+   index_field3 = 'index_value3' and
+   index_field4 = 'index_value4' and
+   index_field5 = 'index_value5'
+order by
+   index_field1,
+   index_field2,
+   index_field3,
+   index_field4,
+   index_field5
+limit [number]</pre>"
 	),
 );

@@ -193,7 +193,7 @@ namespace net::worker::shared::zsetmulti{
 		}
 
 		template<typename F>
-		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
+		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F func){
 			auto const S = keySub;
 			auto const A = indexes[0];
 
@@ -202,7 +202,7 @@ namespace net::worker::shared::zsetmulti{
 
 				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b);
 
-				f(key);
+				func(key);
 			};
 
 			// old style not supports txt
@@ -294,7 +294,7 @@ namespace net::worker::shared::zsetmulti{
 		}
 
 		template<typename F>
-		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
+		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F func){
 			auto const S = keySub;
 			auto const A = indexes[0];
 
@@ -303,7 +303,7 @@ namespace net::worker::shared::zsetmulti{
 
 				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b);
 
-				f(key);
+				func(key);
 			};
 
 			ff("A", A, S);
@@ -416,7 +416,7 @@ namespace net::worker::shared::zsetmulti{
 		}
 
 		template<typename F>
-		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
+		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F func){
 			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
@@ -426,7 +426,7 @@ namespace net::worker::shared::zsetmulti{
 
 				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c);
 
-				f(key);
+				func(key);
 			};
 
 			ff("AB", A, B, S);
@@ -558,7 +558,7 @@ namespace net::worker::shared::zsetmulti{
 		}
 
 		template<typename F>
-		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
+		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F func){
 			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
@@ -569,7 +569,7 @@ namespace net::worker::shared::zsetmulti{
 
 				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d);
 
-				f(key);
+				func(key);
 			};
 
 			ff("ABC", A, B, C, S);
@@ -580,29 +580,6 @@ namespace net::worker::shared::zsetmulti{
 			ff("CBA", C, B, A, S);
 
 		}
-
-	public:
-		#if 0
-		static std::string_view validateIndex(std::string_view s){
-			if (s.size() != 3)
-				return "";
-
-			auto _ = [](std::string_view s){
-				return impl_::s2u_3(s);
-			};
-
-			switch( _(s) ){
-			case _("ABC") : return "ABC";
-			case _("ACB") : return "ACB";
-			case _("BAC") : return "BAC";
-			case _("BCA") : return "BCA";
-			case _("CAB") : return "CAB";
-			case _("CBA") : return "CBA";
-			default:
-				return "";
-			}
-		}
-		#endif
 	};
 
 
@@ -714,7 +691,7 @@ namespace net::worker::shared::zsetmulti{
 
 			return concatenateBuffer(bufferKey,
 					keyN		,	separator	,
-					"ABC"		,	separator	,
+					"ABCD"		,	separator	,
 					indexes[0]	,	separator	,
 					indexes[1]	,	separator	,
 					indexes[2]	,	separator	,
@@ -724,7 +701,7 @@ namespace net::worker::shared::zsetmulti{
 		}
 
 		template<typename F>
-		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F f){
+		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F func){
 			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
@@ -736,7 +713,7 @@ namespace net::worker::shared::zsetmulti{
 
 				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e);
 
-				f(key);
+				func(key);
 			};
 
 			ff("ABCD", A, B, C, D, S);
@@ -764,47 +741,283 @@ namespace net::worker::shared::zsetmulti{
 			ff("DCAB", D, C, A, B, S);
 			ff("DCBA", D, C, B, A, S);
 		}
+	};
 
-	public:
-		#if 0
-		static std::string_view validateIndex(std::string_view s){
-			if (s.size() != 3)
-				return "";
 
-			auto _ = [](std::string_view s){
-				return impl_::s2u_3(s);
-			};
 
-			switch( _(s) ){
-			case _("ABCD") : return "ABCD";
-			case _("ABDC") : return "ABDC";
-			case _("ACBD") : return "ACBD";
-			case _("ACDB") : return "ACDB";
-			case _("ADBC") : return "ADBC";
-			case _("ADCB") : return "ADCB";
-			case _("BACD") : return "BACD";
-			case _("BADC") : return "BADC";
-			case _("BCAD") : return "BCAD";
-			case _("BCDA") : return "BCDA";
-			case _("BDAC") : return "BDAC";
-			case _("BDCA") : return "BDCA";
-			case _("CABD") : return "CABD";
-			case _("CADB") : return "CADB";
-			case _("CBAD") : return "CBAD";
-			case _("CBDA") : return "CBDA";
-			case _("CDAB") : return "CDAB";
-			case _("CDBA") : return "CDBA";
-			case _("DABC") : return "DABC";
-			case _("DACB") : return "DACB";
-			case _("DBAC") : return "DBAC";
-			case _("DBCA") : return "DBCA";
-			case _("DCAB") : return "DCAB";
-			case _("DCBA") : return "DCBA";
+	template<>
+	struct Permutation<5>{
+		constexpr static size_t N = 5;
+
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
+			// keyN~ABC~A~B~C~D~E~keySub, 7 * ~ + ABCDE
+			return hm4::Pair::isCompositeKeyValid(7 * 1 + 5 + more, keyN, keySub);
+		}
+
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
+			// keyN~ABC~A~B~C~D~E~keySub, 7 * ~ + ABCDE
+			return hm4::Pair::isCompositeKeyValid(7 * 1 + 5 + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3], indexes[4]);
+		}
+
+		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
+		//	logger<Logger::DEBUG>() << indexes[0] << indexes[1] << indexes[2];
+
+			return concatenateBuffer(bufferKey,
+						indexes[0],	separator	,
+						indexes[1],	separator	,
+						indexes[2],	separator	,
+						indexes[3],	separator	,
+						indexes[4]
+			);
+		}
+
+		static auto decodeIndex(std::string_view separator, std::string_view s){
+			StringTokenizer const tok{ s, separator[0] };
+			auto _ = getForwardTokenizer(tok);
+
+			return std::array<std::string_view, N>{ _(), _(), _(), _(), _() };
+		}
+
+		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view key,
+					std::string_view txt,
+					std::string_view a = "", std::string_view b = "", std::string_view c = "",
+					std::string_view d = "", std::string_view e = "", std::string_view f = ""){
+
+			uint64_t const x =
+				(a.empty() ? 0x000000 : 0xA00000) |
+				(b.empty() ? 0x000000 : 0x0B0000) |
+				(c.empty() ? 0x000000 : 0x00C000) |
+				(d.empty() ? 0x000000 : 0x000D00) |
+				(e.empty() ? 0x000000 : 0x0000E0) |
+				(f.empty() ? 0x000000 : 0x00000F) |
+				0;
+
+			switch(x){
 			default:
-				return "";
+			case 0x000000:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator
+				);
+
+			case 0xA00000:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator
+				);
+
+			case 0xAB0000:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator
+				);
+
+			case 0xABC000:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator	,
+						c	,	separator
+				);
+
+			case 0xABCD00:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator	,
+						c	,	separator	,
+						d	,	separator
+				);
+
+			case 0xABCDE0:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator	,
+						c	,	separator	,
+						d	,	separator	,
+						e	,	separator
+				);
+
+			case 0xABCDEF:
+				return concatenateBuffer(bufferKey,
+						key	,	separator	,
+						txt	,	separator	,
+						a	,	separator	,
+						b	,	separator	,
+						c	,	separator	,
+						d	,	separator	,
+						e	,	separator	,
+						f
+				);
 			}
 		}
-		#endif
+
+		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return concatenateBuffer(bufferKey,
+					keyN		,	separator	,
+					"ABCDE"		,	separator	,
+					indexes[0]	,	separator	,
+					indexes[1]	,	separator	,
+					indexes[2]	,	separator	,
+					indexes[3]	,	separator	,
+					indexes[4]	,	separator	,
+					keySub
+			);
+		}
+
+		template<typename F>
+		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, F func){
+			auto const S = keySub;
+			auto const A = indexes[0];
+			auto const B = indexes[1];
+			auto const C = indexes[2];
+			auto const D = indexes[3];
+			auto const E = indexes[4];
+
+			auto ff = [&](std::string_view txt,
+							std::string_view a, std::string_view b, std::string_view c,
+							std::string_view d, std::string_view e, std::string_view f){
+
+				hm4::PairBufferKey bufferKey;
+
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e, f);
+
+				func(key);
+			};
+
+			ff("ABCDE", A, B, C, D, E, S);
+			ff("ABCED", A, B, C, E, D, S);
+			ff("ABDCE", A, B, D, C, E, S);
+			ff("ABDEC", A, B, D, E, C, S);
+			ff("ABECD", A, B, E, C, D, S);
+			ff("ABEDC", A, B, E, D, C, S);
+			ff("ACBDE", A, C, B, D, E, S);
+			ff("ACBED", A, C, B, E, D, S);
+			ff("ACDBE", A, C, D, B, E, S);
+			ff("ACDEB", A, C, D, E, B, S);
+			ff("ACEBD", A, C, E, B, D, S);
+			ff("ACEDC", A, C, E, D, C, S);
+			ff("ADBCE", A, D, B, C, E, S);
+			ff("ADBEC", A, D, B, E, C, S);
+			ff("ADCBE", A, D, C, B, E, S);
+			ff("ADCEB", A, D, C, E, B, S);
+			ff("ADEBC", A, D, E, B, C, S);
+			ff("ADECB", A, D, E, C, B, S);
+			ff("AEBCD", A, E, B, C, D, S);
+			ff("AEBDC", A, E, B, D, C, S);
+			ff("AECBD", A, E, C, B, D, S);
+			ff("AECDB", A, E, C, D, B, S);
+			ff("AEDBC", A, E, D, B, C, S);
+			ff("AEDCB", A, E, D, C, B, S);
+			ff("BACDE", B, A, C, D, E, S);
+			ff("BACED", B, A, C, E, D, S);
+			ff("BADCE", B, A, D, C, E, S);
+			ff("BADEC", B, A, D, E, C, S);
+			ff("BAECD", B, A, E, C, D, S);
+			ff("BAEDC", B, A, E, D, C, S);
+			ff("BCADE", B, C, A, D, E, S);
+			ff("BCAED", B, C, A, E, D, S);
+			ff("BCDAE", B, C, D, A, E, S);
+			ff("BCDEA", B, C, D, E, A, S);
+			ff("BCEAD", B, C, E, A, D, S);
+			ff("BCEDA", B, C, E, D, A, S);
+			ff("BDACE", B, D, A, C, E, S);
+			ff("BDAEC", B, D, A, E, C, S);
+			ff("BDCAE", B, D, C, A, E, S);
+			ff("BDCEA", B, D, C, E, A, S);
+			ff("BDEAC", B, D, E, A, C, S);
+			ff("BDECA", B, D, E, C, A, S);
+			ff("BEACD", B, E, A, C, D, S);
+			ff("BEADC", B, E, A, D, C, S);
+			ff("BECAD", B, E, C, A, D, S);
+			ff("BECDA", B, E, C, D, A, S);
+			ff("BEDAC", B, E, D, A, C, S);
+			ff("BEDCA", B, E, D, C, A, S);
+			ff("CABDE", C, A, B, D, E, S);
+			ff("CABED", C, A, B, E, D, S);
+			ff("CADBE", C, A, D, B, E, S);
+			ff("CADEB", C, A, D, E, B, S);
+			ff("CAEBD", C, A, E, B, D, S);
+			ff("CAEDB", C, A, E, D, B, S);
+			ff("CBADE", C, B, A, D, E, S);
+			ff("CBAED", C, B, A, E, D, S);
+			ff("CBDAE", C, B, D, A, E, S);
+			ff("CBDEA", C, B, D, E, A, S);
+			ff("CBEAD", C, B, E, A, D, S);
+			ff("CBEDA", C, B, E, D, A, S);
+			ff("CDABE", C, D, A, B, E, S);
+			ff("CDAEB", C, D, A, E, B, S);
+			ff("CDBAE", C, D, B, A, E, S);
+			ff("CDBEA", C, D, B, E, A, S);
+			ff("CDEAB", C, D, E, A, B, S);
+			ff("CDEBA", C, D, E, B, A, S);
+			ff("CEABD", C, E, A, B, D, S);
+			ff("CEADB", C, E, A, D, B, S);
+			ff("CEBAD", C, E, B, A, D, S);
+			ff("CEBDA", C, E, B, D, A, S);
+			ff("CEDAB", C, E, D, A, B, S);
+			ff("CEDBA", C, E, D, B, A, S);
+			ff("DABCE", D, A, B, C, E, S);
+			ff("DABEC", D, A, B, E, C, S);
+			ff("DACBE", D, A, C, B, E, S);
+			ff("DACEB", D, A, C, E, B, S);
+			ff("DAEBC", D, A, E, B, C, S);
+			ff("DAECB", D, A, E, C, B, S);
+			ff("DBACE", D, B, A, C, E, S);
+			ff("DBAEC", D, B, A, E, C, S);
+			ff("DBCAE", D, B, C, A, E, S);
+			ff("DBCEA", D, B, C, E, A, S);
+			ff("DBEAC", D, B, E, A, C, S);
+			ff("DBECA", D, B, E, C, A, S);
+			ff("DCABE", D, C, A, B, E, S);
+			ff("DCAEB", D, C, A, E, B, S);
+			ff("DCBAE", D, C, B, A, E, S);
+			ff("DCBEA", D, C, B, E, A, S);
+			ff("DCEAB", D, C, E, A, B, S);
+			ff("DCEBA", D, C, E, B, A, S);
+			ff("DEABC", D, E, A, B, C, S);
+			ff("DEACB", D, E, A, C, B, S);
+			ff("DEBAC", D, E, B, A, C, S);
+			ff("DEBCA", D, E, B, C, A, S);
+			ff("DECAB", D, E, C, A, B, S);
+			ff("DECBA", D, E, C, B, A, S);
+			ff("EABCD", E, A, B, C, D, S);
+			ff("EABDC", E, A, B, D, C, S);
+			ff("EACBD", E, A, C, B, D, S);
+			ff("EACDB", E, A, C, D, B, S);
+			ff("EADBC", E, A, D, B, C, S);
+			ff("EADCB", E, A, D, C, B, S);
+			ff("EBACD", E, B, A, C, D, S);
+			ff("EBADC", E, B, A, D, C, S);
+			ff("EBCAD", E, B, C, A, D, S);
+			ff("EBCDA", E, B, C, D, A, S);
+			ff("EBDAC", E, B, D, A, C, S);
+			ff("EBDCA", E, B, D, C, A, S);
+			ff("ECABD", E, C, A, B, D, S);
+			ff("ECADB", E, C, A, D, B, S);
+			ff("ECBAD", E, C, B, A, D, S);
+			ff("ECBDA", E, C, B, D, A, S);
+			ff("ECDAB", E, C, D, A, B, S);
+			ff("ECDBA", E, C, D, B, A, S);
+			ff("EDABC", E, D, A, B, C, S);
+			ff("EDACB", E, D, A, C, B, S);
+			ff("EDBAC", E, D, B, A, C, S);
+			ff("EDBCA", E, D, B, C, A, S);
+			ff("EDCAB", E, D, C, A, B, S);
+			ff("EDCBA", E, D, C, B, A, S);
+		}
 	};
 
 
