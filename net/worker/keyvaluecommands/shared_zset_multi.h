@@ -194,19 +194,18 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const S = keySub;
 			auto const A = indexes[0];
 
-			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b){
+			auto ff = [&](std::string_view txt, std::string_view a){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b);
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, keySub);
 
 				func(key);
 			};
 
 			// old style not supports txt
-			ff("X", A, S);
+			ff("X", A);
 		}
 	};
 
@@ -295,18 +294,17 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const S = keySub;
 			auto const A = indexes[0];
 
-			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b){
+			auto ff = [&](std::string_view txt, std::string_view a){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b);
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, keySub);
 
 				func(key);
 			};
 
-			ff("A", A, S);
+			ff("A", A);
 		}
 
 		#if 0
@@ -417,40 +415,20 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
 
-			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c){
+			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c);
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, keySub);
 
 				func(key);
 			};
 
-			ff("AB", A, B, S);
-			ff("BA", B, A, S);
+			ff("AB", A, B);
+			ff("BA", B, A);
 		}
-
-	public:
-		#if 0
-		static std::string_view validateIndex(std::string_view s){
-			if (s.size() != 2)
-				return "";
-
-			auto _ = [](std::string_view s){
-				return impl_::s2u_2(s);
-			};
-
-			switch( _(s) ){
-			case _("AB") : return "AB";
-			case _("BA") : return "BA";
-			default:
-				return "";
-			}
-		}
-		#endif
 	};
 
 
@@ -559,25 +537,24 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
 			auto const C = indexes[2];
 
-			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c, std::string_view d){
+			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d);
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, keySub);
 
 				func(key);
 			};
 
-			ff("ABC", A, B, C, S);
-			ff("ACB", A, C, B, S);
-			ff("BAC", B, A, C, S);
-			ff("BCA", B, C, A, S);
-			ff("CAB", C, A, B, S);
-			ff("CBA", C, B, A, S);
+			ff("ABC", A, B, C);
+			ff("ACB", A, C, B);
+			ff("BAC", B, A, C);
+			ff("BCA", B, C, A);
+			ff("CAB", C, A, B);
+			ff("CBA", C, B, A);
 
 		}
 	};
@@ -702,44 +679,43 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
 			auto const C = indexes[2];
 			auto const D = indexes[3];
 
-			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c, std::string_view d, std::string_view e){
+			auto ff = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c, std::string_view d){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e);
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, keySub);
 
 				func(key);
 			};
 
-			ff("ABCD", A, B, C, D, S);
-			ff("ABDC", A, B, D, C, S);
-			ff("ACBD", A, C, B, D, S);
-			ff("ACDB", A, C, D, B, S);
-			ff("ADBC", A, D, B, C, S);
-			ff("ADCB", A, D, C, B, S);
-			ff("BACD", B, A, C, D, S);
-			ff("BADC", B, A, D, C, S);
-			ff("BCAD", B, C, A, D, S);
-			ff("BCDA", B, C, D, A, S);
-			ff("BDAC", B, D, A, C, S);
-			ff("BDCA", B, D, C, A, S);
-			ff("CABD", C, A, B, D, S);
-			ff("CADB", C, A, D, B, S);
-			ff("CBAD", C, B, A, D, S);
-			ff("CBDA", C, B, D, A, S);
-			ff("CDAB", C, D, A, B, S);
-			ff("CDBA", C, D, B, A, S);
-			ff("DABC", D, A, B, C, S);
-			ff("DACB", D, A, C, B, S);
-			ff("DBAC", D, B, A, C, S);
-			ff("DBCA", D, B, C, A, S);
-			ff("DCAB", D, C, A, B, S);
-			ff("DCBA", D, C, B, A, S);
+			ff("ABCD", A, B, C, D);
+			ff("ABDC", A, B, D, C);
+			ff("ACBD", A, C, B, D);
+			ff("ACDB", A, C, D, B);
+			ff("ADBC", A, D, B, C);
+			ff("ADCB", A, D, C, B);
+			ff("BACD", B, A, C, D);
+			ff("BADC", B, A, D, C);
+			ff("BCAD", B, C, A, D);
+			ff("BCDA", B, C, D, A);
+			ff("BDAC", B, D, A, C);
+			ff("BDCA", B, D, C, A);
+			ff("CABD", C, A, B, D);
+			ff("CADB", C, A, D, B);
+			ff("CBAD", C, B, A, D);
+			ff("CBDA", C, B, D, A);
+			ff("CDAB", C, D, A, B);
+			ff("CDBA", C, D, B, A);
+			ff("DABC", D, A, B, C);
+			ff("DACB", D, A, C, B);
+			ff("DBAC", D, B, A, C);
+			ff("DBCA", D, B, C, A);
+			ff("DCAB", D, C, A, B);
+			ff("DCBA", D, C, B, A);
 		}
 	};
 
@@ -879,7 +855,6 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
 			auto const C = indexes[2];
@@ -888,11 +863,11 @@ namespace net::worker::shared::zsetmulti{
 
 			auto ff = [&](std::string_view txt,
 							std::string_view a, std::string_view b, std::string_view c,
-							std::string_view d, std::string_view e, std::string_view f){
+							std::string_view d, std::string_view e){
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e, f);
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e, keySub);
 
 				func(key);
 			};
@@ -900,126 +875,126 @@ namespace net::worker::shared::zsetmulti{
 			// All 120 permutations here:
 			// thanks chatgpt
 
-			ff("ABCDE", A, B, C, D, E, S);
-			ff("ABCED", A, B, C, E, D, S);
-			ff("ABDCE", A, B, D, C, E, S);
-			ff("ABDEC", A, B, D, E, C, S);
-			ff("ABECD", A, B, E, C, D, S);
-			ff("ABEDC", A, B, E, D, C, S);
-			ff("ACBDE", A, C, B, D, E, S);
-			ff("ACBED", A, C, B, E, D, S);
-			ff("ACDBE", A, C, D, B, E, S);
-			ff("ACDEB", A, C, D, E, B, S);
-			ff("ACEBD", A, C, E, B, D, S);
-			ff("ACEDC", A, C, E, D, C, S);
-			ff("ADBCE", A, D, B, C, E, S);
-			ff("ADBEC", A, D, B, E, C, S);
-			ff("ADCBE", A, D, C, B, E, S);
-			ff("ADCEB", A, D, C, E, B, S);
-			ff("ADEBC", A, D, E, B, C, S);
-			ff("ADECB", A, D, E, C, B, S);
-			ff("AEBCD", A, E, B, C, D, S);
-			ff("AEBDC", A, E, B, D, C, S);
-			ff("AECBD", A, E, C, B, D, S);
-			ff("AECDB", A, E, C, D, B, S);
-			ff("AEDBC", A, E, D, B, C, S);
-			ff("AEDCB", A, E, D, C, B, S);
-			ff("BACDE", B, A, C, D, E, S);
-			ff("BACED", B, A, C, E, D, S);
-			ff("BADCE", B, A, D, C, E, S);
-			ff("BADEC", B, A, D, E, C, S);
-			ff("BAECD", B, A, E, C, D, S);
-			ff("BAEDC", B, A, E, D, C, S);
-			ff("BCADE", B, C, A, D, E, S);
-			ff("BCAED", B, C, A, E, D, S);
-			ff("BCDAE", B, C, D, A, E, S);
-			ff("BCDEA", B, C, D, E, A, S);
-			ff("BCEAD", B, C, E, A, D, S);
-			ff("BCEDA", B, C, E, D, A, S);
-			ff("BDACE", B, D, A, C, E, S);
-			ff("BDAEC", B, D, A, E, C, S);
-			ff("BDCAE", B, D, C, A, E, S);
-			ff("BDCEA", B, D, C, E, A, S);
-			ff("BDEAC", B, D, E, A, C, S);
-			ff("BDECA", B, D, E, C, A, S);
-			ff("BEACD", B, E, A, C, D, S);
-			ff("BEADC", B, E, A, D, C, S);
-			ff("BECAD", B, E, C, A, D, S);
-			ff("BECDA", B, E, C, D, A, S);
-			ff("BEDAC", B, E, D, A, C, S);
-			ff("BEDCA", B, E, D, C, A, S);
-			ff("CABDE", C, A, B, D, E, S);
-			ff("CABED", C, A, B, E, D, S);
-			ff("CADBE", C, A, D, B, E, S);
-			ff("CADEB", C, A, D, E, B, S);
-			ff("CAEBD", C, A, E, B, D, S);
-			ff("CAEDB", C, A, E, D, B, S);
-			ff("CBADE", C, B, A, D, E, S);
-			ff("CBAED", C, B, A, E, D, S);
-			ff("CBDAE", C, B, D, A, E, S);
-			ff("CBDEA", C, B, D, E, A, S);
-			ff("CBEAD", C, B, E, A, D, S);
-			ff("CBEDA", C, B, E, D, A, S);
-			ff("CDABE", C, D, A, B, E, S);
-			ff("CDAEB", C, D, A, E, B, S);
-			ff("CDBAE", C, D, B, A, E, S);
-			ff("CDBEA", C, D, B, E, A, S);
-			ff("CDEAB", C, D, E, A, B, S);
-			ff("CDEBA", C, D, E, B, A, S);
-			ff("CEABD", C, E, A, B, D, S);
-			ff("CEADB", C, E, A, D, B, S);
-			ff("CEBAD", C, E, B, A, D, S);
-			ff("CEBDA", C, E, B, D, A, S);
-			ff("CEDAB", C, E, D, A, B, S);
-			ff("CEDBA", C, E, D, B, A, S);
-			ff("DABCE", D, A, B, C, E, S);
-			ff("DABEC", D, A, B, E, C, S);
-			ff("DACBE", D, A, C, B, E, S);
-			ff("DACEB", D, A, C, E, B, S);
-			ff("DAEBC", D, A, E, B, C, S);
-			ff("DAECB", D, A, E, C, B, S);
-			ff("DBACE", D, B, A, C, E, S);
-			ff("DBAEC", D, B, A, E, C, S);
-			ff("DBCAE", D, B, C, A, E, S);
-			ff("DBCEA", D, B, C, E, A, S);
-			ff("DBEAC", D, B, E, A, C, S);
-			ff("DBECA", D, B, E, C, A, S);
-			ff("DCABE", D, C, A, B, E, S);
-			ff("DCAEB", D, C, A, E, B, S);
-			ff("DCBAE", D, C, B, A, E, S);
-			ff("DCBEA", D, C, B, E, A, S);
-			ff("DCEAB", D, C, E, A, B, S);
-			ff("DCEBA", D, C, E, B, A, S);
-			ff("DEABC", D, E, A, B, C, S);
-			ff("DEACB", D, E, A, C, B, S);
-			ff("DEBAC", D, E, B, A, C, S);
-			ff("DEBCA", D, E, B, C, A, S);
-			ff("DECAB", D, E, C, A, B, S);
-			ff("DECBA", D, E, C, B, A, S);
-			ff("EABCD", E, A, B, C, D, S);
-			ff("EABDC", E, A, B, D, C, S);
-			ff("EACBD", E, A, C, B, D, S);
-			ff("EACDB", E, A, C, D, B, S);
-			ff("EADBC", E, A, D, B, C, S);
-			ff("EADCB", E, A, D, C, B, S);
-			ff("EBACD", E, B, A, C, D, S);
-			ff("EBADC", E, B, A, D, C, S);
-			ff("EBCAD", E, B, C, A, D, S);
-			ff("EBCDA", E, B, C, D, A, S);
-			ff("EBDAC", E, B, D, A, C, S);
-			ff("EBDCA", E, B, D, C, A, S);
-			ff("ECABD", E, C, A, B, D, S);
-			ff("ECADB", E, C, A, D, B, S);
-			ff("ECBAD", E, C, B, A, D, S);
-			ff("ECBDA", E, C, B, D, A, S);
-			ff("ECDAB", E, C, D, A, B, S);
-			ff("ECDBA", E, C, D, B, A, S);
-			ff("EDABC", E, D, A, B, C, S);
-			ff("EDACB", E, D, A, C, B, S);
-			ff("EDBAC", E, D, B, A, C, S);
-			ff("EDBCA", E, D, B, C, A, S);
-			ff("EDCAB", E, D, C, A, B, S);
-			ff("EDCBA", E, D, C, B, A, S);
+			ff("ABCDE", A, B, C, D, E);
+			ff("ABCED", A, B, C, E, D);
+			ff("ABDCE", A, B, D, C, E);
+			ff("ABDEC", A, B, D, E, C);
+			ff("ABECD", A, B, E, C, D);
+			ff("ABEDC", A, B, E, D, C);
+			ff("ACBDE", A, C, B, D, E);
+			ff("ACBED", A, C, B, E, D);
+			ff("ACDBE", A, C, D, B, E);
+			ff("ACDEB", A, C, D, E, B);
+			ff("ACEBD", A, C, E, B, D);
+			ff("ACEDC", A, C, E, D, C);
+			ff("ADBCE", A, D, B, C, E);
+			ff("ADBEC", A, D, B, E, C);
+			ff("ADCBE", A, D, C, B, E);
+			ff("ADCEB", A, D, C, E, B);
+			ff("ADEBC", A, D, E, B, C);
+			ff("ADECB", A, D, E, C, B);
+			ff("AEBCD", A, E, B, C, D);
+			ff("AEBDC", A, E, B, D, C);
+			ff("AECBD", A, E, C, B, D);
+			ff("AECDB", A, E, C, D, B);
+			ff("AEDBC", A, E, D, B, C);
+			ff("AEDCB", A, E, D, C, B);
+			ff("BACDE", B, A, C, D, E);
+			ff("BACED", B, A, C, E, D);
+			ff("BADCE", B, A, D, C, E);
+			ff("BADEC", B, A, D, E, C);
+			ff("BAECD", B, A, E, C, D);
+			ff("BAEDC", B, A, E, D, C);
+			ff("BCADE", B, C, A, D, E);
+			ff("BCAED", B, C, A, E, D);
+			ff("BCDAE", B, C, D, A, E);
+			ff("BCDEA", B, C, D, E, A);
+			ff("BCEAD", B, C, E, A, D);
+			ff("BCEDA", B, C, E, D, A);
+			ff("BDACE", B, D, A, C, E);
+			ff("BDAEC", B, D, A, E, C);
+			ff("BDCAE", B, D, C, A, E);
+			ff("BDCEA", B, D, C, E, A);
+			ff("BDEAC", B, D, E, A, C);
+			ff("BDECA", B, D, E, C, A);
+			ff("BEACD", B, E, A, C, D);
+			ff("BEADC", B, E, A, D, C);
+			ff("BECAD", B, E, C, A, D);
+			ff("BECDA", B, E, C, D, A);
+			ff("BEDAC", B, E, D, A, C);
+			ff("BEDCA", B, E, D, C, A);
+			ff("CABDE", C, A, B, D, E);
+			ff("CABED", C, A, B, E, D);
+			ff("CADBE", C, A, D, B, E);
+			ff("CADEB", C, A, D, E, B);
+			ff("CAEBD", C, A, E, B, D);
+			ff("CAEDB", C, A, E, D, B);
+			ff("CBADE", C, B, A, D, E);
+			ff("CBAED", C, B, A, E, D);
+			ff("CBDAE", C, B, D, A, E);
+			ff("CBDEA", C, B, D, E, A);
+			ff("CBEAD", C, B, E, A, D);
+			ff("CBEDA", C, B, E, D, A);
+			ff("CDABE", C, D, A, B, E);
+			ff("CDAEB", C, D, A, E, B);
+			ff("CDBAE", C, D, B, A, E);
+			ff("CDBEA", C, D, B, E, A);
+			ff("CDEAB", C, D, E, A, B);
+			ff("CDEBA", C, D, E, B, A);
+			ff("CEABD", C, E, A, B, D);
+			ff("CEADB", C, E, A, D, B);
+			ff("CEBAD", C, E, B, A, D);
+			ff("CEBDA", C, E, B, D, A);
+			ff("CEDAB", C, E, D, A, B);
+			ff("CEDBA", C, E, D, B, A);
+			ff("DABCE", D, A, B, C, E);
+			ff("DABEC", D, A, B, E, C);
+			ff("DACBE", D, A, C, B, E);
+			ff("DACEB", D, A, C, E, B);
+			ff("DAEBC", D, A, E, B, C);
+			ff("DAECB", D, A, E, C, B);
+			ff("DBACE", D, B, A, C, E);
+			ff("DBAEC", D, B, A, E, C);
+			ff("DBCAE", D, B, C, A, E);
+			ff("DBCEA", D, B, C, E, A);
+			ff("DBEAC", D, B, E, A, C);
+			ff("DBECA", D, B, E, C, A);
+			ff("DCABE", D, C, A, B, E);
+			ff("DCAEB", D, C, A, E, B);
+			ff("DCBAE", D, C, B, A, E);
+			ff("DCBEA", D, C, B, E, A);
+			ff("DCEAB", D, C, E, A, B);
+			ff("DCEBA", D, C, E, B, A);
+			ff("DEABC", D, E, A, B, C);
+			ff("DEACB", D, E, A, C, B);
+			ff("DEBAC", D, E, B, A, C);
+			ff("DEBCA", D, E, B, C, A);
+			ff("DECAB", D, E, C, A, B);
+			ff("DECBA", D, E, C, B, A);
+			ff("EABCD", E, A, B, C, D);
+			ff("EABDC", E, A, B, D, C);
+			ff("EACBD", E, A, C, B, D);
+			ff("EACDB", E, A, C, D, B);
+			ff("EADBC", E, A, D, B, C);
+			ff("EADCB", E, A, D, C, B);
+			ff("EBACD", E, B, A, C, D);
+			ff("EBADC", E, B, A, D, C);
+			ff("EBCAD", E, B, C, A, D);
+			ff("EBCDA", E, B, C, D, A);
+			ff("EBDAC", E, B, D, A, C);
+			ff("EBDCA", E, B, D, C, A);
+			ff("ECABD", E, C, A, B, D);
+			ff("ECADB", E, C, A, D, B);
+			ff("ECBAD", E, C, B, A, D);
+			ff("ECBDA", E, C, B, D, A);
+			ff("ECDAB", E, C, D, A, B);
+			ff("ECDBA", E, C, D, B, A);
+			ff("EDABC", E, D, A, B, C);
+			ff("EDACB", E, D, A, C, B);
+			ff("EDBAC", E, D, B, A, C);
+			ff("EDBCA", E, D, B, C, A);
+			ff("EDCAB", E, D, C, A, B);
+			ff("EDCBA", E, D, C, B, A);
 		}
 	};
 
@@ -1176,7 +1151,6 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const S = keySub;
 			auto const A = indexes[0];
 			auto const B = indexes[1];
 			auto const C = indexes[2];
@@ -1186,12 +1160,11 @@ namespace net::worker::shared::zsetmulti{
 
 			auto ff = [&](std::string_view txt,
 							std::string_view a, std::string_view b, std::string_view c,
-							std::string_view d, std::string_view e, std::string_view f,
-							std::string_view g){
+							std::string_view d, std::string_view e, std::string_view f){
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e, f, g);
+				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e, f, keySub);
 
 				func(key);
 			};
@@ -1200,247 +1173,247 @@ namespace net::worker::shared::zsetmulti{
 			// thanks wolfram alpha
 			// this is still acceptable, sinse XNDEL can do 32K inserts.
 
-			ff("ABCDEF", A, B, C, D, E, F, S);	ff("CABDEF", C, A, B, D, E, F, S);	ff("EABCDF", E, A, B, C, D, F, S);
-			ff("ABCDFE", A, B, C, D, F, E, S);	ff("CABDFE", C, A, B, D, F, E, S);	ff("EABCFD", E, A, B, C, F, D, S);
-			ff("ABCEDF", A, B, C, E, D, F, S);	ff("CABEDF", C, A, B, E, D, F, S);	ff("EABDCF", E, A, B, D, C, F, S);
-			ff("ABCEFD", A, B, C, E, F, D, S);	ff("CABEFD", C, A, B, E, F, D, S);	ff("EABDFC", E, A, B, D, F, C, S);
-			ff("ABCFDE", A, B, C, F, D, E, S);	ff("CABFDE", C, A, B, F, D, E, S);	ff("EABFCD", E, A, B, F, C, D, S);
-			ff("ABCFED", A, B, C, F, E, D, S);	ff("CABFED", C, A, B, F, E, D, S);	ff("EABFDC", E, A, B, F, D, C, S);
-			ff("ABDCEF", A, B, D, C, E, F, S);	ff("CADBEF", C, A, D, B, E, F, S);	ff("EACBDF", E, A, C, B, D, F, S);
-			ff("ABDCFE", A, B, D, C, F, E, S);	ff("CADBFE", C, A, D, B, F, E, S);	ff("EACBFD", E, A, C, B, F, D, S);
-			ff("ABDECF", A, B, D, E, C, F, S);	ff("CADEBF", C, A, D, E, B, F, S);	ff("EACDBF", E, A, C, D, B, F, S);
-			ff("ABDEFC", A, B, D, E, F, C, S);	ff("CADEFB", C, A, D, E, F, B, S);	ff("EACDFB", E, A, C, D, F, B, S);
-			ff("ABDFCE", A, B, D, F, C, E, S);	ff("CADFBE", C, A, D, F, B, E, S);	ff("EACFBD", E, A, C, F, B, D, S);
-			ff("ABDFEC", A, B, D, F, E, C, S);	ff("CADFEB", C, A, D, F, E, B, S);	ff("EACFDB", E, A, C, F, D, B, S);
-			ff("ABECDF", A, B, E, C, D, F, S);	ff("CAEBDF", C, A, E, B, D, F, S);	ff("EADBCF", E, A, D, B, C, F, S);
-			ff("ABECFD", A, B, E, C, F, D, S);	ff("CAEBFD", C, A, E, B, F, D, S);	ff("EADBFC", E, A, D, B, F, C, S);
-			ff("ABEDCF", A, B, E, D, C, F, S);	ff("CAEDBF", C, A, E, D, B, F, S);	ff("EADCBF", E, A, D, C, B, F, S);
-			ff("ABEDFC", A, B, E, D, F, C, S);	ff("CAEDFB", C, A, E, D, F, B, S);	ff("EADCFB", E, A, D, C, F, B, S);
-			ff("ABEFCD", A, B, E, F, C, D, S);	ff("CAEFBD", C, A, E, F, B, D, S);	ff("EADFBC", E, A, D, F, B, C, S);
-			ff("ABEFDC", A, B, E, F, D, C, S);	ff("CAEFDB", C, A, E, F, D, B, S);	ff("EADFCB", E, A, D, F, C, B, S);
-			ff("ABFCDE", A, B, F, C, D, E, S);	ff("CAFBDE", C, A, F, B, D, E, S);	ff("EAFBCD", E, A, F, B, C, D, S);
-			ff("ABFCED", A, B, F, C, E, D, S);	ff("CAFBED", C, A, F, B, E, D, S);	ff("EAFBDC", E, A, F, B, D, C, S);
-			ff("ABFDCE", A, B, F, D, C, E, S);	ff("CAFDBE", C, A, F, D, B, E, S);	ff("EAFCBD", E, A, F, C, B, D, S);
-			ff("ABFDEC", A, B, F, D, E, C, S);	ff("CAFDEB", C, A, F, D, E, B, S);	ff("EAFCDB", E, A, F, C, D, B, S);
-			ff("ABFECD", A, B, F, E, C, D, S);	ff("CAFEBD", C, A, F, E, B, D, S);	ff("EAFDBC", E, A, F, D, B, C, S);
-			ff("ABFEDC", A, B, F, E, D, C, S);	ff("CAFEDB", C, A, F, E, D, B, S);	ff("EAFDCB", E, A, F, D, C, B, S);
-			ff("ACBDEF", A, C, B, D, E, F, S);	ff("CBADEF", C, B, A, D, E, F, S);	ff("EBACDF", E, B, A, C, D, F, S);
-			ff("ACBDFE", A, C, B, D, F, E, S);	ff("CBADFE", C, B, A, D, F, E, S);	ff("EBACFD", E, B, A, C, F, D, S);
-			ff("ACBEDF", A, C, B, E, D, F, S);	ff("CBAEDF", C, B, A, E, D, F, S);	ff("EBADCF", E, B, A, D, C, F, S);
-			ff("ACBEFD", A, C, B, E, F, D, S);	ff("CBAEFD", C, B, A, E, F, D, S);	ff("EBADFC", E, B, A, D, F, C, S);
-			ff("ACBFDE", A, C, B, F, D, E, S);	ff("CBAFDE", C, B, A, F, D, E, S);	ff("EBAFCD", E, B, A, F, C, D, S);
-			ff("ACBFED", A, C, B, F, E, D, S);	ff("CBAFED", C, B, A, F, E, D, S);	ff("EBAFDC", E, B, A, F, D, C, S);
-			ff("ACDBEF", A, C, D, B, E, F, S);	ff("CBDAEF", C, B, D, A, E, F, S);	ff("EBCADF", E, B, C, A, D, F, S);
-			ff("ACDBFE", A, C, D, B, F, E, S);	ff("CBDAFE", C, B, D, A, F, E, S);	ff("EBCAFD", E, B, C, A, F, D, S);
-			ff("ACDEBF", A, C, D, E, B, F, S);	ff("CBDEAF", C, B, D, E, A, F, S);	ff("EBCDAF", E, B, C, D, A, F, S);
-			ff("ACDEFB", A, C, D, E, F, B, S);	ff("CBDEFA", C, B, D, E, F, A, S);	ff("EBCDFA", E, B, C, D, F, A, S);
-			ff("ACDFBE", A, C, D, F, B, E, S);	ff("CBDFAE", C, B, D, F, A, E, S);	ff("EBCFAD", E, B, C, F, A, D, S);
-			ff("ACDFEB", A, C, D, F, E, B, S);	ff("CBDFEA", C, B, D, F, E, A, S);	ff("EBCFDA", E, B, C, F, D, A, S);
-			ff("ACEBDF", A, C, E, B, D, F, S);	ff("CBEADF", C, B, E, A, D, F, S);	ff("EBDACF", E, B, D, A, C, F, S);
-			ff("ACEBFD", A, C, E, B, F, D, S);	ff("CBEAFD", C, B, E, A, F, D, S);	ff("EBDAFC", E, B, D, A, F, C, S);
-			ff("ACEDBF", A, C, E, D, B, F, S);	ff("CBEDAF", C, B, E, D, A, F, S);	ff("EBDCAF", E, B, D, C, A, F, S);
-			ff("ACEDFB", A, C, E, D, F, B, S);	ff("CBEDFA", C, B, E, D, F, A, S);	ff("EBDCFA", E, B, D, C, F, A, S);
-			ff("ACEFBD", A, C, E, F, B, D, S);	ff("CBEFAD", C, B, E, F, A, D, S);	ff("EBDFAC", E, B, D, F, A, C, S);
-			ff("ACEFDB", A, C, E, F, D, B, S);	ff("CBEFDA", C, B, E, F, D, A, S);	ff("EBDFCA", E, B, D, F, C, A, S);
-			ff("ACFBDE", A, C, F, B, D, E, S);	ff("CBFADE", C, B, F, A, D, E, S);	ff("EBFACD", E, B, F, A, C, D, S);
-			ff("ACFBED", A, C, F, B, E, D, S);	ff("CBFAED", C, B, F, A, E, D, S);	ff("EBFADC", E, B, F, A, D, C, S);
-			ff("ACFDBE", A, C, F, D, B, E, S);	ff("CBFDAE", C, B, F, D, A, E, S);	ff("EBFCAD", E, B, F, C, A, D, S);
-			ff("ACFDEB", A, C, F, D, E, B, S);	ff("CBFDEA", C, B, F, D, E, A, S);	ff("EBFCDA", E, B, F, C, D, A, S);
-			ff("ACFEBD", A, C, F, E, B, D, S);	ff("CBFEAD", C, B, F, E, A, D, S);	ff("EBFDAC", E, B, F, D, A, C, S);
-			ff("ACFEDB", A, C, F, E, D, B, S);	ff("CBFEDA", C, B, F, E, D, A, S);	ff("EBFDCA", E, B, F, D, C, A, S);
-			ff("ADBCEF", A, D, B, C, E, F, S);	ff("CDABEF", C, D, A, B, E, F, S);	ff("ECABDF", E, C, A, B, D, F, S);
-			ff("ADBCFE", A, D, B, C, F, E, S);	ff("CDABFE", C, D, A, B, F, E, S);	ff("ECABFD", E, C, A, B, F, D, S);
-			ff("ADBECF", A, D, B, E, C, F, S);	ff("CDAEBF", C, D, A, E, B, F, S);	ff("ECADBF", E, C, A, D, B, F, S);
-			ff("ADBEFC", A, D, B, E, F, C, S);	ff("CDAEFB", C, D, A, E, F, B, S);	ff("ECADFB", E, C, A, D, F, B, S);
-			ff("ADBFCE", A, D, B, F, C, E, S);	ff("CDAFBE", C, D, A, F, B, E, S);	ff("ECAFBD", E, C, A, F, B, D, S);
-			ff("ADBFEC", A, D, B, F, E, C, S);	ff("CDAFEB", C, D, A, F, E, B, S);	ff("ECAFDB", E, C, A, F, D, B, S);
-			ff("ADCBEF", A, D, C, B, E, F, S);	ff("CDBAEF", C, D, B, A, E, F, S);	ff("ECBADF", E, C, B, A, D, F, S);
-			ff("ADCBFE", A, D, C, B, F, E, S);	ff("CDBAFE", C, D, B, A, F, E, S);	ff("ECBAFD", E, C, B, A, F, D, S);
-			ff("ADCEBF", A, D, C, E, B, F, S);	ff("CDBEAF", C, D, B, E, A, F, S);	ff("ECBDAF", E, C, B, D, A, F, S);
-			ff("ADCEFB", A, D, C, E, F, B, S);	ff("CDBEFA", C, D, B, E, F, A, S);	ff("ECBDFA", E, C, B, D, F, A, S);
-			ff("ADCFBE", A, D, C, F, B, E, S);	ff("CDBFAE", C, D, B, F, A, E, S);	ff("ECBFAD", E, C, B, F, A, D, S);
-			ff("ADCFEB", A, D, C, F, E, B, S);	ff("CDBFEA", C, D, B, F, E, A, S);	ff("ECBFDA", E, C, B, F, D, A, S);
-			ff("ADEBCF", A, D, E, B, C, F, S);	ff("CDEABF", C, D, E, A, B, F, S);	ff("ECDABF", E, C, D, A, B, F, S);
-			ff("ADEBFC", A, D, E, B, F, C, S);	ff("CDEAFB", C, D, E, A, F, B, S);	ff("ECDAFB", E, C, D, A, F, B, S);
-			ff("ADECBF", A, D, E, C, B, F, S);	ff("CDEBAF", C, D, E, B, A, F, S);	ff("ECDBAF", E, C, D, B, A, F, S);
-			ff("ADECFB", A, D, E, C, F, B, S);	ff("CDEBFA", C, D, E, B, F, A, S);	ff("ECDBFA", E, C, D, B, F, A, S);
-			ff("ADEFBC", A, D, E, F, B, C, S);	ff("CDEFAB", C, D, E, F, A, B, S);	ff("ECDFAB", E, C, D, F, A, B, S);
-			ff("ADEFCB", A, D, E, F, C, B, S);	ff("CDEFBA", C, D, E, F, B, A, S);	ff("ECDFBA", E, C, D, F, B, A, S);
-			ff("ADFBCE", A, D, F, B, C, E, S);	ff("CDFABE", C, D, F, A, B, E, S);	ff("ECFABD", E, C, F, A, B, D, S);
-			ff("ADFBEC", A, D, F, B, E, C, S);	ff("CDFAEB", C, D, F, A, E, B, S);	ff("ECFADB", E, C, F, A, D, B, S);
-			ff("ADFCBE", A, D, F, C, B, E, S);	ff("CDFBAE", C, D, F, B, A, E, S);	ff("ECFBAD", E, C, F, B, A, D, S);
-			ff("ADFCEB", A, D, F, C, E, B, S);	ff("CDFBEA", C, D, F, B, E, A, S);	ff("ECFBDA", E, C, F, B, D, A, S);
-			ff("ADFEBC", A, D, F, E, B, C, S);	ff("CDFEAB", C, D, F, E, A, B, S);	ff("ECFDAB", E, C, F, D, A, B, S);
-			ff("ADFECB", A, D, F, E, C, B, S);	ff("CDFEBA", C, D, F, E, B, A, S);	ff("ECFDBA", E, C, F, D, B, A, S);
-			ff("AEBCDF", A, E, B, C, D, F, S);	ff("CEABDF", C, E, A, B, D, F, S);	ff("EDABCF", E, D, A, B, C, F, S);
-			ff("AEBCFD", A, E, B, C, F, D, S);	ff("CEABFD", C, E, A, B, F, D, S);	ff("EDABFC", E, D, A, B, F, C, S);
-			ff("AEBDCF", A, E, B, D, C, F, S);	ff("CEADBF", C, E, A, D, B, F, S);	ff("EDACBF", E, D, A, C, B, F, S);
-			ff("AEBDFC", A, E, B, D, F, C, S);	ff("CEADFB", C, E, A, D, F, B, S);	ff("EDACFB", E, D, A, C, F, B, S);
-			ff("AEBFCD", A, E, B, F, C, D, S);	ff("CEAFBD", C, E, A, F, B, D, S);	ff("EDAFBC", E, D, A, F, B, C, S);
-			ff("AEBFDC", A, E, B, F, D, C, S);	ff("CEAFDB", C, E, A, F, D, B, S);	ff("EDAFCB", E, D, A, F, C, B, S);
-			ff("AECBDF", A, E, C, B, D, F, S);	ff("CEBADF", C, E, B, A, D, F, S);	ff("EDBACF", E, D, B, A, C, F, S);
-			ff("AECBFD", A, E, C, B, F, D, S);	ff("CEBAFD", C, E, B, A, F, D, S);	ff("EDBAFC", E, D, B, A, F, C, S);
-			ff("AECDBF", A, E, C, D, B, F, S);	ff("CEBDAF", C, E, B, D, A, F, S);	ff("EDBCAF", E, D, B, C, A, F, S);
-			ff("AECDFB", A, E, C, D, F, B, S);	ff("CEBDFA", C, E, B, D, F, A, S);	ff("EDBCFA", E, D, B, C, F, A, S);
-			ff("AECFBD", A, E, C, F, B, D, S);	ff("CEBFAD", C, E, B, F, A, D, S);	ff("EDBFAC", E, D, B, F, A, C, S);
-			ff("AECFDB", A, E, C, F, D, B, S);	ff("CEBFDA", C, E, B, F, D, A, S);	ff("EDBFCA", E, D, B, F, C, A, S);
-			ff("AEDBCF", A, E, D, B, C, F, S);	ff("CEDABF", C, E, D, A, B, F, S);	ff("EDCABF", E, D, C, A, B, F, S);
-			ff("AEDBFC", A, E, D, B, F, C, S);	ff("CEDAFB", C, E, D, A, F, B, S);	ff("EDCAFB", E, D, C, A, F, B, S);
-			ff("AEDCBF", A, E, D, C, B, F, S);	ff("CEDBAF", C, E, D, B, A, F, S);	ff("EDCBAF", E, D, C, B, A, F, S);
-			ff("AEDCFB", A, E, D, C, F, B, S);	ff("CEDBFA", C, E, D, B, F, A, S);	ff("EDCBFA", E, D, C, B, F, A, S);
-			ff("AEDFBC", A, E, D, F, B, C, S);	ff("CEDFAB", C, E, D, F, A, B, S);	ff("EDCFAB", E, D, C, F, A, B, S);
-			ff("AEDFCB", A, E, D, F, C, B, S);	ff("CEDFBA", C, E, D, F, B, A, S);	ff("EDCFBA", E, D, C, F, B, A, S);
-			ff("AEFBCD", A, E, F, B, C, D, S);	ff("CEFABD", C, E, F, A, B, D, S);	ff("EDFABC", E, D, F, A, B, C, S);
-			ff("AEFBDC", A, E, F, B, D, C, S);	ff("CEFADB", C, E, F, A, D, B, S);	ff("EDFACB", E, D, F, A, C, B, S);
-			ff("AEFCBD", A, E, F, C, B, D, S);	ff("CEFBAD", C, E, F, B, A, D, S);	ff("EDFBAC", E, D, F, B, A, C, S);
-			ff("AEFCDB", A, E, F, C, D, B, S);	ff("CEFBDA", C, E, F, B, D, A, S);	ff("EDFBCA", E, D, F, B, C, A, S);
-			ff("AEFDBC", A, E, F, D, B, C, S);	ff("CEFDAB", C, E, F, D, A, B, S);	ff("EDFCAB", E, D, F, C, A, B, S);
-			ff("AEFDCB", A, E, F, D, C, B, S);	ff("CEFDBA", C, E, F, D, B, A, S);	ff("EDFCBA", E, D, F, C, B, A, S);
-			ff("AFBCDE", A, F, B, C, D, E, S);	ff("CFABDE", C, F, A, B, D, E, S);	ff("EFABCD", E, F, A, B, C, D, S);
-			ff("AFBCED", A, F, B, C, E, D, S);	ff("CFABED", C, F, A, B, E, D, S);	ff("EFABDC", E, F, A, B, D, C, S);
-			ff("AFBDCE", A, F, B, D, C, E, S);	ff("CFADBE", C, F, A, D, B, E, S);	ff("EFACBD", E, F, A, C, B, D, S);
-			ff("AFBDEC", A, F, B, D, E, C, S);	ff("CFADEB", C, F, A, D, E, B, S);	ff("EFACDB", E, F, A, C, D, B, S);
-			ff("AFBECD", A, F, B, E, C, D, S);	ff("CFAEBD", C, F, A, E, B, D, S);	ff("EFADBC", E, F, A, D, B, C, S);
-			ff("AFBEDC", A, F, B, E, D, C, S);	ff("CFAEDB", C, F, A, E, D, B, S);	ff("EFADCB", E, F, A, D, C, B, S);
-			ff("AFCBDE", A, F, C, B, D, E, S);	ff("CFBADE", C, F, B, A, D, E, S);	ff("EFBACD", E, F, B, A, C, D, S);
-			ff("AFCBED", A, F, C, B, E, D, S);	ff("CFBAED", C, F, B, A, E, D, S);	ff("EFBADC", E, F, B, A, D, C, S);
-			ff("AFCDBE", A, F, C, D, B, E, S);	ff("CFBDAE", C, F, B, D, A, E, S);	ff("EFBCAD", E, F, B, C, A, D, S);
-			ff("AFCDEB", A, F, C, D, E, B, S);	ff("CFBDEA", C, F, B, D, E, A, S);	ff("EFBCDA", E, F, B, C, D, A, S);
-			ff("AFCEBD", A, F, C, E, B, D, S);	ff("CFBEAD", C, F, B, E, A, D, S);	ff("EFBDAC", E, F, B, D, A, C, S);
-			ff("AFCEDB", A, F, C, E, D, B, S);	ff("CFBEDA", C, F, B, E, D, A, S);	ff("EFBDCA", E, F, B, D, C, A, S);
-			ff("AFDBCE", A, F, D, B, C, E, S);	ff("CFDABE", C, F, D, A, B, E, S);	ff("EFCABD", E, F, C, A, B, D, S);
-			ff("AFDBEC", A, F, D, B, E, C, S);	ff("CFDAEB", C, F, D, A, E, B, S);	ff("EFCADB", E, F, C, A, D, B, S);
-			ff("AFDCBE", A, F, D, C, B, E, S);	ff("CFDBAE", C, F, D, B, A, E, S);	ff("EFCBAD", E, F, C, B, A, D, S);
-			ff("AFDCEB", A, F, D, C, E, B, S);	ff("CFDBEA", C, F, D, B, E, A, S);	ff("EFCBDA", E, F, C, B, D, A, S);
-			ff("AFDEBC", A, F, D, E, B, C, S);	ff("CFDEAB", C, F, D, E, A, B, S);	ff("EFCDAB", E, F, C, D, A, B, S);
-			ff("AFDECB", A, F, D, E, C, B, S);	ff("CFDEBA", C, F, D, E, B, A, S);	ff("EFCDBA", E, F, C, D, B, A, S);
-			ff("AFEBCD", A, F, E, B, C, D, S);	ff("CFEABD", C, F, E, A, B, D, S);	ff("EFDABC", E, F, D, A, B, C, S);
-			ff("AFEBDC", A, F, E, B, D, C, S);	ff("CFEADB", C, F, E, A, D, B, S);	ff("EFDACB", E, F, D, A, C, B, S);
-			ff("AFECBD", A, F, E, C, B, D, S);	ff("CFEBAD", C, F, E, B, A, D, S);	ff("EFDBAC", E, F, D, B, A, C, S);
-			ff("AFECDB", A, F, E, C, D, B, S);	ff("CFEBDA", C, F, E, B, D, A, S);	ff("EFDBCA", E, F, D, B, C, A, S);
-			ff("AFEDBC", A, F, E, D, B, C, S);	ff("CFEDAB", C, F, E, D, A, B, S);	ff("EFDCAB", E, F, D, C, A, B, S);
-			ff("AFEDCB", A, F, E, D, C, B, S);	ff("CFEDBA", C, F, E, D, B, A, S);	ff("EFDCBA", E, F, D, C, B, A, S);
+			ff("ABCDEF", A, B, C, D, E, F);	ff("CABDEF", C, A, B, D, E, F);	ff("EABCDF", E, A, B, C, D, F);
+			ff("ABCDFE", A, B, C, D, F, E);	ff("CABDFE", C, A, B, D, F, E);	ff("EABCFD", E, A, B, C, F, D);
+			ff("ABCEDF", A, B, C, E, D, F);	ff("CABEDF", C, A, B, E, D, F);	ff("EABDCF", E, A, B, D, C, F);
+			ff("ABCEFD", A, B, C, E, F, D);	ff("CABEFD", C, A, B, E, F, D);	ff("EABDFC", E, A, B, D, F, C);
+			ff("ABCFDE", A, B, C, F, D, E);	ff("CABFDE", C, A, B, F, D, E);	ff("EABFCD", E, A, B, F, C, D);
+			ff("ABCFED", A, B, C, F, E, D);	ff("CABFED", C, A, B, F, E, D);	ff("EABFDC", E, A, B, F, D, C);
+			ff("ABDCEF", A, B, D, C, E, F);	ff("CADBEF", C, A, D, B, E, F);	ff("EACBDF", E, A, C, B, D, F);
+			ff("ABDCFE", A, B, D, C, F, E);	ff("CADBFE", C, A, D, B, F, E);	ff("EACBFD", E, A, C, B, F, D);
+			ff("ABDECF", A, B, D, E, C, F);	ff("CADEBF", C, A, D, E, B, F);	ff("EACDBF", E, A, C, D, B, F);
+			ff("ABDEFC", A, B, D, E, F, C);	ff("CADEFB", C, A, D, E, F, B);	ff("EACDFB", E, A, C, D, F, B);
+			ff("ABDFCE", A, B, D, F, C, E);	ff("CADFBE", C, A, D, F, B, E);	ff("EACFBD", E, A, C, F, B, D);
+			ff("ABDFEC", A, B, D, F, E, C);	ff("CADFEB", C, A, D, F, E, B);	ff("EACFDB", E, A, C, F, D, B);
+			ff("ABECDF", A, B, E, C, D, F);	ff("CAEBDF", C, A, E, B, D, F);	ff("EADBCF", E, A, D, B, C, F);
+			ff("ABECFD", A, B, E, C, F, D);	ff("CAEBFD", C, A, E, B, F, D);	ff("EADBFC", E, A, D, B, F, C);
+			ff("ABEDCF", A, B, E, D, C, F);	ff("CAEDBF", C, A, E, D, B, F);	ff("EADCBF", E, A, D, C, B, F);
+			ff("ABEDFC", A, B, E, D, F, C);	ff("CAEDFB", C, A, E, D, F, B);	ff("EADCFB", E, A, D, C, F, B);
+			ff("ABEFCD", A, B, E, F, C, D);	ff("CAEFBD", C, A, E, F, B, D);	ff("EADFBC", E, A, D, F, B, C);
+			ff("ABEFDC", A, B, E, F, D, C);	ff("CAEFDB", C, A, E, F, D, B);	ff("EADFCB", E, A, D, F, C, B);
+			ff("ABFCDE", A, B, F, C, D, E);	ff("CAFBDE", C, A, F, B, D, E);	ff("EAFBCD", E, A, F, B, C, D);
+			ff("ABFCED", A, B, F, C, E, D);	ff("CAFBED", C, A, F, B, E, D);	ff("EAFBDC", E, A, F, B, D, C);
+			ff("ABFDCE", A, B, F, D, C, E);	ff("CAFDBE", C, A, F, D, B, E);	ff("EAFCBD", E, A, F, C, B, D);
+			ff("ABFDEC", A, B, F, D, E, C);	ff("CAFDEB", C, A, F, D, E, B);	ff("EAFCDB", E, A, F, C, D, B);
+			ff("ABFECD", A, B, F, E, C, D);	ff("CAFEBD", C, A, F, E, B, D);	ff("EAFDBC", E, A, F, D, B, C);
+			ff("ABFEDC", A, B, F, E, D, C);	ff("CAFEDB", C, A, F, E, D, B);	ff("EAFDCB", E, A, F, D, C, B);
+			ff("ACBDEF", A, C, B, D, E, F);	ff("CBADEF", C, B, A, D, E, F);	ff("EBACDF", E, B, A, C, D, F);
+			ff("ACBDFE", A, C, B, D, F, E);	ff("CBADFE", C, B, A, D, F, E);	ff("EBACFD", E, B, A, C, F, D);
+			ff("ACBEDF", A, C, B, E, D, F);	ff("CBAEDF", C, B, A, E, D, F);	ff("EBADCF", E, B, A, D, C, F);
+			ff("ACBEFD", A, C, B, E, F, D);	ff("CBAEFD", C, B, A, E, F, D);	ff("EBADFC", E, B, A, D, F, C);
+			ff("ACBFDE", A, C, B, F, D, E);	ff("CBAFDE", C, B, A, F, D, E);	ff("EBAFCD", E, B, A, F, C, D);
+			ff("ACBFED", A, C, B, F, E, D);	ff("CBAFED", C, B, A, F, E, D);	ff("EBAFDC", E, B, A, F, D, C);
+			ff("ACDBEF", A, C, D, B, E, F);	ff("CBDAEF", C, B, D, A, E, F);	ff("EBCADF", E, B, C, A, D, F);
+			ff("ACDBFE", A, C, D, B, F, E);	ff("CBDAFE", C, B, D, A, F, E);	ff("EBCAFD", E, B, C, A, F, D);
+			ff("ACDEBF", A, C, D, E, B, F);	ff("CBDEAF", C, B, D, E, A, F);	ff("EBCDAF", E, B, C, D, A, F);
+			ff("ACDEFB", A, C, D, E, F, B);	ff("CBDEFA", C, B, D, E, F, A);	ff("EBCDFA", E, B, C, D, F, A);
+			ff("ACDFBE", A, C, D, F, B, E);	ff("CBDFAE", C, B, D, F, A, E);	ff("EBCFAD", E, B, C, F, A, D);
+			ff("ACDFEB", A, C, D, F, E, B);	ff("CBDFEA", C, B, D, F, E, A);	ff("EBCFDA", E, B, C, F, D, A);
+			ff("ACEBDF", A, C, E, B, D, F);	ff("CBEADF", C, B, E, A, D, F);	ff("EBDACF", E, B, D, A, C, F);
+			ff("ACEBFD", A, C, E, B, F, D);	ff("CBEAFD", C, B, E, A, F, D);	ff("EBDAFC", E, B, D, A, F, C);
+			ff("ACEDBF", A, C, E, D, B, F);	ff("CBEDAF", C, B, E, D, A, F);	ff("EBDCAF", E, B, D, C, A, F);
+			ff("ACEDFB", A, C, E, D, F, B);	ff("CBEDFA", C, B, E, D, F, A);	ff("EBDCFA", E, B, D, C, F, A);
+			ff("ACEFBD", A, C, E, F, B, D);	ff("CBEFAD", C, B, E, F, A, D);	ff("EBDFAC", E, B, D, F, A, C);
+			ff("ACEFDB", A, C, E, F, D, B);	ff("CBEFDA", C, B, E, F, D, A);	ff("EBDFCA", E, B, D, F, C, A);
+			ff("ACFBDE", A, C, F, B, D, E);	ff("CBFADE", C, B, F, A, D, E);	ff("EBFACD", E, B, F, A, C, D);
+			ff("ACFBED", A, C, F, B, E, D);	ff("CBFAED", C, B, F, A, E, D);	ff("EBFADC", E, B, F, A, D, C);
+			ff("ACFDBE", A, C, F, D, B, E);	ff("CBFDAE", C, B, F, D, A, E);	ff("EBFCAD", E, B, F, C, A, D);
+			ff("ACFDEB", A, C, F, D, E, B);	ff("CBFDEA", C, B, F, D, E, A);	ff("EBFCDA", E, B, F, C, D, A);
+			ff("ACFEBD", A, C, F, E, B, D);	ff("CBFEAD", C, B, F, E, A, D);	ff("EBFDAC", E, B, F, D, A, C);
+			ff("ACFEDB", A, C, F, E, D, B);	ff("CBFEDA", C, B, F, E, D, A);	ff("EBFDCA", E, B, F, D, C, A);
+			ff("ADBCEF", A, D, B, C, E, F);	ff("CDABEF", C, D, A, B, E, F);	ff("ECABDF", E, C, A, B, D, F);
+			ff("ADBCFE", A, D, B, C, F, E);	ff("CDABFE", C, D, A, B, F, E);	ff("ECABFD", E, C, A, B, F, D);
+			ff("ADBECF", A, D, B, E, C, F);	ff("CDAEBF", C, D, A, E, B, F);	ff("ECADBF", E, C, A, D, B, F);
+			ff("ADBEFC", A, D, B, E, F, C);	ff("CDAEFB", C, D, A, E, F, B);	ff("ECADFB", E, C, A, D, F, B);
+			ff("ADBFCE", A, D, B, F, C, E);	ff("CDAFBE", C, D, A, F, B, E);	ff("ECAFBD", E, C, A, F, B, D);
+			ff("ADBFEC", A, D, B, F, E, C);	ff("CDAFEB", C, D, A, F, E, B);	ff("ECAFDB", E, C, A, F, D, B);
+			ff("ADCBEF", A, D, C, B, E, F);	ff("CDBAEF", C, D, B, A, E, F);	ff("ECBADF", E, C, B, A, D, F);
+			ff("ADCBFE", A, D, C, B, F, E);	ff("CDBAFE", C, D, B, A, F, E);	ff("ECBAFD", E, C, B, A, F, D);
+			ff("ADCEBF", A, D, C, E, B, F);	ff("CDBEAF", C, D, B, E, A, F);	ff("ECBDAF", E, C, B, D, A, F);
+			ff("ADCEFB", A, D, C, E, F, B);	ff("CDBEFA", C, D, B, E, F, A);	ff("ECBDFA", E, C, B, D, F, A);
+			ff("ADCFBE", A, D, C, F, B, E);	ff("CDBFAE", C, D, B, F, A, E);	ff("ECBFAD", E, C, B, F, A, D);
+			ff("ADCFEB", A, D, C, F, E, B);	ff("CDBFEA", C, D, B, F, E, A);	ff("ECBFDA", E, C, B, F, D, A);
+			ff("ADEBCF", A, D, E, B, C, F);	ff("CDEABF", C, D, E, A, B, F);	ff("ECDABF", E, C, D, A, B, F);
+			ff("ADEBFC", A, D, E, B, F, C);	ff("CDEAFB", C, D, E, A, F, B);	ff("ECDAFB", E, C, D, A, F, B);
+			ff("ADECBF", A, D, E, C, B, F);	ff("CDEBAF", C, D, E, B, A, F);	ff("ECDBAF", E, C, D, B, A, F);
+			ff("ADECFB", A, D, E, C, F, B);	ff("CDEBFA", C, D, E, B, F, A);	ff("ECDBFA", E, C, D, B, F, A);
+			ff("ADEFBC", A, D, E, F, B, C);	ff("CDEFAB", C, D, E, F, A, B);	ff("ECDFAB", E, C, D, F, A, B);
+			ff("ADEFCB", A, D, E, F, C, B);	ff("CDEFBA", C, D, E, F, B, A);	ff("ECDFBA", E, C, D, F, B, A);
+			ff("ADFBCE", A, D, F, B, C, E);	ff("CDFABE", C, D, F, A, B, E);	ff("ECFABD", E, C, F, A, B, D);
+			ff("ADFBEC", A, D, F, B, E, C);	ff("CDFAEB", C, D, F, A, E, B);	ff("ECFADB", E, C, F, A, D, B);
+			ff("ADFCBE", A, D, F, C, B, E);	ff("CDFBAE", C, D, F, B, A, E);	ff("ECFBAD", E, C, F, B, A, D);
+			ff("ADFCEB", A, D, F, C, E, B);	ff("CDFBEA", C, D, F, B, E, A);	ff("ECFBDA", E, C, F, B, D, A);
+			ff("ADFEBC", A, D, F, E, B, C);	ff("CDFEAB", C, D, F, E, A, B);	ff("ECFDAB", E, C, F, D, A, B);
+			ff("ADFECB", A, D, F, E, C, B);	ff("CDFEBA", C, D, F, E, B, A);	ff("ECFDBA", E, C, F, D, B, A);
+			ff("AEBCDF", A, E, B, C, D, F);	ff("CEABDF", C, E, A, B, D, F);	ff("EDABCF", E, D, A, B, C, F);
+			ff("AEBCFD", A, E, B, C, F, D);	ff("CEABFD", C, E, A, B, F, D);	ff("EDABFC", E, D, A, B, F, C);
+			ff("AEBDCF", A, E, B, D, C, F);	ff("CEADBF", C, E, A, D, B, F);	ff("EDACBF", E, D, A, C, B, F);
+			ff("AEBDFC", A, E, B, D, F, C);	ff("CEADFB", C, E, A, D, F, B);	ff("EDACFB", E, D, A, C, F, B);
+			ff("AEBFCD", A, E, B, F, C, D);	ff("CEAFBD", C, E, A, F, B, D);	ff("EDAFBC", E, D, A, F, B, C);
+			ff("AEBFDC", A, E, B, F, D, C);	ff("CEAFDB", C, E, A, F, D, B);	ff("EDAFCB", E, D, A, F, C, B);
+			ff("AECBDF", A, E, C, B, D, F);	ff("CEBADF", C, E, B, A, D, F);	ff("EDBACF", E, D, B, A, C, F);
+			ff("AECBFD", A, E, C, B, F, D);	ff("CEBAFD", C, E, B, A, F, D);	ff("EDBAFC", E, D, B, A, F, C);
+			ff("AECDBF", A, E, C, D, B, F);	ff("CEBDAF", C, E, B, D, A, F);	ff("EDBCAF", E, D, B, C, A, F);
+			ff("AECDFB", A, E, C, D, F, B);	ff("CEBDFA", C, E, B, D, F, A);	ff("EDBCFA", E, D, B, C, F, A);
+			ff("AECFBD", A, E, C, F, B, D);	ff("CEBFAD", C, E, B, F, A, D);	ff("EDBFAC", E, D, B, F, A, C);
+			ff("AECFDB", A, E, C, F, D, B);	ff("CEBFDA", C, E, B, F, D, A);	ff("EDBFCA", E, D, B, F, C, A);
+			ff("AEDBCF", A, E, D, B, C, F);	ff("CEDABF", C, E, D, A, B, F);	ff("EDCABF", E, D, C, A, B, F);
+			ff("AEDBFC", A, E, D, B, F, C);	ff("CEDAFB", C, E, D, A, F, B);	ff("EDCAFB", E, D, C, A, F, B);
+			ff("AEDCBF", A, E, D, C, B, F);	ff("CEDBAF", C, E, D, B, A, F);	ff("EDCBAF", E, D, C, B, A, F);
+			ff("AEDCFB", A, E, D, C, F, B);	ff("CEDBFA", C, E, D, B, F, A);	ff("EDCBFA", E, D, C, B, F, A);
+			ff("AEDFBC", A, E, D, F, B, C);	ff("CEDFAB", C, E, D, F, A, B);	ff("EDCFAB", E, D, C, F, A, B);
+			ff("AEDFCB", A, E, D, F, C, B);	ff("CEDFBA", C, E, D, F, B, A);	ff("EDCFBA", E, D, C, F, B, A);
+			ff("AEFBCD", A, E, F, B, C, D);	ff("CEFABD", C, E, F, A, B, D);	ff("EDFABC", E, D, F, A, B, C);
+			ff("AEFBDC", A, E, F, B, D, C);	ff("CEFADB", C, E, F, A, D, B);	ff("EDFACB", E, D, F, A, C, B);
+			ff("AEFCBD", A, E, F, C, B, D);	ff("CEFBAD", C, E, F, B, A, D);	ff("EDFBAC", E, D, F, B, A, C);
+			ff("AEFCDB", A, E, F, C, D, B);	ff("CEFBDA", C, E, F, B, D, A);	ff("EDFBCA", E, D, F, B, C, A);
+			ff("AEFDBC", A, E, F, D, B, C);	ff("CEFDAB", C, E, F, D, A, B);	ff("EDFCAB", E, D, F, C, A, B);
+			ff("AEFDCB", A, E, F, D, C, B);	ff("CEFDBA", C, E, F, D, B, A);	ff("EDFCBA", E, D, F, C, B, A);
+			ff("AFBCDE", A, F, B, C, D, E);	ff("CFABDE", C, F, A, B, D, E);	ff("EFABCD", E, F, A, B, C, D);
+			ff("AFBCED", A, F, B, C, E, D);	ff("CFABED", C, F, A, B, E, D);	ff("EFABDC", E, F, A, B, D, C);
+			ff("AFBDCE", A, F, B, D, C, E);	ff("CFADBE", C, F, A, D, B, E);	ff("EFACBD", E, F, A, C, B, D);
+			ff("AFBDEC", A, F, B, D, E, C);	ff("CFADEB", C, F, A, D, E, B);	ff("EFACDB", E, F, A, C, D, B);
+			ff("AFBECD", A, F, B, E, C, D);	ff("CFAEBD", C, F, A, E, B, D);	ff("EFADBC", E, F, A, D, B, C);
+			ff("AFBEDC", A, F, B, E, D, C);	ff("CFAEDB", C, F, A, E, D, B);	ff("EFADCB", E, F, A, D, C, B);
+			ff("AFCBDE", A, F, C, B, D, E);	ff("CFBADE", C, F, B, A, D, E);	ff("EFBACD", E, F, B, A, C, D);
+			ff("AFCBED", A, F, C, B, E, D);	ff("CFBAED", C, F, B, A, E, D);	ff("EFBADC", E, F, B, A, D, C);
+			ff("AFCDBE", A, F, C, D, B, E);	ff("CFBDAE", C, F, B, D, A, E);	ff("EFBCAD", E, F, B, C, A, D);
+			ff("AFCDEB", A, F, C, D, E, B);	ff("CFBDEA", C, F, B, D, E, A);	ff("EFBCDA", E, F, B, C, D, A);
+			ff("AFCEBD", A, F, C, E, B, D);	ff("CFBEAD", C, F, B, E, A, D);	ff("EFBDAC", E, F, B, D, A, C);
+			ff("AFCEDB", A, F, C, E, D, B);	ff("CFBEDA", C, F, B, E, D, A);	ff("EFBDCA", E, F, B, D, C, A);
+			ff("AFDBCE", A, F, D, B, C, E);	ff("CFDABE", C, F, D, A, B, E);	ff("EFCABD", E, F, C, A, B, D);
+			ff("AFDBEC", A, F, D, B, E, C);	ff("CFDAEB", C, F, D, A, E, B);	ff("EFCADB", E, F, C, A, D, B);
+			ff("AFDCBE", A, F, D, C, B, E);	ff("CFDBAE", C, F, D, B, A, E);	ff("EFCBAD", E, F, C, B, A, D);
+			ff("AFDCEB", A, F, D, C, E, B);	ff("CFDBEA", C, F, D, B, E, A);	ff("EFCBDA", E, F, C, B, D, A);
+			ff("AFDEBC", A, F, D, E, B, C);	ff("CFDEAB", C, F, D, E, A, B);	ff("EFCDAB", E, F, C, D, A, B);
+			ff("AFDECB", A, F, D, E, C, B);	ff("CFDEBA", C, F, D, E, B, A);	ff("EFCDBA", E, F, C, D, B, A);
+			ff("AFEBCD", A, F, E, B, C, D);	ff("CFEABD", C, F, E, A, B, D);	ff("EFDABC", E, F, D, A, B, C);
+			ff("AFEBDC", A, F, E, B, D, C);	ff("CFEADB", C, F, E, A, D, B);	ff("EFDACB", E, F, D, A, C, B);
+			ff("AFECBD", A, F, E, C, B, D);	ff("CFEBAD", C, F, E, B, A, D);	ff("EFDBAC", E, F, D, B, A, C);
+			ff("AFECDB", A, F, E, C, D, B);	ff("CFEBDA", C, F, E, B, D, A);	ff("EFDBCA", E, F, D, B, C, A);
+			ff("AFEDBC", A, F, E, D, B, C);	ff("CFEDAB", C, F, E, D, A, B);	ff("EFDCAB", E, F, D, C, A, B);
+			ff("AFEDCB", A, F, E, D, C, B);	ff("CFEDBA", C, F, E, D, B, A);	ff("EFDCBA", E, F, D, C, B, A);
 
-			ff("BACDEF", B, A, C, D, E, F, S);	ff("DABCEF", D, A, B, C, E, F, S);	ff("FABCDE", F, A, B, C, D, E, S);
-			ff("BACDFE", B, A, C, D, F, E, S);	ff("DABCFE", D, A, B, C, F, E, S);	ff("FABCED", F, A, B, C, E, D, S);
-			ff("BACEDF", B, A, C, E, D, F, S);	ff("DABECF", D, A, B, E, C, F, S);	ff("FABDCE", F, A, B, D, C, E, S);
-			ff("BACEFD", B, A, C, E, F, D, S);	ff("DABEFC", D, A, B, E, F, C, S);	ff("FABDEC", F, A, B, D, E, C, S);
-			ff("BACFDE", B, A, C, F, D, E, S);	ff("DABFCE", D, A, B, F, C, E, S);	ff("FABECD", F, A, B, E, C, D, S);
-			ff("BACFED", B, A, C, F, E, D, S);	ff("DABFEC", D, A, B, F, E, C, S);	ff("FABEDC", F, A, B, E, D, C, S);
-			ff("BADCEF", B, A, D, C, E, F, S);	ff("DACBEF", D, A, C, B, E, F, S);	ff("FACBDE", F, A, C, B, D, E, S);
-			ff("BADCFE", B, A, D, C, F, E, S);	ff("DACBFE", D, A, C, B, F, E, S);	ff("FACBED", F, A, C, B, E, D, S);
-			ff("BADECF", B, A, D, E, C, F, S);	ff("DACEBF", D, A, C, E, B, F, S);	ff("FACDBE", F, A, C, D, B, E, S);
-			ff("BADEFC", B, A, D, E, F, C, S);	ff("DACEFB", D, A, C, E, F, B, S);	ff("FACDEB", F, A, C, D, E, B, S);
-			ff("BADFCE", B, A, D, F, C, E, S);	ff("DACFBE", D, A, C, F, B, E, S);	ff("FACEBD", F, A, C, E, B, D, S);
-			ff("BADFEC", B, A, D, F, E, C, S);	ff("DACFEB", D, A, C, F, E, B, S);	ff("FACEDB", F, A, C, E, D, B, S);
-			ff("BAECDF", B, A, E, C, D, F, S);	ff("DAEBCF", D, A, E, B, C, F, S);	ff("FADBCE", F, A, D, B, C, E, S);
-			ff("BAECFD", B, A, E, C, F, D, S);	ff("DAEBFC", D, A, E, B, F, C, S);	ff("FADBEC", F, A, D, B, E, C, S);
-			ff("BAEDCF", B, A, E, D, C, F, S);	ff("DAECBF", D, A, E, C, B, F, S);	ff("FADCBE", F, A, D, C, B, E, S);
-			ff("BAEDFC", B, A, E, D, F, C, S);	ff("DAECFB", D, A, E, C, F, B, S);	ff("FADCEB", F, A, D, C, E, B, S);
-			ff("BAEFCD", B, A, E, F, C, D, S);	ff("DAEFBC", D, A, E, F, B, C, S);	ff("FADEBC", F, A, D, E, B, C, S);
-			ff("BAEFDC", B, A, E, F, D, C, S);	ff("DAEFCB", D, A, E, F, C, B, S);	ff("FADECB", F, A, D, E, C, B, S);
-			ff("BAFCDE", B, A, F, C, D, E, S);	ff("DAFBCE", D, A, F, B, C, E, S);	ff("FAEBCD", F, A, E, B, C, D, S);
-			ff("BAFCED", B, A, F, C, E, D, S);	ff("DAFBEC", D, A, F, B, E, C, S);	ff("FAEBDC", F, A, E, B, D, C, S);
-			ff("BAFDCE", B, A, F, D, C, E, S);	ff("DAFCBE", D, A, F, C, B, E, S);	ff("FAECBD", F, A, E, C, B, D, S);
-			ff("BAFDEC", B, A, F, D, E, C, S);	ff("DAFCEB", D, A, F, C, E, B, S);	ff("FAECDB", F, A, E, C, D, B, S);
-			ff("BAFECD", B, A, F, E, C, D, S);	ff("DAFEBC", D, A, F, E, B, C, S);	ff("FAEDBC", F, A, E, D, B, C, S);
-			ff("BAFEDC", B, A, F, E, D, C, S);	ff("DAFECB", D, A, F, E, C, B, S);	ff("FAEDCB", F, A, E, D, C, B, S);
-			ff("BCADEF", B, C, A, D, E, F, S);	ff("DBACEF", D, B, A, C, E, F, S);	ff("FBACDE", F, B, A, C, D, E, S);
-			ff("BCADFE", B, C, A, D, F, E, S);	ff("DBACFE", D, B, A, C, F, E, S);	ff("FBACED", F, B, A, C, E, D, S);
-			ff("BCAEDF", B, C, A, E, D, F, S);	ff("DBAECF", D, B, A, E, C, F, S);	ff("FBADCE", F, B, A, D, C, E, S);
-			ff("BCAEFD", B, C, A, E, F, D, S);	ff("DBAEFC", D, B, A, E, F, C, S);	ff("FBADEC", F, B, A, D, E, C, S);
-			ff("BCAFDE", B, C, A, F, D, E, S);	ff("DBAFCE", D, B, A, F, C, E, S);	ff("FBAECD", F, B, A, E, C, D, S);
-			ff("BCAFED", B, C, A, F, E, D, S);	ff("DBAFEC", D, B, A, F, E, C, S);	ff("FBAEDC", F, B, A, E, D, C, S);
-			ff("BCDAEF", B, C, D, A, E, F, S);	ff("DBCAEF", D, B, C, A, E, F, S);	ff("FBCADE", F, B, C, A, D, E, S);
-			ff("BCDAFE", B, C, D, A, F, E, S);	ff("DBCAFE", D, B, C, A, F, E, S);	ff("FBCAED", F, B, C, A, E, D, S);
-			ff("BCDEAF", B, C, D, E, A, F, S);	ff("DBCEAF", D, B, C, E, A, F, S);	ff("FBCDAE", F, B, C, D, A, E, S);
-			ff("BCDEFA", B, C, D, E, F, A, S);	ff("DBCEFA", D, B, C, E, F, A, S);	ff("FBCDEA", F, B, C, D, E, A, S);
-			ff("BCDFAE", B, C, D, F, A, E, S);	ff("DBCFAE", D, B, C, F, A, E, S);	ff("FBCEAD", F, B, C, E, A, D, S);
-			ff("BCDFEA", B, C, D, F, E, A, S);	ff("DBCFEA", D, B, C, F, E, A, S);	ff("FBCEDA", F, B, C, E, D, A, S);
-			ff("BCEADF", B, C, E, A, D, F, S);	ff("DBEACF", D, B, E, A, C, F, S);	ff("FBDACE", F, B, D, A, C, E, S);
-			ff("BCEAFD", B, C, E, A, F, D, S);	ff("DBEAFC", D, B, E, A, F, C, S);	ff("FBDAEC", F, B, D, A, E, C, S);
-			ff("BCEDAF", B, C, E, D, A, F, S);	ff("DBECAF", D, B, E, C, A, F, S);	ff("FBDCAE", F, B, D, C, A, E, S);
-			ff("BCEDFA", B, C, E, D, F, A, S);	ff("DBECFA", D, B, E, C, F, A, S);	ff("FBDCEA", F, B, D, C, E, A, S);
-			ff("BCEFAD", B, C, E, F, A, D, S);	ff("DBEFAC", D, B, E, F, A, C, S);	ff("FBDEAC", F, B, D, E, A, C, S);
-			ff("BCEFDA", B, C, E, F, D, A, S);	ff("DBEFCA", D, B, E, F, C, A, S);	ff("FBDECA", F, B, D, E, C, A, S);
-			ff("BCFADE", B, C, F, A, D, E, S);	ff("DBFACE", D, B, F, A, C, E, S);	ff("FBEACD", F, B, E, A, C, D, S);
-			ff("BCFAED", B, C, F, A, E, D, S);	ff("DBFAEC", D, B, F, A, E, C, S);	ff("FBEADC", F, B, E, A, D, C, S);
-			ff("BCFDAE", B, C, F, D, A, E, S);	ff("DBFCAE", D, B, F, C, A, E, S);	ff("FBECAD", F, B, E, C, A, D, S);
-			ff("BCFDEA", B, C, F, D, E, A, S);	ff("DBFCEA", D, B, F, C, E, A, S);	ff("FBECDA", F, B, E, C, D, A, S);
-			ff("BCFEAD", B, C, F, E, A, D, S);	ff("DBFEAC", D, B, F, E, A, C, S);	ff("FBEDAC", F, B, E, D, A, C, S);
-			ff("BCFEDA", B, C, F, E, D, A, S);	ff("DBFECA", D, B, F, E, C, A, S);	ff("FBEDCA", F, B, E, D, C, A, S);
-			ff("BDACEF", B, D, A, C, E, F, S);	ff("DCABEF", D, C, A, B, E, F, S);	ff("FCABDE", F, C, A, B, D, E, S);
-			ff("BDACFE", B, D, A, C, F, E, S);	ff("DCABFE", D, C, A, B, F, E, S);	ff("FCABED", F, C, A, B, E, D, S);
-			ff("BDAECF", B, D, A, E, C, F, S);	ff("DCAEBF", D, C, A, E, B, F, S);	ff("FCADBE", F, C, A, D, B, E, S);
-			ff("BDAEFC", B, D, A, E, F, C, S);	ff("DCAEFB", D, C, A, E, F, B, S);	ff("FCADEB", F, C, A, D, E, B, S);
-			ff("BDAFCE", B, D, A, F, C, E, S);	ff("DCAFBE", D, C, A, F, B, E, S);	ff("FCAEBD", F, C, A, E, B, D, S);
-			ff("BDAFEC", B, D, A, F, E, C, S);	ff("DCAFEB", D, C, A, F, E, B, S);	ff("FCAEDB", F, C, A, E, D, B, S);
-			ff("BDCAEF", B, D, C, A, E, F, S);	ff("DCBAEF", D, C, B, A, E, F, S);	ff("FCBADE", F, C, B, A, D, E, S);
-			ff("BDCAFE", B, D, C, A, F, E, S);	ff("DCBAFE", D, C, B, A, F, E, S);	ff("FCBAED", F, C, B, A, E, D, S);
-			ff("BDCEAF", B, D, C, E, A, F, S);	ff("DCBEAF", D, C, B, E, A, F, S);	ff("FCBDAE", F, C, B, D, A, E, S);
-			ff("BDCEFA", B, D, C, E, F, A, S);	ff("DCBEFA", D, C, B, E, F, A, S);	ff("FCBDEA", F, C, B, D, E, A, S);
-			ff("BDCFAE", B, D, C, F, A, E, S);	ff("DCBFAE", D, C, B, F, A, E, S);	ff("FCBEAD", F, C, B, E, A, D, S);
-			ff("BDCFEA", B, D, C, F, E, A, S);	ff("DCBFEA", D, C, B, F, E, A, S);	ff("FCBEDA", F, C, B, E, D, A, S);
-			ff("BDEACF", B, D, E, A, C, F, S);	ff("DCEABF", D, C, E, A, B, F, S);	ff("FCDABE", F, C, D, A, B, E, S);
-			ff("BDEAFC", B, D, E, A, F, C, S);	ff("DCEAFB", D, C, E, A, F, B, S);	ff("FCDAEB", F, C, D, A, E, B, S);
-			ff("BDECAF", B, D, E, C, A, F, S);	ff("DCEBAF", D, C, E, B, A, F, S);	ff("FCDBAE", F, C, D, B, A, E, S);
-			ff("BDECFA", B, D, E, C, F, A, S);	ff("DCEBFA", D, C, E, B, F, A, S);	ff("FCDBEA", F, C, D, B, E, A, S);
-			ff("BDEFAC", B, D, E, F, A, C, S);	ff("DCEFAB", D, C, E, F, A, B, S);	ff("FCDEAB", F, C, D, E, A, B, S);
-			ff("BDEFCA", B, D, E, F, C, A, S);	ff("DCEFBA", D, C, E, F, B, A, S);	ff("FCDEBA", F, C, D, E, B, A, S);
-			ff("BDFACE", B, D, F, A, C, E, S);	ff("DCFABE", D, C, F, A, B, E, S);	ff("FCEABD", F, C, E, A, B, D, S);
-			ff("BDFAEC", B, D, F, A, E, C, S);	ff("DCFAEB", D, C, F, A, E, B, S);	ff("FCEADB", F, C, E, A, D, B, S);
-			ff("BDFCAE", B, D, F, C, A, E, S);	ff("DCFBAE", D, C, F, B, A, E, S);	ff("FCEBAD", F, C, E, B, A, D, S);
-			ff("BDFCEA", B, D, F, C, E, A, S);	ff("DCFBEA", D, C, F, B, E, A, S);	ff("FCEBDA", F, C, E, B, D, A, S);
-			ff("BDFEAC", B, D, F, E, A, C, S);	ff("DCFEAB", D, C, F, E, A, B, S);	ff("FCEDAB", F, C, E, D, A, B, S);
-			ff("BDFECA", B, D, F, E, C, A, S);	ff("DCFEBA", D, C, F, E, B, A, S);	ff("FCEDBA", F, C, E, D, B, A, S);
-			ff("BEACDF", B, E, A, C, D, F, S);	ff("DEABCF", D, E, A, B, C, F, S);	ff("FDABCE", F, D, A, B, C, E, S);
-			ff("BEACFD", B, E, A, C, F, D, S);	ff("DEABFC", D, E, A, B, F, C, S);	ff("FDABEC", F, D, A, B, E, C, S);
-			ff("BEADCF", B, E, A, D, C, F, S);	ff("DEACBF", D, E, A, C, B, F, S);	ff("FDACBE", F, D, A, C, B, E, S);
-			ff("BEADFC", B, E, A, D, F, C, S);	ff("DEACFB", D, E, A, C, F, B, S);	ff("FDACEB", F, D, A, C, E, B, S);
-			ff("BEAFCD", B, E, A, F, C, D, S);	ff("DEAFBC", D, E, A, F, B, C, S);	ff("FDAEBC", F, D, A, E, B, C, S);
-			ff("BEAFDC", B, E, A, F, D, C, S);	ff("DEAFCB", D, E, A, F, C, B, S);	ff("FDAECB", F, D, A, E, C, B, S);
-			ff("BECADF", B, E, C, A, D, F, S);	ff("DEBACF", D, E, B, A, C, F, S);	ff("FDBACE", F, D, B, A, C, E, S);
-			ff("BECAFD", B, E, C, A, F, D, S);	ff("DEBAFC", D, E, B, A, F, C, S);	ff("FDBAEC", F, D, B, A, E, C, S);
-			ff("BECDAF", B, E, C, D, A, F, S);	ff("DEBCAF", D, E, B, C, A, F, S);	ff("FDBCAE", F, D, B, C, A, E, S);
-			ff("BECDFA", B, E, C, D, F, A, S);	ff("DEBCFA", D, E, B, C, F, A, S);	ff("FDBCEA", F, D, B, C, E, A, S);
-			ff("BECFAD", B, E, C, F, A, D, S);	ff("DEBFAC", D, E, B, F, A, C, S);	ff("FDBEAC", F, D, B, E, A, C, S);
-			ff("BECFDA", B, E, C, F, D, A, S);	ff("DEBFCA", D, E, B, F, C, A, S);	ff("FDBECA", F, D, B, E, C, A, S);
-			ff("BEDACF", B, E, D, A, C, F, S);	ff("DECABF", D, E, C, A, B, F, S);	ff("FDCABE", F, D, C, A, B, E, S);
-			ff("BEDAFC", B, E, D, A, F, C, S);	ff("DECAFB", D, E, C, A, F, B, S);	ff("FDCAEB", F, D, C, A, E, B, S);
-			ff("BEDCAF", B, E, D, C, A, F, S);	ff("DECBAF", D, E, C, B, A, F, S);	ff("FDCBAE", F, D, C, B, A, E, S);
-			ff("BEDCFA", B, E, D, C, F, A, S);	ff("DECBFA", D, E, C, B, F, A, S);	ff("FDCBEA", F, D, C, B, E, A, S);
-			ff("BEDFAC", B, E, D, F, A, C, S);	ff("DECFAB", D, E, C, F, A, B, S);	ff("FDCEAB", F, D, C, E, A, B, S);
-			ff("BEDFCA", B, E, D, F, C, A, S);	ff("DECFBA", D, E, C, F, B, A, S);	ff("FDCEBA", F, D, C, E, B, A, S);
-			ff("BEFACD", B, E, F, A, C, D, S);	ff("DEFABC", D, E, F, A, B, C, S);	ff("FDEABC", F, D, E, A, B, C, S);
-			ff("BEFADC", B, E, F, A, D, C, S);	ff("DEFACB", D, E, F, A, C, B, S);	ff("FDEACB", F, D, E, A, C, B, S);
-			ff("BEFCAD", B, E, F, C, A, D, S);	ff("DEFBAC", D, E, F, B, A, C, S);	ff("FDEBAC", F, D, E, B, A, C, S);
-			ff("BEFCDA", B, E, F, C, D, A, S);	ff("DEFBCA", D, E, F, B, C, A, S);	ff("FDEBCA", F, D, E, B, C, A, S);
-			ff("BEFDAC", B, E, F, D, A, C, S);	ff("DEFCAB", D, E, F, C, A, B, S);	ff("FDECAB", F, D, E, C, A, B, S);
-			ff("BEFDCA", B, E, F, D, C, A, S);	ff("DEFCBA", D, E, F, C, B, A, S);	ff("FDECBA", F, D, E, C, B, A, S);
-			ff("BFACDE", B, F, A, C, D, E, S);	ff("DFABCE", D, F, A, B, C, E, S);	ff("FEABCD", F, E, A, B, C, D, S);
-			ff("BFACED", B, F, A, C, E, D, S);	ff("DFABEC", D, F, A, B, E, C, S);	ff("FEABDC", F, E, A, B, D, C, S);
-			ff("BFADCE", B, F, A, D, C, E, S);	ff("DFACBE", D, F, A, C, B, E, S);	ff("FEACBD", F, E, A, C, B, D, S);
-			ff("BFADEC", B, F, A, D, E, C, S);	ff("DFACEB", D, F, A, C, E, B, S);	ff("FEACDB", F, E, A, C, D, B, S);
-			ff("BFAECD", B, F, A, E, C, D, S);	ff("DFAEBC", D, F, A, E, B, C, S);	ff("FEADBC", F, E, A, D, B, C, S);
-			ff("BFAEDC", B, F, A, E, D, C, S);	ff("DFAECB", D, F, A, E, C, B, S);	ff("FEADCB", F, E, A, D, C, B, S);
-			ff("BFCADE", B, F, C, A, D, E, S);	ff("DFBACE", D, F, B, A, C, E, S);	ff("FEBACD", F, E, B, A, C, D, S);
-			ff("BFCAED", B, F, C, A, E, D, S);	ff("DFBAEC", D, F, B, A, E, C, S);	ff("FEBADC", F, E, B, A, D, C, S);
-			ff("BFCDAE", B, F, C, D, A, E, S);	ff("DFBCAE", D, F, B, C, A, E, S);	ff("FEBCAD", F, E, B, C, A, D, S);
-			ff("BFCDEA", B, F, C, D, E, A, S);	ff("DFBCEA", D, F, B, C, E, A, S);	ff("FEBCDA", F, E, B, C, D, A, S);
-			ff("BFCEAD", B, F, C, E, A, D, S);	ff("DFBEAC", D, F, B, E, A, C, S);	ff("FEBDAC", F, E, B, D, A, C, S);
-			ff("BFCEDA", B, F, C, E, D, A, S);	ff("DFBECA", D, F, B, E, C, A, S);	ff("FEBDCA", F, E, B, D, C, A, S);
-			ff("BFDACE", B, F, D, A, C, E, S);	ff("DFCABE", D, F, C, A, B, E, S);	ff("FECABD", F, E, C, A, B, D, S);
-			ff("BFDAEC", B, F, D, A, E, C, S);	ff("DFCAEB", D, F, C, A, E, B, S);	ff("FECADB", F, E, C, A, D, B, S);
-			ff("BFDCAE", B, F, D, C, A, E, S);	ff("DFCBAE", D, F, C, B, A, E, S);	ff("FECBAD", F, E, C, B, A, D, S);
-			ff("BFDCEA", B, F, D, C, E, A, S);	ff("DFCBEA", D, F, C, B, E, A, S);	ff("FECBDA", F, E, C, B, D, A, S);
-			ff("BFDEAC", B, F, D, E, A, C, S);	ff("DFCEAB", D, F, C, E, A, B, S);	ff("FECDAB", F, E, C, D, A, B, S);
-			ff("BFDECA", B, F, D, E, C, A, S);	ff("DFCEBA", D, F, C, E, B, A, S);	ff("FECDBA", F, E, C, D, B, A, S);
-			ff("BFEACD", B, F, E, A, C, D, S);	ff("DFEABC", D, F, E, A, B, C, S);	ff("FEDABC", F, E, D, A, B, C, S);
-			ff("BFEADC", B, F, E, A, D, C, S);	ff("DFEACB", D, F, E, A, C, B, S);	ff("FEDACB", F, E, D, A, C, B, S);
-			ff("BFECAD", B, F, E, C, A, D, S);	ff("DFEBAC", D, F, E, B, A, C, S);	ff("FEDBAC", F, E, D, B, A, C, S);
-			ff("BFECDA", B, F, E, C, D, A, S);	ff("DFEBCA", D, F, E, B, C, A, S);	ff("FEDBCA", F, E, D, B, C, A, S);
-			ff("BFEDAC", B, F, E, D, A, C, S);	ff("DFECAB", D, F, E, C, A, B, S);	ff("FEDCAB", F, E, D, C, A, B, S);
-			ff("BFEDCA", B, F, E, D, C, A, S);	ff("DFECBA", D, F, E, C, B, A, S);	ff("FEDCBA", F, E, D, C, B, A, S);
+			ff("BACDEF", B, A, C, D, E, F);	ff("DABCEF", D, A, B, C, E, F);	ff("FABCDE", F, A, B, C, D, E);
+			ff("BACDFE", B, A, C, D, F, E);	ff("DABCFE", D, A, B, C, F, E);	ff("FABCED", F, A, B, C, E, D);
+			ff("BACEDF", B, A, C, E, D, F);	ff("DABECF", D, A, B, E, C, F);	ff("FABDCE", F, A, B, D, C, E);
+			ff("BACEFD", B, A, C, E, F, D);	ff("DABEFC", D, A, B, E, F, C);	ff("FABDEC", F, A, B, D, E, C);
+			ff("BACFDE", B, A, C, F, D, E);	ff("DABFCE", D, A, B, F, C, E);	ff("FABECD", F, A, B, E, C, D);
+			ff("BACFED", B, A, C, F, E, D);	ff("DABFEC", D, A, B, F, E, C);	ff("FABEDC", F, A, B, E, D, C);
+			ff("BADCEF", B, A, D, C, E, F);	ff("DACBEF", D, A, C, B, E, F);	ff("FACBDE", F, A, C, B, D, E);
+			ff("BADCFE", B, A, D, C, F, E);	ff("DACBFE", D, A, C, B, F, E);	ff("FACBED", F, A, C, B, E, D);
+			ff("BADECF", B, A, D, E, C, F);	ff("DACEBF", D, A, C, E, B, F);	ff("FACDBE", F, A, C, D, B, E);
+			ff("BADEFC", B, A, D, E, F, C);	ff("DACEFB", D, A, C, E, F, B);	ff("FACDEB", F, A, C, D, E, B);
+			ff("BADFCE", B, A, D, F, C, E);	ff("DACFBE", D, A, C, F, B, E);	ff("FACEBD", F, A, C, E, B, D);
+			ff("BADFEC", B, A, D, F, E, C);	ff("DACFEB", D, A, C, F, E, B);	ff("FACEDB", F, A, C, E, D, B);
+			ff("BAECDF", B, A, E, C, D, F);	ff("DAEBCF", D, A, E, B, C, F);	ff("FADBCE", F, A, D, B, C, E);
+			ff("BAECFD", B, A, E, C, F, D);	ff("DAEBFC", D, A, E, B, F, C);	ff("FADBEC", F, A, D, B, E, C);
+			ff("BAEDCF", B, A, E, D, C, F);	ff("DAECBF", D, A, E, C, B, F);	ff("FADCBE", F, A, D, C, B, E);
+			ff("BAEDFC", B, A, E, D, F, C);	ff("DAECFB", D, A, E, C, F, B);	ff("FADCEB", F, A, D, C, E, B);
+			ff("BAEFCD", B, A, E, F, C, D);	ff("DAEFBC", D, A, E, F, B, C);	ff("FADEBC", F, A, D, E, B, C);
+			ff("BAEFDC", B, A, E, F, D, C);	ff("DAEFCB", D, A, E, F, C, B);	ff("FADECB", F, A, D, E, C, B);
+			ff("BAFCDE", B, A, F, C, D, E);	ff("DAFBCE", D, A, F, B, C, E);	ff("FAEBCD", F, A, E, B, C, D);
+			ff("BAFCED", B, A, F, C, E, D);	ff("DAFBEC", D, A, F, B, E, C);	ff("FAEBDC", F, A, E, B, D, C);
+			ff("BAFDCE", B, A, F, D, C, E);	ff("DAFCBE", D, A, F, C, B, E);	ff("FAECBD", F, A, E, C, B, D);
+			ff("BAFDEC", B, A, F, D, E, C);	ff("DAFCEB", D, A, F, C, E, B);	ff("FAECDB", F, A, E, C, D, B);
+			ff("BAFECD", B, A, F, E, C, D);	ff("DAFEBC", D, A, F, E, B, C);	ff("FAEDBC", F, A, E, D, B, C);
+			ff("BAFEDC", B, A, F, E, D, C);	ff("DAFECB", D, A, F, E, C, B);	ff("FAEDCB", F, A, E, D, C, B);
+			ff("BCADEF", B, C, A, D, E, F);	ff("DBACEF", D, B, A, C, E, F);	ff("FBACDE", F, B, A, C, D, E);
+			ff("BCADFE", B, C, A, D, F, E);	ff("DBACFE", D, B, A, C, F, E);	ff("FBACED", F, B, A, C, E, D);
+			ff("BCAEDF", B, C, A, E, D, F);	ff("DBAECF", D, B, A, E, C, F);	ff("FBADCE", F, B, A, D, C, E);
+			ff("BCAEFD", B, C, A, E, F, D);	ff("DBAEFC", D, B, A, E, F, C);	ff("FBADEC", F, B, A, D, E, C);
+			ff("BCAFDE", B, C, A, F, D, E);	ff("DBAFCE", D, B, A, F, C, E);	ff("FBAECD", F, B, A, E, C, D);
+			ff("BCAFED", B, C, A, F, E, D);	ff("DBAFEC", D, B, A, F, E, C);	ff("FBAEDC", F, B, A, E, D, C);
+			ff("BCDAEF", B, C, D, A, E, F);	ff("DBCAEF", D, B, C, A, E, F);	ff("FBCADE", F, B, C, A, D, E);
+			ff("BCDAFE", B, C, D, A, F, E);	ff("DBCAFE", D, B, C, A, F, E);	ff("FBCAED", F, B, C, A, E, D);
+			ff("BCDEAF", B, C, D, E, A, F);	ff("DBCEAF", D, B, C, E, A, F);	ff("FBCDAE", F, B, C, D, A, E);
+			ff("BCDEFA", B, C, D, E, F, A);	ff("DBCEFA", D, B, C, E, F, A);	ff("FBCDEA", F, B, C, D, E, A);
+			ff("BCDFAE", B, C, D, F, A, E);	ff("DBCFAE", D, B, C, F, A, E);	ff("FBCEAD", F, B, C, E, A, D);
+			ff("BCDFEA", B, C, D, F, E, A);	ff("DBCFEA", D, B, C, F, E, A);	ff("FBCEDA", F, B, C, E, D, A);
+			ff("BCEADF", B, C, E, A, D, F);	ff("DBEACF", D, B, E, A, C, F);	ff("FBDACE", F, B, D, A, C, E);
+			ff("BCEAFD", B, C, E, A, F, D);	ff("DBEAFC", D, B, E, A, F, C);	ff("FBDAEC", F, B, D, A, E, C);
+			ff("BCEDAF", B, C, E, D, A, F);	ff("DBECAF", D, B, E, C, A, F);	ff("FBDCAE", F, B, D, C, A, E);
+			ff("BCEDFA", B, C, E, D, F, A);	ff("DBECFA", D, B, E, C, F, A);	ff("FBDCEA", F, B, D, C, E, A);
+			ff("BCEFAD", B, C, E, F, A, D);	ff("DBEFAC", D, B, E, F, A, C);	ff("FBDEAC", F, B, D, E, A, C);
+			ff("BCEFDA", B, C, E, F, D, A);	ff("DBEFCA", D, B, E, F, C, A);	ff("FBDECA", F, B, D, E, C, A);
+			ff("BCFADE", B, C, F, A, D, E);	ff("DBFACE", D, B, F, A, C, E);	ff("FBEACD", F, B, E, A, C, D);
+			ff("BCFAED", B, C, F, A, E, D);	ff("DBFAEC", D, B, F, A, E, C);	ff("FBEADC", F, B, E, A, D, C);
+			ff("BCFDAE", B, C, F, D, A, E);	ff("DBFCAE", D, B, F, C, A, E);	ff("FBECAD", F, B, E, C, A, D);
+			ff("BCFDEA", B, C, F, D, E, A);	ff("DBFCEA", D, B, F, C, E, A);	ff("FBECDA", F, B, E, C, D, A);
+			ff("BCFEAD", B, C, F, E, A, D);	ff("DBFEAC", D, B, F, E, A, C);	ff("FBEDAC", F, B, E, D, A, C);
+			ff("BCFEDA", B, C, F, E, D, A);	ff("DBFECA", D, B, F, E, C, A);	ff("FBEDCA", F, B, E, D, C, A);
+			ff("BDACEF", B, D, A, C, E, F);	ff("DCABEF", D, C, A, B, E, F);	ff("FCABDE", F, C, A, B, D, E);
+			ff("BDACFE", B, D, A, C, F, E);	ff("DCABFE", D, C, A, B, F, E);	ff("FCABED", F, C, A, B, E, D);
+			ff("BDAECF", B, D, A, E, C, F);	ff("DCAEBF", D, C, A, E, B, F);	ff("FCADBE", F, C, A, D, B, E);
+			ff("BDAEFC", B, D, A, E, F, C);	ff("DCAEFB", D, C, A, E, F, B);	ff("FCADEB", F, C, A, D, E, B);
+			ff("BDAFCE", B, D, A, F, C, E);	ff("DCAFBE", D, C, A, F, B, E);	ff("FCAEBD", F, C, A, E, B, D);
+			ff("BDAFEC", B, D, A, F, E, C);	ff("DCAFEB", D, C, A, F, E, B);	ff("FCAEDB", F, C, A, E, D, B);
+			ff("BDCAEF", B, D, C, A, E, F);	ff("DCBAEF", D, C, B, A, E, F);	ff("FCBADE", F, C, B, A, D, E);
+			ff("BDCAFE", B, D, C, A, F, E);	ff("DCBAFE", D, C, B, A, F, E);	ff("FCBAED", F, C, B, A, E, D);
+			ff("BDCEAF", B, D, C, E, A, F);	ff("DCBEAF", D, C, B, E, A, F);	ff("FCBDAE", F, C, B, D, A, E);
+			ff("BDCEFA", B, D, C, E, F, A);	ff("DCBEFA", D, C, B, E, F, A);	ff("FCBDEA", F, C, B, D, E, A);
+			ff("BDCFAE", B, D, C, F, A, E);	ff("DCBFAE", D, C, B, F, A, E);	ff("FCBEAD", F, C, B, E, A, D);
+			ff("BDCFEA", B, D, C, F, E, A);	ff("DCBFEA", D, C, B, F, E, A);	ff("FCBEDA", F, C, B, E, D, A);
+			ff("BDEACF", B, D, E, A, C, F);	ff("DCEABF", D, C, E, A, B, F);	ff("FCDABE", F, C, D, A, B, E);
+			ff("BDEAFC", B, D, E, A, F, C);	ff("DCEAFB", D, C, E, A, F, B);	ff("FCDAEB", F, C, D, A, E, B);
+			ff("BDECAF", B, D, E, C, A, F);	ff("DCEBAF", D, C, E, B, A, F);	ff("FCDBAE", F, C, D, B, A, E);
+			ff("BDECFA", B, D, E, C, F, A);	ff("DCEBFA", D, C, E, B, F, A);	ff("FCDBEA", F, C, D, B, E, A);
+			ff("BDEFAC", B, D, E, F, A, C);	ff("DCEFAB", D, C, E, F, A, B);	ff("FCDEAB", F, C, D, E, A, B);
+			ff("BDEFCA", B, D, E, F, C, A);	ff("DCEFBA", D, C, E, F, B, A);	ff("FCDEBA", F, C, D, E, B, A);
+			ff("BDFACE", B, D, F, A, C, E);	ff("DCFABE", D, C, F, A, B, E);	ff("FCEABD", F, C, E, A, B, D);
+			ff("BDFAEC", B, D, F, A, E, C);	ff("DCFAEB", D, C, F, A, E, B);	ff("FCEADB", F, C, E, A, D, B);
+			ff("BDFCAE", B, D, F, C, A, E);	ff("DCFBAE", D, C, F, B, A, E);	ff("FCEBAD", F, C, E, B, A, D);
+			ff("BDFCEA", B, D, F, C, E, A);	ff("DCFBEA", D, C, F, B, E, A);	ff("FCEBDA", F, C, E, B, D, A);
+			ff("BDFEAC", B, D, F, E, A, C);	ff("DCFEAB", D, C, F, E, A, B);	ff("FCEDAB", F, C, E, D, A, B);
+			ff("BDFECA", B, D, F, E, C, A);	ff("DCFEBA", D, C, F, E, B, A);	ff("FCEDBA", F, C, E, D, B, A);
+			ff("BEACDF", B, E, A, C, D, F);	ff("DEABCF", D, E, A, B, C, F);	ff("FDABCE", F, D, A, B, C, E);
+			ff("BEACFD", B, E, A, C, F, D);	ff("DEABFC", D, E, A, B, F, C);	ff("FDABEC", F, D, A, B, E, C);
+			ff("BEADCF", B, E, A, D, C, F);	ff("DEACBF", D, E, A, C, B, F);	ff("FDACBE", F, D, A, C, B, E);
+			ff("BEADFC", B, E, A, D, F, C);	ff("DEACFB", D, E, A, C, F, B);	ff("FDACEB", F, D, A, C, E, B);
+			ff("BEAFCD", B, E, A, F, C, D);	ff("DEAFBC", D, E, A, F, B, C);	ff("FDAEBC", F, D, A, E, B, C);
+			ff("BEAFDC", B, E, A, F, D, C);	ff("DEAFCB", D, E, A, F, C, B);	ff("FDAECB", F, D, A, E, C, B);
+			ff("BECADF", B, E, C, A, D, F);	ff("DEBACF", D, E, B, A, C, F);	ff("FDBACE", F, D, B, A, C, E);
+			ff("BECAFD", B, E, C, A, F, D);	ff("DEBAFC", D, E, B, A, F, C);	ff("FDBAEC", F, D, B, A, E, C);
+			ff("BECDAF", B, E, C, D, A, F);	ff("DEBCAF", D, E, B, C, A, F);	ff("FDBCAE", F, D, B, C, A, E);
+			ff("BECDFA", B, E, C, D, F, A);	ff("DEBCFA", D, E, B, C, F, A);	ff("FDBCEA", F, D, B, C, E, A);
+			ff("BECFAD", B, E, C, F, A, D);	ff("DEBFAC", D, E, B, F, A, C);	ff("FDBEAC", F, D, B, E, A, C);
+			ff("BECFDA", B, E, C, F, D, A);	ff("DEBFCA", D, E, B, F, C, A);	ff("FDBECA", F, D, B, E, C, A);
+			ff("BEDACF", B, E, D, A, C, F);	ff("DECABF", D, E, C, A, B, F);	ff("FDCABE", F, D, C, A, B, E);
+			ff("BEDAFC", B, E, D, A, F, C);	ff("DECAFB", D, E, C, A, F, B);	ff("FDCAEB", F, D, C, A, E, B);
+			ff("BEDCAF", B, E, D, C, A, F);	ff("DECBAF", D, E, C, B, A, F);	ff("FDCBAE", F, D, C, B, A, E);
+			ff("BEDCFA", B, E, D, C, F, A);	ff("DECBFA", D, E, C, B, F, A);	ff("FDCBEA", F, D, C, B, E, A);
+			ff("BEDFAC", B, E, D, F, A, C);	ff("DECFAB", D, E, C, F, A, B);	ff("FDCEAB", F, D, C, E, A, B);
+			ff("BEDFCA", B, E, D, F, C, A);	ff("DECFBA", D, E, C, F, B, A);	ff("FDCEBA", F, D, C, E, B, A);
+			ff("BEFACD", B, E, F, A, C, D);	ff("DEFABC", D, E, F, A, B, C);	ff("FDEABC", F, D, E, A, B, C);
+			ff("BEFADC", B, E, F, A, D, C);	ff("DEFACB", D, E, F, A, C, B);	ff("FDEACB", F, D, E, A, C, B);
+			ff("BEFCAD", B, E, F, C, A, D);	ff("DEFBAC", D, E, F, B, A, C);	ff("FDEBAC", F, D, E, B, A, C);
+			ff("BEFCDA", B, E, F, C, D, A);	ff("DEFBCA", D, E, F, B, C, A);	ff("FDEBCA", F, D, E, B, C, A);
+			ff("BEFDAC", B, E, F, D, A, C);	ff("DEFCAB", D, E, F, C, A, B);	ff("FDECAB", F, D, E, C, A, B);
+			ff("BEFDCA", B, E, F, D, C, A);	ff("DEFCBA", D, E, F, C, B, A);	ff("FDECBA", F, D, E, C, B, A);
+			ff("BFACDE", B, F, A, C, D, E);	ff("DFABCE", D, F, A, B, C, E);	ff("FEABCD", F, E, A, B, C, D);
+			ff("BFACED", B, F, A, C, E, D);	ff("DFABEC", D, F, A, B, E, C);	ff("FEABDC", F, E, A, B, D, C);
+			ff("BFADCE", B, F, A, D, C, E);	ff("DFACBE", D, F, A, C, B, E);	ff("FEACBD", F, E, A, C, B, D);
+			ff("BFADEC", B, F, A, D, E, C);	ff("DFACEB", D, F, A, C, E, B);	ff("FEACDB", F, E, A, C, D, B);
+			ff("BFAECD", B, F, A, E, C, D);	ff("DFAEBC", D, F, A, E, B, C);	ff("FEADBC", F, E, A, D, B, C);
+			ff("BFAEDC", B, F, A, E, D, C);	ff("DFAECB", D, F, A, E, C, B);	ff("FEADCB", F, E, A, D, C, B);
+			ff("BFCADE", B, F, C, A, D, E);	ff("DFBACE", D, F, B, A, C, E);	ff("FEBACD", F, E, B, A, C, D);
+			ff("BFCAED", B, F, C, A, E, D);	ff("DFBAEC", D, F, B, A, E, C);	ff("FEBADC", F, E, B, A, D, C);
+			ff("BFCDAE", B, F, C, D, A, E);	ff("DFBCAE", D, F, B, C, A, E);	ff("FEBCAD", F, E, B, C, A, D);
+			ff("BFCDEA", B, F, C, D, E, A);	ff("DFBCEA", D, F, B, C, E, A);	ff("FEBCDA", F, E, B, C, D, A);
+			ff("BFCEAD", B, F, C, E, A, D);	ff("DFBEAC", D, F, B, E, A, C);	ff("FEBDAC", F, E, B, D, A, C);
+			ff("BFCEDA", B, F, C, E, D, A);	ff("DFBECA", D, F, B, E, C, A);	ff("FEBDCA", F, E, B, D, C, A);
+			ff("BFDACE", B, F, D, A, C, E);	ff("DFCABE", D, F, C, A, B, E);	ff("FECABD", F, E, C, A, B, D);
+			ff("BFDAEC", B, F, D, A, E, C);	ff("DFCAEB", D, F, C, A, E, B);	ff("FECADB", F, E, C, A, D, B);
+			ff("BFDCAE", B, F, D, C, A, E);	ff("DFCBAE", D, F, C, B, A, E);	ff("FECBAD", F, E, C, B, A, D);
+			ff("BFDCEA", B, F, D, C, E, A);	ff("DFCBEA", D, F, C, B, E, A);	ff("FECBDA", F, E, C, B, D, A);
+			ff("BFDEAC", B, F, D, E, A, C);	ff("DFCEAB", D, F, C, E, A, B);	ff("FECDAB", F, E, C, D, A, B);
+			ff("BFDECA", B, F, D, E, C, A);	ff("DFCEBA", D, F, C, E, B, A);	ff("FECDBA", F, E, C, D, B, A);
+			ff("BFEACD", B, F, E, A, C, D);	ff("DFEABC", D, F, E, A, B, C);	ff("FEDABC", F, E, D, A, B, C);
+			ff("BFEADC", B, F, E, A, D, C);	ff("DFEACB", D, F, E, A, C, B);	ff("FEDACB", F, E, D, A, C, B);
+			ff("BFECAD", B, F, E, C, A, D);	ff("DFEBAC", D, F, E, B, A, C);	ff("FEDBAC", F, E, D, B, A, C);
+			ff("BFECDA", B, F, E, C, D, A);	ff("DFEBCA", D, F, E, B, C, A);	ff("FEDBCA", F, E, D, B, C, A);
+			ff("BFEDAC", B, F, E, D, A, C);	ff("DFECAB", D, F, E, C, A, B);	ff("FEDCAB", F, E, D, C, A, B);
+			ff("BFEDCA", B, F, E, D, C, A);	ff("DFECBA", D, F, E, C, B, A);	ff("FEDCBA", F, E, D, C, B, A);
 		}
 	};
 
