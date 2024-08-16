@@ -43,7 +43,7 @@ namespace net::worker::commands::Index{
 
 
 		constexpr bool assertN(int n){
-			return n > 0 && n <= 5;
+			return n > 0 && n <= 6;
 		}
 
 		template<template<int, class, class> class Cmd>
@@ -62,6 +62,9 @@ namespace net::worker::commands::Index{
 
 			template<class Protocol, class DBAdapter>
 			using cmd5 = Cmd<5, Protocol, DBAdapter>;
+
+			template<class Protocol, class DBAdapter>
+			using cmd6 = Cmd<6, Protocol, DBAdapter>;
 		};
 	} // namespace index_impl_
 
@@ -107,7 +110,8 @@ namespace net::worker::commands::Index{
 			{	"ix2get",	"IX2GET"	},
 			{	"ix3get",	"IX3GET"	},
 			{	"ix4get",	"IX4GET"	},
-			{	"ix5get",	"IX5GET"	}
+			{	"ix5get",	"IX5GET"	},
+			{	"ix6get",	"IX6GET"	}
 		};
 	};
 
@@ -172,7 +176,8 @@ namespace net::worker::commands::Index{
 			{	"ix2mget",	"IX2MGET"	},
 			{	"ix3mget",	"IX3MGET"	},
 			{	"ix4mget",	"IX4MGET"	},
-			{	"ix5mget",	"IX5MGET"	}
+			{	"ix5mget",	"IX5MGET"	},
+			{	"ix6mget",	"IX6MGET"	}
 		};
 	};
 
@@ -207,7 +212,8 @@ namespace net::worker::commands::Index{
 			{	"ix2exists",	"IX2EXISTS"	},
 			{	"ix3exists",	"IX3EXISTS"	},
 			{	"ix4exists",	"IX4EXISTS"	},
-			{	"ix5exists",	"IX5EXISTS"	}
+			{	"ix5exists",	"IX5EXISTS"	},
+			{	"ix6exists",	"IX6EXISTS"	}
 		};
 		#endif
 
@@ -216,7 +222,8 @@ namespace net::worker::commands::Index{
 				"ix2exists",	"IX2EXISTS",
 				"ix3exists",	"IX3EXISTS",
 				"ix4exists",	"IX4EXISTS",
-				"ix5exists",	"IX5EXISTS"
+				"ix5exists",	"IX5EXISTS",
+				"ix6exists",	"IX6EXISTS"
 		};
 	};
 
@@ -262,7 +269,8 @@ namespace net::worker::commands::Index{
 			{	"ix2getindexes",	"IX2GETINDEXES"	},
 			{	"ix3getindexes",	"IX3GETINDEXES"	},
 			{	"ix4getindexes",	"IX4GETINDEXES"	},
-			{	"ix5getindexes",	"IX5GETINDEXES"	}
+			{	"ix5getindexes",	"IX5GETINDEXES"	},
+			{	"ix6getindexes",	"IX6GETINDEXES"	}
 		};
 	};
 
@@ -322,6 +330,10 @@ namespace net::worker::commands::Index{
 					if constexpr(N == 5)
 						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5) }))
 							return e();
+
+					if constexpr(N == 6)
+						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5), *(itk + 6) }))
+							return e();
 				}
 
 				if (!hm4::Pair::isValValid(value))
@@ -365,6 +377,12 @@ namespace net::worker::commands::Index{
 							db,
 							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5) }, value
 					);
+
+				if constexpr(N == 6)
+					shared::zsetmulti::add<PN>(
+							db,
+							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5), *(itk + 6) }, value
+					);
 			}
 
 			return result.set();
@@ -380,7 +398,8 @@ namespace net::worker::commands::Index{
 			{	"ix2add",	"IX2ADD"	},
 			{	"ix3add",	"IX3ADD"	},
 			{	"ix4add",	"IX4ADD"	},
-			{	"ix5add",	"IX5ADD"	}
+			{	"ix5add",	"IX5ADD"	},
+			{	"ix6add",	"IX6ADD"	}
 		};
 	};
 
@@ -414,7 +433,8 @@ namespace net::worker::commands::Index{
 			{	"ix2rem",	"IX2REM",	"ix2remove",	"IX2REMOVE",	"ix2del",	"IX2DEL"	},
 			{	"ix3rem",	"IX3REM",	"ix3remove",	"IX3REMOVE",	"ix3del",	"IX3DEL"	},
 			{	"ix4rem",	"IX4REM",	"ix4remove",	"IX4REMOVE",	"ix4del",	"IX4DEL"	},
-			{	"ix5rem",	"IX5REM",	"ix5remove",	"IX5REMOVE",	"ix5del",	"IX5DEL"	}
+			{	"ix5rem",	"IX5REM",	"ix5remove",	"IX5REMOVE",	"ix5del",	"IX5DEL"	},
+			{	"ix6rem",	"IX6REM",	"ix6remove",	"IX6REMOVE",	"ix6del",	"IX6DEL"	}
 		};
 	};
 
@@ -454,6 +474,16 @@ namespace net::worker::commands::Index{
 
 			{
 				auto size = [&p](){
+					#if 0
+					size_t size = 0;
+					for(size_t i = 1; i <= N; ++i)
+						size += p[varg + i].size();
+
+					return size;
+					#endif
+
+					// intent is more important
+
 					if constexpr(N == 1)
 						return p[varg + 1].size();
 
@@ -468,6 +498,9 @@ namespace net::worker::commands::Index{
 
 					if constexpr(N == 5)
 						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size() + p[varg + 4].size() + p[varg + 5].size();
+
+					if constexpr(N == 6)
+						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size() + p[varg + 4].size() + p[varg + 5].size() + p[varg + 6].size();
 				};
 
 				if (!PN::valid(keyN, index, size() ))
@@ -491,6 +524,9 @@ namespace net::worker::commands::Index{
 
 				if constexpr(N == 5)
 					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3], p[varg + 4], p[varg + 5]);
+
+				if constexpr(N == 6)
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3], p[varg + 4], p[varg + 5], p[varg + 6]);
 			}();
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
@@ -521,7 +557,8 @@ namespace net::worker::commands::Index{
 			{	"ix2range",	"IX2RANGE"	},
 			{	"ix3range",	"IX3RANGE"	},
 			{	"ix4range",	"IX4RANGE"	},
-			{	"ix5range",	"IX5RANGE"	}
+			{	"ix5range",	"IX5RANGE"	},
+			{	"ix6range",	"IX6RANGE"	}
 		};
 	};
 
@@ -571,6 +608,13 @@ namespace net::worker::commands::Index{
 				LH<IX_ADD		>::cmd5	,
 				LH<IX_REM		>::cmd5	,
 				LH<IX_RANGE		>::cmd5	,
+
+				LH<IX_GET		>::cmd6	,
+				LH<IX_MGET		>::cmd6	,
+				LH<IX_GETINDEXES	>::cmd6	,
+				LH<IX_ADD		>::cmd6	,
+				LH<IX_REM		>::cmd6	,
+				LH<IX_RANGE		>::cmd6	,
 
 				IX_EXISTS
 			>(pack);

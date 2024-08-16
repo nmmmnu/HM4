@@ -310,4 +310,5 @@ Changelog
 
 ### 1.3.8
 -	refactor geo, linear curve, morton curve modules. This change is NOT breaking with previous versions.
+-	new module INDEX
 
