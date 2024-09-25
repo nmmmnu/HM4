@@ -311,28 +311,32 @@ namespace net::worker::commands::Index{
 						return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 					};
 
+					auto _ = [&itk](auto i){
+						return *(itk + i);
+					};
+
 					if constexpr(N == 1)
-						if (!PN::valid(keyN, keySub, { *(itk + 1) }))
+						if (!PN::valid(keyN, keySub, { _(1) }))
 							return e();
 
 					if constexpr(N == 2)
-						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2) }))
 							return e();
 
 					if constexpr(N == 3)
-						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3) }))
 							return e();
 
 					if constexpr(N == 4)
-						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3), *(itk + 4) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4) }))
 							return e();
 
 					if constexpr(N == 5)
-						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }))
 							return e();
 
 					if constexpr(N == 6)
-						if (!PN::valid(keyN, keySub, { *(itk + 1), *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5), *(itk + 6) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }))
 							return e();
 				}
 
@@ -348,40 +352,44 @@ namespace net::worker::commands::Index{
 				auto const &keySub	= *(itk + 0);
 				auto const &value	= *(itk + X);
 
+				auto _ = [&itk](auto i){
+					return *(itk + i);
+				};
+
 				if constexpr(N == 1)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { *(itk + 1) }, value
+							keyN, keySub, { _(1) }, value
 					);
 
 				if constexpr(N == 2)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { *(itk + 1), *(itk + 2) }, value
+							keyN, keySub, { _(1), _(2) }, value
 					);
 
 				if constexpr(N == 3)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3) }, value
+							keyN, keySub, { _(1), _(2), _(3) }, value
 					);
 
 				if constexpr(N == 4)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3), *(itk + 4) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4) }, value
 					);
 
 				if constexpr(N == 5)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }, value
 					);
 
 				if constexpr(N == 6)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { *(itk + 1),  *(itk + 2), *(itk + 3), *(itk + 4), *(itk + 5), *(itk + 6) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }, value
 					);
 			}
 
@@ -484,23 +492,28 @@ namespace net::worker::commands::Index{
 
 					// intent is more important
 
+					auto _ = [&p, varg](auto i){
+						return p[varg + i].size();
+					};
+
 					if constexpr(N == 1)
-						return p[varg + 1].size();
+						return _(1);
 
 					if constexpr(N == 2)
-						return p[varg + 1].size() + p[varg + 2].size();
+						return _(1) + _(2);
 
 					if constexpr(N == 3)
-						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size();
+						return _(1) + _(2) + _(3);
 
 					if constexpr(N == 4)
-						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size() + p[varg + 4].size();
+						return _(1) + _(2) + _(3) + _(4);
 
 					if constexpr(N == 5)
-						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size() + p[varg + 4].size() + p[varg + 5].size();
+						return _(1) + _(2) + _(3) + _(4) + _(5);
+
 
 					if constexpr(N == 6)
-						return p[varg + 1].size() + p[varg + 2].size() + p[varg + 3].size() + p[varg + 4].size() + p[varg + 5].size() + p[varg + 6].size();
+						return _(1) + _(2) + _(3) + _(4) + _(5) + _(6);
 				};
 
 				if (!PN::valid(keyN, index, size() ))
@@ -510,23 +523,27 @@ namespace net::worker::commands::Index{
 			hm4::PairBufferKey bufferKey;
 
 			auto const prefix = [&](){
+				auto _ = [&p, varg](auto i){
+					return p[varg + i];
+				};
+
 				if constexpr(N == 1)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1));
 
 				if constexpr(N == 2)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2));
 
 				if constexpr(N == 3)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3));
 
 				if constexpr(N == 4)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3], p[varg + 4]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4));
 
 				if constexpr(N == 5)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3], p[varg + 4], p[varg + 5]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5));
 
 				if constexpr(N == 6)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, p[varg + 1], p[varg + 2], p[varg + 3], p[varg + 4], p[varg + 5], p[varg + 6]);
+					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5), _(6));
 			}();
 
 			auto const key = keyStart.empty() ? prefix : keyStart;

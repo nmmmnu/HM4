@@ -5,7 +5,7 @@
 #include <cmath>
 
 namespace{
-	uint32_t getLeadingbits(uint64_t const hash, uint8_t bits){
+	uint32_t getLeadingBits(uint64_t const hash, uint8_t bits){
 		return uint32_t( hash >> (64 - bits));
 	}
 
@@ -45,7 +45,7 @@ namespace hyperloglog::hyperloglog_implementation{
 	CalcAddResult calcAdd(const char *s, size_t size, uint8_t bits){
 		uint64_t const hash = murmur_hash64a(s, size);
 
-		uint32_t const index = getLeadingbits   (hash, bits);
+		uint32_t const index = getLeadingBits   (hash, bits);
 		uint8_t  const rank  = countLeadingZeros(hash, bits) + 1;
 
 		return { index, rank };
