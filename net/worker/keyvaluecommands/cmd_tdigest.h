@@ -11,7 +11,7 @@ namespace net::worker::commands::TDigest{
 		auto const MIN_SIZE = 16;
 		auto const MAX_SIZE = 20'000;
 
-		static_assert(MAX_SIZE <= hm4::PairConf::MAX_VAL_SIZE / sizeof(RawTDigest::CentroidBase));
+		static_assert(RawTDigest::bytes(MAX_SIZE) <= hm4::PairConf::MAX_VAL_SIZE);
 
 
 		std::string_view formatLine(to_string_buffer_t &buffer, double d){
@@ -136,7 +136,7 @@ namespace net::worker::commands::TDigest{
 
 				auto const compression = RawTDigest::Compression::AGGRESSIVE;
 
-				auto *data = reinterpret_cast<RawTDigest::Centroid *>(pair->getValC());
+				auto *data = reinterpret_cast<RawTDigest::TDigest *>(pair->getValC());
 
 				for(auto it = begin; it != end; ++it){
 					auto const val = to_double_def(*it);
@@ -191,31 +191,135 @@ namespace net::worker::commands::TDigest{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes());
-			const auto *data = reinterpret_cast<const RawTDigest::Centroid *>(pair->getValC());
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				auto &container = blob.container();
+
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+					container.push_back("0.0");
+
+				return result.set_container(container);
+			}else{
+				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
 
 
-			auto &container  = blob.container();
-			auto &bcontainer = blob.bcontainer();
+				auto &container  = blob.container();
+				auto &bcontainer = blob.bcontainer();
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const p = std::clamp<double>(to_double_def(*itk), 0.0, 1.0);
-				auto const r = td.percentile(data, p);
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+					auto const p = std::clamp<double>(to_double_def(*itk), 0.0, 1.0);
+					auto const r = td.percentile(data, p);
 
-				bcontainer.push_back();
+					bcontainer.push_back();
 
-				auto const line = formatLine(bcontainer.back(), r);
+					auto const line = formatLine(bcontainer.back(), r);
 
-				container.push_back(line);
+					container.push_back(line);
+				}
+
+				return result.set_container(container);
 			}
-
-			return result.set_container(container);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"tdpercentile",	"TDPERCENTILE",
 			"thquantile",	"TDQUANTILE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct TDMIN : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// TDADD key capacity
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace td_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const c = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), MIN_SIZE, MAX_SIZE);
+
+			RawTDigest td{ c };
+
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				return result.set("0.0");
+			}else{
+				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+
+				auto const r = td.min(data);
+
+				to_string_buffer_t buffer;
+				auto const line = formatLine(buffer, r);
+
+				return result.set(line);
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"tdmin",	"TDMIN"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct TDMAX : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// TDADD key capacity
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace td_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const c = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), MIN_SIZE, MAX_SIZE);
+
+			RawTDigest td{ c };
+
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				return result.set("0.0");
+			}else{
+				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+
+				auto const r = td.max(data);
+
+				to_string_buffer_t buffer;
+				auto const line = formatLine(buffer, r);
+
+				return result.set(line);
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"tdmax",	"TDMAX"
 		};
 	};
 
@@ -247,15 +351,62 @@ namespace net::worker::commands::TDigest{
 
 			RawTDigest td{ c };
 
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes());
-			const auto *data = reinterpret_cast<const RawTDigest::Centroid *>(pair->getValC());
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				return result.set(uint64_t{0});
+			}else{
+				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
 
-			return result.set(td.size(data));
+				return result.set(td.weight(data));
+			}
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"tdsize",	"TDSIZE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct TDCENTROIDCOUNT : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// TDCENTROIDCOUNT key capacity
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace td_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const c = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), MIN_SIZE, MAX_SIZE);
+
+			RawTDigest td{ c };
+
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				return result.set(uint64_t{0});
+			}else{
+				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+
+				return result.set(td.size(data));
+			}
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"tdcentroidcount",	"TDCENTROIDCOUNT"	,
+			"tdcentroidscount",	"TDCENTROIDSCOUNT"	,
 		};
 	};
 
@@ -270,7 +421,10 @@ namespace net::worker::commands::TDigest{
 				TDRESERVE	,
 				TDADD		,
 				TDPERCENTILE	,
-				TDSIZE
+				TDMIN		,
+				TDMAX		,
+				TDSIZE		,
+				TDCENTROIDCOUNT
 			>(pack);
 		}
 	};

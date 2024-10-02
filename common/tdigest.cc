@@ -6,15 +6,6 @@
 #include "myendian_fp.h"
 
 namespace {
-	#if 0
-	template<typename T>
-	void insertSorted2(T *arr, size_t const n, T &&last){
-	    auto it = std::lower_bound(arr, arr + n, last);
-	    std::move_backward(it, arr + n, arr + n + 1);
-	    *it = std::move(last);
-	}
-	#endif
-
 	template<typename IT>
 	void insertIntoSortedRange(IT first, IT last, typename std::iterator_traits<IT>::value_type &&item){
 	    auto it = std::lower_bound(first, last, item);
@@ -22,11 +13,13 @@ namespace {
 
 	    *it = std::move(item);
 	}
-}
+} // namespace
 
 
 
-struct RawTDigest::Centroid : CentroidBase{
+struct Centroid{
+	double		mean_;
+	uint64_t	weight_;
 
 	constexpr static auto create(double mean, uint64_t weight){
 		return Centroid{
@@ -40,11 +33,11 @@ struct RawTDigest::Centroid : CentroidBase{
 		weight_ = 0;
 	}
 
-	constexpr auto getMean() const{
+	constexpr auto mean() const{
 		return betoh(mean_);
 	}
 
-	constexpr auto getWeight() const{
+	constexpr auto weight() const{
 		return betoh(weight_);
 	}
 
@@ -52,194 +45,259 @@ struct RawTDigest::Centroid : CentroidBase{
 		return weight_;
 	}
 
-	constexpr double getWeightedMean() const{
-		return getMean() * static_cast<double>(getWeight());
+	constexpr double weightedMean() const{
+		return mean() * static_cast<double>(weight());
 	}
 
 	void print() const{
-		printf("> Addr %p | mean: %10.4f | weight: %5zu\n", (void *) this, getMean(), getWeight());
+		printf("> Addr %p | mean: %10.4f | weight: %5zu\n", (void *) this, mean(), weight());
 	}
 
 	friend constexpr bool operator<(Centroid const &a, Centroid const &b){
-		return a.getMean() < b.getMean();
+		return a.mean() < b.mean();
 	}
 };
 
-static_assert(std::is_trivial_v<RawTDigest::Centroid>);
-
-static_assert(sizeof(RawTDigest::CentroidBase) == sizeof(RawTDigest::Centroid));
 
 
+namespace {
 
-void RawTDigest::print(const Centroid *cd) const{
-	printf("Centroids, capacity %zu\n", capacity());
+	double findMinDistance(const Centroid *centroids, size_t const size){
+		assert(size > 1);
 
-	for(size_t i = 0; i < capacity(); ++i){
-		auto const &x = cd[i];
-		if (!x)
-			break;
+		double minDistance = std::numeric_limits<double>::max();
 
-		x.print();
+		for(auto it = centroids; it != centroids + size - 1; ++it){
+			auto const distance = std::abs(it->mean() - std::next(it)->mean());
+
+			if (distance < minDistance)
+				minDistance = distance;
+		}
+
+		return minDistance;
 	}
+
+	template<bool UseWeight>
+	size_t compressCentroids_(Centroid *centroids, size_t size, double const delta){
+		assert(size > 1);
+
+		size_t newSize = 0;
+		auto   current = centroids[0];
+
+		auto const _ = [](double weight) -> double{
+			if constexpr(UseWeight)
+				return weight;
+			else
+				return 1.0;
+		};
+
+		for (size_t i = 1; i < size; ++i){
+			auto const distance = std::abs(centroids[i].mean() - current.mean());
+			auto const weight_u = current.weight() + centroids[i].weight();
+			auto const weight   = static_cast<double>(weight_u);
+
+			if (_(weight) * distance <= delta) {
+				current = Centroid::create(
+						(current.weightedMean() + centroids[i].weightedMean()) / weight,
+						weight_u
+				);
+			}else{
+				centroids[newSize++] = current;
+				current = centroids[i];
+			}
+		}
+
+		centroids[newSize++] = current;
+
+		return newSize;
+	}
+
+	size_t compressNormal(Centroid *centroids, size_t size, double const delta){
+		if (size < 2)
+			return size;
+
+		return compressCentroids_<1>(centroids, size, delta);
+	}
+
+	size_t compressAggressive(Centroid *centroids, size_t size, double const delta){
+		if (size < 2)
+			return size;
+
+		auto const distance = findMinDistance(centroids, size);
+
+		if (distance > delta)
+			return compressCentroids_<0>(centroids, size, distance);
+		else
+			return compressCentroids_<1>(centroids, size, delta);
+	}
+
+} // namespace
+
+
+
+struct RawTDigest::TDigest{
+	uint64_t	size_;
+	uint64_t	weight_;
+
+	double		min_;
+	double		max_;
+
+	Centroid	data[1];
+
+	constexpr auto size() const{
+		return betoh(size_);
+	}
+
+	constexpr auto empty() const{
+		return ! size_;
+	}
+
+public:
+	constexpr auto weight() const{
+		return betoh(weight_);
+	}
+
+	constexpr auto min() const{
+		return betoh(min_);
+	}
+
+	constexpr auto max() const{
+		return betoh(max_);
+	}
+
+public:
+	constexpr auto setSize(uint64_t size){
+		size_ = htobe(size);
+	}
+
+	constexpr auto setWeight(uint64_t weight){
+		weight_ = htobe(weight);
+	}
+
+	void setMin_(double value){
+		min_ = htobe(value);
+	}
+
+	void setMax_(double value){
+		max_ = htobe(value);
+	}
+};
+
+
+
+static_assert(std::is_trivial_v<RawTDigest::TDigest>);
+static_assert(sizeof(RawTDigest::TDigest) == RawTDigest::bytes(1));
+
+
+
+void RawTDigest::print(const TDigest *td) const{
+	printf("Capacity %zu\n", capacity());
+
+	for(size_t i = 0; i < size(td); ++i)
+		td->data[i].print();
 }
 
 
 
-size_t RawTDigest::size(const Centroid *cd) const{
-	size_t size = 0;
-
-	for(size_t i = 0; i < capacity(); ++i){
-		auto const &x = cd[i];
-		if (!x)
-			break;
-
-		++size;
-	}
-
-	return size;
+bool RawTDigest::empty(const TDigest *td) const{
+	return ! td->size();
 }
 
-std::pair<uint64_t, size_t> RawTDigest::getWeightAndSize_(const Centroid *cd) const{
-	std::pair<uint64_t, size_t> r{ 0, 0 };
+uint64_t RawTDigest::size(const TDigest *td) const{
+	auto const size = td->size();
 
-	for(size_t i = 0; i < capacity(); ++i){
-		auto const &x = cd[i];
-		if (!x)
-			break;
-
-		r.first += x.getWeight();
-		++r.second;
-	}
-
-	return r;
+	return size <= capacity() ? size : 0;
 }
 
-double RawTDigest::percentile_(const Centroid *cd, size_t size, uint64_t weight, double const p) const{
-	if (size == 0)
+uint64_t RawTDigest::weight(const TDigest *td) const{
+	return td->weight();
+}
+
+double RawTDigest::percentile_(const TDigest *td, double const p) const{
+	if (empty(td))
 		return 0;
 
-	double const targetRank = p * static_cast<double>(weight);
+	auto const size = this->size(td);
+
+	double const targetRank = p * static_cast<double>(td->weight());
 	double cumulativeWeight = 0;
 
 	for(size_t i = 0; i < size - 1; ++i){
-		cumulativeWeight += static_cast<double>(cd[i].getWeight());
+		cumulativeWeight += static_cast<double>(td->data[i].weight());
 		if (cumulativeWeight >= targetRank)
-			return cd[i].getMean();
+			return td->data[i].mean();
 	}
 
-	return cd[size - 1].getMean();
+	return td->data[size - 1].mean();
+}
+
+void RawTDigest::updateMinMax_(TDigest *td, double value) const{
+	if (empty(td)){
+		td->setMin_(value);
+		td->setMax_(value);
+	}else{
+		if (value < td->min())
+			td->setMin_(value);
+
+		if (value > td->max())
+			td->setMax_(value);
+	}
 }
 
 template<RawTDigest::Compression C>
-void RawTDigest::add(Centroid *cd, double delta, double value, uint64_t weight) const{
+void RawTDigest::add(TDigest *td, double delta, double value, uint64_t weight) const{
 	assert(weight > 0);
 
-	auto size1 = size(cd);
+	updateMinMax_(td, value);
+
+	auto size = this->size(td);
 
 	auto insert = [&](){
-		insertIntoSortedRange(cd, cd + size1, Centroid::create(value, weight) );
+		auto &centroids = td->data;
 
-		if (++size1 < capacity())
-			cd[size1].clear();
+		insertIntoSortedRange(centroids, centroids + size, Centroid::create(value, weight));
+		td->setSize	(size		+ 1		);
+		td->setWeight	(td->weight()	+ weight	);
 	};
 
-	if (size1 < capacity())
+	if (size < capacity())
 		return insert();
 
 	if constexpr(C == Compression::NONE)
 		return;
 
 	if constexpr(C == Compression::STANDARD)
-		size1 = compressNormal_(cd, size1, delta);
+		size = compressNormal		(td->data, size, delta);
 
 	if constexpr(C == Compression::AGGRESSIVE)
-		size1 = compressAggressive_(cd, size1, delta);
+		size = compressAggressive	(td->data, size, delta);
 
-	if (size1 < capacity())
+	if (size < capacity())
 		return insert();
 
 	// drop the value
-	// should be unreachible if Aggressive,
+	// should be unreachible, if Aggressive
+	// no need to update size because size is unchanged
 }
 
-template void RawTDigest::add<RawTDigest::Compression::NONE		>(Centroid *cd,double delta, double value, uint64_t weight) const;
-template void RawTDigest::add<RawTDigest::Compression::STANDARD		>(Centroid *cd,double delta, double value, uint64_t weight) const;
-template void RawTDigest::add<RawTDigest::Compression::AGGRESSIVE	>(Centroid *cd,double delta, double value, uint64_t weight) const;
+template void RawTDigest::add<RawTDigest::Compression::NONE		>(TDigest *td, double delta, double value, uint64_t weight) const;
+template void RawTDigest::add<RawTDigest::Compression::STANDARD		>(TDigest *td, double delta, double value, uint64_t weight) const;
+template void RawTDigest::add<RawTDigest::Compression::AGGRESSIVE	>(TDigest *td, double delta, double value, uint64_t weight) const;
 
 
 
-size_t RawTDigest::compressNormal_(Centroid *cd, size_t size, double delta) const{
-	if (size < 2)
-		return size;
-
-	return compressCentroids_<1>(cd, size, delta);
+void RawTDigest::compress(TDigest *td, double delta) const{
+	auto const size = compressNormal(td->data, this->size(td), delta);
+	td->setSize(size);
 }
 
-size_t RawTDigest::compressAggressive_(Centroid *cd, size_t size, double delta) const{
-	if (size < 2)
-		return size;
-
-	auto const distance = findMinDistance__(cd, size);
-
-	if (distance > delta)
-		return compressCentroids_<0>(cd, size, distance);
-	else
-		return compressCentroids_<1>(cd, size, delta);
+double RawTDigest::min(const TDigest *td) const{
+	return td->min();
 }
 
-template<bool UseWeight>
-size_t RawTDigest::compressCentroids_(Centroid *cd, size_t size, double delta) const{
-	assert(size > 1);
-
-	size_t newSize = 0;
-	auto   current = cd[0];
-
-	auto const _ = [](double weight) -> double{
-		if constexpr(UseWeight)
-			return weight;
-		else
-			return 1.0;
-	};
-
-	for (size_t i = 1; i < size; ++i){
-		auto const distance = std::abs(cd[i].getMean() - current.getMean());
-		auto const weight_u = current.getWeight() + cd[i].getWeight();
-		auto const weight   = static_cast<double>(weight_u);
-
-		if (_(weight) * distance <= delta) {
-			current = Centroid::create(
-					(current.getWeightedMean() + cd[i].getWeightedMean()) / weight,
-					weight_u
-			);
-		}else{
-			cd[newSize++] = current;
-			current = cd[i];
-		}
-	}
-
-	cd[newSize++] = current;
-
-	if (newSize < capacity())
-		cd[newSize].clear();
-
-	return newSize;
+double RawTDigest::max(const TDigest *td) const{
+	return td->max();
 }
 
-
-
-double RawTDigest::findMinDistance__(const Centroid *cd, size_t const size){
-	assert(size > 1);
-
-	double minDistance = std::numeric_limits<double>::max();
-
-	for(auto it = cd; it != cd + size - 1; ++it){
-		auto const distance = std::abs(it->getMean() - std::next(it)->getMean());
-
-		if (distance < minDistance)
-			minDistance = distance;
-	}
-
-	return minDistance;
-}
 
 
