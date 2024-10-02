@@ -26,6 +26,7 @@ $(A)db_net: $(O)db_net.o	\
 								\
 			$(O)hyperloglog.o $(O)murmur_hash_64a.o \
 			$(O)geohash.o $(O)mortoncurve.o		\
+			$(O)tdigest.o				\
 								\
 			$(O)signalguard.o			\
 			$(O)redisprotocol.o $(O)sockets.o	\

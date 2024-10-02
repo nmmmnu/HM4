@@ -7,7 +7,8 @@ EXTRA_INCL += -I$(SRC_DIR)test_bfslookup
 MY_TARGETS = $(A)test_stringhash $(A)test_stringreplace $(A)test_trim $(A)test_stringtokenizer	\
 		$(A)test_blobref $(A)test_binarysearch $(A)test_bfslookup			\
 		$(A)test_glob  $(A)test_myalign $(A)test_mynarrow $(A)test_signalguard		\
-		$(A)test_base64 $(A)test_idgenerator $(A)test_mortoncurve $(A)test_endianfp
+		$(A)test_base64 $(A)test_idgenerator $(A)test_mortoncurve $(A)test_endianfp	\
+		$(A)test_tdigest
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -61,6 +62,9 @@ $(A)test_mortoncurve: $(O)test_mortoncurve.o $(O)mortoncurve.o
 	$(LINK)
 
 $(A)test_endianfp: $(O)test_endianfp.o
+	$(LINK)
+
+$(A)test_tdigest: $(O)test_tdigest.o $(O)tdigest.o
 	$(LINK)
 
 
