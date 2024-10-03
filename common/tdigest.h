@@ -37,9 +37,13 @@ public:
 
 	void print(const TDigest *td) const;
 
+	bool valid(const TDigest *td) const;
+
 	bool empty(const TDigest *td) const;
 	uint64_t size(const TDigest *td) const;
 	uint64_t weight(const TDigest *td) const;
+	double min(const TDigest *td) const;
+	double max(const TDigest *td) const;
 
 public:
 	void clearFast(TDigest *td);
@@ -57,9 +61,11 @@ public:
 	}
 
 public:
-
 	template<Compression C = Compression::AGGRESSIVE>
 	void add(TDigest *td, double delta, double value, uint64_t weight = 1) const;
+
+	template<Compression C = Compression::AGGRESSIVE>
+	void merge(TDigest *dest, double delta, const TDigest *src) const;
 
 	void compress(TDigest *td, double delta) const;
 
@@ -87,12 +93,14 @@ public:
 		std::transform(first, last, out, f);
 	}
 
-	double min(const TDigest *td) const;
-	double max(const TDigest *td) const;
-
 private:
 	double percentile_(const TDigest *td, double const p) const;
 	void updateMinMax_(TDigest *td, double value) const;
+	uint64_t weight_(const TDigest *td) const;
+
+	template<Compression C>
+	void add_(TDigest *td, double delta, double value, uint64_t weight) const;
+
 };
 
 #endif

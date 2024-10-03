@@ -199,6 +199,12 @@ void RawTDigest::print(const TDigest *td) const{
 
 
 
+bool RawTDigest::valid(const TDigest *td) const{
+	auto const size = td->size();
+
+	return size <= capacity();
+}
+
 bool RawTDigest::empty(const TDigest *td) const{
 	return ! td->size();
 }
@@ -210,7 +216,15 @@ uint64_t RawTDigest::size(const TDigest *td) const{
 }
 
 uint64_t RawTDigest::weight(const TDigest *td) const{
-	return td->weight();
+	return valid(td) ? td->weight() : 0;
+}
+
+double RawTDigest::min(const TDigest *td) const{
+	return valid(td) ? td->min() : 0;
+}
+
+double RawTDigest::max(const TDigest *td) const{
+	return valid(td) ? td->max() : 0;
 }
 
 double RawTDigest::percentile_(const TDigest *td, double const p) const{
@@ -235,29 +249,37 @@ void RawTDigest::updateMinMax_(TDigest *td, double value) const{
 	if (empty(td)){
 		td->setMin_(value);
 		td->setMax_(value);
-	}else{
-		if (value < td->min())
-			td->setMin_(value);
 
-		if (value > td->max())
-			td->setMax_(value);
+		return;
 	}
+
+	if (value < td->min())
+		td->setMin_(value);
+
+	if (value > td->max())
+		td->setMax_(value);
 }
 
+uint64_t RawTDigest::weight_(const TDigest *td) const{
+	return empty(td) ? 0 : td->weight();
+}
+
+
+
 template<RawTDigest::Compression C>
-void RawTDigest::add(TDigest *td, double delta, double value, uint64_t weight) const{
-	assert(weight > 0);
+void RawTDigest::add_(TDigest *td, double delta, double value, uint64_t weight) const{
+	auto size = this->size(td);
 
 	updateMinMax_(td, value);
 
-	auto size = this->size(td);
+	auto const oldWeight = weight_(td);
 
 	auto insert = [&](){
 		auto &centroids = td->data;
 
 		insertIntoSortedRange(centroids, centroids + size, Centroid::create(value, weight));
 		td->setSize	(size		+ 1		);
-		td->setWeight	(td->weight()	+ weight	);
+		td->setWeight	(oldWeight	+ weight	);
 	};
 
 	if (size < capacity())
@@ -280,9 +302,33 @@ void RawTDigest::add(TDigest *td, double delta, double value, uint64_t weight) c
 	// no need to update size because size is unchanged
 }
 
+
+
+template<RawTDigest::Compression C>
+void RawTDigest::add(TDigest *td, double delta, double value, uint64_t weight) const{
+	assert(weight > 0);
+
+	add_<C>(td, delta, value, weight);
+}
+
 template void RawTDigest::add<RawTDigest::Compression::NONE		>(TDigest *td, double delta, double value, uint64_t weight) const;
 template void RawTDigest::add<RawTDigest::Compression::STANDARD		>(TDigest *td, double delta, double value, uint64_t weight) const;
 template void RawTDigest::add<RawTDigest::Compression::AGGRESSIVE	>(TDigest *td, double delta, double value, uint64_t weight) const;
+
+
+
+template<RawTDigest::Compression C>
+void RawTDigest::merge(TDigest *dest, double delta, const TDigest *src) const{
+	if (! valid(src))
+		return;
+
+	for(auto &x : src->data)
+		add_<C>(dest, delta, x.mean(), x.weight());
+}
+
+template void RawTDigest::merge<RawTDigest::Compression::NONE		>(TDigest *td, double delta, const TDigest *src) const;
+template void RawTDigest::merge<RawTDigest::Compression::STANDARD	>(TDigest *td, double delta, const TDigest *src) const;
+template void RawTDigest::merge<RawTDigest::Compression::AGGRESSIVE	>(TDigest *td, double delta, const TDigest *src) const;
 
 
 
@@ -291,13 +337,6 @@ void RawTDigest::compress(TDigest *td, double delta) const{
 	td->setSize(size);
 }
 
-double RawTDigest::min(const TDigest *td) const{
-	return td->min();
-}
-
-double RawTDigest::max(const TDigest *td) const{
-	return td->max();
-}
 
 
 
