@@ -322,8 +322,10 @@ void RawTDigest::merge(TDigest *dest, double delta, const TDigest *src) const{
 	if (! valid(src))
 		return;
 
-	for(auto &x : src->data)
+	for(size_t i = 0; i < size(src); ++i){
+		auto const &x = src->data[i];
 		add_<C>(dest, delta, x.mean(), x.weight());
+	}
 }
 
 template void RawTDigest::merge<RawTDigest::Compression::NONE		>(TDigest *td, double delta, const TDigest *src) const;
