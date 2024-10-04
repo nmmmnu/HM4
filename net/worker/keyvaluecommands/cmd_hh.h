@@ -63,7 +63,7 @@ namespace net::worker::commands::HH{
 			bool action_(Pair *pair) const{
 				using Item = typename MyRawHeavyHitter::Item;
 
-				Item *hh_data = reinterpret_cast<Item *>(pair->getValC());
+				auto *hh_data = hm4::getValAs<Item>(pair);
 
 				bool result = false;
 
@@ -310,7 +310,7 @@ namespace net::worker::commands::HH{
 
 			using Item = typename MyRawHeavyHitter::Item;
 
-			const auto *hh_data = reinterpret_cast<const Item *>(pair->getValC());
+			const auto *hh_data = hm4::getValAs<Item>(pair);
 
 			for(size_t i = 0; i < hh.size(); ++i)
 				if(auto const &x = hh_data[i]; x){

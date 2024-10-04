@@ -135,7 +135,7 @@ namespace net::worker::commands::MG{
 			bool action_(Pair *pair) const{
 				using Item = typename MyRawMisraGries::Item;
 
-				Item *mg_data = reinterpret_cast<Item *>(pair->getValC());
+				Item *mg_data = hm4::getValAs<Item>(pair);
 
 				bool result = false;
 
@@ -255,7 +255,7 @@ namespace net::worker::commands::MG{
 			uint64_t action_(Pair *pair) const{
 				using Item = typename MyRawMisraGries::Item;
 
-				Item *mg_data = reinterpret_cast<Item *>(pair->getValC());
+				Item *mg_data = hm4::getValAs<Item>(pair);
 
 				return mg.add(mg_data, item);
 			}
@@ -393,7 +393,7 @@ namespace net::worker::commands::MG{
 
 			using Item = typename MyRawMisraGries::Item;
 
-			const auto *mg_data = reinterpret_cast<const Item *>(pair->getValC());
+			const auto *mg_data = hm4::getValAs<Item>(pair);
 
 			for(size_t i = 0; i < mg.size(); ++i)
 				if (auto const &x = mg_data[i]; x){

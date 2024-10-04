@@ -592,8 +592,31 @@ inline namespace version_4_00_00{
 		return p1->equals(*p2);
 	}
 
+
+
 	inline void print(Pair const &pair){
 		pair.print();
+	}
+
+	inline void print(const Pair *pair){
+		if (pair)
+			pair->print();
+		else
+			printf("%s\n", PairConf::EMPTY_MESSAGE);
+	}
+
+
+
+	template<typename T>
+	[[nodiscard]]
+	constexpr auto *getValAs(const Pair *p) noexcept{
+		return reinterpret_cast<const T *>(p->getValC());
+	}
+
+	template<typename T>
+	[[nodiscard]]
+	constexpr auto *getValAs(Pair *p) noexcept{
+		return reinterpret_cast<T *>(p->getValC());
 	}
 
 
@@ -603,15 +626,6 @@ inline namespace version_4_00_00{
 	static_assert(std::is_same_v<OPair, std::unique_ptr<Pair> >, "OPair is not std::unique_ptr");
 
 	inline void print(OPair const &pair){
-		if (pair)
-			pair->print();
-		else
-			printf("%s\n", PairConf::EMPTY_MESSAGE);
-	}
-
-
-
-	inline void print(const Pair *pair){
 		if (pair)
 			pair->print();
 		else

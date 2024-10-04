@@ -137,7 +137,7 @@ namespace net::worker::commands::HLL{
 			bool action_(Pair *pair) const{
 				using namespace hll_impl_;
 
-				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
+				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
 
 				bool result = false;
 
@@ -367,7 +367,7 @@ namespace net::worker::commands::HLL{
 			double action_(Pair *pair) const{
 				using namespace hll_impl_;
 
-				uint8_t *hll_data = reinterpret_cast<uint8_t *>(pair->getValC());
+				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
 
 				for(auto itk = begin; itk != end; ++itk){
 					const auto &val = *itk;

@@ -131,7 +131,7 @@ namespace net::worker::commands::RS{
 			bool action_(Pair *pair){
 				using List = typename MyReservoirSampling::List;
 
-				auto *rs_data = reinterpret_cast<List *>(pair->getValC());
+				auto *rs_data = hm4::getValAs<List>(pair);
 
 				bool result = false;
 
@@ -290,7 +290,7 @@ namespace net::worker::commands::RS{
 
 			using List = typename MyReservoirSampling::List;
 
-			const auto *rs_data = reinterpret_cast<const List *>(pair->getValC());
+			const auto *rs_data = hm4::getValAs<List>(pair);
 
 			for(size_t i = 0; i < rs.size(); ++i)
 				if (auto const &x = rs_data->items[i]; x)
@@ -364,7 +364,7 @@ namespace net::worker::commands::RS{
 
 			using List = typename MyReservoirSampling::List;
 
-			const auto *rs_data = reinterpret_cast<const List *>(pair->getValC());
+			const auto *rs_data = hm4::getValAs<List>(pair);
 
 			return result.set(rs_data->getCount());
 		}

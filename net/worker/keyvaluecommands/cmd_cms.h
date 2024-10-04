@@ -2,6 +2,7 @@
 #include "murmur_hash_64a.h"
 #include "pair_vfactory.h"
 #include "shared_incr.h"
+#include "shared_hint.h"
 #include "matrix.h"
 
 #include <algorithm>

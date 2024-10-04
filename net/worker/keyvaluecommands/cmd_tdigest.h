@@ -2,6 +2,7 @@
 #include "tdigest.h"
 #include "pair_vfactory.h"
 #include "to_fp.h"
+#include "shared_hint.h"
 
 namespace net::worker::commands::TDigest{
 	namespace td_impl_{
@@ -139,7 +140,7 @@ namespace net::worker::commands::TDigest{
 
 				auto const compression = RawTDigest::Compression::AGGRESSIVE;
 
-				auto *data = reinterpret_cast<RawTDigest::TDigest *>(pair->getValC());
+				auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				for(auto it = begin; it != end; ++it){
 					auto const val = to_double_def(*it);
@@ -224,7 +225,7 @@ namespace net::worker::commands::TDigest{
 
 				auto const compression = RawTDigest::Compression::AGGRESSIVE;
 
-				auto *data = reinterpret_cast<RawTDigest::TDigest *>(pair->getValC());
+				auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				for(auto itk = begin; itk != end; itk += 2){
 					auto const value  = to_double_def(*itk);
@@ -289,7 +290,7 @@ namespace net::worker::commands::TDigest{
 				if (! pair)
 					continue;
 
-				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				if (!td.valid(data))
 					continue;
@@ -332,12 +333,12 @@ namespace net::worker::commands::TDigest{
 
 				auto const compression = RawTDigest::Compression::AGGRESSIVE;
 
-				auto *data = reinterpret_cast<RawTDigest::TDigest *>(pair->getValC());
+				auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				for(auto it = begin; it != end; ++it){
 					const auto *src_pair = *it;
 
-					const auto *src_data = reinterpret_cast<const RawTDigest::TDigest *>(src_pair->getValC());
+					const auto *src_data = hm4::getValAs<RawTDigest::TDigest>(src_pair);
 
 					tdigest.merge<compression>(data, delta, src_data);
 				}
@@ -398,7 +399,7 @@ namespace net::worker::commands::TDigest{
 
 				return result.set_container(container);
 			}else{
-				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 
 				auto &container  = blob.container();
@@ -457,7 +458,7 @@ namespace net::worker::commands::TDigest{
 			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
 				return result.set("0.0");
 			}else{
-				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				auto const r = td.min(data);
 
@@ -505,7 +506,7 @@ namespace net::worker::commands::TDigest{
 			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
 				return result.set("0.0");
 			}else{
-				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				auto const r = td.max(data);
 
@@ -553,7 +554,7 @@ namespace net::worker::commands::TDigest{
 			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
 				return result.set(uint64_t{0});
 			}else{
-				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				return result.set(td.weight(data));
 			}
@@ -601,7 +602,7 @@ namespace net::worker::commands::TDigest{
 
 				return result.set_container(container);
 			}else{
-				const auto *data = reinterpret_cast<const RawTDigest::TDigest *>(pair->getValC());
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				to_string_buffer_t buffer[5];
 
