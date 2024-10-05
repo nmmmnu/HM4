@@ -61,7 +61,7 @@ public:
 	constexpr static inline std::string_view	ENDLN		= "\r\n";
 
 public:
-	constexpr static inline size_t			MAX_PARAMS	= 256;
+	constexpr static inline size_t			MAX_PARAMS	= 0xFF;
 
 	static_assert(MAX_PARAMS >= 7, "7 params is the minimum - pfmerge dest a b c d e");
 

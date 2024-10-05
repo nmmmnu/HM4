@@ -26,7 +26,8 @@ namespace net::worker::commands{
 
 
 	struct OutputBlob{
-		constexpr static size_t ContainerSize	= 0xFFFF;
+		constexpr static size_t ContainerSize		= 0xFFFF;
+		constexpr static size_t ParamContainerSize	= 0xFF;
 
 		using Container		= StaticVector<std::string_view		, ContainerSize>;	// 1024 KB, if string_view is 16 bytes
 		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	//  514 KB

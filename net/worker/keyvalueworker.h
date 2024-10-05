@@ -231,6 +231,10 @@ namespace net::worker{
 		commands::OutputBlob	output_		;
 
 		IOBuffer		output_buffer_	;
+
+	private:
+		static_assert(Protocol::MAX_PARAMS <= commands::OutputBlob::ContainerSize	);
+		static_assert(Protocol::MAX_PARAMS <= commands::OutputBlob::ParamContainerSize	);
 	};
 
 
