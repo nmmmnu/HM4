@@ -70,6 +70,7 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -116,6 +117,7 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			// check if any key exists
@@ -193,6 +195,7 @@ namespace net::worker::commands::Mutable{
 					return result.set_0();
 			}
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			// HINT
@@ -339,6 +342,7 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
@@ -474,6 +478,7 @@ namespace net::worker::commands::Mutable{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
@@ -522,6 +527,7 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){

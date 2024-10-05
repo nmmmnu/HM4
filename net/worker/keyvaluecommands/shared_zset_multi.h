@@ -147,6 +147,8 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view a = "", std::string_view b = ""){
 
 			auto const separator_last = [separator](){
+				(void) separator;
+
 				if constexpr(LAST_SEPARATOR)
 					return separator;
 				else

@@ -207,6 +207,7 @@ namespace net::worker::commands::Queue{
 				// update control key...
 				logger<Logger::DEBUG>() << "SPOP: Update control key" << keyControl << "to" << score;
 
+				[[maybe_unused]]
 				hm4::TXGuard guard{ list };
 
 				if (score.empty())

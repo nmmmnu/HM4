@@ -344,6 +344,7 @@ namespace net::worker::commands::Index{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
@@ -426,6 +427,7 @@ namespace net::worker::commands::Index{
 		// IXDEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			return shared::zsetmulti::cmdProcessRem<PN>(p, db, result, blob);
@@ -492,7 +494,7 @@ namespace net::worker::commands::Index{
 
 					// intent is more important
 
-					auto _ = [&p, varg](auto i){
+					auto _ = [&p](uint8_t i){
 						return p[varg + i].size();
 					};
 
@@ -523,7 +525,7 @@ namespace net::worker::commands::Index{
 			hm4::PairBufferKey bufferKey;
 
 			auto const prefix = [&](){
-				auto _ = [&p, varg](auto i){
+				auto _ = [&p](uint8_t i){
 					return p[varg + i];
 				};
 

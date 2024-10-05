@@ -530,6 +530,7 @@ namespace net::worker::commands::MortonCurve{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
@@ -574,6 +575,7 @@ namespace net::worker::commands::MortonCurve{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
+			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);

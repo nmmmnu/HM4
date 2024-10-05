@@ -87,6 +87,7 @@ namespace net::worker::commands::MutableX{
 
 			template<bool ResultAsHash, class Predicate, class StopPredicate, class List, class Result>
 			void process_x_(Predicate p, StopPredicate stop, List &list, std::string_view key, Result &result, ContainerX &container){
+				[[maybe_unused]]
 				hm4::TXGuard guard{ list };
 
 				uint8_t check_passes = 0;

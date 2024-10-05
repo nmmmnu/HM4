@@ -29,7 +29,12 @@ namespace net::worker::commands::TDigest{
 				return { buffer.data(), result.size };
 		};
 
+		struct TDPair{
+			const Pair	*pair;
+			uint64_t	size;
+		};
 
+		using TDPairVector = StaticVector<TDPair, OutputBlob::ParamContainerSize>;
 	} // namespace td_impl_
 
 
@@ -260,7 +265,7 @@ namespace net::worker::commands::TDigest{
 		}
 
 		// TDMERGE key capacity delta src_key [src_key]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace td_impl_;
 
 			if (p.size() < 5)
@@ -280,35 +285,22 @@ namespace net::worker::commands::TDigest{
 				if (const auto &src = *itk; src.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			auto &pcontainer = blob.pcontainer();
+			TDPairVector container;
 
 			RawTDigest td{ c };
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto *pair = hm4::getPairPtrWithSize(*db, *itk, td.bytes());
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto *pair = hm4::getPairPtrWithSize(*db, *itk, td.bytes()); pair)
+					container.push_back( TDPair{ pair, td.bytes() } );
 
-				if (! pair)
-					continue;
-
-				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
-
-				if (!td.valid(data))
-					continue;
-
-				if (td.empty(data))
-					continue;
-
-				pcontainer.push_back(pair);
-			}
-
-			if (pcontainer.empty())
+			if (container.empty())
 				return result.set_1();
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes());
 
-			using MyTDMERGE_Factory = TDMERGE_Factory<OutputBlob::PairContainer::iterator>;
+			using MyTDMERGE_Factory = TDMERGE_Factory<TDPairVector::iterator>;
 
-			MyTDMERGE_Factory factory{ key, pair, td, d, std::begin(pcontainer), std::end(pcontainer) };
+			MyTDMERGE_Factory factory{ key, pair, td, d, std::begin(container), std::end(container) };
 
 			insertHintVFactory(pair, *db, factory);
 
@@ -336,11 +328,11 @@ namespace net::worker::commands::TDigest{
 				auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				for(auto it = begin; it != end; ++it){
-					const auto *src_pair = *it;
+					const auto *src_data = hm4::getValAs<RawTDigest::TDigest>(it->pair);
 
-					const auto *src_data = hm4::getValAs<RawTDigest::TDigest>(src_pair);
+					RawTDigest src_tdigest{ it->size };
 
-					tdigest.merge<compression>(data, delta, src_data);
+					merge<compression>(tdigest, data, delta, src_tdigest, src_data);
 				}
 			}
 

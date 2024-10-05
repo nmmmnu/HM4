@@ -43,6 +43,7 @@ namespace net::worker::commands::Copy{
 					if constexpr(operation == CPMVOperation::MV || operation == CPMVOperation::MV_NX){
 						// Move  operation
 
+						[[maybe_unused]]
 						hm4::TXGuard guard{ list };
 
 						hm4::insert(list, newkey, it->getVal(), it->getTTL());
