@@ -190,15 +190,6 @@ static_assert(sizeof(RawTDigest::TDigest) == RawTDigest::bytes(1));
 
 
 
-void RawTDigest::print(const TDigest *td) const{
-	printf("Capacity %zu\n", capacity());
-
-	for(size_t i = 0; i < size(td); ++i)
-		td->data[i].print();
-}
-
-
-
 bool RawTDigest::valid(const TDigest *td) const{
 	auto const size = td->size();
 
@@ -227,23 +218,14 @@ double RawTDigest::max(const TDigest *td) const{
 	return valid(td) ? td->max() : 0;
 }
 
-double RawTDigest::percentile_(const TDigest *td, double const p) const{
-	if (empty(td))
-		return 0;
+void RawTDigest::print(const TDigest *td) const{
+	printf("Capacity %zu\n", capacity());
 
-	auto const size = this->size(td);
-
-	double const targetRank = p * static_cast<double>(td->weight());
-	double cumulativeWeight = 0;
-
-	for(size_t i = 0; i < size - 1; ++i){
-		cumulativeWeight += static_cast<double>(td->data[i].weight());
-		if (cumulativeWeight >= targetRank)
-			return td->data[i].mean();
-	}
-
-	return td->data[size - 1].mean();
+	for(size_t i = 0; i < size(td); ++i)
+		td->data[i].print();
 }
+
+
 
 void RawTDigest::updateMinMax_(TDigest *td, double value) const{
 	if (empty(td)){
@@ -260,10 +242,6 @@ void RawTDigest::updateMinMax_(TDigest *td, double value) const{
 		td->setMax_(value);
 }
 
-uint64_t RawTDigest::weight_(const TDigest *td) const{
-	return empty(td) ? 0 : td->weight();
-}
-
 
 
 template<RawTDigest::Compression C>
@@ -272,7 +250,7 @@ void RawTDigest::add_(TDigest *td, double delta, double value, uint64_t weight) 
 
 	updateMinMax_(td, value);
 
-	auto const oldWeight = weight_(td);
+	auto const oldWeight = empty(td) ? 0 : td->weight();
 
 	auto insert = [&](){
 		auto &centroids = td->data;
@@ -318,19 +296,26 @@ template void RawTDigest::add<RawTDigest::Compression::AGGRESSIVE	>(TDigest *td,
 
 
 template<RawTDigest::Compression C>
-void RawTDigest::merge(TDigest *dest, double delta, const TDigest *src) const{
-	if (! valid(src))
+void merge_(RawTDigest const &td_dest, RawTDigest::TDigest *dest, double delta, RawTDigest const &td_src, const RawTDigest::TDigest *src){
+	if (! td_src.valid(src))
 		return;
 
-	for(size_t i = 0; i < size(src); ++i){
-		auto const &x = src->data[i];
-		add_<C>(dest, delta, x.mean(), x.weight());
-	}
+	auto &data = src->data;
+
+	for(auto it = data; it < data + td_src.size(src); ++it)
+		td_dest.add_<C>(dest, delta, it->mean(), it->weight());
 }
 
-template void RawTDigest::merge<RawTDigest::Compression::NONE		>(TDigest *td, double delta, const TDigest *src) const;
-template void RawTDigest::merge<RawTDigest::Compression::STANDARD	>(TDigest *td, double delta, const TDigest *src) const;
-template void RawTDigest::merge<RawTDigest::Compression::AGGRESSIVE	>(TDigest *td, double delta, const TDigest *src) const;
+
+
+template<RawTDigest::Compression C>
+void merge(RawTDigest const &td_dest, RawTDigest::TDigest *dest, double delta, RawTDigest const &td_src, const RawTDigest::TDigest *src){
+	return merge_<C>(td_dest, dest, delta, td_src, src);
+}
+
+template void merge<RawTDigest::Compression::NONE	>(RawTDigest const &td_dest, RawTDigest::TDigest *dest, double delta, RawTDigest const &td_src, const RawTDigest::TDigest *src);
+template void merge<RawTDigest::Compression::STANDARD	>(RawTDigest const &td_dest, RawTDigest::TDigest *dest, double delta, RawTDigest const &td_src, const RawTDigest::TDigest *src);
+template void merge<RawTDigest::Compression::AGGRESSIVE	>(RawTDigest const &td_dest, RawTDigest::TDigest *dest, double delta, RawTDigest const &td_src, const RawTDigest::TDigest *src);
 
 
 
@@ -340,5 +325,34 @@ void RawTDigest::compress(TDigest *td, double delta) const{
 }
 
 
+
+template<RawTDigest::Compression C>
+void RawTDigest::merge(TDigest *dest, double delta, const TDigest *src) const{
+	merge_<C>(*this, dest, delta, *this, src);
+}
+
+template void RawTDigest::merge<RawTDigest::Compression::NONE		>(TDigest *td, double delta, const TDigest *src) const;
+template void RawTDigest::merge<RawTDigest::Compression::STANDARD	>(TDigest *td, double delta, const TDigest *src) const;
+template void RawTDigest::merge<RawTDigest::Compression::AGGRESSIVE	>(TDigest *td, double delta, const TDigest *src) const;
+
+
+
+double RawTDigest::percentile(const TDigest *td, double const p) const{
+	if (empty(td))
+		return 0;
+
+	auto const size = this->size(td);
+
+	double const targetRank = p * static_cast<double>(td->weight());
+	double cumulativeWeight = 0;
+
+	for(size_t i = 0; i < size - 1; ++i){
+		cumulativeWeight += static_cast<double>(td->data[i].weight());
+		if (cumulativeWeight >= targetRank)
+			return td->data[i].mean();
+	}
+
+	return td->data[size - 1].mean();
+}
 
 

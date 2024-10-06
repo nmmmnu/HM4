@@ -23,31 +23,31 @@ public:
 		assert(capacity_ >= 2);
 	}
 
-	constexpr size_t capacity() const{
-		return capacity_;
-	}
-
 	constexpr static size_t bytes(size_t capacity){
 		return 2 * sizeof(uint64_t) + 2 * sizeof(double) + capacity * (sizeof(uint64_t) + sizeof(double));
+	}
+
+public:
+	constexpr size_t capacity() const{
+		return capacity_;
 	}
 
 	constexpr size_t bytes() const{
 		return bytes(capacity_);
 	}
 
-	void print(const TDigest *td) const;
-
 	bool valid(const TDigest *td) const;
 
+public:
 	bool empty(const TDigest *td) const;
 	uint64_t size(const TDigest *td) const;
 	uint64_t weight(const TDigest *td) const;
 	double min(const TDigest *td) const;
 	double max(const TDigest *td) const;
 
-public:
-	void clearFast(TDigest *td);
+	void print(const TDigest *td) const;
 
+public:
 	void clear(TDigest *td) const{
 		memset(td, 0, bytes());
 	}
@@ -67,8 +67,12 @@ public:
 	template<Compression C = Compression::AGGRESSIVE>
 	void merge(TDigest *dest, double delta, const TDigest *src) const;
 
+	template<Compression C>
+	friend void merge_(RawTDigest const &td_dest, TDigest *dest, double delta, RawTDigest const &td_src, const TDigest *src);
+
 	void compress(TDigest *td, double delta) const;
 
+public:
 	double percentile_50(const TDigest *td) const{
 		return percentile(td, 0.50);
 	}
@@ -77,31 +81,21 @@ public:
 		return percentile(td, 0.95);
 	}
 
-	double percentile(const TDigest *td, double const p) const{
-		assert(p >= 0.00 && p <= 1.00);
-
-		return percentile_(td, p);
-	}
-
-	template<typename IT, typename OutIT>
-	void percentile(const TDigest *td, IT first, IT last, OutIT out) const{
-		auto f = [&](double p){
-			assert(p >= 0.00 && p <= 1.00);
-			return percentile_(td, p);
-		};
-
-		std::transform(first, last, out, f);
-	}
+	double percentile(const TDigest *td, double const p) const;
 
 private:
-	double percentile_(const TDigest *td, double const p) const;
 	void updateMinMax_(TDigest *td, double value) const;
-	uint64_t weight_(const TDigest *td) const;
 
 	template<Compression C>
 	void add_(TDigest *td, double delta, double value, uint64_t weight) const;
-
 };
+
+
+
+template<RawTDigest::Compression C = RawTDigest::Compression::AGGRESSIVE>
+void merge(RawTDigest const &td_dest, RawTDigest::TDigest *dest, double delta, RawTDigest const &td_src, const RawTDigest::TDigest *src);
+
+
 
 #endif
 

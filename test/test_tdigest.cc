@@ -23,14 +23,13 @@ int main(){
 
 	auto *a = alloc(td.bytes());
 	auto *b = alloc(td.bytes());
-	auto *c = alloc(td.bytes());
 
 	for(size_t i = 0; i < 100; ++i){
 		td.add(a, delta, 10);
-		td.add(b, delta, 10);
+		td.add(b, delta, 10, 2);
 
-		assert(td.weight(a) == i + 1);
-		assert(td.weight(b) == i + 1);
+		assert(td.weight(a) == 1*(i + 1));
+		assert(td.weight(b) == 2*(i + 1));
 	}
 
 	std::cout << "size   A: " << td.size(a) << '\n';
@@ -40,7 +39,7 @@ int main(){
 
 	for(size_t i = 0; i < 5; ++i){
 		td.add(a, delta, 10);
-		td.add(b, delta, 10);
+		td.add(b, delta, 10, 2);
 	}
 
 	std::cout << "size   A after: " << td.size(a) << '\n';
@@ -48,12 +47,15 @@ int main(){
 	std::cout << "size   B after: " << td.size(b) << '\n';
 	std::cout << "weight B after: " << td.weight(b) << '\n';
 
-	td.merge(c, delta, a);
+	RawTDigest tdc{ SIZE * 2 };
+	auto *c = alloc(tdc.bytes());
+
+	merge(tdc, c, delta, td, a);
 
 	std::cout << "size   C: " << td.size(c) << '\n';
 	std::cout << "weight C: " << td.weight(c) << '\n';
 
-	td.merge(c, delta, a);
+	merge(tdc, c, delta, td, b);
 
 	std::cout << "size   C end: " << td.size(c) << '\n';
 	std::cout << "weight C end: " << td.weight(c) << '\n';
