@@ -405,7 +405,7 @@ namespace net::worker::commands::HLL{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -422,7 +422,9 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			uint8_t *hll = hll_;
+			auto buffer = blob.rawBuffer();
+
+			uint8_t *hll = reinterpret_cast<uint8_t *>(buffer.data());
 
 			getHLL().clear(hll);
 
@@ -444,7 +446,7 @@ namespace net::worker::commands::HLL{
 		}
 
 	private:
-		uint8_t hll_[hll_impl_::HLL_M];
+		static_assert(OutputBlob::RawBufferSize >= hll_impl_::HLL_M);
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

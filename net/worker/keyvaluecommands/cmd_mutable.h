@@ -158,7 +158,7 @@ namespace net::worker::commands::Mutable{
 		};
 
 		// MSETXX a 5 b 6
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using hm4::Pair;
 
 			auto const varg = 1;
@@ -174,7 +174,7 @@ namespace net::worker::commands::Mutable{
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
-			auto &pcontainer = blob.pcontainer();
+			PairVector pcontainer;
 
 			// theoretically can happen
 			if (p.size() / 2 > pcontainer.capacity())
@@ -222,6 +222,9 @@ namespace net::worker::commands::Mutable{
 
 			return result.set_1();
 		}
+
+	private:
+		using PairVector = StaticVector<const hm4::Pair *, OutputBlob::ParamContainerSize>;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

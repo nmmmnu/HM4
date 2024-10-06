@@ -24,7 +24,17 @@ public:
 	}
 
 	constexpr static size_t bytes(size_t capacity){
-		return 2 * sizeof(uint64_t) + 2 * sizeof(double) + capacity * (sizeof(uint64_t) + sizeof(double));
+		size_t const base = 2 * sizeof(uint64_t) + 2 * sizeof(double);
+		size_t const node = sizeof(uint64_t) + sizeof(double);
+
+		return base + capacity * node;
+	}
+
+	constexpr static size_t maxCapacity(size_t memory){
+		size_t const base = 2 * sizeof(uint64_t) + 2 * sizeof(double);
+		size_t const node = sizeof(uint64_t) + sizeof(double);
+
+		return (memory - base) / node;
 	}
 
 public:

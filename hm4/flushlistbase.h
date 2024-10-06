@@ -58,6 +58,12 @@ namespace flushlist_impl_{
 		notifyLoader(loader);
 	}
 
+	template<class FlushList, class PFactory>
+	auto insertF_NoFlush(FlushList &flushList, PFactory &factory){
+		// redirection need, because flushlist internal list may updated
+		return flushList.insertF_NoFlush(factory);
+	}
+
 	template<class FlushList, class PFactory, class MyPairBuffer>
 	auto flushThenInsert(FlushList &flushList, PFactory &factory, MyPairBuffer &pairBuffer){
 		MyBuffer::AdviceNeededGuard guard(pairBuffer);
@@ -76,7 +82,7 @@ namespace flushlist_impl_{
 
 		PairFactory::Clone cloneFactory{ pair };
 
-		return flushList.insertF_NoFlush(cloneFactory);
+		return insertF_NoFlush(flushList, cloneFactory);
 	}
 
 	template<class FlushList, class InsertList, class Predicate, class PFactory, class MyPairBuffer>
@@ -87,7 +93,7 @@ namespace flushlist_impl_{
 		if (predicate(insertList, factory.bytes()))
 			return flushThenInsert(flushList, factory, pairBuffer);
 
-		auto const result = flushList.insertF_NoFlush(factory);
+		auto const result = insertF_NoFlush(flushList, factory);
 
 		switch(result.status){
 		case result.ERROR_NO_MEMORY:	return flushThenInsert(flushList, factory, pairBuffer);	// try insert again

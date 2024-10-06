@@ -539,7 +539,7 @@ namespace net::worker::commands::CBF{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
 
 			if (p.size() < 6)
@@ -563,7 +563,7 @@ namespace net::worker::commands::CBF{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_<T>(key, p, CBF<T>{ w, d }, *db, result, blob);
+					return process_<T>(key, p, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
@@ -572,7 +572,7 @@ namespace net::worker::commands::CBF{
 
 	private:
 		template<typename T>
-		void process_(std::string_view key, ParamContainer const &p, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob) const{
+		void process_(std::string_view key, ParamContainer const &p, cbf_impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cbf_impl_;
 
 			auto const varg = 5;
@@ -582,7 +582,7 @@ namespace net::worker::commands::CBF{
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
-			auto &container  = blob.container();
+			Container container;
 
 			if (container.capacity() < p.size() - varg)
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
@@ -592,7 +592,7 @@ namespace net::worker::commands::CBF{
 					container.push_back("0");
 				}
 			}else{
-				auto &bcontainer = blob.bcontainer();
+				BContainer bcontainer;
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const &item = *itk;
@@ -607,6 +607,10 @@ namespace net::worker::commands::CBF{
 
 			return result.set_container(container);
 		}
+
+	private:
+		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
+		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
