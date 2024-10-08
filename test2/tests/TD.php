@@ -4,7 +4,6 @@ function cmd_TD($redis){
 	$redis->del("a");
 	$redis->del("b");
 	$redis->del("c");
-	$redis->del("d");
 
 	$size  = 100;
 	$delta = 0.05;
@@ -66,6 +65,5 @@ function cmd_TD($redis){
 	$redis->del("a");
 	$redis->del("b");
 	$redis->del("c");
-	$redis->del("d");
 }
 
