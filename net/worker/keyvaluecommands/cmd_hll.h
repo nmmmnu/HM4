@@ -29,12 +29,10 @@ namespace net::worker::commands::HLL{
 
 		template<class List>
 		const uint8_t *load_ptr(List &list, std::string_view key){
-			return hm4::getPair_(list, key, [](bool b, auto it) -> const uint8_t *{
-				if (b && it->getVal().size() == HLL_M)
-					return reinterpret_cast<const uint8_t *>(it->getVal().data());
-				else
-					return nullptr;
-			});
+			if (const auto *pair = hm4::getPairPtrWithSize(list, key, HLL_M); pair)
+				return hm4::getValAs<uint8_t>(pair);
+
+			return nullptr;
 		}
 
 		template<class DBAdapter>
@@ -69,8 +67,6 @@ namespace net::worker::commands::HLL{
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
 		}
 
-
-
 	} // namespace hll_impl_
 
 
@@ -104,9 +100,7 @@ namespace net::worker::commands::HLL{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
-			using MyHLLADD_Factory = PFADDFactoryBits<ParamContainer::iterator>;
-
-			MyHLLADD_Factory factory{ key, pair, std::begin(p) + varg, std::end(p) };
+			PFADDFactoryBits factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
 			insertHintVFactory(pair, *db, factory);
 
@@ -114,16 +108,16 @@ namespace net::worker::commands::HLL{
 		}
 
 	private:
-		// mostly copy of PFADDFactory but add some operations
-		template<typename It>
-		struct PFADDFactoryBits : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits<It> >{
+		struct PFADDFactoryBits : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits<It> >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>;
+
+			using It = ParamContainer::iterator;
 
 			PFADDFactoryBits(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
-							begin			(begin		),
-							end			(end		){}
+							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair	),
+							begin			(begin				),
+							end			(end				){}
 
 			void action(Pair *pair){
 				bits = action_(pair);;
@@ -330,9 +324,7 @@ namespace net::worker::commands::HLL{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
-			using MyHLLADD_Factory = PFADDFactoryCount<ParamContainer::iterator>;
-
-			MyHLLADD_Factory factory{ key, pair, std::begin(p) + varg, std::end(p) };
+			PFADDFactoryCount factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
 			insertHintVFactory(pair, *db, factory);
 
@@ -345,15 +337,16 @@ namespace net::worker::commands::HLL{
 
 	private:
 		// mostly copy of PFADDFactory but add some operations
-		template<typename It>
-		struct PFADDFactoryCount : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount<It> >{
+		struct PFADDFactoryCount : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount<It> >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>;
+
+			using It = ParamContainer::iterator;
 
 			PFADDFactoryCount(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
-							begin			(begin		),
-							end			(end		){}
+							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair	),
+							begin			(begin				),
+							end			(end				){}
 
 			void action(Pair *pair){
 				this->count = action_(pair);
@@ -405,13 +398,13 @@ namespace net::worker::commands::HLL{
 			return std::end(cmd);
 		};
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
-			const auto &dest_key = p[1];
+			const auto &key = p[1];
 
-			if (!hm4::Pair::isKeyValid(dest_key))
+			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const varg = 2;
@@ -422,31 +415,61 @@ namespace net::worker::commands::HLL{
 
 			using namespace hll_impl_;
 
-			auto buffer = blob.rawBuffer();
+			HLLVector container;
 
-			uint8_t *hll = reinterpret_cast<uint8_t *>(buffer.data());
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto const &src_key = *itk;
 
-			getHLL().clear(hll);
+				// prevent merge with itself.
+				if (src_key == key)
+					continue;
 
-			// This is not good candidate for a factory,
-			// because it will read and write at the same time.
-			// Even is values are added to a vector,
-			// a possibility of overwrite exists, e.g.
-			// PFMERGE KEY KEY
-			// or
-			// PFMERGE KEY a b c KEY a b c
+				if (const auto *b = load_ptr(*db, src_key); b)
+					container.push_back(b);
+			}
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto *b = load_ptr(*db, *itk); b)
-					getHLL().merge(hll, b);
+			if (container.empty())
+				return result.set();
 
-			store(*db, dest_key, hll);
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
+
+			PFMergeFactory factory{ key, pair, std::begin(container), std::end(container) };
+
+			insertHintVFactory(pair, *db, factory);
 
 			return result.set();
 		}
 
 	private:
-		static_assert(OutputBlob::RawBufferSize >= hll_impl_::HLL_M);
+		using HLLVector = StaticVector<const uint8_t *, OutputBlob::ParamContainerSize>;
+
+	private:
+		struct PFMergeFactory : hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory >;
+
+			PFMergeFactory(std::string_view const key, const Pair *pair, HLLVector::iterator begin, HLLVector::iterator end) :
+							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
+							begin			(begin		),
+							end			(end		){}
+
+			void action(Pair *pair) const{
+				using namespace hll_impl_;
+
+				auto *hll = hm4::getValAs<uint8_t>(pair);
+
+				// getHLL().clear(hll);
+
+				// This is fine, because flush list give guarantees now.
+
+				for(auto it = begin; it != end; ++it)
+					getHLL().merge(hll, *it);
+			}
+
+		private:
+			HLLVector::iterator	begin;
+			HLLVector::iterator	end;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {

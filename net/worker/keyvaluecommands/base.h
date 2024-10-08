@@ -28,13 +28,10 @@ namespace net::worker::commands{
 	struct OutputBlob{
 		constexpr static size_t ContainerSize		= 0xFFFF;
 		constexpr static size_t ParamContainerSize	= 0xFF;
-		constexpr static size_t RawBufferSize		= 1024 * 1024 * 4;
 
 		using Container		= StaticVector<std::string_view		, ContainerSize>;	// 1024 KB, if string_view is 16 bytes
 		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	//  514 KB
 		using BufferContainer	= StaticVector<to_string_buffer_t	, ContainerSize>;	// 2048 KB, if to_string_buffer_t is 32 bytes
-
-		using RawBuffer		= std::array<char, RawBufferSize>;				// 4096 KB
 
 		constexpr static void resetAllocator(){
 		}
@@ -51,10 +48,6 @@ namespace net::worker::commands{
 			return getClean__(pack->bcontainer);
 		}
 
-		auto &rawBuffer(){
-			return pack->rawBuffer;
-		}
-
 	private:
 		template<class T>
 		static T &getClean__(T &container){
@@ -67,7 +60,6 @@ namespace net::worker::commands{
 			Container	container;
 			PairContainer	pcontainer;
 			BufferContainer	bcontainer;
-			RawBuffer	rawBuffer;
 		};
 
 		std::unique_ptr<Pack> pack = std::make_unique<Pack>();

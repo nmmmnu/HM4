@@ -311,4 +311,8 @@ Changelog
 ### 1.3.8
 -	refactor geo, linear curve, morton curve modules. This change is NOT breaking with previous versions.
 -	new module INDEX
+-	new module TDigest: TDADD, TDADDWEIGHT, TDRESERVE, TDMERGE, TDMERGECAPACITY, TDPERCENTILE, TDMIN, TDMAX, TDSIZE, TDINFO
+-	skip using OutputBlob for small vectors that can stay on the stack
+
+
 

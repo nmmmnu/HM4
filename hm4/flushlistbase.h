@@ -95,10 +95,15 @@ namespace flushlist_impl_{
 
 		auto const result = insertF_NoFlush(flushList, factory);
 
-		switch(result.status){
-		case result.ERROR_NO_MEMORY:	return flushThenInsert(flushList, factory, pairBuffer);	// try insert again
-		default:			return result;
+		if (result.status == result.ERROR_NO_MEMORY){
+			// unlikely, because we checked with the predicate already,
+			// but just in case
+			//
+			// the list guarantee, no changes on the list are done.
+			return flushThenInsert(flushList, factory, pairBuffer);
 		}
+
+		return result;
 	}
 
 } // namespace

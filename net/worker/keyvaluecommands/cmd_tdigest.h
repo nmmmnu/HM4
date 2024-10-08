@@ -10,7 +10,7 @@ namespace net::worker::commands::TDigest{
 		using Pair = hm4::Pair;
 
 		constexpr auto MIN_SIZE		= 16;
-		constexpr auto MAX_SIZE		= RawTDigest::maxCapacity(OutputBlob::RawBufferSize);
+		constexpr auto MAX_SIZE		= RawTDigest::maxCapacity(hm4::PairConf::MAX_VAL_SIZE);
 
 		constexpr auto MIN_WEIGHT	= 1;
 		constexpr auto MAX_WEIGHT	= 0xFFFF;
@@ -65,6 +65,53 @@ namespace net::worker::commands::TDigest{
 
 		private:
 			constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
+
+		private:
+			RawTDigest	&tdigest;
+			double		delta;
+			It		begin;
+			It		end;
+		};
+
+
+
+		struct TDPair{
+			const Pair	*pair;
+			uint64_t	size;
+		};
+
+		using TDPairVector = StaticVector<TDPair, OutputBlob::ParamContainerSize>;
+
+
+
+		struct TDMERGE_Factory : hm4::PairFactory::IFactoryAction<1, 1, TDMERGE_Factory>{
+			using Pair	= hm4::Pair;
+			using Base	= hm4::PairFactory::IFactoryAction<1, 1, TDMERGE_Factory>;
+
+			using It	= TDPairVector::iterator;
+
+			constexpr TDMERGE_Factory(std::string_view const key, const Pair *pair, RawTDigest &tdigest, double delta, It begin, It end) :
+							Base::IFactoryAction	(key, tdigest.bytes(), pair),
+							tdigest			(tdigest	),
+							delta			(delta		),
+							begin			(begin		),
+							end			(end		){}
+
+			void action(Pair *pair) const{
+				using namespace td_impl_;
+
+				auto const compression = RawTDigest::Compression::AGGRESSIVE;
+
+				auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
+
+				for(auto it = begin; it != end; ++it){
+					const auto *src_data = hm4::getValAs<RawTDigest::TDigest>(it->pair);
+
+					RawTDigest src_tdigest{ it->size };
+
+					merge<compression>(tdigest, data, delta, src_tdigest, src_data);
+				}
+			}
 
 		private:
 			RawTDigest	&tdigest;
@@ -249,8 +296,9 @@ namespace net::worker::commands::TDigest{
 			return std::end(cmd);
 		}
 
+
 		// TDMERGE key capacity delta src_key [src_key]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace td_impl_;
 
 			if (p.size() < 5)
@@ -272,47 +320,39 @@ namespace net::worker::commands::TDigest{
 
 			RawTDigest td{ c };
 
-			auto &buffer = blob.rawBuffer();
-
-			RawTDigest::TDigest *data = reinterpret_cast<RawTDigest::TDigest *>(buffer.data());
-
-			td.clear(data);
+			TDPairVector container;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				RawTDigest &src_td  = td;
+				auto const &src_key = *itk;
 
-				const auto *pair = hm4::getPairPtrWithSize(*db, *itk, src_td.bytes());
-
-				if (!pair)
+				// prevent merge with itself.
+				if (src_key == key)
 					continue;
 
-				const auto *src_data = hm4::getValAs<RawTDigest::TDigest>(pair);
+				auto const src_c = c;
 
-				merge<compression>(td, data, d, src_td, src_data);
+				RawTDigest &td_src = td;
+
+				if (const auto *pair = hm4::getPairPtrWithSize(*db, src_key, td_src.bytes()); pair)
+					container.push_back( TDPair{ pair, src_c } );
+
 			}
 
-			// This is not good candidate for a factory,
-			// because it will read and write at the same time.
-			// Even is values are added to a vector,
-			// a possibility of overwrite exists, e.g.
-			// TDMERGE KEY 10 0.05 KEY
-			// or
-			// TDMERGE KEY 10 0.05 a b c KEY a b c
+			if (container.empty())
+				return result.set_1();
 
-			hm4::insert(*db,
-				key,
-				std::string_view{
-					buffer.data(),
-					td.bytes()
-				}
-			);
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes());
+
+			TDMERGE_Factory factory{ key, pair, td, d, std::begin(container), std::end(container) };
+
+			// This is fine, because flush list give guarantees now.
+
+			insertHintVFactory(pair, *db, factory);
 
 			return result.set_1();
 		}
 
 	private:
-		static_assert(OutputBlob::RawBufferSize >= RawTDigest::bytes(td_impl_::MAX_SIZE) );
-
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
 	private:
@@ -334,7 +374,7 @@ namespace net::worker::commands::TDigest{
 		}
 
 		// TDMERGE key capacity delta src_key [src_key src_capacity]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace td_impl_;
 
 			if (p.size() < 6)
@@ -354,51 +394,40 @@ namespace net::worker::commands::TDigest{
 				if (const auto &src = *itk; !hm4::Pair::isKeyValid(src))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			RawTDigest td{ c };
-
-			auto &buffer = blob.rawBuffer();
-
-			RawTDigest::TDigest *data = reinterpret_cast<RawTDigest::TDigest *>(buffer.data());
-
-			td.clear(data);
+			TDPairVector container;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
-				auto const src_c    = std::clamp<uint64_t>(from_string<uint64_t>(*std::next(itk)), MIN_SIZE, MAX_SIZE);
+				auto const &src_key = *itk;
 
-				RawTDigest src_td{ src_c };
-
-				const auto *pair = hm4::getPairPtrWithSize(*db, *itk, src_td.bytes());
-
-				if (!pair)
+				// prevent merge with itself.
+				if (src_key == key)
 					continue;
 
-				const auto *src_data = hm4::getValAs<RawTDigest::TDigest>(pair);
+				auto const src_c = std::clamp<uint64_t>(from_string<uint64_t>(*std::next(itk)), MIN_SIZE, MAX_SIZE);
 
-				merge<compression>(td, data, d, src_td, src_data);
+				RawTDigest td_src{ src_c };
+
+				if (const auto *pair = hm4::getPairPtrWithSize(*db, src_key, td_src.bytes()); pair)
+					container.push_back( TDPair{ pair, src_c } );
 			}
 
-			// This is not good candidate for a factory,
-			// because it will read and write at the same time.
-			// Even is values are added to a vector,
-			// a possibility of overwrite exists, e.g.
-			// TDMERGE KEY 10 0.05 KEY
-			// or
-			// TDMERGE KEY 10 0.05 a b c KEY a b c
+			if (container.empty())
+				return result.set_1();
 
-			hm4::insert(*db,
-				key,
-				std::string_view{
-					buffer.data(),
-					td.bytes(c)
-				}
-			);
+			RawTDigest td{ c };
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes());
+
+			TDMERGE_Factory factory{ key, pair, td, d, std::begin(container), std::end(container) };
+
+			// This is fine, because flush list give guarantees now.
+
+			insertHintVFactory(pair, *db, factory);
 
 			return result.set_1();
 		}
 
 	private:
-		static_assert(OutputBlob::RawBufferSize >= RawTDigest::bytes(td_impl_::MAX_SIZE) );
-
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
 	private:
@@ -420,7 +449,67 @@ namespace net::worker::commands::TDigest{
 			return std::end(cmd);
 		};
 
-		// TDADD key capacity percentile [percentile]
+		// TDPERCENTILE key capacity percentile
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace td_impl_;
+
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const c = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), MIN_SIZE, MAX_SIZE);
+
+			RawTDigest td{ c };
+
+			const auto &val = p[3];
+
+			if (val.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				return result.set("0.0");
+			}else{
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
+
+				to_string_buffer_t buffer;
+
+				auto const percentile       = std::clamp<double>(to_double_def(val), 0.0, 1.0);
+				auto const percentileResult = td.percentile(data, percentile);
+
+				auto const line             = formatLine(percentileResult, buffer);
+
+				return result.set(line);
+			}
+		}
+
+	private:
+		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
+		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"tdpercentile",	"TDPERCENTILE",
+			"thquantile",	"TDQUANTILE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct TDMPERCENTILE : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// TDMPERCENTILE key capacity percentile [percentile]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace td_impl_;
 
@@ -475,8 +564,8 @@ namespace net::worker::commands::TDigest{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"tdpercentile",	"TDPERCENTILE",
-			"thquantile",	"TDQUANTILE"
+			"tdmpercentile",	"TDMPERCENTILE",
+			"thmquantile",		"TDMQUANTILE"
 		};
 	};
 
@@ -692,6 +781,7 @@ namespace net::worker::commands::TDigest{
 				TDMERGE		,
 				TDMERGECAPACITY	,
 				TDPERCENTILE	,
+				TDMPERCENTILE	,
 				TDMIN		,
 				TDMAX		,
 				TDSIZE		,

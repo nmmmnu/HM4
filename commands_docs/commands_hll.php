@@ -93,10 +93,11 @@ return array(
 	new Cmd(
 			"PFMERGE",
 
-			"PFMERGE / HLLMERGE dest_key [key1] [key2] [key3] [key4] [key5]",
+			"PFMERGE / HLLMERGE dest_key key [key]... ",
 
-			"Make a HLL union of up to 5 keys and store it in <i>dest_key</i><br />" .
-			"Works with single key too. Works without key too.",
+			"Make a HLL union of <i>key</i>... and store it in <i>dest_key</i><br />" .
+			"If <i>dest_key</i> contains valid HLL value, its value used in the merge process too.<br />" .
+			"Works with single key too.",
 			"OK",
 			"Value of the removed element or empty string.",
 			"1.2.17",
