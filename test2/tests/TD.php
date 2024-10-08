@@ -31,6 +31,7 @@ function cmd_TD($redis){
 
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "a", $size, 0.50) == 100	);
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "a", $size, 0.90) == 110	);
+	expect("TDMPERCENTILE", rawCommand($redis, "tdmpercentile", "a", $size, 0.50, 0.90) == [ 100, 110 ]	);
 	expect("TDSIZE",	rawCommand($redis, "tdsize",       "a", $size) == 2001		);
 
 	expect("TDMIN",		rawCommand($redis, "tdmin",        "a", $size) == 80		);
@@ -42,6 +43,7 @@ function cmd_TD($redis){
 
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "b", $size, 0.50) == 100	);
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "b", $size, 0.90) == 110	);
+	expect("TDMPERCENTILE", rawCommand($redis, "tdmpercentile", "b", $size, 0.50, 0.90) == [ 100, 110 ]	);
 	expect("TDSIZE",	rawCommand($redis, "tdsize",       "b", $size) == 2001		);
 
 	rawCommand($redis, "tdmerge", "b", $size, $delta, "a", "a");
@@ -50,6 +52,7 @@ function cmd_TD($redis){
 
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "b", $size, 0.50) == 100	);
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "b", $size, 0.90) == 110	);
+	expect("TDMPERCENTILE", rawCommand($redis, "tdmpercentile", "b", $size, 0.50, 0.90) == [ 100, 110 ]	);
 	expect("TDSIZE",	rawCommand($redis, "tdsize",       "b", $size) == 6003		);
 
 	$csize = 10;
@@ -60,6 +63,7 @@ function cmd_TD($redis){
 
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "c", $csize, 0.50) == 100	);
 	expect("TDPERCENTILE",	rawCommand($redis, "tdpercentile", "c", $csize, 0.90) == 110	);
+	expect("TDMPERCENTILE", rawCommand($redis, "tdmpercentile", "c", $csize, 0.50, 0.90) == [ 100, 110 ]	);
 	expect("TDSIZE",	rawCommand($redis, "tdsize",       "c", $csize) == 8004		);
 
 	$redis->del("a");
