@@ -581,7 +581,7 @@ namespace net::worker::commands::TDigest{
 			return std::end(cmd);
 		};
 
-		// TDADD key capacity
+		// TDMIN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace td_impl_;
 
@@ -629,7 +629,7 @@ namespace net::worker::commands::TDigest{
 			return std::end(cmd);
 		};
 
-		// TDADD key capacity
+		// TDMAX key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace td_impl_;
 
@@ -677,7 +677,7 @@ namespace net::worker::commands::TDigest{
 			return std::end(cmd);
 		};
 
-		// TDADD key capacity
+		// TDSIZE key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace td_impl_;
 

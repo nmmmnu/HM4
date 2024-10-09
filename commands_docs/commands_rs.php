@@ -22,7 +22,7 @@ return array(
 			false,
 			true,
 
-			"mg"
+			"rs"
 	),
 
 	new Cmd(
@@ -41,7 +41,7 @@ return array(
 			false,
 			true,
 
-			"mg"
+			"rs"
 	),
 
 	new Cmd(
@@ -60,7 +60,7 @@ return array(
 			false,
 			false,
 
-			"mg"
+			"rs"
 	),
 
 
@@ -80,6 +80,6 @@ return array(
 			false,
 			false,
 
-			"mg"
+			"rs"
 	),
 );

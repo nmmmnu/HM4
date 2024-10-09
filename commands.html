@@ -380,6 +380,18 @@
 				<li><a href="#RSGETCOUNT">RSGETCOUNT</a></li>
 				</div>
 			<div>
+			<b>tdigest.h</b><br />
+			&nbsp;
+
+					<li><a href="#TDADD">TDADD</a></li>
+				<li><a href="#TDADDWEIGHT">TDADDWEIGHT</a></li>
+				<li><a href="#TDRESERVE">TDRESERVE</a></li>
+				<li><a href="#TDMERGE">TDMERGE</a></li>
+				<li><a href="#TDMERGECAPACITY">TDMERGECAPACITY</a></li>
+				<li><a href="#TDPERCENTILE">TDPERCENTILE</a></li>
+				<li><a href="#TDMPERCENTILE">TDMPERCENTILE</a></li>
+				</div>
+			<div>
 			<b>murmur.h</b><br />
 			&nbsp;
 
@@ -4933,7 +4945,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mg.h</td></tr>
+				<tr><td>Module			</td><td>rs.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4956,7 +4968,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mg.h</td></tr>
+				<tr><td>Module			</td><td>rs.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4979,7 +4991,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mg.h</td></tr>
+				<tr><td>Module			</td><td>rs.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -5002,7 +5014,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mg.h</td></tr>
+				<tr><td>Module			</td><td>rs.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -5011,6 +5023,167 @@ limit [number]</pre>
 			int
 			<h3>Return value:</h3>
 			count of insertions made
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TDADD">
+
+			<h2>TDADD key td_capacity delta value [value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TDADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>tdigest.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>value</i>'s into the TDigests with capacity <i>td_capacity</i>.<br /><i>td_capacity</i> can be from 16 to over 100'000.<br />Read TDigest information document.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			always returns 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TDADDWEIGHT">
+
+			<h2>TDADDWEIGHT key td_capacity delta value weight [value weight]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TDADDWEIGHT</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>tdigest.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>value</i>'s with <i>weight</i> into the TDigests with capacity <i>td_capacity</i>.<br /><i>td_capacity</i> can be from 16 to over 100'000.<br /><i>weight</i> is integer larger or equal to 1.<br />Read TDigest information document.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TDRESERVE">
+
+			<h2>TDRESERVE key td_capacity</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TDRESERVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>tdigest.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Create new, empty TDigests with capacity <i>td_capacity</i>.<br /><i>td_capacity</i> can be from 16 to over 100'000.<br />Read TDigest information document.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			always returns 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TDMERGE">
+
+			<h2>TDMERGE key td_capacity delta src_key [src_key]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TDMERGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n * READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>tdigest.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Merge <i>src_key</i> with capacity <i>td_capacity</i> into <i>key</i> with capacity <i>td_capacity</i>.<br /><i>td_capacity</i> can be from 16 to over 100'000.<br />Read TDigest information document.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TDMERGECAPACITY">
+
+			<h2>TDMERGECAPACITY / TDMERGECAP key td_capacity delta src_key src_td_capacity [src_key src_td_capacity]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TDMERGECAPACITY</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n * READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>tdigest.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Merge <i>src_key</i> with capacity <i>src_td_capacity</i> into <i>key</i> with capacity <i>td_capacity</i>.<br /><i>td_capacity</i> and <i>src_td_capacity</i> can be from 16 to over 100'000.<br />Read TDigest information document.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TDPERCENTILE">
+
+			<h2>TDPERCENTILE / TDQUANTILE key td_capacity percentile</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TDPERCENTILE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n * READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>tdigest.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate percentile (quantile) from <i>key</i> with capacity <i>td_capacity</i>.<br /><i>td_capacity</i> can be from 16 to over 100'000.<br /><i>percentile</i> is floating point from 0.0 to 1.0 .<br />Read TDigest information document.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			floating point returned as string
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="TDMPERCENTILE">
+
+			<h2>TDMPERCENTILE / TDMQUANTILE key td_capacity percentile [percentile]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>TDMPERCENTILE</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n * READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>tdigest.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate percentile (quantile) from <i>key</i> with capacity <i>td_capacity</i>.<br /><i>td_capacity</i> can be from 16 to over 100'000.<br /><i>percentile</i> is floating point from 0.0 to 1.0 .<br />Read TDigest information document.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			array of floating point values as string
 			
 			
 			<p class="top"><a href="#top">top</a></p>

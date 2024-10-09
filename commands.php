@@ -229,6 +229,7 @@ function getData(){
 		"hh"				=> require "$d/commands_hh.php"			,
 		"mg"				=> require "$d/commands_mg.php"			,
 		"rs"				=> require "$d/commands_rs.php"			,
+		"tdigest"			=> require "$d/commands_tdigest.php"		,
 	//	"cv"				=> require "$d/commands_cv.php"			,
 		"murmur"			=> require "$d/commands_murmur.php"		,
 		"info"				=> require "$d/commands_info.php"		,
