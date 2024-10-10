@@ -103,9 +103,9 @@ return array(
 			"string",
 			"floating point returned as string",
 			"1.3.7.8",
-			"n * READ + WRITE",
+			"READ",
 			false,
-			true,
+			false,
 
 			"tdigest"
 	),
@@ -122,12 +122,83 @@ return array(
 			"array",
 			"array of floating point values as string",
 			"1.3.7.8",
-			"n * READ + WRITE",
+			"READ",
 			false,
-			true,
+			false,
 
 			"tdigest"
 	),
 
+	new Cmd(
+			"TDMIN",
+
+			"TDMIN key td_capacity",
+
+			"Return min value from <i>key</i> with capacity <i>td_capacity</i>.<br />" .
+			"<i>td_capacity</i> can be from 16 to over 100'000.<br />" .
+			"Read TDigest information document.",
+			"string",
+			"floating point returned as string",
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"tdigest"
+	),
+
+	new Cmd(
+			"TDMAX",
+
+			"TDMAX key td_capacity",
+
+			"Return max value from <i>key</i> with capacity <i>td_capacity</i>.<br />" .
+			"<i>td_capacity</i> can be from 16 to over 100'000.<br />" .
+			"Read TDigest information document.",
+			"string",
+			"floating point returned as string",
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"tdigest"
+	),
+
+	new Cmd(
+			"TDSIZE",
+
+			"TDSIZE key td_capacity",
+
+			"Return count of the values from <i>key</i> with capacity <i>td_capacity</i>.<br />" .
+			"<i>td_capacity</i> can be from 16 to over 100'000.<br />" .
+			"Read TDigest information document.",
+			"int",
+			"count of the values",
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"tdigest"
+	),
+
+	new Cmd(
+			"TDINFO",
+
+			"TDINFO key td_capacity",
+
+			"Return information about the <i>key</i> with capacity <i>td_capacity</i>.<br />" .
+			"<i>td_capacity</i> can be from 16 to over 100'000.<br />" .
+			"Read TDigest information document.",
+			"int",
+			"count of the values",
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"tdigest"
+	),
 
 );
