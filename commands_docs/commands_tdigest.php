@@ -130,6 +130,24 @@ return array(
 	),
 
 	new Cmd(
+			"TDMEDIAN",
+
+			"TDMEDIAN key td_capacity",
+
+			"Estimate 50% percentile (median) from <i>key</i> with capacity <i>td_capacity</i>.<br />" .
+			"<i>td_capacity</i> can be from 16 to over 100'000.<br />" .
+			"Read TDigest information document.",
+			"string",
+			"floating point returned as string",
+			"1.3.7.8",
+			"READ",
+			false,
+			false,
+
+			"tdigest"
+	),
+
+	new Cmd(
 			"TDMIN",
 
 			"TDMIN key td_capacity",
