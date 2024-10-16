@@ -93,11 +93,25 @@ public:
 
 	double percentile(const TDigest *td, double const p) const;
 
+	double trimmedMean(const TDigest *td, double const min, double const max) const{
+		assert(min >= 0.0 && min <= 1.0);
+		assert(max >= 0.0 && max <= 1.0);
+
+		if (min >= max)
+			return 0;
+
+		return trimmedMean_(td, min, max);
+	}
+
+	double mean(const TDigest *td) const;
+
 private:
 	void updateMinMax_(TDigest *td, double value) const;
 
 	template<Compression C>
 	void add_(TDigest *td, double delta, double value, uint64_t weight) const;
+
+	double trimmedMean_(const TDigest *td, double const min, double const max) const;
 };
 
 

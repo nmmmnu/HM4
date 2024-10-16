@@ -2,16 +2,17 @@
 
 #include <limits>
 #include <cstdio>
+#include <numeric>	// accumulate
 
 #include "myendian_fp.h"
 
 namespace {
 	template<typename IT>
 	void insertIntoSortedRange(IT first, IT last, typename std::iterator_traits<IT>::value_type &&item){
-	    auto it = std::lower_bound(first, last, item);
-	    std::move_backward(it, last, std::next(last));
+		auto it = std::lower_bound(first, last, item);
+		std::move_backward(it, last, std::next(last));
 
-	    *it = std::move(item);
+		*it = std::move(item);
 	}
 } // namespace
 
@@ -55,6 +56,10 @@ struct Centroid{
 
 	friend constexpr bool operator<(Centroid const &a, Centroid const &b){
 		return a.mean() < b.mean();
+	}
+
+	friend constexpr bool operator<(Centroid const &a, double const mean){
+		return a.mean() < mean;
 	}
 };
 
@@ -341,11 +346,19 @@ double RawTDigest::percentile(const TDigest *td, double const p) const{
 	if (empty(td))
 		return 0;
 
+	if (p == 0.0)
+		return min(td);
+
+	if (p == 1.0)
+		return max(td);
+
 	auto const size = this->size(td);
 
 	double const targetRank = p * static_cast<double>(td->weight());
 	double cumulativeWeight = 0;
 
+	// size - 1, because we will return last element anyway.
+	// array is not empty
 	for(size_t i = 0; i < size - 1; ++i){
 		cumulativeWeight += static_cast<double>(td->data[i].weight());
 		if (cumulativeWeight >= targetRank)
@@ -353,6 +366,88 @@ double RawTDigest::percentile(const TDigest *td, double const p) const{
 	}
 
 	return td->data[size - 1].mean();
+}
+
+
+
+double RawTDigest::trimmedMean_(const TDigest *td, double const minD, double const maxD) const{
+	constexpr bool debug = false;
+
+	if (empty(td))
+		return 0;
+
+	auto const w = static_cast<double>(weight(td));
+
+	auto       min = w * minD;
+	auto const max = w * maxD;
+
+	auto const size = this->size(td);
+
+	double cumulativeWeight	= 0;
+
+	double sum		= 0.0;
+	double count		= 0;
+
+	for(size_t i = 0; i < size; ++i){
+		cumulativeWeight += static_cast<double>(td->data[i].weight());
+
+		if (cumulativeWeight < min){
+			if constexpr(debug)
+				printf("loop>>> %10zu | %10.4f | %10.4f | %10.4f |  %10.4f | %s\n", i, 0., cumulativeWeight, min, max, "skip");
+
+			continue;
+		}
+
+		if (cumulativeWeight <= max){
+			// normal delta, until end of the centroid
+			auto const delta = cumulativeWeight - min;
+
+			min = cumulativeWeight;
+
+			sum   += td->data[i].mean() * delta;
+
+			count += delta;
+
+			if constexpr(debug)
+				printf("loop>>> %10zu | %10.4f | %10.4f | %10.4f |  %10.4f | %s\n", i, delta, cumulativeWeight, min, max, "ongoing");
+
+			continue;
+		}else{
+			// tricky delta, because is last centroid we will check
+			auto const delta = max - min;
+
+			sum += td->data[i].mean() * delta;
+
+			count += delta;
+
+			if constexpr(debug)
+				printf("loop>>> %10zu | %10.4f | %10.4f | %10.4f |  %10.4f | %s\n", i, delta, cumulativeWeight, min, max, "final");
+
+			break;
+		}
+	}
+
+	if constexpr(debug)
+		printf("finish> %10u | %10.4f | %10.4f | %10.4f | %10.4f | %10.4f\n", 0u, sum, count, sum / count, min, max);
+
+	return sum / count;
+}
+
+
+
+double RawTDigest::mean(const TDigest *td) const{
+	if (empty(td))
+		return 0;
+
+	auto const size = this->size(td);
+
+	auto acc =  [](double a, Centroid const &c){
+		return a + c.weightedMean();
+	};
+
+	auto const sum = std::accumulate(td->data, td->data + size, 0.0, acc);
+
+	return sum / static_cast<double>(weight(td));
 }
 
 

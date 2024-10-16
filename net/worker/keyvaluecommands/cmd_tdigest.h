@@ -602,10 +602,10 @@ namespace net::worker::commands::TDigest{
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
-				to_string_buffer_t buffer;
-
 				auto const percentile       = 0.5;
 				auto const percentileResult = td.percentile(data, percentile);
+
+				to_string_buffer_t buffer;
 
 				auto const line             = formatLine(percentileResult, buffer);
 
@@ -620,6 +620,115 @@ namespace net::worker::commands::TDigest{
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"tdmedian",	"TDMEDIAN"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct TDTRIMMEDMEAN : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// TDTRIMMEDMEAN key capacity from_percentile to_percentile
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace td_impl_;
+
+			if (p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const c = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), MIN_SIZE, MAX_SIZE);
+
+			RawTDigest td{ c };
+
+			auto const p1 = std::clamp<double>(to_double_def(p[3]), 0.0, 1.0);
+			auto const p2 = std::clamp<double>(to_double_def(p[4]), 0.0, 1.0);
+
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				return result.set("0.0");
+			}else{
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
+
+				auto const trimmedMeanResult = td.trimmedMean(data, p1, p2);
+
+				to_string_buffer_t buffer;
+
+				auto const line = formatLine(trimmedMeanResult, buffer);
+
+				return result.set(line);
+			}
+		}
+
+	private:
+		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
+		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"tdtrimmedmean",	"TDTRIMMEDMEAN"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct TDMEAN : BaseRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// TDMEAN key capacity
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace td_impl_;
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const c = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), MIN_SIZE, MAX_SIZE);
+
+			RawTDigest td{ c };
+
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+				return result.set("0.0");
+			}else{
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
+
+				auto const meanResult = td.mean(data);
+
+				to_string_buffer_t buffer;
+
+				auto const line = formatLine(meanResult, buffer);
+
+				return result.set(line);
+			}
+		}
+
+	private:
+		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
+		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"tdmean",	"TDMEAN"
 		};
 	};
 
@@ -837,6 +946,8 @@ namespace net::worker::commands::TDigest{
 				TDPERCENTILE	,
 				TDMPERCENTILE	,
 				TDMEDIAN	,
+				TDTRIMMEDMEAN	,
+				TDMEAN		,
 				TDMIN		,
 				TDMAX		,
 				TDSIZE		,
