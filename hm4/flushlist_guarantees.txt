@@ -4,4 +4,6 @@ Flushlist guarantees under normal operations
 - All references to any dynamic data will be kept until pair is inserted / created.
   In case of list flush, insert will be done in a buffer,
   after the flush, the buffer will be cloned into the list.
+- However, if you have two or more consequtive inserts,
+  this guarantee apply only for the first mutation. e.g XNDEL
 

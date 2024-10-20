@@ -86,7 +86,7 @@ namespace flushlist_impl_{
 	}
 
 	template<class FlushList, class InsertList, class Predicate, class PFactory, class MyPairBuffer>
-	auto insertF(FlushList &flushList, InsertList &insertList, Predicate &predicate, PFactory &factory, MyPairBuffer &pairBuffer){
+	auto insertF(FlushList &flushList, InsertList const &insertList, Predicate &predicate, PFactory &factory, MyPairBuffer &pairBuffer){
 		if (!factory.valid())
 			return InsertResult::errorInvalid();
 
