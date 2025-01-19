@@ -315,4 +315,6 @@ Changelog
 -	skip using OutputBlob for small vectors that can stay on the stack
 -	Release
 
+### 1.3.9
+-	introduce FileWriter instead of std::ofstream
 
