@@ -22,8 +22,8 @@ bool BTreeIndexBuilder<List>::build(){
 		return true;
 	}
 
-	file_indx_.open(filenameBTreeIndx(filename_),	std::ios::out | std::ios::binary);
-	file_data_.open(filenameBTreeData(filename_),	std::ios::out | std::ios::binary);
+	file_indx_ = { filenameBTreeIndx(filename_) };
+	file_data_ = { filenameBTreeData(filename_) };
 
 	std::cout
 		 << "Records          : "	<< size			<< '\n'

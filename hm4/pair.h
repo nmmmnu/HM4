@@ -5,7 +5,6 @@
 #include <cstring>
 #include <cassert>
 
-#include <ostream>
 #include <memory>
 #include <string_view>
 
@@ -461,11 +460,12 @@ inline namespace version_4_00_00{
 
 		void print() const noexcept;
 
-		void fwrite(std::ostream & os, WriteOptions const writeOptions) const{
-			os.write((const char *) this, narrow<std::streamsize>( bytes() ) );
+		template<typename MyFileWriter>
+		void fwrite(MyFileWriter &fw, WriteOptions const writeOptions) const{
+			fw.write(this, bytes());
 
 			if (writeOptions == WriteOptions::ALIGNED)
-				my_align::fwriteGap(os, bytes(), PairConf::ALIGN);
+				my_align::fwriteGap(fw, bytes(), PairConf::ALIGN);
 		}
 
 		// ==============================

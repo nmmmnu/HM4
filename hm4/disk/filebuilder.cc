@@ -22,14 +22,14 @@ namespace FileBuilder{
 			return fixMinMax(val, std::numeric_limits<T>::min());
 		}
 
-		void writeU64(std::ofstream &file, uint64_t const data){
+		void writeU64(FileWriter &file, uint64_t const data){
 			uint64_t const be_data = htobe(data);
 
-			file.write( (const char *) & be_data, sizeof(uint64_t));
+			file.write( & be_data, sizeof(uint64_t));
 		}
 
-		void writeStr(std::ofstream &file, HPair::HKey const data){
-			file.write( (const char *) & data, sizeof(HPair::HKey));
+		void writeStr(FileWriter &file, HPair::HKey const data){
+			file.write( & data, sizeof(HPair::HKey));
 		}
 	}
 
@@ -108,9 +108,8 @@ namespace FileBuilder{
 		auto const filename_norm = filenameMeta_string_view(filename);
 
 		{
-			std::ofstream file_meta{ filename_temp, config::MODE };
-			file_meta.write( (const char *) & blob, sizeof(FileMetaBlob));
-			file_meta.close();
+			FileWriter file_meta{ filename_temp };
+			file_meta.write( & blob, sizeof(FileMetaBlob));
 		}
 
 		// "weird rename" in lock free environment.

@@ -3,9 +3,9 @@
 
 #include "btreeindexnode.h"
 #include "filenames.h"
+#include "filewriter.h"
 
 #include <string>
-#include <fstream>
 
 namespace hm4{
 namespace disk{
@@ -48,8 +48,8 @@ private:
 
 	std::string	filename_;
 
-	std::ofstream	file_indx_;
-	std::ofstream	file_data_;
+	FileWriter	file_indx_;
+	FileWriter	file_data_;
 };
 
 

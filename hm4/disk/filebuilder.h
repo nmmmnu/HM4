@@ -1,7 +1,6 @@
 #ifndef DISK_FILE_BUILDER_H_
 #define DISK_FILE_BUILDER_H_
 
-#include <fstream>
 #include <algorithm>
 #include <limits>
 
@@ -9,14 +8,11 @@
 
 #include "hpair.h"
 #include "stringhash.h"
+#include "filewriter.h"
 
 namespace hm4{
 namespace disk{
 namespace FileBuilder{
-	namespace config{
-		constexpr std::ios::openmode MODE = std::ios::out | std::ios::binary | std::ios::trunc;
-	}
-
 	enum class TombstoneOptions : bool{
 		REMOVE,
 		KEEP
@@ -25,7 +21,7 @@ namespace FileBuilder{
 	class FileDataBuilder{
 	public:
 		FileDataBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
-							file_data(filenameData(filename), config::MODE),
+							file_data(filenameData(filename)),
 							fileWriteOptions(fileWriteOptions){}
 
 		void operator()(Pair const &pair);
@@ -39,7 +35,7 @@ namespace FileBuilder{
 		}
 
 	private:
-		std::ofstream		file_data;
+		FileWriter		file_data;
 
 		Pair::WriteOptions	fileWriteOptions;
 	};
@@ -49,13 +45,13 @@ namespace FileBuilder{
 	class FileIndxBuilder{
 	public:
 		FileIndxBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
-							file_indx(filenameIndx(filename), config::MODE),
+							file_indx(filenameIndx(filename)),
 							fileWriteOptions(fileWriteOptions){}
 
 		void operator()(Pair const &pair);
 
 	private:
-		std::ofstream	file_indx;
+		FileWriter		file_indx;
 
 		Pair::WriteOptions	fileWriteOptions;
 
@@ -67,12 +63,12 @@ namespace FileBuilder{
 	class FileLineBuilder{
 	public:
 		FileLineBuilder(std::string_view const filename) :
-							file_line(filenameLine(filename), config::MODE){}
+							file_line(filenameLine(filename)){}
 
 		void operator()(Pair const &pair);
 
 	private:
-		std::ofstream	file_line;
+		FileWriter	file_line;
 
 		uint64_t	pos		= 0;
 
