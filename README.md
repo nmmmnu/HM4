@@ -592,7 +592,7 @@ Instead of using a heap, it is implemented as flat array. This was made, because
 #### HH Value Size
 
 | Config | Max size | Comment       |
-|   ---: |     ---: |  :---         |
+|   ---: |     ---: | :---          |
 |     16 |       15 |               |
 |     32 |       31 |               |
 |     40 |       39 | IP6           |
@@ -652,7 +652,7 @@ They are implemented as flat array in a way similar to Heavy Hitters (HH).
 #### HH Value Size
 
 | Config | Max size | Comment       |
-|   ---: |     ---: |  :---         |
+|   ---: |     ---: | :---          |
 |     16 |       15 |               |
 |     32 |       31 |               |
 |     40 |       39 | IP6           |

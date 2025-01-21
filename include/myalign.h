@@ -11,10 +11,6 @@ namespace my_align{
 	*/
 
 	// http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator
-	constexpr size_t align(size_t n, size_t align){
-		return (n + align - 1) & ~(align - 1);
-	}
-
 	constexpr size_t calc(size_t n, size_t align){
 		return (n + align - 1) & ~(align - 1);
 	}
