@@ -59,7 +59,8 @@ namespace net::worker{
 
 
 
-	namespace key_value_worker_impl_{
+	namespace registration_impl_{
+
 		template<template<class, class, class> class Module, class Protocol, class DBAdapter, class RegisterPack>
 		void registerModule(RegisterPack &pack){
 			using M = Module<Protocol, DBAdapter, RegisterPack>;
@@ -69,7 +70,7 @@ namespace net::worker{
 		}
 
 		template<class Protocol, class DBAdapter, class RegisterPack, template<class, class, class> typename... Modules>
-		void registerModulesAll(RegisterPack &pack){
+		void registerModules(RegisterPack &pack){
 			pack.storage.reserve(sizeof...(Modules));
 
 			( registerModule<Modules, Protocol, DBAdapter, RegisterPack>(pack), ...);
@@ -86,7 +87,7 @@ namespace net::worker{
 
 			using namespace commands;
 
-			registerModulesAll<Protocol, DBAdapter, RegisterPack,
+			registerModules<Protocol, DBAdapter, RegisterPack,
 				Immutable	::RegisterModule,
 				ImmutableX	::RegisterModule,
 				Accumulators	::RegisterModule,
@@ -138,7 +139,7 @@ namespace net::worker{
 							db_(db),
 							output_buffer_(output_buffer_reserve){
 
-			using namespace key_value_worker_impl_;
+			using namespace registration_impl_;
 
 			registerModules<Protocol, DBAdapter>(storage_, map_);
 		}
@@ -198,9 +199,9 @@ namespace net::worker{
 		}
 
 	private:
-		using MyBaseCmd		= commands::BaseCmd<Protocol, DBAdapter>;
-		using Storage		= std::vector<std::unique_ptr<MyBaseCmd> >;
-		using Map		= std::unordered_map<std::string_view, MyBaseCmd *>;
+		using MyBaseCommand	= commands::BaseCommand<Protocol, DBAdapter>;
+		using Storage		= std::vector<std::unique_ptr<MyBaseCommand> >;
+		using Map		= std::unordered_map<std::string_view, MyBaseCommand *>;
 
 		WorkerStatus translate_(commands::Result<Protocol> const result, IOBuffer &buffer){
 			using cs = commands::Status;

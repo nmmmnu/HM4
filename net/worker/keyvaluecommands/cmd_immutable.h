@@ -6,7 +6,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GET : BaseCmdRO<Protocol,DBAdapter>{
+	struct GET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -38,7 +38,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct MGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -78,7 +78,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXISTS : BaseCmdRO<Protocol,DBAdapter>{
+	struct EXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -110,7 +110,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TTL : BaseCmdRO<Protocol,DBAdapter>{
+	struct TTL : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -144,7 +144,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXPIRETIME : BaseCmdRO<Protocol,DBAdapter>{
+	struct EXPIRETIME : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -178,7 +178,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DUMP : BaseCmdRO<Protocol,DBAdapter>{
+	struct DUMP : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -219,7 +219,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETRANGE : BaseCmdRO<Protocol,DBAdapter>{
+	struct GETRANGE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -261,7 +261,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct STRLEN : BaseCmdRO<Protocol,DBAdapter>{
+	struct STRLEN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -296,7 +296,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct HGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -332,7 +332,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HMGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct HMGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -387,7 +387,7 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HEXISTS : BaseCmdRO<Protocol,DBAdapter>{
+	struct HEXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

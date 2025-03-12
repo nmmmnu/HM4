@@ -72,7 +72,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct PFADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -161,7 +161,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFRESERVE : BaseCmdRW<Protocol,DBAdapter>{
+	struct PFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -196,7 +196,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFINTERSECT : BaseCmdRO<Protocol,DBAdapter>{
+	struct PFINTERSECT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -242,7 +242,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFCOUNT : BaseCmdRO<Protocol,DBAdapter>{
+	struct PFCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -296,7 +296,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFADDCOUNT : BaseCmdRW<Protocol,DBAdapter>{
+	struct PFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -389,7 +389,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFMERGE : BaseCmdRW<Protocol,DBAdapter>{
+	struct PFMERGE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -481,7 +481,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFBITS : BaseCmdRO<Protocol,DBAdapter>{
+	struct PFBITS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -506,7 +506,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFERROR : BaseCmdRO<Protocol,DBAdapter>{
+	struct PFERROR : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

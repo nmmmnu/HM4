@@ -141,7 +141,7 @@ namespace net::worker::commands::HH{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HHINCR : BaseCmdRW<Protocol,DBAdapter>{
+	struct HHINCR : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -167,7 +167,7 @@ namespace net::worker::commands::HH{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HHDECR : BaseCmdRW<Protocol,DBAdapter>{
+	struct HHDECR : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -193,7 +193,7 @@ namespace net::worker::commands::HH{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HHRESERVE : BaseCmdRW<Protocol,DBAdapter>{
+	struct HHRESERVE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -250,7 +250,7 @@ namespace net::worker::commands::HH{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HHGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct HHGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

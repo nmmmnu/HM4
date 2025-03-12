@@ -223,7 +223,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct COUNT : BaseCmdRO<Protocol,DBAdapter>{
+	struct COUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -247,7 +247,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SUM : BaseCmdRO<Protocol,DBAdapter>{
+	struct SUM : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -271,7 +271,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNCOUNT : BaseCmdRO<Protocol,DBAdapter>{
+	struct XNCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -295,7 +295,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRCOUNT : BaseCmdRO<Protocol,DBAdapter>{
+	struct XRCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -319,7 +319,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNSUM : BaseCmdRO<Protocol,DBAdapter>{
+	struct XNSUM : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -343,7 +343,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRSUM : BaseCmdRO<Protocol,DBAdapter>{
+	struct XRSUM : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -367,7 +367,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNMIN : BaseCmdRO<Protocol,DBAdapter>{
+	struct XNMIN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -391,7 +391,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRMIN : BaseCmdRO<Protocol,DBAdapter>{
+	struct XRMIN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -415,7 +415,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNMAX : BaseCmdRO<Protocol,DBAdapter>{
+	struct XNMAX : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -439,7 +439,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRMAX : BaseCmdRO<Protocol,DBAdapter>{
+	struct XRMAX : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -463,7 +463,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNFIRST : BaseCmdRO<Protocol,DBAdapter>{
+	struct XNFIRST : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -487,7 +487,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRFIRST : BaseCmdRO<Protocol,DBAdapter>{
+	struct XRFIRST : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -511,7 +511,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNLAST : BaseCmdRO<Protocol,DBAdapter>{
+	struct XNLAST : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -535,7 +535,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRLAST : BaseCmdRO<Protocol,DBAdapter>{
+	struct XRLAST : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -559,7 +559,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNAVG : BaseCmdRO<Protocol,DBAdapter>{
+	struct XNAVG : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -583,7 +583,7 @@ namespace net::worker::commands::Accumulators{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRAVG : BaseCmdRO<Protocol,DBAdapter>{
+	struct XRAVG : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

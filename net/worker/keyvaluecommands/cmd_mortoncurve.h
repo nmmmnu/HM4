@@ -310,7 +310,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2GET : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2GET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -350,7 +350,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2MGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2MGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -409,7 +409,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2EXISTS : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2EXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -435,7 +435,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2SCORE : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2SCORE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -492,7 +492,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2ADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct MC2ADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -561,7 +561,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2REM : BaseCmdRW<Protocol,DBAdapter>{
+	struct MC2REM : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -593,7 +593,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2POINT : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2POINT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -650,7 +650,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2RANGENAIVE : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -709,7 +709,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2RANGE : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2RANGE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -767,7 +767,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2ENCODE : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2ENCODE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -801,7 +801,7 @@ namespace net::worker::commands::MortonCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC2DECODE : BaseCmdRO<Protocol,DBAdapter>{
+	struct MC2DECODE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

@@ -20,7 +20,7 @@ namespace net::worker::commands::Queue{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct SADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -69,7 +69,7 @@ namespace net::worker::commands::Queue{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SPOP : BaseCmdRW<Protocol,DBAdapter>{
+	struct SPOP : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

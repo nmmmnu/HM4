@@ -292,7 +292,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct CBFADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -320,7 +320,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFREM : BaseCmdRW<Protocol,DBAdapter>{
+	struct CBFREM : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -348,7 +348,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFADDCOUNT : BaseCmdRW<Protocol,DBAdapter>{
+	struct CBFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -374,7 +374,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFREMCOUNT : BaseCmdRW<Protocol,DBAdapter>{
+	struct CBFREMCOUNT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -400,7 +400,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFRESERVE : BaseCmdRW<Protocol,DBAdapter>{
+	struct CBFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -464,7 +464,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFCOUNT : BaseCmdRO<Protocol,DBAdapter>{
+	struct CBFCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -530,7 +530,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFMCOUNT : BaseCmdRO<Protocol,DBAdapter>{
+	struct CBFMCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

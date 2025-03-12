@@ -39,7 +39,7 @@ namespace net::worker::commands::RS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct RSADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct RSADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -175,7 +175,7 @@ namespace net::worker::commands::RS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct RSRESERVE : BaseCmdRW<Protocol,DBAdapter>{
+	struct RSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -232,7 +232,7 @@ namespace net::worker::commands::RS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct RSGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct RSGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -308,7 +308,7 @@ namespace net::worker::commands::RS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct RSGETCOUNT : BaseCmdRO<Protocol,DBAdapter>{
+	struct RSGETCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

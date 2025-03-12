@@ -71,7 +71,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_GET : BaseCmdRO<Protocol,DBAdapter>{
+	struct IX_GET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -118,7 +118,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_MGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct IX_MGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -184,7 +184,7 @@ namespace net::worker::commands::Index{
 
 
 	template<class Protocol, class DBAdapter>
-	struct IX_EXISTS : BaseCmdRO<Protocol,DBAdapter>{
+	struct IX_EXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 		//	return std::begin(cmd[N-1]);
 			return std::begin(cmd);
@@ -230,7 +230,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_GETINDEXES : BaseCmdRO<Protocol,DBAdapter>{
+	struct IX_GETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -277,7 +277,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_ADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct IX_ADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -415,7 +415,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_REM : BaseCmdRW<Protocol,DBAdapter>{
+	struct IX_REM : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -451,7 +451,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_RANGE : BaseCmdRO<Protocol,DBAdapter>{
+	struct IX_RANGE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};

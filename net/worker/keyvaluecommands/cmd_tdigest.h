@@ -125,7 +125,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDRESERVE : BaseCmdRW<Protocol,DBAdapter>{
+	struct TDRESERVE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -169,7 +169,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct TDADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -228,7 +228,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDADDWEIGHT : BaseCmdRW<Protocol,DBAdapter>{
+	struct TDADDWEIGHT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -287,7 +287,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMERGE : BaseCmdRW<Protocol,DBAdapter>{
+	struct TDMERGE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -364,7 +364,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMERGECAPACITY : BaseCmdRW<Protocol,DBAdapter>{
+	struct TDMERGECAPACITY : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -440,7 +440,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDPERCENTILE : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -500,7 +500,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMPERCENTILE : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDMPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -572,7 +572,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMEDIAN : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDMEDIAN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -626,7 +626,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDTRIMMEDMEAN : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDTRIMMEDMEAN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -682,7 +682,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMEAN : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDMEAN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -735,7 +735,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMIN : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDMIN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -783,7 +783,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMAX : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDMAX : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -831,7 +831,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDSIZE : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDSIZE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -874,7 +874,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDINFO : BaseCmdRO<Protocol,DBAdapter>{
+	struct TDINFO : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

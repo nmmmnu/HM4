@@ -208,7 +208,7 @@ namespace net::worker::commands{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BaseCmd{
+	struct BaseCommand{
 		bool mut() const{
 			return mut_();
 		}
@@ -216,7 +216,7 @@ namespace net::worker::commands{
 		virtual const std::string_view *begin() const = 0;
 		virtual const std::string_view *end()   const = 0;
 
-		virtual ~BaseCmd() = default;
+		virtual ~BaseCommand() = default;
 
 		void operator()(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			return process(params, db, result, blob);
@@ -230,7 +230,7 @@ namespace net::worker::commands{
 
 
 	template<class Protocol, class DBAdapter, bool Mutable>
-	struct BaseCmd_ : BaseCmd<Protocol,DBAdapter>{
+	struct BaseCommand_ : BaseCommand<Protocol,DBAdapter>{
 		constexpr static bool MUTABLE = Mutable;
 
 	private:
@@ -240,42 +240,45 @@ namespace net::worker::commands{
 	};
 
 	template<class Protocol, class DBAdapter>
-	using BaseCmdRO = BaseCmd_<Protocol,DBAdapter,false>;
+	using BaseCommandRO = BaseCommand_<Protocol,DBAdapter,false>;
 
 	template<class Protocol, class DBAdapter>
-	using BaseCmdRW = BaseCmd_<Protocol,DBAdapter,true>;
+	using BaseCommandRW = BaseCommand_<Protocol,DBAdapter,true>;
 
 
 
-	template<
-		template<class, class>  class Cmd,
-		class Protocol,
-		class DBAdapter,
-		class RegisterPack
-	>
-	void registerCommand(RegisterPack &pack){
-		using Command		= Cmd		<Protocol, DBAdapter>;
-		using CommandBase	= BaseCmd	<Protocol, DBAdapter>;
-		using CommandBaseRO	= BaseCmdRO	<Protocol, DBAdapter>;
-		using CommandBaseRW	= BaseCmdRW	<Protocol, DBAdapter>;
+	namespace registration_impl_{
 
-		static_assert(	std::is_base_of_v<CommandBase, Command>,
-							"Command not seems to be a command");
+		template<
+			template<class, class>  class Command,
+			class Protocol,
+			class DBAdapter,
+			class RegisterPack
+		>
+		void registerCommand(RegisterPack &pack){
+			using MyCommand		= Command	<Protocol, DBAdapter>;
+			using MyCommandBase	= BaseCommand	<Protocol, DBAdapter>;
+			using MyCommandBaseRO	= BaseCommandRO	<Protocol, DBAdapter>;
+			using MyCommandBaseRW	= BaseCommandRW	<Protocol, DBAdapter>;
 
-		static_assert(	std::is_base_of_v<CommandBaseRO, Command> ||
-				std::is_base_of_v<CommandBaseRW, Command>,
-							"Command not seems to be a command");
+			static_assert(	std::is_base_of_v<MyCommandBase, MyCommand>,
+								"Command not seems to be a command");
 
-		bool const mut = std::is_base_of_v<CommandBaseRW, Command>;
+			static_assert(	std::is_base_of_v<MyCommandBaseRO, MyCommand> ||
+					std::is_base_of_v<MyCommandBaseRW, MyCommand>,
+								"Command not seems to be a command");
 
-		if constexpr(mut == false || mut == DBAdapter::MUTABLE){
-			auto &up = pack.storage.emplace_back(std::make_unique<Command>());
+			bool const mut = std::is_base_of_v<MyCommandBaseRW, MyCommand>;
 
-			for(auto const &key : *up)
-				pack.map.emplace(key, up.get());
+			if constexpr(mut == false || mut == DBAdapter::MUTABLE){
+				auto &up = pack.storage.emplace_back(std::make_unique<MyCommand>());
+
+				for(auto const &key : *up)
+					pack.map.emplace(key, up.get());
+			}
 		}
-	}
 
+	} // namespace registration_impl_
 
 
 	template<
@@ -285,54 +288,10 @@ namespace net::worker::commands{
 		template<class,class> typename... Commands
 	>
 	void registerCommands(RegisterPack &pack){
+		using namespace registration_impl_;
+
 		( registerCommand<Commands, Protocol, DBAdapter>(pack), ... );
 	}
-
-
-#if 0
-	template<class Protocol>
-	struct BasePipe{
-		virtual ~BasePipe() = default;
-
-		virtual const std::string_view *begin() const = 0;
-		virtual const std::string_view *end()   const = 0;
-
-		virtual bool init(ParamContainer const &params, OutputBlob &blob) = 0;
-
-		virtual void done(Result<Protocol> &result) = 0;
-
-		virtual bool process(const hm4::Pair *) = 0;
-	};
-
-	template<class Protocol>
-	struct DonePipe : BasePipe<Protocol>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		virtual bool init(ParamContainer const &, OutputBlob &){
-			return true;
-		}
-
-		virtual void done(Result<Protocol> &result){
-			return result.set();
-		}
-
-		virtual bool process(const hm4::Pair *){
-			return false;
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"done",	"DONE"
-		};
-	};
-#endif
-
 }
 
 

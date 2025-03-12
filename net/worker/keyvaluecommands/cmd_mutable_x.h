@@ -229,7 +229,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNDEL : BaseCmdRW<Protocol,DBAdapter>{
+	struct XNDEL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -265,7 +265,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRDEL : BaseCmdRW<Protocol,DBAdapter>{
+	struct XRDEL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -301,7 +301,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HDELALL : BaseCmdRW<Protocol,DBAdapter>{
+	struct HDELALL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -341,7 +341,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNPERSIST : BaseCmdRW<Protocol,DBAdapter>{
+	struct XNPERSIST : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -377,7 +377,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRPERSIST : BaseCmdRW<Protocol,DBAdapter>{
+	struct XRPERSIST : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -413,7 +413,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HPERSISTALL : BaseCmdRW<Protocol,DBAdapter>{
+	struct HPERSISTALL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -453,7 +453,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNEXPIRE : BaseCmdRW<Protocol,DBAdapter>{
+	struct XNEXPIRE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -490,7 +490,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XREXPIRE : BaseCmdRW<Protocol,DBAdapter>{
+	struct XREXPIRE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -527,7 +527,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HEXPIREALL : BaseCmdRW<Protocol,DBAdapter>{
+	struct HEXPIREALL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -569,7 +569,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNEXPIREAT : BaseCmdRW<Protocol,DBAdapter>{
+	struct XNEXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -606,7 +606,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XREXPIREAT : BaseCmdRW<Protocol,DBAdapter>{
+	struct XREXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -643,7 +643,7 @@ namespace net::worker::commands::MutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HEXPIREATALL : BaseCmdRW<Protocol,DBAdapter>{
+	struct HEXPIREATALL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

@@ -42,7 +42,7 @@ namespace net::worker::commands::MG{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MGADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct MGADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -165,7 +165,7 @@ namespace net::worker::commands::MG{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MGADDGET : BaseCmdRW<Protocol,DBAdapter>{
+	struct MGADDGET : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -276,7 +276,7 @@ namespace net::worker::commands::MG{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MGRESERVE : BaseCmdRW<Protocol,DBAdapter>{
+	struct MGRESERVE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -333,7 +333,7 @@ namespace net::worker::commands::MG{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MGGET : BaseCmdRO<Protocol,DBAdapter>{
+	struct MGGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

@@ -206,7 +206,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct INCR : BaseCmdRW<Protocol,DBAdapter>{
+	struct INCR : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -231,7 +231,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DECR : BaseCmdRW<Protocol,DBAdapter>{
+	struct DECR : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -256,7 +256,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct INCRLIMIT : BaseCmdRW<Protocol,DBAdapter>{
+	struct INCRLIMIT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -280,7 +280,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DECRLIMIT : BaseCmdRW<Protocol,DBAdapter>{
+	struct DECRLIMIT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -304,7 +304,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct INCRTO : BaseCmdRW<Protocol,DBAdapter>{
+	struct INCRTO : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -328,7 +328,7 @@ namespace net::worker::commands::Counter{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DECRTO : BaseCmdRW<Protocol,DBAdapter>{
+	struct DECRTO : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

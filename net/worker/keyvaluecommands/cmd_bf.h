@@ -46,7 +46,7 @@ namespace net::worker::commands::BF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BFADD : BaseCmdRW<Protocol,DBAdapter>{
+	struct BFADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -126,7 +126,7 @@ namespace net::worker::commands::BF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BFRESERVE : BaseCmdRW<Protocol,DBAdapter>{
+	struct BFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -164,7 +164,7 @@ namespace net::worker::commands::BF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BFEXISTS : BaseCmdRO<Protocol,DBAdapter>{
+	struct BFEXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -211,7 +211,7 @@ namespace net::worker::commands::BF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BFMEXISTS : BaseCmdRO<Protocol,DBAdapter>{
+	struct BFMEXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

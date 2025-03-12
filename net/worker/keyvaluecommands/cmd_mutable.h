@@ -8,7 +8,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SET : BaseCmdRW<Protocol,DBAdapter>{
+	struct SET : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -45,7 +45,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MSET : BaseCmdRW<Protocol,DBAdapter>{
+	struct MSET : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -92,7 +92,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MSETNX : BaseCmdRW<Protocol,DBAdapter>{
+	struct MSETNX : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -148,7 +148,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MSETXX : BaseCmdRW<Protocol,DBAdapter>{
+	struct MSETXX : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -235,7 +235,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SETEX : BaseCmdRW<Protocol,DBAdapter>{
+	struct SETEX : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -272,7 +272,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HSET : BaseCmdRW<Protocol,DBAdapter>{
+	struct HSET : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -314,7 +314,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HMSET : BaseCmdRW<Protocol,DBAdapter>{
+	struct HMSET : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -370,7 +370,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SETNX : BaseCmdRW<Protocol,DBAdapter>{
+	struct SETNX : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -415,7 +415,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct SETXX : BaseCmdRW<Protocol,DBAdapter>{
+	struct SETXX : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -462,7 +462,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DEL : BaseCmdRW<Protocol,DBAdapter>{
+	struct DEL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -503,7 +503,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HDEL : BaseCmdRW<Protocol,DBAdapter>{
+	struct HDEL : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -554,7 +554,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct APPEND : BaseCmdRW<Protocol,DBAdapter>{
+	struct APPEND : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -626,7 +626,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXPIRE : BaseCmdRW<Protocol,DBAdapter>{
+	struct EXPIRE : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -668,7 +668,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct EXPIREAT : BaseCmdRW<Protocol,DBAdapter>{
+	struct EXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -722,7 +722,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PERSIST : BaseCmdRW<Protocol,DBAdapter>{
+	struct PERSIST : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -768,7 +768,7 @@ namespace net::worker::commands::Mutable{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PERSISTDELETED : BaseCmdRW<Protocol,DBAdapter>{
+	struct PERSISTDELETED : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
