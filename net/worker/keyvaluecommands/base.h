@@ -249,6 +249,23 @@ namespace net::worker::commands{
 
 	namespace registration_impl_{
 
+		constexpr bool REGISTER_DEBUG_PRINT = true;
+
+		constexpr void registerPrint(std::string_view obj){
+			if constexpr(! REGISTER_DEBUG_PRINT)
+				return;
+
+			bool once = true;
+
+			for(auto const &key : obj){
+				if (!once)
+					return;
+
+				logger<Logger::STARTUP>() << " - " << key;
+				once = false;
+			}
+		}
+
 		template<
 			template<class, class>  class Command,
 			class Protocol,
@@ -273,20 +290,17 @@ namespace net::worker::commands{
 			if constexpr(mut == false || mut == DBAdapter::MUTABLE){
 				auto &up = pack.commandStorage.emplace_back(std::make_unique<MyCommand>());
 
-				bool once = true;
 
 				for(auto const &key : *up){
 					pack.commandMap.emplace(key, up.get());
 
-					if (once){
-						logger<Logger::NOTICE>() << " - " << key;
-						once = false;
-					}
+					registerPrint(key);
 				}
 			}
 		}
 
 	} // namespace registration_impl_
+
 
 
 	template<
