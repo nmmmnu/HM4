@@ -71,19 +71,20 @@ namespace net::worker{
 
 		template<class Protocol, class DBAdapter, class RegisterPack, template<class, class, class> typename... Modules>
 		void registerModules(RegisterPack &pack){
-			pack.storage.reserve(sizeof...(Modules));
+			// this is good idea, but definitely is wrong
+			// pack.commandStorage.reserve(sizeof...(Modules));
 
 			( registerModule<Modules, Protocol, DBAdapter, RegisterPack>(pack), ...);
 		}
 
-		template<class Protocol, class DBAdapter, class Storage, class Map>
-		void registerModules(Storage &s, Map &m){
+		template<class Protocol, class DBAdapter, class CommandStorage, class CommandMap>
+		void registerModules(CommandStorage &commandStorage, CommandMap &commandMap){
 			struct RegisterPack{
-				Storage	&storage;
-				Map	&map;
+				CommandStorage	&commandStorage;
+				CommandMap	&commandMap;
 			};
 
-			RegisterPack pack{s, m};
+			RegisterPack pack{commandStorage, commandMap};
 
 			using namespace commands;
 

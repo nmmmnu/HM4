@@ -271,10 +271,18 @@ namespace net::worker::commands{
 			bool const mut = std::is_base_of_v<MyCommandBaseRW, MyCommand>;
 
 			if constexpr(mut == false || mut == DBAdapter::MUTABLE){
-				auto &up = pack.storage.emplace_back(std::make_unique<MyCommand>());
+				auto &up = pack.commandStorage.emplace_back(std::make_unique<MyCommand>());
 
-				for(auto const &key : *up)
-					pack.map.emplace(key, up.get());
+				bool once = true;
+
+				for(auto const &key : *up){
+					pack.commandMap.emplace(key, up.get());
+
+					if (once){
+						logger<Logger::NOTICE>() << " - " << key;
+						once = false;
+					}
+				}
 			}
 		}
 
