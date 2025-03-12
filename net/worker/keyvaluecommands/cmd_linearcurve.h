@@ -194,7 +194,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1GET : BaseRO<Protocol,DBAdapter>{
+	struct MC1GET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -234,7 +234,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1MGET : BaseRO<Protocol,DBAdapter>{
+	struct MC1MGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -293,7 +293,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1EXISTS : BaseRO<Protocol,DBAdapter>{
+	struct MC1EXISTS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -319,7 +319,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1SCORE : BaseRO<Protocol,DBAdapter>{
+	struct MC1SCORE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -359,7 +359,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1ADD : BaseRW<Protocol,DBAdapter>{
+	struct MC1ADD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -426,7 +426,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1REM : BaseRW<Protocol,DBAdapter>{
+	struct MC1REM : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -457,7 +457,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1POINT : BaseRO<Protocol,DBAdapter>{
+	struct MC1POINT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -511,7 +511,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1RANGE : BaseRO<Protocol,DBAdapter>{
+	struct MC1RANGE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

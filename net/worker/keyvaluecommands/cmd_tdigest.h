@@ -125,7 +125,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDRESERVE : BaseRW<Protocol,DBAdapter>{
+	struct TDRESERVE : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -169,7 +169,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDADD : BaseRW<Protocol,DBAdapter>{
+	struct TDADD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -228,7 +228,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDADDWEIGHT : BaseRW<Protocol,DBAdapter>{
+	struct TDADDWEIGHT : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -287,7 +287,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMERGE : BaseRW<Protocol,DBAdapter>{
+	struct TDMERGE : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -364,7 +364,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMERGECAPACITY : BaseRW<Protocol,DBAdapter>{
+	struct TDMERGECAPACITY : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -440,7 +440,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDPERCENTILE : BaseRO<Protocol,DBAdapter>{
+	struct TDPERCENTILE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -500,7 +500,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMPERCENTILE : BaseRO<Protocol,DBAdapter>{
+	struct TDMPERCENTILE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -572,7 +572,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMEDIAN : BaseRO<Protocol,DBAdapter>{
+	struct TDMEDIAN : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -626,7 +626,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDTRIMMEDMEAN : BaseRO<Protocol,DBAdapter>{
+	struct TDTRIMMEDMEAN : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -682,7 +682,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMEAN : BaseRO<Protocol,DBAdapter>{
+	struct TDMEAN : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -735,7 +735,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMIN : BaseRO<Protocol,DBAdapter>{
+	struct TDMIN : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -783,7 +783,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDMAX : BaseRO<Protocol,DBAdapter>{
+	struct TDMAX : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -831,7 +831,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDSIZE : BaseRO<Protocol,DBAdapter>{
+	struct TDSIZE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -874,7 +874,7 @@ namespace net::worker::commands::TDigest{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TDINFO : BaseRO<Protocol,DBAdapter>{
+	struct TDINFO : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

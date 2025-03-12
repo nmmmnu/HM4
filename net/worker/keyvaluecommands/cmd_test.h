@@ -7,7 +7,7 @@ namespace net::worker::commands::Test{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TEST : BaseRW<Protocol,DBAdapter>{
+	struct TEST : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

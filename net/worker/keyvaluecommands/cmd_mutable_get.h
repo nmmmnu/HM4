@@ -104,7 +104,7 @@ namespace net::worker::commands::MutableGET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETSET : BaseRW<Protocol,DBAdapter>{
+	struct GETSET : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -141,7 +141,7 @@ namespace net::worker::commands::MutableGET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETDEL : BaseRW<Protocol,DBAdapter>{
+	struct GETDEL : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -174,7 +174,7 @@ namespace net::worker::commands::MutableGET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETEX : BaseRW<Protocol,DBAdapter>{
+	struct GETEX : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -209,7 +209,7 @@ namespace net::worker::commands::MutableGET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETEXAT : BaseRW<Protocol,DBAdapter>{
+	struct GETEXAT : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -244,7 +244,7 @@ namespace net::worker::commands::MutableGET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GETPERSIST : BaseRW<Protocol,DBAdapter>{
+	struct GETPERSIST : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

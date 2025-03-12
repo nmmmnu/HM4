@@ -198,9 +198,9 @@ namespace net::worker{
 		}
 
 	private:
-		using MyBase		= commands::Base<Protocol, DBAdapter>;
-		using Storage		= std::vector<std::unique_ptr<MyBase> >;
-		using Map		= std::unordered_map<std::string_view, MyBase *>;
+		using MyBaseCmd		= commands::BaseCmd<Protocol, DBAdapter>;
+		using Storage		= std::vector<std::unique_ptr<MyBaseCmd> >;
+		using Map		= std::unordered_map<std::string_view, MyBaseCmd *>;
 
 		WorkerStatus translate_(commands::Result<Protocol> const result, IOBuffer &buffer){
 			using cs = commands::Status;

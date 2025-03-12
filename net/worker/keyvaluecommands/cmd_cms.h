@@ -273,7 +273,7 @@ namespace net::worker::commands::CMS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSADD : BaseRW<Protocol,DBAdapter>{
+	struct CMSADD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -301,7 +301,7 @@ namespace net::worker::commands::CMS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSREM : BaseRW<Protocol,DBAdapter>{
+	struct CMSREM : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -329,7 +329,7 @@ namespace net::worker::commands::CMS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSADDCOUNT : BaseRW<Protocol,DBAdapter>{
+	struct CMSADDCOUNT : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -355,7 +355,7 @@ namespace net::worker::commands::CMS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSREMCOUNT : BaseRW<Protocol,DBAdapter>{
+	struct CMSREMCOUNT : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -381,7 +381,7 @@ namespace net::worker::commands::CMS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSRESERVE : BaseRW<Protocol,DBAdapter>{
+	struct CMSRESERVE : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -445,7 +445,7 @@ namespace net::worker::commands::CMS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct CMSCOUNT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -511,7 +511,7 @@ namespace net::worker::commands::CMS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CMSMCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct CMSMCOUNT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

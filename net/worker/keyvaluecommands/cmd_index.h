@@ -71,7 +71,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_GET : BaseRO<Protocol,DBAdapter>{
+	struct IX_GET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -118,7 +118,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_MGET : BaseRO<Protocol,DBAdapter>{
+	struct IX_MGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -184,7 +184,7 @@ namespace net::worker::commands::Index{
 
 
 	template<class Protocol, class DBAdapter>
-	struct IX_EXISTS : BaseRO<Protocol,DBAdapter>{
+	struct IX_EXISTS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 		//	return std::begin(cmd[N-1]);
 			return std::begin(cmd);
@@ -230,7 +230,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_GETINDEXES : BaseRO<Protocol,DBAdapter>{
+	struct IX_GETINDEXES : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -277,7 +277,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_ADD : BaseRW<Protocol,DBAdapter>{
+	struct IX_ADD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -415,7 +415,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_REM : BaseRW<Protocol,DBAdapter>{
+	struct IX_REM : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};
@@ -451,7 +451,7 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_RANGE : BaseRO<Protocol,DBAdapter>{
+	struct IX_RANGE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};

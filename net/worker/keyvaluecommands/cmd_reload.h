@@ -7,7 +7,7 @@ namespace net::worker::commands::Reload{
 
 
 	template<class Protocol, class DBAdapter>
-	struct LISTMAINTAINANCE : BaseRO<Protocol,DBAdapter>{
+	struct LISTMAINTAINANCE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -32,7 +32,7 @@ namespace net::worker::commands::Reload{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct SAVE : BaseRO<Protocol,DBAdapter>{
+	struct SAVE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -58,7 +58,7 @@ namespace net::worker::commands::Reload{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct RELOAD : BaseRO<Protocol,DBAdapter>{
+	struct RELOAD : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

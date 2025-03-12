@@ -101,7 +101,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEOADD : BaseRW<Protocol,DBAdapter>{
+	struct GEOADD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -166,7 +166,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEOREM : BaseRW<Protocol,DBAdapter>{
+	struct GEOREM : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -195,7 +195,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEOGET : BaseRO<Protocol,DBAdapter>{
+	struct GEOGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -238,7 +238,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEOMGET : BaseRO<Protocol,DBAdapter>{
+	struct GEOMGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -295,7 +295,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEORADIUS : BaseRO<Protocol,DBAdapter>{
+	struct GEORADIUS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -395,7 +395,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEODIST : BaseRO<Protocol,DBAdapter>{
+	struct GEODIST : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -479,7 +479,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEOENCODE : BaseRO<Protocol,DBAdapter>{
+	struct GEOENCODE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -518,7 +518,7 @@ namespace net::worker::commands::Geo{
 
 
 	template<class Protocol, class DBAdapter>
-	struct GEODECODE : BaseRO<Protocol,DBAdapter>{
+	struct GEODECODE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

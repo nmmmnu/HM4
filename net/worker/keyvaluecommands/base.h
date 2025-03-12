@@ -208,7 +208,7 @@ namespace net::worker::commands{
 
 
 	template<class Protocol, class DBAdapter>
-	struct Base{
+	struct BaseCmd{
 		bool mut() const{
 			return mut_();
 		}
@@ -216,7 +216,7 @@ namespace net::worker::commands{
 		virtual const std::string_view *begin() const = 0;
 		virtual const std::string_view *end()   const = 0;
 
-		virtual ~Base() = default;
+		virtual ~BaseCmd() = default;
 
 		void operator()(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			return process(params, db, result, blob);
@@ -230,7 +230,7 @@ namespace net::worker::commands{
 
 
 	template<class Protocol, class DBAdapter, bool Mutable>
-	struct Base_ : Base<Protocol,DBAdapter>{
+	struct BaseCmd_ : BaseCmd<Protocol,DBAdapter>{
 		constexpr static bool MUTABLE = Mutable;
 
 	private:
@@ -240,10 +240,10 @@ namespace net::worker::commands{
 	};
 
 	template<class Protocol, class DBAdapter>
-	using BaseRO = Base_<Protocol,DBAdapter,false>;
+	using BaseCmdRO = BaseCmd_<Protocol,DBAdapter,false>;
 
 	template<class Protocol, class DBAdapter>
-	using BaseRW = Base_<Protocol,DBAdapter,true>;
+	using BaseCmdRW = BaseCmd_<Protocol,DBAdapter,true>;
 
 
 
@@ -255,9 +255,9 @@ namespace net::worker::commands{
 	>
 	void registerCommand(RegisterPack &pack){
 		using Command		= Cmd		<Protocol, DBAdapter>;
-		using CommandBase	= Base		<Protocol, DBAdapter>;
-		using CommandBaseRO	= BaseRO	<Protocol, DBAdapter>;
-		using CommandBaseRW	= BaseRW	<Protocol, DBAdapter>;
+		using CommandBase	= BaseCmd	<Protocol, DBAdapter>;
+		using CommandBaseRO	= BaseCmdRO	<Protocol, DBAdapter>;
+		using CommandBaseRW	= BaseCmdRW	<Protocol, DBAdapter>;
 
 		static_assert(	std::is_base_of_v<CommandBase, Command>,
 							"Command not seems to be a command");
@@ -287,6 +287,52 @@ namespace net::worker::commands{
 	void registerCommands(RegisterPack &pack){
 		( registerCommand<Commands, Protocol, DBAdapter>(pack), ... );
 	}
+
+
+#if 0
+	template<class Protocol>
+	struct BasePipe{
+		virtual ~BasePipe() = default;
+
+		virtual const std::string_view *begin() const = 0;
+		virtual const std::string_view *end()   const = 0;
+
+		virtual bool init(ParamContainer const &params, OutputBlob &blob) = 0;
+
+		virtual void done(Result<Protocol> &result) = 0;
+
+		virtual bool process(const hm4::Pair *) = 0;
+	};
+
+	template<class Protocol>
+	struct DonePipe : BasePipe<Protocol>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		virtual bool init(ParamContainer const &, OutputBlob &){
+			return true;
+		}
+
+		virtual void done(Result<Protocol> &result){
+			return result.set();
+		}
+
+		virtual bool process(const hm4::Pair *){
+			return false;
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"done",	"DONE"
+		};
+	};
+#endif
+
 }
 
 

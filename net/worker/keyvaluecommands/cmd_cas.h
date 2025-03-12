@@ -7,7 +7,7 @@ namespace net::worker::commands::CAS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CAS : BaseRW<Protocol,DBAdapter>{
+	struct CAS : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -62,7 +62,7 @@ namespace net::worker::commands::CAS{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CAD : BaseRW<Protocol,DBAdapter>{
+	struct CAD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

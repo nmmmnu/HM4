@@ -71,7 +71,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNGET : BaseRO<Protocol,DBAdapter>{
+	struct XNGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -120,7 +120,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNNEXT : BaseRO<Protocol,DBAdapter>{
+	struct XNNEXT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -167,7 +167,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRGET : BaseRO<Protocol,DBAdapter>{
+	struct XRGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -215,7 +215,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRNEXT : BaseRO<Protocol,DBAdapter>{
+	struct XRNEXT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -262,7 +262,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XUGET : BaseRO<Protocol,DBAdapter>{
+	struct XUGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -306,7 +306,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XUNEXT : BaseRO<Protocol,DBAdapter>{
+	struct XUNEXT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -349,7 +349,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XNGETKEYS : BaseRO<Protocol,DBAdapter>{
+	struct XNGETKEYS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -397,7 +397,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XRGETKEYS : BaseRO<Protocol,DBAdapter>{
+	struct XRGETKEYS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -445,7 +445,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct XUGETKEYS : BaseRO<Protocol,DBAdapter>{
+	struct XUGETKEYS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -489,7 +489,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HGETALL : BaseRO<Protocol,DBAdapter>{
+	struct HGETALL : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -539,7 +539,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HGETKEYS : BaseRO<Protocol,DBAdapter>{
+	struct HGETKEYS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -589,7 +589,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HGETVALS : BaseRO<Protocol,DBAdapter>{
+	struct HGETVALS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -639,7 +639,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 	template<class Protocol, class DBAdapter>
-	struct HLEN : BaseRO<Protocol,DBAdapter>{
+	struct HLEN : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

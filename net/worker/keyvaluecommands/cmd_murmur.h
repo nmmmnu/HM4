@@ -8,7 +8,7 @@ namespace net::worker::commands::Murmur{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MURMUR : BaseRO<Protocol,DBAdapter>{
+	struct MURMUR : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

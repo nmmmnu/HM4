@@ -18,7 +18,7 @@ namespace net::worker::commands::BITSET{
 	}
 
 	template<class Protocol, class DBAdapter>
-	struct BITSET : BaseRW<Protocol,DBAdapter>{
+	struct BITSET : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -131,7 +131,7 @@ namespace net::worker::commands::BITSET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BITGET : BaseRO<Protocol,DBAdapter>{
+	struct BITGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -181,7 +181,7 @@ namespace net::worker::commands::BITSET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BITMGET : BaseRO<Protocol,DBAdapter>{
+	struct BITMGET : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -244,7 +244,7 @@ namespace net::worker::commands::BITSET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BITCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct BITCOUNT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -288,7 +288,7 @@ namespace net::worker::commands::BITSET{
 
 
 	template<class Protocol, class DBAdapter>
-	struct BITMAX : BaseRO<Protocol,DBAdapter>{
+	struct BITMAX : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

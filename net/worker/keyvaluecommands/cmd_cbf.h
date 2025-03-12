@@ -292,7 +292,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFADD : BaseRW<Protocol,DBAdapter>{
+	struct CBFADD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -320,7 +320,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFREM : BaseRW<Protocol,DBAdapter>{
+	struct CBFREM : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -348,7 +348,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFADDCOUNT : BaseRW<Protocol,DBAdapter>{
+	struct CBFADDCOUNT : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -374,7 +374,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFREMCOUNT : BaseRW<Protocol,DBAdapter>{
+	struct CBFREMCOUNT : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		}
@@ -400,7 +400,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFRESERVE : BaseRW<Protocol,DBAdapter>{
+	struct CBFRESERVE : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -464,7 +464,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct CBFCOUNT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -530,7 +530,7 @@ namespace net::worker::commands::CBF{
 
 
 	template<class Protocol, class DBAdapter>
-	struct CBFMCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct CBFMCOUNT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

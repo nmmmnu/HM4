@@ -72,7 +72,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFADD : BaseRW<Protocol,DBAdapter>{
+	struct PFADD : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -161,7 +161,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFRESERVE : BaseRW<Protocol,DBAdapter>{
+	struct PFRESERVE : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -196,7 +196,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFINTERSECT : BaseRO<Protocol,DBAdapter>{
+	struct PFINTERSECT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -242,7 +242,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFCOUNT : BaseRO<Protocol,DBAdapter>{
+	struct PFCOUNT : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -296,7 +296,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFADDCOUNT : BaseRW<Protocol,DBAdapter>{
+	struct PFADDCOUNT : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -389,7 +389,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFMERGE : BaseRW<Protocol,DBAdapter>{
+	struct PFMERGE : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -481,7 +481,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFBITS : BaseRO<Protocol,DBAdapter>{
+	struct PFBITS : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -506,7 +506,7 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFERROR : BaseRO<Protocol,DBAdapter>{
+	struct PFERROR : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};

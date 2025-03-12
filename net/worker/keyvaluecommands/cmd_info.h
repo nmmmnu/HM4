@@ -8,7 +8,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct INFO : BaseRO<Protocol,DBAdapter>{
+	struct INFO : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -34,7 +34,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DBSIZE : BaseRO<Protocol,DBAdapter>{
+	struct DBSIZE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -58,7 +58,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct DBSIZEMUTABLE : BaseRW<Protocol,DBAdapter>{
+	struct DBSIZEMUTABLE : BaseCmdRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -81,7 +81,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct VERSION : BaseRO<Protocol,DBAdapter>{
+	struct VERSION : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -105,7 +105,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MAXKEYSIZE : BaseRO<Protocol,DBAdapter>{
+	struct MAXKEYSIZE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -127,7 +127,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MAXVALSIZE : BaseRO<Protocol,DBAdapter>{
+	struct MAXVALSIZE : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -149,7 +149,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PING : BaseRO<Protocol,DBAdapter>{
+	struct PING : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -171,7 +171,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct ECHO : BaseRO<Protocol,DBAdapter>{
+	struct ECHO : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -201,7 +201,7 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
-	struct TIME : BaseRO<Protocol,DBAdapter>{
+	struct TIME : BaseCmdRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
