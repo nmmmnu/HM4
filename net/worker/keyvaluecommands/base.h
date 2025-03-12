@@ -251,7 +251,8 @@ namespace net::worker::commands{
 
 		constexpr bool REGISTER_DEBUG_PRINT = true;
 
-		constexpr void registerPrint(std::string_view obj){
+		template<typename Obj>
+		constexpr void registerPrint(Obj const &obj){
 			if constexpr(! REGISTER_DEBUG_PRINT)
 				return;
 
@@ -290,12 +291,10 @@ namespace net::worker::commands{
 			if constexpr(mut == false || mut == DBAdapter::MUTABLE){
 				auto &up = pack.commandStorage.emplace_back(std::make_unique<MyCommand>());
 
+				registerPrint(*up);
 
-				for(auto const &key : *up){
+				for(auto const &key : *up)
 					pack.commandMap.emplace(key, up.get());
-
-					registerPrint(key);
-				}
 			}
 		}
 
