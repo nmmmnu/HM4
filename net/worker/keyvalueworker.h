@@ -141,7 +141,7 @@ namespace net::worker{
 
 			using namespace registration_impl_;
 
-			registerModules<Protocol, DBAdapter>(storage_, map_);
+			registerModules<Protocol, DBAdapter>(commandStorage_, commandMap_);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){
@@ -173,9 +173,9 @@ namespace net::worker{
 
 			// EXEC command
 
-			auto it = map_.find(p.front());
+			auto it = commandMap_.find(p.front());
 
-			if (it == std::end(map_))
+			if (it == std::end(commandMap_))
 				return emitError(protocol_, buffer, ResultErrorMessages::SYS_NOT_IMPLEMENTED);
 
 			// LOG command
@@ -200,8 +200,8 @@ namespace net::worker{
 
 	private:
 		using MyBaseCommand	= commands::BaseCommand<Protocol, DBAdapter>;
-		using Storage		= std::vector<std::unique_ptr<MyBaseCommand> >;
-		using Map		= std::unordered_map<std::string_view, MyBaseCommand *>;
+		using CommandStorage	= std::vector<std::unique_ptr<MyBaseCommand> >;
+		using CommandMap	= std::unordered_map<std::string_view, MyBaseCommand *>;
 
 		WorkerStatus translate_(commands::Result<Protocol> const result, IOBuffer &buffer){
 			using cs = commands::Status;
@@ -226,8 +226,8 @@ namespace net::worker{
 		Protocol		protocol_	;
 		DBAdapter		&db_		;
 
-		Storage			storage_	;
-		Map			map_		;
+		CommandStorage		commandStorage_	;
+		CommandMap		commandMap_	;
 
 		commands::OutputBlob	output_		;
 
