@@ -317,4 +317,6 @@ Changelog
 
 ### 1.3.9
 -	introduce FileWriter instead of std::ofstream
+-	Redis protocol output very large numbers as strings to avoid errors with redis-cli
+
 

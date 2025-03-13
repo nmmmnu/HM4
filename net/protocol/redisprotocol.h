@@ -118,8 +118,11 @@ public:
 	template<class Buffer>
 	static void response_simple_string(Buffer &buffer, std::string_view msg);
 
-	template<class Buffer, typename T>
-	static void response_number(Buffer &buffer, T n);
+	template<class Buffer>
+	static void response_number(Buffer &buffer, int64_t n);
+
+	template<class Buffer>
+	static void response_number(Buffer &buffer, uint64_t n);
 
 	template<class Buffer>
 	static void response_number_sv(Buffer &buffer, std::string_view n);
@@ -248,17 +251,21 @@ void RedisProtocol::response_number_sv(Buffer &buffer, std::string_view n){
 	response_log_("number", res, buffer.capacity(), buffer.data());
 }
 
-template<class Buffer, typename T>
-void RedisProtocol::response_number(Buffer &buffer, T const n){
-	static_assert(
-		std::is_same_v<T, uint64_t	> ||
-		std::is_same_v<T, int64_t	> ||
-		true
-	);
-
+template<class Buffer>
+void RedisProtocol::response_number(Buffer &buffer, int64_t const n){
 	to_string_buffer_t std_buffer;
 
 	return response_number_sv(buffer, to_string(n, std_buffer));
+}
+
+template<class Buffer>
+void RedisProtocol::response_number(Buffer &buffer, uint64_t const n){
+	to_string_buffer_t std_buffer;
+
+	if (n > 0x0FFF'FFFF'FFFF'FFFF)
+		return response_string(buffer, to_string(n, std_buffer));
+	else
+		return response_number_sv(buffer, to_string(n, std_buffer));
 }
 
 template<class Buffer>
