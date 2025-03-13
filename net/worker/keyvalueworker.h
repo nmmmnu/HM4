@@ -50,10 +50,7 @@
 
 #include "protocol/protocoldefs.h"
 
-#include <vector>
-#include <unordered_map>
 
-#include "logger.h"
 
 namespace net::worker{
 
@@ -66,29 +63,23 @@ namespace net::worker{
 			using M = Module<Protocol, DBAdapter, RegisterPack>;
 
 			logger<Logger::STARTUP>() << "Loading" << M::name << "module...";
+
 			M::load(pack);
 		}
 
 		template<class Protocol, class DBAdapter, class RegisterPack, template<class, class, class> typename... Modules>
-		void registerModules(RegisterPack &pack){
+		void registerModulesUnwrap(RegisterPack &pack){
 			// this is good idea, but definitely is wrong
 			// pack.commandStorage.reserve(sizeof...(Modules));
 
-			( registerModule<Modules, Protocol, DBAdapter, RegisterPack>(pack), ...);
+			( registerModule<Modules, Protocol, DBAdapter>(pack), ...);
 		}
 
-		template<class Protocol, class DBAdapter, class CommandStorage, class CommandMap>
-		void registerModules(CommandStorage &commandStorage, CommandMap &commandMap){
-			struct RegisterPack{
-				CommandStorage	&commandStorage;
-				CommandMap	&commandMap;
-			};
-
-			RegisterPack pack{commandStorage, commandMap};
-
+		template<class Protocol, class DBAdapter, class RegisterPack>
+		void registerModules(RegisterPack &pack){
 			using namespace commands;
 
-			registerModules<Protocol, DBAdapter, RegisterPack,
+			registerModulesUnwrap<Protocol, DBAdapter, RegisterPack,
 				Immutable	::RegisterModule,
 				ImmutableX	::RegisterModule,
 				Accumulators	::RegisterModule,
@@ -142,7 +133,13 @@ namespace net::worker{
 
 			using namespace registration_impl_;
 
-			registerModules<Protocol, DBAdapter>(commandStorage_, commandMap_);
+			struct RegisterPack{
+				StorageCommands	&storageCommands;
+			};
+
+			RegisterPack pack{ storageCommands_ };
+
+			registerModules<Protocol, DBAdapter>(pack);
 		}
 
 		WorkerStatus operator()(IOBuffer &buffer){
@@ -172,18 +169,18 @@ namespace net::worker{
 			if (p.empty())
 				return emitError(protocol_, buffer, ResultErrorMessages::SYS_PROTOCOL_BREAK);
 
-			// EXEC command
+			// FETCH command object
 
-			auto it = commandMap_.find(p.front());
+			auto *pcommand = storageCommands_(p.front());
 
-			if (it == std::end(commandMap_))
+			if (!pcommand)
 				return emitError(protocol_, buffer, ResultErrorMessages::SYS_NOT_IMPLEMENTED);
+
+			auto &command = *pcommand;
 
 			// LOG command
 			if constexpr(LogCommands)
 				logger<LogCommandsLevel>().range(std::begin(p), std::end(p));
-
-			auto &command = *it->second;
 
 			commands::Result<Protocol> result{ protocol_, output_buffer_ };
 
@@ -200,10 +197,6 @@ namespace net::worker{
 		}
 
 	private:
-		using MyBaseCommand	= commands::BaseCommand<Protocol, DBAdapter>;
-		using CommandStorage	= std::vector<std::unique_ptr<MyBaseCommand> >;
-		using CommandMap	= std::unordered_map<std::string_view, MyBaseCommand *>;
-
 		WorkerStatus translate_(commands::Result<Protocol> const result, IOBuffer &buffer){
 			using cs = commands::Status;
 
@@ -224,15 +217,16 @@ namespace net::worker{
 		}
 
 	private:
-		Protocol		protocol_	;
-		DBAdapter		&db_		;
+		using StorageCommands = commands::StorageCommands<Protocol, DBAdapter>;
 
-		CommandStorage		commandStorage_	;
-		CommandMap		commandMap_	;
+		Protocol		protocol_		;
+		DBAdapter		&db_			;
 
-		commands::OutputBlob	output_		;
+		StorageCommands		storageCommands_	;
 
-		IOBuffer		output_buffer_	;
+		commands::OutputBlob	output_			;
+
+		IOBuffer		output_buffer_		;
 
 	private:
 		static_assert(Protocol::MAX_PARAMS <= commands::OutputBlob::ContainerSize	);

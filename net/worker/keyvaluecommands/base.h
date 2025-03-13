@@ -11,6 +11,8 @@
 #include "logger.h"
 
 #include <memory>
+#include <vector>
+#include <unordered_map>
 
 namespace net::worker::commands{
 
@@ -247,25 +249,54 @@ namespace net::worker::commands{
 
 
 
-	namespace registration_impl_{
+	template<class Protocol, class DBAdapter>
+	struct StorageCommands{
+		using BaseObject	= BaseCommand<Protocol, DBAdapter>;
+		using BasePtr		= std::unique_ptr<BaseObject>;
+		using Storage		= std::vector<BasePtr>;
+		using Map		= std::unordered_map<std::string_view, BaseObject *>;
 
-		constexpr bool REGISTER_DEBUG_PRINT = true;
+		constexpr static bool RegisterDebugPrint = true;
 
-		template<typename Obj>
-		constexpr void registerPrint(Obj const &obj){
-			if constexpr(! REGISTER_DEBUG_PRINT)
+		BaseObject *operator()(std::string_view key){
+			auto it = map_.find(key);
+
+			if (it == std::end(map_))
+				return nullptr;
+
+			auto &command = *it->second;
+
+			return & command;
+		}
+
+		void push(BasePtr ptr){
+			storage_.push_back(std::move(ptr));
+
+			auto &x = storage_.back();
+
+			debugPrint(*x);
+
+			for(auto const &key : *x)
+				map_.emplace(key, x.get());
+		}
+
+	private:
+		static void debugPrint(BaseObject const &x){
+			if constexpr(!RegisterDebugPrint)
 				return;
 
-			bool once = true;
-
-			for(auto const &key : obj){
-				if (!once)
-					return;
-
-				logger<Logger::STARTUP>() << " - " << key;
-				once = false;
-			}
+			if (auto it = std::begin(x); it != std::end(x))
+				logger<Logger::STARTUP>() << " - " << *it;
 		}
+
+	private:
+		Storage	storage_	;
+		Map	map_		;
+	};
+
+
+
+	namespace registration_impl_{
 
 		template<
 			template<class, class>  class Command,
@@ -274,6 +305,9 @@ namespace net::worker::commands{
 			class RegisterPack
 		>
 		void registerCommand(RegisterPack &pack){
+			StorageCommands<Protocol, DBAdapter> &storage = pack.storageCommands;
+
+
 			using MyCommand		= Command	<Protocol, DBAdapter>;
 			using MyCommandBase	= BaseCommand	<Protocol, DBAdapter>;
 			using MyCommandBaseRO	= BaseCommandRO	<Protocol, DBAdapter>;
@@ -288,14 +322,8 @@ namespace net::worker::commands{
 
 			bool const mut = std::is_base_of_v<MyCommandBaseRW, MyCommand>;
 
-			if constexpr(mut == false || mut == DBAdapter::MUTABLE){
-				auto &up = pack.commandStorage.emplace_back(std::make_unique<MyCommand>());
-
-				registerPrint(*up);
-
-				for(auto const &key : *up)
-					pack.commandMap.emplace(key, up.get());
-			}
+			if constexpr(mut == false || mut == DBAdapter::MUTABLE)
+				storage.push( std::make_unique<MyCommand>() );
 		}
 
 	} // namespace registration_impl_
