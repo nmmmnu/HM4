@@ -269,8 +269,9 @@ namespace net::worker::commands{
 			return & command;
 		}
 
-		void push(BasePtr ptr){
-			storage_.push_back(std::move(ptr));
+		template<typename Object>
+		void push(){
+			storage_.push_back( std::make_unique<Object>() );
 
 			auto &x = storage_.back();
 
@@ -323,7 +324,7 @@ namespace net::worker::commands{
 			bool const mut = std::is_base_of_v<MyCommandBaseRW, MyCommand>;
 
 			if constexpr(mut == false || mut == DBAdapter::MUTABLE)
-				storage.push( std::make_unique<MyCommand>() );
+				storage. template push<MyCommand>();
 		}
 
 	} // namespace registration_impl_
