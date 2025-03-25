@@ -29,7 +29,7 @@ struct FileWriterIOStream{
 
 		assert(data);
 
-		return !! os.write(data, size);
+		return !! os.write(data, static_cast<std::streamsize>(size));
 	}
 
 	auto write(std::string_view s){

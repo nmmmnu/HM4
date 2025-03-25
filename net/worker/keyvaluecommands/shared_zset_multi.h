@@ -1463,7 +1463,7 @@ namespace net::worker::shared::zsetmulti{
 						erase(*db, key);
 					};
 
-					Permutation::template for_each(DBAdapter::SEPARATOR, keyN, keySub, save.copy, deleteOldKeys);
+					Permutation::for_each(DBAdapter::SEPARATOR, keyN, keySub, save.copy, deleteOldKeys);
 				}
 			}else{
 				// Case 2: no ctrl key

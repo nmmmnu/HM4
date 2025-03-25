@@ -110,7 +110,7 @@ void BTreeIndexBuilder<List>::push_back_key(size_type const index){
 	file_data_.write( (const char *) &nd, sizeof nd );
 
 	// push the key
-	file_data_.write( key.data(), (std::streamsize) key.size() );
+	file_data_.write( key.data(), key.size() );
 
 	// push NULL terminator to help recover the file
 	file_data_.put(0);
