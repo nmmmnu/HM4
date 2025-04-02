@@ -52,6 +52,15 @@ namespace MyBuffer{
 			return data_;
 		}
 
+		constexpr const value_type &operator[](std::size_t const index) const noexcept{
+			return data_[index];
+		}
+
+		constexpr
+		value_type &operator[](std::size_t const index) noexcept{
+			return data_[index];
+		}
+
 		auto size() const noexcept{
 			return size_;
 		}
