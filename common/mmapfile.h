@@ -8,7 +8,8 @@ public:
 	enum class Advice : char{
 		NORMAL		,
 		SEQUENTIAL	,
-		RANDOM
+		RANDOM		,
+		ALL
 	};
 
 public:
@@ -20,7 +21,13 @@ public:
 		close();
 	}
 
-	bool open(std::string_view filename, Advice advice = Advice::NORMAL);
+	bool open(std::string_view filename, Advice advice){
+		return openRO(filename, advice);
+	}
+
+	bool openRO(std::string_view filename, Advice advice);
+	bool openRW(std::string_view filename, Advice advice);
+	bool create(std::string_view filename, Advice advice, size_t size);
 
 	void close();
 
@@ -29,7 +36,15 @@ public:
 	}
 
 	constexpr const void *mem() const{
+		return memRO();
+	}
+
+	constexpr const void *memRO() const{
 		return mem_;
+	}
+
+	constexpr void *memRW(){
+		return rw_ ? mem_ : nullptr;
 	}
 
 	constexpr size_t size() const{
@@ -37,13 +52,12 @@ public:
 	}
 
 private:
-	bool open_(std::string_view filename, int mode, int prot, int advice);
+	bool mmap_(bool rw, size_t size, int fd, Advice advice);
 
 private:
 	void	*mem_		= nullptr;
-	size_t	size_		= 0;
-
-	int	fd_;
+	size_t	size_;
+	bool	rw_;
 };
 
 #endif
