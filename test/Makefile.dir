@@ -67,5 +67,8 @@ $(A)test_endianfp: $(O)test_endianfp.o
 $(A)test_tdigest: $(O)test_tdigest.o $(O)tdigest.o
 	$(LINK)
 
+$(A)test_mmap: $(O)test_mmap.o $(O)mmapfile.o
+	$(LINK)
+
 
 
