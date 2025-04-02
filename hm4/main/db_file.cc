@@ -23,7 +23,7 @@ namespace{
 				"Usage:\n"
 				"\t{1} r [file.db] [key] - load file.db, then search for the key\n"
 				"\t{1} l [file.db] -     - load file.db, then list using iterator\n"
-				"\t{1} l [file.db] [key] - load file.db, then list using iterator\n"
+				"\t{1} i [file.db] [key] - load file.db, then list using index\n"
 				"\n",
 				hm4::version::str,
 				cmd
@@ -63,12 +63,31 @@ namespace{
 		return 0;
 	}
 
+
+	template <class List>
+	int op_id(List const &, std::string_view const ){
+		return 2;
+	}
+
+	int op_id(hm4::disk::DiskList const &list, std::string_view const key){
+		if (key.empty())
+			return 1;
+
+		auto const index = from_string<size_t>(key);
+
+		if (index < list.size())
+			print(list[index]);
+
+		return 0;
+	}
+
 	template <class List>
 	int op_select(char const op, List const &list, std::string_view const key){
 		switch(op){
 		default:
 		case 'r':	return op_search (list, key);
 		case 'l':	return op_iterate(list, key);
+		case 'i':	return op_id     (list, key);
 		}
 	}
 
