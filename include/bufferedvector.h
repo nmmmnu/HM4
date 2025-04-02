@@ -52,7 +52,7 @@ public:
 	// STANDARD C-TORS
 
 	template<typename... Args>
-	constexpr BufferedVector(Args&&... args) : buffer_(std::forward<Args>(args)...){
+	explicit constexpr BufferedVector(Args&&... args) : buffer_(std::forward<Args>(args)...){
 	}
 
 	template<typename... Args>
@@ -144,6 +144,10 @@ public:
 
 	constexpr bool empty() const noexcept{
 		return size() == 0;
+	}
+
+	constexpr bool full() const noexcept{
+		return size() == capacity();
 	}
 
 	// MORE Size
