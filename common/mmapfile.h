@@ -51,11 +51,6 @@ public:
 		return size_;
 	}
 
-	template<class T>
-	constexpr size_t sizeArray() const{
-		return size() / sizeof(T);
-	}
-
 private:
 	bool mmap_(bool rw, size_t size, int fd, Advice advice);
 

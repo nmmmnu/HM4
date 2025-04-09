@@ -10,37 +10,35 @@
 
 class BlobRef{
 public:
-	constexpr
-	BlobRef() = default;
+	constexpr BlobRef() = default;
 
-	constexpr
-	BlobRef(const void *mem, size_t const size) noexcept :
+	constexpr BlobRef(const void *mem, size_t const size) noexcept :
 				mem_( (const char *) mem ),
 				size_(size){}
 
-	constexpr
-	BlobRef(std::string_view s) noexcept :
+	constexpr BlobRef(std::string_view s) noexcept :
 				mem_	(s.data()),
 				size_	(s.size()){}
 
 	template<size_t N>
-	constexpr
-	BlobRef(const char(&mem)[N]) noexcept:
+	constexpr BlobRef(const char(&mem)[N]) noexcept:
 				BlobRef(mem, N){}
 
 public:
-	constexpr
-	bool empty() const noexcept{
+	constexpr bool empty() const noexcept{
 		return mem_ == nullptr || size_ == 0;
 	}
 
-	constexpr
-	size_t size() const noexcept{
+	constexpr size_t size() const noexcept{
 		return size_;
 	}
 
-	constexpr
-	const void *data_() const noexcept{
+	template <class T>
+	constexpr size_t sizeAs() const noexcept{
+		return size() / sizeof(T);
+	}
+
+	constexpr const void *data_() const noexcept{
 		return mem_;
 	}
 

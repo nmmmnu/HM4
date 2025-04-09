@@ -25,11 +25,6 @@ struct MMAPFilePlus{
 		return file_.size();
 	}
 
-	template<class T>
-	constexpr size_t sizeArray() const{
-		return size() / sizeof(T);
-	}
-
 	constexpr const BlobRef &operator*() const{
 		return blob_;
 	}

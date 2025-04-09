@@ -59,7 +59,7 @@ namespace{
 			return searchBinary(key, list);
 		};
 
-		size_t const nodesCount = line.sizeArray<SmallNode>();
+		size_t const nodesCount = line.size() ;
 
 		const SmallNode *nodes = line->as<const SmallNode>(0, nodesCount);
 
@@ -150,7 +150,7 @@ namespace{
 			return list.ra_find_<DiskList::FindMode::HASH_FALLBACK>(key);
 		};
 
-		size_t const nodesCount = hashIndex.sizeArray<HashNode>();
+		size_t const nodesCount = hashIndex->sizeAs<HashNode>();
 
 		const HashNode *nodes = hashIndex->as<const HashNode>(0, nodesCount);
 
@@ -271,7 +271,7 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice co
 	bool const b2 =	mData_.open(filenameData(filename), advice);
 
 	// integrity check, size is safe to be used now.
-	bool const b3 =	mIndx_.sizeArray<uint64_t>() == size();
+	bool const b3 =	mIndx_->sizeAs<uint64_t>() == size();
 
 	log__mmap_file__(filenameIndx(filename), mIndx_);
 	log__mmap_file__(filenameData(filename), mData_);
@@ -296,7 +296,7 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 
 	mLine_.open(filenameLine(filename));
 
-	if (mLine_.sizeArray<SmallNode>() <= 1){
+	if (mLine_->sizeAs<SmallNode>() <= 1){
 		logger<Logger::WARNING>() << "Hotline too small. Ignoring.";
 		mLine_.close();
 	}
@@ -306,7 +306,7 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 	mHash_.open(filenameHash(filename));
 
 	// why 64 ? because if less, Line will be as fast as Hash
-	if (mHash_.sizeArray<hash::Node>() < 64){
+	if (mHash_->sizeAs<HashNode>() < 64){
 		logger<Logger::WARNING>() << "HashIndex too small. Ignoring.";
 		mHash_.close();
 	}
