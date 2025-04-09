@@ -2,7 +2,7 @@ SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 EXTRA_INCL += -I$(SRC_DIR)
 
-MY_TARGETS = $(A)db_file $(A)db_merge $(A)db_replay $(A)db_builder $(A)db_builder_concurrent $(A)db_preload $(A)db_mkbtree
+MY_TARGETS = $(A)db_file $(A)db_merge $(A)db_replay $(A)db_builder $(A)db_builder_concurrent $(A)db_preload $(A)db_mkbtree $(A)db_mkhash
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -12,7 +12,7 @@ all: $(MY_TARGETS)
 
 
 PAIR_OBJ = $(O)pair.o $(O)mytime.o $(O)logger.o
-DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o $(O)mmapbuffer.o $(PAIR_OBJ)
+DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)filemeta.o $(O)filemetablob.o $(O)mmapbuffer.o $(O)murmur_hash_64a.o $(PAIR_OBJ)
 
 
 $(A)db_file: $(O)db_file.o		$(DISKLIST_OBJ) $(O)directorylistloader.o $(O)myfs.o $(O)myglob.o
@@ -41,6 +41,9 @@ $(A)zone_loader: $(O)zone_loader.o
 	$(LINK)
 
 $(A)db_mkbtree: $(O)db_mkbtree.o	$(DISKLIST_OBJ)
+	$(LINK)
+
+$(A)db_mkhash: $(O)db_mkhash.o		$(DISKLIST_OBJ) $(O)murmur_hash_64a.o
 	$(LINK)
 
 

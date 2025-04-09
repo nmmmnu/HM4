@@ -6,6 +6,8 @@
 
 #include "stringhash.h"
 
+#include "hashindexnode.h"
+
 #include "binarysearch.h"
 
 #include "myalign.h"
@@ -23,21 +25,11 @@ struct SmallNode{
 
 static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
 
+using HashNode = hash::Node;
+
 // ==============================
 
 namespace{
-
-	template<bool B>
-	auto find_fix(BinarySearchResult<DiskList::random_access_iterator> const result, DiskList const &list, std::bool_constant<B>){
-		if constexpr(B)
-			return result.found ? result.it : list.ra_end();
-		else
-			return result.it;
-
-	}
-
-	// -----------------------------------
-
 	template<size_t start>
 	int comp(Pair const &p, std::string_view const key){
 		return p.cmpX<start>(key);
@@ -63,12 +55,16 @@ namespace{
 	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;
 
 	auto searchHotLine(std::string_view const key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<DiskList::random_access_iterator>{
+		auto fallback = [key, &list](){
+			return searchBinary(key, list);
+		};
+
 		size_t const nodesCount = line.sizeArray<SmallNode>();
 
 		const SmallNode *nodes = line->as<const SmallNode>(0, nodesCount);
 
 		if (!nodes)
-			return searchBinary(key, list);
+			return fallback();
 
 		HPair::HKey const hkey = HPair::SS::create(key);
 
@@ -97,7 +93,7 @@ namespace{
 		if ( listPos >= list.size() ){
 			logger<Logger::ERROR>() << "Hotline corruption detected. Advice Hotline removal.";
 
-			return searchBinary(key, list);
+			return fallback();
 		}
 
 		if (found == false){
@@ -149,9 +145,81 @@ namespace{
 		return searchBinary<HPair::N>(key, list, listPos, listPosLast);
 	}
 
+	auto searchHashIndex(std::string_view const key, DiskList const &list, MMAPFilePlus const &hashIndex) -> BinarySearchResult<DiskList::random_access_iterator>{
+		auto fallback = [key, &list](){
+			return list.ra_find_<DiskList::FindMode::HASH_FALLBACK>(key);
+		};
+
+		size_t const nodesCount = hashIndex.sizeArray<HashNode>();
+
+		const HashNode *nodes = hashIndex->as<const HashNode>(0, nodesCount);
+
+		if (!nodes)
+			return fallback();
+
+		auto const hc = murmur_hash64a(key);
+
+		for(size_t i = 0; i < hash::HASHTABLE_OPEN_ADDRESSES; ++i){
+			// branchless
+			auto const cell = (hc + i) % nodesCount;
+
+			auto const &node = nodes[cell];
+
+			if (node.hash == 0){
+				logger<Logger::DEBUG>() << "Not found, the open range is terminated.";
+
+				return { false, list.ra_end() };
+			}
+
+			if (betoh(node.hash) == hc){
+				auto const listPos = betoh(node.pos);
+
+				if ( listPos >= list.size() ){
+					logger<Logger::ERROR>() << "HashIndex corruption detected. Advice HashIndex removal.";
+
+					return fallback();
+				}
+
+				if (!list[listPos].cmp(key)){
+					logger<Logger::DEBUG>() << "Found, direct hit at pos" << listPos;
+
+					return { true, { list, listPos } };
+				}
+
+				logger<Logger::DEBUG>() << "Collision on pos" << listPos;
+			}
+		}
+
+		logger<Logger::DEBUG>() << "Not Found, the open range if full.";
+
+		return fallback();
+	}
+
+	// -----------------------------------
+
 	[[maybe_unused]]
 	void log__mmap_file__(std::string_view const filename, bool const mmap){
 		logger<Logger::NOTICE>() << "mmap" << filename << (mmap ? "Success" : "Error");
+	}
+
+	// -----------------------------------
+
+	bool checkMetadata(FileMeta const &metadata){
+		if (metadata == false)
+			return false;
+
+		// Non sorted files are no longer supported
+		if (metadata.sorted() == false){
+			logger<Logger::FATAL>() << "Non sorted files are no longer supported. Please replay the file as binlog.";
+			return false;
+		}
+
+		if (metadata.size() == 0){
+			logger<Logger::WARNING>() << "Skipping empty disktable.";
+			return false;
+		}
+
+		return true;
 	}
 
 } // anonymous namespace
@@ -174,30 +242,6 @@ bool DiskList::openDataOnly_with_bool(std::string_view const filename, bool cons
 
 	return openDataOnly_(filename);
 }
-
-
-
-namespace{
-	bool checkMetadata(FileMeta const &metadata){
-		if (metadata == false)
-			return false;
-
-		// Non sorted files are no longer supported
-		if (metadata.sorted() == false){
-			logger<Logger::FATAL>() << "Non sorted files are no longer supported. Please replay the file as binlog.";
-			return false;
-		}
-
-		if (metadata.size() == 0){
-			logger<Logger::WARNING>() << "Skipping empty disktable.";
-			return false;
-		}
-
-		return true;
-	}
-}
-
-
 
 bool DiskList::openForward_(std::string_view const filename){
 	logger<Logger::NOTICE>() << "Open disktable forward only" << filename << "ID" << id_;
@@ -259,10 +303,21 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 
 	// ==============================
 
+	mHash_.open(filenameHash(filename));
+
+	// why 64 ? because if less, Line will be as fast as Hash
+	if (mHash_.sizeArray<hash::Node>() < 64){
+		logger<Logger::WARNING>() << "HashIndex too small. Ignoring.";
+		mHash_.close();
+	}
+
+	// ==============================
+
 	mTree_.open(filenameBTreeIndx(filename));
 	mKeys_.open(filenameBTreeData(filename));
 
 	log__mmap_file__(filenameLine(filename), mLine_);
+	log__mmap_file__(filenameHash(filename), mHash_);
 
 	log__mmap_file__(filenameBTreeIndx(filename), mTree_);
 	log__mmap_file__(filenameBTreeData(filename), mKeys_);
@@ -282,7 +337,7 @@ bool DiskList::open_(std::string_view const filename, MMAPFile::Advice const adv
 
 bool DiskList::open(std::string_view const filename, MMAPFile::Advice const advice, OpenMode const mode){
 	bool const result = open_(filename, advice, mode);
-	searchMode_ = calcSearchMode_();
+	calcSearchMode_();
 	return result;
 }
 
@@ -294,6 +349,7 @@ void DiskList::close(){
 	mData_.close();
 
 	mLine_.close();
+	mHash_.close();
 
 	mTree_.close();
 	mKeys_.close();
@@ -305,15 +361,35 @@ void DiskList::close(){
 
 
 
-auto DiskList::calcSearchMode_() const -> SearchMode{
-	if (mTree_ && mKeys_)
-		return SearchMode::BTREE;
+void DiskList::calcSearchMode_(){
+	auto bit = [this]{
+		uint64_t x = 0;
 
-	if (mLine_)
-		return SearchMode::HOTLINE;
+		x |= mLine_		? 0x001 : 0x0;
+		x |= mHash_		? 0x010 : 0x0;
+		x |= mTree_ && mKeys_	? 0x100 : 0x0;
 
-	else
-		return SearchMode::BINARY;
+		return x;
+	};
+
+	auto set = [this](auto t, auto f){
+		searchMode_T_ = t;
+		searchMode_F_ = f;
+	};
+
+	using sm = SearchMode;
+
+	switch( bit() ){
+	default:
+	case 0x000:	return set(sm::BINARY		, sm::BINARY	);
+	case 0x001:	return set(sm::HOTLINE		, sm::HOTLINE	);
+	case 0x010:	return set(sm::HASHINDEX	, sm::BINARY	);
+	case 0x011:	return set(sm::HASHINDEX	, sm::HOTLINE	);
+	case 0x100:
+	case 0x101:	return set(sm::BTREE		, sm::BTREE	);
+	case 0x110:
+	case 0x111:	return set(sm::HASHINDEX	, sm::BTREE	);
+	}
 }
 
 
@@ -388,29 +464,79 @@ namespace fd_impl_{
 // ==============================
 
 
+template<DiskList::FindMode B>
+auto DiskList::ra_find_(std::string_view const key) const -> BinarySearchResult<random_access_iterator>{
+	auto log = [](SearchMode search){
+		auto f = []{
+			switch(B){
+			case FindMode::HASH_FALLBACK	:
+			case FindMode::EXACT		: return "Exact";
+			case FindMode::PREFIX		: return "Prefix";
+			}
+		};
+
+		auto s = [search]{
+			switch(search){
+			default:
+			case SearchMode::BINARY		: return "binary";
+			case SearchMode::HOTLINE	: return "hotline";
+			case SearchMode::HASHINDEX	: return "hashindex";
+			case SearchMode::BTREE		: return "btree";
+			}
+		};
+
+		logger<Logger::DEBUG>() << f() << "search using" << s();
+	};
+
+
+
+	if constexpr(B == FindMode::PREFIX){
+		auto const searchMode = searchMode_F_;
+
+		switch(searchMode){
+		default:
+		case SearchMode::BINARY		: log(searchMode); return searchBinary	(key, *this);
+		case SearchMode::HOTLINE	: log(searchMode); return searchHotLine	(key, *this, mLine_);
+		case SearchMode::BTREE		: log(searchMode); return searchBTree	(key, *this);
+		}
+	}
+
+	if constexpr(B == FindMode::EXACT){
+		auto const searchMode = searchMode_T_;
+
+		switch(searchMode){
+		default:
+		case SearchMode::BINARY		: log(searchMode); return searchBinary		(key, *this);
+		case SearchMode::HOTLINE	: log(searchMode); return searchHotLine		(key, *this, mLine_);
+		case SearchMode::HASHINDEX	: log(searchMode); return searchHashIndex	(key, *this, mHash_);
+		case SearchMode::BTREE		: log(searchMode); return searchBTree		(key, *this);
+		}
+	}
+
+	if constexpr(B == FindMode::HASH_FALLBACK){
+		auto const searchMode = searchMode_F_;
+
+		std::string_view const what = "Exact";
+
+		switch(searchMode){
+		default:
+		case SearchMode::BINARY		: log(searchMode); return searchBinary	(key, *this);
+		case SearchMode::HOTLINE	: log(searchMode); return searchHotLine	(key, *this, mLine_);
+		case SearchMode::BTREE		: log(searchMode); return searchBTree	(key, *this);
+		}
+	}
+}
 
 template<bool B>
-auto DiskList::ra_find(std::string_view const key, std::bool_constant<B> const exact) const -> random_access_iterator{
-	// made this way to hide BinarySearchResult<iterator> type
-	switch(searchMode_){
-	case SearchMode::BTREE: {
-			logger<Logger::DEBUG>() << "btree";
-			auto const x = searchBTree(key, *this);
-			return find_fix(x, *this, exact);
-		}
+auto DiskList::ra_find(std::string_view const key, std::bool_constant<B>) const -> random_access_iterator{
+	if constexpr(B){
+		auto const result = ra_find_<FindMode::EXACT>(key);
 
-	case SearchMode::HOTLINE: {
-			logger<Logger::DEBUG>() << "hotline";
-			auto const x = searchHotLine(key, *this, mLine_);
-			return find_fix(x, *this, exact);
-		}
+		return result.found ? result.it : ra_end();
+	}else{
+		auto const result = ra_find_<FindMode::PREFIX>(key);
 
-	default:
-	case SearchMode::BINARY: {
-			logger<Logger::DEBUG>() << "binary";
-			auto const x = searchBinary(key, *this);
-			return find_fix(x, *this, exact );
-		}
+		return result.it;
 	}
 }
 
@@ -599,18 +725,15 @@ private:
 
 
 
-// ==============================
-
-
-
 namespace{
+
 	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>{
 		DiskList::BTreeSearchHelper helper{list, key};
 
 		return helper();
 	}
-} // anonymous namespace
 
+} // namespace
 
 } // namespace disk
 } // namespace

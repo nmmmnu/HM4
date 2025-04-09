@@ -1,0 +1,53 @@
+#include "hashindexbuilder.misc.h"
+
+#include "filewriter.h"
+
+#include <cstring>	// memset
+
+namespace hm4::disk::hash::algo{
+
+	template<typename T>
+	bool insertHH(NodeHelper<T> const &data, NodeHelperBuffer<T> &nodes, size_t const nodesCount){
+		auto f = [](auto const &data){
+			return data;
+		};
+
+		return insert__(data, nodes, nodesCount, f);
+	}
+
+
+
+	template<typename T>
+	struct HashIndexStandardBuilder{
+		HashIndexStandardBuilder(std::string_view filename, size_t nodesCount, MyBuffer::ByteBufferView buffer) :
+								buffer_		(buffer		),
+								nodesCount_	(nodesCount	),
+								filename_	(filename	){
+
+			memset( static_cast<void *>(buffer_.data()), 0, nodesCount_ * sizeof(NodeHelper<T>));
+		}
+
+		bool operator()(Pair const &pair){
+			auto const data = NodeHelper<T>{ murmur_hash64a(pair.getKey()), pos_++ };
+
+			return insertHH(data, buffer_, nodesCount_);
+		}
+
+		~HashIndexStandardBuilder(){
+			FileWriter file{ filename_ };
+
+			for(size_t i = 0; i < nodesCount_; ++i){
+				auto const node = buffer_[i].getNodeBE();
+				file.write(& node, sizeof(Node));
+			}
+		}
+
+	private:
+		T			pos_		= 0;
+		NodeHelperBuffer<T>	buffer_		;
+		size_t			nodesCount_	;
+		std::string_view 	filename_	;
+	};
+
+} // namespace hm4::disk::hash::algo
+

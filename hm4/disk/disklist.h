@@ -8,6 +8,13 @@
 
 #include <type_traits>
 
+
+
+template<class Iterator>
+struct BinarySearchResult;
+
+
+
 namespace hm4::disk{
 
 namespace fd_impl_{
@@ -41,6 +48,7 @@ public:
 	enum class SearchMode : char {
 		BINARY,
 		HOTLINE,
+		HASHINDEX,
 		BTREE
 	};
 
@@ -140,6 +148,15 @@ public:
 	template<bool B>
 	random_access_iterator ra_find(std::string_view const key, std::bool_constant<B>) const;
 
+	enum class FindMode{
+		EXACT,
+		PREFIX,
+		HASH_FALLBACK
+	};
+
+	template<FindMode B>
+	BinarySearchResult<random_access_iterator> ra_find_(std::string_view const key) const;
+
 private:
 	forward_iterator make_forward_iterator_(const Pair *pair) const;
 
@@ -159,7 +176,7 @@ private:
 
 	bool open_(std::string_view filename, MMAPFile::Advice advice, OpenMode mode);
 
-	SearchMode calcSearchMode_() const;
+	void calcSearchMode_();
 
 private:
 	const Pair *fdGetAt_(size_type const index) const{
@@ -176,6 +193,7 @@ public:
 private:
 	MMAPFilePlus	mIndx_;
 	MMAPFilePlus	mLine_;
+	MMAPFilePlus	mHash_;
 	MMAPFilePlus	mData_;
 
 	MMAPFilePlus	mTree_;
@@ -183,7 +201,8 @@ private:
 
 	FileMeta	metadata_;
 
-	SearchMode	searchMode_	= SearchMode::BINARY;
+	SearchMode	searchMode_T_	= SearchMode::BINARY;
+	SearchMode	searchMode_F_	= SearchMode::BINARY;
 
 	bool		aligned_	= true;
 
