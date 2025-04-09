@@ -71,7 +71,7 @@ namespace MyBuffer{
 
 	private:
 		static value_type *allocate__(size_type size){
-			return reinterpret_cast<value_type *>(
+			return static_cast<value_type *>(
 				#ifdef USE_HUGETLB
 					mmapbuffer_impl_::createHugeTLB(size)
 				#else
