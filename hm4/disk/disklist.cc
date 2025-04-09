@@ -157,7 +157,8 @@ namespace{
 		if (!nodes)
 			return fallback();
 
-		auto const hc = murmur_hash64a(key);
+		auto const hc    = murmur_hash64a(key);
+		auto const be_hc = htobe(hc);
 
 		for(size_t i = 0; i < hash::HASHTABLE_OPEN_ADDRESSES; ++i){
 			// branchless
@@ -171,7 +172,7 @@ namespace{
 				return { false, list.ra_end() };
 			}
 
-			if (betoh(node.hash) == hc){
+			if (node.hash == be_hc){
 				auto const listPos = betoh(node.pos);
 
 				if ( listPos >= list.size() ){
