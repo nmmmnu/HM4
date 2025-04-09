@@ -9,7 +9,7 @@ constexpr double delta	= 0.05;
 namespace{
 
 	auto alloc(size_t size){
-		auto *p = reinterpret_cast<RawTDigest::TDigest *>(malloc(size));
+		auto *p = static_cast<RawTDigest::TDigest *>(malloc(size));
 
 		memset(p, 0, size);
 

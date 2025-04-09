@@ -38,7 +38,7 @@ namespace MyBuffer{
 
 		template<class Buffer, std::enable_if_t<impl_::c_tor_2<T, Buffer>, int> = 0>
 		constexpr BufferView(Buffer &buffer) :
-					BufferView( reinterpret_cast<void *>(buffer.data()), buffer.size() ){}
+					BufferView( static_cast<void *>(buffer.data()), buffer.size() ){}
 
 		template<class Buffer, std::enable_if_t<impl_::c_tor_3<T, Buffer>, int> = 0>
 		constexpr BufferView(Buffer &buffer){
@@ -97,8 +97,6 @@ namespace MyBuffer{
 		value_type	*data_	= nullptr;
 		size_type	size_	= 0;
 	};
-
-
 
 	using ByteBufferView = BufferView<std::uint8_t>;
 

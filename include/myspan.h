@@ -214,7 +214,7 @@ struct MySpan<T, MySpanConstructor::EXPLICIT, RangeCheck> : public MySpan<T, MyS
 template<typename T, bool RangeCheck = false>
 auto blobAsMySpan(void *ptr, size_t size){
 	return MySpan<T, MySpanConstructor::NORMAL>{
-		reinterpret_cast<T *>(ptr),
+		static_cast<T *>(ptr),
 		size / sizeof(T)
 	};
 }
@@ -224,7 +224,7 @@ auto blobAsMySpan(const void *ptr, size_t size){
 	using T = const T_;
 
 	return MySpan<T, MySpanConstructor::NORMAL>{
-		reinterpret_cast<T *>(ptr),
+		static_cast<T *>(ptr),
 		size / sizeof(T)
 	};
 }

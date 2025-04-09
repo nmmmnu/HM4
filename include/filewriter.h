@@ -25,7 +25,7 @@ struct FileWriterIOStream{
 	FileWriterIOStream(const char *name, size_t = 0) : os(name, MODE){}
 
 	bool write(const void *vdata, size_t size){
-		const char *data = reinterpret_cast<const char *>(vdata);
+		const char *data = static_cast<const char *>(vdata);
 
 		assert(data);
 
@@ -80,7 +80,7 @@ struct FileWriterFOpen{
 	}
 
 	bool write(const void *vdata, size_t size){
-		const char *data = reinterpret_cast<const char *>(vdata);
+		const char *data = static_cast<const char *>(vdata);
 
 		assert(data);
 

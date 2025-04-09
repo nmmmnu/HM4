@@ -80,21 +80,21 @@ public:
 	const T *asArray(size_t const pos, size_t const elements = 1) const noexcept{
 		static_assert(std::is_pod<T>::value, "T must be POD type");
 
-		return reinterpret_cast<const T *>( safeAccessMemory(pos * sizeof(T), elements * sizeof(T)) );
+		return static_cast<const T *>( safeAccessMemory(pos * sizeof(T), elements * sizeof(T)) );
 	}
 
 	template <class T>
 	const T *as(size_t const pos, size_t const elements = 1) const noexcept{
 		static_assert(std::is_pod<T>::value, "T must be POD type");
 
-		return reinterpret_cast<const T *>( safeAccessMemory(pos, elements * sizeof(T)) );
+		return static_cast<const T *>( safeAccessMemory(pos, elements * sizeof(T)) );
 	}
 
 	template <class T>
 	const T *as(const void *ptr, size_t const elements = 1) const noexcept{
 		static_assert(std::is_pod<T>::value, "T must be POD type");
 
-		return reinterpret_cast<const T *>( safeAccessMemory(ptr, elements * sizeof(T)) );
+		return static_cast<const T *>( safeAccessMemory(ptr, elements * sizeof(T)) );
 	}
 
 	// ambiguous call guard for 0
