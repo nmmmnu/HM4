@@ -60,9 +60,9 @@ namespace hm4::disk::hash::algo{
 			vector_.emplace_back(murmur_hash64a(pair.getKey()), pos_++);
 
 			if (vector_.full()){
-				logger<Logger::NOTICE>() << "Processed" << vector_.size() << "records, total records" << pos_ << ", buffer flush...";
-
+				logger<Logger::NOTICE>() << "HashIndex buffer flush... Processed" << vector_.size() << "record(s), total record(s)" << pos_;
 				flush(vector_, nodes_(), nodesCount_);
+				logger<Logger::NOTICE>() << "HashIndex buffer flush done.";
 
 				vector_.clear();
 			}
@@ -72,9 +72,9 @@ namespace hm4::disk::hash::algo{
 
 		~HashIndexMultiPassBuilder(){
 			if (!vector_.empty()){
-				logger<Logger::NOTICE>() << "Processed" << vector_.size() << "records, total records" << pos_ << ", buffer final flush...";
-
+				logger<Logger::NOTICE>() << "HashIndex buffer flush... Processed" << vector_.size() << "record(s), total record(s)" << pos_;
 				flush(vector_, nodes_(), nodesCount_);
+				logger<Logger::NOTICE>() << "HashIndex buffer flush done.";
 			}
 		}
 

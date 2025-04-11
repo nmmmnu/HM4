@@ -4,6 +4,8 @@
 
 #include "myfs.h"
 
+#include "mmapbuffer.h"
+
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
 
@@ -16,9 +18,10 @@ namespace{
 				"\tDate   : {date} {time}\n"
 				"\n"
 				"Usage:\n"
-				"\t{cmd} - output.db [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones\n"
-				"\t{cmd} t output.db [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones\n"
+				"\t{cmd} - output.db [hash arena in MB] [file1.db] [file2.db] [fileN.db] - merge files, keep   tombstones\n"
+				"\t{cmd} t output.db [hash arena in MB] [file1.db] [file2.db] [fileN.db] - merge files, remove tombstones\n"
 				"\t\tDo not forget you usually need two input files\n"
+				"\t\tIf hash arena in MB is zero, no hashindex will be made\n"
 				"\n",
 				fmt::arg("version",	hm4::version::str	),
 				fmt::arg("date",	__DATE__		),
@@ -30,8 +33,21 @@ namespace{
 	}
 
 	template <class FACTORY>
-	int mergeFromFactory(const FACTORY &f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions){
-		hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()), tombstoneOptions, hm4::Pair::WriteOptions::ALIGNED);
+	int mergeFromFactory(FACTORY &&f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions, size_t const bufferSize){
+		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
+
+		if (bufferSize){
+			MyBuffer::ByteMMapBuffer buffer{ bufferSize };
+
+			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+								tombstoneOptions, aligned,
+								f().size(), buffer
+			);
+		}else{
+			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+								tombstoneOptions, aligned
+			);
+		}
 
 		return 0;
 	}
@@ -100,6 +116,9 @@ private:
 constexpr auto	DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
 constexpr auto	DEFAULT_MODE	= DiskList::OpenMode::FORWARD;
 
+constexpr size_t MIN_ARENA_SIZE	= 8;
+constexpr size_t MB		= 1024 * 1024;
+
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)
 		return printUsage(argv[0]);
@@ -111,49 +130,53 @@ int main(int argc, char **argv){
 		return 2;
 	}
 
+	size_t const hashBufferSize_ = from_string<size_t>(argv[3]);
+	size_t const hashBufferSize  = hashBufferSize_ < MIN_ARENA_SIZE ? 0 : hashBufferSize_ * MB;
+
 	using hm4::disk::FileBuilder::TombstoneOptions;
 
 	TombstoneOptions const tombstoneOptions = argv[1][0] == 't' ? TombstoneOptions::REMOVE : TombstoneOptions::KEEP;
 
-	int const table_count	= argc - 3;
-	const char **path	= (const char **) &argv[3];
-
+	int const table_count	= argc - 4;
+	const char **path	= (const char **) &argv[4];
 
 	switch(table_count){
 	case 1:
-		{
-			fmt::print(	"Merging (cleanup) single table...\n"
-					"\t{}\n",
-					path[0]
-			);
+		fmt::print(	"Merging (cleanup) single table...\n"
+				"\t{}\n",
+				path[0]
+		);
 
-			MergeListFactory_1 factory{ path[0], DEFAULT_ADVICE, DEFAULT_MODE };
-
-			return mergeFromFactory(factory, output, tombstoneOptions);
-		}
+		return mergeFromFactory(
+			MergeListFactory_1{ path[0], DEFAULT_ADVICE, DEFAULT_MODE },
+			output,
+			tombstoneOptions,
+			hashBufferSize
+		);
 
 	case 2:
-		{
-			fmt::print(	"Merging two tables...\n"
-					"\t{}\n"
-					"\t{}\n",
-					path[0], path[1]
-			);
+		fmt::print(	"Merging two tables...\n"
+				"\t{}\n"
+				"\t{}\n",
+				path[0], path[1]
+		);
 
-			MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE };
-
-			return mergeFromFactory(factory, output, tombstoneOptions);
-
-		}
+		return mergeFromFactory(
+			MergeListFactory_2{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE },
+			output,
+			tombstoneOptions,
+			hashBufferSize
+		);
 
 	default:
-		{
-			fmt::print(	"Merging multiple tables...\n");
+		fmt::print(	"Merging multiple tables...\n");
 
-			MergeListFactory_N<const char **> factory{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE };
-
-			return mergeFromFactory(factory, output, tombstoneOptions);
-		}
+		return mergeFromFactory(
+			MergeListFactory_N<const char **>{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE },
+			output,
+			tombstoneOptions,
+			hashBufferSize
+		);
 	}
 }
 

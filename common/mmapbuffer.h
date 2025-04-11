@@ -24,6 +24,11 @@ namespace MyBuffer{
 
 		MMapBuffer(size_type size = 1) : size_(size){}
 
+		MMapBuffer(MMapBuffer &other) : size_(other.size_), data_(other.data_){
+			other.size_ = 0;
+			other.data_ = nullptr;
+		}
+
 		~MMapBuffer(){
 			mmapbuffer_impl_::destroy(data_, bytes());
 		}

@@ -16,9 +16,12 @@
 #include "multi/duallist.h"
 #include "multi/collectionlist.h"
 
+#include "mmapbuffer.h"
+
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <optional>
 #include "myspan.h"
 
 
@@ -35,15 +38,28 @@ constexpr TombstoneOptions TOMBSTONE_OPTION = TombstoneOptions::KEEP;
 
 
 
+using MyOptionalBuffer = std::optional<MyBuffer::ByteMMapBuffer>;
+
 namespace{
 
 	MyOptions prepareOptions(int argc, char **argv);
 
-	int compact(MyOptions const &opt);
+	int compact(MyOptions const &opt, MyOptionalBuffer &buffer);
 
 	template <class Factory>
-	void mergeFromFactory(Factory const &f, std::string_view output_file){
-		hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()), TOMBSTONE_OPTION, hm4::Pair::WriteOptions::ALIGNED);
+	void mergeFromFactory(Factory &&f, std::string_view output_file, MyOptionalBuffer &buffer){
+		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
+
+		if (buffer){
+			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+							TOMBSTONE_OPTION, aligned,
+							f().size(), *buffer
+			);
+		}else{
+			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+							TOMBSTONE_OPTION, aligned
+			);
+		}
 	}
 
 } // anonymous namespace
@@ -85,10 +101,23 @@ private:
 
 
 
+constexpr size_t MIN_ARENA_SIZE	= 8;
+constexpr size_t MB		= 1024 * 1024;
+
+
+
 int main(int argc, char **argv){
 	MyOptions const opt = prepareOptions(argc, argv);
 
-	return compact(opt);
+	size_t const hashBufferSize  = opt.hash_arena < MIN_ARENA_SIZE ? 0 : opt.hash_arena * MB;
+
+	MyOptionalBuffer buffer;
+
+	if (hashBufferSize){
+		buffer.emplace(hashBufferSize);
+	}
+
+	return compact(opt, buffer);
 }
 
 namespace{
@@ -292,7 +321,16 @@ namespace{
 
 
 
-	int compact(MyOptions const &opt){
+	int compact(MyOptions const &opt, MyOptionalBuffer &buffer){
+
+		auto merge = [&opt, &buffer](std::string_view what, auto &&factory){
+			auto const output_file = getNewFilename(opt.db_path);
+
+			fmt::print("Merging {} tables into {}\n", what, output_file);
+
+			mergeFromFactory(factory, output_file, buffer);
+		};
+
 		while(true){
 			auto const out = prepareSmartMergeFileList(opt);
 
@@ -307,37 +345,23 @@ namespace{
 			switch(path.size()){
 			case 0:
 			case 1:
-				{
-					fmt::print(	"No need to compact...\n");
+				fmt::print("No need to compact...\n");
 
-					return 0;
-				}
+				return 0;
 
 			case 2:
-				{
-					auto const output_file = getNewFilename(opt.db_path);
+				merge( "two",
+					MergeListFactory_2{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE }
+				);
 
-					fmt::print(	"Merging two tables into {}\n", output_file);
-
-					MergeListFactory_2 factory{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE };
-
-					mergeFromFactory(factory, output_file);
-
-					break;
-				}
+				break;
 
 			default:
-				{
-					auto const output_file = getNewFilename(opt.db_path);
+				merge( "multiple",
+					MergeListFactory_N{ std::begin(path), std::end(path), DEFAULT_ADVICE, DEFAULT_MODE }
+				);
 
-					fmt::print(	"Merging multiple tables into {}\n", output_file);
-
-					MergeListFactory_N factory{ std::begin(path), std::end(path), DEFAULT_ADVICE, DEFAULT_MODE };
-
-					mergeFromFactory(factory, output_file);
-
-					break;
-				}
+				break;
 			}
 
 			renameFiles(path, opt.rename_from, opt.rename_to);

@@ -1,6 +1,8 @@
 #ifndef HASH_INDEX_BUILDER_H
 #define HASH_INDEX_BUILDER_H_
 
+#include "disk/filenames.h"
+
 #include "hashindexnode.h"
 
 #include "hashindexbuilder.multipass.h"
@@ -12,6 +14,7 @@
 
 #include <variant>
 #include <limits>
+#include <cassert>
 
 namespace hm4::disk::hash{
 
@@ -19,7 +22,8 @@ namespace hm4::disk::hash{
 		constexpr static double EXPAND_FACTOR = 1.333333;
 
 		HashIndexBuilder(std::string_view filename, size_t listSize, MyBuffer::ByteBufferView buffer) :
-								impl_( selectImplementation__(filename, listSize, buffer) ){}
+								filename_	(filenameHash(filename)),
+								impl_		( selectImplementation__(filename_, listSize, buffer) ){}
 
 		void operator()(Pair const &pair){
 			auto visitor = [&pair](auto &x){
@@ -52,7 +56,7 @@ namespace hm4::disk::hash{
 			auto print = [nodesCount](const char *s){
 				size_t const u = sizeof(T) * 8;
 
-				logger<Logger::NOTICE>() << "Using" << s << u << "bit algorithm, with" << nodesCount << "nodes.";
+				logger<Logger::NOTICE>() << "Using" << s << u << "bit HashIndex builder, with" << nodesCount << "nodes.";
 			};
 
 			if (buffer.size() >= nodesCount * sizeof(algo::NodeHelper<T>)){
@@ -66,6 +70,8 @@ namespace hm4::disk::hash{
 		}
 
 		static Implementation selectImplementation__(std::string_view filename, size_t listSize, MyBuffer::ByteBufferView buffer){
+			assert(listSize > 0);
+
 			size_t const nodesCount = selectNodeCount__(listSize);
 
 			if (nodesCount <= std::numeric_limits<uint32_t>::max())
@@ -75,6 +81,7 @@ namespace hm4::disk::hash{
 		}
 
 	private:
+		std::string	filename_;
 		Implementation	impl_;
 	};
 

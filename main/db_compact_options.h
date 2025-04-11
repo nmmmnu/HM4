@@ -25,6 +25,8 @@ public:
 
 	std::nullptr_t	compaction_percent;
 
+	size_t		hash_arena		= 0;
+
 	uint64_t	compaction_min_records	= 128;
 	uint64_t	compaction_max_records	= 128'000'000;
 
@@ -39,6 +41,8 @@ public:
 		case hash("db_path"			)	: return assign_(db_path,			value);
 
 		case hash("compaction_percent"		)	: return assign_(compaction_percent,		value);
+
+		case hash("hash_arena"			)	: return assign_(hash_arena,			value);
 
 		case hash("compaction_min_records"	)	: return assign_(compaction_min_records,	value);
 		case hash("compaction_max_records"	)	: return assign_(compaction_max_records,	value);
@@ -62,6 +66,8 @@ public:
 		put("db_path",						"Path to database"							);
 
 		put("compaction_percent",	compaction_percent,	"not used yet. hard set to 25%"						);
+
+		put("hash_arena",		hash_arena,		"HashIndex buffer size                                 , 0 = disabled"	);
 
 		put("compaction_min_records",	compaction_min_records,	"Tables with less than min_records are always compacted, 0 = disabled"	);
 		put("compaction_max_records",	compaction_max_records,	"Tables with more than min_records are *NOT*  compacted, 0 = disabled"	);

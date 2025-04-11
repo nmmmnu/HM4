@@ -10,6 +10,8 @@
 #include "stringhash.h"
 #include "filewriter.h"
 
+#include "hashindexbuilder.h"
+
 namespace hm4{
 namespace disk{
 namespace FileBuilder{
@@ -18,8 +20,7 @@ namespace FileBuilder{
 		KEEP
 	};
 
-	class FileDataBuilder{
-	public:
+	struct FileDataBuilder{
 		FileDataBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
 							file_data(filenameData(filename)),
 							fileWriteOptions(fileWriteOptions){}
@@ -42,8 +43,7 @@ namespace FileBuilder{
 
 
 
-	class FileIndxBuilder{
-	public:
+	struct FileIndxBuilder{
 		FileIndxBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions) :
 							file_indx(filenameIndx(filename)),
 							fileWriteOptions(fileWriteOptions){}
@@ -60,8 +60,7 @@ namespace FileBuilder{
 
 
 
-	class FileLineBuilder{
-	public:
+	struct FileLineBuilder{
 		FileLineBuilder(std::string_view const filename) :
 							file_line(filenameLine(filename)){}
 
@@ -77,8 +76,7 @@ namespace FileBuilder{
 
 
 
-	class FileMetaBuilder{
-	public:
+	struct FileMetaBuilder{
 		template<typename UString>
 		FileMetaBuilder(UString &&filename, Pair::WriteOptions const fileWriteOptions) :
 							fileWriteOptions(fileWriteOptions),
@@ -102,8 +100,8 @@ namespace FileBuilder{
 
 
 
-	class FileBuilder{
-	public:
+	template<bool WithHash>
+	struct FileBuilder{
 		using value_type = Pair const;
 
 		FileBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions):
@@ -111,6 +109,13 @@ namespace FileBuilder{
 					indx(filename, fileWriteOptions	),
 					line(filename			),
 					data(filename, fileWriteOptions	){}
+
+		FileBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions, size_t listSize, MyBuffer::ByteBufferView buffer):
+					meta(filename, fileWriteOptions	),
+					indx(filename, fileWriteOptions	),
+					line(filename			),
+					data(filename, fileWriteOptions	),
+					hazh(filename, listSize, buffer	){}
 
 		void operator()(Pair const &pair){
 			push_back(pair);
@@ -121,13 +126,21 @@ namespace FileBuilder{
 			indx(pair);
 			line(pair);
 			data(pair);
+
+			if constexpr(!std::is_same_v<FileHashBuilder, std::nullptr_t>){
+			hazh(pair);
+			}
 		}
+
+	private:
+		using FileHashBuilder = std::conditional_t<WithHash, hash::HashIndexBuilder, std::nullptr_t>;
 
 	private:
 		FileMetaBuilder meta;
 		FileIndxBuilder indx;
 		FileLineBuilder line;
 		FileDataBuilder data;
+		FileHashBuilder hazh;
 	};
 
 
@@ -135,30 +148,49 @@ namespace FileBuilder{
 	// ==============================
 
 
+	namespace FileBuilderImpl_{
 
-	template <class IT>
-	bool build(std::string_view const filename, IT first, IT last,
-					TombstoneOptions const tombstoneOptions, Pair::WriteOptions const fileWriteOptions){
+		template <class IT, bool B>
+		bool copy(FileBuilder<B> &&builder, IT first, IT last,
+						TombstoneOptions const tombstoneOptions){
 
-		FileBuilder builder(filename, fileWriteOptions);
+			if (tombstoneOptions == TombstoneOptions::KEEP){
 
-		if (tombstoneOptions == TombstoneOptions::KEEP){
+				// invalid pairs must be kept as tombstones
+				std::copy(first, last, std::back_inserter(builder));
 
-			// invalid pairs must be kept as tombstones
-			std::copy(first, last, std::back_inserter(builder));
+			}else{
 
-		}else{
+				std::copy_if(first, last, std::back_inserter(builder), [](Pair const &pair){
+					return pair.isOK();
+				});
 
-			std::copy_if(first, last, std::back_inserter(builder), [](Pair const &pair){
-				return pair.isOK();
-			});
+			}
 
+			return true;
 		}
 
-		return true;
+	} // namespace FileBuilderImpl_
+
+	template <class IT>
+	bool build(std::string_view const filename, IT first, IT last, TombstoneOptions const tombstoneOptions,
+					Pair::WriteOptions const fileWriteOptions, size_t listSize, MyBuffer::ByteBufferView buffer){
+
+		return FileBuilderImpl_::copy(
+				FileBuilder<1>(filename, fileWriteOptions, listSize, buffer),
+				first, last, tombstoneOptions
+		);
 	}
 
+	template <class IT>
+	bool build(std::string_view const filename, IT first, IT last, TombstoneOptions const tombstoneOptions,
+					Pair::WriteOptions const fileWriteOptions){
 
+		return FileBuilderImpl_::copy(
+				FileBuilder<0>(filename, fileWriteOptions),
+				first, last, tombstoneOptions
+		);
+	}
 
 } // namespace
 } // namespace

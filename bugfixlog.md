@@ -72,3 +72,7 @@ Changelog
 -	bugfix on mutable_x when table is flushed during commands like DELX.
 -	bugfix with removing key in GEOREM
 -	bugfix on searching disktable keys with size 8 characters
+
+### 1.3.9
+-	bugfix on potential issue with MMAP buffer.
+

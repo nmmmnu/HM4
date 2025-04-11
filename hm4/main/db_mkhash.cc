@@ -21,7 +21,7 @@ namespace{
 				"Build:\n"
 				"\tDate   : {date} {time}\n"
 				"Usage:\n"
-				"\t{cmd} [file.db] [btree_file.db] [arena in MB] - create hashmap for file.db\n"
+				"\t{cmd} [file.db] [hashindex_file.db] [arena in MB] - create hashmap for file.db\n"
 				"\n",
 				fmt::arg("version",	hm4::version::str	),
 				fmt::arg("date",	__DATE__		),

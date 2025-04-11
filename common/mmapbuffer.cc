@@ -16,6 +16,9 @@ namespace MyBuffer{
 		}
 
 		void *createNormal(std::size_t const size) noexcept{
+			if (size == 0)
+				return nullptr;
+
 			if (void *p = mmap_(size); p != MAP_FAILED){
 				logger_fmt<Logger::NOTICE>(maskAllocate, size, "conventional");
 				return p;
@@ -28,6 +31,9 @@ namespace MyBuffer{
 		#ifdef USE_HUGETLB
 
 		void *createHugeTLB(std::size_t const size) noexcept{
+			if (size == 0)
+				return nullptr;
+
 			if (void *p = mmap_(size, MAP_HUGETLB); p != MAP_FAILED){
 				logger_fmt<Logger::NOTICE>(maskAllocate, size, "HugeTLB");
 				return p;
@@ -40,17 +46,26 @@ namespace MyBuffer{
 		#endif
 
 		void destroy(void *p, std::size_t size) noexcept{
+			if (!p || size == 0)
+				return;
+
 			logger_fmt<Logger::NOTICE>(maskDeallocate, size);
 
 			munmap(p, size);
 		}
 
 		void adviceNeed(void *p, std::size_t size) noexcept{
+			if (!p || size == 0)
+				return;
+
 			logger<Logger::NOTICE>() << "MMapBuffer advising MADV_WILLNEED.";
 			madvise(p, size, MADV_WILLNEED);
 		}
 
 		void adviceFree(void *p, std::size_t size) noexcept{
+			if (!p || size == 0)
+				return;
+
 			logger<Logger::NOTICE>() << "MMapBuffer advising MADV_DONTNEED.";
 			madvise(p, size, MADV_DONTNEED);
 		}

@@ -36,10 +36,14 @@ namespace hm4::disk::hash::algo{
 		~HashIndexStandardBuilder(){
 			FileWriter file{ filename_ };
 
+			logger<Logger::NOTICE>() << "HashIndex save index...";
+
 			for(size_t i = 0; i < nodesCount_; ++i){
 				auto const node = buffer_[i].getNodeBE();
 				file.write(& node, sizeof(Node));
 			}
+
+			logger<Logger::NOTICE>() << "HashIndex save index done.";
 		}
 
 	private:
