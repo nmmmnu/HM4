@@ -3,8 +3,11 @@
 
 #include <type_traits>
 #include <algorithm>
+#include <cassert>
 
-#include "mybufferadvice.h"
+//#include "mybufferadvice.h"
+
+#include "mybuffer.h"
 
 #include "logger.h"
 
@@ -42,14 +45,17 @@ namespace flushlist_impl_{
 	}
 
 	template<class List, class Flusher>
-	void save(List &list, Flusher &flusher){
+	void save(List &list, Flusher &flusher, MyBuffer::ByteBufferView bufferHash){
 		if constexpr(HasPrepareFlush<List>::value){
 			list.prepareFlush();
 		}
 
 		const auto &clist = list;
 
-		flusher(std::begin(clist), std::end(clist));
+		if (bufferHash)
+			flusher(clist, bufferHash);
+		else
+			flusher(clist);
 	}
 
 	template<class List, class ListLoader>
@@ -64,11 +70,11 @@ namespace flushlist_impl_{
 		return flushList.insertF_NoFlush(factory);
 	}
 
-	template<class FlushList, class PFactory, class MyPairBuffer>
-	auto flushThenInsert(FlushList &flushList, PFactory &factory, MyPairBuffer &pairBuffer){
-		MyBuffer::AdviceNeededGuard guard(pairBuffer);
+	template<class FlushList, class PFactory>
+	auto flushThenInsert(FlushList &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair){
+		// MyBuffer::AdviceNeededGuard guard(bufferPair);
 
-		Pair *pair = reinterpret_cast<Pair *>(pairBuffer->data());
+		Pair *pair = reinterpret_cast<Pair *>(bufferPair.data());
 
 		factory.create(pair);
 
@@ -85,13 +91,13 @@ namespace flushlist_impl_{
 		return insertF_NoFlush(flushList, cloneFactory);
 	}
 
-	template<class FlushList, class InsertList, class Predicate, class PFactory, class MyPairBuffer>
-	auto insertF(FlushList &flushList, InsertList const &insertList, Predicate &predicate, PFactory &factory, MyPairBuffer &pairBuffer){
+	template<class FlushList, class InsertList, class Predicate, class PFactory>
+	auto insertF(FlushList &flushList, InsertList const &insertList, Predicate &predicate, PFactory &factory, MyBuffer::ByteBufferView bufferPair){
 		if (!factory.valid())
 			return InsertResult::errorInvalid();
 
 		if (predicate(insertList, factory.bytes()))
-			return flushThenInsert(flushList, factory, pairBuffer);
+			return flushThenInsert(flushList, factory, bufferPair);
 
 		auto const result = insertF_NoFlush(flushList, factory);
 
@@ -100,7 +106,7 @@ namespace flushlist_impl_{
 			// but just in case
 			//
 			// the list guarantee, no changes on the list are done.
-			return flushThenInsert(flushList, factory, pairBuffer);
+			return flushThenInsert(flushList, factory, bufferPair);
 		}
 
 		return result;

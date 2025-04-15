@@ -4,6 +4,9 @@
 #include "disk/filebuilder.h"
 
 #include "stringreplace.h"
+#include "mybuffer.h"
+
+#include <cassert>
 
 namespace hm4{
 namespace flusher{
@@ -18,33 +21,51 @@ private:
 public:
 	template<class UIDGenerator, typename UString>
 	DiskFileFlush(
-			UIDGenerator &&idGenerator,
-			UString &&path,
-			TombstoneOptions const tombstoneOptions = TombstoneOptions::KEEP
-		):
-				idGenerator_(std::forward<UIDGenerator>(idGenerator)),
-				path_(std::forward<UString>(path)),
-				tombstoneOptions_(tombstoneOptions){}
+			UIDGenerator		&&idGenerator,
+			UString			&&path,
+			TombstoneOptions	tombstoneOptions = TombstoneOptions::KEEP):
+				idGenerator_		(std::forward<UIDGenerator>(idGenerator)	),
+				path_			(std::forward<UString>(path)			),
+				tombstoneOptions_	(tombstoneOptions				){}
 
 public:
-	template<class It>
-	bool operator()(It first, It last) const{
-		if (first == last)
+	template<class List>
+	bool operator()(List const &list) const{
+		if (std::empty(list))
 			return false;
 
 		typename IDGenerator::to_string_buffer_t buffer;
 
 		auto const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_(buffer));
 
-		disk::FileBuilder::build(filename, first, last, tombstoneOptions_, Pair::WriteOptions::ALIGNED);
+		disk::FileBuilder::build(filename, std::begin(list), std::end(list), tombstoneOptions_,
+							Pair::WriteOptions::ALIGNED);
+
+		return true;
+	}
+
+	template<class List>
+	bool operator()(List const &list, MyBuffer::ByteBufferView bufferHash) const{
+		if (std::empty(list))
+			return false;
+
+		assert(bufferHash);
+
+		typename IDGenerator::to_string_buffer_t buffer;
+
+		auto const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_(buffer));
+
+		disk::FileBuilder::build(filename, std::begin(list), std::end(list), tombstoneOptions_,
+							Pair::WriteOptions::ALIGNED,
+							list.size(), bufferHash);
 
 		return true;
 	}
 
 private:
-	IDGenerator		idGenerator_;
-	std::string		path_;
-	TombstoneOptions	tombstoneOptions_;
+	IDGenerator			idGenerator_;
+	std::string			path_;
+	TombstoneOptions		tombstoneOptions_;
 };
 
 } // namespace flusher

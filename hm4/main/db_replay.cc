@@ -16,10 +16,7 @@
 
 #include "binlogreplay.h"
 
-using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator		= MyAllocator::ArenaAllocator;
-
-using MyPairBuffer	= MyBuffer::MMapBuffer<hm4::PairBuffer>;
 
 constexpr size_t	MIN_ARENA_SIZE		= 264;
 
@@ -47,20 +44,21 @@ static_assert(MIN_ARENA_SIZE * 1024 * 1024 > hm4::Pair::maxBytes());
 
 // same as in db_net
 
-template<class MyMemList, class MyPairBuffer>
+template<class MyMemList>
 struct BinLogReplay{
 	using MemList		= MyMemList;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-	using MyList		= hm4::FlushList<MemList,MyPairBuffer,Predicate, Flush>;
+	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyPairBuffer &pairBuffer) :
+	BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyBuffer::ByteBufferView bufferPair) :
 				memlist{ allocator },
 				mylist{
 					memlist,
-					pairBuffer,
+					bufferPair,
+					{}, // bufferHash
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -74,8 +72,8 @@ private:
 	MyList	mylist;
 };
 
-template<class MyMemList, class MyPairBuffer>
-using MyListFactory = BinLogReplay<MyMemList,MyPairBuffer>;
+template<class MyMemList>
+using MyListFactory = BinLogReplay<MyMemList>;
 
 
 
@@ -108,23 +106,25 @@ namespace{
 
 
 int main(int argc, char **argv){
+	using MyBuffer::ByteMMapBuffer;
+
 	if (argc <= 3)
 		return printUsage(argv[0]);
 
-	const char *inputFile	= argv[1];
-	const char *path	= argv[2];
+	const char *inputFile		= argv[1];
+	const char *path		= argv[2];
 
-	bool const non_aligned = argc >= 5 && argv[4][0] == 'n';
+	bool const non_aligned		= argc >= 5 && argv[4][0] == 'n';
 
-	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
+	size_t const memlist_arena	= std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	ArenaBuffer	buffer{ max_memlist_arena * MB };
+	ByteMMapBuffer	buffer{ memlist_arena * MB };
 
 	Allocator	allocator{ buffer };
 
-	MyPairBuffer	pairBuffer;
+	ByteMMapBuffer	bufferPair{ hm4::Pair::maxBytes() };
 
-	MyListFactory<MyReplayList,MyPairBuffer> factory{ path, allocator, pairBuffer };
+	MyListFactory<MyReplayList> factory{ path, allocator, bufferPair };
 
 	auto &mylist = factory();
 

@@ -13,10 +13,7 @@ using MyReader = FileReader;
 #include "arenaallocator.h"
 #include "mmapbuffer.h"
 
-using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator		= MyAllocator::ArenaAllocator;
-
-using MyPairBuffer	= MyBuffer::MMapBuffer<hm4::PairBuffer>;
 
 constexpr size_t	MIN_ARENA_SIZE		= 264;
 
@@ -24,20 +21,21 @@ static_assert(MIN_ARENA_SIZE * 1024 * 1024 > hm4::Pair::maxBytes());
 
 
 
-template<class Allocato, class MyPairBufferr>
+template<class Allocator>
 struct ListFactory{
 	using MemList		= hm4::UnsortedList<Allocator>;
 	using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 	using IDGenerator	= idgenerator::IDGeneratorDate;
 	using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-	using MyList		= hm4::FlushList<MemList,MyPairBuffer,Predicate,Flush>;
+	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	ListFactory(UString &&path, typename MemList::Allocator &allocator, MyPairBuffer &pairBuffer) :
+	ListFactory(UString &&path, typename MemList::Allocator &allocator, MyBuffer::ByteBufferView bufferPair) :
 				memlist{ allocator },
 				mylist{
 					memlist,
-					pairBuffer,
+					bufferPair,
+					{}, // bufferHash
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -53,7 +51,9 @@ private:
 
 
 int main(int argc, char **argv){
-	using MyListFactory = ListFactory<Allocator,MyPairBuffer>;
+	using MyBuffer::ByteMMapBuffer;
+
+	using MyListFactory = ListFactory<Allocator>;
 
 	if (argc <= 3)
 		return printUsage<FileReader, MyListFactory::MemList, Allocator>(argv[0]);
@@ -63,16 +63,16 @@ int main(int argc, char **argv){
 
 	bool const blob = argc >= 5 && argv[4][0] == 'b';
 
-	size_t const arenaSize = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
+	size_t const arenaSize	= std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	ArenaBuffer	buffer{ arenaSize * MB };
+	ByteMMapBuffer	buffer{ arenaSize * MB };
 
 	Allocator	allocator{ buffer };
 
-	MyPairBuffer	pairBuffer;
+	ByteMMapBuffer	bufferPair{ hm4::Pair::maxBytes() };
 
 	return process<FileReader>(
-			MyListFactory{ path, allocator, pairBuffer },
+			MyListFactory{ path, allocator, bufferPair },
 			filename,
 			blob
 	);

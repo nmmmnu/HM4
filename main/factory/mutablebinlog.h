@@ -17,20 +17,28 @@ namespace DBAdapterFactory{
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData, typename UStringPathBinLog>
-		MutableBinLog(UStringPathData &&path_data, UStringPathBinLog &&path_binlog, BinLogger::SyncOptions const syncOprions, typename MemList::Allocator &allocator, hm4::PairBuffer &pairBuffer) :
+		MutableBinLog(
+				UStringPathData			&&path_data,
+				UStringPathBinLog		&&path_binlog,
+				BinLogger::SyncOptions		syncOptions,
+				typename MemList::Allocator	&allocator,
+				MyBuffer::ByteBufferView	bufferPair,
+				MyBuffer::ByteBufferView	bufferHash
+			) :
 					memList_{ allocator },
 					binLogList_{
 						memList_,
 						BinLogger{
 							std::forward<UStringPathBinLog>(path_binlog),
-							syncOprions,
+							syncOptions,
 							hm4::Pair::WriteOptions::ALIGNED
 						}
 					},
 					base_{
 						std::forward<UStringPathData>(path_data),
 						binLogList_,
-						pairBuffer
+						bufferPair,
+						bufferHash
 					}{}
 
 		auto &operator()(){

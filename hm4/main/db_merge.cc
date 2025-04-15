@@ -36,15 +36,17 @@ namespace{
 	int mergeFromFactory(FACTORY &&f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions, size_t const bufferSize){
 		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
 
-		if (bufferSize){
-			MyBuffer::ByteMMapBuffer buffer{ bufferSize };
+		auto &list = f();
 
-			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+		if (bufferSize){
+			MyBuffer::ByteMMapBuffer bufferHash{ bufferSize };
+
+			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
 								tombstoneOptions, aligned,
-								f().size(), buffer
+								list.size(), bufferHash
 			);
 		}else{
-			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
 								tombstoneOptions, aligned
 			);
 		}
@@ -113,25 +115,25 @@ private:
 
 
 
-constexpr auto	DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
-constexpr auto	DEFAULT_MODE	= DiskList::OpenMode::FORWARD;
+constexpr auto	DEFAULT_ADVICE		= MMAPFile::Advice::SEQUENTIAL;
+constexpr auto	DEFAULT_MODE		= DiskList::OpenMode::FORWARD;
 
-constexpr size_t MIN_ARENA_SIZE	= 8;
-constexpr size_t MB		= 1024 * 1024;
+constexpr size_t MIN_HASH_ARENA_SIZE	= 8;
+constexpr size_t MB			= 1024 * 1024;
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)
 		return printUsage(argv[0]);
 
-	const char *output	= argv[2];
+	const char *output = argv[2];
 
 	if (fileExists(output)){
 		fmt::print("File {} exists. Please remove it and try again.\n", output);
 		return 2;
 	}
 
-	size_t const hashBufferSize_ = from_string<size_t>(argv[3]);
-	size_t const hashBufferSize  = hashBufferSize_ < MIN_ARENA_SIZE ? 0 : hashBufferSize_ * MB;
+	size_t const hash_arena_ = from_string<size_t>(argv[3]);
+	size_t const hash_arena  = hash_arena_ < MIN_HASH_ARENA_SIZE ? 0 : hash_arena_ * MB;
 
 	using hm4::disk::FileBuilder::TombstoneOptions;
 
@@ -151,7 +153,7 @@ int main(int argc, char **argv){
 			MergeListFactory_1{ path[0], DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			hashBufferSize
+			hash_arena
 		);
 
 	case 2:
@@ -165,7 +167,7 @@ int main(int argc, char **argv){
 			MergeListFactory_2{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			hashBufferSize
+			hash_arena
 		);
 
 	default:
@@ -175,7 +177,7 @@ int main(int argc, char **argv){
 			MergeListFactory_N<const char **>{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			hashBufferSize
+			hash_arena
 		);
 	}
 }

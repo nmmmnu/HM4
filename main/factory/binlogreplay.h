@@ -3,20 +3,21 @@
 
 namespace DBAdapterFactory{
 
-	template<class MyMemList, class MyPairBuffer>
+	template<class MyMemList>
 	struct BinLogReplay{
 		using MemList		= MyMemList;
 		using Predicate		= hm4::flusher::DiskFileAllocatorPredicate;
 		using IDGenerator	= idgenerator::IDGeneratorDate;
 		using Flush		= hm4::flusher::DiskFileFlush<IDGenerator>;
-		using MyList		= hm4::FlushList<MemList,MyPairBuffer,Predicate, Flush>;
+		using MyList		= hm4::FlushList<MemList,Predicate, Flush>;
 
 		template<typename UString>
-		BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyPairBuffer &pairBuffer) :
+		BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyBuffer::ByteBufferView bufferPair) :
 					memlist{ allocator },
 					mylist{
 						memlist,
-						pairBuffer,
+						bufferPair,
+						{}, // bufferHash
 						Predicate{},
 						Flush{ IDGenerator{}, std::forward<UString>(path) }
 					}{}

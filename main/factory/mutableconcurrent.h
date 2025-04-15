@@ -5,23 +5,30 @@
 
 namespace DBAdapterFactory{
 
-	template<DualListEraseType ET, class MyMemList, class MyPairBuffer>
+	template<DualListEraseType ET, class MyMemList>
 	struct MutableConcurrent{
 		using MemList		= MyMemList;
 
-		using MutableBase_	= MutableBase<ET, MemList, MyPairBuffer, hm4::ConcurrentFlushList>;
+		using MutableBase_	= MutableBase<ET, MemList, hm4::ConcurrentFlushList>;
 
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
-		MutableConcurrent(UStringPathData &&path_data, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2, MyPairBuffer &pairBuffer) :
+		MutableConcurrent(
+				UStringPathData			&&path_data,
+				typename MemList::Allocator	&allocator1,
+				typename MemList::Allocator	&allocator2,
+				MyBuffer::ByteBufferView	pairBuffer,
+				MyBuffer::ByteBufferView	bufferHash
+			) :
 					memList1_{ allocator1 },
 					memList2_{ allocator2 },
 					base_{
 						std::forward<UStringPathData>(path_data),
 						memList1_,
 						memList2_,
-						pairBuffer
+						pairBuffer,
+						bufferHash
 					}{}
 
 		auto &operator()(){

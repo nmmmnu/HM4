@@ -21,8 +21,8 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
-#include <optional>
 #include "myspan.h"
+
 
 
 using hm4::disk::DiskList;
@@ -38,22 +38,20 @@ constexpr TombstoneOptions TOMBSTONE_OPTION = TombstoneOptions::KEEP;
 
 
 
-using MyOptionalBuffer = std::optional<MyBuffer::ByteMMapBuffer>;
-
 namespace{
 
 	MyOptions prepareOptions(int argc, char **argv);
 
-	int compact(MyOptions const &opt, MyOptionalBuffer &buffer);
+	int compact(MyOptions const &opt, MyBuffer::ByteBufferView bufferHash);
 
 	template <class Factory>
-	void mergeFromFactory(Factory &&f, std::string_view output_file, MyOptionalBuffer &buffer){
+	void mergeFromFactory(Factory &&f, std::string_view output_file, MyBuffer::ByteBufferView &bufferHash){
 		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
 
-		if (buffer){
+		if (bufferHash){
 			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
 							TOMBSTONE_OPTION, aligned,
-							f().size(), *buffer
+							f().size(), bufferHash
 			);
 		}else{
 			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
@@ -109,15 +107,17 @@ constexpr size_t MB		= 1024 * 1024;
 int main(int argc, char **argv){
 	MyOptions const opt = prepareOptions(argc, argv);
 
-	size_t const hashBufferSize  = opt.hash_arena < MIN_ARENA_SIZE ? 0 : opt.hash_arena * MB;
+	size_t const bufferHashSize  = opt.hash_arena < MIN_ARENA_SIZE ? 0 : opt.hash_arena * MB;
 
-	MyOptionalBuffer buffer;
+	if (bufferHashSize){
+		MyBuffer::ByteMMapBuffer bufferHash{ bufferHashSize };
 
-	if (hashBufferSize){
-		buffer.emplace(hashBufferSize);
+		return compact(opt, bufferHash);
+	}else{
+		MyBuffer::ByteBufferView bufferHash;
+
+		return compact(opt, bufferHash);
 	}
-
-	return compact(opt, buffer);
 }
 
 namespace{
@@ -321,14 +321,14 @@ namespace{
 
 
 
-	int compact(MyOptions const &opt, MyOptionalBuffer &buffer){
+	int compact(MyOptions const &opt, MyBuffer::ByteBufferView bufferHash){
 
-		auto merge = [&opt, &buffer](std::string_view what, auto &&factory){
+		auto merge = [&opt, &bufferHash](std::string_view what, auto &&factory){
 			auto const output_file = getNewFilename(opt.db_path);
 
 			fmt::print("Merging {} tables into {}\n", what, output_file);
 
-			mergeFromFactory(factory, output_file, buffer);
+			mergeFromFactory(factory, output_file, bufferHash);
 		};
 
 		while(true){
