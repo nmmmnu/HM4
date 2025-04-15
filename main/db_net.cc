@@ -32,10 +32,7 @@
 
 using MyProtocol	= net::protocol::RedisProtocol;
 
-using ArenaBuffer	= MyBuffer::ByteMMapBuffer;
 using Allocator		= MyAllocator::ArenaAllocator;
-
-using MyPairBuffer	= MyBuffer::MMapBuffer<hm4::PairBuffer>;
 
 // ----------------------------------
 
@@ -123,6 +120,7 @@ constexpr size_t MIN_ARENA_SIZE		= MIN_ARENA_SIZE_BYTES / 1024 / 1024;
 #include "mystring.h"
 #include "db_net_options.h"
 #include "binlogreplay.h"
+#include <optional>
 
 namespace{
 
@@ -169,7 +167,7 @@ namespace{
 		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena) * MB;
 	}
 
-	Allocator createAllocator(const MyOptions &opt, ArenaBuffer &buffer){
+	Allocator createAllocator(const MyOptions &opt, MyBuffer::ByteMMapBuffer &buffer){
 		// uncomment for virtual Allocator
 		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
@@ -185,23 +183,25 @@ namespace{
 		return allocator;
 	}
 
-	auto createPairBuffer(){
-		return MyPairBuffer{};
+	auto createBufferPair(){
+		return MyBuffer::ByteMMapBuffer{ hm4::Pair::maxBytes() };
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyPairBuffer &pairBuffer);
+	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::ByteMMapBuffer &bufferPair);
 
-	void checkBinLogFile(std::string_view file, std::string_view path, Allocator &allocator, MyPairBuffer &pairBuffer){
+	void checkBinLogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::ByteMMapBuffer &bufferPair){
 		if (file.empty())
 			return;
 
 		if (!fileExists(hm4::disk::filenameData(file)))
 			return;
 
-		return replayBinlogFile(file, path, allocator, pairBuffer);
+		return replayBinlogFile(file, path, allocator, bufferPair);
 	}
 
 	int select_MutableLists(const MyOptions &opt){
+		MyBuffer::ByteBufferView bufferHash; // empty for now...
+
 		constexpr std::string_view starting_server_with = "Starting {} server with {} and {}...";
 
 		using MyMemList = MyDBNetMemList;
@@ -210,38 +210,38 @@ namespace{
 
 		#ifdef USE_CONCURRENCY
 
-			ArenaBuffer buffer1{ allocatorSize };
-			ArenaBuffer buffer2{ allocatorSize };
+			MyBuffer::ByteMMapBuffer buffer1{ allocatorSize };
+			MyBuffer::ByteMMapBuffer buffer2{ allocatorSize };
 
 			auto allocator1 = createAllocator(opt, buffer1);
 			auto allocator2 = createAllocator(opt, buffer2);
 
-			auto pairBuffer = createPairBuffer();
+			auto bufferPair = createBufferPair();
 
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
 
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
-				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
+				SyncOptions syncOptions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
 
 				// can be done in parallel,
 				// but then it will make preasure to the disk
 
-				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator1, pairBuffer);
-				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator2, pairBuffer);
+				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator1, bufferPair);
+				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator2, bufferPair);
 
-				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<ET, MyMemList, decltype(pairBuffer)>;
+				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOprions, allocator1, allocator2, pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOptions, allocator1, allocator2, bufferPair, bufferHash },
 								starting_server_with,
 									"mutable concurrent binlog",
 									MyMemList::getName(),
 									Allocator::getName()
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::MutableConcurrent<ET, MyMemList, decltype(pairBuffer)>;
+				using MyFactory = DBAdapterFactory::MutableConcurrent<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2, pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2, bufferPair, bufferHash },
 								starting_server_with,
 									"mutable concurrent",
 									MyMemList::getName(),
@@ -251,32 +251,32 @@ namespace{
 
 		#else
 
-			ArenaBuffer buffer{ allocatorSize };
+			MyBuffer::ByteMMapBuffer buffer{ allocatorSize };
 
 			auto allocator = createAllocator(opt, buffer);
 
-			auto pairBuffer = createPairBuffer();
+			auto bufferPair = createBufferPair();
 
 			bool const have_binlog = ! opt.binlog_path1.empty();
 
 			if (have_binlog){
 				using SyncOptions = hm4::binlogger::DiskFileBinLogger::SyncOptions;
-				SyncOptions syncOprions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
+				SyncOptions syncOptions = opt.binlog_fsync ? SyncOptions::FSYNC : SyncOptions::NONE;
 
-				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator, pairBuffer);
+				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator, bufferPair);
 
-				using MyFactory = DBAdapterFactory::MutableBinLog<ET, MyMemList, decltype(pairBuffer)>;
+				using MyFactory = DBAdapterFactory::MutableBinLog<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOprions, allocator, pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOptions, allocator, bufferPair, bufferHash },
 								starting_server_with,
 									"mutable binlog",
 									MyMemList::getName(),
 									Allocator::getName()
 				);
 			}else{
-				using MyFactory = DBAdapterFactory::Mutable<ET, MyMemList, decltype(pairBuffer)>;
+				using MyFactory = DBAdapterFactory::Mutable<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, allocator, pairBuffer },
+				return fLists(opt, MyFactory{	opt.db_path, allocator, bufferPair, bufferHash },
 								starting_server_with,
 									"mutable",
 									MyMemList::getName(),
@@ -510,7 +510,7 @@ namespace{
 
 
 
-	void replayBinlogFile_(std::string_view file, std::string_view path, Allocator &allocator, MyPairBuffer &pairBuffer){
+	void replayBinlogFile_(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::ByteMMapBuffer &bufferPair){
 		logger<Logger::WARNING>() << "Binlog file exists. Trying to replay...";
 
 		using hm4::disk::DiskList;
@@ -526,7 +526,7 @@ namespace{
 
 		/* nested scope for the d-tor */
 		{
-			DBAdapterFactory::BinLogReplay<MyReplayList,MyPairBuffer> factory{ path, allocator, pairBuffer };
+			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ path, allocator, bufferPair };
 
 			auto &list = factory();
 
@@ -539,8 +539,8 @@ namespace{
 		logger<Logger::NOTICE>() << "Replay done.";
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyPairBuffer &pairBuffer){
-		replayBinlogFile_(file, path, allocator, pairBuffer);
+	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::ByteMMapBuffer &bufferPair){
+		replayBinlogFile_(file, path, allocator, bufferPair);
 		allocator.reset();
 	}
 
