@@ -105,17 +105,17 @@ namespace FileBuilder{
 		using value_type = Pair const;
 
 		FileBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions):
-					meta(filename, fileWriteOptions	),
-					indx(filename, fileWriteOptions	),
-					line(filename			),
-					data(filename, fileWriteOptions	){}
+					meta(filename, fileWriteOptions		),
+					indx(filename, fileWriteOptions		),
+					line(filename				),
+					data(filename, fileWriteOptions		){}
 
-		FileBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions, size_t listSize, MyBuffer::ByteBufferView buffer):
-					meta(filename, fileWriteOptions	),
-					indx(filename, fileWriteOptions	),
-					line(filename			),
-					data(filename, fileWriteOptions	),
-					hazh(filename, listSize, buffer	){}
+		FileBuilder(std::string_view const filename, Pair::WriteOptions const fileWriteOptions, size_t listSize, MyBuffer::ByteBufferView bufferHash):
+					meta(filename, fileWriteOptions		),
+					indx(filename, fileWriteOptions		),
+					line(filename				),
+					data(filename, fileWriteOptions		),
+					hazh(filename, listSize, bufferHash	){}
 
 		void operator()(Pair const &pair){
 			push_back(pair);
@@ -174,10 +174,11 @@ namespace FileBuilder{
 
 	template <class IT>
 	bool build(std::string_view const filename, IT first, IT last, TombstoneOptions const tombstoneOptions,
-					Pair::WriteOptions const fileWriteOptions, size_t listSize, MyBuffer::ByteBufferView buffer){
+					Pair::WriteOptions const fileWriteOptions,
+					size_t listSize, MyBuffer::ByteBufferView bufferHash){
 
 		return FileBuilderImpl_::copy(
-				FileBuilder<1>(filename, fileWriteOptions, listSize, buffer),
+				FileBuilder<1>(filename, fileWriteOptions, listSize, bufferHash),
 				first, last, tombstoneOptions
 		);
 	}
