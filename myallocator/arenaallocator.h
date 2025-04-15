@@ -35,11 +35,24 @@ namespace MyAllocator{
 			if (pos + size > buffer.size())
 				return nullptr;
 
-			std::uint8_t *result = buffer.data() + pos;
+			auto *result = buffer.data() + pos;
 
 			pos += size;
 
 			return result;
+		}
+
+		template<std::size_t Align = DEFAULT_ALIGN>
+		MyBuffer::ByteBufferView xallocateAll() noexcept{
+			pos = align__<Align>(pos);
+
+			size_t const size = buffer.size() - pos;
+
+			auto *result = buffer.data() + pos;
+
+			pos += size;
+
+			return { result, size };
 		}
 
 		constexpr
@@ -90,6 +103,26 @@ namespace MyAllocator{
 		MyBuffer::ByteBufferView	buffer;
 		std::size_t			pos	= 0;
 	};
+
+
+
+	inline MyBuffer::ByteBufferView allocateAll(ArenaAllocator &allocator){
+		return allocator.xallocateAll();
+	}
+
+	template<typename T>
+	MyBuffer::BufferView<T> allocateAll(ArenaAllocator &allocator){
+		return allocateAll(allocator);
+	}
+
+	inline auto allocateAll(ArenaAllocator *allocator){
+		return allocateAll(*allocator);
+	}
+
+	template<typename T>
+	auto allocateAll(ArenaAllocator *allocator){
+		return allocateAll<T>(*allocator);
+	}
 
 } // namespace MyAllocator
 
