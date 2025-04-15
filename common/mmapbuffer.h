@@ -33,6 +33,10 @@ namespace MyBuffer{
 			mmapbuffer_impl_::destroy(data_, bytes());
 		}
 
+		operator bool() const noexcept{
+			return data_;
+		}
+
 		value_type *data() noexcept{
 			return data_;
 		}

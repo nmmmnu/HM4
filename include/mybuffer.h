@@ -53,6 +53,10 @@ namespace MyBuffer{
 					data_(reinterpret_cast<T *>(data)),
 					size_(size / sizeof(T)){}
 
+		constexpr operator bool() const noexcept{
+			return data_;
+		}
+
 		constexpr
 		value_type *data() noexcept{
 			return data_;
@@ -106,6 +110,10 @@ namespace MyBuffer{
 	struct StaticBuffer{
 		using value_type	= T;
 		using size_type		= std::size_t;
+
+		constexpr operator bool() noexcept{
+			return true;
+		}
 
 		constexpr
 		value_type *data() noexcept{

@@ -35,6 +35,10 @@ namespace MyBuffer{
 					allocator_	(allocator	),
 					size_		(size		){}
 
+		operator bool() const noexcept{
+			return data_;
+		}
+
 		value_type *data() noexcept{
 			return data_.get();
 		}
@@ -88,6 +92,10 @@ namespace MyBuffer{
 		AllocatedBufferLinked(size_type const size, std::nullptr_t allocator) :
 					allocator_	(allocator	),
 					size_		(size		){}
+
+		operator bool() const noexcept{
+			return data_;
+		}
 
 		value_type *data() noexcept{
 			return data_.get();
