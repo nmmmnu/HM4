@@ -12,6 +12,9 @@
 
 #include "logger.h"
 
+#include "mybuffer.h"
+#include "mmapbuffer.h"
+
 #include <variant>
 #include <limits>
 #include <cassert>
@@ -22,8 +25,9 @@ namespace hm4::disk::hash{
 		constexpr static double EXPAND_FACTOR = 1.333333;
 
 		HashIndexBuilder(std::string_view filename, size_t listSize, MyBuffer::ByteBufferView buffer) :
-								filename_	(filenameHash(filename)),
-								impl_		( selectImplementation__(filename_, listSize, buffer) ){}
+								filename_	(filenameHash(filename)					),
+								guard_		(buffer							),
+								impl_		( selectImplementation__(filename_, listSize, buffer)	){}
 
 		void operator()(Pair const &pair){
 			auto visitor = [&pair](auto &x){
@@ -81,8 +85,12 @@ namespace hm4::disk::hash{
 		}
 
 	private:
-		std::string	filename_;
-		Implementation	impl_;
+		using AdviceNeededGuard = MyBuffer::AdviceNeededGuard<MyBuffer::ByteBufferView>;
+
+	private:
+		std::string		filename_;
+		AdviceNeededGuard	guard_;
+		Implementation		impl_;
 	};
 
 } // namespace hm4::disk::hash

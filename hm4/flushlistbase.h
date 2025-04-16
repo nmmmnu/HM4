@@ -1,15 +1,13 @@
 #ifndef FLUSH_LIST_BASE_H_
 #define FLUSH_LIST_BASE_H_
 
-#include <type_traits>
-#include <algorithm>
-#include <cassert>
-
-//#include "mybufferadvice.h"
-
 #include "mybuffer.h"
+#include "mmapbuffer.h"
 
 #include "logger.h"
+
+#include <type_traits>
+//#include <algorithm>
 
 namespace hm4::flushlist_impl_{
 
@@ -78,7 +76,11 @@ namespace hm4::flushlist_impl_{
 	InsertResult flushThenInsert(FlushList &flushList, PFactory &factory, FlushContext &context){
 		// this is single thread, no guard needed
 
-		Pair *pair = reinterpret_cast<Pair *>(context.bufferPair.data());
+		auto bufferPair = context.bufferPair;
+
+		MyBuffer::AdviceNeededGuard guard{ bufferPair };
+
+		Pair *pair = reinterpret_cast<Pair *>(bufferPair.data());
 
 		factory.create(pair);
 

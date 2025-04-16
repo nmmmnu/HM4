@@ -96,13 +96,34 @@ namespace MyBuffer{
 
 	using ByteMMapBuffer = MMapBuffer<std::uint8_t>;
 
-	template<typename T>
-	void adviceNeeded(MMapBuffer<T> &buffer, bool b){
+
+
+	template<typename Buffer>
+	void adviceNeeded(Buffer &buffer, bool b){
+		if (! buffer)
+			return;
+
 		if (b)
 			mmapbuffer_impl_::adviceNeed(buffer.data(), buffer.size());
 		else
 			mmapbuffer_impl_::adviceFree(buffer.data(), buffer.size());
 	}
+
+
+
+	template<typename Buffer>
+	struct AdviceNeededGuard{
+		constexpr AdviceNeededGuard(Buffer &buffer) : buffer_(buffer){
+			adviceNeeded(buffer_, true);
+		}
+
+		~AdviceNeededGuard(){
+			adviceNeeded(buffer_, false);
+		}
+
+	private:
+		Buffer &buffer_;
+	};
 
 } // namespace MyBuffer
 
