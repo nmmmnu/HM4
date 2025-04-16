@@ -85,12 +85,12 @@ namespace MyBuffer{
 			return data_;
 		}
 
-		constexpr const value_type &operator[](size_t const index) const noexcept{
+		constexpr const value_type &operator[](size_type const index) const noexcept{
 			return data_[index];
 		}
 
 		constexpr
-		value_type &operator[](size_t const index) noexcept{
+		value_type &operator[](size_type const index) noexcept{
 			return data_[index];
 		}
 

@@ -20,6 +20,7 @@ namespace MyBuffer{
 					size_		(size			){}
 
 		AllocatedMemoryResourceOwned(AllocatedMemoryResourceOwned &other) :
+					allocator_	(other.allocator_	),
 					size_		(other.size_		),
 					data_		(other.data_		){
 
@@ -100,7 +101,7 @@ namespace MyBuffer{
 	private:
 		Allocator	*allocator_;
 		std::size_t	size_;
-		void		*data_	= MyAllocator::allocate<char>(allocator, size_);
+		void		*data_	= MyAllocator::allocate(allocator, size_);
 	};
 
 } // namespace MyBuffer

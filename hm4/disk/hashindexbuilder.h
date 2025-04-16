@@ -85,12 +85,9 @@ namespace hm4::disk::hash{
 		}
 
 	private:
-		using AdviceNeededGuard = MyBuffer::AdviceNeededGuard<MyBuffer::ByteBufferView>;
-
-	private:
-		std::string		filename_;
-		AdviceNeededGuard	guard_;
-		Implementation		impl_;
+		std::string			filename_;
+		MyBuffer::MMapAdviceGuard	guard_;
+		Implementation			impl_;
 	};
 
 } // namespace hm4::disk::hash

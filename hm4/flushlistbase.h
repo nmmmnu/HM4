@@ -77,7 +77,7 @@ namespace hm4::flushlist_impl_{
 
 		auto bufferPair = context.bufferPair;
 
-		MyBuffer::AdviceNeededGuard guard{ bufferPair };
+		MyBuffer::MMapAdviceGuard guard{ bufferPair };
 
 		Pair *pair = reinterpret_cast<Pair *>(bufferPair.data());
 

@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstdint>
 
+#include "mybufferview.h"
+
 namespace MyBuffer{
 
 	namespace mmapbuffer_impl_{
@@ -15,6 +17,16 @@ namespace MyBuffer{
 
 		void adviceNeed(void *p, std::size_t size) noexcept;
 		void adviceFree(void *p, std::size_t size) noexcept;
+
+		inline void *allocate__(std::size_t size){
+			return
+				#ifdef USE_HUGETLB
+					createHugeTLB(size)
+				#else
+					createNormal(size)
+				#endif
+			;
+		}
 	};
 
 	struct MMapMemoryResource{
@@ -49,25 +61,15 @@ namespace MyBuffer{
 		}
 
 	private:
-		static value_type *allocate__(std::size_t size){
-			return static_cast<value_type *>(
-				#ifdef USE_HUGETLB
-					mmapbuffer_impl_::createHugeTLB(size)
-				#else
-					mmapbuffer_impl_::createNormal(size)
-				#endif
-			);
-		}
 
 	private:
 		std::size_t	size_;
-		void		*data_ = allocate__(size_);
+		void		*data_ = mmapbuffer_impl_::allocate__(size_);
 	};
 
 
 
-	template<typename Buffer>
-	void adviceNeeded(Buffer &buffer, bool b){
+	inline void mmapAdvice(ByteBufferView buffer, bool b){
 		if (! buffer)
 			return;
 
@@ -79,18 +81,17 @@ namespace MyBuffer{
 
 
 
-	template<typename Buffer>
-	struct AdviceNeededGuard{
-		constexpr AdviceNeededGuard(Buffer &buffer) : buffer_(buffer){
-			adviceNeeded(buffer_, true);
+	struct MMapAdviceGuard{
+		MMapAdviceGuard(ByteBufferView buffer) : buffer(buffer){
+			mmapAdvice(buffer, true);
 		}
 
-		~AdviceNeededGuard(){
-			adviceNeeded(buffer_, false);
+		~MMapAdviceGuard(){
+			mmapAdvice(buffer, false);
 		}
 
 	private:
-		Buffer &buffer_;
+		ByteBufferView buffer;
 	};
 
 } // namespace MyBuffer
