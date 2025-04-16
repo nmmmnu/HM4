@@ -3,7 +3,7 @@
 
 #include "hashindexnode.h"
 #include "mmapfile.h"
-#include "mybuffer.h"
+#include "mybufferview.h"
 #include "bufferedvector.h"
 
 #include "disk/disklist.h"

@@ -1,7 +1,7 @@
 #ifndef FLUSH_LIST_BASE_H_
 #define FLUSH_LIST_BASE_H_
 
-#include "mybuffer.h"
+#include "mybufferview.h"
 #include "mmapbuffer.h"
 
 #include "logger.h"

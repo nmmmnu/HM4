@@ -2,7 +2,7 @@
 #define HASH_INDEX_BUILDER_ALGO_MISC_H_
 
 #include "myendian.h"
-#include "mybuffer.h"
+#include "mybufferview.h"
 #include "bufferedvector.h"
 
 #include "pair.h"

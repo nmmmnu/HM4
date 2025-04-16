@@ -93,7 +93,7 @@ namespace MyBuffer{
 			return data_[index];
 		}
 
-		constexpr auto size() const noexcept{
+		constexpr size_type size() const noexcept{
 			return size_;
 		}
 
@@ -102,7 +102,7 @@ namespace MyBuffer{
 		size_type	size_	= 0;
 	};
 
-	using ByteBufferView = BufferView<std::uint8_t>;
+	using ByteBufferView = BufferView<char>;
 
 } // namespace MyBuffer
 

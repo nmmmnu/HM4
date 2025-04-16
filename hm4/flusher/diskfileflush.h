@@ -4,7 +4,7 @@
 #include "disk/filebuilder.h"
 
 #include "stringreplace.h"
-#include "mybuffer.h"
+#include "mybufferview.h"
 
 #include <cassert>
 
