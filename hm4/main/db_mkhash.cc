@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 
 	list.printMetadata();
 
-	MyBuffer::MMapBufferResource buffer{ bufferSize };
+	MyBuffer::MMapMemoryResource buffer{ bufferSize };
 
 	HashIndexBuilder builder{ output_file, list.size(), buffer };
 

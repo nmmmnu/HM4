@@ -6,20 +6,20 @@
 namespace MyBuffer{
 
 	template<class Allocator = std::nullptr_t>
-	struct AllocatedBufferOwnedResource{
-		using value_type = char;
+	struct AllocatedMemoryResourceOwned{
+		using value_type = void;
 		using size_type  = std::size_t;
 
 		template<class ...Args>
-		AllocatedBufferOwnedResource(size_type size, Args &&...args) :
+		AllocatedMemoryResourceOwned(std::size_t size, Args &&...args) :
 					allocator_	(std::forward<Args>(args)...	),
 					size_		(size				){}
 
-		AllocatedBufferOwnedResource(size_type size, std::nullptr_t allocator) :
+		AllocatedMemoryResourceOwned(std::size_t size, std::nullptr_t allocator) :
 					allocator_	(allocator		),
 					size_		(size			){}
 
-		AllocatedBufferOwnedResource(AllocatedBufferOwnedResource &other) :
+		AllocatedMemoryResourceOwned(AllocatedMemoryResourceOwned &other) :
 					size_		(other.size_		),
 					data_		(other.data_		){
 
@@ -27,7 +27,7 @@ namespace MyBuffer{
 			other.data_ = nullptr;
 		}
 
-		~AllocatedBufferOwnedResource(){
+		~AllocatedMemoryResourceOwned(){
 			MyAllocator::deallocate(allocator, data_);
 		}
 
@@ -35,40 +35,40 @@ namespace MyBuffer{
 			return data_;
 		}
 
-		value_type *data() noexcept{
+		void *data() noexcept{
 			return data_.get();
 		}
 
-		const value_type *data() const noexcept{
+		const void *data() const noexcept{
 			return data_.get();
 		}
 
-		size_type size() const noexcept{
+		std::size_t size() const noexcept{
 			return size_;
 		}
 
 	private:
 		Allocator	allocator_;
-		size_type	size_;
-		value_type	data_	= MyAllocator::allocate<char>(allocator, size_);
+		std::size_t	size_;
+		void		*data_	= MyAllocator::allocate<char>(allocator, size_);
 	};
 
 
 
 	template<typename T, class Allocator = std::nullptr_t>
-	struct AllocatedBufferLinkedResource{
-		using value_type = char;
+	struct AllocatedMemoryResourceLinked{
+		using value_type = void;
 		using size_type  = std::size_t;
 
-		AllocatedBufferLinkedResource(size_type size, Allocator &allocator) :
+		AllocatedMemoryResourceLinked(std::size_t size, Allocator &allocator) :
 					allocator_	(& allocator	),
 					size_		(size		){}
 
-		AllocatedBufferLinkedResource(size_type size, std::nullptr_t) :
+		AllocatedMemoryResourceLinked(std::size_t size, std::nullptr_t) :
 					allocator_	(nullptr	),
 					size_		(size		){}
 
-		AllocatedBufferLinkedResource(AllocatedBufferLinkedResource &other) :
+		AllocatedMemoryResourceLinked(AllocatedMemoryResourceLinked &other) :
 					allocator_	(other.allocator_	),
 					size_		(other.size_		),
 					data_		(other.data_		){
@@ -77,7 +77,7 @@ namespace MyBuffer{
 			other.data_ = nullptr;
 		}
 
-		~AllocatedBufferLinkedResource(){
+		~AllocatedMemoryResourceLinked(){
 			MyAllocator::deallocate(allocator, data_);
 		}
 
@@ -85,22 +85,22 @@ namespace MyBuffer{
 			return data_;
 		}
 
-		value_type *data() noexcept{
+		void *data() noexcept{
 			return data_.get();
 		}
 
-		const value_type *data() const noexcept{
+		const void *data() const noexcept{
 			return data_.get();
 		}
 
-		size_type size() const noexcept{
+		std::size_t size() const noexcept{
 			return size_;
 		}
 
 	private:
 		Allocator	*allocator_;
-		size_type	size_;
-		char		data_	= MyAllocator::allocate<char>(allocator, size_);
+		std::size_t	size_;
+		void		*data_	= MyAllocator::allocate<char>(allocator, size_);
 	};
 
 } // namespace MyBuffer

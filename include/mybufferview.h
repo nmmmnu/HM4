@@ -12,7 +12,8 @@ namespace MyBuffer{
 		constexpr bool is_byte =
 			std::is_same_v<T, uint8_t> ||
 			std::is_same_v<T, int8_t > ||
-			std::is_same_v<T, char   >
+			std::is_same_v<T, char   > ||
+			std::is_same_v<T, void   >
 		;
 
 		template<typename T, typename Buffer>

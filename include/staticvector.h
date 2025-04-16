@@ -1,5 +1,5 @@
-#ifndef MY_FIXED_VECTOR_H_
-#define MY_FIXED_VECTOR_H_
+#ifndef MY_STATIC_VECTOR_H_
+#define MY_STATIC_VECTOR_H_
 
 #include "bufferedvector.h"
 #include "staticbuffer.h"

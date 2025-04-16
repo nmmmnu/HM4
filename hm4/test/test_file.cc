@@ -19,7 +19,7 @@ using Allocator_std0	= MyAllocator::PMOwnerAllocator<MyAllocator::STDAllocator>;
 using Allocator_std1	= MyAllocator::PMOwnerAllocator<MyAllocator::TrackingAllocator<MyAllocator::STDAllocator> >;
 using Allocator_std	= Allocator_std0;
 
-using ArenaBuffer	= MyBuffer::MMapBufferResource;
+using ArenaBuffer	= MyBuffer::MMapMemoryResource;
 using Allocator_arena	= MyAllocator::PMOwnerAllocator<MyAllocator::ArenaAllocator>;
 
 constexpr unsigned int PROCESS_STEP = 1000 * 10;

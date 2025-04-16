@@ -17,18 +17,18 @@ namespace MyBuffer{
 		void adviceFree(void *p, std::size_t size) noexcept;
 	};
 
-	struct MMapBufferResource{
-		using value_type = char;
+	struct MMapMemoryResource{
+		using value_type = void;
 		using size_type  = std::size_t;
 
-		MMapBufferResource(size_type size) : size_(size){}
+		MMapMemoryResource(size_type size) : size_(size){}
 
-		MMapBufferResource(MMapBufferResource &other) : size_(other.size_), data_(other.data_){
+		MMapMemoryResource(MMapMemoryResource &other) : size_(other.size_), data_(other.data_){
 			other.size_ = 0;
 			other.data_ = nullptr;
 		}
 
-		~MMapBufferResource(){
+		~MMapMemoryResource(){
 			mmapbuffer_impl_::destroy(data_, size_);
 		}
 
@@ -36,15 +36,15 @@ namespace MyBuffer{
 			return data_;
 		}
 
-		value_type *data() noexcept{
+		void *data() noexcept{
 			return data_;
 		}
 
-		const value_type *data() const noexcept{
+		const void *data() const noexcept{
 			return data_;
 		}
 
-		size_type size() const noexcept{
+		std::size_t size() const noexcept{
 			return size_;
 		}
 
@@ -60,8 +60,8 @@ namespace MyBuffer{
 		}
 
 	private:
-		size_type	size_;
-		value_type	*data_ = allocate__(size_);
+		std::size_t	size_;
+		void		*data_ = allocate__(size_);
 	};
 
 

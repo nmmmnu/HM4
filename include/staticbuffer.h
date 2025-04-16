@@ -2,6 +2,7 @@
 #define MY_STATIC_BUFFER_
 
 #include <cstdint>
+#include <type_traits>
 
 namespace MyBuffer{
 
@@ -55,14 +56,21 @@ namespace MyBuffer{
 		}
 
 	private:
-		value_type data_[Size] {};
+		using data_type = std::conditional_t<
+						std::is_same_v<value_type, void>,
+						char,
+						value_type
+		>;
+
+	private:
+		data_type data_[Size] {};
 	};
 
 	template<std::size_t Size>
-	using ByteStaticBuffer		= StaticBuffer<char, Size>;
+	using ByteStaticBuffer		= StaticBuffer<void, Size>;
 
 	template<std::size_t Size>
-	using StaticBufferResource	= StaticBuffer<char, Size>;
+	using StaticMemoryResource	= StaticBuffer<void, Size>;
 
 } // namespace MyBuffer
 

@@ -167,7 +167,7 @@ namespace{
 		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena) * MB;
 	}
 
-	Allocator createAllocator(const MyOptions &opt, MyBuffer::MMapBufferResource &buffer){
+	Allocator createAllocator(const MyOptions &opt, MyBuffer::MMapMemoryResource &buffer){
 		// uncomment for virtual Allocator
 		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
@@ -184,12 +184,12 @@ namespace{
 	}
 
 	auto createBufferPair(){
-		return MyBuffer::MMapBufferResource{ hm4::Pair::maxBytes() };
+		return MyBuffer::MMapMemoryResource{ hm4::Pair::maxBytes() };
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapBufferResource &bufferPair);
+	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair);
 
-	void checkBinLogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapBufferResource &bufferPair){
+	void checkBinLogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
 		if (file.empty())
 			return;
 
@@ -210,8 +210,8 @@ namespace{
 
 		#ifdef USE_CONCURRENCY
 
-			MyBuffer::MMapBufferResource buffer1{ allocatorSize };
-			MyBuffer::MMapBufferResource buffer2{ allocatorSize };
+			MyBuffer::MMapMemoryResource buffer1{ allocatorSize };
+			MyBuffer::MMapMemoryResource buffer2{ allocatorSize };
 
 			auto allocator1 = createAllocator(opt, buffer1);
 			auto allocator2 = createAllocator(opt, buffer2);
@@ -251,7 +251,7 @@ namespace{
 
 		#else
 
-			MyBuffer::MMapBufferResource buffer{ allocatorSize };
+			MyBuffer::MMapMemoryResource buffer{ allocatorSize };
 
 			auto allocator = createAllocator(opt, buffer);
 
@@ -510,7 +510,7 @@ namespace{
 
 
 
-	void replayBinlogFile_(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapBufferResource &bufferPair){
+	void replayBinlogFile_(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
 		logger<Logger::WARNING>() << "Binlog file exists. Trying to replay...";
 
 		using hm4::disk::DiskList;
@@ -539,7 +539,7 @@ namespace{
 		logger<Logger::NOTICE>() << "Replay done.";
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapBufferResource &bufferPair){
+	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
 		replayBinlogFile_(file, path, allocator, bufferPair);
 		allocator.reset();
 	}
