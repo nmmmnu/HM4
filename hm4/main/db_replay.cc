@@ -106,7 +106,7 @@ namespace{
 
 
 int main(int argc, char **argv){
-	using MyBuffer::ByteMMapBuffer;
+	using MyBuffer::MMapBufferResource;
 
 	if (argc <= 3)
 		return printUsage(argv[0]);
@@ -118,11 +118,11 @@ int main(int argc, char **argv){
 
 	size_t const memlist_arena	= std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	ByteMMapBuffer	buffer{ memlist_arena * MB };
+	MMapBufferResource	buffer{ memlist_arena * MB };
 
-	Allocator	allocator{ buffer };
+	Allocator		allocator{ buffer };
 
-	ByteMMapBuffer	bufferPair{ hm4::Pair::maxBytes() };
+	MMapBufferResource	bufferPair{ hm4::Pair::maxBytes() };
 
 	MyListFactory<MyReplayList> factory{ path, allocator, bufferPair };
 

@@ -17,20 +17,19 @@ namespace MyBuffer{
 		void adviceFree(void *p, std::size_t size) noexcept;
 	};
 
-	template<typename T>
-	struct MMapBuffer{
-		using value_type	= T;
-		using size_type		= std::size_t;
+	struct MMapBufferResource{
+		using value_type = char;
+		using size_type  = std::size_t;
 
-		MMapBuffer(size_type size = 1) : size_(size){}
+		MMapBufferResource(size_type size) : size_(size){}
 
-		MMapBuffer(MMapBuffer &other) : size_(other.size_), data_(other.data_){
+		MMapBufferResource(MMapBufferResource &other) : size_(other.size_), data_(other.data_){
 			other.size_ = 0;
 			other.data_ = nullptr;
 		}
 
-		~MMapBuffer(){
-			mmapbuffer_impl_::destroy(data_, bytes());
+		~MMapBufferResource(){
+			mmapbuffer_impl_::destroy(data_, size_);
 		}
 
 		operator bool() const noexcept{
@@ -45,41 +44,12 @@ namespace MyBuffer{
 			return data_;
 		}
 
-		value_type &operator*() noexcept{
-			return *data_;
-		}
-
-		value_type const &operator*() const noexcept{
-			return *data_;
-		}
-
-		const value_type *operator->() const noexcept{
-			return data_;
-		}
-
-		value_type *operator->() noexcept{
-			return data_;
-		}
-
-		constexpr const value_type &operator[](std::size_t const index) const noexcept{
-			return data_[index];
-		}
-
-		constexpr
-		value_type &operator[](std::size_t const index) noexcept{
-			return data_[index];
-		}
-
-		auto size() const noexcept{
+		size_type size() const noexcept{
 			return size_;
 		}
 
-		auto bytes() const noexcept{
-			return sizeof(T) * size_;
-		}
-
 	private:
-		static value_type *allocate__(size_type size){
+		static value_type *allocate__(std::size_t size){
 			return static_cast<value_type *>(
 				#ifdef USE_HUGETLB
 					mmapbuffer_impl_::createHugeTLB(size)
@@ -91,10 +61,8 @@ namespace MyBuffer{
 
 	private:
 		size_type	size_;
-		value_type	*data_ = allocate__(sizeof(T) * size_);
+		value_type	*data_ = allocate__(size_);
 	};
-
-	using ByteMMapBuffer = MMapBuffer<std::uint8_t>;
 
 
 

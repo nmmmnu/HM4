@@ -7,7 +7,6 @@
 #include "logger.h"
 
 #include <type_traits>
-//#include <algorithm>
 
 namespace hm4::flushlist_impl_{
 

@@ -51,7 +51,7 @@ private:
 
 
 int main(int argc, char **argv){
-	using MyBuffer::ByteMMapBuffer;
+	using MyBuffer::MMapBufferResource;
 
 	using MyListFactory = ListFactory<Allocator>;
 
@@ -65,11 +65,11 @@ int main(int argc, char **argv){
 
 	size_t const arenaSize	= std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	ByteMMapBuffer	buffer{ arenaSize * MB };
+	MMapBufferResource	buffer{ arenaSize * MB };
 
-	Allocator	allocator{ buffer };
+	Allocator		allocator{ buffer };
 
-	ByteMMapBuffer	bufferPair{ hm4::Pair::maxBytes() };
+	MMapBufferResource	bufferPair{ hm4::Pair::maxBytes() };
 
 	return process<FileReader>(
 			MyListFactory{ path, allocator, bufferPair },

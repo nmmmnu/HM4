@@ -67,7 +67,7 @@ private:
 
 
 int main(int argc, char **argv){
-	using MyBuffer::ByteMMapBuffer;
+	using MyBuffer::MMapBufferResource;
 
 	using MyListFactory = ListFactory<MyMemList>;
 
@@ -81,13 +81,13 @@ int main(int argc, char **argv){
 
 	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
 
-	ByteMMapBuffer buffer1{ max_memlist_arena * MB };
-	ByteMMapBuffer buffer2{ max_memlist_arena * MB };
+	MMapBufferResource	buffer1{ max_memlist_arena * MB };
+	MMapBufferResource	buffer2{ max_memlist_arena * MB };
 
-	Allocator	allocator1{ buffer1 };
-	Allocator	allocator2{ buffer2 };
+	Allocator		allocator1{ buffer1 };
+	Allocator		allocator2{ buffer2 };
 
-	ByteMMapBuffer	bufferPair{ hm4::Pair::maxBytes() };
+	MMapBufferResource	bufferPair{ hm4::Pair::maxBytes() };
 
 	return process<FileReader>(
 			MyListFactory{ path, allocator1, allocator2, bufferPair },

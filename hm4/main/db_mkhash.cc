@@ -2,7 +2,7 @@
 
 #include "version.h"
 
-#include "allocatedbuffer.h"
+#include "mmapbuffer.h"
 
 #include "disk/disklist.h"
 
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 
 	list.printMetadata();
 
-	MyBuffer::AllocatedByteBufferOwned<> buffer{ bufferSize, nullptr };
+	MyBuffer::MMapBufferResource buffer{ bufferSize };
 
 	HashIndexBuilder builder{ output_file, list.size(), buffer };
 

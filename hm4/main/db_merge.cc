@@ -39,7 +39,7 @@ namespace{
 		auto &list = f();
 
 		if (bufferSize){
-			MyBuffer::ByteMMapBuffer bufferHash{ bufferSize };
+			MyBuffer::MMapBufferResource bufferHash{ bufferSize };
 
 			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
 								tombstoneOptions, aligned,
