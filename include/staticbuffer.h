@@ -56,21 +56,41 @@ namespace MyBuffer{
 		}
 
 	private:
-		using data_type = std::conditional_t<
-						std::is_same_v<value_type, void>,
-						char,
-						value_type
-		>;
-
-	private:
-		data_type data_[Size] {};
+		value_type data_[Size] {};
 	};
 
 	template<std::size_t Size>
-	using ByteStaticBuffer		= StaticBuffer<void, Size>;
+	using ByteStaticBuffer		= StaticBuffer<char, Size>;
+
+
 
 	template<std::size_t Size>
-	using StaticMemoryResource	= StaticBuffer<void, Size>;
+	struct StaticMemoryResource{
+		using value_type	= void;
+		using size_type		= std::size_t;
+
+		constexpr operator bool() const noexcept{
+			return true;
+		}
+
+		constexpr
+		void *data() noexcept{
+			return data_;
+		}
+
+		constexpr const void *data() const noexcept{
+			return data_;
+		}
+
+		constexpr static std::size_t size() noexcept{
+			return Size;
+		}
+
+	private:
+		char data_[Size] {};
+	};
+
+
 
 } // namespace MyBuffer
 

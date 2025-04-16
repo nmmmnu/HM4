@@ -41,7 +41,8 @@ public:
 					ConcurrentFlushList(list1, list2, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~ConcurrentFlushList(){
-		// block, if thread works
+		// this is single thread, no guard needed
+		// block, if save thread works
 		thread_.join();
 
 		save_(*list1_);
@@ -71,6 +72,8 @@ public:
 	}
 
 	void flush(){
+		// this is single thread, no guard needed
+
 		if (empty(*list1_)){
 			logger<Logger::NOTICE>() << "No data for flushing.";
 			return;
@@ -78,7 +81,7 @@ public:
 
 		logger<Logger::NOTICE>() << "Start Flushing data...";
 
-		// block, if thread works
+		// block, if save thread works
 		thread_.join();
 
 		using std::swap;
@@ -101,7 +104,7 @@ private:
 	using FlushContext = flushlist_impl_::FlushContext;
 
 	template<class FlushList1, class PFactory>
-	friend InsertResult flushlist_impl_::flushThenInsert(FlushList1 &flushList, PFactory &factory, FlushContext &context);
+	friend InsertResult flushlist_impl_::flushThenInsert(FlushList1 &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair);
 
 	template<class FlushList1, class InsertList, class Predicate1, class PFactory>
 	friend InsertResult flushlist_impl_::insertF(FlushList1 &flushList, InsertList const &insertList, Predicate1 &predicate, PFactory &factory, FlushContext &context);

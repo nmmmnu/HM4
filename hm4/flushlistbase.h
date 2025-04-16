@@ -1,7 +1,7 @@
 #ifndef FLUSH_LIST_BASE_H_
 #define FLUSH_LIST_BASE_H_
 
-#include "mybufferview.h"
+#include "staticbuffer.h"
 #include "mmapbuffer.h"
 
 #include "logger.h"
@@ -41,9 +41,9 @@ namespace hm4::flushlist_impl_{
 
 	template<class List, class Flusher>
 	void save(List &list, Flusher &flusher, MyBuffer::ByteBufferView bufferHash){
-		// this is can run in main thread or in save thread,
+		// this code may runs in main thread or in save thread,
 		// but no guard needed,
-		// because thread is join every time before call to this.
+		// because thread is join-ed every time before call to this.
 
 		if constexpr(HasPrepareFlush<List>::value){
 			list.prepareFlush();
@@ -72,12 +72,8 @@ namespace hm4::flushlist_impl_{
 
 
 	template<class FlushList, class PFactory>
-	InsertResult flushThenInsert(FlushList &flushList, PFactory &factory, FlushContext &context){
+	InsertResult flushThenInsert(FlushList &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair){
 		// this is single thread, no guard needed
-
-		auto bufferPair = context.bufferPair;
-
-		MyBuffer::MMapAdviceGuard guard{ bufferPair };
 
 		Pair *pair = reinterpret_cast<Pair *>(bufferPair.data());
 
@@ -87,7 +83,7 @@ namespace hm4::flushlist_impl_{
 				<< "Save referenced data in the pair."
 				<< "Pair size:" << pair->bytes();
 
-		// this can block, but usually happens immediately.
+		// this may block, but usually happens immediately.
 
 		flushList.flush();
 
@@ -98,6 +94,29 @@ namespace hm4::flushlist_impl_{
 		return flushList.insertF_(cloneFactory);
 	}
 
+	template<class FlushList, class PFactory>
+	InsertResult flushThenInsertWithContext(FlushList &flushList, PFactory &factory, FlushContext &context){
+		// this is single thread, no guard needed
+
+		constexpr size_t microBufferSize = 4096;
+
+		if (factory.bytes() <= microBufferSize){
+			// using micro buffer
+
+			MyBuffer::StaticMemoryResource<microBufferSize> bufferPair;
+
+			return flushThenInsert(flushList, factory, bufferPair);
+		}else{
+			// using MMAP buffer from the context
+
+			auto bufferPair = context.bufferPair;
+
+			MyBuffer::MMapAdviceGuard guard{ bufferPair };
+
+			return flushThenInsert(flushList, factory, bufferPair);
+		}
+	}
+
 	template<class FlushList, class InsertList, class Predicate, class PFactory>
 	InsertResult insertF(FlushList &flushList, InsertList const &insertList, Predicate &predicate, PFactory &factory, FlushContext &context){
 		// this is single thread, no guard needed
@@ -106,7 +125,7 @@ namespace hm4::flushlist_impl_{
 			return InsertResult::errorInvalid();
 
 		if (predicate(insertList, factory.bytes()))
-			return flushThenInsert(flushList, factory, context);
+			return flushThenInsertWithContext(flushList, factory, context);
 
 		if (auto const result = flushList.insertF_(factory); result.status != result.ERROR_NO_MEMORY)
 			return result;
@@ -117,7 +136,7 @@ namespace hm4::flushlist_impl_{
 		//
 		// The list guarantee, no changes on the list are done, if ERROR_NO_MEMORY
 
-		return flushThenInsert(flushList, factory, context);
+		return flushThenInsertWithContext(flushList, factory, context);
 	}
 
 } // namespace namespace hm4::flushlist_impl_
