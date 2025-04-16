@@ -41,7 +41,7 @@ public:
 					ConcurrentFlushList(list1, list2, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~ConcurrentFlushList(){
-		// future improvement
+		// block, if thread works
 		thread_.join();
 
 		save_(*list1_);
@@ -49,6 +49,25 @@ public:
 
 	auto mutable_version() const{
 		return version_;
+	}
+
+
+	// Command pattern
+	bool command(){
+		flush();
+
+		return true;
+	}
+
+	template<class PFactory>
+	auto insertF(PFactory &factory){
+		using namespace flushlist_impl_;
+
+		FlushContext context{
+			bufferPair_
+		};
+
+		return flushlist_impl_::insertF(*this, *list1_, predicate_, factory, context);
 	}
 
 	void flush(){
@@ -59,7 +78,7 @@ public:
 
 		logger<Logger::NOTICE>() << "Start Flushing data...";
 
-		// we have to switch lists, so need to join()
+		// block, if thread works
 		thread_.join();
 
 		using std::swap;
@@ -78,24 +97,21 @@ public:
 		++version_;
 	}
 
-	// Command pattern
-	bool command(){
-		flush();
+private:
+	using FlushContext = flushlist_impl_::FlushContext;
 
-		return true;
-	}
+	template<class FlushList1, class PFactory>
+	friend InsertResult flushlist_impl_::flushThenInsert(FlushList1 &flushList, PFactory &factory, FlushContext &context);
 
+	template<class FlushList1, class InsertList, class Predicate1, class PFactory>
+	friend InsertResult flushlist_impl_::insertF(FlushList1 &flushList, InsertList const &insertList, Predicate1 &predicate, PFactory &factory, FlushContext &context);
+
+private:
 	template<class PFactory>
-	auto insertF(PFactory &factory){
-		return flushlist_impl_::insertF(*this, *list1_, predicate_, factory, bufferPair_);
-	}
-
-	template<class PFactory>
-	auto insertF_NoFlush(PFactory &factory){
+	auto insertF_(PFactory &factory){
 		return list1_->insertF(factory);
 	}
 
-private:
 	void save_(List &list, bool const fg = true) const{
 		[[maybe_unused]]
 		std::string_view const id = fg ? "Foreground" : "Background";
@@ -115,12 +131,12 @@ private:
 	Flusher				flusher_;
 	ListLoader			*loader_;
 
-	ScopedThread			thread_;
-
 	uint64_t			version_ = 0;
 
 	MyBuffer::ByteBufferView	bufferPair_;
 	MyBuffer::ByteBufferView	bufferHash_;
+
+	ScopedThread			thread_;
 };
 
 

@@ -11,11 +11,9 @@
 
 #include "logger.h"
 
-namespace hm4{
+namespace hm4::flushlist_impl_{
 
 
-
-namespace flushlist_impl_{
 
 	template <typename, typename = void>
 	struct HasPrepareFlush : std::false_type {};
@@ -46,6 +44,10 @@ namespace flushlist_impl_{
 
 	template<class List, class Flusher>
 	void save(List &list, Flusher &flusher, MyBuffer::ByteBufferView bufferHash){
+		// this is can run in main thread or in save thread,
+		// but no guard needed,
+		// because thread is join every time before call to this.
+
 		if constexpr(HasPrepareFlush<List>::value){
 			list.prepareFlush();
 		}
@@ -64,23 +66,27 @@ namespace flushlist_impl_{
 		notifyLoader(loader);
 	}
 
-	template<class FlushList, class PFactory>
-	auto insertF_NoFlush(FlushList &flushList, PFactory &factory){
-		// redirection need, because flushlist internal list may updated
-		return flushList.insertF_NoFlush(factory);
-	}
+
+
+	struct FlushContext{
+		MyBuffer::ByteBufferView bufferPair;
+	};
+
+
 
 	template<class FlushList, class PFactory>
-	auto flushThenInsert(FlushList &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair){
-		// MyBuffer::AdviceNeededGuard guard(bufferPair);
+	InsertResult flushThenInsert(FlushList &flushList, PFactory &factory, FlushContext &context){
+		// this is single thread, no guard needed
 
-		Pair *pair = reinterpret_cast<Pair *>(bufferPair.data());
+		Pair *pair = reinterpret_cast<Pair *>(context.bufferPair.data());
 
 		factory.create(pair);
 
-		logger<Logger::NOTICE>() << "Save referenced data in the pair."
-			//	<< "key:" << pair->getKey()
+		logger<Logger::NOTICE>()
+				<< "Save referenced data in the pair."
 				<< "Pair size:" << pair->bytes();
+
+		// this can block, but usually happens immediately.
 
 		flushList.flush();
 
@@ -88,36 +94,32 @@ namespace flushlist_impl_{
 
 		PairFactory::Clone cloneFactory{ pair };
 
-		return insertF_NoFlush(flushList, cloneFactory);
+		return flushList.insertF_(cloneFactory);
 	}
 
 	template<class FlushList, class InsertList, class Predicate, class PFactory>
-	auto insertF(FlushList &flushList, InsertList const &insertList, Predicate &predicate, PFactory &factory, MyBuffer::ByteBufferView bufferPair){
+	InsertResult insertF(FlushList &flushList, InsertList const &insertList, Predicate &predicate, PFactory &factory, FlushContext &context){
+		// this is single thread, no guard needed
+
 		if (!factory.valid())
 			return InsertResult::errorInvalid();
 
 		if (predicate(insertList, factory.bytes()))
-			return flushThenInsert(flushList, factory, bufferPair);
+			return flushThenInsert(flushList, factory, context);
 
-		auto const result = insertF_NoFlush(flushList, factory);
+		if (auto const result = flushList.insertF_(factory); result.status != result.ERROR_NO_MEMORY)
+			return result;
 
-		if (result.status == result.ERROR_NO_MEMORY){
-			// unlikely, because we checked with the predicate already,
-			// but just in case
-			//
-			// the list guarantee, no changes on the list are done.
-			return flushThenInsert(flushList, factory, bufferPair);
-		}
+		// ERROR_NO_MEMORY
+		//
+		// Unlikely, because we checked with the predicate already, but just in case
+		//
+		// The list guarantee, no changes on the list are done, if ERROR_NO_MEMORY
 
-		return result;
+		return flushThenInsert(flushList, factory, context);
 	}
 
-} // namespace
-
-
-
-} // namespace
-
+} // namespace namespace hm4::flushlist_impl_
 
 #endif
 

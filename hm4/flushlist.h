@@ -57,15 +57,28 @@ public:
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){
-		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, bufferPair_);
-	}
+		FlushContext context{
+			bufferPair_
+		};
 
-	template<class PFactory>
-	auto insertF_NoFlush(PFactory &factory){
-		return list_->insertF(factory);
+		return flushlist_impl_::insertF(*this, *list_, predicate_, factory, context);
 	}
 
 private:
+	using FlushContext = flushlist_impl_::FlushContext;
+
+	template<class FlushList1, class PFactory>
+	friend InsertResult flushlist_impl_::flushThenInsert(FlushList1 &flushList, PFactory &factory, FlushContext &context);
+
+	template<class FlushList1, class InsertList, class Predicate1, class PFactory>
+	friend InsertResult flushlist_impl_::insertF(FlushList1 &flushList, InsertList const &insertList, Predicate1 &predicate, PFactory &factory, FlushContext &context);
+
+private:
+	template<class PFactory>
+	auto insertF_(PFactory &factory){
+		return list_->insertF(factory);
+	}
+
 	void save_() const{
 		logger<Logger::NOTICE>() << "Save data..." << "List record(s):" << list_->size() << "List size:" << list_->bytes();
 
