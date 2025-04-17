@@ -115,7 +115,7 @@ int printUsage(std::string_view const cmd){
 			"\tAllocator : {allocator}\n"
 			"\n"
 			"Usage:\n"
-			"\t{cmd} [file.txt] [lsm_path] [memlist arena in MB] [b = import as base64 blobs] - load file.txt, then create / add to lsm_path\n"
+			"\t{cmd} [file.txt] [lsm_path] [memlist arena in MB] [hash arena in MB] [b = import as base64 blobs] - load file.txt, then create / add to lsm_path\n"
 			"\t\tPath names must be written with quotes:\n"
 			"\t\t\tExample directory/file.'*'.db\n"
 			"\t\t\tThe '*', will be replaced with ID's\n"

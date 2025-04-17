@@ -22,9 +22,10 @@ using Allocator		= MyAllocator::ArenaAllocator;
 	using MyMemList = hm4::SkipList<Allocator>;
 #endif
 
-constexpr size_t	MIN_ARENA_SIZE		= 264;
+constexpr size_t	MIN_LIST_ARENA_SIZE	= 264;
+constexpr size_t	MIN_HASH_ARENA_SIZE	= 8;
 
-static_assert(MIN_ARENA_SIZE * 1024 * 1024 > hm4::Pair::maxBytes());
+static_assert(MIN_LIST_ARENA_SIZE * MB >= hm4::Pair::maxBytes());
 
 
 
@@ -42,14 +43,15 @@ struct ListFactory{
 				>;
 
 	template<typename UString>
-	ListFactory(UString &path, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2, MyBuffer::ByteBufferView bufferPair) :
+	ListFactory(UString &path, typename MemList::Allocator &allocator1, typename MemList::Allocator &allocator2,
+						MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash) :
 				memlist1{ allocator1 },
 				memlist2{ allocator2 },
 				mylist{
 					memlist1,
 					memlist2,
 					bufferPair,
-					{}, // bufferHash
+					bufferHash,
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -71,32 +73,33 @@ int main(int argc, char **argv){
 
 	using MyListFactory = ListFactory<MyMemList>;
 
-	if (argc <= 3)
+	if (argc <= 4)
 		return printUsage<FileReader, MyListFactory::MemList, Allocator>(argv[0]);
 
-	const char *filename	= argv[1];
-	const char *path	= argv[2];
+	const char *filename		= argv[1];
+	const char *path		= argv[2];
 
-	bool const blob = argc >= 5 && argv[4][0] == 'b';
+	size_t const arenaListSize	= std::max(from_string<size_t>(argv[3]), MIN_LIST_ARENA_SIZE);
 
-	size_t const max_memlist_arena = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
+	size_t const arenaHashSize_	= from_string<size_t>(argv[4]);
+	size_t const arenaHashSize  	= arenaHashSize_ < MIN_HASH_ARENA_SIZE ? 0 : arenaHashSize_;
 
-	MMapMemoryResource	buffer1{ max_memlist_arena * MB };
-	MMapMemoryResource	buffer2{ max_memlist_arena * MB };
+	bool const blob 		= argc >= 6 && argv[5][0] == 'b';
+
+	MMapMemoryResource	buffer1{ arenaListSize * MB };
+	MMapMemoryResource	buffer2{ arenaListSize * MB };
 
 	Allocator		allocator1{ buffer1 };
 	Allocator		allocator2{ buffer2 };
 
 	MMapMemoryResource	bufferPair{ hm4::Pair::maxBytes() };
+	MMapMemoryResource	bufferHash{ arenaHashSize * MB };
 
 	return process<FileReader>(
-			MyListFactory{ path, allocator1, allocator2, bufferPair },
+			MyListFactory{ path, allocator1, allocator2, bufferPair, bufferHash },
 			filename,
 			blob
 	);
 }
-
-
-
 
 
