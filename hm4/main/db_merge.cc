@@ -126,8 +126,9 @@ int main(int argc, char **argv){
 		return 2;
 	}
 
-	size_t const hash_arena_ = from_string<size_t>(argv[3]);
-	size_t const hash_arena  = hash_arena_ < MIN_HASH_ARENA_SIZE ? 0 : hash_arena_ * MB;
+	size_t const arenaHashSize_	= from_string<size_t>(argv[3]);
+	size_t const arenaHashSize__  	= arenaHashSize_ < MIN_HASH_ARENA_SIZE ? 0 : arenaHashSize_;
+	size_t const arenaHashSize 	= arenaHashSize__ * MB;
 
 	using hm4::disk::FileBuilder::TombstoneOptions;
 
@@ -147,7 +148,7 @@ int main(int argc, char **argv){
 			MergeListFactory_1{ path[0], DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			hash_arena
+			arenaHashSize
 		);
 
 	case 2:
@@ -161,7 +162,7 @@ int main(int argc, char **argv){
 			MergeListFactory_2{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			hash_arena
+			arenaHashSize
 		);
 
 	default:
@@ -171,7 +172,7 @@ int main(int argc, char **argv){
 			MergeListFactory_N<const char **>{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			hash_arena
+			arenaHashSize
 		);
 	}
 }
