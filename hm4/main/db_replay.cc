@@ -18,9 +18,10 @@
 
 using Allocator		= MyAllocator::ArenaAllocator;
 
-constexpr size_t	MIN_ARENA_SIZE		= 264;
+constexpr size_t	MIN_LIST_ARENA_SIZE	= 264;
+constexpr size_t	MIN_HASH_ARENA_SIZE	= 8;
 
-static_assert(MIN_ARENA_SIZE * 1024 * 1024 > hm4::Pair::maxBytes());
+static_assert(MIN_LIST_ARENA_SIZE * MB >= hm4::Pair::maxBytes());
 
 
 
@@ -53,12 +54,12 @@ struct BinLogReplay{
 	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyBuffer::ByteBufferView bufferPair) :
+	BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash) :
 				memlist{ allocator },
 				mylist{
 					memlist,
 					bufferPair,
-					{}, // bufferHash
+					bufferHash,
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -86,7 +87,7 @@ namespace{
 				"\tDate   : {date} {time}\n"
 				"\n"
 				"Usage:\n"
-				"\t{cmd} [file.data] [lsm_path] [memlist arena in MB] [n = import as non aligned] - load file.data, then create / add to lsm_path\n"
+				"\t{cmd} [file.data] [lsm_path] [memlist arena in MB] [hash arena in MB] [n = import as non aligned] - load file.data, then create / add to lsm_path\n"
 				"\t\tPath names must be written with quotes:\n"
 				"\t\t\tExample directory/file.'*'.db\n"
 				"\t\t\tThe '*', will be replaced with ID's\n"
@@ -108,23 +109,27 @@ namespace{
 int main(int argc, char **argv){
 	using MyBuffer::MMapMemoryResource;
 
-	if (argc <= 3)
+	if (argc <= 4)
 		return printUsage(argv[0]);
 
 	const char *inputFile		= argv[1];
 	const char *path		= argv[2];
 
-	bool const non_aligned		= argc >= 5 && argv[4][0] == 'n';
+	size_t const arenaListSize	= std::max(from_string<size_t>(argv[3]), MIN_LIST_ARENA_SIZE);
 
-	size_t const memlist_arena	= std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE);
+	size_t const arenaHashSize_	= from_string<size_t>(argv[4]);
+	size_t const arenaHashSize  	= arenaHashSize_ < MIN_HASH_ARENA_SIZE ? 0 : arenaHashSize_;
 
-	MMapMemoryResource	buffer{ memlist_arena * MB };
+	bool const non_aligned		= argc >= 6 && argv[5][0] == 'n';
+
+	MMapMemoryResource	buffer{ arenaListSize * MB };
 
 	Allocator		allocator{ buffer };
 
 	MMapMemoryResource	bufferPair{ hm4::Pair::maxBytes() };
+	MMapMemoryResource	bufferHash{ arenaHashSize * MB };
 
-	MyListFactory<MyReplayList> factory{ path, allocator, bufferPair };
+	MyListFactory<MyReplayList> factory{ path, allocator, bufferPair, bufferHash };
 
 	auto &mylist = factory();
 

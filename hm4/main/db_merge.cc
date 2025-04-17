@@ -38,18 +38,12 @@ namespace{
 
 		auto &list = f();
 
-		if (bufferSize){
-			MyBuffer::MMapMemoryResource bufferHash{ bufferSize };
+		MyBuffer::MMapMemoryResource bufferHash{ bufferSize };
 
-			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
-								tombstoneOptions, aligned,
-								list.size(), bufferHash
-			);
-		}else{
-			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
-								tombstoneOptions, aligned
-			);
-		}
+		hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
+							tombstoneOptions, aligned,
+							list.size(), bufferHash
+		);
 
 		return 0;
 	}

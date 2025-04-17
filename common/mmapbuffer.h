@@ -19,6 +19,9 @@ namespace MyBuffer{
 		void adviceFree(void *p, std::size_t size) noexcept;
 
 		inline void *allocate__(std::size_t size){
+			if (size == 0)
+				return nullptr;
+
 			return
 				#ifdef USE_HUGETLB
 					createHugeTLB(size)
@@ -32,6 +35,8 @@ namespace MyBuffer{
 	struct MMapMemoryResource{
 		using value_type = void;
 		using size_type  = std::size_t;
+
+		MMapMemoryResource() = default;
 
 		MMapMemoryResource(size_type size) : size_(size){}
 
@@ -61,10 +66,8 @@ namespace MyBuffer{
 		}
 
 	private:
-
-	private:
-		std::size_t	size_;
-		void		*data_ = mmapbuffer_impl_::allocate__(size_);
+		std::size_t	size_	= 0;
+		void		*data_	= mmapbuffer_impl_::allocate__(size_);
 	};
 
 

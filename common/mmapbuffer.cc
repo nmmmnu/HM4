@@ -4,6 +4,8 @@
 
 #include <sys/mman.h>
 
+#include <cassert>
+
 namespace MyBuffer{
 	namespace mmapbuffer_impl_{
 		// duplicate, but with template looks very bad.
@@ -31,8 +33,7 @@ namespace MyBuffer{
 		#ifdef USE_HUGETLB
 
 		void *createHugeTLB(std::size_t const size) noexcept{
-			if (size == 0)
-				return nullptr;
+			assert(size);
 
 			if (void *p = mmap_(size, MAP_HUGETLB); p != MAP_FAILED){
 				logger_fmt<Logger::NOTICE>(maskAllocate, size, "HugeTLB");

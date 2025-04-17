@@ -109,15 +109,9 @@ int main(int argc, char **argv){
 
 	size_t const bufferHashSize  = opt.hash_arena < MIN_ARENA_SIZE ? 0 : opt.hash_arena * MB;
 
-	if (bufferHashSize){
-		MyBuffer::MMapMemoryResource bufferHash{ bufferHashSize };
+	MyBuffer::MMapMemoryResource bufferHash{ bufferHashSize };
 
-		return compact(opt, bufferHash);
-	}else{
-		MyBuffer::ByteBufferView bufferHash;
-
-		return compact(opt, bufferHash);
-	}
+	return compact(opt, bufferHash);
 }
 
 namespace{
