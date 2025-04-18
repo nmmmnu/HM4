@@ -1,36 +1,20 @@
 #ifndef MY_MMAP_BUFFER_
 #define MY_MMAP_BUFFER_
 
-#include <cassert>
 #include <cstdint>
+#include <new>		// std::bad_alloc, std::nothrow_t
 
 #include "mybufferview.h"
 
 namespace MyBuffer{
 
 	namespace mmapbuffer_impl_{
-		void *createNormal(std::size_t size) noexcept;
-		#ifdef USE_HUGETLB
-		void *createHugeTLB(std::size_t size) noexcept;
-		#endif
+		void *create(std::size_t size) noexcept;
 		void destroy(void *p, std::size_t size) noexcept;
 
 		void adviceNeed(void *p, std::size_t size) noexcept;
 		void adviceFree(void *p, std::size_t size) noexcept;
-
-		inline void *allocate__(std::size_t size){
-			if (size == 0)
-				return nullptr;
-
-			return
-				#ifdef USE_HUGETLB
-					createHugeTLB(size)
-				#else
-					createNormal(size)
-				#endif
-			;
-		}
-	};
+	}
 
 	struct MMapMemoryResource{
 		using value_type = void;
@@ -38,14 +22,22 @@ namespace MyBuffer{
 
 		MMapMemoryResource() = default;
 
-		MMapMemoryResource(size_type size) : size_(size){}
+		explicit MMapMemoryResource(size_type size, std::nothrow_t) noexcept :
+					size_(size				),
+					data_(mmapbuffer_impl_::create(size_)	){}
 
-		MMapMemoryResource(MMapMemoryResource &other) : size_(other.size_), data_(other.data_){
+		explicit MMapMemoryResource(size_type size) :
+					size_(size			),
+					data_(createOrThrow__(size_)	){}
+
+		MMapMemoryResource(MMapMemoryResource &other) noexcept :
+					size_(other.size_		),
+					data_(other.data_		){
 			other.size_ = 0;
 			other.data_ = nullptr;
 		}
 
-		~MMapMemoryResource(){
+		~MMapMemoryResource() noexcept {
 			mmapbuffer_impl_::destroy(data_, size_);
 		}
 
@@ -66,8 +58,18 @@ namespace MyBuffer{
 		}
 
 	private:
+		static void *createOrThrow__(std::size_t size){
+			if (size == 0)
+				return nullptr;
+
+			if (void *p = mmapbuffer_impl_::create(size); p)
+				return p;
+
+			throw std::bad_alloc{};
+		}
+	private:
 		std::size_t	size_	= 0;
-		void		*data_	= mmapbuffer_impl_::allocate__(size_);
+		void		*data_	= nullptr;
 	};
 
 
