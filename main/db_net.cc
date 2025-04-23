@@ -114,6 +114,8 @@ constexpr size_t MIN_ARENA_SIZE_BYTES	= 1024 + hm4::Pair::maxBytes() +
 
 constexpr size_t MIN_ARENA_SIZE		= MIN_ARENA_SIZE_BYTES / 1024 / 1024;
 
+constexpr size_t MIN_HASH_ARENA_SIZE	= 8;
+
 // ----------------------------------
 
 #include "signalguard.h"
@@ -167,6 +169,14 @@ namespace{
 		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena) * MB;
 	}
 
+	size_t calcArenaHashSize(const MyOptions &opt){
+		constexpr size_t MB = 1024 * 1024;
+
+		auto const size = opt.hash_arena < MIN_HASH_ARENA_SIZE ? 0 : opt.hash_arena;
+
+		return size * MB;
+	}
+
 	Allocator createAllocator(const MyOptions &opt, MyBuffer::MMapMemoryResource &buffer){
 		// uncomment for virtual Allocator
 		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
@@ -200,13 +210,13 @@ namespace{
 	}
 
 	int select_MutableLists(const MyOptions &opt){
-		MyBuffer::ByteBufferView bufferHash; // empty for now...
 
 		constexpr std::string_view starting_server_with = "Starting {} server with {} and {}...";
 
 		using MyMemList = MyDBNetMemList;
 
-		auto const allocatorSize = calcAllocatorSize(opt);
+		auto const allocatorSize	= calcAllocatorSize(opt);
+		auto const arenaHashSize 	= calcArenaHashSize(opt);
 
 		#ifdef USE_CONCURRENCY
 
@@ -216,7 +226,11 @@ namespace{
 			auto allocator1 = createAllocator(opt, buffer1);
 			auto allocator2 = createAllocator(opt, buffer2);
 
+			// is not duplication, we want this to be executed after main allocator(s).
+
 			auto bufferPair = createBufferPair();
+
+			MyBuffer::MMapMemoryResource bufferHash{ arenaHashSize };
 
 			bool const have_binlog = ! opt.binlog_path1.empty() && ! opt.binlog_path2.empty();
 
@@ -255,7 +269,11 @@ namespace{
 
 			auto allocator = createAllocator(opt, buffer);
 
+			// is not duplication, we want this to be executed after main allocator(s).
+
 			auto bufferPair = createBufferPair();
+
+			MyBuffer::MMapMemoryResource bufferHash{ arenaHashSize };
 
 			bool const have_binlog = ! opt.binlog_path1.empty();
 
