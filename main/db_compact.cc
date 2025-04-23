@@ -246,7 +246,7 @@ namespace{
 			fmt::print("Sorted file list to consider:\n");
 
 			for(auto &[size, filename] : files)
-				fmt::print(" - {:<62} {:>12}\n", filename, size);
+				fmt::print(" - {:<62} {:>16}\n", filename, size);
 
 			fmt::print("\n");
 		}
