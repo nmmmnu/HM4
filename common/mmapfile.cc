@@ -10,9 +10,9 @@
 
 namespace{
 
-	int convertAdv__(MMAPFile::Advice const advice){
-		using Advice = MMAPFile::Advice;
+	using Advice = mmap_file_impl_::Advice;
 
+	int convertAdv__(Advice const advice){
 		switch(advice){
 		default:
 		case Advice::NORMAL:		return MADV_NORMAL	;
@@ -28,58 +28,127 @@ namespace{
 		return false;
 	}
 
+	struct FileResult{
+		bool	ok	= false;
+		int	fd	= 0;
+		size_t	size	= 0;
+	};
+
+	FileResult file__(std::string_view filename, int mode){
+		int const fd = ::open(filename.data(), mode);
+
+		if (fd < 0)
+			return {};
+
+		off_t size2 = lseek(fd, 0, SEEK_END);
+
+		if (size2 <= 0){
+			::close(fd);
+			return {};
+		}
+
+		return { true, fd, static_cast<size_t>(size2) };
+	}
+
+	struct MMAPResult{
+		bool	ok	= false;
+		void	*mem	= 0;
+		size_t	size	= 0;
+	};
+
+	MMAPResult mmap__(int fd, size_t size, int const prot, Advice adviceC){
+		void *mem = mmap(nullptr, size, prot, MAP_SHARED, fd, /* offset */ 0);
+
+		if (mem == MAP_FAILED){
+			::close(fd);
+			return {};
+		}
+
+		int const advice = convertAdv__(adviceC);
+
+		madvise(mem, size, advice);
+
+		// the file no need to stay open
+		::close(fd);
+
+		return { true, mem, size };
+	}
+
 } // namespace
 
 
 
-MMAPFile::MMAPFile(MMAPFile &&other) :
-		mem_		( std::move(other.mem_	)),
-		size_		( std::move(other.size_	)),
-		rw_		( std::move(other.rw_	)){
-	other.mem_ = nullptr;
-}
-
-bool MMAPFile::openRO(std::string_view filename, Advice const advice){
+bool MMAPFileRO::open(std::string_view filename, Advice const advice){
 	close();
 
 	int const mode = O_RDONLY;
 
-	int const fd = ::open(filename.data(), mode);
+	auto const r = file__(filename, mode);
 
-	if (fd < 0)
+	if (!r.ok)
 		return false;
 
-	off_t size2 = lseek(fd, 0, SEEK_END);
+	int const prot = PROT_READ;
 
-	if (size2 <= 0)
-		return openFail__(fd);
+	if (auto const m = mmap__(r.fd, r.size, prot, advice); m.ok){
+		this->mem_	= m.mem;
+		this->size_	= m.size;
 
-	size_t const size = static_cast<size_t>(size2);
+		return true;
+	}
 
-	return mmap_(false, size, fd, advice);
+	return false;
 }
 
-bool MMAPFile::openRW(std::string_view filename, Advice const advice){
+bool MMAPFileRO::openFD(int fd, size_t size, Advice advice){
+	close();
+
+	int const prot = PROT_READ;
+
+	if (auto const m = mmap__(fd, size, prot, advice); m.ok){
+		this->mem_	= m.mem;
+		this->size_	= m.size;
+
+		return true;
+	}
+
+	return false;
+}
+
+void MMAPFileRO::close(){
+	if (!mem_)
+		return;
+
+	munmap((void *) mem_, size_);
+
+	mem_	= nullptr;
+}
+
+
+
+bool MMAPFileRW::open(std::string_view filename, Advice const advice){
 	close();
 
 	int const mode = O_RDWR;
 
-	int const fd = ::open(filename.data(), mode);
+	auto const r = file__(filename, mode);
 
-	if (fd < 0)
+	if (!r.ok)
 		return false;
 
-	off_t size2 = lseek(fd, 0, SEEK_END);
+	int const prot = PROT_READ | PROT_WRITE;
 
-	if (size2 <= 0)
-		return openFail__(fd);
+	if (auto const m = mmap__(r.fd, r.size, prot, advice); m.ok){
+		this->mem_	= m.mem;
+		this->size_	= m.size;
 
-	size_t const size = static_cast<size_t>(size2);
+		return true;
+	}
 
-	return mmap_(true, size, fd, advice);
+	return false;
 }
 
-bool MMAPFile::create(std::string_view filename, Advice const advice, size_t size){
+bool MMAPFileRW::create(std::string_view filename, Advice const advice, size_t size){
 	close();
 
 	int const mode = O_RDWR | O_CREAT | O_TRUNC;
@@ -94,33 +163,19 @@ bool MMAPFile::create(std::string_view filename, Advice const advice, size_t siz
 	if (int const result = ftruncate(fd, static_cast<off_t>(size)); result < 0)
 		return openFail__(fd);
 
-	return mmap_(true, size, fd, advice);
+	int const prot = PROT_READ | PROT_WRITE;
+
+	if (auto const m = mmap__(fd, size, prot, advice); m.ok){
+		this->mem_	= m.mem;
+		this->size_	= m.size;
+
+		return true;
+	}
+
+	return false;
 }
 
-bool MMAPFile::mmap_(bool rw, size_t size, int fd, Advice adviceC){
-	int const prot = rw ?	PROT_READ | PROT_WRITE :
-				PROT_READ;
-
-	void *mem = mmap(nullptr, size, prot, MAP_SHARED, fd, /* offset */ 0);
-
-	if (mem == MAP_FAILED)
-		return openFail__(fd);
-
-	int const advice = convertAdv__(adviceC);
-
-	madvise(mem, size, advice);
-
-	// the file no need to stay open
-	::close(fd);
-
-	mem_	= mem;
-	size_	= size;
-	rw_	= rw;
-
-	return true;
-}
-
-void MMAPFile::close(){
+void MMAPFileRW::close(){
 	if (!mem_)
 		return;
 
@@ -128,4 +183,5 @@ void MMAPFile::close(){
 
 	mem_	= nullptr;
 }
+
 

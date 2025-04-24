@@ -9,8 +9,8 @@
 namespace hm4::disk::hash::algo{
 
 	template<typename T>
-	MMAPFile createMMAP(std::string_view filename, size_t const size){
-		MMAPFile mmap;
+	MMAPFileRW createMMAP(std::string_view filename, size_t const size){
+		MMAPFileRW mmap;
 
 		mmap.create(filename, MMAPFile::Advice::SEQUENTIAL, size * sizeof(T));
 
@@ -80,14 +80,14 @@ namespace hm4::disk::hash::algo{
 
 	private:
 		Node *nodes_(){
-			return static_cast<Node *>(mmap_.memRW());
+			return static_cast<Node *>(mmap_.mem());
 		}
 
 	private:
 		T			pos_		= 0;
 		NodeHelperVector<T>	vector_		;
 		size_t			nodesCount_	;
-		MMAPFile		mmap_		;
+		MMAPFileRW		mmap_		;
 	};
 
 } // namespace hm4::disk::hash::algo
