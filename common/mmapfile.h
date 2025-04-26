@@ -8,8 +8,7 @@ namespace mmap_file_impl_{
 	enum class Advice : char{
 		NORMAL		,
 		SEQUENTIAL	,
-		RANDOM		,
-		ALL
+		RANDOM
 	};
 
 } // namespace mmap_file_impl_
@@ -21,6 +20,10 @@ struct MMAPFileRO{
 
 	MMAPFileRO() = default;
 
+	MMAPFileRO(std::string_view filename, Advice advice = Advice::NORMAL){
+		open(filename, advice);
+	}
+
 	MMAPFileRO(MMAPFileRO &&other) :
 			mem_		( std::move(other.mem_	)),
 			size_		( std::move(other.size_	)){
@@ -31,9 +34,10 @@ struct MMAPFileRO{
 		close();
 	}
 
-	bool open(std::string_view filename, Advice advice);
+public:
+	bool open(std::string_view filename, Advice advice = Advice::NORMAL);
 
-	bool openFD(int fd, size_t size, Advice advice);
+	bool openFD(int fd, size_t size, Advice advice = Advice::NORMAL);
 
 	void close();
 
@@ -42,7 +46,7 @@ public:
 		return mem_ != nullptr;
 	}
 
-	constexpr const void *mem() const{
+	constexpr const void *data() const{
 		return mem_;
 	}
 
@@ -63,6 +67,10 @@ struct MMAPFileRW{
 	using Advice = mmap_file_impl_::Advice;
 
 	MMAPFileRW() = default;
+
+	MMAPFileRW(std::string_view filename, Advice advice = Advice::NORMAL){
+		open(filename, advice);
+	}
 
 	MMAPFileRW(MMAPFileRW &&other) :
 			mem_		( std::move(other.mem_	)),
@@ -86,11 +94,11 @@ public:
 		return mem_ != nullptr;
 	}
 
-	constexpr const void *mem() const{
+	constexpr const void *data() const{
 		return mem_;
 	}
 
-	constexpr void *mem(){
+	constexpr void *data(){
 		return mem_;
 	}
 

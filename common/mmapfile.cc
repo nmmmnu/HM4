@@ -5,6 +5,7 @@
 #include <sys/mman.h>	// mmap
 #include <fcntl.h>	// open
 #include <unistd.h>	// close, lseek
+#include <type_traits>
 
 
 
@@ -18,15 +19,11 @@ namespace{
 		case Advice::NORMAL:		return MADV_NORMAL	;
 		case Advice::SEQUENTIAL:	return MADV_SEQUENTIAL	;
 		case Advice::RANDOM:		return MADV_RANDOM	;
-		case Advice::ALL:		return MADV_WILLNEED	;
+	//	case Advice::ALL:		return MADV_WILLNEED	;
 		}
 	}
 
-	bool openFail__(int const fd){
-		::close(fd);
 
-		return false;
-	}
 
 	struct FileResult{
 		bool	ok	= false;
@@ -50,13 +47,33 @@ namespace{
 		return { true, fd, static_cast<size_t>(size2) };
 	}
 
-	struct MMAPResult{
+
+
+	struct PtrResult{
 		bool	ok	= false;
 		void	*mem	= 0;
 		size_t	size	= 0;
+
+		template<typename T>
+		bool unpack(T *&mem, size_t &size) const{
+			static_assert(
+				std::is_same_v<
+					std::remove_const_t<T>,
+					void
+				>,
+				"Accepts void * only"
+			);
+
+			if (ok){
+				mem	= this->mem;
+				size	= this->size;
+			}
+
+			return ok;
+		}
 	};
 
-	MMAPResult mmap__(int fd, size_t size, int const prot, Advice adviceC){
+	PtrResult mmap__(int fd, size_t size, int const prot, Advice adviceC){
 		void *mem = mmap(nullptr, size, prot, MAP_SHARED, fd, /* offset */ 0);
 
 		if (mem == MAP_FAILED){
@@ -90,14 +107,9 @@ bool MMAPFileRO::open(std::string_view filename, Advice const advice){
 
 	int const prot = PROT_READ;
 
-	if (auto const m = mmap__(r.fd, r.size, prot, advice); m.ok){
-		this->mem_	= m.mem;
-		this->size_	= m.size;
+	auto const m = mmap__(r.fd, r.size, prot, advice);
 
-		return true;
-	}
-
-	return false;
+	return m.unpack(mem_, size_);
 }
 
 bool MMAPFileRO::openFD(int fd, size_t size, Advice advice){
@@ -105,23 +117,18 @@ bool MMAPFileRO::openFD(int fd, size_t size, Advice advice){
 
 	int const prot = PROT_READ;
 
-	if (auto const m = mmap__(fd, size, prot, advice); m.ok){
-		this->mem_	= m.mem;
-		this->size_	= m.size;
+	auto const m = mmap__(fd, size, prot, advice);
 
-		return true;
-	}
-
-	return false;
+	return m.unpack(mem_, size_);
 }
 
 void MMAPFileRO::close(){
 	if (!mem_)
 		return;
 
-	munmap((void *) mem_, size_);
+	munmap(mem_, size_);
 
-	mem_	= nullptr;
+	mem_ = nullptr;
 }
 
 
@@ -138,14 +145,9 @@ bool MMAPFileRW::open(std::string_view filename, Advice const advice){
 
 	int const prot = PROT_READ | PROT_WRITE;
 
-	if (auto const m = mmap__(r.fd, r.size, prot, advice); m.ok){
-		this->mem_	= m.mem;
-		this->size_	= m.size;
+	auto const m = mmap__(r.fd, r.size, prot, advice);
 
-		return true;
-	}
-
-	return false;
+	return m.unpack(mem_, size_);
 }
 
 bool MMAPFileRW::create(std::string_view filename, Advice const advice, size_t size){
@@ -160,28 +162,24 @@ bool MMAPFileRW::create(std::string_view filename, Advice const advice, size_t s
 	if (fd < 0)
 		return false;
 
-	if (int const result = ftruncate(fd, static_cast<off_t>(size)); result < 0)
-		return openFail__(fd);
+	if (int const result = ftruncate(fd, static_cast<off_t>(size)); result < 0){
+		::close(fd);
+		return false;
+	}
 
 	int const prot = PROT_READ | PROT_WRITE;
 
-	if (auto const m = mmap__(fd, size, prot, advice); m.ok){
-		this->mem_	= m.mem;
-		this->size_	= m.size;
+	auto const m = mmap__(fd, size, prot, advice);
 
-		return true;
-	}
-
-	return false;
+	return m.unpack(mem_, size_);
 }
 
 void MMAPFileRW::close(){
 	if (!mem_)
 		return;
 
-	munmap((void *) mem_, size_);
+	munmap(mem_, size_);
 
-	mem_	= nullptr;
+	mem_ = nullptr;
 }
-
 

@@ -85,9 +85,9 @@ namespace{
 	int op_select(char const op, List const &list, std::string_view const key){
 		switch(op){
 		default:
-		case 'r':	return op_search (list, key);
-		case 'l':	return op_iterate(list, key);
-		case 'i':	return op_id     (list, key);
+		case 'r': return op_search (list, key);
+		case 'l': return op_iterate(list, key);
+		case 'i': return op_id     (list, key);
 		}
 	}
 

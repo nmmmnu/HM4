@@ -54,14 +54,14 @@ namespace{
 
 	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;
 
-	auto searchHotLine(std::string_view const key, DiskList const &list, MMAPFilePlus const &line) -> BinarySearchResult<DiskList::random_access_iterator>{
+	auto searchHotLine(std::string_view const key, DiskList const &list, BlobView const vLine) -> BinarySearchResult<DiskList::random_access_iterator>{
 		auto fallback = [key, &list](){
 			return searchBinary(key, list);
 		};
 
-		size_t const nodesCount = line.size() ;
+		size_t const nodesCount = vLine.size() ;
 
-		const SmallNode *nodes = line->as<const SmallNode>(0, nodesCount);
+		const SmallNode *nodes = vLine.as<const SmallNode>(0, nodesCount);
 
 		if (!nodes)
 			return fallback();
@@ -145,14 +145,14 @@ namespace{
 		return searchBinary<HPair::N>(key, list, listPos, listPosLast);
 	}
 
-	auto searchHashIndex(std::string_view const key, DiskList const &list, MMAPFilePlus const &hashIndex) -> BinarySearchResult<DiskList::random_access_iterator>{
+	auto searchHashIndex(std::string_view const key, DiskList const &list, BlobView const vHashIndex) -> BinarySearchResult<DiskList::random_access_iterator>{
 		auto fallback = [key, &list](){
 			return list.ra_find_<DiskList::FindMode::HASH_FALLBACK>(key);
 		};
 
-		size_t const nodesCount = hashIndex->sizeAs<HashNode>();
+		size_t const nodesCount = vHashIndex.sizeAs<HashNode>();
 
-		const HashNode *nodes = hashIndex->as<const HashNode>(0, nodesCount);
+		const HashNode *nodes = vHashIndex.as<const HashNode>(0, nodesCount);
 
 		if (!nodes)
 			return fallback();
@@ -272,7 +272,7 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice co
 	bool const b2 =	mData_.open(filenameData(filename), advice);
 
 	// integrity check, size is safe to be used now.
-	bool const b3 =	mIndx_->sizeAs<uint64_t>() == size();
+	bool const b3 =	BlobView{ mIndx_ }.sizeAs<uint64_t>() == size();
 
 	log__mmap_file__(filenameIndx(filename), mIndx_);
 	log__mmap_file__(filenameData(filename), mData_);
@@ -297,7 +297,7 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 
 	mLine_.open(filenameLine(filename));
 
-	if (mLine_->sizeAs<SmallNode>() <= 1){
+	if (BlobView{ mLine_ }.sizeAs<SmallNode>() <= 1){
 		logger<Logger::WARNING>() << "Hotline too small. Ignoring.";
 		mLine_.close();
 	}
@@ -307,7 +307,7 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 	mHash_.open(filenameHash(filename));
 
 	// why 64 ? because if less, Line will be as fast as Hash
-	if (mHash_->sizeAs<HashNode>() < 64){
+	if (BlobView{ mHash_ }.sizeAs<HashNode>() < 64){
 		logger<Logger::WARNING>() << "HashIndex too small. Ignoring.";
 		mHash_.close();
 	}
@@ -407,44 +407,44 @@ namespace fd_impl_{
 	}
 
 	template<bool B>
-	const Pair *fdSafeAccess(BlobRef const &mData, const Pair *blob){
+	const Pair *fdSafeAccess(BlobView const vData, const Pair *blob){
 		if (!blob)
 			return nullptr;
 
 		// check for overrun, because Pair might be not complete...
 		if constexpr(B)
-		if (! mData.safeAccessMemory(blob, sizeof(Pair)) )
+		if (! vData.safeAccessMemory(blob, sizeof(Pair)) )
 			return nullptr;
 
 		// check for overrun, because Pair is dynamic size...
-		if (! mData.safeAccessMemory(blob, blob->bytes()) )
+		if (! vData.safeAccessMemory(blob, blob->bytes()) )
 			return nullptr;
 
 		return blob;
 	}
 
-	const Pair *fdGetFirst(BlobRef const &mData){
+	const Pair *fdGetFirst(BlobView const vData){
 		size_t const offset = 0;
 
-		const Pair *blob = mData.as<const Pair>(offset);
+		const Pair *blob = vData.as<const Pair>(offset);
 
 		// check for overrun because PairBlob is dynamic size
-		return fdSafeAccess<false>(mData, blob);
+		return fdSafeAccess<false>(vData, blob);
 	}
 
-	const Pair *fdGetNext(BlobRef const &mData, const Pair *current, bool const aligned){
+	const Pair *fdGetNext(BlobView const vData, const Pair *current, bool const aligned){
 		size_t size = alignedSize__(current, aligned);
 
 		const char *currentC = (const char *) current;
 
-		const Pair *blob = mData.as<const Pair>(currentC + size);
+		const Pair *blob = vData.as<const Pair>(currentC + size);
 
 		// check for overrun because PairBlob is dynamic size
-		return fdSafeAccess<false>(mData, blob);
+		return fdSafeAccess<false>(vData, blob);
 	}
 
-	const Pair *fdGetAt(BlobRef const &mData, BlobRef const &mIndx, size_type const index){
-		const uint64_t *be_array = mIndx.as<const uint64_t>(0);
+	const Pair *fdGetAt(BlobView const vData, BlobView const vIndx, size_type const index){
+		const uint64_t *be_array = vIndx.as<const uint64_t>(0);
 
 		if (!be_array)
 			return nullptr;
@@ -453,10 +453,10 @@ namespace fd_impl_{
 
 		size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
 
-		const Pair *blob = mData.as<const Pair>(offset);
+		const Pair *blob = vData.as<const Pair>(offset);
 
 		// check for overrun because PairBlob is dynamic size
-		return fdSafeAccess<false>(mData, blob);
+		return fdSafeAccess<false>(vData, blob);
 	}
 }
 
@@ -589,15 +589,15 @@ private:
 
 	const std::string_view	&key_;
 
-	const MMAPFilePlus	&mTree_		= list_.mTree_;
-	const MMAPFilePlus	&mKeys_		= list_.mKeys_;
+	const BlobView		mTree_		= list_.mTree_;
+	const BlobView		mKeys_		= list_.mKeys_;
 
 private:
 	size_type		start		= 0;
 	size_type		end		= list_.size();
 
 public:
-	BTreeSearchHelper(const DiskList &list, std::string_view const &key) : list_(list), key_(key){}
+	BTreeSearchHelper(const DiskList &list, std::string_view key) : list_(list), key_(key){}
 
 	auto operator()(){
 		try{
@@ -612,7 +612,7 @@ private:
 	auto btreeSearch_() -> BinarySearchResult<DiskList::random_access_iterator>{
 		size_t const nodesCount	= mTree_.size() / sizeof(Node);
 
-		const Node *nodes = mTree_->as<const Node>(0, nodesCount);
+		const Node *nodes = mTree_.as<const Node>(0, nodesCount);
 
 		if (!nodes)
 			throw BTreeAccessError{};
@@ -706,7 +706,7 @@ private:
 
 		// BTree NIL case - can not happen
 
-		const NodeData *nd = mKeys_->as<const NodeData>(narrow<size_t>(offset));
+		const NodeData *nd = mKeys_.as<const NodeData>(narrow<size_t>(offset));
 
 		if (!nd)
 			throw BTreeAccessError{};
@@ -715,7 +715,7 @@ private:
 		size_type const dataid  = betoh<uint64_t>(nd->dataid);
 
 		// key is just after the NodeData
-		const char *keyptr = mKeys_->as<const char>(narrow<size_t>(offset + sizeof(NodeData)), keysize);
+		const char *keyptr = mKeys_.as<const char>(narrow<size_t>(offset + sizeof(NodeData)), keysize);
 
 		if (!keyptr)
 			throw BTreeAccessError{};

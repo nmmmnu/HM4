@@ -1,4 +1,4 @@
-#include "blobref.h"
+#include "blobview.h"
 
 #include <cstdint>
 #include <cstring>
@@ -12,8 +12,8 @@
 
 MyTest mytest;
 
-void test_blobref(){
-	mytest.begin("BlobRef");
+void test_blobview(){
+	mytest.begin("blobview");
 
 	constexpr size_t SIZE = 256;
 	char mem[SIZE];
@@ -21,7 +21,7 @@ void test_blobref(){
 	for(size_t i = 0; i < SIZE; ++i)
 		mem[i] = (char) i;
 
-	BlobRef br{ mem };
+	BlobView br{ mem };
 
 	mytest("as()",		*br.as<uint16_t>(0x00) == htobe<uint16_t>(0x0001)	);
 	mytest("as()",		*br.as<uint16_t>(0x0E) == htobe<uint16_t>(0x0E0F)	);
@@ -94,7 +94,7 @@ void test_blobref(){
 }
 
 int main(){
-	test_blobref();
+	test_blobview();
 
 	return mytest.end();
 }

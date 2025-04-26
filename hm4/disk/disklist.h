@@ -1,7 +1,8 @@
 #ifndef DISK_LIST_H_
 #define DISK_LIST_H_
 
-#include "mmapfileplus.h"
+#include "mmapfile.h"
+#include "blobview.h"
 
 #include "ilist.h"
 #include "filemeta.h"
@@ -20,10 +21,10 @@ namespace hm4::disk{
 namespace fd_impl_{
 	using config::size_type;
 
-	const Pair *fdGetFirst	(BlobRef const &mData);
-	const Pair *fdGetNext	(BlobRef const &mData, const Pair *blob, bool aligned);
+	const Pair *fdGetFirst	(BlobView const vData);
+	const Pair *fdGetNext	(BlobView const vData, const Pair *blob, bool aligned);
 
-	const Pair *fdGetAt	(BlobRef const &mData, BlobRef const &mIndx, size_type index);
+	const Pair *fdGetAt	(BlobView const vData, BlobView const vIndx, size_type index);
 }
 
 
@@ -180,24 +181,24 @@ private:
 
 private:
 	const Pair *fdGetAt_(size_type const index) const{
-		return fd_impl_::fdGetAt(*mData_, *mIndx_, index);
+		return fd_impl_::fdGetAt(mData_, mIndx_, index);
 	}
 
 	const Pair *fdGetFirst_() const{
-		return fd_impl_::fdGetFirst(*mData_);
+		return fd_impl_::fdGetFirst(mData_);
 	}
 
 public:
 	class BTreeSearchHelper;
 
 private:
-	MMAPFilePlus	mIndx_;
-	MMAPFilePlus	mLine_;
-	MMAPFilePlus	mHash_;
-	MMAPFilePlus	mData_;
+	MMAPFile	mIndx_;
+	MMAPFile	mLine_;
+	MMAPFile	mHash_;
+	MMAPFile	mData_;
 
-	MMAPFilePlus	mTree_;
-	MMAPFilePlus	mKeys_;
+	MMAPFile	mTree_;
+	MMAPFile	mKeys_;
 
 	FileMeta	metadata_;
 
@@ -230,7 +231,7 @@ namespace hm4::disk{
 	}
 
 	inline auto DiskList::make_forward_iterator_(const Pair *pair) const -> forward_iterator{
-		return forward_iterator(*mData_, pair, aligned());
+		return forward_iterator(mData_, pair, aligned());
 	}
 
 	inline auto DiskList::begin() const -> forward_iterator{

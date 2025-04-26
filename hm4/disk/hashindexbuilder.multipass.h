@@ -80,7 +80,7 @@ namespace hm4::disk::hash::algo{
 
 	private:
 		Node *nodes_(){
-			return static_cast<Node *>(mmap_.mem());
+			return static_cast<Node *>(mmap_.data());
 		}
 
 	private:

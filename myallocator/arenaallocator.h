@@ -106,6 +106,11 @@ namespace MyAllocator{
 
 
 
+	constexpr void deallocate(ArenaAllocator &, const void *){
+	}
+
+
+
 	inline MyBuffer::ByteBufferView allocateAll(ArenaAllocator &allocator){
 		return allocator.xallocateAll();
 	}

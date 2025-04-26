@@ -2,27 +2,23 @@
 #define BLOB_REF_H_
 
 #include <cstddef>	// size_t
-#include <cassert>
 #include <type_traits>	// is_pod
-#include <string_view>
 
-#include <cstdio>
-
-class BlobRef{
+class BlobView{
 public:
-	constexpr BlobRef() = default;
+	constexpr BlobView() = default;
 
-	constexpr BlobRef(const void *mem, size_t const size) noexcept :
-				mem_( (const char *) mem ),
-				size_(size){}
+	constexpr BlobView(const void *mem, size_t const size) noexcept :
+				mem_	(static_cast<const char *>(mem)	),
+				size_	(size				){}
 
-	constexpr BlobRef(std::string_view s) noexcept :
-				mem_	(s.data()),
-				size_	(s.size()){}
+	template<typename T>
+	constexpr BlobView(T const &x) noexcept :
+				BlobView(x.data(), x.size()){}
 
 	template<size_t N>
-	constexpr BlobRef(const char(&mem)[N]) noexcept:
-				BlobRef(mem, N){}
+	constexpr BlobView(const char(&mem)[N]) noexcept:
+				BlobView(mem, N){}
 
 public:
 	constexpr bool empty() const noexcept{
@@ -60,12 +56,7 @@ public:
 			return p + size;
 		};
 
-		const char *ptrc = (const char *) ptr;
-
-	//	printf("Buffer check %p %p / %p %p\n",
-	//			(const void *) ptrc, (const void *) endpoint(ptrc, size),
-	//			(const void *) mem_, (const void *) endpoint(mem_, size_)
-	//	);
+		const char *ptrc = static_cast<const char *>(ptr);
 
 		if ( empty() || size == 0 || ptrc < mem_ || endpoint(ptrc, size) > endpoint(mem_, size_) )
 			return nullptr;
@@ -102,8 +93,8 @@ public:
 	}
 
 private:
-	const char	*mem_ = nullptr;
-	size_t		size_ = 0;
+	const char	*mem_	= nullptr;
+	size_t		size_	= 0;
 };
 
 #endif

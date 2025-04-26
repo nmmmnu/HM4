@@ -6,8 +6,8 @@ namespace disk{
 class DiskList::forward_iterator {
 public:
 	// begin or specific position
-	forward_iterator(BlobRef const &blob, const Pair *pair, bool const aligned) :
-				blob	(&blob		),
+	forward_iterator(BlobView blob, const Pair *pair, bool const aligned) :
+				blob	(blob		),
 				pair	(pair		),
 				aligned	(aligned	){}
 
@@ -26,7 +26,7 @@ public:
 public:
 	iterator &operator++(){
 		if (pair)
-			pair = fd_impl_::fdGetNext(*blob, pair, aligned);
+			pair = fd_impl_::fdGetNext(blob, pair, aligned);
 
 		return *this;
 	}
@@ -49,7 +49,7 @@ public:
 	}
 
 private:
-	const BlobRef	*blob	= nullptr;
+	BlobView	blob;
 	const Pair	*pair	= nullptr;
 	bool		aligned	= false;
 };
