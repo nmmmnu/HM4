@@ -33,14 +33,12 @@ namespace{
 	}
 
 	template <class FACTORY>
-	int mergeFromFactory(FACTORY &&f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions, size_t const bufferSize){
+	int mergeFromFactory(FACTORY &&f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions, MyBuffer::ByteBufferView bufferHash){
 		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
 
 		auto &list = f();
 
-		if (bufferSize){
-			MyBuffer::MMapMemoryResource bufferHash{ bufferSize };
-
+		if (bufferHash){
 			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
 								tombstoneOptions, aligned,
 								list.size(), bufferHash
@@ -138,6 +136,8 @@ int main(int argc, char **argv){
 	size_t const arenaHashSize__  	= arenaHashSize_ < MIN_HASH_ARENA_SIZE ? 0 : arenaHashSize_;
 	size_t const arenaHashSize 	= arenaHashSize__ * MB;
 
+	MyBuffer::MMapMemoryResource bufferHash{ arenaHashSize };
+
 	using hm4::disk::FileBuilder::TombstoneOptions;
 
 	TombstoneOptions const tombstoneOptions = argv[1][0] == 't' ? TombstoneOptions::REMOVE : TombstoneOptions::KEEP;
@@ -156,7 +156,7 @@ int main(int argc, char **argv){
 			MergeListFactory_1{ path[0], DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			arenaHashSize
+			bufferHash
 		);
 
 	case 2:
@@ -170,7 +170,7 @@ int main(int argc, char **argv){
 			MergeListFactory_2{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			arenaHashSize
+			bufferHash
 		);
 
 	default:
@@ -180,7 +180,7 @@ int main(int argc, char **argv){
 			MergeListFactory_N<const char **>{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
-			arenaHashSize
+			bufferHash
 		);
 	}
 }

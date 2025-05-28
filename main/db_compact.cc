@@ -45,7 +45,7 @@ namespace{
 	int compact(MyOptions const &opt, MyBuffer::ByteBufferView bufferHash);
 
 	template <class Factory>
-	void mergeFromFactory(Factory &&f, std::string_view output_file, MyBuffer::ByteBufferView &bufferHash){
+	void mergeFromFactory(Factory &&f, std::string_view output_file, MyBuffer::ByteBufferView bufferHash){
 		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
 
 		if (bufferHash){
