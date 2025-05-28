@@ -1,5 +1,7 @@
 #include "mmapfilesbo.h"
 
+#include "logger.h"
+
 #define _FILE_OFFSET_BITS 64
 
 #include <fcntl.h>	// open
@@ -32,6 +34,14 @@ bool MMAPFileSBO::open(SlabAllocator &allocator, std::string_view const filename
 		// go SBO
 
 		if (char *data = MyAllocator::allocate<char>(allocator, size); data){
+
+			logger<Logger::DEBUG>() << "Using SBO (small buffer optimization) for" << filename;
+
+			// rewind...
+			if (lseek(fd, 0, SEEK_SET) < 0){
+				::close(fd);
+				return false;
+			}
 
 			ssize_t const bytes = read(fd, data, size);
 
