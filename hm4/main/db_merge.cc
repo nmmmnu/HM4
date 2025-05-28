@@ -38,14 +38,22 @@ namespace{
 
 		auto &list = f();
 
-		MyBuffer::MMapMemoryResource bufferHash{ bufferSize };
+		if (bufferSize){
+			MyBuffer::MMapMemoryResource bufferHash{ bufferSize };
 
-		hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
-							tombstoneOptions, aligned,
-							list.size(), bufferHash
-		);
+			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
+								tombstoneOptions, aligned,
+								list.size(), bufferHash
+			);
 
-		return 0;
+			return 0;
+		}else{
+			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
+								tombstoneOptions, aligned
+			);
+
+			return 0;
+		}
 	}
 
 } // anonymous namespace
