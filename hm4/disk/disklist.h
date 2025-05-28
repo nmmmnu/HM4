@@ -1,7 +1,7 @@
 #ifndef DISK_LIST_H_
 #define DISK_LIST_H_
 
-#include "mmapfile.h"
+#include "mmapfilesbo.h"
 #include "blobview.h"
 
 #include "ilist.h"
@@ -38,6 +38,8 @@ public:
 	class forward_iterator;
 
 	using iterator = forward_iterator;
+
+	using SlabAllocator = MMAPFileSBO::SlabAllocator;
 
 public:
 	enum class OpenMode : char {
@@ -97,6 +99,10 @@ public:
 
 	void printMetadata() const{
 		metadata_.print();
+	}
+
+	void setSBOAllocator(SlabAllocator &allocator){
+		sboAllocator_ = &allocator;
 	}
 
 public:
@@ -192,13 +198,13 @@ public:
 	class BTreeSearchHelper;
 
 private:
-	MMAPFile	mIndx_;
-	MMAPFile	mLine_;
-	MMAPFile	mHash_;
-	MMAPFile	mData_;
+	MMAPFileSBO	mIndx_;
+	MMAPFileSBO	mLine_;
+	MMAPFileSBO	mHash_;
+	MMAPFileSBO	mData_;
 
-	MMAPFile	mTree_;
-	MMAPFile	mKeys_;
+	MMAPFileSBO	mTree_;
+	MMAPFileSBO	mKeys_;
 
 	FileMeta	metadata_;
 
@@ -208,6 +214,8 @@ private:
 	bool		aligned_	= true;
 
 	uint64_t	id_		= 0;
+
+	SlabAllocator	*sboAllocator_	= nullptr;
 };
 
 

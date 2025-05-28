@@ -23,7 +23,7 @@ namespace MyAllocator{
 		}
 
 		template<typename... Args>
-		SlabAllocator(Args&&... args) : buffer(std::forward<Args>(args)...){
+		SlabAllocator(Args&&... args) : buffer_(std::forward<Args>(args)...){
 			createFreeList_();
 		}
 
@@ -72,7 +72,7 @@ namespace MyAllocator{
 	private:
 		void createFreeList_(){
 			for (size_t i = 0; i < numBlocks_(); ++i){
-				void *block = buffer_.data() + i * blockSize_;
+				void *block = buffer_.data() + i * BlockSize;
 				*reinterpret_cast<void **>(block) = freeList_;
 				freeList_ = block;
 			}

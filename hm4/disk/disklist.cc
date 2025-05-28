@@ -233,7 +233,7 @@ namespace{
 bool DiskList::openDataOnly_(std::string_view const filename){
 	MMAPFile::Advice const advice = MMAPFile::Advice::SEQUENTIAL;
 
-	return mData_.open(filenameData(filename), advice);
+	return mData_.open(sboAllocator_, filenameData(filename), advice);
 }
 
 bool DiskList::openDataOnly_with_bool(std::string_view const filename, bool const aligned){
@@ -268,8 +268,8 @@ bool DiskList::openMinimal_(std::string_view const filename, MMAPFile::Advice co
 	if (checkMetadata(metadata_) == false)
 		return false;
 
-	bool const b1 =	mIndx_.open(filenameIndx(filename));
-	bool const b2 =	mData_.open(filenameData(filename), advice);
+	bool const b1 =	mIndx_.open(sboAllocator_, filenameIndx(filename));
+	bool const b2 =	mData_.open(sboAllocator_, filenameData(filename), advice);
 
 	// integrity check, size is safe to be used now.
 	bool const b3 =	BlobView{ mIndx_ }.sizeAs<uint64_t>() == size();
@@ -295,7 +295,7 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 
 	// ==============================
 
-	mLine_.open(filenameLine(filename));
+	mLine_.open(sboAllocator_, filenameLine(filename));
 
 	if (BlobView{ mLine_ }.sizeAs<SmallNode>() <= 1){
 		logger<Logger::WARNING>() << "Hotline too small. Ignoring.";
@@ -304,7 +304,7 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 
 	// ==============================
 
-	mHash_.open(filenameHash(filename));
+	mHash_.open(sboAllocator_, filenameHash(filename));
 
 	// why 64 ? because if less, Line will be as fast as Hash
 	if (BlobView{ mHash_ }.sizeAs<HashNode>() < 64){
@@ -314,8 +314,8 @@ bool DiskList::openNormal_(std::string_view const filename, MMAPFile::Advice con
 
 	// ==============================
 
-	mTree_.open(filenameBTreeIndx(filename));
-	mKeys_.open(filenameBTreeData(filename));
+	mTree_.open(sboAllocator_, filenameBTreeIndx(filename));
+	mKeys_.open(sboAllocator_, filenameBTreeData(filename));
 
 	log__mmap_file__(filenameLine(filename), mLine_);
 	log__mmap_file__(filenameHash(filename), mHash_);

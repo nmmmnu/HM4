@@ -60,7 +60,8 @@ namespace{
 using hm4::disk::DiskList;
 
 struct MergeListFactory_1{
-	MergeListFactory_1(const char *filename, MMAPFile::Advice const advice, DiskList::OpenMode const mode){
+	MergeListFactory_1(const char *filename, DiskList::SlabAllocator &allocator, MMAPFile::Advice const advice, DiskList::OpenMode const mode){
+		table_.setSBOAllocator(allocator);
 		table_.open(filename, advice, mode);
 	}
 
@@ -75,7 +76,10 @@ private:
 
 
 struct MergeListFactory_2{
-	MergeListFactory_2(const char *filename1, const char *filename2, const MMAPFile::Advice advice, DiskList::OpenMode const mode){
+	MergeListFactory_2(const char *filename1, const char *filename2, DiskList::SlabAllocator &allocator, const MMAPFile::Advice advice, DiskList::OpenMode const mode){
+		table1_.setSBOAllocator(allocator);
+		table2_.setSBOAllocator(allocator);
+
 		table1_.open(filename1, advice, mode);
 		table2_.open(filename2, advice, mode);
 	}
@@ -96,7 +100,7 @@ private:
 
 template<class IT>
 struct MergeListFactory_N{
-	MergeListFactory_N(IT first, IT last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
+	MergeListFactory_N(IT first, IT last, DiskList::SlabAllocator &, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
 					loader_(first, last, advice, mode){}
 
 	const auto &operator()() const{
@@ -137,6 +141,9 @@ int main(int argc, char **argv){
 	int const table_count	= argc - 4;
 	const char **path	= (const char **) &argv[4];
 
+	MyBuffer::MMapMemoryResource slabBuffer{ 2048 * 32 };
+	DiskList::SlabAllocator allocator{ slabBuffer };
+
 	switch(table_count){
 	case 1:
 		fmt::print(	"Merging (cleanup) single table...\n"
@@ -145,7 +152,7 @@ int main(int argc, char **argv){
 		);
 
 		return mergeFromFactory(
-			MergeListFactory_1{ path[0], DEFAULT_ADVICE, DEFAULT_MODE },
+			MergeListFactory_1{ path[0], allocator, DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
 			arenaHashSize
@@ -159,7 +166,7 @@ int main(int argc, char **argv){
 		);
 
 		return mergeFromFactory(
-			MergeListFactory_2{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE },
+			MergeListFactory_2{ path[0], path[1], allocator, DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
 			arenaHashSize
@@ -169,7 +176,7 @@ int main(int argc, char **argv){
 		fmt::print(	"Merging multiple tables...\n");
 
 		return mergeFromFactory(
-			MergeListFactory_N<const char **>{ path, path + table_count, DEFAULT_ADVICE, DEFAULT_MODE },
+			MergeListFactory_N<const char **>{ path, path + table_count, allocator, DEFAULT_ADVICE, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
 			arenaHashSize
