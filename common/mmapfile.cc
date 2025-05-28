@@ -109,7 +109,7 @@ bool MMAPFileRO::open(std::string_view filename, Advice const advice){
 
 	auto const m = mmap__(r.fd, r.size, prot, advice);
 
-	return m.unpack(mem_, size_);
+	return m.unpack(data_, size_);
 }
 
 bool MMAPFileRO::openFD(int fd, size_t size, Advice advice){
@@ -119,16 +119,16 @@ bool MMAPFileRO::openFD(int fd, size_t size, Advice advice){
 
 	auto const m = mmap__(fd, size, prot, advice);
 
-	return m.unpack(mem_, size_);
+	return m.unpack(data_, size_);
 }
 
 void MMAPFileRO::close(){
-	if (!mem_)
+	if (!data_)
 		return;
 
-	munmap(mem_, size_);
+	munmap(data_, size_);
 
-	mem_ = nullptr;
+	data_ = nullptr;
 }
 
 
@@ -147,7 +147,7 @@ bool MMAPFileRW::open(std::string_view filename, Advice const advice){
 
 	auto const m = mmap__(r.fd, r.size, prot, advice);
 
-	return m.unpack(mem_, size_);
+	return m.unpack(data_, size_);
 }
 
 bool MMAPFileRW::create(std::string_view filename, Advice const advice, size_t size){
@@ -171,15 +171,15 @@ bool MMAPFileRW::create(std::string_view filename, Advice const advice, size_t s
 
 	auto const m = mmap__(fd, size, prot, advice);
 
-	return m.unpack(mem_, size_);
+	return m.unpack(data_, size_);
 }
 
 void MMAPFileRW::close(){
-	if (!mem_)
+	if (!data_)
 		return;
 
-	munmap(mem_, size_);
+	munmap(data_, size_);
 
-	mem_ = nullptr;
+	data_ = nullptr;
 }
 

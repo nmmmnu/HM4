@@ -2,6 +2,7 @@
 #define BLOB_REF_H_
 
 #include <cstddef>	// size_t
+#include <cstdint>	// size_t
 #include <type_traits>	// is_pod
 
 class BlobView{
@@ -14,7 +15,21 @@ public:
 
 	template<typename T>
 	constexpr BlobView(T const &x) noexcept :
-				BlobView(x.data(), x.size()){}
+				BlobView(x.data(), x.size()){
+
+		using P	= decltype(x.data());
+		using B	= std::remove_const_t<
+					std::remove_pointer_t<P>
+				>;
+
+		static_assert(
+			std::is_same_v<B, uint8_t> ||
+			std::is_same_v<B, int8_t > ||
+			std::is_same_v<B, char   > ||
+			std::is_same_v<B, void   >,
+			"Only byte-types allowed"
+		);
+	}
 
 	template<size_t N>
 	constexpr BlobView(const char(&mem)[N]) noexcept:
@@ -74,14 +89,14 @@ public:
 
 	template <class T>
 	const T *as(size_t const pos, size_t const elements = 1) const noexcept{
-		static_assert(std::is_pod<T>::value, "T must be POD type");
+		static_assert(std::is_standard_layout_v<T>, "T must be POD type");
 
 		return static_cast<const T *>( safeAccessMemory(pos, elements * sizeof(T)) );
 	}
 
 	template <class T>
 	const T *as(const void *ptr, size_t const elements = 1) const noexcept{
-		static_assert(std::is_pod<T>::value, "T must be POD type");
+		static_assert(std::is_standard_layout_v<T>, "T must be POD type");
 
 		return static_cast<const T *>( safeAccessMemory(ptr, elements * sizeof(T)) );
 	}

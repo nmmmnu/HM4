@@ -583,7 +583,7 @@ inline namespace version_4_00_00{
 
 	} __attribute__((__packed__));
 
-	static_assert(std::is_trivial<Pair>::value, "Pair must be POD type");
+	static_assert(std::is_standard_layout_v<Pair>, "Pair must be POD type");
 
 
 

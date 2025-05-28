@@ -26,11 +26,8 @@ namespace MyAllocator{
 		}
 		#endif
 
-		constexpr static std::size_t DEFAULT_ALIGN = sizeof(void *);
-
-		template<std::size_t Align = DEFAULT_ALIGN>
 		void *xallocate(std::size_t const size) noexcept{
-			pos = align__<Align>(pos);
+			pos = align__(pos);
 
 			if (pos + size > buffer.size())
 				return nullptr;
@@ -42,9 +39,8 @@ namespace MyAllocator{
 			return result;
 		}
 
-		template<std::size_t Align = DEFAULT_ALIGN>
 		MyBuffer::ByteBufferView xallocateAll() noexcept{
-			pos = align__<Align>(pos);
+			pos = align__(pos);
 
 			size_t const size = buffer.size() - pos;
 
@@ -94,7 +90,9 @@ namespace MyAllocator{
 	//		return (n + align - 1) & ~(align - 1);
 	//	}
 
-		template<std::size_t Align>
+		constexpr static std::size_t DEFAULT_ALIGN = sizeof(void *);
+
+		template<std::size_t Align = DEFAULT_ALIGN>
 		constexpr static std::size_t align__(std::size_t n) noexcept{
 			return (n + Align - 1) & ~(Align - 1);
 		}

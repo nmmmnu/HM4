@@ -1,4 +1,4 @@
-#ifndef HASH_INDEX_NODE_H
+#ifndef HASH_INDEX_NODE_H_
 #define HASH_INDEX_NODE_H_
 
 #include <cstdint>

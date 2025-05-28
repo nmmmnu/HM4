@@ -318,5 +318,7 @@ Changelog
 ### 1.3.9
 -	introduce FileWriter instead of std::ofstream
 -	Redis protocol output very large numbers as strings to avoid errors with redis-cli
-
+-	Refactor buffers and memory resources
+-	Add hash indexes
+-	Free 8 bit memory per AVLList node by moving balance into the up pointer
 

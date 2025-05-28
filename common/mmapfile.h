@@ -25,9 +25,9 @@ struct MMAPFileRO{
 	}
 
 	MMAPFileRO(MMAPFileRO &&other) :
-			mem_		( std::move(other.mem_	)),
+			data_		( std::move(other.data_	)),
 			size_		( std::move(other.size_	)){
-		other.mem_ = nullptr;
+		other.data_ = nullptr;
 	}
 
 	~MMAPFileRO(){
@@ -43,11 +43,11 @@ public:
 
 public:
 	constexpr operator bool() const{
-		return mem_ != nullptr;
+		return data_ != nullptr;
 	}
 
 	constexpr const void *data() const{
-		return mem_;
+		return data_;
 	}
 
 	constexpr size_t size() const{
@@ -55,7 +55,7 @@ public:
 	}
 
 private:
-	void	*mem_		= nullptr;
+	void	*data_		= nullptr;
 	size_t	size_;
 };
 
@@ -73,9 +73,9 @@ struct MMAPFileRW{
 	}
 
 	MMAPFileRW(MMAPFileRW &&other) :
-			mem_		( std::move(other.mem_	)),
+			data_		( std::move(other.data_	)),
 			size_		( std::move(other.size_	)){
-		other.mem_ = nullptr;
+		other.data_ = nullptr;
 	}
 
 	~MMAPFileRW(){
@@ -91,15 +91,15 @@ struct MMAPFileRW{
 
 public:
 	constexpr operator bool() const{
-		return mem_ != nullptr;
+		return data_;
 	}
 
 	constexpr const void *data() const{
-		return mem_;
+		return data_;
 	}
 
 	constexpr void *data(){
-		return mem_;
+		return data_;
 	}
 
 	constexpr size_t size() const{
@@ -107,7 +107,7 @@ public:
 	}
 
 private:
-	void	*mem_		= nullptr;
+	void	*data_		= nullptr;
 	size_t	size_;
 };
 

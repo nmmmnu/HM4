@@ -87,7 +87,7 @@ namespace MyBuffer{
 		}
 
 	private:
-		char data_[Size] {};
+		char data_[Size];
 	};
 
 

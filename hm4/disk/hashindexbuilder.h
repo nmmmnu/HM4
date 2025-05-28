@@ -1,4 +1,4 @@
-#ifndef HASH_INDEX_BUILDER_H
+#ifndef HASH_INDEX_BUILDER_H_
 #define HASH_INDEX_BUILDER_H_
 
 #include "disk/filenames.h"
