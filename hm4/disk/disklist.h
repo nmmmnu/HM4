@@ -30,6 +30,8 @@ namespace fd_impl_{
 
 
 class DiskList{
+	constexpr static bool USE_SBO = true;
+
 public:
 	using size_type		= config::size_type;
 	using difference_type	= config::difference_type;
@@ -55,12 +57,21 @@ public:
 		BTREE
 	};
 
-	static constexpr MMAPFile::Advice	DEFAULT_ADVICE	= MMAPFile::Advice::RANDOM;
+	static constexpr MMAPFile::Advice	DEFAULT_ADVICE_	= MMAPFile::Advice::RANDOM;
 	static constexpr OpenMode		DEFAULT_MODE	= OpenMode::NORMAL;
 
 private:
 	static constexpr size_type	BIN_SEARCH_MINIMUM_DISTANCE	= 3;
 //	static constexpr int		CMP_ZERO			= 1;
+
+	constexpr static auto calcAdvice__(OpenMode mode){
+		switch(mode){
+		default:
+		case OpenMode::NORMAL	:
+		case OpenMode::MINIMAL	: return DEFAULT_ADVICE_		;
+		case OpenMode::FORWARD	: return MMAPFile::Advice::SEQUENTIAL	;
+		}
+	}
 
 public:
 	DiskList() = default;
@@ -74,35 +85,64 @@ public:
 		close();
 	}
 
-	bool open(uint64_t id, std::string_view filename, MMAPFile::Advice advice = DEFAULT_ADVICE, OpenMode mode = DEFAULT_MODE){
+	struct OpenController{
+		MMAPFile::Advice	advice		= DEFAULT_ADVICE_;
+		SlabAllocator		*allocator	= nullptr;
+
+		bool open(MMAPFileSBO &f, std::string_view filename, bool b = false){
+			return f.open(allocator, filename, adviceX_(b));
+		}
+
+		bool open(MMAPFile &f, std::string_view filename, bool b = false){
+			return f.open(filename, adviceX_(b));
+		}
+
+	private:
+		constexpr MMAPFile::Advice adviceX_(bool b) const{
+			return b ? advice : DEFAULT_ADVICE_;
+		}
+	};
+
+	bool open(uint64_t id, std::string_view filename,                           OpenMode mode = DEFAULT_MODE){
 		id_ = id;
 
-		return open(filename, advice, mode);
+		auto const advice = calcAdvice__(mode);
+
+		return open_(filename, mode, OpenController{ advice });
 	}
 
-	bool open(std::string_view filename, MMAPFile::Advice advice = DEFAULT_ADVICE, OpenMode mode = DEFAULT_MODE);
+	bool open(uint64_t id, std::string_view filename, SlabAllocator &allocator, OpenMode mode = DEFAULT_MODE){
+		id_ = id;
 
-	bool openDataOnly_with_bool(std::string_view filename, bool aligned);
+		auto const advice = calcAdvice__(mode);
 
-	bool openDataOnly(std::string_view filename, hm4::Pair::WriteOptions writeOptions){
-		auto translateOptions = [](auto x){
-			switch(x){
-			case hm4::Pair::WriteOptions::ALIGNED	: return true;
-			case hm4::Pair::WriteOptions::NONE	: return false;
-			}
-		};
+		return open_(filename, mode, OpenController{ advice, &allocator });
+	}
 
-		return openDataOnly_with_bool(filename, translateOptions(writeOptions) );
+	bool open(std::string_view filename,                           OpenMode mode = DEFAULT_MODE){
+		return open(0, filename, mode);
+	}
+
+	bool open(std::string_view filename, SlabAllocator &allocator, OpenMode mode = DEFAULT_MODE){
+		return open(0, filename, allocator, mode);
+	}
+
+	bool openForRepair(std::string_view filename, bool aligned){
+		auto const advice = MMAPFile::Advice::SEQUENTIAL;
+
+		return openForRepair_(filename, aligned, OpenController{ advice });
+	}
+
+	bool openForRepair(std::string_view filename, bool aligned, SlabAllocator &allocator){
+		auto const advice = MMAPFile::Advice::SEQUENTIAL;
+
+		return openForRepair_(filename, aligned, OpenController{ advice, &allocator });
 	}
 
 	void close();
 
 	void printMetadata() const{
 		metadata_.print();
-	}
-
-	void setSBOAllocator(SlabAllocator &allocator){
-		sboAllocator_ = &allocator;
 	}
 
 public:
@@ -175,13 +215,12 @@ public:
 	forward_iterator find(std::string_view key, std::bool_constant<B>) const;
 
 private:
-	bool openNormal_  (std::string_view filename, MMAPFile::Advice advice);
-	bool openMinimal_ (std::string_view filename, MMAPFile::Advice advice);
-	bool openForward_ (std::string_view filename);
+	bool openNormal_	(std::string_view filename, OpenController oc);
+	bool openMinimal_	(std::string_view filename, OpenController oc);
+	bool openForward_	(std::string_view filename, OpenController oc);
 
-	bool openDataOnly_(std::string_view filename);
-
-	bool open_(std::string_view filename, MMAPFile::Advice advice, OpenMode mode);
+	bool openForRepair_	(std::string_view filename, bool aligned,  OpenController oc);
+	bool open_		(std::string_view filename, OpenMode mode, OpenController oc);
 
 	void calcSearchMode_();
 
@@ -198,13 +237,19 @@ public:
 	class BTreeSearchHelper;
 
 private:
-	MMAPFileSBO	mIndx_;
-	MMAPFileSBO	mLine_;
-	MMAPFileSBO	mHash_;
-	MMAPFileSBO	mData_;
+	using MMAPFileCond = std::conditional_t<
+				USE_SBO,
+				MMAPFileSBO,
+				MMAPFile
+	>;
 
-	MMAPFileSBO	mTree_;
-	MMAPFileSBO	mKeys_;
+	MMAPFileCond	mIndx_;
+	MMAPFileCond	mLine_;
+	MMAPFileCond	mHash_;
+	MMAPFileCond	mData_;
+
+	MMAPFileCond	mTree_;
+	MMAPFileCond	mKeys_;
 
 	FileMeta	metadata_;
 
@@ -214,8 +259,6 @@ private:
 	bool		aligned_	= true;
 
 	uint64_t	id_		= 0;
-
-	SlabAllocator	*sboAllocator_	= nullptr;
 };
 
 

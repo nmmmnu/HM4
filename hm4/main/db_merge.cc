@@ -5,6 +5,7 @@
 #include "myfs.h"
 
 #include "mmapbuffer.h"
+#include "staticbuffer.h"
 
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
@@ -66,9 +67,8 @@ namespace{
 using hm4::disk::DiskList;
 
 struct MergeListFactory_1{
-	MergeListFactory_1(const char *filename, DiskList::SlabAllocator &allocator, MMAPFile::Advice const advice, DiskList::OpenMode const mode){
-		table_.setSBOAllocator(allocator);
-		table_.open(filename, advice, mode);
+	MergeListFactory_1(const char *filename, DiskList::SlabAllocator &allocator, DiskList::OpenMode const mode){
+		table_.open(filename, allocator, mode);
 	}
 
 	const auto &operator()() const{
@@ -82,12 +82,9 @@ private:
 
 
 struct MergeListFactory_2{
-	MergeListFactory_2(const char *filename1, const char *filename2, DiskList::SlabAllocator &allocator, const MMAPFile::Advice advice, DiskList::OpenMode const mode){
-		table1_.setSBOAllocator(allocator);
-		table2_.setSBOAllocator(allocator);
-
-		table1_.open(filename1, advice, mode);
-		table2_.open(filename2, advice, mode);
+	MergeListFactory_2(const char *filename1, const char *filename2, DiskList::SlabAllocator &allocator, DiskList::OpenMode const mode){
+		table1_.open(filename1, allocator, mode);
+		table2_.open(filename2, allocator, mode);
 	}
 
 	const auto &operator()() const{
@@ -99,15 +96,15 @@ private:
 
 	DiskList	table1_;
 	DiskList	table2_;
-	MyDualList	table_{ table2_, table1_ };
+	MyDualList	table_{ table1_, table2_ };
 };
 
 
 
 template<class IT>
 struct MergeListFactory_N{
-	MergeListFactory_N(IT first, IT last, DiskList::SlabAllocator &, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
-					loader_(first, last, advice, mode){}
+	MergeListFactory_N(IT first, IT last, DiskList::SlabAllocator &, DiskList::OpenMode const mode) :
+					loader_(first, last, mode){}
 
 	const auto &operator()() const{
 		return loader_.getList();
@@ -119,11 +116,13 @@ private:
 
 
 
-constexpr auto	DEFAULT_ADVICE		= MMAPFile::Advice::SEQUENTIAL;
 constexpr auto	DEFAULT_MODE		= DiskList::OpenMode::FORWARD;
 
 constexpr size_t MIN_HASH_ARENA_SIZE	= 8;
 constexpr size_t MB			= 1024 * 1024;
+
+// not to have 64K on the stack
+MyBuffer::StaticMemoryResource<32 * 2048> g_slabBuffer;
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)
@@ -149,8 +148,7 @@ int main(int argc, char **argv){
 	int const table_count	= argc - 4;
 	const char **path	= (const char **) &argv[4];
 
-	MyBuffer::MMapMemoryResource slabBuffer{ 2048 * 32 };
-	DiskList::SlabAllocator allocator{ slabBuffer };
+	DiskList::SlabAllocator allocator{ g_slabBuffer };
 
 	switch(table_count){
 	case 1:
@@ -160,7 +158,7 @@ int main(int argc, char **argv){
 		);
 
 		return mergeFromFactory(
-			MergeListFactory_1{ path[0], allocator, DEFAULT_ADVICE, DEFAULT_MODE },
+			MergeListFactory_1{ path[0], allocator, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
 			bufferHash
@@ -174,7 +172,7 @@ int main(int argc, char **argv){
 		);
 
 		return mergeFromFactory(
-			MergeListFactory_2{ path[0], path[1], allocator, DEFAULT_ADVICE, DEFAULT_MODE },
+			MergeListFactory_2{ path[0], path[1], allocator, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
 			bufferHash
@@ -184,7 +182,7 @@ int main(int argc, char **argv){
 		fmt::print(	"Merging multiple tables...\n");
 
 		return mergeFromFactory(
-			MergeListFactory_N<const char **>{ path, path + table_count, allocator, DEFAULT_ADVICE, DEFAULT_MODE },
+			MergeListFactory_N<const char **>{ path, path + table_count, allocator, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
 			bufferHash

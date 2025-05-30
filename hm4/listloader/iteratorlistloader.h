@@ -14,8 +14,8 @@ public:
 	using List 	= const impl_::ContainerHelper::CollectionList;
 
 public:
-	IteratorListLoader(IT first, IT last, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				container_(advice, mode){
+	IteratorListLoader(IT first, IT last, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				container_(mode){
 
 		container_.copy(first, last);
 	}

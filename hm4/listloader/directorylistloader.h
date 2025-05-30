@@ -15,8 +15,8 @@ public:
 
 public:
 	template<typename UString>
-	DirectoryListLoader(UString &&path, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				container_(advice, mode),
+	DirectoryListLoader(UString &&path, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				container_(mode),
 				path_(std::forward<UString>(path)){
 
 		// guard against missing '*'

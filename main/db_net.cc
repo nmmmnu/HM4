@@ -535,7 +535,7 @@ namespace{
 
 		DiskList input;
 
-		auto const result = input.openDataOnly(file, hm4::Pair::WriteOptions::ALIGNED);
+		auto const result = input.openForRepair(file, true);
 
 		if (! result){
 			logger<Logger::ERROR>() << "Replay failed.";

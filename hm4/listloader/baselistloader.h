@@ -19,8 +19,7 @@ namespace listloader{
 			using Container		= std::vector<DiskList>;
 			using CollectionList	= hm4::multi::CollectionList<Container>;
 
-			ContainerHelper(MMAPFile::Advice const advice, DiskList::OpenMode const mode) :
-							advice_(advice),
+			ContainerHelper(DiskList::OpenMode const mode) :
 							mode_(mode){}
 
 			const auto &getList() const{
@@ -58,7 +57,7 @@ namespace listloader{
 					}else{
 						// not found, add new
 						neo.emplace_back();
-						neo.back().open(id, filename, advice_, mode_);
+						neo.back().open(id, filename, mode_);
 					}
 				}
 
@@ -70,7 +69,6 @@ namespace listloader{
 
 			CollectionList		list_{ container_ };
 
-			MMAPFile::Advice	advice_;
 			DiskList::OpenMode	mode_;
 		};
 
