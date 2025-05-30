@@ -48,7 +48,7 @@ int main(int argc, char **argv){
 	size_t const bufferSize = std::max(from_string<size_t>(argv[3]), MIN_ARENA_SIZE) * MB;
 
 	DiskList list;
-	if (list.open(input_file, MMAPFile::Advice::SEQUENTIAL, DiskList::OpenMode::FORWARD) == false){
+	if (!list.open(input_file, DiskList::NoVMAllocator{}, DiskList::OpenMode::FORWARD)){
 		printf("Database file does not exists or is incorrect.\n");
 		return 2;
 	}

@@ -17,6 +17,7 @@
 #include "multi/collectionlist.h"
 
 #include "mmapbuffer.h"
+#include "staticbuffer.h"
 
 #include <vector>
 #include <utility>
@@ -35,6 +36,9 @@ using IDGenerator = idgenerator::IDGeneratorDate;
 using hm4::disk::FileBuilder::TombstoneOptions;
 
 constexpr TombstoneOptions TOMBSTONE_OPTION = TombstoneOptions::KEEP;
+
+// not to have 64K on the stack
+MyBuffer::StaticMemoryResource<32 * 2048> g_slabBuffer;
 
 
 
@@ -65,9 +69,9 @@ namespace{
 
 
 struct MergeListFactory_2{
-	MergeListFactory_2(std::string_view filename1, std::string_view filename2, const MMAPFile::Advice advice, DiskList::OpenMode const mode){
-		table1_.open(filename1, advice, mode);
-		table2_.open(filename2, advice, mode);
+	MergeListFactory_2(std::string_view filename1, std::string_view filename2, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode){
+		table1_.open(filename1, allocator, mode);
+		table2_.open(filename2, allocator, mode);
 	}
 
 	const auto &operator()() const{
@@ -86,8 +90,8 @@ private:
 
 template<class IT>
 struct MergeListFactory_N{
-	MergeListFactory_N(IT first, IT last, const MMAPFile::Advice advice, DiskList::OpenMode const mode) :
-					loader_(first, last, advice, mode){}
+	MergeListFactory_N(IT first, IT last, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode) :
+					loader_(first, last, allocator, mode){}
 
 	const auto &operator()() const{
 		return loader_.getList();
@@ -179,7 +183,7 @@ namespace{
 
 	auto getSize(std::string_view filename){
 		hm4::disk::DiskList list;
-		list.open(filename, DEFAULT_ADVICE, DEFAULT_MODE);
+		list.open(filename, DiskList::NoVMAllocator{}, DEFAULT_MODE);
 		return list.size();
 	}
 
@@ -325,6 +329,8 @@ namespace{
 			mergeFromFactory(factory, output_file, bufferHash);
 		};
 
+		DiskList::VMAllocator allocator{ g_slabBuffer };
+
 		while(true){
 			auto const out = prepareSmartMergeFileList(opt);
 
@@ -345,14 +351,14 @@ namespace{
 
 			case 2:
 				merge( "two",
-					MergeListFactory_2{ path[0], path[1], DEFAULT_ADVICE, DEFAULT_MODE }
+					MergeListFactory_2{ path[0], path[1],                 allocator, DEFAULT_MODE }
 				);
 
 				break;
 
 			default:
 				merge( "multiple",
-					MergeListFactory_N{ std::begin(path), std::end(path), DEFAULT_ADVICE, DEFAULT_MODE }
+					MergeListFactory_N{ std::begin(path), std::end(path), allocator, DEFAULT_MODE }
 				);
 
 				break;

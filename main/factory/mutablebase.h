@@ -15,6 +15,8 @@
 
 namespace DBAdapterFactory{
 
+	using hm4::disk::DiskList;
+
 	using hm4::multi::DualListEraseType;
 
 #ifndef USE_CONCURRENCY
@@ -62,9 +64,10 @@ namespace DBAdapterFactory{
 		using MyDBAdapter		= DBAdapter;
 
 		template<typename UStringPathData, typename... FlushListArgs>
-		MutableBase(UStringPathData &&path_data, FlushListArgs&&... args) :
+		MutableBase(UStringPathData &&path_data, DiskList::VMAllocator &slabAllocator, FlushListArgs&&... args) :
 						loader_{
-							std::forward<UStringPathData>(path_data)
+							std::forward<UStringPathData>(path_data),
+							&slabAllocator
 						},
 						muFlushList_{
 							std::forward<FlushListArgs>(args)...,

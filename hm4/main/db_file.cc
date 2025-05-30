@@ -115,7 +115,7 @@ int main(int argc, char **argv){
 		using hm4::disk::DiskList;
 
 		DiskList list;
-		if (list.open(filename) == false){
+		if (!list.open(filename, DiskList::NoVMAllocator{})){
 			printf("Database file does not exists or is incorrect.\n");
 			return 2;
 		}
@@ -129,7 +129,7 @@ int main(int argc, char **argv){
 	}else{
 		using MyListLoader = DirectoryListLoader;
 
-		MyListLoader	loader{ filename };
+		MyListLoader	loader{ filename, MyListLoader::NoSlabAllocator{} };
 
 		auto const 	&list = loader.getList();
 

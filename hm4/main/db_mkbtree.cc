@@ -46,7 +46,7 @@ int main(int argc, char **argv){
 
 	DiskList list;
 
-	if ( list.open(input_file) ){
+	if ( list.open(input_file, DiskList::NoVMAllocator{}) ){
 		fmt::print("List is invalid. Please check it and try again.\n");
 		return 3;
 	}

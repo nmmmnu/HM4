@@ -15,12 +15,20 @@ public:
 
 public:
 	template<typename UString>
-	SingleListLoader(UString &&filename, MMAPFile::Advice const advice = DiskList::DEFAULT_ADVICE, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+	SingleListLoader(UString &&filename, DiskList::VMAllocator *allocator, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
 				filename_(std::forward<UString>(filename)),
-				advice_(advice),
+				allocator_(allocator),
 				mode_(mode){
 		open_();
 	}
+
+	template<typename UString>
+	SingleListLoader(UString &&filename, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+		SingleListLoader(std::forward<UString>(filename), &allocator, mode){}
+
+	template<typename UString>
+	SingleListLoader(UString &&filename, DiskList::NoVMAllocator,          DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+		SingleListLoader(std::forward<UString>(filename), nullptr,    mode){}
 
 	void refresh(){
 		auto const inode = fileInode(filename_);
@@ -29,7 +37,7 @@ public:
 			return;
 
 		list_.close();
-		list_.open(inode, filename_, advice_, mode_);
+		list_.open(inode, filename_, allocator_, mode_);
 	}
 
 	// Command pattern
@@ -50,14 +58,14 @@ private:
 		if (inode == 0)
 			return false;
 
-		return list_.open(inode, filename_, advice_, mode_);
+		return list_.open(inode, filename_, allocator_, mode_);
 	}
 
 private:
 	DiskList		list_;
 
 	std::string		filename_;
-	MMAPFile::Advice	advice_;
+	DiskList::VMAllocator	*allocator_;
 	DiskList::OpenMode	mode_;
 };
 

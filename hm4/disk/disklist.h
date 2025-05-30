@@ -41,7 +41,8 @@ public:
 
 	using iterator = forward_iterator;
 
-	using SlabAllocator = MMAPFileSBO::SlabAllocator;
+	using VMAllocator	= MMAPFileSBO::VMAllocator;
+	using NoVMAllocator	= MMAPFileSBO::NoVMAllocator;
 
 public:
 	enum class OpenMode : char {
@@ -87,7 +88,7 @@ public:
 
 	struct OpenController{
 		MMAPFile::Advice	advice		= DEFAULT_ADVICE_;
-		SlabAllocator		*allocator	= nullptr;
+		VMAllocator		*allocator	= nullptr;
 
 		bool open(MMAPFileSBO &f, std::string_view filename, bool b = false){
 			return f.open(allocator, filename, adviceX_(b));
@@ -103,28 +104,28 @@ public:
 		}
 	};
 
-	bool open(uint64_t id, std::string_view filename,                           OpenMode mode = DEFAULT_MODE){
+	bool open(uint64_t id, std::string_view filename, VMAllocator *allocator, OpenMode mode = DEFAULT_MODE){
 		id_ = id;
 
 		auto const advice = calcAdvice__(mode);
 
-		return open_(filename, mode, OpenController{ advice });
+		return open_(filename, mode, OpenController{ advice, allocator });
 	}
 
-	bool open(uint64_t id, std::string_view filename, SlabAllocator &allocator, OpenMode mode = DEFAULT_MODE){
-		id_ = id;
-
-		auto const advice = calcAdvice__(mode);
-
-		return open_(filename, mode, OpenController{ advice, &allocator });
+	bool open(uint64_t id, std::string_view filename, NoVMAllocator,          OpenMode mode = DEFAULT_MODE){
+		return open(id, filename, nullptr,    mode);
 	}
 
-	bool open(std::string_view filename,                           OpenMode mode = DEFAULT_MODE){
-		return open(0, filename, mode);
+	bool open(uint64_t id, std::string_view filename, VMAllocator &allocator, OpenMode mode = DEFAULT_MODE){
+		return open(id, filename, &allocator, mode);
 	}
 
-	bool open(std::string_view filename, SlabAllocator &allocator, OpenMode mode = DEFAULT_MODE){
-		return open(0, filename, allocator, mode);
+	bool open(std::string_view filename, NoVMAllocator,          OpenMode mode = DEFAULT_MODE){
+		return open( 0, filename, nullptr,    mode);
+	}
+
+	bool open(std::string_view filename, VMAllocator &allocator, OpenMode mode = DEFAULT_MODE){
+		return open( 0, filename, &allocator, mode);
 	}
 
 	bool openForRepair(std::string_view filename, bool aligned){
@@ -133,7 +134,7 @@ public:
 		return openForRepair_(filename, aligned, OpenController{ advice });
 	}
 
-	bool openForRepair(std::string_view filename, bool aligned, SlabAllocator &allocator){
+	bool openForRepair(std::string_view filename, bool aligned, VMAllocator &allocator){
 		auto const advice = MMAPFile::Advice::SEQUENTIAL;
 
 		return openForRepair_(filename, aligned, OpenController{ advice, &allocator });

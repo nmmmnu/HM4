@@ -20,17 +20,19 @@ namespace DBAdapterFactory{
 
 		template<typename UStringPathData, typename UStringPathBinLog1, typename UStringPathBinLog2>
 		MutableBinLogConcurrent(
-				UStringPathData			&&path_data,
+				UStringPathData			&&path_data	,
 
-				UStringPathBinLog1		&&path_binlog1,
-				UStringPathBinLog2		&&path_binlog2,
+				DiskList::VMAllocator		&slabAllocator	,
 
-				BinLogger::SyncOptions		syncOptions,
+				UStringPathBinLog1		&&path_binlog1	,
+				UStringPathBinLog2		&&path_binlog2	,
 
-				typename MemList::Allocator	&allocator1,
-				typename MemList::Allocator	&allocator2,
+				BinLogger::SyncOptions		syncOptions	,
 
-				MyBuffer::ByteBufferView	bufferPair,
+				typename MemList::Allocator	&allocator1	,
+				typename MemList::Allocator	&allocator2	,
+
+				MyBuffer::ByteBufferView	bufferPair	,
 				MyBuffer::ByteBufferView	bufferHash
 
 			) :
@@ -54,9 +56,10 @@ namespace DBAdapterFactory{
 					},
 					base_{
 						std::forward<UStringPathData>(path_data),
-						binLogList1_,
-						binLogList2_,
-						bufferPair,
+						slabAllocator	,
+						binLogList1_	,
+						binLogList2_	,
+						bufferPair	,
 						bufferHash
 					}{}
 

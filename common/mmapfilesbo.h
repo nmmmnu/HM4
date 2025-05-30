@@ -10,21 +10,22 @@
 struct MMAPFileSBO{
 	constexpr static size_t SmallSize = 2048;
 
-	using SlabAllocator = MyAllocator::SlabAllocator<SmallSize>;
+	using VMAllocator = MyAllocator::SlabAllocator<SmallSize>;
+	struct NoVMAllocator{};
 
-	bool open(SlabAllocator &allocator, std::string_view filename, MMAPFile::Advice advice = MMAPFile::Advice::NORMAL);
+	bool open(VMAllocator &allocator, std::string_view filename, MMAPFile::Advice advice = MMAPFile::Advice::NORMAL);
 
-	bool openNoAllocator(std::string_view filename, MMAPFile::Advice advice = MMAPFile::Advice::NORMAL){
+	bool open(NoVMAllocator,          std::string_view filename, MMAPFile::Advice advice = MMAPFile::Advice::NORMAL){
 		impl_.emplace<MMAPFile>();
 
 		return std::get<MMAPFile>(impl_).open(filename, advice);
 	}
 
-	bool open(SlabAllocator *allocator, std::string_view filename, MMAPFile::Advice advice = MMAPFile::Advice::NORMAL){
+	bool open(VMAllocator *allocator, std::string_view filename, MMAPFile::Advice advice = MMAPFile::Advice::NORMAL){
 		if (allocator)
-			return open(*allocator, filename, advice);
+			return open(*allocator,      filename, advice);
 		else
-			return openNoAllocator(filename, advice);
+			return open(NoVMAllocator{}, filename, advice);
 	}
 
 	void close(){
@@ -75,9 +76,7 @@ private:
 	};
 
 	struct SBOFile{
-		using Allocator = SlabAllocator;
-
-		SBOFile(char *data, size_t size, Allocator &allocator) :
+		SBOFile(char *data, size_t size, VMAllocator &allocator) :
 						data_		(data		),
 						size_		(size		),
 						allocator_	(& allocator	){}
@@ -127,7 +126,7 @@ private:
 	private:
 		char		*data_		= nullptr;
 		size_t		size_		= 0;
-		Allocator	*allocator_	= nullptr;
+		VMAllocator	*allocator_	= nullptr;
 	};
 
 	using Implementation = std::variant<

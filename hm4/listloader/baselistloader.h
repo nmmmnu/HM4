@@ -12,6 +12,7 @@
 
 namespace hm4{
 namespace listloader{
+
 	namespace impl_{
 
 		struct ContainerHelper{
@@ -19,8 +20,9 @@ namespace listloader{
 			using Container		= std::vector<DiskList>;
 			using CollectionList	= hm4::multi::CollectionList<Container>;
 
-			ContainerHelper(DiskList::OpenMode const mode) :
-							mode_(mode){}
+			ContainerHelper(DiskList::VMAllocator *allocator, DiskList::OpenMode const mode) :
+							allocator_	(allocator	),
+							mode_		(mode		){}
 
 			const auto &getList() const{
 				return list_;
@@ -57,7 +59,8 @@ namespace listloader{
 					}else{
 						// not found, add new
 						neo.emplace_back();
-						neo.back().open(id, filename, mode_);
+
+						neo.back().open(id, filename, allocator_, mode_);
 					}
 				}
 
@@ -69,6 +72,7 @@ namespace listloader{
 
 			CollectionList		list_{ container_ };
 
+			DiskList::VMAllocator	*allocator_;
 			DiskList::OpenMode	mode_;
 		};
 

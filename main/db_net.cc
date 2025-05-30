@@ -124,6 +124,13 @@ constexpr size_t MIN_HASH_ARENA_SIZE	= 8;
 #include "binlogreplay.h"
 #include <optional>
 
+// ----------------------------------
+
+//#include "staticbuffer.h"
+
+// not to have 128K on the stack
+// MyBuffer::StaticMemoryResource<64 * 2048> g_vmBuffer;
+
 namespace{
 
 	template<typename T, T factor = 1024>
@@ -149,27 +156,38 @@ namespace{
 		return main2(opt, std::move(adapter_factory));
 	}
 
-	int select_ImmutableLists(const MyOptions &opt){
+	int select_ImmutableLists(MyOptions const &opt){
 		using hm4::listloader::DirectoryListLoader;
 
 		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path)){
-			return fLists(opt, DBAdapterFactory::Immutable{ opt.db_path },
+			MyBuffer::MMapMemoryResource vmBuffer{ opt.vm_arena * 2048 };
+
+			hm4::disk::DiskList::VMAllocator vmAllocator{ vmBuffer };
+
+			return fLists(opt, DBAdapterFactory::Immutable { opt.db_path, vmAllocator },
 					"Starting {} server...", "immutable"
 			);
 		}else{
-			return fLists(opt, DBAdapterFactory::SingleList{ opt.db_path },
+			// Because is single table, only 6 possible files.
+			// It will not affect VM much.
+
+			// MyBuffer::StaticMemoryResource<6 * 2048> vmBuffer;
+			//
+			// hm4::disk::DiskList::VMAllocator vmAllocator{ vmBuffer };
+
+			return fLists(opt, DBAdapterFactory::SingleList{ opt.db_path, hm4::disk::DiskList::NoVMAllocator{} },
 					"Starting {} server...", "singlelist"
 			);
 		}
 	}
 
-	size_t calcAllocatorSize(const MyOptions &opt){
+	size_t calcAllocatorSize(MyOptions const &opt){
 		constexpr size_t MB = 1024 * 1024;
 
 		return std::max(MIN_ARENA_SIZE, opt.max_memlist_arena) * MB;
 	}
 
-	size_t calcArenaHashSize(const MyOptions &opt){
+	size_t calcArenaHashSize(MyOptions const &opt){
 		constexpr size_t MB = 1024 * 1024;
 
 		auto const size = opt.hash_arena < MIN_HASH_ARENA_SIZE ? 0 : opt.hash_arena;
@@ -177,7 +195,7 @@ namespace{
 		return size * MB;
 	}
 
-	Allocator createAllocator(const MyOptions &opt, MyBuffer::MMapMemoryResource &buffer){
+	Allocator createAllocator(MyOptions const &opt, MyBuffer::MMapMemoryResource &buffer){
 		// uncomment for virtual Allocator
 		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
@@ -209,7 +227,10 @@ namespace{
 		return replayBinlogFile(file, path, allocator, bufferPair);
 	}
 
-	int select_MutableLists(const MyOptions &opt){
+	int select_MutableLists(MyOptions const &opt){
+		MyBuffer::MMapMemoryResource vmBuffer{ opt.vm_arena * 2048 };
+
+		hm4::disk::DiskList::VMAllocator vmAllocator{ vmBuffer };
 
 		constexpr std::string_view starting_server_with = "Starting {} server with {} and {}...";
 
@@ -246,20 +267,43 @@ namespace{
 
 				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, opt.binlog_path2, syncOptions, allocator1, allocator2, bufferPair, bufferHash },
-								starting_server_with,
-									"mutable concurrent binlog",
-									MyMemList::getName(),
-									Allocator::getName()
+				return fLists(	opt,
+						MyFactory{
+							opt.db_path		,
+							vmAllocator		,
+
+							opt.binlog_path1	,
+							opt.binlog_path2	,
+
+							syncOptions		,
+
+							allocator1		,
+							allocator2		,
+
+							bufferPair		,
+							bufferHash
+						},
+						starting_server_with,
+							"mutable concurrent binlog",
+							MyMemList::getName(),
+							Allocator::getName()
 				);
 			}else{
 				using MyFactory = DBAdapterFactory::MutableConcurrent<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, allocator1, allocator2, bufferPair, bufferHash },
-								starting_server_with,
-									"mutable concurrent",
-									MyMemList::getName(),
-									Allocator::getName()
+				return fLists(	opt,
+						MyFactory{
+							opt.db_path		,
+							vmAllocator		,
+							allocator1		,
+							allocator2		,
+							bufferPair		,
+							bufferHash
+						},
+						starting_server_with,
+							"mutable concurrent",
+							MyMemList::getName(),
+							Allocator::getName()
 				);
 			}
 
@@ -285,31 +329,47 @@ namespace{
 
 				using MyFactory = DBAdapterFactory::MutableBinLog<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, opt.binlog_path1, syncOptions, allocator, bufferPair, bufferHash },
-								starting_server_with,
-									"mutable binlog",
-									MyMemList::getName(),
-									Allocator::getName()
+				return fLists(	opt,
+						MyFactory{
+							opt.db_path		,
+							vmAllocator		,
+							opt.binlog_path1	,
+							syncOptions		,
+							allocator		,
+							bufferPair		,
+							bufferHash
+						},
+						starting_server_with,
+							"mutable binlog",
+							MyMemList::getName(),
+							Allocator::getName()
 				);
 			}else{
 				using MyFactory = DBAdapterFactory::Mutable<ET, MyMemList>;
 
-				return fLists(opt, MyFactory{	opt.db_path, allocator, bufferPair, bufferHash },
-								starting_server_with,
-									"mutable",
-									MyMemList::getName(),
-									Allocator::getName()
+				return fLists(	opt,
+						MyFactory{
+							opt.db_path		,
+							vmAllocator		,
+							allocator		,
+							bufferPair		,
+							bufferHash
+						},
+						starting_server_with,
+							"mutable",
+							MyMemList::getName(),
+							Allocator::getName()
 				);
 			}
 
 		#endif
 	}
 
-	int select_List(const MyOptions &opt){
+	int select_List(MyOptions const &opt){
 		if (opt.immutable)
 			return select_ImmutableLists(opt);
 		else
-			return select_MutableLists(opt);
+			return select_MutableLists  (opt);
 	}
 
 } // anonymous namespace

@@ -13,15 +13,25 @@ public:
 	using DiskList	= hm4::disk::DiskList;
 	using List 	= const impl_::ContainerHelper::CollectionList;
 
+	using NoSlabAllocator = DiskList::NoVMAllocator;
+
 public:
 	template<typename UString>
-	DirectoryListLoader(UString &&path, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				container_(mode),
+	DirectoryListLoader(UString &&path, DiskList::VMAllocator *allocator, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				container_(allocator, mode),
 				path_(std::forward<UString>(path)){
 
 		// guard against missing '*'
 		checkAndRefresh_();
 	}
+
+	template<typename UString>
+	DirectoryListLoader(UString &&path, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				DirectoryListLoader(std::forward<UString>(path), &allocator, mode){}
+
+	template<typename UString>
+	DirectoryListLoader(UString &&path, DiskList::NoVMAllocator,          DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				DirectoryListLoader(std::forward<UString>(path), nullptr,     mode){}
 
 	void refresh();
 

@@ -67,7 +67,7 @@ namespace{
 using hm4::disk::DiskList;
 
 struct MergeListFactory_1{
-	MergeListFactory_1(const char *filename, DiskList::SlabAllocator &allocator, DiskList::OpenMode const mode){
+	MergeListFactory_1(const char *filename, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode){
 		table_.open(filename, allocator, mode);
 	}
 
@@ -82,7 +82,7 @@ private:
 
 
 struct MergeListFactory_2{
-	MergeListFactory_2(const char *filename1, const char *filename2, DiskList::SlabAllocator &allocator, DiskList::OpenMode const mode){
+	MergeListFactory_2(const char *filename1, const char *filename2, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode){
 		table1_.open(filename1, allocator, mode);
 		table2_.open(filename2, allocator, mode);
 	}
@@ -103,8 +103,8 @@ private:
 
 template<class IT>
 struct MergeListFactory_N{
-	MergeListFactory_N(IT first, IT last, DiskList::SlabAllocator &, DiskList::OpenMode const mode) :
-					loader_(first, last, mode){}
+	MergeListFactory_N(IT first, IT last, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode) :
+					loader_(first, last, allocator, mode){}
 
 	const auto &operator()() const{
 		return loader_.getList();
@@ -148,7 +148,7 @@ int main(int argc, char **argv){
 	int const table_count	= argc - 4;
 	const char **path	= (const char **) &argv[4];
 
-	DiskList::SlabAllocator allocator{ g_slabBuffer };
+	DiskList::VMAllocator allocator{ g_slabBuffer };
 
 	switch(table_count){
 	case 1:

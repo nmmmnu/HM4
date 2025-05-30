@@ -4,6 +4,8 @@
 
 namespace DBAdapterFactory{
 
+	using hm4::disk::DiskList;
+
 	struct Immutable{
 		using ListLoader		= hm4::listloader::DirectoryListLoader;
 
@@ -21,9 +23,10 @@ namespace DBAdapterFactory{
 		using MyDBAdapter		= DBAdapter;
 
 		template<typename UStringPathData>
-		Immutable(UStringPathData &&path_data) :
+		Immutable(UStringPathData &&path_data, DiskList::VMAllocator &allocator) :
 						loader_{
-							std::forward<UStringPathData>(path_data)
+							std::forward<UStringPathData>(path_data),
+							&allocator
 						},
 						adapter_{
 							loader_.getList(),

@@ -133,7 +133,7 @@ namespace{
 					forbidden_.expand(range);
 					forbidden_.expand(current_);
 					current_ = {};
-					payload_ = {};
+					payload_ = "";
 
 					return;
 				}
@@ -154,7 +154,7 @@ namespace{
 		private:
 			EndlessRange	forbidden_;
 			Range		current_;
-			Payload		payload_{};
+			Payload		payload_ = "";
 		};
 
 	} // namespace tombstone_calculator_
@@ -164,11 +164,10 @@ namespace{
 	auto getInfo(std::string_view filename){
 		using hm4::disk::DiskList;
 
-		constexpr auto DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
 		constexpr auto DEFAULT_MODE	= DiskList::OpenMode::FORWARD;
 
 		hm4::disk::DiskList list;
-		list.open(filename, DEFAULT_ADVICE, DEFAULT_MODE);
+		list.open(filename, DiskList::NoVMAllocator{}, DEFAULT_MODE);
 
 		struct ListInfo{
 			uint64_t time_min;

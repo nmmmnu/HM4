@@ -46,6 +46,8 @@ public:
 
 	size_t		hash_arena			= 0;
 
+	size_t		vm_arena			= 32;
+
 	uint32_t	crontab_reload			= 90;
 	uint32_t	crontab_table_maintainance	= 90;
 	uint32_t	crontab_server_info		= 90;
@@ -83,6 +85,8 @@ public:
 		case hash("map_memlist_arena"		)	: return assign_(map_memlist_arena,		value);
 
 		case hash("hash_arena"			)	: return assign_(hash_arena,			value);
+
+		case hash("vm_arena"			)	: return assign_(vm_arena,			value);
 
 		case hash("crontab_reload"		)	: return assign_(crontab_reload,		value);
 		case hash("crontab_table_maintainance"	)	: return assign_(crontab_table_maintainance,	value);
@@ -126,6 +130,8 @@ public:
 		put("map_memlist_arena",		map_memlist_arena,		"Map all virtual memory pages used from AllocatorArena (Linux)"			);
 
 		put("hash_arena",			hash_arena,			"HashIndex buffer size, 0 = disabled"						);
+
+		put("vm_arena",				vm_arena,			"Max cache chunks of 2048 bytes each, used to speedup DiskList access"		);
 
 		put("crontab_reload",			crontab_reload,			"crontab - reload every XX seconds, 0 disabled, min 15 sec"			);
 		put("crontab_table_maintainance",	crontab_table_maintainance,	"crontab - table maintainance every XX seconds, 0 disabled, min 15 sec"		);

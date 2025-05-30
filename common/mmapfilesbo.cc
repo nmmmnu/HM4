@@ -7,7 +7,7 @@
 #include <fcntl.h>	// open
 #include <unistd.h>	// close, lseek
 
-bool MMAPFileSBO::open(SlabAllocator &allocator, std::string_view const filename, MMAPFile::Advice advice){
+bool MMAPFileSBO::open(VMAllocator &allocator, std::string_view const filename, MMAPFile::Advice advice){
 	close();
 
 	// -------------------------

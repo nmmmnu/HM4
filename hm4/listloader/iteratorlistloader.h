@@ -14,11 +14,17 @@ public:
 	using List 	= const impl_::ContainerHelper::CollectionList;
 
 public:
-	IteratorListLoader(IT first, IT last, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
-				container_(mode){
+	IteratorListLoader(IT first, IT last, DiskList::VMAllocator *allocator, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				container_(allocator, mode){
 
 		container_.copy(first, last);
 	}
+
+	IteratorListLoader(IT first, IT last, DiskList::VMAllocator &allocator, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				IteratorListLoader(first, last, &allocator, mode){}
+
+	IteratorListLoader(IT first, IT last, DiskList::NoVMAllocator,          DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :
+				IteratorListLoader(first, last, nullptr   , mode){}
 
 	// reload not supported
 	// Command pattern not supported

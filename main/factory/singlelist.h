@@ -3,6 +3,8 @@
 
 namespace DBAdapterFactory{
 
+	using hm4::disk::DiskList;
+
 	struct SingleList{
 		using ListLoader		= hm4::listloader::SingleListLoader;
 
@@ -19,9 +21,22 @@ namespace DBAdapterFactory{
 		using MyDBAdapter		= DBAdapter;
 
 		template<typename UStringPathData>
-		SingleList(UStringPathData &&path_data) :
+		SingleList(UStringPathData &&path_data, DiskList::VMAllocator &allocator) :
 						loader_{
-							std::forward<UStringPathData>(path_data)
+							std::forward<UStringPathData>(path_data),
+							&allocator
+						},
+						adapter_{
+							loader_.getList(),
+							/* cmd Save   */ loader_,
+							/* cmd Reload */ loader_
+						}{}
+
+		template<typename UStringPathData>
+		SingleList(UStringPathData &&path_data, DiskList::NoVMAllocator) :
+						loader_{
+							std::forward<UStringPathData>(path_data),
+							nullptr
 						},
 						adapter_{
 							loader_.getList(),

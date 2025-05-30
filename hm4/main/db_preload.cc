@@ -44,7 +44,7 @@ int main(int argc, char **argv){
 	const char *filename	= argv[1];
 
 	DiskList list;
-	if (list.open(filename) == false){
+	if (!list.open(filename, DiskList::NoVMAllocator{})){
 		printf("Database file does not exists or is incorrect.\n");
 		return 2;
 	}
