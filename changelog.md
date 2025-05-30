@@ -321,4 +321,5 @@ Changelog
 -	Refactor buffers and memory resources
 -	Add hash indexes
 -	Free 8 bit memory per AVLList node by moving balance into the up pointer
+-	Add SBO (small buffer optimization) for disktables smaller than 2KB to avoid unnecessary VM preasure
 
