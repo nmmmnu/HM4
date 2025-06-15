@@ -86,7 +86,7 @@ namespace net::worker::commands::LinearCurve{
 				container.emplace_back(pkey);
 			};
 
-			for(auto it = db->find(prefix, std::false_type{}); it != db->end(); ++it){
+			for(auto it = db->find(prefix); it != db->end(); ++it){
 				auto const &key = it->getKey();
 
 				if (!same_prefix(prefix, key))
@@ -152,7 +152,7 @@ namespace net::worker::commands::LinearCurve{
 				container.emplace_back(pkey);
 			};
 
-			for(auto it = db->find(key_min, std::false_type{}); it != db->end(); ++it){
+			for(auto it = db->find(key_min); it != db->end(); ++it){
 				auto const &key = it->getKey();
 
 				if (stop(key))

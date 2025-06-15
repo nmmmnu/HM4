@@ -353,17 +353,17 @@ auto insertHintV(List &list, const Pair *pair, Args &&...args){
 // ==============================
 
 template<bool CheckOK = true, typename List, typename Predicate>
-auto getPair_(List const &list, std::string_view key, Predicate p){
-	auto it = list.find(key, std::true_type{});
+auto getPair_(List const &list, std::string_view key, Predicate pred){
+	const auto *p = list.findExact(key);
 
 	if constexpr(CheckOK){
-		bool const b = it != std::end(list) && it->isOK();
+		bool const b = p && p->isOK();
 
-		return p(b, it);
+		return pred(b, p);
 	}else{
-		bool const b = it != std::end(list);
+		bool const b = p;
 
-		return p(b, it);
+		return pred(b, p);
 	}
 }
 
@@ -414,7 +414,7 @@ auto getPairPtrNC(List const &list, std::string_view key){
 
 template<typename List, typename Predicate>
 auto getPairByPrefix_(List const &list, std::string_view key, Predicate p){
-	auto it = list.find(key, std::false_type{});
+	auto it = list.find(key);
 
 	bool const b = it != std::end(list) && it->isOK() && same_prefix(key, it->getKey());
 

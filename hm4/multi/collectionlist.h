@@ -58,21 +58,18 @@ public:
 		auto first = std::begin(*list_);
 		auto last  = std::end(*list_);
 
-		// this is std::min_element, but it uses projection,
-		// so it can not use the algorithm,
-		// from the other side, result needed is the projection,
-		// so it can not be written as a template...
+		// this is simillar to std::min_element...
 
 		if (first == last){
 			// not found. done.
 			return nullptr;
 		}
 
-		const Pair *min = nullptr;
+		const Pair *smallest = nullptr;
 
 		for(; first != last; ++first){
-			if (!min){
-				min = first->findExact(key);
+			if (!smallest){
+				smallest = first->findExact(key);
 				continue;
 			}
 
@@ -81,10 +78,10 @@ public:
 			if (!p)
 				continue;
 
-			min = min->cmpTime(*p) > 0 ? min : p;
+			smallest = smallest->cmpTime(*p) > 0 ? smallest : p;
 		}
 
-		return min;
+		return smallest;
 	}
 
 public:

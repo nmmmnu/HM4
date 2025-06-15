@@ -27,7 +27,7 @@ namespace net::worker::commands::MutableX{
 
 				uint32_t iterations = 0;
 
-				for(auto it = list.find(key, std::false_type{}); it != std::end(list); ++it){
+				for(auto it = list.find(key); it != std::end(list); ++it){
 					auto const key = it->getKey();
 
 					if (stop(key))
@@ -61,7 +61,7 @@ namespace net::worker::commands::MutableX{
 			void scanForLastKey_(StopPredicate stop, List &list, std::string_view key, Result &result){
 				uint32_t iterations = 0;
 
-				for(auto it = list.find(key, std::false_type{}); it != std::end(list); ++it){
+				for(auto it = list.find(key); it != std::end(list); ++it){
 					auto const key = it->getKey();
 
 					if (stop(key))

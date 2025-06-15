@@ -100,10 +100,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
-				count					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -148,10 +148,10 @@ namespace net::worker::commands::ImmutableX{
 			std::array<std::string_view, 2> container;
 
 			accumulateResultsNext(
-				key					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				key		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -196,10 +196,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
-				count					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -243,10 +243,10 @@ namespace net::worker::commands::ImmutableX{
 			std::array<std::string_view, 2> container;
 
 			accumulateResultsNext(
-				key					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				key		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -287,10 +287,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
-				count					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -330,10 +330,10 @@ namespace net::worker::commands::ImmutableX{
 			std::array<std::string_view, 2> container;
 
 			accumulateResultsNext(
-				key					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				key		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -378,10 +378,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
-				count					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -426,10 +426,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
-				count					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -470,10 +470,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
-				count					,
-				stop					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
 				container
 			);
 
@@ -520,10 +520,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsH<AccumulateOutput::BOTH>(
-				ITERATIONS_RESULTS_MAX			,
-				key					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				ITERATIONS_RESULTS_MAX	,
+				key			,
+				db->find(key)		,
+				std::end(*db)		,
 				container
 			);
 
@@ -570,10 +570,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsH<AccumulateOutput::KEYS>(
-				ITERATIONS_RESULTS_MAX			,
-				key					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				ITERATIONS_RESULTS_MAX	,
+				key			,
+				db->find(key)		,
+				std::end(*db)		,
 				container
 			);
 
@@ -620,10 +620,10 @@ namespace net::worker::commands::ImmutableX{
 			auto &container = blob.container();
 
 			accumulateResultsH<AccumulateOutput::VALS>(
-				ITERATIONS_RESULTS_MAX			,
-				key					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
+				ITERATIONS_RESULTS_MAX	,
+				key			,
+				db->find(key)		,
+				std::end(*db)		,
 				container
 			);
 
@@ -667,8 +667,8 @@ namespace net::worker::commands::ImmutableX{
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
 			auto const n = countResultsH(
-				key					,
-				db->find(key, std::false_type{})	,
+				key		,
+				db->find(key)	,
 				std::end(*db)
 			);
 

@@ -69,9 +69,9 @@ namespace net::worker::commands::Accumulators{
 				StopPredicate stop{ prefix };
 
 				auto const [ data, lastKey ] = accumulateResults<Accumulator>(
-								count					,
-								stop					,
-								list.find(key, std::false_type{})	,
+								count		,
+								stop		,
+								list.find(key)	,
 								std::end(list)
 				);
 

@@ -348,7 +348,7 @@ namespace net::worker::commands::Geo{
 				logger<Logger::DEBUG>() << "GeoHash searching cell" << hash << "prefix" << prefix;
 
 				// send query to DB
-				for(auto it = db->find(prefix, std::false_type{}); it != std::end(*db); ++it){
+				for(auto it = db->find(prefix); it != std::end(*db); ++it){
 					if (auto const &k = it->getKey(); ! same_prefix(prefix, k))
 						break;
 

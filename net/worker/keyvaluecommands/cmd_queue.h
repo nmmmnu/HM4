@@ -95,7 +95,7 @@ namespace net::worker::commands::Queue{
 			hm4::PairBufferKey bufferKey;
 			auto const keyControl = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
-			auto it = db->find(keyControl, std::false_type{});
+			auto it = db->find(keyControl);
 
 			if (it == std::end(*db)){
 				// case 1. it == end, no any data
@@ -120,9 +120,9 @@ namespace net::worker::commands::Queue{
 						logger<Logger::DEBUG>() << "SPOP: next key" << keyNext;
 
 						return collect_(
-							keyControl,
-							db->find(keyNext, std::false_type{}),
-							std::end(*db),
+							keyControl		,
+							db->find(keyNext)	,
+							std::end(*db)		,
 							*db,
 							result
 						);

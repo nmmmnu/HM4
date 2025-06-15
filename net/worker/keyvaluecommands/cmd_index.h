@@ -555,11 +555,11 @@ namespace net::worker::commands::Index{
 			auto &container = blob.container();
 
 			accumulateResultsIX_<N, AccumulateOutput::BOTH_WITH_TAIL>(
-				count					,
-				prefix					,
-				db->find(key, std::false_type{})	,
-				std::end(*db)				,
-				DBAdapter::SEPARATOR[0]			,
+				count			,
+				prefix			,
+				db->find(key)		,
+				std::end(*db)		,
+				DBAdapter::SEPARATOR[0]	,
 				container
 			);
 
