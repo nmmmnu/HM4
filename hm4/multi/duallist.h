@@ -86,9 +86,18 @@ public:
 		return { *list1_, *list2_, std::false_type{} };
 	}
 
-	template <bool B>
-	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
-		return { *list1_, *list2_, key, exact };
+	iterator find(std::string_view const key) const{
+		return { *list1_, *list2_, key };
+	}
+
+	const Pair *findExact(std::string_view const key) const{
+		const auto *p1 = list1_->findExact(key);
+		const auto *p2 = list2_->findExact(key);
+
+		if (!p1) return p2;
+		if (!p2) return p1;
+
+		return p1->cmpTime(*p2) > 0 ? p1 : p2;
 	}
 
 protected:

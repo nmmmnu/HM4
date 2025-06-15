@@ -307,7 +307,7 @@ auto UnrolledLinkList<T_Allocator>::locate_(HPairHKey const hkey, std::string_vi
 
 template<class T_Allocator>
 template<bool ExactMatch>
-auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
+auto UnrolledLinkList<T_Allocator>::find_(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
 	assert(!key.empty());
 
 	auto const hkey = HPair::SS::create(key);
@@ -343,6 +343,19 @@ auto UnrolledLinkList<T_Allocator>::find(std::string_view const key, std::bool_c
 		return fix_iterator_(node, it);
 }
 
+template<class T_Allocator>
+auto UnrolledLinkList<T_Allocator>::find(std::string_view const key) const -> iterator{
+	return find_(key, std::false_type{});
+}
+
+template<class T_Allocator>
+const Pair *UnrolledLinkList<T_Allocator>::findExact(std::string_view const key) const{
+	auto it = find_(key, std::true_type{});
+
+	return it == end() ? nullptr : & *it;
+}
+
+
 // ==============================
 
 template<class T_Allocator>
@@ -372,16 +385,6 @@ template class UnrolledLinkList<MyAllocator::PMAllocator>;
 template class UnrolledLinkList<MyAllocator::STDAllocator>;
 template class UnrolledLinkList<MyAllocator::ArenaAllocator>;
 template class UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>;
-
-template auto UnrolledLinkList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto UnrolledLinkList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
-
-template auto UnrolledLinkList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto UnrolledLinkList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto UnrolledLinkList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto UnrolledLinkList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
 template auto UnrolledLinkList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto UnrolledLinkList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;

@@ -76,3 +76,7 @@ Changelog
 ### 1.3.9
 -	bugfix on potential issue with MMAP buffer.
 
+### 1.3.10
+-	Fix bug in AVLList deallocation (part of tests, not affecting  db_net)
+
+

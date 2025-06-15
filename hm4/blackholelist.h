@@ -69,9 +69,13 @@ public:
 	}
 
 public:
-	template<bool B>
 	constexpr static
-	iterator find(std::string_view, std::bool_constant<B>){
+	iterator find(std::string_view){
+		return nullptr;
+	}
+
+	constexpr static
+	const Pair *findExact(std::string_view){
 		return nullptr;
 	}
 

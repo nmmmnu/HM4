@@ -60,6 +60,7 @@ public:
 		// printf("Here...\n");
 	}
 
+#if 0
 	template<class StoreIterator>
 	CollectionIterator(
 			StoreIterator first, StoreIterator last,
@@ -98,6 +99,7 @@ public:
 			itp_.push_back(std::move(min_element));
 		}
 	}
+#endif
 
 public:
 	reference operator*() const{

@@ -50,9 +50,41 @@ public:
 		return { std::begin(*list_), std::end(*list_), std::false_type{} };
 	}
 
-	template<bool B>
-	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
-		return { std::begin(*list_), std::end(*list_), key, exact };
+	iterator find(std::string_view const key) const{
+		return { std::begin(*list_), std::end(*list_), key };
+	}
+
+	const Pair *findExact(std::string_view const key) const{
+		auto first = std::begin(*list_);
+		auto last  = std::end(*list_);
+
+		// this is std::min_element, but it uses projection,
+		// so it can not use the algorithm,
+		// from the other side, result needed is the projection,
+		// so it can not be written as a template...
+
+		if (first == last){
+			// not found. done.
+			return nullptr;
+		}
+
+		const Pair *min = nullptr;
+
+		for(; first != last; ++first){
+			if (!min){
+				min = first->findExact(key);
+				continue;
+			}
+
+			const auto *p = first->findExact(key);
+
+			if (!p)
+				continue;
+
+			min = min->cmpTime(*p) > 0 ? min : p;
+		}
+
+		return min;
 	}
 
 public:

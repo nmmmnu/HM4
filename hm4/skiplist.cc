@@ -422,7 +422,7 @@ auto SkipList<T_Allocator>::locate_(std::string_view const key) -> NodeLocator{
 
 template<class T_Allocator>
 template<bool ExactMatch>
-auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
+auto SkipList<T_Allocator>::find_(std::string_view const key) const -> const Node *{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in SkipList::locateNode_" };
@@ -460,6 +460,19 @@ auto SkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<
 		return node;
 }
 
+template<class T_Allocator>
+auto SkipList<T_Allocator>::find(std::string_view const key) const -> iterator{
+	return find_<0>(key);
+}
+
+template<class T_Allocator>
+const Pair *SkipList<T_Allocator>::findExact(std::string_view const key) const{
+	if (const Node *node = find_<1>(key); node)
+		return node->data;
+	else
+		return nullptr;
+}
+
 
 // ==============================
 
@@ -484,16 +497,6 @@ template class SkipList<MyAllocator::PMAllocator>;
 template class SkipList<MyAllocator::STDAllocator>;
 template class SkipList<MyAllocator::ArenaAllocator>;
 template class SkipList<MyAllocator::SimulatedArenaAllocator>;
-
-template auto SkipList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
-
-template auto SkipList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto SkipList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto SkipList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto SkipList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
 template auto SkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto SkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;

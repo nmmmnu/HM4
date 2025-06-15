@@ -67,8 +67,8 @@ public:
 	}
 
 public:
-	template<bool B>
-	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
+	iterator    find     (std::string_view const key) const;
+	const Pair *findExact(std::string_view const key) const;
 
 	iterator begin() const;
 	static constexpr iterator end();
@@ -81,6 +81,10 @@ private:
 	ListCounter	lc_;
 
 	Allocator	*allocator_;
+
+private:
+	template<bool B>
+	iterator find_(std::string_view const key, std::bool_constant<B> exact) const;
 
 private:
 	void deallocate_(Node *node);

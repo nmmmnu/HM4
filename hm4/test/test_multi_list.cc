@@ -58,17 +58,35 @@ bool iteratorDereference(Iterator const &it, Iterator const &et, const char *val
 	;
 }
 
-template <class List, bool B>
-bool getCheck(List const &list, const char *key, const char *value, std::bool_constant<B> const exact){
-	auto const it = list.find(key, exact);
-	auto const et = list.end();
+template <bool Exact, class List>
+bool getCheck(List const &list, const char *key, const char *value){
+	if constexpr(Exact){
+		const auto *p = list.findExact(key);
 
-	return iteratorDereference(it, et, value);
+		if (value)
+			return p && p->getVal() == value;
+
+		if (!p)
+			return true;
+
+		return ! p->isOK();
+	}else{
+		auto const it = list.find(key);
+		auto const et = list.end();
+
+		if (value)
+			return iteratorDereference(it, et, value);
+
+		if (it == et)
+			return true;
+
+		return ! it->isOK();
+	}
 }
 
 template <class List>
 bool getCheck(List const &list, const char *key){
-	auto const it = list.find(key, std::true_type{});
+	auto const it = list.find(key);
 	auto const et = list.end();
 
 	return
@@ -81,20 +99,17 @@ bool getCheck(List const &list, const char *key){
 
 template <class List>
 void iterator_test_get(const List &list){
-	constexpr std::false_type	N{};
-	constexpr std::true_type	Y{};
-
-	mytest("it", 			getCheck(list, "1",		"Niki",		N	));
-	mytest("it", 			getCheck(list, "1 name",	"Niki",		Y	));
-	mytest("it", 			getCheck(list, "2",		"22",		N	));
-	mytest("it", 			getCheck(list, "2 age",		"22",		Y	));
-	mytest("it", 			getCheck(list, "3",		"Sofia",	N	));
-	mytest("it", 			getCheck(list, "3 city",	"Sofia",	Y	));
-	mytest("it", 			getCheck(list, "4",		"Linux",	N	));
-	mytest("it", 			getCheck(list, "4 os",		"Linux",	Y	));
-	mytest("it", 			getCheck(list, "4 osX"					));
-	mytest("it", 			getCheck(list, "5"					));
-	mytest("it", 			getCheck(list, "6"					));
+	mytest("it", 			getCheck<0>(list, "1",		"Niki"		));
+	mytest("it", 			getCheck<1>(list, "1 name",	"Niki"		));
+	mytest("it", 			getCheck<0>(list, "2",		"22"		));
+	mytest("it", 			getCheck<1>(list, "2 age",	"22"		));
+	mytest("it", 			getCheck<0>(list, "3",		"Sofia"		));
+	mytest("it", 			getCheck<1>(list, "3 city",	"Sofia"		));
+	mytest("it", 			getCheck<0>(list, "4",		"Linux"		));
+	mytest("it", 			getCheck<1>(list, "4 os",	"Linux"		));
+	mytest("it", 			getCheck   (list, "4 osX"			));
+	mytest("it", 			getCheck   (list, "5"				));
+	mytest("it", 			getCheck   (list, "6"				));
 
 	// this is no longer supported
 	//mytest("it", 			getCheck(list, "",		"Niki",		std::false_type{}	));
@@ -137,8 +152,8 @@ void list_test(const List &list, typename List::size_type const count, size_t co
 
 	// GET
 
-	mytest("get",			getCheck(list, "3 city",	"Sofia", std::true_type{}	));
-	mytest("get non existent",	getCheck(list, "nonexistent"					));
+	mytest("get",			getCheck<1>(list, "3 city",	"Sofia"		));
+	mytest("get non existent",	getCheck(list, "nonexistent"			));
 
 	//std::cout << list.bytes() << ' ' << bytes << '\n';
 
@@ -183,11 +198,11 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 
 		MyMultiList listM{ list1, list2 };
 
-		mytest("get erased N1",			getCheck(listM, "a",		"1", std::true_type{}	));
+		mytest("get erased N1",			getCheck<1>(listM, "a",		"1"	));
 
 		erase(listM, "a");
 
-		mytest("get erased N2",			getCheck(listM, "a",		"2", std::true_type{}	));
+		mytest("get erased N2",			getCheck<1>(listM, "a",		"2"	));
 	}
 
 	// --------
@@ -204,11 +219,11 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 
 		MyMultiList listM{ list1, list2 };
 
-		mytest("get erased T1",			getCheck(listM, "a",		"1", std::true_type{}	));
+		mytest("get erased T1",			getCheck<1>(listM, "a",		"1"	));
 
 		erase(listM, "a");
 
-		mytest("get erased T2",			getCheck(listM, "a"					));
+		mytest("get erased T2",			getCheck   (listM, "a"			));
 	}
 
 	// --------
@@ -225,11 +240,11 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 
 		MyMultiList listM{ list1, list2 };
 
-		mytest("get erased T1",			getCheck(listM, "a",		"1", std::true_type{}	));
+		mytest("get erased T1",			getCheck<1>(listM, "a",		"1"	));
 
 		erase(listM, "a");
 
-		mytest("get erased T2",			getCheck(listM, "a"					));
+		mytest("get erased T2",			getCheck   (listM, "a"			));
 	}
 
 	// --------

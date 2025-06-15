@@ -75,35 +75,47 @@ bool iteratorDereference(Iterator const &it, Iterator const &et, const char *val
 	;
 }
 
-template <class List, bool B>
-bool getCheck(List const &list, const char *key, const char *value, std::bool_constant<B> const exact){
-	auto const it = list.find(key, exact);
-	auto const et = list.end();
+template <bool Exact, class List>
+bool getCheck(List const &list, const char *key, const char *value){
+	if constexpr(Exact){
+		const auto *p = list.findExact(key);
 
-	if (value)
-		return iteratorDereference(it, et, value);
+		if (value)
+			return p && p->getVal() == value;
 
-	if (it == et)
-		return true;
+		if (!p)
+			return true;
 
-	return ! it->isOK();
+		return ! p->isOK();
+	}else{
+		auto const it = list.find(key);
+		auto const et = list.end();
+
+		if (value)
+			return iteratorDereference(it, et, value);
+
+		if (it == et)
+			return true;
+
+		return ! it->isOK();
+	}
 }
 
 // ==============================
 
 template <class List>
 void iterator_test_get(const List &list){
-	mytest("it", 			getCheck(list, "1",		"Niki",		std::false_type{}	));
-	mytest("it", 			getCheck(list, "1 firstname",	"Niki",		std::true_type{}	));
-	mytest("it", 			getCheck(list, "2",		"22",		std::false_type{}	));
-	mytest("it", 			getCheck(list, "2 age",		"22",		std::true_type{}	));
-	mytest("it", 			getCheck(list, "3",		"Sofia",	std::false_type{}	));
-	mytest("it", 			getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
-	mytest("it", 			getCheck(list, "4",		"Linux",	std::false_type{}	));
-	mytest("it", 			getCheck(list, "4 os",		"Linux",	std::true_type{}	));
-	mytest("it", 			getCheck(list, "4 osX",		nullptr,	std::true_type{}	));
-	mytest("it", 			getCheck(list, "5",		nullptr,	std::true_type{}	));
-	mytest("it", 			getCheck(list, "6",		nullptr,	std::true_type{}	));
+	mytest("it",			getCheck<0>(list, "1",			"Niki"	));
+	mytest("it",			getCheck<1>(list, "1 firstname",	"Niki"	));
+	mytest("it",			getCheck<0>(list, "2",			"22"	));
+	mytest("it",			getCheck<1>(list, "2 age",		"22"	));
+	mytest("it",			getCheck<0>(list, "3",			"Sofia"	));
+	mytest("it",			getCheck<1>(list, "3 city",		"Sofia"	));
+	mytest("it",			getCheck<0>(list, "4",			"Linux"	));
+	mytest("it",			getCheck<1>(list, "4 os",		"Linux"	));
+	mytest("it",			getCheck<1>(list, "4 osX",		nullptr	));
+	mytest("it",			getCheck<1>(list, "5",			nullptr	));
+	mytest("it",			getCheck<1>(list, "6",			nullptr	));
 
 	// this is no longer supported
 	//mytest("it", 			getCheck(list, "",		"Niki",		std::false_type{}	));
@@ -210,8 +222,8 @@ void list_test(List &list){
 
 	// GET
 
-	mytest("get",			getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
-	mytest("get non existent",	getCheck(list, "nonexistent",	nullptr,	std::true_type{}	));
+	mytest("get",			getCheck<1>(list, "3 city",		"Sofia"	));
+	mytest("get non existent",	getCheck<1>(list, "nonexistent",	nullptr	));
 
 
 	// OVERWRITE
@@ -222,11 +234,11 @@ void list_test(List &list){
 	insert(list, key_over, "original"	);
 	insert(list, key_over, val_over		);
 
-	mytest("overwrite",		getCheck(list, key_over,	val_over,	std::true_type{}	));
+	mytest("overwrite",		getCheck<1>(list, key_over,	val_over	));
 
 	insert(list, key_over, "original", 0, 1	);
 
-	mytest("overwrite 2",		getCheck(list, key_over,	val_over,	std::true_type{}	));
+	mytest("overwrite 2",		getCheck<1>(list, key_over,	val_over	));
 
 	// INSERT BY CLONING PAIR
 
@@ -235,7 +247,7 @@ void list_test(List &list){
 		insert(list, *p);
 	}
 
-	mytest("clone",			getCheck(list, "clone_pair",	"123",		std::true_type{}	));
+	mytest("clone",			getCheck<1>(list, "clone_pair",	"123"	));
 
 	// ERASE
 
@@ -253,7 +265,7 @@ void list_test(List &list){
 	// remove last
 	erase(list, "4 os");
 
-	mytest("overwrite",		getCheck(list, "3 city",	"Sofia",	std::true_type{}	));
+	mytest("overwrite",		getCheck<1>(list, "3 city",	"Sofia"	));
 	mytest("remove count",		list.size() == 1				);
 
 	// remove last element
@@ -302,7 +314,7 @@ void list_test_hint(const char *name){
 
 		auto chk = [&](const char *val){
 			return
-				getCheck(list, key, val, std::true_type{}) &&
+				getCheck<1>(list, key, val) &&
 				used == allocator.getUsedMemory();
 		};
 
@@ -336,8 +348,8 @@ void list_test(hm4::BlackHoleList &list){
 	mytest("sizeof",		list.bytes() == 0						);
 
 	mytest("put",			insert(list, "key", "val").ok					);
-	mytest("find",			list.find("key", std::false_type{}) == std::end(list)		);
-	mytest("find",			list.find("key", std::true_type{} ) == std::end(list)		);
+	mytest("find",			list.find     ("key") == std::end(list)		);
+	mytest("find",			list.findExact("key") == std::end(list)		);
 	mytest("remove",		erase(list, "key").status == hm4::InsertResult::SKIP_DELETED	);
 }
 

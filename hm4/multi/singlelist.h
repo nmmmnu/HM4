@@ -53,9 +53,12 @@ public:
 		return list_->end();
 	}
 
-	template<bool B>
-	iterator find(std::string_view const key, std::bool_constant<B> const exact) const{
-		return list_->find(key, exact);
+	iterator    find     (std::string_view const key) const{
+		return list_->find(key);
+	}
+
+	const Pair *findExact(std::string_view const key) const{
+		return list_->findExact(key);
 	}
 
 public:

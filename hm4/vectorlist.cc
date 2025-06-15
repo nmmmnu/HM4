@@ -37,16 +37,21 @@ namespace{
 } // anonymous namespace
 
 template<class T_Allocator>
-template<bool ExactEvaluation>
-auto VectorList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
+auto VectorList<T_Allocator>::find(std::string_view const key) const -> iterator{
 	assert(!key.empty());
 
 	const auto &[found, it] = binarySearch(vector_, key);
 
-	if constexpr(ExactEvaluation)
-		return found ? iterator{ it } : end();
-	else
-		return iterator{ it };
+	return iterator{ it };
+}
+
+template<class T_Allocator>
+const Pair *VectorList<T_Allocator>::findExact(std::string_view const key) const{
+	assert(!key.empty());
+
+	const auto &[found, it] = binarySearch(vector_, key);
+
+	return found ? *it : nullptr;
 }
 
 template<class T_Allocator>
@@ -154,16 +159,6 @@ template class VectorList<MyAllocator::PMAllocator>;
 template class VectorList<MyAllocator::STDAllocator>;
 template class VectorList<MyAllocator::ArenaAllocator>;
 template class VectorList<MyAllocator::SimulatedArenaAllocator>;
-
-template auto VectorList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
-
-template auto VectorList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto VectorList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto VectorList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto VectorList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
 template auto VectorList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto VectorList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;

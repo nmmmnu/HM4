@@ -352,24 +352,6 @@ auto insertHintV(List &list, const Pair *pair, Args &&...args){
 
 // ==============================
 
-template<class List, bool B>
-auto getIterator(List const &list, std::bool_constant<B>){
-	if constexpr(B)
-		return std::begin(list);
-	else
-		return std::end(list);
-}
-
-template<class List, bool B>
-auto getIterator(List const &list, std::string_view const key, std::bool_constant<B> const exact){
-	if (key.empty())
-		return std::begin(list);
-	else
-		return list.find(key, exact);
-}
-
-// ==============================
-
 template<bool CheckOK = true, typename List, typename Predicate>
 auto getPair_(List const &list, std::string_view key, Predicate p){
 	auto it = list.find(key, std::true_type{});

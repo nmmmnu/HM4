@@ -88,19 +88,19 @@ namespace{
 
 	template <class List>
 	void listSearch(const List &list, std::string_view const key){
-		auto const it = list.find(key, std::true_type{});
+		const auto *p = list.findExact(key);
 
-		if (it == std::end(list)){
+		if (!p){
 			fmt::print("Key '{}' not found...\n", key);
 			return;
 		}
 
-		print(*it);
+		print(*p);
 	}
 
 	template <class List>
 	void listIterate(const List &list, std::string_view const key, size_t count = 10){
-		for(auto it = list.find(key, std::false_type{}); count && it != list.end(); ++it, --count)
+		for(auto it = list.find(key); count && it != list.end(); ++it, --count)
 			print(*it);
 	}
 

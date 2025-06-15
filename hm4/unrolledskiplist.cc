@@ -504,7 +504,7 @@ auto UnrolledSkipList<T_Allocator>::locate_(HPairHKey const hkey, std::string_vi
 
 template<class T_Allocator>
 template<bool ExactMatch>
-auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
+auto UnrolledSkipList<T_Allocator>::find_(std::string_view const key, std::bool_constant<ExactMatch>) const -> iterator{
 	if (key.empty()){
 		// it is extremly dangerous to have key == nullptr here.
 		throw std::logic_error{ "Key can not be nullptr in UnrolledSkipList::locateNode_" };
@@ -551,6 +551,19 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key, std::bool_c
 		return fix_iterator_(node, it);
 }
 
+template<class T_Allocator>
+auto UnrolledSkipList<T_Allocator>::find(std::string_view const key) const -> iterator{
+	return find_(key, std::false_type{});
+}
+
+template<class T_Allocator>
+const Pair *UnrolledSkipList<T_Allocator>::findExact(std::string_view const key) const{
+	auto it = find_(key, std::true_type{});
+
+	return it == end() ? nullptr : & *it;
+}
+
+
 
 // ==============================
 
@@ -582,16 +595,6 @@ template class UnrolledSkipList<MyAllocator::PMAllocator>;
 template class UnrolledSkipList<MyAllocator::STDAllocator>;
 template class UnrolledSkipList<MyAllocator::ArenaAllocator>;
 template class UnrolledSkipList<MyAllocator::SimulatedArenaAllocator>;
-
-template auto UnrolledSkipList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto UnrolledSkipList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto UnrolledSkipList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto UnrolledSkipList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
-
-template auto UnrolledSkipList<MyAllocator::PMAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto UnrolledSkipList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto UnrolledSkipList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto UnrolledSkipList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
 template auto UnrolledSkipList<MyAllocator::PMAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto UnrolledSkipList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;

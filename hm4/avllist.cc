@@ -453,8 +453,7 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 
 
 template<class T_Allocator>
-template<bool ExactEvaluation>
-auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<ExactEvaluation>) const -> iterator{
+auto AVLList<T_Allocator>::find(std::string_view const key) const -> iterator{
 	assert(!key.empty());
 
 	auto *node = root_;
@@ -463,29 +462,27 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 		int const cmp = node->cmp(key);
 
 		if (cmp > 0){
-			if constexpr(!ExactEvaluation)
-				if (node->l == nullptr){
-					// We need successor of the `key`,
-					// but it should be on the left, but is not there.
-					// this means the `node` is the successor of the `key`.
-					return { node, root_ };
-				}
+			if (node->l == nullptr){
+				// We need successor of the `key`,
+				// but it should be on the left, but is not there.
+				// this means the `node` is the successor of the `key`.
+				return { node, root_ };
+			}
 
 			node = node->l;
 			continue;
 		}
 
 		if (cmp < 0){
-			if constexpr(!ExactEvaluation)
-				if (node->r == nullptr){
-					// We need successor of the `key`,
-					// this means the successor of the `node`,
-					// is also the successor of the `key`.
-					return {
-						avl_impl_::getSuccessorNode(node),
-						root_
-					};
-				}
+			if (node->r == nullptr){
+				// We need successor of the `key`,
+				// this means the successor of the `node`,
+				// is also the successor of the `key`.
+				return {
+					avl_impl_::getSuccessorNode(node),
+					root_
+				};
+			}
 
 			node = node->r;
 			continue;
@@ -500,6 +497,35 @@ auto AVLList<T_Allocator>::find(std::string_view const key, std::bool_constant<E
 
 
 template<class T_Allocator>
+const Pair *AVLList<T_Allocator>::findExact(std::string_view const key) const{
+	assert(!key.empty());
+
+	auto *node = root_;
+
+	while(node){
+		int const cmp = node->cmp(key);
+
+		if (cmp > 0){
+			node = node->l;
+			continue;
+		}
+
+		if (cmp < 0){
+			node = node->r;
+			continue;
+		}
+
+		// found
+		return & node->data;
+	}
+
+	// not found
+	return nullptr;
+}
+
+
+
+template<class T_Allocator>
 void AVLList<T_Allocator>::deallocate_(Node *node){
 	using namespace MyAllocator;
 	deallocate(allocator_, node);
@@ -507,28 +533,32 @@ void AVLList<T_Allocator>::deallocate_(Node *node){
 
 template<class T_Allocator>
 void AVLList<T_Allocator>::deallocateTree_(Node *node){
-	if (allocator_->reset() == false){
+	if (allocator_->reset())
+		return;
 
-		// Morris traversal
-		// https://stackoverflow.com/questions/69777742/how-can-i-delete-a-binary-tree-with-o1-additional-memory
+	// Morris traversal
+	// https://gist.github.com/eopXD/7e7c86ee0662632df79289023ab0b47a
 
-		Node *tail = node;
+	while(node){
+		if (!node->l){
+			Node *tmp = node;
+			node = node->r;
+			deallocate_(tmp);
+		}else{
+			Node *tmp = node->l;
 
-		while (node){
-			// update tail
-			while (tail->l)
-				tail = tail->l;
+			while(tmp->r and tmp->r != node )
+				tmp = tmp->r;
 
-			// move right to the end of the "list"
-			// needs to happen before retrieving next,
-			// since the node may only have a right subtree
-			tail->l = node->r;
-
-			Node *temp = node->l;
-
-			deallocate_(node);
-
-			node = temp;
+			if (!tmp->r){
+				tmp->r = node;
+				tmp  = node;
+				node = node->l;
+				tmp->l = nullptr;
+			}
+			// else{
+			//	assert(0);
+			// }
 		}
 	}
 }
@@ -1019,16 +1049,6 @@ template class AVLList<MyAllocator::PMAllocator>;
 template class AVLList<MyAllocator::STDAllocator>;
 template class AVLList<MyAllocator::ArenaAllocator>;
 template class AVLList<MyAllocator::SimulatedArenaAllocator>;
-
-template auto AVLList<MyAllocator::PMAllocator>			::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto AVLList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto AVLList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::true_type ) const -> iterator;
-template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::true_type ) const -> iterator;
-
-template auto AVLList<MyAllocator::PMAllocator>			::find(std::string_view const key, std::false_type) const -> iterator;
-template auto AVLList<MyAllocator::STDAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto AVLList<MyAllocator::ArenaAllocator>		::find(std::string_view const key, std::false_type) const -> iterator;
-template auto AVLList<MyAllocator::SimulatedArenaAllocator>	::find(std::string_view const key, std::false_type) const -> iterator;
 
 template auto AVLList<MyAllocator::PMAllocator>			::insertF(PairFactory::Normal		&factory) -> InsertResult;
 template auto AVLList<MyAllocator::STDAllocator>		::insertF(PairFactory::Normal		&factory) -> InsertResult;

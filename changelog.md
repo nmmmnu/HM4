@@ -316,11 +316,15 @@ Changelog
 -	Release
 
 ### 1.3.9
--	introduce FileWriter instead of std::ofstream
+-	Introduce FileWriter instead of std::ofstream
 -	Redis protocol output very large numbers as strings to avoid errors with redis-cli
 -	Refactor buffers and memory resources
 -	Add hash indexes
 -	Free 8 bit memory per AVLList node by moving balance into the up pointer
 -	Add SBO (small buffer optimization) for disktables smaller than 2KB to avoid unnecessary VM preasure
 -	Release
+
+### 1.3.10
+-	Fix bug in AVLList deallocation (part of tests, not affecting  db_net)
+
 

@@ -37,10 +37,8 @@ namespace{
 		if (key.empty())
 			return 1;
 
-		auto it = list.find(key, std::true_type{});
-
-		if (it != std::end(list))
-			print(*it);
+		if (const auto *p = list.findExact(key); p)
+			print(*p);
 
 		return 0;
 	}
@@ -49,7 +47,7 @@ namespace{
 	int op_iterate(List const &list, std::string_view const key, size_t const count = 10){
 		size_t c = 0;
 
-		auto it = key == "-" ? std::begin(list) : list.find(key, std::false_type{});
+		auto it = key == "-" ? std::begin(list) : list.find(key);
 
 		for(; it != std::end(list); ++it){
 			using hm4::print;

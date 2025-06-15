@@ -9,6 +9,24 @@ namespace hm4{
 namespace multi{
 namespace multiiterator_impl_{
 
+	template<class List, bool B>
+	auto getIterator(List const &list, std::bool_constant<B>){
+		if constexpr(B)
+			return std::begin(list);
+		else
+			return std::end(list);
+	}
+
+	template<class List>
+	auto getIterator(List const &list, std::string_view const key){
+		if (key.empty())
+			return std::begin(list);
+		else
+			return list.find(key);
+	}
+
+
+
 	template <class Iterator>
 	class IteratorPair{
 	private:
@@ -34,9 +52,9 @@ namespace multiiterator_impl_{
 		IteratorPair(List const &list, std::bool_constant<B> const tag) :
 				IteratorPair(getIterator(list, tag), std::end(list)){}
 
-		template<class List, bool B>
-		IteratorPair(List const &list, std::string_view const key, std::bool_constant<B> const exact) :
-				IteratorPair(getIterator(list, key, exact), std::end(list)){}
+		template<class List>
+		IteratorPair(List const &list, std::string_view const key) :
+				IteratorPair(getIterator(list, key), std::end(list)){}
 
 	public:
 		operator bool() const{

@@ -78,8 +78,9 @@ public:
 	}
 
 public:
-	template<bool B>
-	iterator find(std::string_view const key, std::bool_constant<B> exact) const;
+	iterator    find     (std::string_view const key) const;
+	const Pair *findExact(std::string_view const key) const;
+
 	iterator begin() const;
 	static constexpr iterator end();
 
@@ -102,6 +103,10 @@ private:
 
 public:
 	static size_t const INTERNAL_NODE_SIZE;
+
+private:
+	template<bool B>
+	const Node *find_(std::string_view const key) const;
 
 private:
 	void deallocate_(Node *node);

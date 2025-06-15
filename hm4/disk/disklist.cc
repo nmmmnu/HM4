@@ -528,21 +528,17 @@ auto DiskList::ra_find_(std::string_view const key) const -> BinarySearchResult<
 	}
 }
 
-template<bool B>
-auto DiskList::ra_find(std::string_view const key, std::bool_constant<B>) const -> random_access_iterator{
-	if constexpr(B){
-		auto const result = ra_find_<FindMode::EXACT>(key);
+auto DiskList::ra_find(std::string_view const key) const -> random_access_iterator{
+	auto const result = ra_find_<FindMode::PREFIX>(key);
 
-		return result.found ? result.it : ra_end();
-	}else{
-		auto const result = ra_find_<FindMode::PREFIX>(key);
-
-		return result.it;
-	}
+	return result.it;
 }
 
-template auto DiskList::ra_find(std::string_view const key, std::true_type  ) const -> random_access_iterator;
-template auto DiskList::ra_find(std::string_view const key, std::false_type ) const -> random_access_iterator;
+const Pair *DiskList::findExact(std::string_view const key) const{
+	auto const result = ra_find_<FindMode::EXACT>(key);
+
+	return result.found ? & *result.it : nullptr;
+}
 
 
 

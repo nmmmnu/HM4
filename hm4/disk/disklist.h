@@ -193,8 +193,7 @@ public:
 	random_access_iterator ra_begin() const;
 	random_access_iterator ra_end() const;
 
-	template<bool B>
-	random_access_iterator ra_find(std::string_view const key, std::bool_constant<B>) const;
+	random_access_iterator ra_find(std::string_view const key) const;
 
 	enum class FindMode{
 		EXACT,
@@ -212,8 +211,8 @@ public:
 	forward_iterator begin() const;
 	constexpr forward_iterator end() const;
 
-	template<bool B>
-	forward_iterator find(std::string_view key, std::bool_constant<B>) const;
+	forward_iterator find     (std::string_view key) const;
+	const Pair      *findExact(std::string_view key) const;
 
 private:
 	bool openNormal_	(std::string_view filename, OpenController oc);
@@ -294,10 +293,9 @@ namespace hm4::disk{
 		return {};
 	}
 
-	template<bool B>
-	auto DiskList::find(std::string_view const key, std::bool_constant<B> const exact) const -> forward_iterator{
+	inline auto DiskList::find(std::string_view const key) const -> forward_iterator{
 		// gcc error if "forward_iterator" ommited
-		return forward_iterator{ ra_find(key, exact) };
+		return forward_iterator{ ra_find(key) };
 	}
 
 } // namespace disk
