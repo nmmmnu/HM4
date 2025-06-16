@@ -75,7 +75,7 @@ public:
 	}
 
 	constexpr static
-	const Pair *findExact(std::string_view){
+	const Pair *getPair(std::string_view){
 		return nullptr;
 	}
 

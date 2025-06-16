@@ -497,7 +497,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key) const -> iterator{
 
 
 template<class T_Allocator>
-const Pair *AVLList<T_Allocator>::findExact(std::string_view const key) const{
+const Pair *AVLList<T_Allocator>::getPair(std::string_view const key) const{
 	assert(!key.empty());
 
 	auto *node = root_;

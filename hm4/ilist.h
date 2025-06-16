@@ -354,12 +354,12 @@ auto insertHintV(List &list, const Pair *pair, Args &&...args){
 
 // template<typename List>
 // auto getPairPtrNC(List const &list, std::string_view key){
-// 	return list.findExact(key);
+// 	return list.getPair(key);
 // }
 
 template<typename List, typename Predicate>
 auto getPairOK_(List const &list, std::string_view key, Predicate pred){
-	const auto *p = list.findExact(key);
+	const auto *p = list.getPair(key);
 
 	return pred(p && p->isOK(), p);
 }

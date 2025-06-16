@@ -46,7 +46,7 @@ auto VectorList<T_Allocator>::find(std::string_view const key) const -> iterator
 }
 
 template<class T_Allocator>
-const Pair *VectorList<T_Allocator>::findExact(std::string_view const key) const{
+const Pair *VectorList<T_Allocator>::getPair(std::string_view const key) const{
 	assert(!key.empty());
 
 	const auto &[found, it] = binarySearch(vector_, key);

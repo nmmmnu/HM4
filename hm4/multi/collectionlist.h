@@ -54,7 +54,7 @@ public:
 		return { std::begin(*list_), std::end(*list_), key };
 	}
 
-	const Pair *findExact(std::string_view const key) const{
+	const Pair *getPair(std::string_view const key) const{
 		auto first = std::begin(*list_);
 		auto last  = std::end(*list_);
 
@@ -69,11 +69,11 @@ public:
 
 		for(; first != last; ++first){
 			if (!smallest){
-				smallest = first->findExact(key);
+				smallest = first->getPair(key);
 				continue;
 			}
 
-			const auto *p = first->findExact(key);
+			const auto *p = first->getPair(key);
 
 			if (!p)
 				continue;

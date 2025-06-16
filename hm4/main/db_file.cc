@@ -37,7 +37,7 @@ namespace{
 		if (key.empty())
 			return 1;
 
-		if (const auto *p = list.findExact(key); p)
+		if (const auto *p = list.getPair(key); p)
 			print(*p);
 
 		return 0;

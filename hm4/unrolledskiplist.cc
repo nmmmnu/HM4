@@ -557,7 +557,7 @@ auto UnrolledSkipList<T_Allocator>::find(std::string_view const key) const -> it
 }
 
 template<class T_Allocator>
-const Pair *UnrolledSkipList<T_Allocator>::findExact(std::string_view const key) const{
+const Pair *UnrolledSkipList<T_Allocator>::getPair(std::string_view const key) const{
 	auto it = find_(key, std::true_type{});
 
 	return it == end() ? nullptr : & *it;

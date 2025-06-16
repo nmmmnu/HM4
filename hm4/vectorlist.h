@@ -98,8 +98,8 @@ public:
 	}
 
 public:
-	iterator    find     (std::string_view const key) const;
-	const Pair *findExact(std::string_view const key) const;
+	iterator    find   (std::string_view const key) const;
+	const Pair *getPair(std::string_view const key) const;
 
 	iterator begin() const noexcept{
 		return iterator{ std::begin(vector_) };

@@ -88,14 +88,10 @@ namespace{
 
 	template <class List>
 	void listSearch(const List &list, std::string_view const key){
-		const auto *p = list.findExact(key);
-
-		if (!p){
+		if (const auto *p = list.getPair(key); p)
+			print(*p);
+		else
 			fmt::print("Key '{}' not found...\n", key);
-			return;
-		}
-
-		print(*p);
 	}
 
 	template <class List>

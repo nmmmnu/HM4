@@ -211,8 +211,8 @@ public:
 	forward_iterator begin() const;
 	constexpr forward_iterator end() const;
 
-	forward_iterator find     (std::string_view key) const;
-	const Pair      *findExact(std::string_view key) const;
+	forward_iterator find   (std::string_view key) const;
+	const Pair      *getPair(std::string_view key) const;
 
 private:
 	bool openNormal_	(std::string_view filename, OpenController oc);

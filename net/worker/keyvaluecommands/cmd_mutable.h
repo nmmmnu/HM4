@@ -787,7 +787,7 @@ namespace net::worker::commands::Mutable{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (const auto *p = db->findExact(key); p){
+			if (const auto *p = db->getPair(key); p){
 				// SET
 
 				const auto *hint = p;

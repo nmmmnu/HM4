@@ -466,7 +466,7 @@ auto SkipList<T_Allocator>::find(std::string_view const key) const -> iterator{
 }
 
 template<class T_Allocator>
-const Pair *SkipList<T_Allocator>::findExact(std::string_view const key) const{
+const Pair *SkipList<T_Allocator>::getPair(std::string_view const key) const{
 	if (const Node *node = find_<1>(key); node)
 		return node->data;
 	else

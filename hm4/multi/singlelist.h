@@ -57,8 +57,8 @@ public:
 		return list_->find(key);
 	}
 
-	const Pair *findExact(std::string_view const key) const{
-		return list_->findExact(key);
+	const Pair *getPair(std::string_view const key) const{
+		return list_->getPair(key);
 	}
 
 public:

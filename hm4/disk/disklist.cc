@@ -534,7 +534,7 @@ auto DiskList::ra_find(std::string_view const key) const -> random_access_iterat
 	return result.it;
 }
 
-const Pair *DiskList::findExact(std::string_view const key) const{
+const Pair *DiskList::getPair(std::string_view const key) const{
 	auto const result = ra_find_<FindMode::EXACT>(key);
 
 	return result.found ? & *result.it : nullptr;

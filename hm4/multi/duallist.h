@@ -90,9 +90,9 @@ public:
 		return { *list1_, *list2_, key };
 	}
 
-	const Pair *findExact(std::string_view const key) const{
-		const auto *p1 = list1_->findExact(key);
-		const auto *p2 = list2_->findExact(key);
+	const Pair *getPair(std::string_view const key) const{
+		const auto *p1 = list1_->getPair(key);
+		const auto *p2 = list2_->getPair(key);
 
 		if (!p1) return p2;
 		if (!p2) return p1;

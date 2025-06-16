@@ -61,7 +61,7 @@ bool iteratorDereference(Iterator const &it, Iterator const &et, const char *val
 template <bool Exact, class List>
 bool getCheck(List const &list, const char *key, const char *value){
 	if constexpr(Exact){
-		const auto *p = list.findExact(key);
+		const auto *p = list.getPair(key);
 
 		if (value)
 			return p && p->getVal() == value;
