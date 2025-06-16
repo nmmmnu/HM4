@@ -12,7 +12,7 @@ namespace multi{
 
 
 
-template <class Iterator, class Projection = std::nullptr_t>
+template <class Iterator>
 class CollectionIterator{
 public:
 	CollectionIterator(CollectionIterator const &other) = default;
@@ -69,7 +69,7 @@ public:
 	){
 		// skip the work and creates iterator with single element
 
-		// this is std::min_element, but it uses projection,
+		// this is std::min_element,
 		// so it can not use the algorithm,
 		// from the other side, result needed is the projection,
 		// so it can not be written as a template...
@@ -103,13 +103,7 @@ public:
 
 public:
 	reference operator*() const{
-		if constexpr(std::is_same_v<Projection, std::nullptr_t>){
-			return *itp_.front();
-		}else{
-			return Projection()(
-				*itp_.front()
-			);
-		}
+		return *itp_.front();
 	}
 
 	bool operator==(CollectionIterator const &other) const{
