@@ -155,9 +155,9 @@ namespace net::worker::commands::BITSET{
 
 			BitOps const bitops{ n };
 
-			const char *data = hm4::getPair_(*db, key, [size = bitops.size()](bool b, auto it) -> const char *{
-				if (b && it->getVal().size() >= size)
-					return it->getVal().data();
+			const char *data = hm4::getPairOK_(*db, key, [size = bitops.size()](bool b, const auto *p) -> const char *{
+				if (b && p->getVal().size() >= size)
+					return p->getVal().data();
 				else
 					return nullptr;
 			});
@@ -208,9 +208,9 @@ namespace net::worker::commands::BITSET{
 			if (container.capacity() < p.size() - varg)
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
-			const char *data = hm4::getPair_(*db, key, [](bool b, auto it) -> const char *{
+			const char *data = hm4::getPairOK_(*db, key, [](bool b, const auto *p) -> const char *{
 				if (b)
-					return it->getVal().data();
+					return p->getVal().data();
 				else
 					return nullptr;
 			});

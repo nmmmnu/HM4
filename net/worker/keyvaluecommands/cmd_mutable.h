@@ -787,11 +787,11 @@ namespace net::worker::commands::Mutable{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (auto *it = hm4::getPairPtrNC(*db, key); it){
+			if (const auto *p = db->findExact(key); p){
 				// SET
 
-				const auto *hint = & *it;
-				hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, it->getKey(), it->getVal());
+				const auto *hint = p;
+				hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, p->getKey(), p->getVal());
 			}
 
 			return result.set();

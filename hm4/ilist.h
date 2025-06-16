@@ -352,97 +352,48 @@ auto insertHintV(List &list, const Pair *pair, Args &&...args){
 
 // ==============================
 
-template<bool CheckOK = true, typename List, typename Predicate>
-auto getPair_(List const &list, std::string_view key, Predicate pred){
+// template<typename List>
+// auto getPairPtrNC(List const &list, std::string_view key){
+// 	return list.findExact(key);
+// }
+
+template<typename List, typename Predicate>
+auto getPairOK_(List const &list, std::string_view key, Predicate pred){
 	const auto *p = list.findExact(key);
 
-	if constexpr(CheckOK){
-		bool const b = p && p->isOK();
-
-		return pred(b, p);
-	}else{
-		bool const b = p;
-
-		return pred(b, p);
-	}
+	return pred(p && p->isOK(), p);
 }
 
 template<typename List>
 auto getPairOK(List const &list, std::string_view key){
-	return getPair_(list, key, [](bool b, auto ){
+	return getPairOK_(list, key, [](bool b, const void *){
 		return b;
-	});
-}
-
-template<typename List>
-auto getPairVal(List const &list, std::string_view key){
-	return getPair_(list, key, [](bool b, auto it){
-		return b ? it->getVal() : "";
-	});
-}
-
-template<bool B, typename List>
-auto getPairPtr_(List const &list, std::string_view key){
-	return getPair_<B>(list, key, [](bool b, auto it){
-		return b ? & *it : nullptr;
 	});
 }
 
 template<typename List>
 auto getPairPtr(List const &list, std::string_view key){
-	return getPairPtr_<1>(list, key);
+	return getPairOK_(list, key, [](bool b, const auto *p){
+		return b ? p : nullptr;
+	});
+}
+
+template<typename List>
+auto getPairVal(List const &list, std::string_view key){
+	return getPairOK_(list, key, [](bool b, const auto *p){
+		return b ? p->getVal() : "";
+	});
 }
 
 template<typename List>
 auto getPairPtrWithSize(List const &list, std::string_view key, size_t size){
-	return hm4::getPair_(list, key, [size](bool b, auto it) -> const hm4::Pair *{
-		if (b && it->getVal().size() == size)
-			return & *it;
+	return getPairOK_(list, key, [size](bool b, const auto *p) -> const Pair *{
+		if (b && p->getVal().size() == size)
+			return p;
 		else
 			return nullptr;
 	});
 }
-
-template<typename List>
-auto getPairPtrNC(List const &list, std::string_view key){
-	return getPairPtr_<0>(list, key);
-}
-
-// ==============================
-
-#if 0
-
-template<typename List, typename Predicate>
-auto getPairByPrefix_(List const &list, std::string_view key, Predicate p){
-	auto it = list.find(key);
-
-	bool const b = it != std::end(list) && it->isOK() && same_prefix(key, it->getKey());
-
-	return p(b, it);
-}
-
-template<typename List>
-auto getPairOKByPrefix(List const &list, std::string_view key){
-	return getPairByPrefix_(list, key, [](bool b, auto ){
-		return b;
-	});
-}
-
-template<typename List>
-auto getPairValByPrefix(List const &list, std::string_view key){
-	return getPairByPrefix_(list, key, [](bool b, auto it){
-		return b ? it->getVal() : "";
-	});
-}
-
-template<typename List>
-auto getPairPtrByPrefix(List const &list, std::string_view key){
-	return getPairByPrefix_(list, key, [](bool b, auto it){
-		return b ? & *it : nullptr;
-	});
-}
-
-#endif
 
 } // namespace
 

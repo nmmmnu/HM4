@@ -128,8 +128,8 @@ namespace net::worker::commands::Immutable{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			uint64_t const ttl = hm4::getPair_(*db, key, [](bool b, auto it){
-				return b ? it->getTTL() : 0;
+			uint64_t const ttl = hm4::getPairOK_(*db, key, [](bool b, const auto *p){
+				return b ? p->getTTL() : 0;
 			});
 
 			return result.set(ttl);
@@ -162,8 +162,8 @@ namespace net::worker::commands::Immutable{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			uint64_t const time = hm4::getPair_(*db, key, [](bool b, auto it){
-				return b ? it->getExpiresAt() : 0;
+			uint64_t const time = hm4::getPairOK_(*db, key, [](bool b, const auto *p){
+				return b ? p->getExpiresAt() : 0;
 			});
 
 			return result.set(time);
@@ -196,7 +196,7 @@ namespace net::worker::commands::Immutable{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const *pair = hm4::getPairPtrNC(*db, key);
+			const auto *pair = db->findExact(key);
 
 			if (pair){
 				std::string_view const x{
@@ -280,8 +280,8 @@ namespace net::worker::commands::Immutable{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			return result.set(
-				hm4::getPair_(*db, key, [](bool b, auto it) -> uint64_t{
-					return b ? it->getVal().size() : 0;
+				hm4::getPairOK_(*db, key, [](bool b, const auto *p) -> uint64_t{
+					return b ? p->getVal().size() : 0;
 				})
 			);
 		}
