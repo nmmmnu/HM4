@@ -19,7 +19,7 @@ namespace MyBuffer{
 					allocator_	(allocator		),
 					size_		(size			){}
 
-		AllocatedMemoryResourceOwned(AllocatedMemoryResourceOwned &other) :
+		AllocatedMemoryResourceOwned(AllocatedMemoryResourceOwned &&other) :
 					allocator_	(other.allocator_	),
 					size_		(other.size_		),
 					data_		(other.data_		){

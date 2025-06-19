@@ -3,9 +3,9 @@
 
 #include "iteratorpair.h"
 
-#include <vector>
+//#include <vector>
 #include <algorithm>	// heap
-
+#include "smallvector.h"
 
 namespace hm4{
 namespace multi{
@@ -29,7 +29,12 @@ public:
 private:
 	using ITP		= multiiterator_impl_::IteratorPair<Iterator>;
 
-	using ITPVector		= std::vector<ITP>;
+	// sizeof(ITP) => 64
+
+	constexpr static size_t ITPVectorInlineCapacity = 64;
+
+	//using ITPVector	= std::vector<ITP>;
+	using ITPVector		= SmallVector<ITP, ITPVectorInlineCapacity>; // as of 2025-06-19, sizeof 4120
 
 	ITPVector		itp_;
 
@@ -39,7 +44,13 @@ public:
 			StoreIterator first, StoreIterator last,
 			Args&& ...args
 	){
-		itp_.reserve( static_cast<typename ITPVector::size_type>( std::distance(first, last) ) );
+		auto const size = static_cast<typename ITPVector::size_type>( std::distance(first, last) );
+
+		itp_.reserve(size);
+
+		// if (size <= itp_.capacity()){
+		// 	printf("CollectionIterator Using inline storage %zu.\n", sizeof(ITPVector));
+		// }
 
 		for (; first != last; ++first){
 			ITP itp{ *first, std::forward<Args>(args)... };
@@ -48,7 +59,7 @@ public:
 				itp_.push_back(std::move(itp));
 		}
 
-		make_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
+		std::make_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
 	}
 
 	template<class StoreIterator>
@@ -57,49 +68,8 @@ public:
 			std::false_type
 	){
 		// skip the work and creates end iterator directly
-		// printf("Here...\n");
+		// printf("ITP = %zu\n", sizeof(ITP));
 	}
-
-#if 0
-	template<class StoreIterator>
-	CollectionIterator(
-			StoreIterator first, StoreIterator last,
-			std::string_view const key,
-			std::true_type
-	){
-		// skip the work and creates iterator with single element
-
-		// this is std::min_element,
-		// so it can not use the algorithm,
-		// from the other side, result needed is the projection,
-		// so it can not be written as a template...
-
-		if (first == last){
-			// not found. done.
-			return;
-		}
-
-		auto proj = [key](auto const &table){
-			return ITP{ table, key, std::true_type{} };
-		};
-
-		auto min_element = proj(*first);
-
-		++first;
-
-		for(; first != last; ++first){
-			auto element = proj(*first);
-
-			if (heap_comp(min_element, element))
-				min_element = std::move(element);
-		}
-
-		if (min_element){
-			itp_.reserve(1);
-			itp_.push_back(std::move(min_element));
-		}
-	}
-#endif
 
 public:
 	reference operator*() const{
@@ -128,7 +98,7 @@ public:
 private:
 	void increment_(){
 		while(!itp_.empty()){
-			pop_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
+			std::pop_heap(std::begin(itp_), std::end(itp_), & CollectionIterator::heap_comp);
 
 			auto &ip = itp_.back();
 

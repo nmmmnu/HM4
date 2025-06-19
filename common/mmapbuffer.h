@@ -30,7 +30,7 @@ namespace MyBuffer{
 					size_(size			),
 					data_(createOrThrow__(size_)	){}
 
-		MMapMemoryResource(MMapMemoryResource &other) noexcept :
+		MMapMemoryResource(MMapMemoryResource &&other) noexcept :
 					size_(other.size_		),
 					data_(other.data_		){
 			other.size_ = 0;

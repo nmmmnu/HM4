@@ -49,8 +49,8 @@ namespace hm4::disk::hash::algo{
 	template<typename T>
 	struct HashIndexMultiPassBuilder{
 		HashIndexMultiPassBuilder(std::string_view filename, size_t nodesCount, MyBuffer::ByteBufferView buffer) :
-								vector_		(buffer		),
-								nodesCount_	(nodesCount	),
+								vector_		(buffer.data(), buffer.size()	),
+								nodesCount_	(nodesCount			),
 								mmap_		(createMMAP<Node>(filename, nodesCount) ){}
 
 		bool operator()(Pair const &pair){

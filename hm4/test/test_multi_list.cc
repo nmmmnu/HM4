@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "smallvector.h"
+
 using hm4::Pair;
 using hm4::OPair;
 
@@ -323,7 +325,7 @@ void test_DualListEmpty(const char *name, List &&list1, List &&list2){
 
 template <class List>
 void test_CollectionList(const char *name){
-	using Vector = std::vector<List>;
+	using Vector = SmallVector<List, 16>;
 	Vector v;
 
 	auto f = [](){

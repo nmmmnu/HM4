@@ -3,7 +3,7 @@
 
 #include "myendian.h"
 #include "mybufferview.h"
-#include "bufferedvector.h"
+#include "staticvector.h"
 
 #include "pair.h"
 
@@ -44,7 +44,7 @@ namespace hm4::disk::hash::algo{
 	using NodeHelperBuffer = MyBuffer::BufferView<NodeHelper<T> >;
 
 	template<typename T>
-	using NodeHelperVector = BufferedVector<NodeHelper<T>, NodeHelperBuffer<T> >;
+	using NodeHelperVector = BufferedVector<NodeHelper<T> >;
 
 
 
