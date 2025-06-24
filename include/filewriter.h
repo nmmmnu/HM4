@@ -1,13 +1,16 @@
 #ifndef FILE_WRITTER_H_
 #define FILE_WRITTER_H_
 
-#include <fstream>
-#include <cstdio>
 #include <cassert>
 #include <string_view>
 
-#include "mybufferview.h"
+#include <cstdio>	// fopen
 
+#include <cstring>	// memcpy
+#include <fcntl.h>	// open
+#include <unistd.h>	// close
+
+#include "mybufferview.h"
 
 /*
 real	0m13.186s
@@ -77,7 +80,87 @@ private:
 
 
 
-using FileWriter = FileWriterFOpen;
+class FileWriterFD{
+	int				fd_	= -1;
+	size_t				pos_	=  0;
+	MyBuffer::ByteBufferView	buffer_;
+
+public:
+	constexpr static std::string_view name(){
+		return "FD";
+	}
+
+	FileWriterFD() = default;
+
+	FileWriterFD(std::string_view name, MyBuffer::ByteBufferView buffer) : FileWriterFD(name.data(), buffer){}
+
+	FileWriterFD(const char *name, MyBuffer::ByteBufferView buffer) : buffer_(buffer){
+		int const mode = O_WRONLY; //O_RDWR;
+
+		fd_ = ::open(name, mode);
+	}
+
+	~FileWriterFD(){
+		if (fd_ < 0)
+			return;
+
+		flush();
+		close();
+	}
+
+	void write(const void *data, size_t size) {
+		if (fd_ < 0)
+			return;
+
+		assert(data);
+
+		const char *p = static_cast<const char *>(data);
+		      char *b = static_cast<      char *>(buffer_.data());
+
+		while(size){
+			size_t const space = buffer_.size() - size;
+
+			if (size <= space) {
+				memcpy(&b[pos_], p, size);
+				pos_ += size;
+			}else{
+				memcpy(&b[pos_], p, space);
+				pos_ += space;
+
+				flush();
+
+				p    += space;
+				size -= space;
+			}
+		}
+	}
+
+	auto write(std::string_view s){
+		return write(s.data(), s.size());
+	}
+
+	auto put(char c){
+		return write(& c, 1);
+	}
+
+	void flush(){
+		if (pos_ > 0) {
+			::write(fd_, buffer_.data(), pos_);
+			pos_ = 0;
+		}
+	}
+
+	void close(){
+		if (fd_ < 0)
+			return;
+
+		::close(fd_);
+	}
+};
+
+
+
+using FileWriter = FileWriterFD;
 
 #endif
 

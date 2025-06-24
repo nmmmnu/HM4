@@ -46,19 +46,23 @@ namespace{
 
 	MyOptions prepareOptions(int argc, char **argv);
 
-	int compact(MyOptions const &opt, MyBuffer::ByteBufferView bufferHash);
+	int compact(MyOptions const &opt, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferHash);
 
 	template <class Factory>
-	void mergeFromFactory(Factory &&f, std::string_view output_file, MyBuffer::ByteBufferView bufferHash){
+	void mergeFromFactory(Factory &&f, std::string_view output_file, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferHash){
 		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
 
 		if (bufferHash){
-			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+			hm4::disk::FileBuilder::build(output_file,
+							buffersWrite,
+							std::begin(f()), std::end(f()),
 							TOMBSTONE_OPTION, aligned,
 							f().size(), bufferHash
 			);
 		}else{
-			hm4::disk::FileBuilder::build(output_file, std::begin(f()), std::end(f()),
+			hm4::disk::FileBuilder::build(output_file,
+							buffersWrite,
+							std::begin(f()), std::end(f()),
 							TOMBSTONE_OPTION, aligned
 			);
 		}
@@ -106,7 +110,8 @@ private:
 constexpr size_t MIN_ARENA_SIZE	= 8;
 constexpr size_t MB		= 1024 * 1024;
 
-
+#include "disk/filebuilder.misc.h"
+// defines g_fbwb;
 
 int main(int argc, char **argv){
 	MyOptions const opt = prepareOptions(argc, argv);
@@ -115,7 +120,9 @@ int main(int argc, char **argv){
 
 	MyBuffer::MMapMemoryResource bufferHash{ bufferHashSize };
 
-	return compact(opt, bufferHash);
+	auto buffersWrite = g_fbwb();
+
+	return compact(opt, buffersWrite, bufferHash);
 }
 
 namespace{
@@ -319,14 +326,14 @@ namespace{
 
 
 
-	int compact(MyOptions const &opt, MyBuffer::ByteBufferView bufferHash){
+	int compact(MyOptions const &opt, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferHash){
 
-		auto merge = [&opt, &bufferHash](std::string_view what, auto &&factory){
+		auto merge = [&opt, &buffersWrite, &bufferHash](std::string_view what, auto &&factory){
 			auto const output_file = getNewFilename(opt.db_path);
 
 			fmt::print("Merging {} tables into {}\n", what, output_file);
 
-			mergeFromFactory(factory, output_file, bufferHash);
+			mergeFromFactory(factory, output_file, buffersWrite, bufferHash);
 		};
 
 		DiskList::VMAllocator allocator{ g_slabBuffer };
