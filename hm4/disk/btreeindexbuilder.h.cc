@@ -5,14 +5,12 @@
 #include "myalign.h"
 #include "mynarrow.h"
 
-
 namespace hm4{
 namespace disk{
 namespace btree{
 
-
 template <class List>
-bool BTreeIndexBuilder<List>::build(){
+bool BTreeIndexBuilder<List>::build(MyBuffer::ByteBufferView bufferIndx, MyBuffer::ByteBufferView bufferData){
 	size_type const size = list_.size();
 
 	level_type total_levels = level_type(calcDepth__(size) - 1);
@@ -22,8 +20,8 @@ bool BTreeIndexBuilder<List>::build(){
 		return true;
 	}
 
-	file_indx_ = { filenameBTreeIndx(filename_) };
-	file_data_ = { filenameBTreeData(filename_) };
+	file_indx_ = { filenameBTreeIndx(filename_), bufferIndx };
+	file_data_ = { filenameBTreeData(filename_), bufferData };
 
 	std::cout
 		 << "Records          : "	<< size			<< '\n'

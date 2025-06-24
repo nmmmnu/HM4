@@ -28,6 +28,8 @@ struct FileWriterFOpen{
 		return "FOpen";
 	}
 
+	FileWriterFOpen() = default;
+
 	FileWriterFOpen(std::string_view name, MyBuffer::ByteBufferView buffer) : FileWriterFOpen(name.data(), buffer){}
 
 	FileWriterFOpen(const char *name, MyBuffer::ByteBufferView buffer){

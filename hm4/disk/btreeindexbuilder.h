@@ -4,6 +4,7 @@
 #include "btreeindexnode.h"
 #include "filenames.h"
 #include "filewriter.h"
+//#include "mybuffer.h"
 
 #include <string>
 
@@ -22,7 +23,7 @@ public:
 							list_(list),
 							filename_(std::move(filename)){}
 
-	bool build();
+	bool build(MyBuffer::ByteBufferView bufferIndx, MyBuffer::ByteBufferView bufferData);
 
 private:
 	static level_type calcDepth__(size_type count);

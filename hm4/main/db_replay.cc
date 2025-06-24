@@ -54,12 +54,15 @@ struct BinLogReplay{
 	using MyList		= hm4::FlushList<MemList,Predicate,Flush>;
 
 	template<typename UString>
-	BinLogReplay(UString &&path, typename MemList::Allocator &allocator, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash) :
+	BinLogReplay(UString &&path, typename MemList::Allocator &allocator,
+						hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite,
+						MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash) :
 				memlist{ allocator },
 				mylist{
-					memlist,
-					bufferPair,
-					bufferHash,
+					memlist		,
+					buffersWrite	,
+					bufferPair	,
+					bufferHash	,
 					Predicate{},
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
@@ -106,6 +109,11 @@ namespace{
 
 
 
+#include "disk/filebuilder.misc.h"
+// defines g_fbwb;
+
+
+
 int main(int argc, char **argv){
 	using MyBuffer::MMapMemoryResource;
 
@@ -129,7 +137,9 @@ int main(int argc, char **argv){
 	MMapMemoryResource	bufferPair{ hm4::Pair::maxBytes() };
 	MMapMemoryResource	bufferHash{ arenaHashSize * MB };
 
-	MyListFactory<MyReplayList> factory{ path, allocator, bufferPair, bufferHash };
+	auto buffersWrite = g_fbwb();
+
+	MyListFactory<MyReplayList> factory{ path, allocator, buffersWrite, bufferPair, bufferHash };
 
 	auto &mylist = factory();
 

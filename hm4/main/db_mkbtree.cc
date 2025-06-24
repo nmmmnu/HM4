@@ -5,6 +5,8 @@
 #include "version.h"
 #include "myfs.h"
 
+#include "staticbuffer.h"
+
 #define FMT_HEADER_ONLY
 #include "fmt/printf.h"
 
@@ -25,6 +27,9 @@ namespace{
 	}
 
 } // namespace
+
+MyBuffer::StaticMemoryResource<4096> g_bufferIndx;
+MyBuffer::StaticMemoryResource<4096> g_bufferData;
 
 int main(int argc, char **argv){
 	if (argc <= 1 + 1){
@@ -55,7 +60,7 @@ int main(int argc, char **argv){
 
 	BTreeIndexBuilder builder(output_file, list);
 
-	bool const result = builder.build();
+	bool const result = builder.build(g_bufferIndx, g_bufferData);
 
 	return result ? 0 : 1;
 }

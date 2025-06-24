@@ -2,6 +2,7 @@
 
 #include "version.h"
 
+#include "staticbuffer.h"
 #include "mmapbuffer.h"
 
 #include "disk/disklist.h"
@@ -39,6 +40,8 @@ namespace{
 constexpr size_t MIN_ARENA_SIZE	= 8;
 constexpr size_t MB		= 1024 * 1024;
 
+MyBuffer::StaticMemoryResource<4096> g_bufferHash;
+
 int main(int argc, char **argv){
 	if (argc <= 3)
 		return printUsage(argv[0]);
@@ -57,7 +60,7 @@ int main(int argc, char **argv){
 
 	MyBuffer::MMapMemoryResource buffer{ bufferSize };
 
-	HashIndexBuilder builder{ output_file, list.size(), buffer };
+	HashIndexBuilder builder{ output_file, g_bufferHash, list.size(), buffer };
 
 	for(auto const &p : list)
 		builder(p);
