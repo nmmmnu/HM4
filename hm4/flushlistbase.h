@@ -40,7 +40,7 @@ namespace hm4::flushlist_impl_{
 	}
 
 	template<class List, class Flusher>
-	void save(List &list, Flusher &flusher, MyBuffer::ByteBufferView bufferHash){
+	void save(List &list, Flusher &flusher, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferHash){
 		// this code may runs in main thread or in save thread,
 		// but no guard needed,
 		// because thread is join-ed every time before call to this.
@@ -52,9 +52,9 @@ namespace hm4::flushlist_impl_{
 		const auto &clist = list;
 
 		if (bufferHash)
-			flusher(clist, bufferHash);
+			flusher(clist, buffersWrite, bufferHash);
 		else
-			flusher(clist);
+			flusher(clist, buffersWrite);
 	}
 
 	template<class List, class ListLoader>

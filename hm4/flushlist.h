@@ -12,12 +12,15 @@ namespace hm4{
 template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
 class FlushList : public multi::SingleList<List>{
 private:
+	using FileBuilderWriteBuffers = hm4::disk::FileBuilder::FileBuilderWriteBuffers;
+
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
+	FlushList(List &list, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
 					multi::SingleList<List>(list),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
 						loader_		(loader					),
+						buffersWrite_	(&buffersWrite				),
 						bufferPair_	(bufferPair				),
 						bufferHash_	(bufferHash				){}
 
@@ -25,12 +28,12 @@ public:
 	using Allocator = typename multi::SingleList<List>::Allocator;
 
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
-					FlushList(list, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
+	FlushList(List &list, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
+					FlushList(list, buffersWrite, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
 
 	template <class UPredicate, class UFlusher>
-	FlushList(List &list, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher) :
-					FlushList(list, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
+	FlushList(List &list, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher) :
+					FlushList(list, buffersWrite, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~FlushList(){
 		save_();
@@ -82,7 +85,7 @@ private:
 	void save_() const{
 		logger<Logger::NOTICE>() << "Save data..." << "List record(s):" << list_->size() << "List size:" << list_->bytes();
 
-		flushlist_impl_::save(*list_, flusher_, bufferHash_);
+		flushlist_impl_::save(*list_, flusher_, *buffersWrite_, bufferHash_);
 
 		logger<Logger::NOTICE>() << "Save done";
 	}
@@ -95,6 +98,8 @@ private:
 	ListLoader			*loader_;
 
 	uint64_t			version_ = 0;
+
+	FileBuilderWriteBuffers		*buffersWrite_;
 
 	MyBuffer::ByteBufferView	bufferPair_;
 	MyBuffer::ByteBufferView	bufferHash_;

@@ -19,10 +19,11 @@ namespace hm4::disk::hash::algo{
 
 	template<typename T>
 	struct HashIndexStandardBuilder{
-		HashIndexStandardBuilder(std::string_view filename, size_t nodesCount, MyBuffer::ByteBufferView buffer) :
+		HashIndexStandardBuilder(std::string_view filename, MyBuffer::ByteBufferView bufferWrite, size_t nodesCount, MyBuffer::ByteBufferView buffer) :
 								buffer_		(buffer		),
 								nodesCount_	(nodesCount	),
-								filename_	(filename	){
+								filename_	(filename	),
+								bufferWrite_	(bufferWrite	){
 
 			memset( static_cast<void *>(buffer_.data()), 0, nodesCount_ * sizeof(NodeHelper<T>));
 		}
@@ -34,7 +35,7 @@ namespace hm4::disk::hash::algo{
 		}
 
 		~HashIndexStandardBuilder(){
-			FileWriter file{ filename_ };
+			FileWriter file{ filename_, bufferWrite_ };
 
 			logger<Logger::NOTICE>() << "HashIndex save index...";
 
@@ -47,10 +48,11 @@ namespace hm4::disk::hash::algo{
 		}
 
 	private:
-		T			pos_		= 0;
-		NodeHelperBuffer<T>	buffer_		;
-		size_t			nodesCount_	;
-		std::string_view 	filename_	;
+		T				pos_		= 0;
+		NodeHelperBuffer<T>		buffer_		;
+		size_t				nodesCount_	;
+		std::string_view 		filename_	;
+		MyBuffer::ByteBufferView	bufferWrite_	;
 	};
 
 } // namespace hm4::disk::hash::algo

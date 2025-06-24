@@ -30,7 +30,7 @@ public:
 
 public:
 	template<class List>
-	bool operator()(List const &list) const{
+	bool operator()(List const &list, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite) const{
 		if (std::empty(list))
 			return false;
 
@@ -38,14 +38,16 @@ public:
 
 		auto const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_(buffer));
 
-		disk::FileBuilder::build(filename, std::begin(list), std::end(list), tombstoneOptions_,
+		disk::FileBuilder::build(filename, buffersWrite,
+							std::begin(list), std::end(list),
+							tombstoneOptions_,
 							Pair::WriteOptions::ALIGNED);
 
 		return true;
 	}
 
 	template<class List>
-	bool operator()(List const &list, MyBuffer::ByteBufferView bufferHash) const{
+	bool operator()(List const &list, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferHash) const{
 		if (std::empty(list))
 			return false;
 
@@ -55,7 +57,9 @@ public:
 
 		auto const filename = StringReplace::replaceByCopy(path_, DIR_WILDCARD, idGenerator_(buffer));
 
-		disk::FileBuilder::build(filename, std::begin(list), std::end(list), tombstoneOptions_,
+		disk::FileBuilder::build(filename, buffersWrite,
+							std::begin(list), std::end(list),
+							tombstoneOptions_,
 							Pair::WriteOptions::ALIGNED,
 							list.size(), bufferHash);
 

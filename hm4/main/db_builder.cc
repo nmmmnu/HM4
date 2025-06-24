@@ -32,13 +32,15 @@ struct ListFactory{
 
 	template<typename UString>
 	ListFactory(UString &&path, typename MemList::Allocator &allocator,
+					hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite,
 					MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash) :
 				memlist{ allocator },
 				mylist{
-					memlist,
-					bufferPair,
-					bufferHash,
-					Predicate{},
+					memlist		,
+					buffersWrite	,
+					bufferPair	,
+					bufferHash	,
+					Predicate{}	,
 					Flush{ IDGenerator{}, std::forward<UString>(path) }
 				}{}
 
@@ -50,6 +52,12 @@ private:
 	MemList	memlist;
 	MyList	mylist;
 };
+
+
+
+#include "disk/filebuilder.misc.h"
+// defines g_fbwb;
+
 
 
 int main(int argc, char **argv){
@@ -77,8 +85,10 @@ int main(int argc, char **argv){
 	MMapMemoryResource	bufferPair{ hm4::Pair::maxBytes() };
 	MMapMemoryResource	bufferHash{ arenaHashSize * MB };
 
+	auto buffersWrite = g_fbwb();
+
 	return process<FileReader>(
-			MyListFactory{ path, allocator, bufferPair, bufferHash },
+			MyListFactory{ path, allocator, buffersWrite, bufferPair, bufferHash },
 			filename,
 			blob
 	);

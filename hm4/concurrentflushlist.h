@@ -19,12 +19,15 @@ using ConcurrentFlushListBase = multi::DualList<List, List, ET>;
 template <hm4::multi::DualListEraseType ET, class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
 class ConcurrentFlushList : public ConcurrentFlushListBase<ET, List>{
 private:
+	using FileBuilderWriteBuffers = hm4::disk::FileBuilder::FileBuilderWriteBuffers;
+
 	template <class UPredicate, class UFlusher>
-	ConcurrentFlushList(List &list1, List &list2, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
+	ConcurrentFlushList(List &list1, List &list2, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
 					ConcurrentFlushListBase<ET, List>(list1, list2),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
 						loader_		(loader					),
+						buffersWrite_	(&buffersWrite				),
 						bufferPair_	(bufferPair				),
 						bufferHash_	(bufferHash				){}
 
@@ -33,12 +36,12 @@ public:
 	using Allocator = typename Base::Allocator;
 
 	template <class UPredicate, class UFlusher>
-	ConcurrentFlushList(List &list1, List &list2, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
-					ConcurrentFlushList(list1, list2, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
+	ConcurrentFlushList(List &list1, List &list2, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
+					ConcurrentFlushList(list1, list2, buffersWrite, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), &loader){}
 
 	template <class UPredicate, class UFlusher>
-	ConcurrentFlushList(List &list1, List &list2, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher) :
-					ConcurrentFlushList(list1, list2, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
+	ConcurrentFlushList(List &list1, List &list2, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher) :
+					ConcurrentFlushList(list1, list2, buffersWrite, bufferPair, bufferHash, std::forward<UPredicate>(predicate), std::forward<UFlusher>(flusher), nullptr){}
 
 	~ConcurrentFlushList(){
 		// this is single thread, no guard needed
@@ -121,7 +124,7 @@ private:
 
 		logger<Logger::NOTICE>() << "TH#" << id << "Flushing data..." << "List record(s): " << list.size() << "List size: " << list.bytes();
 
-		flushlist_impl_::save(list, flusher_, bufferHash_);
+		flushlist_impl_::save(list, flusher_, *buffersWrite_, bufferHash_);
 
 		logger<Logger::NOTICE>() << "TH#" << id << "Flushing done";
 	}
@@ -135,6 +138,8 @@ private:
 	ListLoader			*loader_;
 
 	uint64_t			version_ = 0;
+
+	FileBuilderWriteBuffers		*buffersWrite_;
 
 	MyBuffer::ByteBufferView	bufferPair_;
 	MyBuffer::ByteBufferView	bufferHash_;

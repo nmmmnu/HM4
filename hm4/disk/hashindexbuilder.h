@@ -24,10 +24,10 @@ namespace hm4::disk::hash{
 	struct HashIndexBuilder{
 		constexpr static double EXPAND_FACTOR = 1.333333;
 
-		HashIndexBuilder(std::string_view filename, size_t listSize, MyBuffer::ByteBufferView buffer) :
-								filename_	(filenameHash(filename)					),
-								guard_		(buffer							),
-								impl_		( selectImplementation__(filename_, listSize, buffer)	){}
+		HashIndexBuilder(std::string_view filename, MyBuffer::ByteBufferView bufferWrite, size_t listSize, MyBuffer::ByteBufferView buffer) :
+								filename_	(filenameHash(filename)	),
+								guard_		(buffer			),
+								impl_		( selectImplementation__(filename_, bufferWrite, listSize, buffer)	){}
 
 		void operator()(Pair const &pair){
 			auto visitor = [&pair](auto &x){
@@ -56,7 +56,7 @@ namespace hm4::disk::hash{
 		}
 
 		template<typename T>
-		static Implementation selectImplementation__2(std::string_view filename, size_t nodesCount, MyBuffer::ByteBufferView buffer){
+		static Implementation selectImplementation__2(std::string_view filename, MyBuffer::ByteBufferView bufferWrite, size_t nodesCount, MyBuffer::ByteBufferView buffer){
 			auto print = [nodesCount](const char *s){
 				size_t const u = sizeof(T) * 8;
 
@@ -65,23 +65,23 @@ namespace hm4::disk::hash{
 
 			if (buffer.size() >= nodesCount * sizeof(algo::NodeHelper<T>)){
 				print("standard");
-				return Implementation{ std::in_place_type<algo::HashIndexStandardBuilder<T> >, filename, nodesCount, buffer };
+				return Implementation{ std::in_place_type<algo::HashIndexStandardBuilder<T> >, filename, bufferWrite, nodesCount, buffer };
 			}else{
 				print("multi-pass");
-				return Implementation{ std::in_place_type<algo::HashIndexMultiPassBuilder<T> >, filename, nodesCount, buffer };
+				return Implementation{ std::in_place_type<algo::HashIndexMultiPassBuilder<T> >, filename,             nodesCount, buffer };
 			}
 
 		}
 
-		static Implementation selectImplementation__(std::string_view filename, size_t listSize, MyBuffer::ByteBufferView buffer){
+		static Implementation selectImplementation__(std::string_view filename, MyBuffer::ByteBufferView bufferWrite, size_t listSize, MyBuffer::ByteBufferView buffer){
 			assert(listSize > 0);
 
 			size_t const nodesCount = selectNodeCount__(listSize);
 
 			if (nodesCount <= std::numeric_limits<uint32_t>::max())
-				return selectImplementation__2<uint32_t>(filename, nodesCount, buffer);
+				return selectImplementation__2<uint32_t>(filename, bufferWrite, nodesCount, buffer);
 			else
-				return selectImplementation__2<uint64_t>(filename, nodesCount, buffer);
+				return selectImplementation__2<uint64_t>(filename, bufferWrite, nodesCount, buffer);
 		}
 
 	private:

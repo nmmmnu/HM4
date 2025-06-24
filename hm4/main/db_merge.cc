@@ -34,20 +34,25 @@ namespace{
 	}
 
 	template <class FACTORY>
-	int mergeFromFactory(FACTORY &&f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions, MyBuffer::ByteBufferView bufferHash){
+	int mergeFromFactory(FACTORY &&f, const char *output_file, hm4::disk::FileBuilder::TombstoneOptions const tombstoneOptions,
+				hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite,
+				MyBuffer::ByteBufferView bufferHash){
+
 		auto const aligned = hm4::Pair::WriteOptions::ALIGNED;
 
 		auto &list = f();
 
 		if (bufferHash){
-			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
+			hm4::disk::FileBuilder::build(output_file, buffersWrite,
+								std::begin(list), std::end(list),
 								tombstoneOptions, aligned,
 								list.size(), bufferHash
 			);
 
 			return 0;
 		}else{
-			hm4::disk::FileBuilder::build(output_file, std::begin(list), std::end(list),
+			hm4::disk::FileBuilder::build(output_file, buffersWrite,
+								std::begin(list), std::end(list),
 								tombstoneOptions, aligned
 			);
 
@@ -124,6 +129,9 @@ constexpr size_t MB			= 1024 * 1024;
 // not to have 64K on the stack
 MyBuffer::StaticMemoryResource<32 * 2048> g_slabBuffer;
 
+#include "disk/filebuilder.misc.h"
+// defines g_fbwb;
+
 int main(int argc, char **argv){
 	if (argc <= 1 + 1 + 1)
 		return printUsage(argv[0]);
@@ -150,6 +158,8 @@ int main(int argc, char **argv){
 
 	DiskList::VMAllocator allocator{ g_slabBuffer };
 
+	auto buffersWrite = g_fbwb();
+
 	switch(table_count){
 	case 1:
 		fmt::print(	"Merging (cleanup) single table...\n"
@@ -161,6 +171,7 @@ int main(int argc, char **argv){
 			MergeListFactory_1{ path[0], allocator, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
+			buffersWrite,
 			bufferHash
 		);
 
@@ -175,6 +186,7 @@ int main(int argc, char **argv){
 			MergeListFactory_2{ path[0], path[1], allocator, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
+			buffersWrite,
 			bufferHash
 		);
 
@@ -185,6 +197,7 @@ int main(int argc, char **argv){
 			MergeListFactory_N<const char **>{ path, path + table_count, allocator, DEFAULT_MODE },
 			output,
 			tombstoneOptions,
+			buffersWrite,
 			bufferHash
 		);
 	}

@@ -6,6 +6,7 @@
 #include <cassert>
 #include <string_view>
 
+#include "mybufferview.h"
 
 
 /*
@@ -14,47 +15,7 @@ user	0m11.201s
 sys	0m1.726s
 */
 
-struct FileWriterIOStream{
-	constexpr static std::string_view name(){
-		return "IOStream";
-	}
-
-	FileWriterIOStream() = default;
-	FileWriterIOStream(std::string_view name, size_t size = 0) : FileWriterIOStream(name.data(), size){};
-
-	FileWriterIOStream(const char *name, size_t = 0) : os(name, MODE){}
-
-	bool write(const void *vdata, size_t size){
-		const char *data = static_cast<const char *>(vdata);
-
-		assert(data);
-
-		return !! os.write(data, static_cast<std::streamsize>(size));
-	}
-
-	auto write(std::string_view s){
-		return write(s.data(), s.size());
-	}
-
-	auto put(char c){
-		return write(& c, 1);
-	}
-
-	void flush(){
-		os.flush();
-	}
-
-	void close(){
-		os.close();
-	}
-
-private:
-	static constexpr auto MODE = std::ios::out | std::ios::binary | std::ios::trunc;
-
-	std::ofstream os;
-};
-
-
+// struct FileWriterIOStream;
 
 /*
 real	0m10.185s
@@ -67,11 +28,13 @@ struct FileWriterFOpen{
 		return "FOpen";
 	}
 
-	FileWriterFOpen() = default;
-	FileWriterFOpen(std::string_view name, size_t size = 0) : FileWriterFOpen(name.data(), size){}
+	FileWriterFOpen(std::string_view name, MyBuffer::ByteBufferView buffer) : FileWriterFOpen(name.data(), buffer){}
 
-	FileWriterFOpen(const char *name, size_t = 0){
+	FileWriterFOpen(const char *name, MyBuffer::ByteBufferView buffer){
 		f = fopen(name, "w");
+
+		if (buffer)
+			setvbuf(f, static_cast<char *>(buffer.data()), _IOFBF, buffer.size());
 	}
 
 	~FileWriterFOpen(){
@@ -112,8 +75,7 @@ private:
 
 
 
-//using FileWriter = FileWriterFOpen;
-using FileWriter = FileWriterIOStream;
+using FileWriter = FileWriterFOpen;
 
 #endif
 

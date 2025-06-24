@@ -108,7 +108,8 @@ namespace FileBuilder{
 		auto const filename_norm = filenameMeta_string_view(filename);
 
 		{
-			FileWriter file_meta{ filename_temp };
+			MyBuffer::ByteBufferView empty; // remove me
+			FileWriter file_meta{ filename_temp, empty };
 			file_meta.write( & blob, sizeof(FileMetaBlob));
 		}
 
