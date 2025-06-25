@@ -49,7 +49,8 @@ public:
 	bool clear(){
 		dataBuilder_.close();
 		// file is sync to disk.
-		dataBuilder_ = { filename_, MyBuffer::ByteBufferView{}, writeOptions_ };
+		FileDataBuilder temp{ filename_, MyBuffer::ByteBufferView{}, writeOptions_ };
+		dataBuilder_ = std::move(temp);
 		return true;
 	}
 

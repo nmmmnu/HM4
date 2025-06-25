@@ -134,8 +134,27 @@ public:
 		fd_ = ::open(name, mode, 0644);
 	}
 
+	FileWriterFD(FileWriterFD &&other) :
+				fd_	(other.fd_	),
+				pos_	(other.pos_	),
+				buffer_	(other.buffer_	){
+
+		other.fd_  = -1;
+		other.pos_ =  0;
+	}
+
+	FileWriterFD &operator=(FileWriterFD &&other){
+		fd_	= other.fd_;
+		pos_	= other.pos_;
+		buffer_	= other.buffer_;
+
+		other.fd_  = -1;
+		other.pos_ =  0;
+
+		return *this;
+	}
+
 	~FileWriterFD(){
-		flush();
 		close();
 	}
 
@@ -196,66 +215,13 @@ public:
 		if (fd_ < 0)
 			return;
 
-		::close(fd_);
-	}
-};
-
-
-/*
-class FileWriterFDNoBuffer{
-	int				fd_	= -1;
-	size_t				pos_	=  0;
-	MyBuffer::ByteBufferView	buffer_;
-
-public:
-	constexpr static std::string_view name(){
-		return "FD";
-	}
-
-	FileWriterFDNoBuffer() = default;
-
-	FileWriterFDNoBuffer(std::string_view name) : FileWriterFDNoBuffer(name.data()){}
-
-	FileWriterFDNoBuffer(const char *name) : buffer_(buffer){
-		int const mode = O_WRONLY | O_CREAT | O_TRUNC;
-
-		fd_ = ::open(name, mode, 0644);
-	}
-
-	~FileWriterFDNoBuffer(){
 		flush();
-		close();
-	}
 
-	void write(const void *data, size_t size) {
-		if (fd_ < 0)
-			return;
-
-		assert(data);
-
-		::write(fd_, data, size);
-	}
-
-	auto write(std::string_view s){
-		return write(s.data(), s.size());
-	}
-
-	auto put(char c){
-		return write(& c, 1);
-	}
-
-	constexpr static void flush(){
-	}
-
-	void close(){
 		::close(fd_);
+
+		fd_ = -1;
 	}
 };
-
-using FileWriterNoBuffer = FileWriterFDNoBuffer;
-
-*/
-
 
 using FileWriter = FileWriterFD;
 
