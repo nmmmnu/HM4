@@ -7,8 +7,8 @@ namespace hm4::disk::FileBuilder{
 
 	class FileBuilderWriteStaticBuffers{
 		constexpr static size_t KB = 1024;
-		constexpr static size_t DataSize = 64;
-		constexpr static size_t PageSize =  4;
+		constexpr static size_t DataSize = 256;
+		constexpr static size_t PageSize =  16;
 
 		MyBuffer::StaticMemoryResource<DataSize * KB> data;
 		MyBuffer::StaticMemoryResource<PageSize * KB> indx;

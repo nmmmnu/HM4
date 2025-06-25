@@ -13,17 +13,35 @@
 #include "mybufferview.h"
 
 /*
-real	0m13.186s
-user	0m11.201s
-sys	0m1.726s
+build
+real	8m29.119s
+user	11m2.589s
+sys	1m14.905s
+
+merge
+real	7m45.271s
+user	1m44.751s
+sys	1m12.147s
+
+real	10m4.675s
+user	1m50.903s
+sys	1m39.171s
 */
 
 // struct FileWriterIOStream;
 
+
+
 /*
-real	0m10.185s
-user	0m8.564s
-sys	0m1.392s
+build
+real	8m49.530s
+user	10m39.708s
+sys	1m19.855s
+
+merge
+real	9m3.387s
+user	1m40.765s
+sys	1m5.901s
 */
 
 struct FileWriterFOpen{
@@ -80,6 +98,22 @@ private:
 
 
 
+/*
+build
+real	8m31.949s
+user	9m58.846s
+sys	1m18.215s
+
+real	8m34.689s
+user	10m3.363s
+sys	1m21.935s
+
+merge
+real	9m2.521s
+user	1m29.690s
+sys	1m16.328s
+*/
+
 class FileWriterFD{
 	int				fd_	= -1;
 	size_t				pos_	=  0;
@@ -95,9 +129,9 @@ public:
 	FileWriterFD(std::string_view name, MyBuffer::ByteBufferView buffer) : FileWriterFD(name.data(), buffer){}
 
 	FileWriterFD(const char *name, MyBuffer::ByteBufferView buffer) : buffer_(buffer){
-		int const mode = O_WRONLY; //O_RDWR;
+		int const mode = O_WRONLY | O_CREAT | O_TRUNC;
 
-		fd_ = ::open(name, mode);
+		fd_ = ::open(name, mode, 0644);
 	}
 
 	~FileWriterFD(){
@@ -117,21 +151,27 @@ public:
 		const char *p = static_cast<const char *>(data);
 		      char *b = static_cast<      char *>(buffer_.data());
 
-		while(size){
-			size_t const space = buffer_.size() - size;
+		if (size > buffer_.size()){
+			flush();
+			::write(fd_, data, size);
+			return;
+		}
 
-			if (size <= space) {
-				memcpy(&b[pos_], p, size);
-				pos_ += size;
-			}else{
-				memcpy(&b[pos_], p, space);
-				pos_ += space;
+		while(size > 0){
+			size_t const space = buffer_.size() - pos_;
 
+			if (space == 0){
 				flush();
-
-				p    += space;
-				size -= space;
+				continue;
 			}
+
+			size_t const toCopy = std::min(space, size);
+
+			memcpy(&b[pos_], p, toCopy);
+
+			pos_ += toCopy;
+			p    += toCopy;
+			size -= toCopy;
 		}
 	}
 
