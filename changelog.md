@@ -328,5 +328,5 @@ Changelog
 -	Fix bug in AVLList deallocation (part of tests, not affecting  db_net)
 -	Introduce List::getPair(), which eliminate using of iterators and memory allocations in several places
 -	Merge / Replace StaticVector with new version
--	Introduce SmallVector in order to aliminate memory allocation in CollectionIterator
-
+-	Introduce SmallVector in order to eliminate memory allocation in CollectionIterator
+-	Introduce buffered writting when creating disktables for speedup of 5%
