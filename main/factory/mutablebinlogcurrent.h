@@ -32,6 +32,8 @@ namespace DBAdapterFactory{
 				typename MemList::Allocator	&allocator1	,
 				typename MemList::Allocator	&allocator2	,
 
+				hm4::disk::FileBuilder::FileBuilderWriteBuffers
+								&buffersWrite	,
 				MyBuffer::ByteBufferView	bufferPair	,
 				MyBuffer::ByteBufferView	bufferHash
 
@@ -59,6 +61,7 @@ namespace DBAdapterFactory{
 						slabAllocator	,
 						binLogList1_	,
 						binLogList2_	,
+						buffersWrite	,
 						bufferPair	,
 						bufferHash
 					}{}

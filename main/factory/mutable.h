@@ -12,12 +12,25 @@ namespace DBAdapterFactory{
 		using MyDBAdapter	= typename MutableBase_::MyDBAdapter;
 
 		template<typename UStringPathData>
-		Mutable(UStringPathData &&path_data, typename MemList::Allocator &allocator, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash) :
+		Mutable(
+				UStringPathData			 &&path_data	,
+
+				DiskList::VMAllocator		&slabAllocator	,
+
+				typename MemList::Allocator	&allocator	,
+
+				hm4::disk::FileBuilder::FileBuilderWriteBuffers
+								&buffersWrite	,
+				MyBuffer::ByteBufferView	bufferPair	,
+				MyBuffer::ByteBufferView	bufferHash
+			) :
 					memList_{ allocator },
 					base_{
 						std::forward<UStringPathData>(path_data),
-						memList_,
-						bufferPair,
+						slabAllocator	,
+						memList_	,
+						buffersWrite	,
+						bufferPair	,
 						bufferHash
 					}{}
 

@@ -16,9 +16,14 @@ namespace DBAdapterFactory{
 		template<typename UStringPathData>
 		MutableConcurrent(
 				UStringPathData			&&path_data	,
+
 				DiskList::VMAllocator		&slabAllocator	,
+
 				typename MemList::Allocator	&allocator1	,
 				typename MemList::Allocator	&allocator2	,
+
+				hm4::disk::FileBuilder::FileBuilderWriteBuffers
+								&buffersWrite	,
 				MyBuffer::ByteBufferView	pairBuffer	,
 				MyBuffer::ByteBufferView	bufferHash
 			) :
@@ -29,6 +34,7 @@ namespace DBAdapterFactory{
 						slabAllocator	,
 						memList1_	,
 						memList2_	,
+						buffersWrite	,
 						pairBuffer	,
 						bufferHash
 					}{}

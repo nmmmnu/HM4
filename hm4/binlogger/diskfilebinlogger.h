@@ -3,7 +3,8 @@
 
 #include "disk/filebuilder.h"
 #include "myfs.h"
-
+//#include "staticbuffer.h"
+#include "mybufferview.h"
 
 namespace hm4{
 namespace binlogger{
@@ -48,7 +49,7 @@ public:
 	bool clear(){
 		dataBuilder_.close();
 		// file is sync to disk.
-		dataBuilder_ = { filename_, writeOptions_ };
+		dataBuilder_ = { filename_, MyBuffer::ByteBufferView{}, writeOptions_ };
 		return true;
 	}
 
@@ -67,7 +68,7 @@ private:
 	std::string		filename_;
 	SyncOptions		syncOprions_;
 	Pair::WriteOptions	writeOptions_;
-	FileDataBuilder		dataBuilder_{ filename_, writeOptions_ };
+	FileDataBuilder		dataBuilder_{ filename_, MyBuffer::ByteBufferView{}, writeOptions_ };
 };
 
 

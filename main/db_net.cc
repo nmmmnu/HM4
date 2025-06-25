@@ -118,6 +118,11 @@ constexpr size_t MIN_HASH_ARENA_SIZE	= 8;
 
 // ----------------------------------
 
+#include "disk/filebuilder.misc.h"
+auto g_buffersWrite = g_fbwb();
+
+// ----------------------------------
+
 #include "signalguard.h"
 #include "mystring.h"
 #include "db_net_options.h"
@@ -280,6 +285,7 @@ namespace{
 							allocator1		,
 							allocator2		,
 
+							g_buffersWrite		,
 							bufferPair		,
 							bufferHash
 						},
@@ -295,8 +301,11 @@ namespace{
 						MyFactory{
 							opt.db_path		,
 							vmAllocator		,
+
 							allocator1		,
 							allocator2		,
+
+							g_buffersWrite		,
 							bufferPair		,
 							bufferHash
 						},
@@ -333,9 +342,14 @@ namespace{
 						MyFactory{
 							opt.db_path		,
 							vmAllocator		,
+
 							opt.binlog_path1	,
+
 							syncOptions		,
+
 							allocator		,
+
+							g_buffersWrite		,
 							bufferPair		,
 							bufferHash
 						},
@@ -351,7 +365,10 @@ namespace{
 						MyFactory{
 							opt.db_path		,
 							vmAllocator		,
+
 							allocator		,
+
+							g_buffersWrite		,
 							bufferPair		,
 							bufferHash
 						},
@@ -604,7 +621,7 @@ namespace{
 
 		/* nested scope for the d-tor */
 		{
-			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ path, allocator, bufferPair };
+			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ path, allocator, g_buffersWrite, bufferPair };
 
 			auto &list = factory();
 

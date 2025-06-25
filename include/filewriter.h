@@ -135,9 +135,6 @@ public:
 	}
 
 	~FileWriterFD(){
-		if (fd_ < 0)
-			return;
-
 		flush();
 		close();
 	}
@@ -148,14 +145,19 @@ public:
 
 		assert(data);
 
-		const char *p = static_cast<const char *>(data);
-		      char *b = static_cast<      char *>(buffer_.data());
+		if (!buffer_){
+			::write(fd_, data, size);
+			return;
+		}
 
 		if (size > buffer_.size()){
 			flush();
 			::write(fd_, data, size);
 			return;
 		}
+
+		const char *p = static_cast<const char *>(data);
+		      char *b = static_cast<      char *>(buffer_.data());
 
 		while(size > 0){
 			size_t const space = buffer_.size() - pos_;
@@ -198,6 +200,61 @@ public:
 	}
 };
 
+
+/*
+class FileWriterFDNoBuffer{
+	int				fd_	= -1;
+	size_t				pos_	=  0;
+	MyBuffer::ByteBufferView	buffer_;
+
+public:
+	constexpr static std::string_view name(){
+		return "FD";
+	}
+
+	FileWriterFDNoBuffer() = default;
+
+	FileWriterFDNoBuffer(std::string_view name) : FileWriterFDNoBuffer(name.data()){}
+
+	FileWriterFDNoBuffer(const char *name) : buffer_(buffer){
+		int const mode = O_WRONLY | O_CREAT | O_TRUNC;
+
+		fd_ = ::open(name, mode, 0644);
+	}
+
+	~FileWriterFDNoBuffer(){
+		flush();
+		close();
+	}
+
+	void write(const void *data, size_t size) {
+		if (fd_ < 0)
+			return;
+
+		assert(data);
+
+		::write(fd_, data, size);
+	}
+
+	auto write(std::string_view s){
+		return write(s.data(), s.size());
+	}
+
+	auto put(char c){
+		return write(& c, 1);
+	}
+
+	constexpr static void flush(){
+	}
+
+	void close(){
+		::close(fd_);
+	}
+};
+
+using FileWriterNoBuffer = FileWriterFDNoBuffer;
+
+*/
 
 
 using FileWriter = FileWriterFD;

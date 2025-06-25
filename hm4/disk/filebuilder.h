@@ -13,6 +13,8 @@
 
 #include "hashindexbuilder.h"
 
+#include "logger.h"
+
 namespace hm4{
 namespace disk{
 namespace FileBuilder{
@@ -109,14 +111,28 @@ namespace FileBuilder{
 					meta(filename,                    fileWriteOptions		),
 					indx(filename, buffersWrite.indx, fileWriteOptions		),
 					line(filename, buffersWrite.line				),
-					data(filename, buffersWrite.data, fileWriteOptions		){}
+					data(filename, buffersWrite.data, fileWriteOptions		){
+
+			logger<Logger::DEBUG>() << "Building DiskList with following buffer sizes" <<
+					"data" << buffersWrite.data.size() <<
+					"indx" << buffersWrite.indx.size() <<
+					"line" << buffersWrite.line.size()
+			;
+		}
 
 		FileBuilder(std::string_view const filename, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite, Pair::WriteOptions const fileWriteOptions, size_t listSize, MyBuffer::ByteBufferView bufferHash):
 					meta(filename,                    fileWriteOptions		),
 					indx(filename, buffersWrite.indx, fileWriteOptions		),
 					line(filename, buffersWrite.line				),
 					data(filename, buffersWrite.data, fileWriteOptions		),
-					hazh(filename, buffersWrite.hash, listSize, bufferHash	){}
+					hazh(filename, buffersWrite.hash, listSize, bufferHash	){
+			logger<Logger::DEBUG>() << "Building DiskList with following buffer sizes" <<
+					"data" << buffersWrite.data.size() <<
+					"indx" << buffersWrite.indx.size() <<
+					"line" << buffersWrite.line.size() <<
+					"line" << buffersWrite.hash.size()
+			;
+		}
 
 		void operator()(Pair const &pair){
 			push_back(pair);

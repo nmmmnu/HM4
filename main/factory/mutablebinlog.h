@@ -18,11 +18,19 @@ namespace DBAdapterFactory{
 
 		template<typename UStringPathData, typename UStringPathBinLog>
 		MutableBinLog(
-				UStringPathData			&&path_data,
-				UStringPathBinLog		&&path_binlog,
-				BinLogger::SyncOptions		syncOptions,
-				typename MemList::Allocator	&allocator,
-				MyBuffer::ByteBufferView	bufferPair,
+				UStringPathData			&&path_data	,
+
+				DiskList::VMAllocator		&slabAllocator	,
+
+				UStringPathBinLog		&&path_binlog	,
+
+				BinLogger::SyncOptions		syncOptions	,
+
+				typename MemList::Allocator	&allocator	,
+
+				hm4::disk::FileBuilder::FileBuilderWriteBuffers
+								&buffersWrite	,
+				MyBuffer::ByteBufferView	bufferPair	,
 				MyBuffer::ByteBufferView	bufferHash
 			) :
 					memList_{ allocator },
@@ -36,8 +44,10 @@ namespace DBAdapterFactory{
 					},
 					base_{
 						std::forward<UStringPathData>(path_data),
-						binLogList_,
-						bufferPair,
+						slabAllocator	,
+						binLogList_	,
+						buffersWrite	,
+						bufferPair	,
 						bufferHash
 					}{}
 
