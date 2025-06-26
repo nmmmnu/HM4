@@ -60,9 +60,22 @@ struct FileWriterFOpen{
 			setvbuf(f, static_cast<char *>(buffer.data()), _IOFBF, buffer.size());
 	}
 
+	FileWriterFOpen(FileWriterFOpen &&other) :
+				f(std::move(other.f)){
+
+		other.f  = nullptr;
+	}
+
+	FileWriterFOpen &operator=(FileWriterFOpen &&other){
+		f = std::move(other.f);
+
+		other.f  = nullptr;
+
+		return *this;
+	}
+
 	~FileWriterFOpen(){
-		if (f)
-			fclose(f);
+		close();
 	}
 
 	bool write(const void *vdata, size_t size){
@@ -135,18 +148,18 @@ public:
 	}
 
 	FileWriterFD(FileWriterFD &&other) :
-				fd_	(other.fd_	),
-				pos_	(other.pos_	),
-				buffer_	(other.buffer_	){
+				fd_	(std::move(other.fd_		)),
+				pos_	(std::move(other.pos_		)),
+				buffer_	(std::move(other.buffer_	)){
 
 		other.fd_  = -1;
 		other.pos_ =  0;
 	}
 
 	FileWriterFD &operator=(FileWriterFD &&other){
-		fd_	= other.fd_;
-		pos_	= other.pos_;
-		buffer_	= other.buffer_;
+		fd_	= std::move(other.fd_		);
+		pos_	= std::move(other.pos_		);
+		buffer_	= std::move(other.buffer_	);
 
 		other.fd_  = -1;
 		other.pos_ =  0;
