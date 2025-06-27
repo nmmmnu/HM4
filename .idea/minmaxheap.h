@@ -83,12 +83,24 @@ private:
 	}
 
 	bool less_(size_type a, size_type b) const{
+		if (a >= data_.size() || b >= data_.size()) {
+			printf("BUG: less_ OOB! a=%zu, b=%zu, size=%zu\n",
+				(size_t)a, (size_t)b, (size_t)data_.size());
+		}
+
+
 		auto &_ = data_;
 
 		return comp_.less(_[a], _[b]);
 	}
 
 	bool greater_(size_type a, size_type b) const{
+		if (a >= data_.size() || b >= data_.size()) {
+			printf("BUG: greater_ OOB! a=%zu, b=%zu, size=%zu\n",
+				(size_t)a, (size_t)b, (size_t)data_.size());
+		}
+
+
 		auto &_ = data_;
 
 		return comp_.greater(_[a], _[b]);
@@ -103,12 +115,28 @@ private:
 	size_type partnerH_(size_type const k) const{
 		auto const n = size();
 
-		if(k == n - (n & 1)){	// can only occur when n & 1 == 1
+		if(k == n - (n & 1)){
 			size_type const base = k / 2;
-			return base - 1 + (base & 1);
-		}else
-			return k + 1;
+			size_type result = base - 1 + (base & 1);
+
+			if (result >= size()) {
+				printf("BUG: partnerH_ out of bounds! k=%zu, n=%zu, base=%zu → result=%zu\n",
+					(size_t)k, (size_t)n, (size_t)base, (size_t)result);
+			}
+
+			return result;
+		}else{
+			size_type result = k + 1;
+
+			if (result >= size()) {
+				printf("BUG: partnerH_ default out of bounds! k=%zu → result=%zu, size=%zu\n",
+					(size_t)k, (size_t)result, (size_t)size());
+			}
+
+			return result;
+		}
 	}
+
 
 	size_type partnerL_(size_type const k) const{
 		auto const n = size();

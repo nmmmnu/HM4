@@ -1,8 +1,8 @@
 #ifndef NET_SIMPLE_SPARE_POOL_H
 #define NET_SIMPLE_SPARE_POOL_H
 
+#include <algorithm> // make_heap
 #include "iobuffer.h"
-#include "minmaxheap.h"
 
 namespace net{
 
@@ -23,32 +23,28 @@ class HeapSparePool{
 
 		S(S const &other)		= delete;
 		S &operator=(S const &other)	= delete;
-	};
 
-	struct Comp{
-		static auto _(S const &a){
-			return a.data.capacity();
-		}
+		constexpr friend bool operator<(S const &a, S const &b){
+			auto _ = [](S const &a){
+				return a.data.capacity();
+			};
 
-		static bool less(S const &a, S const &b){
 			return _(a) < _(b);
 		}
-
-		static bool greater(S const &a, S const &b){
-			return _(a) > _(b);
-		}
 	};
 
-	using SparePoolContainer = MinMaxHeap<S, std::vector<S>, Comp>;
+	using SparePoolContainer = std::vector<S>;
 
 public:
 	HeapSparePool(uint32_t conf_minSparePoolSize, uint32_t conf_maxSparePoolSize, size_t conf_bufferCapacity) :
-								conf_minSparePoolSize_	(conf_minSparePoolSize		),
-								conf_maxSparePoolSize_	(conf_maxSparePoolSize		),
-								conf_bufferCapacity_	(conf_bufferCapacity		){
+								conf_minSparePoolSize_	(conf_minSparePoolSize	),
+								conf_maxSparePoolSize_	(conf_maxSparePoolSize	),
+								conf_bufferCapacity_	(conf_bufferCapacity	){
+
+		sparePool_.reserve(conf_maxSparePoolSize_ + 1);
 
 		for(size_t i = 0; i < conf_minSparePoolSize; ++i)
-			emplace_back();
+			sparePool_.emplace_back(construct_());
 	}
 
 	bool empty() const{
@@ -60,39 +56,33 @@ public:
 	}
 
 public:
-	auto pop(){
-		if (! sparePool_.empty()){
-			auto x = sparePool_.popMax();
-			log__("get", x);
-			return std::move(x.data);
+	data_type pop(){
+		if (! empty()){
+			return popMax_();
 		}else{
 			return construct_();
 		}
 	}
 
 	void push(data_type &&item){
-		log__("adding", item);
-		sparePool_.insert(std::move(item));
+		push_(std::move(item));
 
-		if (size() > conf_maxSparePoolSize_){
-			auto x = /* destruct */ sparePool_.popMin();
-			log__("add_remove", x);
-		}
+		if (size() > conf_maxSparePoolSize_)
+			popLeaf_<1>();
 	}
 
 	void balance(){
 		if (size() > conf_minSparePoolSize_){
-			auto x = /* destruct */  sparePool_.popMin();
-			log__("remove", x);
+			popLeaf_<0>();
 		}else
 		if (size() < conf_minSparePoolSize_){
-			emplace_back();
+			construct_back_();
 		}
 	}
 
 private:
-	void emplace_back(){
-		sparePool_.insert(conf_bufferCapacity_);
+	void construct_back_(){
+		push(construct_());
 	}
 
 	data_type construct_(){
@@ -102,21 +92,57 @@ private:
 	}
 
 private:
-	static void log__(const char *s, data_type const &data){
-		if constexpr(0)
-			printf("%s %zu\n", s, data.capacity());
+	data_type popMax_(){
+		std::pop_heap(std::begin(sparePool_), std::end(sparePool_));
+		data_type item = std::move(sparePool_.back().data);
+		sparePool_.pop_back();
+
+		log__("get", item.capacity());
+
+		return item;
 	}
 
-	static void log__(const char *s, S const &x){
-		return log__(s, x.data);
+	void push_(data_type &&item){
+		auto const capacity = item.capacity();
+
+		sparePool_.emplace_back(std::move(item));
+		std::push_heap(std::begin(sparePool_), std::end(sparePool_));
+
+		log__("adding", capacity);
+	}
+
+	template<bool B>
+	void popLeaf_(){
+		auto const capacity = sparePool_.back().data.capacity();
+
+		sparePool_.pop_back();
+
+		if constexpr(B)
+			log__("remove after add",    capacity);
+		else
+			log__("remove when balance", capacity);
 	}
 
 private:
-	uint32_t			conf_minSparePoolSize_	;
-	uint32_t			conf_maxSparePoolSize_	;
-	size_t				conf_bufferCapacity_	;
+	void log__(const char *s, size_t const capacity) const{
+		if constexpr(0){
+			printf("%s %zu\n", s, capacity);
 
-	SparePoolContainer		sparePool_{ conf_maxSparePoolSize_ + 1 };
+			if constexpr(1){
+				printf("Buffer Heap:\n");
+				for(auto const &x : sparePool_)
+					printf("- %10zu %p\n", x.data.capacity(), (void *) x.data.data());
+				printf("%5zu items total:\n", sparePool_.size());
+			}
+		}
+	}
+
+private:
+	uint32_t	conf_minSparePoolSize_	;
+	uint32_t	conf_maxSparePoolSize_	;
+	size_t		conf_bufferCapacity_	;
+
+	std::vector<S>	sparePool_;
 };
 
 } // namespace

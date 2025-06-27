@@ -2,7 +2,6 @@
 #define MY_SMALL_VECTOR_H_
 
 #include <memory>		// std::uninitialized_copy, std::uninitialized_move
-#include <stdexcept>		// std::bad_alloc
 #include <limits>
 #include <initializer_list>
 

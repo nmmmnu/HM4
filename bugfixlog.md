@@ -78,5 +78,6 @@ Changelog
 
 ### 1.3.10
 -	Fix bug in AVLList deallocation (part of tests, not affecting  db_net)
+-	Find bug with "bad_alloc" in network protocol when too many clients come at once
 
 
