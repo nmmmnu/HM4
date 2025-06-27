@@ -330,5 +330,8 @@ Changelog
 -	Merge / Replace StaticVector with new version
 -	Introduce SmallVector in order to eliminate memory allocation in CollectionIterator
 -	Introduce buffered writting when creating disktables for speedup of 5%
+
+### 1.3.10.1
 -	Changing HeapSparePool MinMaxHeap to less sophisticated standard MaxHeap.
 -	Find bug with "bad_alloc" in network protocol when too many clients come at once.
+

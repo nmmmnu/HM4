@@ -8,7 +8,7 @@ namespace hm4{
 		constexpr int major	= 1;
 		constexpr int minor	= 3;
 		constexpr int revision	= 10;
-		constexpr int build	= 0;
+		constexpr int build	= 1;
 
 		constexpr int num	=	major		* 100000	+
 						minor		* 1000		+

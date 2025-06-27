@@ -5,8 +5,10 @@
 #include "multi/collectionlist.h"
 #include "myfs.h"
 
-#include <vector>
 #include <string_view>
+
+//#include <vector>
+#include "smallvector.h"
 
 
 
@@ -16,8 +18,11 @@ namespace listloader{
 	namespace impl_{
 
 		struct ContainerHelper{
+			constexpr static size_t ContainerInlineCapacity = 64;
+
 			using DiskList		= hm4::disk::DiskList;
-			using Container		= std::vector<DiskList>;
+			//using Container	= std::vector<DiskList>;
+			using Container		= SmallVector<DiskList, ContainerInlineCapacity>;
 			using CollectionList	= hm4::multi::CollectionList<Container>;
 
 			ContainerHelper(DiskList::VMAllocator *allocator, DiskList::OpenMode const mode) :

@@ -2,6 +2,7 @@
 #define MY_SMALL_VECTOR_H_
 
 #include <memory>		// std::uninitialized_copy, std::uninitialized_move
+#include <stdexcept>		// std::out_of_range
 #include <limits>
 #include <initializer_list>
 
@@ -40,16 +41,16 @@ public:
 	constexpr SmallVector() = default;
 
 	constexpr SmallVector(size_type const count, value_type const &value){
-		assign_<0>(count, value);
+		construct_<0>(count, value);
 	}
 
 	template<class Iterator>
 	constexpr SmallVector(Iterator begin, Iterator end){
-		assign_<0>(begin, end);
+		copy_<0>(begin, end);
 	}
 
 	constexpr SmallVector(std::initializer_list<value_type> const &list){
-		assign_<0>(list.begin(), list.end());
+		copy_<0>(list.begin(), list.end());
 	}
 
 	// D-TOR
@@ -64,10 +65,24 @@ public:
 		copy_<0>(other.begin(), other.end());
 	}
 
-	constexpr SmallVector(SmallVector &&other) noexcept{
+private:
+	template<bool Destruct>
+	constexpr void move_operation__(SmallVector &other) noexcept{
 		if (other.useInternalBuffer_()){
-			move_<0>(other.begin(), other.end());
+			move_<Destruct>(other.begin(), other.end());
+
+		}else if (!useInternalBuffer_()){
+			// both use external buffer
+			// swap external buffers
+
+			using std::swap;
+
+			swap(data_	, other.data_		);
+			swap(size_	, other.size_		);
+			swap(capacity_	, other.capacity_	);
 		}else{
+			deallocate_();
+
 			// plunder other's external buffer
 
 			data_     = other.data_;
@@ -76,6 +91,11 @@ public:
 
 			other.reset_();
 		}
+	}
+
+public:
+	constexpr SmallVector(SmallVector &&other) noexcept{
+		move_operation__<0>(other);
 	}
 
 	constexpr SmallVector &operator=(SmallVector const &other) {
@@ -88,51 +108,10 @@ public:
 	}
 
 	constexpr SmallVector &operator=(SmallVector &&other) noexcept {
-		if (this == &other)
-			return *this;
-
-		if (other.useInternalBuffer_()){
-			move_<1>(other.begin(), other.end());
-
-		}else if (!useInternalBuffer_()){
-			// both use external buffer
-			// swap external buffers
-
-			using std::swap;
-
-			swap(data_	, other.data_		 );
-			swap(size_	, other.size_		 );
-			swap(capacity_	, other.capacity_	 );
-		}else{
-			deallocate_();
-
-			// plunder other's external buffer
-
-			data_     = other.data_;
-			size_     = other.size_;
-			capacity_ = other.capacity_;
-
-			other.reset_();
-		}
+		move_operation__<1>(other);
 
 		return *this;
 	}
-
-	// SWAP
-
-	// constexpr
-	// void swap(SmallVector &other){
-	// 	using std::swap;
-	//
-	// 	swap(data_	, other.data_		 );
-	// 	swap(size_	, other.size_		 );
-	// 	swap(capacity_	, other.capacity_	 );
-	// }
-	//
-	// constexpr
-	// friend void swap(SmallVector &a, SmallVector &b){
-	// 	a.swap(b);
-	// }
 
 	// MISC
 
@@ -324,18 +303,18 @@ public:
 
 	constexpr
 	void assign(size_type const count, value_type const &value){
-		assign_<1>(count, value);
+		construct_<1>(count, value);
 	}
 
 	template<class Iterator>
 	constexpr
 	void assign(Iterator first, Iterator last){
-		assign_<1>(first, last);
+		copy_<1>(first, last);
 	}
 
 	constexpr
 	void assign(std::initializer_list<value_type> const &list){
-		assign(list.begin(), list.end());
+		copy_<1>(list.begin(), list.end());
 	}
 
 private:
@@ -364,7 +343,7 @@ private:
 
 	template<bool Destruct>
 	constexpr
-	void assign_(size_type const count, value_type const &value){
+	void construct_(size_type const count, value_type const &value){
 		if constexpr(Destruct)
 			clear();
 
@@ -374,19 +353,19 @@ private:
 			push_back(value);
 	}
 
+	// copy / move elements
+
 	template<bool Destruct, class Iterator>
 	constexpr
-	void assign_(Iterator first, Iterator last){
+	void helper_copy_(Iterator first, Iterator last){
 		if constexpr(Destruct)
 			clear();
 
-		reserve(static_cast<size_type>(std::distance(first, last)));
+		// reserve(std::distance(first, last));
 
 		for(auto it = first; it != last; ++it)
 			push_back(*it);
 	}
-
-	// copy / move elements
 
 	template<bool Destruct, class Iterator>
 	constexpr
@@ -401,8 +380,20 @@ private:
 
 			std::uninitialized_copy(first, last, data());
 		}else{
-			assign_<Destruct>(first, last);
+			helper_copy_<Destruct>(first, last);
 		}
+	}
+
+	template<bool Destruct, class Iterator>
+	constexpr
+	void helper_move_(Iterator first, Iterator last){
+		if constexpr(Destruct)
+			clear();
+
+		// reserve(std::distance(first, last));
+
+		for(auto it = first; it != last; ++it)
+			push_back(std::move(*it));
 	}
 
 	template<bool Destruct, class Iterator>
@@ -418,7 +409,7 @@ private:
 
 			std::uninitialized_move(first, last, data());
 		}else{
-			assign_<Destruct>(first, last);
+			helper_move_<Destruct>(first, last);
 		}
 	}
 

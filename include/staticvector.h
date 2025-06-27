@@ -223,19 +223,19 @@ public:
 	template<typename buffer_value_type>
 	constexpr StaticVector(size_type const count, value_type const &value,
 				buffer_value_type *data, size_type size) : Base(data, size){
-		assign_(count, value);
+		construct_(count, value);
 	}
 
 	template<class Iterator, typename buffer_value_type>
 	constexpr StaticVector(Iterator begin, Iterator end,
 				buffer_value_type *data, size_type size) : Base(data, size){
-		assign_(begin, end);
+		copy_(begin, end);
 	}
 
 	template<typename buffer_value_type>
 	constexpr StaticVector(std::initializer_list<value_type> const &list,
 				buffer_value_type *data, size_type size) : Base(data, size){
-		assign_(list.begin(), list.end());
+		copy_(list.begin(), list.end());
 	}
 
 	// COPY / MOVE C-TORS
@@ -477,18 +477,18 @@ public:
 
 	constexpr
 	void assign(size_type const count, value_type const &value){
-		assign_<1>(count, value);
+		construct_<1>(count, value);
 	}
 
 	template<class Iterator>
 	constexpr
 	void assign(Iterator first, Iterator last){
-		assign_<1>(first, last);
+		copy_<1>(first, last);
 	}
 
 	constexpr
 	void assign(std::initializer_list<value_type> const &list){
-		assign(list.begin(), list.end());
+		copy_<1>(list.begin(), list.end());
 	}
 
 private:
@@ -496,7 +496,7 @@ private:
 
 	template<bool Destruct>
 	constexpr
-	void assign_(size_type const count, value_type const &value){
+	void construct_(size_type const count, value_type const &value){
 		if constexpr(Destruct)
 			clear();
 
@@ -506,9 +506,11 @@ private:
 			push_back(value);
 	}
 
+	// copy / move elements
+
 	template<bool Destruct, class Iterator>
 	constexpr
-	void assign_(Iterator first, Iterator last){
+	void helper_copy_(Iterator first, Iterator last){
 		if constexpr(Destruct)
 			clear();
 
@@ -518,23 +520,22 @@ private:
 			push_back(*it);
 	}
 
-	// copy / move elements
-
 	template<bool Destruct, class Iterator>
 	constexpr
 	void copy_(Iterator first, Iterator last){
+
+		#if defined(__clang__) || defined(__GNUC__)
+
+		if (__builtin_is_constant_evaluated()){
+			// constant evaluation,
+			// assign is constexpr and exception friendly
+
+			return helper_copy_<Destruct>(first, last);
+		}
+
+		# endif
+
 		if constexpr(std::is_nothrow_copy_constructible_v<value_type>){
-
-			#if defined(__clang__) || defined(__GNUC__)
-
-			if (__builtin_is_constant_evaluated()){
-				// constant evaluation,
-				// assign is constexpr and exception friendly
-				return assign_<Destruct>(first, last);
-			}
-
-			# endif
-
 			if constexpr(Destruct)
 				destroy_();
 
@@ -544,8 +545,20 @@ private:
 
 			std::uninitialized_copy(first, last, data());
 		}else{
-			assign_<Destruct>(first, last);
+			helper_copy_<Destruct>(first, last);
 		}
+	}
+
+	template<bool Destruct, class Iterator>
+	constexpr
+	void helper_move_(Iterator first, Iterator last){
+		if constexpr(Destruct)
+			clear();
+
+		// reserve(std::distance(first, last));
+
+		for(auto it = first; it != last; ++it)
+			push_back(std::move(*it));
 	}
 
 	template<bool Destruct, class Iterator>
@@ -556,18 +569,18 @@ private:
 			return copy_<Destruct>(first, last);
 		}
 
+		#if defined(__clang__) || defined(__GNUC__)
+
+		if (__builtin_is_constant_evaluated()){
+			// constant evaluation,
+			// assign is constexpr and exception friendly
+
+			return helper_move_<Destruct>(first, last);
+		}
+
+		# endif
+
 		if constexpr(std::is_nothrow_move_constructible_v<value_type>){
-
-			#if defined(__clang__) || defined(__GNUC__)
-
-			if (__builtin_is_constant_evaluated()){
-				// constant evaluation,
-				// assign is constexpr and exception friendly
-				return assign_<Destruct>(first, last);
-			}
-
-			# endif
-
 			if constexpr(Destruct)
 				destroy_();
 
@@ -577,7 +590,7 @@ private:
 
 			std::uninitialized_move(first, last, data());
 		}else{
-			assign_<Destruct>(first, last);
+			helper_move_<Destruct>(first, last);
 		}
 	}
 

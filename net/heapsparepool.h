@@ -33,8 +33,6 @@ class HeapSparePool{
 		}
 	};
 
-	using SparePoolContainer = std::vector<S>;
-
 public:
 	HeapSparePool(uint32_t conf_minSparePoolSize, uint32_t conf_maxSparePoolSize, size_t conf_bufferCapacity) :
 								conf_minSparePoolSize_	(conf_minSparePoolSize	),
