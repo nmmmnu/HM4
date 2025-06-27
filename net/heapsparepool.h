@@ -24,7 +24,7 @@ class HeapSparePool{
 		S(S const &other)		= delete;
 		S &operator=(S const &other)	= delete;
 
-		constexpr friend bool operator<(S const &a, S const &b){
+		friend bool operator<(S const &a, S const &b){
 			auto _ = [](S const &a){
 				return a.data.capacity();
 			};

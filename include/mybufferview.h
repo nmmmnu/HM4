@@ -24,6 +24,9 @@ namespace MyBuffer{
 
 		template<typename T, typename Buffer>
 		constexpr bool c_tor_3 = !std::is_same_v<T, typename Buffer::value_type> && !is_byte<typename Buffer::value_type>;
+
+		template<typename T>
+		constexpr bool dependednt_false = false;
 	}
 
 	template<typename T>
@@ -43,7 +46,7 @@ namespace MyBuffer{
 
 		template<class Buffer, std::enable_if_t<impl_::c_tor_3<T, Buffer>, int> = 0>
 		constexpr BufferView(Buffer &buffer){
-			static_assert(false, "Types must be the same or buffer must be from bytes");
+			static_assert(impl_::dependednt_false<Buffer>, "Types must be the same or buffer must be from bytes");
 		}
 
 		constexpr BufferView(value_type *data, size_type size) :
