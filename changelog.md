@@ -335,3 +335,5 @@ Changelog
 -	Changing HeapSparePool MinMaxHeap to less sophisticated standard MaxHeap.
 -	Find bug with "bad_alloc" in network protocol when too many clients come at once.
 
+### 1.3.10.2
+-	Fix non-working tcp_reuseport config option

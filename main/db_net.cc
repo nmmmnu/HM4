@@ -462,17 +462,17 @@ namespace{
 			printError("Can not create server socket on port zero...");
 
 		auto const socket_options = opt.tcp_reuseport ?
-				net::SOCKET_DEFAULTOPT_TCP_REUSE :
+				net::SOCKET_DEFAULTOPT_TCP_REUSE_PORT :
 				net::SOCKET_DEFAULTOPT_TCP
 		;
+
+		if (opt.tcp_reuseport)
+			logger<Logger::WARNING>() << "Server start with SO_REUSEPORT.";
 
 		int const fd = net::socket_create(net::SOCKET_TCP{}, opt.host, opt.port, opt.tcp_backlog, socket_options);
 
 		if (fd < 0)
 			printError("Can not create server socket...");
-
-		if (opt.tcp_reuseport)
-			logger<Logger::WARNING>() << "Server start with SO_REUSEPORT.";
 
 		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS		);
 		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
