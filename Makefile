@@ -63,7 +63,8 @@ ifeq ($(UNAME), Linux)
 # add hugetlb support...
 
 EXTRA_INCL	+= -Iinclude.linux/
-CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB -DHAVE_SO_REUSEPORT
+CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB
+# -DHAVE_SO_REUSEPORT
 LL_SELECTOR	 = $(O)epollselector.o
 
 else ifeq ($(UNAME), FreeBSD)
@@ -73,7 +74,8 @@ else ifeq ($(UNAME), FreeBSD)
 # add correct endian for FreeBSD
 # fix compilation for FreeBSD
 EXTRA_INCL	+= -Iinclude.freebsd/
-CF_MISC		+= -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1 -DHAVE_SO_REUSEPORT
+CF_MISC		+= -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1
+# -DHAVE_SO_REUSEPORT
 CF_MISC		+= -DNOT_HAVE_CHARCONV
 LL_ALL		+= -lm
 
@@ -87,7 +89,8 @@ else ifeq ($(UNAME), Darwin)
 ##### MAC OS #####
 
 EXTRA_INCL	+= -Iinclude.darwin/
-CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T -DHAVE_SO_REUSEPORT
+CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T
+# -DHAVE_SO_REUSEPORT
 
 # add kqueue support...
 

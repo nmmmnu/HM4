@@ -47,6 +47,8 @@ bool socket_options_setReuseAddr(int const fd) noexcept{
 }
 
 bool socket_options_setReusePort(int const fd) noexcept{
+	// SO_REUSEPORT is a macro, so this is rather correct.
+
 	#ifdef SO_REUSEPORT
 	return socket_setOption_<SOL_SOCKET, SO_REUSEPORT>(fd);
 	#else
@@ -107,20 +109,13 @@ ssize_t socket_write(int const fd, const void *buf, size_t const count, int cons
 // ===========================
 
 bool socket_options(int fd, options_type const options) noexcept{
-	if (options & SOCKET_REUSEADDR	&& ! socket_options_setReuseAddr(fd) )
-		return false;
+	// this mixing setsockopt and fcntl so best way is with several if's
 
-	if (options & SOCKET_REUSEPORT	&& ! socket_options_setReusePort(fd) )
-		return false;
-
-	if (options & SOCKET_NONBLOCK	&& ! socket_options_setNonBlocking(fd) )
-		return false;
-
-	if (options & SOCKET_TCPNODELAY	&& ! socket_options_setTCPNoDelay(fd) )
-		return false;
-
-	if (options & SOCKET_KEEPALIVE	&& ! socket_options_setKeepAlive(fd) )
-		return false;
+	if (options & SOCKET_REUSEADDR	&& ! socket_options_setReuseAddr(fd)	) return false;
+	if (options & SOCKET_REUSEPORT	&& ! socket_options_setReusePort(fd)	) return false;
+	if (options & SOCKET_NONBLOCK	&& ! socket_options_setNonBlocking(fd)	) return false;
+	if (options & SOCKET_TCPNODELAY	&& ! socket_options_setTCPNoDelay(fd)	) return false;
+	if (options & SOCKET_KEEPALIVE	&& ! socket_options_setKeepAlive(fd)	) return false;
 
 	return true;
 }
