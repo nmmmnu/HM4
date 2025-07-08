@@ -3,6 +3,8 @@
 
 #include "selector/selectordefs.h"
 
+#include "smallvector.h"
+
 #include "iobuffer.h"
 #include "mytime.h"
 
@@ -144,7 +146,7 @@ private:
 private:
 	Selector		selector_;
 	Worker			worker_;
-	std::vector<int>	serverFD_;
+	SmallVector<int, 8>	serverFD_;
 	ClientContainer		clients_;
 	bool			keepProcessing_ = true;
 
