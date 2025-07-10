@@ -1,6 +1,7 @@
 #include "mortoncurve.h"
 
 #include <type_traits>
+#include <cstdio>
 
 namespace morton_curve{
 
@@ -16,7 +17,7 @@ namespace morton_curve{
 		}
 
 		template<uint8_t D, typename T>
-		constexpr T loadBits(T const bit_pattern, T const bit_position, T const value, uint32_t const dim) {
+		constexpr T loadBits(T const bit_pattern, T const bit_position, T const value, uint32_t const dim){
 			auto splitBits_ = [](auto x){
 				if constexpr(D == 2)	return splitBits2D(x);
 				if constexpr(D == 3)	return splitBits3D(x);
@@ -33,11 +34,11 @@ namespace morton_curve{
 
 		template<uint8_t D, typename T>
 		T computeBigMinFromMorton_(T xd, T z_min, T z_max){
-			uint32_t const bits = sizeof(uint32_t) * D;
+			uint32_t const bits = sizeof(uint32_t) * 8 * D;
 
 			uint32_t const bit_position_start = bits - 1;
 
-			static_assert(sizeof(T) >= bits, "No room for zzz");
+			static_assert(sizeof(T) * 8 >= bits, "No room for zzz");
 
 
 
@@ -64,7 +65,7 @@ namespace morton_curve{
 				case 0b0010:
 				case 0b0110:
 					// not possible because min <= max
-					return T{-1u};
+					return T(-1);
 				case 0b0011:
 					bigmin = z_min;
 					return bigmin;
@@ -87,6 +88,8 @@ namespace morton_curve{
 
 	} // namespace morton_curve_implementation_
 
+
+
 	uint64_t computeBigMinFromMorton2D(uint64_t xd, uint64_t z_min, uint64_t z_max){
 		using namespace morton_curve_implementation_;
 
@@ -95,10 +98,6 @@ namespace morton_curve{
 
 	uint128_t computeBigMinFromMorton3D(uint128_t xd, uint128_t z_min, uint128_t z_max){
 		using namespace morton_curve_implementation_;
-
-		(void)xd;
-		(void)z_min;
-		(void)z_max;
 
 		return computeBigMinFromMorton_<3, uint128_t>(xd, z_min, z_max);
 	}

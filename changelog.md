@@ -338,4 +338,9 @@ Changelog
 ### 1.3.10.2
 -	Fix non-working tcp_reuseport config option
 -	Change std::vector in AsyncLoop to SmallVector to avoid allocation.
+-	new module morton curve 3D: MC3GET, MC3MGET, MC3EXISTS, MC3SCORE,
+	MC3ADD, MC3REM, MC3POINT, MC3RANGENAIVE, MC3RANGE, MC3ENCODE, MC3DECODE
+-	optimized MC2POINT and MC3POINT
+
+
 

@@ -9,28 +9,28 @@ namespace morton_curve{
 
 	namespace morton_curve_implementation_{
 
-		constexpr uint64_t splitBits2D(uint64_t value){
-			value &= 0xffff'ffff;
+		constexpr uint64_t splitBits2D(uint64_t x){
+			x &= 0xffff'ffff;
 
-			value = (value ^ (value << 16)) & 0x0000'ffff'0000'ffff;
-			value = (value ^ (value <<  8)) & 0x00ff'00ff'00ff'00ff;
-			value = (value ^ (value <<  4)) & 0x0f0f'0f0f'0f0f'0f0f;
-			value = (value ^ (value <<  2)) & 0x3333'3333'3333'3333;
-			value = (value ^ (value <<  1)) & 0x5555'5555'5555'5555;
+			x = (x ^ (x << 16)) & 0x0000ffff0000ffff;
+			x = (x ^ (x <<  8)) & 0x00ff00ff00ff00ff;
+			x = (x ^ (x <<  4)) & 0x0f0f0f0f0f0f0f0f;
+			x = (x ^ (x <<  2)) & 0x3333333333333333;
+			x = (x ^ (x <<  1)) & 0x5555555555555555;
 
-			return value;
+			return x;
 		}
 
-		constexpr uint64_t combineBits2D(uint64_t value){
-			value &=                          0x5555'5555'5555'5555;
+		constexpr uint32_t combineBits2D(uint64_t x){
+			x &=                  0x5555555555555555;
 
-			value = (value ^ (value >>  1)) & 0x3333'3333'3333'3333;
-			value = (value ^ (value >>  2)) & 0x0f0f'0f0f'0f0f'0f0f;
-			value = (value ^ (value >>  4)) & 0x00ff'00ff'00ff'00ff;
-			value = (value ^ (value >>  8)) & 0x0000'ffff'0000'ffff;
-			value = (value ^ (value >> 16)) & 0x0000'0000'ffff'ffff;
+			x = (x ^ (x >>  1)) & 0x3333333333333333;
+			x = (x ^ (x >>  2)) & 0x0f0f0f0f0f0f0f0f;
+			x = (x ^ (x >>  4)) & 0x00ff00ff00ff00ff;
+			x = (x ^ (x >>  8)) & 0x0000ffff0000ffff;
+			x = (x ^ (x >> 16)) & 0x00000000ffffffff;
 
-			return value;
+			return static_cast<uint32_t>(x);
 		}
 
 
@@ -90,8 +90,8 @@ namespace morton_curve{
 		// xy xy xy
 
 		return Result{
-			static_cast<uint32_t>( combineBits2D(zzz >> 1) ),
-			static_cast<uint32_t>( combineBits2D(zzz >> 0) )
+			combineBits2D(zzz >> 1),
+			combineBits2D(zzz >> 0)
 		};
 	}
 

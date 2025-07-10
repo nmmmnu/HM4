@@ -302,7 +302,7 @@ namespace net::worker::commands::MortonCurve3D{
 						skips = 0;
 					}
 
-				//	logger<Logger::DEBUG>() << "Y >>>" << hex << x << y;
+				//	logger<Logger::DEBUG>() << "Y >>>" << hex << zzz << x << y << z;
 				}else{
 					if constexpr(bigmin_optimized){
 						if (++skips > ITERATIONS_IDLE){
@@ -322,7 +322,7 @@ namespace net::worker::commands::MortonCurve3D{
 						}
 					}
 
-				//	logger<Logger::DEBUG>() << "N >>>" << hex << x << y << z;
+				//	logger<Logger::DEBUG>() << "N >>>" << hex << zzz << x << y << z;
 				}
 			}
 

@@ -287,7 +287,7 @@ namespace net::worker::commands::MortonCurve2D{
 						skips = 0;
 					}
 
-				//	logger<Logger::DEBUG>() << "Y >>>" << hex << x << y;
+				//	logger<Logger::DEBUG>() << "Y >>>" << hex << zzz << x << y;
 				}else{
 					if constexpr(bigmin_optimized){
 						if (++skips > ITERATIONS_IDLE){
@@ -295,6 +295,8 @@ namespace net::worker::commands::MortonCurve2D{
 								return tail(key);
 
 							auto const big_min = rect.bigmin(zzz);
+
+							logger<Logger::DEBUG>() << "BIGMIN" << zzz << rect.z_min << rect.z_max << big_min;
 
 							// done or error
 							if (big_min > rect.z_max)
@@ -307,7 +309,7 @@ namespace net::worker::commands::MortonCurve2D{
 						}
 					}
 
-				//	logger<Logger::DEBUG>() << "N >>>" << hex << x << y;
+				//	logger<Logger::DEBUG>() << "N >>>" << hex << zzz << x << y;
 				}
 			}
 
