@@ -87,7 +87,7 @@ namespace{
 			}
 
 			if constexpr(BigMinOptimized)
-				printf("%6lu %4u %4u %s\n", (uint64_t) zzz, x, y, s);
+				printf("%6lu %4u %4u %4u %s\n", (uint64_t) zzz, x, y, z, s);
 
 			++it;
 		}
