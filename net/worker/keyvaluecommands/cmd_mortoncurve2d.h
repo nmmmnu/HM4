@@ -10,13 +10,13 @@
 
 #include "ilist/txguard.h"
 
-namespace net::worker::commands::MortonCurve{
+namespace net::worker::commands::MortonCurve2D{
 	namespace morton_curve_impl_{
 
 		using namespace net::worker::shared::stop_predicate;
 		using namespace net::worker::shared::config;
 
-		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
+		constexpr size_t scoreSize		=  8 /* bytes */ * 2;	// uint64_t as hex
 		using MC2Buffer = std::array<char, scoreSize>;
 
 		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
@@ -25,12 +25,12 @@ namespace net::worker::commands::MortonCurve{
 			return P1::valid(keyN, keySub, scoreSize);
 		}
 
-		constexpr std::string_view toHex(uint64_t const z, MC2Buffer &buffer){
+		constexpr std::string_view toHex(uint64_t const zzz, MC2Buffer &buffer){
 			using namespace hex_convert;
 
 			constexpr auto opt = options::lowercase | options::nonterminate;
 
-			return hex_convert::toHex<uint64_t, opt>(z, buffer);
+			return hex_convert::toHex<uint64_t, opt>(zzz, buffer);
 		}
 
 		constexpr std::string_view toHex(uint32_t const x, uint32_t const y, MC2Buffer &buffer){
@@ -67,6 +67,7 @@ namespace net::worker::commands::MortonCurve{
 		struct MortonRectangle{
 			uint32_t x1;
 			uint32_t x2;
+
 			uint32_t y1;
 			uint32_t y2;
 
@@ -78,15 +79,22 @@ namespace net::worker::commands::MortonCurve{
 					y1(y1), y2(y2){}
 
 			constexpr bool inside(uint32_t x, uint32_t y) const{
-				return x >= x1 && x <= x2 && y >= y1 && y <= y2;
+				return
+					x >= x1 && x <= x2 &&
+					y >= y1 && y <= y2
+				;
 			}
 
-			auto bigmin(uint64_t z) const{
-				return morton_curve::computeBigMinFromMorton2D(z, z_min, z_max);
+			auto bigmin(uint64_t zzz) const{
+				return morton_curve::computeBigMinFromMorton2D(zzz, z_min, z_max);
 			}
 
 			void print() const{
-				logger<Logger::DEBUG>() << x1 << x2 << y1 << y2 << z_min << z_max;
+				logger<Logger::DEBUG>()
+						<< x1 << x2
+						<< y1 << y2
+						<< z_min << z_max
+				;
 			}
 		};
 
@@ -97,7 +105,10 @@ namespace net::worker::commands::MortonCurve{
 			uint32_t y;
 
 			constexpr bool inside(uint32_t x, uint32_t y) const{
-				return this->x == x && this->y == y;
+				return
+					this->x == x &&
+					this->y == y
+				;
 			}
 
 			void print() const{
@@ -125,7 +136,11 @@ namespace net::worker::commands::MortonCurve{
 				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN			,
 						"X"			,	// old style not supports txt
-						toHex(point.x, point.y, buffer)
+						toHex(
+							point.x,
+							point.y,
+							buffer
+						)
 				);
 			}();
 
@@ -151,14 +166,15 @@ namespace net::worker::commands::MortonCurve{
 				if (! it->isOK())
 					continue;
 
-				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
-							after_prefix(P1::sizeKey(keyN), key));
+				// auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
+				// 			after_prefix(P1::sizeKey(keyN), key));
 
-				auto const hex  = hexA[0];
+				// auto const hex  = hexA[0];
+				// auto const zzz = hex_convert::fromHex<uint64_t>(hex);
+				// auto const [x, y] = morton_curve::fromMorton2D(zzz);
 
-				auto const z = hex_convert::fromHex<uint64_t>(hex);
-
-				auto const [x, y] = morton_curve::fromMorton2D(z);
+				auto const x = point.x;
+                                auto const y = point.y;
 
 				// because of the prefix check in StopPrefixPredicate,
 				// the point is always correct.
@@ -195,13 +211,13 @@ namespace net::worker::commands::MortonCurve{
 
 			constexpr uint32_t MAX_RETRIES = 9;
 
-			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t z){
-				MC2Buffer z_buffer;
+			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t zzz){
+				MC2Buffer buffer;
 
 				return P1::makeKey(bufferKey, DBAdapter::SEPARATOR,
 						keyN			,
 						"X"			,	// old style not supports txt
-						toHex(z, z_buffer)
+						toHex(zzz, buffer)
 				);
 			};
 
@@ -251,9 +267,9 @@ namespace net::worker::commands::MortonCurve{
 
 				auto const hex  = hexA[0];
 
-				auto const z = hex_convert::fromHex<uint64_t>(hex);
+				auto const zzz = hex_convert::fromHex<uint64_t>(hex);
 
-				auto const [x, y] = morton_curve::fromMorton2D(z);
+				auto const [x, y] = morton_curve::fromMorton2D(zzz);
 
 				if (rect.inside(x, y)){
 					if (++results > count)
@@ -278,7 +294,7 @@ namespace net::worker::commands::MortonCurve{
 							if (++retries > MAX_RETRIES)
 								return tail(key);
 
-							auto const big_min = rect.bigmin(z);
+							auto const big_min = rect.bigmin(zzz);
 
 							// done or error
 							if (big_min > rect.z_max)
@@ -465,21 +481,25 @@ namespace net::worker::commands::MortonCurve{
 
 				auto const hex = hexA[0];
 
-				auto const z   = hex_convert::fromHex<uint64_t>(hex);
+				auto const zzz   = hex_convert::fromHex<uint64_t>(hex);
 
-				auto const [x, y] = morton_curve::fromMorton2D(z);
+				auto const [x, y] = morton_curve::fromMorton2D(zzz);
 
 				to_string_buffer_t buffer[2];
 
-				return result.set_dual(
+				std::array<std::string_view, 2> container{
 					to_string(x, buffer[0]),
 					to_string(y, buffer[1])
-				);
+				};
+
+				return result.set_container(container);
 			}else{
-				return result.set_dual(
+				std::array<std::string_view, 2> container{
 					"",
 					""
-				);
+				};
+
+				return result.set_container(container);
 			}
 		}
 
@@ -627,7 +647,7 @@ namespace net::worker::commands::MortonCurve{
 
 			auto const startKey	= p.size() == 6 ? p[5] : "";
 
-			auto &container = blob.container();
+			auto &container  = blob.container();
 			auto &bcontainer = blob.bcontainer();
 
 			mortonSearchPoint(
@@ -818,9 +838,9 @@ namespace net::worker::commands::MortonCurve{
 
 			auto const &hex = p[1];
 
-			auto const z = hex_convert::fromHex<uint64_t>(hex);
+			auto const zzz = hex_convert::fromHex<uint64_t>(hex);
 
-			auto const [x, y] = morton_curve::fromMorton2D(z);
+			auto const [x, y] = morton_curve::fromMorton2D(zzz);
 
 			to_string_buffer_t buffer[2];
 
@@ -842,7 +862,7 @@ namespace net::worker::commands::MortonCurve{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "morton_curve";
+		constexpr inline static std::string_view name	= "morton_curve_2d";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,

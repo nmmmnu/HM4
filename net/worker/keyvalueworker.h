@@ -31,8 +31,9 @@
 #include "keyvaluecommands/cmd_mg.h"			// MGADD, MGRESERVE, MGGET
 #include "keyvaluecommands/cmd_rs.h"			// RSADD, RSRESERVE, RSGET, RSGETCOUNT
 #include "keyvaluecommands/cmd_geo.h"			// GEOADD, GEOREM, GEOGET, GEOMGET, GEOENCODE, GEODECODE
-#include "keyvaluecommands/cmd_mortoncurve.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
 #include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1EXISTS, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
+#include "keyvaluecommands/cmd_mortoncurve2d.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
+#include "keyvaluecommands/cmd_mortoncurve3d.h"		// MC3GET, MC3MGET, MC3EXISTS, MC3SCORE, MC3ADD, MC3REM, MC3POINT, MC3RANGENAIVE, MC3RANGE, MC3ENCODE, MC3DECODE
 #include "keyvaluecommands/cmd_tdigest.h"		// TDADD, TDRESERVE
 
 #include "keyvaluecommands/cmd_index.h"
@@ -62,7 +63,7 @@ namespace net::worker{
 		void registerModule(RegisterPack &pack){
 			using M = Module<Protocol, DBAdapter, RegisterPack>;
 
-			logger<Logger::STARTUP>() << "Loading" << M::name << "module...";
+			logger<Logger::NOTICE>() << "Loading" << M::name << "module...";
 
 			M::load(pack);
 		}
@@ -101,8 +102,11 @@ namespace net::worker{
 				RS		::RegisterModule,
 				MG		::RegisterModule,
 				Geo		::RegisterModule,
-				MortonCurve	::RegisterModule,
+
 				LinearCurve	::RegisterModule,
+				MortonCurve2D	::RegisterModule,
+				MortonCurve3D	::RegisterModule,
+
 				TDigest		::RegisterModule,
 
 				Index		::RegisterModule,

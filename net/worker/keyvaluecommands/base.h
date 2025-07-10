@@ -287,7 +287,7 @@ namespace net::worker::commands{
 				return;
 
 			if (auto it = std::begin(x); it != std::end(x))
-				logger<Logger::STARTUP>() << " - " << *it;
+				logger<Logger::DEBUG>() << " - " << *it;
 		}
 
 	private:

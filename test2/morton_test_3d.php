@@ -20,16 +20,19 @@ $redis->connect("127.0.0.1");
 
 $results = 64000;
 
-$cmd = true ? "MC2RANGE" : "MC2RANGENAIVE";
+$cmd = ! true ? "MC3RANGE" : "MC3RANGENAIVE";
 
 $next = "";
 
 $id = 0;
 
 do{
-	$x = rawCommand($redis, $cmd, "morton", 4, 5, 4, 5, $results, $next);
-
-print_r($x);
+	$x = rawCommand($redis, $cmd, "morton3d",
+					10, 14, // x
+					 4,  8, // y
+					26, 28, // z
+					$results, $next
+	);
 
 	for($i = 0; $i < count($x) - 1; $i+=2){
 		$k = $x[$i + 0];
@@ -42,3 +45,4 @@ print_r($x);
 
 	$next = end($x);
 }while($next);
+
