@@ -10,6 +10,8 @@
 
 #include "ilist/txguard.h"
 
+#ifdef HAVE_UINT128_T
+
 namespace net::worker::commands::MortonCurve3D{
 	namespace morton_curve_impl_{
 
@@ -913,4 +915,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 
 } // namespace
+
+#endif
+// #if HAVE_UINT128_T
 

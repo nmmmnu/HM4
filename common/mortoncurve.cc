@@ -21,6 +21,7 @@ namespace morton_curve{
 			auto splitBits_ = [](auto x){
 				if constexpr(D == 2)	return splitBits2D(x);
 				if constexpr(D == 3)	return splitBits3D(x);
+				if constexpr(D == 4)	return splitBits4D(x);
 			};
 
 			auto const split  = splitBits_(bit_pattern);
@@ -100,6 +101,12 @@ namespace morton_curve{
 		using namespace morton_curve_implementation_;
 
 		return computeBigMinFromMorton_<3, uint128_t>(xd, z_min, z_max);
+	}
+
+	uint128_t computeBigMinFromMorton4D(uint128_t xd, uint128_t z_min, uint128_t z_max){
+		using namespace morton_curve_implementation_;
+
+		return computeBigMinFromMorton_<4, uint128_t>(xd, z_min, z_max);
 	}
 
 } // namespace morton_curve

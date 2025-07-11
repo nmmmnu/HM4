@@ -34,6 +34,7 @@
 #include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1EXISTS, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
 #include "keyvaluecommands/cmd_mortoncurve2d.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
 #include "keyvaluecommands/cmd_mortoncurve3d.h"		// MC3GET, MC3MGET, MC3EXISTS, MC3SCORE, MC3ADD, MC3REM, MC3POINT, MC3RANGENAIVE, MC3RANGE, MC3ENCODE, MC3DECODE
+#include "keyvaluecommands/cmd_mortoncurve4d.h"		// MC4GET, MC4MGET, MC4EXISTS, MC4SCORE, MC4ADD, MC4REM, MC4POINT, MC4RANGENAIVE, MC4RANGE, MC4ENCODE, MC4DECODE
 #include "keyvaluecommands/cmd_tdigest.h"		// TDADD, TDRESERVE
 
 #include "keyvaluecommands/cmd_index.h"
@@ -105,7 +106,11 @@ namespace net::worker{
 
 				LinearCurve	::RegisterModule,
 				MortonCurve2D	::RegisterModule,
+
+			#ifdef HAVE_UINT128_T
 				MortonCurve3D	::RegisterModule,
+			//	MortonCurve4D	::RegisterModule,
+			#endif
 
 				TDigest		::RegisterModule,
 
