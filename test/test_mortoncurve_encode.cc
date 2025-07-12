@@ -13,6 +13,8 @@ int main(){
 			assert(i == b);
 		}
 
+		#ifdef HAVE_UINT128_T
+
 		{
 			auto const zzz = splitBits3D(i);
 			auto const b = combineBits3D(zzz);
@@ -24,6 +26,8 @@ int main(){
 			auto const b = combineBits4D(zzz);
 			assert(i == b);
 		}
+
+		#endif
 
 		if (i % 0xFFFFFF == 0)
 			printf("%10u of %10u\n", i, 0xFFFFFFFF);

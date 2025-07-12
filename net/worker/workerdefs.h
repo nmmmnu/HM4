@@ -61,6 +61,7 @@ namespace net::worker{
 		constexpr static std::string_view NEED_EXACT_PARAMS_56	= "The command needs exactly 5 or 6 parameters";
 		constexpr static std::string_view NEED_EXACT_PARAMS_67	= "The command needs exactly 6 or 7 parameters";
 		constexpr static std::string_view NEED_EXACT_PARAMS_89	= "The command needs exactly 8 or 9 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_BC	= "The command needs exactly 11 or 12 parameters";
 		constexpr static std::string_view NEED_EXACT_PARAMS_234	= "The command needs exactly 2, 3 or 4 parameters";
 
 		constexpr static std::string_view NEED_MORE_PARAMS_1	= "The command needs 1 or more parameters";

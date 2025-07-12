@@ -13,13 +13,18 @@
 #ifdef HAVE_UINT128_T
 
 namespace net::worker::commands::MortonCurve3D{
+
+	constexpr uint8_t DIM = 3;
+
+	using ZZZType = uint128_t;
+
 	namespace morton_curve_impl_{
 
 		using namespace net::worker::shared::stop_predicate;
 		using namespace net::worker::shared::config;
 
-		constexpr size_t scoreSize		=  16 /* bytes */ * 2;	// uint128_t as hex
-		using MC3Buffer = std::array<char, scoreSize>;
+		constexpr size_t scoreSize =  sizeof(ZZZType) * 2;	// ZZZType as hex
+		using MCBuffer = std::array<char, scoreSize>;
 
 		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
@@ -27,22 +32,22 @@ namespace net::worker::commands::MortonCurve3D{
 			return P1::valid(keyN, keySub, scoreSize);
 		}
 
-		constexpr std::string_view toHex(uint128_t const z, MC3Buffer &buffer){
+		constexpr std::string_view toHex(ZZZType const z, MCBuffer &buffer){
 			using namespace hex_convert;
 
 			constexpr auto opt = options::lowercase | options::nonterminate;
 
-			return hex_convert::toHex<uint128_t, opt>(z, buffer);
+			return hex_convert::toHex<ZZZType, opt>(z, buffer);
 		}
 
-		constexpr std::string_view toHex(uint32_t const x, uint32_t const y, uint32_t const z, MC3Buffer &buffer){
+		constexpr std::string_view toHex(uint32_t const x, uint32_t const y, uint32_t const z, MCBuffer &buffer){
 			return toHex(
 				morton_curve::toMorton3D(x, y, z),
 				buffer
 			);
 		}
 
-		std::string_view toHex(std::string_view const x, std::string_view const y, std::string_view const z, MC3Buffer &buffer){
+		std::string_view toHex(std::string_view const x, std::string_view const y, std::string_view const z, MCBuffer &buffer){
 			return toHex(
 				from_string<uint32_t>(x),
 				from_string<uint32_t>(y),
@@ -53,7 +58,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 		template<size_t N>
 		std::string_view formatLine(uint32_t x, uint32_t y, uint32_t z, uint32_t id, std::array<char, N> &buffer){
-			static_assert(N > 10 + 1 + 10 + 1 + 10 + 1 + 8);
+			static_assert(N > DIM * (10 + 1) + 8);
 
 			constexpr static std::string_view fmt_mask = "{:0>10},{:0>10},{:0>10},{:08x}";
 
@@ -77,8 +82,8 @@ namespace net::worker::commands::MortonCurve3D{
 			uint32_t z1;
 			uint32_t z2;
 
-			uint128_t z_min = morton_curve::toMorton3D(x1, y1, z1);
-			uint128_t z_max = morton_curve::toMorton3D(x2, y2, z2);
+			ZZZType z_min = morton_curve::toMorton3D(x1, y1, z1);
+			ZZZType z_max = morton_curve::toMorton3D(x2, y2, z2);
 
 			constexpr MortonRectangle(uint32_t x1, uint32_t x2, uint32_t y1, uint32_t y2, uint32_t z1, uint32_t z2) :
 					x1(x1), x2(x2),
@@ -93,7 +98,7 @@ namespace net::worker::commands::MortonCurve3D{
 				;
 			}
 
-			auto bigmin(uint128_t zzz) const{
+			auto bigmin(ZZZType zzz) const{
 				return morton_curve::computeBigMinFromMorton3D(zzz, z_min, z_max);
 			}
 
@@ -143,7 +148,7 @@ namespace net::worker::commands::MortonCurve3D{
 				if (!startKey.empty())
 					return startKey;
 
-				MC3Buffer buffer;
+				MCBuffer buffer;
 
 				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN			,
@@ -179,16 +184,7 @@ namespace net::worker::commands::MortonCurve3D{
 				if (! it->isOK())
 					continue;
 
-				// auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
-				// 			after_prefix(P1::sizeKey(keyN), key));
-
-				// auto const hex  = hexA[0];
-				// auto const zzz = hex_convert::fromHex<uint128_t>(hex);
-				// auto const [x, y, z] = morton_curve::fromMorton3D(zzz);
-
-				auto const x = point.x;
-                                auto const y = point.y;
-                                auto const z = point.z;
+				auto const [x, y, z] = point;
 
 				// because of the prefix check in StopPrefixPredicate,
 				// the point is always correct.
@@ -226,8 +222,8 @@ namespace net::worker::commands::MortonCurve3D{
 			[[maybe_unused]]
 			constexpr uint32_t MAX_RETRIES = 9;
 
-			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint128_t zzz){
-				MC3Buffer buffer;
+			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, ZZZType zzz){
+				MCBuffer buffer;
 
 				return P1::makeKey(bufferKey, DBAdapter::SEPARATOR,
 						keyN			,
@@ -284,7 +280,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 				auto const hex  = hexA[0];
 
-				auto const zzz = hex_convert::fromHex<uint128_t>(hex);
+				auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
 				auto const [x, y, z] = morton_curve::fromMorton3D(zzz);
 
@@ -502,9 +498,9 @@ namespace net::worker::commands::MortonCurve3D{
 
 				auto const [x, y, z] = morton_curve::fromMorton3D(zzz);
 
-				to_string_buffer_t buffer[3];
+				to_string_buffer_t buffer[DIM];
 
-				std::array<std::string_view, 3> container{
+				std::array<std::string_view, DIM> container{
 					to_string(x, buffer[0]),
 					to_string(y, buffer[1]),
 					to_string(z, buffer[2])
@@ -512,7 +508,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 				return result.set_container(container);
 			}else{
-				std::array<std::string_view, 3> container{
+				std::array<std::string_view, DIM> container{
 					"",
 					"",
 					""
@@ -540,7 +536,7 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3SET a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
+		// MC3ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -580,7 +576,7 @@ namespace net::worker::commands::MortonCurve3D{
 				auto const &z		= *(itk + 3);
 				auto const &value	= *(itk + 4);
 
-				MC3Buffer buffer;
+				MCBuffer buffer;
 
 				auto const score	= toHex(x, y, z, buffer);
 
@@ -643,12 +639,12 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3POINT morton 10 10 10000 [key]
+		// MC3POINT morton 10 20 30 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
-			if (p.size() != 6 && p.size() != 7)
+			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_56);
 
 			auto const keyN	= p[1];
@@ -701,12 +697,12 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3RANGENAIVE morton 10 10 10 10 10 10 10000 [key]
+		// MC3RANGENAIVE morton 10 10 20 20 30 30 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
-			if (p.size() != 9 && p.size() != 10)
+			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
 
 			auto const keyN	= p[1];
@@ -747,7 +743,8 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3rangenaive",	"MC3RANGENAIVE"
+			"mc3rangenaive",	"MC3RANGENAIVE"	,
+			"mc3rangeflat",		"MC3RANGEFLAT"
 		};
 	};
 
@@ -763,12 +760,12 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC2RANGE morton 10 10 10 10 10 10 10000 [key]
+		// MC2RANGE morton 10 10 20 20 30 30 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
-			if (p.size() != 9 && p.size() != 10)
+			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
 
 			auto const keyN	= p[1];
@@ -827,14 +824,14 @@ namespace net::worker::commands::MortonCurve3D{
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
 
-			if (p.size() != 4)
+			if (p.size() != 1 + DIM)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			auto const &x = p[1];
 			auto const &y = p[2];
-			auto const &z = p[2];
+			auto const &z = p[3];
 
-			MC3Buffer buffer;
+			MCBuffer buffer;
 
 			auto const hex = toHex(x, y, z, buffer);
 
@@ -867,13 +864,13 @@ namespace net::worker::commands::MortonCurve3D{
 
 			auto const &hex = p[1];
 
-			auto const zzz = hex_convert::fromHex<uint64_t>(hex);
+			auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
 			auto const [x, y, z] = morton_curve::fromMorton3D(zzz);
 
-			to_string_buffer_t buffer[3];
+			to_string_buffer_t buffer[DIM];
 
-			const std::array<std::string_view, 3> container{
+			const std::array<std::string_view, DIM> container{
 				to_string(x, buffer[0]),
 				to_string(y, buffer[1]),
 				to_string(z, buffer[2])

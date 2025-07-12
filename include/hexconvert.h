@@ -25,8 +25,11 @@ namespace hex_convert{
 
 	template <typename T, options::type opt = options::defaults>
 	constexpr std::string_view toHex(T const number, char *buffer){
+		#ifdef HAVE_UINT128_T
 		static_assert( is_any_v<T, uint8_t, uint16_t, uint32_t, uint64_t, uint128_t> );
-
+		#else
+		static_assert( is_any_v<T, uint8_t, uint16_t, uint32_t, uint64_t> );
+		#endif
 		constexpr const char *digits = [](){
 			if constexpr(opt & options::uppercase)
 				return "0123456789ABCDEF";
@@ -49,7 +52,11 @@ namespace hex_convert{
 
 	template <typename T, options::type opt = options::defaults, size_t N>
 	constexpr std::string_view toHex(T const number, std::array<char, N> &buffer){
+		#ifdef HAVE_UINT128_T
 		static_assert( is_any_v<T, uint8_t, uint16_t, uint32_t, uint64_t, uint128_t> );
+		#else
+		static_assert( is_any_v<T, uint8_t, uint16_t, uint32_t, uint64_t> );
+		#endif
 
 		static_assert(N >= sizeof(T) * 2 + (opt & options::terminate ? 1 : 0));
 
@@ -58,7 +65,11 @@ namespace hex_convert{
 
 	template <typename T>
 	constexpr auto fromHex(std::string_view const hex){
+		#ifdef HAVE_UINT128_T
 		static_assert( is_any_v<T, uint8_t, uint16_t, uint32_t, uint64_t, uint128_t> );
+		#else
+		static_assert( is_any_v<T, uint8_t, uint16_t, uint32_t, uint64_t> );
+		#endif
 
 		auto _ = [](char c) -> T{
 			switch(c){

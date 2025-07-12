@@ -1,8 +1,8 @@
 #include "mortoncurve.h"
 
+#include <cstdio>
 #include <vector>
 #include <algorithm>
-#include <cstdio>
 
 namespace{
 

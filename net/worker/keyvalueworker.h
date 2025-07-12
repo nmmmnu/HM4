@@ -109,7 +109,7 @@ namespace net::worker{
 
 			#ifdef HAVE_UINT128_T
 				MortonCurve3D	::RegisterModule,
-			//	MortonCurve4D	::RegisterModule,
+				MortonCurve4D	::RegisterModule,
 			#endif
 
 				TDigest		::RegisterModule,

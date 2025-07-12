@@ -45,7 +45,7 @@ namespace MyBuffer{
 					BufferView( static_cast<void *>(buffer.data()), buffer.size() ){}
 
 		template<class Buffer, std::enable_if_t<impl_::c_tor_3<T, Buffer>, int> = 0>
-		constexpr BufferView(Buffer &buffer){
+		constexpr BufferView(Buffer &){
 			static_assert(impl_::dependednt_false<Buffer>, "Types must be the same or buffer must be from bytes");
 		}
 

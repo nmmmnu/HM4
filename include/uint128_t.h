@@ -10,6 +10,7 @@
 		constexpr uint128_t combine64(uint64_t hi, uint64_t lo){
 			return (uint128_t{ hi } << 64) | lo;
 		};
+
 	#endif
 
 #endif

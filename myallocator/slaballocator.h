@@ -59,7 +59,7 @@ namespace MyAllocator{
 		size_t getFreeMemory() const noexcept{
 			size_t n = 0;
 
-			for(const void *block = freeList_; block; block = *reinterpret_cast<const void **>(block))
+			for(const void *block = freeList_; block; block = *reinterpret_cast<const void * const *>(block))
 				++n;
 
 			return n * BlockSize;

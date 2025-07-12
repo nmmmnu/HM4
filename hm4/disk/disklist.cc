@@ -517,7 +517,8 @@ auto DiskList::ra_find_(std::string_view const key) const -> BinarySearchResult<
 	if constexpr(B == FindMode::HASH_FALLBACK){
 		auto const searchMode = searchMode_F_;
 
-		std::string_view const what = "Exact";
+		// [[maybe_unused]]
+		// std::string_view const what = "Exact";
 
 		switch(searchMode){
 		default:
@@ -583,7 +584,7 @@ private:
 private:
 	const DiskList		&list_;
 
-	const std::string_view	&key_;
+	const std::string_view	key_;
 
 	const BlobView		mTree_		= list_.mTree_;
 	const BlobView		mKeys_		= list_.mKeys_;

@@ -1,8 +1,11 @@
 #include "mortoncurve.h"
 
+#include <cstdio>
+
+#ifdef HAVE_UINT128_T
+
 #include <vector>
 #include <algorithm>
-#include <cstdio>
 
 namespace{
 
@@ -188,5 +191,13 @@ int main(){
 	else
 		printf("ERROR! %zu vs %zu Results\n", count1, count2);
 }
+
+#else
+
+int main(){
+	printf("No support for uint128_t\n");
+}
+
+#endif
 
 
