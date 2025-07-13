@@ -18,7 +18,7 @@ $redis->connect("127.0.0.1");
 
 
 
-$max = 100;
+$max = 50;
 
 for($w = 0; $w < $max; ++$w){
 	for($z = 0; $z < $max; ++$z){

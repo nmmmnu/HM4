@@ -49,7 +49,10 @@ namespace hm4::disk::hash::algo{
 	template<typename T>
 	struct HashIndexMultiPassBuilder{
 		HashIndexMultiPassBuilder(std::string_view filename, size_t nodesCount, MyBuffer::ByteBufferView buffer) :
-								vector_		(buffer.data(), buffer.size()	),
+								vector_{
+										reinterpret_cast<VVT *>(buffer.data()),
+										buffer.size() / sizeof(VVT)
+								},
 								nodesCount_	(nodesCount			),
 								mmap_		(createMMAP<Node>(filename, nodesCount) ){}
 
@@ -82,6 +85,9 @@ namespace hm4::disk::hash::algo{
 		Node *nodes_(){
 			return static_cast<Node *>(mmap_.data());
 		}
+
+	private:
+		using VVT = typename NodeHelperVector<T>::value_type;
 
 	private:
 		T			pos_		= 0;
