@@ -344,5 +344,9 @@ Changelog
 -	New module morton curve 4D: MC4GET, MC4MGET, MC4EXISTS, MC4SCORE,
 	MC4ADD, MC4REM, MC4POINT, MC4RANGENAIVE, MC4RANGE, MC4ENCODE, MC4DECODE
 -	Add aliases MC2RANGEFLAT, MC3RANGEFLAT, MC4RANGEFLAT
+-	Refactor morton curve 2D, 3D, 4D modules.
 
+### 1.3.11
+
+-	Release
 
