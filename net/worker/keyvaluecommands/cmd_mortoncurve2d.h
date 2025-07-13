@@ -16,6 +16,9 @@ namespace net::worker::commands::MortonCurve2D{
 
 	using ZZZType = uint64_t;
 
+	using MCVector  = std::array<uint32_t,		DIM>;
+	using SMCVector = std::array<std::string_view,	DIM>;
+
 	namespace morton_curve_impl_{
 
 		using namespace net::worker::shared::stop_predicate;
@@ -38,28 +41,29 @@ namespace net::worker::commands::MortonCurve2D{
 			return hex_convert::toHex<ZZZType, opt>(zzz, buffer);
 		}
 
-		constexpr std::string_view toHex(uint32_t const x, uint32_t const y, MCBuffer &buffer){
+		constexpr std::string_view toHex(MCVector const &vvv, MCBuffer &buffer){
 			return toHex(
-				morton_curve::toMorton2D(x, y),
+				morton_curve::toMorton2D(vvv[0], vvv[1]),
 				buffer
 			);
 		}
 
-		std::string_view toHex(std::string_view const x, std::string_view const y, MCBuffer &buffer){
-			return toHex(
-				from_string<uint32_t>(x),
-				from_string<uint32_t>(y),
-				buffer
-			);
+		std::string_view toHex(SMCVector const &vvvs, MCBuffer &buffer){
+			MCVector const vvv{
+				from_string<uint32_t>(vvvs[0]),
+				from_string<uint32_t>(vvvs[1])
+			};
+
+			return toHex(vvv, buffer);
 		}
 
 		template<size_t N>
-		std::string_view formatLine(uint32_t x, uint32_t y, uint32_t id, std::array<char, N> &buffer){
+		std::string_view formatLine(MCVector const &vvv, uint32_t id, std::array<char, N> &buffer){
 			static_assert(N > DIM * (10 + 1) + 8);
 
 			constexpr static std::string_view fmt_mask = "{:0>10},{:0>10},{:08x}";
 
-			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, x, y, id);
+			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, vvv[0], vvv[1], id);
 
 			if (result.out == std::end(buffer))
 				return "PLS_REPORT_A_BUG";
@@ -83,11 +87,8 @@ namespace net::worker::commands::MortonCurve2D{
 					x1(x1), x2(x2),
 					y1(y1), y2(y2){}
 
-			constexpr bool inside(uint32_t x, uint32_t y) const{
-				return
-					x >= x1 && x <= x2 &&
-					y >= y1 && y <= y2
-				;
+			constexpr bool inside(MCVector const &vvv) const{
+				return inside_(vvv[0], vvv[1]);
 			}
 
 			auto bigmin(ZZZType zzz) const{
@@ -102,6 +103,13 @@ namespace net::worker::commands::MortonCurve2D{
 						<< z_max
 				;
 			}
+		private:
+			constexpr bool inside_(uint32_t x, uint32_t y) const{
+				return
+					x >= x1 && x <= x2 &&
+					y >= y1 && y <= y2
+				;
+			}
 		};
 
 
@@ -110,11 +118,15 @@ namespace net::worker::commands::MortonCurve2D{
 			uint32_t x;
 			uint32_t y;
 
-			constexpr bool inside(uint32_t x, uint32_t y) const{
-				return
-					this->x == x &&
-					this->y == y
-				;
+		//	constexpr bool inside(uint32_t x, uint32_t y) const{
+		//		return
+		//			this->x == x &&
+		//			this->y == y
+		//		;
+		//	}
+
+			constexpr auto vector() const{
+				return MCVector{ x, y };
 			}
 
 			void print() const{
@@ -142,11 +154,7 @@ namespace net::worker::commands::MortonCurve2D{
 				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN			,
 						"X"			,	// old style not supports txt
-						toHex(
-							point.x,
-							point.y,
-							buffer
-						)
+						toHex(point.vector(),buffer)
 				);
 			}();
 
@@ -172,8 +180,6 @@ namespace net::worker::commands::MortonCurve2D{
 				if (! it->isOK())
 					continue;
 
-				auto const [x, y] = point;
-
 				// because of the prefix check in StopPrefixPredicate,
 				// the point is always correct.
 
@@ -183,7 +189,7 @@ namespace net::worker::commands::MortonCurve2D{
 				auto const &val = it->getVal();
 
 				bcontainer.push_back();
-				auto const line = formatLine(x, y, id++, bcontainer.back());
+				auto const line = formatLine(point.vector(), id++, bcontainer.back());
 
 				container.emplace_back(line);
 				container.emplace_back(val);
@@ -267,16 +273,16 @@ namespace net::worker::commands::MortonCurve2D{
 
 				auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-				auto const [x, y] = morton_curve::fromMorton2D(zzz);
+				auto const vvv = morton_curve::fromMorton2D(zzz);
 
-				if (rect.inside(x, y)){
+				if (rect.inside(vvv)){
 					if (++results > count)
 						return tail(key);
 
 					auto const &val = it->getVal();
 
 					bcontainer.push_back();
-					auto const line = formatLine(x, y, id++, bcontainer.back());
+					auto const line = formatLine(vvv, id++, bcontainer.back());
 
 					container.emplace_back(line);
 					container.emplace_back(val);
@@ -285,7 +291,7 @@ namespace net::worker::commands::MortonCurve2D{
 						skips = 0;
 					}
 
-				//	logger<Logger::DEBUG>() << "Y >>>" << hex << zzz << x << y;
+				//	logger<Logger::DEBUG>() << "Y >>>" << hex << zzz << vvv[0] << vvv[1];
 				}else{
 					if constexpr(bigmin_optimized){
 						if (++skips > ITERATIONS_IDLE){
@@ -307,7 +313,7 @@ namespace net::worker::commands::MortonCurve2D{
 						}
 					}
 
-				//	logger<Logger::DEBUG>() << "N >>>" << hex << zzz << x << y;
+				//	logger<Logger::DEBUG>() << "N >>>" << hex << zzz << vvv[0] << vvv[1];
 				}
 			}
 
@@ -483,18 +489,18 @@ namespace net::worker::commands::MortonCurve2D{
 
 				auto const zzz   = hex_convert::fromHex<ZZZType>(hex);
 
-				auto const [x, y] = morton_curve::fromMorton2D(zzz);
+				auto const vvv = morton_curve::fromMorton2D(zzz);
 
 				to_string_buffer_t buffer[DIM];
 
-				std::array<std::string_view, DIM> container{
-					to_string(x, buffer[0]),
-					to_string(y, buffer[1])
+				SMCVector container{
+					to_string(vvv[0], buffer[0]),
+					to_string(vvv[1], buffer[1])
 				};
 
 				return result.set_container(container);
 			}else{
-				std::array<std::string_view, DIM> container{
+				SMCVector const container{
 					"",
 					""
 				};
@@ -555,13 +561,17 @@ namespace net::worker::commands::MortonCurve2D{
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const &keySub	= *(itk + 0);
-				auto const &x		= *(itk + 1);
-				auto const &y		= *(itk + 2);
+
+				SMCVector const vvvs{
+						*(itk + 1),
+						*(itk + 2)
+				};
+
 				auto const &value	= *(itk + 3);
 
 				MCBuffer buffer;
 
-				auto const score	= toHex(x, y, buffer);
+				auto const score	= toHex(vvvs, buffer);
 
 				shared::zsetmulti::add<P1>(
 						db,
@@ -803,12 +813,11 @@ namespace net::worker::commands::MortonCurve2D{
 			if (p.size() != 1 + DIM)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
-			auto const &x = p[1];
-			auto const &y = p[2];
+			SMCVector const vvvs{ p[1], p[2] };
 
 			MCBuffer buffer;
 
-			auto const hex = toHex(x, y, buffer);
+			auto const hex = toHex(vvvs, buffer);
 
 			return result.set(hex);
 		}
@@ -841,13 +850,13 @@ namespace net::worker::commands::MortonCurve2D{
 
 			auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-			auto const [x, y] = morton_curve::fromMorton2D(zzz);
+			auto const vvv = morton_curve::fromMorton2D(zzz);
 
 			to_string_buffer_t buffer[DIM];
 
-			const std::array<std::string_view, DIM> container{
-				to_string(x, buffer[0]),
-				to_string(y, buffer[1])
+			SMCVector const container{
+				to_string(vvv[0], buffer[0]),
+				to_string(vvv[1], buffer[1])
 			};
 
 			return result.set_container(container);

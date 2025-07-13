@@ -97,6 +97,8 @@ namespace morton_curve{
 		return computeBigMinFromMorton_<2, uint64_t>(xd, z_min, z_max);
 	}
 
+	#ifdef HAVE_UINT128_T
+
 	uint128_t computeBigMinFromMorton3D(uint128_t xd, uint128_t z_min, uint128_t z_max){
 		using namespace morton_curve_implementation_;
 
@@ -108,6 +110,8 @@ namespace morton_curve{
 
 		return computeBigMinFromMorton_<4, uint128_t>(xd, z_min, z_max);
 	}
+
+	#endif
 
 } // namespace morton_curve
 

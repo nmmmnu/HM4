@@ -2,6 +2,7 @@
 #define MORTON_CURVE_H_
 
 #include <cstdint>
+#include <array>
 
 #include "uint128_t.h"
 
@@ -112,14 +113,9 @@ namespace morton_curve{
 	constexpr auto fromMorton2D(uint64_t zzz){
 		using namespace morton_curve_implementation_;
 
-		struct Result{
-			uint32_t x;
-			uint32_t y;
-		};
-
 		// xy xy xy
 
-		return Result{
+		return std::array<uint32_t, 2>{
 			combineBits2D(zzz >> 1),
 			combineBits2D(zzz >> 0)
 		};
@@ -144,15 +140,9 @@ namespace morton_curve{
 	constexpr auto fromMorton3D(uint128_t zzz){
 		using namespace morton_curve_implementation_;
 
-		struct Result{
-			uint32_t x;
-			uint32_t y;
-			uint32_t z;
-		};
-
 		// xyz xyz xyz
 
-		return Result{
+		return std::array<uint32_t, 3>{
 			combineBits3D(zzz >> 2),
 			combineBits3D(zzz >> 1),
 			combineBits3D(zzz >> 0)
@@ -177,16 +167,9 @@ namespace morton_curve{
 	constexpr auto fromMorton4D(uint128_t zzz){
 		using namespace morton_curve_implementation_;
 
-		struct Result{
-			uint32_t x;
-			uint32_t y;
-			uint32_t z;
-			uint32_t w;
-		};
-
 		// xyz xyz xyz
 
-		return Result{
+		return std::array<uint32_t, 4>{
 			combineBits4D(zzz >> 3),
 			combineBits4D(zzz >> 2),
 			combineBits4D(zzz >> 1),
