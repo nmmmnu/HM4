@@ -80,6 +80,7 @@ namespace static_vector_implementation_{
 
 
 
+
 	template <typename Derived, typename T>
 	struct StaticVectorBase_<Derived, T, 0, true>{
 		constexpr static bool IS_POD = true;
@@ -88,7 +89,7 @@ namespace static_vector_implementation_{
 		using size_type		= std::size_t;
 
 	public:
-		StaticVectorBase_(value_type *buffer, size_type capacity) : buffer_(buffer), capacity_(capacity){}
+		StaticVectorBase_(value_type *buffer, size_type capacity) : buffer_(reinterpret_cast<char*>(buffer)), capacity_(capacity){}
 
 	public:
 		constexpr value_type *data() noexcept{
@@ -119,7 +120,7 @@ namespace static_vector_implementation_{
 		using size_type		= std::size_t;
 
 	public:
-		StaticVectorBase_(char *buffer, size_type capacity) : buffer_(buffer), capacity_(capacity){}
+		StaticVectorBase_(value_type *buffer, size_type capacity) : buffer_(reinterpret_cast<char *>(buffer)), capacity_(capacity){}
 
 	public:
 		constexpr value_type *data() noexcept{
@@ -215,26 +216,22 @@ public:
 
 	// STANDARD C-TORS FOR Capacity == 0
 
-	template<typename buffer_value_type>
-	constexpr StaticVector(
-				buffer_value_type *data, size_type size) : Base(data, size){
+	constexpr StaticVector(		value_type *data, size_type size) : Base(data, size){
 	}
 
-	template<typename buffer_value_type>
 	constexpr StaticVector(size_type const count, value_type const &value,
-				buffer_value_type *data, size_type size) : Base(data, size){
+					value_type *data, size_type size) : Base(data, size){
 		construct_(count, value);
 	}
 
-	template<class Iterator, typename buffer_value_type>
+	template<class Iterator>
 	constexpr StaticVector(Iterator begin, Iterator end,
-				buffer_value_type *data, size_type size) : Base(data, size){
+					value_type *data, size_type size) : Base(data, size){
 		copy_(begin, end);
 	}
 
-	template<typename buffer_value_type>
 	constexpr StaticVector(std::initializer_list<value_type> const &list,
-				buffer_value_type *data, size_type size) : Base(data, size){
+					value_type *data, size_type size) : Base(data, size){
 		copy_(list.begin(), list.end());
 	}
 

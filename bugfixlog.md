@@ -84,4 +84,5 @@ Changelog
 
 ### 1.3.10.2
 -	Fix non-working tcp_reuseport config option
+-	Fix bug in StaticVector
 
