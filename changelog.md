@@ -347,6 +347,7 @@ Changelog
 -	Refactor morton curve 2D, 3D, 4D modules.
 
 ### 1.3.11
-
 -	Release
 
+### 1.3.12
+-	Change version int scheme (this feature was never used)
