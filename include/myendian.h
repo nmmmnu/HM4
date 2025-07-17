@@ -32,7 +32,7 @@ namespace myendian_impl_{
 
 	template<typename T>
 	constexpr T be_byteswap(T const a){
-		static_assert(std::is_unsigned<T>::value, "be_byteswap<> supports only unsigned type");
+		static_assert(std::is_unsigned_v<T>, "be_byteswap<> supports only unsigned type");
 
 		if constexpr(getEndian() == Endian::BIG){
 			return a;
@@ -40,6 +40,17 @@ namespace myendian_impl_{
 			return byteswap(a);
 		}
 	}
+
+	#ifdef HAVE_UINT128_T
+	// separate, because type_traits don't know about it...
+	constexpr uint128_t be_byteswap(uint128_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return a;
+		}else{
+			return byteswap(a);
+		}
+	}
+	#endif
 
 	constexpr uint8_t be_byteswap(uint8_t const a){
 		return a;
@@ -76,6 +87,14 @@ namespace myendian_impl_{
 		static_assert( htobe_test<uint16_t>(0x1122		, 0x1122		, 0x2211		), "htobe<uint16_t> error" );
 		static_assert( htobe_test<uint32_t>(0x11223344		, 0x11223344		, 0x44332211		), "htobe<uint32_t> error" );
 		static_assert( htobe_test<uint64_t>(0x1122334455667788	, 0x1122334455667788	, 0x8877665544332211	), "htobe<uint64_t> error" );
+
+		#ifdef HAVE_UINT128_T
+		static_assert( htobe_test<uint128_t>(
+						combine64(0x1122334455667788, 0x99aabbccddeeff55),
+						combine64(0x1122334455667788, 0x99aabbccddeeff55),
+						combine64(0x55ffeeddccbbaa99, 0x8877665544332211)			), "htobe<uint128_t> error" );
+		#endif
+
 	} // namespace test_
 } // namespace myendian_impl_
 

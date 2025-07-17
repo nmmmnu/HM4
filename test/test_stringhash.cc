@@ -2,6 +2,8 @@
 
 #include "mytest.h"
 
+#include "uint128_t.h"
+
 MyTest mytest;
 
 template<class T>
@@ -30,6 +32,10 @@ void ss_test(){
 int main(){
 	ss_test<uint32_t>();
 	ss_test<uint64_t>();
+
+	#ifdef HAVE_UINT128_T
+	ss_test<uint128_t>();
+	#endif
 
 	return mytest.end();
 }

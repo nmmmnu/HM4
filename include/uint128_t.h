@@ -5,6 +5,8 @@
 
 		#define HAVE_UINT128_T
 
+		#include <cstdint>
+
 		using uint128_t = __uint128_t;
 
 		constexpr uint128_t combine64(uint64_t hi, uint64_t lo){
