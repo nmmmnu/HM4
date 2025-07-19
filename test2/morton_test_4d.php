@@ -20,17 +20,18 @@ $redis->connect("127.0.0.1");
 
 $results = 64000;
 
-$cmd = ! true ? "MC3RANGE" : "MC3RANGENAIVE";
+$cmd = ! true ? "MC4RANGE" : "MC4RANGENAIVE";
 
 $next = "";
 
 $id = 0;
 
 do{
-	$x = rawCommand($redis, $cmd, "morton3d",
-					10, 14, // x
-					 4,  8, // y
-					26, 28, // z
+	$x = rawCommand($redis, $cmd, "morton4d",
+					 1,  2, // x
+					10, 11, // y
+					20, 21, // z
+					30, 32, // w
 					$results, $next
 	);
 

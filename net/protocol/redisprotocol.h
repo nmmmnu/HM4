@@ -74,7 +74,10 @@ public:
 	//
 	// changed to 25, because redis on the web, have similar limit.
 	// del a b c...
+	//
 	// changed to 128, because of geoadd.
+	//
+	// changed to 255
 
 public:
 	using Status = ProtocolStatus;
