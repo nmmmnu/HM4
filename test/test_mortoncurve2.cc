@@ -28,8 +28,8 @@ namespace{
 
 		using namespace morton_curve;
 
-		auto const zzz1 = toMorton2D(x_min, y_min);
-		auto const zzz2 = toMorton2D(x_max, y_max);
+		auto const zzz1 = toMorton2D32({x_min, y_min});
+		auto const zzz2 = toMorton2D32({x_max, y_max});
 
 		printf("zzz -> %6lu %6lu\n", zzz1, zzz2);
 
@@ -65,7 +65,7 @@ namespace{
 
 						printf("Values for BIGMIN: %lu %lu %lu\n", zzz, zzz1, zzz2);
 
-						auto const bigmin = computeBigMinFromMorton2D(zzz, zzz1, zzz2);
+						auto const bigmin = computeBigMinFromMorton2D32(zzz, zzz1, zzz2);
 
 						printf("BIGMIN: %lu\n", bigmin);
 						printf("Skips : %zu\n", skips);
@@ -75,7 +75,7 @@ namespace{
 
 						++skips;
 
-						it = skipUntil(begin, end, bigmin, zzz2);
+						it = skipUntil(it, end, bigmin, zzz2);
 
 						if (it == end)
 							goto out;
@@ -135,7 +135,7 @@ int main(){
 		for(uint32_t y = 0; y < y_len; ++y)
 			for(uint32_t x = 0; x < x_len; ++x)
 				container.emplace_back(
-					toMorton2D(x, y),
+					toMorton2D32({x, y}),
 					x, y
 				);
 

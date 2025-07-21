@@ -10,16 +10,12 @@
 
 #include "ilist/txguard.h"
 
-#ifdef HAVE_UINT128_T
+namespace net::worker::commands::MortonCurve8D{
 
-namespace net::worker::commands::MortonCurve3D{
+	constexpr uint8_t DIM = 8;
 
-	constexpr uint8_t DIM = 3;
-
-	using ElemType = uint32_t;
-	using ZZZType  = uint128_t;
-
-	using PZZZType  = uint64_t;
+	using ElemType = uint8_t;
+	using ZZZType  = uint64_t;
 
 	using MCVector  = std::array<ElemType,		DIM>;
 	using SMCVector = std::array<std::string_view,	DIM>;
@@ -38,7 +34,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
-		constexpr bool isMC3KeyValid(std::string_view keyN, std::string_view keySub){
+		constexpr bool isMC8KeyValid(std::string_view keyN, std::string_view keySub){
 			return P1::valid(keyN, keySub, scoreSize);
 		}
 
@@ -52,16 +48,22 @@ namespace net::worker::commands::MortonCurve3D{
 
 		constexpr std::string_view toHex(MCVector const &vvv, MCBuffer &buffer){
 			return toHex(
-				morton_curve::toMorton3D32(vvv),
+				morton_curve::toMorton8D8(vvv),
 				buffer
 			);
 		}
 
 		std::string_view toHex(SMCVector const &vvvs, MCBuffer &buffer){
 			MCVector const vvv{
-				from_string<ElemType>(vvvs[0]),
-				from_string<ElemType>(vvvs[1]),
-				from_string<ElemType>(vvvs[2])
+				from_string<ElemType>(vvvs[ 0]),
+				from_string<ElemType>(vvvs[ 1]),
+				from_string<ElemType>(vvvs[ 2]),
+				from_string<ElemType>(vvvs[ 3]),
+
+				from_string<ElemType>(vvvs[ 4]),
+				from_string<ElemType>(vvvs[ 5]),
+				from_string<ElemType>(vvvs[ 6]),
+				from_string<ElemType>(vvvs[ 7])
 			};
 
 			return toHex(vvv, buffer);
@@ -69,11 +71,19 @@ namespace net::worker::commands::MortonCurve3D{
 
 		template<size_t N>
 		std::string_view formatLine(MCVector const &vvv, uint32_t id, std::array<char, N> &buffer){
-			static_assert(N > DIM * (10 + 1) + 8);
+			static_assert(N > DIM * (3 + 1) + 8);
 
-			constexpr static std::string_view fmt_mask = "{:0>10},{:0>10},{:0>10},{:08x}";
+			constexpr static std::string_view fmt_mask =
+							"{:0>3},{:0>3},{:0>3},{:0>3},"
+							"{:0>3},{:0>3},{:0>3},{:0>3},"
+							"{:08x}"
+			;
 
-			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, vvv[0], vvv[1], vvv[2], id);
+			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask,
+											vvv[ 0], vvv[ 1], vvv[ 2], vvv[ 3],
+											vvv[ 4], vvv[ 5], vvv[ 6], vvv[ 7],
+											id
+			);
 
 			if (result.out == std::end(buffer))
 				return "PLS_REPORT_A_BUG";
@@ -87,28 +97,41 @@ namespace net::worker::commands::MortonCurve3D{
 			MCVector v1;
 			MCVector v2;
 
-			ZZZType z_min = morton_curve::toMorton3D32(v1);
-			ZZZType z_max = morton_curve::toMorton3D32(v2);
+			ZZZType z_min = morton_curve::toMorton8D8(v1);
+			ZZZType z_max = morton_curve::toMorton8D8(v2);
 
 			constexpr bool inside(MCVector const &target) const{
 				return
-					target[0] >= v1[0] && target[0] <= v2[0] &&
-					target[1] >= v1[1] && target[1] <= v2[1] &&
-					target[2] >= v1[2] && target[2] <= v2[2]
+					target[ 0] >= v1[ 0] && target[ 0] <= v2[ 0] &&
+					target[ 1] >= v1[ 1] && target[ 1] <= v2[ 1] &&
+					target[ 2] >= v1[ 2] && target[ 2] <= v2[ 2] &&
+					target[ 3] >= v1[ 3] && target[ 3] <= v2[ 3] &&
+
+					target[ 4] >= v1[ 4] && target[ 4] <= v2[ 4] &&
+					target[ 5] >= v1[ 5] && target[ 5] <= v2[ 5] &&
+					target[ 6] >= v1[ 6] && target[ 6] <= v2[ 6] &&
+					target[ 7] >= v1[ 7] && target[ 7] <= v2[ 7]
 				;
 			}
 
 			auto bigmin(ZZZType zzz) const{
-				return morton_curve::computeBigMinFromMorton3D32(zzz, z_min, z_max);
+				return morton_curve::computeBigMinFromMorton8D8(zzz, z_min, z_max);
 			}
 
 			void print() const{
 				logger<Logger::DEBUG>()
-						<< v1[0] << v2[0]
-						<< v1[1] << v2[1]
-						<< v1[2] << v2[2]
-						<< (PZZZType) z_min
-						<< (PZZZType) z_max
+						<< v1[ 0] << v2[ 0]
+						<< v1[ 1] << v2[ 1]
+						<< v1[ 2] << v2[ 2]
+						<< v1[ 3] << v2[ 3]
+
+						<< v1[ 4] << v2[ 4]
+						<< v1[ 5] << v2[ 5]
+						<< v1[ 6] << v2[ 6]
+						<< v1[ 7] << v2[ 7]
+
+						<< z_min
+						<< z_max
 				;
 			}
 		};
@@ -120,9 +143,15 @@ namespace net::worker::commands::MortonCurve3D{
 
 			void print() const{
 				logger<Logger::DEBUG>()
-					<< vector[0]
-					<< vector[1]
-					<< vector[2]
+					<< vector[ 0]
+					<< vector[ 1]
+					<< vector[ 2]
+					<< vector[ 3]
+
+					<< vector[ 4]
+					<< vector[ 5]
+					<< vector[ 6]
+					<< vector[ 7]
 				;
 			}
 		};
@@ -269,7 +298,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 				auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-				auto const vvv = morton_curve::fromMorton3D32(zzz);
+				auto const vvv = morton_curve::fromMorton8D8(zzz);
 
 				if (rect.inside(vvv)){
 					if (++results > count)
@@ -287,7 +316,7 @@ namespace net::worker::commands::MortonCurve3D{
 						skips = 0;
 					}
 
-				//	logger<Logger::DEBUG>() << "Y >>>" << hex << zzz << vvv[0] << vvv[1] << vvv[2];
+				//	logger<Logger::DEBUG>() << "Y >>>" << hex << zzz << vvv[0] << vvv[1] << vvv[2] << vvv[3];
 				}else{
 					if constexpr(bigmin_optimized){
 						if (++skips > MAX_SKIPS){
@@ -307,7 +336,7 @@ namespace net::worker::commands::MortonCurve3D{
 						}
 					}
 
-				//	logger<Logger::DEBUG>() << "N >>>" << hex << zzz << vvv[0] << vvv[1] << vvv[2];
+				//	logger<Logger::DEBUG>() << "N >>>" << hex << zzz << vvv[0] << vvv[1] << vvv[2] << vvv[3];
 				}
 			}
 
@@ -326,7 +355,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3GET : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8GET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -335,7 +364,7 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3GET key subkey
+		// MC8GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -349,7 +378,7 @@ namespace net::worker::commands::MortonCurve3D{
 			if (keyN.empty() || keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC3KeyValid(keyN, keySub))
+			if (!isMC8KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
@@ -359,14 +388,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2get",	"MC2GET"
+			"mc8get",	"MC8GET"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3MGET : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8MGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -375,7 +404,7 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3GET key subkey0 subkey1 ...
+		// MC8GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
@@ -395,7 +424,7 @@ namespace net::worker::commands::MortonCurve3D{
 				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!isMC3KeyValid(keyN, keySub))
+				if (!isMC8KeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -418,14 +447,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3mget",	"MC3MGET"
+			"mc8mget",	"MC8MGET"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3EXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8EXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -434,7 +463,7 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3GET key subkey
+		// MC8GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
@@ -444,14 +473,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3exists",	"MC3EXISTS"
+			"mc8exists",	"MC8EXISTS"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3SCORE : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8SCORE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -460,7 +489,7 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3SCORE key subkey
+		// MC8SCORE key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -474,7 +503,7 @@ namespace net::worker::commands::MortonCurve3D{
 			if (keyN.empty() || keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC3KeyValid(keyN, keySub))
+			if (!isMC8KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			if (auto const hexA = shared::zsetmulti::getIndexes<P1>(db, keyN, keySub); !hexA[0].empty()){
@@ -483,22 +512,27 @@ namespace net::worker::commands::MortonCurve3D{
 
 				auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-				auto const vvv = morton_curve::fromMorton3D32(zzz);
+				auto const vvv = morton_curve::fromMorton8D8(zzz);
 
 				to_string_buffer_t buffer[DIM];
 
 				SMCVector const container{
-					to_string(vvv[0], buffer[0]),
-					to_string(vvv[1], buffer[1]),
-					to_string(vvv[2], buffer[2])
+					to_string(vvv[ 0], buffer[ 0]),
+					to_string(vvv[ 1], buffer[ 1]),
+					to_string(vvv[ 2], buffer[ 2]),
+					to_string(vvv[ 3], buffer[ 3]),
+
+					to_string(vvv[ 4], buffer[ 4]),
+					to_string(vvv[ 5], buffer[ 5]),
+					to_string(vvv[ 6], buffer[ 6]),
+					to_string(vvv[ 7], buffer[ 7])
 				};
 
 				return result.set_container(container);
 			}else{
 				SMCVector const container{
-					"",
-					"",
-					""
+					"", "", "", "",
+					"", "", "", "",
 				};
 
 				return result.set_container(container);
@@ -507,14 +541,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3score",	"MC3SCORE"
+			"mc8score",	"MC8SCORE"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3ADD : BaseCommandRW<Protocol,DBAdapter>{
+	struct MC8ADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -523,7 +557,7 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
+		// MC8ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -532,7 +566,7 @@ namespace net::worker::commands::MortonCurve3D{
 			auto const vstep = varg + DIM;
 
 			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_18);
 
 			const auto &keyN = p[1];
 
@@ -540,13 +574,21 @@ namespace net::worker::commands::MortonCurve3D{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const &keySub	= *(itk + 0);
-			//	auto const &x		= *(itk + 1);
-			//	auto const &y		= *(itk + 2);
-			//	auto const &z		= *(itk + 3);
-				auto const &value	= *(itk + 4);
+				auto const &keySub	= *(itk +  0);
 
-				if (!isMC3KeyValid(keyN, keySub))
+			//	auto const &v00		= *(itk + 0 + 1);
+			//	auto const &v01		= *(itk + 1 + 1);
+			//	auto const &v02		= *(itk + 2 + 1);
+			//	auto const &v03		= *(itk + 3 + 1);
+
+			//	auto const &v04		= *(itk + 4 + 1);
+			//	auto const &v05		= *(itk + 5 + 1);
+			//	auto const &v06		= *(itk + 6 + 1);
+			//	auto const &v07		= *(itk + 7 + 1);
+
+				auto const &value	= *(itk + 8 + 1);
+
+				if (!isMC8KeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 				if (!hm4::Pair::isValValid(value))
@@ -560,9 +602,15 @@ namespace net::worker::commands::MortonCurve3D{
 				auto const &keySub	= *(itk + 0);
 
 				SMCVector const vvvs{
-						*(itk + 0 + 1),
-						*(itk + 1 + 1),
-						*(itk + 2 + 1)
+						*(itk +  0 + 1),
+						*(itk +  1 + 1),
+						*(itk +  2 + 1),
+						*(itk +  3 + 1),
+
+						*(itk +  4 + 1),
+						*(itk +  5 + 1),
+						*(itk +  6 + 1),
+						*(itk +  7 + 1)
 				};
 
 				auto const &value	= *(itk + DIM + 1);
@@ -582,14 +630,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3add",		"MC3ADD"
+			"mc8add",		"MC8ADD"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3REM : BaseCommandRW<Protocol,DBAdapter>{
+	struct MC8REM : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -598,7 +646,7 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3DEL a subkey0 subkey1 ...
+		// MC8DEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
@@ -611,9 +659,9 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3rem",		"MC3REM"	,
-			"mc3remove",		"MC3REMOVE"	,
-			"mc3del",		"MC3DEL"
+			"mc8rem",		"MC8REM"	,
+			"mc8remove",		"MC8REMOVE"	,
+			"mc8del",		"MC8DEL"
 
 		};
 	};
@@ -621,7 +669,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3POINT : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8POINT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -630,29 +678,35 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3POINT morton 10 20 30 10000 [key]
+		// MC8POINT morton 10 20 30 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_56);
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1920);
 
 			auto const keyN	= p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC3KeyValid(keyN, "x"))
+			if (!isMC8KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const pr = 2;
 
 			MortonPoint const point{
 				MCVector{
-					from_string<ElemType>(p[0 + pr]),
-					from_string<ElemType>(p[1 + pr]),
-					from_string<ElemType>(p[2 + pr])
+					from_string<ElemType>(p[ 0 + pr]),
+					from_string<ElemType>(p[ 1 + pr]),
+					from_string<ElemType>(p[ 2 + pr]),
+					from_string<ElemType>(p[ 3 + pr]),
+
+					from_string<ElemType>(p[ 4 + pr]),
+					from_string<ElemType>(p[ 5 + pr]),
+					from_string<ElemType>(p[ 6 + pr]),
+					from_string<ElemType>(p[ 7 + pr])
 				}
 			};
 
@@ -678,14 +732,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3point",	"MC3POINT"
+			"mc8point",	"MC8POINT"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -694,34 +748,46 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC3RANGENAIVE morton 10 10 20 20 30 30 10000 [key]
+		// MC8RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3536);
 
 			auto const keyN	= p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC3KeyValid(keyN, "x"))
+			if (!isMC8KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const pr = 2;
 
 			MortonRectangle const rect{
 				MCVector{
-					from_string<ElemType>(p[0 + pr]),
-					from_string<ElemType>(p[2 + pr]),
-					from_string<ElemType>(p[4 + pr])
+					from_string<ElemType>(p[ 0 + pr]),
+					from_string<ElemType>(p[ 2 + pr]),
+					from_string<ElemType>(p[ 4 + pr]),
+					from_string<ElemType>(p[ 6 + pr]),
+
+					from_string<ElemType>(p[ 8 + pr]),
+					from_string<ElemType>(p[10 + pr]),
+					from_string<ElemType>(p[12 + pr]),
+					from_string<ElemType>(p[14 + pr])
 				},
 				MCVector{
-					from_string<ElemType>(p[1 + pr]),
-					from_string<ElemType>(p[3 + pr]),
-					from_string<ElemType>(p[5 + pr])
+					from_string<ElemType>(p[ 1 + pr]),
+					from_string<ElemType>(p[ 3 + pr]),
+					from_string<ElemType>(p[ 5 + pr]),
+					from_string<ElemType>(p[ 7 + pr]),
+
+					from_string<ElemType>(p[ 9 + pr]),
+					from_string<ElemType>(p[11 + pr]),
+					from_string<ElemType>(p[13 + pr]),
+					from_string<ElemType>(p[15 + pr])
 				}
 			};
 
@@ -746,15 +812,15 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3rangenaive",	"MC3RANGENAIVE"	,
-			"mc3rangeflat",		"MC3RANGEFLAT"
+			"mc8rangenaive",	"MC8RANGENAIVE",
+			"mc8rangeflat",	"MC8RANGEFLAT"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3RANGE : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8RANGE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -763,34 +829,46 @@ namespace net::worker::commands::MortonCurve3D{
 			return std::end(cmd);
 		};
 
-		// MC2RANGE morton 10 10 20 20 30 30 10000 [key]
+		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3536);
 
 			auto const keyN	= p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC3KeyValid(keyN, "x"))
+			if (!isMC8KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const pr = 2;
 
 			MortonRectangle const rect{
 				MCVector{
-					from_string<ElemType>(p[0 + pr]),
-					from_string<ElemType>(p[2 + pr]),
-					from_string<ElemType>(p[4 + pr])
+					from_string<ElemType>(p[ 0 + pr]),
+					from_string<ElemType>(p[ 2 + pr]),
+					from_string<ElemType>(p[ 4 + pr]),
+					from_string<ElemType>(p[ 6 + pr]),
+
+					from_string<ElemType>(p[ 8 + pr]),
+					from_string<ElemType>(p[10 + pr]),
+					from_string<ElemType>(p[12 + pr]),
+					from_string<ElemType>(p[14 + pr])
 				},
 				MCVector{
-					from_string<ElemType>(p[1 + pr]),
-					from_string<ElemType>(p[3 + pr]),
-					from_string<ElemType>(p[5 + pr])
+					from_string<ElemType>(p[ 1 + pr]),
+					from_string<ElemType>(p[ 3 + pr]),
+					from_string<ElemType>(p[ 5 + pr]),
+					from_string<ElemType>(p[ 7 + pr]),
+
+					from_string<ElemType>(p[ 9 + pr]),
+					from_string<ElemType>(p[11 + pr]),
+					from_string<ElemType>(p[13 + pr]),
+					from_string<ElemType>(p[15 + pr])
 				}
 			};
 
@@ -814,14 +892,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3range",	"MC3RANGE"
+			"mc8range",	"MC8RANGE"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3ENCODE : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8ENCODE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -834,14 +912,20 @@ namespace net::worker::commands::MortonCurve3D{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 1 + DIM)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
 			auto const pr = 1;
 
 			SMCVector const vvvs{
-					p[0 + pr],
-					p[1 + pr],
-					p[2 + pr]
+					p[ 0 + pr],
+					p[ 1 + pr],
+					p[ 2 + pr],
+					p[ 3 + pr],
+
+					p[ 4 + pr],
+					p[ 5 + pr],
+					p[ 6 + pr],
+					p[ 7 + pr]
 			};
 
 			MCBuffer buffer;
@@ -853,14 +937,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3encode",	"MC3ENCODE"
+			"mc8encode",	"MC8ENCODE"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3DECODE : BaseCommandRO<Protocol,DBAdapter>{
+	struct MC8DECODE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -879,14 +963,20 @@ namespace net::worker::commands::MortonCurve3D{
 
 			auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-			auto const vvv = morton_curve::fromMorton3D32(zzz);
+			auto const vvv = morton_curve::fromMorton8D8(zzz);
 
 			to_string_buffer_t buffer[DIM];
 
 			SMCVector const container{
-				to_string(vvv[0], buffer[0]),
-				to_string(vvv[1], buffer[1]),
-				to_string(vvv[2], buffer[2])
+				to_string(vvv[ 0], buffer[ 0]),
+				to_string(vvv[ 1], buffer[ 1]),
+				to_string(vvv[ 2], buffer[ 2]),
+				to_string(vvv[ 3], buffer[ 3]),
+
+				to_string(vvv[ 4], buffer[ 4]),
+				to_string(vvv[ 5], buffer[ 5]),
+				to_string(vvv[ 6], buffer[ 6]),
+				to_string(vvv[ 7], buffer[ 7])
 			};
 
 			return result.set_container(container);
@@ -894,7 +984,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc3decode",	"MC3DECODE"
+			"mc8decode",	"MC8DECODE"
 		};
 	};
 
@@ -902,21 +992,21 @@ namespace net::worker::commands::MortonCurve3D{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "morton_curve_3d";
+		constexpr inline static std::string_view name	= "morton_curve_8D";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				MC3GET			,
-				MC3MGET			,
-				MC3EXISTS		,
-				MC3SCORE		,
-				MC3ADD			,
-				MC3REM			,
-				MC3POINT		,
-				MC3RANGENAIVE		,
-				MC3RANGE		,
-				MC3ENCODE		,
-				MC3DECODE
+				MC8GET			,
+				MC8MGET			,
+				MC8EXISTS		,
+				MC8SCORE		,
+				MC8ADD			,
+				MC8REM			,
+				MC8POINT		,
+				MC8RANGENAIVE		,
+				MC8RANGE		,
+				MC8ENCODE		,
+				MC8DECODE
 			>(pack);
 		}
 	};
@@ -925,6 +1015,4 @@ namespace net::worker::commands::MortonCurve3D{
 
 } // namespace
 
-#endif
-// #if HAVE_UINT128_T
 

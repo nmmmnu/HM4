@@ -351,3 +351,9 @@ Changelog
 
 ### 1.3.12
 -	Change version int scheme (this feature was never used)
+-	Change the way MortonCode encode values to more standard one. Old data may be invalid now.
+-	new AI vector inspired module morton curve 16D: MC16GET, MC16MGET, MC16EXISTS, MC16SCORE,
+	MC16ADD, MC16REM, MC16POINT, MC16RANGENAIVE, MC16RANGE, MC16ENCODE, MC16DECODE
+-	new AI vector inspired module morton curve 8D: MC8GET, MC8MGET, MC8EXISTS, MC8SCORE,
+	MC8ADD, MC8REM, MC8POINT, MC8RANGENAIVE, MC8RANGE, MC8ENCODE, MC8DECODE
+

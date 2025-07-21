@@ -16,15 +16,22 @@ namespace net::worker::commands::MortonCurve4D{
 
 	constexpr uint8_t DIM = 4;
 
-	using ZZZType = uint128_t;
+	using ElemType = uint32_t;
+	using ZZZType  = uint128_t;
 
-	using MCVector  = std::array<uint32_t,		DIM>;
+	using PZZZType  = uint64_t;
+
+	using MCVector  = std::array<ElemType,		DIM>;
 	using SMCVector = std::array<std::string_view,	DIM>;
+
+	static_assert(sizeof(ElemType) * DIM <= sizeof(ZZZType));
 
 	namespace morton_curve_impl_{
 
 		using namespace net::worker::shared::stop_predicate;
 		using namespace net::worker::shared::config;
+
+		constexpr size_t MAX_SKIPS = ITERATIONS_IDLE * DIM;
 
 		constexpr size_t scoreSize =  sizeof(ZZZType) * 2;	// ZZZType as hex
 		using MCBuffer = std::array<char, scoreSize>;
@@ -45,17 +52,17 @@ namespace net::worker::commands::MortonCurve4D{
 
 		constexpr std::string_view toHex(MCVector const &vvv, MCBuffer &buffer){
 			return toHex(
-				morton_curve::toMorton4D(vvv[0], vvv[1], vvv[2], vvv[3]),
+				morton_curve::toMorton4D32(vvv),
 				buffer
 			);
 		}
 
 		std::string_view toHex(SMCVector const &vvvs, MCBuffer &buffer){
 			MCVector const vvv{
-				from_string<uint32_t>(vvvs[0]),
-				from_string<uint32_t>(vvvs[1]),
-				from_string<uint32_t>(vvvs[2]),
-				from_string<uint32_t>(vvvs[3])
+				from_string<ElemType>(vvvs[0]),
+				from_string<ElemType>(vvvs[1]),
+				from_string<ElemType>(vvvs[2]),
+				from_string<ElemType>(vvvs[3])
 			};
 
 			return toHex(vvv, buffer);
@@ -78,53 +85,33 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 		struct MortonRectangle{
-			uint32_t x1;
-			uint32_t x2;
+			MCVector v1;
+			MCVector v2;
 
-			uint32_t y1;
-			uint32_t y2;
+			ZZZType z_min = morton_curve::toMorton4D32(v1);
+			ZZZType z_max = morton_curve::toMorton4D32(v2);
 
-			uint32_t z1;
-			uint32_t z2;
-
-			uint32_t w1;
-			uint32_t w2;
-
-			ZZZType z_min = morton_curve::toMorton4D(x1, y1, z1, w1);
-			ZZZType z_max = morton_curve::toMorton4D(x2, y2, z2, w2);
-
-			constexpr MortonRectangle(uint32_t x1, uint32_t x2, uint32_t y1, uint32_t y2, uint32_t z1, uint32_t z2, uint32_t w1, uint32_t w2) :
-					x1(x1), x2(x2),
-					y1(y1), y2(y2),
-					z1(z1), z2(z2),
-					w1(w1), w2(w2){}
-
-			constexpr bool inside(MCVector const &vvv) const{
-				return inside_(vvv[0], vvv[1], vvv[2], vvv[3]);
+			constexpr bool inside(MCVector const &target) const{
+				return
+					target[0] >= v1[0] && target[0] <= v2[0] &&
+					target[1] >= v1[1] && target[1] <= v2[1] &&
+					target[2] >= v1[2] && target[2] <= v2[2] &&
+					target[3] >= v1[3] && target[3] <= v2[3]
+				;
 			}
 
 			auto bigmin(ZZZType zzz) const{
-				return morton_curve::computeBigMinFromMorton4D(zzz, z_min, z_max);
+				return morton_curve::computeBigMinFromMorton4D32(zzz, z_min, z_max);
 			}
 
 			void print() const{
 				logger<Logger::DEBUG>()
-						<< x1 << x2
-						<< y1 << y2
-						<< z1 << z2
-						<< w1 << w2
-						<< (uint64_t) z_min	// no way to print uint128_t
-						<< (uint64_t) z_max	// no way to print uint128_t
-				;
-			}
-
-		private:
-			constexpr bool inside_(uint32_t x, uint32_t y, uint32_t z, uint32_t w) const{
-				return
-					x >= x1 && x <= x2 &&
-					y >= y1 && y <= y2 &&
-					z >= z1 && z <= z2 &&
-					w >= w1 && w <= w2
+						<< v1[0] << v2[0]
+						<< v1[1] << v2[1]
+						<< v1[2] << v2[2]
+						<< v1[3] << v2[3]
+						<< (PZZZType) z_min
+						<< (PZZZType) z_max
 				;
 			}
 		};
@@ -132,26 +119,15 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 		struct MortonPoint{
-			uint32_t x;
-			uint32_t y;
-			uint32_t z;
-			uint32_t w;
-
-		//	constexpr bool inside(uint32_t x, uint32_t y, uint32_t z, uint32_t w) const{
-		//		return
-		//			this->x == x &&
-		//			this->y == y &&
-		//			this->z == z &&
-		//			this->w == w
-		//		;
-		//	}
-
-			constexpr auto vector() const{
-				return MCVector{ x, y, z, w };
-			}
+			MCVector vector;
 
 			void print() const{
-				logger<Logger::DEBUG>() << x << y << z << w;
+				logger<Logger::DEBUG>()
+					<< vector[0]
+					<< vector[1]
+					<< vector[2]
+					<< vector[3]
+				;
 			}
 		};
 
@@ -175,7 +151,7 @@ namespace net::worker::commands::MortonCurve4D{
 				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN			,
 						"X"			,	// old style not supports txt
-						toHex(point.vector(), buffer)
+						toHex(point.vector, buffer)
 				);
 			}();
 
@@ -210,7 +186,7 @@ namespace net::worker::commands::MortonCurve4D{
 				auto const &val = it->getVal();
 
 				bcontainer.push_back();
-				auto const line = formatLine(point.vector(), id++, bcontainer.back());
+				auto const line = formatLine(point.vector, id++, bcontainer.back());
 
 				container.emplace_back(line);
 				container.emplace_back(val);
@@ -255,7 +231,7 @@ namespace net::worker::commands::MortonCurve4D{
 
 			StopRangePrefixPredicate stop(key_max);
 
-			rect.print();
+		//	rect.print();
 
 			uint32_t iterations	= 0;
 			uint32_t results	= 0;
@@ -297,7 +273,7 @@ namespace net::worker::commands::MortonCurve4D{
 
 				auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-				auto const vvv = morton_curve::fromMorton4D(zzz);
+				auto const vvv = morton_curve::fromMorton4D32(zzz);
 
 				if (rect.inside(vvv)){
 					if (++results > count)
@@ -318,7 +294,7 @@ namespace net::worker::commands::MortonCurve4D{
 				//	logger<Logger::DEBUG>() << "Y >>>" << hex << zzz << vvv[0] << vvv[1] << vvv[2] << vvv[3];
 				}else{
 					if constexpr(bigmin_optimized){
-						if (++skips > ITERATIONS_IDLE){
+						if (++skips > MAX_SKIPS){
 							if (++retries > MAX_RETRIES)
 								return tail(key);
 
@@ -509,9 +485,9 @@ namespace net::worker::commands::MortonCurve4D{
 
 				auto const hex = hexA[0];
 
-				auto const zzz = hex_convert::fromHex<uint64_t>(hex);
+				auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-				auto const vvv = morton_curve::fromMorton4D(zzz);
+				auto const vvv = morton_curve::fromMorton4D32(zzz);
 
 				to_string_buffer_t buffer[DIM];
 
@@ -559,7 +535,7 @@ namespace net::worker::commands::MortonCurve4D{
 			using namespace morton_curve_impl_;
 
 			auto const varg  = 2;
-			auto const vstep = 6;
+			auto const vstep = varg + DIM;
 
 			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
@@ -591,13 +567,13 @@ namespace net::worker::commands::MortonCurve4D{
 				auto const &keySub	= *(itk + 0);
 
 				SMCVector const vvvs{
-						*(itk + 1),
-						*(itk + 2),
-						*(itk + 3),
-						*(itk + 4)
+						*(itk + 0 + 1),
+						*(itk + 1 + 1),
+						*(itk + 2 + 1),
+						*(itk + 3 + 1)
 				};
 
-				auto const &value	= *(itk + 5);
+				auto const &value	= *(itk + DIM + 1);
 
 				MCBuffer buffer;
 
@@ -678,16 +654,22 @@ namespace net::worker::commands::MortonCurve4D{
 			if (!isMC4KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
+			auto const pr = 2;
+
 			MortonPoint const point{
-				from_string<uint32_t>(p[2]),
-				from_string<uint32_t>(p[3]),
-				from_string<uint32_t>(p[4]),
-				from_string<uint32_t>(p[5])
+				MCVector{
+					from_string<ElemType>(p[0 + pr]),
+					from_string<ElemType>(p[1 + pr]),
+					from_string<ElemType>(p[2 + pr]),
+					from_string<ElemType>(p[3 + pr])
+				}
 			};
 
-			auto const count	= myClamp<uint32_t>(p[6], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const sx = DIM + pr;
 
-			auto const startKey	= p.size() == 8 ? p[7] : "";
+			auto const count	= myClamp<uint32_t>(p[sx + 0], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+
+			auto const startKey	= p.size() == 8 ? p[sx + 1] : "";
 
 			auto &container  = blob.container();
 			auto &bcontainer = blob.bcontainer();
@@ -727,7 +709,7 @@ namespace net::worker::commands::MortonCurve4D{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_BC);
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1112);
 
 			auto const keyN	= p[1];
 
@@ -737,23 +719,28 @@ namespace net::worker::commands::MortonCurve4D{
 			if (!isMC4KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
+			auto const pr = 2;
+
 			MortonRectangle const rect{
-				from_string<uint32_t>(p[2]),
-				from_string<uint32_t>(p[3]),
-
-				from_string<uint32_t>(p[4]),
-				from_string<uint32_t>(p[5]),
-
-				from_string<uint32_t>(p[6]),
-				from_string<uint32_t>(p[7]),
-
-				from_string<uint32_t>(p[8]),
-				from_string<uint32_t>(p[9])
+				MCVector{
+					from_string<ElemType>(p[0 + pr]),
+					from_string<ElemType>(p[2 + pr]),
+					from_string<ElemType>(p[4 + pr]),
+					from_string<ElemType>(p[6 + pr])
+				},
+				MCVector{
+					from_string<ElemType>(p[1 + pr]),
+					from_string<ElemType>(p[3 + pr]),
+					from_string<ElemType>(p[5 + pr]),
+					from_string<ElemType>(p[7 + pr])
+				}
 			};
 
-			auto const count	= myClamp<uint32_t>(p[10], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const sx = 2 * DIM + pr;
 
-			auto const startKey	= p.size() == 12 ? p[11] : "";
+			auto const count	= myClamp<uint32_t>(p[sx + 0], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+
+			auto const startKey	= p.size() == 2 + 2 * DIM + 1 + 1 ? p[sx + 1] : "";
 
 			auto &container  = blob.container();
 			auto &bcontainer = blob.bcontainer();
@@ -793,7 +780,7 @@ namespace net::worker::commands::MortonCurve4D{
 			using namespace morton_curve_impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_BC);
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1112);
 
 			auto const keyN	= p[1];
 
@@ -803,23 +790,28 @@ namespace net::worker::commands::MortonCurve4D{
 			if (!isMC4KeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
+			auto const pr = 2;
+
 			MortonRectangle const rect{
-				from_string<uint32_t>(p[2]),
-				from_string<uint32_t>(p[3]),
-
-				from_string<uint32_t>(p[4]),
-				from_string<uint32_t>(p[5]),
-
-				from_string<uint32_t>(p[6]),
-				from_string<uint32_t>(p[7]),
-
-				from_string<uint32_t>(p[8]),
-				from_string<uint32_t>(p[9])
+				MCVector{
+					from_string<ElemType>(p[0 + pr]),
+					from_string<ElemType>(p[2 + pr]),
+					from_string<ElemType>(p[4 + pr]),
+					from_string<ElemType>(p[6 + pr])
+				},
+				MCVector{
+					from_string<ElemType>(p[1 + pr]),
+					from_string<ElemType>(p[3 + pr]),
+					from_string<ElemType>(p[5 + pr]),
+					from_string<ElemType>(p[7 + pr])
+				}
 			};
 
-			auto const count	= myClamp<uint32_t>(p[10], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const sx = 2 * DIM + pr;
 
-			auto const startKey	= p.size() == 12 ? p[11] : "";
+			auto const count	= myClamp<uint32_t>(p[sx + 0], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+
+			auto const startKey	= p.size() == 2 + 2 * DIM + 1 + 1 ? p[sx + 1] : "";
 
 			auto &container  = blob.container();
 			auto &bcontainer = blob.bcontainer();
@@ -857,7 +849,14 @@ namespace net::worker::commands::MortonCurve4D{
 			if (p.size() != 1 + DIM)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
-			SMCVector const vvvs{ p[1], p[2], p[3], p[4] };
+			auto const pr = 1;
+
+			SMCVector const vvvs{
+					p[0 + pr],
+					p[1 + pr],
+					p[2 + pr],
+					p[3 + pr]
+			};
 
 			MCBuffer buffer;
 
@@ -894,7 +893,7 @@ namespace net::worker::commands::MortonCurve4D{
 
 			auto const zzz = hex_convert::fromHex<ZZZType>(hex);
 
-			auto const vvv = morton_curve::fromMorton4D(zzz);
+			auto const vvv = morton_curve::fromMorton4D32(zzz);
 
 			to_string_buffer_t buffer[DIM];
 

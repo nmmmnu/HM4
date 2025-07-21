@@ -8,7 +8,7 @@ MY_TARGETS = $(A)test_stringhash $(A)test_stringreplace $(A)test_trim $(A)test_s
 		$(A)test_blobview $(A)test_binarysearch $(A)test_bfslookup			\
 		$(A)test_glob  $(A)test_myalign $(A)test_mynarrow $(A)test_signalguard		\
 		$(A)test_base64 $(A)test_idgenerator $(A)test_tdigest $(A)test_endianfp	\
-		$(A)test_mortoncurve_encode $(A)test_mortoncurve2 $(A)test_mortoncurve3 $(A)test_mortoncurve4
+		$(A)test_mortoncurve_encode $(A)test_mortoncurve2 $(A)test_mortoncurve3 $(A)test_mortoncurve4 $(A)test_mortoncurve8 $(A)test_mortoncurve16
 
 EXTRA_CLEAN += $(MY_TARGETS)
 
@@ -68,6 +68,12 @@ $(A)test_mortoncurve3: $(O)test_mortoncurve3.o $(O)mortoncurve.o
 	$(LINK)
 
 $(A)test_mortoncurve4: $(O)test_mortoncurve4.o $(O)mortoncurve.o
+	$(LINK)
+
+$(A)test_mortoncurve8: $(O)test_mortoncurve8.o $(O)mortoncurve.o
+	$(LINK)
+
+$(A)test_mortoncurve16: $(O)test_mortoncurve16.o $(O)mortoncurve.o
 	$(LINK)
 
 $(A)test_endianfp: $(O)test_endianfp.o

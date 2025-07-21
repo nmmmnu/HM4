@@ -54,15 +54,17 @@ namespace net::worker{
 
 
 
-		constexpr static std::string_view NEED_EXACT_PARAMS_12	= "The command needs exactly 1 or 2 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_23	= "The command needs exactly 2 or 3 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_34	= "The command needs exactly 3 or 4 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_45	= "The command needs exactly 4 or 5 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_56	= "The command needs exactly 5 or 6 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_67	= "The command needs exactly 6 or 7 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_89	= "The command needs exactly 8 or 9 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_BC	= "The command needs exactly 11 or 12 parameters";
-		constexpr static std::string_view NEED_EXACT_PARAMS_234	= "The command needs exactly 2, 3 or 4 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_12		= "The command needs exactly 1 or 2 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_23		= "The command needs exactly 2 or 3 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_34		= "The command needs exactly 3 or 4 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_45		= "The command needs exactly 4 or 5 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_56		= "The command needs exactly 5 or 6 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_67		= "The command needs exactly 6 or 7 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_89		= "The command needs exactly 8 or 9 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_234		= "The command needs exactly 2, 3 or 4 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_1112	= "The command needs exactly 11 or 12 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_1920	= "The command needs exactly 19 or 20 parameters";
+		constexpr static std::string_view NEED_EXACT_PARAMS_3536	= "The command needs exactly 35 or 36 parameters";
 
 		constexpr static std::string_view NEED_MORE_PARAMS_1	= "The command needs 1 or more parameters";
 		constexpr static std::string_view NEED_MORE_PARAMS_2	= "The command needs 2 or more parameters";
@@ -83,17 +85,27 @@ namespace net::worker{
 			"The command needs 6 or more parameters in groups",
 			"The command needs 7 or more parameters in groups",
 			"The command needs 8 or more parameters in groups",
-			"The command needs 9 or more parameters in groups"
+			"The command needs 9 or more parameters in groups",
+			SYS_UNHANDLED,
+			SYS_UNHANDLED,
+			SYS_UNHANDLED,
+			SYS_UNHANDLED,
+			SYS_UNHANDLED,
+			SYS_UNHANDLED,
+			SYS_UNHANDLED,
+			SYS_UNHANDLED,
+			"The command needs 18 or more parameters in groups",
 		};
 
-		constexpr static std::string_view NEED_GROUP_PARAMS_2	= NEED_GROUP_PARAMS[2];
-		constexpr static std::string_view NEED_GROUP_PARAMS_3	= NEED_GROUP_PARAMS[3];
-		constexpr static std::string_view NEED_GROUP_PARAMS_4	= NEED_GROUP_PARAMS[4];
-		constexpr static std::string_view NEED_GROUP_PARAMS_5	= NEED_GROUP_PARAMS[5];
-		constexpr static std::string_view NEED_GROUP_PARAMS_6	= NEED_GROUP_PARAMS[6];
-		constexpr static std::string_view NEED_GROUP_PARAMS_7	= NEED_GROUP_PARAMS[7];
-		constexpr static std::string_view NEED_GROUP_PARAMS_8	= NEED_GROUP_PARAMS[8];
-		constexpr static std::string_view NEED_GROUP_PARAMS_9	= NEED_GROUP_PARAMS[9];
+		constexpr static std::string_view NEED_GROUP_PARAMS_2	= NEED_GROUP_PARAMS[ 2];
+		constexpr static std::string_view NEED_GROUP_PARAMS_3	= NEED_GROUP_PARAMS[ 3];
+		constexpr static std::string_view NEED_GROUP_PARAMS_4	= NEED_GROUP_PARAMS[ 4];
+		constexpr static std::string_view NEED_GROUP_PARAMS_5	= NEED_GROUP_PARAMS[ 5];
+		constexpr static std::string_view NEED_GROUP_PARAMS_6	= NEED_GROUP_PARAMS[ 6];
+		constexpr static std::string_view NEED_GROUP_PARAMS_7	= NEED_GROUP_PARAMS[ 7];
+		constexpr static std::string_view NEED_GROUP_PARAMS_8	= NEED_GROUP_PARAMS[ 8];
+		constexpr static std::string_view NEED_GROUP_PARAMS_9	= NEED_GROUP_PARAMS[ 9];
+		constexpr static std::string_view NEED_GROUP_PARAMS_18	= NEED_GROUP_PARAMS[18];
 
 
 
