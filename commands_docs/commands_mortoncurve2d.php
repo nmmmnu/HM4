@@ -13,7 +13,7 @@ return array(
 			false,
 			false,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -29,7 +29,7 @@ return array(
 			false,
 			false,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -46,7 +46,7 @@ return array(
 			false,
 			false,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -62,7 +62,7 @@ return array(
 			false,
 			false,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -70,7 +70,7 @@ return array(
 
 			"MC2ADD key subKey x y value [subKey x y value]...",
 
-			"Set <i>subkey</i> with 2D coordinates <i>x</i> and <i>y</i> and <i>value</i> in <i>key</i>.<br />" .
+			"Set <i>subkey</i> with 2D coordinates <i>x</i>, <i>y</i> and <i>value</i> in <i>key</i>.<br />" .
 			"Uses <b>uint32_t</b> for coordinates.",
 			"OK",
 			"OK",
@@ -79,7 +79,7 @@ return array(
 			false,
 			true,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -95,7 +95,7 @@ return array(
 			false,
 			true,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -118,7 +118,7 @@ return array(
 			false,
 			false,
 
-			"mortoncurve",
+			"mortoncurve2d",
 
 			"<pre>" .
 			"<i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br />" .
@@ -160,7 +160,7 @@ return array(
 			false,
 			false,
 
-			"mortoncurve",
+			"mortoncurve2d",
 
 			"<pre>" .
 			"<i>Suppose we have a company with two offices in LA and NYC (LA=1, NYC=2).</i><br />" .
@@ -202,7 +202,7 @@ return array(
 			false,
 			false,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -219,7 +219,7 @@ return array(
 			false,
 			null,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 	new Cmd(
@@ -235,7 +235,7 @@ return array(
 			false,
 			null,
 
-			"mortoncurve"
+			"mortoncurve2d"
 	),
 
 );

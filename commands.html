@@ -337,7 +337,7 @@
 				<li><a href="#MC1RANGE">MC1RANGE</a></li>
 				</div>
 			<div>
-			<b>mortoncurve.h</b><br />
+			<b>mortoncurve2d.h</b><br />
 			&nbsp;
 
 					<li><a href="#MC2GET">MC2GET</a></li>
@@ -351,6 +351,70 @@
 				<li><a href="#MC2RANGENAIVE">MC2RANGENAIVE</a></li>
 				<li><a href="#MC2ENCODE">MC2ENCODE</a></li>
 				<li><a href="#MC2DECODE">MC2DECODE</a></li>
+				</div>
+			<div>
+			<b>mortoncurve3d.h</b><br />
+			&nbsp;
+
+					<li><a href="#MC3GET">MC3GET</a></li>
+				<li><a href="#MC3MGET">MC3MGET</a></li>
+				<li><a href="#MC3EXISTS">MC3EXISTS</a></li>
+				<li><a href="#MC3SCORE">MC3SCORE</a></li>
+				<li><a href="#MC3ADD">MC3ADD</a></li>
+				<li><a href="#MC3REM">MC3REM</a></li>
+				<li><a href="#MC3POINT">MC3POINT</a></li>
+				<li><a href="#MC3RANGE">MC3RANGE</a></li>
+				<li><a href="#MC3RANGENAIVE">MC3RANGENAIVE</a></li>
+				<li><a href="#MC3ENCODE">MC3ENCODE</a></li>
+				<li><a href="#MC3DECODE">MC3DECODE</a></li>
+				</div>
+			<div>
+			<b>mortoncurve4d.h</b><br />
+			&nbsp;
+
+					<li><a href="#MC4GET">MC4GET</a></li>
+				<li><a href="#MC4MGET">MC4MGET</a></li>
+				<li><a href="#MC4EXISTS">MC4EXISTS</a></li>
+				<li><a href="#MC4SCORE">MC4SCORE</a></li>
+				<li><a href="#MC4ADD">MC4ADD</a></li>
+				<li><a href="#MC4REM">MC4REM</a></li>
+				<li><a href="#MC4POINT">MC4POINT</a></li>
+				<li><a href="#MC4RANGE">MC4RANGE</a></li>
+				<li><a href="#MC4RANGENAIVE">MC4RANGENAIVE</a></li>
+				<li><a href="#MC4ENCODE">MC4ENCODE</a></li>
+				<li><a href="#MC4DECODE">MC4DECODE</a></li>
+				</div>
+			<div>
+			<b>mortoncurve8d.h</b><br />
+			&nbsp;
+
+					<li><a href="#MC8GET">MC8GET</a></li>
+				<li><a href="#MC8MGET">MC8MGET</a></li>
+				<li><a href="#MC8EXISTS">MC8EXISTS</a></li>
+				<li><a href="#MC8SCORE">MC8SCORE</a></li>
+				<li><a href="#MC8ADD">MC8ADD</a></li>
+				<li><a href="#MC8REM">MC8REM</a></li>
+				<li><a href="#MC8POINT">MC8POINT</a></li>
+				<li><a href="#MC8RANGE">MC8RANGE</a></li>
+				<li><a href="#MC8RANGENAIVE">MC8RANGENAIVE</a></li>
+				<li><a href="#MC8ENCODE">MC8ENCODE</a></li>
+				<li><a href="#MC8DECODE">MC8DECODE</a></li>
+				</div>
+			<div>
+			<b>mortoncurve16d.h</b><br />
+			&nbsp;
+
+					<li><a href="#MC16GET">MC16GET</a></li>
+				<li><a href="#MC16MGET">MC16MGET</a></li>
+				<li><a href="#MC16EXISTS">MC16EXISTS</a></li>
+				<li><a href="#MC16SCORE">MC16SCORE</a></li>
+				<li><a href="#MC16ADD">MC16ADD</a></li>
+				<li><a href="#MC16REM">MC16REM</a></li>
+				<li><a href="#MC16POINT">MC16POINT</a></li>
+				<li><a href="#MC16RANGE">MC16RANGE</a></li>
+				<li><a href="#MC16RANGENAIVE">MC16RANGENAIVE</a></li>
+				<li><a href="#MC16ENCODE">MC16ENCODE</a></li>
+				<li><a href="#MC16DECODE">MC16DECODE</a></li>
 				</div>
 			<div>
 			<b>hh.h</b><br />
@@ -4509,7 +4573,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4532,7 +4596,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4555,7 +4619,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4578,7 +4642,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4601,11 +4665,11 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
-			Set <i>subkey</i> with 2D coordinates <i>x</i> and <i>y</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
+			Set <i>subkey</i> with 2D coordinates <i>x</i>, <i>y</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
 			<h3>Return type:</h3>
 			OK
 			<h3>Return value:</h3>
@@ -4624,7 +4688,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>Yes</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4647,7 +4711,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4672,7 +4736,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 1 .. 9 }</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4697,7 +4761,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>No</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4720,7 +4784,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4743,7 +4807,7 @@ limit [number]</pre>
 				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
 				<tr><td>Redis compatible	</td><td>No</td></tr>
 				<tr><td>Mutable			</td><td>n/a</td></tr>
-				<tr><td>Module			</td><td>mortoncurve.h</td></tr>
+				<tr><td>Module			</td><td>mortoncurve2d.h</td></tr>
 			</table>
 
 			<h3>Description:</h3>
@@ -4752,6 +4816,1018 @@ limit [number]</pre>
 			array
 			<h3>Return value:</h3>
 			x and y
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3GET">
+
+			<h2>MC3GET key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3GET</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get value of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			value of the subkey
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3MGET">
+
+			<h2>MC3MGET key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3MGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get values of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			values of the items
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3EXISTS">
+
+			<h2>MC3EXISTS key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3EXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check if <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the item do not exists.<br />1 if the item exists.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3SCORE">
+
+			<h2>MC3SCORE key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3SCORE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get score of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x, y and z
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3ADD">
+
+			<h2>MC3ADD key subKey x y z value [subKey x y z value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with 3D coordinates <i>x</i>, <i>y</i>, <i>z</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3REM">
+
+			<h2>MC3REM key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3REM</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3POINT">
+
+			<h2>MC3POINT key x y z number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3POINT</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'point' with 3D coordinates <i>x</i>, <i>y</i> and <i>z</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3RANGE">
+
+			<h2>MC3RANGE key x_min x_max y_min y_max z_min z_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 1 .. 9 }</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'rectangle' with 3D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i> to <i>z_max</i> and <i>z_max</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3RANGENAIVE">
+
+			<h2>MC3RANGENAIVE key x_min x_max y_min y_max z_min z_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3RANGENAIVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Naive, non performant version of MC3XNGET. Made for small datasets and for testing.<br />See MC3RANGE for more information.<br />Uses <b>uint32_t</b> for coordinates.<br />Technically the data lookup complexity is single READ, but on large datasets, it might need to read complete dataset.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			results
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3ENCODE">
+
+			<h2>MC3ENCODE x y z</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3ENCODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Encode <i>x</i>, <i>y</i> and <i>z</i> to morton code hex string.<br />Uses <b>uint32_t</b> for coordinates.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			morton code hex string
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC3DECODE">
+
+			<h2>MC3DECODE hex</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC3DECODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve3d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Decode <i>morton code hex string</i> to x, y, z.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x, y and z
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4GET">
+
+			<h2>MC4GET key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4GET</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get value of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			value of the subkey
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4MGET">
+
+			<h2>MC4MGET key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4MGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get values of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			values of the items
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4EXISTS">
+
+			<h2>MC4EXISTS key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4EXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check if <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the item do not exists.<br />1 if the item exists.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4SCORE">
+
+			<h2>MC4SCORE key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4SCORE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get score of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x, y and z
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4ADD">
+
+			<h2>MC4ADD key subKey x y z w value [subKey x y z w value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with 4D coordinates <i>x</i>, <i>y</i>, <i>z</i>, <i>w</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint32_t</b> for coordinates.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4REM">
+
+			<h2>MC4REM key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4REM</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4POINT">
+
+			<h2>MC4POINT key x y z w number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4POINT</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'point' with 4D coordinates <i>x</i>, <i>y</i> <i>z</i> and <i>w</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4RANGE">
+
+			<h2>MC4RANGE key x_min x_max y_min y_max z_min z_max w_min w_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 1 .. 9 }</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'rectangle' with 4D coordinates <i>x_min</i> and <i>y_min</i> to <i>x_max</i> and <i>y_max</i> to <i>z_max</i> and <i>z_max</i> to <i>w_max</i> and <i>w_max</i>.<br />Uses <b>uint32_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4RANGENAIVE">
+
+			<h2>MC4RANGENAIVE key x_min x_max y_min y_max z_min z_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4RANGENAIVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Naive, non performant version of MC4XNGET. Made for small datasets and for testing.<br />See MC4RANGE for more information.<br />Uses <b>uint32_t</b> for coordinates.<br />Technically the data lookup complexity is single READ, but on large datasets, it might need to read complete dataset.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			results
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4ENCODE">
+
+			<h2>MC4ENCODE x y z w</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4ENCODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Encode <i>x</i>, <i>y</i> and <i>z</i> to morton code hex string.<br />Uses <b>uint32_t</b> for coordinates.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			morton code hex string
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC4DECODE">
+
+			<h2>MC4DECODE hex</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC4DECODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.10.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve4d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Decode <i>morton code hex string</i> to x, y, z, w.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x, y, z and w
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8GET">
+
+			<h2>MC8GET key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8GET</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get value of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			value of the subkey
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8MGET">
+
+			<h2>MC8MGET key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8MGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get values of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			values of the items
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8EXISTS">
+
+			<h2>MC8EXISTS key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8EXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check if <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the item do not exists.<br />1 if the item exists.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8SCORE">
+
+			<h2>MC8SCORE key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8SCORE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get score of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x, y and z
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8ADD">
+
+			<h2>MC8ADD key subKey v0 ... v7 value [subKey v0 ... v7 value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with 8D coordinates <i>v0</i> ...<i>v7</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint8_t</b> for coordinates.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8REM">
+
+			<h2>MC8REM key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8REM</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8POINT">
+
+			<h2>MC8POINT key v0 ... v7 number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8POINT</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'point' with 8D coordinates <i>v0</i> ... <i>v7</i>.<br />Uses <b>uint8_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8RANGE">
+
+			<h2>MC8RANGE key v0_min v0_max ... v7_min v7_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 1 .. 9 }</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'rectangle' with 8D coordinates <i>v0_min</i> ... <i>v0_min</i> to <i>v7_min</i> ... <i>v7_min</i>.<br />Uses <b>uint8_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8RANGENAIVE">
+
+			<h2>MC8RANGENAIVE key v0_min v0_max ... v7_min v7_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8RANGENAIVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Naive, non performant version of MC8XNGET. Made for small datasets and for testing.<br />See MC8RANGE for more information.<br />Uses <b>uint8_t</b> for coordinates.<br />Technically the data lookup complexity is single READ, but on large datasets, it might need to read complete dataset.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			results
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8ENCODE">
+
+			<h2>MC8ENCODE v0 ... v7</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8ENCODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Encode <i>v0</i> ... <i>v7</i> to morton code hex string.<br />Uses <b>uint8_t</b> for coordinates.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			morton code hex string
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC8DECODE">
+
+			<h2>MC8DECODE hex</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC8DECODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve8d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Decode <i>morton code hex string</i> to v0 ... v7.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			v0 ... v7
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16GET">
+
+			<h2>MC16GET key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16GET</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get value of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			value of the subkey
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16MGET">
+
+			<h2>MC16MGET key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16MGET</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get values of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			values of the items
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16EXISTS">
+
+			<h2>MC16EXISTS key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16EXISTS</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Check if <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			0 if the item do not exists.<br />1 if the item exists.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16SCORE">
+
+			<h2>MC16SCORE key subkey</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16SCORE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Get score of the <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			x, y and z
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16ADD">
+
+			<h2>MC16ADD key subKey v0 ... v15 value [subKey v0 ... v15 value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16ADD</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 3 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Set <i>subkey</i> with 16D coordinates <i>v0</i> ...<i>v15</i> and <i>value</i> in <i>key</i>.<br />Uses <b>uint8_t</b> for coordinates.
+			<h3>Return type:</h3>
+			OK
+			<h3>Return value:</h3>
+			OK
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16REM">
+
+			<h2>MC16REM key subkey [subkey]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16REM</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Removes <i>subkey</i> stored in <i>key</i>.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			Always return 1
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16POINT">
+
+			<h2>MC16POINT key v0 ... v15 number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16POINT</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'point' with 16D coordinates <i>v0</i> ... <i>v15</i>.<br />Uses <b>uint8_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16RANGE">
+
+			<h2>MC16RANGE key v0_min v0_max ... v15_min v15_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16RANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N &isin; { 1 .. 9 }</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Gets all subkeys stored in 'rectangle' with 16D coordinates <i>v0_min</i> ... <i>v0_min</i> to <i>v15_min</i> ... <i>v15_min</i>.<br />Uses <b>uint8_t</b> for coordinates.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Return up to <i>number</i> of pairs.<br />Returns up to ~32'000 elements.<br />Note this command is useful only on very large datasets.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			First group of element         - array of key and values.<br />Second group of single element - Last key, if there is second page.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16RANGENAIVE">
+
+			<h2>MC16RANGENAIVE key v0_min v0_max ... v15_min v15_max number [start]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16RANGENAIVE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Naive, non performant version of MC16XNGET. Made for small datasets and for testing.<br />See MC16RANGE for more information.<br />Uses <b>uint8_t</b> for coordinates.<br />Technically the data lookup complexity is single READ, but on large datasets, it might need to read complete dataset.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			results
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16ENCODE">
+
+			<h2>MC16ENCODE v0 ... v15</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16ENCODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Encode <i>v0</i> ... <i>v15</i> to morton code hex string.<br />Uses <b>uint8_t</b> for coordinates.
+			<h3>Return type:</h3>
+			string
+			<h3>Return value:</h3>
+			morton code hex string
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MC16DECODE">
+
+			<h2>MC16DECODE hex</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MC16DECODE</td></tr>
+				<tr><td>Available since		</td><td>1.3.12</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>mortoncurve16d.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Decode <i>morton code hex string</i> to v0 ... v15.
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			v0 ... v15
 			
 			
 			<p class="top"><a href="#top">top</a></p>
