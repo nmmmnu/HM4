@@ -6,42 +6,61 @@
 #include <algorithm>	// generate
 
 namespace net::worker::shared::random{
-	namespace {
 
-		auto factory_(){
-			using T = uint32_t;
+	template<size_t Size>
+	struct RandomContainer{
+		RandomContainer(uint64_t seed = 0){
+			std::mt19937_64 gen{ seed };
 
-			static_assert(std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>, "RandomGenerator only supports uint32_t or uint64_t");
+			using T = uint64_t;
 
-			using MT = typename std::conditional_t<
-					std::is_same<T, uint32_t>::value,
-					std::mt19937,
-					std::mt19937_64
-			>;
-
-			MT gen{ 0 };
-
-			std::array<T, 4096> data;
-
-			std::generate(std::begin(data), std::end(data), [&](){
+			std::generate(data<T>(), data<T>() + size<T>(), [&](){
 				return gen();
 			});
-
-			return data;
 		}
 
-	} // anonymous namespace
+		template<typename T>
+		constexpr static size_t size(){
+			if constexpr(std::is_same_v<T, uint64_t>) return Size * 1;
+			if constexpr(std::is_same_v<T, uint32_t>) return Size * 2;
+			if constexpr(std::is_same_v<T, uint16_t>) return Size * 4;
+			if constexpr(std::is_same_v<T, uint8_t >) return Size * 8;
+		}
 
-	auto &get(){
-		static std::array<uint32_t, 4096> const data = factory_();
+		template<typename T>
+		constexpr auto *data(){
+			if constexpr(std::is_same_v<T, uint64_t>) return data8_;
+			if constexpr(std::is_same_v<T, uint32_t>) return data4_;
+			if constexpr(std::is_same_v<T, uint16_t>) return data2_;
+			if constexpr(std::is_same_v<T, uint8_t >) return data1_;
+		}
 
-		return data;
-	}
+		template<typename T>
+		constexpr auto const *data() const{
+			if constexpr(std::is_same_v<T, uint64_t>) return data8_;
+			if constexpr(std::is_same_v<T, uint32_t>) return data4_;
+			if constexpr(std::is_same_v<T, uint16_t>) return data2_;
+			if constexpr(std::is_same_v<T, uint8_t >) return data1_;
+		}
 
+	private:
+		union{
+			uint64_t data8_[size<uint64_t>()];
+			uint32_t data4_[size<uint32_t>()];
+			uint16_t data2_[size<uint16_t>()];
+			uint8_t  data1_[size<uint8_t >()];
+		};
+	};
+
+	template<typename T>
 	auto get(size_t index){
-		auto &data = get();
+		constexpr size_t RandomContainerSize = 4096;
 
-		return data[index % data.size()];
+		static RandomContainer<RandomContainerSize> const rc;
+
+		auto const &data = rc.data<T>();
+
+		return data[index % rc.size<T>()];
 	}
 }
 

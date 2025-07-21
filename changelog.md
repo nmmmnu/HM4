@@ -359,4 +359,4 @@ Changelog
 -	Release
 
 ### 1.3.12.1
--	new module random: RANDOM, MRANDOM
+-	new module random: RANDOM64, MRANDOM64, RANDOM32, MRANDOM32, RANDOM16, MRANDOM16, RANDOM8, MRANDOM8

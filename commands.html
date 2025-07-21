@@ -470,8 +470,14 @@
 			<b>random.h</b><br />
 			&nbsp;
 
-					<li><a href="#RANDOM">RANDOM</a></li>
-				<li><a href="#MRANDOM">MRANDOM</a></li>
+					<li><a href="#RANDOM64">RANDOM64</a></li>
+				<li><a href="#RANDOM32">RANDOM32</a></li>
+				<li><a href="#RANDOM16">RANDOM16</a></li>
+				<li><a href="#RANDOM8">RANDOM8</a></li>
+				<li><a href="#MRANDOM64">MRANDOM64</a></li>
+				<li><a href="#MRANDOM32">MRANDOM32</a></li>
+				<li><a href="#MRANDOM16">MRANDOM16</a></li>
+				<li><a href="#MRANDOM8">MRANDOM8</a></li>
 				</div>
 			<div>
 			<b>info.h</b><br />
@@ -6414,12 +6420,12 @@ limit [number]</pre>
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="RANDOM">
+				<div class="cmd" id="RANDOM64">
 
-			<h2>RANDOM / RAND [seed=0]</h2>
+			<h2>RANDOM64 / RAND64 [seed=0]</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>RANDOM</td></tr>
+				<tr><td>Command			</td><td>RANDOM64</td></tr>
 				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>n/a</td></tr>
@@ -6428,21 +6434,21 @@ limit [number]</pre>
 			</table>
 
 			<h3>Description:</h3>
-			Returns pregenerated stable random number from global array
+			Returns pregenerated stable uint64_t random number from global array
 			<h3>Return type:</h3>
 			int
 			<h3>Return value:</h3>
-			Returns pregenerated stable random number from global array.
+			Returns pregenerated stable uint64_trandom number from global array.
 			
 			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
-				<div class="cmd" id="MRANDOM">
+				<div class="cmd" id="RANDOM32">
 
-			<h2>MRANDOM / MRAND seed0 seed1 ...</h2>
+			<h2>RANDOM32 / RAND32 [seed=0]</h2>
 
 			<table border="1">
-				<tr><td>Command			</td><td>MRANDOM</td></tr>
+				<tr><td>Command			</td><td>RANDOM32</td></tr>
 				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
 				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
 				<tr><td>Redis compatible	</td><td>n/a</td></tr>
@@ -6451,11 +6457,149 @@ limit [number]</pre>
 			</table>
 
 			<h3>Description:</h3>
-			Returns several pregenerated stable random number from global array
+			Returns pregenerated stable uint32_t random number from global array
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			Returns pregenerated stable uint32_t random number from global array.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="RANDOM16">
+
+			<h2>RANDOM16 / RAND16 [seed=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>RANDOM16</td></tr>
+				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>random.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns pregenerated stable uint16_t random number from global array
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			Returns pregenerated stable uint16_t random number from global array.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="RANDOM8">
+
+			<h2>RANDOM8 / RAND8 [seed=0]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>RANDOM8</td></tr>
+				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>random.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns pregenerated stable uint8_t random number from global array
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			Returns pregenerated stable uint8_t random number from global array.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MRANDOM64">
+
+			<h2>MRANDOM64 / MRAND64 seed0 seed1 ...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MRANDOM64</td></tr>
+				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>random.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns several pregenerated uint64_t stable random number from global array
 			<h3>Return type:</h3>
 			array
 			<h3>Return value:</h3>
-			Returns several pregenerated stable random number from global array.
+			Returns several pregenerated uint64_t stable random number from global array.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MRANDOM32">
+
+			<h2>MRANDOM32 / MRAND32 seed0 seed1 ...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MRANDOM32</td></tr>
+				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>random.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns several pregenerated uint32_t stable random number from global array
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			Returns several pregenerated uint32_t stable random number from global array.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MRANDOM16">
+
+			<h2>MRANDOM16 / MRAND16 seed0 seed1 ...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MRANDOM16</td></tr>
+				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>random.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns several pregenerated uint16_t stable random number from global array
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			Returns several pregenerated uint16_t stable random number from global array.
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="MRANDOM8">
+
+			<h2>MRANDOM8 / MRAND8 seed0 seed1 ...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>MRANDOM8</td></tr>
+				<tr><td>Available since		</td><td>1.3.12.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a</td></tr>
+				<tr><td>Redis compatible	</td><td>n/a</td></tr>
+				<tr><td>Mutable			</td><td>n/a</td></tr>
+				<tr><td>Module			</td><td>random.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Returns several pregenerated uint8_t stable random number from global array
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			Returns several pregenerated uint8_t stable random number from global array.
 			
 			
 			<p class="top"><a href="#top">top</a></p>
