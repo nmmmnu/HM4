@@ -236,6 +236,7 @@ function getData(){
 		"tdigest"			=> require "$d/commands_tdigest.php"		,
 	//	"cv"				=> require "$d/commands_cv.php"			,
 		"murmur"			=> require "$d/commands_murmur.php"		,
+		"random"			=> require "$d/commands_random.php"		,
 		"info"				=> require "$d/commands_info.php"		,
 		"reload"			=> require "$d/commands_reload.php"		,
 		"compat"			=> require "$d/commands_compat.php"		,
