@@ -158,7 +158,7 @@ int main(){
 		using namespace morton_curve;
 
 		for(auto const &[zzz, x, y, z] : container){
-			printf("%6lu %4lu %4lu %4lu\n", zzz, x, y, z);
+			printf("%6lu %4u %4u %4u\n", (uint64_t) zzz, x, y, z);
 		}
 	}
 
