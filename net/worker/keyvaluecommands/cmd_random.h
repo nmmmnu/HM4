@@ -33,7 +33,7 @@ namespace net::worker::commands::Random{
 	}
 
 	template<int N, class Protocol, class DBAdapter>
-	struct RANDOM : BaseCommandRW<Protocol,DBAdapter>{
+	struct RANDOM : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd[N-1]);
 		};

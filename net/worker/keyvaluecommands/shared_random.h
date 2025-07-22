@@ -9,18 +9,13 @@ namespace net::worker::shared::random{
 
 	template<size_t Size>
 	struct RandomContainer{
-		RandomContainer(uint64_t seed = 0){
-			std::mt19937_64 gen{ seed };
-
-			using T = uint64_t;
-
-			std::generate(data<T>(), data<T>() + size<T>(), [&](){
-				return gen();
-			});
-		}
-
 		template<typename T>
 		constexpr static size_t size(){
+			static_assert(
+				std::is_same_v<T, uint64_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, uint16_t> || std::is_same_v<T, uint8_t >,
+				"only uint64_t to uint8_t allowed"
+			);
+
 			if constexpr(std::is_same_v<T, uint64_t>) return Size * 1;
 			if constexpr(std::is_same_v<T, uint32_t>) return Size * 2;
 			if constexpr(std::is_same_v<T, uint16_t>) return Size * 4;
@@ -29,6 +24,11 @@ namespace net::worker::shared::random{
 
 		template<typename T>
 		constexpr auto *data(){
+			static_assert(
+				std::is_same_v<T, uint64_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, uint16_t> || std::is_same_v<T, uint8_t >,
+				"only uint64_t to uint8_t allowed"
+			);
+
 			if constexpr(std::is_same_v<T, uint64_t>) return data8_;
 			if constexpr(std::is_same_v<T, uint32_t>) return data4_;
 			if constexpr(std::is_same_v<T, uint16_t>) return data2_;
@@ -37,10 +37,32 @@ namespace net::worker::shared::random{
 
 		template<typename T>
 		constexpr auto const *data() const{
+			static_assert(
+				std::is_same_v<T, uint64_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, uint16_t> || std::is_same_v<T, uint8_t >,
+				"only uint64_t to uint8_t allowed"
+			);
+
 			if constexpr(std::is_same_v<T, uint64_t>) return data8_;
 			if constexpr(std::is_same_v<T, uint32_t>) return data4_;
 			if constexpr(std::is_same_v<T, uint16_t>) return data2_;
 			if constexpr(std::is_same_v<T, uint8_t >) return data1_;
+		}
+
+		static auto const &getInstance(){
+			static RandomContainer<Size> const rc;
+
+			return rc;
+		}
+
+	private:
+		explicit RandomContainer(uint64_t seed = 0){
+			std::mt19937_64 gen{ seed };
+
+			using T = uint64_t;
+
+			std::generate(data<T>(), data<T>() + size<T>(), [&](){
+				return gen();
+			});
 		}
 
 	private:
@@ -53,14 +75,16 @@ namespace net::worker::shared::random{
 	};
 
 	template<typename T>
-	auto get(size_t index){
+	auto get(size_t const index){
 		constexpr size_t RandomContainerSize = 4096;
+		auto const &rc = RandomContainer<RandomContainerSize>::getInstance();
 
-		static RandomContainer<RandomContainerSize> const rc;
+		auto const *data = rc.data<T>();
+		auto const  size = rc.size<T>();
 
-		auto const &data = rc.data<T>();
+		auto const ix = index ^ (index >> 4);
 
-		return data[index % rc.size<T>()];
+		return data[ix % size];
 	}
 }
 
