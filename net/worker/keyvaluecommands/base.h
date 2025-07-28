@@ -31,9 +31,11 @@ namespace net::worker::commands{
 		constexpr static size_t ContainerSize		= 0xFFFF;
 		constexpr static size_t ParamContainerSize	= 0xFF;
 
+		using buffer_t = std::array<char, 128>;
+
 		using Container		= StaticVector<std::string_view		, ContainerSize>;	// 1024 KB, if string_view is 16 bytes
 		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	//  514 KB
-		using BufferContainer	= StaticVector<to_string_buffer_t	, ContainerSize>;	// 2048 KB, if to_string_buffer_t is 32 bytes
+		using BufferContainer	= StaticVector<buffer_t			, ContainerSize>;	// 8191 KB
 
 		constexpr static void resetAllocator(){
 		}

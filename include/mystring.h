@@ -154,7 +154,7 @@ constexpr auto hash(std::string_view const data) noexcept{
 
 
 
-constexpr size_t to_string_buffer_t_size = 128;	// largest uint64_t is 20 digits.
+constexpr size_t to_string_buffer_t_size = 48;	// largest uint64_t is 20 digits.
 						// largest uint128_t is 39 digits.
 						// largest double is less 32.
 using to_string_buffer_t = std::array<char, to_string_buffer_t_size>;
