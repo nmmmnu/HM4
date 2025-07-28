@@ -1,9 +1,9 @@
-#ifndef MY_MIXER_H_
-#define MY_MIXER_H_
+#ifndef MURMUR_HASH_MIXER_H_
+#define MURMUR_HASH_MIXER_H_
 
 #include <cstdint>
 
-uint64_t mixer(uint64_t x){
+constexpr uint64_t murmur_hash_mixer64(uint64_t x){
 	x ^= x >> 33;
 	x *= 0xff51afd7'ed558ccd;
 	x ^= x >> 33;

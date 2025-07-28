@@ -1,6 +1,6 @@
 #include "base.h"
 
-#include "mixer.h"
+#include "murmur_hash_mixer.h"
 
 namespace net::worker::commands::Random{
 
@@ -25,7 +25,7 @@ namespace net::worker::commands::Random{
 						from_string<uint64_t>(p[1])
 			;
 
-			uint64_t const r = mixer(index + 1);
+			uint64_t const r = murmur_hash_mixer64(index + 1);
 
 			return result.set(r);
 		}
@@ -63,7 +63,7 @@ namespace net::worker::commands::Random{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const index = from_string<uint64_t>(*itk);
 
-				uint64_t const r = mixer(index + 1);
+				uint64_t const r = murmur_hash_mixer64(index + 1);
 
 				bcontainer.push_back();
 
