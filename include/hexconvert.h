@@ -105,6 +105,19 @@ namespace hex_convert{
 		return val;
 	}
 
+	template<size_t N>
+	constexpr std::string_view fromHexBytes(std::string_view const hex, std::array<char, N> &buffer){
+		if (hex.size() % 2 != 0 || hex.size() / 2 > N)
+			return "";
+
+		size_t size = 0;
+
+		for (size_t i = 0; i < hex.size(); i += 2)
+			buffer[size++] = static_cast<char>( fromHex<uint8_t>(hex.substr(i, 2)) );
+
+		return { buffer.data(), size };
+	}
+
 	namespace test{
 		template<typename T, uint8_t opt>
 		constexpr bool toHexTest(T number, std::string_view correct){
