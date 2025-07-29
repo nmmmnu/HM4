@@ -30,6 +30,10 @@ namespace myendian_impl_{
 
 	static_assert(getEndian() == Endian::LITTLE || getEndian() == Endian::BIG, "I can handle only big and little endian");
 
+
+
+
+
 	template<typename T>
 	constexpr T be_byteswap(T const a){
 		static_assert(std::is_unsigned_v<T>, "be_byteswap<> supports only unsigned type");
@@ -55,6 +59,36 @@ namespace myendian_impl_{
 	constexpr uint8_t be_byteswap(uint8_t const a){
 		return a;
 	}
+
+
+
+
+
+	template<typename T>
+	constexpr T le_byteswap(T const a){
+		static_assert(std::is_unsigned_v<T>, "be_byteswap<> supports only unsigned type");
+
+		if constexpr(getEndian() == Endian::BIG){
+			return byteswap(a);
+		}else{
+			return a;
+		}
+	}
+
+	#ifdef HAVE_UINT128_T
+	// separate, because type_traits don't know about it...
+	constexpr uint128_t le_byteswap(uint128_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return byteswap(a);
+		}else{
+			return a;
+		}
+	}
+	#endif
+
+	constexpr uint8_t le_byteswap(uint8_t const a){
+		return a;
+	}
 } // namespace myendian_impl_
 
 
@@ -71,6 +105,22 @@ constexpr T betoh(T const a){
 	using myendian_impl_::be_byteswap;
 
 	return be_byteswap(a);
+}
+
+
+
+template <typename T>
+constexpr T htole(T const a){
+	using myendian_impl_::be_byteswap;
+
+	return le_byteswap(a);
+}
+
+template <typename T>
+constexpr T letoh(T const a){
+	using myendian_impl_::be_byteswap;
+
+	return le_byteswap(a);
 }
 
 

@@ -28,8 +28,9 @@ inline int compare(const char *s1, size_t const size1, const char *s2, size_t co
 	// First idea was lazy based on LLVM::StringRef
 	// http://llvm.org/docs/doxygen/html/StringRef_8h_source.html
 
-	if ( int const res = memcmp(s1, s2, std::min(size1, size2) ) )
-		return res; // most likely exit
+	if (auto const minSize = std::min(size1, size2); minSize)
+		if ( int const res = memcmp(s1, s2, minSize ) )
+			return res; // most likely exit
 
 	// sgn helps convert size_t to int, without a branch
 	return sgn(size1, size2);

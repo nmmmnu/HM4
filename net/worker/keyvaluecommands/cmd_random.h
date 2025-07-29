@@ -25,7 +25,7 @@ namespace net::worker::commands::Random{
 						from_string<uint64_t>(p[1])
 			;
 
-			uint64_t const r = murmur_hash_mixer64(index + 1);
+			uint64_t const r = murmur_hash_mixer64_nz(index);
 
 			return result.set(r);
 		}
@@ -63,7 +63,7 @@ namespace net::worker::commands::Random{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const index = from_string<uint64_t>(*itk);
 
-				uint64_t const r = murmur_hash_mixer64(index + 1);
+				uint64_t const r = murmur_hash_mixer64_nz(index);
 
 				bcontainer.push_back();
 

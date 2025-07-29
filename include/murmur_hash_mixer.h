@@ -12,5 +12,10 @@ constexpr uint64_t murmur_hash_mixer64(uint64_t x){
 	return x;
 }
 
+constexpr uint64_t murmur_hash_mixer64_nz(uint64_t x){
+	uint64_t const zero = 0xDEED'BEEF'ABBA'B0BA;
+	return murmur_hash_mixer64( x ? x : zero );
+}
+
 #endif
 
