@@ -37,6 +37,7 @@
 #include "keyvaluecommands/cmd_mortoncurve4d.h"		// MC4GET, MC4MGET, MC4EXISTS, MC4SCORE, MC4ADD, MC4REM, MC4POINT, MC4RANGENAIVE, MC4RANGE, MC4ENCODE, MC4DECODE
 #include "keyvaluecommands/cmd_mortoncurve8d.h"		// MC8GET, MC8MGET, MC8EXISTS, MC8SCORE, MC8ADD, MC8REM, MC8POINT, MC8RANGENAIVE, MC8RANGE, MC8ENCODE, MC8DECODE
 #include "keyvaluecommands/cmd_mortoncurve16d.h"	// MC16GET, MC16MGET, MC16EXISTS, MC16SCORE, MC16ADD, MC16REM, MC16POINT, MC16RANGENAIVE, MC16RANGE, MC16ENCODE, MC16DECODE
+#include "keyvaluecommands/cmd_vectors.h"		// VADD
 #include "keyvaluecommands/cmd_tdigest.h"		// TDADD, TDRESERVE
 
 #include "keyvaluecommands/cmd_index.h"
@@ -116,6 +117,8 @@ namespace net::worker{
 				MortonCurve4D	::RegisterModule,
 				MortonCurve16D	::RegisterModule,
 			#endif
+
+				Vectors		::RegisterModule,
 
 				TDigest		::RegisterModule,
 
