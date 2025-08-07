@@ -757,7 +757,9 @@ To search a vector index, use the `VSIMFLAT` command.
 
 `VSIMFLAT words 300 150 F C b BLOB 100`
 
-This command performs a similarity search on the "words" index using flat method, e.g. brute force.
+This command performs a similarity search on the "words" index using flat method (e.g. brute force)
+
+The result is 100% accurate, but might be slow.
 
 - **300** – dimensionality of the input query vector
 - **150** – dimensionality of the index (must match how the index was built)
@@ -773,7 +775,9 @@ The query vector is projected from 300D to 150D using the same random projection
 
 `VSIMLSH words 300 300 I E b BLOB 100`
 
-This command performs a similarity search on the "words" index using LSH method. Note this is faster, but some results are lost.
+This command performs a similarity search on the "words" index using LSH method.
+
+The result is NOT 100% accurate, but is fast.
 
 - **300** – dimensionality of the input query vector
 - **300** – dimensionality of the index (must match how the index was built)
@@ -826,6 +830,7 @@ Removes the vector associated with the key "cat" from the "words" index.
 ##### Get Vector in Human-Readable Format
 
 `VGET words 150 i cat`
+
 Retrieves the vector for key "cat" from the index "words".
 
 - 150 – dimensionality of the vector
@@ -837,7 +842,7 @@ Output: a list of numbers representing each element of the vector
 
 `VGETNORMALIZED words 150 i cat`
 
-Retrieves and normalizes the vector associated with "cat":
+Retrieves and normalizes the vector for key "cat" from the index "words".
 
 Returns:
 
@@ -846,11 +851,101 @@ Output: magnitude and list of numbers representing each element of the vector
 ##### Get Vector in Binary or Hex Format
 
 `VGETRAW words 150 i h cat`
+
 `VGETRAW words 150 i b cat`
 
 Retrieves the raw representation of the vector for "cat":
 
 h – output is in hexadecimal format (little-endian)
+
+b – output is in hexadecimal format (little-endian)
+
+
+
+#### Key-Based Vectors (No LSH Index)
+
+In HM4, you can store and retrieve individual vectors directly by key without building an LSH index.
+
+This mode uses the `VK*` command family:
+
+- `VKSET` – store a vector under a key
+- `VKGET`, `VKGETNORMALIZED`, `VKGETRAW` – retrieve the vector
+- `VKSIMFLAT` – similarity search over keys with a common prefix
+
+#### Store Vectors in keys
+
+`VKSET word:frog 300 150 F b BLOB0`
+
+`VKSET word:cat  300 150 F b BLOB1`
+
+This stores vectors under keys:
+
+- "word:frog"
+- "word:cat"
+
+Parameters:
+
+- 300 – original dimensionality of the input vector
+- 150 – dimensionality after Random Projection
+- F – vector elements are float32
+- b – vector is passed as a binary blob (little-endian)
+- BLOB0, BLOB1 – the actual vector data (300D binary input)
+
+Vectors are transformed from 300D to 150D before storage.
+
+
+
+#### Searching a Vectors stored as keys
+
+`VKSIMFLAT word: 300 160 F C b BLOB 100`
+
+This command performs a similarity search over all keys starting with the prefix "word:", using flat method (e.g. brute force)
+
+The result is 100% accurate, but might be slow.
+
+- **300** – dimensionality of the input query vector
+- **150** – dimensionality of the index (must match how the index was built)
+- **F** – vector elements are floats (must match how the index was built)
+- **C** – use Cosine similarity
+- **b** – the query vector is passed as a binary blob (little-endian)
+- **BLOB** – the binary data representing the query vector
+**100** – return the 100 nearest results
+
+
+
+#### Additional Vector Key Commands
+
+##### Get Vector from Key in Human-Readable Format
+
+`VKGET word:cat 150 F`
+
+Retrieves the vector from key for key "word:cat".
+
+- 150 – dimensionality of the vector
+- F – elements are stored as float
+
+Output: a list of numbers representing each element of the vector
+
+##### Get Normalized Key Vector with Magnitude
+
+`VGETNORMALIZED words:cat 150 i cat`
+
+Retrieves and normalizes the vector from key  "word:cat".
+
+Returns:
+
+Output: magnitude and list of numbers representing each element of the vector
+
+##### Get Key Vector in Binary or Hex Format
+
+`VGETRAW words 150 i h cat`
+
+`VGETRAW words 150 i b cat`
+
+Retrieves the raw representation of the vector from key  "word:cat".
+
+h – output is in hexadecimal format (little-endian)
+
 b – output is in hexadecimal format (little-endian)
 
 
