@@ -11,9 +11,10 @@ namespace net::worker::shared::config{
 	constexpr uint32_t ITERATIONS_RESULTS_MAX	= (OutputBlob::ContainerSize - 1) / 2;
 
 	// This has nothing to do with the container size,
-	// but to be unified with cmd_mutable.h
+	// but before we choosed it to be the same as OutputBlob::ContainerSize
+
 	constexpr uint32_t ITERATIONS_LOOPS_MIN		= ITERATIONS_RESULTS_MIN;
-	constexpr uint32_t ITERATIONS_LOOPS_MAX		= OutputBlob::ContainerSize;
+	constexpr uint32_t ITERATIONS_LOOPS_MAX		= 100'000;
 
 	constexpr uint32_t ITERATIONS_IDLE		= 10;
 
