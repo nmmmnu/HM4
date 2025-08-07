@@ -701,12 +701,11 @@ HM4 supports two main modes for vector similarity search:
   Use `VADD`, `VSIMFLAT`, and `VSIMLSH`
 
 - **Without LSH (key-only storage)**:
-  Use `VKADD` and `VKSIMFLAT`
-  > ℹ️ In this mode, LSH indexing is **not available**
+  Use `VKADD` and `VKSIMFLAT`. In this mode, LSH indexing is **not available**
 
-> ⚠️ Some vector features are currently in **beta**.
+> Some vector features are currently in **beta**.
 
----
+
 
 #### Building a Vector Index
 
@@ -747,6 +746,7 @@ The resulting index stores **300D int8 quantized vectors**.
 `VADD words 300 64 I h BLOB0 frog BLOB1 cat`
 
 The resulting index stores **64D int8 quantized vectors**.
+
 
 
 #### Searching a Vector Index
@@ -791,14 +791,12 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 
 ##### Supported Metrics
 
-| Flag | Metric Name      | Description                                                                                   | Type            |
-|------|------------------|-----------------------------------------------------------------------------------------------|-----------------|
-| `E`  | **Euclidean (L2)**  | Standard straight-line distance between two points in Euclidean space.                        | Distance |
-| `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance. | Distance |
-| `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude).           | Similarity (0..1) |
-| `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale. | Distance) |
-
----
+| Flag | Metric Name      | Description                                                                                   |
+|------|------------------|-----------------------------------------------------------------------------------------------|
+| `E`  | **Euclidean (L2)**  | Standard straight-line distance between two points in Euclidean space.                        |
+| `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance. |
+| `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude). The result is transformed to be 0..1 |
+| `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale. |
 
 ##### When to Use Each Metric
 
@@ -814,6 +812,46 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 - **Canberra** `K`
   Useful for sparse data or when small differences in low-value components are important. More sensitive than L1/L2 in those regions.
 
+
+
+#### Additional Vector Commands
+
+HM4 provides several commands for managing and inspecting vectors in an index.
+
+##### Delete a Vector from Index
+
+`VREM words cat`
+Removes the vector associated with the key "cat" from the "words" index.
+
+##### Get Vector in Human-Readable Format
+
+`VGET words 150 i cat`
+Retrieves the vector for key "cat" from the index "words".
+
+- 150 – dimensionality of the vector
+- i – elements are stored as int8 (quantized)
+
+Output: a list of numbers representing each element of the vector
+
+##### Get Normalized Vector with Magnitude
+
+`VGETNORMALIZED words 150 i cat`
+
+Retrieves and normalizes the vector associated with "cat":
+
+Returns:
+
+Output: magnitude and list of numbers representing each element of the vector
+
+##### Get Vector in Binary or Hex Format
+
+`VGETRAW words 150 i h cat`
+`VGETRAW words 150 i b cat`
+
+Retrieves the raw representation of the vector for "cat":
+
+h – output is in hexadecimal format (little-endian)
+b – output is in hexadecimal format (little-endian)
 
 
 
