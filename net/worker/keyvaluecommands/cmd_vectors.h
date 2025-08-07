@@ -285,9 +285,10 @@ namespace net::worker::commands::Vectors{
 
 				// step 2.2 - project
 
-				MyVectors::randomProjectionNormalize(fvectorOriginal, fvector);
+				MyVectors::randomProjection(fvectorOriginal, fvector);
 
-				// we have float vector in final format.
+				// we have float vector in final format, without normalization.
+
 				// step 3 - get hash by projecting it again
 
 				if (hashOut)
@@ -299,7 +300,8 @@ namespace net::worker::commands::Vectors{
 			}else{
 				auto const &fvector = fvectorOriginal;
 
-				// we have float vector in final format.
+				// we have float vector in final format, without normalization.
+
 				// step 3 - get hash by projecting it again
 
 				if (hashOut)
@@ -483,17 +485,17 @@ namespace net::worker::commands::Vectors{
 		// 5 * 24KB, if sv is 16 bytes
 		using VSIMHeap = StaticVector<VSIMHeapData, VSIM_MAX_RESULTS + 1>;
 
+		constexpr uint32_t ITERATIONS_LOOPS_VSIM = 1'000'000;
+
 		template<typename T, typename DBAdapter, typename StopPredicate>
-		size_t process_VSIM_range(DBAdapter &db,
+		void process_VSIM_range(DBAdapter &db,
 					StopPredicate predicate,
 					std::string_view prefix,
 					uint32_t const dim_ix,
 					DType dtype,
 					MyVectors::FVectorC const original_fvector, float const original_magnitude,
 					uint32_t const results,
-					VSIMHeap &heap){
-
-			size_t iterations = 0;
+					VSIMHeap &heap, uint32_t &iterations){
 
 			for(auto it = db->find(prefix); it != std::end(*db); ++it){
 				auto const &key = it->getKey();
@@ -501,18 +503,10 @@ namespace net::worker::commands::Vectors{
 				if (predicate(key))
 					break;
 
-				// if constexpr(XR){
-				// 	if (key >= prefixFinish)
-				// 		break;
-				// }else{
-				// 	if (! same_prefix(key, prefix)
-				// 		break;
-				// }
-
 				++iterations;
 
-			//	if (iterations > shared::config::ITERATIONS_LOOPS_MAX)
-			//		break;
+				if (iterations > shared::config::ITERATIONS_LOOPS_VSIM)
+					break;
 
 				if (!it->isOK())
 					continue;
@@ -534,7 +528,7 @@ namespace net::worker::commands::Vectors{
 					default:
 					case DType::COSINE	: return MyVectors::distanceCosine		(a, b, aM, bM);
 					case DType::EUCLIDEAN	: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM);
-					case DType::MANHATTAN	: return MyVectors::distanceManhattan		(a, b, aM, bM);
+					case DType::MANHATTAN	: return MyVectors::distanceManhattanPrepared	(a, b,     bM);
 					case DType::CANBERRA	: return MyVectors::distanceCanberra		(a, b, aM, bM);
 					}
 				}(dtype, original_fvector, vector, original_magnitude, magnitude);
@@ -549,12 +543,21 @@ namespace net::worker::commands::Vectors{
 					}
 				}
 			}
-
-			return iterations;
 		}
 
+		inline float process_VSIM_prepareFVector(DType dtype, MyVectors::FVector &fvector){
 
-		template<typename Protocol, typename DBAdapter>
+			// SEARCH PRE-CONDITION
+			switch(dtype){
+			default:
+			case DType::EUCLIDEAN	:
+			case DType::COSINE	:
+			case DType::CANBERRA	: return MyVectors::normalizeInline(fvector);
+			case DType::MANHATTAN	: return 1.f;
+			}
+		}
+
+		template<bool FullKey = false, typename Protocol, typename DBAdapter>
 		void process_VSIM_finish(DBAdapter &, Result<Protocol> &result,  OutputBlob &blob,
 					DType dtype, VSIMHeap &heap){
 
@@ -567,9 +570,15 @@ namespace net::worker::commands::Vectors{
 
 			for(auto it = std::begin(heap); it != std::end(heap); ++it){
 
-				auto const key = extractNth_(2, DBAdapter::SEPARATOR[0], it->key);
+				if constexpr(FullKey){
+					auto const key = it->key;
 
-				container.push_back(key);
+					container.push_back(key);
+				}else{
+					auto const key = extractNth_(2, DBAdapter::SEPARATOR[0], it->key);
+
+					container.push_back(key);
+				}
 
 				bcontainer.push_back();
 
@@ -1066,16 +1075,7 @@ namespace net::worker::commands::Vectors{
 
 			/* mutable */ MyVectors::FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
 
-			// SEARCH PRE-CONDITION
-			float const magnitude = [](auto dtype, auto &fvector) -> float{
-				switch(dtype){
-				default:
-				case DType::EUCLIDEAN	:
-				case DType::COSINE	:
-				case DType::CANBERRA	: return MyVectors::normalizeInline(fvector);
-				case DType::MANHATTAN	: return 1;
-				}
-			}(dtype, fvector);
+			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
@@ -1107,21 +1107,24 @@ namespace net::worker::commands::Vectors{
 
 			auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
 
-			logger<Logger::DEBUG>() << "VSIM" << "FLAT" << "range" << rangeHash[0] << rangeHash[1];
+			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range" << rangeHash[0] << rangeHash[1];
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
-			auto const iterations = process_VSIM_range<T>(db,
+			uint32_t iterations = 0;
+
+			process_VSIM_range<T>(db,
 						stop,
 						prefix,
 						dim_ix,
 						dtype,
 						original_fvector, original_magnitude,
 						results,
-						heap_
+						heap_,
+						iterations
 			);
 
-			logger<Logger::DEBUG>() << "VSIM" << "FLAT" << "range finish" << iterations << "vectors";
+			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range finish" << iterations << "vectors";
 
 			return process_VSIM_finish(db, result, blob, dtype, heap_);
 		}
@@ -1228,16 +1231,7 @@ namespace net::worker::commands::Vectors{
 
 			/* mutable */ MyVectors::FVector fvector = prepareFVector(&hashOut, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
 
-			// SEARCH PRE-CONDITION
-			float const magnitude = [](auto dtype, auto &fvector) -> float{
-				switch(dtype){
-				default:
-				case DType::EUCLIDEAN	:
-				case DType::COSINE	:
-				case DType::CANBERRA	: return MyVectors::normalizeInline(fvector);
-				case DType::MANHATTAN	: return 1;
-				}
-			}(dtype, fvector);
+			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
@@ -1260,13 +1254,10 @@ namespace net::worker::commands::Vectors{
 
 			using namespace vectors_impl_;
 
-			[[maybe_unused]]
-			uint32_t iterations = 0;
-
 			heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			size_t iterationsTotal = 0;
+			uint32_t iterations = 0;
 
 			auto const nearLSH = hamming1Ranges(lsh);
 
@@ -1284,26 +1275,27 @@ namespace net::worker::commands::Vectors{
 				auto const prefix       = P1::template makeKey(bufferKey[0], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[0]);
 				auto const prefixFinish = P1::template makeKey(bufferKey[1], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[1]);
 
-				logger<Logger::DEBUG>() << "VSIM" << "LSH" << "range" << rangeHash[0] << rangeHash[1];
+				logger<Logger::DEBUG>() << "VSIM.LSH" << "range" << rangeHash[0] << rangeHash[1];
 
 				shared::stop_predicate::StopRangePredicate stop{ prefixFinish };
 
-				auto const iterations = process_VSIM_range<T>(db,
+				auto const iterations2 = iterations;
+
+				process_VSIM_range<T>(db,
 							stop,
 							prefix,
 							dim_ix,
 							dtype,
 							original_fvector, original_magnitude,
 							results,
-							heap_
+							heap_,
+							iterations
 				);
 
-				iterationsTotal += iterations;
-
-				logger<Logger::DEBUG>() << "VSIM" << "LSH" << "range finish" << iterationsTotal << "vectors";
+				logger<Logger::DEBUG>() << "VSIM.LSH" << "range finish" << (iterations - iterations2) << "vectors";
 			}
 
-			logger<Logger::DEBUG>() << "VSIM" << "LSH" << "total ranges" << nearLSH.size() << "scanned" << iterationsTotal << "vectors";
+			logger<Logger::DEBUG>() << "VSIM.LSH" << "total ranges" << nearLSH.size() << "scanned total" << iterations << "vectors";
 
 		//done: // label for goto
 
@@ -1710,16 +1702,7 @@ namespace net::worker::commands::Vectors{
 
 			/* mutable */ MyVectors::FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
 
-			// SEARCH PRE-CONDITION
-			float const magnitude = [](auto dtype, auto &fvector) -> float{
-				switch(dtype){
-				default:
-				case DType::EUCLIDEAN	:
-				case DType::COSINE	:
-				case DType::CANBERRA	: return MyVectors::normalizeInline(fvector);
-				case DType::MANHATTAN	: return 1;
-				}
-			}(dtype, fvector);
+			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
@@ -1745,23 +1728,26 @@ namespace net::worker::commands::Vectors{
 			heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			logger<Logger::DEBUG>() << "VSIM" << "FLAT" << "range prefix" << prefix;
+			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range prefix" << prefix;
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
-			auto const iterations = process_VSIM_range<T>(db,
+			uint32_t iterations = 0;
+
+			process_VSIM_range<T>(db,
 						stop,
 						prefix,
 						dim_ix,
 						dtype,
 						original_fvector, original_magnitude,
 						results,
-						heap_
+						heap_,
+						iterations
 			);
 
-			logger<Logger::DEBUG>() << "VSIM" << "FLAT" << "range finish" << iterations << "vectors";
+			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish(db, result, blob, dtype, heap_);
+			return process_VSIM_finish<1>(db, result, blob, dtype, heap_);
 		}
 
 	private:

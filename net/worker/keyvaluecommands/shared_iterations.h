@@ -17,8 +17,6 @@ namespace net::worker::shared::config{
 
 	constexpr uint32_t ITERATIONS_IDLE		= 10;
 
-	constexpr uint32_t ITERATIONS_LOOPS_ACCUMULATE	= 1'000'000;
-
 } // namespace net::worker::shared::config
 
 
