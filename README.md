@@ -767,7 +767,7 @@ The result is 100% accurate, but might be slow.
 - **C** – use Cosine similarity
 - **b** – the query vector is passed as a binary blob (little-endian)
 - **BLOB** – the binary data representing the query vector
-**100** – return the 100 nearest results
+- **100** – return the 100 nearest results
 
 The query vector is projected from 300D to 150D using the same random projection as during indexing, and similarity is computed using the Cosine distance.
 
@@ -785,7 +785,7 @@ The result is NOT 100% accurate, but is fast.
 - **E** – use Euclidean (L2) distance
 - **b** – the query vector is passed as a binary blob (little-endian)
 - **BLOB** – the binary data representing the query vector
-**100** – return the 100 nearest results
+- **100** – return the 100 nearest results
 
 The query vector is not projected, and similarity is computed using the Euclidean (L2) distance.
 
@@ -833,8 +833,8 @@ Removes the vector associated with the key "cat" from the "words" index.
 
 Retrieves the vector for key "cat" from the index "words".
 
-- 150 – dimensionality of the vector
-- i – elements are stored as int8 (quantized)
+- **150** – dimensionality of the vector
+- **i** – elements are stored as int8 (quantized)
 
 Output: a list of numbers representing each element of the vector
 
@@ -856,9 +856,9 @@ Output: magnitude and list of numbers representing each element of the vector
 
 Retrieves the raw representation of the vector for "cat":
 
-h – output is in hexadecimal format (little-endian)
+- **h** - output is in hexadecimal format (little-endian)
 
-b – output is in hexadecimal format (little-endian)
+- **b** - output is in hexadecimal format (little-endian)
 
 
 
@@ -868,9 +868,9 @@ In HM4, you can store and retrieve individual vectors directly by key without bu
 
 This mode uses the `VK*` command family:
 
-- `VKSET` – store a vector under a key
-- `VKGET`, `VKGETNORMALIZED`, `VKGETRAW` – retrieve the vector
-- `VKSIMFLAT` – similarity search over keys with a common prefix
+- **VKSET** - store a vector under a key
+- **VKGET**, **VKGETNORMALIZED**, **VKGETRAW** - retrieve the vector
+- **VKSIMFLAT** - similarity search over keys with a common prefix
 
 #### Store Vectors in keys
 
@@ -885,11 +885,11 @@ This stores vectors under keys:
 
 Parameters:
 
-- 300 – original dimensionality of the input vector
-- 150 – dimensionality after Random Projection
-- F – vector elements are float32
-- b – vector is passed as a binary blob (little-endian)
-- BLOB0, BLOB1 – the actual vector data (300D binary input)
+- **300** – original dimensionality of the input vector
+- **150** – dimensionality after Random Projection
+- **F** – vector elements are float32
+- **b** – vector is passed as a binary blob (little-endian)
+- **BLOB0**, **BLOB1** – the actual vector data (300D binary input)
 
 Vectors are transformed from 300D to 150D before storage.
 
@@ -909,7 +909,7 @@ The result is 100% accurate, but might be slow.
 - **C** – use Cosine similarity
 - **b** – the query vector is passed as a binary blob (little-endian)
 - **BLOB** – the binary data representing the query vector
-**100** – return the 100 nearest results
+- **100** – return the 100 nearest results
 
 
 
@@ -921,8 +921,8 @@ The result is 100% accurate, but might be slow.
 
 Retrieves the vector from key for key "word:cat".
 
-- 150 – dimensionality of the vector
-- F – elements are stored as float
+- **150** – dimensionality of the vector
+- **F** – elements are stored as float
 
 Output: a list of numbers representing each element of the vector
 
@@ -944,9 +944,23 @@ Output: magnitude and list of numbers representing each element of the vector
 
 Retrieves the raw representation of the vector from key  "word:cat".
 
-h – output is in hexadecimal format (little-endian)
+- **h** - output is in hexadecimal format (little-endian)
+- **b** - output is in hexadecimal format (little-endian)
 
-b – output is in hexadecimal format (little-endian)
+
+
+#### What is not working yet?
+
+- HM4 gives strong guarantees if the client or server are big endian machine. However with vectors this is still not implemented.
+  Vectors are loaded and stored only as little endian data.
+  Note when standard release come out, all stored vectors with beta version will be **unreadable** and has to be imported again.
+
+- When HM4 search the index it always stops after specific number of scanned key-value pairs.
+  **VSIMFLAT**, **VSIMLSH** and **VKSIMFLAT** however have limit ot 1'000'000 key value pairs.
+  This was done in order to have easier testing with "Glove* family of vectors, but in some cases it may freeze the server for couple of seconds.
+  Note when standard release come out, **VSIMFLAT**, **VSIMLSH** and **VKSIMFLAT** will have additional argument for current prefix key a la **XNGET**.
+  This argument is currently not supported.
+
 
 
 
