@@ -505,7 +505,7 @@ namespace net::worker::commands::Vectors{
 
 				++iterations;
 
-				if (iterations > shared::config::ITERATIONS_LOOPS_VSIM)
+				if (iterations > ITERATIONS_LOOPS_VSIM)
 					break;
 
 				if (!it->isOK())

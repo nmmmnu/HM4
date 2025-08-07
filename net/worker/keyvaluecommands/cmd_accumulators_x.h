@@ -23,7 +23,7 @@ namespace net::worker::commands::Accumulators{
 				for(;it != eit;++it){
 					auto const key = it->getKey();
 
-					if (++iterations > ITERATIONS_LOOPS_ACCUMULATE)
+					if (++iterations > ITERATIONS_LOOPS_MAX)
 						return accumulator.result(key);
 
 					if (stop(key))

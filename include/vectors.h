@@ -50,6 +50,7 @@ namespace MyVectors{
 	constexpr float getMagnitude(FVectorC const &vector){
 		float l2 = 0.0f;
 
+		#pragma GCC ivdep
 		for(size_t i = 0; i < vector.size(); ++i)
 			l2 += vector[i] * vector[i];
 
@@ -66,6 +67,7 @@ namespace MyVectors{
 		if (magnitude < ZERO)
 			return magnitude;
 
+		#pragma GCC ivdep
 		for(size_t i = 0; i < vector.size(); ++i)
 			vector[i] /= magnitude;
 
@@ -187,6 +189,7 @@ namespace MyVectors{
 
 			#pragma GCC ivdep
 			for (size_t i = 0; i < a.size(); ++i){
+				// dequantize float is a no op
 				float const a_i = dequantizeComponent(a[i]);
 				float const b_i = dequantizeComponent(b[i]);
 
@@ -259,6 +262,7 @@ namespace MyVectors{
 		float result = 0.0f;
 
 		for (size_t i = 0; i < a.size(); ++i) {
+			// dequantize float is a no op
 			float const a_i = dequantizeComponent(a[i]);
 			float const b_i = dequantizeComponent(b[i]);
 
@@ -289,7 +293,7 @@ namespace MyVectors{
 	}
 
 	template<typename T2>
-	float distanceManhattanPrepared(FVector const &a, VectorC<T2> const &b, float, float bM){
+	float distanceManhattanPrepared(FVectorC const &a, VectorC<T2> const &b, float bM){
 		static_assert(checkT<T2>(), "Only float and int8_t supported");
 
 		float result = 0.0f;
@@ -332,7 +336,7 @@ namespace MyVectors{
 		}
 	}
 
-	FVector &randomProjection(FVectorC const &vector, FVector &result, size_t seed = 0){
+	FVector const &randomProjection(FVectorC const &vector, FVector &result, size_t seed = 0){
 		using namespace random_projection_impl_;
 
 		for (size_t x = 0; x < result.size(); ++x){

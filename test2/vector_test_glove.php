@@ -60,10 +60,10 @@ function process_vector($key, & $vector){
 	global $redis;
 
 	$x = $redis->rawCommand(
-		"VADD",
-		"gi300",
-		300, 300, "i",
-		"b", vbin($vector), $key
+		"VKSET",
+		"grawi150:$key",
+		300, 150, "i",
+		"b", vbin($vector)
 	);
 }
 

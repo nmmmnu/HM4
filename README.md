@@ -25,7 +25,7 @@ Goals of the project are.
 -   Count Min Sketch
 -   Heavy Hitters
 -   Misra Gries Heavy Hitters
-
+-   Vectors
 
 
 ---
@@ -680,6 +680,139 @@ They are implemented as flat array in a way similar to Heavy Hitters (HH).
 
 - Note because we add just 2 elements out of 25, the counts never decayed and counters are still correct.
 - Note how the result is **not** sorted.
+
+
+
+---
+### Vectors
+
+HM4 can also be used as a **vector database**.
+
+Unlike most vector DB implementations, HM4 stores data **on disk**. This makes the commonly used **HNSW algorithm** impractical, as it requires fast random memory access. Instead, HM4 uses two alternative algorithms:
+
+- **Flat Search**
+- **Locality-Sensitive Hashing (LSH)**
+
+#### Modes of Operation
+
+HM4 supports two main modes for vector similarity search:
+
+- **With LSH indexing**:
+  Use `VADD`, `VSIMFLAT`, and `VSIMLSH`
+
+- **Without LSH (key-only storage)**:
+  Use `VKADD` and `VKSIMFLAT`
+  > ℹ️ In this mode, LSH indexing is **not available**
+
+> ⚠️ Some vector features are currently in **beta**.
+
+---
+
+#### Building a Vector Index
+
+To create a vector index, use the `VADD` command.
+
+##### Example 1 – With Random Projection (Dimensionality Reduction)
+
+`VADD words 300 150 F b BLOB0 frog BLOB1 cat`
+
+This command adds the keys `"frog"` and `"cat"` into a vector index named `"words"`.
+
+-   **300** – original vector dimensionality
+
+-   **150** – reduced dimensionality using **Random Projection**
+
+-   `F` – vector elements are stored as **floats**
+
+-   `b` – vectors are passed as **binary blobs** (little-endian)
+
+The resulting index stores **150D float vectors**.
+
+##### Example 2 – Without Random Projection (Full Dimensionality) and quantization to int8
+
+`VADD words 300 300 I h BLOB0 frog BLOB1 cat`
+
+This version keeps the vectors at their full dimensionality:
+
+-   **300** – both input and stored vector dimensionality
+
+-   `I` – vector elements are **quantized to int8 (1 byte)**
+
+-   `h` – vectors are passed as **hex blobs** (little-endian)
+
+The resulting index stores **300D int8 quantized vectors**.
+
+##### Example 3 – With Random Projection (Dimensionality Reduction) and quantization to int8
+
+`VADD words 300 64 I h BLOB0 frog BLOB1 cat`
+
+The resulting index stores **64D int8 quantized vectors**.
+
+
+#### Searching a Vector Index
+
+To search a vector index, use the `VSIMFLAT` command.
+
+##### Example 1
+
+`VSIMFLAT words 300 150 F C b BLOB 100`
+
+This command performs a similarity search on the "words" index using flat method, e.g. brute force.
+
+- **300** – dimensionality of the input query vector
+- **150** – dimensionality of the index (must match how the index was built)
+- **F** – vector elements are floats (must match how the index was built)
+- **C** – use Cosine similarity
+- **b** – the query vector is passed as a binary blob (little-endian)
+- **BLOB** – the binary data representing the query vector
+**100** – return the 100 nearest results
+
+The query vector is projected from 300D to 150D using the same random projection as during indexing, and similarity is computed using the Cosine distance.
+
+##### Example 2
+
+`VSIMLSH words 300 300 I E b BLOB 100`
+
+This command performs a similarity search on the "words" index using LSH method. Note this is faster, but some results are lost.
+
+- **300** – dimensionality of the input query vector
+- **300** – dimensionality of the index (must match how the index was built)
+- **F** – vector elements are floats (must match how the index was built)
+- **E** – use Euclidean (L2) distance
+- **b** – the query vector is passed as a binary blob (little-endian)
+- **BLOB** – the binary data representing the query vector
+**100** – return the 100 nearest results
+
+The query vector is not projected, and similarity is computed using the Euclidean (L2) distance.
+
+#### Distance Metrics in Vector Search
+
+When performing vector similarity search in HM4 using commands like `VSIMFLAT`, you can choose from several **distance (or similarity) metrics** by specifying a corresponding letter flag.
+
+##### Supported Metrics
+
+| Flag | Metric Name      | Description                                                                                   | Type            |
+|------|------------------|-----------------------------------------------------------------------------------------------|-----------------|
+| `E`  | **Euclidean (L2)**  | Standard straight-line distance between two points in Euclidean space.                        | Distance |
+| `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance. | Distance |
+| `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude).           | Similarity (0..1) |
+| `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale. | Distance) |
+
+---
+
+##### When to Use Each Metric
+
+- **Euclidean (L2)** `E`
+  Best for dense, normalized data where overall magnitude matters. It’s the default in many ML applications.
+
+- **Manhattan (L1)** `M`
+  More robust to outliers; works well when vector components are sparse or vary in only a few dimensions.
+
+- **Cosine Similarity** `C`
+  Focuses on **direction**, not magnitude. Ideal for text embeddings or any case where you care about **angular similarity** rather than size.
+
+- **Canberra** `K`
+  Useful for sparse data or when small differences in low-value components are important. More sensitive than L1/L2 in those regions.
 
 
 
