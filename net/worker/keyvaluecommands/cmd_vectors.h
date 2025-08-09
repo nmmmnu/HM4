@@ -15,6 +15,8 @@
 #include "myhamming.h"
 #include "vectors.h"
 
+#include "mybufferview.h"
+
 #include "logger.h"
 
 //#include "stringtokenizer.h"
@@ -23,6 +25,16 @@
 
 
 namespace net::worker::commands::Vectors{
+
+	using FVector  = MyBuffer::BufferView<float>;
+
+	template<typename T>
+	using CVector  = MyBuffer::BufferView<T const>;
+
+	using CFVector = CVector<float>;
+
+
+
 	namespace vectors_impl_{
 
 		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
@@ -65,13 +77,13 @@ namespace net::worker::commands::Vectors{
 
 		template<typename T>
 		struct Wector{
-			static_assert(MyVectors::checkT<T>(), "Only float and int8_t supported");
+			static_assert(MyVectors::checkVectorElement<T>(), "Only float and int8_t supported");
 
 			float		magnitude;	// 4
 			uint32_t	dim;		// 4
 			T		vdata[1];	// flexible member
 
-			constexpr static const Wector *createInRawMemory(void *mem, bool be, MyVectors::FVectorC const vector){
+			constexpr static const Wector *createInRawMemory(void *mem, bool be, CFVector const vector){
 				using namespace MyVectors;
 
 				auto *me = static_cast<Wector *>(mem);
@@ -101,7 +113,7 @@ namespace net::worker::commands::Vectors{
 				};
 			}
 
-			constexpr MyVectors::VectorC<T> toVector() const{
+			constexpr CVector<T> toVector() const{
 				#pragma GCC diagnostic push
 				#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
 
@@ -224,7 +236,7 @@ namespace net::worker::commands::Vectors{
 
 
 
-		inline MyVectors::FVector prepareFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, VectorBuffer<float> &bufferResult){
+		inline FVector prepareFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, VectorBuffer<float> &bufferResult){
 			// step 1 - convert vector into float[]
 
 			using T = float;
@@ -235,7 +247,7 @@ namespace net::worker::commands::Vectors{
 
 			auto &bufferConvert = needsToBeProjected ? bufferConvertReal : bufferResult;
 
-			MyVectors::FVector fvectorOriginal = [](VType vtype, std::string_view fvectorSV, VectorBuffer<T> &buffer){
+			FVector fvectorOriginal = [](VType vtype, std::string_view fvectorSV, VectorBuffer<T> &buffer){
 				switch(vtype){
 				default:
 				case VType::BINARY_LE :
@@ -252,7 +264,7 @@ namespace net::worker::commands::Vectors{
 						for(size_t i = 0; i < size; ++i)
 							out[i] = in[i];
 
-						return MyVectors::FVector{ out, size };
+						return FVector{ out, size };
 					}
 
 				case VType::HEX_LE :
@@ -261,7 +273,7 @@ namespace net::worker::commands::Vectors{
 
 						hex_convert::fromHexBytes(fvectorSV, buffer);
 
-						return MyVectors::FVector{
+						return FVector{
 							buffer.data(),
 							size
 						};
@@ -281,7 +293,7 @@ namespace net::worker::commands::Vectors{
 
 				// step 2.1 - create result vector
 
-				MyVectors::FVector fvector{ bufferResult.data(), dim_ix * sizeof(T) };
+				FVector fvector{ bufferResult.data(), dim_ix * sizeof(T) };
 
 				// step 2.2 - project
 
@@ -313,17 +325,17 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-		inline MyVectors::FVectorC prepareFVectorC(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, VectorBuffer<float> &bufferResult){
-			MyVectors::FVector const v  = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferResult);
+		inline CFVector prepareCFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, VectorBuffer<float> &bufferResult){
+			FVector const v  = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferResult);
 
-			return MyVectors::FVectorC{ v };
+			return CFVector{ v };
 		}
 
 		template<typename T>
 		const Wector<T> *prepareWector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<float> &bufferResult){
 			VectorBuffer<T> bufferVector; // 32 KB, should be OK :)
 
-			MyVectors::FVectorC vector = prepareFVectorC(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferVector);
+			CFVector vector = prepareCFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferVector);
 
 			auto const be = false;
 
@@ -425,7 +437,7 @@ namespace net::worker::commands::Vectors{
 			case VType::BINARY_BE	: {
 					FVectorBuffer buffer;
 
-					MyVectors::FVector fvector{ buffer };
+					FVector fvector{ buffer };
 
 					auto f = [&fvector](size_t i, float const value){
 						fvector[i] = value;
@@ -493,7 +505,7 @@ namespace net::worker::commands::Vectors{
 					std::string_view prefix,
 					uint32_t const dim_ix,
 					DType dtype,
-					MyVectors::FVectorC const original_fvector, float const original_magnitude,
+					CFVector const original_fvector, float const original_magnitude,
 					uint32_t const results,
 					VSIMHeap &heap, uint32_t &iterations){
 
@@ -545,7 +557,7 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-		inline float process_VSIM_prepareFVector(DType dtype, MyVectors::FVector &fvector){
+		inline float process_VSIM_prepareFVector(DType dtype, FVector &fvector){
 
 			// SEARCH PRE-CONDITION
 			switch(dtype){
@@ -1073,7 +1085,7 @@ namespace net::worker::commands::Vectors{
 
 			// uint8_t hashOut;
 
-			/* mutable */ MyVectors::FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			/* mutable */ FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
 
 			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
@@ -1093,7 +1105,7 @@ namespace net::worker::commands::Vectors{
 				std::string_view keyN, uint32_t const dim_ix,
 				vectors_impl_::VType /* vtype */,
 				vectors_impl_::DType dtype,
-				MyVectors::FVectorC const original_fvector, float const original_magnitude,
+				CFVector const original_fvector, float const original_magnitude,
 				uint32_t const results ){
 
 			using namespace vectors_impl_;
@@ -1229,7 +1241,7 @@ namespace net::worker::commands::Vectors{
 
 			uint8_t hashOut;
 
-			/* mutable */ MyVectors::FVector fvector = prepareFVector(&hashOut, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			/* mutable */ FVector fvector = prepareFVector(&hashOut, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
 
 			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
@@ -1249,7 +1261,7 @@ namespace net::worker::commands::Vectors{
 				std::string_view keyN, uint32_t const dim_ix,
 				vectors_impl_::VType /* vtype */,
 				vectors_impl_::DType dtype,
-				MyVectors::FVectorC const original_fvector, float const original_magnitude, uint8_t const lsh,
+				CFVector const original_fvector, float const original_magnitude, uint8_t const lsh,
 				uint32_t const results ){
 
 			using namespace vectors_impl_;
@@ -1324,8 +1336,8 @@ namespace net::worker::commands::Vectors{
 		};
 
 		// VKSET key  DIM_VE DIM_IX QUANTIZE_TYPE VEC_TYPE BLOB
-		// VKSET word 300    150    F             b        BLOB0
-		// VKSET word 300    150    I             b        BLOB0
+		// VKSET word 300    150    F             b        BLOB
+		// VKSET word 300    150    I             b        BLOB
 
 		/*
 		QUANTIZE_TYPE:
@@ -1434,9 +1446,9 @@ namespace net::worker::commands::Vectors{
 			return std::end(cmd);
 		};
 
-		// VKGET key   DIM_IX QUANTIZE_TYPE
-		// VKGET words 300    F
-		// VKGET words 300    I
+		// VKGET key      DIM_IX QUANTIZE_TYPE
+		// VKGET word:cat 300    F
+		// VKGET word:cat 300    I
 
 		/*
 		QUANTIZE_TYPE
@@ -1700,7 +1712,7 @@ namespace net::worker::commands::Vectors{
 
 			// uint8_t hashOut;
 
-			/* mutable */ MyVectors::FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			/* mutable */ FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
 
 			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
@@ -1720,7 +1732,7 @@ namespace net::worker::commands::Vectors{
 				std::string_view prefix, uint32_t const dim_ix,
 				vectors_impl_::VType /* vtype */,
 				vectors_impl_::DType dtype,
-				MyVectors::FVectorC const original_fvector, float const original_magnitude,
+				CFVector const original_fvector, float const original_magnitude,
 				uint32_t const results ){
 
 			using namespace vectors_impl_;
