@@ -6,39 +6,6 @@
 
 namespace MyBuffer{
 
-	namespace impl_{
-
-		template<typename T>
-		constexpr bool is_byte_ =
-			std::is_same_v<T, uint8_t> ||
-			std::is_same_v<T, int8_t > ||
-			std::is_same_v<T, char   > ||
-			std::is_same_v<T, void   >
-		;
-
-		template<typename T>
-		constexpr bool is_byte = is_byte_<std::remove_cv_t<T> >;
-
-
-
-		template<typename T, typename Buffer>
-		constexpr bool c_tor_X =  std::is_same_v<std::remove_cv_t<T>, std::remove_cv_t<typename Buffer::value_type> >;
-
-
-
-		template<typename T, typename Buffer>
-		constexpr bool c_tor_1 =  c_tor_X<T, Buffer>;
-
-		template<typename T, typename Buffer>
-		constexpr bool c_tor_2 = !c_tor_X<T, Buffer> &&  is_byte<typename Buffer::value_type>;
-
-		template<typename T, typename Buffer>
-		constexpr bool c_tor_3 = !c_tor_X<T, Buffer> && !is_byte<typename Buffer::value_type>;
-
-		template<typename T>
-		constexpr bool dependednt_false = false;
-	}
-
 	template<typename T>
 	struct BufferView{
 		using value_type	= T;
@@ -50,22 +17,45 @@ namespace MyBuffer{
 
 
 
-		template<class Buffer, std::enable_if_t<impl_::c_tor_1<T, Buffer>, int> = 0>
-		constexpr BufferView(Buffer &buffer) :
+		template<typename U,
+				std::enable_if_t<
+					// T is const		and
+					// T is same as U	and
+					// U may not be const
+					std::is_const_v<T> &&
+					std::is_same_v<T, U const>,
+				int> = 0
+		>
+		constexpr BufferView(BufferView<U> const &buffer) :
 					BufferView( buffer.data(), buffer.size() ){}
 
 
 
-		template<class Buffer, std::enable_if_t<impl_::c_tor_2<T, Buffer>, int> = 0>
+		template<typename Buffer,
+				std::enable_if_t<
+					// Buffer::value_type is byte
+					std::is_same_v<typename Buffer::value_type, uint8_t> ||
+					std::is_same_v<typename Buffer::value_type, int8_t > ||
+					std::is_same_v<typename Buffer::value_type, char   > ||
+					std::is_same_v<typename Buffer::value_type, void   >,
+				int> = 0
+		>
 		constexpr BufferView(Buffer &buffer) :
 					BufferView( static_cast<void *>(buffer.data()), buffer.size() ){}
 
 
 
-		template<class Buffer, std::enable_if_t<impl_::c_tor_3<T, Buffer>, int> = 0>
-		constexpr BufferView(Buffer &){
-			static_assert(impl_::dependednt_false<Buffer>, "Types must be the same or buffer must be from bytes");
-		}
+		template<typename Buffer,
+				std::enable_if_t<
+					// Buffer::value_type is byte const
+					std::is_same_v<typename Buffer::value_type, uint8_t const> ||
+					std::is_same_v<typename Buffer::value_type, int8_t  const> ||
+					std::is_same_v<typename Buffer::value_type, char    const> ||
+					std::is_same_v<typename Buffer::value_type, void    const>,
+				int> = 0
+		>
+		constexpr BufferView(Buffer const &buffer) :
+					BufferView( static_cast<const void *>(buffer.data()), buffer.size() ){}
 
 
 

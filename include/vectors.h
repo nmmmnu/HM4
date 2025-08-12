@@ -13,19 +13,22 @@ namespace MyVectors{
 	constexpr bool checkVectorElement(){
 		using T = std::remove_cv_t<T2>;
 
-		return	std::is_same_v<T, float		> ||
-			std::is_same_v<T, int8_t	>;
+		return	std::is_same_v<T, float  > ||
+			std::is_same_v<T, int8_t >;
 	}
 
 	template<typename Vector>
 	constexpr bool checkVector(){
-		return checkVectorElement<typename Vector::value_type>();
+		using VE = typename Vector::value_type;
+
+		return checkVectorElement<VE>();
 	}
 
-	template<typename VectorContainer>
+	template<typename Vector>
 	constexpr bool checkFVector(){
+		using VE = typename Vector::value_type;
 
-		using T = std::remove_cv_t<typename VectorContainer::value_type>;
+		using T = std::remove_cv_t<VE>;
 
 		return	std::is_same_v<T, float>;
 	}
@@ -191,6 +194,8 @@ namespace MyVectors{
 				dot += a_i * b_i;
 			}
 
+			// returns -1.0 to +1.0
+
 			return dot;
 		}
 
@@ -201,11 +206,11 @@ namespace MyVectors{
 
 			auto const dot = dotProduct(a, b);
 
-			// returns 0.0 - 1.0
-
 			auto const result = (1 + dot) / 2;
 
 			constexpr float ZERO = 1E-6f;
+
+			// returns +1.0 to 0.0
 
 			return result > ZERO ? result : 0;
 		}
@@ -219,6 +224,8 @@ namespace MyVectors{
 
 		using namespace distance_cosine_impl_;
 
+		// returns 0.0 to +1.0
+
 		return 1 - cosineSimilarity(a, b);
 	}
 
@@ -231,11 +238,11 @@ namespace MyVectors{
 
 		auto const dot = dotProduct(a, b);
 
-		// returns 0.0 - INF
-
 		auto const result = aM * aM + bM * bM - 2 * aM * bM * dot;
 
 		constexpr float ZERO = 1E-6f;
+
+		// returns 0.0 to INF
 
 		return result > ZERO ? result : 0;
 	}
@@ -246,6 +253,8 @@ namespace MyVectors{
 		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
 
 		auto const result = distanceEuclideanSquared(a, b, aM, bM);
+
+		// returns 0.0 to INF
 
 		return std::sqrt(result);
 	}
@@ -268,6 +277,8 @@ namespace MyVectors{
 				result += std::abs(a_i - b_i) / den;
 		}
 
+		// returns 0.0 to INF
+
 		return result;
 	}
 
@@ -285,6 +296,8 @@ namespace MyVectors{
 			result += std::abs(a_i - b_i);
 		}
 
+		// returns 0.0 to INF
+
 		return result;
 	}
 
@@ -301,6 +314,8 @@ namespace MyVectors{
 
 			result += std::abs(a_i - b_i);
 		}
+
+		// returns 0.0 to INF
 
 		return result;
 	}

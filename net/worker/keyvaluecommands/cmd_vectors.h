@@ -557,7 +557,7 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-		inline float process_VSIM_prepareFVector(DType dtype, FVector &fvector){
+		constexpr float process_VSIM_prepareFVector(DType dtype, FVector &fvector){
 
 			// SEARCH PRE-CONDITION
 			switch(dtype){
