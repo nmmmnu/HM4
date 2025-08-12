@@ -60,6 +60,22 @@ namespace myendian_impl_{
 		return a;
 	}
 
+	constexpr float be_byteswap(float const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return a;
+		}else{
+			return byteswap(a);
+		}
+	}
+
+	constexpr double be_byteswap(double const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return a;
+		}else{
+			return byteswap(a);
+		}
+	}
+
 
 
 
@@ -89,6 +105,23 @@ namespace myendian_impl_{
 	constexpr uint8_t le_byteswap(uint8_t const a){
 		return a;
 	}
+
+	constexpr float le_byteswap(float const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return byteswap(a);
+		}else{
+			return a;
+		}
+	}
+
+	constexpr double le_byteswap(double const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return byteswap(a);
+		}else{
+			return a;
+		}
+	}
+
 } // namespace myendian_impl_
 
 

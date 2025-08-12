@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "uint128_t.h"
+#include "bitcast.h"
 
 constexpr uint16_t byteswap(uint16_t const a){
 	constexpr uint8_t b[] = {
@@ -72,6 +73,33 @@ constexpr uint128_t byteswap(uint128_t const а){
 }
 
 #endif
+
+
+
+namespace mybyteswap_impl_{
+
+	template<typename FP, typename T>
+	constexpr FP byteswapFP(FP value){
+		static_assert(sizeof(FP) == sizeof(T));
+
+		auto const x = bit_cast<T>(value);
+
+		return bit_cast<FP>(byteswap(x));
+	}
+
+} // namespace byteswap_fp_impl_
+
+constexpr float byteswap(float value){
+	using namespace mybyteswap_impl_;
+
+	return byteswapFP<float, uint32_t>(value);
+}
+
+constexpr double byteswap(double value){
+	using namespace mybyteswap_impl_;
+
+	return byteswapFP<double, uint64_t>(value);
+}
 
 
 

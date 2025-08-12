@@ -1,4 +1,4 @@
-#include "myendian_fp.h"
+#include "myendian.h"
 #include "mytest.h"
 
 MyTest mytest;

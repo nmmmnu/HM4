@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <numeric>	// accumulate
 
-#include "myendian_fp.h"
+#include "myendian.h"
 
 namespace {
 	template<typename IT>
