@@ -144,14 +144,14 @@ constexpr T betoh(T const a){
 
 template <typename T>
 constexpr T htole(T const a){
-	using myendian_impl_::be_byteswap;
+	using myendian_impl_::le_byteswap;
 
 	return le_byteswap(a);
 }
 
 template <typename T>
 constexpr T letoh(T const a){
-	using myendian_impl_::be_byteswap;
+	using myendian_impl_::le_byteswap;
 
 	return le_byteswap(a);
 }
