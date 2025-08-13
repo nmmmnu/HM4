@@ -212,12 +212,12 @@ namespace MyVectors{
 		template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
 		float cosineSimilarity(CVector1 const &a, CVector2 const &b,
-									FProj1 fpr1, FProj2 fpr2){
+									FProj1 aFpr, FProj2 bFpr){
 
 			static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
 			static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
 
-			auto const dot = dotProduct(a, b, fpr1, fpr2);
+			auto const dot = dotProduct(a, b, aFpr, bFpr);
 
 			auto const result = (1 + dot) / 2;
 
@@ -233,7 +233,7 @@ namespace MyVectors{
 	template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
 	float distanceCosine(CVector1 const &a, CVector2 const &b, float /* aM */, float /* bM */,
-									FProj1 fpr1, FProj2 fpr2){
+									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
 		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
@@ -242,20 +242,20 @@ namespace MyVectors{
 
 		// returns 0.0 to +1.0
 
-		return 1 - cosineSimilarity(a, b, fpr1, fpr2);
+		return 1 - cosineSimilarity(a, b, aFpr, bFpr);
 	}
 
 	template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
 	float distanceEuclideanSquared(CVector1 const &a, CVector2 const &b, float aM, float bM,
-									FProj1 fpr1, FProj2 fpr2){
+									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
 		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
 
 		using namespace distance_cosine_impl_;
 
-		auto const dot = dotProduct(a, b, fpr1, fpr2);
+		auto const dot = dotProduct(a, b, aFpr, bFpr);
 
 		auto const result = aM * aM + bM * bM - 2 * aM * bM * dot;
 
@@ -269,12 +269,12 @@ namespace MyVectors{
 	template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
 	float distanceEuclidean(CVector1 const &a, CVector2 const &b, float aM, float bM,
-									FProj1 fpr1, FProj2 fpr2){
+									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
 		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
 
-		auto const result = distanceEuclideanSquared(a, b, aM, bM, fpr1, fpr2);
+		auto const result = distanceEuclideanSquared(a, b, aM, bM, aFpr, bFpr);
 
 		// returns 0.0 to INF
 
@@ -284,7 +284,7 @@ namespace MyVectors{
 	template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
 	float distanceCanberra(CVector1 const &a, CVector2 const &b, float /* aM */, float /* bM */,
-									FProj1 fpr1, FProj2 fpr2){
+									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
 		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
@@ -293,8 +293,8 @@ namespace MyVectors{
 
 		for (size_t i = 0; i < a.size(); ++i) {
 			// dequantize float is a no op
-			float const a_i = dequantizeComponent(fpr1(a[i]));
-			float const b_i = dequantizeComponent(fpr2(b[i]));
+			float const a_i = dequantizeComponent(aFpr(a[i]));
+			float const b_i = dequantizeComponent(bFpr(b[i]));
 
 			constexpr float ZERO = 1E-6f;
 
@@ -310,7 +310,7 @@ namespace MyVectors{
 	template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
 	float distanceManhattan(CVector1 const &a, CVector2 const &b, float aM, float bM,
-									FProj1 fpr1, FProj2 fpr2){
+									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
 		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
@@ -318,8 +318,8 @@ namespace MyVectors{
 		float result = 0.0f;
 
 		for (size_t i = 0; i < a.size(); ++i) {
-			float const a_i = denormalizeComponent(fpr1(a[i]), aM);
-			float const b_i = denormalizeComponent(fpr2(b[i]), bM);
+			float const a_i = denormalizeComponent(aFpr(a[i]), aM);
+			float const b_i = denormalizeComponent(bFpr(b[i]), bM);
 
 			result += std::abs(a_i - b_i);
 		}
@@ -332,7 +332,7 @@ namespace MyVectors{
 	template<typename CFVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
 	float distanceManhattanPrepared(CFVector1 const &a, CVector2 const &b, float bM,
-									FProj1 fpr1, FProj2 fpr2){
+									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkFVector<CFVector1>(), "Only float supported");
 		static_assert(checkVector <CVector2 >(), "Only float and int8_t supported");
@@ -341,8 +341,8 @@ namespace MyVectors{
 
 		for (size_t i = 0; i < a.size(); ++i) {
 			// fpr1 is a no op
-			float const a_i =                      fpr1(a[i])     ;
-			float const b_i = denormalizeComponent(fpr2(b[i]), bM);
+			float const a_i =                      aFpr(a[i])     ;
+			float const b_i = denormalizeComponent(bFpr(b[i]), bM);
 
 			result += std::abs(a_i - b_i);
 		}
