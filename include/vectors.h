@@ -232,7 +232,7 @@ namespace MyVectors{
 
 	template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceCosine(CVector1 const &a, CVector2 const &b, float /* aM */, float /* bM */,
+	float distanceCosine(CVector1 const &a, CVector2 const &b,
 									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
@@ -283,7 +283,7 @@ namespace MyVectors{
 
 	template<typename CVector1, typename CVector2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceCanberra(CVector1 const &a, CVector2 const &b, float /* aM */, float /* bM */,
+	float distanceCanberra(CVector1 const &a, CVector2 const &b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
@@ -293,8 +293,34 @@ namespace MyVectors{
 
 		for (size_t i = 0; i < a.size(); ++i) {
 			// dequantize float is a no op
-			float const a_i = dequantizeComponent(aFpr(a[i]));
-			float const b_i = dequantizeComponent(bFpr(b[i]));
+			float const a_i = denormalizeComponent(aFpr(a[i]), aM);
+			float const b_i = denormalizeComponent(bFpr(b[i]), bM);
+
+			constexpr float ZERO = 1E-6f;
+
+			if (float const den = std::abs(a_i) + std::abs(b_i); den > ZERO)
+				result += std::abs(a_i - b_i) / den;
+		}
+
+		// returns 0.0 to INF
+
+		return result;
+	}
+
+	template<typename CFVector1, typename CVector2,
+				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
+	float distanceCanberraPrepared(CFVector1 const &a, CVector2 const &b, float bM,
+									FProj1 aFpr, FProj2 bFpr){
+
+		static_assert(checkFVector<CFVector1>(), "Only float supported");
+		static_assert(checkVector <CVector2>(), "Only float and int8_t supported");
+
+		float result = 0.0f;
+
+		for (size_t i = 0; i < a.size(); ++i) {
+			// dequantize float is a no op
+			float const a_i =                      aFpr(a[i])     ;
+			float const b_i = denormalizeComponent(bFpr(b[i]), bM);
 
 			constexpr float ZERO = 1E-6f;
 

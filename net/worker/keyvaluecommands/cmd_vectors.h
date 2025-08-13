@@ -633,10 +633,10 @@ namespace net::worker::commands::Vectors{
 				auto const score = [](DType dtype, auto const &a, auto const &b, auto const &aM, auto const &bM){
 					switch(dtype){
 					default:
-					case DType::COSINE	: return MyVectors::distanceCosine		(a, b, aM, bM, {}, valueProjBE);
+					case DType::COSINE	: return MyVectors::distanceCosine		(a, b,         {}, valueProjBE);
 					case DType::EUCLIDEAN	: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM, {}, valueProjBE);
 					case DType::MANHATTAN	: return MyVectors::distanceManhattanPrepared	(a, b,     bM, {}, valueProjBE);
-					case DType::CANBERRA	: return MyVectors::distanceCanberra		(a, b, aM, bM, {}, valueProjBE);
+					case DType::CANBERRA	: return MyVectors::distanceCanberraPrepared	(a, b,     bM, {}, valueProjBE);
 					}
 				}(dtype, original_fvector, vector, original_magnitude, magnitude);
 
@@ -658,9 +658,9 @@ namespace net::worker::commands::Vectors{
 			switch(dtype){
 			default:
 			case DType::EUCLIDEAN	:
-			case DType::COSINE	:
-			case DType::CANBERRA	: return MyVectors::normalizeInline(fvector);
-			case DType::MANHATTAN	: return 1.f;
+			case DType::COSINE	: return MyVectors::normalizeInline(fvector);
+			case DType::CANBERRA	:
+			case DType::MANHATTAN	: return 1.f; /* skip normalization */
 			}
 		}
 
