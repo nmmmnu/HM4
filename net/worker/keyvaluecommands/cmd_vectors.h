@@ -17,10 +17,9 @@
 
 #include "mybufferview.h"
 
+#include "myendian.h"
+
 #include "logger.h"
-
-//#include "stringtokenizer.h"
-
 
 
 
@@ -109,7 +108,7 @@ namespace net::worker::commands::Vectors{
 			constexpr std::string_view const toSV() const{
 				return std::string_view{
 					reinterpret_cast<const char *>(this),
-					size()
+					bytes()
 				};
 			}
 
@@ -122,15 +121,15 @@ namespace net::worker::commands::Vectors{
 				#pragma GCC diagnostic pop
 			}
 
-			constexpr size_t size() const{
-				return size(dim);
+			constexpr size_t bytes() const{
+				return bytes(dim);
 			}
 
 			constexpr const float *reconstruct(float *buffer) const{
 				return denormalize(vdata, dim, magnitude, buffer);
 			}
 
-			constexpr static size_t size(size_t dim){
+			constexpr static size_t bytes(size_t dim){
 				return sizeof(Wector) + (dim - 1) * sizeof(T);
 			}
 		} __attribute__((__packed__));
@@ -151,7 +150,7 @@ namespace net::worker::commands::Vectors{
 
 
 		template<typename T>
-		using WectorBuffer = std::array<char, Wector<float  > ::size(MaxDimensions)>; // VectorBuffer + 8
+		using WectorBuffer = std::array<char, Wector<float  > ::bytes(MaxDimensions)>; // VectorBuffer + 8
 
 
 
@@ -235,122 +234,166 @@ namespace net::worker::commands::Vectors{
 		}
 
 
+		namespace {
 
-		inline FVector prepareFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, VectorBuffer<float> &bufferResult){
-			// step 1 - convert vector into float[]
+			void prepareHash(uint8_t *hashOut, FVector fvectorResult){
+				// step 3 - get hash by projecting it again
 
-			using T = float;
+				if (hashOut)
+					*hashOut = MyVectors::randomProjectionBit<uint8_t>(fvectorResult, MaxDimensions);
+			}
 
-			bool const needsToBeProjected = dim_ix > 1 && dim_ix < dim_ve;
+			FVector prepareFVector_project(uint8_t *hashOut, FVector fvectorOriginal, FVector fvectorResult){
+				// step 2.2 - project
 
-			VectorBuffer<T> bufferConvertReal; // 32 KB, should be OK :)
+				MyVectors::randomProjection(fvectorOriginal, fvectorResult);
 
-			auto &bufferConvert = needsToBeProjected ? bufferConvertReal : bufferResult;
+				// we have float vector in final format, without normalization, in correct buffer...
 
-			FVector fvectorOriginal = [](VType vtype, std::string_view fvectorSV, VectorBuffer<T> &buffer){
+				// step 3 - get hash by projecting it again
+
+				prepareHash(hashOut, fvectorResult);
+
+				// step 4 - done
+
+				return fvectorResult;
+			}
+
+			FVector prepareFVector_direct(uint8_t *hashOut, FVector fvectorOriginal, FVector fvectorResult){
+				// step 2.2 - non optimized copy
+
+				const auto &in  = fvectorOriginal;
+				      auto &out = fvectorResult;
+
+				for(size_t i = 0; i < fvectorOriginal.size(); ++i)
+					out[i] = in[i];
+
+				// we have float vector in final format, without normalization, in correct buffer...
+
+				// step 3 - get hash by projecting it again
+
+				prepareHash(hashOut, fvectorResult);
+
+				// step 4 - done
+
+				return fvectorResult;
+			}
+
+			FVector prepareFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, FVectorBuffer &bufferResult){
+				// step 1 - convert vector into float[]
+
+				bool const needsToBeProjected = dim_ix > 1 && dim_ix < dim_ve;
+
+				FVectorBuffer bufferConvert; // 32 KB, should be OK :)
+
+				FVector fvectorOriginal = [vtype, dim_ve](std::string_view fvectorSV, FVectorBuffer &buffer){
+					switch(vtype){
+					default:
+					case VType::BINARY_LE :
+					case VType::BINARY_BE : {
+
+							// we have to memcpy() because we need to be able to return mutable version,
+							// but fvectorSV is const char *
+
+							// vectorSV size is checked already
+
+							const float *in  = reinterpret_cast<const float *>(fvectorSV.data()	);
+							      float *out = reinterpret_cast<      float *>(buffer.data()	);
+
+							for(size_t i = 0; i < dim_ve; ++i)
+								out[i] = in[i];
+
+							FVector result{
+								out,
+								dim_ve
+							};
+
+							assert(result.size() == dim_ve);
+
+							return result;
+						}
+
+					case VType::HEX_LE :
+					case VType::HEX_BE : {
+							// vectorSV size is checked already
+
+							hex_convert::fromHexBytes(fvectorSV, buffer);
+
+							FVector result{
+								reinterpret_cast<float *>(buffer.data()),
+								dim_ve
+							};
+
+							assert(result.size() == dim_ve);
+
+							return result;
+						}
+					}
+				}(fvectorSV, bufferConvert);
+
+				// fvectorOriginal is now decoded to float[],
+				// it live in bufferConvert,
+				// depends if it will be projected in a moment.
+
+				// step 2 - project the vector if needed and create a hash, if needed
+
+				// step 2.0 - convert vector host order, else mutations will not work.
+
 				switch(vtype){
 				default:
 				case VType::BINARY_LE :
-				case VType::BINARY_BE : {
+				case VType::HEX_LE    : {
 
-						// we have to memcpy() because we need to be able to return mutable version,
-						// but fvectorSV is const char *
+						#pragma GCC ivdep
+						for(size_t i = 0; i < fvectorOriginal.size(); ++i)
+							fvectorOriginal[i] = letoh(fvectorOriginal[i]);
 
-						auto   size = fvectorSV.size() / sizeof(float);
-
-						const float *in  = reinterpret_cast<const float *>(fvectorSV.data()	);
-						      float *out = reinterpret_cast<      float *>(buffer.data()	);
-
-						for(size_t i = 0; i < size; ++i)
-							out[i] = in[i];
-
-						return FVector{ out, size };
+						break;
 					}
 
-				case VType::HEX_LE :
-				case VType::HEX_BE : {
-						auto const size = fvectorSV.size() / 2;
+				case VType::BINARY_BE :
+				case VType::HEX_BE    : {
 
-						hex_convert::fromHexBytes(fvectorSV, buffer);
+						#pragma GCC ivdep
+						for(size_t i = 0; i < fvectorOriginal.size(); ++i)
+							fvectorOriginal[i] = betoh(fvectorOriginal[i]);
 
-						return FVector{
-							buffer.data(),
-							size
-						};
+						break;
 					}
 				}
 
-			}(vtype, fvectorSV, bufferConvert);
-
-			// fvectorOriginal is now decoded to float[],
-			// it may live in bufferResult or in bufferConvertReal,
-			// depends if it will be projected in a moment.
-
-			// step 2 - project the vector if needed
-
-			if (needsToBeProjected){
-				// shrink the vector with Random Projection
-
 				// step 2.1 - create result vector
 
-				FVector fvector{ bufferResult.data(), dim_ix * sizeof(T) };
+				FVector fvectorResult{ bufferResult.data(), dim_ix * sizeof(float) };
 
-				// step 2.2 - project
-
-				MyVectors::randomProjection(fvectorOriginal, fvector);
-
-				// we have float vector in final format, without normalization.
-
-				// step 3 - get hash by projecting it again
-
-				if (hashOut)
-				*hashOut = MyVectors::randomProjectionBit<uint8_t>(fvector, MaxDimensions);
-
-				// step 4 - done
-
-				return fvector; // with bufferResult
-			}else{
-				auto const &fvector = fvectorOriginal;
-
-				// we have float vector in final format, without normalization.
-
-				// step 3 - get hash by projecting it again
-
-				if (hashOut)
-				*hashOut = MyVectors::randomProjectionBit<uint8_t>(fvector, MaxDimensions);
-
-				// step 4 - done
-
-				return fvector; // with bufferResult
+				if (needsToBeProjected){
+					return prepareFVector_project(hashOut, fvectorOriginal, fvectorResult);
+				}else{
+					return prepareFVector_direct (hashOut, fvectorOriginal, fvectorResult);
+				}
 			}
-		}
 
-		inline CFVector prepareCFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, VectorBuffer<float> &bufferResult){
-			FVector const v  = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferResult);
+			template<typename T>
+			const Wector<T> *prepareWector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<float> &bufferResult){
+				VectorBuffer<T> bufferVector; // 32 KB, should be OK :)
 
-			return CFVector{ v };
-		}
+				FVector vector = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferVector);
 
-		template<typename T>
-		const Wector<T> *prepareWector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<float> &bufferResult){
-			VectorBuffer<T> bufferVector; // 32 KB, should be OK :)
+				auto const be = false;
 
-			CFVector vector = prepareCFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferVector);
+				void *mem = bufferResult.data();
 
-			auto const be = false;
+				return Wector<T>::createInRawMemory(mem, be, vector);
+			}
 
-			void *mem = bufferResult.data();
-
-			return Wector<T>::createInRawMemory(mem, be, vector);
-		}
-
+		} // anonymous namespace
 
 
 		template<typename T, typename Protocol>
 		void process_VGET(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
 			using namespace MyVectors;
 
-			if (wectorSV.size() != Wector<T>::size(dim_ix))
+			if (wectorSV.size() != Wector<T>::bytes(dim_ix))
 				return result.set(false);
 
 			const Wector<T> *bv = reinterpret_cast<const Wector<T> *>(wectorSV.data());
@@ -381,7 +424,7 @@ namespace net::worker::commands::Vectors{
 		void process_VGETNORMALIZED(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
 			using namespace MyVectors;
 
-			if (wectorSV.size() != Wector<T>::size(dim_ix))
+			if (wectorSV.size() != Wector<T>::bytes(dim_ix))
 				return result.set(false);
 
 			const auto *bv = reinterpret_cast<const Wector<T> *>(wectorSV.data());
@@ -420,7 +463,7 @@ namespace net::worker::commands::Vectors{
 		void process_VGETRAW(Result<Protocol> &result, std::string_view const wectorSV, uint32_t const dim_ix, vectors_impl_::VType vtype){
 			using namespace MyVectors;
 
-			if (wectorSV.size() != Wector<T>::size(dim_ix))
+			if (wectorSV.size() != Wector<T>::bytes(dim_ix))
 				return result.set(false);
 
 			const auto *bv = reinterpret_cast<const Wector<T> *>(wectorSV.data());
@@ -433,8 +476,8 @@ namespace net::worker::commands::Vectors{
 
 			switch(vtype){
 			default:
-			case VType::BINARY_LE	:
-			case VType::BINARY_BE	: {
+			case VType::BINARY_LE :
+			case VType::BINARY_BE : {
 					FVectorBuffer buffer;
 
 					FVector fvector{ buffer };
@@ -445,6 +488,18 @@ namespace net::worker::commands::Vectors{
 
 					denormalizeF(vector, magnitude, f);
 
+					// TODO - assuming db is machine order, to be fixed later
+
+					if (vtype == VType::BINARY_BE){
+						#pragma GCC ivdep
+						for(size_t i = 0; i < fvector.size(); ++i)
+							fvector[i] = htobe(fvector[i]);
+					}else{
+						#pragma GCC ivdep
+						for(size_t i = 0; i < fvector.size(); ++i)
+							fvector[i] = htole(fvector[i]);
+					}
+
 					return result.set(
 						std::string_view{
 							buffer.data(),
@@ -453,21 +508,41 @@ namespace net::worker::commands::Vectors{
 					);
 				}
 
-			case VType::HEX_LE	:
-			case VType::HEX_BE	: {
+			case VType::HEX_LE :
+			case VType::HEX_BE : {
 					auto const sizeF = MaxDimensions * sizeof(float) * 2;
 					std::array<char, sizeF> buffer;
 
-					auto f = [&buffer](size_t i, float const value){
-						// our toHex() is big endian, so we have to byteswap...
-						uint32_t const u32 = __builtin_bswap32(  __builtin_bit_cast(uint32_t, value)  );
+					auto f_be = [&buffer](size_t i, float const value_){
+						float const value = htobe(value_);
+
+						uint32_t const u32 = bit_cast<uint32_t>(value);
 
 						char *buff = buffer.data() + i * sizeof(float) * 2;
 
 						hex_convert::toHex(u32, buff);
 					};
 
-					denormalizeF(vector, magnitude, f);
+					auto f_le = [&buffer](size_t i, float const value_){
+						float const value = htole(value_);
+
+						uint32_t const u32 = bit_cast<uint32_t>(value);
+
+						char *buff = buffer.data() + i * sizeof(float) * 2;
+
+						hex_convert::toHex(u32, buff);
+					};
+
+					// TODO - assuming db is machine order, to be fixed later
+					// however our toHex() is big endian, so we have to negate
+
+					if (vtype != VType::HEX_BE){
+						// big endian data
+						denormalizeF(vector, magnitude, f_be);
+					}else{
+						// little endian data
+						denormalizeF(vector, magnitude, f_le);
+					}
 
 					return result.set(
 						std::string_view{
@@ -526,7 +601,7 @@ namespace net::worker::commands::Vectors{
 				auto const vblob = it->getVal();
 
 				// invalid size, skip this one.
-				if (vblob.size() != Wector<T>::size(dim_ix))
+				if (vblob.size() != Wector<T>::bytes(dim_ix))
 					continue;
 
 				const auto *bv = reinterpret_cast<const Wector<T> *>(vblob.data());

@@ -1,16 +1,4 @@
 <?php
-function rawCommand(){
-	$args = func_get_args();
-
-	$redis = $args[0];
-
-	array_shift($args);
-
-	// PHPRedis only
-	return call_user_func_array( [ $redis, "rawCommand" ], $args );
-}
-
-
 
 $redis = new Redis();
 $redis->connect("127.0.0.1");
@@ -60,10 +48,11 @@ function process_vector($key, & $vector){
 	global $redis;
 
 	$x = $redis->rawCommand(
-		"VKSET",
-		"grawi150:$key",
+		"VADD",
+		"test",
 		300, 150, "i",
-		"b", vbin($vector)
+		"h", vhex($vector),
+		$key
 	);
 }
 
@@ -74,4 +63,5 @@ function vbin(array & $vector){
 function vhex(array & $vector){
 	return bin2hex(vbin($vector));
 }
+
 
