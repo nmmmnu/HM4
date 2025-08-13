@@ -43,14 +43,13 @@ printf("Loaded %d vectors\n", $i);
 
 
 
-
 function process_vector($key, & $vector){
 	global $redis;
 
 	$x = $redis->rawCommand(
 		"VADD",
-		"test",
-		300, 150, "i",
+		"gi300",
+		300, 300, "i",
 		"h", vhex($vector),
 		$key
 	);

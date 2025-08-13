@@ -78,31 +78,38 @@ namespace net::worker::commands::Vectors{
 		struct Wector{
 			static_assert(MyVectors::checkVectorElement<T>(), "Only float and int8_t supported");
 
-			float		magnitude;	// 4
-			uint32_t	dim;		// 4
+			float		magnitudeBE;	// 4
+			uint32_t	dimBE;		// 4
 			T		vdata[1];	// flexible member
 
-			constexpr static const Wector *createInRawMemory(void *mem, bool be, CFVector const vector){
+			constexpr static const Wector *createInRawMemory(void *mem, CFVector const vector){
 				using namespace MyVectors;
 
-				auto *me = static_cast<Wector *>(mem);
+				auto *self = static_cast<Wector *>(mem);
 
-				me->dim = static_cast<uint32_t>(vector.size());
+				self->dimBE = htobe( static_cast<uint32_t>(vector.size()) );
 
-				auto normF_LE = [me](size_t const index, float const value){
-					me->vdata[index] = quantizeComponent<T>(value);
+				// auto normF_LE = [me](size_t const index, float const value){
+				// 	self->vdata[index] = htole(quantizeComponent<T>(value));
+				// };
+
+				auto normF_BE = [self](size_t const index, float const value){
+					self->vdata[index] = htobe(quantizeComponent<T>(value));
 				};
 
-				auto normF_BE = [me](size_t const index, float const value){
-					me->vdata[index] = quantizeComponent<T>(value);
-				};
+				self->magnitudeBE = htobe(
+						normalizeF(vector, normF_BE)
+				);
 
-				me->magnitude = be ?
-						normalizeF(vector, normF_BE) :
-						normalizeF(vector, normF_LE)
-				;
+				return self;
+			}
 
-				return me;
+			constexpr auto dim() const{
+				return betoh(dimBE);
+			}
+
+			constexpr auto magnitude() const{
+				return betoh(magnitudeBE);
 			}
 
 			constexpr std::string_view const toSV() const{
@@ -116,17 +123,22 @@ namespace net::worker::commands::Vectors{
 				#pragma GCC diagnostic push
 				#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
 
-				return { vdata, dim };
+				return { vdata, dim() };
 
 				#pragma GCC diagnostic pop
 			}
 
 			constexpr size_t bytes() const{
-				return bytes(dim);
+				return bytes(dim());
 			}
 
 			constexpr const float *reconstruct(float *buffer) const{
-				return denormalize(vdata, dim, magnitude, buffer);
+				return denormalize(
+						vdata,
+						dim(),
+						magnitude(),
+						buffer
+				);
 			}
 
 			constexpr static size_t bytes(size_t dim){
@@ -151,6 +163,12 @@ namespace net::worker::commands::Vectors{
 
 		template<typename T>
 		using WectorBuffer = std::array<char, Wector<float  > ::bytes(MaxDimensions)>; // VectorBuffer + 8
+
+
+
+		auto valueProjBE = [](auto const a){
+			return betoh(a);
+		};
 
 
 
@@ -232,6 +250,7 @@ namespace net::worker::commands::Vectors{
 			default:	return VType::UNKNOWN	;
 			}
 		}
+
 
 
 		namespace {
@@ -374,16 +393,14 @@ namespace net::worker::commands::Vectors{
 			}
 
 			template<typename T>
-			const Wector<T> *prepareWector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<float> &bufferResult){
+			const Wector<T> *prepareWectorBE(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<float> &bufferResult){
 				VectorBuffer<T> bufferVector; // 32 KB, should be OK :)
 
 				FVector vector = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferVector);
 
-				auto const be = false;
-
 				void *mem = bufferResult.data();
 
-				return Wector<T>::createInRawMemory(mem, be, vector);
+				return Wector<T>::createInRawMemory(mem, vector);
 			}
 
 		} // anonymous namespace
@@ -398,11 +415,11 @@ namespace net::worker::commands::Vectors{
 
 			const Wector<T> *bv = reinterpret_cast<const Wector<T> *>(wectorSV.data());
 
-			if (dim_ix != bv->dim)
+			if (dim_ix != bv->dim())
 				return result.set(false);
 
 			auto const vector	= bv->toVector();
-			auto const magnitude	= bv->magnitude;
+			auto const magnitude	= bv->magnitude();
 
 			auto &container  = blob.container();
 			auto &bcontainer = blob.bcontainer();
@@ -415,7 +432,7 @@ namespace net::worker::commands::Vectors{
 				container.push_back(s);
 			};
 
-			denormalizeF(vector, magnitude, f);
+			denormalizeF(vector, magnitude, f, valueProjBE);
 
 			return result.set_container(container);
 		}
@@ -429,11 +446,11 @@ namespace net::worker::commands::Vectors{
 
 			const auto *bv = reinterpret_cast<const Wector<T> *>(wectorSV.data());
 
-			if (dim_ix != bv->dim)
+			if (dim_ix != bv->dim())
 				return result.set(false);
 
 			auto const vector	= bv->toVector();
-			auto const magnitude	= bv->magnitude;
+			auto const magnitude	= bv->magnitude();
 
 			auto &container  = blob.container();
 			auto &bcontainer = blob.bcontainer();
@@ -454,7 +471,7 @@ namespace net::worker::commands::Vectors{
 				container.push_back(s);
 			};
 
-			dequantizeF(vector, f);
+			dequantizeF(vector, f, valueProjBE);
 
 			return result.set_container(container);
 		}
@@ -468,11 +485,11 @@ namespace net::worker::commands::Vectors{
 
 			const auto *bv = reinterpret_cast<const Wector<T> *>(wectorSV.data());
 
-			if (dim_ix != bv->dim)
+			if (dim_ix != bv->dim())
 				return result.set(false);
 
 			auto const vector	= bv->toVector();
-			auto const magnitude	= bv->magnitude;
+			auto const magnitude	= bv->magnitude();
 
 			switch(vtype){
 			default:
@@ -486,9 +503,9 @@ namespace net::worker::commands::Vectors{
 						fvector[i] = value;
 					};
 
-					denormalizeF(vector, magnitude, f);
+					denormalizeF(vector, magnitude, f, valueProjBE);
 
-					// TODO - assuming db is machine order, to be fixed later
+					// fvector is denormalized and in machine order now.
 
 					if (vtype == VType::BINARY_BE){
 						#pragma GCC ivdep
@@ -513,35 +530,38 @@ namespace net::worker::commands::Vectors{
 					auto const sizeF = MaxDimensions * sizeof(float) * 2;
 					std::array<char, sizeF> buffer;
 
-					auto f_be = [&buffer](size_t i, float const value_){
-						float const value = htobe(value_);
-
-						uint32_t const u32 = bit_cast<uint32_t>(value);
-
-						char *buff = buffer.data() + i * sizeof(float) * 2;
-
-						hex_convert::toHex(u32, buff);
-					};
-
-					auto f_le = [&buffer](size_t i, float const value_){
-						float const value = htole(value_);
-
-						uint32_t const u32 = bit_cast<uint32_t>(value);
-
-						char *buff = buffer.data() + i * sizeof(float) * 2;
-
-						hex_convert::toHex(u32, buff);
-					};
-
-					// TODO - assuming db is machine order, to be fixed later
 					// however our toHex() is big endian, so we have to negate
 
 					if (vtype != VType::HEX_BE){
+
 						// big endian data
-						denormalizeF(vector, magnitude, f_be);
+
+						auto f_be = [&buffer](size_t i, float const value_){
+							float const value = htobe(value_);
+
+							uint32_t const u32 = bit_cast<uint32_t>(value);
+
+							char *buff = buffer.data() + i * sizeof(float) * 2;
+
+							hex_convert::toHex(u32, buff);
+						};
+
+						denormalizeF(vector, magnitude, f_be, valueProjBE);
 					}else{
+
 						// little endian data
-						denormalizeF(vector, magnitude, f_le);
+
+						auto f_le = [&buffer](size_t i, float const value_){
+							float const value = htole(value_);
+
+							uint32_t const u32 = bit_cast<uint32_t>(value);
+
+							char *buff = buffer.data() + i * sizeof(float) * 2;
+
+							hex_convert::toHex(u32, buff);
+						};
+
+						denormalizeF(vector, magnitude, f_le, valueProjBE);
 					}
 
 					return result.set(
@@ -607,16 +627,16 @@ namespace net::worker::commands::Vectors{
 				const auto *bv = reinterpret_cast<const Wector<T> *>(vblob.data());
 
 				auto const vector    = bv->toVector();
-				auto const magnitude = bv->magnitude;
+				auto const magnitude = bv->magnitude();
 
 				// SEARCH "IN"-CONDITION
 				auto const score = [](DType dtype, auto const &a, auto const &b, auto const &aM, auto const &bM){
 					switch(dtype){
 					default:
-					case DType::COSINE	: return MyVectors::distanceCosine		(a, b, aM, bM);
-					case DType::EUCLIDEAN	: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM);
-					case DType::MANHATTAN	: return MyVectors::distanceManhattanPrepared	(a, b,     bM);
-					case DType::CANBERRA	: return MyVectors::distanceCanberra		(a, b, aM, bM);
+					case DType::COSINE	: return MyVectors::distanceCosine		(a, b, aM, bM, {}, valueProjBE);
+					case DType::EUCLIDEAN	: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM, {}, valueProjBE);
+					case DType::MANHATTAN	: return MyVectors::distanceManhattanPrepared	(a, b,     bM, {}, valueProjBE);
+					case DType::CANBERRA	: return MyVectors::distanceCanberra		(a, b, aM, bM, {}, valueProjBE);
 					}
 				}(dtype, original_fvector, vector, original_magnitude, magnitude);
 
@@ -809,7 +829,7 @@ namespace net::worker::commands::Vectors{
 
 				uint8_t hashOut;
 
-				const Wector<T> *w = prepareWector<T>(&hashOut, vtype,  vectorSV, dim_ve, dim_ix, bufferResult);
+				const Wector<T> *w = prepareWectorBE<T>(&hashOut, vtype,  vectorSV, dim_ve, dim_ix, bufferResult);
 
 				auto const line = w->toSV();
 
@@ -1492,7 +1512,7 @@ namespace net::worker::commands::Vectors{
 
 			// uint8_t hashOut;
 
-			const Wector<T> *w = prepareWector<T>(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			const Wector<T> *w = prepareWectorBE<T>(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
 
 			auto const val = w->toSV();
 

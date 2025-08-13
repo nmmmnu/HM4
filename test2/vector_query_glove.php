@@ -6,6 +6,7 @@ $redis->connect("127.0.0.1");
 $raw		= "b";
 $results	= 10;
 $vsim		= "VSIMFLAT";
+$dist		= "k";
 
 
 $frog = $redis->rawCommand(
@@ -27,7 +28,7 @@ $result = $redis->rawCommand(
 	300		,
 	300		,
 	"f"		,
-	"c"		,
+	$dist		,
 	$raw		,
 	$frog		,
 	$results
@@ -44,7 +45,7 @@ $result = $redis->rawCommand(
 	300		,
 	150		,
 	"f"		,
-	"c"		,
+	$dist		,
 	$raw		,
 	$frog		,
 	$results
@@ -61,7 +62,7 @@ $result = $redis->rawCommand(
 	300		,
 	300		,
 	"i"		,
-	"c"		,
+	$dist		,
 	$raw		,
 	$frog		,
 	$results
@@ -78,7 +79,7 @@ $result = $redis->rawCommand(
 	300		,
 	150		,
 	"i"		,
-	"c"		,
+	$dist		,
 	$raw		,
 	$frog		,
 	$results
@@ -98,7 +99,7 @@ $frog = $redis->rawCommand(
 	"frog"
 );
 
-// echo "$frog";
+//echo "$frog";
 
 
 
@@ -108,7 +109,7 @@ $result = $redis->rawCommand(
 	150		,
 	150		,
 	"f"		,
-	"c"		,
+	$dist		,
 	$raw		,
 	$frog		,
 	$results
@@ -125,7 +126,7 @@ $result = $redis->rawCommand(
 	150		,
 	150		,
 	"i"		,
-	"c"		,
+	$dist		,
 	$raw		,
 	$frog		,
 	$results

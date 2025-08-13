@@ -60,6 +60,10 @@ namespace myendian_impl_{
 		return a;
 	}
 
+	constexpr int8_t be_byteswap(int8_t const a){
+		return a;
+	}
+
 	constexpr float be_byteswap(float const a){
 		if constexpr(getEndian() == Endian::BIG){
 			return a;
@@ -103,6 +107,10 @@ namespace myendian_impl_{
 	#endif
 
 	constexpr uint8_t le_byteswap(uint8_t const a){
+		return a;
+	}
+
+	constexpr int8_t le_byteswap(int8_t const a){
 		return a;
 	}
 

@@ -717,13 +717,13 @@ To create a vector index, use the `VADD` command.
 
 This command adds the keys `"frog"` and `"cat"` into a vector index named `"words"`.
 
--   **300** – original vector dimensionality
+- `300` – original vector dimensionality
 
--   **150** – reduced dimensionality using **Random Projection**
+- `150` – reduced dimensionality using **Random Projection**
 
--   `F` – vector elements are stored as **floats**
+- `F` – vector elements are stored as **floats**
 
--   `b` – vectors are passed as **binary blobs** (little-endian)
+- `b` – vectors are passed as **binary blobs** (little-endian)
 
 The resulting index stores **150D float vectors**.
 
@@ -733,11 +733,11 @@ The resulting index stores **150D float vectors**.
 
 This version keeps the vectors at their full dimensionality:
 
--   **300** – both input and stored vector dimensionality
+- `300` – both input and stored vector dimensionality
 
--   `I` – vector elements are **quantized to int8 (1 byte)**
+- `I` – vector elements are **quantized to int8 (1 byte)**
 
--   `h` – vectors are passed as **hex blobs** (little-endian)
+- `H` – vectors are passed as **hex blobs** (big-endian)
 
 The resulting index stores **300D int8 quantized vectors**.
 
@@ -761,13 +761,13 @@ This command performs a similarity search on the "words" index using flat method
 
 The result is 100% accurate, but might be slow.
 
-- **300** – dimensionality of the input query vector
-- **150** – dimensionality of the index (must match how the index was built)
-- **F** – vector elements are floats (must match how the index was built)
-- **C** – use Cosine similarity
-- **b** – the query vector is passed as a binary blob (little-endian)
-- **BLOB** – the binary data representing the query vector
-- **100** – return the 100 nearest results
+- `300` – dimensionality of the input query vector
+- `150` – dimensionality of the index (must match how the index was built)
+- `F` – vector elements are floats (must match how the index was built)
+- `C` – use Cosine distance
+- `b` – the query vector is passed as a binary blob (little-endian)
+- `BLOB` – the binary data representing the query vector
+- `100` – return the 100 nearest results
 
 The query vector is projected from 300D to 150D using the same random projection as during indexing, and similarity is computed using the Cosine distance.
 
@@ -779,13 +779,13 @@ This command performs a similarity search on the "words" index using LSH method.
 
 The result is NOT 100% accurate, but is fast.
 
-- **300** – dimensionality of the input query vector
-- **300** – dimensionality of the index (must match how the index was built)
-- **F** – vector elements are floats (must match how the index was built)
-- **E** – use Euclidean (L2) distance
-- **b** – the query vector is passed as a binary blob (little-endian)
-- **BLOB** – the binary data representing the query vector
-- **100** – return the 100 nearest results
+- `300` – dimensionality of the input query vector
+- `300` – dimensionality of the index (must match how the index was built)
+- `F` – vector elements are floats (must match how the index was built)
+- `E` – use Euclidean (L2) distance
+- `b` – the query vector is passed as a binary blob (little-endian)
+- `BLOB` – the binary data representing the query vector
+- `100` – return the 100 nearest results
 
 The query vector is not projected, and similarity is computed using the Euclidean (L2) distance.
 
@@ -802,18 +802,18 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 | `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude). The result is transformed to be 0..1 |
 | `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale. |
 
-##### When to Use Each Metric
+##### When to Use Each Metric:
 
-- **Euclidean (L2)** `E`
+- **Euclidean (L2)** `E` -
   Best for dense, normalized data where overall magnitude matters. It’s the default in many ML applications.
 
-- **Manhattan (L1)** `M`
+- **Manhattan (L1)** `M` -
   More robust to outliers; works well when vector components are sparse or vary in only a few dimensions.
 
-- **Cosine Similarity** `C`
+- **Cosine Similarity** `C` -
   Focuses on **direction**, not magnitude. Ideal for text embeddings or any case where you care about **angular similarity** rather than size.
 
-- **Canberra** `K`
+- **Canberra** `K` -
   Useful for sparse data or when small differences in low-value components are important. More sensitive than L1/L2 in those regions.
 
 
@@ -833,8 +833,8 @@ Removes the vector associated with the key "cat" from the "words" index.
 
 Retrieves the vector for key "cat" from the index "words".
 
-- **150** – dimensionality of the vector
-- **i** – elements are stored as int8 (quantized)
+- `150` – dimensionality of the vector
+- `i` – elements are stored as int8 (quantized)
 
 Output: a list of numbers representing each element of the vector
 
@@ -856,9 +856,9 @@ Output: magnitude and list of numbers representing each element of the vector
 
 Retrieves the raw representation of the vector for "cat":
 
-- **h** - output is in hexadecimal format (little-endian)
+- `h` - output is in hexadecimal format (little-endian)
 
-- **b** - output is in hexadecimal format (little-endian)
+- `b` - output is in hexadecimal format (little-endian)
 
 
 
@@ -885,11 +885,11 @@ This stores vectors under keys:
 
 Parameters:
 
-- **300** – original dimensionality of the input vector
-- **150** – dimensionality after Random Projection
-- **F** – vector elements are float32
-- **b** – vector is passed as a binary blob (little-endian)
-- **BLOB0**, **BLOB1** – the actual vector data (300D binary input)
+- `300` – original dimensionality of the input vector
+- `150` – dimensionality after Random Projection
+- `F` – vector elements are float32
+- `b` – vector is passed as a binary blob (little-endian)
+- `BLOB0`, `BLOB1` – the actual vector data (300D binary input)
 
 Vectors are transformed from 300D to 150D before storage.
 
@@ -903,13 +903,13 @@ This command performs a similarity search over all keys starting with the prefix
 
 The result is 100% accurate, but might be slow.
 
-- **300** – dimensionality of the input query vector
-- **150** – dimensionality of the index (must match how the index was built)
-- **F** – vector elements are floats (must match how the index was built)
-- **C** – use Cosine similarity
-- **b** – the query vector is passed as a binary blob (little-endian)
-- **BLOB** – the binary data representing the query vector
-- **100** – return the 100 nearest results
+- `300` – dimensionality of the input query vector
+- `150` – dimensionality of the index (must match how the index was built)
+- `F` – vector elements are floats (must match how the index was built)
+- `C` – use Cosine similarity
+- `b` – the query vector is passed as a binary blob (little-endian)
+- `BLOB` – the binary data representing the query vector
+- `100` – return the 100 nearest results
 
 
 
@@ -921,8 +921,8 @@ The result is 100% accurate, but might be slow.
 
 Retrieves the vector from key for key "word:cat".
 
-- **150** – dimensionality of the vector
-- **F** – elements are stored as float
+- `150` – dimensionality of the vector
+- `F` – elements are stored as float
 
 Output: a list of numbers representing each element of the vector
 
@@ -944,16 +944,12 @@ Output: magnitude and list of numbers representing each element of the vector
 
 Retrieves the raw representation of the vector from key  "word:cat".
 
-- **h** - output is in hexadecimal format (little-endian)
-- **b** - output is in hexadecimal format (little-endian)
+- `h` - output is in hexadecimal format (little-endian)
+- `b` - output is in hexadecimal format (little-endian)
 
 
 
 #### What is not working yet?
-
-- HM4 gives strong guarantees if the client or server are big endian machine. However with vectors this is still not implemented.
-  Vectors are loaded and stored only as little endian data.
-  Note when standard release come out, all stored vectors with beta version will be **unreadable** and has to be imported again.
 
 - When HM4 search the index it always stops after specific number of scanned key-value pairs.
   **VSIMFLAT**, **VSIMLSH** and **VKSIMFLAT** however have limit ot 1'000'000 key value pairs.
