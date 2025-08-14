@@ -104,6 +104,41 @@ constexpr double byteswap(double value){
 
 
 namespace mybyteswap_impl_{
+
+	template<typename T>
+	constexpr T byteswapSigned(T value){
+		using U = std::make_unsigned_t<T>;
+
+		return static_cast<T>(
+			byteswap(
+				static_cast<U>(value)
+			)
+		);
+	}
+
+} // namespace byteswap_fp_impl_
+
+constexpr int16_t byteswap(int16_t value){
+	using namespace mybyteswap_impl_;
+
+	return byteswapSigned<int16_t>(value);
+}
+
+constexpr int32_t byteswap(int32_t value){
+	using namespace mybyteswap_impl_;
+
+	return byteswapSigned<int32_t>(value);
+}
+
+constexpr int64_t byteswap(int64_t value){
+	using namespace mybyteswap_impl_;
+
+	return byteswapSigned<int64_t>(value);
+}
+
+
+
+namespace mybyteswap_impl_{
 	namespace test_{
 		template<typename T>
 		constexpr T byteswap_test(T const a, T const b){

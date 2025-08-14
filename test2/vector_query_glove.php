@@ -58,6 +58,40 @@ print_r($result);
 
 $result = $redis->rawCommand(
 	$vsim		,
+	"gs300"		,
+	300		,
+	300		,
+	"s"		,
+	$dist		,
+	$raw		,
+	$frog		,
+	$results
+);
+
+echo "300 300 s\n";
+print_r($result);
+
+
+
+$result = $redis->rawCommand(
+	$vsim		,
+	"gs150"		,
+	300		,
+	150		,
+	"s"		,
+	$dist		,
+	$raw		,
+	$frog		,
+	$results
+);
+
+echo "300 150 s\n";
+print_r($result);
+
+
+
+$result = $redis->rawCommand(
+	$vsim		,
 	"gi300"		,
 	300		,
 	300		,
@@ -116,6 +150,23 @@ $result = $redis->rawCommand(
 );
 
 echo "150 150 f\n";
+print_r($result);
+
+
+
+$result = $redis->rawCommand(
+	$vsim		,
+	"gs150"		,
+	150		,
+	150		,
+	"s"		,
+	$dist		,
+	$raw		,
+	$frog		,
+	$results
+);
+
+echo "150 150 s\n";
 print_r($result);
 
 

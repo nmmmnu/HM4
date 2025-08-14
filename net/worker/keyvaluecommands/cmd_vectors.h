@@ -76,7 +76,7 @@ namespace net::worker::commands::Vectors{
 
 		template<typename T>
 		struct Wector{
-			static_assert(MyVectors::checkVectorElement<T>(), "Only float and int8_t supported");
+			static_assert(MyVectors::checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 			float		magnitudeBE;	// 4
 			uint32_t	dimBE;		// 4
@@ -147,6 +147,7 @@ namespace net::worker::commands::Vectors{
 		} __attribute__((__packed__));
 
 		static_assert(std::is_standard_layout_v<Wector<float	> >, "Wector must be POD type");
+		static_assert(std::is_standard_layout_v<Wector<int16_t	> >, "Wector must be POD type");
 		static_assert(std::is_standard_layout_v<Wector<int8_t	> >, "Wector must be POD type");
 
 
@@ -156,8 +157,9 @@ namespace net::worker::commands::Vectors{
 		template<typename T>
 		using VectorBuffer = std::array<char, MaxDimensions * sizeof(float )>;
 
-		using FVectorBuffer = VectorBuffer<float  >; // 32 KB
-		using IVectorBuffer = VectorBuffer<int8_t >; //  8 KB
+		using FVectorBuffer = VectorBuffer<float  >;	// 32 KB
+		using SVectorBuffer = VectorBuffer<int16_t >;	// 16 KB
+		using IVectorBuffer = VectorBuffer<int8_t >;	//  8 KB
 
 
 
@@ -175,6 +177,7 @@ namespace net::worker::commands::Vectors{
 		enum class QType{
 			UNKNOWN	,
 			F32	,
+			I16	,
 			I8
 		};
 
@@ -185,6 +188,9 @@ namespace net::worker::commands::Vectors{
 			switch(s[0]){
 			case 'f' :
 			case 'F' :	return QType::F32	;
+
+			case 's' :
+			case 'S' :	return QType::I16	;
 
 			case 'i' :
 			case 'I' :	return QType::I8	;
@@ -773,8 +779,9 @@ namespace net::worker::commands::Vectors{
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float  >(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
-			case QType::I8	: return process_<int8_t >(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
+			case QType::F32	: return process_<float		>(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
+			case QType::I16	: return process_<int16_t	>(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
+			case QType::I8	: return process_<int8_t	>(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -932,9 +939,10 @@ namespace net::worker::commands::Vectors{
 			auto const wectorBlob = shared::zsetmulti::get<P1>(db, keyN, name);
 
 			switch(qtype){
-			case QType::F32: return process_VGET<float	>(result, blob, wectorBlob, dim_ix);
 			default:
-			case QType::I8:  return process_VGET<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::F32 : return process_VGET<float	>(result, blob, wectorBlob, dim_ix);
+			case QType::I16 : return process_VGET<int16_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::I8  :  return process_VGET<int8_t	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1009,9 +1017,10 @@ namespace net::worker::commands::Vectors{
 			auto const wectorBlob = shared::zsetmulti::get<P1>(db, keyN, name);
 
 			switch(qtype){
-			case QType::F32: return process_VGETRAW<float	>(result, wectorBlob, dim_ix, vtype);
 			default:
-			case QType::I8:  return process_VGETRAW<int8_t	>(result, wectorBlob, dim_ix, vtype);
+			case QType::F32 : return process_VGETRAW<float		>(result, wectorBlob, dim_ix, vtype);
+			case QType::I16 : return process_VGETRAW<int16_t	>(result, wectorBlob, dim_ix, vtype);
+			case QType::I8  : return process_VGETRAW<int8_t		>(result, wectorBlob, dim_ix, vtype);
 			}
 		}
 
@@ -1076,9 +1085,10 @@ namespace net::worker::commands::Vectors{
 			auto const wectorBlob = shared::zsetmulti::get<P1>(db, keyN, name);
 
 			switch(qtype){
-			case QType::F32: return process_VGETNORMALIZED<float	>(result, blob, wectorBlob, dim_ix);
 			default:
-			case QType::I8:  return process_VGETNORMALIZED<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::F32 : return process_VGETNORMALIZED<float	>(result, blob, wectorBlob, dim_ix);
+			case QType::I16 : return process_VGETNORMALIZED<int16_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::I8  :  return process_VGETNORMALIZED<int8_t	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1187,8 +1197,9 @@ namespace net::worker::commands::Vectors{
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float  >(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
-			case QType::I8	: return process_<int8_t >(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1343,8 +1354,9 @@ namespace net::worker::commands::Vectors{
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float  >(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
-			case QType::I8	: return process_<int8_t >(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1493,8 +1505,9 @@ namespace net::worker::commands::Vectors{
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float  >(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
-			case QType::I8	: return process_<int8_t >(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
+			case QType::F32	: return process_<float		>(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
+			case QType::I16	: return process_<int16_t	>(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
+			case QType::I8	: return process_<int8_t	>(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1575,9 +1588,10 @@ namespace net::worker::commands::Vectors{
 			auto const wectorBlob = hm4::getPairVal(*db, key);
 
 			switch(qtype){
-			case QType::F32: return process_VGET<float	>(result, blob, wectorBlob, dim_ix);
 			default:
-			case QType::I8:  return process_VGET<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::F32 : return process_VGET<float	>(result, blob, wectorBlob, dim_ix);
+			case QType::I16 : return process_VGET<int16_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::I8  : return process_VGET<int8_t	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1644,9 +1658,10 @@ namespace net::worker::commands::Vectors{
 			auto const wectorBlob = hm4::getPairVal(*db, key);
 
 			switch(qtype){
-			case QType::F32: return process_VGETRAW<float	>(result, wectorBlob, dim_ix, vtype);
 			default:
-			case QType::I8:  return process_VGETRAW<int8_t	>(result, wectorBlob, dim_ix, vtype);
+			case QType::F32 : return process_VGETRAW<float		>(result, wectorBlob, dim_ix, vtype);
+			case QType::I16 : return process_VGETRAW<int16_t	>(result, wectorBlob, dim_ix, vtype);
+			case QType::I8  : return process_VGETRAW<int8_t		>(result, wectorBlob, dim_ix, vtype);
 			}
 		}
 
@@ -1703,9 +1718,10 @@ namespace net::worker::commands::Vectors{
 			auto const wectorBlob = hm4::getPairVal(*db, key);
 
 			switch(qtype){
-			case QType::F32: return process_VGETNORMALIZED<float	>(result, blob, wectorBlob, dim_ix);
 			default:
-			case QType::I8:  return process_VGETNORMALIZED<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::F32 : return process_VGETNORMALIZED<float	>(result, blob, wectorBlob, dim_ix);
+			case QType::I16 : return process_VGETNORMALIZED<int16_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::I8  : return process_VGETNORMALIZED<int8_t	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1814,8 +1830,9 @@ namespace net::worker::commands::Vectors{
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float  >(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
-			case QType::I8	: return process_<int8_t >(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}

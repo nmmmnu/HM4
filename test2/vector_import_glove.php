@@ -48,8 +48,8 @@ function process_vector($key, & $vector){
 
 	$x = $redis->rawCommand(
 		"VADD",
-		"gi300",
-		300, 300, "i",
+		"gs150",
+		300, 150, "s",
 		"h", vhex($vector),
 		$key
 	);

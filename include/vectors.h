@@ -14,7 +14,8 @@ namespace MyVectors{
 		using T = std::remove_cv_t<T2>;
 
 		return	std::is_same_v<T, float  > ||
-			std::is_same_v<T, int8_t >;
+			std::is_same_v<T, int8_t > ||
+			std::is_same_v<T, int16_t >;
 	}
 
 	template<typename Vector>
@@ -37,7 +38,7 @@ namespace MyVectors{
 
 	template<typename T>
 	constexpr bool validBlobSize(size_t size, size_t dim){
-		static_assert(checkVectorElement<T>(), "Only float and int8_t supported");
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 		return size == dim * sizeof(T);
 	}
@@ -57,7 +58,7 @@ namespace MyVectors{
 
 	template<typename CVector>
 	constexpr float getMagnitude(CVector const &cvector){
-		static_assert(checkVector<CVector>(), "Only float and int8_t supported");
+		static_assert(checkVector<CVector>(), "Only float, int8_t and int16_t supported");
 
 		float l2 = 0.0f;
 
@@ -115,10 +116,16 @@ namespace MyVectors{
 
 	template<typename T>
 	constexpr T quantizeComponent(float v){
-		static_assert(checkVectorElement<T>(), "Only float and int8_t supported");
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 		if (std::is_same_v<T, float>){
 			return v;
+		}
+
+		if (std::is_same_v<T, int16_t>){
+			float const scale = 32767;
+
+			return static_cast<int16_t>( std::round(v * scale) );
 		}
 
 		if (std::is_same_v<T, int8_t>){
@@ -134,6 +141,12 @@ namespace MyVectors{
 		return v;
 	}
 
+	constexpr float dequantizeComponent(int16_t v){
+		float const scale = 1 / 32767.f;
+
+		return v * scale;
+	}
+
 	constexpr float dequantizeComponent(int8_t v){
 		float const scale = 1 / 127.f;
 
@@ -142,7 +155,7 @@ namespace MyVectors{
 
 	template<typename CVector, typename F, typename FProj = DefaultValueProjection>
 	constexpr void dequantizeF(CVector const &cvector, F f, FProj fpr){
-		static_assert(checkVector <CVector>(), "Only float and int8_t supported");
+		static_assert(checkVector <CVector>(), "Only float, int8_t and int16_t supported");
 
 		#pragma GCC ivdep
 		for(size_t i = 0; i < cvector.size(); ++i)
@@ -153,14 +166,14 @@ namespace MyVectors{
 
 	template<typename T>
 	constexpr float denormalizeComponent(T v, float const magnitude){
-		static_assert(checkVectorElement<T>(), "Only float and int8_t supported");
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 		return dequantizeComponent(v) * magnitude;
 	}
 
 	template<typename CVector, typename FVector>
 	constexpr void denormalizeInline(CVector const &cvector, float const magnitude, FVector &fvector){
-		static_assert(checkVector <CVector>(), "Only float and int8_t supported");
+		static_assert(checkVector <CVector>(), "Only float, int8_t and int16_t supported");
 		static_assert(checkFVector<FVector>(), "Only float supported");
 
 		assert(cvector.size() == fvector.size());
@@ -172,7 +185,7 @@ namespace MyVectors{
 
 	template<typename CVector, typename F, typename FProj = DefaultValueProjection>
 	constexpr void denormalizeF(CVector const &cvector, float const magnitude, F f, FProj fpr){
-		static_assert(checkVector<CVector>(), "Only float and int8_t supported");
+		static_assert(checkVector<CVector>(), "Only float, int8_t and int16_t supported");
 
 		#pragma GCC ivdep
 		for(size_t i = 0; i < cvector.size(); ++i)
@@ -188,8 +201,8 @@ namespace MyVectors{
 		float dotProduct(CVector1 const &a, CVector2 const &b,
 									FProj1 fpr1, FProj2 fpr2){
 
-			static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
-			static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
+			static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
+			static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
 
 			assert(a.size() == b.size());
 
@@ -214,8 +227,8 @@ namespace MyVectors{
 		float cosineSimilarity(CVector1 const &a, CVector2 const &b,
 									FProj1 aFpr, FProj2 bFpr){
 
-			static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
-			static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
+			static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
+			static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
 
 			auto const dot = dotProduct(a, b, aFpr, bFpr);
 
@@ -235,8 +248,8 @@ namespace MyVectors{
 	float distanceCosine(CVector1 const &a, CVector2 const &b,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
-		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
+		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
 
 		using namespace distance_cosine_impl_;
 
@@ -250,8 +263,8 @@ namespace MyVectors{
 	float distanceEuclideanSquared(CVector1 const &a, CVector2 const &b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
-		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
+		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
 
 		using namespace distance_cosine_impl_;
 
@@ -271,8 +284,8 @@ namespace MyVectors{
 	float distanceEuclidean(CVector1 const &a, CVector2 const &b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
-		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
+		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
 
 		auto const result = distanceEuclideanSquared(a, b, aM, bM, aFpr, bFpr);
 
@@ -286,8 +299,8 @@ namespace MyVectors{
 	float distanceCanberra(CVector1 const &a, CVector2 const &b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
-		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
+		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 
@@ -313,7 +326,7 @@ namespace MyVectors{
 									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkFVector<CFVector1>(), "Only float supported");
-		static_assert(checkVector <CVector2>(), "Only float and int8_t supported");
+		static_assert(checkVector <CVector2>(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 
@@ -338,8 +351,8 @@ namespace MyVectors{
 	float distanceManhattan(CVector1 const &a, CVector2 const &b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float and int8_t supported");
-		static_assert(checkVector<CVector2>(), "Only float and int8_t supported");
+		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 
@@ -361,7 +374,7 @@ namespace MyVectors{
 									FProj1 aFpr, FProj2 bFpr){
 
 		static_assert(checkFVector<CFVector1>(), "Only float supported");
-		static_assert(checkVector <CVector2 >(), "Only float and int8_t supported");
+		static_assert(checkVector <CVector2 >(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 

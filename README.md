@@ -735,19 +735,45 @@ This version keeps the vectors at their full dimensionality:
 
 - `300` – both input and stored vector dimensionality
 
+- `S` – vector elements are **quantized to int16 (2 byte)**
+
+- `H` – vectors are passed as **hex blobs** (big-endian)
+
+The resulting index stores **300D int8 quantized vectors**.
+
+##### Example 3 – Without Random Projection (Full Dimensionality) and quantization to int8
+
+`VADD words 300 300 I h BLOB0 frog BLOB1 cat`
+
+This version keeps the vectors at their full dimensionality:
+
+- `300` – both input and stored vector dimensionality
+
 - `I` – vector elements are **quantized to int8 (1 byte)**
 
 - `H` – vectors are passed as **hex blobs** (big-endian)
 
 The resulting index stores **300D int8 quantized vectors**.
 
-##### Example 3 – With Random Projection (Dimensionality Reduction) and quantization to int8
+##### Example 4 – With Random Projection (Dimensionality Reduction) and quantization to int16
+
+`VADD words 300 128 S h BLOB0 frog BLOB1 cat`
+
+The resulting index stores **128 int16 quantized vectors**.
+
+##### Example 5 – With Random Projection (Dimensionality Reduction) and quantization to int8
 
 `VADD words 300 64 I h BLOB0 frog BLOB1 cat`
 
 The resulting index stores **64D int8 quantized vectors**.
 
+##### Supported Quantization methods
 
+| Flag | Quantization | Storage Type | Bytes | Notes                                                     | Precision loss | Disk size of GloVe set |
+|:----:|:------------:|:------------:|------:|-----------------------------------------------------------|---------------:|-----------------------:|
+|  F   | None         | `float`      |     4 | No quantization — store values exactly as 32-bit floats   |         0.00 % |               1,232 MB |
+|  S   | Q16          | `int16_t`    |     2 | 50% space reduction — near-lossless precision             |         0.01 % |                 660 MB |
+|  I   | Q8           | `int8_t`     |     1 | 75% space reduction — precision good for most workloads   |         1.00 % |                 374 MB |
 
 #### Searching a Vector Index
 

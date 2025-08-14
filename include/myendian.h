@@ -30,9 +30,11 @@ namespace myendian_impl_{
 
 	static_assert(getEndian() == Endian::LITTLE || getEndian() == Endian::BIG, "I can handle only big and little endian");
 
+	// ---------------
 
-
-
+	constexpr uint8_t be_byteswap(uint8_t const a){
+		return a;
+	}
 
 	template<typename T>
 	constexpr T be_byteswap(T const a){
@@ -56,13 +58,37 @@ namespace myendian_impl_{
 	}
 	#endif
 
-	constexpr uint8_t be_byteswap(uint8_t const a){
-		return a;
-	}
+	// ---------------
 
 	constexpr int8_t be_byteswap(int8_t const a){
 		return a;
 	}
+
+	constexpr int16_t be_byteswap(int16_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return a;
+		}else{
+			return byteswap(a);
+		}
+	}
+
+	constexpr int32_t be_byteswap(int32_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return a;
+		}else{
+			return byteswap(a);
+		}
+	}
+
+	constexpr int64_t be_byteswap(int64_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return a;
+		}else{
+			return byteswap(a);
+		}
+	}
+
+	// ---------------
 
 	constexpr float be_byteswap(float const a){
 		if constexpr(getEndian() == Endian::BIG){
@@ -80,9 +106,13 @@ namespace myendian_impl_{
 		}
 	}
 
+	// ---------------
+	// ---------------
+	// ---------------
 
-
-
+	constexpr uint8_t le_byteswap(uint8_t const a){
+		return a;
+	}
 
 	template<typename T>
 	constexpr T le_byteswap(T const a){
@@ -106,13 +136,37 @@ namespace myendian_impl_{
 	}
 	#endif
 
-	constexpr uint8_t le_byteswap(uint8_t const a){
-		return a;
-	}
+	// ---------------
 
 	constexpr int8_t le_byteswap(int8_t const a){
 		return a;
 	}
+
+	constexpr int16_t le_byteswap(int16_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return byteswap(a);
+		}else{
+			return a;
+		}
+	}
+
+	constexpr int32_t le_byteswap(int32_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return byteswap(a);
+		}else{
+			return a;
+		}
+	}
+
+	constexpr int64_t le_byteswap(int64_t const a){
+		if constexpr(getEndian() == Endian::BIG){
+			return byteswap(a);
+		}else{
+			return a;
+		}
+	}
+
+	// ---------------
 
 	constexpr float le_byteswap(float const a){
 		if constexpr(getEndian() == Endian::BIG){
