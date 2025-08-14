@@ -771,9 +771,9 @@ The resulting index stores **64D int8 quantized vectors**.
 
 | Flag | Quantization | Storage Type | Bytes | Notes                                                     | Precision loss | Disk size of GloVe set |
 |:----:|:------------:|:------------:|------:|-----------------------------------------------------------|---------------:|-----------------------:|
-|  F   | None         | `float`      |     4 | No quantization — store values exactly as 32-bit floats   |         0.00 % |               1,232 MB |
-|  S   | Q16          | `int16_t`    |     2 | 50% space reduction — near-lossless precision             |         0.01 % |                 660 MB |
-|  I   | Q8           | `int8_t`     |     1 | 75% space reduction — precision good for most workloads   |         1.00 % |                 374 MB |
+| `F`  | None         | `float`      |     4 | No quantization — store values exactly as 32-bit floats   |         0.00 % |               1,232 MB |
+| `S`  | Q15          | `int16_t`    |     2 | 50% space reduction — near-lossless precision             |        ~0.01 % |                 660 MB |
+| `I`  | Q7           | `int8_t`     |     1 | 75% space reduction — precision good for most workloads   |        ~1.00 % |                 374 MB |
 
 #### Searching a Vector Index
 
@@ -821,12 +821,12 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 
 ##### Supported Metrics
 
-| Flag | Metric Name      | Description                                                                                   |
-|------|------------------|-----------------------------------------------------------------------------------------------|
-| `E`  | **Euclidean (L2)**  | Standard straight-line distance between two points in Euclidean space.                        |
-| `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance. |
+| Flag | Metric Name         | Description                                                                                                             |
+|:----:|---------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `E`  | **Euclidean (L2)**  | Standard straight-line distance between two points in Euclidean space.                                                  |
+| `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.                        |
 | `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude). The result is transformed to be 0..1 |
-| `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale. |
+| `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.   |
 
 ##### When to Use Each Metric:
 
@@ -880,11 +880,18 @@ Output: magnitude and list of numbers representing each element of the vector
 
 `VGETRAW words 150 i b cat`
 
+`VGETRAW words 150 i H cat`
+
+`VGETRAW words 150 i B cat`
+
 Retrieves the raw representation of the vector for "cat":
 
-- `h` - output is in hexadecimal format (little-endian)
-
-- `b` - output is in hexadecimal format (little-endian)
+| Flag | Output      | Byte Order    |
+|:----:|-------------|--------------:|
+| `H`  | hexadecimal | big-endian    |
+| `h`  | hexadecimal | little-endian |
+| `B`  | binary      | big-endian    |
+| `b`  | binary      | little-endian |
 
 
 
@@ -947,31 +954,23 @@ The result is 100% accurate, but might be slow.
 
 Retrieves the vector from key for key "word:cat".
 
-- `150` – dimensionality of the vector
-- `F` – elements are stored as float
-
-Output: a list of numbers representing each element of the vector
-
 ##### Get Normalized Key Vector with Magnitude
 
 `VGETNORMALIZED words:cat 150 i cat`
 
 Retrieves and normalizes the vector from key  "word:cat".
 
-Returns:
-
-Output: magnitude and list of numbers representing each element of the vector
-
 ##### Get Key Vector in Binary or Hex Format
 
+`VGETRAW words 150 i H cat`
+
 `VGETRAW words 150 i h cat`
+
+`VGETRAW words 150 i B cat`
 
 `VGETRAW words 150 i b cat`
 
 Retrieves the raw representation of the vector from key  "word:cat".
-
-- `h` - output is in hexadecimal format (little-endian)
-- `b` - output is in hexadecimal format (little-endian)
 
 
 
