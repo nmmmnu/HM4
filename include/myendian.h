@@ -38,7 +38,7 @@ namespace myendian_impl_{
 
 	template<typename T>
 	constexpr T be_byteswap(T const a){
-		static_assert(std::is_unsigned_v<T>, "be_byteswap<> supports only unsigned type");
+		static_assert(std::is_unsigned_v<T>, "be_byteswap<> supports only unsigned types");
 
 		if constexpr(getEndian() == Endian::BIG){
 			return a;

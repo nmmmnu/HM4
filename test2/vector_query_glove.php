@@ -34,7 +34,7 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "300 300 f\n";
+echo "300 300 float\n";
 print_r($result);
 
 
@@ -51,7 +51,7 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "300 150 f\n";
+echo "300 150 float\n";
 print_r($result);
 
 
@@ -68,7 +68,7 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "300 300 s\n";
+echo "300 300 short\n";
 print_r($result);
 
 
@@ -85,7 +85,7 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "300 150 s\n";
+echo "300 150 short\n";
 print_r($result);
 
 
@@ -102,7 +102,7 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "300 300 i\n";
+echo "300 300 i8\n";
 print_r($result);
 
 
@@ -119,7 +119,41 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "300 150 i\n";
+echo "300 150 i8\n";
+print_r($result);
+
+
+
+$result = $redis->rawCommand(
+	$vsim		,
+	"gb300"		,
+	300		,
+	300		,
+	"b"		,
+	"h"		,
+	$raw		,
+	$frog		,
+	$results
+);
+
+echo "300 300 bit\n";
+print_r($result);
+
+
+
+$result = $redis->rawCommand(
+	$vsim		,
+	"gb150"		,
+	300		,
+	150		,
+	"b"		,
+	"h"		,
+	$raw		,
+	$frog		,
+	$results
+);
+
+echo "300 150 bit\n";
 print_r($result);
 
 
@@ -149,7 +183,7 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "150 150 f\n";
+echo "150 150 float\n";
 print_r($result);
 
 
@@ -166,7 +200,7 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "150 150 s\n";
+echo "150 150 short\n";
 print_r($result);
 
 
@@ -183,7 +217,24 @@ $result = $redis->rawCommand(
 	$results
 );
 
-echo "150 150 i\n";
+echo "150 150 i8\n";
+print_r($result);
+
+
+
+$result = $redis->rawCommand(
+	$vsim		,
+	"gb150"		,
+	150		,
+	150		,
+	"b"		,
+	"h"		,
+	$raw		,
+	$frog		,
+	$results
+);
+
+echo "150 150 bit\n";
 print_r($result);
 
 

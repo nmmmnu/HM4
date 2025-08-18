@@ -14,6 +14,7 @@
 #include "hexconvert.h"
 #include "myhamming.h"
 #include "vectors.h"
+#include "bitvectors.h"
 
 #include "mybufferview.h"
 
@@ -89,10 +90,6 @@ namespace net::worker::commands::Vectors{
 
 				self->dimBE = htobe( static_cast<uint32_t>(vector.size()) );
 
-				// auto normF_LE = [me](size_t const index, float const value){
-				// 	self->vdata[index] = htole(quantizeComponent<T>(value));
-				// };
-
 				auto normF_BE = [self](size_t const index, float const value){
 					self->vdata[index] = htobe(quantizeComponent<T>(value));
 				};
@@ -112,7 +109,7 @@ namespace net::worker::commands::Vectors{
 				return betoh(magnitudeBE);
 			}
 
-			constexpr std::string_view const toSV() const{
+			constexpr std::string_view toSV() const{
 				return std::string_view{
 					reinterpret_cast<const char *>(this),
 					bytes()
@@ -132,17 +129,8 @@ namespace net::worker::commands::Vectors{
 				return bytes(dim());
 			}
 
-			constexpr const float *reconstruct(float *buffer) const{
-				return denormalize(
-						vdata,
-						dim(),
-						magnitude(),
-						buffer
-				);
-			}
-
 			constexpr static size_t bytes(size_t dim){
-				return sizeof(Wector) + (dim - 1) * sizeof(T);
+				return sizeof(Wector) - sizeof(T) + dim * sizeof(T);
 			}
 		} __attribute__((__packed__));
 
@@ -152,19 +140,72 @@ namespace net::worker::commands::Vectors{
 
 
 
+		template<>
+		struct Wector<bool>{
+			uint32_t	dimBE;		// 4
+			uint8_t		vdata[1];	// flexible member
+
+			static const Wector *createInRawMemory(void *mem, CFVector const vector){
+				using namespace MyVectors;
+
+				auto *self = static_cast<Wector *>(mem);
+
+				self->dimBE = htobe( static_cast<uint32_t>(vector.size()) );
+
+				MyVectors::bitVectorQuantize(vector, self->vdata);
+
+				return self;
+			}
+
+			constexpr auto dim() const{
+				return betoh(dimBE);
+			}
+
+			std::string_view toSV() const{
+				return std::string_view{
+					reinterpret_cast<const char *>(this),
+					bytes()
+				};
+			}
+
+			std::string_view toBitSV() const{
+				return std::string_view{
+					reinterpret_cast<const char *>(vdata),
+					MyVectors::bitVectorBytes(dim())
+				};
+			}
+
+			bool operator[](size_t index) const{
+				using namespace MyVectors;
+
+				return bitVectorGetComponent(vdata, index);
+			}
+
+			constexpr size_t bytes() const{
+				return bytes(dim());
+			}
+
+			constexpr static size_t bytes(size_t dim){
+				using namespace MyVectors;
+
+				return sizeof(Wector) - sizeof(uint8_t) + MyVectors::bitVectorBytes(dim);
+			}
+		};
+
+		static_assert(std::is_standard_layout_v<Wector<bool	> >, "Wector must be POD type");
+
+
+
 		constexpr uint32_t MaxDimensions = 1024 * 8;
 
-		template<typename T>
-		using VectorBuffer = std::array<char, MaxDimensions * sizeof(float )>;
 
-		using FVectorBuffer = VectorBuffer<float  >;	// 32 KB
-		using SVectorBuffer = VectorBuffer<int16_t >;	// 16 KB
-		using IVectorBuffer = VectorBuffer<int8_t >;	//  8 KB
+
+		using FVectorBuffer = std::array<char, MaxDimensions * sizeof(float)>;	// 32 KB
 
 
 
 		template<typename T>
-		using WectorBuffer = std::array<char, Wector<float  > ::bytes(MaxDimensions)>; // VectorBuffer + 8
+		using WectorBuffer = std::array<char, Wector<T>::bytes(MaxDimensions)>; // VectorBuffer + 8
 
 
 
@@ -178,7 +219,8 @@ namespace net::worker::commands::Vectors{
 			UNKNOWN	,
 			F32	,
 			I16	,
-			I8
+			I8	,
+			BIT
 		};
 
 		constexpr auto translateQType(std::string_view s){
@@ -195,6 +237,9 @@ namespace net::worker::commands::Vectors{
 			case 'i' :
 			case 'I' :	return QType::I8	;
 
+			case 'b' :
+			case 'B' :	return QType::BIT	;
+
 			default:	return QType::UNKNOWN	;
 			}
 		}
@@ -206,7 +251,8 @@ namespace net::worker::commands::Vectors{
 			EUCLIDEAN	,
 			MANHATTAN	,
 			COSINE		,
-			CANBERRA
+			CANBERRA	,
+			HAMMING
 		};
 
 		constexpr auto translateDType(std::string_view s){
@@ -227,6 +273,9 @@ namespace net::worker::commands::Vectors{
 
 			case 'k' :
 			case 'K' :	return DType::CANBERRA	;
+
+			case 'h' :
+			case 'H' :	return DType::HAMMING	;
 
 			default:	return DType::UNKNOWN	;
 			}
@@ -254,6 +303,16 @@ namespace net::worker::commands::Vectors{
 			case 'H' :	return VType::HEX_BE	;
 
 			default:	return VType::UNKNOWN	;
+			}
+		}
+
+		constexpr size_t translateVTypeToSizeM(VType vtype){
+			switch(vtype){
+			default:
+			case VType::BINARY_LE	:
+			case VType::BINARY_BE	: return 1;
+			case VType::HEX_LE	:
+			case VType::HEX_BE	: return 2;
 			}
 		}
 
@@ -304,12 +363,12 @@ namespace net::worker::commands::Vectors{
 				return fvectorResult;
 			}
 
-			FVector prepareFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, FVectorBuffer &bufferResult){
+			FVector prepareFVector(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, FVectorBuffer &fVectorBufferResult){
 				// step 1 - convert vector into float[]
 
 				bool const needsToBeProjected = dim_ix > 1 && dim_ix < dim_ve;
 
-				FVectorBuffer bufferConvert; // 32 KB, should be OK :)
+				FVectorBuffer fVectorBufferConvert; // 32 KB, should be OK :)
 
 				FVector fvectorOriginal = [vtype, dim_ve](std::string_view fvectorSV, FVectorBuffer &buffer){
 					switch(vtype){
@@ -354,7 +413,7 @@ namespace net::worker::commands::Vectors{
 							return result;
 						}
 					}
-				}(fvectorSV, bufferConvert);
+				}(fvectorSV, fVectorBufferConvert);
 
 				// fvectorOriginal is now decoded to float[],
 				// it live in bufferConvert,
@@ -389,7 +448,7 @@ namespace net::worker::commands::Vectors{
 
 				// step 2.1 - create result vector
 
-				FVector fvectorResult{ bufferResult.data(), dim_ix * sizeof(float) };
+				FVector fvectorResult{ fVectorBufferResult.data(), dim_ix * sizeof(float) };
 
 				if (needsToBeProjected){
 					return prepareFVector_project(hashOut, fvectorOriginal, fvectorResult);
@@ -399,12 +458,12 @@ namespace net::worker::commands::Vectors{
 			}
 
 			template<typename T>
-			const Wector<T> *prepareWectorBE(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<float> &bufferResult){
-				VectorBuffer<T> bufferVector; // 32 KB, should be OK :)
+			const Wector<T> *prepareWectorBE(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<T> &wectorBufferResult){
+				FVectorBuffer fVectorBuffer; // 32 KB, should be OK :)
 
-				FVector vector = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, bufferVector);
+				FVector vector = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, fVectorBuffer);
 
-				void *mem = bufferResult.data();
+				void *mem = wectorBufferResult.data();
 
 				return Wector<T>::createInRawMemory(mem, vector);
 			}
@@ -412,39 +471,9 @@ namespace net::worker::commands::Vectors{
 		} // anonymous namespace
 
 
-		template<typename T, typename Protocol>
-		void process_VGET(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
-			using namespace MyVectors;
 
-			if (wectorSV.size() != Wector<T>::bytes(dim_ix))
-				return result.set(false);
-
-			const Wector<T> *bv = reinterpret_cast<const Wector<T> *>(wectorSV.data());
-
-			if (dim_ix != bv->dim())
-				return result.set(false);
-
-			auto const vector	= bv->toVector();
-			auto const magnitude	= bv->magnitude();
-
-			auto &container  = blob.container();
-			auto &bcontainer = blob.bcontainer();
-
-			auto f = [&container, &bcontainer](size_t, float const value){
-				bcontainer.push_back();
-
-				auto const s = formatV(value, bcontainer.back());
-
-				container.push_back(s);
-			};
-
-			denormalizeF(vector, magnitude, f, valueProjBE);
-
-			return result.set_container(container);
-		}
-
-		template<typename T, typename Protocol>
-		void process_VGETNORMALIZED(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
+		template<typename T, bool Norm, typename Protocol>
+		void process_VGET_(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
 			using namespace MyVectors;
 
 			if (wectorSV.size() != Wector<T>::bytes(dim_ix))
@@ -455,31 +484,57 @@ namespace net::worker::commands::Vectors{
 			if (dim_ix != bv->dim())
 				return result.set(false);
 
-			auto const vector	= bv->toVector();
-			auto const magnitude	= bv->magnitude();
+			if constexpr(!std::is_same_v<T, bool>){
+				auto const vector	= bv->toVector();
+				auto const magnitude	= bv->magnitude();
 
-			auto &container  = blob.container();
-			auto &bcontainer = blob.bcontainer();
+				auto &container  = blob.container();
+				auto &bcontainer = blob.bcontainer();
 
-			{
-				bcontainer.push_back();
+				if constexpr(Norm){
+					bcontainer.push_back();
 
-				auto const s = formatV(magnitude, bcontainer.back());
+					auto const s = formatV(magnitude, bcontainer.back());
 
-				container.push_back(s);
+					container.push_back(s);
+				}
+
+				auto f = [&container, &bcontainer](size_t, float const value){
+					bcontainer.push_back();
+
+					auto const s = formatV(value, bcontainer.back());
+
+					container.push_back(s);
+				};
+
+				dequantizeF(vector, f, valueProjBE);
+
+				return result.set_container(container);
+			}else{
+				auto &container  = blob.container();
+
+				if constexpr(Norm){
+					container.push_back("0");
+				}
+
+				for (size_t i = 0; i < dim_ix; ++i){
+					auto const s = bv->operator [](i) ? "+1" : "-1";
+
+					container.push_back(s);
+				}
+
+				return result.set_container(container);
 			}
+		}
 
-			auto f = [&container, &bcontainer](size_t, float const value){
-				bcontainer.push_back();
+		template<typename T, typename Protocol>
+		void process_VGET(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
+			return process_VGET_<T, 0>(result, blob, wectorSV, dim_ix);
+		}
 
-				auto const s = formatV(value, bcontainer.back());
-
-				container.push_back(s);
-			};
-
-			dequantizeF(vector, f, valueProjBE);
-
-			return result.set_container(container);
+		template<typename T, typename Protocol>
+		void process_VGETNORMALIZED(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
+			return process_VGET_<T, 1>(result, blob, wectorSV, dim_ix);
 		}
 
 		template<typename T, typename Protocol>
@@ -494,38 +549,46 @@ namespace net::worker::commands::Vectors{
 			if (dim_ix != bv->dim())
 				return result.set(false);
 
-			auto const vector	= bv->toVector();
-			auto const magnitude	= bv->magnitude();
-
 			switch(vtype){
 			default:
 			case VType::BINARY_LE :
 			case VType::BINARY_BE : {
-					FVectorBuffer buffer;
+					FVectorBuffer fVectorBufferResult;
 
-					FVector fvector{ buffer };
+					FVector fvector{ fVectorBufferResult };
 
-					auto f = [&fvector](size_t i, float const value){
-						fvector[i] = value;
-					};
+					if constexpr(!std::is_same_v<T, bool>){
+						auto const vector	= bv->toVector();
+						auto const magnitude	= bv->magnitude();
 
-					denormalizeF(vector, magnitude, f, valueProjBE);
+						auto f = [&fvector](size_t i, float const value){
+							fvector[i] = value;
+						};
 
-					// fvector is denormalized and in machine order now.
+						denormalizeF(vector, magnitude, f, valueProjBE);
 
-					if (vtype == VType::BINARY_BE){
-						#pragma GCC ivdep
-						for(size_t i = 0; i < fvector.size(); ++i)
-							fvector[i] = htobe(fvector[i]);
+						// fvector is denormalized and in machine order now.
+
+						if (vtype == VType::BINARY_BE){
+							#pragma GCC ivdep
+							for(size_t i = 0; i < fvector.size(); ++i)
+								fvector[i] = htobe(fvector[i]);
+						}else{
+							#pragma GCC ivdep
+							for(size_t i = 0; i < fvector.size(); ++i)
+								fvector[i] = htole(fvector[i]);
+						}
 					}else{
-						#pragma GCC ivdep
-						for(size_t i = 0; i < fvector.size(); ++i)
-							fvector[i] = htole(fvector[i]);
+						float const fp = vtype == VType::BINARY_BE ? htobe(+1.f) : htole(+1.f);
+						float const fn = vtype == VType::BINARY_BE ? htobe(-1.f) : htole(-1.f);
+
+						for (size_t i = 0; i < dim_ix; ++i)
+							fvector[i] = bv->operator [](i) ? fp : fn;
 					}
 
 					return result.set(
 						std::string_view{
-							buffer.data(),
+							fVectorBufferResult.data(),
 							dim_ix * sizeof(float)
 						}
 					);
@@ -539,7 +602,6 @@ namespace net::worker::commands::Vectors{
 					// however our toHex() is big endian, so we have to negate
 
 					if (vtype != VType::HEX_BE){
-
 						// big endian data
 
 						auto f_be = [&buffer](size_t i, float const value_){
@@ -552,9 +614,19 @@ namespace net::worker::commands::Vectors{
 							hex_convert::toHex(u32, buff);
 						};
 
-						denormalizeF(vector, magnitude, f_be, valueProjBE);
-					}else{
+						if constexpr(!std::is_same_v<T, bool>){
+							auto const vector	= bv->toVector();
+							auto const magnitude	= bv->magnitude();
 
+							denormalizeF(vector, magnitude, f_be, valueProjBE);
+						}else{
+							float const fp = +1.f;
+							float const fn = -1.f;
+
+							for (size_t i = 0; i < dim_ix; ++i)
+								f_be(i, bv->operator [](i) ? fp : fn);
+						}
+					}else{
 						// little endian data
 
 						auto f_le = [&buffer](size_t i, float const value_){
@@ -567,7 +639,18 @@ namespace net::worker::commands::Vectors{
 							hex_convert::toHex(u32, buff);
 						};
 
-						denormalizeF(vector, magnitude, f_le, valueProjBE);
+						if constexpr(!std::is_same_v<T, bool>){
+							auto const vector	= bv->toVector();
+							auto const magnitude	= bv->magnitude();
+
+							denormalizeF(vector, magnitude, f_le, valueProjBE);
+						}else{
+							float const fp = +1.f;
+							float const fn = -1.f;
+
+							for (size_t i = 0; i < dim_ix; ++i)
+								f_le(i, bv->operator [](i) ? fp : fn);
+						}
 					}
 
 					return result.set(
@@ -599,6 +682,21 @@ namespace net::worker::commands::Vectors{
 		using VSIMHeap = StaticVector<VSIMHeapData, VSIM_MAX_RESULTS + 1>;
 
 		constexpr uint32_t ITERATIONS_LOOPS_VSIM = 1'000'000;
+
+
+
+		void insertIntoHeap(uint32_t const results, VSIMHeap &heap, std::string_view const key, float const score){
+			if (heap.size() >= results && score >= heap.front().score)
+				return;
+
+			heap.emplace_back(key, score);
+			std::push_heap(std::begin(heap), std::end(heap));
+
+			if (heap.size() > results){
+				std::pop_heap(std::begin(heap), std::end(heap));
+				heap.pop_back();
+			}
+		}
 
 		template<typename T, typename DBAdapter, typename StopPredicate>
 		void process_VSIM_range(DBAdapter &db,
@@ -632,47 +730,80 @@ namespace net::worker::commands::Vectors{
 
 				const auto *bv = reinterpret_cast<const Wector<T> *>(vblob.data());
 
-				auto const vector    = bv->toVector();
-				auto const magnitude = bv->magnitude();
-
 				// SEARCH "IN"-CONDITION
-				auto const score = [](DType dtype, auto const &a, auto const &b, auto const &aM, auto const &bM){
+				auto const score = [&](auto const &a, auto const &b, auto const &aM, auto const &bM){
 					switch(dtype){
 					default:
+					case DType::HAMMING	:
 					case DType::COSINE	: return MyVectors::distanceCosine		(a, b,         {}, valueProjBE);
 					case DType::EUCLIDEAN	: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM, {}, valueProjBE);
 					case DType::MANHATTAN	: return MyVectors::distanceManhattanPrepared	(a, b,     bM, {}, valueProjBE);
 					case DType::CANBERRA	: return MyVectors::distanceCanberraPrepared	(a, b,     bM, {}, valueProjBE);
 					}
-				}(dtype, original_fvector, vector, original_magnitude, magnitude);
+				}(original_fvector, bv->toVector(), original_magnitude, bv->magnitude());
 
-				if (heap.size() < results || score < heap.front().score){
-					heap.emplace_back(key, score);
-					std::push_heap(std::begin(heap), std::end(heap));
+				insertIntoHeap(results, heap, key, score);
+			}
+		}
 
-					if (heap.size() > results){
-						std::pop_heap(std::begin(heap), std::end(heap));
-						heap.pop_back();
-					}
-				}
+		template<typename DBAdapter, typename StopPredicate>
+		void process_VSIM_rangeBit(DBAdapter &db,
+					StopPredicate predicate,
+					std::string_view prefix,
+					uint32_t const dim_ix,
+					std::string_view const original_bitVector,
+					uint32_t const results,
+					VSIMHeap &heap, uint32_t &iterations){
+
+			for(auto it = db->find(prefix); it != std::end(*db); ++it){
+				auto const &key = it->getKey();
+
+				if (predicate(key))
+					break;
+
+				++iterations;
+
+				if (iterations > ITERATIONS_LOOPS_VSIM)
+					break;
+
+				if (!it->isOK())
+					continue;
+
+				auto const vblob = it->getVal();
+
+				// invalid size, skip this one.
+				if (vblob.size() != Wector<bool>::bytes(dim_ix))
+					continue;
+
+				const auto *bv = reinterpret_cast<const Wector<bool> *>(vblob.data());
+
+				// SEARCH "IN"-CONDITION
+
+				auto  const score_ = MyVectors::distanceHamming(original_bitVector, bv->toBitSV());
+				float const score  = static_cast<float>(score_);
+
+				insertIntoHeap(results, heap, key, score);
 			}
 		}
 
 		constexpr float process_VSIM_prepareFVector(DType dtype, FVector &fvector){
-
 			// SEARCH PRE-CONDITION
 			switch(dtype){
 			default:
 			case DType::EUCLIDEAN	:
 			case DType::COSINE	: return MyVectors::normalizeInline(fvector);
+
+			case DType::HAMMING	:
 			case DType::CANBERRA	:
 			case DType::MANHATTAN	: return 1.f; /* skip normalization */
 			}
 		}
 
 		template<bool FullKey = false, typename Protocol, typename DBAdapter>
-		void process_VSIM_finish(DBAdapter &, Result<Protocol> &result,  OutputBlob &blob,
-					DType dtype, VSIMHeap &heap){
+		void process_VSIM_finish(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
+					DType dtype, VSIMHeap &heap, CFVector const original_fvector){
+
+			(void) original_fvector;
 
 			// usually we give results unsorted,
 			// but here they are almost heap-sorted...
@@ -680,6 +811,8 @@ namespace net::worker::commands::Vectors{
 
 			auto &container  = blob.container();
 			auto &bcontainer = blob.bcontainer();
+
+			auto const hammingFix = 1 / static_cast<float>(original_fvector.size());
 
 			for(auto it = std::begin(heap); it != std::end(heap); ++it){
 
@@ -696,15 +829,16 @@ namespace net::worker::commands::Vectors{
 				bcontainer.push_back();
 
 				// SEARCH POST-CONDITION
-				auto const score = [](DType dtype, float score){
+				auto const score = [&](float score) -> float{
 					switch(dtype){
 					default:
 					case DType::COSINE	:
 					case DType::MANHATTAN	:
 					case DType::CANBERRA	: return score;
 					case DType::EUCLIDEAN	: return std::sqrt(score);
+					case DType::HAMMING	: return score * hammingFix;
 					}
-				}(dtype, it->score);
+				}(it->score);
 
 				auto const val = formatV(score, bcontainer.back());
 
@@ -782,6 +916,7 @@ namespace net::worker::commands::Vectors{
 			case QType::F32	: return process_<float		>(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
 			case QType::I16	: return process_<int16_t	>(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
 			case QType::I8	: return process_<int8_t	>(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
+			case QType::BIT	: return process_<bool		>(std::begin(p) + varg, std::end(p), db, result, keyN, dim_ve, dim_ix, vtype);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -794,15 +929,7 @@ namespace net::worker::commands::Vectors{
 
 			auto const vstep = 2;
 
-			auto const sizeM = [vtype]() -> size_t{
-				switch(vtype){
-				default:
-				case VType::BINARY_LE	:
-				case VType::BINARY_BE	: return 1;
-				case VType::HEX_LE	:
-				case VType::HEX_BE	: return 2;
-				}
-			}();
+			auto const sizeM = translateVTypeToSizeM(vtype);
 
 			for(auto itk = first; itk != last; itk += vstep){
 				auto const vectorSV = *(itk + 0);
@@ -821,7 +948,7 @@ namespace net::worker::commands::Vectors{
 
 
 
-			WectorBuffer<T> bufferResult;
+			WectorBuffer<T> wectorBuffer;
 
 
 
@@ -836,7 +963,7 @@ namespace net::worker::commands::Vectors{
 
 				uint8_t hashOut;
 
-				const Wector<T> *w = prepareWectorBE<T>(&hashOut, vtype,  vectorSV, dim_ve, dim_ix, bufferResult);
+				const Wector<T> *w = prepareWectorBE<T>(&hashOut, vtype,  vectorSV, dim_ve, dim_ix, wectorBuffer);
 
 				auto const line = w->toSV();
 
@@ -942,7 +1069,8 @@ namespace net::worker::commands::Vectors{
 			default:
 			case QType::F32 : return process_VGET<float	>(result, blob, wectorBlob, dim_ix);
 			case QType::I16 : return process_VGET<int16_t	>(result, blob, wectorBlob, dim_ix);
-			case QType::I8  :  return process_VGET<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::I8  : return process_VGET<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::BIT : return process_VGET<bool	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1021,6 +1149,7 @@ namespace net::worker::commands::Vectors{
 			case QType::F32 : return process_VGETRAW<float		>(result, wectorBlob, dim_ix, vtype);
 			case QType::I16 : return process_VGETRAW<int16_t	>(result, wectorBlob, dim_ix, vtype);
 			case QType::I8  : return process_VGETRAW<int8_t		>(result, wectorBlob, dim_ix, vtype);
+			case QType::BIT : return process_VGETRAW<bool		>(result, wectorBlob, dim_ix, vtype);
 			}
 		}
 
@@ -1088,7 +1217,8 @@ namespace net::worker::commands::Vectors{
 			default:
 			case QType::F32 : return process_VGETNORMALIZED<float	>(result, blob, wectorBlob, dim_ix);
 			case QType::I16 : return process_VGETNORMALIZED<int16_t	>(result, blob, wectorBlob, dim_ix);
-			case QType::I8  :  return process_VGETNORMALIZED<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::I8  : return process_VGETNORMALIZED<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::BIT : return process_VGETNORMALIZED<bool	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1161,6 +1291,9 @@ namespace net::worker::commands::Vectors{
 
 			auto const dtype = translateDType(p[5]);
 
+			if (qtype == QType::BIT && dtype != DType::HAMMING)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			else
 			if (dtype == DType::UNKNOWN)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
@@ -1169,37 +1302,30 @@ namespace net::worker::commands::Vectors{
 			if (vtype == VType::UNKNOWN)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const sizeM = [vtype]() -> size_t{
-				switch(vtype){
-				default:
-				case VType::BINARY_LE	:
-				case VType::BINARY_BE	: return 1;
-				case VType::HEX_LE	:
-				case VType::HEX_BE	: return 2;
-				}
-			}();
+			auto const sizeM = translateVTypeToSizeM(vtype);
 
 			auto const vectorSV = p[7];
 
 			if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			FVectorBuffer bufferResult;
+			FVectorBuffer fVectorBuffer;
 
 			// vectorSV size is checked already
 
 			// uint8_t hashOut;
 
-			/* mutable */ FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			/* mutable */ FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, fVectorBuffer);
 
 			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
-			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
-			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
+			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, dim_ix,        fvector,            results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1209,7 +1335,6 @@ namespace net::worker::commands::Vectors{
 		template<typename T>
 		void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, uint32_t const dim_ix,
-				vectors_impl_::VType /* vtype */,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
 				uint32_t const results ){
@@ -1231,7 +1356,7 @@ namespace net::worker::commands::Vectors{
 
 			uint32_t iterations = 0;
 
-			process_VSIM_range<T>(db,
+			process_VSIM_range<T>(	db,
 						stop,
 						prefix,
 						dim_ix,
@@ -1244,7 +1369,55 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish(db, result, blob, dtype, heap_);
+			return process_VSIM_finish(db, result, blob, dtype, heap_, original_fvector);
+		}
+
+		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+				std::string_view keyN, uint32_t const dim_ix,
+				CFVector const original_fvector,
+				uint32_t const results ){
+
+			using namespace vectors_impl_;
+
+			auto const bitVectorBytesMax = Wector<bool>::bytes(MaxDimensions);
+
+			std::array<uint8_t, bitVectorBytesMax> bitVectorBuffer;
+
+			MyVectors::bitVectorQuantize(original_fvector, bitVectorBuffer.data());
+
+			auto const bitVector = std::string_view{
+					reinterpret_cast<const char *>(bitVectorBuffer.data()),
+					MyVectors::bitVectorBytes(original_fvector.size())
+			};
+
+			heap_.clear();
+			// std::make_heap(std::begin(heap_), std::end(heap_));
+
+			std::string_view const rangeHash = "00";
+
+			hm4::PairBufferKey bufferKey;
+
+			auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range" << rangeHash[0] << rangeHash[1];
+
+			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
+
+			uint32_t iterations = 0;
+
+			process_VSIM_rangeBit(	db,
+						stop,
+						prefix,
+						dim_ix,
+						bitVector,
+						results,
+						heap_,
+						iterations
+			);
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
+
+			return process_VSIM_finish(db, result, blob, DType::HAMMING, heap_, original_fvector);
 		}
 
 	private:
@@ -1318,6 +1491,9 @@ namespace net::worker::commands::Vectors{
 
 			auto const dtype = translateDType(p[5]);
 
+			if (qtype == QType::BIT && dtype != DType::HAMMING)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			else
 			if (dtype == DType::UNKNOWN)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
@@ -1326,37 +1502,30 @@ namespace net::worker::commands::Vectors{
 			if (vtype == VType::UNKNOWN)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const sizeM = [vtype]() -> size_t{
-				switch(vtype){
-				default:
-				case VType::BINARY_LE	:
-				case VType::BINARY_BE	: return 1;
-				case VType::HEX_LE	:
-				case VType::HEX_BE	: return 2;
-				}
-			}();
+			auto const sizeM = translateVTypeToSizeM(vtype);
 
 			auto const vectorSV = p[7];
 
 			if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			FVectorBuffer bufferResult;
+			FVectorBuffer fVectorBuffer;
 
 			// vectorSV size is checked already
 
 			uint8_t hashOut;
 
-			/* mutable */ FVector fvector = prepareFVector(&hashOut, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			/* mutable */ FVector fvector = prepareFVector(&hashOut, vtype, vectorSV, dim_ve, dim_ix, fVectorBuffer);
 
 			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
-			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
-			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, hashOut, results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, hashOut, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, hashOut, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, hashOut, results);
+			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, dim_ix,        fvector,            hashOut, results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1366,7 +1535,6 @@ namespace net::worker::commands::Vectors{
 		template<typename T>
 		void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, uint32_t const dim_ix,
-				vectors_impl_::VType /* vtype */,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude, uint8_t const lsh,
 				uint32_t const results ){
@@ -1400,7 +1568,7 @@ namespace net::worker::commands::Vectors{
 
 				auto const iterations2 = iterations;
 
-				process_VSIM_range<T>(db,
+				process_VSIM_range<T>(	db,
 							stop,
 							prefix,
 							dim_ix,
@@ -1418,7 +1586,72 @@ namespace net::worker::commands::Vectors{
 
 		//done: // label for goto
 
-			return process_VSIM_finish(db, result, blob, dtype, heap_);
+			return process_VSIM_finish(db, result, blob, dtype, heap_, original_fvector);
+		}
+
+		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+				std::string_view keyN, uint32_t const dim_ix,
+				CFVector const original_fvector, uint8_t const lsh,
+				uint32_t const results ){
+
+			using namespace vectors_impl_;
+
+			auto const bitVectorBytesMax = Wector<bool>::bytes(MaxDimensions);
+
+			std::array<uint8_t, bitVectorBytesMax> bitVectorBuffer;
+
+			MyVectors::bitVectorQuantize(original_fvector, bitVectorBuffer.data());
+
+			auto const bitVector = std::string_view{
+					reinterpret_cast<const char *>(bitVectorBuffer.data()),
+					MyVectors::bitVectorBytes(original_fvector.size())
+			};
+
+			heap_.clear();
+			// std::make_heap(std::begin(heap_), std::end(heap_));
+
+			uint32_t iterations = 0;
+
+			auto const nearLSH = hamming1Ranges(lsh);
+
+			for(auto const &range : nearLSH){
+				std::array<char, 5> rangeBuffer[2]; // 00FF\0
+
+				std::string_view const rangeHash[2]{
+					// add 00 in front of the hash
+					hex_convert::toHex<uint16_t>(range.start,      rangeBuffer[0]),
+					hex_convert::toHex<uint16_t>(range.finish + 1, rangeBuffer[1])
+				};
+
+				hm4::PairBufferKey bufferKey[2];
+
+				auto const prefix       = P1::template makeKey(bufferKey[0], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[0]);
+				auto const prefixFinish = P1::template makeKey(bufferKey[1], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[1]);
+
+				logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "range" << rangeHash[0] << rangeHash[1];
+
+				shared::stop_predicate::StopRangePredicate stop{ prefixFinish };
+
+				auto const iterations2 = iterations;
+
+				process_VSIM_rangeBit(	db,
+							stop,
+							prefix,
+							dim_ix,
+							bitVector,
+							results,
+							heap_,
+							iterations
+				);
+
+				logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "range finish" << (iterations - iterations2) << "vectors";
+			}
+
+			logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "total ranges" << nearLSH.size() << "scanned total" << iterations << "vectors";
+
+		//done: // label for goto
+
+			return process_VSIM_finish(db, result, blob, DType::HAMMING, heap_, original_fvector);
 		}
 
 	private:
@@ -1489,15 +1722,7 @@ namespace net::worker::commands::Vectors{
 			if (vtype == VType::UNKNOWN)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const sizeM = [vtype]() -> size_t{
-				switch(vtype){
-				default:
-				case VType::BINARY_LE	:
-				case VType::BINARY_BE	: return 1;
-				case VType::HEX_LE	:
-				case VType::HEX_BE	: return 2;
-				}
-			}();
+			auto const sizeM = translateVTypeToSizeM(vtype);
 
 			auto const vectorSV = p[6];
 
@@ -1508,6 +1733,7 @@ namespace net::worker::commands::Vectors{
 			case QType::F32	: return process_<float		>(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
 			case QType::I16	: return process_<int16_t	>(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
 			case QType::I8	: return process_<int8_t	>(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
+			case QType::BIT	: return process_<bool		>(db, result, key, vectorSV, dim_ve, dim_ix, vtype);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1518,14 +1744,14 @@ namespace net::worker::commands::Vectors{
 		static void process_(DBAdapter &db, Result<Protocol> &result, std::string_view key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype){
 			using namespace vectors_impl_;
 
-			WectorBuffer<T> bufferResult;
+			WectorBuffer<T> wectorBuffer;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			// uint8_t hashOut;
 
-			const Wector<T> *w = prepareWectorBE<T>(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			const Wector<T> *w = prepareWectorBE<T>(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, wectorBuffer);
 
 			auto const val = w->toSV();
 
@@ -1592,6 +1818,7 @@ namespace net::worker::commands::Vectors{
 			case QType::F32 : return process_VGET<float	>(result, blob, wectorBlob, dim_ix);
 			case QType::I16 : return process_VGET<int16_t	>(result, blob, wectorBlob, dim_ix);
 			case QType::I8  : return process_VGET<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::BIT : return process_VGET<bool	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1662,6 +1889,7 @@ namespace net::worker::commands::Vectors{
 			case QType::F32 : return process_VGETRAW<float		>(result, wectorBlob, dim_ix, vtype);
 			case QType::I16 : return process_VGETRAW<int16_t	>(result, wectorBlob, dim_ix, vtype);
 			case QType::I8  : return process_VGETRAW<int8_t		>(result, wectorBlob, dim_ix, vtype);
+			case QType::BIT : return process_VGETRAW<bool		>(result, wectorBlob, dim_ix, vtype);
 			}
 		}
 
@@ -1722,6 +1950,7 @@ namespace net::worker::commands::Vectors{
 			case QType::F32 : return process_VGETNORMALIZED<float	>(result, blob, wectorBlob, dim_ix);
 			case QType::I16 : return process_VGETNORMALIZED<int16_t	>(result, blob, wectorBlob, dim_ix);
 			case QType::I8  : return process_VGETNORMALIZED<int8_t	>(result, blob, wectorBlob, dim_ix);
+			case QType::BIT : return process_VGETNORMALIZED<bool	>(result, blob, wectorBlob, dim_ix);
 			}
 		}
 
@@ -1802,37 +2031,30 @@ namespace net::worker::commands::Vectors{
 			if (vtype == VType::UNKNOWN)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const sizeM = [vtype]() -> size_t{
-				switch(vtype){
-				default:
-				case VType::BINARY_LE	:
-				case VType::BINARY_BE	: return 1;
-				case VType::HEX_LE	:
-				case VType::HEX_BE	: return 2;
-				}
-			}();
+			auto const sizeM = translateVTypeToSizeM(vtype);
 
 			auto const vectorSV = p[7];
 
 			if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			FVectorBuffer bufferResult;
+			FVectorBuffer fVectorBuffer;
 
 			// vectorSV size is checked already
 
 			// uint8_t hashOut;
 
-			/* mutable */ FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, bufferResult);
+			/* mutable */ FVector fvector = prepareFVector(/* hashOut */ nullptr, vtype, vectorSV, dim_ve, dim_ix, fVectorBuffer);
 
 			auto const magnitude = process_VSIM_prepareFVector(dtype, fvector);
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
 			switch(qtype){
-			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
-			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
-			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, vtype, dtype, fvector, magnitude, results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
+			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, dim_ix,        fvector,            results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1842,7 +2064,6 @@ namespace net::worker::commands::Vectors{
 		template<typename T>
 		void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view prefix, uint32_t const dim_ix,
-				vectors_impl_::VType /* vtype */,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
 				uint32_t const results ){
@@ -1858,7 +2079,7 @@ namespace net::worker::commands::Vectors{
 
 			uint32_t iterations = 0;
 
-			process_VSIM_range<T>(db,
+			process_VSIM_range<T>(	db,
 						stop,
 						prefix,
 						dim_ix,
@@ -1871,7 +2092,49 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<1>(db, result, blob, dtype, heap_);
+			return process_VSIM_finish<1>(db, result, blob, dtype, heap_, original_fvector);
+		}
+
+		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+				std::string_view prefix, uint32_t const dim_ix,
+				CFVector const original_fvector,
+				uint32_t const results ){
+
+			using namespace vectors_impl_;
+
+			auto const bitVectorBytesMax = Wector<bool>::bytes(MaxDimensions);
+
+			std::array<uint8_t, bitVectorBytesMax> bitVectorBuffer;
+
+			MyVectors::bitVectorQuantize(original_fvector, bitVectorBuffer.data());
+
+			auto const bitVector = std::string_view{
+					reinterpret_cast<const char *>(bitVectorBuffer.data()),
+					MyVectors::bitVectorBytes(original_fvector.size())
+			};
+
+			heap_.clear();
+			// std::make_heap(std::begin(heap_), std::end(heap_));
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range prefix" << prefix;
+
+			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
+
+			uint32_t iterations = 0;
+
+			process_VSIM_rangeBit(	db,
+						stop,
+						prefix,
+						dim_ix,
+						bitVector,
+						results,
+						heap_,
+						iterations
+			);
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
+
+			return process_VSIM_finish<1>(db, result, blob, DType::HAMMING, heap_, original_fvector);
 		}
 
 	private:

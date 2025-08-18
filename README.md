@@ -771,9 +771,10 @@ The resulting index stores **64D int8 quantized vectors**.
 
 | Flag | Quantization | Storage Type | Bytes | Notes                                                     | Precision loss | Disk size of GloVe set |
 |:----:|:------------:|:------------:|------:|-----------------------------------------------------------|---------------:|-----------------------:|
-| `F`  | None         | `float`      |     4 | No quantization — store values exactly as 32-bit floats   |         0.00 % |               1,232 MB |
-| `S`  | Q15          | `int16_t`    |     2 | 50% space reduction — near-lossless precision             |        ~0.01 % |                 660 MB |
-| `I`  | Q7           | `int8_t`     |     1 | 75% space reduction — precision good for most workloads   |        ~1.00 % |                 374 MB |
+| `F`  | None         | `float`      |     4 | No quantization - store values exactly as 32-bit floats   |         0.00 % |               1,232 MB |
+| `S`  | Q15          | `int16_t`    |     2 | 50% space reduction - near-lossless precision             |        ~0.01 % |                 660 MB |
+| `I`  | Q7           | `int8_t`     |     1 | 75% space reduction - precision good for most workloads   |        ~1.00 % |                 374 MB |
+| `B`  | bit          | `bit`        |   1/8 | 97% space reduction - precision probably is lost          |      ~~~5.00 % |                 124 MB |
 
 #### Searching a Vector Index
 
@@ -827,6 +828,7 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 | `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.                        |
 | `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude). The result is transformed to be 0..1 |
 | `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.   |
+| `H`  | **Hamming**         | Works only on bit quantized vectors.                                                                                    |
 
 ##### When to Use Each Metric:
 
@@ -841,6 +843,9 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 
 - **Canberra** `K` -
   Useful for sparse data or when small differences in low-value components are important. More sensitive than L1/L2 in those regions.
+
+- **Hamming** `H` -
+  Works only on bit quantized vectors.
 
 
 

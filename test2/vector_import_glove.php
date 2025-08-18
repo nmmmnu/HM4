@@ -47,11 +47,10 @@ function process_vector($key, & $vector){
 	global $redis;
 
 	$x = $redis->rawCommand(
-		"VADD",
-		"gs150",
-		300, 150, "s",
-		"h", vhex($vector),
-		$key
+		"VKSET",
+		"gkb150:$key",
+		300, 150, "b",
+		"h", vhex($vector)
 	);
 }
 

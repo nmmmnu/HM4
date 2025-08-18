@@ -87,7 +87,7 @@ namespace mybyteswap_impl_{
 		return bit_cast<FP>(byteswap(x));
 	}
 
-} // namespace byteswap_fp_impl_
+} // namespace mybyteswap_impl_
 
 constexpr float byteswap(float value){
 	using namespace mybyteswap_impl_;
@@ -116,7 +116,7 @@ namespace mybyteswap_impl_{
 		);
 	}
 
-} // namespace byteswap_fp_impl_
+} // namespace mybyteswap_impl_
 
 constexpr int16_t byteswap(int16_t value){
 	using namespace mybyteswap_impl_;
