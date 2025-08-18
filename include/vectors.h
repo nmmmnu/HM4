@@ -82,9 +82,11 @@ namespace MyVectors{
 		if (magnitude < ZERO)
 			return magnitude;
 
+		auto const fix = 1 / magnitude;
+
 		#pragma GCC ivdep
 		for(size_t i = 0; i < fvector.size(); ++i)
-			fvector[i] /= magnitude;
+			fvector[i] *= fix;
 
 		return magnitude;
 	}
@@ -104,9 +106,11 @@ namespace MyVectors{
 
 			return 0.0f;
 		}else{
+			auto const fix = 1 / magnitude;
+
 			// normalize values
 			for(size_t i = 0; i < cfvector.size(); ++i)
-				f(i, cfvector[i] / magnitude);
+				f(i, cfvector[i] * fix);
 
 			return magnitude;
 		}

@@ -665,11 +665,12 @@ namespace net::worker::commands::Vectors{
 
 
 
+		template<typename T>
 		struct VSIMHeapData{
 			std::string_view	key;
-			float			score;
+			T			score;
 
-			constexpr VSIMHeapData(std::string_view key, float score) : key(key), score(score){}
+			constexpr VSIMHeapData(std::string_view key, T score) : key(key), score(score){}
 
 			constexpr bool operator<(VSIMHeapData const &other) const{
 				return score < other.score;
@@ -678,14 +679,19 @@ namespace net::worker::commands::Vectors{
 
 		constexpr static size_t VSIM_MAX_RESULTS = 5000;
 
-		// 5 * 24KB, if sv is 16 bytes
-		using VSIMHeap = StaticVector<VSIMHeapData, VSIM_MAX_RESULTS + 1>;
+		// 118KB, if sv is 16 bytes, same for bits
+		template<typename T>
+		using VSIMHeap     = StaticVector<VSIMHeapData<T>, VSIM_MAX_RESULTS + 1>;
+
+		using VSIMHeapFloat = VSIMHeap<float >;
+		using VSIMHeapSize  = VSIMHeap<size_t>;
 
 		constexpr uint32_t ITERATIONS_LOOPS_VSIM = 1'000'000;
 
 
 
-		void insertIntoHeap(uint32_t const results, VSIMHeap &heap, std::string_view const key, float const score){
+		template<typename T>
+		void insertIntoHeap(uint32_t const results, VSIMHeap<T> &heap, std::string_view const key, T const score){
 			if (heap.size() >= results && score >= heap.front().score)
 				return;
 
@@ -706,7 +712,7 @@ namespace net::worker::commands::Vectors{
 					DType dtype,
 					CFVector const original_fvector, float const original_magnitude,
 					uint32_t const results,
-					VSIMHeap &heap, uint32_t &iterations){
+					VSIMHeapFloat &heap, uint32_t &iterations){
 
 			for(auto it = db->find(prefix); it != std::end(*db); ++it){
 				auto const &key = it->getKey();
@@ -753,7 +759,7 @@ namespace net::worker::commands::Vectors{
 					uint32_t const dim_ix,
 					std::string_view const original_bitVector,
 					uint32_t const results,
-					VSIMHeap &heap, uint32_t &iterations){
+					VSIMHeapSize &heap, uint32_t &iterations){
 
 			for(auto it = db->find(prefix); it != std::end(*db); ++it){
 				auto const &key = it->getKey();
@@ -779,8 +785,7 @@ namespace net::worker::commands::Vectors{
 
 				// SEARCH "IN"-CONDITION
 
-				auto  const score_ = MyVectors::distanceHamming(original_bitVector, bv->toBitSV());
-				float const score  = static_cast<float>(score_);
+				auto const score = MyVectors::distanceHamming(original_bitVector, bv->toBitSV());
 
 				insertIntoHeap(results, heap, key, score);
 			}
@@ -799,9 +804,9 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-		template<bool FullKey = false, typename Protocol, typename DBAdapter>
+		template<bool FullKey = false, typename Protocol, typename DBAdapter, typename T>
 		void process_VSIM_finish(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
-					DType dtype, VSIMHeap &heap, CFVector const original_fvector){
+					DType dtype, VSIMHeap<T> &heap, CFVector const original_fvector){
 
 			(void) original_fvector;
 
@@ -829,14 +834,22 @@ namespace net::worker::commands::Vectors{
 				bcontainer.push_back();
 
 				// SEARCH POST-CONDITION
-				auto const score = [&](float score) -> float{
-					switch(dtype){
-					default:
-					case DType::COSINE	:
-					case DType::MANHATTAN	:
-					case DType::CANBERRA	: return score;
-					case DType::EUCLIDEAN	: return std::sqrt(score);
-					case DType::HAMMING	: return score * hammingFix;
+				auto const score = [&](auto score) -> float{
+					if constexpr(std::is_same_v<T, float>){
+						switch(dtype){
+						case DType::COSINE	:
+						case DType::MANHATTAN	:
+						case DType::CANBERRA	: return score;
+						case DType::EUCLIDEAN	: return std::sqrt(score);
+
+						default			: return 1; // will never come here.
+						}
+					}else{
+						switch(dtype){
+						case DType::HAMMING	: return static_cast<float>(score) * hammingFix;
+
+						default			: return 1; // will never come here.
+						}
 					}
 				}(it->score);
 
@@ -1333,7 +1346,7 @@ namespace net::worker::commands::Vectors{
 
 	private:
 		template<typename T>
-		void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
@@ -1341,7 +1354,9 @@ namespace net::worker::commands::Vectors{
 
 			using namespace vectors_impl_;
 
-			heap_.clear();
+			// ~150KB
+			VSIMHeapFloat heap;
+			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
 			std::string_view const rangeHash = "00";
@@ -1363,16 +1378,16 @@ namespace net::worker::commands::Vectors{
 						dtype,
 						original_fvector, original_magnitude,
 						results,
-						heap_,
+						heap,
 						iterations
 			);
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish(db, result, blob, dtype, heap_, original_fvector);
+			return process_VSIM_finish(db, result, blob, dtype, heap, original_fvector);
 		}
 
-		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, uint32_t const dim_ix,
 				CFVector const original_fvector,
 				uint32_t const results ){
@@ -1390,7 +1405,9 @@ namespace net::worker::commands::Vectors{
 					MyVectors::bitVectorBytes(original_fvector.size())
 			};
 
-			heap_.clear();
+			// ~150KB
+			VSIMHeapSize heap;
+			// heap.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
 			std::string_view const rangeHash = "00";
@@ -1411,17 +1428,14 @@ namespace net::worker::commands::Vectors{
 						dim_ix,
 						bitVector,
 						results,
-						heap_,
+						heap,
 						iterations
 			);
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish(db, result, blob, DType::HAMMING, heap_, original_fvector);
+			return process_VSIM_finish(db, result, blob, DType::HAMMING, heap, original_fvector);
 		}
-
-	private:
-		vectors_impl_::VSIMHeap heap_;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -1533,7 +1547,7 @@ namespace net::worker::commands::Vectors{
 
 	private:
 		template<typename T>
-		void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude, uint8_t const lsh,
@@ -1541,7 +1555,9 @@ namespace net::worker::commands::Vectors{
 
 			using namespace vectors_impl_;
 
-			heap_.clear();
+			// ~150KB
+			VSIMHeapFloat heap;
+			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
 			uint32_t iterations = 0;
@@ -1575,7 +1591,7 @@ namespace net::worker::commands::Vectors{
 							dtype,
 							original_fvector, original_magnitude,
 							results,
-							heap_,
+							heap,
 							iterations
 				);
 
@@ -1586,10 +1602,10 @@ namespace net::worker::commands::Vectors{
 
 		//done: // label for goto
 
-			return process_VSIM_finish(db, result, blob, dtype, heap_, original_fvector);
+			return process_VSIM_finish(db, result, blob, dtype, heap, original_fvector);
 		}
 
-		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, uint32_t const dim_ix,
 				CFVector const original_fvector, uint8_t const lsh,
 				uint32_t const results ){
@@ -1607,7 +1623,9 @@ namespace net::worker::commands::Vectors{
 					MyVectors::bitVectorBytes(original_fvector.size())
 			};
 
-			heap_.clear();
+			// ~150KB
+			VSIMHeapSize heap;
+			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
 			uint32_t iterations = 0;
@@ -1640,7 +1658,7 @@ namespace net::worker::commands::Vectors{
 							dim_ix,
 							bitVector,
 							results,
-							heap_,
+							heap,
 							iterations
 				);
 
@@ -1651,11 +1669,8 @@ namespace net::worker::commands::Vectors{
 
 		//done: // label for goto
 
-			return process_VSIM_finish(db, result, blob, DType::HAMMING, heap_, original_fvector);
+			return process_VSIM_finish(db, result, blob, DType::HAMMING, heap, original_fvector);
 		}
-
-	private:
-		vectors_impl_::VSIMHeap heap_;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -2062,7 +2077,7 @@ namespace net::worker::commands::Vectors{
 
 	private:
 		template<typename T>
-		void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view prefix, uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
@@ -2070,7 +2085,9 @@ namespace net::worker::commands::Vectors{
 
 			using namespace vectors_impl_;
 
-			heap_.clear();
+			// ~150KB
+			VSIMHeapFloat heap;
+			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
 			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range prefix" << prefix;
@@ -2086,13 +2103,13 @@ namespace net::worker::commands::Vectors{
 						dtype,
 						original_fvector, original_magnitude,
 						results,
-						heap_,
+						heap,
 						iterations
 			);
 
 			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<1>(db, result, blob, dtype, heap_, original_fvector);
+			return process_VSIM_finish<1>(db, result, blob, dtype, heap, original_fvector);
 		}
 
 		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
@@ -2113,7 +2130,9 @@ namespace net::worker::commands::Vectors{
 					MyVectors::bitVectorBytes(original_fvector.size())
 			};
 
-			heap_.clear();
+			// ~150KB
+			VSIMHeapSize heap;
+			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range prefix" << prefix;
@@ -2128,17 +2147,14 @@ namespace net::worker::commands::Vectors{
 						dim_ix,
 						bitVector,
 						results,
-						heap_,
+						heap,
 						iterations
 			);
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<1>(db, result, blob, DType::HAMMING, heap_, original_fvector);
+			return process_VSIM_finish<1>(db, result, blob, DType::HAMMING, heap, original_fvector);
 		}
-
-	private:
-		vectors_impl_::VSIMHeap heap_;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
