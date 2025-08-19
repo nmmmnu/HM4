@@ -47,23 +47,22 @@ namespace net::worker::commands{
 		;
 
 		void resetAllocator(){
+			allocations_ = 0;
 			allocator_.reset();
 		}
 
 		template<typename T>
 		auto &construct(){
 			if (auto *p = MyAllocator::construct<T>(allocator_); p){
-				auto const level = Logger::DEBUG;
+				logAllocatorStatus_<Logger::DEBUG, T>();
 
-				logAllocatorStatus_<level, T>();
+				++allocations_;
 
 				return *p;
 			}else{
-				auto const level = Logger::FATAL;
+				logAllocatorStatus_<Logger::FATAL, T>("PLEASE REPORT THIS:");
 
-				logger<level>() << "PLEASE REPORT THIS:";
-
-				logAllocatorStatus_<level, T>();
+				++allocations_;
 
 				throw std::bad_alloc();
 			}
@@ -76,15 +75,21 @@ namespace net::worker::commands{
 
 	private:
 		template<Logger::Level level, typename T>
-		void logAllocatorStatus_(){
-			logger<level>() << "Allocating" << sizeof(T) << "bytes."
-					<< "Allocator free" << allocator_.getFreeMemory() << "bytes."
-					<< "Allocator used" << allocator_.getUsedMemory() << "bytes.";
+		void logAllocatorStatus_(std::string_view title = ""){
+			if (!title.empty())
+				logger<level>() << title;
+
+			logger<level>() << "Allocation" << allocations_
+					<< "Size" << sizeof(T) << "bytes."
+					<< "Free" << allocator_.getFreeMemory() << "bytes."
+					<< "Used" << allocator_.getUsedMemory() << "bytes.";
 		}
 
 	private:
 		MyBuffer::AllocatedMemoryResourceOwned<>	buffer_		{ MaxMemory };
 		MyAllocator::ArenaAllocator			allocator_	{ buffer_   };
+
+		size_t						allocations_	= 0;
 	};
 
 
