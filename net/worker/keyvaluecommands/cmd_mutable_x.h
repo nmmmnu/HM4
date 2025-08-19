@@ -252,7 +252,7 @@ namespace net::worker::commands::MutableX{
 
 			DeletePredicate<DBAdapter>	pred;
 			StopPrefixPredicate		stop{ prefix };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -288,7 +288,7 @@ namespace net::worker::commands::MutableX{
 
 			DeletePredicate<DBAdapter>	pred;
 			StopRangePredicate		stop{ keyEnd };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -328,7 +328,7 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			DeletePredicate<DBAdapter>	pred;
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
@@ -364,7 +364,7 @@ namespace net::worker::commands::MutableX{
 
 			PersistPredicate<DBAdapter>	pred;
 			StopPrefixPredicate		stop{ prefix };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -400,7 +400,7 @@ namespace net::worker::commands::MutableX{
 
 			PersistPredicate<DBAdapter>	pred;
 			StopRangePredicate		stop{ keyEnd };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -440,7 +440,7 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			PersistPredicate<DBAdapter>	pred;
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
@@ -477,7 +477,7 @@ namespace net::worker::commands::MutableX{
 
 			ExpirePredicate<DBAdapter>	pred{exp};
 			StopPrefixPredicate		stop{ prefix };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -514,7 +514,7 @@ namespace net::worker::commands::MutableX{
 
 			ExpirePredicate<DBAdapter>	pred{exp};
 			StopRangePredicate		stop{ keyEnd };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -556,7 +556,7 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
@@ -593,7 +593,7 @@ namespace net::worker::commands::MutableX{
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
 			StopPrefixPredicate		stop{ prefix };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -630,7 +630,7 @@ namespace net::worker::commands::MutableX{
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
 			StopRangePredicate		stop{ keyEnd };
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
@@ -672,7 +672,7 @@ namespace net::worker::commands::MutableX{
 			using namespace mutablex_impl_;
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
-			auto &pcontainer = blob.pcontainer();
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 

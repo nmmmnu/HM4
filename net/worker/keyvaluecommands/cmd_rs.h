@@ -283,7 +283,7 @@ namespace net::worker::commands::RS{
 	private:
 		template<class MyReservoirSampling>
 		void process_(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (pair == nullptr)
 				return result.set_container(container);

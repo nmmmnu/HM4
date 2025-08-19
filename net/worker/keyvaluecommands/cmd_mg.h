@@ -384,12 +384,12 @@ namespace net::worker::commands::MG{
 	private:
 		template<class MyRawMisraGries>
 		void process_(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (pair == nullptr)
 				return result.set_container(container);
 
-			auto &bcontainer = blob.bcontainer();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			using Item = typename MyRawMisraGries::Item;
 

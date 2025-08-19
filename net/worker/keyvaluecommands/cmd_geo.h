@@ -258,7 +258,7 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			auto const varg = 2;
 
@@ -325,8 +325,8 @@ namespace net::worker::commands::Geo{
 
 			auto const radius = to_double_def(p[4]);
 
-			auto &container  = blob.container();
-			auto &bcontainer = blob.bcontainer();
+			auto &container  = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			auto const cells = GeoHash::nearbyCells(me, radius, sphere);
 

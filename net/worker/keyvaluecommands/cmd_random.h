@@ -52,8 +52,8 @@ namespace net::worker::commands::Random{
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
-			auto &container  = blob.container();
-			auto &bcontainer = blob.bcontainer();
+			auto &container  = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			auto const varg = 1;
 

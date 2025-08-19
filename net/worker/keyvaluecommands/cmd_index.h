@@ -151,7 +151,7 @@ namespace net::worker::commands::Index{
 
 
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 
 
@@ -552,7 +552,7 @@ namespace net::worker::commands::Index{
 
 			logger<Logger::DEBUG>() << "IX_RANGE" << "prefix" << prefix;
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsIX_<N, AccumulateOutput::BOTH_WITH_TAIL>(
 				count			,

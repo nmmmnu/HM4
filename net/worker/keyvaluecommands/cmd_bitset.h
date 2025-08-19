@@ -201,7 +201,7 @@ namespace net::worker::commands::BITSET{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			auto const varg = 2;
 

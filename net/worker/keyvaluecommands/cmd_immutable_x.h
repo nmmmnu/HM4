@@ -97,7 +97,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopPrefixPredicate stop{ prefix };
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count		,
@@ -193,7 +193,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopRangePredicate stop{ keyEnd };
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count		,
@@ -284,7 +284,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopUnboundPredicate stop;
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsX<AccumulateOutput::BOTH_WITH_TAIL>(
 				count		,
@@ -375,7 +375,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopPrefixPredicate stop{ prefix };
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
 				count		,
@@ -423,7 +423,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopRangePredicate stop{ keyEnd };
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
 				count		,
@@ -467,7 +467,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopUnboundPredicate stop;
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsX<AccumulateOutput::KEYS_WITH_TAIL>(
 				count		,
@@ -517,7 +517,7 @@ namespace net::worker::commands::ImmutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsH<AccumulateOutput::BOTH>(
 				ITERATIONS_RESULTS_MAX	,
@@ -567,7 +567,7 @@ namespace net::worker::commands::ImmutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsH<AccumulateOutput::KEYS>(
 				ITERATIONS_RESULTS_MAX	,
@@ -617,7 +617,7 @@ namespace net::worker::commands::ImmutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const key = concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			accumulateResultsH<AccumulateOutput::VALS>(
 				ITERATIONS_RESULTS_MAX	,

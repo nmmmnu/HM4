@@ -392,7 +392,7 @@ namespace net::worker::commands::MortonCurve2D{
 
 
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 
 
@@ -648,8 +648,8 @@ namespace net::worker::commands::MortonCurve2D{
 
 			auto const startKey	= p.size() == 2 + DIM + 1 + 1 ? p[sx + 0] : "";
 
-			auto &container  = blob.container();
-			auto &bcontainer = blob.bcontainer();
+			auto &container  = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			mortonSearchPoint(
 				db,
@@ -715,8 +715,8 @@ namespace net::worker::commands::MortonCurve2D{
 
 			auto const startKey	= p.size() == 2 + 2 * DIM + 1 + 1 ? p[sx + 1] : "";
 
-			auto &container = blob.container();
-			auto &bcontainer = blob.bcontainer();
+			auto &container = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			mortonSearch<false>(
 				db,
@@ -782,8 +782,8 @@ namespace net::worker::commands::MortonCurve2D{
 
 			auto const startKey	= p.size() == 2 + 2 * DIM + 1 + 1 ? p[sx + 1] : "";
 
-			auto &container = blob.container();
-			auto &bcontainer = blob.bcontainer();
+			auto &container = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			mortonSearch<true>(
 				db, container, bcontainer,

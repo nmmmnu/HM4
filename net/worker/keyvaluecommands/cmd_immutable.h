@@ -51,7 +51,7 @@ namespace net::worker::commands::Immutable{
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			auto const varg = 1;
 
@@ -348,7 +348,7 @@ namespace net::worker::commands::Immutable{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			auto const varg = 2;
 

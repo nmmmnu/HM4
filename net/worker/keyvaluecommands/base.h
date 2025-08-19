@@ -14,6 +14,9 @@
 #include <vector>
 #include <unordered_map>
 
+#include "allocatedbuffer.h"
+#include "arenaallocator.h"
+
 namespace net::worker::commands{
 
 
@@ -33,40 +36,55 @@ namespace net::worker::commands{
 
 		using buffer_t = std::array<char, 128>;
 
-		using Container		= StaticVector<std::string_view		, ContainerSize>;	// 1024 KB, if string_view is 16 bytes
-		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	//  514 KB
-		using BufferContainer	= StaticVector<buffer_t			, ContainerSize>;	// 8191 KB
+		using Container		= StaticVector<std::string_view		, ContainerSize>;	// 1   MB, if string_view is 16 bytes
+		using BufferContainer	= StaticVector<buffer_t			, ContainerSize>;	// 8   MB
+		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	// 0.5 MB
 
-		constexpr static void resetAllocator(){
+		constexpr static size_t MaxMemory =	sizeof(Container	) +
+							sizeof(BufferContainer	) +
+							sizeof(PairContainer	) +
+							64
+		;
+
+		void resetAllocator(){
+			allocator_.reset();
 		}
 
-		auto &container(){
-			return getClean__(pack->container);
+		template<typename T>
+		auto &construct(){
+			if (auto *p = MyAllocator::construct<T>(allocator_); p){
+				auto const level = Logger::DEBUG;
+
+				logAllocatorStatus_<level, T>();
+
+				return *p;
+			}else{
+				auto const level = Logger::FATAL;
+
+				logger<level>() << "PLEASE REPORT THIS:";
+
+				logAllocatorStatus_<level, T>();
+
+				throw std::bad_alloc();
+			}
 		}
 
-		auto &pcontainer(){
-			return getClean__(pack->pcontainer);
-		}
-
-		auto &bcontainer(){
-			return getClean__(pack->bcontainer);
-		}
-
-	private:
 		template<class T>
-		static T &getClean__(T &container){
-			container.clear();
-			return container;
+		auto &destruct(T *p){
+			MyAllocator::destruct<T>(allocator_, p);
 		}
 
 	private:
-		struct Pack{
-			Container	container;
-			PairContainer	pcontainer;
-			BufferContainer	bcontainer;
-		};
+		template<Logger::Level level, typename T>
+		void logAllocatorStatus_(){
+			logger<level>() << "Allocating" << sizeof(T) << "bytes."
+					<< "Allocator free" << allocator_.getFreeMemory() << "bytes."
+					<< "Allocator used" << allocator_.getUsedMemory() << "bytes.";
+		}
 
-		std::unique_ptr<Pack> pack = std::make_unique<Pack>();
+	private:
+		MyBuffer::AllocatedMemoryResourceOwned<>	buffer_		{ MaxMemory };
+		MyAllocator::ArenaAllocator			allocator_	{ buffer_   };
 	};
 
 

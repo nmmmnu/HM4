@@ -269,7 +269,7 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-			auto &container = blob.container();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 
 
@@ -488,8 +488,8 @@ namespace net::worker::commands::LinearCurve{
 
 			auto const startKey	= p.size() == 5 ? p[4] : "";
 
-			auto &container = blob.container();
-			auto &bcontainer = blob.bcontainer();
+			auto &container = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			linearSearchPoint(
 				db,
@@ -543,8 +543,8 @@ namespace net::worker::commands::LinearCurve{
 
 			auto const startKey	= p.size() == 6 ? p[5] : "";
 
-			auto &container = blob.container();
-			auto &bcontainer = blob.bcontainer();
+			auto &container = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			linearSearch(
 				db, container, bcontainer,
