@@ -2,7 +2,6 @@
 #define MY_BASE_ALLOCATOR_H_
 
 #include <cstddef>
-//#include <new>
 #include <memory>
 #include <limits>
 
@@ -45,6 +44,20 @@ namespace MyAllocator{
 		allocator.xdeallocate(p);
 	}
 
+	template<typename T, class Allocator, typename ...Args>
+	T *construct(Allocator &allocator, Args &&...args){
+		if (auto *p = allocate<T>(allocator); p)
+			return new(p) T(std::forward<Args>(args)...);
+
+		return nullptr;
+	}
+
+	template<typename T, class Allocator>
+	void destruct(Allocator &allocator, T *p){
+		p->~T();
+
+		allocator.xdeallocate(p);
+	}
 
 
 	template<typename T, class Allocator>
@@ -92,6 +105,16 @@ namespace MyAllocator{
 	template<class Allocator>
 	void deallocate(Allocator *allocator, void *p){
 		deallocate(*allocator, p);
+	}
+
+	template<typename T, class Allocator, typename ...Args>
+	T *construct(Allocator *allocator, Args &&...args){
+		return construct(*allocator, std::forward<Args>(args)...);
+	}
+
+	template<typename T, class Allocator>
+	void destruct(Allocator *allocator, T *p){
+		destruct(*allocator, p);
 	}
 }
 

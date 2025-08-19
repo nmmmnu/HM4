@@ -29,7 +29,7 @@ namespace MyBuffer{
 		}
 
 		~AllocatedMemoryResourceOwned(){
-			MyAllocator::deallocate(allocator, data_);
+			MyAllocator::deallocate(allocator_, data_);
 		}
 
 		operator bool() const noexcept{
@@ -37,11 +37,11 @@ namespace MyBuffer{
 		}
 
 		void *data() noexcept{
-			return data_.get();
+			return data_;
 		}
 
 		const void *data() const noexcept{
-			return data_.get();
+			return data_;
 		}
 
 		std::size_t size() const noexcept{
@@ -51,7 +51,7 @@ namespace MyBuffer{
 	private:
 		Allocator	allocator_;
 		std::size_t	size_;
-		void		*data_	= MyAllocator::allocate<char>(allocator, size_);
+		void		*data_	= MyAllocator::allocate<char>(allocator_, size_);
 	};
 
 
@@ -79,7 +79,7 @@ namespace MyBuffer{
 		}
 
 		~AllocatedMemoryResourceLinked(){
-			MyAllocator::deallocate(allocator, data_);
+			MyAllocator::deallocate(allocator_, data_);
 		}
 
 		operator bool() const noexcept{
@@ -87,11 +87,11 @@ namespace MyBuffer{
 		}
 
 		void *data() noexcept{
-			return data_.get();
+			return data_;
 		}
 
 		const void *data() const noexcept{
-			return data_.get();
+			return data_;
 		}
 
 		std::size_t size() const noexcept{
@@ -101,7 +101,7 @@ namespace MyBuffer{
 	private:
 		Allocator	*allocator_;
 		std::size_t	size_;
-		void		*data_	= MyAllocator::allocate(allocator, size_);
+		void		*data_	= MyAllocator::allocate(*allocator_, size_);
 	};
 
 } // namespace MyBuffer
