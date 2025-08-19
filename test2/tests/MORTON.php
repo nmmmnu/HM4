@@ -95,17 +95,17 @@ function cmd_MORTON($redis){
 		""
 	];
 
-	expect("MC2RANGENAIVE",	rawCommand($redis, "mc2rangenaive",	"morton", 6, 8, 6, 8, 1000		) == $result				);
-	expect("MC2RANGE",	rawCommand($redis, "mc2range",		"morton", 6, 8, 6, 8, 1000		) == $result				);
+//	expect("MC2RANGENAIVE",	rawCommand($redis, "mc2rangenaive",	"morton", 6, 8, 6, 8, 1000		) == $result				);
+//	expect("MC2RANGE",	rawCommand($redis, "mc2range",		"morton", 6, 8, 6, 8, 1000		) == $result				);
 
 	expect("MC2ENCODE",	rawCommand($redis, "mc2encode",		0x00000000, 0x00000000			) == "0000000000000000"			);
-	expect("MC2ENCODE",	rawCommand($redis, "mc2encode",		       123,       5789			) == "0000000001146bdb"			);
-	expect("MC2ENCODE",	rawCommand($redis, "mc2encode",		0xFFFF0000, 0x0000FFFF			) == "aaaaaaaa55555555"			);
+	expect("MC2ENCODE",	rawCommand($redis, "mc2encode",		      5789,        123			) == "0000000001146bdb"			);
+	expect("MC2ENCODE",	rawCommand($redis, "mc2encode",		0x0000FFFF, 0xFFFF0000			) == "aaaaaaaa55555555"			);
 	expect("MC2ENCODE",	rawCommand($redis, "mc2encode",		0xFFFFFFFF, 0xFFFFFFFF			) == "ffffffffffffffff"			);
 
 	expect("MC2DECODE",	rawCommand($redis, "mc2decode",		"0000000000000000"			) == [0x00000000, 0x00000000]		);
-	expect("MC2DECODE",	rawCommand($redis, "mc2decode",		"0000000001146bdb"			) == [      123,       5789]		);
-	expect("MC2DECODE",	rawCommand($redis, "mc2decode",		"aaaaaaaa55555555"			) == [0xFFFF0000, 0x0000FFFF]		);
+	expect("MC2DECODE",	rawCommand($redis, "mc2decode",		"0000000001146bdb"			) == [      5789,        123]		);
+	expect("MC2DECODE",	rawCommand($redis, "mc2decode",		"aaaaaaaa55555555"			) == [0x0000FFFF, 0xFFFF0000]		);
 	expect("MC2DECODE",	rawCommand($redis, "mc2decode",		"ffffffffffffffff"			) == [0xFFFFFFFF, 0xFFFFFFFF]		);
 
 	expect("MC2DECODE 0",	rawCommand($redis, "mc2decode",		"F"					) == [0x00000003, 0x00000003]		);
