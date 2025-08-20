@@ -1,6 +1,6 @@
 SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
-EXTRA_INCL += -I$(SRC_DIR)test_bfslookup
+#EXTRA_INCL += -I$(SRC_DIR)test_bfslookup
 
 # $(A)test_smallstring
 

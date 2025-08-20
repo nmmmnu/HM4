@@ -13,13 +13,14 @@
 //
 
 namespace static_vector_implementation_{
-	template <typename Derived, typename T, std::size_t Capacity, bool Trivial>
+
+	template <typename Derived, typename T, std::size_t Capacity, bool Init, bool Trivial>
 	struct StaticVectorBase_;
 
 
 
 	template <typename Derived, typename T, std::size_t Capacity>
-	struct StaticVectorBase_<Derived, T, Capacity, true>{
+	struct StaticVectorBase_<Derived, T, Capacity, true, true>{
 		constexpr static bool IS_POD = true;
 
 		using value_type	= T;
@@ -45,8 +46,35 @@ namespace static_vector_implementation_{
 
 
 
-	template <typename Derived, typename T, std::size_t Capacity>
-	struct StaticVectorBase_<Derived, T, Capacity, false>{
+	template <typename Derived, typename T, std::size_t Capacity, bool Init>
+	struct StaticVectorBase_<Derived, T, Capacity, Init, true>{
+		constexpr static bool IS_POD = true;
+
+		using value_type	= T;
+		using size_type		= std::size_t;
+
+	public:
+		constexpr value_type *data() noexcept{
+			return buffer_;
+		}
+
+		constexpr const value_type *data() const noexcept{
+			return buffer_;
+		}
+
+		constexpr static size_type capacity() noexcept{
+			return Capacity;
+		}
+
+	protected:
+		value_type	buffer_[Capacity];
+		size_type	size_ = 0;
+	};
+
+
+
+	template <typename Derived, typename T, std::size_t Capacity, bool Init>
+	struct StaticVectorBase_<Derived, T, Capacity, Init, false>{
 		constexpr static bool IS_POD = false;
 
 		using value_type	= T;
@@ -74,22 +102,22 @@ namespace static_vector_implementation_{
 
 	protected:
 		alignas(value_type)
-		char		buffer_[Capacity * sizeof(value_type)]{};
+		char		buffer_[Capacity * sizeof(value_type)];
 		size_type	size_ = 0;
 	};
 
 
 
 
-	template <typename Derived, typename T>
-	struct StaticVectorBase_<Derived, T, 0, true>{
+	template <typename Derived, typename T, bool Init>
+	struct StaticVectorBase_<Derived, T, 0, Init, true>{
 		constexpr static bool IS_POD = true;
 
 		using value_type	= T;
 		using size_type		= std::size_t;
 
 	public:
-		StaticVectorBase_(value_type *buffer, size_type capacity) : buffer_(reinterpret_cast<char*>(buffer)), capacity_(capacity){}
+		StaticVectorBase_(T *buffer, size_type capacity) : buffer_(buffer), capacity_(capacity){}
 
 	public:
 		constexpr value_type *data() noexcept{
@@ -112,15 +140,15 @@ namespace static_vector_implementation_{
 
 
 
-	template <typename Derived, typename T>
-	struct StaticVectorBase_<Derived, T, 0, false>{
+	template <typename Derived, typename T, bool Init>
+	struct StaticVectorBase_<Derived, T, 0, Init, false>{
 		constexpr static bool IS_POD = false;
 
 		using value_type	= T;
 		using size_type		= std::size_t;
 
 	public:
-		StaticVectorBase_(value_type *buffer, size_type capacity) : buffer_(reinterpret_cast<char *>(buffer)), capacity_(capacity){}
+		StaticVectorBase_(void *buffer, size_type capacity) : buffer_(static_cast<char *>(buffer)), capacity_(capacity){}
 
 	public:
 		constexpr value_type *data() noexcept{
@@ -154,11 +182,12 @@ namespace static_vector_implementation_{
 
 
 
-template<typename T, std::size_t Capacity>
+template<typename T, std::size_t Capacity, bool ConstexprInit = false>
 class StaticVector : public static_vector_implementation_::StaticVectorBase_<
 						StaticVector<T, Capacity>,
 						T,
 						Capacity,
+						ConstexprInit,
 						std::is_trivial_v<T> && std::is_standard_layout_v<T>
 				>{
 
@@ -166,6 +195,7 @@ class StaticVector : public static_vector_implementation_::StaticVectorBase_<
 						StaticVector<T, Capacity>,
 						T,
 						Capacity,
+						ConstexprInit,
 						std::is_trivial_v<T> && std::is_standard_layout_v<T>
 				>;
 
@@ -216,22 +246,43 @@ public:
 
 	// STANDARD C-TORS FOR Capacity == 0
 
-	constexpr StaticVector(		value_type *data, size_type size) : Base(data, size){
+	constexpr StaticVector(		void *data, size_type size) : Base(data, size){
 	}
 
 	constexpr StaticVector(size_type const count, value_type const &value,
-					value_type *data, size_type size) : Base(data, size){
+					void *data, size_type size) : Base(data, size){
 		construct_(count, value);
 	}
 
 	template<class Iterator>
 	constexpr StaticVector(Iterator begin, Iterator end,
-					value_type *data, size_type size) : Base(data, size){
+					void *data, size_type size) : Base(data, size){
 		copy_(begin, end);
 	}
 
 	constexpr StaticVector(std::initializer_list<value_type> const &list,
-					value_type *data, size_type size) : Base(data, size){
+					void *data, size_type size) : Base(data, size){
+		copy_(list.begin(), list.end());
+	}
+
+	// STANDARD C-TORS FOR Capacity == 0 and T
+
+	constexpr StaticVector(		T *data, size_type size) : Base(data, size){
+	}
+
+	constexpr StaticVector(size_type const count, value_type const &value,
+					T *data, size_type size) : Base(data, size){
+		construct_(count, value);
+	}
+
+	template<class Iterator>
+	constexpr StaticVector(Iterator begin, Iterator end,
+					T *data, size_type size) : Base(data, size){
+		copy_(begin, end);
+	}
+
+	constexpr StaticVector(std::initializer_list<value_type> const &list,
+					T *data, size_type size) : Base(data, size){
 		copy_(list.begin(), list.end());
 	}
 

@@ -48,7 +48,7 @@ public:
 		std::array<T, SIZE> a{};
 
 		// std::copy
-		for(typename StaticVector<T, SIZE>::size_type i = 0; i < f.value.size(); ++i)
+		for(size_t i = 0; i < f.value.size(); ++i)
 			a[i] = f.value[i];
 
 		return a;
@@ -57,7 +57,7 @@ public:
 private:
 	constexpr static T SIZE = (1 << Levels) - 1;
 
-	StaticVector<T, SIZE> value;
+	StaticVector<T, SIZE, true> value;
 };
 
 #endif
