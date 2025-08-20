@@ -52,15 +52,32 @@ namespace net::worker::commands{
 		}
 
 		template<typename T>
-		auto &construct(){
-			if (auto *p = MyAllocator::construct<T>(allocator_); p){
-				logAllocatorStatus_<Logger::DEBUG, T>();
+		auto &allocate(){
+			if (auto *p = MyAllocator::allocate<T>(allocator_); p){
+				logAllocatorStatus_<Logger::DEBUG, T>(false);
 
 				++allocations_;
 
 				return *p;
 			}else{
-				logAllocatorStatus_<Logger::FATAL, T>("PLEASE REPORT THIS:");
+				logAllocatorStatus_<Logger::FATAL, T>(false, "PLEASE REPORT THIS:");
+
+				++allocations_;
+
+				throw std::bad_alloc();
+			}
+		}
+
+		template<typename T>
+		auto &construct(){
+			if (auto *p = MyAllocator::construct<T>(allocator_); p){
+				logAllocatorStatus_<Logger::DEBUG, T>(true);
+
+				++allocations_;
+
+				return *p;
+			}else{
+				logAllocatorStatus_<Logger::FATAL, T>(true, "PLEASE REPORT THIS:");
 
 				++allocations_;
 
@@ -75,11 +92,15 @@ namespace net::worker::commands{
 
 	private:
 		template<Logger::Level level, typename T>
-		void logAllocatorStatus_(std::string_view title = ""){
+		void logAllocatorStatus_(bool construct, std::string_view title = ""){
 			if (!title.empty())
 				logger<level>() << title;
 
+			auto const op = construct ? "Construct" : "Allocate";
+
 			logger<level>() << "Allocation" << allocations_
+					<< op
+					<< "Type" << typeid(T).name()
 					<< "Size" << sizeof(T) << "bytes."
 					<< "Free" << allocator_.getFreeMemory() << "bytes."
 					<< "Used" << allocator_.getUsedMemory() << "bytes.";

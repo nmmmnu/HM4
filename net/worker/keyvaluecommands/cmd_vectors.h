@@ -368,7 +368,7 @@ namespace net::worker::commands::Vectors{
 
 				bool const needsToBeProjected = dim_ix > 1 && dim_ix < dim_ve;
 
-				auto &fVectorBufferConvert = blob.construct<FVectorBuffer>();
+				auto &fVectorBufferConvert = blob.allocate<FVectorBuffer>();
 
 				FVector fvectorOriginal = [vtype, dim_ve](std::string_view fvectorSV, FVectorBuffer &buffer){
 					switch(vtype){
@@ -463,7 +463,7 @@ namespace net::worker::commands::Vectors{
 
 			template<typename T>
 			const Wector<T> *prepareWectorBE(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<T> &wectorBufferResult, OutputBlob &blob){
-				auto &fVectorBuffer = blob.construct<FVectorBuffer>();
+				auto &fVectorBuffer = blob.allocate<FVectorBuffer>();
 
 				FVector vector = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, fVectorBuffer, blob);
 
@@ -562,7 +562,7 @@ namespace net::worker::commands::Vectors{
 			default:
 			case VType::BINARY_LE :
 			case VType::BINARY_BE : {
-					auto &fVectorBufferResult = blob.construct<FVectorBuffer>();
+					auto &fVectorBufferResult = blob.allocate<FVectorBuffer>();
 
 					FVector fvector{ fVectorBufferResult };
 
@@ -970,7 +970,7 @@ namespace net::worker::commands::Vectors{
 
 
 
-			auto &wectorBuffer = blob.construct<WectorBuffer<T> >();
+			auto &wectorBuffer = blob.allocate<WectorBuffer<T> >();
 
 
 
@@ -1331,7 +1331,7 @@ namespace net::worker::commands::Vectors{
 			if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto &fVectorBuffer = blob.construct<FVectorBuffer>();
+			auto &fVectorBuffer = blob.allocate<FVectorBuffer>();
 
 			// vectorSV size is checked already
 
@@ -1528,7 +1528,7 @@ namespace net::worker::commands::Vectors{
 			if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto &fVectorBuffer = blob.construct<FVectorBuffer>();
+			auto &fVectorBuffer = blob.allocate<FVectorBuffer>();
 
 			// vectorSV size is checked already
 
@@ -1762,7 +1762,7 @@ namespace net::worker::commands::Vectors{
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype){
 			using namespace vectors_impl_;
 
-			auto &wectorBuffer = blob.construct<WectorBuffer<T> >();;
+			auto &wectorBuffer = blob.allocate<WectorBuffer<T> >();;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -2054,7 +2054,7 @@ namespace net::worker::commands::Vectors{
 			if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto &fVectorBuffer = blob.construct<FVectorBuffer>();;
+			auto &fVectorBuffer = blob.allocate<FVectorBuffer>();;
 
 			// vectorSV size is checked already
 
@@ -2121,7 +2121,7 @@ namespace net::worker::commands::Vectors{
 
 			auto const bitVectorBytesMax = Wector<bool>::bytes(MaxDimensions);
 
-			auto &bitVectorBuffer = blob.construct<std::array<uint8_t, bitVectorBytesMax> >();
+			auto &bitVectorBuffer = blob.allocate<std::array<uint8_t, bitVectorBytesMax> >();
 
 			MyVectors::bitVectorQuantize(original_fvector, bitVectorBuffer.data());
 
