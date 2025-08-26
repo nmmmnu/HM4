@@ -1421,18 +1421,13 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
-	void add(DBAdapter &db,
-			std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes, std::string_view value){
+	namespace impl_{
 
-		using namespace impl_;
+		template<typename Permutation, typename IndexController, typename DBAdapter>
+		void add_removePreviousKeys(DBAdapter &db,
+				std::string_view keyCtrl,
+				std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes){
 
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
-
-		logger<Logger::DEBUG>() << "ZSetMulti::ADD: ctrl key" << keyCtrl;
-
-		{
 			// Update control key and delete hash key if any
 
 			if (auto const pair = hm4::getPairPtr(*db, keyCtrl); pair){
@@ -1472,6 +1467,24 @@ namespace net::worker::shared::zsetmulti{
 			}
 		}
 
+	} // namespace impl_
+
+
+
+	template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
+	void add(DBAdapter &db,
+			std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes, std::string_view value){
+
+		using namespace impl_;
+
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
+
+		logger<Logger::DEBUG>() << "ZSetMulti::ADD: ctrl key" << keyCtrl;
+
+		// Update control key and delete hash key if any
+		add_removePreviousKeys<Permutation, IndexController>(db, keyCtrl, keyN, keySub, indexes);
+
 		auto insertNewKeys = [&](std::string_view key){
 			logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET index key" << key;
 
@@ -1485,6 +1498,49 @@ namespace net::worker::shared::zsetmulti{
 		hm4::PairBufferKey bufferVal;
 
 		auto const encodedValue = encodeIndex<Permutation, IndexController>(bufferVal, DBAdapter::SEPARATOR, indexes, value);
+
+		insert(*db, keyCtrl, encodedValue);
+	}
+
+
+
+	template<typename Permutation, typename DBAdapter, typename VPairFactory>
+	void addF(DBAdapter &db,
+			std::string_view keyN, std::string_view keySub, std::array<std::string_view, 1> const &indexes, VPairFactory &factory){
+
+		using P1    = Permutation1NoIndex;
+		using VBase = hm4::PairFactory::IFactory;
+
+		static_assert(std::is_same_v<Permutation, P1>, "This works only with Permutation1NoIndex");
+		static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from PairFactory::IFactoryAction");
+
+		using namespace impl_;
+
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
+
+		logger<Logger::DEBUG>() << "ZSetMulti::ADD: ctrl key" << keyCtrl;
+
+		// Update control key and delete hash key if any
+		add_removePreviousKeys<P1>(db, keyCtrl, keyN, keySub, indexes);
+
+		auto insertNewKeys = [&](std::string_view key){
+			logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET index key" << key;
+
+			factory.setKey(key);
+
+			insert(*db, factory);
+		};
+
+		P1::for_each(DBAdapter::SEPARATOR, keyN, keySub, indexes, insertNewKeys);
+
+		logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET ctrl key" << keyCtrl;
+
+		hm4::PairBufferKey bufferVal;
+
+		// auto const encodedValue = encodeIndex<Permutation1NoIndex, IndexController>(bufferVal, DBAdapter::SEPARATOR, indexes, value);
+
+		auto const encodedValue = P1::encodeIndex(bufferVal, DBAdapter::SEPARATOR, indexes);
 
 		insert(*db, keyCtrl, encodedValue);
 	}

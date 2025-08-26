@@ -1760,23 +1760,49 @@ namespace net::worker::commands::Vectors{
 	private:
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype){
-			using namespace vectors_impl_;
-
-			auto &wectorBuffer = blob.allocate<WectorBuffer<T> >();;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
-			const Wector<T> *w = prepareWectorBE<T>(vtype, vectorSV, dim_ve, dim_ix, wectorBuffer, blob);
+			using MyVKADD_Factory = VKADD_Factory<T>;
 
-			auto const val = w->toSV();
-
-			uint32_t const exp = 0;
-
-			hm4::insert(*db, key, val, exp);
+			hm4::insertV<MyVKADD_Factory>(*db, key, vectorSV, dim_ve, dim_ix, vtype, blob);
 
 			return result.set();
 		}
+
+	private:
+		template<typename T>
+		struct VKADD_Factory : hm4::PairFactory::IFactoryAction<0, 0, VKADD_Factory<T> >{
+			using Pair   = hm4::Pair;
+			using Base   = hm4::PairFactory::IFactoryAction<0, 0, VKADD_Factory<T> >;
+
+			constexpr VKADD_Factory(std::string_view const key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype, OutputBlob &blob) :
+							Base::IFactoryAction	(key, vectors_impl_::Wector<T>::bytes(dim_ix) ),
+							vectorSV			(vectorSV	),
+							dim_ve				(dim_ve		),
+							dim_ix				(dim_ix		),
+							vtype				(vtype		),
+							blob				(blob		){}
+
+			void action(Pair *pair) const{
+				using namespace vectors_impl_;
+
+				auto &wectorBuffer = *reinterpret_cast<WectorBuffer<T> *>(pair->getValC());
+
+				[[maybe_unused]]
+				const auto *w = prepareWectorBE<T>(vtype, vectorSV, dim_ve, dim_ix, wectorBuffer, blob);
+
+				// assert(w->bytes() == pair->getVal().size() && "Size needs to be the same");
+			}
+
+		private:
+			std::string_view	vectorSV;
+			uint32_t		dim_ve;
+			uint32_t		dim_ix;
+			vectors_impl_::VType	vtype;
+			OutputBlob 		&blob;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
