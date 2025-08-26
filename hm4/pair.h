@@ -829,6 +829,10 @@ inline namespace version_4_00_00{
 
 			virtual void createHint(Pair *pair) = 0;
 			virtual void create(Pair *pair) = 0;
+
+			virtual void setKey(std::string_view){
+				assert(false && "Can not be called directly!");
+			}
 		};
 
 	} // namespace PairFactory
