@@ -22,6 +22,8 @@
 
 #include "logger.h"
 
+#include "pair_vfactory.h"
+
 
 
 namespace net::worker::commands::Vectors{
@@ -461,6 +463,7 @@ namespace net::worker::commands::Vectors{
 				return prepareFVector(nullptr, vtype, fvectorSV, dim_ve, dim_ix, fVectorBufferResult, blob);
 			}
 
+			/*
 			template<typename T>
 			const Wector<T> *prepareWectorBE(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<T> &wectorBufferResult, OutputBlob &blob){
 				auto &fVectorBuffer = blob.allocate<FVectorBuffer>();
@@ -476,6 +479,7 @@ namespace net::worker::commands::Vectors{
 			const Wector<T> *prepareWectorBE(VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<T> &wectorBufferResult, OutputBlob &blob){
 				return prepareWectorBE<T>(nullptr, vtype, fvectorSV, dim_ve, dim_ix, wectorBufferResult, blob);
 			}
+			*/
 
 		} // anonymous namespace
 
@@ -969,7 +973,7 @@ namespace net::worker::commands::Vectors{
 			}
 
 
-
+			[[maybe_unused]]
 			auto &wectorBuffer = blob.allocate<WectorBuffer<T> >();
 
 
@@ -981,23 +985,65 @@ namespace net::worker::commands::Vectors{
 				auto const vectorSV = *(itk + 0);
 				auto const name     = *(itk + 1);
 
-				// vectorSV size is checked already
+
+
+				auto &fVectorBuffer = blob.allocate<FVectorBuffer>();
 
 				uint8_t hashOut;
 
-				const Wector<T> *w = prepareWectorBE<T>(&hashOut, vtype,  vectorSV, dim_ve, dim_ix, wectorBuffer, blob);
-
-				auto const line = w->toSV();
+				auto fvector = prepareFVector(&hashOut, vtype, vectorSV, dim_ve, dim_ix, fVectorBuffer, blob);
 
 				char buffer[5]; // 00FF\0
-				// add 00 in front of the hash
-				std::string_view const hash = hex_convert::toHex<uint16_t>(hashOut, buffer);
 
-				shared::zsetmulti::add<P1>(db, keyN, name, { hash }, line);
+				auto hash = hex_convert::toHex<uint16_t>(hashOut, buffer);
+
+
+
+				using MyVADD_Factory = VADD_Factory<T>;
+
+				MyVADD_Factory factory{ fvector, hash };
+
+				shared::zsetmulti::addF<P1>(db, keyN, name, factory);
 			}
 
 			return result.set();
 		}
+
+
+	private:
+		template<typename T>
+		struct VADD_Factory : hm4::PairFactory::IFactoryAction<0, 0, VADD_Factory<T>, shared::zsetmulti::IZSetMultyFactory >{
+			using Pair  = hm4::Pair;
+			using Base  = hm4::PairFactory::IFactoryAction<0, 0, VADD_Factory<T>, shared::zsetmulti::IZSetMultyFactory >;
+
+			constexpr VADD_Factory(FVector fvector, std::string_view hash) :
+							Base::IFactoryAction	(/* key */ {}, vectors_impl_::Wector<T>::bytes(fvector.size()) ),
+							fvector				(fvector	),
+							hash				(hash		){}
+
+			void action(Pair *pair) const{
+				using namespace vectors_impl_;
+
+				auto &wectorBuffer = *reinterpret_cast<WectorBuffer<T> *>(pair->getValC());
+
+				void *mem = wectorBuffer.data();
+
+				Wector<T>::createInRawMemory(mem, fvector);
+			}
+
+			constexpr_virtual void setKey(std::string_view key) override{
+				this->key = key;
+			}
+
+			[[nodiscard]]
+			constexpr_virtual std::string_view getIndex() const{
+				return hash;
+			}
+
+		private:
+			FVector			fvector;
+			std::string_view	hash;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -1760,13 +1806,24 @@ namespace net::worker::commands::Vectors{
 	private:
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype){
+			using namespace vectors_impl_;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
+
+
+			auto &fVectorBuffer = blob.allocate<FVectorBuffer>();
+
+			auto fvector = prepareFVector(vtype, vectorSV, dim_ve, dim_ix, fVectorBuffer, blob);
+
 			using MyVKADD_Factory = VKADD_Factory<T>;
 
-			hm4::insertV<MyVKADD_Factory>(*db, key, vectorSV, dim_ve, dim_ix, vtype, blob);
+			MyVKADD_Factory factory{ key, fvector };
+
+			hm4::PairFactory::IFactory &f = factory;
+
+			hm4::insert(*db, f);
 
 			return result.set();
 		}
@@ -1777,31 +1834,24 @@ namespace net::worker::commands::Vectors{
 			using Pair   = hm4::Pair;
 			using Base   = hm4::PairFactory::IFactoryAction<0, 0, VKADD_Factory<T> >;
 
-			constexpr VKADD_Factory(std::string_view const key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype, OutputBlob &blob) :
-							Base::IFactoryAction	(key, vectors_impl_::Wector<T>::bytes(dim_ix) ),
-							vectorSV			(vectorSV	),
-							dim_ve				(dim_ve		),
-							dim_ix				(dim_ix		),
-							vtype				(vtype		),
-							blob				(blob		){}
+			constexpr VKADD_Factory(std::string_view key, FVector fvector) :
+							Base::IFactoryAction	(key, vectors_impl_::Wector<T>::bytes(fvector.size()) ),
+							key				(key		),
+							fvector				(fvector	){}
 
 			void action(Pair *pair) const{
 				using namespace vectors_impl_;
 
 				auto &wectorBuffer = *reinterpret_cast<WectorBuffer<T> *>(pair->getValC());
 
-				[[maybe_unused]]
-				const auto *w = prepareWectorBE<T>(vtype, vectorSV, dim_ve, dim_ix, wectorBuffer, blob);
+				void *mem = wectorBuffer.data();
 
-				// assert(w->bytes() == pair->getVal().size() && "Size needs to be the same");
+				Wector<T>::createInRawMemory(mem, fvector);
 			}
 
 		private:
-			std::string_view	vectorSV;
-			uint32_t		dim_ve;
-			uint32_t		dim_ix;
-			vectors_impl_::VType	vtype;
-			OutputBlob 		&blob;
+			std::string_view	key;
+			FVector			fvector;
 		};
 
 	private:

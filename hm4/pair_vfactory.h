@@ -13,10 +13,11 @@ namespace hm4{
 inline namespace version_4_00_00{
 	namespace PairFactory{
 
+		template<bool copy_value, bool same_size, typename Child, typename VBase = IFactory>
+		struct IFactoryAction : VBase{
 
+			static_assert(std::is_base_of_v<IFactory, VBase>, "VBase must derive from IFactory");
 
-		template<bool copy_value, bool same_size, typename Child>
-		struct IFactoryAction : IFactory{
 			constexpr IFactoryAction(std::string_view const key, size_t const val_size, const Pair *old_pair) :
 							key		(key		),
 							val_size	(val_size	),
@@ -119,15 +120,6 @@ inline namespace version_4_00_00{
 			constexpr void action(Pair *) const{
 			}
 		};
-
-
-
-	//	struct SetSize : IFactoryAction<true, false, SetSize>{
-	//		using IFactoryAction<true, false, SetSize>::IFactoryAction;
-	//
-	//		constexpr void action(Pair *) const{
-	//		}
-	//	};
 
 	} // namespace PairFactory
 } // anonymous namespace

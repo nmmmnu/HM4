@@ -3,8 +3,15 @@
 
 #include "mystring.h"
 #include "stringtokenizer.h"
+#include "pair.h"
 
 namespace net::worker::shared::zsetmulti{
+
+	struct IZSetMultyFactory : hm4::PairFactory::IFactory{
+		virtual void setKey(std::string_view key) = 0;
+		virtual std::string_view getIndex() const = 0;
+	};
+
 	namespace impl_{
 		template<size_t N>
 		bool valid(std::array<std::string_view, N> const &indexes){
@@ -1423,7 +1430,7 @@ namespace net::worker::shared::zsetmulti{
 
 	namespace impl_{
 
-		template<typename Permutation, typename IndexController, typename DBAdapter>
+		template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
 		void add_removePreviousKeys(DBAdapter &db,
 				std::string_view keyCtrl,
 				std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes){
@@ -1506,13 +1513,13 @@ namespace net::worker::shared::zsetmulti{
 
 	template<typename Permutation, typename DBAdapter, typename VPairFactory>
 	void addF(DBAdapter &db,
-			std::string_view keyN, std::string_view keySub, std::array<std::string_view, 1> const &indexes, VPairFactory &factory){
+			std::string_view keyN, std::string_view keySub, VPairFactory &factory){
 
 		using P1    = Permutation1NoIndex;
-		using VBase = hm4::PairFactory::IFactory;
+		using VBase = IZSetMultyFactory;
 
 		static_assert(std::is_same_v<Permutation, P1>, "This works only with Permutation1NoIndex");
-		static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from PairFactory::IFactoryAction");
+		static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from IZSetMultyFactory");
 
 		using namespace impl_;
 
@@ -1522,27 +1529,33 @@ namespace net::worker::shared::zsetmulti{
 		logger<Logger::DEBUG>() << "ZSetMulti::ADD: ctrl key" << keyCtrl;
 
 		// Update control key and delete hash key if any
-		add_removePreviousKeys<P1>(db, keyCtrl, keyN, keySub, indexes);
+
+		auto const index = factory.getIndex();
+		std::array<std::string_view, 1> const indexes{ index };
+
+		add_removePreviousKeys<P1>(db, keyCtrl, keyN, keySub, indexes );
 
 		auto insertNewKeys = [&](std::string_view key){
 			logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET index key" << key;
 
 			factory.setKey(key);
 
-			insert(*db, factory);
+			hm4::PairFactory::IFactory &f = factory;
+
+			insert(*db, f);
 		};
 
 		P1::for_each(DBAdapter::SEPARATOR, keyN, keySub, indexes, insertNewKeys);
 
 		logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET ctrl key" << keyCtrl;
 
-		hm4::PairBufferKey bufferVal;
-
+		// we are using no IndexController...
 		// auto const encodedValue = encodeIndex<Permutation1NoIndex, IndexController>(bufferVal, DBAdapter::SEPARATOR, indexes, value);
 
-		auto const encodedValue = P1::encodeIndex(bufferVal, DBAdapter::SEPARATOR, indexes);
+		// P1::encodeIndex is just copy of the hash
+		// auto const encodedValue = P1::encodeIndex(bufferVal, DBAdapter::SEPARATOR, indexes);
 
-		insert(*db, keyCtrl, encodedValue);
+		insert(*db, keyCtrl, index);
 	}
 
 
