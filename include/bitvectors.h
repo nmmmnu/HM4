@@ -49,7 +49,7 @@ namespace MyVectors{
 		return (size + 7) / 8;
 	}
 
-	size_t distanceHamming(std::string_view a, std::string_view b) {
+	size_t distanceHamming(std::string_view a, std::string_view b){
 		assert(a.size() == b.size());
 
 		const auto *pa = reinterpret_cast<const uint8_t *>(a.data());
@@ -61,6 +61,37 @@ namespace MyVectors{
 			result += __builtin_popcount(pa[i] ^ pb[i]);
 
 		return result;
+	}
+
+	float distanceHammingFloat(std::string_view a, std::string_view b){
+		return static_cast<float>(
+			distanceHamming(a, b)
+		);
+	}
+
+	float distanceCosineBit(std::string_view a, std::string_view b){
+		assert(a.size() == b.size());
+
+		const auto *pa = reinterpret_cast<const uint8_t *>(a.data());
+		const auto *pb = reinterpret_cast<const uint8_t *>(b.data());
+
+		size_t dot   = 0;
+		size_t normA = 0;
+		size_t normB = 0;
+
+		for (size_t i = 0; i < a.size(); ++i){
+			auto const byteA = pa[i];
+			auto const byteB = pb[i];
+
+			dot   += __builtin_popcount(byteA & byteB);
+			normA += __builtin_popcount(byteA);
+			normB += __builtin_popcount(byteB);
+		}
+
+		if (normA == 0 || normB == 0)
+			return 1.0;
+
+		return 1 - static_cast<float>(dot * dot) / static_cast<float>(normA * normB);
 	}
 
 } // namspace MyVectors

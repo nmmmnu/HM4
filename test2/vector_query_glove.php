@@ -7,6 +7,7 @@ $raw		= "b";
 $results	= 10;
 $vsim		= "VSIMFLAT";
 $dist		= "k";
+$distBit	= "b";
 
 
 $frog = $redis->rawCommand(
@@ -130,7 +131,7 @@ $result = $redis->rawCommand(
 	300		,
 	300		,
 	"b"		,
-	"h"		,
+	$distBit	,
 	$raw		,
 	$frog		,
 	$results
@@ -147,7 +148,7 @@ $result = $redis->rawCommand(
 	300		,
 	150		,
 	"b"		,
-	"h"		,
+	$distBit	,
 	$raw		,
 	$frog		,
 	$results
@@ -228,7 +229,7 @@ $result = $redis->rawCommand(
 	150		,
 	150		,
 	"b"		,
-	"h"		,
+	$distBit	,
 	$raw		,
 	$frog		,
 	$results

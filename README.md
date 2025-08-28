@@ -828,7 +828,8 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 | `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.                        |
 | `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude). The result is transformed to be 0..1 |
 | `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.   |
-| `H`  | **Hamming**         | Works only on bit quantized vectors.                                                                                    |
+| `B`  | **Bit cosine**      | Works only on bit quantized vectors. Cosine distance for bit vectors. The result is transformed to be 0..1              |
+| `H`  | **Hamming**         | Works only on bit quantized vectors. The result is transformed to be 0..1                                               |
 
 ##### When to Use Each Metric:
 
@@ -845,7 +846,10 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
   Useful for sparse data or when small differences in low-value components are important. More sensitive than L1/L2 in those regions.
 
 - **Hamming** `H` -
-  Works only on bit quantized vectors.
+  Works only on bit quantized vectors. Very fast.
+
+- **Bit cosine** `B` -
+  Works only on bit quantized vectors. Similar to hamming, but result is "weighted" to be more "human understandable".
 
 
 
