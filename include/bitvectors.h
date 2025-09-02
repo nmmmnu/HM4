@@ -50,15 +50,34 @@ namespace MyVectors{
 	}
 
 	size_t distanceHamming(std::string_view a, std::string_view b){
-		assert(a.size() == b.size());
-
-		const auto *pa = reinterpret_cast<const uint8_t *>(a.data());
-		const auto *pb = reinterpret_cast<const uint8_t *>(b.data());
+		assert(a.size() == b.size()	&& "Size of the vectors must be the same");
 
 		size_t result = 0;
 
-		for (size_t i = 0; i < a.size(); ++i)
-			result += __builtin_popcount(pa[i] ^ pb[i]);
+		// const auto *pa = reinterpret_cast<const uint8_t *>(a.data());
+		// const auto *pb = reinterpret_cast<const uint8_t *>(b.data());
+		//
+		// for (size_t i = 0; i < a.size(); ++i)
+		// 	result += __builtin_popcount(pa[i] ^ pb[i]);
+
+
+
+		size_t const size64 = a.size() / sizeof(uint64_t);
+
+		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
+		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
+
+		#pragma GCC ivdep
+		for (size_t i = 0; i < size64; ++i)
+		    result += __builtin_popcountll(pa64[i] ^ pb64[i]);
+
+		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
+		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
+
+		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
+		    result += __builtin_popcount(pa8[i] ^ pb8[i]);
+
+
 
 		return result;
 	}
@@ -70,28 +89,100 @@ namespace MyVectors{
 	}
 
 	float distanceCosineBit(std::string_view a, std::string_view b){
-		assert(a.size() == b.size());
-
-		const auto *pa = reinterpret_cast<const uint8_t *>(a.data());
-		const auto *pb = reinterpret_cast<const uint8_t *>(b.data());
+		assert(a.size() == b.size()	&& "Size of the vectors must be the same");
 
 		size_t dot   = 0;
 		size_t normA = 0;
 		size_t normB = 0;
 
-		for (size_t i = 0; i < a.size(); ++i){
-			auto const byteA = pa[i];
-			auto const byteB = pb[i];
+
+
+		size_t const size64 = a.size() / sizeof(uint64_t);
+
+		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
+		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
+
+		#pragma GCC ivdep
+		for (size_t i = 0; i < size64; ++i){
+			auto const byteA = pa64[i];
+			auto const byteB = pb64[i];
+
+			dot   += __builtin_popcountll(byteA & byteB);
+			normA += __builtin_popcountll(byteA);
+			normB += __builtin_popcountll(byteB);
+		}
+
+		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
+		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
+
+		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i){
+			auto const byteA = pa8[i];
+			auto const byteB = pb8[i];
 
 			dot   += __builtin_popcount(byteA & byteB);
 			normA += __builtin_popcount(byteA);
 			normB += __builtin_popcount(byteB);
 		}
 
+
+
 		if (normA == 0 || normB == 0)
 			return 1.0;
 
 		return 1 - static_cast<float>(dot * dot) / static_cast<float>(normA * normB);
+	}
+
+	size_t distanceDominatingPrepare(std::string_view a){
+		size_t result = 0;
+
+
+
+		size_t const size64 = a.size() / sizeof(uint64_t);
+
+		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
+
+		#pragma GCC ivdep
+		for (size_t i = 0; i < size64; ++i)
+		    result += __builtin_popcountll(pa64[i]);
+
+		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
+
+		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
+		    result += __builtin_popcount(pa8[i]);
+
+
+
+		return result;
+	}
+
+	float distanceDominatingPrepared(std::string_view a, std::string_view b){
+		assert(a.size() == b.size()	&& "Size of the vectors must be the same");
+
+		size_t result = 0;
+
+
+
+		size_t const size64 = a.size() / sizeof(uint64_t);
+
+		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
+		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
+
+		#pragma GCC ivdep
+		for (size_t i = 0; i < size64; ++i)
+		    result += __builtin_popcountll(pa64[i] & pb64[i]);
+
+		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
+		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
+
+		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
+		    result += __builtin_popcount(pa8[i] & pb8[i]);
+
+
+
+		// return 1 - static_cast<float>(result) / static_cast<float>(popA);
+
+		// bigger popcount, smaller distance
+		return - static_cast<float>(result);
 	}
 
 } // namspace MyVectors

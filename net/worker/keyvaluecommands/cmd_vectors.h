@@ -255,7 +255,8 @@ namespace net::worker::commands::Vectors{
 			COSINE		,
 			CANBERRA	,
 			HAMMING		,
-			BIT_COSINE
+			BIT_COSINE	,
+			BIT_DOMINATE
 		};
 
 		constexpr auto translateDType(std::string_view s){
@@ -283,22 +284,26 @@ namespace net::worker::commands::Vectors{
 			case 'b' :
 			case 'B' :	return DType::BIT_COSINE	;
 
+			case 'd' :
+			case 'D' :	return DType::BIT_DOMINATE	;
+
 			default:	return DType::UNKNOWN		;
 			}
 		}
 
 		constexpr bool checkDType(DType dtype, QType qtype){
 			switch(dtype){
-			case DType::EUCLIDEAN	:
-			case DType::MANHATTAN	:
-			case DType::COSINE	:
-			case DType::CANBERRA	:	return qtype != QType::BIT;
+			case DType::EUCLIDEAN		:
+			case DType::MANHATTAN		:
+			case DType::COSINE		:
+			case DType::CANBERRA		:	return qtype != QType::BIT;
 
-			case DType::HAMMING	:
-			case DType::BIT_COSINE	:	return qtype == QType::BIT;
+			case DType::HAMMING		:
+			case DType::BIT_COSINE		:
+			case DType::BIT_DOMINATE	:	return qtype == QType::BIT;
 
-			case DType::UNKNOWN	:
-			default:			return false;
+			case DType::UNKNOWN		:
+			default:				return false;
 			}
 		}
 
@@ -479,24 +484,6 @@ namespace net::worker::commands::Vectors{
 			FVector prepareFVector(VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, FVectorBuffer &fVectorBufferResult, OutputBlob &blob){
 				return prepareFVector(nullptr, vtype, fvectorSV, dim_ve, dim_ix, fVectorBufferResult, blob);
 			}
-
-			/*
-			template<typename T>
-			const Wector<T> *prepareWectorBE(uint8_t *hashOut, VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<T> &wectorBufferResult, OutputBlob &blob){
-				auto &fVectorBuffer = blob.allocate<FVectorBuffer>();
-
-				FVector vector = prepareFVector(hashOut, vtype, fvectorSV, dim_ve, dim_ix, fVectorBuffer, blob);
-
-				void *mem = wectorBufferResult.data();
-
-				return Wector<T>::createInRawMemory(mem, vector);
-			}
-
-			template<typename T>
-			const Wector<T> *prepareWectorBE(VType vtype, std::string_view fvectorSV, uint32_t const dim_ve, uint32_t const dim_ix, WectorBuffer<T> &wectorBufferResult, OutputBlob &blob){
-				return prepareWectorBE<T>(nullptr, vtype, fvectorSV, dim_ve, dim_ix, wectorBufferResult, blob);
-			}
-			*/
 
 		} // anonymous namespace
 
@@ -764,12 +751,13 @@ namespace net::worker::commands::Vectors{
 				auto const score = [&](auto const &a, auto const &b, auto const &aM, auto const &bM){
 					switch(dtype){
 					default:
-					case DType::HAMMING	:
-					case DType::BIT_COSINE	:
-					case DType::COSINE	: return MyVectors::distanceCosine		(a, b,         {}, valueProjBE);
-					case DType::EUCLIDEAN	: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM, {}, valueProjBE);
-					case DType::MANHATTAN	: return MyVectors::distanceManhattanPrepared	(a, b,     bM, {}, valueProjBE);
-					case DType::CANBERRA	: return MyVectors::distanceCanberraPrepared	(a, b,     bM, {}, valueProjBE);
+					case DType::HAMMING		:
+					case DType::BIT_COSINE		:
+					case DType::BIT_DOMINATE	:
+					case DType::COSINE		: return MyVectors::distanceCosine		(a, b,         {}, valueProjBE);
+					case DType::EUCLIDEAN		: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM, {}, valueProjBE);
+					case DType::MANHATTAN		: return MyVectors::distanceManhattanPrepared	(a, b,     bM, {}, valueProjBE);
+					case DType::CANBERRA		: return MyVectors::distanceCanberraPrepared	(a, b,     bM, {}, valueProjBE);
 					}
 				}(original_fvector, bv->toVector(), original_magnitude, bv->magnitude());
 
@@ -813,8 +801,9 @@ namespace net::worker::commands::Vectors{
 				auto const score = [&](auto const &a, auto const &b) -> float{
 					switch(dtype){
 					default:
-					case DType::HAMMING	: return MyVectors::distanceHammingFloat	(a, b);
-					case DType::BIT_COSINE	: return MyVectors::distanceCosineBit		(a, b);
+					case DType::HAMMING		: return MyVectors::distanceHammingFloat	(a, b);
+					case DType::BIT_COSINE		: return MyVectors::distanceCosineBit		(a, b);
+					case DType::BIT_DOMINATE	: return MyVectors::distanceDominatingPrepared	(a, b);
 					}
 				}(original_bitVector, bv->toBitSV());
 
@@ -836,11 +825,15 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
+		// template<typename T, typename T1>
+		// using CCVector = std::conditional_t<std::is_same_v<T, bool>, T1, std::nullptr_t>;
+
 		template<typename T, bool FullKey = false, typename Protocol, typename DBAdapter>
 		void process_VSIM_finish(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
-					DType dtype, VSIMHeap &heap, CFVector const original_fvector){
-
-			(void) original_fvector;
+					DType dtype, VSIMHeap &heap,
+						CFVector         const original_fvector = {},
+						std::string_view const bit_vector       = {}
+					){
 
 			// usually we give results unsorted,
 			// but here they are almost heap-sorted...
@@ -849,7 +842,13 @@ namespace net::worker::commands::Vectors{
 			auto &container  = blob.construct<OutputBlob::Container>();
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
-			auto const hammingFix = 1 / static_cast<float>(original_fvector.size());
+			auto const scoreFix = [&]() -> float{
+							switch(dtype){
+							case DType::HAMMING		: return 1 / static_cast<float>(original_fvector.size());
+							case DType::BIT_DOMINATE	: return 1 / static_cast<float>(MyVectors::distanceDominatingPrepare(bit_vector));
+							default				: return 0;
+							}
+						}();
 
 			for(auto it = std::begin(heap); it != std::end(heap); ++it){
 
@@ -869,19 +868,20 @@ namespace net::worker::commands::Vectors{
 				auto const score = [&](auto score) -> float{
 					if constexpr(std::is_same_v<T, float>){
 						switch(dtype){
-						case DType::COSINE	:
-						case DType::MANHATTAN	:
-						case DType::CANBERRA	: return score;
-						case DType::EUCLIDEAN	: return std::sqrt(score);
+						case DType::COSINE		:
+						case DType::MANHATTAN		:
+						case DType::CANBERRA		: return score;
+						case DType::EUCLIDEAN		: return std::sqrt(score);
 
-						default			: return 1; // will never come here.
+						default				: return 1; // will never come here.
 						}
 					}else{
 						switch(dtype){
-						case DType::HAMMING	: return score * hammingFix;
-						case DType::BIT_COSINE	: return std::sqrt(score);
+						case DType::HAMMING		: return score * scoreFix;
+						case DType::BIT_COSINE		: return std::sqrt(score);
+						case DType::BIT_DOMINATE	: return 1 + score * scoreFix;
 
-						default			: return 1; // will never come here.
+						default				: return 1; // will never come here.
 						}
 					}
 				}(it->score);
@@ -1454,7 +1454,7 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<T>(db, result, blob, dtype, heap, original_fvector);
+			return process_VSIM_finish<T>(db, result, blob, dtype, heap);
 		}
 
 		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
@@ -1505,7 +1505,7 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, original_fvector);
+			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, original_fvector, bitVector);
 		}
 
 	private:
@@ -1672,7 +1672,7 @@ namespace net::worker::commands::Vectors{
 
 		//done: // label for goto
 
-			return process_VSIM_finish<T>(db, result, blob, dtype, heap, original_fvector);
+			return process_VSIM_finish<T>(db, result, blob, dtype, heap);
 		}
 
 		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
@@ -1740,7 +1740,7 @@ namespace net::worker::commands::Vectors{
 
 		//done: // label for goto
 
-			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, original_fvector);
+			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, original_fvector, bitVector);
 		}
 
 	private:
@@ -2208,7 +2208,7 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<T, 1>(db, result, blob, dtype, heap, original_fvector);
+			return process_VSIM_finish<T, 1>(db, result, blob, dtype, heap);
 		}
 
 		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
@@ -2253,7 +2253,7 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<bool, 1>(db, result, blob, dtype, heap, original_fvector);
+			return process_VSIM_finish<bool, 1>(db, result, blob, dtype, heap, original_fvector, bitVector);
 		}
 
 	private:

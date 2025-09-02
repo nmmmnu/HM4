@@ -822,14 +822,15 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 
 ##### Supported Metrics
 
-| Flag | Metric Name         | Description                                                                                                             |
-|:----:|---------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `E`  | **Euclidean (L2)**  | Standard straight-line distance between two points in Euclidean space.                                                  |
-| `M`  | **Manhattan (L1)**  | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.                        |
-| `C`  | **Cosine**          | Measures the cosine of the angle between two vectors (orientation, not magnitude). The result is transformed to be 0..1 |
-| `K`  | **Canberra**        | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.   |
-| `B`  | **Bit cosine**      | Works only on bit quantized vectors. Cosine distance for bit vectors. The result is transformed to be 0..1              |
-| `H`  | **Hamming**         | Works only on bit quantized vectors. The result is transformed to be 0..1                                               |
+| Flag | Metric Name         | Range    | Description                                                                                                             |
+|:----:|---------------------|----------|-------------------------------------------------------------------------------------------------------------------------|
+| `E`  | **Euclidean (L2)**  | 0 .. inf | Standard straight-line distance between two points in Euclidean space.                                                  |
+| `M`  | **Manhattan (L1)**  | 0 .. inf | Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.                        |
+| `C`  | **Cosine**          | 0 .. 1   | Measures the cosine of the angle between two vectors (orientation, not magnitude).                                      |
+| `K`  | **Canberra**        | 0 .. inf | A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.   |
+| `B`  | **Bit cosine**      | 0 .. 1   | Works only on bit quantized vectors. Cosine distance for bit vectors.                                                   |
+| `H`  | **Hamming**         | 0 .. 1   | Works only on bit quantized vectors.                                                                                    |
+| `D`  | **Dominating**      | 0 .. 1   | Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector.       |
 
 ##### When to Use Each Metric:
 
@@ -850,6 +851,10 @@ When performing vector similarity search in HM4 using commands like `VSIMFLAT`, 
 
 - **Bit cosine** `B` -
   Works only on bit quantized vectors. Similar to hamming, but result is "weighted" to be more "human understandable".
+
+- **Dominating** `D` -
+  Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector. Ideal for non AI generated vectors.
+
 
 
 
