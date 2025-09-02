@@ -844,9 +844,21 @@ namespace net::worker::commands::Vectors{
 
 			auto const scoreFix = [&]() -> float{
 							switch(dtype){
-							case DType::HAMMING		: return 1 / static_cast<float>(original_fvector.size());
-							case DType::BIT_DOMINATE	: return 1 / static_cast<float>(MyVectors::distanceDominatingPrepare(bit_vector));
-							default				: return 0;
+							case DType::HAMMING : {
+									if (auto const d = original_fvector.size(); d)
+										return 1 / static_cast<float>(d);
+									else
+										return 1;
+								}
+
+							case DType::BIT_DOMINATE : {
+									if (auto const d = MyVectors::distanceDominatingPrepare(bit_vector); d)
+										return 1 / static_cast<float>(d);
+									else
+										return 1;
+								}
+
+							default : return 0;
 							}
 						}();
 
