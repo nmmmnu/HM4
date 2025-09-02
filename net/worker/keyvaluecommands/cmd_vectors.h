@@ -848,14 +848,14 @@ namespace net::worker::commands::Vectors{
 									if (auto const d = original_fvector.size(); d)
 										return 1 / static_cast<float>(d);
 									else
-										return 1;
+										return 0;
 								}
 
 							case DType::BIT_DOMINATE : {
 									if (auto const d = MyVectors::distanceDominatingPrepare(bit_vector); d)
 										return 1 / static_cast<float>(d);
 									else
-										return 1;
+										return 0;
 								}
 
 							default : return 0;
@@ -878,14 +878,14 @@ namespace net::worker::commands::Vectors{
 
 				// SEARCH POST-CONDITION
 				auto const score = [&](auto score) -> float{
-					if constexpr(std::is_same_v<T, float>){
+					if constexpr(!std::is_same_v<T, bool>){
 						switch(dtype){
 						case DType::COSINE		:
 						case DType::MANHATTAN		:
 						case DType::CANBERRA		: return score;
 						case DType::EUCLIDEAN		: return std::sqrt(score);
 
-						default				: return 1; // will never come here.
+						default				: return 8888; // will never come here.
 						}
 					}else{
 						switch(dtype){
@@ -893,7 +893,7 @@ namespace net::worker::commands::Vectors{
 						case DType::BIT_COSINE		: return std::sqrt(score);
 						case DType::BIT_DOMINATE	: return 1 + score * scoreFix;
 
-						default				: return 1; // will never come here.
+						default				: return 8888; // will never come here.
 						}
 					}
 				}(it->score);
