@@ -265,13 +265,32 @@ namespace net::worker::commands::BITSET{
 
 
 			if (auto const val = hm4::getPairVal(*db, key); !std::empty(val)){
-				const uint8_t *bits = reinterpret_cast<const uint8_t *>(val.data());
-
-				// std::accumulate fails to compile
+				// const uint8_t *bits = reinterpret_cast<const uint8_t *>(val.data());
+				//
+				// // std::accumulate fails to compile
+				//
+				// uint64_t count = 0;
+				// for(auto it = bits; it != bits + val.size(); ++it)
+				// 	count += (uint64_t) __builtin_popcount(*it);
 
 				uint64_t count = 0;
-				for(auto it = bits; it != bits + val.size(); ++it)
-					count += (uint64_t) __builtin_popcount(*it);
+
+
+
+				size_t const size64 = val.size() / sizeof(uint64_t);
+
+				const uint64_t *bits64 = reinterpret_cast<const uint64_t *>(val.data());
+
+				#pragma GCC ivdep
+				for (size_t i = 0; i < size64; ++i)
+				    count += __builtin_popcountll(bits64[i]);
+
+				const uint8_t  *bits8  = reinterpret_cast<const uint8_t *>(bits64 + size64);
+
+				for (size_t i = 0; i < val.size() % sizeof(uint64_t); ++i)
+				    count += __builtin_popcount(bits8[i]);
+
+
 
 				return result.set(count);
 			}else{

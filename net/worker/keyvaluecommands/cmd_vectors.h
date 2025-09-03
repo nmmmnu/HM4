@@ -254,7 +254,7 @@ namespace net::worker::commands::Vectors{
 			MANHATTAN	,
 			COSINE		,
 			CANBERRA	,
-			HAMMING		,
+			BIT_HAMMING	,
 			BIT_COSINE	,
 			BIT_DOMINATE
 		};
@@ -279,7 +279,7 @@ namespace net::worker::commands::Vectors{
 			case 'K' :	return DType::CANBERRA		;
 
 			case 'h' :
-			case 'H' :	return DType::HAMMING		;
+			case 'H' :	return DType::BIT_HAMMING	;
 
 			case 'b' :
 			case 'B' :	return DType::BIT_COSINE	;
@@ -298,12 +298,12 @@ namespace net::worker::commands::Vectors{
 			case DType::COSINE		:
 			case DType::CANBERRA		:	return qtype != QType::BIT;
 
-			case DType::HAMMING		:
+			case DType::BIT_HAMMING		:
 			case DType::BIT_COSINE		:
 			case DType::BIT_DOMINATE	:	return qtype == QType::BIT;
 
-			case DType::UNKNOWN		:
-			default:				return false;
+			default				:
+			case DType::UNKNOWN		:	return false;
 			}
 		}
 
@@ -751,9 +751,6 @@ namespace net::worker::commands::Vectors{
 				auto const score = [&](auto const &a, auto const &b, auto const &aM, auto const &bM){
 					switch(dtype){
 					default:
-					case DType::HAMMING		:
-					case DType::BIT_COSINE		:
-					case DType::BIT_DOMINATE	:
 					case DType::COSINE		: return MyVectors::distanceCosine		(a, b,         {}, valueProjBE);
 					case DType::EUCLIDEAN		: return MyVectors::distanceEuclideanSquared	(a, b, aM, bM, {}, valueProjBE);
 					case DType::MANHATTAN		: return MyVectors::distanceManhattanPrepared	(a, b,     bM, {}, valueProjBE);
@@ -801,7 +798,7 @@ namespace net::worker::commands::Vectors{
 				auto const score = [&](auto const &a, auto const &b) -> float{
 					switch(dtype){
 					default:
-					case DType::HAMMING		: return MyVectors::distanceHammingFloat	(a, b);
+					case DType::BIT_HAMMING		: return MyVectors::distanceHammingFloat	(a, b);
 					case DType::BIT_COSINE		: return MyVectors::distanceCosineBit		(a, b);
 					case DType::BIT_DOMINATE	: return MyVectors::distanceDominatingPrepared	(a, b);
 					}
@@ -814,14 +811,10 @@ namespace net::worker::commands::Vectors{
 		constexpr float process_VSIM_prepareFVector(DType dtype, FVector &fvector){
 			// SEARCH PRE-CONDITION
 			switch(dtype){
-			default:
-			case DType::EUCLIDEAN	:
-			case DType::COSINE	: return MyVectors::normalizeInline(fvector);
+			case DType::EUCLIDEAN		:
+			case DType::COSINE		: return MyVectors::normalizeInline(fvector);
 
-			case DType::HAMMING	:
-			case DType::BIT_COSINE	:
-			case DType::CANBERRA	:
-			case DType::MANHATTAN	: return 1.f; /* skip normalization */
+			default				: return 1.f; /* skip normalization */
 			}
 		}
 
@@ -844,7 +837,7 @@ namespace net::worker::commands::Vectors{
 
 			auto const scoreFix = [&]() -> float{
 							switch(dtype){
-							case DType::HAMMING : {
+							case DType::BIT_HAMMING : {
 									if (auto const d = original_fvector.size(); d)
 										return 1 / static_cast<float>(d);
 									else
@@ -880,16 +873,16 @@ namespace net::worker::commands::Vectors{
 				auto const score = [&](auto score) -> float{
 					if constexpr(!std::is_same_v<T, bool>){
 						switch(dtype){
-						case DType::COSINE		:
-						case DType::MANHATTAN		:
-						case DType::CANBERRA		: return score;
 						case DType::EUCLIDEAN		: return std::sqrt(score);
+						case DType::MANHATTAN		:
+						case DType::COSINE		:
+						case DType::CANBERRA		: return score;
 
 						default				: return 8888; // will never come here.
 						}
 					}else{
 						switch(dtype){
-						case DType::HAMMING		: return score * scoreFix;
+						case DType::BIT_HAMMING		: return score * scoreFix;
 						case DType::BIT_COSINE		: return std::sqrt(score);
 						case DType::BIT_DOMINATE	: return 1 + score * scoreFix;
 
