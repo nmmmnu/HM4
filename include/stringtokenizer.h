@@ -2,9 +2,7 @@
 #define STRING_TOKENIZER_H
 
 #include <string_view>
-
-#include <cstdio>
-#include <iostream>
+#include <cstddef>
 
 class StringTokenizer{
 private:
