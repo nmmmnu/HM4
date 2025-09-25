@@ -988,17 +988,6 @@ Retrieves the raw representation of the vector from key  "word:cat".
 
 
 
-#### What is not working yet?
-
-- When HM4 search the index it always stops after specific number of scanned key-value pairs.
-  **VSIMFLAT**, **VSIMLSH** and **VKSIMFLAT** however have limit ot 1'000'000 key value pairs.
-  This was done in order to have easier testing with "Glove* family of vectors, but in some cases it may freeze the server for couple of seconds.
-  Note when standard release come out, **VSIMFLAT**, **VSIMLSH** and **VKSIMFLAT** will have additional argument for current prefix key a la **XNGET**.
-  This argument is currently not supported.
-
-
-
-
 
 
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
