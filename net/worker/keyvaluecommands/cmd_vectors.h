@@ -11,6 +11,7 @@
 #include "ilist/txguard.h"
 
 #include "mystring.h"
+#include "stringtokenizer.h"
 #include "hexconvert.h"
 #include "myhamming.h"
 #include "vectors.h"
@@ -50,7 +51,7 @@ namespace net::worker::commands::Vectors{
 			return "INVALID_DATA";
 		}
 
-		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
+		using P1 = shared::zsetmulti::Permutation1NoIndex;
 
 		constexpr bool isVectorsKeyValid(std::string_view key, std::string_view name){
 			return P1::valid(key, name, 4);
@@ -695,10 +696,12 @@ namespace net::worker::commands::Vectors{
 
 		constexpr static size_t VSIM_MAX_RESULTS = 5000;
 
+		static_assert(VSIM_MAX_RESULTS <= shared::config::ITERATIONS_RESULTS_MAX);
+
 		// 118KB, if sv is 16 bytes, same for bits
 		using VSIMHeap = StaticVector<VSIMHeapData, VSIM_MAX_RESULTS + 1>;
 
-		constexpr uint32_t ITERATIONS_LOOPS_VSIM = 1'000'000;
+		constexpr uint32_t ITERATIONS_LOOPS_VSIM = shared::config::ITERATIONS_LOOPS_MAX;
 
 
 
@@ -715,17 +718,23 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-		template<typename T, typename DBAdapter, typename StopPredicate>
-		void process_VSIM_range(DBAdapter &db,
+		template<typename T, bool StopImmediately = false, typename DBAdapter, typename StopPredicate>
+		std::string_view process_VSIM_range(DBAdapter &db,
 					StopPredicate predicate,
-					std::string_view prefix,
+					std::string_view startKey,
 					uint32_t const dim_ix,
 					DType dtype,
 					CFVector const original_fvector, float const original_magnitude,
 					uint32_t const results,
 					VSIMHeap &heap, uint32_t &iterations){
 
-			for(auto it = db->find(prefix); it != std::end(*db); ++it){
+			if constexpr(StopImmediately){
+				// check for stop condition with startKey
+				if (predicate(startKey))
+					return "";
+			}
+
+			for(auto it = db->find(startKey); it != std::end(*db); ++it){
 				auto const &key = it->getKey();
 
 				if (predicate(key))
@@ -734,7 +743,7 @@ namespace net::worker::commands::Vectors{
 				++iterations;
 
 				if (iterations > ITERATIONS_LOOPS_VSIM)
-					break;
+					return key;
 
 				if (!it->isOK())
 					continue;
@@ -760,19 +769,21 @@ namespace net::worker::commands::Vectors{
 
 				insertIntoHeap(results, heap, key, score);
 			}
+
+			return "";
 		}
 
 		template<typename DBAdapter, typename StopPredicate>
-		void process_VSIM_rangeBit(DBAdapter &db,
+		std::string_view process_VSIM_rangeBit(DBAdapter &db,
 					StopPredicate predicate,
-					std::string_view prefix,
+					std::string_view startKey,
 					uint32_t const dim_ix,
 					DType dtype,
 					std::string_view const original_bitVector,
 					uint32_t const results,
 					VSIMHeap &heap, uint32_t &iterations){
 
-			for(auto it = db->find(prefix); it != std::end(*db); ++it){
+			for(auto it = db->find(startKey); it != std::end(*db); ++it){
 				auto const &key = it->getKey();
 
 				if (predicate(key))
@@ -781,7 +792,7 @@ namespace net::worker::commands::Vectors{
 				++iterations;
 
 				if (iterations > ITERATIONS_LOOPS_VSIM)
-					break;
+					return key;
 
 				if (!it->isOK())
 					continue;
@@ -806,6 +817,8 @@ namespace net::worker::commands::Vectors{
 
 				insertIntoHeap(results, heap, key, score);
 			}
+
+			return "";
 		}
 
 		constexpr float process_VSIM_prepareFVector(DType dtype, FVector &fvector){
@@ -824,6 +837,7 @@ namespace net::worker::commands::Vectors{
 		template<typename T, bool FullKey = false, typename Protocol, typename DBAdapter>
 		void process_VSIM_finish(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
 					DType dtype, VSIMHeap &heap,
+					std::string_view tail,
 						CFVector         const original_fvector = {},
 						std::string_view const bit_vector       = {}
 					){
@@ -896,6 +910,8 @@ namespace net::worker::commands::Vectors{
 				container.push_back(val);
 			}
 
+			container.push_back(tail);
+
 			return result.set_container(container);
 		}
 
@@ -920,7 +936,9 @@ namespace net::worker::commands::Vectors{
 		/*
 		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 
 		VEC_TYPE:
 		B = binary BE
@@ -1122,9 +1140,11 @@ namespace net::worker::commands::Vectors{
 		// VGET words 300    I             frog
 
 		/*
-		QUANTIZE_TYPE
+		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -1190,9 +1210,11 @@ namespace net::worker::commands::Vectors{
 		// VGETHEX words 300    I             b            frog
 
 		/*
-		QUANTIZE_TYPE
+		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 
 		VEC_TYPE:
 		B = binary BE
@@ -1270,9 +1292,11 @@ namespace net::worker::commands::Vectors{
 		// VGETNORMALIZED words 300    I             frog
 
 		/*
-		QUANTIZE_TYPE
+		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -1334,14 +1358,16 @@ namespace net::worker::commands::Vectors{
 			return std::end(cmd);
 		};
 
-		// VSIMFLAT key   DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS
-		// VSIMFLAT words 300    300    F             C             b        BLOB 100
-		// VSIMFLAT words 300    300    I             C             b        BLOB 100
+		// VSIMFLAT key   DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS START
+		// VSIMFLAT words 300    300    F             C             b        BLOB 100     ''
+		// VSIMFLAT words 300    300    I             C             b        BLOB 100     dfssdhg
 
 		/*
 		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 
 		VEC_TYPE:
 		B = binary BE
@@ -1359,8 +1385,8 @@ namespace net::worker::commands::Vectors{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace vectors_impl_;
 
-			if (p.size() != 9)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_8);
+			if (p.size() != 9 && p.size() != 10)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
 
 			auto const keyN = p[1];
 
@@ -1410,11 +1436,13 @@ namespace net::worker::commands::Vectors{
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
+			auto const startKey = p.size() == 10 ? p[9] : "";
+
 			switch(qtype){
-			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
-			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
-			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
-			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, dim_ix, dtype, fvector,            results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, results);
+			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, startKey, dim_ix, dtype, fvector,            results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1423,7 +1451,7 @@ namespace net::worker::commands::Vectors{
 	private:
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
-				std::string_view keyN, uint32_t const dim_ix,
+				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
 				uint32_t const results ){
@@ -1431,7 +1459,7 @@ namespace net::worker::commands::Vectors{
 			using namespace vectors_impl_;
 
 			auto &heap = blob.construct<VSIMHeap>();
-			// heap_.clear();
+			// heap.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
 			std::string_view const rangeHash = "00";
@@ -1440,15 +1468,21 @@ namespace net::worker::commands::Vectors{
 
 			auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
 
-			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range" << rangeHash[0] << rangeHash[1];
-
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range prefix" << prefix << "start key" << (startKey.empty() ? "(none)" : startKey);
+
+			if (startKey.empty()){
+				startKey = prefix;
+				logger<Logger::DEBUG>() << "VSIM.FLAT" << "start key change" << startKey;
+			}
 
 			uint32_t iterations = 0;
 
-			process_VSIM_range<T>(	db,
+			auto const tail = process_VSIM_range<T>(
+						db,
 						stop,
-						prefix,
+						startKey,
 						dim_ix,
 						dtype,
 						original_fvector, original_magnitude,
@@ -1459,11 +1493,11 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<T>(db, result, blob, dtype, heap);
+			return process_VSIM_finish<T>(db, result, blob, dtype, heap, tail);
 		}
 
 		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
-				std::string_view keyN, uint32_t const dim_ix,
+				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector,
 				uint32_t const results ){
@@ -1491,15 +1525,21 @@ namespace net::worker::commands::Vectors{
 
 			auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
 
-			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range" << rangeHash[0] << rangeHash[1];
-
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range prefix" << prefix << "start key" << (startKey.empty() ? "(none)" : startKey);
+
+			if (startKey.empty()){
+				startKey = prefix;
+				logger<Logger::DEBUG>() << "VSIM.FLAT" << "start key change" << startKey;
+			}
 
 			uint32_t iterations = 0;
 
-			process_VSIM_rangeBit(	db,
+			auto const tail = process_VSIM_rangeBit(
+						db,
 						stop,
-						prefix,
+						startKey,
 						dim_ix,
 						dtype,
 						bitVector,
@@ -1510,7 +1550,7 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, original_fvector, bitVector);
+			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
 
 	private:
@@ -1531,14 +1571,16 @@ namespace net::worker::commands::Vectors{
 			return std::end(cmd);
 		};
 
-		// VSIMFLAT key   DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS
-		// VSIMFLAT words 300    300    F             C             b        BLOB 100
-		// VSIMFLAT words 300    300    I             C             b        BLOB 100
+		// VSIMLSH key   DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS START
+		// VSIMLSH words 300    300    F             C             b        BLOB 100     ''
+		// VSIMLSH words 300    300    I             C             b        BLOB 100     dfssdhg
 
 		/*
 		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 
 		VEC_TYPE:
 		B = binary BE
@@ -1556,8 +1598,8 @@ namespace net::worker::commands::Vectors{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace vectors_impl_;
 
-			if (p.size() != 9)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_8);
+			if (p.size() != 9 && p.size() != 10)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
 
 			auto const keyN = p[1];
 
@@ -1611,11 +1653,13 @@ namespace net::worker::commands::Vectors{
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
+			auto const startKey = p.size() == 10 ? p[9] : "";
+
 			switch(qtype){
-			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, hashOut, results);
-			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, hashOut, results);
-			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, hashOut, results);
-			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, dim_ix, dtype, fvector,            hashOut, results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, hashOut, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, hashOut, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, hashOut, results);
+			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, startKey, dim_ix, dtype, fvector,            hashOut, results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1624,7 +1668,7 @@ namespace net::worker::commands::Vectors{
 	private:
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
-				std::string_view keyN, uint32_t const dim_ix,
+				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude, uint8_t const lsh,
 				uint32_t const results ){
@@ -1635,7 +1679,9 @@ namespace net::worker::commands::Vectors{
 			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			uint32_t iterations = 0;
+			uint32_t rangeIterations = 0;
+			uint32_t iterations      = 0;
+			std::string_view tail;
 
 			auto const nearLSH = hamming1Ranges(lsh);
 
@@ -1653,15 +1699,30 @@ namespace net::worker::commands::Vectors{
 				auto const prefix       = P1::template makeKey(bufferKey[0], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[0]);
 				auto const prefixFinish = P1::template makeKey(bufferKey[1], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[1]);
 
-				logger<Logger::DEBUG>() << "VSIM.LSH" << "range" << rangeHash[0] << rangeHash[1];
-
 				shared::stop_predicate::StopRangePredicate stop{ prefixFinish };
+
+				logger<Logger::DEBUG>() << "VSIM.LSH" << "range" << rangeHash[0] << rangeHash[1] << "range prefix" << prefix << prefixFinish << "start key" << (startKey.empty() ? "(none)" : startKey);
+
+				if (startKey.empty()){
+					// startKey.empty()
+
+					startKey = prefix;
+					logger<Logger::DEBUG>() << "VSIM.LSH" << "start key change" << startKey;
+				}else{
+					// check stop, because the startKey is user provided.
+
+					if (stop(startKey)){
+						// try next range
+						continue;
+					}
+				}
 
 				auto const iterations2 = iterations;
 
-				process_VSIM_range<T>(	db,
+				tail = process_VSIM_range<T>(
+							db,
 							stop,
-							prefix,
+							startKey,
 							dim_ix,
 							dtype,
 							original_fvector, original_magnitude,
@@ -1670,18 +1731,26 @@ namespace net::worker::commands::Vectors{
 							iterations
 				);
 
+				++rangeIterations;
+
 				logger<Logger::DEBUG>() << "VSIM.LSH" << "range finish" << (iterations - iterations2) << "vectors";
+
+				if (tail.empty()){
+					startKey = "";
+				}else{
+					break;
+				}
 			}
 
-			logger<Logger::DEBUG>() << "VSIM.LSH" << "total ranges" << nearLSH.size() << "scanned total" << iterations << "vectors";
+			logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "total ranges" << rangeIterations << "of" << nearLSH.size() << "scanned total" << iterations << "vectors";
 
 		//done: // label for goto
 
-			return process_VSIM_finish<T>(db, result, blob, dtype, heap);
+			return process_VSIM_finish<T>(db, result, blob, dtype, heap, tail);
 		}
 
 		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
-				std::string_view keyN, uint32_t const dim_ix,
+				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, uint8_t const lsh,
 				uint32_t const results ){
@@ -1703,7 +1772,9 @@ namespace net::worker::commands::Vectors{
 			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			uint32_t iterations = 0;
+			uint32_t rangeIterations = 0;
+			uint32_t iterations      = 0;
+			std::string_view tail;
 
 			auto const nearLSH = hamming1Ranges(lsh);
 
@@ -1721,15 +1792,29 @@ namespace net::worker::commands::Vectors{
 				auto const prefix       = P1::template makeKey(bufferKey[0], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[0]);
 				auto const prefixFinish = P1::template makeKey(bufferKey[1], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[1]);
 
-				logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "range" << rangeHash[0] << rangeHash[1];
-
 				shared::stop_predicate::StopRangePredicate stop{ prefixFinish };
+
+				logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "range" << rangeHash[0] << rangeHash[1] << "range prefix" << prefix << prefixFinish << "start key" << (startKey.empty() ? "(none)" : startKey);
+
+				if (startKey.empty()){
+					// startKey.empty()
+
+					startKey = prefix;
+					logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "start key change" << startKey;
+				}else{
+					// check stop, because the startKey is user provided.
+
+					if (stop(startKey)){
+						// try next range
+						continue;
+					}
+				}
 
 				auto const iterations2 = iterations;
 
-				process_VSIM_rangeBit(	db,
+				tail = process_VSIM_rangeBit(	db,
 							stop,
-							prefix,
+							startKey,
 							dim_ix,
 							dtype,
 							bitVector,
@@ -1738,14 +1823,22 @@ namespace net::worker::commands::Vectors{
 							iterations
 				);
 
+				++rangeIterations;
+
 				logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "range finish" << (iterations - iterations2) << "vectors";
+
+				if (tail.empty()){
+					startKey = "";
+				}else{
+					break;
+				}
 			}
 
-			logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "total ranges" << nearLSH.size() << "scanned total" << iterations << "vectors";
+			logger<Logger::DEBUG>() << "VSIM.LSH.BIT" << "total ranges" << rangeIterations << "of" << nearLSH.size() << "scanned total" << iterations << "vectors";
 
 		//done: // label for goto
 
-			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, original_fvector, bitVector);
+			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
 
 	private:
@@ -1773,7 +1866,9 @@ namespace net::worker::commands::Vectors{
 		/*
 		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 
 		VEC_TYPE:
 		B = binary BE
@@ -1904,9 +1999,11 @@ namespace net::worker::commands::Vectors{
 		// VKGET word:cat 300    I
 
 		/*
-		QUANTIZE_TYPE
+		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -1964,9 +2061,11 @@ namespace net::worker::commands::Vectors{
 		// VKGETHEX words 300    I             b
 
 		/*
-		QUANTIZE_TYPE
+		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 
 		VEC_TYPE:
 		B = binary BE
@@ -2036,9 +2135,11 @@ namespace net::worker::commands::Vectors{
 		// VKGETNORMALIZED words 300    I
 
 		/*
-		QUANTIZE_TYPE
+		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -2092,14 +2193,16 @@ namespace net::worker::commands::Vectors{
 			return std::end(cmd);
 		};
 
-		// VSIMFLAT prefix DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS
-		// VSIMFLAT words: 300    300    F             C             b        BLOB 100
-		// VSIMFLAT words: 300    300    I             C             b        BLOB 100
+		// VSIMFLAT prefix DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS START
+		// VSIMFLAT words: 300    300    F             C             b        BLOB 100     ''
+		// VSIMFLAT words: 300    300    I             C             b        BLOB 100     dfssdhg
 
 		/*
 		QUANTIZE_TYPE:
 		F = float	e.g. do not quantize
+		S = int16
 		I = int8
+		B = bit
 
 		VEC_TYPE:
 		B = binary BE
@@ -2117,8 +2220,8 @@ namespace net::worker::commands::Vectors{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace vectors_impl_;
 
-			if (p.size() != 9)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_8);
+			if (p.size() != 9 && p.size() != 10)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
 
 			auto const keyN = p[1];
 
@@ -2170,11 +2273,13 @@ namespace net::worker::commands::Vectors{
 
 			auto const results = std::clamp<uint32_t>(from_string<uint32_t>(p[8]), 1, VSIM_MAX_RESULTS);
 
+			auto const startKey = p.size() == 10 ? p[9] : "";
+
 			switch(qtype){
-			case QType::F32	: return process_<float		>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
-			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
-			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, dim_ix, dtype, fvector, magnitude, results);
-			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, dim_ix, dtype, fvector,            results);
+			case QType::F32	: return process_<float		>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I16	: return process_<int16_t	>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, results);
+			case QType::I8	: return process_<int8_t	>(db, result, blob, keyN, startKey, dim_ix, dtype, fvector, magnitude, results);
+			case QType::BIT	: return process_bit_		 (db, result, blob, keyN, startKey, dim_ix, dtype, fvector,            results);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -2183,10 +2288,11 @@ namespace net::worker::commands::Vectors{
 	private:
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
-				std::string_view prefix, uint32_t const dim_ix,
+				std::string_view prefix, std::string_view startKey,
+				uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
-				uint32_t const results ){
+				uint32_t const results){
 
 			using namespace vectors_impl_;
 
@@ -2194,15 +2300,21 @@ namespace net::worker::commands::Vectors{
 			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range prefix" << prefix;
-
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
+
+			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range prefix" << prefix << "start key" << (startKey.empty() ? "(none)" : startKey);
+
+			if (startKey.empty()){
+				startKey = prefix;
+				logger<Logger::DEBUG>() << "VSIM.FLAT" << "start key change" << startKey;
+			}
 
 			uint32_t iterations = 0;
 
-			process_VSIM_range<T>(	db,
+			auto const tail = process_VSIM_range<T>(
+						db,
 						stop,
-						prefix,
+						startKey,
 						dim_ix,
 						dtype,
 						original_fvector, original_magnitude,
@@ -2213,14 +2325,15 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VKSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<T, 1>(db, result, blob, dtype, heap);
+			return process_VSIM_finish<T, 1>(db, result, blob, dtype, heap, tail);
 		}
 
 		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
-				std::string_view prefix, uint32_t const dim_ix,
+				std::string_view prefix, std::string_view startKey,
+				uint32_t const dim_ix,
 				vectors_impl_::DType dtype,
 				CFVector const original_fvector,
-				uint32_t const results ){
+				uint32_t const results){
 
 			using namespace vectors_impl_;
 
@@ -2239,15 +2352,21 @@ namespace net::worker::commands::Vectors{
 			// heap_.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range prefix" << prefix;
-
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
+
+			logger<Logger::DEBUG>() << "VKSIM.FLAT.BIT" << "range prefix" << prefix << "start key" << (startKey.empty() ? "(none)" : startKey);
+
+			if (startKey.empty()){
+				startKey = prefix;
+				logger<Logger::DEBUG>() << "VSIM.FLAT" << "start key change" << startKey;
+			}
 
 			uint32_t iterations = 0;
 
-			process_VSIM_rangeBit(	db,
+			auto const tail = process_VSIM_rangeBit(
+						db,
 						stop,
-						prefix,
+						startKey,
 						dim_ix,
 						dtype,
 						bitVector,
@@ -2258,7 +2377,7 @@ namespace net::worker::commands::Vectors{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT.BIT" << "range finish" << iterations << "vectors";
 
-			return process_VSIM_finish<bool, 1>(db, result, blob, dtype, heap, original_fvector, bitVector);
+			return process_VSIM_finish<bool, 1>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
 
 	private:

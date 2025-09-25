@@ -46,13 +46,22 @@ printf("Loaded %d vectors\n", $i);
 function process_vector($key, & $vector){
 	global $redis;
 
-	if (1){
+	if (0){
 		$x = $redis->rawCommand(
 			"VADD",
 			"gb150",
 			300, 150, "b",
 			"h", vhex($vector),
 			$key
+		);
+	}
+
+	if (1){
+		$x = $redis->rawCommand(
+			"VKSET",
+			"gkf150:$key",
+			300, 150, "f",
+			"h", vhex($vector)
 		);
 	}
 
