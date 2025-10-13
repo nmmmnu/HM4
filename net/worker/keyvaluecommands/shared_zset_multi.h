@@ -58,44 +58,6 @@ namespace net::worker::shared::zsetmulti{
 			}
 		}
 
-		#if 0
-		constexpr auto s2u_2(std::string_view s){
-			using T = uint16_t;
-
-			auto _ = [s](size_t i){
-				return T(s[i]) << (8 * i);
-			};
-
-			T const up = 0x2020;
-
-			return _(0) | _(1) | up;
-		}
-
-		constexpr auto s2u_3(std::string_view s){
-			using T = uint32_t;
-
-			auto _ = [s](size_t i){
-				return T(s[i]) << (8 * i);
-			};
-
-			T const up = 0x202020;
-
-			return _(0) | _(1) | _(2) | up;
-		}
-
-		constexpr auto s2u_4(std::string_view s){
-			using T = uint32_t;
-
-			auto _ = [s](size_t i){
-				return T(s[i]) << (8 * i);
-			};
-
-			T const up = 0x20202020;
-
-			return _(0) | _(1) | _(2) | _(3) | up;
-		}
-		#endif
-
 	} // namespace impl_
 
 
@@ -153,67 +115,80 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view /* txt */,
 					std::string_view a = "", std::string_view b = ""){
 
-			auto const separator_last = [separator](){
-				(void) separator;
+			// things we do for reading + performance :)
+			if constexpr(LAST_SEPARATOR){
+				if (a.empty())
+					return concatenateBuffer(bufferKey,
+							key	,	separator
+					);
 
-				if constexpr(LAST_SEPARATOR)
-					return separator;
-				else
-					return "";
-			}();
+				if (b.empty())
+					return concatenateBuffer(bufferKey,
+							key	,	separator	,
+							a	,	separator
+					);
 
-			uint64_t const x =
-				(a.empty() ? 0x00 : 0xA0) |
-				(b.empty() ? 0x00 : 0x0B) |
-				0;
+				if constexpr(1)
+					return concatenateBuffer(bufferKey,
+							key	,	separator	,
+							a	,	separator	,
+							b
+					);
+			}else{
+				if (a.empty())
+					return concatenateBuffer(bufferKey,
+							key	,	separator
+					);
 
-			switch(x){
-			default:
-			case 0x00:
-				return concatenateBuffer(bufferKey,
-						key	,	separator
-				);
+				if (b.empty())
+					return concatenateBuffer(bufferKey,
+							key	,	separator	,
+							a		// missing separator
+					);
 
-			case 0xA0:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						a	,	separator_last
-				);
-
-			case 0xAB:
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						a	,	separator	,
-						b
-				);
+				if constexpr(1)
+					return concatenateBuffer(bufferKey,
+							key	,	separator	,
+							a	,	separator	,
+							b
+					);
 			}
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
+					std::string_view ix0
+				){
 
 			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-					indexes[0]	,	separator	,
+					keyN	,		separator	,
+						ix0	,	separator	,
 					keySub
 			);
+		}
+
+		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return makeKeyData(bufferKey, separator, keyN, keySub, indexes[0]);
 		}
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const A = indexes[0];
 
-			auto _ = [&](std::string_view txt, std::string_view a){
+			auto _ = [&](std::string_view, std::string_view a){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, keySub);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, a);
 
 				func(key);
 			};
 
-			// old style not supports txt
+			// old style not supports txt, nor order
 			_("X", A);
 		}
 	};
@@ -230,13 +205,13 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~_~A~keySub, 3 * ~ + _
-			return hm4::Pair::isCompositeKeyValid(3 * 1 + 1 + more, keyN, keySub);
+			// keyN~A~a~keySub, (N + 2) * ~ + N -> {A}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~_~A~keySub, 3 * ~ + _
-			return hm4::Pair::isCompositeKeyValid(3 * 1 + 1 + more, keyN, keySub, indexes[0]);
+			// keyN~A~a~keySub, (N + 2) * ~ + N -> {A}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view /* separator */, std::array<std::string_view, N> const &indexes){
@@ -258,46 +233,52 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = ""){
 
-			uint64_t const x =
-				(a.empty() ? 0x00 : 0xA0) |
-				(b.empty() ? 0x00 : 0x0B) |
-				0;
-
-			switch(x){
-			default:
-			case 0x00:
+			if (a.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator
 				);
 
-			case 0xA0:
+			if (b.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator
 				);
 
-			case 0xAB:
+			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator	,
 						b
 				);
-			}
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
+						std::string_view txt,
+							std::string_view ix0
+				){
 
 			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-					"A"		,	separator	,
-					indexes[0]	,	separator	,
+					keyN	,		separator	,
+					txt	,		separator	,
+						ix0	,	separator	,
 					keySub
+			);
+		}
+
+
+		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return makeKeyData(bufferKey, separator, keyN, keySub,
+								"A",
+									indexes[0]
 			);
 		}
 
@@ -308,29 +289,13 @@ namespace net::worker::shared::zsetmulti{
 			auto _ = [&](std::string_view txt, std::string_view a){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, keySub);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a);
 
 				func(key);
 			};
 
 			_("A", A);
 		}
-
-		#if 0
-		static std::string_view validateIndex(std::string_view s){
-			if (s.size() != 1)
-				return "";
-
-			char const up = 0x20;
-
-			char const x = s[0] | up;
-
-			if (x == 'A')
-				return "A";
-
-			return "";
-		}
-		#endif
 	};
 
 
@@ -340,13 +305,13 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 2;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~AB~A~B~keySub, 4 * ~ + AB
-			return hm4::Pair::isCompositeKeyValid(4 * 1 + 2 + more, keyN, keySub);
+			// keyN~AB~a~b~keySub, (N + 2) * ~ + N -> {AB}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~AB~A~B~keySub, 4 * ~ + AB
-			return hm4::Pair::isCompositeKeyValid(4 * 1 + 2 + more, keyN, keySub, indexes[0], indexes[1]);
+			// keyN~AB~a~b~keySub, (N + 2) * ~ + N -> {AB}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -368,28 +333,20 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = ""){
 
-			uint64_t const x =
-				(a.empty() ? 0x000 : 0xA00) |
-				(b.empty() ? 0x000 : 0x0B0) |
-				(c.empty() ? 0x000 : 0x00C) |
-				0;
-
-			switch(x){
-			default:
-			case 0x000:
+			if (a.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator
 				);
 
-			case 0xA00:
+			if (b.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator
 				);
 
-			case 0xAB0:
+			if (c.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -397,7 +354,7 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator
 				);
 
-			case 0xABC:
+			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -405,22 +362,38 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator	,
 						c
 				);
-			}
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
+						std::string_view txt,
+							std::string_view ix0,
+							std::string_view ix1
+				){
 
 			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-					"AB"		,	separator	,
-					indexes[0]	,	separator	,
-					indexes[1]	,	separator	,
+					keyN	,		separator	,
+					txt	,		separator	,
+						ix0	,	separator	,
+						ix1	,	separator	,
 					keySub
 			);
 		}
+
+
+		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return makeKeyData(bufferKey, separator, keyN, keySub,
+								"AB",
+									indexes[0],
+									indexes[1]
+			);
+		}
+
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
@@ -430,7 +403,7 @@ namespace net::worker::shared::zsetmulti{
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, keySub);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b);
 
 				func(key);
 			};
@@ -447,13 +420,13 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 3;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABC~A~B~C~keySub, 5 * ~ + ABC
-			return hm4::Pair::isCompositeKeyValid(5 * 1 + 3 + more, keyN, keySub);
+			// keyN~ABC~A~B~C~keySub, (N + 2) * ~ + N {ABC}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABC~A~B~C~keySub, 5 * ~ + ABC
-			return hm4::Pair::isCompositeKeyValid(5 * 1 + 3 + more, keyN, keySub, indexes[0], indexes[1], indexes[2]);
+			// keyN~ABC~A~B~C~keySub, (N + 2) * ~ + N {ABC}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -478,29 +451,20 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = ""){
 
-			uint64_t const x =
-				(a.empty() ? 0x0000 : 0xA000) |
-				(b.empty() ? 0x0000 : 0x0B00) |
-				(c.empty() ? 0x0000 : 0x00C0) |
-				(d.empty() ? 0x0000 : 0x000D) |
-				0;
-
-			switch(x){
-			default:
-			case 0x0000:
+			if (a.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator
 				);
 
-			case 0xA000:
+			if (b.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator
 				);
 
-			case 0xAB00:
+			if (c.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -508,7 +472,7 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator
 				);
 
-			case 0xABC0:
+			if (d.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -517,7 +481,7 @@ namespace net::worker::shared::zsetmulti{
 						c	,	separator
 				);
 
-			case 0xABCD:
+			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -526,21 +490,38 @@ namespace net::worker::shared::zsetmulti{
 						c	,	separator	,
 						d
 				);
-			}
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
+						std::string_view txt,
+							std::string_view ix0,
+							std::string_view ix1,
+							std::string_view ix2
+				){
 
 			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-					"ABC"		,	separator	,
-					indexes[0]	,	separator	,
-					indexes[1]	,	separator	,
-					indexes[2]	,	separator	,
+					keyN	,		separator	,
+					txt	,		separator	,
+						ix0	,	separator	,
+						ix1	,	separator	,
+						ix2	,	separator	,
 					keySub
+			);
+		}
+
+
+		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return makeKeyData(bufferKey, separator, keyN, keySub,
+								"ABC",
+									indexes[0],
+									indexes[1],
+									indexes[2]
 			);
 		}
 
@@ -553,7 +534,7 @@ namespace net::worker::shared::zsetmulti{
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, keySub);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c);
 
 				func(key);
 			};
@@ -575,13 +556,13 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 4;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABCD~A~B~C~D~keySub, 6 * ~ + ABCD
-			return hm4::Pair::isCompositeKeyValid(6 * 1 + 4 + more, keyN, keySub);
+			// keyN~ABCD~A~B~C~D~keySub, (N + 2) * ~ + N {ABCD}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABCD~A~B~C~D~keySub, 6 * ~ + ABCD
-			return hm4::Pair::isCompositeKeyValid(6 * 1 + 4 + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3]);
+			// keyN~ABCD~A~B~C~D~keySub, (N + 2) * ~ + N {ABCD}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -607,30 +588,20 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = "", std::string_view e = ""){
 
-			uint64_t const x =
-				(a.empty() ? 0x00000 : 0xA0000) |
-				(b.empty() ? 0x00000 : 0x0B000) |
-				(c.empty() ? 0x00000 : 0x00C00) |
-				(d.empty() ? 0x00000 : 0x000D0) |
-				(e.empty() ? 0x00000 : 0x0000E) |
-				0;
-
-			switch(x){
-			default:
-			case 0x00000:
+			if (a.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator
 				);
 
-			case 0xA0000:
+			if (b.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator
 				);
 
-			case 0xAB000:
+			if (c.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -638,7 +609,7 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator
 				);
 
-			case 0xABC00:
+			if (d.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -647,7 +618,7 @@ namespace net::worker::shared::zsetmulti{
 						c	,	separator
 				);
 
-			case 0xABCD0:
+			if (e.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -657,7 +628,7 @@ namespace net::worker::shared::zsetmulti{
 						d	,	separator
 				);
 
-			case 0xABCDE:
+			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -667,22 +638,41 @@ namespace net::worker::shared::zsetmulti{
 						d	,	separator	,
 						e
 				);
-			}
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
+						std::string_view txt,
+							std::string_view ix0,
+							std::string_view ix1,
+							std::string_view ix2,
+							std::string_view ix3
+				){
 
 			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-					"ABCD"		,	separator	,
-					indexes[0]	,	separator	,
-					indexes[1]	,	separator	,
-					indexes[2]	,	separator	,
-					indexes[3]	,	separator	,
+					keyN	,		separator	,
+					txt	,		separator	,
+						ix0	,	separator	,
+						ix1	,	separator	,
+						ix2	,	separator	,
+						ix3	,	separator	,
 					keySub
+			);
+		}
+
+
+		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return makeKeyData(bufferKey, separator, keyN, keySub,
+								"ABCD",
+									indexes[0],
+									indexes[1],
+									indexes[2],
+									indexes[3]
 			);
 		}
 
@@ -696,7 +686,7 @@ namespace net::worker::shared::zsetmulti{
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c, std::string_view d){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, keySub);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d);
 
 				func(key);
 			};
@@ -735,13 +725,13 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 5;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABCDE~A~B~C~D~E~keySub, 7 * ~ + ABCDE
-			return hm4::Pair::isCompositeKeyValid(7 * 1 + 5 + more, keyN, keySub);
+			// keyN~ABCDE~A~B~C~D~E~keySub, (N + 2) * ~ + N {ABCDE}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABCDE~A~B~C~D~E~keySub, 7 * ~ + ABCDE
-			return hm4::Pair::isCompositeKeyValid(7 * 1 + 5 + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3], indexes[4]);
+			// keyN~ABCDE~A~B~C~D~E~keySub, (N + 2) * ~ + N {ABCDE}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3], indexes[4]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -769,31 +759,20 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view a = "", std::string_view b = "", std::string_view c = "",
 					std::string_view d = "", std::string_view e = "", std::string_view f = ""){
 
-			uint64_t const x =
-				(a.empty() ? 0x000000 : 0xA00000) |
-				(b.empty() ? 0x000000 : 0x0B0000) |
-				(c.empty() ? 0x000000 : 0x00C000) |
-				(d.empty() ? 0x000000 : 0x000D00) |
-				(e.empty() ? 0x000000 : 0x0000E0) |
-				(f.empty() ? 0x000000 : 0x00000F) |
-				0;
-
-			switch(x){
-			default:
-			case 0x000000:
+			if (a.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator
 				);
 
-			case 0xA00000:
+			if (b.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator
 				);
 
-			case 0xAB0000:
+			if (c.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -801,7 +780,7 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator
 				);
 
-			case 0xABC000:
+			if (d.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -810,7 +789,7 @@ namespace net::worker::shared::zsetmulti{
 						c	,	separator
 				);
 
-			case 0xABCD00:
+			if (e.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -820,7 +799,7 @@ namespace net::worker::shared::zsetmulti{
 						d	,	separator
 				);
 
-			case 0xABCDE0:
+			if (f.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -831,7 +810,7 @@ namespace net::worker::shared::zsetmulti{
 						e	,	separator
 				);
 
-			case 0xABCDEF:
+			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -842,23 +821,44 @@ namespace net::worker::shared::zsetmulti{
 						e	,	separator	,
 						f
 				);
-			}
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
+						std::string_view txt,
+							std::string_view ix0,
+							std::string_view ix1,
+							std::string_view ix2,
+							std::string_view ix3,
+							std::string_view ix4
+				){
 
 			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-					"ABCDE"		,	separator	,
-					indexes[0]	,	separator	,
-					indexes[1]	,	separator	,
-					indexes[2]	,	separator	,
-					indexes[3]	,	separator	,
-					indexes[4]	,	separator	,
+					keyN	,		separator	,
+					txt	,		separator	,
+						ix0	,	separator	,
+						ix1	,	separator	,
+						ix2	,	separator	,
+						ix3	,	separator	,
+						ix4	,	separator	,
 					keySub
+			);
+		}
+
+
+		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return makeKeyData(bufferKey, separator, keyN, keySub,
+								"ABCDE",
+									indexes[0],
+									indexes[1],
+									indexes[2],
+									indexes[3],
+									indexes[4]
 			);
 		}
 
@@ -876,7 +876,7 @@ namespace net::worker::shared::zsetmulti{
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e, keySub);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e);
 
 				func(key);
 			};
@@ -1014,13 +1014,13 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 6;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABCDEF~A~B~C~D~E~F~keySub, 8 * ~ + ABCDEF
-			return hm4::Pair::isCompositeKeyValid(8 * 1 + 6 + more, keyN, keySub);
+			// keyN~ABCDEF~A~B~C~D~E~F~keySub, (N + 2) * ~ + N {ABCDE}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABCDEF~A~B~C~D~E~F~keySub, 8 * ~ + ABCDEF
-			return hm4::Pair::isCompositeKeyValid(8 * 1 + 6 + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3], indexes[4]);
+			// keyN~ABCDEF~A~B~C~D~E~F~keySub, (N + 2) * ~ + N {ABCDE}
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3], indexes[4]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -1050,32 +1050,20 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view d = "", std::string_view e = "", std::string_view f = "",
 					std::string_view g = ""){
 
-			uint64_t const x =
-				(a.empty() ? 0x0000000 : 0xA000000) |
-				(b.empty() ? 0x0000000 : 0x0B00000) |
-				(c.empty() ? 0x0000000 : 0x00C0000) |
-				(d.empty() ? 0x0000000 : 0x000D000) |
-				(e.empty() ? 0x0000000 : 0x0000E00) |
-				(f.empty() ? 0x0000000 : 0x00000F0) |
-				(f.empty() ? 0x0000000 : 0x0000001) |
-				0;
-
-			switch(x){
-			default:
-			case 0x0000000:
+			if (a.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator
 				);
 
-			case 0xA000000:
+			if (b.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator
 				);
 
-			case 0xAB00000:
+			if (c.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -1083,7 +1071,7 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator
 				);
 
-			case 0xABC0000:
+			if (d.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -1092,7 +1080,7 @@ namespace net::worker::shared::zsetmulti{
 						c	,	separator
 				);
 
-			case 0xABCD000:
+			if (e.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -1102,7 +1090,7 @@ namespace net::worker::shared::zsetmulti{
 						d	,	separator
 				);
 
-			case 0xABCDE00:
+			if (f.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -1113,7 +1101,7 @@ namespace net::worker::shared::zsetmulti{
 						e	,	separator
 				);
 
-			case 0xABCDEF0:
+			if (g.empty())
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -1125,7 +1113,7 @@ namespace net::worker::shared::zsetmulti{
 						f	,	separator
 				);
 
-			case 0xABCDEF1:
+			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
@@ -1137,24 +1125,46 @@ namespace net::worker::shared::zsetmulti{
 						f	,	separator	,
 						g
 				);
-			}
 		}
 
 		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
+						std::string_view txt,
+							std::string_view ix0,
+							std::string_view ix1,
+							std::string_view ix2,
+							std::string_view ix3,
+							std::string_view ix4,
+							std::string_view ix5
+				){
 
 			return concatenateBuffer(bufferKey,
-					keyN		,	separator	,
-					"ABCDEF"	,	separator	,
-					indexes[0]	,	separator	,
-					indexes[1]	,	separator	,
-					indexes[2]	,	separator	,
-					indexes[3]	,	separator	,
-					indexes[4]	,	separator	,
-					indexes[5]	,	separator	,
+					keyN	,		separator	,
+					txt	,		separator	,
+						ix0	,	separator	,
+						ix1	,	separator	,
+						ix2	,	separator	,
+						ix3	,	separator	,
+						ix4	,	separator	,
+						ix5	,	separator	,
 					keySub
+			);
+		}
+
+		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::array<std::string_view, N> const &indexes){
+
+			return makeKeyData(bufferKey, separator, keyN, keySub,
+								"ABCDEF",
+									indexes[0],
+									indexes[1],
+									indexes[2],
+									indexes[3],
+									indexes[4],
+									indexes[5]
 			);
 		}
 
@@ -1173,7 +1183,7 @@ namespace net::worker::shared::zsetmulti{
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKey(bufferKey, separator, keyN, txt, a, b, c, d, e, f, keySub);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e, f);
 
 				func(key);
 			};
@@ -1637,7 +1647,7 @@ namespace net::worker::shared::zsetmulti{
 
 				if (Permutation::valid(keyN, keySub, indexes)){
 					hm4::PairBufferKey bufferKeyData;
-					auto const keyData = Permutation::makeKeyData(bufferKeyData, DBAdapter::SEPARATOR, keyN, keySub, indexes);
+					auto const keyData = Permutation::makeKeyDataFirst(bufferKeyData, DBAdapter::SEPARATOR, keyN, keySub, indexes);
 
 					logger<Logger::DEBUG>() << "ZSetMulti::GET: data key" << keyData;
 
