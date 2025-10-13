@@ -113,7 +113,7 @@ namespace net::worker::shared::zsetmulti{
 		static std::string_view makeKeyRangeN(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 				//	std::string_view /* txt */,
-					std::string_view a = "", std::string_view b = ""){
+					std::string_view a = ""){
 
 			// things we do for reading + performance :)
 			if constexpr(LAST_SEPARATOR){
@@ -122,17 +122,10 @@ namespace net::worker::shared::zsetmulti{
 							key	,	separator
 					);
 
-				if (b.empty())
-					return concatenateBuffer(bufferKey,
-							key	,	separator	,
-							a	,	separator
-					);
-
 				if constexpr(1)
 					return concatenateBuffer(bufferKey,
 							key	,	separator	,
-							a	,	separator	,
-							b
+							a	,	separator
 					);
 			}else{
 				if (a.empty())
@@ -140,17 +133,10 @@ namespace net::worker::shared::zsetmulti{
 							key	,	separator
 					);
 
-				if (b.empty())
-					return concatenateBuffer(bufferKey,
-							key	,	separator	,
-							a		// missing separator
-					);
-
 				if constexpr(1)
 					return concatenateBuffer(bufferKey,
 							key	,	separator	,
-							a	,	separator	,
-							b
+							a		// missing separator
 					);
 			}
 		}
@@ -230,7 +216,7 @@ namespace net::worker::shared::zsetmulti{
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
-					std::string_view a = "", std::string_view b = ""){
+					std::string_view a = ""){
 
 			if (a.empty())
 				return concatenateBuffer(bufferKey,
@@ -238,19 +224,11 @@ namespace net::worker::shared::zsetmulti{
 						txt	,	separator
 				);
 
-			if (b.empty())
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator
-				);
-
 			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
-						a	,	separator	,
-						b
+						a	,	separator
 				);
 		}
 
@@ -330,7 +308,7 @@ namespace net::worker::shared::zsetmulti{
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
-					std::string_view a = "", std::string_view b = "", std::string_view c = ""){
+					std::string_view a = "", std::string_view b = ""){
 
 			if (a.empty())
 				return concatenateBuffer(bufferKey,
@@ -345,21 +323,12 @@ namespace net::worker::shared::zsetmulti{
 						a	,	separator
 				);
 
-			if (c.empty())
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator
-				);
-
 			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator	,
-						b	,	separator	,
-						c
+						b	,	separator
 				);
 		}
 
@@ -448,7 +417,7 @@ namespace net::worker::shared::zsetmulti{
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
-					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = ""){
+					std::string_view a = "", std::string_view b = "", std::string_view c = ""){
 
 			if (a.empty())
 				return concatenateBuffer(bufferKey,
@@ -471,23 +440,13 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator
 				);
 
-			if (d.empty())
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator	,
-						c	,	separator
-				);
-
 			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
 						txt	,	separator	,
 						a	,	separator	,
 						b	,	separator	,
-						c	,	separator	,
-						d
+						c	,	separator
 				);
 		}
 
@@ -585,7 +544,7 @@ namespace net::worker::shared::zsetmulti{
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
-					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = "", std::string_view e = ""){
+					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = ""){
 
 			if (a.empty())
 				return concatenateBuffer(bufferKey,
@@ -617,16 +576,6 @@ namespace net::worker::shared::zsetmulti{
 						c	,	separator
 				);
 
-			if (e.empty())
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator	,
-						c	,	separator	,
-						d	,	separator
-				);
-
 			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
@@ -634,8 +583,7 @@ namespace net::worker::shared::zsetmulti{
 						a	,	separator	,
 						b	,	separator	,
 						c	,	separator	,
-						d	,	separator	,
-						e
+						d	,	separator
 				);
 		}
 
@@ -756,7 +704,7 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "",
-					std::string_view d = "", std::string_view e = "", std::string_view f = ""){
+					std::string_view d = "", std::string_view e = ""){
 
 			if (a.empty())
 				return concatenateBuffer(bufferKey,
@@ -798,17 +746,6 @@ namespace net::worker::shared::zsetmulti{
 						d	,	separator
 				);
 
-			if (f.empty())
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator	,
-						c	,	separator	,
-						d	,	separator	,
-						e	,	separator
-				);
-
 			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
@@ -817,8 +754,7 @@ namespace net::worker::shared::zsetmulti{
 						b	,	separator	,
 						c	,	separator	,
 						d	,	separator	,
-						e	,	separator	,
-						f
+						e	,	separator
 				);
 		}
 
@@ -1046,8 +982,7 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "",
-					std::string_view d = "", std::string_view e = "", std::string_view f = "",
-					std::string_view g = ""){
+					std::string_view d = "", std::string_view e = "", std::string_view f = ""){
 
 			if (a.empty())
 				return concatenateBuffer(bufferKey,
@@ -1100,18 +1035,6 @@ namespace net::worker::shared::zsetmulti{
 						e	,	separator
 				);
 
-			if (g.empty())
-				return concatenateBuffer(bufferKey,
-						key	,	separator	,
-						txt	,	separator	,
-						a	,	separator	,
-						b	,	separator	,
-						c	,	separator	,
-						d	,	separator	,
-						e	,	separator	,
-						f	,	separator
-				);
-
 			if constexpr(1)
 				return concatenateBuffer(bufferKey,
 						key	,	separator	,
@@ -1121,8 +1044,7 @@ namespace net::worker::shared::zsetmulti{
 						c	,	separator	,
 						d	,	separator	,
 						e	,	separator	,
-						f	,	separator	,
-						g
+						f	,	separator
 				);
 		}
 

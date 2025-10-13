@@ -1466,7 +1466,7 @@ namespace net::worker::commands::Vectors{
 
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
+			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, rangeHash);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
@@ -1523,7 +1523,7 @@ namespace net::worker::commands::Vectors{
 
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
+			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, rangeHash);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
