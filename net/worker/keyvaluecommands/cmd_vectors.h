@@ -1466,7 +1466,7 @@ namespace net::worker::commands::Vectors{
 
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
+			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
@@ -1523,7 +1523,7 @@ namespace net::worker::commands::Vectors{
 
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
+			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
@@ -1696,8 +1696,8 @@ namespace net::worker::commands::Vectors{
 
 				hm4::PairBufferKey bufferKey[2];
 
-				auto const prefix       = P1::template makeKey(bufferKey[0], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[0]);
-				auto const prefixFinish = P1::template makeKey(bufferKey[1], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[1]);
+				auto const prefix       = P1::makeKeyRangeN(bufferKey[0], DBAdapter::SEPARATOR, keyN, rangeHash[0]);
+				auto const prefixFinish = P1::makeKeyRangeN(bufferKey[1], DBAdapter::SEPARATOR, keyN, rangeHash[1]);
 
 				shared::stop_predicate::StopRangePredicate stop{ prefixFinish };
 
@@ -1789,8 +1789,8 @@ namespace net::worker::commands::Vectors{
 
 				hm4::PairBufferKey bufferKey[2];
 
-				auto const prefix       = P1::template makeKey(bufferKey[0], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[0]);
-				auto const prefixFinish = P1::template makeKey(bufferKey[1], DBAdapter::SEPARATOR, keyN, /* unused */ std::string_view{}, rangeHash[1]);
+				auto const prefix       = P1::makeKeyRangeN(bufferKey[0], DBAdapter::SEPARATOR, keyN, rangeHash[0]);
+				auto const prefixFinish = P1::makeKeyRangeN(bufferKey[1], DBAdapter::SEPARATOR, keyN, rangeHash[1]);
 
 				shared::stop_predicate::StopRangePredicate stop{ prefixFinish };
 

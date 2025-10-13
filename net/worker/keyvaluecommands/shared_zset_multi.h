@@ -110,9 +110,9 @@ namespace net::worker::shared::zsetmulti{
 		}
 
 		template<bool LAST_SEPARATOR = true>
-		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyRangeN(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
-					std::string_view /* txt */,
+				//	std::string_view /* txt */,
 					std::string_view a = "", std::string_view b = ""){
 
 			// things we do for reading + performance :)
@@ -180,7 +180,7 @@ namespace net::worker::shared::zsetmulti{
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const A = indexes[0];
 
-			auto _ = [&](std::string_view, std::string_view a){
+			auto _ = [&](std::string_view a){
 				hm4::PairBufferKey bufferKey;
 
 				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, a);
@@ -188,8 +188,7 @@ namespace net::worker::shared::zsetmulti{
 				func(key);
 			};
 
-			// old style not supports txt, nor order
-			_("X", A);
+			_(A);
 		}
 	};
 
@@ -228,7 +227,7 @@ namespace net::worker::shared::zsetmulti{
 			return std::array<std::string_view, N>{ _() };
 		}
 
-		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = ""){
@@ -328,7 +327,7 @@ namespace net::worker::shared::zsetmulti{
 			return std::array<std::string_view, N>{ _(), _() };
 		}
 
-		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = ""){
@@ -446,7 +445,7 @@ namespace net::worker::shared::zsetmulti{
 			return std::array<std::string_view, N>{ _(), _(), _() };
 		}
 
-		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = ""){
@@ -583,7 +582,7 @@ namespace net::worker::shared::zsetmulti{
 			return std::array<std::string_view, N>{ _(), _(), _(), _() };
 		}
 
-		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = "", std::string_view e = ""){
@@ -753,7 +752,7 @@ namespace net::worker::shared::zsetmulti{
 			return std::array<std::string_view, N>{ _(), _(), _(), _(), _() };
 		}
 
-		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "",
@@ -1043,7 +1042,7 @@ namespace net::worker::shared::zsetmulti{
 			return std::array<std::string_view, N>{ _(), _(), _(), _(), _(), _() };
 		}
 
-		static std::string_view makeKey(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
 					std::string_view a = "", std::string_view b = "", std::string_view c = "",

@@ -339,9 +339,9 @@ namespace net::worker::commands::Geo{
 			for(auto &hash : cells){
 				hm4::PairBufferKey bufferKey;
 
-				auto const prefix = P1::template makeKey<0>(bufferKey, DBAdapter::SEPARATOR,
+				auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR,
 								keyN	,
-								"X"	,	// old style not supports txt
+							//	"X"	,	// old style not supports txt
 								hash
 				);
 

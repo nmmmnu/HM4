@@ -69,9 +69,9 @@ namespace net::worker::commands::LinearCurve{
 
 				MC1Buffer buffer;
 
-				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
+				return P1::makeKeyRangeN(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN	,
-						"X"	,	// old style not supports txt
+					//	"X"	,	// old style not supports txt
 						toHex(x, buffer)
 				);
 			}();
@@ -129,9 +129,9 @@ namespace net::worker::commands::LinearCurve{
 
 			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, uint64_t x){
 				MC1Buffer buffer;
-				return P1::makeKey(bufferKey, DBAdapter::SEPARATOR,
+				return P1::makeKeyRangeN(bufferKey, DBAdapter::SEPARATOR,
 						keyN	,
-						"X"	,	// old style not supports txt
+					//	"X"	,	// old style not supports txt
 						toHex(x, buffer)
 				);
 			};

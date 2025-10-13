@@ -530,22 +530,22 @@ namespace net::worker::commands::Index{
 				};
 
 				if constexpr(N == 1)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1));
+					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1));
 
 				if constexpr(N == 2)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2));
+					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2));
 
 				if constexpr(N == 3)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3));
+					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3));
 
 				if constexpr(N == 4)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4));
+					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4));
 
 				if constexpr(N == 5)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5));
+					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5));
 
 				if constexpr(N == 6)
-					return PN::makeKey(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5), _(6));
+					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5), _(6));
 			}();
 
 			auto const key = keyStart.empty() ? prefix : keyStart;

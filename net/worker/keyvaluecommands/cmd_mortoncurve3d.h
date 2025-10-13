@@ -144,9 +144,9 @@ namespace net::worker::commands::MortonCurve3D{
 
 				MCBuffer buffer;
 
-				return P1::makeKey(bufferKeyPrefix, DBAdapter::SEPARATOR,
+				return P1::makeKeyRangeN(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN			,
-						"X"			,	// old style not supports txt
+					//	"X"			,	// old style not supports txt
 						toHex(point.vector, buffer)
 				);
 			}();
@@ -212,9 +212,9 @@ namespace net::worker::commands::MortonCurve3D{
 			auto createKey = [keyN](hm4::PairBufferKey &bufferKey, ZZZType zzz){
 				MCBuffer buffer;
 
-				return P1::makeKey(bufferKey, DBAdapter::SEPARATOR,
+				return P1::makeKeyRangeN(bufferKey, DBAdapter::SEPARATOR,
 						keyN			,
-						"X"			,	// old style not supports txt
+					//	"X"			,	// old style not supports txt
 						toHex(zzz, buffer)
 				);
 			};
