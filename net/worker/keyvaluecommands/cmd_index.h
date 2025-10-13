@@ -34,7 +34,7 @@ namespace net::worker::commands::Index{
 
 			auto proj = [separator](std::string_view x){
 				// a~ABC~a~b~c~d
-				return extractNth_(N + 2, separator, x);
+				return extractNth_(N + 2 + 1, separator, x);
 			};
 
 			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
@@ -286,14 +286,14 @@ namespace net::worker::commands::Index{
 			return std::end(cmd[N-1]);
 		};
 
-		// IXADD a keySub0 x0 val0 keySub1 x1 val1 ...
+		// IXADD a keySub0 x0 sort0 val0 keySub1 x1 sort1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			auto const varg  = 2;
-			auto const vstep = 2 + N;
+			auto const vstep = 2 + N + 1; // N + 1 for sort
 
 			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS[3 + N]);
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS[4 + N]);
 
 			const auto &keyN = p[1];
 
@@ -316,27 +316,27 @@ namespace net::worker::commands::Index{
 					};
 
 					if constexpr(N == 1)
-						if (!PN::valid(keyN, keySub, { _(1) }))
-							return e();
-
-					if constexpr(N == 2)
 						if (!PN::valid(keyN, keySub, { _(1), _(2) }))
 							return e();
 
-					if constexpr(N == 3)
+					if constexpr(N == 2)
 						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3) }))
 							return e();
 
-					if constexpr(N == 4)
+					if constexpr(N == 3)
 						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4) }))
 							return e();
 
-					if constexpr(N == 5)
+					if constexpr(N == 4)
 						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }))
 							return e();
 
-					if constexpr(N == 6)
+					if constexpr(N == 5)
 						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }))
+							return e();
+
+					if constexpr(N == 6)
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), _(7) }))
 							return e();
 				}
 
@@ -360,37 +360,37 @@ namespace net::worker::commands::Index{
 				if constexpr(N == 1)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1) }, value
+							keyN, keySub, { _(1), _(2) }, value
 					);
 
 				if constexpr(N == 2)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2) }, value
+							keyN, keySub, { _(1), _(2), _(3) }, value
 					);
 
 				if constexpr(N == 3)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4) }, value
 					);
 
 				if constexpr(N == 4)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }, value
 					);
 
 				if constexpr(N == 5)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }, value
 					);
 
 				if constexpr(N == 6)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), _(7) }, value
 					);
 			}
 

@@ -12,6 +12,8 @@ namespace net::worker::shared::zsetmulti{
 		virtual std::string_view getIndex() const = 0;
 	};
 
+	struct Permutation1NoIndex;
+
 	namespace impl_{
 		template<size_t N>
 		bool valid(std::array<std::string_view, N> const &indexes){
@@ -43,6 +45,9 @@ namespace net::worker::shared::zsetmulti{
 			if constexpr(std::is_same_v<IndexController, std::nullptr_t>){
 				return Permutation::encodeIndex(bufferVal, separator, indexes);
 			}else{
+				using P1    = Permutation1NoIndex;
+				static_assert(std::is_same_v<Permutation, P1>, "This works only with Permutation1NoIndex");
+
 				logger<Logger::DEBUG>() << "Using IndexController to encode";
 				return IndexController::encode(value);
 			}
@@ -53,6 +58,9 @@ namespace net::worker::shared::zsetmulti{
 			if constexpr(std::is_same_v<IndexController, std::nullptr_t>){
 				return Permutation::decodeIndex(separator, value);
 			}else{
+				using P1    = Permutation1NoIndex;
+				static_assert(std::is_same_v<Permutation, P1>, "This works only with Permutation1NoIndex");
+
 				logger<Logger::DEBUG>() << "Using IndexController to decode";
 				return IndexController::template decode<Permutation::N>(value);
 			}
@@ -87,7 +95,8 @@ namespace net::worker::shared::zsetmulti{
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~A~keySub, 2 * ~ + 0 * _
-			return hm4::Pair::isCompositeKeyValid(2 * 1 + 0 * 1 + more, keyN, keySub, indexes[0]);
+			return hm4::Pair::isCompositeKeyValid(2 * 1 + 0 * 1 + more, keyN, keySub,
+						indexes[0]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view /* separator */, std::array<std::string_view, N> const &indexes){
@@ -105,7 +114,6 @@ namespace net::worker::shared::zsetmulti{
 		}
 
 		constexpr static size_t sizeKey(std::string_view keyN){
-			// keyN~, 1 * ~ + keyN
 			return 1 * 1 + keyN.size();
 		}
 
@@ -164,7 +172,7 @@ namespace net::worker::shared::zsetmulti{
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const A = indexes[0];
+			auto const [A] = indexes;
 
 			auto _ = [&](std::string_view a){
 				hm4::PairBufferKey bufferKey;
@@ -187,7 +195,7 @@ namespace net::worker::shared::zsetmulti{
 
 	template<>
 	struct Permutation<1>{
-		constexpr static size_t N = 1;
+		constexpr static size_t N = 1 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~A~a~keySub, (N + 2) * ~ + N -> {A}
@@ -196,13 +204,16 @@ namespace net::worker::shared::zsetmulti{
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~A~a~keySub, (N + 2) * ~ + N -> {A}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0]);
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
+						indexes[0],
+						indexes[1]);
 		}
 
-		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view /* separator */, std::array<std::string_view, N> const &indexes){
+		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
 			// no need to copy, but lets do it anyway, because the caller expects it.
 			return concatenateBuffer(bufferKey,
-						indexes[0]
+						indexes[0],	separator	,
+						indexes[1]
 			);
 		}
 
@@ -210,7 +221,7 @@ namespace net::worker::shared::zsetmulti{
 			StringTokenizer const tok{ s, separator[0] };
 			auto _ = getForwardTokenizer(tok);
 
-			return std::array<std::string_view, N>{ _() };
+			return std::array<std::string_view, N>{ _(), _() };
 		}
 
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -236,13 +247,15 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view keyN,
 					std::string_view keySub,
 						std::string_view txt,
-							std::string_view ix0
+							std::string_view ix0,
+							std::string_view ixS
 				){
 
 			return concatenateBuffer(bufferKey,
 					keyN	,		separator	,
 					txt	,		separator	,
 						ix0	,	separator	,
+						ixS	,	separator	,
 					keySub
 			);
 		}
@@ -255,18 +268,19 @@ namespace net::worker::shared::zsetmulti{
 
 			return makeKeyData(bufferKey, separator, keyN, keySub,
 								"A",
-									indexes[0]
+									indexes[0],
+									indexes[1]
 			);
 		}
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const A = indexes[0];
+			auto const [A, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, S);
 
 				func(key);
 			};
@@ -279,7 +293,7 @@ namespace net::worker::shared::zsetmulti{
 
 	template<>
 	struct Permutation<2>{
-		constexpr static size_t N = 2;
+		constexpr static size_t N = 2 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~AB~a~b~keySub, (N + 2) * ~ + N -> {AB}
@@ -288,13 +302,17 @@ namespace net::worker::shared::zsetmulti{
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~AB~a~b~keySub, (N + 2) * ~ + N -> {AB}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1]);
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
+						indexes[0],
+						indexes[1],
+						indexes[2]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
 			return concatenateBuffer(bufferKey,
 						indexes[0],	separator	,
-						indexes[1]
+						indexes[1],	separator	,
+						indexes[2]
 			);
 		}
 
@@ -302,7 +320,7 @@ namespace net::worker::shared::zsetmulti{
 			StringTokenizer const tok{ s, separator[0] };
 			auto _ = getForwardTokenizer(tok);
 
-			return std::array<std::string_view, N>{ _(), _() };
+			return std::array<std::string_view, N>{ _(), _(), _() };
 		}
 
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -337,7 +355,8 @@ namespace net::worker::shared::zsetmulti{
 					std::string_view keySub,
 						std::string_view txt,
 							std::string_view ix0,
-							std::string_view ix1
+							std::string_view ix1,
+							std::string_view ixS
 				){
 
 			return concatenateBuffer(bufferKey,
@@ -345,6 +364,7 @@ namespace net::worker::shared::zsetmulti{
 					txt	,		separator	,
 						ix0	,	separator	,
 						ix1	,	separator	,
+						ixS	,	separator	,
 					keySub
 			);
 		}
@@ -358,20 +378,20 @@ namespace net::worker::shared::zsetmulti{
 			return makeKeyData(bufferKey, separator, keyN, keySub,
 								"AB",
 									indexes[0],
-									indexes[1]
+									indexes[1],
+									indexes[2]
 			);
 		}
 
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const A = indexes[0];
-			auto const B = indexes[1];
+			auto const [A, B, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, S);
 
 				func(key);
 			};
@@ -385,7 +405,7 @@ namespace net::worker::shared::zsetmulti{
 
 	template<>
 	struct Permutation<3>{
-		constexpr static size_t N = 3;
+		constexpr static size_t N = 3 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~ABC~A~B~C~keySub, (N + 2) * ~ + N {ABC}
@@ -394,7 +414,11 @@ namespace net::worker::shared::zsetmulti{
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~ABC~A~B~C~keySub, (N + 2) * ~ + N {ABC}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2]);
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
+						indexes[0],
+						indexes[1],
+						indexes[2],
+						indexes[3]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -403,7 +427,8 @@ namespace net::worker::shared::zsetmulti{
 			return concatenateBuffer(bufferKey,
 						indexes[0],	separator	,
 						indexes[1],	separator	,
-						indexes[2]
+						indexes[2],	separator	,
+						indexes[3]
 			);
 		}
 
@@ -411,7 +436,7 @@ namespace net::worker::shared::zsetmulti{
 			StringTokenizer const tok{ s, separator[0] };
 			auto _ = getForwardTokenizer(tok);
 
-			return std::array<std::string_view, N>{ _(), _(), _() };
+			return std::array<std::string_view, N>{ _(), _(), _(), _() };
 		}
 
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -456,7 +481,8 @@ namespace net::worker::shared::zsetmulti{
 						std::string_view txt,
 							std::string_view ix0,
 							std::string_view ix1,
-							std::string_view ix2
+							std::string_view ix2,
+							std::string_view ixS
 				){
 
 			return concatenateBuffer(bufferKey,
@@ -465,6 +491,7 @@ namespace net::worker::shared::zsetmulti{
 						ix0	,	separator	,
 						ix1	,	separator	,
 						ix2	,	separator	,
+						ixS	,	separator	,
 					keySub
 			);
 		}
@@ -479,20 +506,19 @@ namespace net::worker::shared::zsetmulti{
 								"ABC",
 									indexes[0],
 									indexes[1],
-									indexes[2]
+									indexes[2],
+									indexes[3]
 			);
 		}
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const A = indexes[0];
-			auto const B = indexes[1];
-			auto const C = indexes[2];
+			auto const [A, B, C, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, S);
 
 				func(key);
 			};
@@ -511,7 +537,7 @@ namespace net::worker::shared::zsetmulti{
 
 	template<>
 	struct Permutation<4>{
-		constexpr static size_t N = 4;
+		constexpr static size_t N = 4 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~ABCD~A~B~C~D~keySub, (N + 2) * ~ + N {ABCD}
@@ -520,7 +546,12 @@ namespace net::worker::shared::zsetmulti{
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~ABCD~A~B~C~D~keySub, (N + 2) * ~ + N {ABCD}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3]);
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
+						indexes[0],
+						indexes[1],
+						indexes[2],
+						indexes[3],
+						indexes[4]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -530,7 +561,8 @@ namespace net::worker::shared::zsetmulti{
 						indexes[0],	separator	,
 						indexes[1],	separator	,
 						indexes[2],	separator	,
-						indexes[3]
+						indexes[3],	separator	,
+						indexes[4]
 			);
 		}
 
@@ -538,7 +570,7 @@ namespace net::worker::shared::zsetmulti{
 			StringTokenizer const tok{ s, separator[0] };
 			auto _ = getForwardTokenizer(tok);
 
-			return std::array<std::string_view, N>{ _(), _(), _(), _() };
+			return std::array<std::string_view, N>{ _(), _(), _(), _(), _() };
 		}
 
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -594,7 +626,8 @@ namespace net::worker::shared::zsetmulti{
 							std::string_view ix0,
 							std::string_view ix1,
 							std::string_view ix2,
-							std::string_view ix3
+							std::string_view ix3,
+							std::string_view ixS
 				){
 
 			return concatenateBuffer(bufferKey,
@@ -604,6 +637,7 @@ namespace net::worker::shared::zsetmulti{
 						ix1	,	separator	,
 						ix2	,	separator	,
 						ix3	,	separator	,
+						ixS	,	separator	,
 					keySub
 			);
 		}
@@ -619,21 +653,19 @@ namespace net::worker::shared::zsetmulti{
 									indexes[0],
 									indexes[1],
 									indexes[2],
-									indexes[3]
+									indexes[3],
+									indexes[4]
 			);
 		}
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const A = indexes[0];
-			auto const B = indexes[1];
-			auto const C = indexes[2];
-			auto const D = indexes[3];
+			auto const [A, B, C, D, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c, std::string_view d){
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, S);
 
 				func(key);
 			};
@@ -669,7 +701,7 @@ namespace net::worker::shared::zsetmulti{
 
 	template<>
 	struct Permutation<5>{
-		constexpr static size_t N = 5;
+		constexpr static size_t N = 5 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~ABCDE~A~B~C~D~E~keySub, (N + 2) * ~ + N {ABCDE}
@@ -678,7 +710,13 @@ namespace net::worker::shared::zsetmulti{
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~ABCDE~A~B~C~D~E~keySub, (N + 2) * ~ + N {ABCDE}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3], indexes[4]);
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
+						indexes[0],
+						indexes[1],
+						indexes[2],
+						indexes[3],
+						indexes[4],
+						indexes[5]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -689,7 +727,8 @@ namespace net::worker::shared::zsetmulti{
 						indexes[1],	separator	,
 						indexes[2],	separator	,
 						indexes[3],	separator	,
-						indexes[4]
+						indexes[4],	separator	,
+						indexes[5]
 			);
 		}
 
@@ -697,7 +736,7 @@ namespace net::worker::shared::zsetmulti{
 			StringTokenizer const tok{ s, separator[0] };
 			auto _ = getForwardTokenizer(tok);
 
-			return std::array<std::string_view, N>{ _(), _(), _(), _(), _() };
+			return std::array<std::string_view, N>{ _(), _(), _(), _(), _(), _() };
 		}
 
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -766,7 +805,8 @@ namespace net::worker::shared::zsetmulti{
 							std::string_view ix1,
 							std::string_view ix2,
 							std::string_view ix3,
-							std::string_view ix4
+							std::string_view ix4,
+							std::string_view ixS
 				){
 
 			return concatenateBuffer(bufferKey,
@@ -777,6 +817,7 @@ namespace net::worker::shared::zsetmulti{
 						ix2	,	separator	,
 						ix3	,	separator	,
 						ix4	,	separator	,
+						ixS	,	separator	,
 					keySub
 			);
 		}
@@ -793,17 +834,14 @@ namespace net::worker::shared::zsetmulti{
 									indexes[1],
 									indexes[2],
 									indexes[3],
-									indexes[4]
+									indexes[4],
+									indexes[5]
 			);
 		}
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const A = indexes[0];
-			auto const B = indexes[1];
-			auto const C = indexes[2];
-			auto const D = indexes[3];
-			auto const E = indexes[4];
+			auto const [A, B, C, D, E, S] = indexes;
 
 			auto _ = [&](std::string_view txt,
 							std::string_view a, std::string_view b, std::string_view c,
@@ -811,7 +849,7 @@ namespace net::worker::shared::zsetmulti{
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e, S);
 
 				func(key);
 			};
@@ -946,7 +984,7 @@ namespace net::worker::shared::zsetmulti{
 
 	template<>
 	struct Permutation<6>{
-		constexpr static size_t N = 6;
+		constexpr static size_t N = 6 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~ABCDEF~A~B~C~D~E~F~keySub, (N + 2) * ~ + N {ABCDE}
@@ -955,7 +993,14 @@ namespace net::worker::shared::zsetmulti{
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
 			// keyN~ABCDEF~A~B~C~D~E~F~keySub, (N + 2) * ~ + N {ABCDE}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub, indexes[0], indexes[1], indexes[2], indexes[3], indexes[4]);
+			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
+						indexes[0],
+						indexes[1],
+						indexes[2],
+						indexes[3],
+						indexes[4],
+						indexes[5],
+						indexes[6]);
 		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
@@ -967,7 +1012,8 @@ namespace net::worker::shared::zsetmulti{
 						indexes[2],	separator	,
 						indexes[3],	separator	,
 						indexes[4],	separator	,
-						indexes[5]
+						indexes[5],	separator	,
+						indexes[6]
 			);
 		}
 
@@ -975,7 +1021,7 @@ namespace net::worker::shared::zsetmulti{
 			StringTokenizer const tok{ s, separator[0] };
 			auto _ = getForwardTokenizer(tok);
 
-			return std::array<std::string_view, N>{ _(), _(), _(), _(), _(), _() };
+			return std::array<std::string_view, N>{ _(), _(), _(), _(), _(), _(), _() };
 		}
 
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -1057,7 +1103,8 @@ namespace net::worker::shared::zsetmulti{
 							std::string_view ix2,
 							std::string_view ix3,
 							std::string_view ix4,
-							std::string_view ix5
+							std::string_view ix5,
+							std::string_view ixS
 				){
 
 			return concatenateBuffer(bufferKey,
@@ -1069,6 +1116,7 @@ namespace net::worker::shared::zsetmulti{
 						ix3	,	separator	,
 						ix4	,	separator	,
 						ix5	,	separator	,
+						ixS	,	separator	,
 					keySub
 			);
 		}
@@ -1085,18 +1133,14 @@ namespace net::worker::shared::zsetmulti{
 									indexes[2],
 									indexes[3],
 									indexes[4],
-									indexes[5]
+									indexes[5],
+									indexes[6]
 			);
 		}
 
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
-			auto const A = indexes[0];
-			auto const B = indexes[1];
-			auto const C = indexes[2];
-			auto const D = indexes[3];
-			auto const E = indexes[4];
-			auto const F = indexes[5];
+			auto const [A, B, C, D, E, F, S] = indexes;
 
 			auto _ = [&](std::string_view txt,
 							std::string_view a, std::string_view b, std::string_view c,
@@ -1104,7 +1148,7 @@ namespace net::worker::shared::zsetmulti{
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e, f);
+				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e, f, S);
 
 				func(key);
 			};
@@ -1575,6 +1619,9 @@ namespace net::worker::shared::zsetmulti{
 					return hm4::getPairVal(*db, keyData);
 				}
 			}else{
+				using P1 = Permutation1NoIndex;
+				static_assert(std::is_same_v<Permutation, P1>, "This works only with Permutation1NoIndex");
+
 				logger<Logger::DEBUG>() << "Using IndexController to get data";
 				return IndexController::decodeValue(encodedValue);
 			}

@@ -366,4 +366,7 @@ Changelog
 ### 1.3.14
 -	Release
 
+### 1.3.14.1
+-	refactor INDEX: IX*ADD now requires sort parameter
+
 
