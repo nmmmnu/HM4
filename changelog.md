@@ -368,5 +368,8 @@ Changelog
 
 ### 1.3.14.1
 -	refactor INDEX: IX*ADD now requires sort parameter
-
+-	increase the size of ArenaAllocator for command processing from 9 MB to approximately 270 MB
+-	optimize XNDEL, XRDEL, HDELALL to take advantage of bigger ArenaAllocator.
+	The query never reloads, even if the memtable flushes.
+	XNEXPIRE et others still reload the query, if the memtable flushes.
 
