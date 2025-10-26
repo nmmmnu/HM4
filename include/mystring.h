@@ -267,5 +267,71 @@ auto myClamp(std::string_view p, uint64_t min, uint64_t max){
 
 
 
+template<typename Container>
+std::string_view implodeRawBuffer_(char *buffer, Container const &container, std::string_view separator = "", std::string_view first = "", std::string_view last = ""){
+	static_assert( std::is_constructible_v<std::string_view, typename Container::value_type> );
+
+	size_t pos = 0;
+
+	auto push = [&](std::string_view s){
+		memcpy(buffer + pos, s.data(), s.size());
+		pos += s.size();
+	};
+
+	push(first);
+
+	auto it  = std::begin(container);
+	auto end = std::end  (container);
+
+	if (it != end){
+		push(*it);
+		++it;
+
+		for (; it != end; ++it) {
+			push(separator);
+			push(*it);
+		}
+	}
+
+	push(last);
+
+	return std::string_view{ buffer, pos };
+}
+
+template<typename Container>
+size_t implodeBufferSize(Container const &container, std::string_view separator = "", std::string_view first = "", std::string_view last = ""){
+	static_assert( std::is_constructible_v<std::string_view, typename Container::value_type> );
+
+	size_t size = 0;
+
+	for(std::string_view const x : container)
+		size += std::string_view{ x }.size();
+
+	if (container.empty()){
+		return size +
+			first.size()					+
+			last.size()
+		;
+	}else{
+		return size +
+			(container.size() - 1) * separator.size()	+
+			first.size()					+
+			last.size()
+		;
+	}
+}
+
+template<size_t N, typename Container>
+std::string_view implodeBuffer(std::array<char, N> &buffer, Container const &container, std::string_view separator = "", std::string_view first = "", std::string_view last = ""){
+	static_assert( std::is_constructible_v<std::string_view, typename Container::value_type> );
+
+	size_t const reserve_size = implodeBufferSize(container, separator, first, last);
+
+	if (reserve_size > buffer.size())
+		return "";
+
+	return implodeRawBuffer_(buffer.data(), container, separator, first, last);
+}
+
 #endif
 
