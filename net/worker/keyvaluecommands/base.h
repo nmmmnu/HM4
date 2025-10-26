@@ -35,19 +35,20 @@ namespace net::worker::commands{
 		constexpr static size_t ContainerSize		= 0xFFFF;
 		constexpr static size_t ParamContainerSize	= 0xFF;
 
+		// KeyValue worker checks the size against Protocol::MAX_PARAMS
+
 		using buffer_t = std::array<char, 128>;
 
 		using Container		= StaticVector<std::string_view		, ContainerSize>;	//  1   MB, if string_view is 16 bytes
 		using BufferContainer	= StaticVector<buffer_t			, ContainerSize>;	//  8   MB
 		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	//  0.5 MB
 
-		using BufferKArray	= std::array	<hm4::PairBufferKey	, ContainerSize>;	//  64  MB
 		using BufferKContainer	= StaticVector	<hm4::PairBufferKey	, ContainerSize>;	// ~64  MB
 
 		constexpr static size_t MaxMemory =	sizeof(Container	)	+	//   1 MB
 							sizeof(BufferContainer	)	+	//   8 MB
 							sizeof(PairContainer	)	+
-							hm4::Pair::maxBytes()		+	// 256 MB !!!
+							hm4::Pair::maxBytes()		+	// 256 MB !!!, bit bigger than hm4::PairBufferVal
 							64
 		;
 

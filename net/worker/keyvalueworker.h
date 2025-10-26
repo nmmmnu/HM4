@@ -40,7 +40,8 @@
 #include "keyvaluecommands/cmd_vectors.h"		// VADD
 #include "keyvaluecommands/cmd_tdigest.h"		// TDADD, TDRESERVE
 
-#include "keyvaluecommands/cmd_index.h"
+#include "keyvaluecommands/cmd_index.h"			// IX_GET, IX_MGET, IX_GETINDEXES, IX_ADD, IX_REM, IX_RANGE
+#include "keyvaluecommands/cmd_mindex.h"
 
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
@@ -123,6 +124,7 @@ namespace net::worker{
 				TDigest		::RegisterModule,
 
 				Index		::RegisterModule,
+				MIndex		::RegisterModule,
 
 				Murmur		::RegisterModule,
 				Random		::RegisterModule,

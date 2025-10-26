@@ -8,6 +8,10 @@ namespace multi{
 
 
 
+// it is tempting to make a specialization like this one
+// template <class Iterator> class DualIterator<Iterator, Iterator>;
+// but it does not worth at all.
+
 template <class FirstIterator, class SecondIterator>
 class DualIterator{
 public:
@@ -94,8 +98,8 @@ private:
 		constexpr bool _ = false;
 
 		auto SP = [this](bool f, bool s, const Pair *p){
-			hit_ = { f, s };
-			pair_   = p;
+			hit_  = { f, s };
+			pair_ = p;
 		};
 
 		auto S = [&SP](bool f, bool s, auto const &ip){
@@ -134,7 +138,7 @@ private:
 
 private:
 	IteratorTuple	tt_;
-	HitTuple	hit_;
+	HitTuple	hit_;	// if we do not have this,
 
 	const Pair      *pair_;
 
