@@ -1,11 +1,17 @@
 #include "base.h"
 
+#include "shared_accumulateresults.h"
+
 #include "stringtokenizer.h"
 #include "pair_vfactory.h"
 #include "ilist/txguard.h"
 
 namespace net::worker::commands::MIndex{
 	namespace mindex_impl_{
+		using namespace net::worker::shared::accumulate_results;
+		using namespace net::worker::shared::config;
+
+
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 			// keyN~word~sort~keySub, 3 * ~
@@ -47,6 +53,19 @@ namespace net::worker::commands::MIndex{
 					txt	,	separator	,
 					sort	,	separator	,
 					keySub
+			);
+		}
+
+		static std::string_view makeKeyDataSearch(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+						std::string_view txt
+				){
+
+			// keyN~word~
+
+			return concatenateBuffer(bufferKey,
+					keyN	,	separator	,
+					txt	,	separator
 			);
 		}
 
@@ -211,6 +230,31 @@ namespace net::worker::commands::MIndex{
 			}
 
 			return "";
+		}
+
+
+
+		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
+			size_t count = 0;
+
+			for (size_t i = 0; i < s.size(); ++i)
+				if (s[i] == separator)
+					if (++count; count == nth)
+						return s.substr(i + 1);
+
+			return "INVALID_DATA";
+		}
+
+		template<AccumulateOutput Out, class It, class Container>
+		void accumulateResultsIXMOne(uint32_t const maxResults, std::string_view const prefix, It it, It eit, char const separator, Container &container){
+			StopPrefixPredicate stop{ prefix };
+
+			auto proj = [separator](std::string_view x){
+				// keyN~word~
+				return extractNth_(3, separator, x);
+			};
+
+			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
 		}
 
 	} // namespace mindex_impl_
@@ -651,27 +695,25 @@ namespace net::worker::commands::MIndex{
 	};
 
 
-/*
-	template<int N, class Protocol, class DBAdapter>
-	struct IX_RANGE : BaseCommandRO<Protocol,DBAdapter>{
+	template<class Protocol, class DBAdapter>
+	struct IXMRANGE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
-			return std::begin(cmd[N-1]);
+			return std::begin(cmd);
 		};
 
 		const std::string_view *end()   const final{
-			return std::end(cmd[N-1]);
+			return std::end(cmd);
 		};
 
-		// IX_RANGE key ABC a  b  c  count from
-		// IX_RANGE key ABC a  b  '' count from
-		// IX_RANGE key ABC a  '' '' count from
-		// IX_RANGE key ABC '' '' '' count from
+		// IXMRANGE key txt count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace index_impl_;
+			namespace PN = mindex_impl_;
 
-			if (p.size() != 1 + 2 + N + 2)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS[4 + N]);
+			using namespace mindex_impl_;
+
+			if (p.size() != 4 && p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
 			auto const keyN     = p[1];
 			auto const index    = p[2];
@@ -679,84 +721,19 @@ namespace net::worker::commands::MIndex{
 			if (keyN.empty() || index.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const varg = 2;
-
-			auto const count    = myClamp<uint32_t>(p[varg + N + 1], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
-			auto const keyStart = p[varg + N + 2];
-
-			{
-				auto size = [&p](){
-					#if 0
-					size_t size = 0;
-					for(size_t i = 1; i <= N; ++i)
-						size += p[varg + i].size();
-
-					return size;
-					#endif
-
-					// intent is more important
-
-					auto _ = [&p](uint8_t i){
-						return p[varg + i].size();
-					};
-
-					if constexpr(N == 1)
-						return _(1);
-
-					if constexpr(N == 2)
-						return _(1) + _(2);
-
-					if constexpr(N == 3)
-						return _(1) + _(2) + _(3);
-
-					if constexpr(N == 4)
-						return _(1) + _(2) + _(3) + _(4);
-
-					if constexpr(N == 5)
-						return _(1) + _(2) + _(3) + _(4) + _(5);
-
-
-					if constexpr(N == 6)
-						return _(1) + _(2) + _(3) + _(4) + _(5) + _(6);
-				};
-
-				if (!PN::valid(keyN, index, size() ))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
+			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const keyStart = p[4];
 
 			hm4::PairBufferKey bufferKey;
-
-			auto const prefix = [&](){
-				auto _ = [&p](uint8_t i){
-					return p[varg + i];
-				};
-
-				if constexpr(N == 1)
-					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1));
-
-				if constexpr(N == 2)
-					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2));
-
-				if constexpr(N == 3)
-					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3));
-
-				if constexpr(N == 4)
-					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4));
-
-				if constexpr(N == 5)
-					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5));
-
-				if constexpr(N == 6)
-					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5), _(6));
-			}();
+			auto const prefix = PN::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
 
-			logger<Logger::DEBUG>() << "IX_RANGE" << "prefix" << prefix;
+			logger<Logger::DEBUG>() << "IXMRANGE" << "prefix" << prefix;
 
 			auto &container = blob.construct<OutputBlob::Container>();
 
-			accumulateResultsIX_<N, AccumulateOutput::BOTH_WITH_TAIL>(
+			accumulateResultsIXMOne<AccumulateOutput::BOTH_WITH_TAIL>(
 				count			,
 				prefix			,
 				db->find(key)		,
@@ -769,20 +746,11 @@ namespace net::worker::commands::MIndex{
 		}
 
 	private:
-		static_assert(index_impl_::assertN(N));
-
-		using PN = shared::zsetmulti::Permutation<N>;
-
-		constexpr inline static std::string_view cmd[][2] = {
-			{	"ix1range",	"IX1RANGE"	},
-			{	"ix2range",	"IX2RANGE"	},
-			{	"ix3range",	"IX3RANGE"	},
-			{	"ix4range",	"IX4RANGE"	},
-			{	"ix5range",	"IX5RANGE"	},
-			{	"ix6range",	"IX6RANGE"	}
+		constexpr inline static std::string_view cmd[]	= {
+			"ixmrange",	"IXMRANGE"
 		};
 	};
-*/
+
 
 
 
@@ -798,7 +766,8 @@ namespace net::worker::commands::MIndex{
 				IXMMGET		,
 				IXMEXISTS	,
 				IXMGETINDEXES	,
-				IXMREM
+				IXMREM		,
+				IXMRANGE
 			>(pack);
 		}
 	};
