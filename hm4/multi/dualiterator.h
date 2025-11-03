@@ -17,6 +17,7 @@ class DualIterator{
 public:
 	DualIterator(DualIterator const &other) = default;
 	DualIterator(DualIterator &&other) = default;
+	DualIterator &operator =(DualIterator &&other) = default;
 
 private:
 	template<class T>
