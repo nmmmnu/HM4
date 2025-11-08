@@ -16,8 +16,8 @@ namespace net::worker::shared::accumulate_results{
 		BOTH_WITH_TAIL
 	};
 
-	template<AccumulateOutput Out, class StopPredicate, class It, class Container, class ProjectionKey>
-	void accumulateResults(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container, ProjectionKey projKey){
+	template<AccumulateOutput Out, class StopPredicate, class It, class Container, class ProjectionKey, class TailKey>
+	void sharedAccumulateResults(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container, ProjectionKey projKey, TailKey tailkey){
 		uint32_t iterations	= 0;
 		uint32_t results	= 0;
 
@@ -33,7 +33,7 @@ namespace net::worker::shared::accumulate_results{
 			auto pkey = projKey(key);
 
 			if (++iterations > ITERATIONS_RESULTS_MAX)
-				return tail(pkey);
+				return tail(tailkey(key));
 
 			if (stop(key))
 				return tail(); // no tail
@@ -42,7 +42,7 @@ namespace net::worker::shared::accumulate_results{
 				continue;
 
 			if (++results > maxResults)
-				return tail(pkey);
+				return tail(tailkey(key));
 
 			auto const &val = it->getVal();
 
@@ -59,8 +59,26 @@ namespace net::worker::shared::accumulate_results{
 		return tail();
 	}
 
+	template<AccumulateOutput Out, class StopPredicate, class It, class Container, class ProjectionKey>
+	void sharedAccumulateResults(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container, ProjectionKey projKey){
+		auto tailKey = [](std::string_view const key){
+			return key;
+		};
+
+		return sharedAccumulateResults<Out>(maxResults, stop, it, eit, container, projKey, tailKey);
+	}
+
+	template<AccumulateOutput Out, class StopPredicate, class It, class Container>
+	void sharedAccumulateResults(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container){
+		auto projKey = [](std::string_view const key){
+			return key;
+		};
+
+		return sharedAccumulateResults<Out>(maxResults, stop, it, eit, container, projKey);
+	}
+
 	template<class StopPredicate, class It>
-	void accumulateResultsNext(std::string_view firstKey, StopPredicate stop, It it, It eit, std::array<std::string_view, 2> &container){
+	void sharedAccumulateResultsNext(std::string_view firstKey, StopPredicate stop, It it, It eit, std::array<std::string_view, 2> &container){
 		uint32_t iterations	= 0;
 
 		// capture & instead of &container to silence clang warning.

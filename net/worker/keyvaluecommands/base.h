@@ -74,9 +74,9 @@ namespace net::worker::commands{
 			}
 		}
 
-		template<typename T>
-		auto &construct(){
-			if (auto *p = MyAllocator::construct<T>(allocator_); p){
+		template<typename T, typename ...Args>
+		auto &construct(Args &&...args){
+			if (auto *p = MyAllocator::construct<T>(allocator_, std::forward<Args>(args)...); p){
 				logAllocatorStatus_<Logger::DEBUG, T>(true);
 
 				++allocations_;

@@ -18,11 +18,7 @@ namespace net::worker::commands::ImmutableX{
 
 		template<AccumulateOutput Out, class StopPredicate, class It, class Container>
 		void accumulateResultsX(uint32_t const maxResults, StopPredicate stop, It it, It eit, Container &container){
-			auto proj = [](std::string_view x){
-				return x;
-			};
-
-			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
+			return sharedAccumulateResults<Out>(maxResults, stop, it, eit, container);
 		}
 
 		template<AccumulateOutput Out, class It, class Container>
@@ -34,7 +30,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopPrefixPredicate stop{ prefix };
 
-			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
+			return sharedAccumulateResults<Out>(maxResults, stop, it, eit, container, proj);
 		}
 
 
@@ -46,7 +42,7 @@ namespace net::worker::commands::ImmutableX{
 
 			StopPrefixPredicate stop{ prefix };
 
-			for(;it != eit;++it){
+			for(;it != eit; ++it){
 				auto const &key = it->getKey();
 
 				// should be ITERATIONS_LOOPS,
@@ -147,7 +143,7 @@ namespace net::worker::commands::ImmutableX{
 
 			std::array<std::string_view, 2> container;
 
-			accumulateResultsNext(
+			sharedAccumulateResultsNext(
 				key		,
 				stop		,
 				db->find(key)	,
@@ -242,7 +238,7 @@ namespace net::worker::commands::ImmutableX{
 
 			std::array<std::string_view, 2> container;
 
-			accumulateResultsNext(
+			sharedAccumulateResultsNext(
 				key		,
 				stop		,
 				db->find(key)	,
@@ -329,7 +325,7 @@ namespace net::worker::commands::ImmutableX{
 
 			std::array<std::string_view, 2> container;
 
-			accumulateResultsNext(
+			sharedAccumulateResultsNext(
 				key		,
 				stop		,
 				db->find(key)	,

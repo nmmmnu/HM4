@@ -123,19 +123,17 @@ namespace net::worker::commands::MIndex{
 			return sortTokens_(container);
 		}
 
-		template<typename Container>
-		bool loadTokens(Container &container, std::string_view separator, std::string_view text){
+		template<bool HasSortKey, size_t ContainerSize, typename Container>
+		bool loadTokensSorted(Container &container, std::string_view separator, std::string_view text){
 			static_assert( std::is_constructible_v<typename Container::value_type, std::string_view>);
 
 			StringTokenizer const tok{ text, separator[0] };
 
 			bool lastElement = false;
 
-			size_t count = 0;
-
 			for(auto const &x : tok){
 				// sort key is inside
-				if (++count > OutputBlob::ContainerSize)
+				if (container.size() > ContainerSize)
 					return false;
 
 				if (lastElement || x.empty())
@@ -148,9 +146,39 @@ namespace net::worker::commands::MIndex{
 				container.push_back(x);
 			}
 
-			// inside must be: at least one token + sort key
+			if constexpr(HasSortKey){
+				// inside must be: at least one token + sort key
+				return container.size() >= 2;
+			}else{
+				return !container.empty();
+			}
+		}
 
-			return container.size() >= 2;
+		template<bool HasSortKey, size_t ContainerSize, typename Container>
+		bool loadTokensUnsorted(Container &container, std::string_view separator, std::string_view text){
+			static_assert( std::is_constructible_v<typename Container::value_type, std::string_view>);
+
+			StringTokenizer const tok{ text, separator[0] };
+
+			for(auto const &x : tok){
+				if (container.size() > ContainerSize)
+					return false;
+
+				if (x.empty())
+					continue;
+
+				container.push_back(x);
+			}
+
+			// if the function returns false, this is cheap operation
+			std::sort(std::begin(container), std::end(container));
+
+			if constexpr(HasSortKey){
+				// inside must be: at least one token + sort key
+				return container.size() >= 2;
+			}else{
+				return !container.empty();
+			}
 		}
 
 		template<typename Container>
@@ -325,7 +353,7 @@ namespace net::worker::commands::MIndex{
 
 				auto const valCtrl = concatenateBuffer(buferVal, pair->getVal());
 
-				if (!PN::loadTokens(oContainer, DBAdapter::SEPARATOR, valCtrl)){
+				if (!PN::loadTokensSorted<1, OutputBlob::ContainerSize>(oContainer, DBAdapter::SEPARATOR, valCtrl)){
 					// Case 1.0: invalid ctrl key, probable attack.
 
 					logger<Logger::DEBUG>() << "MIndex::ADD: INVALID ctrl key" << keyCtrl;
@@ -602,7 +630,7 @@ namespace net::worker::commands::MIndex{
 			if (auto const encodedValue = hm4::getPairVal(*db, keyCtrl); !encodedValue.empty()){
 				auto &container = blob.construct<OutputBlob::Container>();
 
-				if (PN::loadTokens(container, DBAdapter::SEPARATOR, encodedValue))
+				if (PN::loadTokensSorted<1, OutputBlob::ContainerSize>(container, DBAdapter::SEPARATOR, encodedValue))
 					return result.set_container(container);
 			}
 
@@ -661,7 +689,7 @@ namespace net::worker::commands::MIndex{
 				const auto *hint = pair;
 				hm4::insertHintF<hm4::PairFactory::Tombstone>(*db, hint, keyCtrl);
 
-				if (!PN::loadTokens(container, DBAdapter::SEPARATOR, valCtrl)){
+				if (!PN::loadTokensSorted<1, OutputBlob::ContainerSize>(container, DBAdapter::SEPARATOR, valCtrl)){
 					// Case 1.0: invalid ctrl key, probable attack.
 
 					logger<Logger::DEBUG>() << "MIndex::REM: INVALID ctrl key" << keyCtrl;
@@ -712,8 +740,8 @@ namespace net::worker::commands::MIndex{
 
 			using namespace mindex_impl_;
 
-			if (p.size() != 4 && p.size() != 5)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
+			if (p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
 			auto const keyN     = p[1];
 			auto const index    = p[2];
@@ -751,7 +779,89 @@ namespace net::worker::commands::MIndex{
 		};
 	};
 
+	template<class Protocol, class DBAdapter>
+	struct IXMRANGEMULTI : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
 
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// IXMRANGEMULTI key delimiter "words,words" count from
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			namespace PN = mindex_impl_;
+
+			using namespace mindex_impl_;
+
+			if (p.size() != 6)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+
+			auto const keyN		= p[1];
+			auto const delimiter	= p[2];
+			auto const tokens	= p[3];
+
+			if (delimiter.size() != 1)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (keyN.empty() || tokens.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const keyStart	= p[5];
+
+			auto &container = blob.construct<TokenContainer>();
+
+			if (!PN::loadTokensUnsorted<0, MaxTokens>(container, delimiter, tokens))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (container.size() == 1){
+				// optimized way for single word, same as IXMRANGE
+
+				auto const &index = container[0];
+
+				hm4::PairBufferKey bufferKey;
+				auto const prefix = PN::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+
+				auto const key = keyStart.empty() ? prefix : keyStart;
+
+				logger<Logger::DEBUG>() << "IXMRANGEMILTI" << "prefix" << prefix;
+
+				auto &container = blob.construct<OutputBlob::Container>();
+
+				accumulateResultsIXMOne<AccumulateOutput::BOTH_WITH_TAIL>(
+					count			,
+					prefix			,
+					db->find(key)		,
+					std::end(*db)		,
+					DBAdapter::SEPARATOR[0]	,
+					container
+				);
+
+				return result.set_container(container);
+			}else{
+				return processMulti__(keyN, container, count, keyStart, db, result, blob);
+			}
+		}
+
+	private:
+		constexpr static size_t MaxTokens  = 32;
+
+		using TokenContainer = StaticVector<std::string_view, MaxTokens>;
+
+	private:
+		static void processMulti__(std::string_view keyN, TokenContainer &tokens, uint32_t count, std::string_view keyStart,
+					DBAdapter &db, Result<Protocol> &result, OutputBlob &blob);
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ixmrangemulti",	"IXMRANGEMULTI"
+		};
+	};
+
+	#include "cmd_mindex_ixmrangemulti.h.cc"
 
 
 
@@ -767,7 +877,8 @@ namespace net::worker::commands::MIndex{
 				IXMEXISTS	,
 				IXMGETINDEXES	,
 				IXMREM		,
-				IXMRANGE
+				IXMRANGE	,
+				IXMRANGEMULTI
 			>(pack);
 		}
 	};

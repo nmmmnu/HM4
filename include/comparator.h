@@ -4,6 +4,7 @@
 #include "sgn.h"
 
 #include <type_traits>
+#include <string_view>
 
 
 namespace comparator{
@@ -35,6 +36,12 @@ int comp(const T &a, const T &b){
 	using namespace comparator_impl_;
 
 	return comp(a, b, std::is_integral<T>{} );
+}
+
+constexpr int comp(std::string_view &a, std::string_view &b){
+	using namespace comparator_impl_;
+
+	return a.compare(b);
 }
 
 constexpr int comp(int const a, int const b){

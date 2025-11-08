@@ -37,7 +37,7 @@ namespace net::worker::commands::Index{
 				return extractNth_(N + 2 + 1, separator, x);
 			};
 
-			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
+			return sharedAccumulateResults<Out>(maxResults, stop, it, eit, container, proj);
 		}
 
 
