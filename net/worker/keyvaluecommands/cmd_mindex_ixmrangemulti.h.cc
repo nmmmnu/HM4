@@ -3,30 +3,45 @@
 
 
 
-namespace ixmrangemulti_impl_{
+namespace IXMRANGEFLEX_impl_{
 
-	struct Token{
+	struct BaseToken{
+		std::string_view	pkey;
+		std::string_view	pval;
+
 		std::string_view	index;
 		std::string_view	sort;
 		std::string_view	key;
-		std::string_view	val;
+
+		constexpr void clearOthers(){
+			index	=	"";
+			sort	=	"";
+			key	=	"";
+		}
+	};
+
+	struct Token : BaseToken{
 		size_t			count	= 0;
 
 		constexpr operator bool() const{
 			return !index.empty();
 		}
 
+		Token &operator=(BaseToken const &bt){
+			static_cast<BaseToken &>(*this) = bt;
+			return *this;
+		}
+
 		static constexpr bool comp2(Token const &a, Token const &b){
-			if (a.count == b.count){
-				int const comp = a.sort.compare(b.sort);
+			// first count >, then sort <, then key <
 
-				if (comp == 0)
-					return a.key < b.key;
+			if (a.count != b.count)
+				return a.count > b.count;
 
+			if (int comp = a.sort.compare(b.sort); a != 0)
 				return comp < 0;
-			}
 
-			return a.count > b.count;
+			return a.key < b.key;
 		}
 
 		static constexpr bool comp(Token const &a, Token const &b){
@@ -44,10 +59,7 @@ namespace ixmrangemulti_impl_{
 		bool			active_		= true;
 		std::string_view	prefix_;
 
-		std::string_view	index_;
-		std::string_view	key_;
-		std::string_view	sort_; // suppose to be better for the cache-line ;)
-		std::string_view	val_;
+		BaseToken		token_;
 
 	public:
 		constexpr IteratorPair(Iterator it, Iterator end, char separator, std::string_view prefix) :
@@ -63,18 +75,24 @@ namespace ixmrangemulti_impl_{
 		}
 
 		static constexpr bool comp(IteratorPair const &a, IteratorPair const &b){
-			return a.key_ > b.key_;
+			// first sort_, then key_
+
+			if (int comp = a.token_.sort.compare(b.token_.sort); a != 0)
+				return comp > 0;
+
+			return a.token_.key  > b.token_.key;
 		}
 
 		constexpr auto const &getKey() const{
-			return key_;
+			return token_.key;
 		}
 
-		constexpr void getToken(Token &t) const{
-				t.index	= index_	;
-				t.sort	= sort_		;
-				t.key	= key_		;
-				t.val	= val_		;
+		constexpr auto const &getPairKey() const{
+			return token_.pkey;
+		}
+
+		constexpr auto const &getToken() const{
+			return token_;
 		}
 
 		void operator ++(){
@@ -97,24 +115,30 @@ namespace ixmrangemulti_impl_{
 				return;
 			}
 
-			StringTokenizer const tok{ it_->getKey(), separator_ };
-			auto _ = getForwardTokenizer(tok);
+			token_.pkey = it_->getKey();
+			token_.pval = it_->getVal();
 
-			// a~index~sort~key
+			if (it_->isOK()){
+				StringTokenizer const tok{ it_->getKey(), separator_ };
+				auto _ = getForwardTokenizer(tok);
 
-					_(); // 0 = a (keyN)
-			index_	=	_(); // 1 = index
-			sort_	=	_(); // 2 = sort
-			key_	=	_(); // 3 = key (keySub)
+				// a~index~sort~key
+							_(); // 0 = a (keyN)
+				token_.index	=	_(); // 1 = index
+				token_.sort	=	_(); // 2 = sort
+				token_.key	=	_(); // 3 = key (keySub)
+			}else{
+				// tombstone
 
-			val_	=	it_->getVal();
+				token_.clearOthers();
+			}
 		}
 	};
 
 
 
 	template <class Iterator, size_t MaxTokens>
-	class Walker{
+	class FTSMerger{
 		using IP		= IteratorPair<Iterator>;
 
 		using Container		= StaticVector<IP, MaxTokens>;
@@ -146,15 +170,14 @@ namespace ixmrangemulti_impl_{
 			return !size();
 		}
 
-		operator bool(){
+		operator bool() const{
 			return size();
 		}
 
 		void print_() const{
 			for(auto &x : container_){
-				Token t;
-				x.getToken(t);
-				logger<Logger::DEBUG>() << "Walker::print>>>" << t.index << t.key << t.val << t.count;
+				Token t = x.getToken();
+				logger<Logger::DEBUG>() << "IXMRANGE*::Merger::print>>>" << t.index << t.key << t.pval << t.count;
 			}
 		}
 
@@ -168,13 +191,17 @@ namespace ixmrangemulti_impl_{
 
 				auto &ip = container_.back();
 
-				ip.getToken(t);
+				t = ip.getToken();
+
+			//	logger<Logger::DEBUG>() << "IXMRANGE*::Merger::walk" << "----->" << t.pkey << t.count;
 
 				++ip;
 
 				if (ip){
 					std::push_heap(std::begin(container_), std::end(container_), & IP::comp);
 				}else{
+					logger<Logger::DEBUG>() << "IXMRANGE*::Merger::walk" << "remove from the container" << t.index << t.key;
+
 					container_.pop_back();
 
 					if (container_.empty()){
@@ -195,53 +222,121 @@ namespace ixmrangemulti_impl_{
 
 
 	template<typename DBAdapter, size_t MaxTokens>
-	class FTS{
+	class FTSBase{
+	protected:
 		using IT_			= typename DBAdapter::List::iterator;
-		using MyWalker			= Walker<IT_, MaxTokens>;
+		using MyFTSMerger		= FTSMerger<IT_, MaxTokens>;
 
 		using PairBufferKeyVector	= StaticVector<hm4::PairBufferKey, MaxTokens>;
 		using TokenContainer		= StaticVector<std::string_view,   MaxTokens>;
 
-		using OutputHeap		= StaticVector<Token, net::worker::shared::config::ITERATIONS_RESULTS_MAX>;
+		DBAdapter		&db_;
 
-		DBAdapter		&db;
-		std::string_view	keyN;
-		uint32_t		resultCount;
+	private:
+		std::string_view	keyN_;
+		std::string_view	keyStart_;
 
-		MyWalker		walker;
-		PairBufferKeyVector	bufferKeyVector;
-		OutputHeap		heap;
+	protected:
+		uint32_t		resultCount_;
+
+		MyFTSMerger		merger_;
+
+	private:
+		PairBufferKeyVector	bufferKeyVector_;
+
+	protected:
+		FTSBase(DBAdapter &db, std::string_view keyN, uint32_t resultCount, std::string_view keyStart) :
+							db_		(db				),
+							keyN_		(keyN				),
+							keyStart_	(calcKeyStart__(keyStart)	),
+							resultCount_	(resultCount			){}
+
+		constexpr size_t getIterationsMax() const{
+			auto const max = net::worker::shared::config::ITERATIONS_LOOPS_MAX;
+			auto const cnt = 3;
+
+			static_assert(cnt > 0);
+
+			if (merger_.size() <= cnt)
+				return max;
+			else
+				return max / (merger_.size() - cnt);
+		}
+
+	private:
+		static std::string_view calcKeyStart__(std::string_view s){
+			if (s.empty())
+				return "";
+
+			namespace PN = mindex_impl_;
+
+			return PN::extractNth_(2, DBAdapter::SEPARATOR[0], s);
+		}
+
+		constexpr std::string_view calcStart_(hm4::PairBufferKey &bufferKey, std::string_view prefix) const{
+			if (keyStart_.empty())
+				return prefix;
+
+			return concatenateBuffer(bufferKey, prefix, keyStart_);
+		}
 
 	public:
-		FTS(DBAdapter &db, std::string_view keyN, uint32_t resultCount) :
-							db		(db		),
-							keyN		(keyN		),
-							resultCount	(resultCount	){}
-
 		constexpr bool empty() const{
-			return walker.empty();
+			return merger_.empty();
+		}
+
+		constexpr auto size() const{
+			return merger_.size();
 		}
 
 		void addIPs(TokenContainer const &tokens){
 			namespace PN = mindex_impl_;
 
 			for(auto const &index : tokens){
-				bufferKeyVector.push_back();
-				auto const prefix = PN::makeKeyDataSearch(bufferKeyVector.back(), DBAdapter::SEPARATOR, keyN, index);
-				auto const key = prefix;
+				bufferKeyVector_.push_back();
+				auto const prefix = PN::makeKeyDataSearch(bufferKeyVector_.back(), DBAdapter::SEPARATOR, keyN_, index);
 
-				auto begin = db->find(key);
-				auto end = std::end(*db);
+				hm4::PairBufferKey bufferKey;	// the key needs to be alive until db->find(key)
+
+				auto const key = calcStart_(bufferKey, prefix);
+
+				auto begin = db_->find(key);	// key does not need to be alive any longer
+				auto end = std::end(*db_);
 
 				[[maybe_unused]]
-				bool const b = walker.push(begin, end, DBAdapter::SEPARATOR[0], prefix);
+				bool const b = merger_.push(begin, end, DBAdapter::SEPARATOR[0], prefix);
 
-				logger<Logger::DEBUG>() << "IXMRANGEMULTI::addIPs" << "index" << index << "key" << key << "push accepted" << (b ? "Y" : "N");
+				logger<Logger::DEBUG>() << "IXMRANGE*::addIPs" << "index" << index << "prefix" << prefix << "key" << key << "accepted" << (b ? "Y" : "N");
 			}
 		}
+	};
 
-		void walk(){
-			while(walker){
+
+	template<typename DBAdapter, size_t MaxTokens>
+	class FTSFlex : public FTSBase<DBAdapter, MaxTokens>{
+		using Base = FTSBase<DBAdapter, MaxTokens>;
+
+		using Base::merger_		;
+		using Base::resultCount_	;
+
+		using OutputHeap	= StaticVector<Token, net::worker::shared::config::ITERATIONS_RESULTS_MAX>;
+		OutputHeap		heap_;
+
+	public:
+		FTSFlex(DBAdapter &db, std::string_view keyN, uint32_t resultCount, std::string_view keyStart) :
+							Base(db, keyN, resultCount, keyStart){}
+
+		void process(OutputBlob::Container &container){
+			size_t iterations = 0;
+
+			auto const iterationsMax = this->getIterationsMax();
+
+			while(merger_){
+				if (++iterations > iterationsMax){
+					logger<Logger::DEBUG>() << "IXMRANGEFLEX::walk" << "too many iterations. break";
+					break;
+				}
+
 				// assuming the output list (heap) is full,
 				//
 				// if front.count is 4 and we have 4 lists,
@@ -252,56 +347,148 @@ namespace ixmrangemulti_impl_{
 				// then is not possible new elements to come
 				// so we are done
 
-				if (heap.size() >= resultCount && heap.front().count >= walker.size()){
-					// logger<Logger::DEBUG>() << "IXMRANGEMULTI::walk" << "collected enough keys. break";
+				if (heap_.size() >= resultCount_ && heap_.front().count >= merger_.size()){
+					logger<Logger::DEBUG>() << "IXMRANGEFLEX::walk" << "collected enough keys. break. iterations" << iterations;
 					break;
 				}
 
-				auto const &t = walker();
+				auto const &t = merger_();
 
 				if (!t)
 					continue;
 
-				if (heap.size() < resultCount){
-					heap.push_back(t);
-					std::push_heap(std::begin(heap), std::end(heap), & Token::comp);
+				if (heap_.size() < resultCount_){
+					heap_.push_back(t);
+					std::push_heap(std::begin(heap_), std::end(heap_), & Token::comp);
 
-					// logger<Logger::DEBUG>() << "IXMRANGEMULTI::walk" << "initial push" << t.key << t.val << t.count;
+				//	logger<Logger::DEBUG>() << "IXMRANGEFLEX::walk" << "initial push" << t.key << t.val << t.count;
 
 					continue;
 				}
 
-				if (!Token::comp(t, heap.front()))
+				if (!Token::comp(t, heap_.front()))
 					continue;
 
 				// remove smallest
-				std::pop_heap(std::begin(heap), std::end(heap), & Token::comp);
-				heap.pop_back();
+				std::pop_heap(std::begin(heap_), std::end(heap_), & Token::comp);
+				heap_.pop_back();
 
 				// insert bigger
-				heap.push_back(t);
-				std::push_heap(std::begin(heap), std::end(heap), & Token::comp);
+				heap_.push_back(t);
+				std::push_heap(std::begin(heap_), std::end(heap_), & Token::comp);
 
-				// logger<Logger::DEBUG>() << "IXMRANGEMULTI::walk" << "push" << t.index << t.key << t.val << t.count;
+			//	logger<Logger::DEBUG>() << "IXMRANGEFLEX::walk" << "push" << t.index << t.key << t.val << t.count;
 			}
+
+			logger<Logger::DEBUG>() << "IXMRANGEFLEX::walk" << "finished. iterations" << iterations;
 
 			//std::sort_heap(std::begin(heap), std::end(heap), & Token::comp);
 
 			// using different comparator
-			std::sort(std::begin(heap), std::end(heap), & Token::comp2);
+			std::sort(std::begin(heap_), std::end(heap_), & Token::comp2);
+
+			// collecting the data
+			container.clear();
+
+			for(auto &t : heap_){
+				container.push_back(t.key);
+				container.push_back(t.pval);
+
+				// logger<Logger::DEBUG>() << "IXMRANGEFLEX::collect" << t.index << t.key << t.val << t.count;
+			}
 		}
 
-		void collect(OutputBlob::Container &container) const{
-			for(auto &t : heap){
-				container.push_back(t.key);
-				container.push_back(t.val);
-
-				// logger<Logger::DEBUG>() << "IXMRANGEMULTI::collect" << t.index << t.key << t.val << t.count;
+		std::string_view tail(){
+			if (!merger_){
+				// merger is inactive
+				return "";
 			}
+
+			auto const &t = merger_();
+
+			return t.pkey;
 		}
 	};
 
-} // namespace ixmrangemulti_impl_
+
+
+	template<typename DBAdapter, size_t MaxTokens>
+	class FTSStrict : public FTSBase<DBAdapter, MaxTokens>{
+		using Base = FTSBase<DBAdapter, MaxTokens>;
+
+		using Base::merger_		;
+		using Base::resultCount_	;
+
+		size_t tokensSize_;
+
+	public:
+		FTSStrict(DBAdapter &db, std::string_view keyN, uint32_t resultCount, size_t tokensSize, std::string_view keyStart) :
+							Base(db, keyN, resultCount, keyStart),
+								tokensSize_(tokensSize){}
+
+		void process(OutputBlob::Container &container){
+			container.clear();
+
+			size_t results = 0;
+
+			size_t iterations = 0;
+
+			auto const iterationsMax = this->getIterationsMax();
+
+			while(merger_){
+				if (++iterations > iterationsMax){
+					logger<Logger::DEBUG>() << "IXMRANGESTRICT::walk" << "too many iterations. break";
+					break;
+				}
+
+				if (results >= resultCount_){
+					logger<Logger::DEBUG>() << "IXMRANGESTRICT::walk" << "collected enough keys. break. iterations" << iterations;
+					break;
+				}
+
+				if (merger_.size() < tokensSize_){
+					logger<Logger::DEBUG>() << "IXMRANGESTRICT::walk" << "input stream exhausted. break. iterations" << iterations;
+					break;
+				}
+
+				auto const &t = merger_();
+
+				if (t && t.count == tokensSize_){
+					container.push_back(t.key);
+					container.push_back(t.pval);
+
+					++results;
+				//	logger<Logger::DEBUG>() << "IXMRANGESTRICT::walk" << "push" << t.key << t.val << t.count;
+				}
+			}
+
+			logger<Logger::DEBUG>() << "IXMRANGESTRICT::walk" << "finished. iterations" << iterations;
+
+			// already sorted
+
+			// already collected
+		}
+
+		std::string_view tail(){
+			if (!merger_){
+				// merger is inactive
+				return "";
+			}
+
+			if (merger_.size() < tokensSize_){
+				// input stream exhausted.
+				return "";
+			}
+
+			auto const &t = merger_();
+
+			return t.pkey;
+		}
+	};
+
+
+
+} // namespace IXMRANGEFLEX_impl_
 
 
 
@@ -309,16 +496,14 @@ namespace ixmrangemulti_impl_{
 // namespace net::worker::commands::MIndex
 
 template<class Protocol, class DBAdapter>
-void IXMRANGEMULTI<Protocol, DBAdapter>::processMulti__(std::string_view keyN, TokenContainer &tokens, uint32_t resultCount, std::string_view keyStart,
+void IXMRANGEFLEX<Protocol, DBAdapter>::process__(std::string_view keyN, TokenContainer &tokens, uint32_t resultCount, std::string_view keyStart,
 			DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
-	(void)keyStart;
+	using namespace IXMRANGEFLEX_impl_;
 
-	using namespace ixmrangemulti_impl_;
+	using MyFTS = FTSFlex<DBAdapter, MaxTokens>;
 
-	using MyFTS = FTS<DBAdapter, MaxTokens>;
-
-	auto fts = blob.construct<MyFTS>(db, keyN, resultCount);
+	auto fts = blob.construct<MyFTS>(db, keyN, resultCount, keyStart);
 
 	fts.addIPs(tokens);
 
@@ -327,13 +512,37 @@ void IXMRANGEMULTI<Protocol, DBAdapter>::processMulti__(std::string_view keyN, T
 		return result.set_container(container);
 	}
 
-	fts.walk();
+	auto &container = blob.construct<OutputBlob::Container>();
+
+	fts.process(container);
+
+	container.push_back(fts.tail()); // tail
+
+	return result.set_container(container);
+}
+
+template<class Protocol, class DBAdapter>
+void IXMRANGESTRICT<Protocol, DBAdapter>::process__(std::string_view keyN, TokenContainer &tokens, uint32_t resultCount, std::string_view keyStart,
+			DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+
+	using namespace IXMRANGEFLEX_impl_;
+
+	using MyFTS = FTSStrict<DBAdapter, MaxTokens>;
+
+	auto fts = blob.construct<MyFTS>(db, keyN, resultCount, tokens.size(), keyStart);
+
+	fts.addIPs(tokens);
+
+	if (fts.size() != tokens.size()){
+		std::array<std::string_view, 1> container;
+		return result.set_container(container);
+	}
 
 	auto &container = blob.construct<OutputBlob::Container>();
 
-	fts.collect(container);
+	fts.process(container);
 
-	container.push_back(""); // tail
+	container.push_back(fts.tail()); // tail
 
 	return result.set_container(container);
 }

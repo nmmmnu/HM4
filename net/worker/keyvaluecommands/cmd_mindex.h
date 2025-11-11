@@ -155,7 +155,7 @@ namespace net::worker::commands::MIndex{
 		}
 
 		template<bool HasSortKey, size_t ContainerSize, typename Container>
-		bool loadTokensUnsorted(Container &container, std::string_view separator, std::string_view text){
+		bool loadTokensUnsorted(Container &container, std::string_view separator, std::string_view text, std::string_view keyN){
 			static_assert( std::is_constructible_v<typename Container::value_type, std::string_view>);
 
 			StringTokenizer const tok{ text, separator[0] };
@@ -165,6 +165,9 @@ namespace net::worker::commands::MIndex{
 					return false;
 
 				if (x.empty())
+					continue;
+
+				if (!valid(keyN, x))
 					continue;
 
 				container.push_back(x);
@@ -273,16 +276,40 @@ namespace net::worker::commands::MIndex{
 			return "INVALID_DATA";
 		}
 
-		template<AccumulateOutput Out, class It, class Container>
-		void accumulateResultsIXMOne(uint32_t const maxResults, std::string_view const prefix, It it, It eit, char const separator, Container &container){
+		template<class Protocol, class DBAdapter>
+		void processRange(std::string_view keyN, std::string_view index, uint32_t count, std::string_view keyStart,
+										DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			hm4::PairBufferKey bufferKey;
+			auto const prefix = makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+
+			auto const key = keyStart.empty() ? prefix : keyStart;
+
+			logger<Logger::DEBUG>() << "IXMRANGE*" << "prefix" << prefix << "key" << key;
+
 			StopPrefixPredicate stop{ prefix };
 
-			auto proj = [separator](std::string_view x){
+			auto proj = [](std::string_view x){
+				auto const separator = DBAdapter::SEPARATOR[0];
+
 				// keyN~word~
 				return extractNth_(3, separator, x);
 			};
 
-			return accumulateResults<Out>(maxResults, stop, it, eit, container, proj);
+			auto const Out = AccumulateOutput::BOTH_WITH_TAIL;
+
+			sharedAccumulateResults<Out>(
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
+				container	,
+				proj
+			);
+
+			return result.set_container(container);
 		}
 
 	} // namespace mindex_impl_
@@ -305,7 +332,7 @@ namespace net::worker::commands::MIndex{
 			namespace PN = mindex_impl_;
 
 			if (p.size() != 7)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
 
 			auto const &keyN	= p[1];
 			auto const &keySub	= p[2];
@@ -320,7 +347,6 @@ namespace net::worker::commands::MIndex{
 			if (!PN::valid(keyN, keySub, keySort))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-
 			if (!hm4::Pair::isValValid(value))
 				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
@@ -332,8 +358,6 @@ namespace net::worker::commands::MIndex{
 
 			if (!PN::prepareTokens(container, delimiter, tokens, checkF))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -365,7 +389,10 @@ namespace net::worker::commands::MIndex{
 					if (oKeySort != keySort){
 						// remove all keys
 						for(auto &x : oContainer)
-							mutate(db, keyN, keySub, oKeySort, x, "MIndex::ADD: DEL index key");
+							if (PN::valid(keyN, keySub, oKeySort, x)) // check consistency
+								mutate(db, keyN, keySub, oKeySort, x, "MIndex::ADD: DEL index key");
+							else
+								logger<Logger::DEBUG>() << "MIndex::ADD: INVALID index key";
 					}else{
 						// because keySort is the same,
 						// we are skipping elements that will be inserted in a later
@@ -580,8 +607,6 @@ namespace net::worker::commands::MIndex{
 			if (!PN::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-
-
 			hm4::PairBufferKey bufferKey;
 			auto const keyCtrl = PN::makeKeyCtrl(bufferKey, DBAdapter::SEPARATOR, keyN, keySub);
 
@@ -622,16 +647,23 @@ namespace net::worker::commands::MIndex{
 			if (!PN::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-
-
 			hm4::PairBufferKey bufferKey;
 			auto const keyCtrl = PN::makeKeyCtrl(bufferKey, DBAdapter::SEPARATOR, keyN, keySub);
 
 			if (auto const encodedValue = hm4::getPairVal(*db, keyCtrl); !encodedValue.empty()){
 				auto &container = blob.construct<OutputBlob::Container>();
 
-				if (PN::loadTokensSorted<1, OutputBlob::ContainerSize>(container, DBAdapter::SEPARATOR, encodedValue))
-					return result.set_container(container);
+				if (PN::loadTokensSorted<1, OutputBlob::ContainerSize>(container, DBAdapter::SEPARATOR, encodedValue)){
+					auto const keySort = container.back();
+
+					// container is guaranteed to be at least 2 elements
+
+					for(auto it = std::begin(container); it != std::prev(std::end(container)); ++it)
+						if (!PN::valid(keyN, keySub, keySort, *it)) // check consistency
+							*it = "INVALID_DATA";
+
+					return result.set_container(container); // we do not checking, because is harmless
+				}
 			}
 
 			std::array<std::string_view, 1> const container;
@@ -668,8 +700,6 @@ namespace net::worker::commands::MIndex{
 			if (!PN::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-
-
 			hm4::PairBufferKey bufferKey;
 			auto const keyCtrl = PN::makeKeyCtrl(bufferKey, DBAdapter::SEPARATOR, keyN, keySub);
 
@@ -702,7 +732,10 @@ namespace net::worker::commands::MIndex{
 					using PN::mutate;
 
 					for(auto &x : container)
-						mutate(db, keyN, keySub, keySort, x, "MIndex::REM: DEL index key");
+						if (PN::valid(keyN, keySub, keySort, x)) // check consistency
+							mutate(db, keyN, keySub, keySort, x, "MIndex::REM: DEL index key");
+						else
+							logger<Logger::DEBUG>() << "MIndex::REM: INVALID index key";
 				}
 
 			}else{
@@ -749,28 +782,16 @@ namespace net::worker::commands::MIndex{
 			if (keyN.empty() || index.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			if (!PN::valid(keyN, index))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
 			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart = p[4];
 
-			hm4::PairBufferKey bufferKey;
-			auto const prefix = PN::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
-
-			auto const key = keyStart.empty() ? prefix : keyStart;
-
-			logger<Logger::DEBUG>() << "IXMRANGE" << "prefix" << prefix;
-
-			auto &container = blob.construct<OutputBlob::Container>();
-
-			accumulateResultsIXMOne<AccumulateOutput::BOTH_WITH_TAIL>(
-				count			,
-				prefix			,
-				db->find(key)		,
-				std::end(*db)		,
-				DBAdapter::SEPARATOR[0]	,
-				container
-			);
-
-			return result.set_container(container);
+			{
+				return processRange(keyN, index, count, keyStart,
+									db, result, blob);
+			}
 		}
 
 	private:
@@ -780,7 +801,7 @@ namespace net::worker::commands::MIndex{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMRANGEMULTI : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXMRANGEFLEX : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -789,7 +810,7 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMRANGEMULTI key delimiter "words,words" count from
+		// IXMRANGEFLEX key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			namespace PN = mindex_impl_;
@@ -801,48 +822,30 @@ namespace net::worker::commands::MIndex{
 
 			auto const keyN		= p[1];
 			auto const delimiter	= p[2];
-			auto const tokens	= p[3];
+			auto const tokensData	= p[3];
 
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			if (keyN.empty() || tokens.empty())
+			if (keyN.empty() || tokensData.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart	= p[5];
 
-			auto &container = blob.construct<TokenContainer>();
+			auto &tokensContainer = blob.construct<TokenContainer>();
 
-			if (!PN::loadTokensUnsorted<0, MaxTokens>(container, delimiter, tokens))
+			if (!PN::loadTokensUnsorted<0, MaxTokens>(tokensContainer, delimiter, tokensData, keyN))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			if (container.size() == 1){
-				// optimized way for single word, same as IXMRANGE
+			if (tokensContainer.size() == 1){
+				auto const &index = tokensContainer[0];
 
-				auto const &index = container[0];
-
-				hm4::PairBufferKey bufferKey;
-				auto const prefix = PN::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
-
-				auto const key = keyStart.empty() ? prefix : keyStart;
-
-				logger<Logger::DEBUG>() << "IXMRANGEMILTI" << "prefix" << prefix;
-
-				auto &container = blob.construct<OutputBlob::Container>();
-
-				accumulateResultsIXMOne<AccumulateOutput::BOTH_WITH_TAIL>(
-					count			,
-					prefix			,
-					db->find(key)		,
-					std::end(*db)		,
-					DBAdapter::SEPARATOR[0]	,
-					container
-				);
-
-				return result.set_container(container);
+				return processRange(keyN, index, count, keyStart,
+									db, result, blob);
 			}else{
-				return processMulti__(keyN, container, count, keyStart, db, result, blob);
+				return process__(keyN, tokensContainer, count, keyStart,
+									db, result, blob);
 			}
 		}
 
@@ -852,14 +855,82 @@ namespace net::worker::commands::MIndex{
 		using TokenContainer = StaticVector<std::string_view, MaxTokens>;
 
 	private:
-		static void processMulti__(std::string_view keyN, TokenContainer &tokens, uint32_t count, std::string_view keyStart,
+		static void process__(std::string_view keyN, TokenContainer &tokens, uint32_t count, std::string_view keyStart,
 					DBAdapter &db, Result<Protocol> &result, OutputBlob &blob);
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmrangemulti",	"IXMRANGEMULTI"
+			"ixmrangeflex",	"IXMRANGEFLEX"
 		};
 	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IXMRANGESTRICT : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// IXMRANGESTRICT key delimiter "words,words" count from
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			namespace PN = mindex_impl_;
+
+			using namespace mindex_impl_;
+
+			if (p.size() != 6)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+
+			auto const keyN		= p[1];
+			auto const delimiter	= p[2];
+			auto const tokensData	= p[3];
+
+			if (delimiter.size() != 1)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (keyN.empty() || tokensData.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const keyStart	= p[5];
+
+			auto &tokensContainer = blob.construct<TokenContainer>();
+
+			if (!PN::loadTokensUnsorted<0, MaxTokens>(tokensContainer, delimiter, tokensData, keyN))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (tokensContainer.size() == 1){
+				auto const &index = tokensContainer[0];
+
+				return processRange(keyN, index, count, keyStart,
+									db, result, blob);
+			}else{
+				return process__(keyN, tokensContainer, count, keyStart,
+									db, result, blob);
+			}
+		}
+
+	private:
+		constexpr static size_t MaxTokens  = 32;
+
+		using TokenContainer = StaticVector<std::string_view, MaxTokens>;
+
+	private:
+		static void process__(std::string_view keyN, TokenContainer &tokens, uint32_t count, std::string_view keyStart,
+					DBAdapter &db, Result<Protocol> &result, OutputBlob &blob);
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ixmrangestrict",	"IXMRANGESTRICT"
+		};
+	};
+
+
 
 	#include "cmd_mindex_ixmrangemulti.h.cc"
 
@@ -878,7 +949,8 @@ namespace net::worker::commands::MIndex{
 				IXMGETINDEXES	,
 				IXMREM		,
 				IXMRANGE	,
-				IXMRANGEMULTI
+				IXMRANGEFLEX	,
+				IXMRANGESTRICT
 			>(pack);
 		}
 	};
