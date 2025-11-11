@@ -13,6 +13,10 @@ namespace IXMRANGEFLEX_impl_{
 		std::string_view	sort;
 		std::string_view	key;
 
+		constexpr operator bool() const{
+			return !index.empty();
+		}
+
 		constexpr void clearOthers(){
 			index	=	"";
 			sort	=	"";
@@ -23,16 +27,16 @@ namespace IXMRANGEFLEX_impl_{
 	struct Token : BaseToken{
 		size_t			count	= 0;
 
-		constexpr operator bool() const{
-			return !index.empty();
-		}
-
 		Token &operator=(BaseToken const &bt){
 			static_cast<BaseToken &>(*this) = bt;
 			return *this;
 		}
 
-		static constexpr bool comp2(Token const &a, Token const &b){
+		constexpr static bool comp(Token const &a, Token const &b){
+			return a.count > b.count;
+		}
+
+		constexpr static bool comp2(Token const &a, Token const &b){
 			// first count >, then sort <, then key <
 
 			if (a.count != b.count)
@@ -42,10 +46,6 @@ namespace IXMRANGEFLEX_impl_{
 				return comp < 0;
 
 			return a.key < b.key;
-		}
-
-		static constexpr bool comp(Token const &a, Token const &b){
-			return a.count > b.count;
 		}
 	};
 
