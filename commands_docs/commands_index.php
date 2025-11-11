@@ -68,7 +68,7 @@ return array(
 	new Cmd(
 			"IX1ADD",
 
-			"IX1ADD key subKey index_value1 value [subKey index_value1 value]...",
+			"IX1ADD key subKey index_value1 index_sort_valie value [subKey index_value1 index_sort_valie value]...",
 
 			"Set <i>subkey</i> with index values <i>index_value1</i> + <i>sort_value1</i> and <i>value</i> in <i>key</i>.",
 			"OK",
@@ -84,7 +84,7 @@ return array(
 	new Cmd(
 			"IX2ADD",
 
-			"IX2ADD key subKey index_value1 index_value2 value [subKey index_value1 index_value2 value]...",
+			"IX2ADD key subKey index_value1 index_value2 index_sort_valie value [subKey index_value1 index_value2 index_sort_valie value]...",
 
 			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i> + <i>sort_value1</i> and <i>value</i> in <i>key</i>.",
 			"OK",
@@ -100,7 +100,7 @@ return array(
 	new Cmd(
 			"IX3ADD",
 
-			"IX3ADD key subKey index_value1 index_value2 index_value3 value [subKey index_value1 index_value2 index_value3 value]...",
+			"IX3ADD key subKey index_value1 index_value2 index_value3 index_sort_valie value [subKey index_value1 index_value2 index_value3 index_sort_valie value]...",
 
 			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i> + <i>sort_value1</i> and <i>value</i> in <i>key</i>.",
 			"OK",
@@ -116,7 +116,7 @@ return array(
 	new Cmd(
 			"IX4ADD",
 
-			"IX4ADD key subKey index_value1 index_value2 index_value3 index_value4 value [subKey index_value1 index_value2 index_value3 index_value4 value]...",
+			"IX4ADD key subKey index_value1 index_value2 index_value3 index_value4 index_sort_valie value [subKey index_value1 index_value2 index_value3 index_value4 index_sort_valie value]...",
 
 			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i>, <i>index_value4</i> + <i>sort_value1</i> and <i>value</i> in <i>key</i>.",
 			"OK",
@@ -132,7 +132,7 @@ return array(
 	new Cmd(
 			"IX5ADD",
 
-			"IX5ADD key subKey index_value1 index_value2 index_value3 index_value4 index_value5 value [subKey index_value1 index_value2 index_value3 index_value4 index_value5 value]...",
+			"IX5ADD key subKey index_value1 index_value2 index_value3 index_value4 index_value5 index_sort_valie value [subKey index_value1 index_value2 index_value3 index_value4 index_value5 index_sort_valie value]...",
 
 			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i>, <i>index_value4</i>, <i>index_value5</i> + <i>sort_value1</i> and <i>value</i> in <i>key</i>.",
 			"OK",
@@ -148,7 +148,7 @@ return array(
 	new Cmd(
 			"IX6ADD",
 
-			"IX6ADD key subKey index_value1 index_value2 index_value3 index_value4 index_value5 index_value6 value [subKey index_value1 index_value2 index_value3 index_value4 index_value5 index_value6 value]...",
+			"IX6ADD key subKey index_value1 index_value2 index_value3 index_value4 index_value5 index_value6 index_sort_valie value [subKey index_value1 index_value2 index_value3 index_value4 index_value5 index_value6 index_sort_valie value]...",
 
 			"Set <i>subkey</i> with index values <i>index_value1</i>, <i>index_value2</i>, <i>index_value3</i>, <i>index_value4</i>, <i>index_value5</i>, <i>index_value6</i> + <i>sort_value1</i> and <i>value</i> in <i>key</i>.",
 			"OK",

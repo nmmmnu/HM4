@@ -938,7 +938,7 @@ namespace net::worker::commands::MIndex{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "morton_curve_2d";
+		constexpr inline static std::string_view name	= "mindex";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,

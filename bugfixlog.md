@@ -86,3 +86,6 @@ Changelog
 -	Fix non-working tcp_reuseport config option
 -	Fix bug in StaticVector
 
+### 1.3.14.1
+-	fix feature with assest() for composite keys in vectors module
+

@@ -372,4 +372,8 @@ Changelog
 -	optimize XNDEL, XRDEL, HDELALL to take advantage of bigger ArenaAllocator.
 	The query never reloads, even if the memtable flushes.
 	XNEXPIRE et others still reload the query, if the memtable flushes.
+-	new module MINDEX (FTS): IXMADD, IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM, IXMRANGE,
+	IXMRANGEFLEX, IXMRANGESTRICT
+-	fix feature with assest() for composite keys in vectors module
+
 
