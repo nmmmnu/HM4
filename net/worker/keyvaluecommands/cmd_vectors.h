@@ -1393,6 +1393,9 @@ namespace net::worker::commands::Vectors{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			if (!P1::valid(keyN, rangeHash__))
+				logger<Logger::DEBUG>() << "MIndex::REM: INVALID index key";
+
 			auto const dim_ve = from_string<uint32_t>(p[2]);
 
 			if (dim_ve <  1 || dim_ve > MaxDimensions)
@@ -1462,11 +1465,9 @@ namespace net::worker::commands::Vectors{
 			// heap.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			std::string_view const rangeHash = "00";
-
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, rangeHash);
+			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, rangeHash__);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
@@ -1519,11 +1520,9 @@ namespace net::worker::commands::Vectors{
 			// heap.clear();
 			// std::make_heap(std::begin(heap_), std::end(heap_));
 
-			std::string_view const rangeHash = "00";
-
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, rangeHash);
+			auto const prefix = P1::template makeKeyRangeN<0>(bufferKey, DBAdapter::SEPARATOR, keyN, rangeHash__);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
@@ -1552,6 +1551,9 @@ namespace net::worker::commands::Vectors{
 
 			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
+
+	private:
+		constexpr static std::string_view rangeHash__ = "00";
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -1602,6 +1604,9 @@ namespace net::worker::commands::Vectors{
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
 
 			auto const keyN = p[1];
+
+			if (!P1::valid(keyN, "", rangeHashSize__))
+				logger<Logger::DEBUG>() << "MIndex::REM: INVALID index key";
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
@@ -1686,7 +1691,7 @@ namespace net::worker::commands::Vectors{
 			auto const nearLSH = hamming1Ranges(lsh);
 
 			for(auto const &range : nearLSH){
-				std::array<char, 5> rangeBuffer[2]; // 00FF\0
+				RangeBuffer rangeBuffer[2];
 
 				std::string_view const rangeHash[2]{
 					// add 00 in front of the hash
@@ -1779,7 +1784,7 @@ namespace net::worker::commands::Vectors{
 			auto const nearLSH = hamming1Ranges(lsh);
 
 			for(auto const &range : nearLSH){
-				std::array<char, 5> rangeBuffer[2]; // 00FF\0
+				RangeBuffer rangeBuffer[2];
 
 				std::string_view const rangeHash[2]{
 					// add 00 in front of the hash
@@ -1840,6 +1845,11 @@ namespace net::worker::commands::Vectors{
 
 			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
+
+	private:
+		constexpr static size_t rangeHashSize__ = 4; // 00FF
+
+		using RangeBuffer = std::array<char, rangeHashSize__ + 1>; // 00FF\0
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
