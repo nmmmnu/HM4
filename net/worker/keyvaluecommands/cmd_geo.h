@@ -7,7 +7,8 @@
 #include "fmt/format.h"
 
 #include "shared_zset_multi.h"
-#include "shared_iterations.h"
+#include "shared_accumulateresults.h"
+#include "shared_accumulateresults.h"
 
 #include "ilist/txguard.h"
 
@@ -333,8 +334,7 @@ namespace net::worker::commands::Geo{
 		//	logger<Logger::DEBUG>() << "GeoHash searching" << me.lon << me.lat << radius;
 		//	logger<Logger::DEBUG>().range(std::begin(cells), std::end(cells));
 
-			uint32_t iterations = 0;
-			uint32_t results    = 0;
+			uint32_t results = 0;
 
 			for(auto &hash : cells){
 				hm4::PairBufferKey bufferKey;
@@ -347,26 +347,18 @@ namespace net::worker::commands::Geo{
 
 				logger<Logger::DEBUG>() << "GeoHash searching cell" << hash << "prefix" << prefix;
 
-				// send query to DB
-				for(auto it = db->find(prefix); it != std::end(*db); ++it){
-					if (auto const &k = it->getKey(); ! same_prefix(prefix, k))
-						break;
+				auto pTail = [](std::string_view = ""){};
 
-					if (++iterations > shared::config::ITERATIONS_LOOPS_MAX)
-						return result.set_container(container);
-
-					if (!it->isOK())
-						continue;
-
-					auto const t_point = extractPoint(it->getVal());
+				auto pPair = [&](auto const &pair) mutable -> bool{
+					auto const t_point = extractPoint(pair.getVal());
 
 					auto const dist = distance(me, t_point, sphere);
 
 					if (dist <  radius){
 						if (++results > shared::config::ITERATIONS_RESULTS_MAX)
-							return result.set_container(container);
+							return false;
 
-						auto const place = extractName( db.SEPARATOR[0], it->getKey() );
+						auto const place = extractName( db.SEPARATOR[0], pair.getKey() );
 
 						bcontainer.push_back();
 
@@ -377,7 +369,23 @@ namespace net::worker::commands::Geo{
 
 						logger<Logger::DEBUG>() << "GeoHash result" << place << dist_sv;
 					}
-				}
+
+					return true;
+				};
+
+				using namespace net::worker::shared::accumulate_results;
+
+				StopPrefixPredicate stop{ prefix };
+
+				// send query to DB
+
+				sharedAccumulatePairs(
+					stop			,
+					db->find(prefix)	,
+					db->end()		,
+					pTail			,
+					pPair
+				);
 			}
 
 			return result.set_container(container);

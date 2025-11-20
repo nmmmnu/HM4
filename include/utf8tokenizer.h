@@ -127,7 +127,7 @@ private:
 		if ((c >> 3) == 0x1E)
 			return 4;	// 11110xxx → 4 bytes
 
-		return 1; 		// invalid byte
+		return 1;		// invalid byte
 	}
 };
 

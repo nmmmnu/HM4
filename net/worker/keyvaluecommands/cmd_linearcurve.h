@@ -14,6 +14,7 @@ namespace net::worker::commands::LinearCurve{
 
 		using namespace net::worker::shared::stop_predicate;
 		using namespace net::worker::shared::config;
+		using namespace net::worker::shared::accumulate_results;
 
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC1Buffer = std::array<char, scoreSize>;
@@ -59,7 +60,7 @@ namespace net::worker::commands::LinearCurve{
 				DBAdapter &db,
 				OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer,
 				std::string_view keyN, uint32_t count,
-				uint64_t x, std::string_view startKey){
+				uint64_t x_coord, std::string_view startKey){
 
 			hm4::PairBufferKey bufferKeyPrefix;
 
@@ -72,51 +73,38 @@ namespace net::worker::commands::LinearCurve{
 				return P1::makeKeyRangeN(bufferKeyPrefix, DBAdapter::SEPARATOR,
 						keyN	,
 					//	"X"	,	// old style not supports txt
-						toHex(x, buffer)
+						toHex(x_coord, buffer)
 				);
 			}();
 
 			StopPrefixPredicate stop(prefix);
 
-			uint32_t iterations	= 0;
-			uint32_t results	= 0;
-			uint32_t id		= 0;
+			uint32_t id = 0;
 
-			auto tail = [&](std::string_view const pkey = ""){
+			auto pTail = [&](std::string_view const pkey = ""){
 				container.emplace_back(pkey);
 			};
 
-			for(auto it = db->find(prefix); it != db->end(); ++it){
-				auto const &key = it->getKey();
-
-				if (!same_prefix(prefix, key))
-					break;
-
-				if (stop(key))
-					return tail(); // no tail
-
-				if (++iterations > ITERATIONS_LOOPS_MAX)
-					return tail(key);
-
-				if (! it->isOK())
-					continue;
-
-				// because of the prefix check in StopPrefixPredicate,
-				// the point is always correct (inside).
-
-				if (++results > count)
-					return tail(key);
-
-				auto const &val = it->getVal();
+			auto pPair = [&](auto const &pair) -> bool{
+				auto const val = pair.getVal();
 
 				bcontainer.push_back();
-				auto const line = formatLine(x, id++, bcontainer.back());
+				auto const line = formatLine(x_coord, id++, bcontainer.back());
 
 				container.emplace_back(line);
 				container.emplace_back(val);
-			}
 
-			return tail();
+				return true;
+			};
+
+			sharedAccumulatePairs(
+				count			,
+				stop			,
+				db->find(prefix)	,
+				db->end()		,
+				pTail			,
+				pPair
+			);
 		}
 
 
@@ -144,25 +132,14 @@ namespace net::worker::commands::LinearCurve{
 
 			StopRangePrefixPredicate stop(key_max);
 
-			uint32_t iterations	= 0;
-			uint32_t results	= 0;
 			uint32_t id		= 0;
 
-			auto tail = [&](std::string_view const pkey = ""){
+			auto pTail = [&](std::string_view const pkey = ""){
 				container.emplace_back(pkey);
 			};
 
-			for(auto it = db->find(key_min); it != db->end(); ++it){
-				auto const &key = it->getKey();
-
-				if (stop(key))
-					return tail(); // no tail
-
-				if (++iterations > ITERATIONS_LOOPS_MAX)
-					return tail(key);
-
-				if (! it->isOK())
-					continue;
+			auto pPair = [&](auto const &pair) -> bool{
+				auto const &key = pair.getKey();
 
 				auto const hexA = P1::decodeIndex(DBAdapter::SEPARATOR,
 							after_prefix(P1::sizeKey(keyN), key));
@@ -171,22 +148,25 @@ namespace net::worker::commands::LinearCurve{
 
 				auto const x    = hex_convert::fromHex<uint64_t>(hex);
 
-				// because of the prefix check in StopPrefixPredicate,
-				// the point is always correct (inside).
-
-				if (++results > count)
-					return tail(key);
-
-				auto const &val = it->getVal();
+				auto const &val = pair.getVal();
 
 				bcontainer.push_back();
 				auto const line = formatLine(x, id++, bcontainer.back());
 
 				container.emplace_back(line);
 				container.emplace_back(val);
-			}
 
-			return tail();
+				return true;
+			};
+
+			sharedAccumulatePairs(
+				count			,
+				stop			,
+				db->find(key_min)	,
+				db->end()		,
+				pTail			,
+				pPair
+			);
 		}
 
 	} // namespace linear_curve_impl_

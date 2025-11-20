@@ -390,7 +390,7 @@ namespace IXMRANGEFLEX_impl_{
 			// collecting the data
 			container.clear();
 
-			for(auto &t : heap_){
+			for(auto const &t : heap_){
 				container.push_back(t.key);
 				container.push_back(t.pval);
 

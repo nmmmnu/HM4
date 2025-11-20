@@ -375,5 +375,5 @@ Changelog
 -	new module MINDEX (FTS): IXMADD, IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM, IXMRANGE,
 	IXMRANGEFLEX, IXMRANGESTRICT
 -	fix feature with assest() for composite keys in vectors module
-
-
+-	new module AUTOCOMPLETE: ACADD_XXX, ACDEL_XXX, ACRANGE
+-	refactor sharedAccumulateResults / sharedAccumulatePairs

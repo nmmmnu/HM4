@@ -39,7 +39,7 @@ namespace net::worker::commands::MIndex{
 			);
 		}
 
-		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		inline std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
 						std::string_view txt,
@@ -56,7 +56,7 @@ namespace net::worker::commands::MIndex{
 			);
 		}
 
-		static std::string_view makeKeyDataSearch(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		inline std::string_view makeKeyDataSearch(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 						std::string_view txt
 				){

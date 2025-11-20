@@ -88,4 +88,4 @@ Changelog
 
 ### 1.3.14.1
 -	fix feature with assest() for composite keys in vectors module
-
+-	fix sharedAccumulateResults() loop count to more correct ITERATIONS_LOOPS_MAX

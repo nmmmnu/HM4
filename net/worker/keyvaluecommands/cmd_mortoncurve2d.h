@@ -5,7 +5,7 @@
 #include "hexconvert.h"
 
 #include "shared_stoppredicate.h"
-#include "shared_iterations.h"
+#include "shared_accumulateresults.h"
 #include "shared_zset_multi.h"
 
 #include "ilist/txguard.h"
@@ -26,6 +26,7 @@ namespace net::worker::commands::MortonCurve2D{
 
 		using namespace net::worker::shared::stop_predicate;
 		using namespace net::worker::shared::config;
+		using namespace net::worker::shared::accumulate_results;
 
 		constexpr size_t MAX_SKIPS = ITERATIONS_IDLE * DIM;
 
@@ -145,42 +146,32 @@ namespace net::worker::commands::MortonCurve2D{
 
 			StopPrefixPredicate stop(prefix);
 
-			uint32_t iterations	= 0;
-			uint32_t results	= 0;
-			uint32_t id		= 0;
+			uint32_t id = 0;
 
-			auto tail = [&](std::string_view const pkey = ""){
+			auto pTail = [&](std::string_view const pkey = ""){
 				container.emplace_back(pkey);
 			};
 
-			for(auto it = db->find(prefix); it != db->end(); ++it){
-				auto const &key = it->getKey();
-
-				if (stop(key))
-					return tail(); // no tail
-
-				if (++iterations > ITERATIONS_LOOPS_MAX)
-					return tail(key);
-
-				if (! it->isOK())
-					continue;
-
-				// because of the prefix check in StopPrefixPredicate,
-				// the point is always correct.
-
-				if (++results > count)
-					return tail(key);
-
-				auto const &val = it->getVal();
+			auto pPair = [&](auto const &pair) -> bool{
+				auto const val = pair.getVal();
 
 				bcontainer.push_back();
 				auto const line = formatLine(point.vector, id++, bcontainer.back());
 
 				container.emplace_back(line);
 				container.emplace_back(val);
-			}
 
-			return tail();
+				return true;
+			};
+
+			sharedAccumulatePairs(
+				count			,
+				stop			,
+				db->find(prefix)	,
+				db->end()		,
+				pTail			,
+				pPair
+			);
 		}
 
 

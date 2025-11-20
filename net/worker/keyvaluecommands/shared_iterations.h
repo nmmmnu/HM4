@@ -18,6 +18,7 @@ namespace net::worker::shared::config{
 
 	constexpr uint32_t ITERATIONS_IDLE		= 10;
 
+	static_assert(ITERATIONS_LOOPS_MAX > ITERATIONS_RESULTS_MAX);
 } // namespace net::worker::shared::config
 
 
