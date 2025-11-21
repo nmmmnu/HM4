@@ -290,7 +290,8 @@ namespace net::worker::commands::AC{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"acadd_utf8",	"ACADD_UTF8"	,	"acadd",	"ACADD"
+			"acadd_utf8"	,	"ACADD_UTF8"	,
+			"acadd"		,	"ACADD"
 		};
 	};
 
@@ -342,9 +343,9 @@ namespace net::worker::commands::AC{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"acdel_utf8",		"ACDEL_UTF8"	,	"acdel",	"ACDEL"		,
-			"acrem_utf8",		"ACREM_UTF8"	,	"acrem",	"ACREM"		,
-			"acremove_utf8",	"ACREMOVE_UTF8"	,	"acremove",	"ACREMOVE"
+			"acdel_utf8"	,	"ACDEL_UTF8"	,	"acdel"		,	"ACDEL"		,
+			"acrem_utf8"	,	"ACREM_UTF8"	,	"acrem"		,	"ACREM"		,
+			"acremove_utf8"	,	"ACREMOVE_UTF8"	,	"acremove"	,	"ACREMOVE"
 		};
 	};
 
@@ -370,9 +371,9 @@ namespace net::worker::commands::AC{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"acdel_bin",		"ACDEL_BIN"	,
-			"acrem_bin",		"ACREM_BIN"	,
-			"acremove_bin",		"ACREMOVE_BIN"
+			"acdel_bin"	,		"ACDEL_BIN"	,
+			"acrem_bin"	,		"ACREM_BIN"	,
+			"acremove_bin"	,		"ACREMOVE_BIN"
 		};
 	};
 
@@ -418,9 +419,9 @@ namespace net::worker::commands::AC{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"acrange",		"ACRANGE"	,
-			"acrange_bin",		"ACRANGE_BIN"	,
-			"acrange_utf8",		"ACRANGE_UTF8"
+			"acrange"	,	"ACRANGE"	,
+			"acrange_bin"	,	"ACRANGE_BIN"	,
+			"acrange_utf8"	,	"ACRANGE_UTF8"
 		};
 	};
 
@@ -466,9 +467,9 @@ namespace net::worker::commands::AC{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"acrangeall",		"ACRANGEALL"	,
-			"acrangeall_bin",	"ACRANGEALL_BIN"	,
-			"acrangeall_utf8",	"ACRANGEALL_UTF8"
+			"acrangeall"		,	"ACRANGEALL"		,
+			"acrangeall_bin"	,	"ACRANGEALL_BIN"	,
+			"acrangeall_utf8"	,	"ACRANGEALL_UTF8"
 		};
 	};
 
@@ -491,77 +492,4 @@ namespace net::worker::commands::AC{
 
 
 } // namespace
-
-
-
-
-
-
-
-#if 0
-			std::string_view populateHeap____(){
-				uint32_t iterations	= 0;
-				uint32_t results	= 0;
-
-				auto proj = [](std::string_view x){
-					auto const separator = DBAdapter::SEPARATOR[0];
-
-					// keyN~word~
-					return extractNth(2, separator, x);
-				};
-
-				hm4::PairBufferKey bufferKey;
-				auto const prefix = makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN_, text_);
-				auto const key = keyStart_.empty() ? prefix : keyStart_;
-
-				StopPrefixPredicate stop{ prefix };
-
-				logger<Logger::DEBUG>() << "ACRANGE prefix" << prefix;
-
-				for(auto it = db_->find(key); it != db_->end(); ++it){
-					auto const &key = it->getKey();
-
-					auto const pkey = proj(key);
-
-					logger<Logger::DEBUG>() << "ACRANGE keys" << key << pkey;
-
-					if (++iterations > ITERATIONS_LOOPS_MAX)
-						return key; // tail
-
-					if (stop(key))
-						return ""; // no tail
-
-					if (! it->isOK())
-						continue;
-
-					if (++results > resultCount_)
-						return key; // tail
-
-					auto const &val = it->getVal();
-					auto const num  = from_string<uint32_t>(val);
-
-					if (heap_.size() < resultCount_){
-						heap_.emplace_back(pkey, val, num);
-						std::push_heap(std::begin(heap_), std::end(heap_), & Result::comp);
-
-						logger<Logger::DEBUG>() << "ACRANGE add to heap" << pkey << val << num;
-
-						continue;
-					}
-
-					if (!Result::compN(num, heap_.front()))
-						continue;
-
-					// remove smallest
-					std::pop_heap(std::begin(heap_), std::end(heap_), & Result::comp);
-					heap_.pop_back();
-
-					// insert bigger
-					heap_.emplace_back(pkey, val, num);
-					std::push_heap(std::begin(heap_), std::end(heap_), & Result::comp);
-				}
-
-				return ""; // no tail
-			}
-#endif
 

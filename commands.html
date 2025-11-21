@@ -88,7 +88,8 @@
 
 
 <div class="menurow">
-			<div>
+	
+		<div>
 			<b>immutable.h</b><br />
 			&nbsp;
 
@@ -324,6 +325,12 @@
 				<li><a href="#IX6RANGE">IX6RANGE</a></li>
 				</div>
 			<div>
+			<b>mindex.h</b><br />
+			&nbsp;
+
+					<li><a href="#XXXX">XXXX</a></li>
+				</div>
+			<div>
 			<b>linearcurve.h</b><br />
 			&nbsp;
 
@@ -461,6 +468,23 @@
 				<li><a href="#TDINFO">TDINFO</a></li>
 				</div>
 			<div>
+			<b>vectors.h</b><br />
+			&nbsp;
+
+					<li><a href="#XXXX">XXXX</a></li>
+				</div>
+			<div>
+			<b>autocomplete.h</b><br />
+			&nbsp;
+
+					<li><a href="#ACADD_UTF8">ACADD_UTF8</a></li>
+				<li><a href="#ACADD_BIN">ACADD_BIN</a></li>
+				<li><a href="#ACDEL_UTF8">ACDEL_UTF8</a></li>
+				<li><a href="#ACDEL_BIN">ACDEL_BIN</a></li>
+				<li><a href="#ACRANGE">ACRANGE</a></li>
+				<li><a href="#ACRANGEALL">ACRANGEALL</a></li>
+				</div>
+			<div>
 			<b>murmur.h</b><br />
 			&nbsp;
 
@@ -518,6 +542,7 @@
 					<li><a href="#TEST">TEST</a></li>
 				</div>
 	</div>
+
 
 
 
@@ -4451,6 +4476,29 @@ order by
 limit [number]</pre>			
 			<p class="top"><a href="#top">top</a></p>
 		</div>
+				<div class="cmd" id="XXXX">
+
+			<h2>XXXX value [value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XXXX</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>xx.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>value</i>'s into the Misra Gries heavy hitter with size <i>mg_count</i> and fixed value size of <i>mg_value_size</i>.<br /><i>mg_count</i> can be from 1 to 200.<br />Supported sizes are:<br />-  32 (gives you string size of  31)<br />-  40 (gives you string size of  39) - IP6 compatible<br />-  64 (gives you string size of  63)<br />- 128 (gives you string size of 127)<br />- 256 (gives you string size of 255) - Pascal string compatible :)<br />Read Misra Gries information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			0 if all the items is not qualified for insert<br />1 if at least one item is qualified for insert
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
 				<div class="cmd" id="MC1GET">
 
 			<h2>MC1GET key subkey</h2>
@@ -6456,6 +6504,178 @@ limit [number]</pre>
 			int
 			<h3>Return value:</h3>
 			count of the values
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="XXXX">
+
+			<h2>XXXX value [value]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>XXXX</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>xx.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>value</i>'s into the Misra Gries heavy hitter with size <i>mg_count</i> and fixed value size of <i>mg_value_size</i>.<br /><i>mg_count</i> can be from 1 to 200.<br />Supported sizes are:<br />-  32 (gives you string size of  31)<br />-  40 (gives you string size of  39) - IP6 compatible<br />-  64 (gives you string size of  63)<br />- 128 (gives you string size of 127)<br />- 256 (gives you string size of 255) - Pascal string compatible :)<br />Read Misra Gries information document.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			0 if all the items is not qualified for insert<br />1 if at least one item is qualified for insert
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="ACADD_UTF8">
+
+			<h2>ACADD_UTF8 / ACADD key text exp</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>ACADD_UTF8</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>autocomplete.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>text</i> into the autocomplete object <i>key</i>, with expiration of <i>exp</i> seconds.<br /><i>text</i> can be ASCII or UTF8.<br />Old style encodings like CP1250, CP1251, KOI8 etc will not be tokenized correctly.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			new score of the text
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="ACADD_BIN">
+
+			<h2>ACADD_BIN key text exp</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>ACADD_BIN</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>autocomplete.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Add <i>text</i> into the autocomplete object <i>key</i>, with expiration of <i>exp</i> seconds.<br /><i>text</i> can be ASCII or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.<br />UTF8 will not be tokenized correctly.
+			<h3>Return type:</h3>
+			int
+			<h3>Return value:</h3>
+			new score of the text
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="ACDEL_UTF8">
+
+			<h2>ACDEL_UTF8 / ACREM_UTF8 / ACREMOVE_UTF8 / ACDEL / ACREM / ACREMOVE key text</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>ACDEL_UTF8</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>autocomplete.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Remove <i>text</i> from the autocomplete object <i>key</i> - UTF8 version.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			true
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="ACDEL_BIN">
+
+			<h2>ACDEL_BIN / ACREM_BIN / ACREMOVE_BIN key text</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>ACDEL_BIN</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>Yes</td></tr>
+				<tr><td>Module			</td><td>autocomplete.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Remove <i>text</i> from the autocomplete object <i>key</i> - 8 bit binary version.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			true
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="ACRANGE">
+
+			<h2>ACRANGE / ACRANGE_UTF8 / ACRANGE_BIN key text count start</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>ACRANGE</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>autocomplete.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Make a query with <i>text</i> from the autocomplete object <i>key</i>, return up to <i>count</i> results.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			true
+						<h3>Example:</h3>
+			<pre><i>Example:</i><br /><br />acadd a test 0
+acadd a testing 0
+acadd a test 0
+acadd a test 0
+acrange a te 100 ''
+acadd a 'test now' 0
+acadd a 'test now' 0
+acdel a test
+acrange a te 100 ''
+</pre>
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="ACRANGEALL">
+
+			<h2>ACRANGEALL / ACRANGEALL_UTF8 / ACRANGEALL_BIN key text count start</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>ACRANGEALL</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>autocomplete.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Make a query with empty text (e.g. '') from the autocomplete object <i>key</i>, return up to <i>count</i> results.<br /><i>start</i> specify starting key (for pagination in the similar way as in XNGET).<br />Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.
+			<h3>Return type:</h3>
+			bool
+			<h3>Return value:</h3>
+			true
 			
 			
 			<p class="top"><a href="#top">top</a></p>
