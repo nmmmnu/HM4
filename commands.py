@@ -86,6 +86,7 @@ def generate():
 			<li>{{name}}</li>
 		{{/commands}}
 		</ul>
+		<br />
 	{{/modules}}
 	</ul>
 	<hr />
@@ -200,9 +201,13 @@ def generate():
 	print(output)
 
 
-load_module("mindex"		)
-load_module("autocomplete"	)
+#load_module("mindex"		)
 
+
+
+load_module("autocomplete"	)
+load_module("murmur"		)
+load_module("random"		)
 load_module("info"		)
 load_module("reload"		)
 load_module("compat"		)

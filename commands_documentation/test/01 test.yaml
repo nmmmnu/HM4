@@ -1,0 +1,10 @@
+- id:          TEST
+  name:        TEST
+  usage:       TEST
+  description: |
+    Internal command to do tests during development.<br />
+    Command arguments and return type can be changed any time.<br />
+
+  version:     1.3.5.1
+  compatible:  false
+  mutable:     n/a

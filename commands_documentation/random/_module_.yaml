@@ -1,0 +1,55 @@
+id:          RANDOM
+name:        RANDOM
+
+version:     1.3.12.1
+
+description: |
+  <p>This module provides commands for generating <b>pseudo-random numbers</b>.
+  The numbers are deterministic: the same seed always produces the same result.</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Generating a random number</b></p>
+  <p>The <b>RANDOM</b> command returns a single pseudo-random number using murmur hash mixer.
+  If no seed is given, an internal seed (equal to zero) is used.
+  If you provide a seed, the output is always the same for that seed.</p>
+
+  <ul>
+    <li><i>RANDOM</i>   - returns the number generated from seed <b>0</b>. .</li>
+    <li><i>RANDOM 5</i> - returns the number generated from seed <b>5</b>.</li>
+  </ul>
+
+  <p><b>2. Generating multiple random numbers</b></p>
+  <p>The <b>MRANDOM</b> command accepts multiple seeds and returns an array of random numbers, one for each seed.</p>
+
+  <ul>
+    <li><i>MRANDOM 0 1 2 3</i> - returns four pseudo-random numbers, each derived from the respective seed.</li>
+  </ul>
+
+  <p><b>3. Deterministic output</b></p>
+  <p>The generator is <b>fully deterministic</b>: the same seed always maps to the same output.
+  This makes the module useful for testing, simulations, sharding, or any logic where reproducible randomness is required.</p>
+
+  <p><b>4. Output types</b></p>
+  <p>Depending on the internal state, RANDOM may return a <b>string</b> or an <b>integer</b>.
+  MRANDOM always returns an <b>array</b> of such values.</p>
+
+  <p><b>Tip:</b> Use MRANDOM when you need several reproducible values at once.
+  Use RANDOM without arguments when you simply need a single pseudo-random value.</p>
+
+example:     |
+  127.0.0.1:6379> random
+  "15926910803142346387"
+  127.0.0.1:6379> random 0
+  "15926910803142346387"
+  127.0.0.1:6379> random 1
+  "12994781566227106604"
+  127.0.0.1:6379> random 2
+  "4233148493373801447"
+  127.0.0.1:6379> random 3
+  (integer) 815575690806614222
+  127.0.0.1:6379> mrandom 0 1 2 3
+  1) "15926910803142346387"
+  2) "12994781566227106604"
+  3) "4233148493373801447"
+  4) "815575690806614222"

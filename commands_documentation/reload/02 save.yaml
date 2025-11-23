@@ -3,7 +3,7 @@
   usage:    SAVE
   aliases:
     items:
-      - BGSAVE
+      - bgsave
   description: |
     Flushes memtable to the disk.<br />
     Reloads the disktable(s) from the disk.<br />

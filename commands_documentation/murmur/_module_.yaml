@@ -1,0 +1,40 @@
+id:          MURMUR
+name:        MURMUR
+
+version:     1.3.0
+
+description: |
+  <p>This module provides fast and reliable <b>non-cryptographic hashing</b> using the well-known <b>MurmurHash64A</b> algorithm.</p>
+  <p><b>What It Does:</b></p>
+  <p><b>1. Generates a 64-bit hash from any string</b></p>
+  <p>The command <b>MURMUR</b> takes an input string and produces a deterministic 64-bit hash value.
+  This type of hash is ideal for systems where speed and distribution quality are more important than cryptographic security.</p>
+  <p><b>2. Optional seed value</b></p>
+  <p>You can provide a custom <b>seed</b> to influence the hash outcome. Different seeds generate different hash outputs for the same string,
+  which is useful for sharding, randomized hashing, and avoiding collisions in custom scenarios.</p>
+  <p><b>3. Optional modulo reduction</b></p>
+  <p>If you include a <b>modulo</b> argument, the result will be reduced to <b>hash % modulo</b> and returned as an integer.
+  This is particularly useful for:</p>
+  <ul>
+    <li>distributing keys across buckets,</li>
+    <li>implementing partitioned storage,</li>
+    <li>mapping hashes into a fixed numeric range.</li>
+  </ul>
+  <p><b>Use Cases:</b></p>
+  <ul>
+    <li>Fast indexing</li>
+    <li>Hash-based partitioning</li>
+    <li>Deduplication checks</li>
+    <li>Bloom filters and probabilistic data structures</li>
+  </ul>
+  <p><b>Note:</b> MurmurHash is <b>not cryptographically secure</b> and should not be used for password hashing or security-critical operations.</p>
+
+example:     |
+  127.0.0.1:6379> murmur test
+  "3407684658384555107"
+  127.0.0.1:6379> murmur test 0
+  "3407684658384555107"
+  127.0.0.1:6379> murmur test 1
+  "1618900948208871284"
+  127.0.0.1:6379> murmur test 1 1024
+  (integer) 884
