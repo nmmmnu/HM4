@@ -1,0 +1,10 @@
+- id:          SHUTDOWN
+  name:        SHUTDOWN
+  usage:       SHUTDOWN
+  description: |
+    Shutdowns the server.<br />
+    SAVE / NOSAVE is not supported yet.<br />
+
+  version:     1.0.0
+  compatible:  true
+  mutable:     n/a

@@ -1,0 +1,15 @@
+- id:      DBSIZEMUTABLE
+  name:    DBSIZEMUTABLE
+  usage:   DBSIZEMUTABLE
+  description: |
+    Returns number of mutable keys.<br />
+
+  return_type: int
+  return:      number of keys
+  version:     1.2.18
+  mutable:     n/a
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> dbsize
+    (integer) 39
+

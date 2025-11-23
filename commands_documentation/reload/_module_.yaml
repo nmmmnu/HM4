@@ -1,0 +1,8 @@
+id:          COMPAT
+name:        COMPAT
+
+version:     1.0.0
+
+description: |
+  <p>This module provides command for controlling memtable.</p>
+

@@ -1,0 +1,100 @@
+id:          MINDEX
+name:        MINDEX
+
+version:     1.3.14.2
+
+description: |
+  <p>This module provides a <b>multi-index object</b> that helps in storing and retrieving data efficiently for your application.</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Storing entries with multiple sub-keys</b></p>
+  <p>You can insert entries into a mindex object using <b>IXMADD</b>. Each entry can have a <i>sub_key</i>, <i>sort_key</i>, and multiple indexes (words). Example:</p>
+  <ul>
+    <li><i>IXMADD mykey John , "london,new york" x "Data for John"</i> - stores data under sub_key "John" with indexes "london" and "new york".</li>
+  </ul>
+
+  <p><b>2. Retrieving values</b></p>
+  <p>You can get values from the mindex object using <b>IXMGET</b> or <b>IXMMGET</b>. Single or multiple sub-keys can be queried. Example:</p>
+  <ul>
+    <li><i>IXMGET mykey John</i> - retrieves the value for sub_key "John".</li>
+    <li><i>IXMMGET mykey John Pete Ivan</i> - retrieves values for several sub_keys.</li>
+  </ul>
+
+  <p><b>3. Checking existence</b></p>
+  <p>Use <b>IXMEXISTS</b> to check whether a value exists for a given sub_key. Example:</p>
+  <ul>
+    <li><i>IXMEXISTS mykey John</i> - returns 1 if exists, 0 otherwise.</li>
+  </ul>
+
+  <p><b>4. Removing entries</b></p>
+  <p>Remove entries using <b>IXMREM</b> (aliases: IXMREMOVE, IXMDEL). Example:</p>
+  <ul>
+    <li><i>IXMREM mykey John</i> - deletes the entry for sub_key "John".</li>
+  </ul>
+
+  <p><b>5. Fetching ranges</b></p>
+  <p>You can get a range of indexed results using <b>IXMRANGE</b>, <b>IXMRANGEFLEX</b>, and <b>IXMRANGESTRICT</b>. These commands allow pagination and filtering based on indexes. Example:</p>
+  <ul>
+    <li><i>IXMRANGE mykey london 100 ''</i> - fetches up to 100 results starting from key "london".</li>
+    <li><i>IXMRANGEFLEX mykey , 'london,new york' 100 ''</i> - returns results that match any of the given indexes.</li>
+    <li><i>IXMRANGESTRICT mykey , 'london,new york' 100 ''</i> - returns results only if all indexes match.</li>
+  </ul>
+
+  <p><b>Tip:</b> This module can be used both for <b>tagging</b> and <b>full-text search</b>. Always add your data correctly before querying ranges to ensure accurate results.</p>
+
+example:     |
+  127.0.0.1:6379> IXMADD news 1000 , "George,Bush,spokes,in,the,senate" x "article 1000"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1001 , "New,laptop,from,DELL" x "article 1001"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1002 , "George,Bush,visits,France" x "article 1002"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1003 , "Cold,weathe,soon" x "article 1003"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1004 , "George,Michael,had,a,concert,with,Kate,Bush" x "article 1004"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1005 , "Why,you,should,read,1984,from,George,Orwell" x "article 1005"
+  (integer) 1
+  127.0.0.1:6379> IXMRANGESTRICT news , "George,Bush" 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1002"
+  4) "article 1002"
+  5) "1004"
+  6) "article 1004"
+  7) ""
+  127.0.0.1:6379> IXMRANGEFLEX news , "George,Bush" 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1004"
+  4) "article 1004"
+  5) "1002"
+  6) "article 1002"
+  7) "1005"
+  8) "article 1005"
+  9) ""
+  127.0.0.1:6379> IXMRANGE news George 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1002"
+  4) "article 1002"
+  5) "1004"
+  6) "article 1004"
+  7) "1005"
+  8) "article 1005"
+  9) ""
+  127.0.0.1:6379> IXMGETINDEXES news 1004
+  1) "Bush"
+  2) "George"
+  3) "Kate"
+  4) "Michael"
+  5) "a"
+  6) "concert"
+  7) "had"
+  8) "with"
+  9) "x"
+
+see_also_module:
+  items:
+    - autocomplete

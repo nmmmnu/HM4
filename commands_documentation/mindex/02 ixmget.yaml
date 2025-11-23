@@ -1,0 +1,28 @@
+- id:          IXMGET
+  name:        IXMGET
+#  aliases:
+#    items:
+  usage:       IXMGET key sub_key
+  description: |
+    Get the value from mindex object *key*, with *sub_key*<br />
+    If the *sub_key* not exists, returns an empty string<br />
+
+  return_type: string
+  return:      the value
+  version:     1.3.14.2
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ixmget mykey John
+    "Data for John"
+    127.0.0.1:6379> ixmget mykey Pete
+    "Data for Pete"
+    127.0.0.1:6379> ixmget mykey Ivan
+    ""
+
+  see_also:
+    items:
+      - IXMMGET
+      - IXMEXISTS
+      - IXMGETINDEXES

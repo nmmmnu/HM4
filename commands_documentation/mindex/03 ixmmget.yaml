@@ -1,0 +1,25 @@
+- id:          IXMMGET
+  name:        IXMMGET
+#  aliases:
+#    items:
+  usage:       IXMMGET key sub_key0 [sub_key1]...
+  description: |
+    Get the value from mindex object *key*, with *sub_key0*, *sub_key1*...<br />
+    The command is same as IXMGET, except it returns several values.<br />
+
+  return_type: array
+  return:      list of the values
+  version:     1.3.14.2
+  complexity:  N * READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ixmmget mykey John Pete Ivan John
+    1) "Data for John"
+    2) "Data for Pete"
+    3) ""
+    4) "Data for John"
+
+  see_also:
+    items:
+      - IXMMGET

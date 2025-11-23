@@ -1,0 +1,15 @@
+- id:      VERSION
+  name:    VERSION
+  usage:   VERSION
+  description: |
+    Returns server version.<br />
+
+  return_type: string
+  return:      version
+  version:     1.2.16
+  mutable:     n/a
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> version
+    "1.3.14.1"
+

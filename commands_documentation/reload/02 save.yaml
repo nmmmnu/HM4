@@ -1,0 +1,18 @@
+- id:       SAVE
+  name:     SAVE
+  usage:    SAVE
+  aliases:
+    items:
+      - BGSAVE
+  description: |
+    Flushes memtable to the disk.<br />
+    Reloads the disktable(s) from the disk.<br />
+    Tthis is no-op on immutable servers.<br />
+
+  return_type: OK
+  version:     1.0.0
+  mutable:     n/a
+  compatible:  true
+  see_also:
+    items:
+      - RELOAD

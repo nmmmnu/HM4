@@ -1,0 +1,7 @@
+id:          TEST
+name:        TEST
+version:     1.3.5.1
+description: |
+  This module provides internal command(s) for testing during development.<br />
+  You can safely ignore it.<br />
+

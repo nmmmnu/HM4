@@ -1,0 +1,20 @@
+- id:      MAXKEYSIZE
+  name:    MAXKEYSIZE
+  usage:   MAXKEYSIZE
+  description: |
+    Returns MAX_KEY_SIZE.<br />
+
+  return_type: string
+  return:      version
+  version:     1.2.30
+  mutable:     n/a
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> maxkeysize
+    (integer) 1023
+    127.0.0.1:6379> maxvalsize
+    (integer) 268435455
+
+  see_also:
+    items:
+      - MAXVALSIZE

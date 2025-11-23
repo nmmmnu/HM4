@@ -1,0 +1,14 @@
+- id:      RELOAD
+  name:    RELOAD
+  usage:   RELOAD
+  description: |
+    Reloads the disktable(s) from the disk.<br />
+    This command is used when disktable(s) are updated or replaced from an external process.<br />
+
+  return_type: OK
+  version:     1.0.0
+  mutable:     n/a
+  compatible:  false
+  see_also:
+    items:
+      - SAVE

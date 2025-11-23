@@ -1,0 +1,15 @@
+- id:      DBSIZE
+  name:    DBSIZE
+  usage:   DBSIZE
+  description: |
+    Returns number of keys.<br />
+
+  return_type: int
+  return:      number of keys
+  version:     1.2.18
+  mutable:     n/a
+  compatible:  true
+  example:     |
+    127.0.0.1:6379> dbsize
+    (integer) 3391
+

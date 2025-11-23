@@ -1,0 +1,11 @@
+- id:      LISTMAINTAINANCE
+  name:    LISTMAINTAINANCE
+  usage:   LISTMAINTAINANCE
+  description: |
+    Run crontab list maintainance. For example, crontab list maintainance may fsync binlogs.<br />
+    Very useful if crontab list maintainance is disabled.<br />
+
+  return_type: OK
+  version:     1.3.5.3
+  mutable:     n/a
+  compatible:  false

@@ -17,6 +17,7 @@ Goals of the project are.
 -   Consistent
 -   High quality code
 -   Supported [commands]
+-   Supported [commands in new doc format]
 -   Complexity is a lie :)
 -   Atomic queues
 -   HyperLogLog
@@ -993,6 +994,7 @@ Retrieves the raw representation of the vector from key  "word:cat".
 [Log structured merge tree]: http://en.wikipedia.org/wiki/Log-structured_merge-tree
 [Differential files: their application to the maintenance of large databases - University of Minnesota, Minneapolis]: http://www-users.cs.umn.edu/~he/diff/p256-severance.pdf
 [commands]: https://htmlpreview.github.io/?https://raw.githubusercontent.com/nmmmnu/HM4/master/commands.html
+[commands in new doc format]: https://htmlpreview.github.io/?https://raw.githubusercontent.com/nmmmnu/HM4/master/commands_new.html
 [HyperLogLog]: https://en.wikipedia.org/wiki/HyperLogLog
 [Bloom_filter]: https://en.wikipedia.org/wiki/Bloom_filter
 [Counting_Bloom_filter]: https://en.wikipedia.org/wiki/Bloom_filter

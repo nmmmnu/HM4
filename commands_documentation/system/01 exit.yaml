@@ -1,0 +1,9 @@
+- id:          EXIT
+  name:        EXIT
+  usage:       EXIT
+  description: |
+    Disconnect from the server.<br />
+
+  version:     1.0.0
+  compatible:  true
+  mutable:     n/a

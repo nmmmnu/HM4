@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Commands Documentation</title>
+	<style>
+	pre.x{
+		padding:	20px;
+		border:		dotted 1px black;
+	}
+
+	table.x{
+		border-collapse: collapse;
+		border:		solid 2px black;
+	}
+
+	table.x td{
+		padding:	10px;
+	}
+	</style>
+</head>
+<body>
+	<h1>Commands Documentation</h1>
+
+	<h2>Modules</h2>
+	<ul>
+		<li>INFO</li>
+		<ul>
+			<li>INFO</li>
+			<li>DBSIZE</li>
+			<li>DBSIZEMUTABLE</li>
+			<li>VERSION</li>
+			<li>MAXKEYSIZE</li>
+			<li>MAXVALSIZE</li>
+			<li>PING</li>
+			<li>ECHO</li>
+			<li>TIME</li>
+		</ul>
+		<li>COMPAT</li>
+		<ul>
+			<li>LISTMAINTAINANCE</li>
+			<li>SAVE</li>
+			<li>RELOAD</li>
+		</ul>
+	</ul>
+	<hr />
+
+		<h2>Module INFO</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides information.</p>
+</blockquote>
+
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li>INFO</li>
+			<li>DBSIZE</li>
+			<li>DBSIZEMUTABLE</li>
+			<li>VERSION</li>
+			<li>MAXKEYSIZE</li>
+			<li>MAXVALSIZE</li>
+			<li>PING</li>
+			<li>ECHO</li>
+			<li>TIME</li>
+		</ul>
+
+		<hr />
+
+		<div class="cmd" id="INFO">
+			<h4>INFO</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>INFO		</td></tr>
+				<tr><td>Available since		</td><td>1.0.0	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>INFO</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Provides information about the server process.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; info
+# Server
+Version          : 1.3.14.1
+Mutable          : Yes
+
+# Pair Limits
+Max Key Size     : 1023
+Max Val Size     : 268435455
+
+# Network
+Connections      : 1
+Spare Pool       : 31
+
+# Keys
+Keys (estimated) : 39
+Size             : 2088
+
+# MemList
+MemList          : AVLList
+MemList Keys     : 0
+MemList Size     : 0
+
+# Allocator
+Allocator        : ArenaAllocator
+Allocator Free   : 1073741824
+Allocator Used   : 0
+
+# System
+PID              : 745140
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="DBSIZE">
+			<h4>DBSIZE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>DBSIZE		</td></tr>
+				<tr><td>Available since		</td><td>1.2.18	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>DBSIZE</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns number of keys.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>number of keys</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; dbsize
+(integer) 3391
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="DBSIZEMUTABLE">
+			<h4>DBSIZEMUTABLE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>DBSIZEMUTABLE		</td></tr>
+				<tr><td>Available since		</td><td>1.2.18	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>DBSIZEMUTABLE</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns number of mutable keys.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>number of keys</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; dbsize
+(integer) 39
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="VERSION">
+			<h4>VERSION</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VERSION		</td></tr>
+				<tr><td>Available since		</td><td>1.2.16	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VERSION</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns server version.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>version</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; version
+&quot;1.3.14.1&quot;
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="MAXKEYSIZE">
+			<h4>MAXKEYSIZE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MAXKEYSIZE		</td></tr>
+				<tr><td>Available since		</td><td>1.2.30	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MAXKEYSIZE</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns MAX_KEY_SIZE.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>version</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; maxkeysize
+(integer) 1023
+127.0.0.1:6379&gt; maxvalsize
+(integer) 268435455
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>MAXVALSIZE</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="MAXVALSIZE">
+			<h4>MAXVALSIZE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MAXVALSIZE		</td></tr>
+				<tr><td>Available since		</td><td>1.2.30	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MAXVALSIZE</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns MAX_VAL_SIZE.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>version</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; maxkeysize
+(integer) 1023
+127.0.0.1:6379&gt; maxvalsize
+(integer) 268435455
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>MAXKEYSIZE</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="PING">
+			<h4>PING</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PING		</td></tr>
+				<tr><td>Available since		</td><td>1.2.16	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PING</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns "pong".<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>pong</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ping
+pong
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="ECHO">
+			<h4>ECHO</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ECHO		</td></tr>
+				<tr><td>Available since		</td><td>1.2.16	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ECHO message</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns *message*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the message</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; echo hello
+&quot;hello&quot;
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="TIME">
+			<h4>TIME</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>TIME		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.5	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>INFO	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>TIME</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns number of keys.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>time and microtime the way redis returns it</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; time
+1) &quot;1763909802&quot;
+2) &quot;256909&quot;
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<h2>Module COMPAT</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides command for controlling memtable.</p>
+</blockquote>
+
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li>LISTMAINTAINANCE</li>
+			<li>SAVE</li>
+			<li>RELOAD</li>
+		</ul>
+
+		<hr />
+
+		<div class="cmd" id="LISTMAINTAINANCE">
+			<h4>LISTMAINTAINANCE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>LISTMAINTAINANCE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.5.3	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>COMPAT	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>LISTMAINTAINANCE</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Run crontab list maintainance. For example, crontab list maintainance may fsync binlogs.<br />
+Very useful if crontab list maintainance is disabled.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="SAVE">
+			<h4>SAVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SAVE		</td></tr>
+				<tr><td>Available since		</td><td>1.0.0	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>COMPAT	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SAVE</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Flushes memtable to the disk.<br />
+Reloads the disktable(s) from the disk.<br />
+Tthis is no-op on immutable servers.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>BGSAVE</li>
+			</ul>
+
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>RELOAD</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="RELOAD">
+			<h4>RELOAD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>RELOAD		</td></tr>
+				<tr><td>Available since		</td><td>1.0.0	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>COMPAT	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>RELOAD</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Reloads the disktable(s) from the disk.<br />
+This command is used when disktable(s) are updated or replaced from an external process.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>SAVE</li>
+			</ul>
+		</div>
+		<hr />
+
+	<h6 align="center">Copyleft 2017 - 2025, Nikolay Mihaylov<br />
+	<a href="https://github.com/nmmmnu/HM4/">https://github.com/nmmmnu/HM4/</a></h6>
+</body>
+</html>
+

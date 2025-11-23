@@ -1,0 +1,11 @@
+- id:       RESET
+  name:     RESET
+  usage:    RESET
+  description: |
+    Provided for compatibility.<br />
+    Does not do anything.<br />
+
+  return_type: OK
+  version:     1.2.18
+  mutable:     n/a
+  compatible:  true

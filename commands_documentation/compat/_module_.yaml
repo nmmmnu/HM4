@@ -1,0 +1,9 @@
+id:          COMPAT
+name:        COMPAT
+
+version:     1.2.16
+
+description: |
+  <p>This module gives you redis compatibility commands.</p>
+  <p>These commands does not do anything.</p>
+

@@ -1,0 +1,11 @@
+- id:      SELECT
+  name:    SELECT
+  usage:   SELECT
+  description: |
+    Provided for compatibility.<br />
+    Does not do anything.<br />
+
+  return_type: OK
+  version:     1.2.16
+  mutable:     n/a
+  compatible:  true

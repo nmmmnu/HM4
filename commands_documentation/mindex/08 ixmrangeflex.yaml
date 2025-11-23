@@ -1,0 +1,34 @@
+- id:          IXMRANGEFLEX
+  name:        IXMRANGEFLEX
+  usage:       IXMRANGEFLEX key delimiter "words,words" count start
+  description: |
+    Returns a range mindex object *key* using indexes *words,words*<br />
+    Returns up to *count* results.<br />
+    *start* specify starting key (for pagination in the similar way as in XNGET).<br />
+    Results apears if contains at least one of the indexes. The result that contains more indexes are on top.<br />
+
+  return_type: array
+  return:      list of key / values with "next" key at the end.
+  version:     1.3.14.2
+  complexity:  N * READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> IXMADD mykey John , "london,new york" x "Data for John"
+    (integer) 1
+    127.0.0.1:6379> IXMADD mykey Pete , "london,boston" x "Data for Pete"
+    (integer) 1
+    127.0.0.1:6379> IXMRANGEFLEX mykey , 'london,new york' 100 ''
+    1) "John"
+    2) "Data for John"
+    3) "John"
+    4) "Data for John"
+    5) "Pete"
+    6) "Data for Pete"
+    7) ""
+
+  see_also:
+    items:
+      - IXMRANGE
+      - IXMRANGESTRICT
+

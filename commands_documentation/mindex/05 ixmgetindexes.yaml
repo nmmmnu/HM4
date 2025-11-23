@@ -1,0 +1,31 @@
+- id:          IXMGETINDEXES
+  name:        IXMGETINDEXES
+#  aliases:
+#    items:
+  usage:       IXMGETINDEXES key sub_key
+  description: |
+    Get the "indexes" from mindex object *key*, with *sub_key*<br />
+    If the *sub_key* not exists, returns an empty array<br />
+
+  return_type: array
+  return:      the indexes
+  version:     1.3.14.2
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    not connected> ixmgetindexes mykey John
+    1) "london"
+    2) "new york"
+    3) "x"
+    127.0.0.1:6379> ixmgetindexes mykey Pete
+    1) "boston"
+    2) "london"
+    3) "x"
+    127.0.0.1:6379> ixmgetindexes mykey Ivan
+    1) ""
+
+  see_also:
+    items:
+      - IXMMGET
+
