@@ -200,14 +200,14 @@ def generate():
 	print(output)
 
 
-#load_module("mindex"		)
-#load_module("autocomplete"	)
+load_module("mindex"		)
+load_module("autocomplete"	)
 
 load_module("info"		)
 load_module("reload"		)
-#load_module("compat"		)
-#load_module("system"		)
-#load_module("test"		)
+load_module("compat"		)
+load_module("system"		)
+load_module("test"		)
 
 generate()
 

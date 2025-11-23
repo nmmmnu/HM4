@@ -25,6 +25,27 @@
 
 	<h2>Modules</h2>
 	<ul>
+		<li>MINDEX</li>
+		<ul>
+			<li>IXMADD</li>
+			<li>IXMGET</li>
+			<li>IXMMGET</li>
+			<li>IXMEXISTS</li>
+			<li>IXMGETINDEXES</li>
+			<li>IXMREM</li>
+			<li>IXMRANGE</li>
+			<li>IXMRANGEFLEX</li>
+			<li>IXMRANGESTRICT</li>
+		</ul>
+		<li>AUTOCOMPLETE</li>
+		<ul>
+			<li>ACADD_UTF8</li>
+			<li>ACDEL_UTF8</li>
+			<li>ACADD_BIN</li>
+			<li>ACDEL_BIN</li>
+			<li>ACRANGE</li>
+			<li>ACRANGEALL</li>
+		</ul>
 		<li>INFO</li>
 		<ul>
 			<li>INFO</li>
@@ -43,9 +64,898 @@
 			<li>SAVE</li>
 			<li>RELOAD</li>
 		</ul>
+		<li>COMPAT</li>
+		<ul>
+			<li>SELECT</li>
+			<li>RESET</li>
+			<li>TYPE</li>
+			<li>TOUCH</li>
+		</ul>
+		<li>SYSTEM</li>
+		<ul>
+			<li>EXIT</li>
+			<li>SHUTDOWN</li>
+		</ul>
+		<li>TEST</li>
+		<ul>
+			<li>TEST</li>
+		</ul>
 	</ul>
 	<hr />
 
+		<h2>Module MINDEX</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides a <b>multi-index object</b> that helps in storing and retrieving data efficiently for your application.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Storing entries with multiple sub-keys</b></p>
+<p>You can insert entries into a mindex object using <b>IXMADD</b>. Each entry can have a <i>sub_key</i>, <i>sort_key</i>, and multiple indexes (words). Example:</p>
+<ul>
+  <li><i>IXMADD mykey John , "london,new york" x "Data for John"</i> - stores data under sub_key "John" with indexes "london" and "new york".</li>
+</ul>
+
+<p><b>2. Retrieving values</b></p>
+<p>You can get values from the mindex object using <b>IXMGET</b> or <b>IXMMGET</b>. Single or multiple sub-keys can be queried. Example:</p>
+<ul>
+  <li><i>IXMGET mykey John</i> - retrieves the value for sub_key "John".</li>
+  <li><i>IXMMGET mykey John Pete Ivan</i> - retrieves values for several sub_keys.</li>
+</ul>
+
+<p><b>3. Checking existence</b></p>
+<p>Use <b>IXMEXISTS</b> to check whether a value exists for a given sub_key. Example:</p>
+<ul>
+  <li><i>IXMEXISTS mykey John</i> - returns 1 if exists, 0 otherwise.</li>
+</ul>
+
+<p><b>4. Removing entries</b></p>
+<p>Remove entries using <b>IXMREM</b> (aliases: IXMREMOVE, IXMDEL). Example:</p>
+<ul>
+  <li><i>IXMREM mykey John</i> - deletes the entry for sub_key "John".</li>
+</ul>
+
+<p><b>5. Fetching ranges</b></p>
+<p>You can get a range of indexed results using <b>IXMRANGE</b>, <b>IXMRANGEFLEX</b>, and <b>IXMRANGESTRICT</b>. These commands allow pagination and filtering based on indexes. Example:</p>
+<ul>
+  <li><i>IXMRANGE mykey london 100 ''</i> - fetches up to 100 results starting from key "london".</li>
+  <li><i>IXMRANGEFLEX mykey , 'london,new york' 100 ''</i> - returns results that match any of the given indexes.</li>
+  <li><i>IXMRANGESTRICT mykey , 'london,new york' 100 ''</i> - returns results only if all indexes match.</li>
+</ul>
+
+<p><b>Tip:</b> This module can be used both for <b>tagging</b> and <b>full-text search</b>. Always add your data correctly before querying ranges to ensure accurate results.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD news 1000 , &quot;George,Bush,spokes,in,the,senate&quot; x &quot;article 1000&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1001 , &quot;New,laptop,from,DELL&quot; x &quot;article 1001&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1002 , &quot;George,Bush,visits,France&quot; x &quot;article 1002&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1003 , &quot;Cold,weathe,soon&quot; x &quot;article 1003&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1004 , &quot;George,Michael,had,a,concert,with,Kate,Bush&quot; x &quot;article 1004&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1005 , &quot;Why,you,should,read,1984,from,George,Orwell&quot; x &quot;article 1005&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGESTRICT news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; IXMRANGEFLEX news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1004&quot;
+4) &quot;article 1004&quot;
+5) &quot;1002&quot;
+6) &quot;article 1002&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXMRANGE news George 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXMGETINDEXES news 1004
+1) &quot;Bush&quot;
+2) &quot;George&quot;
+3) &quot;Kate&quot;
+4) &quot;Michael&quot;
+5) &quot;a&quot;
+6) &quot;concert&quot;
+7) &quot;had&quot;
+8) &quot;with&quot;
+9) &quot;x&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li>autocomplete module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li>IXMADD</li>
+			<li>IXMGET</li>
+			<li>IXMMGET</li>
+			<li>IXMEXISTS</li>
+			<li>IXMGETINDEXES</li>
+			<li>IXMREM</li>
+			<li>IXMRANGE</li>
+			<li>IXMRANGEFLEX</li>
+			<li>IXMRANGESTRICT</li>
+		</ul>
+
+		<hr />
+
+		<div class="cmd" id="IXMADD">
+			<h4>IXMADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMADD key sub_key delimiter &quot;words,words&quot; sort_key value</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *words* separated by *delimiter* into mindex object *key*, with *sub_key* and *sort_key*, value *value* and indexes *words,words*<br />
+*sort_key* influences the sorting of the results of IXMRANGE* commands. If you do not want to influence the sort just pass "x" or "1".<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="IXMGET">
+			<h4>IXMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMGET key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the value from mindex object *key*, with *sub_key*<br />
+If the *sub_key* not exists, returns an empty string<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmget mykey John
+&quot;Data for John&quot;
+127.0.0.1:6379&gt; ixmget mykey Pete
+&quot;Data for Pete&quot;
+127.0.0.1:6379&gt; ixmget mykey Ivan
+&quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>IXMMGET</li>
+				<li>IXMEXISTS</li>
+				<li>IXMGETINDEXES</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="IXMMGET">
+			<h4>IXMMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMMGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the value from mindex object *key*, with *sub_key0*, *sub_key1*...<br />
+The command is same as IXMGET, except it returns several values.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of the values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmmget mykey John Pete Ivan John
+1) &quot;Data for John&quot;
+2) &quot;Data for Pete&quot;
+3) &quot;&quot;
+4) &quot;Data for John&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>IXMMGET</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="IXMEXISTS">
+			<h4>IXMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMEXISTS key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of mindex object *key*, with *sub_key* exists<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = not exists, 1 = exists</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmexists mykey John
+(integer) 1
+127.0.0.1:6379&gt; ixmexists mykey Ivan
+(integer) 0
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>IXMMGET</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="IXMGETINDEXES">
+			<h4>IXMGETINDEXES</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMGETINDEXES		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMGETINDEXES key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the "indexes" from mindex object *key*, with *sub_key*<br />
+If the *sub_key* not exists, returns an empty array<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the indexes</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">not connected&gt; ixmgetindexes mykey John
+1) &quot;london&quot;
+2) &quot;new york&quot;
+3) &quot;x&quot;
+127.0.0.1:6379&gt; ixmgetindexes mykey Pete
+1) &quot;boston&quot;
+2) &quot;london&quot;
+3) &quot;x&quot;
+127.0.0.1:6379&gt; ixmgetindexes mykey Ivan
+1) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>IXMMGET</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="IXMREM">
+			<h4>IXMREM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMREM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMREM key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *sub_key* from mindex object *key*<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>IXMREMOVE</li>
+				<li>IXMDEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey Leon , &quot;london,new york,Serdica&quot; x &quot;Data for Leon&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMGET mykey Leon
+&quot;Data for Leon&quot;
+127.0.0.1:6379&gt; IXMREM mykey Leon
+(integer) 1
+127.0.0.1:6379&gt; IXMGET mykey Leon
+&quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="IXMRANGE">
+			<h4>IXMRANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMRANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMRANGE key text count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range mindex object *key* using single *text*<br />
+Returns up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with &quot;next&quot; key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGE mykey london 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Pete&quot;
+4) &quot;Data for Pete&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>IXMRANGEFLEX</li>
+				<li>IXMRANGESTRICT</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="IXMRANGEFLEX">
+			<h4>IXMRANGEFLEX</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMRANGEFLEX		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMRANGEFLEX key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range mindex object *key* using indexes *words,words*<br />
+Returns up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+Results apears if contains at least one of the indexes. The result that contains more indexes are on top.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with &quot;next&quot; key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGEFLEX mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;John&quot;
+4) &quot;Data for John&quot;
+5) &quot;Pete&quot;
+6) &quot;Data for Pete&quot;
+7) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>IXMRANGE</li>
+				<li>IXMRANGESTRICT</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="IXMRANGESTRICT">
+			<h4>IXMRANGESTRICT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMRANGESTRICT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMRANGESTRICT key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range mindex object *key* using indexes *words,words*<br />
+Returns up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+Results apears if contains ALL of the indexes.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with &quot;next&quot; key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Leon , &quot;london,new york,serdica&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGESTRICT mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Leon&quot;
+4) &quot;Data for Pete&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>IXMRANGE</li>
+				<li>IXMRANGEFLEX</li>
+			</ul>
+		</div>
+		<hr />
+		<h2>Module AUTOCOMPLETE</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module collects <b>search strings</b> and helps in <b>building autocomplete</b> functionality for your website or application.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Collecting valid search strings</b></p>
+<p>The module stores "correct" search strings that users perform. For example, on a music-related website:</p>
+<ul>
+  <li>User searches for <i>"madonna"</i> - a result is found - this is a    <b>valid search string</b>.</li>
+  <li>User searches for <i>"madona"</i> - no result is found - this is an <b>invalid search string</b>.</li>
+</ul>
+
+<p><b>2. Adding valid search strings</b></p>
+<p>Before the module can generate autocomplete suggestions, you need to add valid search strings using the command <b>ACADD</b>.
+Example: <i>ACADD mykey "madonna" 3600</i>. This tells the system: "this is a valid search string, store it for autocomplete."</p>
+
+<p><b>3. Retrieving autocomplete results</b></p>
+<p>Once the valid strings are added, you can use the command <b>ACRANGE</b> to get autocomplete suggestions.
+Example: <i>ACRANGE mykey "ma"</i>. The system returns a list of suggestions starting with <i>"ma"</i>.</p>
+
+<p><b>4. Ordering results</b></p>
+<p>Results are sorted by <b>number of hits</b>. More frequently used or more correct search strings appear first.</p>
+
+<p><b>Tip:</b> Always add valid search strings before using autocomplete.
+The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not only music-related queries.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; ACADD mykey &quot;hello sir&quot;   3600
+(integer) 1
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 1
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 2
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 3
+127.0.0.1:6379&gt; ACRANGE mykey he 20 &#x27;&#x27;
+1) &quot;hello world&quot;
+2) &quot;3&quot;
+3) &quot;hello sir&quot;
+4) &quot;1&quot;
+5) &quot;&quot;
+127.0.0.1:6379&gt; ACRANGE mykey &quot;hello s&quot; 20 &#x27;&#x27;
+1) &quot;hello sir&quot;
+2) &quot;1&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li>mindex module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li>ACADD_UTF8</li>
+			<li>ACDEL_UTF8</li>
+			<li>ACADD_BIN</li>
+			<li>ACDEL_BIN</li>
+			<li>ACRANGE</li>
+			<li>ACRANGEALL</li>
+		</ul>
+
+		<hr />
+
+		<div class="cmd" id="ACADD_UTF8">
+			<h4>ACADD_UTF8</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ACADD_UTF8		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ACADD_UTF8 key text exp</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.<br />
+*text* must be ASCII or UTF8.<br />
+Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>new score of the text</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>ACADD</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>ACADD_BIN</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="ACDEL_UTF8">
+			<h4>ACDEL_UTF8</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ACDEL_UTF8		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ACDEL_UTF8 key text</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *text* from the autocomplete object *key*.<br />
+*text* must be ASCII or UTF8.<br />
+Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>ACDEL</li>
+				<li>ACREM</li>
+				<li>ACREMOVE</li>
+				<li>ACREM_UTF8</li>
+				<li>ACREMOVE_UTF8</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ACDEL_UTF8 mykey &quot;hello world&quot;
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>ACDEL_BIN</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="ACADD_BIN">
+			<h4>ACADD_BIN</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ACADD_BIN		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ACADD_BIN key text exp</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.<br />
+*text* must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8.<br />
+UTF8 etc will not works correctly.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>new score of the text</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ACADD_BIN mykey &quot;hello world&quot; 3600
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>ACADD_UTF8</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="ACDEL_BIN">
+			<h4>ACDEL_BIN</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ACDEL_BIN		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ACDEL_BIN key text</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *text* from the autocomplete object *key*.<br />
+*text* must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8.<br />
+UTF8 etc will not works correctly.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>ACREM_BIN</li>
+				<li>ACREMOVE_BIN</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ACDEL_BIN mykey &quot;hello world&quot;
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>ACDEL_UTF8</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="ACRANGE">
+			<h4>ACRANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ACRANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ACRANGE key text count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Make a query with *text* from the autocomplete object *key*, return up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>results as key value + next</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>ACRANGE_UTF8</li>
+				<li>ACRANGE_BIN</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ACADD mykey &quot;hello sir&quot;   3600
+(integer) 1
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 1
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 2
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 3
+127.0.0.1:6379&gt; ACRANGE mykey he 20 &#x27;&#x27;
+1) &quot;hello world&quot;
+2) &quot;3&quot;
+3) &quot;hello sir&quot;
+4) &quot;1&quot;
+5) &quot;&quot;
+127.0.0.1:6379&gt; ACRANGE mykey &quot;hello s&quot; 20 &#x27;&#x27;
+1) &quot;hello sir&quot;
+2) &quot;1&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>ACRANGEALL</li>
+			</ul>
+		</div>
+		<hr />
+		<div class="cmd" id="ACRANGEALL">
+			<h4>ACRANGEALL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ACRANGEALL		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ACRANGEALL text count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Make a query with empty text from the autocomplete object *key*,
+returns up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>results as key value + next</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>ACRANGEALL_UTF8</li>
+				<li>ACRANGEALL_BIN</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ACADD mykey &quot;hello sir&quot;   3600
+(integer) 1
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 1
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 2
+127.0.0.1:6379&gt; ACADD mykey &quot;hello world&quot; 3600
+(integer) 3
+127.0.0.1:6379&gt; ACRANGEALL mykey 20 &#x27;&#x27;
+1) &quot;hello world&quot;
+2) &quot;3&quot;
+3) &quot;hello sir&quot;
+4) &quot;1&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li>ACRANGE</li>
+			</ul>
+		</div>
+		<hr />
 		<h2>Module INFO</h2>
 
 		<h3><b>Description:</b></h3>
@@ -504,6 +1414,243 @@ This command is used when disktable(s) are updated or replaced from an external 
 			<ul>
 				<li>SAVE</li>
 			</ul>
+		</div>
+		<hr />
+		<h2>Module COMPAT</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module gives you redis compatibility commands.</p>
+<p>These commands does not do anything.</p>
+</blockquote>
+
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li>SELECT</li>
+			<li>RESET</li>
+			<li>TYPE</li>
+			<li>TOUCH</li>
+		</ul>
+
+		<hr />
+
+		<div class="cmd" id="SELECT">
+			<h4>SELECT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SELECT		</td></tr>
+				<tr><td>Available since		</td><td>1.2.16	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>COMPAT	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SELECT</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Provided for compatibility.<br />
+Does not do anything.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="RESET">
+			<h4>RESET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>RESET		</td></tr>
+				<tr><td>Available since		</td><td>1.2.18	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>COMPAT	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>RESET</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Provided for compatibility.<br />
+Does not do anything.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="TYPE">
+			<h4>TYPE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>TYPE		</td></tr>
+				<tr><td>Available since		</td><td>1.2.16	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>COMPAT	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>TYPE key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Provided for compatibility.<br />
+Does not do anything.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns text &quot;string&quot;</blockquote>
+
+
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="TOUCH">
+			<h4>TOUCH</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>TOUCH		</td></tr>
+				<tr><td>Available since		</td><td>1.2.17	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>COMPAT	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>TOUCH key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Provided for compatibility.<br />
+Does not do anything.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns text &quot;1&quot;</blockquote>
+
+
+
+
+		</div>
+		<hr />
+		<h2>Module SYSTEM</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote>This module provides system command.<br />
+</blockquote>
+
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li>EXIT</li>
+			<li>SHUTDOWN</li>
+		</ul>
+
+		<hr />
+
+		<div class="cmd" id="EXIT">
+			<h4>EXIT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>EXIT		</td></tr>
+				<tr><td>Available since		</td><td>1.0.0	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>SYSTEM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>EXIT</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Disconnect from the server.<br />
+</blockquote>
+
+
+
+
+
+
+		</div>
+		<hr />
+		<div class="cmd" id="SHUTDOWN">
+			<h4>SHUTDOWN</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SHUTDOWN		</td></tr>
+				<tr><td>Available since		</td><td>1.0.0	</td></tr>
+				<tr><td>Redis compatible	</td><td>Y			</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>SYSTEM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SHUTDOWN</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Shutdowns the server.<br />
+SAVE / NOSAVE is not supported yet.<br />
+</blockquote>
+
+
+
+
+
+
+		</div>
+		<hr />
+		<h2>Module TEST</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote>This module provides internal command(s) for testing during development.<br />
+You can safely ignore it.<br />
+</blockquote>
+
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li>TEST</li>
+		</ul>
+
+		<hr />
+
+		<div class="cmd" id="TEST">
+			<h4>TEST</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>TEST		</td></tr>
+				<tr><td>Available since		</td><td>1.3.5.1	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Module			</td><td>TEST	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>TEST</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Internal command to do tests during development.<br />
+Command arguments and return type can be changed any time.<br />
+</blockquote>
+
+
+
+
+
+
 		</div>
 		<hr />
 
