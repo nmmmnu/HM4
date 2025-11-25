@@ -3,14 +3,15 @@
 import os
 import yaml
 import pystache
+import pprint
 
-DATA = []
+DATA_MODULES	= []
 
+MODULE_PATH	= "commands_documentation"
 MODULE_METAFILE = "_module_.yaml"
 
 def load_module(module_name):
-	""" scans commands_documentation/<module_name>/ for YAML files and adds them to all_commands"""
-	path = os.path.join("commands_documentation", module_name)
+	path = os.path.join(MODULE_PATH, module_name)
 	if not os.path.isdir(path):
 		print(f"Module {module_name} not found at {path}")
 		return
@@ -49,7 +50,11 @@ def load_module(module_name):
 
 	module["commands"] = module_commands
 
-	DATA.append(module)
+	DATA_MODULES.append(module)
+
+def load(path):
+    with open(path, "r", encoding="utf8") as f:
+        return f.read()
 
 def generate():
 	template = """
@@ -59,39 +64,83 @@ def generate():
 	<meta charset="utf-8" />
 	<title>Commands Documentation</title>
 	<style>
-	pre.x{
-		padding:	20px;
-		border:		dotted 1px black;
+	a {
+		font-weight:	bold;
+		text-decoration: none;
+		color:		#007;
 	}
 
-	table.x{
+	div.menurow {
+		display:	flex;
+		flex-wrap:	wrap;
+		gap:		5px;
+	}
+
+	div.menurow div {
+		flex:		200px;
+
+		border:		solid 1px #777;
+		border-right:	solid 3px #777;
+		border-bottom:	solid 3px #777;
+
+		border-radius:	5px;
+
+		padding:	10px;
+
+		vertical-align:	top;
+	}
+
+	pre.x {
+		border:		solid  1px black;
+		border-left:	solid 15px #007;
+
+		border-radius:	5px;
+
+		padding:	20px;
+	}
+
+	table.x {
 		border-collapse: collapse;
 		border:		solid 2px black;
+		border-right:	solid 3px black;
+		border-bottom:	solid 3px black;
+
+		margin-top:	10px;
+		margin-bottom:	10px;
 	}
 
-	table.x td{
-		padding:	10px;
+	div.menurow div,
+	table.x th {
+		background-color: #eee;
+	}
+
+	table.x th,
+	table.x td {
+		padding:	5px;
 	}
 	</style>
 </head>
 <body>
+	<a name="top"></a>
 	<h1>Commands Documentation</h1>
 
 	<h2>Modules</h2>
-	<ul>
+	<div class="menurow">
 	{{#modules}}
-		<li>{{name}}</li>
-		<ul>
-		{{#commands}}
-			<li>{{name}}</li>
-		{{/commands}}
-		</ul>
-		<br />
+		<div>
+			<a href="#M::{{id}}">{{name}}</a>
+			<ul>
+			{{#commands}}
+				<li><a href="#C::{{id}}">{{name}}</a></li>
+			{{/commands}}
+			</ul>
+		</div>
 	{{/modules}}
-	</ul>
+	</div>
 	<hr />
 
 	{{#modules}}
+		<a name="M::{{id}}"></a>
 		<h2>Module {{name}}</h2>
 
 		{{#description}}
@@ -108,7 +157,7 @@ def generate():
 		<h3>See Also:</h3>
 		<ul>
 			{{#items}}
-			<li>{{.}} module</li>
+			<li><a href="#M::{{.}}">{{.}}</a> module</li>
 			{{/items}}
 		</ul>
 		{{/see_also_module}}
@@ -116,14 +165,16 @@ def generate():
 		<h3>Commands:</h3>
 		<ul>
 		{{#commands}}
-			<li>{{name}}</li>
+			<li><a href="#C::{{id}}">{{name}}</a></li>
 		{{/commands}}
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		{{#commands}}
 		<div class="cmd" id="{{id}}">
+			<a name="C::{{id}}"></a>
 			<h4>{{name}}</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>{{id}}		</td></tr>
@@ -132,7 +183,7 @@ def generate():
 				<tr><td>Data lookup complexity	</td><td>{{.}}		</td></tr>
 				{{/complexity}}
 				<tr><td>Redis compatible	</td><td>{{#compatible}}Y{{/compatible}}	{{^compatible}}N{{/compatible}}		</td></tr>
-				<tr><td>Mutable			</td><td>{{#mutable}}{{.}}{{/mutable}}		{{^mutable}}N{{/mutable}}		</td></tr>
+				<tr><td>Mutable			</td><td>{{#mutable}}Y{{/mutable}}		{{^mutable}}N{{/mutable}}		</td></tr>
 				<tr><td>Module			</td><td>{{module}}	</td></tr>
 			</table>
 
@@ -149,7 +200,7 @@ def generate():
 
 			{{#return}}
 			<h4>Return value:</h4>
-			<blockquote>{{.}}</blockquote>
+			<blockquote>{{{.}}}</blockquote>
 			{{/return}}
 
 			{{#aliases}}
@@ -175,11 +226,13 @@ def generate():
 			<h4>See Also:</h4>
 			<ul>
 				{{#items}}
-				<li>{{.}}</li>
+				<li><a href="#C::{{.}}">{{.}}</a></li>
 				{{/items}}
 			</ul>
 			{{/see_also}}
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		{{/commands}}
 	{{/modules}}
@@ -190,29 +243,44 @@ def generate():
 </html>
 """
 
-	for mod in DATA:
+	for mod in DATA_MODULES:
 		mod["commands"].sort(key=lambda cmd: cmd['file'])
 
 		for cmd in mod["commands"] :
 			cmd["module"] = mod["name"]
 
+	DATA = {
+		"modules" : DATA_MODULES,
+	#	"partials" : {
+	#		'string_size_table': load(MODULE_PATH + "/_templates/string_size_table.mustache"),
+	#	}
+	}
+
+	# pprint.pprint(DATA)
+	# exit
+
 	renderer = pystache.Renderer()
-	output = renderer.render(template, {'modules': DATA})
+
+	output = renderer.render(template, DATA)
 	print(output)
 
 
-#load_module("mindex"		)
 
 
 
-load_module("autocomplete"	)
-load_module("murmur"		)
-load_module("random"		)
-load_module("info"		)
-load_module("reload"		)
-load_module("compat"		)
-load_module("system"		)
-load_module("test"		)
+load_module("heavy_hitters"		)
+load_module("misra_gries_heavy_hitters"	)
+load_module("reservoir_sampling"	)
+load_module("vectors"			)
+load_module("mindex"			)
+load_module("autocomplete"		)
+load_module("murmur"			)
+load_module("random"			)
+load_module("info"			)
+load_module("reload"			)
+load_module("compat"			)
+load_module("system"			)
+load_module("test"			)
 
 generate()
 

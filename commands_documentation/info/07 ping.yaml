@@ -7,7 +7,6 @@
   return_type: string
   return:      "pong"
   version:     1.2.16
-  mutable:     n/a
   compatible:  true
   example:     |
     127.0.0.1:6379> ping

@@ -7,7 +7,6 @@
 
   return_type: OK
   version:     1.0.0
-  mutable:     n/a
   compatible:  false
   see_also:
     items:

@@ -1,0 +1,156 @@
+- id:          VKSET
+  name:        VKSET
+  usage:       VKSET key dim_vec dim_ix quantize_type raw_vector_type BLOB
+  return_type: OK
+  version:     1.3.14
+  complexity:  WRITE
+  mutable:     true
+  compatible:  false
+  description: |
+    Store vector represented by *BLOB* into the key *key*<br />
+    The command is same as VADD, except it set a key instead of adding to an index.<br />
+    The parameters as as following:
+    <ul>
+      <li>*key*			- name of the index object</li>
+      <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
+      <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
+      <li>*quantize_type*	- quantization, see the table below.</li>
+      <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
+      <li>*BLOB*		- vector values.</li>
+    </ul>
+
+    Quantization types:
+    <table border="1" class="x">
+      <tr>
+        <th>Flag</th>
+        <th>Quantization</th>
+        <th>Storage Type</th>
+        <th>Bytes</th>
+        <th>Notes</th>
+        <th>Precision loss</th>
+        <th>Disk size of GloVe set</th>
+      </tr>
+      <tr>
+        <td align="center">F</td>
+        <td>None</td>
+        <td>float</td>
+        <td align="right">4</td>
+        <td>No quantization - store values exactly as 32-bit floats</td>
+        <td align="right">0.00 %</td>
+        <td align="right">1,232 MB</td>
+      </tr>
+      <tr>
+        <td align="center">S</td>
+        <td>Q15</td>
+        <td>int16_t</td>
+        <td align="right">2</td>
+        <td>50% space reduction - near-lossless precision</td>
+        <td align="right">~0.01 %</td>
+        <td align="right">660 MB</td>
+      </tr>
+      <tr>
+        <td align="center">I</td>
+        <td>Q7</td>
+        <td>int8_t</td>
+        <td align="right">1</td>
+        <td>75% space reduction - precision good for most workloads</td>
+        <td align="right">~1.00 %</td>
+        <td align="right">374 MB
+      </td>
+      </tr>
+      <tr>
+        <td align="center">B</td>
+        <td>bit</td>
+        <td>bit</td>
+        <td align="right">1/8</td>
+        <td>97% space reduction - precision probably is lost</td>
+        <td align="right">~~~5.00 %</td>
+        <td align="right">124 MB</td>
+      </tr>
+    </table>
+
+    Vector types:
+    <table border="1" class="x">
+      <tr>
+        <th>Flag</th>
+        <th>Output</th>
+        <th>Byte Order</th>
+      </tr>
+      <tr>
+        <td align="center">H</td>
+        <td>hexadecimal</td>
+        <td>big-endian</td>
+      </tr>
+      <tr>
+        <td align="center">h</td>
+        <td>hexadecimal</td>
+        <td>little-endian</td>
+      </tr>
+      <tr>
+        <td align="center">B</td>
+        <td>binary</td>
+        <td>big-endian</td>
+      </tr>
+      <tr>
+        <td align="center">b</td>
+        <td>binary</td>
+        <td>little-endian</td>
+      </tr>
+    </table>
+
+  example:     |
+    # no random projection and no quantization
+
+    VKSET vector_frog1 300 300 f H PASTE_VECTOR_HERE
+    OK
+
+    # random projection to 150 and no quantization
+
+    VKSET vector_frog2 300 150 f H PASTE_VECTOR_HERE
+    OK
+
+    # no random projection and quantization to Q7
+
+    VKSET vector_frog3 300 150 i H PASTE_VECTOR_HERE
+    OK
+
+    # random projection to 150 and quantization to Q15
+    VKSET vector_frog4 300 150 s H PASTE_VECTOR_HERE
+    OK
+
+    # real GloVe frog value is as follows, you need to place it on single row
+
+    BE42C3CA3EC275253DCEA4A9BD1E83E4BD9B3D08BC07FCB9BDC951823C809D493DDC5D643DC18938
+    BB9374BCBE288CE8BE2FEC57BCD013A93D858794BE502DDFBDBF1412BDE978D43C816F00BEF020C6
+    BED22D0D3D6282413D45D639BD95B5743CB50B0FBBD4FDF43E0240B83E36AE7D3E73EAB3BD202752
+    3DAF1AA03DC7AE143B16BB99BCB923A33D378034BCC985F03E50E5603D656042BE050481BE87AE14
+    3DFDBF48BD676C8B3E8305533E0F41F2BD271DE6BD6B1C43BC9AD42C3D38BAC7BDC6DC5DBDB2CA58
+    BE559B3DBE3C84B6BF37381D3D60DED23DE21965BDA0F9093EB4C9863DA43FE63DBB645ABD816F00
+    3B9D4952BE0FF972BE0CCCCDBE4DB8BBBDB126EABE14AF4FBE2075F73C28C155BD9FF2E53E7E9100
+    BDADE00DBB23D70ABDFF62B73D84EA4B3E3141203E8CB2963DD254613E05BC023E0D9E843DC18938
+    BCF34D6A3DF9A6B53CA64C31BE6786C2BBAA64C3BDF487FD3E102DE0BE3A0F913E6161E5BD49EECC
+    3DBE0DEDBD810625BD83126FBD9E83E4BD009D49BC656042BE42F837BE191687BDF4F0D73DB851EC
+    BE13DD983EA7A0F9BD549518BE0F76603D2EE633BD2EE6333B8CE7043E741F223C858794BDA5119D
+    BE315B573E276C8B3E1446743CD916863D95B5743E2B851F3DDE353FBCB020C5BDD844D1BE9B2FEC
+    BE10624EBE21FF2E3E1C0EBFBD93404F3E1288CE3E41D7DDBE4D844D3D809D49BD6353F83B7F9725
+    3D0B4396BDBA29C7BD428F5CBC6BEDFA3D85F06F3CB0F27C3DC6DC5DBBDB8BACBE3F2E49BD3EDFA4
+    3E01F213BD292A30BD4A57A83E4D4FDE3CFDF3B6BD07FCB93D762B6C3C88CE70BD072B023E056D5D
+    BE4B295FBC257A78BD9B089ABE8B295F3D5013A9BD4ED9173D91D14E3DC3C9EFBCFDF3B63D9DE69B
+    BC809D49BDAD42C43EAE8A723B449BA6BC3E0DED3DA5AEE73DC0EBEEBCF41F223D82DE013C22339C
+    BD401A363E153261BE1C91D13D4A57A83E5FBE78BDA9C77A3EB71759BD6075F73DF34D6ABD521FF3
+    3D06594B3D9FBE77BDAFB7E8BD8418933DDA511ABDFC1BDA3D3AC7113E43E427BE8944673E404EA5
+    BBFC50483E864C303E1FA4403B9374BC3E0C154DBD9374BC3E8106253D09A0273DBA92A3BE025AEE
+    3D03E426BD83E426BD82A993BE83A29C3D42F8373E243FE63CE7D567BE12F1AA3DB15B573E6353F8
+    BE102DE0BE54C9853E6C8B443CCBFB163E3439583E5758E2BDCEA4A93E138EF3BDDA511A3E0D6A16
+    BCADAB9E3D178D50BE12A3053E1916873D542C3DBE87D5673E0189373E050481BDC39582BDD9E83E
+    3D1E83E4BD919CE03EAF41F2BDA2680A3D428F5CBE2CA57ABDFCED91BDAE7D56BE793DD8BD985F07
+    BE170A3DBE8C3C9F3DD38EF33E636E2FBDFCB924BDCCCCCDBE68F5C43DFE91003E41A36E3ED80347
+    3D947AE1BC3E0DED3E8353F8BDF24745BC4154CABE0F9097BDC361133E4A233ABDAF4F0EBE932618
+    BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
+    3D6D9168BD1B3D083DD5CFAB3C1D4952BE0AF4F13D9E1B093E5B22D2BA51B717BDC1F2133C535A86
+    3D8A3D71BDF247453BD1B7173E13A92ABD0E2196BED013A93C8B4396BE26B50BBD9D49523CBFB15B
+    3D96872BBDD288CEBD79DB22BDBA29C7BE09374C3DA1FF2E3BD1B717BDB8EF343DCC63F13D19999A
+
+  see_also:
+    items:
+      VADD

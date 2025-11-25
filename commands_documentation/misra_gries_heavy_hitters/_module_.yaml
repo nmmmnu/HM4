@@ -1,0 +1,66 @@
+id:          MISRA_GRIES_HEAVY_HEATERS
+name:        MISRA-GRIES HEAVY HEATERS
+
+version:     1.3.7.8
+
+description: |
+  <p>This module implements the <b>Misra-Gries heavy hitters</b> algorithm,
+  allowing you to track top items in a fixed-size collection efficiently.</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Adding items</b></p>
+  <p>Use the <b>MGADD</b> command to add one or more values into the Misra-Gries heavy hitters object.
+  The object has a fixed size (<i>mg_count</i>) and each value has a fixed byte size (<i>mg_value_size</i>).</p>
+
+  <p><b>2. Supports fixed-size values</b></p>
+  <p>Each item stored in the Misra-Gries heavy hitters has a predefined size (<b>mg_value_size</b>).</p>
+  <p>This keeps the structure compact and guarantees stable memory usage.</p></p>
+
+  <table border="1" class="x">
+    <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+    <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+    <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+    <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+    <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+    <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+    <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  </table>
+
+  <p><b>3. Getting top items</b></p>
+  <p>Use the <b>MGGET</b> command to retrieve the top items and their counts from the object.</p>
+
+  <p><b>4. Adding with retrieval</b></p>
+  <p>The <b>MGADDGET</b> command adds a value and immediately returns its score.
+  This allows you to track frequency while inserting.</p>
+
+  <p><b>Tip:</b> This module is ideal for tracking frequent items in a stream, such as popular searches, tags, or event identifiers.</p>
+
+example:     |
+  127.0.0.1:6379> del mymg
+  (integer) 1
+  127.0.0.1:6379> mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+  (integer) 1
+  127.0.0.1:6379> mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+  (integer) 1
+  127.0.0.1:6379> mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+  (integer) 1
+  127.0.0.1:6379> mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+  (integer) 1
+  127.0.0.1:6379> mgadd mymg 5 64 amazon
+  (integer) 0
+  127.0.0.1:6379> mgget mymg 5 64
+   1) "facebook"
+   2) "3"
+   3) "outlook"
+   4) "3"
+   5) "cloudflare"
+   6) "3"
+   7) "yahoo"
+   8) "3"
+   9) "google"
+  10) "3"
+
+see_also_module:
+  items:
+    - HEAVY_HEATERS

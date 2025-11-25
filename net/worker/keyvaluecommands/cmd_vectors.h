@@ -1205,9 +1205,9 @@ namespace net::worker::commands::Vectors{
 			return std::end(cmd);
 		};
 
-		// VGETHEX key   DIM_IX QUANTIZE_TYPE OUT_VEC_TYPE name
-		// VGETHEX words 300    F             b            frog
-		// VGETHEX words 300    I             b            frog
+		// VGETRAW key   DIM_IX QUANTIZE_TYPE OUT_VEC_TYPE name
+		// VGETRAW words 300    F             b            frog
+		// VGETRAW words 300    I             b            frog
 
 		/*
 		QUANTIZE_TYPE:

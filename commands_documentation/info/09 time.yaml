@@ -7,7 +7,6 @@
   return_type: array
   return:      time and microtime the way redis returns it
   version:     1.3.7.5
-  mutable:     n/a
   compatible:  true
   example:     |
     127.0.0.1:6379> time

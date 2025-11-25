@@ -8,5 +8,4 @@
   return_type: string
   return:      always returns text "string"
   version:     1.2.16
-  mutable:     n/a
   compatible:  true

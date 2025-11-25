@@ -6,7 +6,6 @@
     Does not do anything.<br />
 
   return_type: int
-  return:      always returns text "1"
+  return:      always returns 1
   version:     1.2.17
-  mutable:     n/a
   compatible:  true

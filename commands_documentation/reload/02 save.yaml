@@ -11,7 +11,6 @@
 
   return_type: OK
   version:     1.0.0
-  mutable:     n/a
   compatible:  true
   see_also:
     items:

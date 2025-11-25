@@ -5,89 +5,4538 @@
 	<meta charset="utf-8" />
 	<title>Commands Documentation</title>
 	<style>
-	pre.x{
-		padding:	20px;
-		border:		dotted 1px black;
+	a {
+		font-weight:	bold;
+		text-decoration: none;
+		color:		#007;
 	}
 
-	table.x{
+	div.menurow {
+		display:	flex;
+		flex-wrap:	wrap;
+		gap:		5px;
+	}
+
+	div.menurow div {
+		flex:		200px;
+
+		border:		solid 1px #777;
+		border-right:	solid 3px #777;
+		border-bottom:	solid 3px #777;
+
+		border-radius:	5px;
+
+		padding:	10px;
+
+		vertical-align:	top;
+	}
+
+	pre.x {
+		border:		solid  1px black;
+		border-left:	solid 15px #007;
+
+		border-radius:	5px;
+
+		padding:	20px;
+	}
+
+	table.x {
 		border-collapse: collapse;
 		border:		solid 2px black;
+		border-right:	solid 3px black;
+		border-bottom:	solid 3px black;
+
+		margin-top:	10px;
+		margin-bottom:	10px;
 	}
 
-	table.x td{
-		padding:	10px;
+	div.menurow div,
+	table.x th {
+		background-color: #eee;
+	}
+
+	table.x th,
+	table.x td {
+		padding:	5px;
 	}
 	</style>
 </head>
 <body>
+	<a name="top"></a>
 	<h1>Commands Documentation</h1>
 
 	<h2>Modules</h2>
-	<ul>
-		<li>AUTOCOMPLETE</li>
-		<ul>
-			<li>ACADD_UTF8</li>
-			<li>ACDEL_UTF8</li>
-			<li>ACADD_BIN</li>
-			<li>ACDEL_BIN</li>
-			<li>ACRANGE</li>
-			<li>ACRANGEALL</li>
-		</ul>
-		<br />
-		<li>MURMUR</li>
-		<ul>
-			<li>MURMUR</li>
-		</ul>
-		<br />
-		<li>RANDOM</li>
-		<ul>
-			<li>RANDOM</li>
-			<li>MRANDOM</li>
-		</ul>
-		<br />
-		<li>INFO</li>
-		<ul>
-			<li>INFO</li>
-			<li>DBSIZE</li>
-			<li>DBSIZEMUTABLE</li>
-			<li>VERSION</li>
-			<li>MAXKEYSIZE</li>
-			<li>MAXVALSIZE</li>
-			<li>PING</li>
-			<li>ECHO</li>
-			<li>TIME</li>
-		</ul>
-		<br />
-		<li>COMPAT</li>
-		<ul>
-			<li>LISTMAINTAINANCE</li>
-			<li>SAVE</li>
-			<li>RELOAD</li>
-		</ul>
-		<br />
-		<li>COMPAT</li>
-		<ul>
-			<li>SELECT</li>
-			<li>RESET</li>
-			<li>TYPE</li>
-			<li>TOUCH</li>
-		</ul>
-		<br />
-		<li>SYSTEM</li>
-		<ul>
-			<li>EXIT</li>
-			<li>SHUTDOWN</li>
-		</ul>
-		<br />
-		<li>TEST</li>
-		<ul>
-			<li>TEST</li>
-		</ul>
-		<br />
-	</ul>
+	<div class="menurow">
+		<div>
+			<a href="#M::HEAVY_HEATERS">HEAVY HEATERS</a>
+			<ul>
+				<li><a href="#C::HHRESERVE">HHRESERVE</a></li>
+				<li><a href="#C::HHINCR">HHINCR</a></li>
+				<li><a href="#C::HHDECR">HHDECR</a></li>
+				<li><a href="#C::HHGET">HHGET</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::MISRA_GRIES_HEAVY_HEATERS">MISRA-GRIES HEAVY HEATERS</a>
+			<ul>
+				<li><a href="#C::MGRESERVE">MGRESERVE</a></li>
+				<li><a href="#C::MGADD">MGADD</a></li>
+				<li><a href="#C::MGADDGET">MGADDGET</a></li>
+				<li><a href="#C::MGGET">MGGET</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::RESERVOIR_SAMPLING">RESERVOIR SAMPLING</a>
+			<ul>
+				<li><a href="#C::RSRESERVE">RSRESERVE</a></li>
+				<li><a href="#C::RSADD">RSADD</a></li>
+				<li><a href="#C::RSGET">RSGET</a></li>
+				<li><a href="#C::RSGETCOUNT">RSGETCOUNT</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::VECTOR">VECTOR</a>
+			<ul>
+				<li><a href="#C::VADD">VADD</a></li>
+				<li><a href="#C::VREM">VREM</a></li>
+				<li><a href="#C::VGET">VGET</a></li>
+				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+				<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+				<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
+				<li><a href="#C::VKSET">VKSET</a></li>
+				<li><a href="#C::VKGET">VKGET</a></li>
+				<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+				<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::MINDEX">MINDEX</a>
+			<ul>
+				<li><a href="#C::IXMADD">IXMADD</a></li>
+				<li><a href="#C::IXMGET">IXMGET</a></li>
+				<li><a href="#C::IXMMGET">IXMMGET</a></li>
+				<li><a href="#C::IXMEXISTS">IXMEXISTS</a></li>
+				<li><a href="#C::IXMGETINDEXES">IXMGETINDEXES</a></li>
+				<li><a href="#C::IXMREM">IXMREM</a></li>
+				<li><a href="#C::IXMRANGE">IXMRANGE</a></li>
+				<li><a href="#C::IXMRANGEFLEX">IXMRANGEFLEX</a></li>
+				<li><a href="#C::IXMRANGESTRICT">IXMRANGESTRICT</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::AUTOCOMPLETE">AUTOCOMPLETE</a>
+			<ul>
+				<li><a href="#C::ACADD_UTF8">ACADD_UTF8</a></li>
+				<li><a href="#C::ACDEL_UTF8">ACDEL_UTF8</a></li>
+				<li><a href="#C::ACADD_BIN">ACADD_BIN</a></li>
+				<li><a href="#C::ACDEL_BIN">ACDEL_BIN</a></li>
+				<li><a href="#C::ACRANGE">ACRANGE</a></li>
+				<li><a href="#C::ACRANGEALL">ACRANGEALL</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::MURMUR">MURMUR</a>
+			<ul>
+				<li><a href="#C::MURMUR">MURMUR</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::RANDOM">RANDOM</a>
+			<ul>
+				<li><a href="#C::RANDOM">RANDOM</a></li>
+				<li><a href="#C::MRANDOM">MRANDOM</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::INFO">INFO</a>
+			<ul>
+				<li><a href="#C::INFO">INFO</a></li>
+				<li><a href="#C::DBSIZE">DBSIZE</a></li>
+				<li><a href="#C::DBSIZEMUTABLE">DBSIZEMUTABLE</a></li>
+				<li><a href="#C::VERSION">VERSION</a></li>
+				<li><a href="#C::MAXKEYSIZE">MAXKEYSIZE</a></li>
+				<li><a href="#C::MAXVALSIZE">MAXVALSIZE</a></li>
+				<li><a href="#C::PING">PING</a></li>
+				<li><a href="#C::ECHO">ECHO</a></li>
+				<li><a href="#C::TIME">TIME</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::RELOAD">RELOAD</a>
+			<ul>
+				<li><a href="#C::LISTMAINTAINANCE">LISTMAINTAINANCE</a></li>
+				<li><a href="#C::SAVE">SAVE</a></li>
+				<li><a href="#C::RELOAD">RELOAD</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::COMPAT">COMPAT</a>
+			<ul>
+				<li><a href="#C::SELECT">SELECT</a></li>
+				<li><a href="#C::RESET">RESET</a></li>
+				<li><a href="#C::TYPE">TYPE</a></li>
+				<li><a href="#C::TOUCH">TOUCH</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::SYSTEM">SYSTEM</a>
+			<ul>
+				<li><a href="#C::EXIT">EXIT</a></li>
+				<li><a href="#C::SHUTDOWN">SHUTDOWN</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::TEST">TEST</a>
+			<ul>
+				<li><a href="#C::TEST">TEST</a></li>
+			</ul>
+		</div>
+	</div>
 	<hr />
 
+		<a name="M::HEAVY_HEATERS"></a>
+		<h2>Module HEAVY HEATERS</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module implements simple <b>heavy hitters</b> algorithm,
+allowing you to track top items in a fixed-size collection efficiently.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Adding items</b></p>
+<p>Use the <b>HHINCR</b> (if higer score is better) or <b>HHDECR</b> (if lower score is better) command
+to add one or more values into the heavy hitters object.
+The object has a fixed size (<i>hh_count</i>) and each value has a fixed byte size (<i>hh_value_size</i>).</p>
+
+<p><b>2. Supports fixed-size values</b></p>
+<p>Each item stored in the heavy hitters has a predefined size (<b>hh_value_size</b>).</p>
+<p>This keeps the structure compact and guarantees stable memory usage.</p></p>
+
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+
+<p><b>3. Getting top items</b></p>
+<p>Use the <b>HHGET</b> command to retrieve the top items and their counts from the object.</p>
+
+<p><b>Tip:</b> This module is ideal for tracking frequent items in a stream, such as popular searches, tags, or event identifiers.
+However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have to supply the score. See the examples for some ideas.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; del myhh
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 google 140 yahoo 34 cloudflare 13 outlook 10 facebook 5
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 oracle 55
+(integer) 1
+127.0.0.1:6379&gt; hhget myhh 5 64
+ 1) &quot;oracle&quot;
+ 2) &quot;55&quot;
+ 3) &quot;outlook&quot;
+ 4) &quot;10&quot;
+ 5) &quot;cloudflare&quot;
+ 6) &quot;13&quot;
+ 7) &quot;yahoo&quot;
+ 8) &quot;34&quot;
+ 9) &quot;google&quot;
+10) &quot;140&quot;
+
+# Getting the count from INCR/DECR
+# The result is 100% accurate,
+# but memory usage may be huge,
+# if you track several items
+
+127.0.0.1:6379&gt; del myhh
+(integer) 1
+127.0.0.1:6379&gt; incr item::google
+(integer) 140
+127.0.0.1:6379&gt; hhincr myhh 5 64 google  140
+(integer) 1
+127.0.0.1:6379&gt; incr item::facebook
+(integer) 33
+127.0.0.1:6379&gt; hhincr myhh 5 64 facebook 33
+(integer) 1
+127.0.0.1:6379&gt; incr item::oracle
+(integer) 55
+127.0.0.1:6379&gt; hhincr myhh 5 64 oracle   55
+(integer) 1
+127.0.0.1:6379&gt; hhget  myhh 5 64
+1) &quot;oracle&quot;
+2) &quot;55&quot;
+3) &quot;facebook&quot;
+4) &quot;33&quot;
+5) &quot;google&quot;
+6) &quot;140&quot;
+
+# Getting the count from MG (Misra-Gries heavy hitter)
+# The result is NOT 100% accurate,
+# but memory usage is constant
+
+127.0.0.1:6379&gt; del myhh mymg
+(integer) 1
+127.0.0.1:6379&gt; mgaddget mymg 5 64 google
+(integer) 1
+127.0.0.1:6379&gt; hhincr   myhh 5 64 google 1
+(integer) 1
+127.0.0.1:6379&gt; mgaddget mymg 5 64 yahoo
+(integer) 1
+127.0.0.1:6379&gt; hhincr   myhh 5 64 yahoo  1
+(integer) 1
+127.0.0.1:6379&gt; mgaddget mymg 5 64 google
+(integer) 2
+127.0.0.1:6379&gt; hhincr   myhh 5 64 google 2
+(integer) 1
+127.0.0.1:6379&gt; mgaddget mymg 5 64 yahoo
+(integer) 2
+127.0.0.1:6379&gt; hhincr   myhh 5 64 yahoo  2
+(integer) 1
+127.0.0.1:6379&gt; mgaddget mymg 5 64 google
+(integer) 3
+127.0.0.1:6379&gt; hhincr   myhh 5 64 google 3
+(integer) 1
+127.0.0.1:6379&gt; hhget    myhh 5 64
+1) &quot;yahoo&quot;
+2) &quot;2&quot;
+3) &quot;google&quot;
+4) &quot;3&quot;
+
+# Getting the count from CMS (Count Min Sketch)
+# The result is NOT 100% accurate,
+# but memory usage is constant
+
+127.0.0.1:6379&gt; del myhh mycms
+(integer) 1
+127.0.0.1:6379&gt; cmsaddcount mycms 1024 8 64 google 1
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 google 1
+(integer) 1
+127.0.0.1:6379&gt; cmsaddcount mycms 1024 8 64 yahoo  1
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 yahoo 1
+(integer) 1
+127.0.0.1:6379&gt; cmsaddcount mycms 1024 8 64 google 1
+(integer) 2
+127.0.0.1:6379&gt; hhincr myhh 5 64 google 2
+(integer) 1
+127.0.0.1:6379&gt; cmsaddcount mycms 1024 8 64 yahoo  1
+(integer) 2
+127.0.0.1:6379&gt; hhincr myhh 5 64 yahoo 2
+(integer) 1
+127.0.0.1:6379&gt; cmsaddcount mycms 1024 8 64 google 1
+(integer) 3
+127.0.0.1:6379&gt; hhincr myhh 5 64 google 3
+(integer) 1
+127.0.0.1:6379&gt; hhget  myhh 5 64
+1) &quot;yahoo&quot;
+2) &quot;2&quot;
+3) &quot;google&quot;
+4) &quot;3&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::MISRA_GRIES_HEAVY_HEATERS">MISRA_GRIES_HEAVY_HEATERS</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::HHRESERVE">HHRESERVE</a></li>
+			<li><a href="#C::HHINCR">HHINCR</a></li>
+			<li><a href="#C::HHDECR">HHDECR</a></li>
+			<li><a href="#C::HHGET">HHGET</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="HHRESERVE">
+			<a name="C::HHRESERVE"></a>
+			<h4>HHRESERVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>HHRESERVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>HHRESERVE key hh_count hh_value_size</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Create new, empty heavy hitters object *key* with size *hh_count* and fixed value size of *hh_value_size*.<br />
+*mg_count* can be from 1 to 200.<br />
+*mg_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; hhreserve myhh 100 32
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="HHINCR">
+			<a name="C::HHINCR"></a>
+			<h4>HHINCR</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>HHINCR		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>HHINCR key hh_count hh_value_size value0 count0 [value1 count1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add *value0* with score *count0*, *value1* with score *count1*... into the Misra-Gries heavy hitters object *key* with size *hh_count* and fixed value size of *h_value_size*.<br />
+Bigger values are with higher score.<br />
+*hh_count* can be from 1 to 200.<br />
+*hh_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = if all the items is not qualified for insert<br />
+1 = if at least one item is qualified for insert
+</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del myhh
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 google 140 yahoo 34 cloudflare 13 outlook 10 facebook 5
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 oracle 55
+(integer) 1
+127.0.0.1:6379&gt; hhget myhh 5 64
+ 1) &quot;oracle&quot;
+ 2) &quot;55&quot;
+ 3) &quot;outlook&quot;
+ 4) &quot;10&quot;
+ 5) &quot;cloudflare&quot;
+ 6) &quot;13&quot;
+ 7) &quot;yahoo&quot;
+ 8) &quot;34&quot;
+ 9) &quot;google&quot;
+10) &quot;140&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::HHDECR">HHDECR</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="HHDECR">
+			<a name="C::HHDECR"></a>
+			<h4>HHDECR</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>HHDECR		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>HHDECR key hh_count hh_value_size value0 count0 [value1 count1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add *value0* with score *count0*, *value1* with score *count1*... into the Misra-Gries heavy hitters object *key* with size *hh_count* and fixed value size of *h_value_size*.<br />
+Bigger values are with higher score.<br />
+*hh_count* can be from 1 to 200.<br />
+*hh_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = if all the items is not qualified for insert<br />
+1 = if at least one item is qualified for insert
+</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del myhh
+(integer) 1
+127.0.0.1:6379&gt; hhdecr myhh 5 64 google 140 yahoo 34 cloudflare 13 outlook 10 facebook 5
+(integer) 1
+127.0.0.1:6379&gt; hhdecr myhh 5 64 oracle 55
+(integer) 1
+127.0.0.1:6379&gt; hhget myhh 5 64
+ 1) &quot;facebook&quot;
+ 2) &quot;5&quot;
+ 3) &quot;outlook&quot;
+ 4) &quot;10&quot;
+ 5) &quot;cloudflare&quot;
+ 6) &quot;13&quot;
+ 7) &quot;yahoo&quot;
+ 8) &quot;34&quot;
+ 9) &quot;oracle&quot;
+10) &quot;55&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::HHINCR">HHINCR</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="HHGET">
+			<a name="C::HHGET"></a>
+			<h4>HHGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>HHGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>HHGET key hh_count hh_value_size</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get top results from the heavy hitters object *key* with size *hh_count* and fixed value size of *hh_value_size*.<br />
+*hh_count* can be from 1 to 200.<br />
+*hh_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array with top results (not sorted)</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del myhh
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 google 140 yahoo 34 cloudflare 13 outlook 10 facebook 5
+(integer) 1
+127.0.0.1:6379&gt; hhincr myhh 5 64 oracle 55
+(integer) 1
+127.0.0.1:6379&gt; hhget myhh 5 64
+ 1) &quot;oracle&quot;
+ 2) &quot;55&quot;
+ 3) &quot;outlook&quot;
+ 4) &quot;10&quot;
+ 5) &quot;cloudflare&quot;
+ 6) &quot;13&quot;
+ 7) &quot;yahoo&quot;
+ 8) &quot;34&quot;
+ 9) &quot;google&quot;
+10) &quot;140&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MISRA_GRIES_HEAVY_HEATERS"></a>
+		<h2>Module MISRA-GRIES HEAVY HEATERS</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module implements the <b>Misra-Gries heavy hitters</b> algorithm,
+allowing you to track top items in a fixed-size collection efficiently.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Adding items</b></p>
+<p>Use the <b>MGADD</b> command to add one or more values into the Misra-Gries heavy hitters object.
+The object has a fixed size (<i>mg_count</i>) and each value has a fixed byte size (<i>mg_value_size</i>).</p>
+
+<p><b>2. Supports fixed-size values</b></p>
+<p>Each item stored in the Misra-Gries heavy hitters has a predefined size (<b>mg_value_size</b>).</p>
+<p>This keeps the structure compact and guarantees stable memory usage.</p></p>
+
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+
+<p><b>3. Getting top items</b></p>
+<p>Use the <b>MGGET</b> command to retrieve the top items and their counts from the object.</p>
+
+<p><b>4. Adding with retrieval</b></p>
+<p>The <b>MGADDGET</b> command adds a value and immediately returns its score.
+This allows you to track frequency while inserting.</p>
+
+<p><b>Tip:</b> This module is ideal for tracking frequent items in a stream, such as popular searches, tags, or event identifiers.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; del mymg
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 amazon
+(integer) 0
+127.0.0.1:6379&gt; mgget mymg 5 64
+ 1) &quot;facebook&quot;
+ 2) &quot;3&quot;
+ 3) &quot;outlook&quot;
+ 4) &quot;3&quot;
+ 5) &quot;cloudflare&quot;
+ 6) &quot;3&quot;
+ 7) &quot;yahoo&quot;
+ 8) &quot;3&quot;
+ 9) &quot;google&quot;
+10) &quot;3&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::HEAVY_HEATERS">HEAVY_HEATERS</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MGRESERVE">MGRESERVE</a></li>
+			<li><a href="#C::MGADD">MGADD</a></li>
+			<li><a href="#C::MGADDGET">MGADDGET</a></li>
+			<li><a href="#C::MGGET">MGGET</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MGRESERVE">
+			<a name="C::MGRESERVE"></a>
+			<h4>MGRESERVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MGRESERVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MGRESERVE key mg_count mg_value_size</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Create new, empty Misra-Gries heavy hitters object *key* with size *mg_count* and fixed value size of *mg_value_size*.<br />
+*mg_count* can be from 1 to 200.<br />
+*mg_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mgreserve myrs 100 32
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MGADD">
+			<a name="C::MGADD"></a>
+			<h4>MGADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MGADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MGADD key mg_count mg_value_size value0 [value1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add *value0*, *value1*... into the Misra-Gries heavy hitters object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
+*mg_count* can be from 1 to 200.<br />
+*mg_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = if all the items is not qualified for insert<br />
+1 = if at least one item is qualified for insert
+</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>MGINCR</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del mymg
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 amazon
+(integer) 0
+127.0.0.1:6379&gt; mgget mymg 5 64
+ 1) &quot;facebook&quot;
+ 2) &quot;3&quot;
+ 3) &quot;outlook&quot;
+ 4) &quot;3&quot;
+ 5) &quot;cloudflare&quot;
+ 6) &quot;3&quot;
+ 7) &quot;yahoo&quot;
+ 8) &quot;3&quot;
+ 9) &quot;google&quot;
+10) &quot;3&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MGADDGET">MGADDGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MGADDGET">
+			<a name="C::MGADDGET"></a>
+			<h4>MGADDGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MGADDGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MGADDGET key mg_count mg_value_size value</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add *value*... into the Misra-Gries heavy hitters object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
+*mg_count* can be from 1 to 200.<br />
+*mg_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = if the item is not qualified for insert
+score of the item = if the item is qualified for insert
+</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del mymg
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgaddget mymg 5 64 amazon
+(integer) 0
+127.0.0.1:6379&gt; mgaddget mymg 5 64 amazon
+(integer) 0
+127.0.0.1:6379&gt; mgaddget mymg 5 64 amazon
+(integer) 1
+127.0.0.1:6379&gt; mgget mymg 5 64
+1) &quot;amazon&quot;
+2) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MGADD">MGADD</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MGGET">
+			<a name="C::MGGET"></a>
+			<h4>MGGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MGGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MGGET key mg_count mg_value_size</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get top results from the Misra-Gries heavy hitters object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
+*mg_count* can be from 1 to 200.<br />
+*mg_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array with top results (not sorted)</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del mymg
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 google yahoo cloudflare outlook facebook
+(integer) 1
+127.0.0.1:6379&gt; mgadd mymg 5 64 amazon
+(integer) 0
+127.0.0.1:6379&gt; mgget mymg 5 64
+ 1) &quot;facebook&quot;
+ 2) &quot;3&quot;
+ 3) &quot;outlook&quot;
+ 4) &quot;3&quot;
+ 5) &quot;cloudflare&quot;
+ 6) &quot;3&quot;
+ 7) &quot;yahoo&quot;
+ 8) &quot;3&quot;
+ 9) &quot;google&quot;
+10) &quot;3&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::RESERVOIR_SAMPLING"></a>
+		<h2>Module RESERVOIR SAMPLING</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module implements <b>reservoir sampling</b> — a technique used to keep a uniformly random sample from a stream of values,
+even when the total number of items is unknown or extremely large.</p>
+
+<p><b>What It Does:</b></p>
+
+<p><b>1. Stores a fixed-size random sample</b></p>
+<p>You can add any number of values to a reservoir sampling object using <b>RSADD</b>.
+Even if millions of items are added, the module keeps only <b>rs_count</b> items,
+but ensures that every item from the stream has an equal chance to appear in the reservoir.</p>
+
+<p><b>2. Supports fixed-size values</b></p>
+<p>Each item stored in the reservoir has a predefined size (<b>rs_value_size</b>).
+This keeps the structure compact and guarantees stable memory usage.</p>
+
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+
+<p><b>3. Randomized insertion logic</b></p>
+<p>When adding items, some values will replace existing samples while others will be skipped. <b>RSADD</b> returns:</p>
+<ul>
+  <li><b>1</b> - if at least one of the provided items was included in the reservoir</li>
+  <li><b>0</b> - if none of the items were selected</li>
+</ul>
+
+<p><b>4. Retrieving the sample</b></p>
+<p>You can retrieve the current sample set using <b>RSGET</b>. The returned array contains up to <b>rs_count</b> items.</p>
+
+<p><b>5. Tracking total insertions</b></p>
+<p><b>RSGETCOUNT</b> tells you how many total items were attempted for insertion into the reservoir, even if they were not selected.</p>
+<p><b>Use Cases:</b></p>
+<ul>
+  <li>Uniform random sampling of high-volume data streams</li>
+  <li>Analytics pipelines</li> <li>Approximation algorithms</li>
+  <li>Monitoring and logging systems</li>
+</ul>
+
+<p><b>Tip:</b> The reservoir sampling object is deterministic given identical sequences of inserts, making it useful for reproducible sampling scenarios.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; del myrs
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 google yahoo cloudflare outlook facebook amazon
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 oracle hotmail softlayer
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 wikipedia
+(integer) 0
+127.0.0.1:6379&gt; rsget myrs 5 64
+1) &quot;google&quot;
+2) &quot;oracle&quot;
+3) &quot;cloudflare&quot;
+4) &quot;outlook&quot;
+5) &quot;facebook&quot;
+127.0.0.1:6379&gt; rsgetcount myrs 5 64
+(integer) 9
+</pre></blockquote>
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::RSRESERVE">RSRESERVE</a></li>
+			<li><a href="#C::RSADD">RSADD</a></li>
+			<li><a href="#C::RSGET">RSGET</a></li>
+			<li><a href="#C::RSGETCOUNT">RSGETCOUNT</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="RSRESERVE">
+			<a name="C::RSRESERVE"></a>
+			<h4>RSRESERVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>RSRESERVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>RSRESERVE key rs_count rs_value_size</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Create new, empty reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
+*rs_count* can be from 1 to 4096.<br />
+*rs_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; rsreserve myrs 100 32
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="RSADD">
+			<a name="C::RSADD"></a>
+			<h4>RSADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>RSADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>RSADD key rs_count rs_value_size value0 [value1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add *value0*, *value1*... into the reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
+*rs_count* can be from 1 to 4096.<br />
+*rs_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = if all the items is not qualified for insert<br />
+1 = if at least one item is qualified for insert
+</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del myrs
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 google yahoo cloudflare outlook facebook amazon
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 oracle hotmail softlayer
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 wikipedia
+(integer) 0
+127.0.0.1:6379&gt; rsget myrs 5 64
+1) &quot;google&quot;
+2) &quot;oracle&quot;
+3) &quot;cloudflare&quot;
+4) &quot;outlook&quot;
+5) &quot;facebook&quot;
+127.0.0.1:6379&gt; rsgetcount myrs 5 64
+(integer) 9
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="RSGET">
+			<a name="C::RSGET"></a>
+			<h4>RSGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>RSGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>RSGET key rs_count rs_value_size</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Collect samples from the reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
+*rs_count* can be from 1 to 4096.<br />
+*rs_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array with samples</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del myrs
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 google yahoo cloudflare outlook facebook amazon
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 oracle hotmail softlayer
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 wikipedia
+(integer) 0
+127.0.0.1:6379&gt; rsget myrs 5 64
+1) &quot;google&quot;
+2) &quot;oracle&quot;
+3) &quot;cloudflare&quot;
+4) &quot;outlook&quot;
+5) &quot;facebook&quot;
+127.0.0.1:6379&gt; rsgetcount myrs 5 64
+(integer) 9
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="RSGETCOUNT">
+			<a name="C::RSGETCOUNT"></a>
+			<h4>RSGETCOUNT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>RSGETCOUNT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>RSGETCOUNT key rs_count rs_value_size</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Collect the count of insertions in the reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
+*rs_count* can be from 1 to 4096.<br />
+*rs_value_size* can be:<br />
+<table border="1" class="x">
+  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>number of insetions</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; del myrs
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 google yahoo cloudflare outlook facebook amazon
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 oracle hotmail softlayer
+(integer) 1
+127.0.0.1:6379&gt; rsadd myrs 5 64 wikipedia
+(integer) 0
+127.0.0.1:6379&gt; rsget myrs 5 64
+1) &quot;google&quot;
+2) &quot;oracle&quot;
+3) &quot;cloudflare&quot;
+4) &quot;outlook&quot;
+5) &quot;facebook&quot;
+127.0.0.1:6379&gt; rsgetcount myrs 5 64
+(integer) 9
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::VECTOR"></a>
+		<h2>Module VECTOR</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>HM4 can be used as a <b>vector database</b>.
+Unlike most vector DBs, HM4 <b>stores data on disk</b>, so memory-heavy algorithms like HNSW are impractical.
+Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Locality-Sensitive Hashing (LSH)</b> (approximate).</p>
+
+<p><b>Modes of Operation:</b></p>
+<ul>
+  <li>With FLAT/LSH indexing:		use <i>VADD</i>, <i>VSIMFLAT</i>, <i>VSIMLSH</i>.</li>
+  <li>With user key-only storage:	use <i>VKSET</i>, <i>VKSIMFLAT</i>. In this mode LSH indexing is not available.</li>
+</ul>
+
+<p><b>Building a Vector Index (VADD)</b></p>
+<p>Use <i>VADD</i> to create a vector index.</p>
+<p><i>Parameters</i>: input dimensionality, stored dimensionality (projection), quantization type, raw vector format, then pairs of <b>BLOB name</b>.</p>
+
+<p><b>Quantization types:</b></p>
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+<p><b>Vector types:</b></p>
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+
+<p><b>Searching a Vector Index</b></p>
+
+<p>Use <i>VSIMFLAT</i> for exact (brute-force) search and <i>VSIMLSH</i> for fast approximate search.</p>
+
+<p><b>Distance / Similarity Metrics :</b></p>
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Metric Name</th>
+    <th>Range</th>
+    <th>Bit</th>
+    <th>Description</th>
+    <th>When to use</th>
+  </tr>
+  <tr>
+    <td align="center">E</td>
+    <td>Euclidean (L2)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Standard straight-line distance between two points in Euclidean space.</td>
+    <td>Best for dense, normalized data where overall magnitude matters. It’s the default in many ML applications.</td>
+ </tr>
+  <tr>
+    <td align="center">M</td>
+    <td>Manhattan (L1)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.</td>
+    <td>More robust to outliers; works well when vector components are sparse or vary in only a few dimensions.</td>
+  </tr>
+  <tr>
+    <td align="center">C</td>
+    <td>Cosine</td>
+    <td align="center">0 .. 1</td>
+    <td>&nbsp;</td>
+    <td>Measures the cosine of the angle between two vectors (orientation, not magnitude).</td>
+    <td>Focuses on direction, not magnitude. Ideal for text embeddings or any case where you care about angular similarity rather than size.</td>
+  </tr>
+  <tr>
+    <td align="center">K</td>
+    <td>Canberra</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.</td>
+    <td>Useful for sparse data or when small differences in low-value components are important. More sensitive than L1/L2 in those regions.</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>Bit cosine	</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. Cosine distance for bit vectors.</td>
+    <td>Works only on bit quantized vectors. Very fast.</td>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>Hamming</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors.</td>
+    <td>Works only on bit quantized vectors. Similar to hamming, but result is "weighted" to be more "human understandable".</td>
+  </tr>
+  <tr>
+    <td align="center">D</td>
+    <td>Dominating</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector.</td>
+    <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector. Ideal for non AI generated vectors.</td>
+  </tr>
+</table>
+
+<p><b>Additional Vector Commands</b></p>
+<ul>
+  <li><i>VREM key name</i>		- remove vector with given key from index.</li>
+  <li><i>VGET key dim type name</i>	- get vector in human-readable form.</li>
+  <li><i>VGETNORMALIZED</i> 		- return normalized vector with magnitude.</li>
+  <li><i>VGETRAW</i>			- get raw binary/hex representation.</li>
+</ul>
+
+<p><b>Key-Based Vectors (no LSH)</b></p>
+<p>Store vectors directly under keys (no index) with <i>VKSET</i> and query with <i>VKSIMFLAT</i> to search over keys sharing a prefix.</p>
+
+<p><b>Notes & Tips</b></p>
+<ul>
+  <li>Flat searches are exact but slower; use for small indexes or when accuracy is critical.</li>
+  <li>LSH trades accuracy for speed.</li>
+  <li>Choose distance metric (E, M, C, K, H, B, D) according to data type and semantics.</li>
+</ul>
+</blockquote>
+
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::VADD">VADD</a></li>
+			<li><a href="#C::VREM">VREM</a></li>
+			<li><a href="#C::VGET">VGET</a></li>
+			<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+			<li><a href="#C::VGETRAW">VGETRAW</a></li>
+			<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+			<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
+			<li><a href="#C::VKSET">VKSET</a></li>
+			<li><a href="#C::VKGET">VKGET</a></li>
+			<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
+			<li><a href="#C::VGETRAW">VGETRAW</a></li>
+			<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="VADD">
+			<a name="C::VADD"></a>
+			<h4>VADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VADD key dim_vec dim_ix quantize_type raw_vector_type BLOB0 name0 [BLOB1  name1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Add the *BLOB0* as *name0*, *BLOB1* as *name1*... into the index *key*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
+  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
+  <li>*BLOB*		- vector values.</li>
+  <li>*name*		- vector name.</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+Vector types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x"># no random projection and no quantization
+
+VADD vectors1 300 300 f H PASTE_VECTOR_HERE frog
+OK
+
+# random projection to 150 and no quantization
+
+VADD vectors2 300 150 f H PASTE_VECTOR_HERE frog
+OK
+
+# no random projection and quantization to Q7
+
+VADD vectors3 300 150 i H PASTE_VECTOR_HERE frog
+OK
+
+# random projection to 150 and quantization to Q15
+VADD vectors4 300 150 s H PASTE_VECTOR_HERE frog
+OK
+
+# real GloVe frog value is as follows, you need to place it on single row
+
+BE42C3CA3EC275253DCEA4A9BD1E83E4BD9B3D08BC07FCB9BDC951823C809D493DDC5D643DC18938
+BB9374BCBE288CE8BE2FEC57BCD013A93D858794BE502DDFBDBF1412BDE978D43C816F00BEF020C6
+BED22D0D3D6282413D45D639BD95B5743CB50B0FBBD4FDF43E0240B83E36AE7D3E73EAB3BD202752
+3DAF1AA03DC7AE143B16BB99BCB923A33D378034BCC985F03E50E5603D656042BE050481BE87AE14
+3DFDBF48BD676C8B3E8305533E0F41F2BD271DE6BD6B1C43BC9AD42C3D38BAC7BDC6DC5DBDB2CA58
+BE559B3DBE3C84B6BF37381D3D60DED23DE21965BDA0F9093EB4C9863DA43FE63DBB645ABD816F00
+3B9D4952BE0FF972BE0CCCCDBE4DB8BBBDB126EABE14AF4FBE2075F73C28C155BD9FF2E53E7E9100
+BDADE00DBB23D70ABDFF62B73D84EA4B3E3141203E8CB2963DD254613E05BC023E0D9E843DC18938
+BCF34D6A3DF9A6B53CA64C31BE6786C2BBAA64C3BDF487FD3E102DE0BE3A0F913E6161E5BD49EECC
+3DBE0DEDBD810625BD83126FBD9E83E4BD009D49BC656042BE42F837BE191687BDF4F0D73DB851EC
+BE13DD983EA7A0F9BD549518BE0F76603D2EE633BD2EE6333B8CE7043E741F223C858794BDA5119D
+BE315B573E276C8B3E1446743CD916863D95B5743E2B851F3DDE353FBCB020C5BDD844D1BE9B2FEC
+BE10624EBE21FF2E3E1C0EBFBD93404F3E1288CE3E41D7DDBE4D844D3D809D49BD6353F83B7F9725
+3D0B4396BDBA29C7BD428F5CBC6BEDFA3D85F06F3CB0F27C3DC6DC5DBBDB8BACBE3F2E49BD3EDFA4
+3E01F213BD292A30BD4A57A83E4D4FDE3CFDF3B6BD07FCB93D762B6C3C88CE70BD072B023E056D5D
+BE4B295FBC257A78BD9B089ABE8B295F3D5013A9BD4ED9173D91D14E3DC3C9EFBCFDF3B63D9DE69B
+BC809D49BDAD42C43EAE8A723B449BA6BC3E0DED3DA5AEE73DC0EBEEBCF41F223D82DE013C22339C
+BD401A363E153261BE1C91D13D4A57A83E5FBE78BDA9C77A3EB71759BD6075F73DF34D6ABD521FF3
+3D06594B3D9FBE77BDAFB7E8BD8418933DDA511ABDFC1BDA3D3AC7113E43E427BE8944673E404EA5
+BBFC50483E864C303E1FA4403B9374BC3E0C154DBD9374BC3E8106253D09A0273DBA92A3BE025AEE
+3D03E426BD83E426BD82A993BE83A29C3D42F8373E243FE63CE7D567BE12F1AA3DB15B573E6353F8
+BE102DE0BE54C9853E6C8B443CCBFB163E3439583E5758E2BDCEA4A93E138EF3BDDA511A3E0D6A16
+BCADAB9E3D178D50BE12A3053E1916873D542C3DBE87D5673E0189373E050481BDC39582BDD9E83E
+3D1E83E4BD919CE03EAF41F2BDA2680A3D428F5CBE2CA57ABDFCED91BDAE7D56BE793DD8BD985F07
+BE170A3DBE8C3C9F3DD38EF33E636E2FBDFCB924BDCCCCCDBE68F5C43DFE91003E41A36E3ED80347
+3D947AE1BC3E0DED3E8353F8BDF24745BC4154CABE0F9097BDC361133E4A233ABDAF4F0EBE932618
+BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
+3D6D9168BD1B3D083DD5CFAB3C1D4952BE0AF4F13D9E1B093E5B22D2BA51B717BDC1F2133C535A86
+3D8A3D71BDF247453BD1B7173E13A92ABD0E2196BED013A93C8B4396BE26B50BBD9D49523CBFB15B
+3D96872BBDD288CEBD79DB22BDBA29C7BE09374C3DA1FF2E3BD1B717BDB8EF343DCC63F13D19999A
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VKSET">VKSET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VREM">
+			<a name="C::VREM"></a>
+			<h4>VREM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VREM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VREM key name0 [name1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *name0*, *name1*... from the index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>VREMOVE</li>
+				<li>VDEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; VREM vectors frog
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VGET">
+			<a name="C::VGET"></a>
+			<h4>VGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VGET key dim_ix quantize_type name</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *name*'s vector elements from the index *key*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_ix*		- dimention of the index.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*name*		- vector name.</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>vector elements dequantized as 32-bit floats, non normalized</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; VGET vectors 150 i frog
+  1) &quot;+0.000000000000000&quot;
+  2) &quot;+0.062992125749588&quot;
+  3) &quot;-0.070866137742996&quot;
+  4) &quot;+0.047244094312191&quot;
+  5) &quot;+0.000000000000000&quot;
+  6) &quot;-0.047244094312191&quot;
+  7) &quot;-0.259842514991760&quot;
+  8) &quot;+0.055118110030890&quot;
+  9) &quot;+0.000000000000000&quot;
+ 10) &quot;-0.125984251499176&quot;
+ 11) &quot;-0.047244094312191&quot;
+ 12) &quot;+0.000000000000000&quot;
+ 13) &quot;+0.023622047156096&quot;
+ 14) &quot;-0.007874015718699&quot;
+ 15) &quot;-0.070866137742996&quot;
+ 16) &quot;+0.047244094312191&quot;
+ 17) &quot;-0.118110239505768&quot;
+ 18) &quot;+0.062992125749588&quot;
+ 19) &quot;+0.047244094312191&quot;
+ 20) &quot;-0.165354326367378&quot;
+ 21) &quot;+0.062992125749588&quot;
+ 22) &quot;+0.039370078593493&quot;
+ 23) &quot;-0.196850389242172&quot;
+ 24) &quot;+0.015748031437397&quot;
+ 25) &quot;+0.039370078593493&quot;
+ 26) &quot;+0.133858263492584&quot;
+ 27) &quot;+0.062992125749588&quot;
+ 28) &quot;+0.023622047156096&quot;
+ 29) &quot;+0.015748031437397&quot;
+ 30) &quot;+0.118110239505768&quot;
+ 31) &quot;+0.118110239505768&quot;
+ 32) &quot;+0.125984251499176&quot;
+ 33) &quot;+0.055118110030890&quot;
+ 34) &quot;-0.047244094312191&quot;
+ 35) &quot;+0.007874015718699&quot;
+ 36) &quot;+0.086614176630974&quot;
+ 37) &quot;+0.039370078593493&quot;
+ 38) &quot;+0.118110239505768&quot;
+ 39) &quot;+0.015748031437397&quot;
+ 40) &quot;+0.015748031437397&quot;
+ 41) &quot;-0.141732275485992&quot;
+ 42) &quot;-0.047244094312191&quot;
+ 43) &quot;-0.039370078593493&quot;
+ 44) &quot;-0.015748031437397&quot;
+ 45) &quot;+0.062992125749588&quot;
+ 46) &quot;+0.031496062874794&quot;
+ 47) &quot;+0.023622047156096&quot;
+ 48) &quot;+0.031496062874794&quot;
+ 49) &quot;-0.062992125749588&quot;
+ 50) &quot;-0.141732275485992&quot;
+ 51) &quot;-0.055118110030890&quot;
+ 52) &quot;+0.086614176630974&quot;
+ 53) &quot;+0.031496062874794&quot;
+ 54) &quot;-0.023622047156096&quot;
+ 55) &quot;-0.023622047156096&quot;
+ 56) &quot;+0.047244094312191&quot;
+ 57) &quot;+0.031496062874794&quot;
+ 58) &quot;-0.055118110030890&quot;
+ 59) &quot;-0.102362200617790&quot;
+ 60) &quot;+0.062992125749588&quot;
+ 61) &quot;-0.031496062874794&quot;
+ 62) &quot;+0.188976377248764&quot;
+ 63) &quot;-0.055118110030890&quot;
+ 64) &quot;-0.078740157186985&quot;
+ 65) &quot;+0.031496062874794&quot;
+ 66) &quot;+0.062992125749588&quot;
+ 67) &quot;+0.141732275485992&quot;
+ 68) &quot;+0.062992125749588&quot;
+ 69) &quot;+0.039370078593493&quot;
+ 70) &quot;+0.062992125749588&quot;
+ 71) &quot;+0.023622047156096&quot;
+ 72) &quot;+0.078740157186985&quot;
+ 73) &quot;-0.023622047156096&quot;
+ 74) &quot;-0.070866137742996&quot;
+ 75) &quot;+0.102362200617790&quot;
+ 76) &quot;+0.039370078593493&quot;
+ 77) &quot;+0.031496062874794&quot;
+ 78) &quot;-0.007874015718699&quot;
+ 79) &quot;-0.055118110030890&quot;
+ 80) &quot;+0.165354326367378&quot;
+ 81) &quot;+0.023622047156096&quot;
+ 82) &quot;-0.007874015718699&quot;
+ 83) &quot;+0.181102365255356&quot;
+ 84) &quot;-0.023622047156096&quot;
+ 85) &quot;+0.086614176630974&quot;
+ 86) &quot;+0.039370078593493&quot;
+ 87) &quot;-0.031496062874794&quot;
+ 88) &quot;+0.031496062874794&quot;
+ 89) &quot;-0.062992125749588&quot;
+ 90) &quot;+0.023622047156096&quot;
+ 91) &quot;-0.055118110030890&quot;
+ 92) &quot;+0.110236220061779&quot;
+ 93) &quot;-0.165354326367378&quot;
+ 94) &quot;+0.118110239505768&quot;
+ 95) &quot;+0.031496062874794&quot;
+ 96) &quot;+0.094488188624382&quot;
+ 97) &quot;+0.196850389242172&quot;
+ 98) &quot;-0.015748031437397&quot;
+ 99) &quot;+0.047244094312191&quot;
+100) &quot;+0.000000000000000&quot;
+101) &quot;+0.031496062874794&quot;
+102) &quot;+0.149606302380562&quot;
+103) &quot;+0.070866137742996&quot;
+104) &quot;-0.055118110030890&quot;
+105) &quot;+0.055118110030890&quot;
+106) &quot;+0.078740157186985&quot;
+107) &quot;+0.007874015718699&quot;
+108) &quot;+0.157480314373970&quot;
+109) &quot;+0.000000000000000&quot;
+110) &quot;+0.023622047156096&quot;
+111) &quot;-0.133858263492584&quot;
+112) &quot;-0.086614176630974&quot;
+113) &quot;+0.000000000000000&quot;
+114) &quot;+0.086614176630974&quot;
+115) &quot;+0.078740157186985&quot;
+116) &quot;-0.094488188624382&quot;
+117) &quot;+0.007874015718699&quot;
+118) &quot;+0.086614176630974&quot;
+119) &quot;-0.015748031437397&quot;
+120) &quot;+0.047244094312191&quot;
+121) &quot;-0.062992125749588&quot;
+122) &quot;+0.015748031437397&quot;
+123) &quot;+0.133858263492584&quot;
+124) &quot;-0.015748031437397&quot;
+125) &quot;-0.062992125749588&quot;
+126) &quot;+0.039370078593493&quot;
+127) &quot;-0.023622047156096&quot;
+128) &quot;+0.055118110030890&quot;
+129) &quot;+0.102362200617790&quot;
+130) &quot;-0.070866137742996&quot;
+131) &quot;-0.039370078593493&quot;
+132) &quot;-0.094488188624382&quot;
+133) &quot;-0.110236220061779&quot;
+134) &quot;+0.015748031437397&quot;
+135) &quot;+0.031496062874794&quot;
+136) &quot;-0.173228353261948&quot;
+137) &quot;-0.094488188624382&quot;
+138) &quot;-0.023622047156096&quot;
+139) &quot;+0.062992125749588&quot;
+140) &quot;-0.110236220061779&quot;
+141) &quot;+0.141732275485992&quot;
+142) &quot;-0.015748031437397&quot;
+143) &quot;-0.047244094312191&quot;
+144) &quot;-0.094488188624382&quot;
+145) &quot;+0.062992125749588&quot;
+146) &quot;-0.047244094312191&quot;
+147) &quot;+0.086614176630974&quot;
+148) &quot;+0.015748031437397&quot;
+149) &quot;+0.023622047156096&quot;
+150) &quot;+0.141732275485992&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+				<li><a href="#C::VKGET">VKGET</a></li>
+				<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
+				<li><a href="#C::VKGETRAW">VKGETRAW</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VGETNORMALIZED">
+			<a name="C::VGETNORMALIZED"></a>
+			<h4>VGETNORMALIZED</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VGETNORMALIZED		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VGETNORMALIZED key dim_ix quantize_type name</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *name*'s vector elements from the index *key*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_ix*		- dimention of the index.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*name*		- vector name.</li>
+</ul>
+Note the result contains the vector magnitude as a first array element<br />
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>vector magnitude, then vector elements dequantized and normalized as 32-bit floats</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; VGETNORMALIZED vectors 150 i frog
+  1) &quot;+21.644849777221680&quot;
+  2) &quot;+0.000000000000000&quot;
+  3) &quot;+0.062992125749588&quot;
+  4) &quot;-0.070866137742996&quot;
+  5) &quot;+0.047244094312191&quot;
+  6) &quot;+0.000000000000000&quot;
+  7) &quot;-0.047244094312191&quot;
+  8) &quot;-0.259842514991760&quot;
+  9) &quot;+0.055118110030890&quot;
+ 10) &quot;+0.000000000000000&quot;
+ 11) &quot;-0.125984251499176&quot;
+ 12) &quot;-0.047244094312191&quot;
+ 13) &quot;+0.000000000000000&quot;
+ 14) &quot;+0.023622047156096&quot;
+ 15) &quot;-0.007874015718699&quot;
+ 16) &quot;-0.070866137742996&quot;
+ 17) &quot;+0.047244094312191&quot;
+ 18) &quot;-0.118110239505768&quot;
+ 19) &quot;+0.062992125749588&quot;
+ 20) &quot;+0.047244094312191&quot;
+ 21) &quot;-0.165354326367378&quot;
+ 22) &quot;+0.062992125749588&quot;
+ 23) &quot;+0.039370078593493&quot;
+ 24) &quot;-0.196850389242172&quot;
+ 25) &quot;+0.015748031437397&quot;
+ 26) &quot;+0.039370078593493&quot;
+ 27) &quot;+0.133858263492584&quot;
+ 28) &quot;+0.062992125749588&quot;
+ 29) &quot;+0.023622047156096&quot;
+ 30) &quot;+0.015748031437397&quot;
+ 31) &quot;+0.118110239505768&quot;
+ 32) &quot;+0.118110239505768&quot;
+ 33) &quot;+0.125984251499176&quot;
+ 34) &quot;+0.055118110030890&quot;
+ 35) &quot;-0.047244094312191&quot;
+ 36) &quot;+0.007874015718699&quot;
+ 37) &quot;+0.086614176630974&quot;
+ 38) &quot;+0.039370078593493&quot;
+ 39) &quot;+0.118110239505768&quot;
+ 40) &quot;+0.015748031437397&quot;
+ 41) &quot;+0.015748031437397&quot;
+ 42) &quot;-0.141732275485992&quot;
+ 43) &quot;-0.047244094312191&quot;
+ 44) &quot;-0.039370078593493&quot;
+ 45) &quot;-0.015748031437397&quot;
+ 46) &quot;+0.062992125749588&quot;
+ 47) &quot;+0.031496062874794&quot;
+ 48) &quot;+0.023622047156096&quot;
+ 49) &quot;+0.031496062874794&quot;
+ 50) &quot;-0.062992125749588&quot;
+ 51) &quot;-0.141732275485992&quot;
+ 52) &quot;-0.055118110030890&quot;
+ 53) &quot;+0.086614176630974&quot;
+ 54) &quot;+0.031496062874794&quot;
+ 55) &quot;-0.023622047156096&quot;
+ 56) &quot;-0.023622047156096&quot;
+ 57) &quot;+0.047244094312191&quot;
+ 58) &quot;+0.031496062874794&quot;
+ 59) &quot;-0.055118110030890&quot;
+ 60) &quot;-0.102362200617790&quot;
+ 61) &quot;+0.062992125749588&quot;
+ 62) &quot;-0.031496062874794&quot;
+ 63) &quot;+0.188976377248764&quot;
+ 64) &quot;-0.055118110030890&quot;
+ 65) &quot;-0.078740157186985&quot;
+ 66) &quot;+0.031496062874794&quot;
+ 67) &quot;+0.062992125749588&quot;
+ 68) &quot;+0.141732275485992&quot;
+ 69) &quot;+0.062992125749588&quot;
+ 70) &quot;+0.039370078593493&quot;
+ 71) &quot;+0.062992125749588&quot;
+ 72) &quot;+0.023622047156096&quot;
+ 73) &quot;+0.078740157186985&quot;
+ 74) &quot;-0.023622047156096&quot;
+ 75) &quot;-0.070866137742996&quot;
+ 76) &quot;+0.102362200617790&quot;
+ 77) &quot;+0.039370078593493&quot;
+ 78) &quot;+0.031496062874794&quot;
+ 79) &quot;-0.007874015718699&quot;
+ 80) &quot;-0.055118110030890&quot;
+ 81) &quot;+0.165354326367378&quot;
+ 82) &quot;+0.023622047156096&quot;
+ 83) &quot;-0.007874015718699&quot;
+ 84) &quot;+0.181102365255356&quot;
+ 85) &quot;-0.023622047156096&quot;
+ 86) &quot;+0.086614176630974&quot;
+ 87) &quot;+0.039370078593493&quot;
+ 88) &quot;-0.031496062874794&quot;
+ 89) &quot;+0.031496062874794&quot;
+ 90) &quot;-0.062992125749588&quot;
+ 91) &quot;+0.023622047156096&quot;
+ 92) &quot;-0.055118110030890&quot;
+ 93) &quot;+0.110236220061779&quot;
+ 94) &quot;-0.165354326367378&quot;
+ 95) &quot;+0.118110239505768&quot;
+ 96) &quot;+0.031496062874794&quot;
+ 97) &quot;+0.094488188624382&quot;
+ 98) &quot;+0.196850389242172&quot;
+ 99) &quot;-0.015748031437397&quot;
+100) &quot;+0.047244094312191&quot;
+101) &quot;+0.000000000000000&quot;
+102) &quot;+0.031496062874794&quot;
+103) &quot;+0.149606302380562&quot;
+104) &quot;+0.070866137742996&quot;
+105) &quot;-0.055118110030890&quot;
+106) &quot;+0.055118110030890&quot;
+107) &quot;+0.078740157186985&quot;
+108) &quot;+0.007874015718699&quot;
+109) &quot;+0.157480314373970&quot;
+110) &quot;+0.000000000000000&quot;
+111) &quot;+0.023622047156096&quot;
+112) &quot;-0.133858263492584&quot;
+113) &quot;-0.086614176630974&quot;
+114) &quot;+0.000000000000000&quot;
+115) &quot;+0.086614176630974&quot;
+116) &quot;+0.078740157186985&quot;
+117) &quot;-0.094488188624382&quot;
+118) &quot;+0.007874015718699&quot;
+119) &quot;+0.086614176630974&quot;
+120) &quot;-0.015748031437397&quot;
+121) &quot;+0.047244094312191&quot;
+122) &quot;-0.062992125749588&quot;
+123) &quot;+0.015748031437397&quot;
+124) &quot;+0.133858263492584&quot;
+125) &quot;-0.015748031437397&quot;
+126) &quot;-0.062992125749588&quot;
+127) &quot;+0.039370078593493&quot;
+128) &quot;-0.023622047156096&quot;
+129) &quot;+0.055118110030890&quot;
+130) &quot;+0.102362200617790&quot;
+131) &quot;-0.070866137742996&quot;
+132) &quot;-0.039370078593493&quot;
+133) &quot;-0.094488188624382&quot;
+134) &quot;-0.110236220061779&quot;
+135) &quot;+0.015748031437397&quot;
+136) &quot;+0.031496062874794&quot;
+137) &quot;-0.173228353261948&quot;
+138) &quot;-0.094488188624382&quot;
+139) &quot;-0.023622047156096&quot;
+140) &quot;+0.062992125749588&quot;
+141) &quot;-0.110236220061779&quot;
+142) &quot;+0.141732275485992&quot;
+143) &quot;-0.015748031437397&quot;
+144) &quot;-0.047244094312191&quot;
+145) &quot;-0.094488188624382&quot;
+146) &quot;+0.062992125749588&quot;
+147) &quot;-0.047244094312191&quot;
+148) &quot;+0.086614176630974&quot;
+149) &quot;+0.015748031437397&quot;
+150) &quot;+0.023622047156096&quot;
+151) &quot;+0.141732275485992&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VGET">VGET</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+				<li><a href="#C::VKGET">VKGET</a></li>
+				<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
+				<li><a href="#C::VKGETRAW">VKGETRAW</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VGETRAW">
+			<a name="C::VGETRAW"></a>
+			<h4>VGETRAW</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VGETRAW		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VGETRAW key dim_ix quantize_type raw_vector_type name</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *name*'s vector elements from the index *key*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_ix*		- dimention of the index.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*raw_vector_type*	- type of the vector, see the table below.</li>
+  <li>*name*		- vector name.</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+Vector types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>vector elements dequantized as 32-bit floats, non normalized</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; VGETRAW vectors 150 i H frog
+&quot;RESULT_HERE&quot;
+
+# real GloVe frog value random projected at 150D vector is as follows,
+# you will see it at the RESULT_HERE place as single line.
+
+000000003FAE85B2BFC456683F82E44600000000BF82E446C0B3F9E03F98B4FC00000000C02E85B2
+BF82E446000000003F02E446BE2E85B2BFC456683F82E446C0239D583FAE85B23F82E446C0650F7A
+3FAE85B23F5A271FC08858733EAE85B23F5A271F40396E0D3FAE85B23F02E4463EAE85B240239D58
+40239D58402E85B23F98B4FCBF82E4463E2E85B23FEFF7D63F5A271F40239D583EAE85B23EAE85B2
+C0445668BF82E446BF5A271FBEAE85B23FAE85B23F2E85B23F02E4463F2E85B2BFAE85B2C0445668
+BF98B4FC3FEFF7D63F2E85B2BF02E446BF02E4463F82E4463F2E85B2BF98B4FCC00DCCA13FAE85B2
+BF2E85B24082E446BF98B4FCBFDA271F3F2E85B23FAE85B2404456683FAE85B23F5A271F3FAE85B2
+3F02E4463FDA271FBF02E446BFC45668400DCCA13F5A271F3F2E85B2BE2E85B2BF98B4FC40650F7A
+3F02E446BE2E85B2407AE031BF02E4463FEFF7D63F5A271FBF2E85B23F2E85B2BFAE85B23F02E446
+BF98B4FC4018B4FCC0650F7A40239D583F2E85B24002E44640885873BEAE85B23F82E44600000000
+3F2E85B2404F3EC43FC45668BF98B4FC3F98B4FC3FDA271F3E2E85B2405A271F000000003F02E446
+C0396E0DBFEFF7D6000000003FEFF7D63FDA271FC002E4463E2E85B23FEFF7D6BEAE85B23F82E446
+BFAE85B23EAE85B240396E0DBEAE85B2BFAE85B23F5A271FBF02E4463F98B4FC400DCCA1BFC45668
+BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
+40445668BEAE85B2BF82E446C002E4463FAE85B2BF82E4463FEFF7D63EAE85B23F02E44640445668
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VGET">VGET</a></li>
+				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+				<li><a href="#C::VKGET">VKGET</a></li>
+				<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
+				<li><a href="#C::VKGETRAW">VKGETRAW</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VSIMFLAT">
+			<a name="C::VSIMFLAT"></a>
+			<h4>VSIMFLAT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VSIMFLAT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VSIMFLAT key dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count &#x27;&#x27;</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Search the index *key* using flat method (e.g. brute force) for *BLOB*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
+  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
+  <li>*BLOB*		- vector values.</li>
+  <li>*count*		- result count.</li>
+  <li>*from*		- start key (for pagination in the similar way as in XNGET).</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+Distance types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Metric Name</th>
+    <th>Range</th>
+    <th>Bit</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td align="center">E</td>
+    <td>Euclidean (L2)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Standard straight-line distance between two points in Euclidean space.</td>
+  </tr>
+  <tr>
+    <td align="center">M</td>
+    <td>Manhattan (L1)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.</td>
+  </tr>
+  <tr>
+    <td align="center">C</td>
+    <td>Cosine</td>
+    <td align="center">0 .. 1</td>
+    <td>&nbsp;</td>
+    <td>Measures the cosine of the angle between two vectors (orientation, not magnitude).</td>
+  </tr>
+  <tr>
+    <td align="center">K</td>
+    <td>Canberra</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>Bit cosine	</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. Cosine distance for bit vectors.</td>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>Hamming</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors.</td>
+  </tr>
+  <tr>
+    <td align="center">D</td>
+    <td>Dominating</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector.</td>
+  </tr>
+</table>
+
+Vector types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / score with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x"># no random projection and no quantization
+
+127.0.0.1:6379&gt; VSIMFLAT gf150 150 150 f c H FROG_150D 10 &#x27;&#x27;
+ 1) &quot;tarantula&quot;
+ 2) &quot;+0.158455252647400&quot;
+ 3) &quot;critter&quot;
+ 4) &quot;+0.158813476562500&quot;
+ 5) &quot;creature&quot;
+ 6) &quot;+0.170749366283417&quot;
+ 7) &quot;grasshopper&quot;
+ 8) &quot;+0.176068365573883&quot;
+ 9) &quot;organs&quot;
+10) &quot;+0.183578848838806&quot;
+11) &quot;octopus&quot;
+12) &quot;+0.186295330524445&quot;
+13) &quot;rat&quot;
+14) &quot;+0.187209129333496&quot;
+15) &quot;crayfish&quot;
+16) &quot;+0.192203581333160&quot;
+17) &quot;mosquito&quot;
+18) &quot;+0.200614154338837&quot;
+19) &quot;habitat&quot;
+20) &quot;+0.200940608978271&quot;
+21) &quot;gf150~007E~son-of-a-bitch&quot;
+
+# with random projection and with quantization
+
+127.0.0.1:6379&gt; VSIMFLAT gi150 300 150 i c H FROG_300D 10 &#x27;&#x27;
+ 1) &quot;tarantula&quot;
+ 2) &quot;+0.157726109027863&quot;
+ 3) &quot;critter&quot;
+ 4) &quot;+0.159292817115784&quot;
+ 5) &quot;creature&quot;
+ 6) &quot;+0.171702146530151&quot;
+ 7) &quot;grasshopper&quot;
+ 8) &quot;+0.175196170806885&quot;
+ 9) &quot;octopus&quot;
+10) &quot;+0.185684680938721&quot;
+11) &quot;organs&quot;
+12) &quot;+0.185989320278168&quot;
+13) &quot;rat&quot;
+14) &quot;+0.186304152011871&quot;
+15) &quot;crayfish&quot;
+16) &quot;+0.193844795227051&quot;
+17) &quot;mosquito&quot;
+18) &quot;+0.199590861797333&quot;
+19) &quot;elephant&quot;
+20) &quot;+0.200601100921631&quot;
+21) &quot;gi150~007E~son-of-a-bitch&quot;
+
+# real GloVe frog value in 300D is as follows, you need to place it on single row
+
+BE42C3CA3EC275253DCEA4A9BD1E83E4BD9B3D08BC07FCB9BDC951823C809D493DDC5D643DC18938
+BB9374BCBE288CE8BE2FEC57BCD013A93D858794BE502DDFBDBF1412BDE978D43C816F00BEF020C6
+BED22D0D3D6282413D45D639BD95B5743CB50B0FBBD4FDF43E0240B83E36AE7D3E73EAB3BD202752
+3DAF1AA03DC7AE143B16BB99BCB923A33D378034BCC985F03E50E5603D656042BE050481BE87AE14
+3DFDBF48BD676C8B3E8305533E0F41F2BD271DE6BD6B1C43BC9AD42C3D38BAC7BDC6DC5DBDB2CA58
+BE559B3DBE3C84B6BF37381D3D60DED23DE21965BDA0F9093EB4C9863DA43FE63DBB645ABD816F00
+3B9D4952BE0FF972BE0CCCCDBE4DB8BBBDB126EABE14AF4FBE2075F73C28C155BD9FF2E53E7E9100
+BDADE00DBB23D70ABDFF62B73D84EA4B3E3141203E8CB2963DD254613E05BC023E0D9E843DC18938
+BCF34D6A3DF9A6B53CA64C31BE6786C2BBAA64C3BDF487FD3E102DE0BE3A0F913E6161E5BD49EECC
+3DBE0DEDBD810625BD83126FBD9E83E4BD009D49BC656042BE42F837BE191687BDF4F0D73DB851EC
+BE13DD983EA7A0F9BD549518BE0F76603D2EE633BD2EE6333B8CE7043E741F223C858794BDA5119D
+BE315B573E276C8B3E1446743CD916863D95B5743E2B851F3DDE353FBCB020C5BDD844D1BE9B2FEC
+BE10624EBE21FF2E3E1C0EBFBD93404F3E1288CE3E41D7DDBE4D844D3D809D49BD6353F83B7F9725
+3D0B4396BDBA29C7BD428F5CBC6BEDFA3D85F06F3CB0F27C3DC6DC5DBBDB8BACBE3F2E49BD3EDFA4
+3E01F213BD292A30BD4A57A83E4D4FDE3CFDF3B6BD07FCB93D762B6C3C88CE70BD072B023E056D5D
+BE4B295FBC257A78BD9B089ABE8B295F3D5013A9BD4ED9173D91D14E3DC3C9EFBCFDF3B63D9DE69B
+BC809D49BDAD42C43EAE8A723B449BA6BC3E0DED3DA5AEE73DC0EBEEBCF41F223D82DE013C22339C
+BD401A363E153261BE1C91D13D4A57A83E5FBE78BDA9C77A3EB71759BD6075F73DF34D6ABD521FF3
+3D06594B3D9FBE77BDAFB7E8BD8418933DDA511ABDFC1BDA3D3AC7113E43E427BE8944673E404EA5
+BBFC50483E864C303E1FA4403B9374BC3E0C154DBD9374BC3E8106253D09A0273DBA92A3BE025AEE
+3D03E426BD83E426BD82A993BE83A29C3D42F8373E243FE63CE7D567BE12F1AA3DB15B573E6353F8
+BE102DE0BE54C9853E6C8B443CCBFB163E3439583E5758E2BDCEA4A93E138EF3BDDA511A3E0D6A16
+BCADAB9E3D178D50BE12A3053E1916873D542C3DBE87D5673E0189373E050481BDC39582BDD9E83E
+3D1E83E4BD919CE03EAF41F2BDA2680A3D428F5CBE2CA57ABDFCED91BDAE7D56BE793DD8BD985F07
+BE170A3DBE8C3C9F3DD38EF33E636E2FBDFCB924BDCCCCCDBE68F5C43DFE91003E41A36E3ED80347
+3D947AE1BC3E0DED3E8353F8BDF24745BC4154CABE0F9097BDC361133E4A233ABDAF4F0EBE932618
+BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
+3D6D9168BD1B3D083DD5CFAB3C1D4952BE0AF4F13D9E1B093E5B22D2BA51B717BDC1F2133C535A86
+3D8A3D71BDF247453BD1B7173E13A92ABD0E2196BED013A93C8B4396BE26B50BBD9D49523CBFB15B
+3D96872BBDD288CEBD79DB22BDBA29C7BE09374C3DA1FF2E3BD1B717BDB8EF343DCC63F13D19999A
+
+# real GloVe frog value in 150D is as follows, you need to place it on single row
+
+000000003FAE85B2BFC456683F82E44600000000BF82E446C0B3F9E03F98B4FC00000000C02E85B2
+BF82E446000000003F02E446BE2E85B2BFC456683F82E446C0239D583FAE85B23F82E446C0650F7A
+3FAE85B23F5A271FC08858733EAE85B23F5A271F40396E0D3FAE85B23F02E4463EAE85B240239D58
+40239D58402E85B23F98B4FCBF82E4463E2E85B23FEFF7D63F5A271F40239D583EAE85B23EAE85B2
+C0445668BF82E446BF5A271FBEAE85B23FAE85B23F2E85B23F02E4463F2E85B2BFAE85B2C0445668
+BF98B4FC3FEFF7D63F2E85B2BF02E446BF02E4463F82E4463F2E85B2BF98B4FCC00DCCA13FAE85B2
+BF2E85B24082E446BF98B4FCBFDA271F3F2E85B23FAE85B2404456683FAE85B23F5A271F3FAE85B2
+3F02E4463FDA271FBF02E446BFC45668400DCCA13F5A271F3F2E85B2BE2E85B2BF98B4FC40650F7A
+3F02E446BE2E85B2407AE031BF02E4463FEFF7D63F5A271FBF2E85B23F2E85B2BFAE85B23F02E446
+BF98B4FC4018B4FCC0650F7A40239D583F2E85B24002E44640885873BEAE85B23F82E44600000000
+3F2E85B2404F3EC43FC45668BF98B4FC3F98B4FC3FDA271F3E2E85B2405A271F000000003F02E446
+C0396E0DBFEFF7D6000000003FEFF7D63FDA271FC002E4463E2E85B23FEFF7D6BEAE85B23F82E446
+BFAE85B23EAE85B240396E0DBEAE85B2BFAE85B23F5A271FBF02E4463F98B4FC400DCCA1BFC45668
+BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
+40445668BEAE85B2BF82E446C002E4463FAE85B2BF82E4463FEFF7D63EAE85B23F02E44640445668
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
+				<li><a href="#C::VKSIMFLAT">VKSIMFLAT</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VSIMLSH">
+			<a name="C::VSIMLSH"></a>
+			<h4>VSIMLSH</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VSIMLSH		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 9, 8 }		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VSIMLSH key dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count &#x27;&#x27;</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Search the index *key* using LSH method for *BLOB*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
+  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
+  <li>*BLOB*		- vector values.</li>
+  <li>*count*		- result count.</li>
+  <li>*from*		- start key (for pagination in the similar way as in XNGET).</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+Distance types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Metric Name</th>
+    <th>Range</th>
+    <th>Bit</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td align="center">E</td>
+    <td>Euclidean (L2)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Standard straight-line distance between two points in Euclidean space.</td>
+  </tr>
+  <tr>
+    <td align="center">M</td>
+    <td>Manhattan (L1)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.</td>
+  </tr>
+  <tr>
+    <td align="center">C</td>
+    <td>Cosine</td>
+    <td align="center">0 .. 1</td>
+    <td>&nbsp;</td>
+    <td>Measures the cosine of the angle between two vectors (orientation, not magnitude).</td>
+  </tr>
+  <tr>
+    <td align="center">K</td>
+    <td>Canberra</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>Bit cosine	</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. Cosine distance for bit vectors.</td>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>Hamming</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors.</td>
+  </tr>
+  <tr>
+    <td align="center">D</td>
+    <td>Dominating</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector.</td>
+  </tr>
+</table>
+
+Vector types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / score with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x"># no random projection and no quantization
+
+127.0.0.1:6379&gt; VSIMLSH gf150 150 150 f c H  FROG_150D 10 &#x27;&#x27;
+ 1) &quot;salamander&quot;
+ 2) &quot;+0.130580902099609&quot;
+ 3) &quot;critter&quot;
+ 4) &quot;+0.158813476562500&quot;
+ 5) &quot;creature&quot;
+ 6) &quot;+0.170749366283417&quot;
+ 7) &quot;grasshopper&quot;
+ 8) &quot;+0.176068365573883&quot;
+ 9) &quot;organs&quot;
+10) &quot;+0.183578848838806&quot;
+11) &quot;caecilian&quot;
+12) &quot;+0.186551809310913&quot;
+13) &quot;snails&quot;
+14) &quot;+0.188938736915588&quot;
+15) &quot;crayfish&quot;
+16) &quot;+0.192203581333160&quot;
+17) &quot;froglet&quot;
+18) &quot;+0.192259669303894&quot;
+19) &quot;eels&quot;
+20) &quot;+0.193883359432220&quot;
+21) &quot;gf150~00F6~Highness&quot;
+
+# with random projection and with quantization
+
+127.0.0.1:6379&gt; VSIMLSH gi150 300 150 i c H FROG_300D 10 &#x27;&#x27;
+ 1) &quot;salamander&quot;
+ 2) &quot;+0.132619619369507&quot;
+ 3) &quot;critter&quot;
+ 4) &quot;+0.159292817115784&quot;
+ 5) &quot;creature&quot;
+ 6) &quot;+0.171702146530151&quot;
+ 7) &quot;grasshopper&quot;
+ 8) &quot;+0.175196170806885&quot;
+ 9) &quot;organs&quot;
+10) &quot;+0.185989320278168&quot;
+11) &quot;caecilian&quot;
+12) &quot;+0.187077164649963&quot;
+13) &quot;snails&quot;
+14) &quot;+0.188893675804138&quot;
+15) &quot;froglet&quot;
+16) &quot;+0.192517578601837&quot;
+17) &quot;crayfish&quot;
+18) &quot;+0.193844795227051&quot;
+19) &quot;eels&quot;
+20) &quot;+0.195781469345093&quot;
+21) &quot;gi150~00F6~Highness&quot;
+
+
+# real GloVe frog value in 300D is as follows, you need to place it on single row
+
+BE42C3CA3EC275253DCEA4A9BD1E83E4BD9B3D08BC07FCB9BDC951823C809D493DDC5D643DC18938
+BB9374BCBE288CE8BE2FEC57BCD013A93D858794BE502DDFBDBF1412BDE978D43C816F00BEF020C6
+BED22D0D3D6282413D45D639BD95B5743CB50B0FBBD4FDF43E0240B83E36AE7D3E73EAB3BD202752
+3DAF1AA03DC7AE143B16BB99BCB923A33D378034BCC985F03E50E5603D656042BE050481BE87AE14
+3DFDBF48BD676C8B3E8305533E0F41F2BD271DE6BD6B1C43BC9AD42C3D38BAC7BDC6DC5DBDB2CA58
+BE559B3DBE3C84B6BF37381D3D60DED23DE21965BDA0F9093EB4C9863DA43FE63DBB645ABD816F00
+3B9D4952BE0FF972BE0CCCCDBE4DB8BBBDB126EABE14AF4FBE2075F73C28C155BD9FF2E53E7E9100
+BDADE00DBB23D70ABDFF62B73D84EA4B3E3141203E8CB2963DD254613E05BC023E0D9E843DC18938
+BCF34D6A3DF9A6B53CA64C31BE6786C2BBAA64C3BDF487FD3E102DE0BE3A0F913E6161E5BD49EECC
+3DBE0DEDBD810625BD83126FBD9E83E4BD009D49BC656042BE42F837BE191687BDF4F0D73DB851EC
+BE13DD983EA7A0F9BD549518BE0F76603D2EE633BD2EE6333B8CE7043E741F223C858794BDA5119D
+BE315B573E276C8B3E1446743CD916863D95B5743E2B851F3DDE353FBCB020C5BDD844D1BE9B2FEC
+BE10624EBE21FF2E3E1C0EBFBD93404F3E1288CE3E41D7DDBE4D844D3D809D49BD6353F83B7F9725
+3D0B4396BDBA29C7BD428F5CBC6BEDFA3D85F06F3CB0F27C3DC6DC5DBBDB8BACBE3F2E49BD3EDFA4
+3E01F213BD292A30BD4A57A83E4D4FDE3CFDF3B6BD07FCB93D762B6C3C88CE70BD072B023E056D5D
+BE4B295FBC257A78BD9B089ABE8B295F3D5013A9BD4ED9173D91D14E3DC3C9EFBCFDF3B63D9DE69B
+BC809D49BDAD42C43EAE8A723B449BA6BC3E0DED3DA5AEE73DC0EBEEBCF41F223D82DE013C22339C
+BD401A363E153261BE1C91D13D4A57A83E5FBE78BDA9C77A3EB71759BD6075F73DF34D6ABD521FF3
+3D06594B3D9FBE77BDAFB7E8BD8418933DDA511ABDFC1BDA3D3AC7113E43E427BE8944673E404EA5
+BBFC50483E864C303E1FA4403B9374BC3E0C154DBD9374BC3E8106253D09A0273DBA92A3BE025AEE
+3D03E426BD83E426BD82A993BE83A29C3D42F8373E243FE63CE7D567BE12F1AA3DB15B573E6353F8
+BE102DE0BE54C9853E6C8B443CCBFB163E3439583E5758E2BDCEA4A93E138EF3BDDA511A3E0D6A16
+BCADAB9E3D178D50BE12A3053E1916873D542C3DBE87D5673E0189373E050481BDC39582BDD9E83E
+3D1E83E4BD919CE03EAF41F2BDA2680A3D428F5CBE2CA57ABDFCED91BDAE7D56BE793DD8BD985F07
+BE170A3DBE8C3C9F3DD38EF33E636E2FBDFCB924BDCCCCCDBE68F5C43DFE91003E41A36E3ED80347
+3D947AE1BC3E0DED3E8353F8BDF24745BC4154CABE0F9097BDC361133E4A233ABDAF4F0EBE932618
+BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
+3D6D9168BD1B3D083DD5CFAB3C1D4952BE0AF4F13D9E1B093E5B22D2BA51B717BDC1F2133C535A86
+3D8A3D71BDF247453BD1B7173E13A92ABD0E2196BED013A93C8B4396BE26B50BBD9D49523CBFB15B
+3D96872BBDD288CEBD79DB22BDBA29C7BE09374C3DA1FF2E3BD1B717BDB8EF343DCC63F13D19999A
+
+# real GloVe frog value in 150D is as follows, you need to place it on single row
+
+000000003FAE85B2BFC456683F82E44600000000BF82E446C0B3F9E03F98B4FC00000000C02E85B2
+BF82E446000000003F02E446BE2E85B2BFC456683F82E446C0239D583FAE85B23F82E446C0650F7A
+3FAE85B23F5A271FC08858733EAE85B23F5A271F40396E0D3FAE85B23F02E4463EAE85B240239D58
+40239D58402E85B23F98B4FCBF82E4463E2E85B23FEFF7D63F5A271F40239D583EAE85B23EAE85B2
+C0445668BF82E446BF5A271FBEAE85B23FAE85B23F2E85B23F02E4463F2E85B2BFAE85B2C0445668
+BF98B4FC3FEFF7D63F2E85B2BF02E446BF02E4463F82E4463F2E85B2BF98B4FCC00DCCA13FAE85B2
+BF2E85B24082E446BF98B4FCBFDA271F3F2E85B23FAE85B2404456683FAE85B23F5A271F3FAE85B2
+3F02E4463FDA271FBF02E446BFC45668400DCCA13F5A271F3F2E85B2BE2E85B2BF98B4FC40650F7A
+3F02E446BE2E85B2407AE031BF02E4463FEFF7D63F5A271FBF2E85B23F2E85B2BFAE85B23F02E446
+BF98B4FC4018B4FCC0650F7A40239D583F2E85B24002E44640885873BEAE85B23F82E44600000000
+3F2E85B2404F3EC43FC45668BF98B4FC3F98B4FC3FDA271F3E2E85B2405A271F000000003F02E446
+C0396E0DBFEFF7D6000000003FEFF7D63FDA271FC002E4463E2E85B23FEFF7D6BEAE85B23F82E446
+BFAE85B23EAE85B240396E0DBEAE85B2BFAE85B23F5A271FBF02E4463F98B4FC400DCCA1BFC45668
+BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
+40445668BEAE85B2BF82E446C002E4463FAE85B2BF82E4463FEFF7D63EAE85B23F02E44640445668
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
+				<li><a href="#C::VKSIMFLAT">VKSIMFLAT</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VKSET">
+			<a name="C::VKSET"></a>
+			<h4>VKSET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VKSET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VKSET key dim_vec dim_ix quantize_type raw_vector_type BLOB</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Store vector represented by *BLOB* into the key *key*<br />
+The command is same as VADD, except it set a key instead of adding to an index.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
+  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
+  <li>*BLOB*		- vector values.</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+Vector types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x"># no random projection and no quantization
+
+VKSET vector_frog1 300 300 f H PASTE_VECTOR_HERE
+OK
+
+# random projection to 150 and no quantization
+
+VKSET vector_frog2 300 150 f H PASTE_VECTOR_HERE
+OK
+
+# no random projection and quantization to Q7
+
+VKSET vector_frog3 300 150 i H PASTE_VECTOR_HERE
+OK
+
+# random projection to 150 and quantization to Q15
+VKSET vector_frog4 300 150 s H PASTE_VECTOR_HERE
+OK
+
+# real GloVe frog value is as follows, you need to place it on single row
+
+BE42C3CA3EC275253DCEA4A9BD1E83E4BD9B3D08BC07FCB9BDC951823C809D493DDC5D643DC18938
+BB9374BCBE288CE8BE2FEC57BCD013A93D858794BE502DDFBDBF1412BDE978D43C816F00BEF020C6
+BED22D0D3D6282413D45D639BD95B5743CB50B0FBBD4FDF43E0240B83E36AE7D3E73EAB3BD202752
+3DAF1AA03DC7AE143B16BB99BCB923A33D378034BCC985F03E50E5603D656042BE050481BE87AE14
+3DFDBF48BD676C8B3E8305533E0F41F2BD271DE6BD6B1C43BC9AD42C3D38BAC7BDC6DC5DBDB2CA58
+BE559B3DBE3C84B6BF37381D3D60DED23DE21965BDA0F9093EB4C9863DA43FE63DBB645ABD816F00
+3B9D4952BE0FF972BE0CCCCDBE4DB8BBBDB126EABE14AF4FBE2075F73C28C155BD9FF2E53E7E9100
+BDADE00DBB23D70ABDFF62B73D84EA4B3E3141203E8CB2963DD254613E05BC023E0D9E843DC18938
+BCF34D6A3DF9A6B53CA64C31BE6786C2BBAA64C3BDF487FD3E102DE0BE3A0F913E6161E5BD49EECC
+3DBE0DEDBD810625BD83126FBD9E83E4BD009D49BC656042BE42F837BE191687BDF4F0D73DB851EC
+BE13DD983EA7A0F9BD549518BE0F76603D2EE633BD2EE6333B8CE7043E741F223C858794BDA5119D
+BE315B573E276C8B3E1446743CD916863D95B5743E2B851F3DDE353FBCB020C5BDD844D1BE9B2FEC
+BE10624EBE21FF2E3E1C0EBFBD93404F3E1288CE3E41D7DDBE4D844D3D809D49BD6353F83B7F9725
+3D0B4396BDBA29C7BD428F5CBC6BEDFA3D85F06F3CB0F27C3DC6DC5DBBDB8BACBE3F2E49BD3EDFA4
+3E01F213BD292A30BD4A57A83E4D4FDE3CFDF3B6BD07FCB93D762B6C3C88CE70BD072B023E056D5D
+BE4B295FBC257A78BD9B089ABE8B295F3D5013A9BD4ED9173D91D14E3DC3C9EFBCFDF3B63D9DE69B
+BC809D49BDAD42C43EAE8A723B449BA6BC3E0DED3DA5AEE73DC0EBEEBCF41F223D82DE013C22339C
+BD401A363E153261BE1C91D13D4A57A83E5FBE78BDA9C77A3EB71759BD6075F73DF34D6ABD521FF3
+3D06594B3D9FBE77BDAFB7E8BD8418933DDA511ABDFC1BDA3D3AC7113E43E427BE8944673E404EA5
+BBFC50483E864C303E1FA4403B9374BC3E0C154DBD9374BC3E8106253D09A0273DBA92A3BE025AEE
+3D03E426BD83E426BD82A993BE83A29C3D42F8373E243FE63CE7D567BE12F1AA3DB15B573E6353F8
+BE102DE0BE54C9853E6C8B443CCBFB163E3439583E5758E2BDCEA4A93E138EF3BDDA511A3E0D6A16
+BCADAB9E3D178D50BE12A3053E1916873D542C3DBE87D5673E0189373E050481BDC39582BDD9E83E
+3D1E83E4BD919CE03EAF41F2BDA2680A3D428F5CBE2CA57ABDFCED91BDAE7D56BE793DD8BD985F07
+BE170A3DBE8C3C9F3DD38EF33E636E2FBDFCB924BDCCCCCDBE68F5C43DFE91003E41A36E3ED80347
+3D947AE1BC3E0DED3E8353F8BDF24745BC4154CABE0F9097BDC361133E4A233ABDAF4F0EBE932618
+BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
+3D6D9168BD1B3D083DD5CFAB3C1D4952BE0AF4F13D9E1B093E5B22D2BA51B717BDC1F2133C535A86
+3D8A3D71BDF247453BD1B7173E13A92ABD0E2196BED013A93C8B4396BE26B50BBD9D49523CBFB15B
+3D96872BBDD288CEBD79DB22BDBA29C7BE09374C3DA1FF2E3BD1B717BDB8EF343DCC63F13D19999A
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VADD">VADD</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VKGET">
+			<a name="C::VKGET"></a>
+			<h4>VKGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VKGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VKGET key dim_ix quantize_type</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get vector elements from the index *key*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_ix*		- dimention of the index.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>vector elements dequantized as 32-bit floats, non normalized</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; VKGET vector_frog 150 i
+  1) &quot;+0.000000000000000&quot;
+  2) &quot;+0.062992125749588&quot;
+  3) &quot;-0.070866137742996&quot;
+  4) &quot;+0.047244094312191&quot;
+  5) &quot;+0.000000000000000&quot;
+  6) &quot;-0.047244094312191&quot;
+  7) &quot;-0.259842514991760&quot;
+  8) &quot;+0.055118110030890&quot;
+  9) &quot;+0.000000000000000&quot;
+ 10) &quot;-0.125984251499176&quot;
+ 11) &quot;-0.047244094312191&quot;
+ 12) &quot;+0.000000000000000&quot;
+ 13) &quot;+0.023622047156096&quot;
+ 14) &quot;-0.007874015718699&quot;
+ 15) &quot;-0.070866137742996&quot;
+ 16) &quot;+0.047244094312191&quot;
+ 17) &quot;-0.118110239505768&quot;
+ 18) &quot;+0.062992125749588&quot;
+ 19) &quot;+0.047244094312191&quot;
+ 20) &quot;-0.165354326367378&quot;
+ 21) &quot;+0.062992125749588&quot;
+ 22) &quot;+0.039370078593493&quot;
+ 23) &quot;-0.196850389242172&quot;
+ 24) &quot;+0.015748031437397&quot;
+ 25) &quot;+0.039370078593493&quot;
+ 26) &quot;+0.133858263492584&quot;
+ 27) &quot;+0.062992125749588&quot;
+ 28) &quot;+0.023622047156096&quot;
+ 29) &quot;+0.015748031437397&quot;
+ 30) &quot;+0.118110239505768&quot;
+ 31) &quot;+0.118110239505768&quot;
+ 32) &quot;+0.125984251499176&quot;
+ 33) &quot;+0.055118110030890&quot;
+ 34) &quot;-0.047244094312191&quot;
+ 35) &quot;+0.007874015718699&quot;
+ 36) &quot;+0.086614176630974&quot;
+ 37) &quot;+0.039370078593493&quot;
+ 38) &quot;+0.118110239505768&quot;
+ 39) &quot;+0.015748031437397&quot;
+ 40) &quot;+0.015748031437397&quot;
+ 41) &quot;-0.141732275485992&quot;
+ 42) &quot;-0.047244094312191&quot;
+ 43) &quot;-0.039370078593493&quot;
+ 44) &quot;-0.015748031437397&quot;
+ 45) &quot;+0.062992125749588&quot;
+ 46) &quot;+0.031496062874794&quot;
+ 47) &quot;+0.023622047156096&quot;
+ 48) &quot;+0.031496062874794&quot;
+ 49) &quot;-0.062992125749588&quot;
+ 50) &quot;-0.141732275485992&quot;
+ 51) &quot;-0.055118110030890&quot;
+ 52) &quot;+0.086614176630974&quot;
+ 53) &quot;+0.031496062874794&quot;
+ 54) &quot;-0.023622047156096&quot;
+ 55) &quot;-0.023622047156096&quot;
+ 56) &quot;+0.047244094312191&quot;
+ 57) &quot;+0.031496062874794&quot;
+ 58) &quot;-0.055118110030890&quot;
+ 59) &quot;-0.102362200617790&quot;
+ 60) &quot;+0.062992125749588&quot;
+ 61) &quot;-0.031496062874794&quot;
+ 62) &quot;+0.188976377248764&quot;
+ 63) &quot;-0.055118110030890&quot;
+ 64) &quot;-0.078740157186985&quot;
+ 65) &quot;+0.031496062874794&quot;
+ 66) &quot;+0.062992125749588&quot;
+ 67) &quot;+0.141732275485992&quot;
+ 68) &quot;+0.062992125749588&quot;
+ 69) &quot;+0.039370078593493&quot;
+ 70) &quot;+0.062992125749588&quot;
+ 71) &quot;+0.023622047156096&quot;
+ 72) &quot;+0.078740157186985&quot;
+ 73) &quot;-0.023622047156096&quot;
+ 74) &quot;-0.070866137742996&quot;
+ 75) &quot;+0.102362200617790&quot;
+ 76) &quot;+0.039370078593493&quot;
+ 77) &quot;+0.031496062874794&quot;
+ 78) &quot;-0.007874015718699&quot;
+ 79) &quot;-0.055118110030890&quot;
+ 80) &quot;+0.165354326367378&quot;
+ 81) &quot;+0.023622047156096&quot;
+ 82) &quot;-0.007874015718699&quot;
+ 83) &quot;+0.181102365255356&quot;
+ 84) &quot;-0.023622047156096&quot;
+ 85) &quot;+0.086614176630974&quot;
+ 86) &quot;+0.039370078593493&quot;
+ 87) &quot;-0.031496062874794&quot;
+ 88) &quot;+0.031496062874794&quot;
+ 89) &quot;-0.062992125749588&quot;
+ 90) &quot;+0.023622047156096&quot;
+ 91) &quot;-0.055118110030890&quot;
+ 92) &quot;+0.110236220061779&quot;
+ 93) &quot;-0.165354326367378&quot;
+ 94) &quot;+0.118110239505768&quot;
+ 95) &quot;+0.031496062874794&quot;
+ 96) &quot;+0.094488188624382&quot;
+ 97) &quot;+0.196850389242172&quot;
+ 98) &quot;-0.015748031437397&quot;
+ 99) &quot;+0.047244094312191&quot;
+100) &quot;+0.000000000000000&quot;
+101) &quot;+0.031496062874794&quot;
+102) &quot;+0.149606302380562&quot;
+103) &quot;+0.070866137742996&quot;
+104) &quot;-0.055118110030890&quot;
+105) &quot;+0.055118110030890&quot;
+106) &quot;+0.078740157186985&quot;
+107) &quot;+0.007874015718699&quot;
+108) &quot;+0.157480314373970&quot;
+109) &quot;+0.000000000000000&quot;
+110) &quot;+0.023622047156096&quot;
+111) &quot;-0.133858263492584&quot;
+112) &quot;-0.086614176630974&quot;
+113) &quot;+0.000000000000000&quot;
+114) &quot;+0.086614176630974&quot;
+115) &quot;+0.078740157186985&quot;
+116) &quot;-0.094488188624382&quot;
+117) &quot;+0.007874015718699&quot;
+118) &quot;+0.086614176630974&quot;
+119) &quot;-0.015748031437397&quot;
+120) &quot;+0.047244094312191&quot;
+121) &quot;-0.062992125749588&quot;
+122) &quot;+0.015748031437397&quot;
+123) &quot;+0.133858263492584&quot;
+124) &quot;-0.015748031437397&quot;
+125) &quot;-0.062992125749588&quot;
+126) &quot;+0.039370078593493&quot;
+127) &quot;-0.023622047156096&quot;
+128) &quot;+0.055118110030890&quot;
+129) &quot;+0.102362200617790&quot;
+130) &quot;-0.070866137742996&quot;
+131) &quot;-0.039370078593493&quot;
+132) &quot;-0.094488188624382&quot;
+133) &quot;-0.110236220061779&quot;
+134) &quot;+0.015748031437397&quot;
+135) &quot;+0.031496062874794&quot;
+136) &quot;-0.173228353261948&quot;
+137) &quot;-0.094488188624382&quot;
+138) &quot;-0.023622047156096&quot;
+139) &quot;+0.062992125749588&quot;
+140) &quot;-0.110236220061779&quot;
+141) &quot;+0.141732275485992&quot;
+142) &quot;-0.015748031437397&quot;
+143) &quot;-0.047244094312191&quot;
+144) &quot;-0.094488188624382&quot;
+145) &quot;+0.062992125749588&quot;
+146) &quot;-0.047244094312191&quot;
+147) &quot;+0.086614176630974&quot;
+148) &quot;+0.015748031437397&quot;
+149) &quot;+0.023622047156096&quot;
+150) &quot;+0.141732275485992&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
+				<li><a href="#C::VKGETRAW">VKGETRAW</a></li>
+				<li><a href="#C::VGET">VGET</a></li>
+				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VKGETNORMALIZED">
+			<a name="C::VKGETNORMALIZED"></a>
+			<h4>VKGETNORMALIZED</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VKGETNORMALIZED		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VKGETNORMALIZED key dim_ix quantize_type</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get vector elements from the index *key*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_ix*		- dimention of the index.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+</ul>
+Note the result contains the vector magnitude as a first array element<br />
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>vector magnitude, then vector elements dequantized and normalized as 32-bit floats</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; VKGETNORMALIZED vector_frog 150 i
+  1) &quot;+21.644849777221680&quot;
+  2) &quot;+0.000000000000000&quot;
+  3) &quot;+0.062992125749588&quot;
+  4) &quot;-0.070866137742996&quot;
+  5) &quot;+0.047244094312191&quot;
+  6) &quot;+0.000000000000000&quot;
+  7) &quot;-0.047244094312191&quot;
+  8) &quot;-0.259842514991760&quot;
+  9) &quot;+0.055118110030890&quot;
+ 10) &quot;+0.000000000000000&quot;
+ 11) &quot;-0.125984251499176&quot;
+ 12) &quot;-0.047244094312191&quot;
+ 13) &quot;+0.000000000000000&quot;
+ 14) &quot;+0.023622047156096&quot;
+ 15) &quot;-0.007874015718699&quot;
+ 16) &quot;-0.070866137742996&quot;
+ 17) &quot;+0.047244094312191&quot;
+ 18) &quot;-0.118110239505768&quot;
+ 19) &quot;+0.062992125749588&quot;
+ 20) &quot;+0.047244094312191&quot;
+ 21) &quot;-0.165354326367378&quot;
+ 22) &quot;+0.062992125749588&quot;
+ 23) &quot;+0.039370078593493&quot;
+ 24) &quot;-0.196850389242172&quot;
+ 25) &quot;+0.015748031437397&quot;
+ 26) &quot;+0.039370078593493&quot;
+ 27) &quot;+0.133858263492584&quot;
+ 28) &quot;+0.062992125749588&quot;
+ 29) &quot;+0.023622047156096&quot;
+ 30) &quot;+0.015748031437397&quot;
+ 31) &quot;+0.118110239505768&quot;
+ 32) &quot;+0.118110239505768&quot;
+ 33) &quot;+0.125984251499176&quot;
+ 34) &quot;+0.055118110030890&quot;
+ 35) &quot;-0.047244094312191&quot;
+ 36) &quot;+0.007874015718699&quot;
+ 37) &quot;+0.086614176630974&quot;
+ 38) &quot;+0.039370078593493&quot;
+ 39) &quot;+0.118110239505768&quot;
+ 40) &quot;+0.015748031437397&quot;
+ 41) &quot;+0.015748031437397&quot;
+ 42) &quot;-0.141732275485992&quot;
+ 43) &quot;-0.047244094312191&quot;
+ 44) &quot;-0.039370078593493&quot;
+ 45) &quot;-0.015748031437397&quot;
+ 46) &quot;+0.062992125749588&quot;
+ 47) &quot;+0.031496062874794&quot;
+ 48) &quot;+0.023622047156096&quot;
+ 49) &quot;+0.031496062874794&quot;
+ 50) &quot;-0.062992125749588&quot;
+ 51) &quot;-0.141732275485992&quot;
+ 52) &quot;-0.055118110030890&quot;
+ 53) &quot;+0.086614176630974&quot;
+ 54) &quot;+0.031496062874794&quot;
+ 55) &quot;-0.023622047156096&quot;
+ 56) &quot;-0.023622047156096&quot;
+ 57) &quot;+0.047244094312191&quot;
+ 58) &quot;+0.031496062874794&quot;
+ 59) &quot;-0.055118110030890&quot;
+ 60) &quot;-0.102362200617790&quot;
+ 61) &quot;+0.062992125749588&quot;
+ 62) &quot;-0.031496062874794&quot;
+ 63) &quot;+0.188976377248764&quot;
+ 64) &quot;-0.055118110030890&quot;
+ 65) &quot;-0.078740157186985&quot;
+ 66) &quot;+0.031496062874794&quot;
+ 67) &quot;+0.062992125749588&quot;
+ 68) &quot;+0.141732275485992&quot;
+ 69) &quot;+0.062992125749588&quot;
+ 70) &quot;+0.039370078593493&quot;
+ 71) &quot;+0.062992125749588&quot;
+ 72) &quot;+0.023622047156096&quot;
+ 73) &quot;+0.078740157186985&quot;
+ 74) &quot;-0.023622047156096&quot;
+ 75) &quot;-0.070866137742996&quot;
+ 76) &quot;+0.102362200617790&quot;
+ 77) &quot;+0.039370078593493&quot;
+ 78) &quot;+0.031496062874794&quot;
+ 79) &quot;-0.007874015718699&quot;
+ 80) &quot;-0.055118110030890&quot;
+ 81) &quot;+0.165354326367378&quot;
+ 82) &quot;+0.023622047156096&quot;
+ 83) &quot;-0.007874015718699&quot;
+ 84) &quot;+0.181102365255356&quot;
+ 85) &quot;-0.023622047156096&quot;
+ 86) &quot;+0.086614176630974&quot;
+ 87) &quot;+0.039370078593493&quot;
+ 88) &quot;-0.031496062874794&quot;
+ 89) &quot;+0.031496062874794&quot;
+ 90) &quot;-0.062992125749588&quot;
+ 91) &quot;+0.023622047156096&quot;
+ 92) &quot;-0.055118110030890&quot;
+ 93) &quot;+0.110236220061779&quot;
+ 94) &quot;-0.165354326367378&quot;
+ 95) &quot;+0.118110239505768&quot;
+ 96) &quot;+0.031496062874794&quot;
+ 97) &quot;+0.094488188624382&quot;
+ 98) &quot;+0.196850389242172&quot;
+ 99) &quot;-0.015748031437397&quot;
+100) &quot;+0.047244094312191&quot;
+101) &quot;+0.000000000000000&quot;
+102) &quot;+0.031496062874794&quot;
+103) &quot;+0.149606302380562&quot;
+104) &quot;+0.070866137742996&quot;
+105) &quot;-0.055118110030890&quot;
+106) &quot;+0.055118110030890&quot;
+107) &quot;+0.078740157186985&quot;
+108) &quot;+0.007874015718699&quot;
+109) &quot;+0.157480314373970&quot;
+110) &quot;+0.000000000000000&quot;
+111) &quot;+0.023622047156096&quot;
+112) &quot;-0.133858263492584&quot;
+113) &quot;-0.086614176630974&quot;
+114) &quot;+0.000000000000000&quot;
+115) &quot;+0.086614176630974&quot;
+116) &quot;+0.078740157186985&quot;
+117) &quot;-0.094488188624382&quot;
+118) &quot;+0.007874015718699&quot;
+119) &quot;+0.086614176630974&quot;
+120) &quot;-0.015748031437397&quot;
+121) &quot;+0.047244094312191&quot;
+122) &quot;-0.062992125749588&quot;
+123) &quot;+0.015748031437397&quot;
+124) &quot;+0.133858263492584&quot;
+125) &quot;-0.015748031437397&quot;
+126) &quot;-0.062992125749588&quot;
+127) &quot;+0.039370078593493&quot;
+128) &quot;-0.023622047156096&quot;
+129) &quot;+0.055118110030890&quot;
+130) &quot;+0.102362200617790&quot;
+131) &quot;-0.070866137742996&quot;
+132) &quot;-0.039370078593493&quot;
+133) &quot;-0.094488188624382&quot;
+134) &quot;-0.110236220061779&quot;
+135) &quot;+0.015748031437397&quot;
+136) &quot;+0.031496062874794&quot;
+137) &quot;-0.173228353261948&quot;
+138) &quot;-0.094488188624382&quot;
+139) &quot;-0.023622047156096&quot;
+140) &quot;+0.062992125749588&quot;
+141) &quot;-0.110236220061779&quot;
+142) &quot;+0.141732275485992&quot;
+143) &quot;-0.015748031437397&quot;
+144) &quot;-0.047244094312191&quot;
+145) &quot;-0.094488188624382&quot;
+146) &quot;+0.062992125749588&quot;
+147) &quot;-0.047244094312191&quot;
+148) &quot;+0.086614176630974&quot;
+149) &quot;+0.015748031437397&quot;
+150) &quot;+0.023622047156096&quot;
+151) &quot;+0.141732275485992&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VGET">VGET</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+				<li><a href="#C::VGET">VGET</a></li>
+				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VGETRAW">
+			<a name="C::VGETRAW"></a>
+			<h4>VGETRAW</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VGETRAW		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VGETRAW key dim_ix quantize_type raw_vector_type</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get vector elements from the index *key*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_ix*		- dimention of the index.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*raw_vector_type*	- type of the vector, see the table below.</li>
+  <li>*name*		- vector name.</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+Vector types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>vector elements dequantized as 32-bit floats, non normalized</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; VKGETRAW vector_frog 150 i H
+&quot;RESULT_HERE&quot;
+
+# real GloVe frog value random projected at 150D vector is as follows,
+# you will see it at the RESULT_HERE place as single line.
+
+000000003FAE85B2BFC456683F82E44600000000BF82E446C0B3F9E03F98B4FC00000000C02E85B2
+BF82E446000000003F02E446BE2E85B2BFC456683F82E446C0239D583FAE85B23F82E446C0650F7A
+3FAE85B23F5A271FC08858733EAE85B23F5A271F40396E0D3FAE85B23F02E4463EAE85B240239D58
+40239D58402E85B23F98B4FCBF82E4463E2E85B23FEFF7D63F5A271F40239D583EAE85B23EAE85B2
+C0445668BF82E446BF5A271FBEAE85B23FAE85B23F2E85B23F02E4463F2E85B2BFAE85B2C0445668
+BF98B4FC3FEFF7D63F2E85B2BF02E446BF02E4463F82E4463F2E85B2BF98B4FCC00DCCA13FAE85B2
+BF2E85B24082E446BF98B4FCBFDA271F3F2E85B23FAE85B2404456683FAE85B23F5A271F3FAE85B2
+3F02E4463FDA271FBF02E446BFC45668400DCCA13F5A271F3F2E85B2BE2E85B2BF98B4FC40650F7A
+3F02E446BE2E85B2407AE031BF02E4463FEFF7D63F5A271FBF2E85B23F2E85B2BFAE85B23F02E446
+BF98B4FC4018B4FCC0650F7A40239D583F2E85B24002E44640885873BEAE85B23F82E44600000000
+3F2E85B2404F3EC43FC45668BF98B4FC3F98B4FC3FDA271F3E2E85B2405A271F000000003F02E446
+C0396E0DBFEFF7D6000000003FEFF7D63FDA271FC002E4463E2E85B23FEFF7D6BEAE85B23F82E446
+BFAE85B23EAE85B240396E0DBEAE85B2BFAE85B23F5A271FBF02E4463F98B4FC400DCCA1BFC45668
+BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
+40445668BEAE85B2BF82E446C002E4463FAE85B2BF82E4463FEFF7D63EAE85B23F02E44640445668
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VGET">VGET</a></li>
+				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VSIMFLAT">
+			<a name="C::VSIMFLAT"></a>
+			<h4>VSIMFLAT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VSIMFLAT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTOR	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VSIMFLAT key dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count &#x27;&#x27;</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Search the index *key* using flat method (e.g. brute force) for *BLOB*.<br />
+The parameters as as following:
+<ul>
+  <li>*key*			- name of the index object</li>
+  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
+  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
+  <li>*quantize_type*	- quantization, see the table below.</li>
+  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
+  <li>*BLOB*		- vector values.</li>
+  <li>*count*		- result count.</li>
+  <li>*from*		- start key (for pagination in the similar way as in XNGET).</li>
+</ul>
+
+Quantization types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Quantization</th>
+    <th>Storage Type</th>
+    <th>Bytes</th>
+    <th>Notes</th>
+    <th>Precision loss</th>
+    <th>Disk size of GloVe set</th>
+  </tr>
+  <tr>
+    <td align="center">F</td>
+    <td>None</td>
+    <td>float</td>
+    <td align="right">4</td>
+    <td>No quantization - store values exactly as 32-bit floats</td>
+    <td align="right">0.00 %</td>
+    <td align="right">1,232 MB</td>
+  </tr>
+  <tr>
+    <td align="center">S</td>
+    <td>Q15</td>
+    <td>int16_t</td>
+    <td align="right">2</td>
+    <td>50% space reduction - near-lossless precision</td>
+    <td align="right">~0.01 %</td>
+    <td align="right">660 MB</td>
+  </tr>
+  <tr>
+    <td align="center">I</td>
+    <td>Q7</td>
+    <td>int8_t</td>
+    <td align="right">1</td>
+    <td>75% space reduction - precision good for most workloads</td>
+    <td align="right">~1.00 %</td>
+    <td align="right">374 MB
+  </td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>bit</td>
+    <td>bit</td>
+    <td align="right">1/8</td>
+    <td>97% space reduction - precision probably is lost</td>
+    <td align="right">~~~5.00 %</td>
+    <td align="right">124 MB</td>
+  </tr>
+</table>
+
+Distance types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Metric Name</th>
+    <th>Range</th>
+    <th>Bit</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td align="center">E</td>
+    <td>Euclidean (L2)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Standard straight-line distance between two points in Euclidean space.</td>
+  </tr>
+  <tr>
+    <td align="center">M</td>
+    <td>Manhattan (L1)</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.</td>
+  </tr>
+  <tr>
+    <td align="center">C</td>
+    <td>Cosine</td>
+    <td align="center">0 .. 1</td>
+    <td>&nbsp;</td>
+    <td>Measures the cosine of the angle between two vectors (orientation, not magnitude).</td>
+  </tr>
+  <tr>
+    <td align="center">K</td>
+    <td>Canberra</td>
+    <td align="center">0 .. &infin;</td>
+    <td>&nbsp;</td>
+    <td>A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>Bit cosine	</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. Cosine distance for bit vectors.</td>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>Hamming</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors.</td>
+  </tr>
+  <tr>
+    <td align="center">D</td>
+    <td>Dominating</td>
+    <td align="center">0 .. 1</td>
+    <td align="center">Yes</td>
+    <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector.</td>
+  </tr>
+</table>
+
+Vector types:
+<table border="1" class="x">
+  <tr>
+    <th>Flag</th>
+    <th>Output</th>
+    <th>Byte Order</th>
+  </tr>
+  <tr>
+    <td align="center">H</td>
+    <td>hexadecimal</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">h</td>
+    <td>hexadecimal</td>
+    <td>little-endian</td>
+  </tr>
+  <tr>
+    <td align="center">B</td>
+    <td>binary</td>
+    <td>big-endian</td>
+  </tr>
+  <tr>
+    <td align="center">b</td>
+    <td>binary</td>
+    <td>little-endian</td>
+  </tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / score with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x"># no random projection and no quantization
+
+127.0.0.1:6379&gt; VKSIMFLAT vector_ 150 150 i c H FROG_150D 10 &#x27;&#x27;
+1) &quot;vector_frog&quot;
+2) &quot;+0.000728964805603&quot;
+3) &quot;&quot;
+
+# with random projection and with quantization
+
+127.0.0.1:6379&gt; VKSIMFLAT vector_ 300 150 i c H FROG_300D 10 &#x27;&#x27;
+1) &quot;vector_frog&quot;
+2) &quot;+0.000904202461243&quot;
+
+# real GloVe frog value in 300D is as follows, you need to place it on single row
+
+BE42C3CA3EC275253DCEA4A9BD1E83E4BD9B3D08BC07FCB9BDC951823C809D493DDC5D643DC18938
+BB9374BCBE288CE8BE2FEC57BCD013A93D858794BE502DDFBDBF1412BDE978D43C816F00BEF020C6
+BED22D0D3D6282413D45D639BD95B5743CB50B0FBBD4FDF43E0240B83E36AE7D3E73EAB3BD202752
+3DAF1AA03DC7AE143B16BB99BCB923A33D378034BCC985F03E50E5603D656042BE050481BE87AE14
+3DFDBF48BD676C8B3E8305533E0F41F2BD271DE6BD6B1C43BC9AD42C3D38BAC7BDC6DC5DBDB2CA58
+BE559B3DBE3C84B6BF37381D3D60DED23DE21965BDA0F9093EB4C9863DA43FE63DBB645ABD816F00
+3B9D4952BE0FF972BE0CCCCDBE4DB8BBBDB126EABE14AF4FBE2075F73C28C155BD9FF2E53E7E9100
+BDADE00DBB23D70ABDFF62B73D84EA4B3E3141203E8CB2963DD254613E05BC023E0D9E843DC18938
+BCF34D6A3DF9A6B53CA64C31BE6786C2BBAA64C3BDF487FD3E102DE0BE3A0F913E6161E5BD49EECC
+3DBE0DEDBD810625BD83126FBD9E83E4BD009D49BC656042BE42F837BE191687BDF4F0D73DB851EC
+BE13DD983EA7A0F9BD549518BE0F76603D2EE633BD2EE6333B8CE7043E741F223C858794BDA5119D
+BE315B573E276C8B3E1446743CD916863D95B5743E2B851F3DDE353FBCB020C5BDD844D1BE9B2FEC
+BE10624EBE21FF2E3E1C0EBFBD93404F3E1288CE3E41D7DDBE4D844D3D809D49BD6353F83B7F9725
+3D0B4396BDBA29C7BD428F5CBC6BEDFA3D85F06F3CB0F27C3DC6DC5DBBDB8BACBE3F2E49BD3EDFA4
+3E01F213BD292A30BD4A57A83E4D4FDE3CFDF3B6BD07FCB93D762B6C3C88CE70BD072B023E056D5D
+BE4B295FBC257A78BD9B089ABE8B295F3D5013A9BD4ED9173D91D14E3DC3C9EFBCFDF3B63D9DE69B
+BC809D49BDAD42C43EAE8A723B449BA6BC3E0DED3DA5AEE73DC0EBEEBCF41F223D82DE013C22339C
+BD401A363E153261BE1C91D13D4A57A83E5FBE78BDA9C77A3EB71759BD6075F73DF34D6ABD521FF3
+3D06594B3D9FBE77BDAFB7E8BD8418933DDA511ABDFC1BDA3D3AC7113E43E427BE8944673E404EA5
+BBFC50483E864C303E1FA4403B9374BC3E0C154DBD9374BC3E8106253D09A0273DBA92A3BE025AEE
+3D03E426BD83E426BD82A993BE83A29C3D42F8373E243FE63CE7D567BE12F1AA3DB15B573E6353F8
+BE102DE0BE54C9853E6C8B443CCBFB163E3439583E5758E2BDCEA4A93E138EF3BDDA511A3E0D6A16
+BCADAB9E3D178D50BE12A3053E1916873D542C3DBE87D5673E0189373E050481BDC39582BDD9E83E
+3D1E83E4BD919CE03EAF41F2BDA2680A3D428F5CBE2CA57ABDFCED91BDAE7D56BE793DD8BD985F07
+BE170A3DBE8C3C9F3DD38EF33E636E2FBDFCB924BDCCCCCDBE68F5C43DFE91003E41A36E3ED80347
+3D947AE1BC3E0DED3E8353F8BDF24745BC4154CABE0F9097BDC361133E4A233ABDAF4F0EBE932618
+BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
+3D6D9168BD1B3D083DD5CFAB3C1D4952BE0AF4F13D9E1B093E5B22D2BA51B717BDC1F2133C535A86
+3D8A3D71BDF247453BD1B7173E13A92ABD0E2196BED013A93C8B4396BE26B50BBD9D49523CBFB15B
+3D96872BBDD288CEBD79DB22BDBA29C7BE09374C3DA1FF2E3BD1B717BDB8EF343DCC63F13D19999A
+
+# real GloVe frog value in 150D is as follows, you need to place it on single row
+
+000000003FAE85B2BFC456683F82E44600000000BF82E446C0B3F9E03F98B4FC00000000C02E85B2
+BF82E446000000003F02E446BE2E85B2BFC456683F82E446C0239D583FAE85B23F82E446C0650F7A
+3FAE85B23F5A271FC08858733EAE85B23F5A271F40396E0D3FAE85B23F02E4463EAE85B240239D58
+40239D58402E85B23F98B4FCBF82E4463E2E85B23FEFF7D63F5A271F40239D583EAE85B23EAE85B2
+C0445668BF82E446BF5A271FBEAE85B23FAE85B23F2E85B23F02E4463F2E85B2BFAE85B2C0445668
+BF98B4FC3FEFF7D63F2E85B2BF02E446BF02E4463F82E4463F2E85B2BF98B4FCC00DCCA13FAE85B2
+BF2E85B24082E446BF98B4FCBFDA271F3F2E85B23FAE85B2404456683FAE85B23F5A271F3FAE85B2
+3F02E4463FDA271FBF02E446BFC45668400DCCA13F5A271F3F2E85B2BE2E85B2BF98B4FC40650F7A
+3F02E446BE2E85B2407AE031BF02E4463FEFF7D63F5A271FBF2E85B23F2E85B2BFAE85B23F02E446
+BF98B4FC4018B4FCC0650F7A40239D583F2E85B24002E44640885873BEAE85B23F82E44600000000
+3F2E85B2404F3EC43FC45668BF98B4FC3F98B4FC3FDA271F3E2E85B2405A271F000000003F02E446
+C0396E0DBFEFF7D6000000003FEFF7D63FDA271FC002E4463E2E85B23FEFF7D6BEAE85B23F82E446
+BFAE85B23EAE85B240396E0DBEAE85B2BFAE85B23F5A271FBF02E4463F98B4FC400DCCA1BFC45668
+BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
+40445668BEAE85B2BF82E446C002E4463FAE85B2BF82E4463FEFF7D63EAE85B23F02E44640445668
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MINDEX"></a>
+		<h2>Module MINDEX</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides a <b>multi-index object</b> that helps in storing and retrieving data efficiently for your application.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Storing entries with multiple sub-keys</b></p>
+<p>You can insert entries into a mindex object using <b>IXMADD</b>. Each entry can have a <i>sub_key</i>, <i>sort_key</i>, and multiple indexes (words). Example:</p>
+<ul>
+  <li><i>IXMADD mykey John , "london,new york" x "Data for John"</i> - stores data under sub_key "John" with indexes "london" and "new york".</li>
+</ul>
+
+<p><b>2. Retrieving values</b></p>
+<p>You can get values from the mindex object using <b>IXMGET</b> or <b>IXMMGET</b>. Single or multiple sub-keys can be queried. Example:</p>
+<ul>
+  <li><i>IXMGET mykey John</i> - retrieves the value for sub_key "John".</li>
+  <li><i>IXMMGET mykey John Pete Ivan</i> - retrieves values for several sub_keys.</li>
+</ul>
+
+<p><b>3. Checking existence</b></p>
+<p>Use <b>IXMEXISTS</b> to check whether a value exists for a given sub_key. Example:</p>
+<ul>
+  <li><i>IXMEXISTS mykey John</i> - returns 1 if exists, 0 otherwise.</li>
+</ul>
+
+<p><b>4. Removing entries</b></p>
+<p>Remove entries using <b>IXMREM</b> (aliases: IXMREMOVE, IXMDEL). Example:</p>
+<ul>
+  <li><i>IXMREM mykey John</i> - deletes the entry for sub_key "John".</li>
+</ul>
+
+<p><b>5. Fetching ranges</b></p>
+<p>You can get a range of indexed results using <b>IXMRANGE</b>, <b>IXMRANGEFLEX</b>, and <b>IXMRANGESTRICT</b>. These commands allow pagination and filtering based on indexes. Example:</p>
+<ul>
+  <li><i>IXMRANGE mykey london 100 ''</i> - fetches up to 100 results starting from key "london".</li>
+  <li><i>IXMRANGEFLEX mykey , 'london,new york' 100 ''</i> - returns results that match any of the given indexes.</li>
+  <li><i>IXMRANGESTRICT mykey , 'london,new york' 100 ''</i> - returns results only if all indexes match.</li>
+</ul>
+
+<p><b>Tip:</b> This module can be used both for <b>tagging</b> and <b>full-text search</b>. Always add your data correctly before querying ranges to ensure accurate results.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD news 1000 , &quot;George,Bush,spokes,in,the,senate&quot; x &quot;article 1000&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1001 , &quot;New,laptop,from,DELL&quot; x &quot;article 1001&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1002 , &quot;George,Bush,visits,France&quot; x &quot;article 1002&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1003 , &quot;Cold,weathe,soon&quot; x &quot;article 1003&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1004 , &quot;George,Michael,had,a,concert,with,Kate,Bush&quot; x &quot;article 1004&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD news 1005 , &quot;Why,you,should,read,1984,from,George,Orwell&quot; x &quot;article 1005&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGESTRICT news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; IXMRANGEFLEX news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1004&quot;
+4) &quot;article 1004&quot;
+5) &quot;1002&quot;
+6) &quot;article 1002&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXMRANGE news George 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXMGETINDEXES news 1004
+1) &quot;Bush&quot;
+2) &quot;George&quot;
+3) &quot;Kate&quot;
+4) &quot;Michael&quot;
+5) &quot;a&quot;
+6) &quot;concert&quot;
+7) &quot;had&quot;
+8) &quot;with&quot;
+9) &quot;x&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::AUTOCOMPLETE">AUTOCOMPLETE</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::IXMADD">IXMADD</a></li>
+			<li><a href="#C::IXMGET">IXMGET</a></li>
+			<li><a href="#C::IXMMGET">IXMMGET</a></li>
+			<li><a href="#C::IXMEXISTS">IXMEXISTS</a></li>
+			<li><a href="#C::IXMGETINDEXES">IXMGETINDEXES</a></li>
+			<li><a href="#C::IXMREM">IXMREM</a></li>
+			<li><a href="#C::IXMRANGE">IXMRANGE</a></li>
+			<li><a href="#C::IXMRANGEFLEX">IXMRANGEFLEX</a></li>
+			<li><a href="#C::IXMRANGESTRICT">IXMRANGESTRICT</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="IXMADD">
+			<a name="C::IXMADD"></a>
+			<h4>IXMADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMADD key sub_key delimiter &quot;words,words&quot; sort_key value</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *words* separated by *delimiter* into mindex object *key*, with *sub_key* and *sort_key*, value *value* and indexes *words,words*<br />
+*sort_key* influences the sorting of the results of IXMRANGE* commands. If you do not want to influence the sort just pass "x" or "1".<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMGET">
+			<a name="C::IXMGET"></a>
+			<h4>IXMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMGET key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the value from mindex object *key*, with *sub_key*<br />
+If the *sub_key* not exists, returns an empty string<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmget mykey John
+&quot;Data for John&quot;
+127.0.0.1:6379&gt; ixmget mykey Pete
+&quot;Data for Pete&quot;
+127.0.0.1:6379&gt; ixmget mykey Ivan
+&quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMMGET">IXMMGET</a></li>
+				<li><a href="#C::IXMEXISTS">IXMEXISTS</a></li>
+				<li><a href="#C::IXMGETINDEXES">IXMGETINDEXES</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMMGET">
+			<a name="C::IXMMGET"></a>
+			<h4>IXMMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMMGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the value from mindex object *key*, with *sub_key0*, *sub_key1*...<br />
+The command is same as IXMGET, except it returns several values.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of the values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmmget mykey John Pete Ivan John
+1) &quot;Data for John&quot;
+2) &quot;Data for Pete&quot;
+3) &quot;&quot;
+4) &quot;Data for John&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMMGET">IXMMGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMEXISTS">
+			<a name="C::IXMEXISTS"></a>
+			<h4>IXMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMEXISTS key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of mindex object *key*, with *sub_key* exists<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = not exists<br />
+1 = exists
+</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmexists mykey John
+(integer) 1
+127.0.0.1:6379&gt; ixmexists mykey Ivan
+(integer) 0
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMMGET">IXMMGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMGETINDEXES">
+			<a name="C::IXMGETINDEXES"></a>
+			<h4>IXMGETINDEXES</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMGETINDEXES		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMGETINDEXES key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the "indexes" from mindex object *key*, with *sub_key*<br />
+If the *sub_key* not exists, returns an empty array<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the indexes</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">not connected&gt; ixmgetindexes mykey John
+1) &quot;london&quot;
+2) &quot;new york&quot;
+3) &quot;x&quot;
+127.0.0.1:6379&gt; ixmgetindexes mykey Pete
+1) &quot;boston&quot;
+2) &quot;london&quot;
+3) &quot;x&quot;
+127.0.0.1:6379&gt; ixmgetindexes mykey Ivan
+1) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMMGET">IXMMGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMREM">
+			<a name="C::IXMREM"></a>
+			<h4>IXMREM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMREM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMREM key sub_key</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *sub_key* from mindex object *key*<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>IXMREMOVE</li>
+				<li>IXMDEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey Leon , &quot;london,new york,Serdica&quot; x &quot;Data for Leon&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMGET mykey Leon
+&quot;Data for Leon&quot;
+127.0.0.1:6379&gt; IXMREM mykey Leon
+(integer) 1
+127.0.0.1:6379&gt; IXMGET mykey Leon
+&quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMRANGE">
+			<a name="C::IXMRANGE"></a>
+			<h4>IXMRANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMRANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMRANGE key text count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range mindex object *key* using single *text*<br />
+Returns up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGE mykey london 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Pete&quot;
+4) &quot;Data for Pete&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMRANGEFLEX">IXMRANGEFLEX</a></li>
+				<li><a href="#C::IXMRANGESTRICT">IXMRANGESTRICT</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMRANGEFLEX">
+			<a name="C::IXMRANGEFLEX"></a>
+			<h4>IXMRANGEFLEX</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMRANGEFLEX		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMRANGEFLEX key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range mindex object *key* using indexes *words,words*<br />
+Returns up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+Results apears if contains at least one of the indexes. The result that contains more indexes are on top.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGEFLEX mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;John&quot;
+4) &quot;Data for John&quot;
+5) &quot;Pete&quot;
+6) &quot;Data for Pete&quot;
+7) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMRANGE">IXMRANGE</a></li>
+				<li><a href="#C::IXMRANGESTRICT">IXMRANGESTRICT</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMRANGESTRICT">
+			<a name="C::IXMRANGESTRICT"></a>
+			<h4>IXMRANGESTRICT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMRANGESTRICT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMRANGESTRICT key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range mindex object *key* using indexes *words,words*<br />
+Returns up to *count* results.<br />
+*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+Results apears if contains ALL of the indexes.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMADD mykey Leon , &quot;london,new york,serdica&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGESTRICT mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Leon&quot;
+4) &quot;Data for Pete&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMRANGE">IXMRANGE</a></li>
+				<li><a href="#C::IXMRANGEFLEX">IXMRANGEFLEX</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::AUTOCOMPLETE"></a>
 		<h2>Module AUTOCOMPLETE</h2>
 
 		<h3><b>Description:</b></h3>
@@ -140,29 +4589,31 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 
 		<h3>See Also:</h3>
 		<ul>
-			<li>mindex module</li>
+			<li><a href="#M::MINDEX">MINDEX</a> module</li>
 		</ul>
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>ACADD_UTF8</li>
-			<li>ACDEL_UTF8</li>
-			<li>ACADD_BIN</li>
-			<li>ACDEL_BIN</li>
-			<li>ACRANGE</li>
-			<li>ACRANGEALL</li>
+			<li><a href="#C::ACADD_UTF8">ACADD_UTF8</a></li>
+			<li><a href="#C::ACDEL_UTF8">ACDEL_UTF8</a></li>
+			<li><a href="#C::ACADD_BIN">ACADD_BIN</a></li>
+			<li><a href="#C::ACDEL_BIN">ACDEL_BIN</a></li>
+			<li><a href="#C::ACRANGE">ACRANGE</a></li>
+			<li><a href="#C::ACRANGEALL">ACRANGEALL</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="ACADD_UTF8">
+			<a name="C::ACADD_UTF8"></a>
 			<h4>ACADD_UTF8</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACADD_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
 			</table>
 
@@ -194,18 +4645,21 @@ Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>ACADD_BIN</li>
+				<li><a href="#C::ACADD_BIN">ACADD_BIN</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="ACDEL_UTF8">
+			<a name="C::ACDEL_UTF8"></a>
 			<h4>ACDEL_UTF8</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACDEL_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
 			</table>
 
@@ -241,18 +4695,21 @@ Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>ACDEL_BIN</li>
+				<li><a href="#C::ACDEL_BIN">ACDEL_BIN</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="ACADD_BIN">
+			<a name="C::ACADD_BIN"></a>
 			<h4>ACADD_BIN</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACADD_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
 			</table>
 
@@ -280,18 +4737,21 @@ UTF8 etc will not works correctly.<br />
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>ACADD_UTF8</li>
+				<li><a href="#C::ACADD_UTF8">ACADD_UTF8</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="ACDEL_BIN">
+			<a name="C::ACDEL_BIN"></a>
 			<h4>ACDEL_BIN</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACDEL_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>True				</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
 			</table>
 
@@ -324,11 +4784,14 @@ UTF8 etc will not works correctly.<br />
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>ACDEL_UTF8</li>
+				<li><a href="#C::ACDEL_UTF8">ACDEL_UTF8</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="ACRANGE">
+			<a name="C::ACRANGE"></a>
 			<h4>ACRANGE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACRANGE		</td></tr>
@@ -384,11 +4847,14 @@ Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>ACRANGEALL</li>
+				<li><a href="#C::ACRANGEALL">ACRANGEALL</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="ACRANGEALL">
+			<a name="C::ACRANGEALL"></a>
 			<h4>ACRANGEALL</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACRANGEALL		</td></tr>
@@ -441,10 +4907,13 @@ Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>ACRANGE</li>
+				<li><a href="#C::ACRANGE">ACRANGE</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
+		<a name="M::MURMUR"></a>
 		<h2>Module MURMUR</h2>
 
 		<h3><b>Description:</b></h3>
@@ -488,12 +4957,14 @@ This is particularly useful for:</p>
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>MURMUR</li>
+			<li><a href="#C::MURMUR">MURMUR</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="MURMUR">
+			<a name="C::MURMUR"></a>
 			<h4>MURMUR</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MURMUR		</td></tr>
@@ -536,7 +5007,10 @@ Very useful for debugging.<br />
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
+		<a name="M::RANDOM"></a>
 		<h2>Module RANDOM</h2>
 
 		<h3><b>Description:</b></h3>
@@ -595,13 +5069,15 @@ Use RANDOM without arguments when you simply need a single pseudo-random value.<
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>RANDOM</li>
-			<li>MRANDOM</li>
+			<li><a href="#C::RANDOM">RANDOM</a></li>
+			<li><a href="#C::MRANDOM">MRANDOM</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="RANDOM">
+			<a name="C::RANDOM"></a>
 			<h4>RANDOM</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RANDOM		</td></tr>
@@ -651,11 +5127,14 @@ The output type is int or string, depending if the result can fit in int64 or no
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>MRANDOM</li>
+				<li><a href="#C::MRANDOM">MRANDOM</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="MRANDOM">
+			<a name="C::MRANDOM"></a>
 			<h4>MRANDOM</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MRANDOM		</td></tr>
@@ -704,10 +5183,13 @@ The output type is int or string, depending if the result can fit in int64 or no
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>RANDOM</li>
+				<li><a href="#C::RANDOM">RANDOM</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
+		<a name="M::INFO"></a>
 		<h2>Module INFO</h2>
 
 		<h3><b>Description:</b></h3>
@@ -718,26 +5200,28 @@ The output type is int or string, depending if the result can fit in int64 or no
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>INFO</li>
-			<li>DBSIZE</li>
-			<li>DBSIZEMUTABLE</li>
-			<li>VERSION</li>
-			<li>MAXKEYSIZE</li>
-			<li>MAXVALSIZE</li>
-			<li>PING</li>
-			<li>ECHO</li>
-			<li>TIME</li>
+			<li><a href="#C::INFO">INFO</a></li>
+			<li><a href="#C::DBSIZE">DBSIZE</a></li>
+			<li><a href="#C::DBSIZEMUTABLE">DBSIZEMUTABLE</a></li>
+			<li><a href="#C::VERSION">VERSION</a></li>
+			<li><a href="#C::MAXKEYSIZE">MAXKEYSIZE</a></li>
+			<li><a href="#C::MAXVALSIZE">MAXVALSIZE</a></li>
+			<li><a href="#C::PING">PING</a></li>
+			<li><a href="#C::ECHO">ECHO</a></li>
+			<li><a href="#C::TIME">TIME</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="INFO">
+			<a name="C::INFO"></a>
 			<h4>INFO</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>INFO		</td></tr>
 				<tr><td>Available since		</td><td>1.0.0	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -787,14 +5271,17 @@ PID              : 745140
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="DBSIZE">
+			<a name="C::DBSIZE"></a>
 			<h4>DBSIZE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>DBSIZE		</td></tr>
 				<tr><td>Available since		</td><td>1.2.18	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -819,14 +5306,17 @@ PID              : 745140
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="DBSIZEMUTABLE">
+			<a name="C::DBSIZEMUTABLE"></a>
 			<h4>DBSIZEMUTABLE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>DBSIZEMUTABLE		</td></tr>
 				<tr><td>Available since		</td><td>1.2.18	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -851,14 +5341,17 @@ PID              : 745140
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="VERSION">
+			<a name="C::VERSION"></a>
 			<h4>VERSION</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VERSION		</td></tr>
 				<tr><td>Available since		</td><td>1.2.16	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -883,14 +5376,17 @@ PID              : 745140
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="MAXKEYSIZE">
+			<a name="C::MAXKEYSIZE"></a>
 			<h4>MAXKEYSIZE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MAXKEYSIZE		</td></tr>
 				<tr><td>Available since		</td><td>1.2.30	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -918,17 +5414,20 @@ PID              : 745140
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>MAXVALSIZE</li>
+				<li><a href="#C::MAXVALSIZE">MAXVALSIZE</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="MAXVALSIZE">
+			<a name="C::MAXVALSIZE"></a>
 			<h4>MAXVALSIZE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MAXVALSIZE		</td></tr>
 				<tr><td>Available since		</td><td>1.2.30	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -956,17 +5455,20 @@ PID              : 745140
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>MAXKEYSIZE</li>
+				<li><a href="#C::MAXKEYSIZE">MAXKEYSIZE</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="PING">
+			<a name="C::PING"></a>
 			<h4>PING</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>PING		</td></tr>
 				<tr><td>Available since		</td><td>1.2.16	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -991,14 +5493,17 @@ pong
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="ECHO">
+			<a name="C::ECHO"></a>
 			<h4>ECHO</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ECHO		</td></tr>
 				<tr><td>Available since		</td><td>1.2.16	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -1023,14 +5528,17 @@ pong
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="TIME">
+			<a name="C::TIME"></a>
 			<h4>TIME</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>TIME		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.5	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>INFO	</td></tr>
 			</table>
 
@@ -1056,8 +5564,11 @@ pong
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
-		<h2>Module COMPAT</h2>
+		<a name="M::RELOAD"></a>
+		<h2>Module RELOAD</h2>
 
 		<h3><b>Description:</b></h3>
 		<blockquote><p>This module provides command for controlling memtable.</p>
@@ -1067,21 +5578,23 @@ pong
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>LISTMAINTAINANCE</li>
-			<li>SAVE</li>
-			<li>RELOAD</li>
+			<li><a href="#C::LISTMAINTAINANCE">LISTMAINTAINANCE</a></li>
+			<li><a href="#C::SAVE">SAVE</a></li>
+			<li><a href="#C::RELOAD">RELOAD</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="LISTMAINTAINANCE">
+			<a name="C::LISTMAINTAINANCE"></a>
 			<h4>LISTMAINTAINANCE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>LISTMAINTAINANCE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.5.3	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
-				<tr><td>Module			</td><td>COMPAT	</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>RELOAD	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -1100,15 +5613,18 @@ Very useful if crontab list maintainance is disabled.<br />
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="SAVE">
+			<a name="C::SAVE"></a>
 			<h4>SAVE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SAVE		</td></tr>
 				<tr><td>Available since		</td><td>1.0.0	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
-				<tr><td>Module			</td><td>COMPAT	</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>RELOAD	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -1133,18 +5649,21 @@ Tthis is no-op on immutable servers.<br />
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>RELOAD</li>
+				<li><a href="#C::RELOAD">RELOAD</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="RELOAD">
+			<a name="C::RELOAD"></a>
 			<h4>RELOAD</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RELOAD		</td></tr>
 				<tr><td>Available since		</td><td>1.0.0	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
-				<tr><td>Module			</td><td>COMPAT	</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>RELOAD	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -1164,10 +5683,13 @@ This command is used when disktable(s) are updated or replaced from an external 
 
 			<h4>See Also:</h4>
 			<ul>
-				<li>SAVE</li>
+				<li><a href="#C::SAVE">SAVE</a></li>
 			</ul>
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
+		<a name="M::COMPAT"></a>
 		<h2>Module COMPAT</h2>
 
 		<h3><b>Description:</b></h3>
@@ -1179,21 +5701,23 @@ This command is used when disktable(s) are updated or replaced from an external 
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>SELECT</li>
-			<li>RESET</li>
-			<li>TYPE</li>
-			<li>TOUCH</li>
+			<li><a href="#C::SELECT">SELECT</a></li>
+			<li><a href="#C::RESET">RESET</a></li>
+			<li><a href="#C::TYPE">TYPE</a></li>
+			<li><a href="#C::TOUCH">TOUCH</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="SELECT">
+			<a name="C::SELECT"></a>
 			<h4>SELECT</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SELECT		</td></tr>
 				<tr><td>Available since		</td><td>1.2.16	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>COMPAT	</td></tr>
 			</table>
 
@@ -1213,14 +5737,17 @@ Does not do anything.<br />
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="RESET">
+			<a name="C::RESET"></a>
 			<h4>RESET</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RESET		</td></tr>
 				<tr><td>Available since		</td><td>1.2.18	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>COMPAT	</td></tr>
 			</table>
 
@@ -1240,14 +5767,17 @@ Does not do anything.<br />
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="TYPE">
+			<a name="C::TYPE"></a>
 			<h4>TYPE</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>TYPE		</td></tr>
 				<tr><td>Available since		</td><td>1.2.16	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>COMPAT	</td></tr>
 			</table>
 
@@ -1263,20 +5793,23 @@ Does not do anything.<br />
 			<blockquote>string</blockquote>
 
 			<h4>Return value:</h4>
-			<blockquote>always returns text &quot;string&quot;</blockquote>
+			<blockquote>always returns text "string"</blockquote>
 
 
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="TOUCH">
+			<a name="C::TOUCH"></a>
 			<h4>TOUCH</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>TOUCH		</td></tr>
 				<tr><td>Available since		</td><td>1.2.17	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>COMPAT	</td></tr>
 			</table>
 
@@ -1292,13 +5825,16 @@ Does not do anything.<br />
 			<blockquote>int</blockquote>
 
 			<h4>Return value:</h4>
-			<blockquote>always returns text &quot;1&quot;</blockquote>
+			<blockquote>always returns 1</blockquote>
 
 
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
+		<a name="M::SYSTEM"></a>
 		<h2>Module SYSTEM</h2>
 
 		<h3><b>Description:</b></h3>
@@ -1309,19 +5845,21 @@ Does not do anything.<br />
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>EXIT</li>
-			<li>SHUTDOWN</li>
+			<li><a href="#C::EXIT">EXIT</a></li>
+			<li><a href="#C::SHUTDOWN">SHUTDOWN</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="EXIT">
+			<a name="C::EXIT"></a>
 			<h4>EXIT</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>EXIT		</td></tr>
 				<tr><td>Available since		</td><td>1.0.0	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>SYSTEM	</td></tr>
 			</table>
 
@@ -1338,14 +5876,17 @@ Does not do anything.<br />
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 		<div class="cmd" id="SHUTDOWN">
+			<a name="C::SHUTDOWN"></a>
 			<h4>SHUTDOWN</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SHUTDOWN		</td></tr>
 				<tr><td>Available since		</td><td>1.0.0	</td></tr>
 				<tr><td>Redis compatible	</td><td>Y			</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>SYSTEM	</td></tr>
 			</table>
 
@@ -1363,7 +5904,10 @@ SAVE / NOSAVE is not supported yet.<br />
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
+		<a name="M::TEST"></a>
 		<h2>Module TEST</h2>
 
 		<h3><b>Description:</b></h3>
@@ -1375,18 +5919,20 @@ You can safely ignore it.<br />
 
 		<h3>Commands:</h3>
 		<ul>
-			<li>TEST</li>
+			<li><a href="#C::TEST">TEST</a></li>
 		</ul>
 
+		<p><a href="#top">top</a></p>
 		<hr />
 
 		<div class="cmd" id="TEST">
+			<a name="C::TEST"></a>
 			<h4>TEST</h4>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>TEST		</td></tr>
 				<tr><td>Available since		</td><td>1.3.5.1	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
-				<tr><td>Mutable			</td><td>n/a				</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TEST	</td></tr>
 			</table>
 
@@ -1404,6 +5950,8 @@ Command arguments and return type can be changed any time.<br />
 
 
 		</div>
+
+		<p><a href="#top">top</a></p>
 		<hr />
 
 	<h6 align="center">Copyleft 2017 - 2025, Nikolay Mihaylov<br />

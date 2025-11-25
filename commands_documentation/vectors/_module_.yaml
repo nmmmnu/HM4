@@ -1,0 +1,189 @@
+id:          VECTOR
+name:        VECTOR
+
+version:     1.3.14
+
+description: |
+  <p>HM4 can be used as a <b>vector database</b>.
+  Unlike most vector DBs, HM4 <b>stores data on disk</b>, so memory-heavy algorithms like HNSW are impractical.
+  Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Locality-Sensitive Hashing (LSH)</b> (approximate).</p>
+
+  <p><b>Modes of Operation:</b></p>
+  <ul>
+    <li>With FLAT/LSH indexing:		use <i>VADD</i>, <i>VSIMFLAT</i>, <i>VSIMLSH</i>.</li>
+    <li>With user key-only storage:	use <i>VKSET</i>, <i>VKSIMFLAT</i>. In this mode LSH indexing is not available.</li>
+  </ul>
+
+  <p><b>Building a Vector Index (VADD)</b></p>
+  <p>Use <i>VADD</i> to create a vector index.</p>
+  <p><i>Parameters</i>: input dimensionality, stored dimensionality (projection), quantization type, raw vector format, then pairs of <b>BLOB name</b>.</p>
+
+  <p><b>Quantization types:</b></p>
+  <table border="1" class="x">
+    <tr>
+      <th>Flag</th>
+      <th>Quantization</th>
+      <th>Storage Type</th>
+      <th>Bytes</th>
+      <th>Notes</th>
+      <th>Precision loss</th>
+      <th>Disk size of GloVe set</th>
+    </tr>
+    <tr>
+      <td align="center">F</td>
+      <td>None</td>
+      <td>float</td>
+      <td align="right">4</td>
+      <td>No quantization - store values exactly as 32-bit floats</td>
+      <td align="right">0.00 %</td>
+      <td align="right">1,232 MB</td>
+    </tr>
+    <tr>
+      <td align="center">S</td>
+      <td>Q15</td>
+      <td>int16_t</td>
+      <td align="right">2</td>
+      <td>50% space reduction - near-lossless precision</td>
+      <td align="right">~0.01 %</td>
+      <td align="right">660 MB</td>
+    </tr>
+    <tr>
+      <td align="center">I</td>
+      <td>Q7</td>
+      <td>int8_t</td>
+      <td align="right">1</td>
+      <td>75% space reduction - precision good for most workloads</td>
+      <td align="right">~1.00 %</td>
+      <td align="right">374 MB
+    </td>
+    </tr>
+    <tr>
+      <td align="center">B</td>
+      <td>bit</td>
+      <td>bit</td>
+      <td align="right">1/8</td>
+      <td>97% space reduction - precision probably is lost</td>
+      <td align="right">~~~5.00 %</td>
+      <td align="right">124 MB</td>
+    </tr>
+  </table>
+
+  <p><b>Vector types:</b></p>
+  <table border="1" class="x">
+    <tr>
+      <th>Flag</th>
+      <th>Output</th>
+      <th>Byte Order</th>
+    </tr>
+    <tr>
+      <td align="center">H</td>
+      <td>hexadecimal</td>
+      <td>big-endian</td>
+    </tr>
+    <tr>
+      <td align="center">h</td>
+      <td>hexadecimal</td>
+      <td>little-endian</td>
+    </tr>
+    <tr>
+      <td align="center">B</td>
+      <td>binary</td>
+      <td>big-endian</td>
+    </tr>
+    <tr>
+      <td align="center">b</td>
+      <td>binary</td>
+      <td>little-endian</td>
+    </tr>
+  </table>
+
+  <p><b>Searching a Vector Index</b></p>
+
+  <p>Use <i>VSIMFLAT</i> for exact (brute-force) search and <i>VSIMLSH</i> for fast approximate search.</p>
+
+  <p><b>Distance / Similarity Metrics :</b></p>
+  <table border="1" class="x">
+    <tr>
+      <th>Flag</th>
+      <th>Metric Name</th>
+      <th>Range</th>
+      <th>Bit</th>
+      <th>Description</th>
+      <th>When to use</th>
+    </tr>
+    <tr>
+      <td align="center">E</td>
+      <td>Euclidean (L2)</td>
+      <td align="center">0 .. &infin;</td>
+      <td>&nbsp;</td>
+      <td>Standard straight-line distance between two points in Euclidean space.</td>
+      <td>Best for dense, normalized data where overall magnitude matters. It’s the default in many ML applications.</td>
+   </tr>
+    <tr>
+      <td align="center">M</td>
+      <td>Manhattan (L1)</td>
+      <td align="center">0 .. &infin;</td>
+      <td>&nbsp;</td>
+      <td>Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.</td>
+      <td>More robust to outliers; works well when vector components are sparse or vary in only a few dimensions.</td>
+    </tr>
+    <tr>
+      <td align="center">C</td>
+      <td>Cosine</td>
+      <td align="center">0 .. 1</td>
+      <td>&nbsp;</td>
+      <td>Measures the cosine of the angle between two vectors (orientation, not magnitude).</td>
+      <td>Focuses on direction, not magnitude. Ideal for text embeddings or any case where you care about angular similarity rather than size.</td>
+    </tr>
+    <tr>
+      <td align="center">K</td>
+      <td>Canberra</td>
+      <td align="center">0 .. &infin;</td>
+      <td>&nbsp;</td>
+      <td>A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.</td>
+      <td>Useful for sparse data or when small differences in low-value components are important. More sensitive than L1/L2 in those regions.</td>
+    </tr>
+    <tr>
+      <td align="center">B</td>
+      <td>Bit cosine	</td>
+      <td align="center">0 .. 1</td>
+      <td align="center">Yes</td>
+      <td>Works only on bit quantized vectors. Cosine distance for bit vectors.</td>
+      <td>Works only on bit quantized vectors. Very fast.</td>
+    </tr>
+    <tr>
+      <td align="center">H</td>
+      <td>Hamming</td>
+      <td align="center">0 .. 1</td>
+      <td align="center">Yes</td>
+      <td>Works only on bit quantized vectors.</td>
+      <td>Works only on bit quantized vectors. Similar to hamming, but result is "weighted" to be more "human understandable".</td>
+    </tr>
+    <tr>
+      <td align="center">D</td>
+      <td>Dominating</td>
+      <td align="center">0 .. 1</td>
+      <td align="center">Yes</td>
+      <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector.</td>
+      <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector. Ideal for non AI generated vectors.</td>
+    </tr>
+  </table>
+
+  <p><b>Additional Vector Commands</b></p>
+  <ul>
+    <li><i>VREM key name</i>		- remove vector with given key from index.</li>
+    <li><i>VGET key dim type name</i>	- get vector in human-readable form.</li>
+    <li><i>VGETNORMALIZED</i> 		- return normalized vector with magnitude.</li>
+    <li><i>VGETRAW</i>			- get raw binary/hex representation.</li>
+  </ul>
+
+  <p><b>Key-Based Vectors (no LSH)</b></p>
+  <p>Store vectors directly under keys (no index) with <i>VKSET</i> and query with <i>VKSIMFLAT</i> to search over keys sharing a prefix.</p>
+
+  <p><b>Notes & Tips</b></p>
+  <ul>
+    <li>Flat searches are exact but slower; use for small indexes or when accuracy is critical.</li>
+    <li>LSH trades accuracy for speed.</li>
+    <li>Choose distance metric (E, M, C, K, H, B, D) according to data type and semantics.</li>
+  </ul>
+

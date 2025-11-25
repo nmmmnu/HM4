@@ -1,0 +1,153 @@
+id:          HEAVY_HEATERS
+name:        HEAVY HEATERS
+
+version:     1.3.7.7
+
+description: |
+  <p>This module implements simple <b>heavy hitters</b> algorithm,
+  allowing you to track top items in a fixed-size collection efficiently.</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Adding items</b></p>
+  <p>Use the <b>HHINCR</b> (if higer score is better) or <b>HHDECR</b> (if lower score is better) command
+  to add one or more values into the heavy hitters object.
+  The object has a fixed size (<i>hh_count</i>) and each value has a fixed byte size (<i>hh_value_size</i>).</p>
+
+  <p><b>2. Supports fixed-size values</b></p>
+  <p>Each item stored in the heavy hitters has a predefined size (<b>hh_value_size</b>).</p>
+  <p>This keeps the structure compact and guarantees stable memory usage.</p></p>
+
+  <table border="1" class="x">
+    <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+    <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+    <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+    <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+    <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+    <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+    <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  </table>
+
+  <p><b>3. Getting top items</b></p>
+  <p>Use the <b>HHGET</b> command to retrieve the top items and their counts from the object.</p>
+
+  <p><b>Tip:</b> This module is ideal for tracking frequent items in a stream, such as popular searches, tags, or event identifiers.
+  However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have to supply the score. See the examples for some ideas.</p>
+
+example:     |
+  127.0.0.1:6379> del myhh
+  (integer) 1
+  127.0.0.1:6379> hhincr myhh 5 64 google 140 yahoo 34 cloudflare 13 outlook 10 facebook 5
+  (integer) 1
+  127.0.0.1:6379> hhincr myhh 5 64 oracle 55
+  (integer) 1
+  127.0.0.1:6379> hhget myhh 5 64
+   1) "oracle"
+   2) "55"
+   3) "outlook"
+   4) "10"
+   5) "cloudflare"
+   6) "13"
+   7) "yahoo"
+   8) "34"
+   9) "google"
+  10) "140"
+
+  # Getting the count from INCR/DECR
+  # The result is 100% accurate,
+  # but memory usage may be huge,
+  # if you track several items
+
+  127.0.0.1:6379> del myhh
+  (integer) 1
+  127.0.0.1:6379> incr item::google
+  (integer) 140
+  127.0.0.1:6379> hhincr myhh 5 64 google  140
+  (integer) 1
+  127.0.0.1:6379> incr item::facebook
+  (integer) 33
+  127.0.0.1:6379> hhincr myhh 5 64 facebook 33
+  (integer) 1
+  127.0.0.1:6379> incr item::oracle
+  (integer) 55
+  127.0.0.1:6379> hhincr myhh 5 64 oracle   55
+  (integer) 1
+  127.0.0.1:6379> hhget  myhh 5 64
+  1) "oracle"
+  2) "55"
+  3) "facebook"
+  4) "33"
+  5) "google"
+  6) "140"
+
+  # Getting the count from MG (Misra-Gries heavy hitter)
+  # The result is NOT 100% accurate,
+  # but memory usage is constant
+
+  127.0.0.1:6379> del myhh mymg
+  (integer) 1
+  127.0.0.1:6379> mgaddget mymg 5 64 google
+  (integer) 1
+  127.0.0.1:6379> hhincr   myhh 5 64 google 1
+  (integer) 1
+  127.0.0.1:6379> mgaddget mymg 5 64 yahoo
+  (integer) 1
+  127.0.0.1:6379> hhincr   myhh 5 64 yahoo  1
+  (integer) 1
+  127.0.0.1:6379> mgaddget mymg 5 64 google
+  (integer) 2
+  127.0.0.1:6379> hhincr   myhh 5 64 google 2
+  (integer) 1
+  127.0.0.1:6379> mgaddget mymg 5 64 yahoo
+  (integer) 2
+  127.0.0.1:6379> hhincr   myhh 5 64 yahoo  2
+  (integer) 1
+  127.0.0.1:6379> mgaddget mymg 5 64 google
+  (integer) 3
+  127.0.0.1:6379> hhincr   myhh 5 64 google 3
+  (integer) 1
+  127.0.0.1:6379> hhget    myhh 5 64
+  1) "yahoo"
+  2) "2"
+  3) "google"
+  4) "3"
+
+  # Getting the count from CMS (Count Min Sketch)
+  # The result is NOT 100% accurate,
+  # but memory usage is constant
+
+  127.0.0.1:6379> del myhh mycms
+  (integer) 1
+  127.0.0.1:6379> cmsaddcount mycms 1024 8 64 google 1
+  (integer) 1
+  127.0.0.1:6379> hhincr myhh 5 64 google 1
+  (integer) 1
+  127.0.0.1:6379> cmsaddcount mycms 1024 8 64 yahoo  1
+  (integer) 1
+  127.0.0.1:6379> hhincr myhh 5 64 yahoo 1
+  (integer) 1
+  127.0.0.1:6379> cmsaddcount mycms 1024 8 64 google 1
+  (integer) 2
+  127.0.0.1:6379> hhincr myhh 5 64 google 2
+  (integer) 1
+  127.0.0.1:6379> cmsaddcount mycms 1024 8 64 yahoo  1
+  (integer) 2
+  127.0.0.1:6379> hhincr myhh 5 64 yahoo 2
+  (integer) 1
+  127.0.0.1:6379> cmsaddcount mycms 1024 8 64 google 1
+  (integer) 3
+  127.0.0.1:6379> hhincr myhh 5 64 google 3
+  (integer) 1
+  127.0.0.1:6379> hhget  myhh 5 64
+  1) "yahoo"
+  2) "2"
+  3) "google"
+  4) "3"
+
+
+see_also_module:
+  items:
+    - MISRA_GRIES_HEAVY_HEATERS
+
+
+

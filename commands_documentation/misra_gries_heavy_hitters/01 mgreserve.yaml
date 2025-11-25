@@ -1,0 +1,27 @@
+- id:       MGRESERVE
+  name:     MGRESERVE
+  usage:    MGRESERVE key mg_count mg_value_size
+  description: |
+    Create new, empty Misra-Gries heavy hitters object *key* with size *mg_count* and fixed value size of *mg_value_size*.<br />
+    *mg_count* can be from 1 to 200.<br />
+    *mg_value_size* can be:<br />
+    <table border="1" class="x">
+      <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+      <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
+      <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
+      <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
+      <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
+      <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
+      <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+    </table>
+
+  return_type: bool
+  return:      always returns 1
+  version:     1.3.7.8
+  complexity:  READ + WRITE
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> mgreserve myrs 100 32
+    (integer) 1
+
