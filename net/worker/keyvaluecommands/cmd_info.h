@@ -201,6 +201,29 @@ namespace net::worker::commands::Info{
 
 
 	template<class Protocol, class DBAdapter>
+	struct REM : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return result.set();
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"rem",	"REM",
+			"//",	"#",	";"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct TIME : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -243,6 +266,7 @@ namespace net::worker::commands::Info{
 				MAXVALSIZE	,
 				PING		,
 				ECHO		,
+				REM		,
 				TIME
 			>(pack);
 		}
