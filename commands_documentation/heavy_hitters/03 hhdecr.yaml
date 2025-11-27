@@ -1,12 +1,23 @@
 - id:      HHDECR
   name:    HHDECR
   usage:   HHDECR key hh_count hh_value_size value0 count0 [value1 count1]...
+  params:
+    items:
+    - k: key
+      v: name of the heavy hitters object
+    - k: hh_count
+      v: size of the object - sizes from 1 to 200 are supported.
+    - k: hh_value_size
+      v: fixed value size, see the table
+    - k: value*
+      v: value to be inserted
+    - k: count*
+      v: score of the value to be inserted
 
   description: |
-    Add *value0* with score *count0*, *value1* with score *count1*... into the Misra-Gries heavy hitters object *key* with size *hh_count* and fixed value size of *h_value_size*.<br />
-    Bigger values are with higher score.<br />
-    *hh_count* can be from 1 to 200.<br />
-    *hh_value_size* can be:<br />
+    <p>Add *value0* with score *count0*, *value1* with score *count1*... into the hitters object *key*<br />
+    "Better" values are with lower score.</p>
+
     <table border="1" class="x">
       <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
       <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -47,4 +58,4 @@
 
   see_also:
     items:
-      - HHINCR
+    - HHINCR

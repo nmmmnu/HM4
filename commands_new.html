@@ -68,6 +68,22 @@
 	<h2>Modules</h2>
 	<div class="menurow">
 		<div>
+			<a href="#M::MORTONCURVE2D">MORTON CURVE 2D</a>
+			<ul>
+				<li><a href="#C::MC2ADD">MC2ADD</a></li>
+				<li><a href="#C::MC2REM">MC2REM</a></li>
+				<li><a href="#C::MC2GET">MC2GET</a></li>
+				<li><a href="#C::MC2MGET">MC2MGET</a></li>
+				<li><a href="#C::MC2EXISTS">MC2EXISTS</a></li>
+				<li><a href="#C::MC2SCORE">MC2SCORE</a></li>
+				<li><a href="#C::MC2POINT">MC2POINT</a></li>
+				<li><a href="#C::MC2RANGE">MC2RANGE</a></li>
+				<li><a href="#C::MC2RANGENAIVE">MC2RANGENAIVE</a></li>
+				<li><a href="#C::MC2ENCODE">MC2ENCODE</a></li>
+				<li><a href="#C::MC2DECODE">MC2DECODE</a></li>
+			</ul>
+		</div>
+		<div>
 			<a href="#M::HEAVY_HEATERS">HEAVY HEATERS</a>
 			<ul>
 				<li><a href="#C::HHRESERVE">HHRESERVE</a></li>
@@ -108,7 +124,7 @@
 				<li><a href="#C::VKGET">VKGET</a></li>
 				<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
 				<li><a href="#C::VGETRAW">VGETRAW</a></li>
-				<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+				<li><a href="#C::VKSIMFLAT">VKSIMFLAT</a></li>
 			</ul>
 		</div>
 		<div>
@@ -197,6 +213,920 @@
 	</div>
 	<hr />
 
+		<a name="M::MORTONCURVE2D"></a>
+		<h2>Module MORTON CURVE 2D</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote>
+<p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
+This structure allows you to store and query points in 2D by mapping them into a single sortable integer using bit interleaving.</p>
+<p>Coordinates are uint32_t, indexes type are uint64_t</p>
+<p>The result is a fast, disk-friendly spatial index suitable for filtering and range searches.</p>
+<p><b>General Concept</b></p>
+<ul>
+  <li>You insert a point with some coordinates.</li>
+  <li>The module computes the Morton key by interleaving bits.</li>
+  <li>All points are stored in sorted order by their Morton code.</li>
+  <li>Queries operate by converting coordinates or ranges into corresponding Morton code intervals</li>
+</ul>
+<p>All MC commands share the same pattern:
+MC{n}{op}<br />
+Where:</p>
+<ul>
+  <li><b>n</b> = number of dimensions (2, 3, 4, 8, 16)</li>
+  <li><b>op</b> = operation: <b>ADD</b>, <b>POINT</b>, <b>RANGE</b>, etc.</li>
+</ul>
+<p><b>Notes</b></p>
+<ul>
+  <li>Morton curves preserve spatial locality well, making disk-based range lookups efficient.</li>
+  <li>POINT = optimized mode when all dimensions are exact values.</li>
+  <li>RANGE = full multidimensional "rectangle".</li>
+  <li>Coordinates are uint32_t</li>
+  <li>Lndexes type are uint64_t</li>
+</ul>
+
+<p>Suppose we have a company with two offices in:</p>
+<ul>
+  <li>LA  = 1</li>
+  <li>NYC = 2</li>
+</ul>
+
+<p>Each office have two kind of employees:</p>
+<ul>
+  <li>sales   = 1</li>
+  <li>support = 2</li>
+</ul>
+
+<pre class="x">
+mc2add users 0 1 1 john   <- adds user_id 0, john,   sales,   LA
+mc2add users 1 1 1 peter  <- adds user_id 1, peter,  sales,   LA
+mc2add users 2 2 1 jill   <- adds user_id 2, jill,   support, LA
+mc2add users 3 1 2 robert <- adds user_id 3, robert, sales,   NYC
+mc2add users 4 2 2 pola   <- adds user_id 4, pola,   support, NYC
+mc2add users 5 2 2 pepe   <- adds user_id 5, pepe,   support, NYC
+mc2point users 2 2 10000  <- gets all support from LA (pola, pepe)
+</pre>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
+Error: Broken pipe
+127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
+OK
+127.0.0.1:6379&gt; MC2ADD users 1 1 1 peter
+OK
+127.0.0.1:6379&gt; MC2ADD users 2 2 1 jill
+OK
+127.0.0.1:6379&gt; MC2ADD users 3 1 2 robert
+OK
+127.0.0.1:6379&gt; MC2ADD users 4 2 2 pola
+OK
+127.0.0.1:6379&gt; MC2ADD users 5 2 2 pepe
+OK
+127.0.0.1:6379&gt; MC2POINT users 2 2 10000
+1) &quot;0000000002,0000000002,00000000&quot;
+2) &quot;pola&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 2 2 2 2 10000
+1) &quot;0000000002,0000000002,00000000&quot;
+2) &quot;pola&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 2 2 1 2 10000
+1) &quot;0000000002,0000000001,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pola&quot;
+5) &quot;0000000002,0000000002,00000002&quot;
+6) &quot;pepe&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 1 2 2 2 10000
+1) &quot;0000000001,0000000002,00000000&quot;
+2) &quot;robert&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pola&quot;
+5) &quot;0000000002,0000000002,00000002&quot;
+6) &quot;pepe&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 1 2 1 2 10000
+ 1) &quot;0000000001,0000000001,00000000&quot;
+ 2) &quot;john&quot;
+ 3) &quot;0000000001,0000000001,00000001&quot;
+ 4) &quot;peter&quot;
+ 5) &quot;0000000002,0000000001,00000002&quot;
+ 6) &quot;jill&quot;
+ 7) &quot;0000000001,0000000002,00000003&quot;
+ 8) &quot;robert&quot;
+ 9) &quot;0000000002,0000000002,00000004&quot;
+10) &quot;pola&quot;
+11) &quot;0000000002,0000000002,00000005&quot;
+12) &quot;pepe&quot;
+13) &quot;&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::linearcurve">linearcurve</a> module</li>
+			<li><a href="#M::mortoncurve3d">mortoncurve3d</a> module</li>
+			<li><a href="#M::mortoncurve4d">mortoncurve4d</a> module</li>
+			<li><a href="#M::mortoncurve8d">mortoncurve8d</a> module</li>
+			<li><a href="#M::mortoncurve16d">mortoncurve16d</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MC2ADD">MC2ADD</a></li>
+			<li><a href="#C::MC2REM">MC2REM</a></li>
+			<li><a href="#C::MC2GET">MC2GET</a></li>
+			<li><a href="#C::MC2MGET">MC2MGET</a></li>
+			<li><a href="#C::MC2EXISTS">MC2EXISTS</a></li>
+			<li><a href="#C::MC2SCORE">MC2SCORE</a></li>
+			<li><a href="#C::MC2POINT">MC2POINT</a></li>
+			<li><a href="#C::MC2RANGE">MC2RANGE</a></li>
+			<li><a href="#C::MC2RANGENAIVE">MC2RANGENAIVE</a></li>
+			<li><a href="#C::MC2ENCODE">MC2ENCODE</a></li>
+			<li><a href="#C::MC2DECODE">MC2DECODE</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MC2ADD">
+			<a name="C::MC2ADD"></a>
+			<h4>MC2ADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2ADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2ADD key key_sub0 x0 y0 val0 [key_sub1 x1 y1 val1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key.</td>
+				</tr>
+				<tr>
+					<td>x0, y0</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint64_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *x0*, *y0* into Morton Curve 2D index *key*, with *sub_key0*, value *value0*.<br />
+Insert *x1*, *y1* into Morton Curve 2D index *key*, with *sub_key1*, value *value1*.<br />
+...<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD mymc2d boston 0 5 boston_data rome 0 6 rome_data sofia 1 7 sofia_data
+OK
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2REM">
+			<a name="C::MC2REM"></a>
+			<h4>MC2REM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2REM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2REM key key_sub0 [key_sub1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *key_sub0*, *key_sub1*... from Morton Curve 2D index *key*.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>MC2REMOVE</li>
+				<li>MC2DEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD mymc2d boston 0 5 boston_data rome 0 6 rome_data sofia 1 7 sofia_data
+OK
+127.0.0.1:6379&gt; MC2DEL mymc2d rome sofia
+(integer) 1
+127.0.0.1:6379&gt; xnget mymc2d~ 10 mymc2d~
+1) &quot;mymc2d~0000000000000022~boston&quot;
+2) &quot;boston_data&quot;
+3) &quot;mymc2d~~boston&quot;
+4) &quot;0000000000000022&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2GET">
+			<a name="C::MC2GET"></a>
+			<h4>MC2GET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2GET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2GET key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key* from Morton Curve 2D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD mymc2d boston 0 5 boston_data rome 0 6 rome_data sofia 1 7 sofia_data
+OK
+127.0.0.1:6379&gt; MC2GET mymc2d rome
+&quot;rome_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2MGET">MC2MGET</a></li>
+				<li><a href="#C::MC2EXISTS">MC2EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2MGET">
+			<a name="C::MC2MGET"></a>
+			<h4>MC2MGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2MGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2MGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key0*, *sub_key1* ... from Morton Curve 2D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD mymc2d boston 0 5 boston_data rome 0 6 rome_data sofia 1 7 sofia_data
+OK
+127.0.0.1:6379&gt; MC2MGET mymc2d rome sofia london boston
+1) &quot;rome_data&quot;
+2) &quot;sofia_data&quot;
+3) &quot;&quot;
+4) &quot;boston_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2GET">MC2GET</a></li>
+				<li><a href="#C::MC2EXISTS">MC2EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2EXISTS">
+			<a name="C::MC2EXISTS"></a>
+			<h4>MC2EXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2EXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2EXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of *sub_key* from Morton Curve 2D index *key* exists.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD mymc2d boston 0 5 boston_data rome 0 6 rome_data sofia 1 7 sofia_data
+OK
+127.0.0.1:6379&gt; MC2EXISTS mymc2d rome
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2GET">MC2GET</a></li>
+				<li><a href="#C::MC2MGET">MC2MGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2SCORE">
+			<a name="C::MC2SCORE"></a>
+			<h4>MC2SCORE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2SCORE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2SCORE key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get indexes for *sub_key* from Morton Curve 2D index *key*.<br />
+Coordinates are uint32_t, indexes type are uint64_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>x, y or empty</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD mymc2d boston 0 5 boston_data rome 0 6 rome_data sofia 1 7 sofia_data
+OK
+127.0.0.1:6379&gt; MC2SCORE mymc2d rome
+1) &quot;0&quot;
+2) &quot;6&quot;
+127.0.0.1:6379&gt; MC2SCORE mymc2d london
+1) &quot;&quot;
+2) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2POINT">
+			<a name="C::MC2POINT"></a>
+			<h4>MC2POINT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2POINT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2POINT key x y count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>x, y</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint64_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 2D index *key*, that are in the "point" with "coordinates" *x*, *y*.<br />
+... or ...<br />
+In other words, get all vectors from Morton Curve 2D index *key*, that have elements { *x*, *y* }.</p>
+
+<p>This command is way faster than MC2RANGE.</p>
+
+<p><b>Example usage:</b></p>
+
+<p>Suppose we have a company with two offices in:</p>
+<ul>
+  <li>LA = 1</li>
+  <li>NY = 2</li>
+</ul>
+
+<p>Each office have two kind of employees:</p>
+<ul>
+  <li>sales   = 1</li>
+  <li>support = 2</li>
+</ul>
+
+<pre class="x">
+mc2add users 0 1 1 john   <- adds user_id 0, john,   sales,   LA
+mc2add users 1 1 1 peter  <- adds user_id 1, peter,  sales,   LA
+mc2add users 2 2 1 jill   <- adds user_id 2, jill,   support, LA
+mc2add users 3 1 2 robert <- adds user_id 3, robert, sales,   NY
+mc2add users 4 2 2 pola   <- adds user_id 4, pola,   support, NY
+mc2add users 5 2 2 pepe   <- adds user_id 5, pepe,   support, NY
+mc2point users 2 2 10000  <- gets all support from LA (pola, pepe)
+</pre>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
+Error: Broken pipe
+127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
+OK
+127.0.0.1:6379&gt; MC2ADD users 1 1 1 peter
+OK
+127.0.0.1:6379&gt; MC2ADD users 2 2 1 jill
+OK
+127.0.0.1:6379&gt; MC2ADD users 3 1 2 robert
+OK
+127.0.0.1:6379&gt; MC2ADD users 4 2 2 pola
+OK
+127.0.0.1:6379&gt; MC2ADD users 5 2 2 pepe
+OK
+127.0.0.1:6379&gt; MC2POINT users 2 2 10000
+1) &quot;0000000002,0000000002,00000000&quot;
+2) &quot;pola&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x = [x] and
+  y = [y]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2RANGE">MC2RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2RANGE">
+			<a name="C::MC2RANGE"></a>
+			<h4>MC2RANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2RANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2RANGE key x_min x_max y_min y_max count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 2D object</td>
+				</tr>
+				<tr>
+					<td>x_min, x_max, y_min, y_max</td>
+					<td>ranges of the coordinates of the stored point / ranges of the elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint64_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 2D index *key*, that are in the "rectangle" *x_min* to *x_max*, *y_min* to *y_max*.</p>
+
+<p>This command is way slower than MC2RANGE.</p>
+
+<p><b>Example usage:</b></p>
+
+<p>Suppose we have a company with two offices in:</p>
+<ul>
+  <li>LA  = 1</li>
+  <li>NY = 2</li>
+</ul>
+
+<p>Each office have two kind of employees:</p>
+<ul>
+  <li>sales   = 1</li>
+  <li>support = 2</li>
+</ul>
+
+<pre class="x">
+mc2add users 0 1 1 john      <- adds user_id 0, john,   sales,   LA
+mc2add users 1 1 1 peter     <- adds user_id 1, peter,  sales,   LA
+mc2add users 2 2 1 jill      <- adds user_id 2, jill,   support, LA
+mc2add users 3 1 2 robert    <- adds user_id 3, robert, sales,   NY
+mc2add users 4 2 2 pola      <- adds user_id 4, pola,   support, NY
+mc2add users 5 2 2 pepe      <- adds user_id 5, pepe,   support, NY
+mc2point users 2 2 10000     <- gets all support from LA               (pola, pepe)
+mc2point users 2 2 10000     <- gets all support from LA               (pola, pepe)
+mc2range users 2 2 2 2 10000 <- gets all support from LA               (pola, pepe) - same as previous, but slower.
+mc2range users 2 2 1 2 10000 <- gets support from LA and NY            (jill, pola, pepe)
+mc2range users 1 2 2 2 10000 <- gets sales and support from LA         (robert, pola, pepe)
+mc2range users 1 2 1 2 10000 <- gets sales and support from LA and NY  (all)
+</pre>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
+Error: Broken pipe
+127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
+OK
+127.0.0.1:6379&gt; MC2ADD users 1 1 1 peter
+OK
+127.0.0.1:6379&gt; MC2ADD users 2 2 1 jill
+OK
+127.0.0.1:6379&gt; MC2ADD users 3 1 2 robert
+OK
+127.0.0.1:6379&gt; MC2ADD users 4 2 2 pola
+OK
+127.0.0.1:6379&gt; MC2ADD users 5 2 2 pepe
+OK
+127.0.0.1:6379&gt; MC2POINT users 2 2 10000
+1) &quot;0000000002,0000000002,00000000&quot;
+2) &quot;pola&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 2 2 2 2 10000
+1) &quot;0000000002,0000000002,00000000&quot;
+2) &quot;pola&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 2 2 1 2 10000
+1) &quot;0000000002,0000000001,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pola&quot;
+5) &quot;0000000002,0000000002,00000002&quot;
+6) &quot;pepe&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 1 2 2 2 10000
+1) &quot;0000000001,0000000002,00000000&quot;
+2) &quot;robert&quot;
+3) &quot;0000000002,0000000002,00000001&quot;
+4) &quot;pola&quot;
+5) &quot;0000000002,0000000002,00000002&quot;
+6) &quot;pepe&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; MC2RANGE users 1 2 1 2 10000
+ 1) &quot;0000000001,0000000001,00000000&quot;
+ 2) &quot;john&quot;
+ 3) &quot;0000000001,0000000001,00000001&quot;
+ 4) &quot;peter&quot;
+ 5) &quot;0000000002,0000000001,00000002&quot;
+ 6) &quot;jill&quot;
+ 7) &quot;0000000001,0000000002,00000003&quot;
+ 8) &quot;robert&quot;
+ 9) &quot;0000000002,0000000002,00000004&quot;
+10) &quot;pola&quot;
+11) &quot;0000000002,0000000002,00000005&quot;
+12) &quot;pepe&quot;
+13) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x &gt;= [x_min] and x &lt;= [x_max] and
+  y &gt;= [y_min] and y &lt;= [y_max]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2POINT">MC2POINT</a></li>
+				<li><a href="#C::MC2RANGENAIVE">MC2RANGENAIVE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2RANGENAIVE">
+			<a name="C::MC2RANGENAIVE"></a>
+			<h4>MC2RANGENAIVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2RANGENAIVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2RANGENAIVE key x_min z_max y_min y_max count start</blockquote>
+
+
+			<h4>Description:</h4>
+			<blockquote>Naive, non performant version of MC2RANGE
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2RANGE">MC2RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2ENCODE">
+			<a name="C::MC2ENCODE"></a>
+			<h4>MC2ENCODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2ENCODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2ENCODE x y</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>x, y</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint64_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Encode coordinates *x*, *y* into Morton Curve 2D hex index.<br />
+Coordinates are uint32_t, indexes type are uint64_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>hex index</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ENCODE 5 23
+&quot;000000000000023b&quot;
+127.0.0.1:6379&gt; MC2DECODE 23b
+1) &quot;5&quot;
+2) &quot;23&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2DECODE">MC2DECODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC2DECODE">
+			<a name="C::MC2DECODE"></a>
+			<h4>MC2DECODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC2DECODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC2DECODE hex</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>hex</td>
+					<td>Morton Curve index value. Coordinates are uint32_t, Morton Curve index is uint64_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Decode coordinates *x*, *y* into Morton Curve 2D hex index.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>coordinates</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ENCODE 5 23
+&quot;000000000000023b&quot;
+127.0.0.1:6379&gt; MC2DECODE 000000000000023b
+1) &quot;5&quot;
+2) &quot;23&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC2DECODE 23b
+1) &quot;5&quot;
+2) &quot;23&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC2ENCODE">MC2ENCODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
 		<a name="M::HEAVY_HEATERS"></a>
 		<h2>Module HEAVY HEATERS</h2>
 
@@ -374,10 +1304,27 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 			<h4>Usage:</h4>
 			<blockquote>HHRESERVE key hh_count hh_value_size</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>hh_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Create new, empty heavy hitters object *key* with size *hh_count* and fixed value size of *hh_value_size*.<br />
-*mg_count* can be from 1 to 200.<br />
-*mg_value_size* can be:<br />
+			<blockquote><p>Create new, empty heavy hitters object *key*</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -421,11 +1368,36 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 			<h4>Usage:</h4>
 			<blockquote>HHINCR key hh_count hh_value_size value0 count0 [value1 count1]...</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>hh_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+				<tr>
+					<td>value*</td>
+					<td>value to be inserted</td>
+				</tr>
+				<tr>
+					<td>count*</td>
+					<td>score of the value to be inserted</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Add *value0* with score *count0*, *value1* with score *count1*... into the Misra-Gries heavy hitters object *key* with size *hh_count* and fixed value size of *h_value_size*.<br />
-Bigger values are with higher score.<br />
-*hh_count* can be from 1 to 200.<br />
-*hh_value_size* can be:<br />
+			<blockquote><p>Add *value0* with score *count0*, *value1* with score *count1*... into the hitters object *key*<br />
+"Better" values are with higher score.</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -490,11 +1462,36 @@ Bigger values are with higher score.<br />
 			<h4>Usage:</h4>
 			<blockquote>HHDECR key hh_count hh_value_size value0 count0 [value1 count1]...</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>hh_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+				<tr>
+					<td>value*</td>
+					<td>value to be inserted</td>
+				</tr>
+				<tr>
+					<td>count*</td>
+					<td>score of the value to be inserted</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Add *value0* with score *count0*, *value1* with score *count1*... into the Misra-Gries heavy hitters object *key* with size *hh_count* and fixed value size of *h_value_size*.<br />
-Bigger values are with higher score.<br />
-*hh_count* can be from 1 to 200.<br />
-*hh_value_size* can be:<br />
+			<blockquote><p>Add *value0* with score *count0*, *value1* with score *count1*... into the hitters object *key*<br />
+"Better" values are with lower score.</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -559,10 +1556,27 @@ Bigger values are with higher score.<br />
 			<h4>Usage:</h4>
 			<blockquote>HHGET key hh_count hh_value_size</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>hh_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get top results from the heavy hitters object *key* with size *hh_count* and fixed value size of *hh_value_size*.<br />
-*hh_count* can be from 1 to 200.<br />
-*hh_value_size* can be:<br />
+			<blockquote><p>Get top results from the heavy hitters object *key*</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -700,10 +1714,27 @@ This allows you to track frequency while inserting.</p>
 			<h4>Usage:</h4>
 			<blockquote>MGRESERVE key mg_count mg_value_size</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Misra-Gries heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>mg_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Create new, empty Misra-Gries heavy hitters object *key* with size *mg_count* and fixed value size of *mg_value_size*.<br />
-*mg_count* can be from 1 to 200.<br />
-*mg_value_size* can be:<br />
+			<blockquote><p>Create new, empty Misra-Gries heavy hitters object *key*.</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -747,10 +1778,31 @@ This allows you to track frequency while inserting.</p>
 			<h4>Usage:</h4>
 			<blockquote>MGADD key mg_count mg_value_size value0 [value1]...</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Misra-Gries heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>mg_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+				<tr>
+					<td>value0</td>
+					<td>value to be added in the object</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Add *value0*, *value1*... into the Misra-Gries heavy hitters object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-*mg_count* can be from 1 to 200.<br />
-*mg_value_size* can be:<br />
+			<blockquote><p>Add *value0*, *value1*... into the Misra-Gries heavy hitters object *key*:</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -825,10 +1877,31 @@ This allows you to track frequency while inserting.</p>
 			<h4>Usage:</h4>
 			<blockquote>MGADDGET key mg_count mg_value_size value</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Misra-Gries heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>mg_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>value to be added in the object</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Add *value*... into the Misra-Gries heavy hitters object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-*mg_count* can be from 1 to 200.<br />
-*mg_value_size* can be:<br />
+			<blockquote><p>Add *value*... into the Misra-Gries heavy hitters object *key*.</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -893,10 +1966,27 @@ score of the item = if the item is qualified for insert
 			<h4>Usage:</h4>
 			<blockquote>MGGET key mg_count mg_value_size</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Misra-Gries heavy hitters object</td>
+				</tr>
+				<tr>
+					<td>mg_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>hh_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get top results from the Misra-Gries heavy hitters object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-*mg_count* can be from 1 to 200.<br />
-*mg_value_size* can be:<br />
+			<blockquote><p>Get top results from the Misra-Gries heavy hitters object *key*.</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -1042,10 +2132,27 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<h4>Usage:</h4>
 			<blockquote>RSRESERVE key rs_count rs_value_size</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the reservoir sampling object</td>
+				</tr>
+				<tr>
+					<td>rs_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>rs_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Create new, empty reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-*rs_count* can be from 1 to 4096.<br />
-*rs_value_size* can be:<br />
+			<blockquote><p>Create new, empty reservoir sampling object *key*</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -1089,10 +2196,31 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<h4>Usage:</h4>
 			<blockquote>RSADD key rs_count rs_value_size value0 [value1]...</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the reservoir sampling object</td>
+				</tr>
+				<tr>
+					<td>rs_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>rs_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+				<tr>
+					<td>value0</td>
+					<td>value to be added</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Add *value0*, *value1*... into the reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-*rs_count* can be from 1 to 4096.<br />
-*rs_value_size* can be:<br />
+			<blockquote><p>Add *value0*, *value1*... into the reservoir sampling object *key*</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -1152,10 +2280,27 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<h4>Usage:</h4>
 			<blockquote>RSGET key rs_count rs_value_size</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the reservoir sampling object</td>
+				</tr>
+				<tr>
+					<td>rs_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>rs_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Collect samples from the reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-*rs_count* can be from 1 to 4096.<br />
-*rs_value_size* can be:<br />
+			<blockquote><p>Collect samples from the reservoir sampling object *key*</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -1213,10 +2358,27 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<h4>Usage:</h4>
 			<blockquote>RSGETCOUNT key rs_count rs_value_size</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the reservoir sampling object</td>
+				</tr>
+				<tr>
+					<td>rs_count</td>
+					<td>size of the object - sizes from 1 to 200 are supported.</td>
+				</tr>
+				<tr>
+					<td>rs_value_size</td>
+					<td>fixed value size, see the table</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Collect the count of insertions in the reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-*rs_count* can be from 1 to 4096.<br />
-*rs_value_size* can be:<br />
+			<blockquote><p>Collect the count of insertions in the reservoir sampling object *key*</p>
+
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
   <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -1462,7 +2624,7 @@ Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Localit
 			<li><a href="#C::VKGET">VKGET</a></li>
 			<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
 			<li><a href="#C::VGETRAW">VGETRAW</a></li>
-			<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+			<li><a href="#C::VKSIMFLAT">VKSIMFLAT</a></li>
 		</ul>
 
 		<p><a href="#top">top</a></p>
@@ -1483,18 +2645,42 @@ Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Localit
 			<h4>Usage:</h4>
 			<blockquote>VADD key dim_vec dim_ix quantize_type raw_vector_type BLOB0 name0 [BLOB1  name1]...</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>dim_vec</td>
+					<td>dimention of the vector (stored inside the *BLOB*)</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>raw_vector_type</td>
+					<td>type of the vector (stored inside the *BLOB*), see the table below</td>
+				</tr>
+				<tr>
+					<td>BLOB</td>
+					<td>vector values</td>
+				</tr>
+				<tr>
+					<td>name</td>
+					<td>vector name</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
 			<blockquote>Add the *BLOB0* as *name0*, *BLOB1* as *name1*... into the index *key*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
-  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
-  <li>*BLOB*		- vector values.</li>
-  <li>*name*		- vector name.</li>
-</ul>
 
 Quantization types:
 <table border="1" class="x">
@@ -1657,10 +2843,24 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 			</table>
 
 			<h4>Usage:</h4>
-			<blockquote>VREM key name0 [name1]...</blockquote>
+			<blockquote>VREM key key_sub0 [key_sub1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>key_sub*</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
 
 			<h4>Description:</h4>
-			<blockquote>Remove *name0*, *name1*... from the index *key*.<br />
+			<blockquote>Remove *key_sub*, *key_sub*... from the index *key*.<br />
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -1700,15 +2900,30 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 			<h4>Usage:</h4>
 			<blockquote>VGET key dim_ix quantize_type name</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>name</td>
+					<td>vector name</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get *name*'s vector elements from the index *key*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_ix*		- dimention of the index.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*name*		- vector name.</li>
-</ul>
+			<blockquote><p>Get *name*'s vector elements from the index *key*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -1950,16 +3165,30 @@ Quantization types:
 			<h4>Usage:</h4>
 			<blockquote>VGETNORMALIZED key dim_ix quantize_type name</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>name</td>
+					<td>vector name</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get *name*'s vector elements from the index *key*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_ix*		- dimention of the index.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*name*		- vector name.</li>
-</ul>
-Note the result contains the vector magnitude as a first array element<br />
+			<blockquote><p>Get *name*'s vector elements from the index *key*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -2202,16 +3431,30 @@ Quantization types:
 			<h4>Usage:</h4>
 			<blockquote>VGETRAW key dim_ix quantize_type raw_vector_type name</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>name</td>
+					<td>vector name</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get *name*'s vector elements from the index *key*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_ix*		- dimention of the index.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*raw_vector_type*	- type of the vector, see the table below.</li>
-  <li>*name*		- vector name.</li>
-</ul>
+			<blockquote><p>Get *name*'s vector elements from the index *key*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -2352,19 +3595,50 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<h4>Usage:</h4>
 			<blockquote>VSIMFLAT key dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count &#x27;&#x27;</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>dim_vec</td>
+					<td>dimention of the vector (stored inside the *BLOB*)</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>distance_type</td>
+					<td>type of the distance, see the table below</td>
+				</tr>
+				<tr>
+					<td>raw_vector_type</td>
+					<td>type of the vector (stored inside the *BLOB*), see the table below</td>
+				</tr>
+				<tr>
+					<td>BLOB</td>
+					<td>vector values</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Search the index *key* using flat method (e.g. brute force) for *BLOB*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
-  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
-  <li>*BLOB*		- vector values.</li>
-  <li>*count*		- result count.</li>
-  <li>*from*		- start key (for pagination in the similar way as in XNGET).</li>
-</ul>
+			<blockquote><p>Search the index *key* using flat method (e.g. brute force) for *BLOB*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -2641,19 +3915,50 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<h4>Usage:</h4>
 			<blockquote>VSIMLSH key dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count &#x27;&#x27;</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>dim_vec</td>
+					<td>dimention of the vector (stored inside the *BLOB*)</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>distance_type</td>
+					<td>type of the distance, see the table below</td>
+				</tr>
+				<tr>
+					<td>raw_vector_type</td>
+					<td>type of the vector (stored inside the *BLOB*), see the table below</td>
+				</tr>
+				<tr>
+					<td>BLOB</td>
+					<td>vector values</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Search the index *key* using LSH method for *BLOB*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
-  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
-  <li>*BLOB*		- vector values.</li>
-  <li>*count*		- result count.</li>
-  <li>*from*		- start key (for pagination in the similar way as in XNGET).</li>
-</ul>
+			<blockquote><p>Search the index *key* using LSH method for *BLOB*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -2909,7 +4214,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 
 			<h4>See Also:</h4>
 			<ul>
-				<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
+				<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
 				<li><a href="#C::VKSIMFLAT">VKSIMFLAT</a></li>
 			</ul>
 		</div>
@@ -2931,18 +4236,39 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<h4>Usage:</h4>
 			<blockquote>VKSET key dim_vec dim_ix quantize_type raw_vector_type BLOB</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>key</td>
+				</tr>
+				<tr>
+					<td>dim_vec</td>
+					<td>dimention of the vector (stored inside the *BLOB*)</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>raw_vector_type</td>
+					<td>type of the vector (stored inside the *BLOB*), see the table below</td>
+				</tr>
+				<tr>
+					<td>BLOB</td>
+					<td>vector values</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Store vector represented by *BLOB* into the key *key*<br />
-The command is same as VADD, except it set a key instead of adding to an index.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
-  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
-  <li>*BLOB*		- vector values.</li>
-</ul>
+			<blockquote><p>Store vector represented by *BLOB* into the key *key*<br />
+The command is same as VADD, except it set a key instead of adding to an index.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -3107,14 +4433,26 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 			<h4>Usage:</h4>
 			<blockquote>VKGET key dim_ix quantize_type</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>key</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get vector elements from the index *key*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_ix*		- dimention of the index.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-</ul>
+			<blockquote><p>Get vector elements from the index *key*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -3356,15 +4694,26 @@ Quantization types:
 			<h4>Usage:</h4>
 			<blockquote>VKGETNORMALIZED key dim_ix quantize_type</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>key</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get vector elements from the index *key*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_ix*		- dimention of the index.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-</ul>
-Note the result contains the vector magnitude as a first array element<br />
+			<blockquote><p>Get vector elements from the index *key*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -3582,8 +4931,8 @@ Quantization types:
 
 			<h4>See Also:</h4>
 			<ul>
-				<li><a href="#C::VGET">VGET</a></li>
-				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+				<li><a href="#C::VKGET">VKGET</a></li>
+				<li><a href="#C::VKGETRAW">VKGETRAW</a></li>
 				<li><a href="#C::VGET">VGET</a></li>
 				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
 				<li><a href="#C::VGETRAW">VGETRAW</a></li>
@@ -3607,16 +4956,26 @@ Quantization types:
 			<h4>Usage:</h4>
 			<blockquote>VGETRAW key dim_ix quantize_type raw_vector_type</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>key</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get vector elements from the index *key*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_ix*		- dimention of the index.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*raw_vector_type*	- type of the vector, see the table below.</li>
-  <li>*name*		- vector name.</li>
-</ul>
+			<blockquote><p>Get vector elements from the index *key*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -3732,18 +5091,21 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 
 			<h4>See Also:</h4>
 			<ul>
+				<li><a href="#C::VKGET">VKGET</a></li>
+				<li><a href="#C::VKGETNORMALIZED">VKGETNORMALIZED</a></li>
 				<li><a href="#C::VGET">VGET</a></li>
 				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+				<li><a href="#C::VGETRAW">VGETRAW</a></li>
 			</ul>
 		</div>
 
 		<p><a href="#top">top</a></p>
 		<hr />
-		<div class="cmd" id="VSIMFLAT">
-			<a name="C::VSIMFLAT"></a>
-			<h4>VSIMFLAT</h4>
+		<div class="cmd" id="VKSIMFLAT">
+			<a name="C::VKSIMFLAT"></a>
+			<h4>VKSIMFLAT</h4>
 			<table border="1" class="x">
-				<tr><td>Command			</td><td>VSIMFLAT		</td></tr>
+				<tr><td>Command			</td><td>VKSIMFLAT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
@@ -3752,21 +5114,52 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			</table>
 
 			<h4>Usage:</h4>
-			<blockquote>VSIMFLAT key dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count &#x27;&#x27;</blockquote>
+			<blockquote>VKSIMFLAT prefix dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count &#x27;&#x27;</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>prefix</td>
+					<td>prefix of the keys</td>
+				</tr>
+				<tr>
+					<td>dim_vec</td>
+					<td>dimention of the vector (stored inside the *BLOB*)</td>
+				</tr>
+				<tr>
+					<td>dim_ix</td>
+					<td>dimention of the index. If different from the vector, a random projection will be performed</td>
+				</tr>
+				<tr>
+					<td>quantize_type</td>
+					<td>quantization, see the table below</td>
+				</tr>
+				<tr>
+					<td>distance_type</td>
+					<td>type of the distance, see the table below</td>
+				</tr>
+				<tr>
+					<td>raw_vector_type</td>
+					<td>type of the vector (stored inside the *BLOB*), see the table below</td>
+				</tr>
+				<tr>
+					<td>BLOB</td>
+					<td>vector values</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
 
 			<h4>Description:</h4>
-			<blockquote>Search the index *key* using flat method (e.g. brute force) for *BLOB*.<br />
-The parameters as as following:
-<ul>
-  <li>*key*			- name of the index object</li>
-  <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
-  <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
-  <li>*quantize_type*	- quantization, see the table below.</li>
-  <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
-  <li>*BLOB*		- vector values.</li>
-  <li>*count*		- result count.</li>
-  <li>*from*		- start key (for pagination in the similar way as in XNGET).</li>
-</ul>
+			<blockquote><p>Search the keys with prefix *prefix* using flat method (e.g. brute force) for *BLOB*.</p>
 
 Quantization types:
 <table border="1" class="x">
@@ -3985,6 +5378,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<h4>See Also:</h4>
 			<ul>
 				<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
+				<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
 			</ul>
 		</div>
 
@@ -4121,11 +5515,40 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			</table>
 
 			<h4>Usage:</h4>
-			<blockquote>IXMADD key sub_key delimiter &quot;words,words&quot; sort_key value</blockquote>
+			<blockquote>IXMADD key key_sub delimiter &quot;words,words&quot; sort_key value</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words</td>
+				</tr>
+				<tr>
+					<td>sort_key</td>
+					<td>influences the sorting of the results of IXMRANGE* commands</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>value of the key_sub. If you do not want to influence the sort just pass &quot;x&quot;, &quot;0&quot; or &quot;1&quot;.</td>
+				</tr>
+			</table>
+			</blockquote>
 
 			<h4>Description:</h4>
-			<blockquote>Insert *words* separated by *delimiter* into mindex object *key*, with *sub_key* and *sort_key*, value *value* and indexes *words,words*<br />
-*sort_key* influences the sorting of the results of IXMRANGE* commands. If you do not want to influence the sort just pass "x" or "1".<br />
+			<blockquote>Insert *words,words* separated by *delimiter* into the mindex object *key*, with *sub_key* and *sort_key*, value *value*
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4138,7 +5561,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<h4>Example:</h4>
 			<blockquote><pre class="x">127.0.0.1:6379&gt; IXMADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
 (integer) 1
-127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot;   x &quot;Data for Pete&quot;
 (integer) 1
 </pre></blockquote>
 
@@ -4162,16 +5585,29 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<h4>Usage:</h4>
 			<blockquote>IXMGET key sub_key</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Get the value from mindex object *key*, with *sub_key*<br />
-If the *sub_key* not exists, returns an empty string<br />
+			<blockquote>Get the value from mindex object *key*, with *sub_key*
 </blockquote>
 
 			<h4>Return type:</h4>
 			<blockquote>string</blockquote>
 
 			<h4>Return value:</h4>
-			<blockquote>the value</blockquote>
+			<blockquote>the value or empty string, if the *sub_key* not exists</blockquote>
 
 
 			<h4>Example:</h4>
@@ -4209,9 +5645,23 @@ If the *sub_key* not exists, returns an empty string<br />
 			<h4>Usage:</h4>
 			<blockquote>IXMMGET key sub_key0 [sub_key1]...</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
 			<blockquote>Get the value from mindex object *key*, with *sub_key0*, *sub_key1*...<br />
-The command is same as IXMGET, except it returns several values.<br />
+The command is same as IXMGET, except it returns several values.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4253,8 +5703,22 @@ The command is same as IXMGET, except it returns several values.<br />
 			<h4>Usage:</h4>
 			<blockquote>IXMEXISTS key sub_key</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Check if the value of mindex object *key*, with *sub_key* exists<br />
+			<blockquote>Check if the value of mindex object *key*, with *sub_key* exists
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4296,6 +5760,20 @@ The command is same as IXMGET, except it returns several values.<br />
 
 			<h4>Usage:</h4>
 			<blockquote>IXMGETINDEXES key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
 
 			<h4>Description:</h4>
 			<blockquote>Get the "indexes" from mindex object *key*, with *sub_key*<br />
@@ -4346,8 +5824,22 @@ If the *sub_key* not exists, returns an empty array<br />
 			<h4>Usage:</h4>
 			<blockquote>IXMREM key sub_key</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Remove *sub_key* from mindex object *key*<br />
+			<blockquote>Remove *sub_key* from mindex object *key*
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4391,12 +5883,32 @@ If the *sub_key* not exists, returns an empty array<br />
 			</table>
 
 			<h4>Usage:</h4>
-			<blockquote>IXMRANGE key text count start</blockquote>
+			<blockquote>IXMRANGE key word count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>word</td>
+					<td>single word</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
 
 			<h4>Description:</h4>
-			<blockquote>Returns a range mindex object *key* using single *text*<br />
-Returns up to *count* results.<br />
-*start* specify starting key (for pagination in the similar way as in XNGET).<br />
+			<blockquote>Returns a range mindex object *key* using single *word*
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4444,11 +5956,35 @@ Returns up to *count* results.<br />
 			<h4>Usage:</h4>
 			<blockquote>IXMRANGEFLEX key delimiter &quot;words,words&quot; count start</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Returns a range mindex object *key* using indexes *words,words*<br />
-Returns up to *count* results.<br />
-*start* specify starting key (for pagination in the similar way as in XNGET).<br />
-Results apears if contains at least one of the indexes. The result that contains more indexes are on top.<br />
+			<blockquote>Returns a range mindex object *key* using words *words,words*<br />
+The results apears, if contains at least one of the words. The result that contains more indexes are on top.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4498,11 +6034,35 @@ Results apears if contains at least one of the indexes. The result that contains
 			<h4>Usage:</h4>
 			<blockquote>IXMRANGESTRICT key delimiter &quot;words,words&quot; count start</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the mindex object</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Returns a range mindex object *key* using indexes *words,words*<br />
-Returns up to *count* results.<br />
-*start* specify starting key (for pagination in the similar way as in XNGET).<br />
-Results apears if contains ALL of the indexes.<br />
+			<blockquote>Returns a range mindex object *key* using words *words,words*<br />
+The results apears, if contains ALL of the words.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4621,10 +6181,26 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<h4>Usage:</h4>
 			<blockquote>ACADD_UTF8 key text exp</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of autocomplete object</td>
+				</tr>
+				<tr>
+					<td>text</td>
+					<td>text, must be ASCII or UTF8</td>
+				</tr>
+				<tr>
+					<td>exp</td>
+					<td>expiration in seconds</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.<br />
-*text* must be ASCII or UTF8.<br />
-Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly.<br />
+			<blockquote><p>Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.</p>
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4667,10 +6243,22 @@ Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly
 			<h4>Usage:</h4>
 			<blockquote>ACDEL_UTF8 key text</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of autocomplete object</td>
+				</tr>
+				<tr>
+					<td>text</td>
+					<td>text, must be ASCII or UTF8</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Remove *text* from the autocomplete object *key*.<br />
-*text* must be ASCII or UTF8.<br />
-Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly.<br />
+			<blockquote>Remove *text* from the autocomplete object *key*.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4717,10 +6305,26 @@ Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly
 			<h4>Usage:</h4>
 			<blockquote>ACADD_BIN key text exp</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of autocomplete object</td>
+				</tr>
+				<tr>
+					<td>text</td>
+					<td>text, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.</td>
+				</tr>
+				<tr>
+					<td>exp</td>
+					<td>expiration in seconds</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.<br />
-*text* must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8.<br />
-UTF8 etc will not works correctly.<br />
+			<blockquote>Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4759,10 +6363,22 @@ UTF8 etc will not works correctly.<br />
 			<h4>Usage:</h4>
 			<blockquote>ACDEL_BIN key text</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of autocomplete object</td>
+				</tr>
+				<tr>
+					<td>text</td>
+					<td>text, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Remove *text* from the autocomplete object *key*.<br />
-*text* must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8.<br />
-UTF8 etc will not works correctly.<br />
+			<blockquote>Remove *text* from the autocomplete object *key*.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4806,10 +6422,30 @@ UTF8 etc will not works correctly.<br />
 			<h4>Usage:</h4>
 			<blockquote>ACRANGE key text count start</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of autocomplete object</td>
+				</tr>
+				<tr>
+					<td>text</td>
+					<td>text, must be ASCII, UTF8 or old style 8 bit encodings like CP1250, CP1251, KOI8</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Make a query with *text* from the autocomplete object *key*, return up to *count* results.<br />
-*start* specify starting key (for pagination in the similar way as in XNGET).<br />
-Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.<br />
+			<blockquote>Make a query with *text* from the autocomplete object *key*
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4867,13 +6503,28 @@ Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc
 			</table>
 
 			<h4>Usage:</h4>
-			<blockquote>ACRANGEALL text count start</blockquote>
+			<blockquote>ACRANGEALL count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of autocomplete object</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
 
 			<h4>Description:</h4>
-			<blockquote>Make a query with empty text from the autocomplete object *key*,
-returns up to *count* results.<br />
-*start* specify starting key (for pagination in the similar way as in XNGET).<br />
-Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.<br />
+			<blockquote>Make a query with empty text from the autocomplete object *key*
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -4978,10 +6629,28 @@ This is particularly useful for:</p>
 			<h4>Usage:</h4>
 			<blockquote>MURMUR string seed modulo</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>string for hashing</td>
+					<td>string</td>
+				</tr>
+				<tr>
+					<td>seed</td>
+					<td>seed for murmurhash64a</td>
+				</tr>
+				<tr>
+					<td>modulo</td>
+					<td>modulo, e.g. murmurhash64a(murmurhash64a, seed) % modulo</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
 			<blockquote>Generate murmurhash64a from the string.<br />
 Optionaly you can provide a seed and modulo value.<br />
-Very useful for debugging.<br />
+Very useful for debugging.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5091,8 +6760,19 @@ Use RANDOM without arguments when you simply need a single pseudo-random value.<
 			<h4>Usage:</h4>
 			<blockquote>RANDOM number</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>number</td>
+					<td>seed for the random</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
 			<blockquote>Generate pseudo random number with specific seed.<br />
+You can also think about it as this is N-th random number.<br />
 The output type is int or string, depending if the result can fit in int64 or not.<br />
 </blockquote>
 
@@ -5146,10 +6826,21 @@ The output type is int or string, depending if the result can fit in int64 or no
 			</table>
 
 			<h4>Usage:</h4>
-			<blockquote>MRANDOM</blockquote>
+			<blockquote>MRANDOM number0 [number1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>number0</td>
+					<td>seed for the random</td>
+				</tr>
+			</table>
+			</blockquote>
 
 			<h4>Description:</h4>
 			<blockquote>Generate pseudo random numbers with specific seed.<br />
+You can also think about it as this is N-th random number.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5230,8 +6921,9 @@ The output type is int or string, depending if the result can fit in int64 or no
 			<h4>Usage:</h4>
 			<blockquote>INFO</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Provides information about the server process.<br />
+			<blockquote>Provides information about the server process.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5290,8 +6982,9 @@ PID              : 745140
 			<h4>Usage:</h4>
 			<blockquote>DBSIZE</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Returns number of keys.<br />
+			<blockquote>Returns number of keys.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5325,8 +7018,9 @@ PID              : 745140
 			<h4>Usage:</h4>
 			<blockquote>DBSIZEMUTABLE</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Returns number of mutable keys.<br />
+			<blockquote>Returns number of mutable keys.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5360,8 +7054,9 @@ PID              : 745140
 			<h4>Usage:</h4>
 			<blockquote>VERSION</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Returns server version.<br />
+			<blockquote>Returns server version.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5395,8 +7090,9 @@ PID              : 745140
 			<h4>Usage:</h4>
 			<blockquote>MAXKEYSIZE</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Returns MAX_KEY_SIZE.<br />
+			<blockquote>Returns MAX_KEY_SIZE.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5436,8 +7132,9 @@ PID              : 745140
 			<h4>Usage:</h4>
 			<blockquote>MAXVALSIZE</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Returns MAX_VAL_SIZE.<br />
+			<blockquote>Returns MAX_VAL_SIZE.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5477,8 +7174,9 @@ PID              : 745140
 			<h4>Usage:</h4>
 			<blockquote>PING</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Returns "pong".<br />
+			<blockquote>Returns "pong".
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5512,8 +7210,18 @@ pong
 			<h4>Usage:</h4>
 			<blockquote>ECHO message</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>message</td>
+					<td>message to be printed</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Returns *message*.<br />
+			<blockquote>Returns *message*.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5547,8 +7255,18 @@ pong
 			<h4>Usage:</h4>
 			<blockquote>REM message</blockquote>
 
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>message</td>
+					<td>message or comment</td>
+				</tr>
+			</table>
+			</blockquote>
+
 			<h4>Description:</h4>
-			<blockquote>Insert comment.<br />
+			<blockquote>Insert comment.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5563,7 +7281,7 @@ pong
 			</ul>
 
 			<h4>Example:</h4>
-			<blockquote><pre class="x">127.0.0.1:6379&gt; rem this is comment
+			<blockquote><pre class="x">127.0.0.1:6379&gt; rem this is a comment
 OK
 127.0.0.1:6379&gt; # this is shell style comment
 OK
@@ -5592,8 +7310,9 @@ OK
 			<h4>Usage:</h4>
 			<blockquote>TIME</blockquote>
 
+
 			<h4>Description:</h4>
-			<blockquote>Returns number of keys.<br />
+			<blockquote>Returns number of keys.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5647,6 +7366,7 @@ OK
 			<h4>Usage:</h4>
 			<blockquote>LISTMAINTAINANCE</blockquote>
 
+
 			<h4>Description:</h4>
 			<blockquote>Run crontab list maintainance. For example, crontab list maintainance may fsync binlogs.<br />
 Very useful if crontab list maintainance is disabled.<br />
@@ -5677,10 +7397,11 @@ Very useful if crontab list maintainance is disabled.<br />
 			<h4>Usage:</h4>
 			<blockquote>SAVE</blockquote>
 
+
 			<h4>Description:</h4>
 			<blockquote>Flushes memtable to the disk.<br />
 Reloads the disktable(s) from the disk.<br />
-Tthis is no-op on immutable servers.<br />
+This is no-op on immutable servers.<br />
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5715,6 +7436,7 @@ Tthis is no-op on immutable servers.<br />
 
 			<h4>Usage:</h4>
 			<blockquote>RELOAD</blockquote>
+
 
 			<h4>Description:</h4>
 			<blockquote>Reloads the disktable(s) from the disk.<br />
@@ -5771,9 +7493,10 @@ This command is used when disktable(s) are updated or replaced from an external 
 			<h4>Usage:</h4>
 			<blockquote>SELECT</blockquote>
 
+
 			<h4>Description:</h4>
 			<blockquote>Provided for compatibility.<br />
-Does not do anything.<br />
+Does not do anything.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5801,9 +7524,10 @@ Does not do anything.<br />
 			<h4>Usage:</h4>
 			<blockquote>RESET</blockquote>
 
+
 			<h4>Description:</h4>
 			<blockquote>Provided for compatibility.<br />
-Does not do anything.<br />
+Does not do anything.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5831,9 +7555,10 @@ Does not do anything.<br />
 			<h4>Usage:</h4>
 			<blockquote>TYPE key</blockquote>
 
+
 			<h4>Description:</h4>
 			<blockquote>Provided for compatibility.<br />
-Does not do anything.<br />
+Does not do anything.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5863,9 +7588,10 @@ Does not do anything.<br />
 			<h4>Usage:</h4>
 			<blockquote>TOUCH key</blockquote>
 
+
 			<h4>Description:</h4>
 			<blockquote>Provided for compatibility.<br />
-Does not do anything.<br />
+Does not do anything.
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -5913,6 +7639,7 @@ Does not do anything.<br />
 			<h4>Usage:</h4>
 			<blockquote>EXIT</blockquote>
 
+
 			<h4>Description:</h4>
 			<blockquote>Disconnect from the server.<br />
 </blockquote>
@@ -5939,6 +7666,7 @@ Does not do anything.<br />
 
 			<h4>Usage:</h4>
 			<blockquote>SHUTDOWN</blockquote>
+
 
 			<h4>Description:</h4>
 			<blockquote>Shutdowns the server.<br />
@@ -5985,6 +7713,7 @@ You can safely ignore it.<br />
 
 			<h4>Usage:</h4>
 			<blockquote>TEST</blockquote>
+
 
 			<h4>Description:</h4>
 			<blockquote>Internal command to do tests during development.<br />

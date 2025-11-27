@@ -2,7 +2,7 @@
   name:    VERSION
   usage:   VERSION
   description: |
-    Returns server version.<br />
+    Returns server version.
 
   return_type: string
   return:      version

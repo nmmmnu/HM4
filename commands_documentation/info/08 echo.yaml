@@ -1,8 +1,13 @@
 - id:      ECHO
   name:    ECHO
   usage:   ECHO message
+  params:
+    items:
+    - k: message
+      v: message to be printed
+
   description: |
-    Returns *message*.<br />
+    Returns *message*.
 
   return_type: string
   return:      the message

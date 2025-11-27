@@ -1,16 +1,20 @@
-- id:          RANDOM
-  name:        RANDOM
+- id:          MRANDOM
+  name:        MRANDOM
   aliases:
     items:
-      - rand
-  usage:       RANDOM
-  usage:       RANDOM number
-  description: |
-    Generate pseudo random number with specific seed.<br />
-    The output type is int or string, depending if the result can fit in int64 or not.<br />
+      - mrand
+  usage:       MRANDOM number0 [number1]...
+  params:
+    items:
+    - k: number0
+      v: seed for the random
 
-  return_type: int or string
-  return:      the random number
+  description: |
+    Generate pseudo random numbers with specific seed.<br />
+    You can also think about it as this is N-th random number.
+
+  return_type: array
+  return:      array with the random numbers
   version:     1.3.12.1
   mutable:     false
   compatible:  false
@@ -33,4 +37,4 @@
 
   see_also:
     items:
-      - MRANDOM
+      - RANDOM

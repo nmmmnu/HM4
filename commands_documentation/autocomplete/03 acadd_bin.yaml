@@ -1,10 +1,16 @@
 - id:      ACADD_BIN
   name:    ACADD_BIN
   usage:   ACADD_BIN key text exp
+  params:
+    items:
+    - k: key
+      v: name of autocomplete object
+    - k: text
+      v: text, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.
+    - k: exp
+      v: expiration in seconds
   description: |
-    Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.<br />
-    *text* must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8.<br />
-    UTF8 etc will not works correctly.<br />
+    Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.
 
   return_type: int
   return:      new score of the text

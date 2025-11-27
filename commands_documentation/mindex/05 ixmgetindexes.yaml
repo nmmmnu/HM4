@@ -1,8 +1,13 @@
 - id:          IXMGETINDEXES
   name:        IXMGETINDEXES
-#  aliases:
-#    items:
   usage:       IXMGETINDEXES key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: key_sub
+      v: sub key
+
   description: |
     Get the "indexes" from mindex object *key*, with *sub_key*<br />
     If the *sub_key* not exists, returns an empty array<br />
@@ -27,5 +32,5 @@
 
   see_also:
     items:
-      - IXMMGET
+    - IXMMGET
 

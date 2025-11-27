@@ -1,14 +1,18 @@
 - id:          IXMGET
   name:        IXMGET
-#  aliases:
-#    items:
   usage:       IXMGET key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: key_sub
+      v: sub key
+
   description: |
-    Get the value from mindex object *key*, with *sub_key*<br />
-    If the *sub_key* not exists, returns an empty string<br />
+    Get the value from mindex object *key*, with *sub_key*
 
   return_type: string
-  return:      the value
+  return:      the value or empty string, if the *sub_key* not exists
   version:     1.3.14.2
   complexity:  READ
   mutable:     false
@@ -23,6 +27,6 @@
 
   see_also:
     items:
-      - IXMMGET
-      - IXMEXISTS
-      - IXMGETINDEXES
+    - IXMMGET
+    - IXMEXISTS
+    - IXMGETINDEXES

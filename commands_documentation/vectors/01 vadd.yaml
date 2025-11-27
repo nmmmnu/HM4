@@ -6,18 +6,25 @@
   complexity:  "[number of keys] * WRITE"
   mutable:     true
   compatible:  false
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: dim_vec
+      v: dimention of the vector (stored inside the *BLOB*)
+    - k: dim_ix
+      v: dimention of the index. If different from the vector, a random projection will be performed
+    - k: quantize_type
+      v: quantization, see the table below
+    - k: raw_vector_type
+      v: type of the vector (stored inside the *BLOB*), see the table below
+    - k: BLOB
+      v: vector values
+    - k: name
+      v: vector name
+
   description: |
     Add the *BLOB0* as *name0*, *BLOB1* as *name1*... into the index *key*.<br />
-    The parameters as as following:
-    <ul>
-      <li>*key*			- name of the index object</li>
-      <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
-      <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
-      <li>*quantize_type*	- quantization, see the table below.</li>
-      <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
-      <li>*BLOB*		- vector values.</li>
-      <li>*name*		- vector name.</li>
-    </ul>
 
     Quantization types:
     <table border="1" class="x">
@@ -153,4 +160,4 @@
 
   see_also:
     items:
-      VKSET
+    - VKSET

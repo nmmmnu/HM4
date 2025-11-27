@@ -1,11 +1,22 @@
 - id:          IXMRANGEFLEX
   name:        IXMRANGEFLEX
   usage:       IXMRANGEFLEX key delimiter "words,words" count start
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: delimiter
+      v: delimiter, for example "," (coma)
+    - k: words,words
+      v: words
+    - k: count
+      v: result count
+    - k: start
+      v: specify starting key (for pagination in the similar way as in XNGET)
+
   description: |
-    Returns a range mindex object *key* using indexes *words,words*<br />
-    Returns up to *count* results.<br />
-    *start* specify starting key (for pagination in the similar way as in XNGET).<br />
-    Results apears if contains at least one of the indexes. The result that contains more indexes are on top.<br />
+    Returns a range mindex object *key* using words *words,words*<br />
+    The results apears, if contains at least one of the words. The result that contains more indexes are on top.
 
   return_type: array
   return:      list of key / values with "next" key at the end.

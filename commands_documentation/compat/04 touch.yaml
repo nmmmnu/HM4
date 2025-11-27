@@ -3,7 +3,7 @@
   usage:   TOUCH key
   description: |
     Provided for compatibility.<br />
-    Does not do anything.<br />
+    Does not do anything.
 
   return_type: int
   return:      always returns 1

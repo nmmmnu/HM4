@@ -2,13 +2,22 @@
   name:     ACRANGE
   aliases:
     items:
-      - ACRANGE_UTF8
-      - ACRANGE_BIN
+    - ACRANGE_UTF8
+    - ACRANGE_BIN
   usage:    ACRANGE key text count start
+  params:
+    items:
+    - k: key
+      v: name of autocomplete object
+    - k: text
+      v: text, must be ASCII, UTF8 or old style 8 bit encodings like CP1250, CP1251, KOI8
+    - k: count
+      v: result count
+    - k: start
+      v: specify starting key (for pagination in the similar way as in XNGET)
+
   description: |
-    Make a query with *text* from the autocomplete object *key*, return up to *count* results.<br />
-    *start* specify starting key (for pagination in the similar way as in XNGET).<br />
-    Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.<br />
+    Make a query with *text* from the autocomplete object *key*
 
   return_type: array
   return:      results as key value + next
@@ -38,4 +47,4 @@
 
   see_also:
     items:
-      - ACRANGEALL
+    - ACRANGEALL

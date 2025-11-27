@@ -1,10 +1,18 @@
 - id:      HHGET
   name:    HHGET
   usage:   HHGET key hh_count hh_value_size
+  params:
+    items:
+    - k: key
+      v: name of the heavy hitters object
+    - k: hh_count
+      v: size of the object - sizes from 1 to 200 are supported.
+    - k: hh_value_size
+      v: fixed value size, see the table
+
   description: |
-    Get top results from the heavy hitters object *key* with size *hh_count* and fixed value size of *hh_value_size*.<br />
-    *hh_count* can be from 1 to 200.<br />
-    *hh_value_size* can be:<br />
+    <p>Get top results from the heavy hitters object *key*</p>
+
     <table border="1" class="x">
       <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
       <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>

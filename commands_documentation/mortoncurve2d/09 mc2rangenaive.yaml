@@ -1,0 +1,17 @@
+- id:      MC2RANGENAIVE
+  name:    MC2RANGENAIVE
+  usage:   MC2RANGENAIVE key x_min z_max y_min y_max count start
+  return_type: array
+  return:      list of key / values with "next" key at the end.
+  version:     1.3.7.7
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  description: |
+    Naive, non performant version of MC2RANGE
+
+  example:
+  see_also:
+    items:
+      - MC2RANGE
+

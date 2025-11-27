@@ -1,10 +1,19 @@
 - id:          IXMRANGE
   name:        IXMRANGE
-  usage:       IXMRANGE key text count start
+  usage:       IXMRANGE key word count start
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: word
+      v: single word
+    - k: count
+      v: result count
+    - k: start
+      v: specify starting key (for pagination in the similar way as in XNGET)
+
   description: |
-    Returns a range mindex object *key* using single *text*<br />
-    Returns up to *count* results.<br />
-    *start* specify starting key (for pagination in the similar way as in XNGET).<br />
+    Returns a range mindex object *key* using single *word*
 
   return_type: array
   return:      list of key / values with "next" key at the end.

@@ -2,7 +2,7 @@
   name:    MAXVALSIZE
   usage:   MAXVALSIZE
   description: |
-    Returns MAX_VAL_SIZE.<br />
+    Returns MAX_VAL_SIZE.
 
   return_type: string
   return:      version
@@ -16,5 +16,5 @@
 
   see_also:
     items:
-      - MAXKEYSIZE
+    - MAXKEYSIZE
 

@@ -7,15 +7,19 @@
   complexity:  READ
   mutable:     false
   compatible:  false
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: dim_ix
+      v: dimention of the index
+    - k: quantize_type
+      v: quantization, see the table below
+    - k: name
+      v: vector name
+
   description: |
-    Get *name*'s vector elements from the index *key*.<br />
-    The parameters as as following:
-    <ul>
-      <li>*key*			- name of the index object</li>
-      <li>*dim_ix*		- dimention of the index.</li>
-      <li>*quantize_type*	- quantization, see the table below.</li>
-      <li>*name*		- vector name.</li>
-    </ul>
+    <p>Get *name*'s vector elements from the index *key*.</p>
 
     Quantization types:
     <table border="1" class="x">
@@ -66,6 +70,7 @@
         <td align="right">124 MB</td>
       </tr>
     </table>
+
   example:     |
     127.0.0.1:6379> VGET vectors 150 i frog
       1) "+0.000000000000000"
@@ -221,8 +226,8 @@
 
   see_also:
     items:
-      - VGETNORMALIZED
-      - VGETRAW
-      - VKGET
-      - VKGETNORMALIZED
-      - VKGETRAW
+    - VGETNORMALIZED
+    - VGETRAW
+    - VKGET
+    - VKGETNORMALIZED
+    - VKGETRAW

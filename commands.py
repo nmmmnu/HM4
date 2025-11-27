@@ -190,6 +190,20 @@ def generate():
 			<h4>Usage:</h4>
 			<blockquote>{{usage}}</blockquote>
 
+			{{#params}}
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				{{#items}}
+				<tr>
+					<td>{{k}}</td>
+					<td>{{v}}</td>
+				</tr>
+				{{/items}}
+			</table>
+			</blockquote>
+			{{/params}}
+
 			<h4>Description:</h4>
 			<blockquote>{{{description}}}</blockquote>
 
@@ -268,6 +282,7 @@ def generate():
 
 
 
+load_module("mortoncurve2d"		)
 load_module("heavy_hitters"		)
 load_module("misra_gries_heavy_hitters"	)
 load_module("reservoir_sampling"	)

@@ -1,11 +1,20 @@
 - id:      MGADDGET
   name:    MGADDGET
   usage:   MGADDGET key mg_count mg_value_size value
+  params:
+    items:
+    - k: key
+      v: name of the Misra-Gries heavy hitters object
+    - k: mg_count
+      v: size of the object - sizes from 1 to 200 are supported.
+    - k: hh_value_size
+      v: fixed value size, see the table
+    - k: value
+      v: value to be added in the object
 
   description: |
-    Add *value*... into the Misra-Gries heavy hitters object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-    *mg_count* can be from 1 to 200.<br />
-    *mg_value_size* can be:<br />
+    <p>Add *value*... into the Misra-Gries heavy hitters object *key*.</p>
+
     <table border="1" class="x">
       <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
       <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>

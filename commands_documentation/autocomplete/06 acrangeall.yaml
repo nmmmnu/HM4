@@ -2,14 +2,20 @@
   name:     ACRANGEALL
   aliases:
     items:
-      - ACRANGEALL_UTF8
-      - ACRANGEALL_BIN
-  usage:    ACRANGEALL text count start
+    - ACRANGEALL_UTF8
+    - ACRANGEALL_BIN
+  usage:    ACRANGEALL count start
+  params:
+    items:
+    - k: key
+      v: name of autocomplete object
+    - k: count
+      v: result count
+    - k: start
+      v: specify starting key (for pagination in the similar way as in XNGET)
+
   description: |
-    Make a query with empty text from the autocomplete object *key*,
-    returns up to *count* results.<br />
-    *start* specify starting key (for pagination in the similar way as in XNGET).<br />
-    Works for ASCII, UTF8 or old style 8 bit encodings such CP1250, CP1251, KOI8 etc.<br />
+    Make a query with empty text from the autocomplete object *key*
 
   return_type: array
   return:      results as key value + next
@@ -35,4 +41,4 @@
 
   see_also:
     items:
-      - ACRANGE
+    - ACRANGE

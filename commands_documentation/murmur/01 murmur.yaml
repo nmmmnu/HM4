@@ -7,10 +7,20 @@
   usage:       MURMUR string
   usage:       MURMUR string seed
   usage:       MURMUR string seed modulo
+  params:
+    items:
+    - k: string for hashing
+      v: string
+    - k: seed
+      v: seed for murmurhash64a
+    - k: modulo
+      v: modulo, e.g.
+         murmurhash64a(murmurhash64a, seed) % modulo
+
   description: |
     Generate murmurhash64a from the string.<br />
     Optionaly you can provide a seed and modulo value.<br />
-    Very useful for debugging.<br />
+    Very useful for debugging.
 
   return_type: string
   return:      murmurhash64a value of the string

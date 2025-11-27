@@ -2,7 +2,7 @@
   name:    INFO
   usage:   INFO
   description: |
-    Provides information about the server process.<br />
+    Provides information about the server process.
 
   return_type: array
   version:     1.0.0

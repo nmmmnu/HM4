@@ -3,7 +3,7 @@
   usage:   TYPE key
   description: |
     Provided for compatibility.<br />
-    Does not do anything.<br />
+    Does not do anything.
 
   return_type: string
   return:      always returns text "string"

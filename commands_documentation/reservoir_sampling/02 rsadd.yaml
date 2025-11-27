@@ -1,11 +1,20 @@
 - id:      RSADD
   name:    RSADD
   usage:   RSADD key rs_count rs_value_size value0 [value1]...
+  params:
+    items:
+    - k: key
+      v: name of the reservoir sampling object
+    - k: rs_count
+      v: size of the object - sizes from 1 to 200 are supported.
+    - k: rs_value_size
+      v: fixed value size, see the table
+    - k: value0
+      v: value to be added
 
   description: |
-    Add *value0*, *value1*... into the reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-    *rs_count* can be from 1 to 4096.<br />
-    *rs_value_size* can be:<br />
+    <p>Add *value0*, *value1*... into the reservoir sampling object *key*</p>
+
     <table border="1" class="x">
       <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
       <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>

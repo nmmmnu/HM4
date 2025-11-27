@@ -1,10 +1,24 @@
 - id:       RSRESERVE
   name:     RSRESERVE
   usage:    RSRESERVE key rs_count rs_value_size
+  params:
+    items:
+    - k: key
+      v: name of the reservoir sampling object
+    - k: rs_count
+      v: size of the object - sizes from 1 to 200 are supported.
+    - k: rs_value_size
+      v: fixed value size, see the table
+
+  return_type: bool
+  return:      always returns 1
+  version:     1.3.7.8
+  complexity:  READ + WRITE
+  mutable:     true
+  compatible:  false
   description: |
-    Create new, empty reservoir sampling object *key* with size *rs_count* and fixed value size of *rs_value_size*.<br />
-    *rs_count* can be from 1 to 4096.<br />
-    *rs_value_size* can be:<br />
+    <p>Create new, empty reservoir sampling object *key*</p>
+
     <table border="1" class="x">
       <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
       <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
@@ -15,12 +29,6 @@
       <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
     </table>
 
-  return_type: bool
-  return:      always returns 1
-  version:     1.3.7.8
-  complexity:  READ + WRITE
-  mutable:     true
-  compatible:  false
   example:     |
     127.0.0.1:6379> rsreserve myrs 100 32
     (integer) 1

@@ -1,9 +1,16 @@
 - id:          IXMMGET
   name:        IXMMGET
   usage:       IXMMGET key sub_key0 [sub_key1]...
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: key_sub0
+      v: sub key
+
   description: |
     Get the value from mindex object *key*, with *sub_key0*, *sub_key1*...<br />
-    The command is same as IXMGET, except it returns several values.<br />
+    The command is same as IXMGET, except it returns several values.
 
   return_type: array
   return:      list of the values
@@ -20,4 +27,4 @@
 
   see_also:
     items:
-      - IXMMGET
+    - IXMMGET

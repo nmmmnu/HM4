@@ -1,20 +1,25 @@
 - id:      REM
   name:    REM
   usage:   REM message
+  params:
+    items:
+    - k: message
+      v: message or comment
+
   description: |
-    Insert comment.<br />
+    Insert comment.
 
   aliases:
     items:
-      - "#"
-      - "//"
-      - ";"
+    - "#"
+    - "//"
+    - ";"
 
   return_type: OK
   version:     1.3.14.1
   compatible:  false
   example:     |
-    127.0.0.1:6379> rem this is comment
+    127.0.0.1:6379> rem this is a comment
     OK
     127.0.0.1:6379> # this is shell style comment
     OK

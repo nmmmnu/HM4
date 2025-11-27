@@ -5,8 +5,15 @@
       - IXMREMOVE
       - IXMDEL
   usage:       IXMREM key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: key_sub
+      v: sub key
+
   description: |
-    Remove *sub_key* from mindex object *key*<br />
+    Remove *sub_key* from mindex object *key*
 
   return_type: bool
   return:      always returns 1

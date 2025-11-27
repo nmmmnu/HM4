@@ -2,7 +2,7 @@
   name:    DBSIZEMUTABLE
   usage:   DBSIZEMUTABLE
   description: |
-    Returns number of mutable keys.<br />
+    Returns number of mutable keys.
 
   return_type: int
   return:      number of keys

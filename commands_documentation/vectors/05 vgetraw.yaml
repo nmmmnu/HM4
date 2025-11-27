@@ -1,6 +1,17 @@
 - id:          VGETRAW
   name:        VGETRAW
   usage:       VGETRAW key dim_ix quantize_type raw_vector_type name
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: dim_ix
+      v: dimention of the index
+    - k: quantize_type
+      v: quantization, see the table below
+    - k: name
+      v: vector name
+
   return_type: array
   return:      vector elements dequantized as 32-bit floats, non normalized
   version:     1.3.14
@@ -8,15 +19,7 @@
   mutable:     false
   compatible:  false
   description: |
-    Get *name*'s vector elements from the index *key*.<br />
-    The parameters as as following:
-    <ul>
-      <li>*key*			- name of the index object</li>
-      <li>*dim_ix*		- dimention of the index.</li>
-      <li>*quantize_type*	- quantization, see the table below.</li>
-      <li>*raw_vector_type*	- type of the vector, see the table below.</li>
-      <li>*name*		- vector name.</li>
-    </ul>
+    <p>Get *name*'s vector elements from the index *key*.</p>
 
     Quantization types:
     <table border="1" class="x">

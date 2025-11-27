@@ -1,10 +1,15 @@
 - id:          IXMEXISTS
   name:        IXMEXISTS
-#  aliases:
-#    items:
   usage:       IXMEXISTS key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: key_sub
+      v: sub key
+
   description: |
-    Check if the value of mindex object *key*, with *sub_key* exists<br />
+    Check if the value of mindex object *key*, with *sub_key* exists
 
   return_type: bool
   return:      |
@@ -22,4 +27,4 @@
 
   see_also:
     items:
-      - IXMMGET
+    - IXMMGET

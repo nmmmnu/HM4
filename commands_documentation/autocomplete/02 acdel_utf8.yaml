@@ -2,16 +2,21 @@
   name:     ACDEL_UTF8
   aliases:
     items:
-      - ACDEL
-      - ACREM
-      - ACREMOVE
-      - ACREM_UTF8
-      - ACREMOVE_UTF8
+    - ACDEL
+    - ACREM
+    - ACREMOVE
+    - ACREM_UTF8
+    - ACREMOVE_UTF8
   usage:    ACDEL_UTF8 key text
+  params:
+    items:
+    - k: key
+      v: name of autocomplete object
+    - k: text
+      v: text, must be ASCII or UTF8
+
   description: |
-    Remove *text* from the autocomplete object *key*.<br />
-    *text* must be ASCII or UTF8.<br />
-    Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly.<br />
+    Remove *text* from the autocomplete object *key*.
 
   return_type: bool
   return:      always returns 1

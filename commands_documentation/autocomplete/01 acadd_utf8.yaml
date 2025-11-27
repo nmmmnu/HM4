@@ -2,12 +2,19 @@
   name:    ACADD_UTF8
   aliases:
     items:
-      - ACADD
+    - ACADD
   usage:   ACADD_UTF8 key text exp
+  params:
+    items:
+    - k: key
+      v: name of autocomplete object
+    - k: text
+      v: text, must be ASCII or UTF8
+    - k: exp
+      v: expiration in seconds
+
   description: |
-    Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.<br />
-    *text* must be ASCII or UTF8.<br />
-    Old style 8 bit encodings like CP1250, CP1251, KOI8 etc will not works correctly.<br />
+    <p>Add *text* into the autocomplete object *key*, with expiration of *exp* seconds.</p>
 
   return_type: int
   return:      new score of the text
@@ -22,4 +29,4 @@
   sql:
   see_also:
     items:
-      - ACADD_BIN
+    - ACADD_BIN

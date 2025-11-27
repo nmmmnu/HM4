@@ -2,13 +2,18 @@
   name:     ACDEL_BIN
   aliases:
     items:
-      - ACREM_BIN
-      - ACREMOVE_BIN
+    - ACREM_BIN
+    - ACREMOVE_BIN
   usage:    ACDEL_BIN key text
+  params:
+    items:
+    - k: key
+      v: name of autocomplete object
+    - k: text
+      v: text, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.
+
   description: |
-    Remove *text* from the autocomplete object *key*.<br />
-    *text* must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8.<br />
-    UTF8 etc will not works correctly.<br />
+    Remove *text* from the autocomplete object *key*.
 
   return_type: bool
   return:      always returns 1
@@ -22,4 +27,4 @@
 
   see_also:
     items:
-      - ACDEL_UTF8
+    - ACDEL_UTF8

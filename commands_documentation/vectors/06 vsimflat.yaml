@@ -1,6 +1,27 @@
 - id:          VSIMFLAT
   name:        VSIMFLAT
   usage:       VSIMFLAT key dim_vec dim_ix quantize_type distance_type raw_vector_type BLOB count ''
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: dim_vec
+      v: dimention of the vector (stored inside the *BLOB*)
+    - k: dim_ix
+      v: dimention of the index. If different from the vector, a random projection will be performed
+    - k: quantize_type
+      v: quantization, see the table below
+    - k: distance_type
+      v: type of the distance, see the table below
+    - k: raw_vector_type
+      v: type of the vector (stored inside the *BLOB*), see the table below
+    - k: BLOB
+      v: vector values
+    - k: count
+      v: result count
+    - k: start
+      v: specify starting key (for pagination in the similar way as in XNGET)
+
   return_type: array
   return:      list of key / score with "next" key at the end.
   version:     1.3.14
@@ -8,18 +29,7 @@
   mutable:     false
   compatible:  false
   description: |
-    Search the index *key* using flat method (e.g. brute force) for *BLOB*.<br />
-    The parameters as as following:
-    <ul>
-      <li>*key*			- name of the index object</li>
-      <li>*dim_vec*		- dimention of the vector (stored inside the *BLOB*)</li>
-      <li>*dim_ix*		- dimention of the index. If different from the vector, a random projection will be performed.</li>
-      <li>*quantize_type*	- quantization, see the table below.</li>
-      <li>*raw_vector_type*	- type of the vector (stored inside the *BLOB*), see the table below.</li>
-      <li>*BLOB*		- vector values.</li>
-      <li>*count*		- result count.</li>
-      <li>*from*		- start key (for pagination in the similar way as in XNGET).</li>
-    </ul>
+    <p>Search the index *key* using flat method (e.g. brute force) for *BLOB*.</p>
 
     Quantization types:
     <table border="1" class="x">
