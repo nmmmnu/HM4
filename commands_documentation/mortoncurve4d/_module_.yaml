@@ -1,0 +1,41 @@
+id:          MORTONCURVE4D
+name:        MORTON CURVE 4D
+
+version:     1.3.7.7
+
+description: |
+  <p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
+  This structure allows you to store and query points in 4D by mapping them into a single sortable integer using bit interleaving.</p>
+  <p>Coordinates are uint32_t, indexes type are uint128_t</p>
+  <p>The result is a fast, disk-friendly spatial index suitable for filtering and range searches.</p>
+  <p><b>General Concept</b></p>
+  <ul>
+    <li>You insert a point with some coordinates.</li>
+    <li>The module computes the Morton key by interleaving bits.</li>
+    <li>All points are stored in sorted order by their Morton code.</li>
+    <li>Queries operate by converting coordinates or ranges into corresponding Morton code intervals</li>
+  </ul>
+  <p>All MC commands share the same pattern:
+  MC{n}{op}<br />
+  Where:</p>
+  <ul>
+    <li><b>n</b> = number of dimensions (2, 3, 4, 8, 16)</li>
+    <li><b>op</b> = operation: <b>ADD</b>, <b>POINT</b>, <b>RANGE</b>, etc.</li>
+  </ul>
+  <p><b>Notes</b></p>
+  <ul>
+    <li>Morton curves preserve spatial locality well, making disk-based range lookups efficient.</li>
+    <li>POINT = optimized mode when all dimensions are exact values.</li>
+    <li>RANGE = full multidimensional "rectangle".</li>
+    <li>Coordinates are uint32_t</li>
+    <li>Lndexes type are uint128_t</li>
+  </ul>
+
+see_also_module:
+  items:
+    - LINEARCURVE
+    - MORTONCURVE2D
+    - MORTONCURVE3D
+    - MORTONCURVE8D
+    - MORTONCURVE16D
+

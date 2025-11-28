@@ -34,7 +34,7 @@ description: |
   <p><b>Tip:</b> This module is ideal for tracking frequent items in a stream, such as popular searches, tags, or event identifiers.
   However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have to supply the score. See the examples for some ideas.</p>
 
-example:     |
+example_module:     |
   127.0.0.1:6379> del myhh
   (integer) 1
   127.0.0.1:6379> hhincr myhh 5 64 google 140 yahoo 34 cloudflare 13 outlook 10 facebook 5

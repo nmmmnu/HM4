@@ -1,0 +1,44 @@
+- id:      MC8DECODE
+  name:    MC8DECODE
+  usage:   MC8DECODE hex
+  params:
+    items:
+    - k: hex
+      v: Morton Curve index value.
+         Coordinates are uint8_t, Morton Curve index is uint64_t.
+
+  return_type: array
+  return:      coordinates
+  version:     1.3.7.7
+  mutable:     false
+  compatible:  false
+  description: |
+    Decode coordinates *x*, *y*, *z*, *w*... into Morton Curve 8D hex index.
+
+  example:     |
+    127.0.0.1:6379> MC8ENCODE 5 23 4 5 4 3 2 3
+    "00000002001fe2ab"
+    127.0.0.1:6379> MC8DECODE 00000002001fe2ab
+    1) "5"
+    2) "23"
+    3) "4"
+    4) "5"
+    5) "4"
+    6) "3"
+    7) "2"
+    8) "3"
+    127.0.0.1:6379> # no need of leading zeroes, this also works
+    OK
+    127.0.0.1:6379> MC8DECODE 2001fe2ab
+    1) "5"
+    2) "23"
+    3) "4"
+    4) "5"
+    5) "4"
+    6) "3"
+    7) "2"
+    8) "3"
+
+  see_also:
+    items:
+      - MC8ENCODE

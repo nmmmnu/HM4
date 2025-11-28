@@ -1,0 +1,27 @@
+- id:      MC1ADD
+  name:    MC1ADD
+  usage:   MC1ADD key key_sub0 x0 val0 [key_sub1 x1 val1]...
+  params:
+    items:
+    - k: key
+      v: name of the Linear curve object
+    - k: sub_key0
+      v: sub key.
+    - k: x0
+      v: coordinate of the stored point / element of the stored vector.
+         Coordinate is uint32_t.
+
+  description: |
+    Insert *x0* into Linear curve index *key*, with *sub_key0*, value *value0*.<br />
+    Insert *x1* into Linear curve index *key*, with *sub_key1*, value *value1*.<br />
+    ...<br />
+
+  return_type: OK
+  version:     1.3.7.7
+  complexity:  2 * READ
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+    OK
+

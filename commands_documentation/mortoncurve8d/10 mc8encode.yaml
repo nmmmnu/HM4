@@ -1,0 +1,45 @@
+- id:      MC8ENCODE
+  name:    MC8ENCODE
+  usage:   MC8ENCODE x y z w ...
+  params:
+    items:
+    - k: x, y, z, w...
+      v: coordinates of the stored point / elements of the stored vector.
+         Coordinates are uint8_t, Morton Curve index is uint64_t.
+
+  return_type: string
+  return:      hex index
+  version:     1.3.7.7
+  mutable:     false
+  compatible:  false
+  description: |
+    Encode coordinates *x*, *y*, *z*, *w*... into Morton Curve 8D hex index.<br />
+    Coordinates are uint8_t, indexes type are uint64_t
+
+  example:     |
+    127.0.0.1:6379> MC8ENCODE 5 23 4 5 4 3 2 3
+    "00000002001fe2ab"
+    127.0.0.1:6379> MC8DECODE 00000002001fe2ab
+    1) "5"
+    2) "23"
+    3) "4"
+    4) "5"
+    5) "4"
+    6) "3"
+    7) "2"
+    8) "3"
+    127.0.0.1:6379> # no need of leading zeroes, this also works
+    OK
+    127.0.0.1:6379> MC8DECODE 2001fe2ab
+    1) "5"
+    2) "23"
+    3) "4"
+    4) "5"
+    5) "4"
+    6) "3"
+    7) "2"
+    8) "3"
+
+  see_also:
+    items:
+      - MC8DECODE

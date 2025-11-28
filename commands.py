@@ -148,10 +148,10 @@ def generate():
 		<blockquote>{{{.}}}</blockquote>
 		{{/description}}
 
-		{{#example}}
+		{{#example_module}}
 		<h3>Example:</h3>
 		<blockquote><pre class="x">{{.}}</pre></blockquote>
-		{{/example}}
+		{{/example_module}}
 
 		{{#see_also_module}}
 		<h3>See Also:</h3>
@@ -282,7 +282,12 @@ def generate():
 
 
 
+load_module("linearcurve"		)
 load_module("mortoncurve2d"		)
+load_module("mortoncurve3d"		)
+load_module("mortoncurve4d"		)
+load_module("mortoncurve8d"		)
+load_module("mortoncurve16d"		)
 load_module("heavy_hitters"		)
 load_module("misra_gries_heavy_hitters"	)
 load_module("reservoir_sampling"	)

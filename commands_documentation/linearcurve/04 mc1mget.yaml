@@ -1,0 +1,32 @@
+- id:      MC1MGET
+  name:    MC1MGET
+  usage:   MC1MGET key sub_key0 [sub_key1]...
+  params:
+    items:
+    - k: key
+      v: name of the Linear curve object
+    - k: sub_key0
+      v: sub key
+
+  description: |
+    Get *sub_key0*, *sub_key1* ... from Linear curve index *key*.<br />
+
+  return_type: array
+  return:      values
+  version:     1.3.7.7
+  complexity:  "[number of items] * 2 * READ"
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+    OK
+    127.0.0.1:6379> MC1MGET mymc1d rome sofia london boston
+    1) "rome_data"
+    2) "sofia_data"
+    3) ""
+    4) "boston_data"
+
+  see_also:
+    items:
+      - MC1GET
+      - MC1EXISTS

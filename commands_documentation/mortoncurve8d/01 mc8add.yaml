@@ -1,0 +1,27 @@
+- id:      MC8ADD
+  name:    MC8ADD
+  usage:   MC8ADD key key_sub0 x0 y0 z0 w0 ... val0 [key_sub1 x1 y1 w1 ... val1]...
+  params:
+    items:
+    - k: key
+      v: name of the Morton Curve 8D object
+    - k: sub_key0
+      v: sub key.
+    - k: x0, y0, z0, w0
+      v: coordinates of the stored point / elements of the stored vector.
+         Coordinates are uint8_t, Morton Curve index is uint64_t.
+
+  description: |
+    Insert *x0*, *y0*, *z0*, *w0*, ... into Morton Curve 8D index *key*, with *sub_key0*, value *value0*.<br />
+    Insert *x1*, *y1*, *z1*, *w1*, ... into Morton Curve 8D index *key*, with *sub_key1*, value *value1*.<br />
+    ...<br />
+
+  return_type: OK
+  version:     1.3.7.7
+  complexity:  2 * READ
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC8ADD mymc8d boston 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 rome_data sofia 1 7 2 6 1 7 2 6 sofia_data
+    OK
+

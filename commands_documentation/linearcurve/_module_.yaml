@@ -1,0 +1,22 @@
+id:          LINEARCURVE
+name:        LINEAR CURVE
+
+version:     1.3.7.7
+
+description: |
+  <p>This module includes an efficient single-dimentional indexing module with the same API like <b>Morton curve</b>.
+  This structure allows you to store and query points in 1D by mapping.</p>
+  <p>It is made for completeness.</p>
+  <p>Coordinate are uint32_t.</p>
+
+example_module:     |
+
+
+see_also_module:
+  items:
+    - MORTONCURVE2D
+    - MORTONCURVE3D
+    - MORTONCURVE4D
+    - MORTONCURVE8D
+    - MORTONCURVE16D
+

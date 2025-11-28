@@ -43,7 +43,7 @@ description: |
 
   <p><b>Tip:</b> This module can be used both for <b>tagging</b> and <b>full-text search</b>. Always add your data correctly before querying ranges to ensure accurate results.</p>
 
-example:     |
+example_module:     |
   127.0.0.1:6379> IXMADD news 1000 , "George,Bush,spokes,in,the,senate" x "article 1000"
   (integer) 1
   127.0.0.1:6379> IXMADD news 1001 , "New,laptop,from,DELL" x "article 1001"

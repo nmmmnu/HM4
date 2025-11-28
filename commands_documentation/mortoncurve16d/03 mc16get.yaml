@@ -1,0 +1,29 @@
+- id:      MC16GET
+  name:    MC16GET
+  usage:   MC16GET key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the Morton Curve 16D object
+    - k: sub_key
+      v: sub key
+
+  description: |
+    Get *sub_key* from Morton Curve 16D index *key*.<br />
+
+  return_type: string
+  return:      value
+  version:     1.3.7.7
+  complexity:  2 * READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC16ADD mymc16d boston 0 5 6 6 0 5 6 6 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 0 5 6 6 0 5 6 6 rome_data sofia 1 7 2 6 1 7 2 6 0 5 6 6 0 5 6 6 sofia_data
+    OK
+    127.0.0.1:6379> MC16GET mymc16d rome
+    "rome_data"
+
+  see_also:
+    items:
+      - MC16MGET
+      - MC16EXISTS

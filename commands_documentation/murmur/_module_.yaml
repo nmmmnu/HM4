@@ -29,7 +29,7 @@ description: |
   </ul>
   <p><b>Note:</b> MurmurHash is <b>not cryptographically secure</b> and should not be used for password hashing or security-critical operations.</p>
 
-example:     |
+example_module:     |
   127.0.0.1:6379> murmur test
   "3407684658384555107"
   127.0.0.1:6379> murmur test 0

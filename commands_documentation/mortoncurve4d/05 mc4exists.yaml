@@ -1,0 +1,29 @@
+- id:      MC4EXISTS
+  name:    MC4EXISTS
+  usage:   MC4EXISTS key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the Morton Curve 4D object
+    - k: sub_key
+      v: sub key
+
+  description: |
+    Check if the value of *sub_key* from Morton Curve 4D index *key* exists.<br />
+
+  return_type: string
+  return:      value
+  version:     1.3.7.7
+  complexity:  2 * READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC4ADD mymc4d boston 0 5 4 boston_data rome 0 6 4 rome_data sofia 1 7 2 sofia_data
+    OK
+    127.0.0.1:6379> MC4EXISTS mymc4d rome
+    (integer) 1
+
+  see_also:
+    items:
+      - MC4GET
+      - MC4MGET

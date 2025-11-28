@@ -68,6 +68,19 @@
 	<h2>Modules</h2>
 	<div class="menurow">
 		<div>
+			<a href="#M::LINEARCURVE">LINEAR CURVE</a>
+			<ul>
+				<li><a href="#C::MC1ADD">MC1ADD</a></li>
+				<li><a href="#C::MC1REM">MC1REM</a></li>
+				<li><a href="#C::MC1GET">MC1GET</a></li>
+				<li><a href="#C::MC1MGET">MC1MGET</a></li>
+				<li><a href="#C::MC1EXISTS">MC1EXISTS</a></li>
+				<li><a href="#C::MC1SCORE">MC1SCORE</a></li>
+				<li><a href="#C::MC1POINT">MC1POINT</a></li>
+				<li><a href="#C::MC1RANGE">MC1RANGE</a></li>
+			</ul>
+		</div>
+		<div>
 			<a href="#M::MORTONCURVE2D">MORTON CURVE 2D</a>
 			<ul>
 				<li><a href="#C::MC2ADD">MC2ADD</a></li>
@@ -81,6 +94,70 @@
 				<li><a href="#C::MC2RANGENAIVE">MC2RANGENAIVE</a></li>
 				<li><a href="#C::MC2ENCODE">MC2ENCODE</a></li>
 				<li><a href="#C::MC2DECODE">MC2DECODE</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::MORTONCURVE3D">MORTON CURVE 3D</a>
+			<ul>
+				<li><a href="#C::MC3ADD">MC3ADD</a></li>
+				<li><a href="#C::MC3REM">MC3REM</a></li>
+				<li><a href="#C::MC3GET">MC3GET</a></li>
+				<li><a href="#C::MC3MGET">MC3MGET</a></li>
+				<li><a href="#C::MC3EXISTS">MC3EXISTS</a></li>
+				<li><a href="#C::MC3SCORE">MC3SCORE</a></li>
+				<li><a href="#C::MC3POINT">MC3POINT</a></li>
+				<li><a href="#C::MC3RANGE">MC3RANGE</a></li>
+				<li><a href="#C::MC3RANGENAIVE">MC3RANGENAIVE</a></li>
+				<li><a href="#C::MC3ENCODE">MC3ENCODE</a></li>
+				<li><a href="#C::MC3DECODE">MC3DECODE</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::MORTONCURVE4D">MORTON CURVE 4D</a>
+			<ul>
+				<li><a href="#C::MC4ADD">MC4ADD</a></li>
+				<li><a href="#C::MC4REM">MC4REM</a></li>
+				<li><a href="#C::MC4GET">MC4GET</a></li>
+				<li><a href="#C::MC4MGET">MC4MGET</a></li>
+				<li><a href="#C::MC4EXISTS">MC4EXISTS</a></li>
+				<li><a href="#C::MC4SCORE">MC4SCORE</a></li>
+				<li><a href="#C::MC4POINT">MC4POINT</a></li>
+				<li><a href="#C::MC4RANGE">MC4RANGE</a></li>
+				<li><a href="#C::MC4RANGENAIVE">MC4RANGENAIVE</a></li>
+				<li><a href="#C::MC4ENCODE">MC4ENCODE</a></li>
+				<li><a href="#C::MC4DECODE">MC4DECODE</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::MORTONCURVE8D">MORTON CURVE 8D</a>
+			<ul>
+				<li><a href="#C::MC8ADD">MC8ADD</a></li>
+				<li><a href="#C::MC8REM">MC8REM</a></li>
+				<li><a href="#C::MC8GET">MC8GET</a></li>
+				<li><a href="#C::MC8MGET">MC8MGET</a></li>
+				<li><a href="#C::MC8EXISTS">MC8EXISTS</a></li>
+				<li><a href="#C::MC8SCORE">MC8SCORE</a></li>
+				<li><a href="#C::MC8POINT">MC8POINT</a></li>
+				<li><a href="#C::MC8RANGE">MC8RANGE</a></li>
+				<li><a href="#C::MC8RANGENAIVE">MC8RANGENAIVE</a></li>
+				<li><a href="#C::MC8ENCODE">MC8ENCODE</a></li>
+				<li><a href="#C::MC8DECODE">MC8DECODE</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::MORTONCURVE16D">MORTON CURVE 16D</a>
+			<ul>
+				<li><a href="#C::MC16ADD">MC16ADD</a></li>
+				<li><a href="#C::MC16REM">MC16REM</a></li>
+				<li><a href="#C::MC16GET">MC16GET</a></li>
+				<li><a href="#C::MC16MGET">MC16MGET</a></li>
+				<li><a href="#C::MC16EXISTS">MC16EXISTS</a></li>
+				<li><a href="#C::MC16SCORE">MC16SCORE</a></li>
+				<li><a href="#C::MC16POINT">MC16POINT</a></li>
+				<li><a href="#C::MC16RANGE">MC16RANGE</a></li>
+				<li><a href="#C::MC16RANGENAIVE">MC16RANGENAIVE</a></li>
+				<li><a href="#C::MC16ENCODE">MC16ENCODE</a></li>
+				<li><a href="#C::MC16DECODE">MC16DECODE</a></li>
 			</ul>
 		</div>
 		<div>
@@ -213,12 +290,638 @@
 	</div>
 	<hr />
 
+		<a name="M::LINEARCURVE"></a>
+		<h2>Module LINEAR CURVE</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module includes an efficient single-dimentional indexing module with the same API like <b>Morton curve</b>.
+This structure allows you to store and query points in 1D by mapping.</p>
+<p>It is made for completeness.</p>
+<p>Coordinate are uint32_t.</p>
+</blockquote>
+
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::MORTONCURVE2D">MORTONCURVE2D</a> module</li>
+			<li><a href="#M::MORTONCURVE3D">MORTONCURVE3D</a> module</li>
+			<li><a href="#M::MORTONCURVE4D">MORTONCURVE4D</a> module</li>
+			<li><a href="#M::MORTONCURVE8D">MORTONCURVE8D</a> module</li>
+			<li><a href="#M::MORTONCURVE16D">MORTONCURVE16D</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MC1ADD">MC1ADD</a></li>
+			<li><a href="#C::MC1REM">MC1REM</a></li>
+			<li><a href="#C::MC1GET">MC1GET</a></li>
+			<li><a href="#C::MC1MGET">MC1MGET</a></li>
+			<li><a href="#C::MC1EXISTS">MC1EXISTS</a></li>
+			<li><a href="#C::MC1SCORE">MC1SCORE</a></li>
+			<li><a href="#C::MC1POINT">MC1POINT</a></li>
+			<li><a href="#C::MC1RANGE">MC1RANGE</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MC1ADD">
+			<a name="C::MC1ADD"></a>
+			<h4>MC1ADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1ADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1ADD key key_sub0 x0 val0 [key_sub1 x1 val1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key.</td>
+				</tr>
+				<tr>
+					<td>x0</td>
+					<td>coordinate of the stored point / element of the stored vector. Coordinate is uint32_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *x0* into Linear curve index *key*, with *sub_key0*, value *value0*.<br />
+Insert *x1* into Linear curve index *key*, with *sub_key1*, value *value1*.<br />
+...<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+OK
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC1REM">
+			<a name="C::MC1REM"></a>
+			<h4>MC1REM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1REM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1REM key key_sub0 [key_sub1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *key_sub0*, *key_sub1*... from Linear curve index *key*.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>MC1REMOVE</li>
+				<li>MC1DEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+OK
+127.0.0.1:6379&gt; MC1DEL mymc1d rome sofia
+(integer) 1
+127.0.0.1:6379&gt; xnget mymc1d~ 10 mymc1d~
+1) &quot;mymc1d~0000000000000000~boston&quot;
+2) &quot;boston_data&quot;
+3) &quot;mymc1d~~boston&quot;
+4) &quot;0000000000000000&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC1GET">
+			<a name="C::MC1GET"></a>
+			<h4>MC1GET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1GET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1GET key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key* from Linear curve index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+OK
+127.0.0.1:6379&gt; MC1GET mymc1d rome
+&quot;rome_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC1MGET">MC1MGET</a></li>
+				<li><a href="#C::MC1EXISTS">MC1EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC1MGET">
+			<a name="C::MC1MGET"></a>
+			<h4>MC1MGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1MGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1MGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key0*, *sub_key1* ... from Linear curve index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+OK
+127.0.0.1:6379&gt; MC1MGET mymc1d rome sofia london boston
+1) &quot;rome_data&quot;
+2) &quot;sofia_data&quot;
+3) &quot;&quot;
+4) &quot;boston_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC1GET">MC1GET</a></li>
+				<li><a href="#C::MC1EXISTS">MC1EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC1EXISTS">
+			<a name="C::MC1EXISTS"></a>
+			<h4>MC1EXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1EXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1EXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of *sub_key* from Linear curve index *key* exists.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+OK
+127.0.0.1:6379&gt; MC1EXISTS mymc1d rome
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC1GET">MC1GET</a></li>
+				<li><a href="#C::MC1MGET">MC1MGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC1SCORE">
+			<a name="C::MC1SCORE"></a>
+			<h4>MC1SCORE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1SCORE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1SCORE key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get indexes for *sub_key* from Linear curve index *key*.<br />
+Coordinate is uint32_t, indexes type are uint32_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>x, y or empty</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+OK
+127.0.0.1:6379&gt; MC1SCORE mymc1d rome
+1) &quot;0000000000000000&quot;
+127.0.0.1:6379&gt; MC1SCORE mymc1d london
+1) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC1POINT">
+			<a name="C::MC1POINT"></a>
+			<h4>MC1POINT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1POINT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1POINT key x y count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>x</td>
+					<td>coordinate of the stored point / element of the stored vector. Coordinate is uint32_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Linear curve index *key*, that are in the "point" with "coordinates" *x*.<br />
+... or ...<br />
+In other words, get all vectors from Linear curve index *key*, that have elements { *x* }.</p>
+
+<p>This command is way faster than MC1RANGE.</p>
+
+<p><b>Example usage:</b></p>
+
+<p>Suppose we have a company with two offices in:</p>
+<ul>
+  <li>LA = 1</li>
+  <li>NY = 2</li>
+</ul>
+
+
+<pre class="x">
+mc1add users 0 1 john   <- adds user_id 0, john,   LA
+mc1add users 1 1 peter  <- adds user_id 1, peter,  LA
+mc1add users 2 2 jill   <- adds user_id 2, jill,   LA
+mc1add users 3 1 robert <- adds user_id 3, robert, NY
+mc1add users 4 2 pola   <- adds user_id 4, pola,   NY
+mc1add users 5 2 pepe   <- adds user_id 5, pepe,   NY
+mc1point users 2 2 10000  <- gets all support from LA (pola, pola, pepe)
+</pre>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD users 0 1 john
+OK
+127.0.0.1:6379&gt; MC1ADD users 1 1 peter
+OK
+127.0.0.1:6379&gt; MC1ADD users 2 2 jill
+OK
+127.0.0.1:6379&gt; MC1ADD users 3 1 robert
+OK
+127.0.0.1:6379&gt; MC1ADD users 4 2 pola
+OK
+127.0.0.1:6379&gt; MC1ADD users 5 2 pepe
+OK
+127.0.0.1:6379&gt; MC1POINT users 2 10000
+1) &quot;00000000000000000002,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;00000000000000000002,00000001&quot;
+4) &quot;pola&quot;
+5) &quot;00000000000000000002,00000002&quot;
+6) &quot;pepe&quot;
+7) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x = [x]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC1RANGE">MC1RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC1RANGE">
+			<a name="C::MC1RANGE"></a>
+			<h4>MC1RANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC1RANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC1RANGE key x_min x_max y_min y_max count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Linear curve object</td>
+				</tr>
+				<tr>
+					<td>x_min, x_max</td>
+					<td>ranges of the coordinates of the stored point / ranges of the elements of the stored vector. Coordinate is uint32_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Linear curve index *key*, that are in the "rectangle" *x_min* to *x_max*, *y_min* to *y_max*.</p>
+
+<p>This command is way slower than MC1RANGE.</p>
+
+<p><b>Example usage:</b></p>
+
+<p>Suppose we have a company with two offices in:</p>
+<ul>
+  <li>LA  = 1</li>
+  <li>NY = 2</li>
+</ul>
+<pre class="x">
+mc1add users 0 1 john      <- adds user_id 0, john,   LA
+mc1add users 1 1 peter     <- adds user_id 1, peter,  LA
+mc1add users 2 2 jill      <- adds user_id 2, jill,   LA
+mc1add users 3 1 robert    <- adds user_id 3, robert, NY
+mc1add users 4 2 pola      <- adds user_id 4, pola,   NY
+mc1add users 5 2 pepe      <- adds user_id 5, pepe,   NY
+mc1point users 2 10000     <- gets all support from LA               (pola, pola, pepe)
+mc1range users 2 2 10000   <- gets all support from LA               (pola, pola, pepe) - same as previous, but slower.
+mc1range users 1 2 10000   <- gets sales and support from LA and NY  (all)
+</pre>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC1ADD users 0 1 john
+OK
+127.0.0.1:6379&gt; MC1ADD users 1 1 peter
+OK
+127.0.0.1:6379&gt; MC1ADD users 2 2 jill
+OK
+127.0.0.1:6379&gt; MC1ADD users 3 1 robert
+OK
+127.0.0.1:6379&gt; MC1ADD users 4 2 pola
+OK
+127.0.0.1:6379&gt; MC1ADD users 5 2 pepe
+OK
+127.0.0.1:6379&gt; MC1POINT users 2 10000
+1) &quot;00000000000000000002,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;00000000000000000002,00000001&quot;
+4) &quot;pola&quot;
+5) &quot;00000000000000000002,00000002&quot;
+6) &quot;pepe&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; MC1RANGE users 2 2 10000
+1) &quot;00000000000000000002,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;00000000000000000002,00000001&quot;
+4) &quot;pola&quot;
+5) &quot;00000000000000000002,00000002&quot;
+6) &quot;pepe&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; MC1RANGE users 1 2 10000
+ 1) &quot;00000000000000000001,00000000&quot;
+ 2) &quot;john&quot;
+ 3) &quot;00000000000000000001,00000001&quot;
+ 4) &quot;peter&quot;
+ 5) &quot;00000000000000000001,00000002&quot;
+ 6) &quot;robert&quot;
+ 7) &quot;00000000000000000002,00000003&quot;
+ 8) &quot;jill&quot;
+ 9) &quot;00000000000000000002,00000004&quot;
+10) &quot;pola&quot;
+11) &quot;00000000000000000002,00000005&quot;
+12) &quot;pepe&quot;
+13) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x &gt;= [x_min] and x &lt;= [x_max]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC1POINT">MC1POINT</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
 		<a name="M::MORTONCURVE2D"></a>
 		<h2>Module MORTON CURVE 2D</h2>
 
 		<h3><b>Description:</b></h3>
-		<blockquote>
-<p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
+		<blockquote><p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
 This structure allows you to store and query points in 2D by mapping them into a single sortable integer using bit interleaving.</p>
 <p>Coordinates are uint32_t, indexes type are uint64_t</p>
 <p>The result is a fast, disk-friendly spatial index suitable for filtering and range searches.</p>
@@ -245,10 +948,12 @@ Where:</p>
   <li>Lndexes type are uint64_t</li>
 </ul>
 
+<p><b>Example usage:</b></p>
+
 <p>Suppose we have a company with two offices in:</p>
 <ul>
   <li>LA  = 1</li>
-  <li>NYC = 2</li>
+  <li>NY = 2</li>
 </ul>
 
 <p>Each office have two kind of employees:</p>
@@ -258,13 +963,18 @@ Where:</p>
 </ul>
 
 <pre class="x">
-mc2add users 0 1 1 john   <- adds user_id 0, john,   sales,   LA
-mc2add users 1 1 1 peter  <- adds user_id 1, peter,  sales,   LA
-mc2add users 2 2 1 jill   <- adds user_id 2, jill,   support, LA
-mc2add users 3 1 2 robert <- adds user_id 3, robert, sales,   NYC
-mc2add users 4 2 2 pola   <- adds user_id 4, pola,   support, NYC
-mc2add users 5 2 2 pepe   <- adds user_id 5, pepe,   support, NYC
-mc2point users 2 2 10000  <- gets all support from LA (pola, pepe)
+mc2add users 0 1 1 john      <- adds user_id 0, john,   sales,   LA
+mc2add users 1 1 1 peter     <- adds user_id 1, peter,  sales,   LA
+mc2add users 2 2 1 jill      <- adds user_id 2, jill,   support, LA
+mc2add users 3 1 2 robert    <- adds user_id 3, robert, sales,   NY
+mc2add users 4 2 2 pola      <- adds user_id 4, pola,   support, NY
+mc2add users 5 2 2 pepe      <- adds user_id 5, pepe,   support, NY
+mc2point users 2 2 10000     <- gets all support from LA               (pola, pepe)
+mc2point users 2 2 10000     <- gets all support from LA               (pola, pepe)
+mc2range users 2 2 2 2 10000 <- gets all support from LA               (pola, pepe) - same as previous, but slower.
+mc2range users 2 2 1 2 10000 <- gets support from LA and NY            (jill, pola, pepe)
+mc2range users 1 2 2 2 10000 <- gets sales and support from LA         (robert, pola, pepe)
+mc2range users 1 2 1 2 10000 <- gets sales and support from LA and NY  (all)
 </pre>
 </blockquote>
 
@@ -329,11 +1039,11 @@ OK
 
 		<h3>See Also:</h3>
 		<ul>
-			<li><a href="#M::linearcurve">linearcurve</a> module</li>
-			<li><a href="#M::mortoncurve3d">mortoncurve3d</a> module</li>
-			<li><a href="#M::mortoncurve4d">mortoncurve4d</a> module</li>
-			<li><a href="#M::mortoncurve8d">mortoncurve8d</a> module</li>
-			<li><a href="#M::mortoncurve16d">mortoncurve16d</a> module</li>
+			<li><a href="#M::LINEARCURVE">LINEARCURVE</a> module</li>
+			<li><a href="#M::MORTONCURVE3D">MORTONCURVE3D</a> module</li>
+			<li><a href="#M::MORTONCURVE4D">MORTONCURVE4D</a> module</li>
+			<li><a href="#M::MORTONCURVE8D">MORTONCURVE8D</a> module</li>
+			<li><a href="#M::MORTONCURVE16D">MORTONCURVE16D</a> module</li>
 		</ul>
 
 		<h3>Commands:</h3>
@@ -780,8 +1490,6 @@ mc2point users 2 2 10000  <- gets all support from LA (pola, pepe)
 
 			<h4>Example:</h4>
 			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
-Error: Broken pipe
-127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
 OK
 127.0.0.1:6379&gt; MC2ADD users 1 1 1 peter
 OK
@@ -902,8 +1610,6 @@ mc2range users 1 2 1 2 10000 <- gets sales and support from LA and NY  (all)
 
 			<h4>Example:</h4>
 			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
-Error: Broken pipe
-127.0.0.1:6379&gt; MC2ADD users 0 1 1 john
 OK
 127.0.0.1:6379&gt; MC2ADD users 1 1 1 peter
 OK
@@ -1056,6 +1762,11 @@ Coordinates are uint32_t, indexes type are uint64_t<br />
 			<h4>Example:</h4>
 			<blockquote><pre class="x">127.0.0.1:6379&gt; MC2ENCODE 5 23
 &quot;000000000000023b&quot;
+127.0.0.1:6379&gt; MC2DECODE 000000000000023b
+1) &quot;5&quot;
+2) &quot;23&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
 127.0.0.1:6379&gt; MC2DECODE 23b
 1) &quot;5&quot;
 2) &quot;23&quot;
@@ -1122,6 +1833,3172 @@ OK
 			<h4>See Also:</h4>
 			<ul>
 				<li><a href="#C::MC2ENCODE">MC2ENCODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MORTONCURVE3D"></a>
+		<h2>Module MORTON CURVE 3D</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
+This structure allows you to store and query points in 3D by mapping them into a single sortable integer using bit interleaving.</p>
+<p>Coordinates are uint32_t, indexes type are uint128_t</p>
+<p>The result is a fast, disk-friendly spatial index suitable for filtering and range searches.</p>
+<p><b>General Concept</b></p>
+<ul>
+  <li>You insert a point with some coordinates.</li>
+  <li>The module computes the Morton key by interleaving bits.</li>
+  <li>All points are stored in sorted order by their Morton code.</li>
+  <li>Queries operate by converting coordinates or ranges into corresponding Morton code intervals</li>
+</ul>
+<p>All MC commands share the same pattern:
+MC{n}{op}<br />
+Where:</p>
+<ul>
+  <li><b>n</b> = number of dimensions (2, 3, 4, 8, 16)</li>
+  <li><b>op</b> = operation: <b>ADD</b>, <b>POINT</b>, <b>RANGE</b>, etc.</li>
+</ul>
+<p><b>Notes</b></p>
+<ul>
+  <li>Morton curves preserve spatial locality well, making disk-based range lookups efficient.</li>
+  <li>POINT = optimized mode when all dimensions are exact values.</li>
+  <li>RANGE = full multidimensional "rectangle".</li>
+  <li>Coordinates are uint32_t</li>
+  <li>Lndexes type are uint128_t</li>
+</ul>
+</blockquote>
+
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::LINEARCURVE">LINEARCURVE</a> module</li>
+			<li><a href="#M::MORTONCURVE2D">MORTONCURVE2D</a> module</li>
+			<li><a href="#M::MORTONCURVE4D">MORTONCURVE4D</a> module</li>
+			<li><a href="#M::MORTONCURVE8D">MORTONCURVE8D</a> module</li>
+			<li><a href="#M::MORTONCURVE16D">MORTONCURVE16D</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MC3ADD">MC3ADD</a></li>
+			<li><a href="#C::MC3REM">MC3REM</a></li>
+			<li><a href="#C::MC3GET">MC3GET</a></li>
+			<li><a href="#C::MC3MGET">MC3MGET</a></li>
+			<li><a href="#C::MC3EXISTS">MC3EXISTS</a></li>
+			<li><a href="#C::MC3SCORE">MC3SCORE</a></li>
+			<li><a href="#C::MC3POINT">MC3POINT</a></li>
+			<li><a href="#C::MC3RANGE">MC3RANGE</a></li>
+			<li><a href="#C::MC3RANGENAIVE">MC3RANGENAIVE</a></li>
+			<li><a href="#C::MC3ENCODE">MC3ENCODE</a></li>
+			<li><a href="#C::MC3DECODE">MC3DECODE</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MC3ADD">
+			<a name="C::MC3ADD"></a>
+			<h4>MC3ADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3ADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3ADD key key_sub0 x0 y0 z0 val0 [key_sub1 x1 y1 val1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key.</td>
+				</tr>
+				<tr>
+					<td>x0, y0, z0</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *x0*, *y0*, *z0* into Morton Curve 3D index *key*, with *sub_key0*, value *value0*.<br />
+Insert *x1*, *y1*, *z1* into Morton Curve 3D index *key*, with *sub_key1*, value *value1*.<br />
+...<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD mymc3d boston 0 5 3 boston_data rome 0 6 2 rome_data sofia 1 7 2 sofia_data
+OK
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3REM">
+			<a name="C::MC3REM"></a>
+			<h4>MC3REM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3REM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3REM key key_sub0 [key_sub1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *key_sub0*, *key_sub1*... from Morton Curve 3D index *key*.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>MC3REMOVE</li>
+				<li>MC3DEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD mymc3d boston 0 5 5 boston_data rome 0 6 3 rome_data sofia 1 7 2 sofia_data
+OK
+127.0.0.1:6379&gt; MC3DEL mymc3d rome sofia
+(integer) 1
+127.0.0.1:6379&gt; xnget mymc3d~ 10 mymc3d~
+1) &quot;mymc3d~00000000000000000000000000000186~boston&quot;
+2) &quot;boston_data&quot;
+3) &quot;mymc3d~~boston&quot;
+4) &quot;00000000000000000000000000000186&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3GET">
+			<a name="C::MC3GET"></a>
+			<h4>MC3GET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3GET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3GET key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key* from Morton Curve 3D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD mymc3d boston 0 5 4 boston_data rome 0 6 2 rome_data sofia 1 7 5 sofia_data
+OK
+127.0.0.1:6379&gt; MC3GET mymc3d rome
+&quot;rome_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3MGET">MC3MGET</a></li>
+				<li><a href="#C::MC3EXISTS">MC3EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3MGET">
+			<a name="C::MC3MGET"></a>
+			<h4>MC3MGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3MGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3MGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key0*, *sub_key1* ... from Morton Curve 3D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD mymc3d boston 0 5 4 boston_data rome 0 6 4 rome_data sofia 1 7 2 sofia_data
+OK
+127.0.0.1:6379&gt; MC3MGET mymc3d rome sofia london boston
+1) &quot;rome_data&quot;
+2) &quot;sofia_data&quot;
+3) &quot;&quot;
+4) &quot;boston_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3GET">MC3GET</a></li>
+				<li><a href="#C::MC3EXISTS">MC3EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3EXISTS">
+			<a name="C::MC3EXISTS"></a>
+			<h4>MC3EXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3EXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3EXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of *sub_key* from Morton Curve 3D index *key* exists.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD mymc3d boston 0 5 4 boston_data rome 0 6 4 rome_data sofia 1 7 2 sofia_data
+OK
+127.0.0.1:6379&gt; MC3EXISTS mymc3d rome
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3GET">MC3GET</a></li>
+				<li><a href="#C::MC3MGET">MC3MGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3SCORE">
+			<a name="C::MC3SCORE"></a>
+			<h4>MC3SCORE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3SCORE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3SCORE key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get indexes for *sub_key* from Morton Curve 3D index *key*.<br />
+Coordinates are uint32_t, indexes type are uint128_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>x, y or empty</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD mymc3d boston 0 5 6 boston_data rome 0 6 6 rome_data sofia 1 7 2 sofia_data
+OK
+127.0.0.1:6379&gt; MC3SCORE mymc3d rome
+1) &quot;0&quot;
+2) &quot;6&quot;
+3) &quot;6&quot;
+127.0.0.1:6379&gt; MC3SCORE mymc3d london
+1) &quot;&quot;
+2) &quot;&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3POINT">
+			<a name="C::MC3POINT"></a>
+			<h4>MC3POINT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3POINT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3POINT key x y z count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>x, y, z</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 3D index *key*, that are in the "point" with "coordinates" *x*, *y*, *z*.<br />
+... or ...<br />
+In other words, get all vectors from Morton Curve 3D index *key*, that have elements { *x*, *y*, *z* }.</p>
+
+<p>This command is way faster than MC3RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD users 0 1 1 0 john
+OK
+127.0.0.1:6379&gt; MC3ADD users 1 1 1 0 peter
+OK
+127.0.0.1:6379&gt; MC3ADD users 2 2 1 0 jill
+OK
+127.0.0.1:6379&gt; MC3ADD users 3 1 2 0 robert
+OK
+127.0.0.1:6379&gt; MC3ADD users 4 2 2 1 pola
+OK
+127.0.0.1:6379&gt; MC3ADD users 5 2 2 0 pepe
+OK
+127.0.0.1:6379&gt; MC3POINT users 2 2 0 10000
+1) &quot;0000000002,0000000002,0000000000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x = [x] and
+  y = [y] and
+  z = [z]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3RANGE">MC3RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3RANGE">
+			<a name="C::MC3RANGE"></a>
+			<h4>MC3RANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3RANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3RANGE key x_min x_max y_min y_max z_min z_max count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 3D object</td>
+				</tr>
+				<tr>
+					<td>x_min, x_max, y_min, y_max, z_min, z_max</td>
+					<td>ranges of the coordinates of the stored point / ranges of the elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 3D index *key*, that are in the "rectangle" *x_min* to *x_max*, *y_min* to *y_max*, *z_min* to *z_max*.</p>
+
+<p>This command is way slower than MC3RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ADD users 0 1 1 0 john
+OK
+127.0.0.1:6379&gt; MC3ADD users 1 1 1 0 peter
+OK
+127.0.0.1:6379&gt; MC3ADD users 2 2 1 0 jill
+OK
+127.0.0.1:6379&gt; MC3ADD users 3 1 2 0 robert
+OK
+127.0.0.1:6379&gt; MC3ADD users 4 2 2 1 pola
+OK
+127.0.0.1:6379&gt; MC3ADD users 5 2 2 0 pepe
+OK
+127.0.0.1:6379&gt; MC3POINT users 2 2 0 10000
+1) &quot;0000000002,0000000002,0000000000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC3RANGE users 2 2 2 2 0 0 10000
+1) &quot;0000000002,0000000002,0000000000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC3RANGE users 2 2 1 2 0 1 10000
+1) &quot;0000000002,0000000001,0000000000,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;0000000002,0000000002,0000000000,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;0000000002,0000000002,0000000001,00000002&quot;
+6) &quot;pola&quot;
+7) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x &gt;= [x_min] and x &lt;= [x_max] and
+  y &gt;= [y_min] and y &lt;= [y_max] and
+  z &gt;= [z_min] and z &lt;= [z_max]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3POINT">MC3POINT</a></li>
+				<li><a href="#C::MC3RANGENAIVE">MC3RANGENAIVE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3RANGENAIVE">
+			<a name="C::MC3RANGENAIVE"></a>
+			<h4>MC3RANGENAIVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3RANGENAIVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3RANGENAIVE key x_min z_max y_min y_max z_min z_max count start</blockquote>
+
+
+			<h4>Description:</h4>
+			<blockquote>Naive, non performant version of MC3RANGE
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3RANGE">MC3RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3ENCODE">
+			<a name="C::MC3ENCODE"></a>
+			<h4>MC3ENCODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3ENCODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3ENCODE x y z</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>x, y, z</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Encode coordinates *x*, *y*, *z* into Morton Curve 3D hex index.<br />
+Coordinates are uint32_t, indexes type are uint128_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>hex index</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ENCODE 5 23 4
+&quot;000000000000000000000000000021d3&quot;
+127.0.0.1:6379&gt; MC3DECODE 000000000000000000000000000021d3
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC3DECODE 21d3
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3DECODE">MC3DECODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC3DECODE">
+			<a name="C::MC3DECODE"></a>
+			<h4>MC3DECODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC3DECODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC3DECODE hex</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>hex</td>
+					<td>Morton Curve index value. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Decode coordinates *x*, *y*, *z* into Morton Curve 3D hex index.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>coordinates</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC3ENCODE 5 23 4
+&quot;000000000000000000000000000021d3&quot;
+127.0.0.1:6379&gt; MC3DECODE 000000000000000000000000000021d3
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC3DECODE 21d3
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC3ENCODE">MC3ENCODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MORTONCURVE4D"></a>
+		<h2>Module MORTON CURVE 4D</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
+This structure allows you to store and query points in 4D by mapping them into a single sortable integer using bit interleaving.</p>
+<p>Coordinates are uint32_t, indexes type are uint128_t</p>
+<p>The result is a fast, disk-friendly spatial index suitable for filtering and range searches.</p>
+<p><b>General Concept</b></p>
+<ul>
+  <li>You insert a point with some coordinates.</li>
+  <li>The module computes the Morton key by interleaving bits.</li>
+  <li>All points are stored in sorted order by their Morton code.</li>
+  <li>Queries operate by converting coordinates or ranges into corresponding Morton code intervals</li>
+</ul>
+<p>All MC commands share the same pattern:
+MC{n}{op}<br />
+Where:</p>
+<ul>
+  <li><b>n</b> = number of dimensions (2, 3, 4, 8, 16)</li>
+  <li><b>op</b> = operation: <b>ADD</b>, <b>POINT</b>, <b>RANGE</b>, etc.</li>
+</ul>
+<p><b>Notes</b></p>
+<ul>
+  <li>Morton curves preserve spatial locality well, making disk-based range lookups efficient.</li>
+  <li>POINT = optimized mode when all dimensions are exact values.</li>
+  <li>RANGE = full multidimensional "rectangle".</li>
+  <li>Coordinates are uint32_t</li>
+  <li>Lndexes type are uint128_t</li>
+</ul>
+</blockquote>
+
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::LINEARCURVE">LINEARCURVE</a> module</li>
+			<li><a href="#M::MORTONCURVE2D">MORTONCURVE2D</a> module</li>
+			<li><a href="#M::MORTONCURVE3D">MORTONCURVE3D</a> module</li>
+			<li><a href="#M::MORTONCURVE8D">MORTONCURVE8D</a> module</li>
+			<li><a href="#M::MORTONCURVE16D">MORTONCURVE16D</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MC4ADD">MC4ADD</a></li>
+			<li><a href="#C::MC4REM">MC4REM</a></li>
+			<li><a href="#C::MC4GET">MC4GET</a></li>
+			<li><a href="#C::MC4MGET">MC4MGET</a></li>
+			<li><a href="#C::MC4EXISTS">MC4EXISTS</a></li>
+			<li><a href="#C::MC4SCORE">MC4SCORE</a></li>
+			<li><a href="#C::MC4POINT">MC4POINT</a></li>
+			<li><a href="#C::MC4RANGE">MC4RANGE</a></li>
+			<li><a href="#C::MC4RANGENAIVE">MC4RANGENAIVE</a></li>
+			<li><a href="#C::MC4ENCODE">MC4ENCODE</a></li>
+			<li><a href="#C::MC4DECODE">MC4DECODE</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MC4ADD">
+			<a name="C::MC4ADD"></a>
+			<h4>MC4ADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4ADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4ADD key key_sub0 x0 y0 z0 w0 val0 [key_sub1 x1 y1 w1 val1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key.</td>
+				</tr>
+				<tr>
+					<td>x0, y0, z0, w0</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *x0*, *y0*, *z0*, *w0* into Morton Curve 4D index *key*, with *sub_key0*, value *value0*.<br />
+Insert *x1*, *y1*, *z1*, *w1* into Morton Curve 4D index *key*, with *sub_key1*, value *value1*.<br />
+...<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD mymc4d boston 0 5 3 5 boston_data rome 0 6 2 6 rome_data sofia 1 7 2 7 sofia_data
+OK
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4REM">
+			<a name="C::MC4REM"></a>
+			<h4>MC4REM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4REM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4REM key key_sub0 [key_sub1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *key_sub0*, *key_sub1*... from Morton Curve 4D index *key*.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>MC4REMOVE</li>
+				<li>MC4DEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD mymc4d boston 0 5 5 boston_data rome 0 6 3 rome_data sofia 1 7 2 sofia_data
+OK
+127.0.0.1:6379&gt; MC4DEL mymc4d rome sofia
+(integer) 1
+127.0.0.1:6379&gt; xnget mymc4d~ 10 mymc4d~
+1) &quot;mymc4d~00000000000000000000000000000186~boston&quot;
+2) &quot;boston_data&quot;
+3) &quot;mymc4d~~boston&quot;
+4) &quot;00000000000000000000000000000186&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4GET">
+			<a name="C::MC4GET"></a>
+			<h4>MC4GET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4GET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4GET key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key* from Morton Curve 4D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD mymc4d boston 0 5 4 boston_data rome 0 6 2 rome_data sofia 1 7 5 sofia_data
+OK
+127.0.0.1:6379&gt; MC4GET mymc4d rome
+&quot;rome_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4MGET">MC4MGET</a></li>
+				<li><a href="#C::MC4EXISTS">MC4EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4MGET">
+			<a name="C::MC4MGET"></a>
+			<h4>MC4MGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4MGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4MGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key0*, *sub_key1* ... from Morton Curve 4D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD mymc4d boston 0 5 4 boston_data rome 0 6 4 rome_data sofia 1 7 2 sofia_data
+OK
+127.0.0.1:6379&gt; MC4MGET mymc4d rome sofia london boston
+1) &quot;rome_data&quot;
+2) &quot;sofia_data&quot;
+3) &quot;&quot;
+4) &quot;boston_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4GET">MC4GET</a></li>
+				<li><a href="#C::MC4EXISTS">MC4EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4EXISTS">
+			<a name="C::MC4EXISTS"></a>
+			<h4>MC4EXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4EXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4EXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of *sub_key* from Morton Curve 4D index *key* exists.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD mymc4d boston 0 5 4 boston_data rome 0 6 4 rome_data sofia 1 7 2 sofia_data
+OK
+127.0.0.1:6379&gt; MC4EXISTS mymc4d rome
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4GET">MC4GET</a></li>
+				<li><a href="#C::MC4MGET">MC4MGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4SCORE">
+			<a name="C::MC4SCORE"></a>
+			<h4>MC4SCORE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4SCORE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4SCORE key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get indexes for *sub_key* from Morton Curve 4D index *key*.<br />
+Coordinates are uint32_t, indexes type are uint128_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>x, y or empty</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD mymc4d boston 0 5 6 6 boston_data rome 0 6 6 6 rome_data sofia 1 7 2 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC4SCORE mymc4d rome
+1) &quot;0&quot;
+2) &quot;6&quot;
+3) &quot;6&quot;
+3) &quot;6&quot;
+127.0.0.1:6379&gt; MC4SCORE mymc4d london
+1) &quot;&quot;
+2) &quot;&quot;
+3) &quot;&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4POINT">
+			<a name="C::MC4POINT"></a>
+			<h4>MC4POINT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4POINT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4POINT key x y z w count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>x, y, z, w</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 4D index *key*, that are in the "point" with "coordinates" *x*, *y*, *z*.<br />
+... or ...<br />
+In other words, get all vectors from Morton Curve 4D index *key*, that have elements { *x*, *y*, *z* }.</p>
+
+<p>This command is way faster than MC4RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD users 0 1 1 0 0 john
+OK
+127.0.0.1:6379&gt; MC4ADD users 1 1 1 0 0 peter
+OK
+127.0.0.1:6379&gt; MC4ADD users 2 2 1 0 0 jill
+OK
+127.0.0.1:6379&gt; MC4ADD users 3 1 2 0 0 robert
+OK
+127.0.0.1:6379&gt; MC4ADD users 4 2 2 1 1 pola
+OK
+127.0.0.1:6379&gt; MC4ADD users 5 2 2 0 0 pepe
+OK
+127.0.0.1:6379&gt; MC4POINT users 2 2 0 0 10000
+1) &quot;0000000002,0000000002,0000000000,0000000000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x = [x] and
+  y = [y] and
+  z = [z] and
+  w = [w]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4RANGE">MC4RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4RANGE">
+			<a name="C::MC4RANGE"></a>
+			<h4>MC4RANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4RANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4RANGE key x_min x_max y_min y_max z_min z_max w_min w_max count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 4D object</td>
+				</tr>
+				<tr>
+					<td>x_min, x_max, y_min, y_max, z_min, z_max, w_min, w_max</td>
+					<td>ranges of the coordinates of the stored point / ranges of the elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 4D index *key*, that are in the "rectangle" *x_min* to *x_max*, *y_min* to *y_max*, *z_min* to *z_max*.</p>
+
+<p>This command is way slower than MC4RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ADD users 0 1 1 0 0 john
+OK
+127.0.0.1:6379&gt; MC4ADD users 1 1 1 0 0 peter
+OK
+127.0.0.1:6379&gt; MC4ADD users 2 2 1 0 0 jill
+OK
+127.0.0.1:6379&gt; MC4ADD users 3 1 2 0 0 robert
+OK
+127.0.0.1:6379&gt; MC4ADD users 4 2 2 1 1 pola
+OK
+127.0.0.1:6379&gt; MC4ADD users 5 2 2 0 0 pepe
+OK
+127.0.0.1:6379&gt; MC4POINT users 2 2 0 0 10000
+1) &quot;0000000002,0000000002,0000000000,0000000000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC4RANGE users 2 2 2 2 0 0 0 0 10000
+1) &quot;0000000002,0000000002,0000000000,0000000000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC4RANGE users 2 2 1 2 0 1 0 0 10000
+1) &quot;0000000002,0000000001,0000000000,0000000000,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;0000000002,0000000002,0000000000,0000000000,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x &gt;= [x_min] and x &lt;= [x_max] and
+  y &gt;= [y_min] and y &lt;= [y_max] and
+  z &gt;= [z_min] and z &lt;= [z_max] and
+  w &gt;= [w_min] and w &lt;= [w_max]
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4POINT">MC4POINT</a></li>
+				<li><a href="#C::MC4RANGENAIVE">MC4RANGENAIVE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4RANGENAIVE">
+			<a name="C::MC4RANGENAIVE"></a>
+			<h4>MC4RANGENAIVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4RANGENAIVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4RANGENAIVE key x_min z_max y_min y_max z_min z_max w_min w_max count start</blockquote>
+
+
+			<h4>Description:</h4>
+			<blockquote>Naive, non performant version of MC4RANGE
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4RANGE">MC4RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4ENCODE">
+			<a name="C::MC4ENCODE"></a>
+			<h4>MC4ENCODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4ENCODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4ENCODE x y z w</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>x, y, z, w</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Encode coordinates *x*, *y*, *z*, *w* into Morton Curve 4D hex index.<br />
+Coordinates are uint32_t, indexes type are uint128_t
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>hex index</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ENCODE 5 23 4 5
+&quot;00000000000000000000000000020f2b&quot;
+127.0.0.1:6379&gt; MC4DECODE 00000000000000000000000000020f2b
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+3) &quot;5&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC4DECODE 20f2b
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+3) &quot;5&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4DECODE">MC4DECODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC4DECODE">
+			<a name="C::MC4DECODE"></a>
+			<h4>MC4DECODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC4DECODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC4DECODE hex</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>hex</td>
+					<td>Morton Curve index value. Coordinates are uint32_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Decode coordinates *x*, *y*, *z*, *w* into Morton Curve 4D hex index.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>coordinates</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC4ENCODE 5 23 4 5
+&quot;00000000000000000000000000020f2b&quot;
+127.0.0.1:6379&gt; MC4DECODE 00000000000000000000000000020f2b
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+3) &quot;5&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC4DECODE 20f2b
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+3) &quot;5&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC4ENCODE">MC4ENCODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MORTONCURVE8D"></a>
+		<h2>Module MORTON CURVE 8D</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
+This structure allows you to store and query points in 8D by mapping them into a single sortable integer using bit interleaving.</p>
+<p>Coordinates are uint8_t, indexes type are uint64_t</p>
+<p>The result is a fast, disk-friendly spatial index suitable for filtering and range searches.</p>
+<p><b>General Concept</b></p>
+<ul>
+  <li>You insert a point with some coordinates.</li>
+  <li>The module computes the Morton key by interleaving bits.</li>
+  <li>All points are stored in sorted order by their Morton code.</li>
+  <li>Queries operate by converting coordinates or ranges into corresponding Morton code intervals</li>
+</ul>
+<p>All MC commands share the same pattern:
+MC{n}{op}<br />
+Where:</p>
+<ul>
+  <li><b>n</b> = number of dimensions (2, 3, 4, 8, 16)</li>
+  <li><b>op</b> = operation: <b>ADD</b>, <b>POINT</b>, <b>RANGE</b>, etc.</li>
+</ul>
+<p><b>Notes</b></p>
+<ul>
+  <li>Morton curves preserve spatial locality well, making disk-based range lookups efficient.</li>
+  <li>POINT = optimized mode when all dimensions are exact values.</li>
+  <li>RANGE = full multidimensional "rectangle".</li>
+  <li>Coordinates are uint8_t</li>
+  <li>Lndexes type are uint64_t</li>
+</ul>
+</blockquote>
+
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::LINEARCURVE">LINEARCURVE</a> module</li>
+			<li><a href="#M::MORTONCURVE2D">MORTONCURVE2D</a> module</li>
+			<li><a href="#M::MORTONCURVE3D">MORTONCURVE3D</a> module</li>
+			<li><a href="#M::MORTONCURVE4D">MORTONCURVE4D</a> module</li>
+			<li><a href="#M::MORTONCURVE16D">MORTONCURVE16D</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MC8ADD">MC8ADD</a></li>
+			<li><a href="#C::MC8REM">MC8REM</a></li>
+			<li><a href="#C::MC8GET">MC8GET</a></li>
+			<li><a href="#C::MC8MGET">MC8MGET</a></li>
+			<li><a href="#C::MC8EXISTS">MC8EXISTS</a></li>
+			<li><a href="#C::MC8SCORE">MC8SCORE</a></li>
+			<li><a href="#C::MC8POINT">MC8POINT</a></li>
+			<li><a href="#C::MC8RANGE">MC8RANGE</a></li>
+			<li><a href="#C::MC8RANGENAIVE">MC8RANGENAIVE</a></li>
+			<li><a href="#C::MC8ENCODE">MC8ENCODE</a></li>
+			<li><a href="#C::MC8DECODE">MC8DECODE</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MC8ADD">
+			<a name="C::MC8ADD"></a>
+			<h4>MC8ADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8ADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8ADD key key_sub0 x0 y0 z0 w0 ... val0 [key_sub1 x1 y1 w1 ... val1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key.</td>
+				</tr>
+				<tr>
+					<td>x0, y0, z0, w0</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint64_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *x0*, *y0*, *z0*, *w0*, ... into Morton Curve 8D index *key*, with *sub_key0*, value *value0*.<br />
+Insert *x1*, *y1*, *z1*, *w1*, ... into Morton Curve 8D index *key*, with *sub_key1*, value *value1*.<br />
+...<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD mymc8d boston 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 rome_data sofia 1 7 2 6 1 7 2 6 sofia_data
+OK
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8REM">
+			<a name="C::MC8REM"></a>
+			<h4>MC8REM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8REM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8REM key key_sub0 [key_sub1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *key_sub0*, *key_sub1*... from Morton Curve 8D index *key*.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>MC8REMOVE</li>
+				<li>MC8DEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD mymc8d boston 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 rome_data sofia 1 7 2 6 1 7 2 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC8DEL mymc8d rome sofia
+(integer) 1
+127.0.0.1:6379&gt; xnget mymc8d~ 10 mymc8d~
+1) &quot;mymc8d~0000000000eecc22~boston&quot;
+2) &quot;boston_data&quot;
+3) &quot;mymc8d~~boston&quot;
+4) &quot;0000000000eecc22&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8GET">
+			<a name="C::MC8GET"></a>
+			<h4>MC8GET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8GET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8GET key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key* from Morton Curve 8D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD mymc8d boston 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 rome_data sofia 1 7 2 6 1 7 2 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC8GET mymc8d rome
+&quot;rome_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8MGET">MC8MGET</a></li>
+				<li><a href="#C::MC8EXISTS">MC8EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8MGET">
+			<a name="C::MC8MGET"></a>
+			<h4>MC8MGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8MGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8MGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key0*, *sub_key1* ... from Morton Curve 8D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD mymc8d boston 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 rome_data sofia 1 7 2 6 1 7 2 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC8MGET mymc8d rome sofia london boston
+1) &quot;rome_data&quot;
+2) &quot;sofia_data&quot;
+3) &quot;&quot;
+4) &quot;boston_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8GET">MC8GET</a></li>
+				<li><a href="#C::MC8EXISTS">MC8EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8EXISTS">
+			<a name="C::MC8EXISTS"></a>
+			<h4>MC8EXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8EXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8EXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of *sub_key* from Morton Curve 8D index *key* exists.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD mymc8d boston 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 rome_data sofia 1 7 2 6 1 7 2 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC8EXISTS mymc8d rome
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8GET">MC8GET</a></li>
+				<li><a href="#C::MC8MGET">MC8MGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8SCORE">
+			<a name="C::MC8SCORE"></a>
+			<h4>MC8SCORE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8SCORE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8SCORE key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get indexes for *sub_key* from Morton Curve 8D index *key*.<br />
+Coordinates are uint8_t, indexes type are uint64_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>x, y or empty</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD mymc8d boston 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 rome_data sofia 1 7 2 6 1 7 2 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC8SCORE mymc8d rome
+1) &quot;0&quot;
+2) &quot;6&quot;
+3) &quot;6&quot;
+3) &quot;6&quot;
+4) &quot;0&quot;
+5) &quot;6&quot;
+6) &quot;6&quot;
+7) &quot;6&quot;
+127.0.0.1:6379&gt; MC8SCORE mymc8d london
+1) &quot;&quot;
+2) &quot;&quot;
+3) &quot;&quot;
+3) &quot;&quot;
+4) &quot;&quot;
+5) &quot;&quot;
+6) &quot;&quot;
+7) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8POINT">
+			<a name="C::MC8POINT"></a>
+			<h4>MC8POINT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8POINT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8POINT key x y z ... count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>x, y, z, w ...</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint64_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 8D index *key*, that are in the "point" with "coordinates" *x*, *y*, *z*.<br />
+... or ...<br />
+In other words, get all vectors from Morton Curve 8D index *key*, that have elements { *x*, *y*, *z* }.</p>
+
+<p>This command is way faster than MC8RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD users 0 1 1 0 0 1 1 0 0 john
+OK
+127.0.0.1:6379&gt; MC8ADD users 1 1 1 0 0 1 1 0 0 peter
+OK
+127.0.0.1:6379&gt; MC8ADD users 2 2 1 0 0 2 1 0 0 jill
+OK
+127.0.0.1:6379&gt; MC8ADD users 3 1 2 0 0 1 2 0 0 robert
+OK
+127.0.0.1:6379&gt; MC8ADD users 4 2 2 1 1 2 2 1 1 pola
+OK
+127.0.0.1:6379&gt; MC8ADD users 5 2 2 0 0 2 2 0 0 pepe
+OK
+127.0.0.1:6379&gt; MC8POINT users 2 2 0 0 2 2 0 0 10000
+1) &quot;002,002,000,000,002,002,000,000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC8RANGE users 2 2 2 2 0 0 0 0 2 2 2 2 0 0 0 0 10000
+1) &quot;002,002,000,000,002,002,000,000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x = [x] and
+  y = [y] and
+  z = [z] and
+  w = [w] and
+  ...
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8RANGE">MC8RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8RANGE">
+			<a name="C::MC8RANGE"></a>
+			<h4>MC8RANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8RANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8RANGE key x_min x_max y_min y_max z_min z_max w_min w_max ... count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 8D object</td>
+				</tr>
+				<tr>
+					<td>x_min, x_max, y_min, y_max, z_min, z_max, w_min, w_max ...</td>
+					<td>ranges of the coordinates of the stored point / ranges of the elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint64_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 8D index *key*, that are in the "rectangle" *x_min* to *x_max*, *y_min* to *y_max*, *z_min* to *z_max*.</p>
+
+<p>This command is way slower than MC8RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ADD users 0 1 1 0 0 1 1 0 0 john
+OK
+127.0.0.1:6379&gt; MC8ADD users 1 1 1 0 0 1 1 0 0 peter
+OK
+127.0.0.1:6379&gt; MC8ADD users 2 2 1 0 0 2 1 0 0 jill
+OK
+127.0.0.1:6379&gt; MC8ADD users 3 1 2 0 0 1 2 0 0 robert
+OK
+127.0.0.1:6379&gt; MC8ADD users 4 2 2 1 1 2 2 1 1 pola
+OK
+127.0.0.1:6379&gt; MC8ADD users 5 2 2 0 0 2 2 0 0 pepe
+OK
+127.0.0.1:6379&gt; MC8POINT users 2 2 0 0 2 2 0 0 10000
+1) &quot;002,002,000,000,002,002,000,000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC8RANGE users 2 2 2 2 0 0 0 0 2 2 2 2 0 0 0 0 10000
+1) &quot;002,002,000,000,002,002,000,000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC8RANGE users 2 2 1 2 0 1 0 0 2 2 1 2 0 1 0 0 10000
+1) &quot;002,001,000,000,002,001,000,000,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;002,002,000,000,002,002,000,000,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x &gt;= [x_min] and x &lt;= [x_max] and
+  y &gt;= [y_min] and y &lt;= [y_max] and
+  z &gt;= [z_min] and z &lt;= [z_max] and
+  w &gt;= [w_min] and w &lt;= [w_max] and
+  ...
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8POINT">MC8POINT</a></li>
+				<li><a href="#C::MC8RANGENAIVE">MC8RANGENAIVE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8RANGENAIVE">
+			<a name="C::MC8RANGENAIVE"></a>
+			<h4>MC8RANGENAIVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8RANGENAIVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8RANGENAIVE key x_min z_max y_min y_max z_min z_max w_min w_max ... count start</blockquote>
+
+
+			<h4>Description:</h4>
+			<blockquote>Naive, non performant version of MC8RANGE
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8RANGE">MC8RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8ENCODE">
+			<a name="C::MC8ENCODE"></a>
+			<h4>MC8ENCODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8ENCODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8ENCODE x y z w ...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>x, y, z, w...</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint64_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Encode coordinates *x*, *y*, *z*, *w*... into Morton Curve 8D hex index.<br />
+Coordinates are uint8_t, indexes type are uint64_t
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>hex index</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ENCODE 5 23 4 5 4 3 2 3
+&quot;00000002001fe2ab&quot;
+127.0.0.1:6379&gt; MC8DECODE 00000002001fe2ab
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+4) &quot;5&quot;
+5) &quot;4&quot;
+6) &quot;3&quot;
+7) &quot;2&quot;
+8) &quot;3&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC8DECODE 2001fe2ab
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+4) &quot;5&quot;
+5) &quot;4&quot;
+6) &quot;3&quot;
+7) &quot;2&quot;
+8) &quot;3&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8DECODE">MC8DECODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC8DECODE">
+			<a name="C::MC8DECODE"></a>
+			<h4>MC8DECODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC8DECODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC8DECODE hex</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>hex</td>
+					<td>Morton Curve index value. Coordinates are uint8_t, Morton Curve index is uint64_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Decode coordinates *x*, *y*, *z*, *w*... into Morton Curve 8D hex index.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>coordinates</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC8ENCODE 5 23 4 5 4 3 2 3
+&quot;00000002001fe2ab&quot;
+127.0.0.1:6379&gt; MC8DECODE 00000002001fe2ab
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+4) &quot;5&quot;
+5) &quot;4&quot;
+6) &quot;3&quot;
+7) &quot;2&quot;
+8) &quot;3&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC8DECODE 2001fe2ab
+1) &quot;5&quot;
+2) &quot;23&quot;
+3) &quot;4&quot;
+4) &quot;5&quot;
+5) &quot;4&quot;
+6) &quot;3&quot;
+7) &quot;2&quot;
+8) &quot;3&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC8ENCODE">MC8ENCODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MORTONCURVE16D"></a>
+		<h2>Module MORTON CURVE 16D</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module includes an efficient multidimensional indexing module based on the <b>Morton curve</b> (also known as <b>Z-order curve</b>).
+This structure allows you to store and query points in 16D by mapping them into a single sortable integer using bit interleaving.</p>
+<p>Coordinates are uint8_t, indexes type are uint128_t</p>
+<p>The result is a fast, disk-friendly spatial index suitable for filtering and range searches.</p>
+<p><b>General Concept</b></p>
+<ul>
+  <li>You insert a point with some coordinates.</li>
+  <li>The module computes the Morton key by interleaving bits.</li>
+  <li>All points are stored in sorted order by their Morton code.</li>
+  <li>Queries operate by converting coordinates or ranges into corresponding Morton code intervals</li>
+</ul>
+<p>All MC commands share the same pattern:
+MC{n}{op}<br />
+Where:</p>
+<ul>
+  <li><b>n</b> = number of dimensions (2, 3, 4, 8, 16)</li>
+  <li><b>op</b> = operation: <b>ADD</b>, <b>POINT</b>, <b>RANGE</b>, etc.</li>
+</ul>
+<p><b>Notes</b></p>
+<ul>
+  <li>Morton curves preserve spatial locality well, making disk-based range lookups efficient.</li>
+  <li>POINT = optimized mode when all dimensions are exact values.</li>
+  <li>RANGE = full multidimensional "rectangle".</li>
+  <li>Coordinates are uint8_t</li>
+  <li>Lndexes type are uint128_t</li>
+</ul>
+</blockquote>
+
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::LINEARCURVE">LINEARCURVE</a> module</li>
+			<li><a href="#M::MORTONCURVE2D">MORTONCURVE2D</a> module</li>
+			<li><a href="#M::MORTONCURVE3D">MORTONCURVE3D</a> module</li>
+			<li><a href="#M::MORTONCURVE4D">MORTONCURVE4D</a> module</li>
+			<li><a href="#M::MORTONCURVE8D">MORTONCURVE8D</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MC16ADD">MC16ADD</a></li>
+			<li><a href="#C::MC16REM">MC16REM</a></li>
+			<li><a href="#C::MC16GET">MC16GET</a></li>
+			<li><a href="#C::MC16MGET">MC16MGET</a></li>
+			<li><a href="#C::MC16EXISTS">MC16EXISTS</a></li>
+			<li><a href="#C::MC16SCORE">MC16SCORE</a></li>
+			<li><a href="#C::MC16POINT">MC16POINT</a></li>
+			<li><a href="#C::MC16RANGE">MC16RANGE</a></li>
+			<li><a href="#C::MC16RANGENAIVE">MC16RANGENAIVE</a></li>
+			<li><a href="#C::MC16ENCODE">MC16ENCODE</a></li>
+			<li><a href="#C::MC16DECODE">MC16DECODE</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MC16ADD">
+			<a name="C::MC16ADD"></a>
+			<h4>MC16ADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16ADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16ADD key key_sub0 x0 y0 z0 w0 ... val0 [key_sub1 x1 y1 w1 ... val1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key.</td>
+				</tr>
+				<tr>
+					<td>x0, y0, z0, w0</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *x0*, *y0*, *z0*, *w0*, ... into Morton Curve 16D index *key*, with *sub_key0*, value *value0*.<br />
+Insert *x1*, *y1*, *z1*, *w1*, ... into Morton Curve 16D index *key*, with *sub_key1*, value *value1*.<br />
+...<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>OK</blockquote>
+
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD mymc16d boston 0 5 6 6 0 5 6 6 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 0 5 6 6 0 5 6 6 rome_data sofia 1 7 2 6 1 7 2 6 0 5 6 6 0 5 6 6 sofia_data
+OK
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16REM">
+			<a name="C::MC16REM"></a>
+			<h4>MC16REM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16REM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16REM key key_sub0 [key_sub1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *key_sub0*, *key_sub1*... from Morton Curve 16D index *key*.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>MC16REMOVE</li>
+				<li>MC16DEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD mymc16d boston 0 5 6 6 0 5 6 6 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 0 5 6 6 0 5 6 6 rome_data sofia 1 7 2 6 1 7 2 6 0 5 6 6 0 5 6 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC16DEL mymc16d rome sofia
+(integer) 1
+127.0.0.1:6379&gt; xnget mymc16d~ 10 mymc16d~
+1) &quot;mymc16d~00000000000000000000eeeecccc2222~boston&quot;
+2) &quot;boston_data&quot;
+3) &quot;mymc16d~~boston&quot;
+4) &quot;00000000000000000000eeeecccc2222&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16GET">
+			<a name="C::MC16GET"></a>
+			<h4>MC16GET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16GET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16GET key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key* from Morton Curve 16D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD mymc16d boston 0 5 6 6 0 5 6 6 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 0 5 6 6 0 5 6 6 rome_data sofia 1 7 2 6 1 7 2 6 0 5 6 6 0 5 6 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC16GET mymc16d rome
+&quot;rome_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16MGET">MC16MGET</a></li>
+				<li><a href="#C::MC16EXISTS">MC16EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16MGET">
+			<a name="C::MC16MGET"></a>
+			<h4>MC16MGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16MGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16MGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>sub_key0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get *sub_key0*, *sub_key1* ... from Morton Curve 16D index *key*.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD mymc16d boston 0 5 6 6 0 5 6 6 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 0 5 6 6 0 5 6 6 rome_data sofia 1 7 2 6 1 7 2 6 0 5 6 6 0 5 6 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC16MGET mymc16d rome sofia london boston
+1) &quot;rome_data&quot;
+2) &quot;sofia_data&quot;
+3) &quot;&quot;
+4) &quot;boston_data&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16GET">MC16GET</a></li>
+				<li><a href="#C::MC16EXISTS">MC16EXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16EXISTS">
+			<a name="C::MC16EXISTS"></a>
+			<h4>MC16EXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16EXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16EXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of *sub_key* from Morton Curve 16D index *key* exists.<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD mymc16d boston 0 5 6 6 0 5 6 6 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 0 5 6 6 0 5 6 6 rome_data sofia 1 7 2 6 1 7 2 6 0 5 6 6 0 5 6 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC16EXISTS mymc16d rome
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16GET">MC16GET</a></li>
+				<li><a href="#C::MC16MGET">MC16MGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16SCORE">
+			<a name="C::MC16SCORE"></a>
+			<h4>MC16SCORE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16SCORE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16SCORE key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get indexes for *sub_key* from Morton Curve 16D index *key*.<br />
+Coordinates are uint8_t, indexes type are uint128_t<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>x, y or empty</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD mymc16d boston 0 5 6 6 0 5 6 6 0 5 6 6 0 5 6 6 boston_data rome 0 6 6 6 0 6 6 6 0 5 6 6 0 5 6 6 rome_data sofia 1 7 2 6 1 7 2 6 0 5 6 6 0 5 6 6 sofia_data
+OK
+127.0.0.1:6379&gt; MC16SCORE mymc16d rome
+ 1) &quot;0&quot;
+ 2) &quot;6&quot;
+ 3) &quot;6&quot;
+ 4) &quot;6&quot;
+ 5) &quot;0&quot;
+ 6) &quot;6&quot;
+ 7) &quot;6&quot;
+ 8) &quot;6&quot;
+ 9) &quot;0&quot;
+10) &quot;5&quot;
+11) &quot;6&quot;
+12) &quot;6&quot;
+13) &quot;0&quot;
+14) &quot;5&quot;
+15) &quot;6&quot;
+16) &quot;6&quot;
+127.0.0.1:6379&gt; MC16SCORE mymc16d london
+ 1) &quot;&quot;
+ 2) &quot;&quot;
+ 3) &quot;&quot;
+ 4) &quot;&quot;
+ 5) &quot;&quot;
+ 6) &quot;&quot;
+ 7) &quot;&quot;
+ 8) &quot;&quot;
+ 9) &quot;&quot;
+10) &quot;&quot;
+11) &quot;&quot;
+12) &quot;&quot;
+13) &quot;&quot;
+14) &quot;&quot;
+15) &quot;&quot;
+16) &quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16POINT">
+			<a name="C::MC16POINT"></a>
+			<h4>MC16POINT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16POINT		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16POINT key x y z ... count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>x, y, z, w ...</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint128_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 16D index *key*, that are in the "point" with "coordinates" *x*, *y*, *z*.<br />
+... or ...<br />
+In other words, get all vectors from Morton Curve 16D index *key*, that have elements { *x*, *y*, *z* }.</p>
+
+<p>This command is way faster than MC16RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD users 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 john
+OK
+127.0.0.1:6379&gt; MC16ADD users 1 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 peter
+OK
+127.0.0.1:6379&gt; MC16ADD users 2 2 1 0 0 2 1 0 0 2 1 0 0 2 1 0 0 jill
+OK
+127.0.0.1:6379&gt; MC16ADD users 3 1 2 0 0 1 2 0 0 1 2 0 0 1 2 0 0 robert
+OK
+127.0.0.1:6379&gt; MC16ADD users 4 2 2 1 1 2 2 1 1 2 2 1 1 2 2 1 1 pola
+OK
+127.0.0.1:6379&gt; MC16ADD users 5 2 2 0 0 2 2 0 0 2 2 0 0 2 2 0 0 pepe
+OK
+127.0.0.1:6379&gt; MC16POINT users 2 2 0 0 2 2 0 0 2 2 0 0 2 2 0 0  10000
+1) &quot;002,002,000,000,002,002,000,000,002,002,000,000,002,002,000,000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x = [x] and
+  y = [y] and
+  z = [z] and
+  w = [w] and
+  ...
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16RANGE">MC16RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16RANGE">
+			<a name="C::MC16RANGE"></a>
+			<h4>MC16RANGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16RANGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16RANGE key x_min x_max y_min y_max z_min z_max w_min w_max ... count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the Morton Curve 16D object</td>
+				</tr>
+				<tr>
+					<td>x_min, x_max, y_min, y_max, z_min, z_max, w_min, w_max ...</td>
+					<td>ranges of the coordinates of the stored point / ranges of the elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint128_t.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Get all elements from Morton Curve 16D index *key*, that are in the "rectangle" *x_min* to *x_max*, *y_min* to *y_max*, *z_min* to *z_max*.</p>
+
+<p>This command is way slower than MC16RANGE.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ADD users 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 john
+OK
+127.0.0.1:6379&gt; MC16ADD users 1 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 peter
+OK
+127.0.0.1:6379&gt; MC16ADD users 2 2 1 0 0 2 1 0 0 2 1 0 0 2 1 0 0 jill
+OK
+127.0.0.1:6379&gt; MC16ADD users 3 1 2 0 0 1 2 0 0 1 2 0 0 1 2 0 0 robert
+OK
+127.0.0.1:6379&gt; MC16ADD users 4 2 2 1 1 2 2 1 1 2 2 1 1 2 2 1 1 pola
+OK
+127.0.0.1:6379&gt; MC16ADD users 5 2 2 0 0 2 2 0 0 2 2 0 0 2 2 0 0 pepe
+OK
+127.0.0.1:6379&gt; MC16POINT users 2 2 0 0 2 2 0 0 2 2 0 0 2 2 0 0 10000
+1) &quot;002,002,000,000,002,002,000,000,002,002,000,000,002,002,000,000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC16RANGE users 2 2 2 2 0 0 0 0 2 2 2 2 0 0 0 0 2 2 2 2 0 0 0 0 2 2 2 2 0 0 0 0 10000
+1) &quot;002,002,000,000,002,002,000,000,002,002,000,000,002,002,000,000,00000000&quot;
+2) &quot;pepe&quot;
+3) &quot;&quot;
+127.0.0.1:6379&gt; MC16RANGE users 2 2 1 2 0 1 0 0 2 2 1 2 0 1 0 0 2 2 1 2 0 1 0 0 2 2 1 2 0 1 0 0 10000
+1) &quot;002,001,000,000,002,001,000,000,002,001,000,000,002,001,000,000,00000000&quot;
+2) &quot;jill&quot;
+3) &quot;002,002,000,000,002,002,000,000,002,002,000,000,002,002,000,000,00000001&quot;
+4) &quot;pepe&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+			<h4>MySQL Rosetta:</h4>
+			<blockquote><pre class="x">select
+  key,
+  val
+from
+  table
+where
+  x &gt;= [x_min] and x &lt;= [x_max] and
+  y &gt;= [y_min] and y &lt;= [y_max] and
+  z &gt;= [z_min] and z &lt;= [z_max] and
+  w &gt;= [w_min] and w &lt;= [w_max] and
+  ...
+limit [count]
+</pre></blockquote>
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16POINT">MC16POINT</a></li>
+				<li><a href="#C::MC16RANGENAIVE">MC16RANGENAIVE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16RANGENAIVE">
+			<a name="C::MC16RANGENAIVE"></a>
+			<h4>MC16RANGENAIVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16RANGENAIVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16RANGENAIVE key x_min z_max y_min y_max z_min z_max w_min w_max ... count start</blockquote>
+
+
+			<h4>Description:</h4>
+			<blockquote>Naive, non performant version of MC16RANGE
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16RANGE">MC16RANGE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16ENCODE">
+			<a name="C::MC16ENCODE"></a>
+			<h4>MC16ENCODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16ENCODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16ENCODE x y z w ...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>x, y, z, w...</td>
+					<td>coordinates of the stored point / elements of the stored vector. Coordinates are uint8_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Encode coordinates *x*, *y*, *z*, *w*... into Morton Curve 16D hex index.<br />
+Coordinates are uint8_t, indexes type are uint128_t
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>hex index</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ENCODE 5 23 4 5 4 3 2 3 5 23 4 5 4 3 2 3
+&quot;000000000000020200001f1fe2e2abab&quot;
+127.0.0.1:6379&gt; MC16DECODE 000000000000020200001f1fe2e2abab
+ 1) &quot;5&quot;
+ 2) &quot;23&quot;
+ 3) &quot;4&quot;
+ 4) &quot;5&quot;
+ 5) &quot;4&quot;
+ 6) &quot;3&quot;
+ 7) &quot;2&quot;
+ 8) &quot;3&quot;
+ 9) &quot;5&quot;
+10) &quot;23&quot;
+11) &quot;4&quot;
+12) &quot;5&quot;
+13) &quot;4&quot;
+14) &quot;3&quot;
+15) &quot;2&quot;
+16) &quot;3&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC16DECODE 20200001f1fe2e2abab
+ 1) &quot;5&quot;
+ 2) &quot;23&quot;
+ 3) &quot;4&quot;
+ 4) &quot;5&quot;
+ 5) &quot;4&quot;
+ 6) &quot;3&quot;
+ 7) &quot;2&quot;
+ 8) &quot;3&quot;
+ 9) &quot;5&quot;
+10) &quot;23&quot;
+11) &quot;4&quot;
+12) &quot;5&quot;
+13) &quot;4&quot;
+14) &quot;3&quot;
+15) &quot;2&quot;
+16) &quot;3&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16DECODE">MC16DECODE</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MC16DECODE">
+			<a name="C::MC16DECODE"></a>
+			<h4>MC16DECODE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MC16DECODE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MC16DECODE hex</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>hex</td>
+					<td>Morton Curve index value. Coordinates are uint8_t, Morton Curve index is uint128_t.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Decode coordinates *x*, *y*, *z*, *w*... into Morton Curve 16D hex index.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>coordinates</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; MC16ENCODE 5 23 4 5 4 3 2 3 5 23 4 5 4 3 2 3
+&quot;000000000000020200001f1fe2e2abab&quot;
+127.0.0.1:6379&gt; MC16DECODE 000000000000020200001f1fe2e2abab
+ 1) &quot;5&quot;
+ 2) &quot;23&quot;
+ 3) &quot;4&quot;
+ 4) &quot;5&quot;
+ 5) &quot;4&quot;
+ 6) &quot;3&quot;
+ 7) &quot;2&quot;
+ 8) &quot;3&quot;
+ 9) &quot;5&quot;
+10) &quot;23&quot;
+11) &quot;4&quot;
+12) &quot;5&quot;
+13) &quot;4&quot;
+14) &quot;3&quot;
+15) &quot;2&quot;
+16) &quot;3&quot;
+127.0.0.1:6379&gt; # no need of leading zeroes, this also works
+OK
+127.0.0.1:6379&gt; MC16DECODE 20200001f1fe2e2abab
+ 1) &quot;5&quot;
+ 2) &quot;23&quot;
+ 3) &quot;4&quot;
+ 4) &quot;5&quot;
+ 5) &quot;4&quot;
+ 6) &quot;3&quot;
+ 7) &quot;2&quot;
+ 8) &quot;3&quot;
+ 9) &quot;5&quot;
+10) &quot;23&quot;
+11) &quot;4&quot;
+12) &quot;5&quot;
+13) &quot;4&quot;
+14) &quot;3&quot;
+15) &quot;2&quot;
+16) &quot;3&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MC16ENCODE">MC16ENCODE</a></li>
 			</ul>
 		</div>
 

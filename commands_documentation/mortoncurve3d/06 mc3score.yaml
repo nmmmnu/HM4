@@ -1,0 +1,32 @@
+- id:      MC3SCORE
+  name:    MC3SCORE
+  usage:   MC3SCORE key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the Morton Curve 3D object
+    - k: sub_key
+      v: sub key
+
+  description: |
+    Get indexes for *sub_key* from Morton Curve 3D index *key*.<br />
+    Coordinates are uint32_t, indexes type are uint128_t<br />
+
+  return_type: array
+  return:      x, y or empty
+  version:     1.3.7.7
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC3ADD mymc3d boston 0 5 6 boston_data rome 0 6 6 rome_data sofia 1 7 2 sofia_data
+    OK
+    127.0.0.1:6379> MC3SCORE mymc3d rome
+    1) "0"
+    2) "6"
+    3) "6"
+    127.0.0.1:6379> MC3SCORE mymc3d london
+    1) ""
+    2) ""
+    3) ""
+

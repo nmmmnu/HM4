@@ -1,0 +1,29 @@
+- id:      MC3GET
+  name:    MC3GET
+  usage:   MC3GET key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the Morton Curve 3D object
+    - k: sub_key
+      v: sub key
+
+  description: |
+    Get *sub_key* from Morton Curve 3D index *key*.<br />
+
+  return_type: string
+  return:      value
+  version:     1.3.7.7
+  complexity:  2 * READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC3ADD mymc3d boston 0 5 4 boston_data rome 0 6 2 rome_data sofia 1 7 5 sofia_data
+    OK
+    127.0.0.1:6379> MC3GET mymc3d rome
+    "rome_data"
+
+  see_also:
+    items:
+      - MC3MGET
+      - MC3EXISTS

@@ -1,0 +1,36 @@
+- id:      MC1REM
+  name:    MC1REM
+  aliases:
+    items:
+      - MC1REMOVE
+      - MC1DEL
+  usage:   MC1REM key key_sub0 [key_sub1]...
+  params:
+    items:
+    - k: key
+      v: name of the Linear curve object
+    - k: sub_key0
+      v: sub key
+
+  description: |
+    Remove *key_sub0*, *key_sub1*... from Linear curve index *key*.
+
+  return_type: int
+  return_type: bool
+  return:      always returns 1
+  version:     1.3.7.7
+  complexity:  "[number of items] * (READ + 2 * WRITE), TX"
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC1ADD mymc1d boston 0 boston_data rome 0 rome_data sofia 1 sofia_data
+    OK
+    127.0.0.1:6379> MC1DEL mymc1d rome sofia
+    (integer) 1
+    127.0.0.1:6379> xnget mymc1d~ 10 mymc1d~
+    1) "mymc1d~0000000000000000~boston"
+    2) "boston_data"
+    3) "mymc1d~~boston"
+    4) "0000000000000000"
+    5) ""
+

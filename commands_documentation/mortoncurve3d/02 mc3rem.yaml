@@ -1,0 +1,36 @@
+- id:      MC3REM
+  name:    MC3REM
+  aliases:
+    items:
+      - MC3REMOVE
+      - MC3DEL
+  usage:   MC3REM key key_sub0 [key_sub1]...
+  params:
+    items:
+    - k: key
+      v: name of the Morton Curve 3D object
+    - k: sub_key0
+      v: sub key
+
+  description: |
+    Remove *key_sub0*, *key_sub1*... from Morton Curve 3D index *key*.
+
+  return_type: int
+  return_type: bool
+  return:      always returns 1
+  version:     1.3.7.7
+  complexity:  "[number of items] * (READ + 2 * WRITE), TX"
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> MC3ADD mymc3d boston 0 5 5 boston_data rome 0 6 3 rome_data sofia 1 7 2 sofia_data
+    OK
+    127.0.0.1:6379> MC3DEL mymc3d rome sofia
+    (integer) 1
+    127.0.0.1:6379> xnget mymc3d~ 10 mymc3d~
+    1) "mymc3d~00000000000000000000000000000186~boston"
+    2) "boston_data"
+    3) "mymc3d~~boston"
+    4) "00000000000000000000000000000186"
+    5) ""
+

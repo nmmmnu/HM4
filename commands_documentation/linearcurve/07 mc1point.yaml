@@ -1,0 +1,83 @@
+- id:      MC1POINT
+  name:    MC1POINT
+  usage:   MC1POINT key x y count start
+  params:
+    items:
+    - k: key
+      v: name of the Linear curve object
+    - k: x
+      v: coordinate of the stored point / element of the stored vector.
+         Coordinate is uint32_t.
+    - k: count
+      v: result count
+    - k: start
+      v: specify starting key (for pagination in the similar way as in XNGET)
+
+  return_type: array
+  return:      list of key / values with "next" key at the end.
+  version:     1.3.7.7
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  description: |
+    <p>Get all elements from Linear curve index *key*, that are in the "point" with "coordinates" *x*.<br />
+    ... or ...<br />
+    In other words, get all vectors from Linear curve index *key*, that have elements { *x* }.</p>
+
+    <p>This command is way faster than MC1RANGE.</p>
+
+    <p><b>Example usage:</b></p>
+
+    <p>Suppose we have a company with two offices in:</p>
+    <ul>
+      <li>LA = 1</li>
+      <li>NY = 2</li>
+    </ul>
+
+
+    <pre class="x">
+    mc1add users 0 1 john   <- adds user_id 0, john,   LA
+    mc1add users 1 1 peter  <- adds user_id 1, peter,  LA
+    mc1add users 2 2 jill   <- adds user_id 2, jill,   LA
+    mc1add users 3 1 robert <- adds user_id 3, robert, NY
+    mc1add users 4 2 pola   <- adds user_id 4, pola,   NY
+    mc1add users 5 2 pepe   <- adds user_id 5, pepe,   NY
+    mc1point users 2 2 10000  <- gets all support from LA (pola, pola, pepe)
+    </pre>
+
+  example:     |
+    127.0.0.1:6379> MC1ADD users 0 1 john
+    OK
+    127.0.0.1:6379> MC1ADD users 1 1 peter
+    OK
+    127.0.0.1:6379> MC1ADD users 2 2 jill
+    OK
+    127.0.0.1:6379> MC1ADD users 3 1 robert
+    OK
+    127.0.0.1:6379> MC1ADD users 4 2 pola
+    OK
+    127.0.0.1:6379> MC1ADD users 5 2 pepe
+    OK
+    127.0.0.1:6379> MC1POINT users 2 10000
+    1) "00000000000000000002,00000000"
+    2) "jill"
+    3) "00000000000000000002,00000001"
+    4) "pola"
+    5) "00000000000000000002,00000002"
+    6) "pepe"
+    7) ""
+
+  sql:         |
+    select
+      key,
+      val
+    from
+      table
+    where
+      x = [x]
+    limit [count]
+
+  see_also:
+    items:
+      - MC1RANGE
+

@@ -36,7 +36,7 @@ description: |
 
   <p><b>Tip:</b> This module is ideal for tracking frequent items in a stream, such as popular searches, tags, or event identifiers.</p>
 
-example:     |
+example_module:     |
   127.0.0.1:6379> del mymg
   (integer) 1
   127.0.0.1:6379> mgadd mymg 5 64 google yahoo cloudflare outlook facebook

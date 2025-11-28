@@ -52,8 +52,6 @@
 
   example:     |
     127.0.0.1:6379> MC2ADD users 0 1 1 john
-    Error: Broken pipe
-    127.0.0.1:6379> MC2ADD users 0 1 1 john
     OK
     127.0.0.1:6379> MC2ADD users 1 1 1 peter
     OK

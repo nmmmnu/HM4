@@ -37,7 +37,7 @@ description: |
   <p><b>Tip:</b> Use MRANDOM when you need several reproducible values at once.
   Use RANDOM without arguments when you simply need a single pseudo-random value.</p>
 
-example:     |
+example_module:     |
   127.0.0.1:6379> random
   "15926910803142346387"
   127.0.0.1:6379> random 0
