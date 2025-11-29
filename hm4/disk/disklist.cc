@@ -45,9 +45,8 @@ namespace{
 		return searchBinaryIt_<start>(key, { list, first }, { list, last });
 	}
 
-	template<size_t start = 0>
 	auto searchBinary(std::string_view const key, DiskList const &list){
-		return searchBinaryIt_<start>(key, list.ra_begin(), list.ra_end());
+		return searchBinaryIt_<0>(key, list.ra_begin(), list.ra_end());
 	}
 
 	// -----------------------------------
