@@ -29,9 +29,9 @@ public:
 		p_	= setBP0__(parent);
 	}
 
-	int cmp(std::string_view const key) const{
-		return data.cmp(key);
-	}
+	// int cmp(std::string_view const key) const{
+	// 	return data.cmp(key);
+	// }
 
 public:
 	constexpr auto *getP(){
@@ -97,6 +97,46 @@ private:
 	constexpr static int       off  = 2;
 };
 
+
+
+struct PairStandardCompare{
+	int operator()(Pair const &pair, std::string_view key) const{
+		return pair.cmp(key);
+	}
+};
+
+struct PairLCPCompare{
+	constexpr PairLCPCompare() = default;
+
+	constexpr PairLCPCompare(size_t val) : prefixL_(val), prefixR_(val){}
+
+	int operator()(Pair const &pair, std::string_view key){
+		auto const pr = prefix();
+
+		auto const [comp, pref] = pair.cmpLCP(key, pr);
+
+		if (comp >= 0)
+			prefixL_ = pr + pref;
+
+		if (comp <= 0)
+			prefixR_ = pr + pref;
+
+		return comp;
+	}
+
+	constexpr size_t prefix() const{
+		return std::min(prefixL_, prefixR_);
+	}
+
+private:
+	size_t prefixL_ = 0;
+	size_t prefixR_ = 0;
+};
+
+
+
+using MyPairCompare = PairLCPCompare;
+//using MyPairCompare = PairLCPCompare;
 
 
 // ==============================
@@ -203,10 +243,12 @@ size_t const AVLList<T_Allocator>::INTERNAL_NODE_SIZE = checkInternalNodeSize<
 
 template<class T_Allocator>
 InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
+	MyPairCompare comp;
+
 	auto *node = root_;
 
 	while(node){
-		int const cmp = node->cmp(key);
+		int const cmp = comp(node->data, key);
 
 		if (cmp > 0){
 			node = node->l;
@@ -371,10 +413,12 @@ auto AVLList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 
 	auto const &key = factory.getKey();
 
+	MyPairCompare comp;
+
 	Node *node   = root_;
 
 	while(true){
-		int const cmp = node->cmp(key);
+		int const cmp = comp(node->data, key);
 
 		if (cmp > 0){
 			if (!node->l){
@@ -456,10 +500,12 @@ template<class T_Allocator>
 auto AVLList<T_Allocator>::find(std::string_view const key) const -> iterator{
 	assert(!key.empty());
 
+	MyPairCompare comp;
+
 	auto *node = root_;
 
 	while(node){
-		int const cmp = node->cmp(key);
+		int const cmp = comp(node->data, key);
 
 		if (cmp > 0){
 			if (node->l == nullptr){
@@ -500,10 +546,12 @@ template<class T_Allocator>
 const Pair *AVLList<T_Allocator>::getPair(std::string_view const key) const{
 	assert(!key.empty());
 
+	MyPairCompare comp;
+
 	auto *node = root_;
 
 	while(node){
-		int const cmp = node->cmp(key);
+		int const cmp = comp(node->data, key);
 
 		if (cmp > 0){
 			node = node->l;

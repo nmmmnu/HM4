@@ -6,7 +6,7 @@ namespace disk{
 class DiskList::forward_iterator {
 public:
 	// begin or specific position
-	forward_iterator(BlobView blob, const Pair *pair, bool const aligned) :
+	forward_iterator(BlobGuard blob, const Pair *pair, bool const aligned) :
 				blob	(blob		),
 				pair	(pair		),
 				aligned	(aligned	){}
@@ -49,7 +49,7 @@ public:
 	}
 
 private:
-	BlobView	blob;
+	BlobGuard	blob;
 	const Pair	*pair	= nullptr;
 	bool		aligned	= false;
 };

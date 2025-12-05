@@ -13,6 +13,7 @@
 #include "myalign.h"
 #include "mystring.h"
 #include "comparator.h"
+#include "cmplcp.h"
 
 #include "baseallocator.h"
 
@@ -359,6 +360,21 @@ inline namespace version_4_00_00{
 
 				return ::compare(getKey_() + start, getKeyLen_() - start, key.data() + start, key.size() - start);
 			}
+		}
+
+	public:
+		[[nodiscard]]
+		ResultCmpLCP cmpLCP(std::string_view const key, size_t const start) const noexcept{
+			return std::empty(key) ?
+				ResultCmpLCP{ CMP_NULLKEY, 0 } :
+				::cmpLCP(getKey(), key, start);
+		}
+
+		[[nodiscard]]
+		ResultCmpLCP cmpLCP(std::string_view const key) const noexcept{
+			return std::empty(key) ?
+				ResultCmpLCP{ CMP_NULLKEY, 0 } :
+				::cmpLCP(getKey(), key);
 		}
 
 	public:

@@ -1,4 +1,4 @@
-#include "blobview.h"
+#include "blobguard.h"
 
 #include <cstdint>
 #include <cstring>
@@ -21,7 +21,7 @@ void test_blobview(){
 	for(size_t i = 0; i < SIZE; ++i)
 		mem[i] = (char) i;
 
-	BlobView br{ mem };
+	BlobGuard br{ mem, SIZE };
 
 	mytest("as()",		*br.as<uint16_t>(0x00) == htobe<uint16_t>(0x0001)	);
 	mytest("as()",		*br.as<uint16_t>(0x0E) == htobe<uint16_t>(0x0E0F)	);
@@ -29,7 +29,7 @@ void test_blobview(){
 
 	{
 	const char *s = br.as<char>('a', 5);
-	mytest("as() str",		strncmp(s, "abcde", 5) == 0);
+	mytest("as() str",	strncmp(s, "abcde", 5) == 0);
 
 	// relative
 	mytest("as() rel",	*br.as<char>(s + 5) == 'f');

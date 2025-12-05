@@ -10,6 +10,8 @@
 
 #include "binarysearch.h"
 
+#include "cmplcp.h"
+
 #include "myalign.h"
 
 #include "logger.h"
@@ -18,26 +20,70 @@
 namespace hm4{
 namespace disk{
 
-struct SmallNode{
+struct HotLineNode{
 	HPair::HKey	key;
 	uint64_t	pos;
 } __attribute__((__packed__));
 
-static_assert(std::is_pod<SmallNode>::value, "SmallNode must be POD type");
+static_assert(std::is_pod<HotLineNode>::value, "HotLineNode must be POD type");
 
 using HashNode = hash::Node;
 
 // ==============================
 
-namespace{
-	template<size_t start>
-	int comp(Pair const &p, std::string_view const key){
-		return p.cmpX<start>(key);
+template<size_t start>
+struct PairStandardCompare{
+	int operator()(Pair const &pair, std::string_view key) const{
+	//	std::cout << ' ' << key << ' ' << pair.getKey() << ' ' << start << '\n';
+
+		return pair.cmpX<start>(key);
 	}
+};
+
+template<size_t start>
+struct PairLCPCompare{
+	int operator()(Pair const &pair, std::string_view key){
+		auto const pr = prefix();
+
+		auto const [comp, pref] = pair.cmpLCP(key, pr);
+
+		if (comp >= 0)
+			prefixL_ = pr + pref;
+
+		if (comp <= 0)
+			prefixR_ = pr + pref;
+
+		std::cout << pr << ' ' << key << ' ' << pair.getKey() << ' ' << start << '\n';
+
+		return comp;
+	}
+
+	constexpr size_t prefix() const{
+		return std::min(prefixL_, prefixR_);
+	}
+
+private:
+	size_t prefixL_ = start;
+	size_t prefixR_ = start;
+};
+
+template<size_t start>
+using MyPairCompare = PairLCPCompare<start>;
+//using MyPairCompare = PairStandardCompare<start>;
+
+
+
+namespace{
+//	template<size_t start>
+//	int comp(Pair const &p, std::string_view const key){
+//		return p.cmpX<start>(key);
+//	}
 
 	template<size_t start>
 	auto searchBinaryIt_(std::string_view const key, DiskList::random_access_iterator first, DiskList::random_access_iterator last){
-		return binarySearch(first, last, key, comp<start>);
+		MyPairCompare<start> comp;
+
+		return binarySearch(first, last, key, comp);
 	}
 
 	template<size_t start = 0>
@@ -53,21 +99,24 @@ namespace{
 
 	auto searchBTree(std::string_view const key, DiskList const &list) -> BinarySearchResult<DiskList::random_access_iterator>;
 
-	auto searchHotLine(std::string_view const key, DiskList const &list, BlobView const vLine) -> BinarySearchResult<DiskList::random_access_iterator>{
+	auto searchHotLine(std::string_view const key, DiskList const &list, BlobGuard vLine) -> BinarySearchResult<DiskList::random_access_iterator>{
 		auto fallback = [key, &list](){
 			return searchBinary(key, list);
 		};
 
-		size_t const nodesCount = vLine.size() ;
+		auto const nodesCount = vLine.sizeAs<const HotLineNode>() ;
 
-		const SmallNode *nodes = vLine.as<const SmallNode>(0, nodesCount);
+		const auto *nodes = vLine.as<const HotLineNode>(0, nodesCount);
 
-		if (!nodes)
+		if (!nodes){
+			logger<Logger::DEBUG>() << "Fallback to to Binary Search";
+
 			return fallback();
+		}
 
 		HPair::HKey const hkey = HPair::SS::create(key);
 
-		auto comp = [](SmallNode const &node, HPair::HKey const hkey){
+		auto comp = [](HotLineNode const &node, HPair::HKey const hkey){
 			const auto [ok, result] = HPair::SS::compare(
 					betoh(node.key), // value is in big endian
 					hkey
@@ -90,7 +139,7 @@ namespace{
 		DiskList::size_type const listPos = betoh<uint64_t>(it->pos);
 
 		if ( listPos >= list.size() ){
-			logger<Logger::ERROR>() << "Hotline corruption detected. Advice Hotline removal.";
+			logger<Logger::ERROR>() << "Hotline corruption detected. Advice Hotline removal. Fallback to to Binary Search";
 
 			return fallback();
 		}
@@ -144,17 +193,20 @@ namespace{
 		return searchBinary<HPair::N>(key, list, listPos, listPosLast);
 	}
 
-	auto searchHashIndex(std::string_view const key, DiskList const &list, BlobView const vHashIndex) -> BinarySearchResult<DiskList::random_access_iterator>{
+	auto searchHashIndex(std::string_view const key, DiskList const &list, BlobGuard vHashIndex) -> BinarySearchResult<DiskList::random_access_iterator>{
 		auto fallback = [key, &list](){
 			return list.ra_find_<DiskList::FindMode::HASH_FALLBACK>(key);
 		};
 
-		size_t const nodesCount = vHashIndex.sizeAs<HashNode>();
+		size_t const nodesCount = vHashIndex.sizeAs<const HashNode>();
 
 		const HashNode *nodes = vHashIndex.as<const HashNode>(0, nodesCount);
 
-		if (!nodes)
+		if (!nodes){
+			logger<Logger::DEBUG>() << "Fallback to to Binary Search";
+
 			return fallback();
+		}
 
 		auto const hc    = murmur_hash64a(key);
 		auto const be_hc = htobe(hc);
@@ -269,7 +321,7 @@ bool DiskList::openMinimal_(std::string_view const filename, OpenController oc){
 	bool const b2 =	oc.open(mIndx_, filenameIndx(filename));
 
 	// integrity check, size is safe to be used now.
-	bool const b3 =	BlobView{ mIndx_ }.sizeAs<uint64_t>() == size();
+	bool const b3 =	BlobGuard{ mIndx_ }.sizeAs<uint64_t>() == size();
 
 	log__mmap_file__(filenameIndx(filename), mIndx_);
 	log__mmap_file__(filenameData(filename), mData_);
@@ -293,7 +345,11 @@ bool DiskList::openNormal_ (std::string_view const filename, OpenController oc){
 	// ==============================
 
 	if (oc.open(mLine_, filenameLine(filename))){
-		if (BlobView{ mLine_ }.sizeAs<SmallNode>() <= 1){
+		// before we ignored lines under 2 records.
+		// now, because of binary search skipping,
+		// we want line even if 1 element is there
+
+		if (BlobGuard{ mLine_ }.sizeAs<const HotLineNode>() == 0){
 			logger<Logger::WARNING>() << "Hotline too small. Ignoring.";
 			mLine_.close();
 		}
@@ -303,7 +359,7 @@ bool DiskList::openNormal_ (std::string_view const filename, OpenController oc){
 
 	if (oc.open(mHash_, filenameHash(filename))){
 		// why 64 ? because if less, Line will be as fast as Hash
-		if (BlobView{ mHash_ }.sizeAs<HashNode>() < 64){
+		if (BlobGuard{ mHash_ }.sizeAs<const HashNode>() < 64){
 			logger<Logger::WARNING>() << "HashIndex too small. Ignoring.";
 			mHash_.close();
 		}
@@ -406,7 +462,7 @@ namespace fd_impl_{
 	}
 
 	template<bool B>
-	const Pair *fdSafeAccess(BlobView const vData, const Pair *blob){
+	const Pair *fdSafeAccess(BlobGuard vData, const Pair *blob){
 		if (!blob)
 			return nullptr;
 
@@ -422,7 +478,7 @@ namespace fd_impl_{
 		return blob;
 	}
 
-	const Pair *fdGetFirst(BlobView const vData){
+	const Pair *fdGetFirst(BlobGuard vData){
 		size_t const offset = 0;
 
 		const Pair *blob = vData.as<const Pair>(offset);
@@ -431,7 +487,7 @@ namespace fd_impl_{
 		return fdSafeAccess<false>(vData, blob);
 	}
 
-	const Pair *fdGetNext(BlobView const vData, const Pair *current, bool const aligned){
+	const Pair *fdGetNext(BlobGuard vData, const Pair *current, bool const aligned){
 		size_t size = alignedSize__(current, aligned);
 
 		const char *currentC = (const char *) current;
@@ -442,7 +498,7 @@ namespace fd_impl_{
 		return fdSafeAccess<false>(vData, blob);
 	}
 
-	const Pair *fdGetAt(BlobView const vData, BlobView const vIndx, size_type const index){
+	const Pair *fdGetAt(BlobGuard vData, BlobGuard vIndx, size_type const index){
 		const uint64_t *be_array = vIndx.as<const uint64_t>(0);
 
 		if (!be_array)
@@ -585,15 +641,15 @@ private:
 
 	const std::string_view	key_;
 
-	const BlobView		mTree_		= list_.mTree_;
-	const BlobView		mKeys_		= list_.mKeys_;
+	BlobGuard		mTree_		= list_.mTree_;
+	BlobGuard		mKeys_		= list_.mKeys_;
 
 private:
 	size_type		start		= 0;
 	size_type		end		= list_.size();
 
 public:
-	BTreeSearchHelper(const DiskList &list, std::string_view key) : list_(list), key_(key){}
+	BTreeSearchHelper(DiskList const &list, std::string_view key) : list_(list), key_(key){}
 
 	auto operator()(){
 		try{
@@ -606,7 +662,7 @@ public:
 
 private:
 	auto btreeSearch_() -> BinarySearchResult<DiskList::random_access_iterator>{
-		size_t const nodesCount	= mTree_.size() / sizeof(Node);
+		size_t const nodesCount	= mTree_.sizeAs<const Node>();
 
 		const Node *nodes = mTree_.as<const Node>(0, nodesCount);
 

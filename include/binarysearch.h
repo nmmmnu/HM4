@@ -25,9 +25,7 @@ struct binarySearchPrefetchFn{
 
 
 
-template<
-		class Iterator
->
+template<class Iterator>
 struct BinarySearchResult{
 	bool		found;
 	Iterator	it;

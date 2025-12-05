@@ -8,6 +8,9 @@
 #include <variant>
 
 struct MMAPFileSBO{
+	using value_type = void;
+	using size_type  = size_t;
+
 	constexpr static size_t SmallSize = 2048;
 
 	using VMAllocator = MyAllocator::SlabAllocator<SmallSize>;

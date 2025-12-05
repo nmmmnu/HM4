@@ -2,7 +2,7 @@
 #define DISK_LIST_H_
 
 #include "mmapfilesbo.h"
-#include "blobview.h"
+#include "blobguard.h"
 
 #include "ilist.h"
 #include "filemeta.h"
@@ -21,10 +21,9 @@ namespace hm4::disk{
 namespace fd_impl_{
 	using config::size_type;
 
-	const Pair *fdGetFirst	(BlobView const vData);
-	const Pair *fdGetNext	(BlobView const vData, const Pair *blob, bool aligned);
-
-	const Pair *fdGetAt	(BlobView const vData, BlobView const vIndx, size_type index);
+	const Pair *fdGetFirst	(BlobGuard vData);
+	const Pair *fdGetNext	(BlobGuard vData, const Pair *blob, bool aligned);
+	const Pair *fdGetAt	(BlobGuard vData, BlobGuard vIndx, size_type index);
 }
 
 

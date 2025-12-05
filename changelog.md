@@ -377,3 +377,6 @@ Changelog
 -	fix feature with assest() for composite keys in vectors module
 -	new module AUTOCOMPLETE: ACADD_XXX, ACDEL_XXX, ACRANGE
 -	refactor sharedAccumulateResults / sharedAccumulatePairs
+-	fix ignoring the hotline index if index is very small.
+-	implement skipping in search in both AVLList and DiskList
+
