@@ -104,9 +104,11 @@ namespace{
 			return searchBinary(key, list);
 		};
 
-		auto const nodesCount = vLine.sizeAs<const HotLineNode>() ;
+		// using T = HotLineNode const;
+		// auto const nodesCount = vLine.sizeAs<T>() ;
+		// const auto *nodes = vLine.as<T>(0, nodesCount);
 
-		const auto *nodes = vLine.as<const HotLineNode>(0, nodesCount);
+		auto [nodes, nodesCount] = vLine.asArray<HotLineNode const>();
 
 		if (!nodes){
 			logger<Logger::DEBUG>() << "Fallback to to Binary Search";
@@ -198,9 +200,11 @@ namespace{
 			return list.ra_find_<DiskList::FindMode::HASH_FALLBACK>(key);
 		};
 
-		size_t const nodesCount = vHashIndex.sizeAs<const HashNode>();
+		// using T = HashNode const;
+		// auto const nodesCount = vHashIndex.sizeAs<T>() ;
+		// const auto *nodes = vHashIndex.as<T>(0, nodesCount);
 
-		const HashNode *nodes = vHashIndex.as<const HashNode>(0, nodesCount);
+		auto [nodes, nodesCount] = vHashIndex.asArray<HashNode const>();
 
 		if (!nodes){
 			logger<Logger::DEBUG>() << "Fallback to to Binary Search";
@@ -349,7 +353,7 @@ bool DiskList::openNormal_ (std::string_view const filename, OpenController oc){
 		// now, because of binary search skipping,
 		// we want line even if 1 element is there
 
-		if (BlobGuard{ mLine_ }.sizeAs<const HotLineNode>() == 0){
+		if (BlobGuard{ mLine_ }.sizeAs<HotLineNode const>() == 0){
 			logger<Logger::WARNING>() << "Hotline too small. Ignoring.";
 			mLine_.close();
 		}
@@ -359,7 +363,7 @@ bool DiskList::openNormal_ (std::string_view const filename, OpenController oc){
 
 	if (oc.open(mHash_, filenameHash(filename))){
 		// why 64 ? because if less, Line will be as fast as Hash
-		if (BlobGuard{ mHash_ }.sizeAs<const HashNode>() < 64){
+		if (BlobGuard{ mHash_ }.sizeAs<HashNode const>() < 64){
 			logger<Logger::WARNING>() << "HashIndex too small. Ignoring.";
 			mHash_.close();
 		}
@@ -481,7 +485,7 @@ namespace fd_impl_{
 	const Pair *fdGetFirst(BlobGuard vData){
 		size_t const offset = 0;
 
-		const Pair *blob = vData.as<const Pair>(offset);
+		const Pair *blob = vData.as<Pair const>(offset);
 
 		// check for overrun because PairBlob is dynamic size
 		return fdSafeAccess<false>(vData, blob);
@@ -490,16 +494,16 @@ namespace fd_impl_{
 	const Pair *fdGetNext(BlobGuard vData, const Pair *current, bool const aligned){
 		size_t size = alignedSize__(current, aligned);
 
-		const char *currentC = (const char *) current;
+		const char *currentC = reinterpret_cast<const char *>(current);
 
-		const Pair *blob = vData.as<const Pair>(currentC + size);
+		const Pair *blob = vData.as<Pair const>(currentC + size);
 
 		// check for overrun because PairBlob is dynamic size
 		return fdSafeAccess<false>(vData, blob);
 	}
 
 	const Pair *fdGetAt(BlobGuard vData, BlobGuard vIndx, size_type const index){
-		const uint64_t *be_array = vIndx.as<const uint64_t>(0);
+		const uint64_t *be_array = vIndx.as<uint64_t const>();
 
 		if (!be_array)
 			return nullptr;
@@ -508,7 +512,7 @@ namespace fd_impl_{
 
 		size_t const offset = narrow<size_t>(betoh<uint64_t>(be_ptr));
 
-		const Pair *blob = vData.as<const Pair>(offset);
+		const Pair *blob = vData.as<Pair const>(offset);
 
 		// check for overrun because PairBlob is dynamic size
 		return fdSafeAccess<false>(vData, blob);
@@ -662,9 +666,11 @@ public:
 
 private:
 	auto btreeSearch_() -> BinarySearchResult<DiskList::random_access_iterator>{
-		size_t const nodesCount	= mTree_.sizeAs<const Node>();
+		// using T = Node const;
+		// size_t const nodesCount	= mTree_.sizeAs<T>();
+		// const Node *nodes = mTree_.as<T>(0, nodesCount);
 
-		const Node *nodes = mTree_.as<const Node>(0, nodesCount);
+		auto [nodes, nodesCount] = mTree_.asArray<Node const>();
 
 		if (!nodes)
 			throw BTreeAccessError{};
@@ -758,7 +764,7 @@ private:
 
 		// BTree NIL case - can not happen
 
-		const NodeData *nd = mKeys_.as<const NodeData>(narrow<size_t>(offset));
+		const NodeData *nd = mKeys_.as<NodeData const>(narrow<size_t>(offset));
 
 		if (!nd)
 			throw BTreeAccessError{};
@@ -767,7 +773,7 @@ private:
 		size_type const dataid  = betoh<uint64_t>(nd->dataid);
 
 		// key is just after the NodeData
-		const char *keyptr = mKeys_.as<const char>(narrow<size_t>(offset + sizeof(NodeData)), keysize);
+		const char *keyptr = mKeys_.as<char const>(narrow<size_t>(offset + sizeof(NodeData)), keysize);
 
 		if (!keyptr)
 			throw BTreeAccessError{};

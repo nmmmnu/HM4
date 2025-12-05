@@ -81,6 +81,23 @@ public:
 		return offset < 0 ? nullptr : as<T>( static_cast<size_t>(offset), elements );
 	}
 
+	template <class T>
+	auto asArray(size_t const offset = 0) const noexcept{
+		static_assert(std::is_standard_layout_v<T>, "T must be POD type");
+
+		struct Result{
+			const T *data;
+			size_t   size;
+		};
+
+		auto const elements = sizeAs<T>();
+
+		return Result{
+			static_cast<const T *>( safeAccessMemory(offset, elements * sizeof(T)) ),
+			elements
+		};
+	}
+
 private:
 	const char	*data_	= nullptr;
 	size_t		size_	= 0;
