@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
+#include <utility>
 
 class BlobGuard{
 public:
@@ -82,17 +83,12 @@ public:
 	}
 
 	template <class T>
-	auto asArray(size_t const offset = 0) const noexcept{
+	std::pair<const T *, size_t> asArray(size_t const offset = 0) const noexcept{
 		static_assert(std::is_standard_layout_v<T>, "T must be POD type");
-
-		struct Result{
-			const T *data;
-			size_t   size;
-		};
 
 		auto const elements = sizeAs<T>();
 
-		return Result{
+		return {
 			static_cast<const T *>( safeAccessMemory(offset, elements * sizeof(T)) ),
 			elements
 		};
