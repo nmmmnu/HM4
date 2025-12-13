@@ -696,8 +696,6 @@ namespace net::worker::commands::SIndex{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			namespace PN = sindex_impl_;
 
-			using namespace sindex_impl_;
-
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
@@ -710,7 +708,7 @@ namespace net::worker::commands::SIndex{
 			if (!PN::valid(keyN, index))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const count    = myClamp<uint32_t>(p[3], PN::ITERATIONS_RESULTS_MIN, PN::ITERATIONS_RESULTS_MAX);
 			auto const keyStart = p[4];
 
 
@@ -720,13 +718,13 @@ namespace net::worker::commands::SIndex{
 
 
 			hm4::PairBufferKey bufferKey;
-			auto const prefix = makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+			auto const prefix = PN::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
 
 			logger<Logger::DEBUG>() << "IXSRANGE*" << "prefix" << prefix << "key" << key;
 
-			StopPrefixPredicate stop{ prefix };
+			PN::StopPrefixPredicate stop{ prefix };
 
 			std::string_view tail;
 
@@ -738,9 +736,8 @@ namespace net::worker::commands::SIndex{
 				auto const separator = DBAdapter::SEPARATOR[0];
 
 				// key~word~sort~keyN
-				auto const key  = extractNth_(3, separator, pair.getKey());
-				auto const sort = extractNth_(2, separator, pair.getKey());
-			//	auto const sort = std::string_view{};
+				auto const key  = PN::extractNth_(3, separator, pair.getKey());
+				auto const sort = PN::extractNth_(2, separator, pair.getKey());
 				auto const val  = pair.getVal();
 
 				ucontainer.emplace_back(key, sort, val);
@@ -748,7 +745,7 @@ namespace net::worker::commands::SIndex{
 				return true;
 			};
 
-			sharedAccumulatePairs(
+			PN::sharedAccumulatePairs(
 				count		,
 				stop		,
 				db->find(key)	,

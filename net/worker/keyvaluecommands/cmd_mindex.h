@@ -731,8 +731,6 @@ namespace net::worker::commands::MIndex{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			namespace PN = mindex_impl_;
 
-			using namespace mindex_impl_;
-
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
@@ -745,11 +743,11 @@ namespace net::worker::commands::MIndex{
 			if (!PN::valid(keyN, index))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const count    = myClamp<uint32_t>(p[3], PN::ITERATIONS_RESULTS_MIN, PN::ITERATIONS_RESULTS_MAX);
 			auto const keyStart = p[4];
 
 			{
-				return processRange(keyN, index, count, keyStart,
+				return PN::processRange(keyN, index, count, keyStart,
 									db, result, blob);
 			}
 		}
@@ -775,8 +773,6 @@ namespace net::worker::commands::MIndex{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			namespace PN = mindex_impl_;
 
-			using namespace mindex_impl_;
-
 			if (p.size() != 6)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
 
@@ -790,7 +786,7 @@ namespace net::worker::commands::MIndex{
 			if (keyN.empty() || tokens.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const count	= myClamp<uint32_t>(p[4], PN::ITERATIONS_RESULTS_MIN, PN::ITERATIONS_RESULTS_MAX);
 			auto const keyStart	= p[5];
 
 			auto &tokensContainer = blob.construct<TokenContainer>();
@@ -805,7 +801,7 @@ namespace net::worker::commands::MIndex{
 			if (tokensContainer.size() == 1){
 				auto const &index = tokensContainer[0];
 
-				return processRange(keyN, index, count, keyStart,
+				return PN::processRange(keyN, index, count, keyStart,
 									db, result, blob);
 			}else{
 				return process__(keyN, tokensContainer, count, keyStart,
@@ -845,8 +841,6 @@ namespace net::worker::commands::MIndex{
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			namespace PN = mindex_impl_;
 
-			using namespace mindex_impl_;
-
 			if (p.size() != 6)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
 
@@ -860,7 +854,7 @@ namespace net::worker::commands::MIndex{
 			if (keyN.empty() || tokens.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const count	= myClamp<uint32_t>(p[4], PN::ITERATIONS_RESULTS_MIN, PN::ITERATIONS_RESULTS_MAX);
 			auto const keyStart	= p[5];
 
 			auto &tokensContainer = blob.construct<TokenContainer>();
@@ -875,7 +869,7 @@ namespace net::worker::commands::MIndex{
 			if (tokensContainer.size() == 1){
 				auto const &index = tokensContainer[0];
 
-				return processRange(keyN, index, count, keyStart,
+				return PN::processRange(keyN, index, count, keyStart,
 									db, result, blob);
 			}else{
 				return process__(keyN, tokensContainer, count, keyStart,
