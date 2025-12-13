@@ -34,8 +34,6 @@ using HashNode = hash::Node;
 template<size_t start>
 struct PairStandardCompare{
 	int operator()(Pair const &pair, std::string_view key) const{
-	//	std::cout << ' ' << key << ' ' << pair.getKey() << ' ' << start << '\n';
-
 		return pair.cmpX<start>(key);
 	}
 };
@@ -52,8 +50,6 @@ struct PairLCPCompare{
 
 		if (comp <= 0)
 			prefixR_ = pr + pref;
-
-		std::cout << pr << ' ' << key << ' ' << pair.getKey() << ' ' << start << '\n';
 
 		return comp;
 	}

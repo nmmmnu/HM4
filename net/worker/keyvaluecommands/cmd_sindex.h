@@ -3,13 +3,19 @@
 #include "shared_accumulateresults.h"
 
 #include "stringtokenizer.h"
+#include "utf8slidingwindow.h"
 #include "pair_vfactory.h"
 #include "ilist/txguard.h"
 
-namespace net::worker::commands::MIndex{
-	namespace mindex_impl_{
+namespace net::worker::commands::SIndex{
+	namespace sindex_impl_{
 		using namespace net::worker::shared::accumulate_results;
 		using namespace net::worker::shared::config;
+
+		constexpr uint8_t NGram = 64;
+
+		// + 1 for the separators
+		static_assert(OutputBlob::ContainerSize * (NGram + 1) < hm4::PairConf::MAX_VAL_SIZE);
 
 
 
@@ -65,7 +71,7 @@ namespace net::worker::commands::MIndex{
 
 			return concatenateBuffer(bufferKey,
 					keyN	,	separator	,
-					txt	,	separator
+					txt	//	no separator here
 			);
 		}
 
@@ -73,17 +79,14 @@ namespace net::worker::commands::MIndex{
 
 
 
-		template<typename Container, typename CheckF>
-		bool prepareTokensExplode_(Container &container, char separator, std::string_view text, CheckF checkF){
+		template<typename SlidingWindow, typename Container, typename CheckF>
+		bool prepareTokensExplode_(Container &container, std::string_view text, CheckF checkF){
 			static_assert( std::is_constructible_v<typename Container::value_type, std::string_view> );
 
-			StringTokenizer const tok{ text, separator };
+			SlidingWindow sw{ text, NGram };
 
-			size_t count = 0;
-
-			for(auto const &x : tok){
-				// we need to have space for the sort
-				if (++count >= container.capacity())
+			for(auto const &x : sw){
+				if (container.full())
 					return false;
 
 				if (!checkF(x))
@@ -115,9 +118,9 @@ namespace net::worker::commands::MIndex{
 			return true;
 		}
 
-		template<typename Container, typename CheckF>
-		bool prepareTokens(Container &container, char separator, std::string_view text, CheckF checkF){
-			if (!prepareTokensExplode_(container, separator, text, checkF))
+		template<typename SlidingWindow, typename Container, typename CheckF>
+		bool prepareTokens(Container &container, std::string_view text, CheckF checkF){
+			if (!prepareTokensExplode_<SlidingWindow>(container, text, checkF))
 				return false;
 
 			return prepareTokensSort_(container);
@@ -233,48 +236,12 @@ namespace net::worker::commands::MIndex{
 			return "INVALID_DATA";
 		}
 
-		template<class Protocol, class DBAdapter>
-		void processRange(std::string_view keyN, std::string_view index, uint32_t count, std::string_view keyStart,
-										DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
-
-			auto &container = blob.construct<OutputBlob::Container>();
-
-			hm4::PairBufferKey bufferKey;
-			auto const prefix = makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
-
-			auto const key = keyStart.empty() ? prefix : keyStart;
-
-			logger<Logger::DEBUG>() << "IXMRANGE*" << "prefix" << prefix << "key" << key;
-
-			StopPrefixPredicate stop{ prefix };
-
-			auto proj = [](std::string_view x){
-				auto const separator = DBAdapter::SEPARATOR[0];
-
-				// keyN~word~
-				return extractNth_(3, separator, x);
-			};
-
-			auto const Out = AccumulateOutput::BOTH_WITH_TAIL;
-
-			sharedAccumulateResults<Out>(
-				count		,
-				stop		,
-				db->find(key)	,
-				std::end(*db)	,
-				container	,
-				proj
-			);
-
-			return result.set_container(container);
-		}
-
-	} // namespace mindex_impl_
+	} // namespace sindex_impl_
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct IXMADD : BaseCommandRW<Protocol,DBAdapter>{
+	struct IXSADD : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -283,23 +250,21 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMADD a keySub delimiter "words,words" sort value
+		// IXSADD a keySub "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			namespace PN = mindex_impl_;
+			using SlidingWindow = UTF8SlidingWindow;
 
-			if (p.size() != 7)
+			namespace PN = sindex_impl_;
+
+			if (p.size() != 6)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
 
 			auto const &keyN	= p[1];
 			auto const &keySub	= p[2];
-			auto const &delimiter	= p[3];
-			auto const &tokens	= p[4];
-			auto const &keySort	= p[5];
-			auto const &value	= p[6];
-
-			if (delimiter.size() != 1)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			auto const &tokens	= p[3];
+			auto const &keySort	= p[4];
+			auto const &value	= p[5];
 
 			if (!PN::valid(keyN, keySub, keySort))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -313,7 +278,7 @@ namespace net::worker::commands::MIndex{
 				return PN::valid(keyN, keySub, keySort, s);
 			};
 
-			if (!PN::prepareTokens(container, delimiter[0], tokens, checkF))
+			if (!PN::prepareTokens<SlidingWindow>(container, tokens, checkF))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			[[maybe_unused]]
@@ -417,25 +382,25 @@ namespace net::worker::commands::MIndex{
 			logger<Logger::DEBUG>() << "MIndex::ADD: SET ctrl key" << keyCtrl;
 
 			hm4::Pair *hint = nullptr;
-			hm4::insertV<IXMADD_Factory>(*db, keyCtrl, hint, container);
+			hm4::insertV<IXSADD_Factory>(*db, keyCtrl, hint, container);
 
 			return result.set(true);
 		}
 
 	private:
-		struct IXMADD_Factory : hm4::PairFactory::IFactoryAction<0, 0, IXMADD_Factory>{
+		struct IXSADD_Factory : hm4::PairFactory::IFactoryAction<0, 0, IXSADD_Factory>{
 			using Pair	= hm4::Pair;
-			using Base	= hm4::PairFactory::IFactoryAction<0, 0, IXMADD_Factory>;
+			using Base	= hm4::PairFactory::IFactoryAction<0, 0, IXSADD_Factory>;
 			using Container	= OutputBlob::Container;
 
-			constexpr IXMADD_Factory(std::string_view const key, const Pair *pair,
+			constexpr IXSADD_Factory(std::string_view const key, const Pair *pair,
 								Container &container) :
 
 							Base::IFactoryAction	(key, getSize__(container), pair),
 							container			(container	){}
 
 			void action(Pair *pair) const{
-				namespace PN = mindex_impl_;
+				namespace PN = sindex_impl_;
 
 				char *data = pair->getValC();
 
@@ -455,12 +420,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmadd",	"IXMADD"
+			"ixsadd",	"IXSADD"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMGET : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXSGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -469,10 +434,10 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMGET key subkey
+		// IXSGET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			namespace PN = mindex_impl_;
+			namespace PN = sindex_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -490,12 +455,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmget",	"IXMGET"
+			"ixsget",	"IXSGET"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMMGET : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXSMGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -504,9 +469,9 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMMGET key subkey0 subkey1 ...
+		// IXSMGET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			namespace PN = mindex_impl_;
+			namespace PN = sindex_impl_;
 
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
@@ -539,12 +504,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmmget",	"IXMMGET"
+			"ixsmget",	"IXSMGET"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMEXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXSEXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -553,10 +518,10 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMEXISTS key subkey
+		// IXSEXISTS key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			namespace PN = mindex_impl_;
+			namespace PN = sindex_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -579,12 +544,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmexists",	"IXMEXISTS"
+			"ixsexists",	"IXSEXISTS"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXSGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -593,10 +558,10 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMGETIXES key subkey
+		// IXSGETIXES key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			namespace PN = mindex_impl_;
+			namespace PN = sindex_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -632,12 +597,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmgetindexes",	"IXMGETINDEXES"
+			"ixsgetindexes",	"IXSGETINDEXES"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMREM : BaseCommandRW<Protocol,DBAdapter>{
+	struct IXSREM : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -646,10 +611,10 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMDEL a subkey0 subkey1 ...
+		// IXSDEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			namespace PN = mindex_impl_;
+			namespace PN = sindex_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -709,15 +674,15 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmrem",	"IXMREM",
-			"ixmremove",	"IXMREMOVE",
-			"ixmdel",	"IXMDEL"
+			"ixsrem",	"IXSREM",
+			"ixsremove",	"IXSREMOVE",
+			"ixsdel",	"IXSDEL"
 		};
 	};
 
 
 	template<class Protocol, class DBAdapter>
-	struct IXMRANGE : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXSRANGE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -726,12 +691,12 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMRANGE key txt count from
+		// IXSRANGE key txt count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			namespace PN = mindex_impl_;
+			namespace PN = sindex_impl_;
 
-			using namespace mindex_impl_;
+			using namespace sindex_impl_;
 
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
@@ -748,177 +713,113 @@ namespace net::worker::commands::MIndex{
 			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart = p[4];
 
-			{
-				return processRange(keyN, index, count, keyStart,
-									db, result, blob);
-			}
-		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixmrange",	"IXMRANGE"
-		};
-	};
 
-	template<class Protocol, class DBAdapter>
-	struct IXMRANGEFLEX : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
+			auto &ucontainer = blob.construct<UContainer>();
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
 
-		// IXMRANGEFLEX key delimiter "words,words" count from
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			namespace PN = mindex_impl_;
+			hm4::PairBufferKey bufferKey;
+			auto const prefix = makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
-			using namespace mindex_impl_;
+			auto const key = keyStart.empty() ? prefix : keyStart;
 
-			if (p.size() != 6)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+			logger<Logger::DEBUG>() << "IXSRANGE*" << "prefix" << prefix << "key" << key;
 
-			auto const keyN		= p[1];
-			auto const delimiter	= p[2];
-			auto const tokens	= p[3];
+			StopPrefixPredicate stop{ prefix };
 
-			if (delimiter.size() != 1)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			std::string_view tail;
 
-			if (keyN.empty() || tokens.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+			auto pTail = [&](std::string_view const key = "") mutable{
+				tail = key;
+			};
 
-			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
-			auto const keyStart	= p[5];
+			auto pPair = [&](auto const &pair) mutable -> bool{
+				auto const separator = DBAdapter::SEPARATOR[0];
 
-			auto &tokensContainer = blob.construct<TokenContainer>();
+				// key~word~sort~keyN
+				auto const key  = extractNth_(3, separator, pair.getKey());
+				auto const sort = extractNth_(2, separator, pair.getKey());
+			//	auto const sort = std::string_view{};
+				auto const val  = pair.getVal();
 
-			auto checkF = [](auto){
+				ucontainer.emplace_back(key, sort, val);
+
 				return true;
 			};
 
-			if (!PN::prepareTokens(tokensContainer, delimiter[0], tokens, checkF))
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			sharedAccumulatePairs(
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
+				pTail		,
+				pPair
+			);
 
-			if (tokensContainer.size() == 1){
-				auto const &index = tokensContainer[0];
+			std::sort(std::begin(ucontainer), std::end(ucontainer));
 
-				return processRange(keyN, index, count, keyStart,
-									db, result, blob);
-			}else{
-				return process__(keyN, tokensContainer, count, keyStart,
-									db, result, blob);
+			auto uit = std::unique(std::begin(ucontainer), std::end(ucontainer));
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			for(auto it = std::begin(ucontainer); it != uit; ++it){
+				container.push_back(it->key);
+				container.push_back(it->val);
 			}
+
+			container.push_back(tail);
+
+			return result.set_container(container);
 		}
 
 	private:
-		constexpr static size_t MaxTokens  = 32;
+		struct UItem{
+			std::string_view key;
+			std::string_view sort;
+			std::string_view val;
 
-		using TokenContainer = StaticVector<std::string_view, MaxTokens>;
+			constexpr UItem(std::string_view key, std::string_view sort, std::string_view val) :
+							key	(key	),
+							sort	(sort	),
+							val	(val	){}
 
-	private:
-		static void process__(std::string_view keyN, TokenContainer &tokens, uint32_t count, std::string_view keyStart,
-					DBAdapter &db, Result<Protocol> &result, OutputBlob &blob);
+			constexpr bool operator  <(UItem const &other) const{
+				// same keys are with same sort
+				if (auto const comp = sort.compare(other.sort); comp)
+					return comp < 0;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixmrangeflex",	"IXMRANGEFLEX"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct IXMRANGESTRICT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// IXMRANGESTRICT key delimiter "words,words" count from
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			namespace PN = mindex_impl_;
-
-			using namespace mindex_impl_;
-
-			if (p.size() != 6)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
-
-			auto const keyN		= p[1];
-			auto const delimiter	= p[2];
-			auto const tokens	= p[3];
-
-			if (delimiter.size() != 1)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			if (keyN.empty() || tokens.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
-			auto const keyStart	= p[5];
-
-			auto &tokensContainer = blob.construct<TokenContainer>();
-
-			auto checkF = [](auto){
-				return true;
-			};
-
-			if (!PN::prepareTokens(tokensContainer, delimiter[0], tokens, checkF))
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			if (tokensContainer.size() == 1){
-				auto const &index = tokensContainer[0];
-
-				return processRange(keyN, index, count, keyStart,
-									db, result, blob);
-			}else{
-				return process__(keyN, tokensContainer, count, keyStart,
-									db, result, blob);
+				return key < other.key;
 			}
-		}
 
-	private:
-		constexpr static size_t MaxTokens  = 32;
+			constexpr bool operator ==(UItem const &other) const{
+				return key == other.key;
+			}
+		};
 
-		using TokenContainer = StaticVector<std::string_view, MaxTokens>;
-
-	private:
-		static void process__(std::string_view keyN, TokenContainer &tokens, uint32_t count, std::string_view keyStart,
-					DBAdapter &db, Result<Protocol> &result, OutputBlob &blob);
+		using UContainer = StaticVector<UItem, OutputBlob::ContainerSize>;
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmrangestrict",	"IXMRANGESTRICT"
+			"ixsrange",	"IXSRANGE"
 		};
 	};
-
-
-
-	#include "cmd_mindex_ixmrangemulti.h.cc"
 
 
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "mindex";
+		constexpr inline static std::string_view name	= "sindex";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				IXMADD		,
-				IXMGET		,
-				IXMMGET		,
-				IXMEXISTS	,
-				IXMGETINDEXES	,
-				IXMREM		,
-				IXMRANGE	,
-				IXMRANGEFLEX	,
-				IXMRANGESTRICT
+				IXSADD		,
+				IXSGET		,
+				IXSMGET		,
+				IXSEXISTS	,
+				IXSGETINDEXES	,
+				IXSREM		,
+				IXSRANGE
 			>(pack);
 		}
 	};

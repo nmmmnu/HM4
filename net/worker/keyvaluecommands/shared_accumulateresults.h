@@ -63,7 +63,7 @@ namespace net::worker::shared::accumulate_results{
 		auto pTail = [&](std::string_view const key = ""){
 			if constexpr(is_any_of(Out, AccumulateOutput::BOTH_WITH_TAIL, AccumulateOutput::KEYS_WITH_TAIL)){
 				auto const pkey = projKeyTail(key);
-				container.emplace_back(key);
+				container.emplace_back(pkey);
 			}
 		};
 
