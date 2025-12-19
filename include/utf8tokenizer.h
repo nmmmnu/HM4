@@ -107,6 +107,10 @@ public:
 		return p_ != other.p_ || s_.data() != other.s_.data();
 	}
 
+	constexpr bool operator==(Iterator const &other) const{
+		return ! operator!=(other);
+	}
+
 	constexpr auto pos() const{
 		return p_;
 	}

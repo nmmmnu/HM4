@@ -8,8 +8,8 @@
 
 
 class ASCIISlidingWindow{
-    std::string_view	s_	;
-    size_t		size_	;
+	std::string_view	s_	;
+	size_t			size_	;
 
 public:
 	ASCIISlidingWindow(std::string_view s, size_t size) : s_(s), size_(size){}
@@ -21,6 +21,8 @@ public:
 };
 
 class ASCIISlidingWindow::Iterator{
+	constexpr static bool ALLOW_SMALL_WINDOW = false;
+
 	std::string_view s_;
 	size_t pos_ = 0;
 	size_t size_;
@@ -33,7 +35,12 @@ public:
 	Iterator(std::string_view s, size_t pos, size_t size) :
 						s_	(s	),
 						pos_	(pos	),
-						size_	(size	){}
+						size_	(size	){
+		if (!ALLOW_SMALL_WINDOW){
+			if (pos_ + size_ > s_.size())
+				pos_ = s_.size();
+		}
+	}
 
 	reference operator*() const{
 		if (pos_ + size_ <= s_.size())
@@ -44,6 +51,12 @@ public:
 
 	Iterator &operator++(){
 		++pos_;
+
+		if (!ALLOW_SMALL_WINDOW){
+			if (pos_ + size_ > s_.size())
+				pos_ = s_.size();
+		}
+
 		return *this;
 	}
 
@@ -80,6 +93,8 @@ public:
 };
 
 class UTF8SlidingWindow::Iterator{
+	constexpr static bool ALLOW_SMALL_WINDOW = false;
+
 	using TokIterator = typename UTF8Tokenizer::iterator;
 
 	std::string_view	s_	;
@@ -96,6 +111,11 @@ class UTF8SlidingWindow::Iterator{
 		if constexpr(B){
 			while(--size && it2_ != end_)
 				++it2_;
+
+			if constexpr(!ALLOW_SMALL_WINDOW){
+				if (it2_ == end_)
+					it1_ = end_;
+			}
 		}
 	}
 
@@ -124,11 +144,20 @@ public:
 		if (it2_ != end_)
 			++it2_;
 
+		if constexpr(!ALLOW_SMALL_WINDOW){
+			if (it2_ == end_)
+				it1_ = end_;
+		}
+
 		return *this;
 	}
 
 	constexpr bool operator!=(Iterator const &other) const{
 		return it1_ != other.it1_ || it2_ != other.it2_;
+	}
+
+	constexpr bool operator==(Iterator const &other) const{
+		return ! operator!=(other);
 	}
 };
 
@@ -139,8 +168,6 @@ auto UTF8SlidingWindow::begin() const -> Iterator{
 auto UTF8SlidingWindow::end()   const -> Iterator{
 	return Iterator{ std::false_type{}, s_, size_ };
 }
-
-
 
 #endif
 
