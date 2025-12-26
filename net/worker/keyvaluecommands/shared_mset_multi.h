@@ -459,7 +459,17 @@ namespace net::worker::shared::msetmulti{
 	}
 
 
-	#include "shared_mset_multi_fts.h.cc"
+
+	#include "shared_mset_multi_fts_strict.h.cc"
+	#include "shared_mset_multi_fts_flex.h.cc"
+
+	namespace FTS{
+		template<typename DBAdapter, size_t MaxTokens>
+		using FTSFlex = flex_impl_::FTS<DBAdapter, MaxTokens>;
+
+		template<typename DBAdapter, size_t MaxTokens>
+		using FTSStrict = strict_impl_::FTS<DBAdapter, MaxTokens>;
+	}
 
 } // namespace net::worker::shared::zsetmulti
 

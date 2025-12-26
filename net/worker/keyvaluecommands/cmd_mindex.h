@@ -377,14 +377,13 @@ namespace net::worker::commands::MIndex{
 			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart	= p[5];
 
-			return shared::msetmulti::FTS::processFTS<MyMDecoder, MyFTS, MyTokenContainer>(keyN, delimiter[0], tokens, count, keyStart,
+			return shared::msetmulti::FTS::processFTS<MyMDecoder, MyFTS>(keyN, delimiter[0], tokens, count, keyStart,
 									db, result, blob);
 		}
 
 	private:
 		constexpr static size_t MaxTokens  = 32;
 
-		using MyTokenContainer	= StaticVector<std::string_view, MaxTokens>;
 		using MyMDecoder	= mindex_impl_::MDecoder<DBAdapter>;
 		using MyFTS		= shared::msetmulti::FTS::FTSFlex<DBAdapter, MaxTokens>;
 
@@ -428,14 +427,13 @@ namespace net::worker::commands::MIndex{
 			auto const count	= myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart	= p[5];
 
-			return shared::msetmulti::FTS::processFTS<MyMDecoder, MyFTS, MyTokenContainer>(keyN, delimiter[0], tokens, count, keyStart,
+			return shared::msetmulti::FTS::processFTS<MyMDecoder, MyFTS>(keyN, delimiter[0], tokens, count, keyStart,
 									db, result, blob);
 		}
 
 	private:
 		constexpr static size_t MaxTokens  = 32;
 
-		using MyTokenContainer	= StaticVector<std::string_view, MaxTokens>;
 		using MyMDecoder	= mindex_impl_::MDecoder<DBAdapter>;
 		using MyFTS		= shared::msetmulti::FTS::FTSStrict<DBAdapter, MaxTokens>;
 

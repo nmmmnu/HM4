@@ -114,10 +114,6 @@ namespace net::worker::commands::SIndex{
 			using namespace shared::accumulate_results;
 			namespace PM = shared::msetmulti;
 
-
-
-			using MyTokenContainer	= StaticVector<std::string_view, MaxTokens>;
-
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
 
@@ -134,7 +130,7 @@ namespace net::worker::commands::SIndex{
 			auto const count	= myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart	= p[4];
 
-			return shared::msetmulti::FTS::processFTS<MyMDecoder, MyFTS, MyTokenContainer>(keyN, delimiter, tokens, count, keyStart,
+			return shared::msetmulti::FTS::processFTS<MyMDecoder, MyFTS>(keyN, delimiter, tokens, count, keyStart,
 									db, result, blob);
 		}
 

@@ -21,7 +21,7 @@ $redis = new Redis();
 $redis->connect("127.0.0.1");
 
 $index		= "flagman_s";
-$separator	= ",";
+//$index		= "f";
 $search		= $argv[1];
 $count		= count($argv) > 2 ? $argv[2] : 10;
 $from		= count($argv) > 3 ? $argv[3] : "";
@@ -34,25 +34,25 @@ if(1){
 }
 
 if(1){
-	$result = rawCommand($redis, "IXSRANGESTRICT",	$index, $separator, $search, $count, $from);
+	$result = rawCommand($redis, "IXSRANGESTRICT",	$index, $search, $count, $from);
 
 	print_r($result);
 }
 
 if(0){
-	$result = rawCommand($redis, "IXSRANGEFLEX",	$index, $separator, $search, $count, $from);
+	$result = rawCommand($redis, "IXSRANGEFLEX",	$index, $search, $count, $from);
 
 	print_r($result);
 }
 
 if(0){
-	$result = rawCommand($redis, "IXSGETINDEXES", "bulnews", "0000031809");
+	$result = rawCommand($redis, "IXSGETINDEXES", "flagman_s", "0000368455");
 
 	print_r($result);
 }
 
 if(0){
-	$result = rawCommand($redis, "XNGETKEYS", "bulnews~герб~", $count, "bulnews~герб~");
+	$result = rawCommand($redis, "XNGETKEYS", "flagman_s~ели~9999636383~0000363617", $count, "flagman_s~ели~");
 
 	print_r($result);
 }

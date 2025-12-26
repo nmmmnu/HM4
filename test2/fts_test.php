@@ -22,6 +22,7 @@ $redis->connect("127.0.0.1");
 
 $index		= "bulnews";
 $index		= "flagman";
+//$index	= "f2";
 $separator	= ",";
 $search		= $argv[1];
 $count		= count($argv) > 2 ? $argv[2] : 10;

@@ -1,9 +1,13 @@
+#ifndef SHARED_MSET_MULTI_FTS_H_
+#define SHARED_MSET_MULTI_FTS_H_
 
-namespace FTS{
+namespace FTS::impl_{
 
-	struct BaseToken{
-		std::string_view	pkey;
-		std::string_view	pval;
+	struct Token{
+		// we can store the pair,
+		// but then we need to check for nullptr every time
+		std::string_view	pairKey;
+		std::string_view	pairVal;
 
 		std::string_view	index;
 		std::string_view	sort;
@@ -13,35 +17,49 @@ namespace FTS{
 			return !index.empty();
 		}
 
-		constexpr void clearOthers(){
+		template<typename Iterator>
+		void updatePair(Iterator it, char separator){
+			pairKey = it->getKey();
+			pairVal = it->getVal();
+
+			if (it->isOK()){
+				// get data
+				update_(it->getKey(), separator);
+			}else{
+				// tombstone
+				clearOthers_();
+			}
+		}
+
+		static constexpr bool greater(Token const &a, Token const &b){
+			// first sort_, then key_
+
+			if (int const comp = a.sort.compare(b.sort); comp != 0)
+				return comp > 0;
+
+			return a.key  > b.key;
+		}
+
+		static constexpr bool less(Token const &a, Token const &b){
+			return greater(b, a);
+		}
+
+	private:
+		constexpr void clearOthers_(){
 			index	=	"";
 			sort	=	"";
 			key	=	"";
 		}
-	};
 
-	struct Token : BaseToken{
-		size_t			count	= 0;
+		void update_(std::string_view s, char separator){
+			StringTokenizer const tok{ s, separator };
+			auto _ = getForwardTokenizer(tok);
 
-		Token &operator=(BaseToken const &bt){
-			static_cast<BaseToken &>(*this) = bt;
-			return *this;
-		}
-
-		constexpr static bool comp(Token const &a, Token const &b){
-			return a.count > b.count;
-		}
-
-		constexpr static bool comp2(Token const &a, Token const &b){
-			// first count >, then sort <, then key <
-
-			if (a.count != b.count)
-				return a.count > b.count;
-
-			if (int comp = a.sort.compare(b.sort); comp != 0)
-				return comp < 0;
-
-			return a.key < b.key;
+			// a~index~sort~key
+					_(); // 0 = a (keyN)
+			index	=	_(); // 1 = index
+			sort	=	_(); // 2 = sort
+			key	=	_(); // 3 = key (keySub)
 		}
 	};
 
@@ -55,7 +73,7 @@ namespace FTS{
 		bool			active_		= true;
 		std::string_view	prefix_;
 
-		BaseToken		token_;
+		Token			token_;
 
 	public:
 		constexpr IteratorPair(Iterator it, Iterator end, char separator, std::string_view prefix) :
@@ -71,23 +89,10 @@ namespace FTS{
 		}
 
 		static constexpr bool comp(IteratorPair const &a, IteratorPair const &b){
-			// first sort_, then key_
-
-			if (int const comp = a.token_.sort.compare(b.token_.sort); comp != 0)
-				return comp > 0;
-
-			return a.token_.key  > b.token_.key;
+			return Token::greater(a.token_, b.token_);
 		}
 
-		constexpr auto const &getKey() const{
-			return token_.key;
-		}
-
-		constexpr auto const &getPairKey() const{
-			return token_.pkey;
-		}
-
-		constexpr auto const &getToken() const{
+		constexpr auto const &getTokenRef() const{
 			return token_;
 		}
 
@@ -111,122 +116,24 @@ namespace FTS{
 				return;
 			}
 
-			token_.pkey = it_->getKey();
-			token_.pval = it_->getVal();
-
-			if (it_->isOK()){
-				StringTokenizer const tok{ it_->getKey(), separator_ };
-				auto _ = getForwardTokenizer(tok);
-
-				// a~index~sort~key
-							_(); // 0 = a (keyN)
-				token_.index	=	_(); // 1 = index
-				token_.sort	=	_(); // 2 = sort
-				token_.key	=	_(); // 3 = key (keySub)
-			}else{
-				// tombstone
-
-				token_.clearOthers();
-			}
+			token_.updatePair(it_, separator_);
 		}
 	};
 
 
 
-	template <class Iterator, size_t MaxTokens>
-	class FTSMerger{
-		using IP		= IteratorPair<Iterator>;
-
-		using Container		= StaticVector<IP, MaxTokens>;
-
-		Container		container_;
-
-	public:
-		bool push(Iterator begin, Iterator end, char separator, std::string_view prefix){
-			IP ip{ begin, end, separator, prefix };
-
-			if (!ip)
-				return false;
-
-			container_.push_back(std::move(ip));
-			std::push_heap(std::begin(container_), std::end(container_), & IP::comp);
-
-			return true;
-		}
-
-		void clear_(){
-			container_.clear();
-		}
-
-		auto size() const{
-			return container_.size();
-		}
-
-		auto empty() const{
-			return !size();
-		}
-
-		operator bool() const{
-			return size();
-		}
-
-		void print_() const{
-			for(auto const &x : container_){
-				auto const &t = x.getToken();
-				logger<Logger::DEBUG>() << "MSetMulti::FTSMerger::print>>>" << t.index << t.key << t.pval;
-			}
-		}
-
-		Token operator()(){
-			Token t;
-
-			while(!container_.empty()){
-				++t.count;
-
-				std::pop_heap(std::begin(container_), std::end(container_), & IP::comp);
-
-				auto &ip = container_.back();
-
-				t = ip.getToken();
-
-				// logger<Logger::DEBUG>() << "MSetMulti::FTSMerger::walk" << "----->" << t.pkey << t.count;
-
-				++ip;
-
-				if (ip){
-					std::push_heap(std::begin(container_), std::end(container_), & IP::comp);
-				}else{
-					logger<Logger::DEBUG>() << "MSetMulti::FTSMerger::walk" << "remove from the container" << t.index << t.key;
-
-					container_.pop_back();
-
-					if (container_.empty()){
-						return t;
-					}
-				}
-
-				if ( t.key != container_.front().getKey() ){
-					// pair index not match
-					return t;
-				}
-			}
-
-			return Token{};
-		}
-	};
-
-
-
-	template<typename DBAdapter, size_t MaxTokens>
+	template<template<typename, size_t> typename FTSReducer, typename DBAdapter, size_t MaxTokens>
 	class FTSBase{
 	protected:
 		using IT_			= typename DBAdapter::List::iterator;
-		using MyFTSMerger		= FTSMerger<IT_, MaxTokens>;
+		using MyFTSReducer		= FTSReducer<IT_, MaxTokens>;
 
 		using PairBufferKeyVector	= StaticVector<hm4::PairBufferKey, MaxTokens>;
-		using TokenContainer		= StaticVector<std::string_view,   MaxTokens>;
 
-		DBAdapter		&db_;
+		DBAdapter	&db_;
+
+	public:
+		using SearchTokenContainer	= StaticVector<std::string_view,   MaxTokens>;
 
 	private:
 		std::string_view	keyN_;
@@ -235,7 +142,7 @@ namespace FTS{
 	protected:
 		uint32_t		resultCount_;
 
-		MyFTSMerger		merger_;
+		MyFTSReducer		reducer_;
 
 	private:
 		PairBufferKeyVector	bufferKeyVector_;
@@ -246,18 +153,6 @@ namespace FTS{
 							keyN_		(keyN				),
 							keyStart_	(calcKeyStart__(keyStart)	),
 							resultCount_	(resultCount			){}
-
-		constexpr size_t getIterationsMax() const{
-			auto const max = net::worker::shared::config::ITERATIONS_LOOPS_MAX;
-			auto const cnt = 3;
-
-			static_assert(cnt > 0);
-
-			if (merger_.size() <= cnt)
-				return max;
-			else
-				return max / (merger_.size() - cnt);
-		}
 
 	private:
 		static std::string_view calcKeyStart__(std::string_view s){
@@ -276,14 +171,14 @@ namespace FTS{
 
 	public:
 		constexpr bool empty() const{
-			return merger_.empty();
+			return reducer_.empty();
 		}
 
 		constexpr auto size() const{
-			return merger_.size();
+			return reducer_.size();
 		}
 
-		void addIPs(TokenContainer const &tokens){
+		void addIPs(SearchTokenContainer const &tokens){
 			for(auto const &index : tokens){
 				bufferKeyVector_.push_back();
 				auto const prefix = makeKeyDataSearch(bufferKeyVector_.back(), DBAdapter::SEPARATOR, keyN_, index);
@@ -293,10 +188,10 @@ namespace FTS{
 				auto const key = calcStart_(bufferKey, prefix);
 
 				auto begin = db_->find(key);	// key does not need to be alive any longer
-				auto end = std::end(*db_);
+				auto end   = std::end(*db_);
 
 				[[maybe_unused]]
-				bool const b = merger_.push(begin, end, DBAdapter::SEPARATOR[0], prefix);
+				bool const b = reducer_.push(begin, end, DBAdapter::SEPARATOR[0], prefix);
 
 				logger<Logger::DEBUG>() << "MSetMulti::FTSBase::addIPs" << "index" << index << "prefix" << prefix << "key" << key << "accepted" << (b ? "Y" : "N");
 			}
@@ -304,11 +199,42 @@ namespace FTS{
 	};
 
 
-	template<typename MDecoder, typename FTS, typename TokenContainer, typename DBAdapter, typename Result>
+
+	struct IterationCounter{
+		bool operator()(){
+			++iterations_;
+
+			stop_ = iterations_ > iterationsMax__;
+
+			return stop_;
+		}
+
+		constexpr auto stop() const{
+			return stop_;
+		}
+
+		constexpr auto iterations() const{
+			return iterations_;
+		}
+
+	private:
+		size_t	iterations_	= 0;
+		bool	stop_		= false;
+
+		constexpr static size_t iterationsMax__	= net::worker::shared::config::ITERATIONS_LOOPS_MAX;
+	};
+
+} // namespace FTS::impl_
+
+namespace FTS{
+
+	template<typename MDecoder, typename MyFTS, typename DBAdapter, typename Result>
 	void processFTS(std::string_view keyN, char delimiter, std::string_view tokens, uint32_t resultCount, std::string_view keyStart,
 				DBAdapter &db, Result &result, OutputBlob &blob){
 
-		auto &tokensContainer = blob.construct<TokenContainer>();
+		using SearchTokenContainer = typename MyFTS::SearchTokenContainer;
+
+		auto &tokensContainer = blob.construct<SearchTokenContainer>();
 
 		MDecoder decoder;
 
@@ -323,7 +249,7 @@ namespace FTS{
 			return PM::cmdProcessRange(keyN, index, resultCount, keyStart,
 								db, result, blob);
 		}else{
-			auto fts = blob.construct<FTS>(db, keyN, resultCount, keyStart);
+			auto fts = blob.construct<MyFTS>(db, keyN, resultCount, keyStart);
 
 			fts.addIPs(tokensContainer);
 
@@ -341,193 +267,6 @@ namespace FTS{
 			return result.set_container(container);
 		}
 	}
-
-
-
-
-
-	template<typename DBAdapter, size_t MaxTokens>
-	class FTSFlex : public FTSBase<DBAdapter, MaxTokens>{
-		using Base = FTSBase<DBAdapter, MaxTokens>;
-
-		using Base::merger_		;
-		using Base::resultCount_	;
-
-		using OutputHeap	= StaticVector<Token, net::worker::shared::config::ITERATIONS_RESULTS_MAX>;
-		OutputHeap		heap_;
-
-	public:
-		FTSFlex(DBAdapter &db, std::string_view keyN, uint32_t resultCount, std::string_view keyStart) :
-							Base(db, keyN, resultCount, keyStart){}
-
-		void process(OutputBlob::Container &container){
-			size_t iterations = 0;
-
-			auto const iterationsMax = this->getIterationsMax();
-
-			while(merger_){
-				if (++iterations > iterationsMax){
-					logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "too many iterations. break";
-					break;
-				}
-
-				// assuming the output list (heap) is full,
-				//
-				// if front.count is 4 and we have 4 lists,
-				// if front.count is 3 and we have 3 lists,
-				// ...
-				// if front.count is N and we have N lists,
-				//
-				// then is not possible new elements to come
-				// so we are done
-
-				if (heap_.size() >= resultCount_ && heap_.front().count >= merger_.size()){
-					logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "collected enough keys. break. iterations" << iterations;
-					break;
-				}
-
-				auto const &t = merger_();
-
-				if (!t)
-					continue;
-
-				if (heap_.size() < resultCount_){
-					heap_.push_back(t);
-					std::push_heap(std::begin(heap_), std::end(heap_), & Token::comp);
-
-					logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "initial push" << t.key << t.pval << t.count;
-
-					continue;
-				}
-
-				if (!Token::comp(t, heap_.front()))
-					continue;
-
-				// remove smallest
-				std::pop_heap(std::begin(heap_), std::end(heap_), & Token::comp);
-				heap_.pop_back();
-
-				// insert bigger
-				heap_.push_back(t);
-				std::push_heap(std::begin(heap_), std::end(heap_), & Token::comp);
-
-				logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "push" << t.index << t.key << t.pval << t.count;
-			}
-
-			logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "finished. iterations" << iterations;
-
-			//std::sort_heap(std::begin(heap), std::end(heap), & Token::comp);
-
-			// using different comparator
-			std::sort(std::begin(heap_), std::end(heap_), & Token::comp2);
-
-			// collecting the data
-			container.clear();
-
-			for(auto const &t : heap_){
-				container.push_back(t.key);
-				container.push_back(t.pval);
-
-				// logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::collect" << t.index << t.key << t.val << t.count;
-			}
-		}
-
-		std::string_view tail(){
-			if (!merger_){
-				// merger is inactive
-				return "";
-			}
-
-			auto const &t = merger_();
-
-			return t.pkey;
-		}
-	};
-
-
-
-
-
-	template<typename DBAdapter, size_t MaxTokens>
-	class FTSStrict : public FTSBase<DBAdapter, MaxTokens>{
-		using Base = FTSBase<DBAdapter, MaxTokens>;
-
-		using TokenContainer = typename Base::TokenContainer;
-
-		using Base::merger_		;
-		using Base::resultCount_	;
-
-		size_t tokensSize_ = 0;
-
-	public:
-		FTSStrict(DBAdapter &db, std::string_view keyN, uint32_t resultCount, std::string_view keyStart) :
-							Base(db, keyN, resultCount, keyStart){}
-
-		void addIPs(typename Base::TokenContainer const &tokens){
-			tokensSize_ = tokens.size();
-
-			Base::addIPs(tokens);
-		}
-
-		void process(OutputBlob::Container &container){
-			container.clear();
-
-			size_t results = 0;
-
-			size_t iterations = 0;
-
-			auto const iterationsMax = this->getIterationsMax();
-
-			while(merger_){
-				if (++iterations > iterationsMax){
-					logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "too many iterations. break";
-					break;
-				}
-
-				if (results >= resultCount_){
-					logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "collected enough keys. break. iterations" << iterations;
-					break;
-				}
-
-				if (merger_.size() < tokensSize_){
-					logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "input stream exhausted. break. iterations" << iterations;
-					break;
-				}
-
-				auto const &t = merger_();
-
-				if (t && t.count == tokensSize_){
-					container.push_back(t.key);
-					container.push_back(t.pval);
-
-					++results;
-				//	logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "push" << t.key << t.val << t.count;
-				}
-			}
-
-			logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "finished. iterations" << iterations;
-
-			// already sorted
-
-			// already collected
-		}
-
-		std::string_view tail(){
-			if (!merger_){
-				// merger is inactive
-				return "";
-			}
-
-			if (merger_.size() < tokensSize_){
-				// input stream exhausted.
-				return "";
-			}
-
-			auto const &t = merger_();
-
-			return t.pkey;
-		}
-	};
 
 
 
@@ -581,6 +320,8 @@ namespace FTS{
 			return container.size() >= 2;
 		}
 	};
+
 } // namespace FTS
 
+#endif
 
