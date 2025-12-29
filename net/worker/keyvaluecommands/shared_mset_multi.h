@@ -2,7 +2,10 @@
 #define SHARED_MSET_MULTI_H_
 
 #include "pair.h"
-#include "stringtokenizer.h"
+#include "ilist/txguard.h"
+
+#include "shared_accumulateresults.h"
+#include "pair_vfactory.h"
 #include "ilist/txguard.h"
 
 namespace net::worker::shared::msetmulti{
@@ -258,6 +261,8 @@ namespace net::worker::shared::msetmulti{
 
 
 
+
+
 	template<typename Decoder, typename DBAdapter>
 	std::string_view get(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){
@@ -322,29 +327,6 @@ namespace net::worker::shared::msetmulti{
 
 
 
-	template<typename DBAdapter, typename Result>
-	void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){
-		// EXISTS key subkey0
-
-		if (p.size() != 3)
-			return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
-
-		auto const &keyN   = p[1];
-		auto const &keySub = p[2];
-
-		if (keyN.empty() || keySub.empty())
-			return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-		if (!valid(keyN, keySub))
-			return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-		return result.set(
-			exists(db, keyN, keySub)
-		);
-	}
-
-
-
 	template<typename Decoder, typename DBAdapter>
 	void rem(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub, OutputBlob::Container &container, hm4::PairBufferVal &buferVal){
@@ -383,45 +365,8 @@ namespace net::worker::shared::msetmulti{
 		}
 	}
 
-
-
-	template<typename MyMDecoder, typename DBAdapter, typename Result>
-	void cmdProcessRem(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &blob){
-		// REM key subkey0 subkey1 ...
-
-		if (p.size() < 3)
-			return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
-
-		const auto &keyN = p[1];
-
-		if (keyN.empty())
-			return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-		auto const varg = 2;
-
-		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-			if (auto const &keySub = *itk; !valid(keyN, keySub))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-		}
-
-		auto &container = blob.construct<OutputBlob::Container>();
-		auto &buferVal  = blob.allocate<hm4::PairBufferVal>();
-
-		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-			auto const &keySub = *itk;
-
-			container.clear();
-
-			rem<MyMDecoder>(db, keyN, keySub, container, buferVal);
-		}
-
-		return result.set_1();
-	}
-
-
-
 	template<typename DBAdapter, typename Result>
-	void cmdProcessRange(std::string_view keyN, std::string_view index, uint32_t count, std::string_view keyStart,
+	void rangeSingle(std::string_view keyN, std::string_view index, uint32_t count, std::string_view keyStart,
 									DBAdapter &db, Result &result, OutputBlob &blob){
 
 		using namespace net::worker::shared::accumulate_results;
@@ -462,6 +407,10 @@ namespace net::worker::shared::msetmulti{
 
 	#include "shared_mset_multi_fts_strict.h.cc"
 	#include "shared_mset_multi_fts_flex.h.cc"
+
+	#include "shared_mset_multi_commands.h.cc"
+
+
 
 	namespace FTS{
 		template<typename DBAdapter, size_t MaxTokens>

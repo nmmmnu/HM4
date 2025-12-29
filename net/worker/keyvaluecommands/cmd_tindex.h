@@ -1,24 +1,40 @@
 #include "base.h"
 
 #include "shared_mset_multi.h"
+
 #include "stringtokenizer.h"
+#include "utf8slidingwindow.h"
 
-namespace net::worker::commands::MIndex{
-	namespace mindex_impl_{
+namespace net::worker::commands::TIndex{
+	namespace tindex_impl_{
 
-		// constexpr uint8_t NGram	= 3;
+		constexpr uint8_t NGram		= 3;
 		constexpr size_t  MaxTokens	= 32;
 
-		template<typename DBAdapter>
+		template<typename DBAdapter, typename SlidingWindow>
 		struct MDecoder : shared::msetmulti::FTS::BaseMDecoder<DBAdapter>{
 
-			constexpr static bool checkSize(size_t size){
-				return hm4::Pair::isValValid(size);
+			constexpr static bool checkSize(size_t){
+				static_assert(
+					hm4::Pair::isValValid(
+						(NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE
+					)
+				);
+
+				return true;
 			}
+
+			// template<typename Container>
+			// static bool indexesUser(std::string_view value, char, Container &container){
+			// 	if (!indexesUserExplode__(value, container))
+			// 		return false;
+			//
+			// 	return indexesUserSort__(container);
+			// }
 
 			template<typename Container>
 			static bool indexesUser(std::string_view value, char separator, Container &container){
-				if (!indexesUserExplode__(value, separator, container))
+				if (!indexesFindExplode__(value, separator, container))
 					return false;
 
 				return indexesUserSort__(container);
@@ -31,21 +47,30 @@ namespace net::worker::commands::MIndex{
 
 		private:
 			template<typename Container>
-			static bool indexesUserExplode__(std::string_view value, char separator, Container &container){
-				StringTokenizer const tok{ value, separator };
+			static bool indexesUserExplode__(std::string_view value, Container &container){
+				SlidingWindow sw{ value, NGram };
 
-				size_t count = 0;
-
-				for(auto const &x : tok){
-					// we need to have space for the sort
-					if (++count >= container.capacity())
+				for(auto const &x : sw){
+					if (container.full())
 						return false;
 
 					// if (!checkF(x))
-					// 	return false;
+					//	return false;
 
 					container.push_back(x);
 				}
+
+				// inside must be: at least one token
+				return !container.empty();
+			}
+
+			template<typename Container>
+			static bool indexesFindExplode__(std::string_view value, char separator, Container &container){
+				StringTokenizer const tok{ value, separator };
+
+				for(auto const &value2 : tok)
+					if (! indexesUserExplode__(value2, container) )
+						return false;
 
 				return true;
 			}
@@ -71,12 +96,12 @@ namespace net::worker::commands::MIndex{
 			}
 		};
 
-	} // namespace mindex_impl_
+	} // namespace tindex_impl_
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct IXMADD : BaseCommandRW<Protocol,DBAdapter>{
+	struct IXTADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -85,22 +110,24 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMADD a keySub delimiter "words,words" sort value
+		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using MyMDecoder = mindex_impl_::MDecoder<DBAdapter>;
+			using MySlidingWindow	= UTF8SlidingWindow;
+			using MyMDecoder	= tindex_impl_::MDecoder<DBAdapter, MySlidingWindow>;
 
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmadd",	"IXMADD"
+			"ixtadd_utf8"	,	"IXTADD_UTF8"	,
+			"ixtadd"	,	"IXTADD"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMGET : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXTADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -109,7 +136,32 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMGET key subkey
+		// IXTADD_BIN a keySub delimiter "words,words" sort value
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using MySlidingWindow	= BinarySlidingWindow;
+			using MyMDecoder	= tindex_impl_::MDecoder<DBAdapter, MySlidingWindow>;
+
+			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ixtadd_bin"	,	"IXTADD_BIN"
+		};
+	};
+
+	template<class Protocol, class DBAdapter>
+	struct IXTGET : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// IXTGET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return shared::msetmulti::cmdProcessGet(p, db, result, blob);
@@ -117,12 +169,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmget",	"IXMGET"
+			"ixtget"	,	"IXTGET"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMMGET : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXTMGET : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -131,19 +183,19 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMMGET key subkey0 subkey1 ...
+		// IXTMGET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return shared::msetmulti::cmdProcessMGet(p, db, result, blob);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmmget",	"IXMMGET"
+			"ixtmget"	,	"IXTMGET"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMEXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXTEXISTS : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -152,7 +204,7 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMEXISTS key subkey
+		// IXTEXISTS key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return shared::msetmulti::cmdProcessExists(p, db, result, blob);
@@ -160,12 +212,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmexists",	"IXMEXISTS"
+			"ixtexists"	,	"IXTEXISTS"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXTGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -174,7 +226,7 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMGETINDEXES key subkey
+		// IXTGETINDEXES key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return shared::msetmulti::cmdProcessGetIndexes(p, db, result, blob);
@@ -182,12 +234,12 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmgetindexes",	"IXMGETINDEXES"
+			"ixtgetindexes"	,	"IXTGETINDEXES"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMREM : BaseCommandRW<Protocol,DBAdapter>{
+	struct IXTREM : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -196,7 +248,7 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMDEL a subkey0 subkey1 ...
+		// IXTDEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return shared::msetmulti::cmdProcessRem(p, db, result, blob);
@@ -204,14 +256,14 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmrem",	"IXMREM",
-			"ixmremove",	"IXMREMOVE",
-			"ixmdel",	"IXMDEL"
+			"ixtrem"	,	"IXTREM"	,
+			"ixtremove"	,	"IXTREMOVE"	,
+			"ixtdel"	,	"IXTDEL"
 		};
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct IXMRANGE : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXTRANGEFLEX_UTF8 : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -220,55 +272,13 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMRANGE key txt count from
+		// IXTRANGEFLEX_UTF8 key "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace shared::accumulate_results;
-			namespace PM = shared::msetmulti;
+			using namespace tindex_impl_;
 
-			if (p.size() != 5)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
-
-			auto const keyN     = p[1];
-			auto const index    = p[2];
-
-			if (keyN.empty() || index.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!PM::valid(keyN, index))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
-			auto const keyStart = p[4];
-
-			return PM::rangeSingle(keyN, index, count, keyStart,
-									db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixmrange",	"IXMRANGE"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct IXMRANGEFLEX : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// IXMRANGEFLEX key delimiter "words,words" count from
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace mindex_impl_;
-
-			using MyMDecoder	= MDecoder<DBAdapter>;
+			using MySlidingWindow	= UTF8SlidingWindow;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
 			using MyFTS		= shared::msetmulti::FTS::FTSFlex<DBAdapter, MaxTokens>;
 
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
@@ -276,14 +286,15 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmrangeflex",	"IXMRANGEFLEX"
+			"ixtrangeflex_utf8"	,	"IXTRANGEFLEX_UTF8"	,
+			"ixtrangeflex"		,	"IXTRANGEFLEX"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct IXMRANGESTRICT : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXTRANGEFLEX_BIN : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -292,14 +303,43 @@ namespace net::worker::commands::MIndex{
 			return std::end(cmd);
 		};
 
-		// IXMRANGESTRICT key delimiter "words,words" count from
+		// IXTRANGEFLEX_BIN key delimiter "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace mindex_impl_;
+			using namespace tindex_impl_;
 
-			constexpr static size_t MaxTokens  = 32;
+			using MySlidingWindow	= BinarySlidingWindow;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
+			using MyFTS		= shared::msetmulti::FTS::FTSFlex<DBAdapter, MaxTokens>;
 
-			using MyMDecoder	= MDecoder<DBAdapter>;
+			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ixtrangeflex_bin"	,	"IXTRANGEFLEX_BIN"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IXTRANGESTRICT_UTF8 : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// IXTRANGESTRICT_UTF8 key delimiter "words words" count from
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace tindex_impl_;
+
+			using MySlidingWindow	= UTF8SlidingWindow;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
 			using MyFTS		= shared::msetmulti::FTS::FTSStrict<DBAdapter, MaxTokens>;
 
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
@@ -307,7 +347,38 @@ namespace net::worker::commands::MIndex{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmrangestrict",	"IXMRANGESTRICT"
+			"ixtrangestrict_utf8"	,	"IXTRANGESTRICT_UTF8"	,
+			"ixtrangestrict"	,	"IXTRANGESTRICT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IXTRANGESTRICT_BIN : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// IXTRANGESTRICT_BIN key delimiter "words words" count from
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace tindex_impl_;
+
+			using MySlidingWindow	= BinarySlidingWindow;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
+			using MyFTS		= shared::msetmulti::FTS::FTSStrict<DBAdapter, MaxTokens>;
+
+			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ixtrangestrict_bin"	,	"IXTRANGESTRICT_BIN"
 		};
 	};
 
@@ -321,15 +392,17 @@ namespace net::worker::commands::MIndex{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				IXMADD		,
-				IXMGET		,
-				IXMMGET		,
-				IXMEXISTS	,
-				IXMGETINDEXES	,
-				IXMREM		,
-				IXMRANGE	,
-				IXMRANGEFLEX	,
-				IXMRANGESTRICT
+				IXTADD_UTF8		,
+				IXTADD_BIN		,
+				IXTGET			,
+				IXTMGET			,
+				IXTEXISTS		,
+				IXTGETINDEXES		,
+				IXTREM			,
+				IXTRANGEFLEX_UTF8	,
+				IXTRANGEFLEX_BIN	,
+				IXTRANGESTRICT_UTF8	,
+				IXTRANGESTRICT_BIN
 			>(pack);
 		}
 	};

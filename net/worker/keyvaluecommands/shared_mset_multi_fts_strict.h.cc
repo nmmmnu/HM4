@@ -32,7 +32,7 @@ namespace FTS::strict_impl_{
 
 			container_.push_back(std::move(ip));
 
-			if (auto const &t = ip.getTokenRef(); tMax_ || Token::greater(t, tMax_))
+			if (auto const &t = ip.getTokenRef(); !tMax_.valid || Token::greater(t, tMax_))
 				tMax_ = t;
 
 			return true;
@@ -54,7 +54,7 @@ namespace FTS::strict_impl_{
 		void print_() const{
 			for(auto const &x : container_){
 				auto const &t = x.getTokenRef();
-				logger<Logger::DEBUG>() << "MSetMulti::FTSIntersector::print>>>" << t.index << t.key << t.pairVal;
+				logger<Logger::DEBUG>() << "MSetMulti::FTSIntersector::print>>>" << t.index << t.key << t.getVal();
 			}
 		}
 
@@ -160,21 +160,27 @@ namespace FTS::strict_impl_{
 					break;
 				}
 
-				// logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << (t ? "Y" : "N");
+				logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << (t.valid ? "Y" : "N") << t.key << t.getVal() << icounter.iterations();
 
-				if (t){
-					container.push_back(t.key);
-					container.push_back(t.pairVal);
+				if (t.valid){
 
-					++results;
-					logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "push" << t.key << t.pairVal;
+					if (t.isOK()){
+						container.push_back(t.key);
+						container.push_back(t.getVal());
+
+						++results;
+						logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "push" << t.key << t.getVal();
+					}else{
+						logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "skip tombstone / expired" << t.getKey();
+					}
+
 				}else{
 					logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "input stream exhausted. break. iterations" << icounter.iterations();
 					break;
 				}
 			}
 
-			logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "finished. iterations" << icounter.iterations();
+			// logger<Logger::DEBUG>() << "MSetMulti::FTSStrict::walk" << "finished. iterations";
 
 			// already sorted
 
@@ -189,7 +195,7 @@ namespace FTS::strict_impl_{
 
 			auto const &t = reducer_(std::true_type{});
 
-			return t.pairKey;
+			return t.getKey();
 		}
 	};
 

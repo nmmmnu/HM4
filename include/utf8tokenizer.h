@@ -48,7 +48,10 @@ using BinaryTokenizer = ASCIITokenizer;
 
 
 
-class UTF8Tokenizer{
+struct UTF8Tokenizer{
+	constexpr static size_t MAX_UTF8_SIZE = 4;
+
+private:
 	std::string_view s_;
 
 	class Iterator;

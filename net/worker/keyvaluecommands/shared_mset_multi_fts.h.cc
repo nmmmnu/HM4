@@ -4,23 +4,35 @@
 namespace FTS::impl_{
 
 	struct Token{
-		// we can store the pair,
-		// but then we need to check for nullptr every time
-		std::string_view	pairKey;
-		std::string_view	pairVal;
+		bool			valid	= false;
+
+		const hm4::Pair		*pair	= nullptr;
 
 		std::string_view	index;
 		std::string_view	sort;
 		std::string_view	key;
 
-		constexpr operator bool() const{
-			return !index.empty();
+
+
+		auto getVal() const{
+			return pair ? pair->getVal() : "";
 		}
+
+		auto getKey() const{
+			return pair ? pair->getKey() : "";
+		}
+
+		auto isOK() const{
+			return pair ? pair->isOK() : false;
+		}
+
+
 
 		template<typename Iterator>
 		void updatePair(Iterator it, char separator){
-			pairKey = it->getKey();
-			pairVal = it->getVal();
+			valid     = true;
+
+			pair = & *it;
 
 			if (it->isOK()){
 				// get data
@@ -30,6 +42,8 @@ namespace FTS::impl_{
 				clearOthers_();
 			}
 		}
+
+
 
 		static constexpr bool greater(Token const &a, Token const &b){
 			// first sort_, then key_
@@ -226,49 +240,45 @@ namespace FTS::impl_{
 
 } // namespace FTS::impl_
 
-namespace FTS{
+template<typename MDecoder, typename MyFTS, typename DBAdapter, typename Result>
+void processFTS(std::string_view keyN, char delimiter, std::string_view tokens, uint32_t resultCount, std::string_view keyStart,
+			DBAdapter &db, Result &result, OutputBlob &blob){
 
-	template<typename MDecoder, typename MyFTS, typename DBAdapter, typename Result>
-	void processFTS(std::string_view keyN, char delimiter, std::string_view tokens, uint32_t resultCount, std::string_view keyStart,
-				DBAdapter &db, Result &result, OutputBlob &blob){
+	using SearchTokenContainer = typename MyFTS::SearchTokenContainer;
 
-		using SearchTokenContainer = typename MyFTS::SearchTokenContainer;
+	auto &tokensContainer = blob.construct<SearchTokenContainer>();
 
-		auto &tokensContainer = blob.construct<SearchTokenContainer>();
+	MDecoder decoder;
 
-		MDecoder decoder;
+	if (!decoder.indexesFind(tokens, delimiter, tokensContainer))
+		return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-		if (!decoder.indexesUser(tokens, delimiter, tokensContainer))
-			return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+	if (tokensContainer.size() == 1){
+		auto const &index = tokensContainer[0];
 
-		if (tokensContainer.size() == 1){
-			namespace PM = shared::msetmulti;
+		return rangeSingle(keyN, index, resultCount, keyStart,
+							db, result, blob);
+	}else{
+		auto fts = blob.construct<MyFTS>(db, keyN, resultCount, keyStart);
 
-			auto const &index = tokensContainer[0];
+		fts.addIPs(tokensContainer);
 
-			return PM::cmdProcessRange(keyN, index, resultCount, keyStart,
-								db, result, blob);
-		}else{
-			auto fts = blob.construct<MyFTS>(db, keyN, resultCount, keyStart);
-
-			fts.addIPs(tokensContainer);
-
-			if (fts.empty()){
-				std::array<std::string_view, 1> container;
-				return result.set_container(container);
-			}
-
-			auto &container = blob.construct<OutputBlob::Container>();
-
-			fts.process(container);
-
-			container.push_back(fts.tail()); // tail
-
+		if (fts.empty()){
+			std::array<std::string_view, 1> container;
 			return result.set_container(container);
 		}
+
+		auto &container = blob.construct<OutputBlob::Container>();
+
+		fts.process(container);
+
+		container.push_back(fts.tail()); // tail
+
+		return result.set_container(container);
 	}
+}
 
-
+namespace FTS{
 
 	template<typename DBAdapter>
 	struct BaseMDecoder{

@@ -43,7 +43,7 @@
 
 #include "keyvaluecommands/cmd_index.h"			// IXGET, IXMGET, IXGETINDEXES, IXADD, IXREM, IXRANGE
 #include "keyvaluecommands/cmd_mindex.h"		// IXMADD, IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM, IXMRANGE, IXMRANGEFLEX, IXMRANGESTRICT
-#include "keyvaluecommands/cmd_sindex.h"		// IXSADD, IXSGET, IXSMGET, IXSEXISTS, IXSGETINDEXES, IXSREM, ISMRANGE
+#include "keyvaluecommands/cmd_tindex.h"		// IXTADD, IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM, ISMRANGE
 #include "keyvaluecommands/cmd_ac.h"			// ACADD_XXX, ACDEL_XXX, ACRANGE
 
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
@@ -128,7 +128,7 @@ namespace net::worker{
 
 				Index		::RegisterModule,
 				MIndex		::RegisterModule,
-				SIndex		::RegisterModule,
+				TIndex		::RegisterModule,
 				AC		::RegisterModule,
 
 				Murmur		::RegisterModule,

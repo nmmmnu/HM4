@@ -66,7 +66,7 @@ namespace FTS::flex_impl_{
 		void print_() const{
 			for(auto const &x : container_){
 				auto const &t = x.getTokenRef();
-				logger<Logger::DEBUG>() << "MSetMulti::FTSMerger::print>>>" << t.index << t.key << t.pairVal;
+				logger<Logger::DEBUG>() << "MSetMulti::FTSMerger::print>>>" << t.index << t.key << t.getVal();
 			}
 		}
 
@@ -170,14 +170,20 @@ namespace FTS::flex_impl_{
 					break;
 				}
 
-				if (!t)
+				if (!t.valid)
 					continue;
+
+				if (!t.isOK()){
+					logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "skip tombstone / expired" << t.getKey();
+
+					continue;
+				}
 
 				if (heap_.size() < resultCount_){
 					heap_.push_back(t);
 					std::push_heap(std::begin(heap_), std::end(heap_), comp);
 
-					logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "initial push" << t.key << t.pairVal << t.count;
+					logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "initial push" << t.key << t.getVal() << t.count;
 
 					continue;
 				}
@@ -193,7 +199,7 @@ namespace FTS::flex_impl_{
 				heap_.push_back(t);
 				std::push_heap(std::begin(heap_), std::end(heap_), comp);
 
-				logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "push" << t.index << t.key << t.pairVal << t.count;
+				logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "push" << t.index << t.key << t.getVal() << t.count;
 			}
 
 			logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::walk" << "finished. iterations" << icounter.iterations();
@@ -208,9 +214,9 @@ namespace FTS::flex_impl_{
 
 			for(auto const &t : heap_){
 				container.push_back(t.key);
-				container.push_back(t.pairVal);
+				container.push_back(t.getVal());
 
-				// logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::collect" << t.index << t.key << t.pairVal << t.count;
+				// logger<Logger::DEBUG>() << "MSetMulti::FTSFlex::collect" << t.index << t.key << t.getVal() << t.count;
 			}
 		}
 
@@ -222,7 +228,7 @@ namespace FTS::flex_impl_{
 
 			auto const &t = reducer_(std::true_type{});
 
-			return t.pairKey;
+			return t.getKey();
 		}
 	};
 
