@@ -3,8 +3,8 @@
 #include "shared_mset_multi.h"
 #include "stringtokenizer.h"
 
-namespace net::worker::commands::MIndex{
-	namespace mindex_impl_{
+namespace net::worker::commands::MultyIndex{
+	namespace multy_index_impl_{
 
 		// constexpr uint8_t NGram	= 3;
 		constexpr size_t  MaxTokens	= 32;
@@ -71,7 +71,7 @@ namespace net::worker::commands::MIndex{
 			}
 		};
 
-	} // namespace mindex_impl_
+	} // namespace multy_index_impl_
 
 
 
@@ -88,7 +88,9 @@ namespace net::worker::commands::MIndex{
 		// IXMADD a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using MyMDecoder = mindex_impl_::MDecoder<DBAdapter>;
+			using namespace multy_index_impl_;
+
+			using MyMDecoder = MDecoder<DBAdapter>;
 
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
@@ -157,7 +159,7 @@ namespace net::worker::commands::MIndex{
 		// IXMRANGEFLEX key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace mindex_impl_;
+			using namespace multy_index_impl_;
 
 			using MyMDecoder	= MDecoder<DBAdapter>;
 			using MyFTS		= shared::msetmulti::FTS::FTSFlex<DBAdapter, MaxTokens>;
@@ -186,9 +188,7 @@ namespace net::worker::commands::MIndex{
 		// IXMRANGESTRICT key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace mindex_impl_;
-
-			constexpr static size_t MaxTokens  = 32;
+			using namespace multy_index_impl_;
 
 			using MyMDecoder	= MDecoder<DBAdapter>;
 			using MyFTS		= shared::msetmulti::FTS::FTSStrict<DBAdapter, MaxTokens>;

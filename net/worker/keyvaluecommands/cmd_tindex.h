@@ -5,8 +5,8 @@
 #include "stringtokenizer.h"
 #include "utf8slidingwindow.h"
 
-namespace net::worker::commands::TIndex{
-	namespace tindex_impl_{
+namespace net::worker::commands::TrigramIndex{
+	namespace trigram_index_impl_{
 
 		constexpr uint8_t NGram		= 3;
 		constexpr size_t  MaxTokens	= 32;
@@ -14,14 +14,22 @@ namespace net::worker::commands::TIndex{
 		template<typename DBAdapter, typename SlidingWindow>
 		struct MDecoder : shared::msetmulti::FTS::BaseMDecoder<DBAdapter>{
 
-			constexpr static bool checkSize(size_t){
-				auto const ngram_size = (NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE;
+			constexpr static bool checkSize(size_t size){
+				auto const sizeNGram = NGram * UTF8Tokenizer::MAX_UTF8_SIZE + 1;
+
+				// Single token is 3 * 4 bytes + 1 ASCII separator = 13 bytes max.
+				// We have up to 64K tokens = 13 * 64K = 832KB max.
+				// The trigrams can be repeaded, for example 'aaaaaaaaaaaa',
+				// but the container needs to hold them before sorting.
+
+				auto const sizeTotal_1 = sizeNGram * OutputBlob::ContainerSize;
+				auto const sizeTotal   = sizeTotal_1;
 
 				static_assert(
-					hm4::Pair::isValValid(ngram_size)
+					hm4::Pair::isValValid(sizeTotal)
 				);
 
-				return true;
+				return size <= sizeTotal;
 			}
 
 			template<typename Container>
@@ -94,7 +102,7 @@ namespace net::worker::commands::TIndex{
 			}
 		};
 
-	} // namespace tindex_impl_
+	} // namespace trigram_index_impl_
 
 
 
@@ -111,8 +119,10 @@ namespace net::worker::commands::TIndex{
 		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace trigram_index_impl_;
+
 			using MySlidingWindow	= UTF8SlidingWindow;
-			using MyMDecoder	= tindex_impl_::MDecoder<DBAdapter, MySlidingWindow>;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
 
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
@@ -137,8 +147,10 @@ namespace net::worker::commands::TIndex{
 		// IXTADD_BIN a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace trigram_index_impl_;
+
 			using MySlidingWindow	= BinarySlidingWindow;
-			using MyMDecoder	= tindex_impl_::MDecoder<DBAdapter, MySlidingWindow>;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
 
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
@@ -164,7 +176,7 @@ namespace net::worker::commands::TIndex{
 		// IXTRANGEFLEX_UTF8 key "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace tindex_impl_;
+			using namespace trigram_index_impl_;
 
 			using MySlidingWindow	= UTF8SlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -195,7 +207,7 @@ namespace net::worker::commands::TIndex{
 		// IXTRANGEFLEX_BIN key delimiter "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace tindex_impl_;
+			using namespace trigram_index_impl_;
 
 			using MySlidingWindow	= BinarySlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -225,7 +237,7 @@ namespace net::worker::commands::TIndex{
 		// IXTRANGESTRICT_UTF8 key delimiter "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace tindex_impl_;
+			using namespace trigram_index_impl_;
 
 			using MySlidingWindow	= UTF8SlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -256,7 +268,7 @@ namespace net::worker::commands::TIndex{
 		// IXTRANGESTRICT_BIN key delimiter "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace tindex_impl_;
+			using namespace trigram_index_impl_;
 
 			using MySlidingWindow	= BinarySlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;

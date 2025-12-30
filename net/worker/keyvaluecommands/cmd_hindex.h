@@ -15,10 +15,25 @@ namespace net::worker::commands::HybridIndex{
 		struct MDecoder : shared::msetmulti::FTS::BaseMDecoder<DBAdapter>{
 
 			constexpr static bool checkSize(size_t size){
-				auto const ngram_size = (NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE;
+				auto const sizeNGram = NGram * UTF8Tokenizer::MAX_UTF8_SIZE + 1;
 
-				return hm4::Pair::isValValid(ngram_size + size);
+				// Single token is 3 * 4 bytes + 1 ASCII separator = 13 bytes max.
+				// We have up to 64K tokens = 13 * 64K = 832KB max.
+				// The trigrams can be repeaded, for example 'aaaaaaaaaaaa',
+				// but the container needs to hold them before sorting.
+
+				auto const sizeTotal_1 = sizeNGram * OutputBlob::ContainerSize;
+
+				// We also have to store the tokens, their size is same as ngrams
+				auto const sizeTotal   = sizeTotal_1 * 2;
+
+				static_assert(
+					hm4::Pair::isValValid(sizeTotal)
+				);
+
+				return size <= sizeTotal;
 			}
+
 
 			template<typename Container>
 			static bool indexesUser(std::string_view value, char separator, Container &container){
@@ -106,8 +121,10 @@ namespace net::worker::commands::HybridIndex{
 		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace hybrid_index_impl_;
+
 			using MySlidingWindow	= UTF8SlidingWindow;
-			using MyMDecoder	= hybrid_index_impl_::MDecoder<DBAdapter, MySlidingWindow>;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
 
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
@@ -132,8 +149,10 @@ namespace net::worker::commands::HybridIndex{
 		// IXTADD_BIN a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace hybrid_index_impl_;
+
 			using MySlidingWindow	= BinarySlidingWindow;
-			using MyMDecoder	= hybrid_index_impl_::MDecoder<DBAdapter, MySlidingWindow>;
+			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
 
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
