@@ -96,6 +96,8 @@ public:
 	Iterator end()   const;
 };
 
+
+
 class UTF8SlidingWindow::Iterator{
 	constexpr static bool ALLOW_SMALL_WINDOW = false;
 

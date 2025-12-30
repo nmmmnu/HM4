@@ -24,14 +24,6 @@ namespace net::worker::commands::TIndex{
 				return true;
 			}
 
-			// template<typename Container>
-			// static bool indexesUser(std::string_view value, char, Container &container){
-			// 	if (!indexesUserExplode__(value, container))
-			// 		return false;
-			//
-			// 	return indexesUserSort__(container);
-			// }
-
 			template<typename Container>
 			static bool indexesUser(std::string_view value, char separator, Container &container){
 				if (!indexesFindExplode__(value, separator, container))
@@ -47,24 +39,6 @@ namespace net::worker::commands::TIndex{
 
 		private:
 			template<typename Container>
-			static bool indexesUserExplode__(std::string_view value, Container &container){
-				SlidingWindow sw{ value, NGram };
-
-				for(auto const &x : sw){
-					if (container.full())
-						return false;
-
-					// if (!checkF(x))
-					//	return false;
-
-					container.push_back(x);
-				}
-
-				// inside must be: at least one token
-				return !container.empty();
-			}
-
-			template<typename Container>
 			static bool indexesFindExplode__(std::string_view value, char separator, Container &container){
 				StringTokenizer const tok{ value, separator };
 
@@ -73,6 +47,30 @@ namespace net::worker::commands::TIndex{
 						return false;
 
 				return true;
+			}
+
+			template<typename Container>
+			static bool indexesUserExplode__(std::string_view value, Container &container){
+				SlidingWindow sw{ value, NGram };
+
+				if (std::begin(sw) != std::end(sw)){
+
+					for(auto const &x : sw){
+						if (container.full())
+							return false;
+
+						// if (!checkF(x))
+						//	return false;
+
+						container.push_back(x);
+					}
+				}else if (!value.empty()){
+					container.push_back(value);
+				}
+
+
+				// inside must be: at least one token
+				return !container.empty();
 			}
 
 			template<typename Container>
