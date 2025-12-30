@@ -14,9 +14,10 @@ namespace net::worker::commands::HybridIndex{
 		template<typename DBAdapter, typename SlidingWindow>
 		struct MDecoder : shared::msetmulti::FTS::BaseMDecoder<DBAdapter>{
 
-			constexpr static bool checkSize(size_t){
+			constexpr static bool checkSize(size_t size){
 				static_assert(
 					hm4::Pair::isValValid(
+						size +
 						(NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE
 					)
 				);
