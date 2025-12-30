@@ -49,7 +49,7 @@ public:
 			return s_.substr(pos_);
 	}
 
-	Iterator &operator++(){
+	constexpr Iterator &operator++(){
 		++pos_;
 
 		if (!ALLOW_SMALL_WINDOW){
@@ -60,8 +60,12 @@ public:
 		return *this;
 	}
 
-	bool operator!=(Iterator const &other) const{
+	constexpr bool operator!=(Iterator const &other) const{
 		return pos_ != other.pos_;
+	}
+
+	constexpr bool operator==(Iterator const &other) const{
+		return ! operator!=(other);
 	}
 };
 
