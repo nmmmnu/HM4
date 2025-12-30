@@ -45,6 +45,7 @@
 
 #include "keyvaluecommands/cmd_mindex.h"		// IXMADD, IXMRANGE, IXMRANGEFLEX,   IXMRANGESTRICT
 #include "keyvaluecommands/cmd_tindex.h"		// IXTADD_*,         IXTRANGEFLEX_*, IXTRANGESTRICT_*
+#include "keyvaluecommands/cmd_hindex.h"		// IXHADD_*
 
 #include "keyvaluecommands/cmd_mindex_shared.h"		// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
 							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
@@ -137,6 +138,7 @@ namespace net::worker{
 
 				MIndex		::RegisterModule,
 				TIndex		::RegisterModule,
+				HybridIndex	::RegisterModule,
 				MIndexShared	::RegisterModule, // has to be included, if any of MIndex / TIndex are included
 
 				ExistsShared	::RegisterModule, // has to be included, if any of LinearCurve / MortonCurve* / *Index are included
