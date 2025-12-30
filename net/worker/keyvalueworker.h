@@ -136,7 +136,7 @@ namespace net::worker{
 
 				Index		::RegisterModule,
 
-				MultyIndex	::RegisterModule,
+				MultiIndex	::RegisterModule,
 				TrigramIndex	::RegisterModule,
 				HybridIndex	::RegisterModule,
 				MIndexShared	::RegisterModule, // has to be included, if any of MIndex / TIndex are included

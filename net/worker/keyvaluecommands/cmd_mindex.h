@@ -3,8 +3,8 @@
 #include "shared_mset_multi.h"
 #include "stringtokenizer.h"
 
-namespace net::worker::commands::MultyIndex{
-	namespace multy_index_impl_{
+namespace net::worker::commands::MultiIndex{
+	namespace multi_index_impl_{
 
 		// constexpr uint8_t NGram	= 3;
 		constexpr size_t  MaxTokens	= 32;
@@ -71,7 +71,7 @@ namespace net::worker::commands::MultyIndex{
 			}
 		};
 
-	} // namespace multy_index_impl_
+	} // namespace multi_index_impl_
 
 
 
@@ -88,7 +88,7 @@ namespace net::worker::commands::MultyIndex{
 		// IXMADD a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace multy_index_impl_;
+			using namespace multi_index_impl_;
 
 			using MyMDecoder = MDecoder<DBAdapter>;
 
@@ -159,7 +159,7 @@ namespace net::worker::commands::MultyIndex{
 		// IXMRANGEFLEX key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace multy_index_impl_;
+			using namespace multi_index_impl_;
 
 			using MyMDecoder	= MDecoder<DBAdapter>;
 			using MyFTS		= shared::msetmulti::FTS::FTSFlex<DBAdapter, MaxTokens>;
@@ -188,7 +188,7 @@ namespace net::worker::commands::MultyIndex{
 		// IXMRANGESTRICT key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace multy_index_impl_;
+			using namespace multi_index_impl_;
 
 			using MyMDecoder	= MDecoder<DBAdapter>;
 			using MyFTS		= shared::msetmulti::FTS::FTSStrict<DBAdapter, MaxTokens>;
