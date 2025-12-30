@@ -313,20 +313,6 @@ namespace net::worker::shared::msetmulti{
 
 
 
-	template<typename DBAdapter>
-	bool exists(DBAdapter &db,
-			std::string_view keyN, std::string_view keySub){
-
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
-
-		logger<Logger::DEBUG>() << "MSetMulti::EXISTS: ctrl key" << keyCtrl;
-
-		return hm4::getPairOK(*db, keyCtrl);
-	}
-
-
-
 	template<typename Decoder, typename DBAdapter>
 	void rem(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub, OutputBlob::Container &container, hm4::PairBufferVal &buferVal){

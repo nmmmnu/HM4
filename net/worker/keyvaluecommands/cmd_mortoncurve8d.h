@@ -445,32 +445,6 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC8EXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// MC8GET key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
-
-			return shared::zsetmulti::cmdProcessExists(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8exists",	"MC8EXISTS"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
 	struct MC8SCORE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -989,7 +963,6 @@ namespace net::worker::commands::MortonCurve8D{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				MC8GET			,
 				MC8MGET			,
-				MC8EXISTS		,
 				MC8SCORE		,
 				MC8ADD			,
 				MC8REM			,

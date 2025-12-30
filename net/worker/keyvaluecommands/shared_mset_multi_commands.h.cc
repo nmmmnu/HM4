@@ -88,27 +88,6 @@ void cmdProcessMGet(ParamContainer const &p, DBAdapter &db, Result &result, Outp
 }
 
 template<typename DBAdapter, typename Result>
-void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){
-	// EXISTS key subkey0
-
-	if (p.size() != 3)
-		return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
-
-	auto const keyN   = p[1];
-	auto const keySub = p[2];
-
-	if (keyN.empty() || keySub.empty())
-		return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-	if (!valid(keyN, keySub))
-		return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-	return result.set(
-		exists(db, keyN, keySub)
-	);
-}
-
-template<typename DBAdapter, typename Result>
 void cmdProcessGetIndexes(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &blob){
 	if (p.size() != 3)
 		return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);

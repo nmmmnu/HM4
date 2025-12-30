@@ -151,116 +151,7 @@ namespace net::worker::commands::TIndex{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct IXTGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// IXTGET key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::msetmulti::cmdProcessGet(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixtget"	,	"IXTGET"
-		};
-	};
-
-	template<class Protocol, class DBAdapter>
-	struct IXTMGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// IXTMGET key subkey0 subkey1 ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::msetmulti::cmdProcessMGet(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixtmget"	,	"IXTMGET"
-		};
-	};
-
-	template<class Protocol, class DBAdapter>
-	struct IXTEXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// IXTEXISTS key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::msetmulti::cmdProcessExists(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixtexists"	,	"IXTEXISTS"
-		};
-	};
-
-	template<class Protocol, class DBAdapter>
-	struct IXTGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// IXTGETINDEXES key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::msetmulti::cmdProcessGetIndexes(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixtgetindexes"	,	"IXTGETINDEXES"
-		};
-	};
-
-	template<class Protocol, class DBAdapter>
-	struct IXTREM : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// IXTDEL a subkey0 subkey1 ...
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::msetmulti::cmdProcessRem(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixtrem"	,	"IXTREM"	,
-			"ixtremove"	,	"IXTREMOVE"	,
-			"ixtdel"	,	"IXTDEL"
-		};
-	};
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGEFLEX_UTF8 : BaseCommandRO<Protocol,DBAdapter>{
@@ -394,11 +285,6 @@ namespace net::worker::commands::TIndex{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				IXTADD_UTF8		,
 				IXTADD_BIN		,
-				IXTGET			,
-				IXTMGET			,
-				IXTEXISTS		,
-				IXTGETINDEXES		,
-				IXTREM			,
 				IXTRANGEFLEX_UTF8	,
 				IXTRANGEFLEX_BIN	,
 				IXTRANGESTRICT_UTF8	,
@@ -411,5 +297,4 @@ namespace net::worker::commands::TIndex{
 
 
 } // namespace
-
 

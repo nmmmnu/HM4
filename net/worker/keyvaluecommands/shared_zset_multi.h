@@ -1657,43 +1657,6 @@ namespace net::worker::shared::zsetmulti{
 
 
 
-	template<typename DBAdapter>
-	bool exists(DBAdapter &db,
-			std::string_view keyN, std::string_view keySub){
-
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
-
-		logger<Logger::DEBUG>() << "ZSetMulti::EXISTS: ctrl key" << keyCtrl;
-
-		return hm4::getPairOK(*db, keyCtrl);
-	}
-
-
-
-	template<typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
-	void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){
-		// EXISTS key subkey0
-
-		if (p.size() != 3)
-			return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
-
-		auto const &keyN   = p[1];
-		auto const &keySub = p[2];
-
-		if (keyN.empty() || keySub.empty())
-			return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-		if (!Permutation<1>::valid(keyN, keySub))
-			return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-		return result.set(
-			exists(db, keyN, keySub)
-		);
-	}
-
-
-
 	template<typename Permutation, typename IndexController = std::nullptr_t, typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
 	void cmdProcessRem(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){
 		// REM key subkey0 subkey1 ...

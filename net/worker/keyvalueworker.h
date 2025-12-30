@@ -31,20 +31,27 @@
 #include "keyvaluecommands/cmd_mg.h"			// MGADD, MGRESERVE, MGGET
 #include "keyvaluecommands/cmd_rs.h"			// RSADD, RSRESERVE, RSGET, RSGETCOUNT
 #include "keyvaluecommands/cmd_geo.h"			// GEOADD, GEOREM, GEOGET, GEOMGET, GEOENCODE, GEODECODE
-#include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1EXISTS, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
-#include "keyvaluecommands/cmd_mortoncurve2d.h"		// MC2GET, MC2MGET, MC2EXISTS, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
-#include "keyvaluecommands/cmd_mortoncurve3d.h"		// MC3GET, MC3MGET, MC3EXISTS, MC3SCORE, MC3ADD, MC3REM, MC3POINT, MC3RANGENAIVE, MC3RANGE, MC3ENCODE, MC3DECODE
-#include "keyvaluecommands/cmd_mortoncurve4d.h"		// MC4GET, MC4MGET, MC4EXISTS, MC4SCORE, MC4ADD, MC4REM, MC4POINT, MC4RANGENAIVE, MC4RANGE, MC4ENCODE, MC4DECODE
-#include "keyvaluecommands/cmd_mortoncurve8d.h"		// MC8GET, MC8MGET, MC8EXISTS, MC8SCORE, MC8ADD, MC8REM, MC8POINT, MC8RANGENAIVE, MC8RANGE, MC8ENCODE, MC8DECODE
+#include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
+#include "keyvaluecommands/cmd_mortoncurve2d.h"		// MC2GET, MC2MGET, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
+#include "keyvaluecommands/cmd_mortoncurve3d.h"		// MC3GET, MC3MGET, MC3SCORE, MC3ADD, MC3REM, MC3POINT, MC3RANGENAIVE, MC3RANGE, MC3ENCODE, MC3DECODE
+#include "keyvaluecommands/cmd_mortoncurve4d.h"		// MC4GET, MC4MGET, MC4SCORE, MC4ADD, MC4REM, MC4POINT, MC4RANGENAIVE, MC4RANGE, MC4ENCODE, MC4DECODE
+#include "keyvaluecommands/cmd_mortoncurve8d.h"		// MC8GET, MC8MGET, MC8SCORE, MC8ADD, MC8REM, MC8POINT, MC8RANGENAIVE, MC8RANGE, MC8ENCODE, MC8DECODE
 #include "keyvaluecommands/cmd_mortoncurve16d.h"	// MC16GET, MC16MGET, MC16EXISTS, MC16SCORE, MC16ADD, MC16REM, MC16POINT, MC16RANGENAIVE, MC16RANGE, MC16ENCODE, MC16DECODE
 #include "keyvaluecommands/cmd_vectors.h"		// VADD, VREM, VGET, VGETNORMALIZED, VGETRAW, VSIMFLAT, VSIMLSH, VKSET, VKGET, VKGETNORMALIZED, VGETRAW, VKSIMFLAT
 
 #include "keyvaluecommands/cmd_tdigest.h"		// TDADD, TDRESERVE
 
 #include "keyvaluecommands/cmd_index.h"			// IXGET, IXMGET, IXGETINDEXES, IXADD, IXREM, IXRANGE
-#include "keyvaluecommands/cmd_mindex.h"		// IXMADD, IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM, IXMRANGE, IXMRANGEFLEX, IXMRANGESTRICT
-#include "keyvaluecommands/cmd_tindex.h"		// IXTADD, IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM, ISMRANGE
-#include "keyvaluecommands/cmd_ac.h"			// ACADD_XXX, ACDEL_XXX, ACRANGE
+
+#include "keyvaluecommands/cmd_mindex.h"		// IXMADD, IXMRANGE, IXMRANGEFLEX,   IXMRANGESTRICT
+#include "keyvaluecommands/cmd_tindex.h"		// IXTADD_*,         IXTRANGEFLEX_*, IXTRANGESTRICT_*
+
+#include "keyvaluecommands/cmd_mindex_shared.h"		// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
+							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
+
+#include "keyvaluecommands/cmd_exists_shared.h"		// MC*EXISTS, IX*EXISTS
+
+#include "keyvaluecommands/cmd_ac.h"			// ACADD_*, ACDEL_*, ACRANGE
 
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
@@ -127,8 +134,13 @@ namespace net::worker{
 				TDigest		::RegisterModule,
 
 				Index		::RegisterModule,
+
 				MIndex		::RegisterModule,
 				TIndex		::RegisterModule,
+				MIndexShared	::RegisterModule, // has to be included, if any of MIndex / TIndex are included
+
+				ExistsShared	::RegisterModule, // has to be included, if any of LinearCurve / MortonCurve* / *Index are included
+
 				AC		::RegisterModule,
 
 				Murmur		::RegisterModule,

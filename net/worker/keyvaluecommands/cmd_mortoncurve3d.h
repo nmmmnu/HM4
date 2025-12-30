@@ -416,32 +416,6 @@ namespace net::worker::commands::MortonCurve3D{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC3EXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// MC3GET key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
-
-			return shared::zsetmulti::cmdProcessExists(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc3exists",	"MC3EXISTS"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
 	struct MC3SCORE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -899,7 +873,6 @@ namespace net::worker::commands::MortonCurve3D{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				MC3GET			,
 				MC3MGET			,
-				MC3EXISTS		,
 				MC3SCORE		,
 				MC3ADD			,
 				MC3REM			,

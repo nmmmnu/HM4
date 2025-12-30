@@ -494,32 +494,6 @@ namespace net::worker::commands::MortonCurve16D{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC16EXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// MC16GET key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
-
-			return shared::zsetmulti::cmdProcessExists(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16exists",	"MC16EXISTS"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
 	struct MC16SCORE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -1139,8 +1113,7 @@ namespace net::worker::commands::MortonCurve16D{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				MC16GET			,
-				MC16MGET			,
-				MC16EXISTS		,
+				MC16MGET		,
 				MC16SCORE		,
 				MC16ADD			,
 				MC16REM			,

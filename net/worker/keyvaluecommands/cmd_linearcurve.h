@@ -273,32 +273,6 @@ namespace net::worker::commands::LinearCurve{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MC1EXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// MC1GET key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace linear_curve_impl_;
-
-			return shared::zsetmulti::cmdProcessExists(p, db, result, blob);
-		}
-
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1exists",	"MC1EXISTS"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
 	struct MC1SCORE : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -552,7 +526,6 @@ namespace net::worker::commands::LinearCurve{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				MC1GET			,
 				MC1MGET			,
-				MC1EXISTS		,
 				MC1SCORE		,
 				MC1ADD			,
 				MC1REM			,
