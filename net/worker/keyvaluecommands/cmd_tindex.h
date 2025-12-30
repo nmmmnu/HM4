@@ -15,10 +15,10 @@ namespace net::worker::commands::TIndex{
 		struct MDecoder : shared::msetmulti::FTS::BaseMDecoder<DBAdapter>{
 
 			constexpr static bool checkSize(size_t){
+				auto const ngram_size = (NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE;
+
 				static_assert(
-					hm4::Pair::isValValid(
-						(NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE
-					)
+					hm4::Pair::isValValid(ngram_size)
 				);
 
 				return true;

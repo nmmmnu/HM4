@@ -15,14 +15,9 @@ namespace net::worker::commands::HybridIndex{
 		struct MDecoder : shared::msetmulti::FTS::BaseMDecoder<DBAdapter>{
 
 			constexpr static bool checkSize(size_t size){
-				static_assert(
-					hm4::Pair::isValValid(
-						size +
-						(NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE
-					)
-				);
+				auto const ngram_size = (NGram + 1) * MaxTokens * UTF8Tokenizer::MAX_UTF8_SIZE < hm4::PairConf::MAX_VAL_SIZE;
 
-				return true;
+				return hm4::Pair::isValValid(ngram_size + size);
 			}
 
 			template<typename Container>
