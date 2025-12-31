@@ -8,7 +8,7 @@
 namespace net::worker::commands::HybridIndex{
 	namespace hybrid_index_impl_{
 
-		constexpr uint8_t NGram		= 3;
+		constexpr uint8_t NGram		=  3;
 		constexpr size_t  MaxTokens	= 32;
 
 		template<typename DBAdapter, typename SlidingWindow>
@@ -34,74 +34,79 @@ namespace net::worker::commands::HybridIndex{
 				return size <= sizeTotal;
 			}
 
-
 			template<typename Container>
-			static bool indexesUser(std::string_view value, char separator, Container &container){
-				if (!indexesFindExplode__(value, separator, container))
-					return false;
-
-				return indexesUserSort__(container);
+			static bool indexesStore(std::string_view value, char separator, Container &container){
+				return process__<1>(value, separator, container);
 			}
 
 			// template<typename Container>
-			// static bool indexesFind(std::string_view value, char separator, Container &container){
-			// 	return indexesUser(value, separator, container);
+			// static bool indexesSearch(std::string_view value, char separator, Container &container){
+			// 	return process__<0>(value, separator, container);
 			// }
 
 		private:
-			template<typename Container>
-			static bool indexesFindExplode__(std::string_view value, char separator, Container &container){
+			template<bool hasSortKey, typename Container>
+			static bool process__(std::string_view value, char separator, Container &container){
+				if (!tokensExplode__<hasSortKey>(value, separator, container))
+					return false;
+
+				return sort__(container);
+			}
+
+			template<bool hasSortKey, typename Container>
+			static bool tokensExplode__(std::string_view value, char separator, Container &container){
 				StringTokenizer const tok{ value, separator };
 
-				for(auto const &value2 : tok)
-					if (! indexesUserExplode__(value2, container) )
+				for(auto const &x : tok)
+					if (! trigramsExplode__(x, container))
 						return false;
 
-				return true;
-			}
+				if (container.empty())
+					return false; // need to have at least one token
 
-			template<typename Container>
-			static bool indexesUserExplode__(std::string_view value, Container &container){
-				SlidingWindow sw{ value, NGram };
+				// all tokens are in now
 
-				// add TIndex
-
-				for(auto const &x : sw){
+				if constexpr(hasSortKey){
 					if (container.full())
-						return false;
-
-					// if (!checkF(x))
-					//	return false;
-
-					container.push_back(x);
+						return false; // no room for the sort key
 				}
 
-				// add MIndex
-				container.push_back(value);
-
-				// inside must be: at least one token
-				return !container.empty();
+				return true;
 			}
 
 			template<typename Container>
-			static bool indexesUserSort__(Container &container){
-				std::sort(std::begin(container), std::end(container));
+			static bool trigramsExplode__(std::string_view value, Container &container){
+				SlidingWindow sw{ value, NGram };
 
-				#if 0
-					container.erase(
-						std::unique( std::begin(container), std::end(container) ),
-						std::end(container)
-					);
-				#else
-					// Quick fix for StaticVector et all
+				size_t count = 0;
 
-					if (auto it = std::unique(std::begin(container), std::end(container)); it != std::end(container))
-						while (container.end() != it)
-							container.pop_back();
-				#endif
+				// insert all trigrams
+				for(auto const &x : sw){
+					if (!container.full()){
+						container.push_back(x);
+						++count;
+					}else
+						return false; // no room for the trigram
+				}
+
+				// insert complementary value
+				// count == 0 small token
+				// count == 1 exact trigram (skip complementary)
+				// count >= 2 big   token
+
+				if (count != 1 && !value.empty()){
+					auto const x = value;
+
+					if (!container.full())
+						container.push_back(x);
+					else
+						return false; // no room for the trigram
+				}
 
 				return true;
 			}
+
+			using shared::msetmulti::FTS::BaseMDecoder<DBAdapter>::sort__;
 		};
 
 	} // namespace tindex_impl_

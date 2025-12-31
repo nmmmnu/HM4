@@ -132,7 +132,7 @@ namespace net::worker::shared::msetmulti{
 
 		Decoder decoder;
 
-		if (!decoder.indexesUser(tokens, separator, containerNew))
+		if (!decoder.indexesStore(tokens, separator, containerNew))
 			return false;
 
 		// prepare old keys

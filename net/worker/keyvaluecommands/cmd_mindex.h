@@ -6,7 +6,7 @@
 namespace net::worker::commands::MultiIndex{
 	namespace multi_index_impl_{
 
-		// constexpr uint8_t NGram	= 3;
+		// constexpr uint8_t NGram	=  3;
 		constexpr size_t  MaxTokens	= 32;
 
 		template<typename DBAdapter>
@@ -17,58 +17,49 @@ namespace net::worker::commands::MultiIndex{
 			}
 
 			template<typename Container>
-			static bool indexesUser(std::string_view value, char separator, Container &container){
-				if (!indexesUserExplode__(value, separator, container))
-					return false;
-
-				return indexesUserSort__(container);
+			static bool indexesStore(std::string_view value, char separator, Container &container){
+				return process__<1>(value, separator, container);
 			}
 
 			template<typename Container>
-			static bool indexesFind(std::string_view value, char separator, Container &container){
-				return indexesUser(value, separator, container);
+			static bool indexesSearch(std::string_view value, char separator, Container &container){
+				return process__<0>(value, separator, container);
 			}
 
 		private:
-			template<typename Container>
-			static bool indexesUserExplode__(std::string_view value, char separator, Container &container){
+			template<bool hasSortKey, typename Container>
+			static bool process__(std::string_view value, char separator, Container &container){
+				if (!tokensExplode__<hasSortKey>(value, separator, container))
+					return false;
+
+				return sort__(container);
+			}
+
+			template<bool hasSortKey, typename Container>
+			static bool tokensExplode__(std::string_view value, char separator, Container &container){
 				StringTokenizer const tok{ value, separator };
 
-				size_t count = 0;
-
 				for(auto const &x : tok){
-					// we need to have space for the sort
-					if (++count >= container.capacity())
-						return false;
+					if (!container.full())
+						container.push_back(x);
+					else
+						return false; // no room for the token
+				}
 
-					// if (!checkF(x))
-					// 	return false;
+				if (container.empty())
+					return false; // need to have at least one token
 
-					container.push_back(x);
+				// all tokens are in now
+
+				if constexpr(hasSortKey){
+					if (container.full())
+						return false; // no room for the sort key
 				}
 
 				return true;
 			}
 
-			template<typename Container>
-			static bool indexesUserSort__(Container &container){
-				std::sort(std::begin(container), std::end(container));
-
-				#if 0
-					container.erase(
-						std::unique( std::begin(container), std::end(container) ),
-						std::end(container)
-					);
-				#else
-					// Quick fix for StaticVector et all
-
-					if (auto it = std::unique(std::begin(container), std::end(container)); it != std::end(container))
-						while (container.end() != it)
-							container.pop_back();
-				#endif
-
-				return true;
-			}
+			using shared::msetmulti::FTS::BaseMDecoder<DBAdapter>::sort__;
 		};
 
 	} // namespace multi_index_impl_
@@ -213,11 +204,6 @@ namespace net::worker::commands::MultiIndex{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				IXMADD		,
-			//	IXMGET		,
-			//	IXMMGET		,
-			//	IXMEXISTS	,
-			//	IXMGETINDEXES	,
-			//	IXMREM		,
 				IXMRANGE	,
 				IXMRANGEFLEX	,
 				IXMRANGESTRICT

@@ -22,8 +22,9 @@ namespace net::worker::commands::MIndexShared{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmget",	"IXMGET"	,
-			"ixtget",	"IXTGET"
+			"ixmget"	,	"IXMGET"	,
+			"ixtget"	,	"IXTGET"	,
+			"ixhget"	,	"IXHGET"
 		};
 	};
 
@@ -44,8 +45,9 @@ namespace net::worker::commands::MIndexShared{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmmget",	"IXMMGET",
-			"ixtmget",	"IXTMGET"
+			"ixmmget"	,	"IXMMGET"	,
+			"ixtmget"	,	"IXTMGET"	,
+			"ixhmget"	,	"IXHMGET"
 		};
 
 
@@ -69,8 +71,9 @@ namespace net::worker::commands::MIndexShared{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"ixmgetindexes",	"IXMGETINDEXES",
-			"ixtgetindexes",	"IXTGETINDEXES"
+			"ixmgetindexes"	,	"IXMGETINDEXES"	,
+			"ixtgetindexes"	,	"IXTGETINDEXES"	,
+			"ixhgetindexes"	,	"IXHGETINDEXES"
 		};
 	};
 
@@ -98,7 +101,11 @@ namespace net::worker::commands::MIndexShared{
 
 			"ixtrem"	,	"IXTREM"	,
 			"ixtremove"	,	"IXTREMOVE"	,
-			"ixtdel"	,	"IXTDEL"
+			"ixtdel"	,	"IXTDEL"	,
+
+			"ixhrem"	,	"IXHREM"	,
+			"ixhremove"	,	"IXHREMOVE"	,
+			"ixhdel"	,	"IXHDEL"
 		};
 	};
 

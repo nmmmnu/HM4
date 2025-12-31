@@ -250,7 +250,7 @@ void processFTS(std::string_view keyN, char delimiter, std::string_view tokens, 
 
 	MDecoder decoder;
 
-	if (!decoder.indexesFind(tokens, delimiter, tokensContainer))
+	if (!decoder.indexesSearch(tokens, delimiter, tokensContainer))
 		return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 	if (tokensContainer.size() == 1){
@@ -328,6 +328,27 @@ namespace FTS{
 
 			// inside must be: at least one token + sort key
 			return container.size() >= 2;
+		}
+
+	protected:
+		template<typename Container>
+		static bool sort__(Container &container){
+			std::sort(std::begin(container), std::end(container));
+
+			#if 0
+				container.erase(
+					std::unique( std::begin(container), std::end(container) ),
+					std::end(container)
+				);
+			#else
+				// Quick fix for StaticVector et all
+
+				if (auto it = std::unique(std::begin(container), std::end(container)); it != std::end(container))
+					while (container.end() != it)
+						container.pop_back();
+			#endif
+
+			return true;
 		}
 	};
 
