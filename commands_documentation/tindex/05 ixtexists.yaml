@@ -1,0 +1,30 @@
+- id:          IXTEXISTS
+  name:        IXTEXISTS
+  usage:       IXTEXISTS key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the tindex object
+    - k: key_sub
+      v: sub key
+
+  description: |
+    Check if the value of tindex object *key*, with *sub_key* exists
+
+  return_type: bool
+  return:      |
+    0 = not exists<br />
+    1 = exists
+  version:     1.3.14.2
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ixmexists mykey John
+    (integer) 1
+    127.0.0.1:6379> ixmexists mykey Ivan
+    (integer) 0
+
+  see_also:
+    items:
+    - IXTMGET

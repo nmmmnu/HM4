@@ -1,0 +1,30 @@
+- id:          IXTMGET
+  name:        IXTMGET
+  usage:       IXTMGET key sub_key0 [sub_key1]...
+  params:
+    items:
+    - k: key
+      v: name of the tindex object
+    - k: key_sub0
+      v: sub key
+
+  description: |
+    Get the value from tindex object *key*, with *sub_key0*, *sub_key1*...<br />
+    The command is same as IXTGET, except it returns several values.
+
+  return_type: array
+  return:      list of the values
+  version:     1.3.14.2
+  complexity:  "[number of keys] * READ"
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ixmmget mykey John Pete Ivan John
+    1) "Data for John"
+    2) "Data for Pete"
+    3) ""
+    4) "Data for John"
+
+  see_also:
+    items:
+    - IXTMGET

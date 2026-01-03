@@ -2,7 +2,7 @@
   name:    TIME
   usage:   TIME
   description: |
-    Returns number of keys.
+    Returns server time
 
   return_type: array
   return:      time and microtime the way redis returns it

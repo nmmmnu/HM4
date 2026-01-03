@@ -1,0 +1,133 @@
+id:          HINDEX
+name:        HYBRID INDEX
+
+version:     1.3.14.2
+
+description: |
+  <p>This module bilds a <b>multi-index object</b> that later can be used with both MINDEX and TINDEX.</p>
+
+example_module:     |
+  127.0.0.1:6379> IXHADD news 1000 , "George,Bush,spokes,in,the,senate" x "article 1000"
+  (integer) 1
+  127.0.0.1:6379> IXHADD news 1001 , "New,laptop,from,DELL" x "article 1001"
+  (integer) 1
+  127.0.0.1:6379> IXHADD news 1002 , "George,Bush,visits,France" x "article 1002"
+  (integer) 1
+  127.0.0.1:6379> IXHADD news 1003 , "Cold,weathe,soon" x "article 1003"
+  (integer) 1
+  127.0.0.1:6379> IXHADD news 1004 , "George,Michael,had,a,concert,with,Kate,Bush" x "article 1004"
+  (integer) 1
+  127.0.0.1:6379> IXHADD news 1005 , "Why,you,should,read,1984,from,George,Orwell" x "article 1005"
+  (integer) 1
+  127.0.0.1:6379> IXMRANGESTRICT news , "George,Bush" 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1002"
+  4) "article 1002"
+  5) "1004"
+  6) "article 1004"
+  7) ""
+  127.0.0.1:6379> IXMRANGEFLEX news , "George,Bush" 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1004"
+  4) "article 1004"
+  5) "1002"
+  6) "article 1002"
+  7) "1005"
+  8) "article 1005"
+  9) ""
+  127.0.0.1:6379> IXTRANGESTRICT news , "George,Bush" 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1002"
+  4) "article 1002"
+  5) "1004"
+  6) "article 1004"
+  7) ""
+  127.0.0.1:6379> IXTRANGEFLEX news , "George,Bush" 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1004"
+  4) "article 1004"
+  5) "1002"
+  6) "article 1002"
+  7) "1005"
+  8) "article 1005"
+  9) ""
+  127.0.0.1:6379> IXMRANGE news George 20 ''
+  1) "1000"
+  2) "article 1000"
+  3) "1002"
+  4) "article 1002"
+  5) "1004"
+  6) "article 1004"
+  7) "1005"
+  8) "article 1005"
+  9) ""
+  127.0.0.1:6379> IXMGETINDEXES news 1004
+   1) "Bus"
+   2) "Bush"
+   3) "Geo"
+   4) "George"
+   5) "Kat"
+   6) "Kate"
+   7) "Mic"
+   8) "Michael"
+   9) "a"
+  10) "ael"
+  11) "ate"
+  12) "cer"
+  13) "cha"
+  14) "con"
+  15) "concert"
+  16) "eor"
+  17) "ert"
+  18) "had"
+  19) "hae"
+  20) "ich"
+  21) "ith"
+  22) "nce"
+  23) "onc"
+  24) "org"
+  25) "rge"
+  26) "ush"
+  27) "wit"
+  28) "with"
+  29) "x"
+  127.0.0.1:6379> IXTGETINDEXES news 1004
+   1) "Bus"
+   2) "Bush"
+   3) "Geo"
+   4) "George"
+   5) "Kat"
+   6) "Kate"
+   7) "Mic"
+   8) "Michael"
+   9) "a"
+  10) "ael"
+  11) "ate"
+  12) "cer"
+  13) "cha"
+  14) "con"
+  15) "concert"
+  16) "eor"
+  17) "ert"
+  18) "had"
+  19) "hae"
+  20) "ich"
+  21) "ith"
+  22) "nce"
+  23) "onc"
+  24) "org"
+  25) "rge"
+  26) "ush"
+  27) "wit"
+  28) "with"
+  29) "x"
+
+see_also_module:
+  items:
+    - MINDEX
+    - TINDEX
+    - AUTOCOMPLETE

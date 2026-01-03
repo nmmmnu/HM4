@@ -29,13 +29,13 @@
     (integer) 1
     127.0.0.1:6379> IXMADD mykey Pete , "london,boston" x "Data for Pete"
     (integer) 1
-    127.0.0.1:6379> IXMADD mykey Leon , "london,new york,serdica" x "Data for Pete"
+    127.0.0.1:6379> IXMADD mykey Leon , "london,new york,serdica" x "Data for Leon"
     (integer) 1
     127.0.0.1:6379> IXMRANGESTRICT mykey , 'london,new york' 100 ''
     1) "John"
     2) "Data for John"
     3) "Leon"
-    4) "Data for Pete"
+    4) "Data for Leon"
     5) ""
 
   see_also:

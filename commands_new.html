@@ -205,7 +205,7 @@
 			</ul>
 		</div>
 		<div>
-			<a href="#M::MINDEX">MINDEX</a>
+			<a href="#M::MINDEX">MULTI INDEX</a>
 			<ul>
 				<li><a href="#C::IXMADD">IXMADD</a></li>
 				<li><a href="#C::IXMGET">IXMGET</a></li>
@@ -216,6 +216,29 @@
 				<li><a href="#C::IXMRANGE">IXMRANGE</a></li>
 				<li><a href="#C::IXMRANGEFLEX">IXMRANGEFLEX</a></li>
 				<li><a href="#C::IXMRANGESTRICT">IXMRANGESTRICT</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::TINDEX">TRIGRAM INDEX</a>
+			<ul>
+				<li><a href="#C::IXTADD_UTF8">IXTADD_UTF8</a></li>
+				<li><a href="#C::IXTADD_BIN">IXTADD_BIN</a></li>
+				<li><a href="#C::IXTGET">IXTGET</a></li>
+				<li><a href="#C::IXTMGET">IXTMGET</a></li>
+				<li><a href="#C::IXTEXISTS">IXTEXISTS</a></li>
+				<li><a href="#C::IXTGETINDEXES">IXTGETINDEXES</a></li>
+				<li><a href="#C::IXTREM">IXTREM</a></li>
+				<li><a href="#C::IXTRANGEFLEX_UTF8">IXTRANGEFLEX_UTF8</a></li>
+				<li><a href="#C::IXTRANGEFLEX_BIN">IXTRANGEFLEX_BIN</a></li>
+				<li><a href="#C::IXTRANGESTRICT_UTF8">IXTRANGESTRICT_UTF8</a></li>
+				<li><a href="#C::IXTRANGESTRICT_BIN">IXTRANGESTRICT_BIN</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::HINDEX">HYBRID INDEX</a>
+			<ul>
+				<li><a href="#C::IXHADD_UTF8">IXHADD_UTF8</a></li>
+				<li><a href="#C::IXHADD_BIN">IXHADD_BIN</a></li>
 			</ul>
 		</div>
 		<div>
@@ -9262,10 +9285,10 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 		<p><a href="#top">top</a></p>
 		<hr />
 		<a name="M::MINDEX"></a>
-		<h2>Module MINDEX</h2>
+		<h2>Module MULTI INDEX</h2>
 
 		<h3><b>Description:</b></h3>
-		<blockquote><p>This module provides a <b>multi-index object</b> that helps in storing and retrieving data efficiently for your application.</p>
+		<blockquote><p>This module provides a <b>multi-index object</b> that helps in storing and retrieving data efficiently for your application, using word index.</p>
 
 <p><b>How It Works:</b></p>
 
@@ -9298,7 +9321,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 <p>You can get a range of indexed results using <b>IXMRANGE</b>, <b>IXMRANGEFLEX</b>, and <b>IXMRANGESTRICT</b>. These commands allow pagination and filtering based on indexes. Example:</p>
 <ul>
   <li><i>IXMRANGE mykey london 100 ''</i> - fetches up to 100 results starting from key "london".</li>
-  <li><i>IXMRANGEFLEX mykey , 'london,new york' 100 ''</i> - returns results that match any of the given indexes.</li>
+  <li><i>IXMRANGEFLEX   mykey , 'london,new york' 100 ''</i> - returns results that match any of the given indexes.</li>
   <li><i>IXMRANGESTRICT mykey , 'london,new york' 100 ''</i> - returns results only if all indexes match.</li>
 </ul>
 
@@ -9360,6 +9383,8 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 
 		<h3>See Also:</h3>
 		<ul>
+			<li><a href="#M::TINDEX">TINDEX</a> module</li>
+			<li><a href="#M::HINDEX">HINDEX</a> module</li>
 			<li><a href="#M::AUTOCOMPLETE">AUTOCOMPLETE</a> module</li>
 		</ul>
 
@@ -9388,7 +9413,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9456,7 +9481,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9516,7 +9541,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9574,7 +9599,7 @@ The command is same as IXMGET, except it returns several values.
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9632,7 +9657,7 @@ The command is same as IXMGET, except it returns several values.
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9695,7 +9720,7 @@ If the *sub_key* not exists, returns an empty array<br />
 				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9756,7 +9781,7 @@ If the *sub_key* not exists, returns an empty array<br />
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9827,7 +9852,7 @@ If the *sub_key* not exists, returns an empty array<br />
 				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9879,11 +9904,9 @@ The results apears, if contains at least one of the words. The result that conta
 127.0.0.1:6379&gt; IXMRANGEFLEX mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
 1) &quot;John&quot;
 2) &quot;Data for John&quot;
-3) &quot;John&quot;
-4) &quot;Data for John&quot;
-5) &quot;Pete&quot;
-6) &quot;Data for Pete&quot;
-7) &quot;&quot;
+3) &quot;Pete&quot;
+4) &quot;Data for Pete&quot;
+5) &quot;&quot;
 </pre></blockquote>
 
 
@@ -9905,7 +9928,7 @@ The results apears, if contains at least one of the words. The result that conta
 				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>MINDEX	</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9954,13 +9977,13 @@ The results apears, if contains ALL of the words.
 (integer) 1
 127.0.0.1:6379&gt; IXMADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
 (integer) 1
-127.0.0.1:6379&gt; IXMADD mykey Leon , &quot;london,new york,serdica&quot; x &quot;Data for Pete&quot;
+127.0.0.1:6379&gt; IXMADD mykey Leon , &quot;london,new york,serdica&quot; x &quot;Data for Leon&quot;
 (integer) 1
 127.0.0.1:6379&gt; IXMRANGESTRICT mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
 1) &quot;John&quot;
 2) &quot;Data for John&quot;
 3) &quot;Leon&quot;
-4) &quot;Data for Pete&quot;
+4) &quot;Data for Leon&quot;
 5) &quot;&quot;
 </pre></blockquote>
 
@@ -9969,6 +9992,1201 @@ The results apears, if contains ALL of the words.
 			<ul>
 				<li><a href="#C::IXMRANGE">IXMRANGE</a></li>
 				<li><a href="#C::IXMRANGEFLEX">IXMRANGEFLEX</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::TINDEX"></a>
+		<h2>Module TRIGRAM INDEX</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides a <b>multi-index object</b> that helps in storing and retrieving data efficiently for your application, using trigram index.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Storing entries with multiple sub-keys</b></p>
+<p>You can insert entries into a mindex object using <b>IXMADD</b>. Each entry can have a <i>sub_key</i>, <i>sort_key</i>, and multiple indexes (words). Example:</p>
+<ul>
+  <li><i>IXMADD mykey John , "london,new york,köln,hi" x "Data for John"</i> - stores data under sub_key "John" with indexes "london" and "new york".</li>
+</ul>
+
+<p>Instead of storing "london" and "new york", this index stores trigrams for each word, e.g.</p>
+<table border="1" class="x">
+  <tr><td>"london"	</td><td>"lon", "ond", "ndo", "don"			</td><td>&nbsp;</td></tr>
+  <tr><td>"new york"	</td><td>"new", "ew_", "w_y", "_yo", "yor", "ork"	</td><td>The spaces are replaced with underscores for the representation. Real trigrams include spaces.</td>
+  <tr><td>"köln"	</td><td>"köl", "öln"					</td><td>IXMADD is UTF8 aware, it tokenize the trigrams correctly.<br />IXMADD_BIN can be used for old style 8 bit encodings like CP1250, CP1251, KOI8 etc.</td></tr>
+  <tr><td>"hi"	</td><td>"hi"						</td><td>If the word is not 3 symbols, it is stored in the index as is.</td></tr>
+</table>
+
+<p><b>2. Retrieving values</b></p>
+<p>You can get values from the mindex object using <b>IXMGET</b> or <b>IXMMGET</b>. Single or multiple sub-keys can be queried. Example:</p>
+<ul>
+  <li><i>IXMGET mykey John</i> - retrieves the value for sub_key "John".</li>
+  <li><i>IXMMGET mykey John Pete Ivan</i> - retrieves values for several sub_keys.</li>
+</ul>
+
+<p><b>3. Checking existence</b></p>
+<p>Use <b>IXMEXISTS</b> to check whether a value exists for a given sub_key. Example:</p>
+<ul>
+  <li><i>IXMEXISTS mykey John</i> - returns 1 if exists, 0 otherwise.</li>
+</ul>
+
+<p><b>4. Removing entries</b></p>
+<p>Remove entries using <b>IXMREM</b> (aliases: IXMREMOVE, IXMDEL). Example:</p>
+<ul>
+  <li><i>IXMREM mykey John</i> - deletes the entry for sub_key "John".</li>
+</ul>
+
+<p><b>5. Fetching ranges</b></p>
+<p>You can get a range of indexed results using <b>IXMRANGE</b>, <b>IXMRANGEFLEX</b>, and <b>IXMRANGESTRICT</b>. These commands allow pagination and filtering based on indexes. Example:</p>
+<ul>
+  <li><i>IXMRANGEFLEX   mykey , 'london,new york' 100 ''</i> - returns results that match any of the given indexes.</li>
+  <li><i>IXMRANGESTRICT mykey , 'london,new york' 100 ''</i> - returns results only if all indexes match.</li>
+</ul>
+
+<p><b>Tip:</b> This module can be used both for <b>tagging</b> and <b>full-text search</b>. Always add your data correctly before querying ranges to ensure accurate results.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD news 1000 , &quot;George,Bush,spokes,in,the,senate&quot; x &quot;article 1000&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD news 1001 , &quot;New,laptop,from,DELL&quot; x &quot;article 1001&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD news 1002 , &quot;George,Bush,visits,France&quot; x &quot;article 1002&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD news 1003 , &quot;Cold,weathe,soon&quot; x &quot;article 1003&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD news 1004 , &quot;George,Michael,had,a,concert,with,Kate,Bush&quot; x &quot;article 1004&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD news 1005 , &quot;Why,you,should,read,1984,from,George,Orwell&quot; x &quot;article 1005&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTRANGESTRICT news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; IXTRANGEFLEX news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1004&quot;
+4) &quot;article 1004&quot;
+5) &quot;1002&quot;
+6) &quot;article 1002&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXTRANGE news George 20 &#x27;&#x27;
+(error) ERR Not Implemented
+127.0.0.1:6379&gt; IXTGETINDEXES news 1004
+ 1) &quot;Bus&quot;
+ 2) &quot;Geo&quot;
+ 3) &quot;Kat&quot;
+ 4) &quot;Mic&quot;
+ 5) &quot;a&quot;
+ 6) &quot;ael&quot;
+ 7) &quot;ate&quot;
+ 8) &quot;cer&quot;
+ 9) &quot;cha&quot;
+10) &quot;con&quot;
+11) &quot;eor&quot;
+12) &quot;ert&quot;
+13) &quot;had&quot;
+14) &quot;hae&quot;
+15) &quot;ich&quot;
+16) &quot;ith&quot;
+17) &quot;nce&quot;
+18) &quot;onc&quot;
+19) &quot;org&quot;
+20) &quot;rge&quot;
+21) &quot;ush&quot;
+22) &quot;wit&quot;
+23) &quot;x&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::MINDEX">MINDEX</a> module</li>
+			<li><a href="#M::HINDEX">HINDEX</a> module</li>
+			<li><a href="#M::AUTOCOMPLETE">AUTOCOMPLETE</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::IXTADD_UTF8">IXTADD_UTF8</a></li>
+			<li><a href="#C::IXTADD_BIN">IXTADD_BIN</a></li>
+			<li><a href="#C::IXTGET">IXTGET</a></li>
+			<li><a href="#C::IXTMGET">IXTMGET</a></li>
+			<li><a href="#C::IXTEXISTS">IXTEXISTS</a></li>
+			<li><a href="#C::IXTGETINDEXES">IXTGETINDEXES</a></li>
+			<li><a href="#C::IXTREM">IXTREM</a></li>
+			<li><a href="#C::IXTRANGEFLEX_UTF8">IXTRANGEFLEX_UTF8</a></li>
+			<li><a href="#C::IXTRANGEFLEX_BIN">IXTRANGEFLEX_BIN</a></li>
+			<li><a href="#C::IXTRANGESTRICT_UTF8">IXTRANGESTRICT_UTF8</a></li>
+			<li><a href="#C::IXTRANGESTRICT_BIN">IXTRANGESTRICT_BIN</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="IXTADD_UTF8">
+			<a name="C::IXTADD_UTF8"></a>
+			<h4>IXTADD_UTF8</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTADD_UTF8		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTADD_UTF8 key key_sub delimiter &quot;words,words&quot; sort_key value</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or UTF8</td>
+				</tr>
+				<tr>
+					<td>sort_key</td>
+					<td>influences the sorting of the results of IXTRANGE* commands</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>value of the key_sub. If you do not want to influence the sort just pass &quot;x&quot;, &quot;0&quot; or &quot;1&quot;.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *words,words* separated by *delimiter* into the tindex object *key*, with *sub_key* and *sort_key*, value *value*
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>IXTADD</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD mykey Pete , &quot;london,boston&quot;   x &quot;Data for Pete&quot;
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTADD_BIN">IXTADD_BIN</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTADD_BIN">
+			<a name="C::IXTADD_BIN"></a>
+			<h4>IXTADD_BIN</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTADD_BIN		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTADD_BIN key key_sub delimiter &quot;words,words&quot; sort_key value</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.</td>
+				</tr>
+				<tr>
+					<td>sort_key</td>
+					<td>influences the sorting of the results of IXTRANGE* commands</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>value of the key_sub. If you do not want to influence the sort just pass &quot;x&quot;, &quot;0&quot; or &quot;1&quot;.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *words,words* separated by *delimiter* into the tindex object *key*, with *sub_key* and *sort_key*, value *value*
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD_BIN mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD_BIN mykey Pete , &quot;london,boston&quot;   x &quot;Data for Pete&quot;
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTADD_UTF8">IXTADD_UTF8</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTGET">
+			<a name="C::IXTGET"></a>
+			<h4>IXTGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTGET key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the value from tindex object *key*, with *sub_key*
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the value or empty string, if the *sub_key* not exists</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmget mykey John
+&quot;Data for John&quot;
+127.0.0.1:6379&gt; ixmget mykey Pete
+&quot;Data for Pete&quot;
+127.0.0.1:6379&gt; ixmget mykey Ivan
+&quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTMGET">IXTMGET</a></li>
+				<li><a href="#C::IXTEXISTS">IXTEXISTS</a></li>
+				<li><a href="#C::IXTGETINDEXES">IXTGETINDEXES</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTMGET">
+			<a name="C::IXTMGET"></a>
+			<h4>IXTMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTMGET key sub_key0 [sub_key1]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub0</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the value from tindex object *key*, with *sub_key0*, *sub_key1*...<br />
+The command is same as IXTGET, except it returns several values.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of the values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmmget mykey John Pete Ivan John
+1) &quot;Data for John&quot;
+2) &quot;Data for Pete&quot;
+3) &quot;&quot;
+4) &quot;Data for John&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTMGET">IXTMGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTEXISTS">
+			<a name="C::IXTEXISTS"></a>
+			<h4>IXTEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTEXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Check if the value of tindex object *key*, with *sub_key* exists
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0 = not exists<br />
+1 = exists
+</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmexists mykey John
+(integer) 1
+127.0.0.1:6379&gt; ixmexists mykey Ivan
+(integer) 0
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTMGET">IXTMGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTGETINDEXES">
+			<a name="C::IXTGETINDEXES"></a>
+			<h4>IXTGETINDEXES</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTGETINDEXES		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTGETINDEXES key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Get the "indexes" from tindex object *key*, with *sub_key*<br />
+If the *sub_key* not exists, returns an empty array<br />
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the indexes</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">not connected&gt; ixmgetindexes mykey John
+1) &quot;london&quot;
+2) &quot;new york&quot;
+3) &quot;x&quot;
+127.0.0.1:6379&gt; ixmgetindexes mykey Pete
+1) &quot;boston&quot;
+2) &quot;london&quot;
+3) &quot;x&quot;
+127.0.0.1:6379&gt; ixmgetindexes mykey Ivan
+1) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTMGET">IXTMGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTREM">
+			<a name="C::IXTREM"></a>
+			<h4>IXTREM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTREM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTREM key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Remove *sub_key* from tindex object *key*
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>IXTREMOVE</li>
+				<li>IXTDEL</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD mykey Leon , &quot;london,new york,Serdica&quot; x &quot;Data for Leon&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTGET mykey Leon
+&quot;Data for Leon&quot;
+127.0.0.1:6379&gt; IXTREM mykey Leon
+(integer) 1
+127.0.0.1:6379&gt; IXTGET mykey Leon
+&quot;&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTRANGEFLEX_UTF8">
+			<a name="C::IXTRANGEFLEX_UTF8"></a>
+			<h4>IXTRANGEFLEX_UTF8</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTRANGEFLEX_UTF8		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTRANGEFLEX_UTF8 key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or UTF8</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range tindex object *key* using words *words,words*<br />
+The results apears, if contains at least one of the trigram. The result that contains more trigram are on top.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>IXTRANGEFLEX</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTRANGEFLEX mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Pete&quot;
+4) &quot;Data for Pete&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTRANGEFLEX_BIN">IXTRANGEFLEX_BIN</a></li>
+				<li><a href="#C::IXTRANGESTRICT_UTF8">IXTRANGESTRICT_UTF8</a></li>
+				<li><a href="#C::IXTRANGESTRICT_BIN">IXTRANGESTRICT_BIN</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTRANGEFLEX_BIN">
+			<a name="C::IXTRANGEFLEX_BIN"></a>
+			<h4>IXTRANGEFLEX_BIN</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTRANGEFLEX_BIN		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTRANGEFLEX_BIN key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range tindex object *key* using words *words,words*<br />
+The results apears, if contains at least one of the trigram. The result that contains more trigram are on top.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD_BIN mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD_BIN mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTRANGEFLEX_BIN mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Pete&quot;
+4) &quot;Data for Pete&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTRANGEFLEX_UTF8">IXTRANGEFLEX_UTF8</a></li>
+				<li><a href="#C::IXTRANGESTRICT_UTF8">IXTRANGESTRICT_UTF8</a></li>
+				<li><a href="#C::IXTRANGESTRICT_BIN">IXTRANGESTRICT_BIN</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTRANGESTRICT_UTF8">
+			<a name="C::IXTRANGESTRICT_UTF8"></a>
+			<h4>IXTRANGESTRICT_UTF8</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTRANGESTRICT_UTF8		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTRANGESTRICT_UTF8 key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or UTF8</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range tindex object *key* using words *words,words*<br />
+The results apears, if contains ALL of the words.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>IXTRANGEFLEX</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD mykey Leon , &quot;london,new york,serdica&quot; x &quot;Data for Leon&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTRANGESTRICT mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Leon&quot;
+4) &quot;Data for Leon&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTRANGEFLEX_UTF8">IXTRANGEFLEX_UTF8</a></li>
+				<li><a href="#C::IXTRANGEFLEX_BIN">IXTRANGEFLEX_BIN</a></li>
+				<li><a href="#C::IXTRANGESTRICT_BIN">IXTRANGESTRICT_BIN</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXTRANGESTRICT_BIN">
+			<a name="C::IXTRANGESTRICT_BIN"></a>
+			<h4>IXTRANGESTRICT_BIN</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXTRANGESTRICT_BIN		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXTRANGESTRICT_BIN key delimiter &quot;words,words&quot; count start</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.</td>
+				</tr>
+				<tr>
+					<td>count</td>
+					<td>result count</td>
+				</tr>
+				<tr>
+					<td>start</td>
+					<td>specify starting key (for pagination in the similar way as in XNGET)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns a range tindex object *key* using words *words,words*<br />
+The results apears, if contains ALL of the words.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>list of key / values with "next" key at the end.</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXTADD_BIN mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD_BIN mykey Pete , &quot;london,boston&quot; x &quot;Data for Pete&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTADD_BIN mykey Leon , &quot;london,new york,serdica&quot; x &quot;Data for Leon&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXTRANGESTRICT_BIN mykey , &#x27;london,new york&#x27; 100 &#x27;&#x27;
+1) &quot;John&quot;
+2) &quot;Data for John&quot;
+3) &quot;Leon&quot;
+4) &quot;Data for Leon&quot;
+5) &quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXTRANGEFLEX_UTF8">IXTRANGEFLEX_UTF8</a></li>
+				<li><a href="#C::IXTRANGEFLEX_BIN">IXTRANGEFLEX_BIN</a></li>
+				<li><a href="#C::IXTRANGESTRICT_UTF8">IXTRANGESTRICT_UTF8</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::HINDEX"></a>
+		<h2>Module HYBRID INDEX</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module bilds a <b>multi-index object</b> that later can be used with both MINDEX and TINDEX.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; IXHADD news 1000 , &quot;George,Bush,spokes,in,the,senate&quot; x &quot;article 1000&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXHADD news 1001 , &quot;New,laptop,from,DELL&quot; x &quot;article 1001&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXHADD news 1002 , &quot;George,Bush,visits,France&quot; x &quot;article 1002&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXHADD news 1003 , &quot;Cold,weathe,soon&quot; x &quot;article 1003&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXHADD news 1004 , &quot;George,Michael,had,a,concert,with,Kate,Bush&quot; x &quot;article 1004&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXHADD news 1005 , &quot;Why,you,should,read,1984,from,George,Orwell&quot; x &quot;article 1005&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXMRANGESTRICT news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; IXMRANGEFLEX news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1004&quot;
+4) &quot;article 1004&quot;
+5) &quot;1002&quot;
+6) &quot;article 1002&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXTRANGESTRICT news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; IXTRANGEFLEX news , &quot;George,Bush&quot; 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1004&quot;
+4) &quot;article 1004&quot;
+5) &quot;1002&quot;
+6) &quot;article 1002&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXMRANGE news George 20 &#x27;&#x27;
+1) &quot;1000&quot;
+2) &quot;article 1000&quot;
+3) &quot;1002&quot;
+4) &quot;article 1002&quot;
+5) &quot;1004&quot;
+6) &quot;article 1004&quot;
+7) &quot;1005&quot;
+8) &quot;article 1005&quot;
+9) &quot;&quot;
+127.0.0.1:6379&gt; IXMGETINDEXES news 1004
+ 1) &quot;Bus&quot;
+ 2) &quot;Bush&quot;
+ 3) &quot;Geo&quot;
+ 4) &quot;George&quot;
+ 5) &quot;Kat&quot;
+ 6) &quot;Kate&quot;
+ 7) &quot;Mic&quot;
+ 8) &quot;Michael&quot;
+ 9) &quot;a&quot;
+10) &quot;ael&quot;
+11) &quot;ate&quot;
+12) &quot;cer&quot;
+13) &quot;cha&quot;
+14) &quot;con&quot;
+15) &quot;concert&quot;
+16) &quot;eor&quot;
+17) &quot;ert&quot;
+18) &quot;had&quot;
+19) &quot;hae&quot;
+20) &quot;ich&quot;
+21) &quot;ith&quot;
+22) &quot;nce&quot;
+23) &quot;onc&quot;
+24) &quot;org&quot;
+25) &quot;rge&quot;
+26) &quot;ush&quot;
+27) &quot;wit&quot;
+28) &quot;with&quot;
+29) &quot;x&quot;
+127.0.0.1:6379&gt; IXTGETINDEXES news 1004
+ 1) &quot;Bus&quot;
+ 2) &quot;Bush&quot;
+ 3) &quot;Geo&quot;
+ 4) &quot;George&quot;
+ 5) &quot;Kat&quot;
+ 6) &quot;Kate&quot;
+ 7) &quot;Mic&quot;
+ 8) &quot;Michael&quot;
+ 9) &quot;a&quot;
+10) &quot;ael&quot;
+11) &quot;ate&quot;
+12) &quot;cer&quot;
+13) &quot;cha&quot;
+14) &quot;con&quot;
+15) &quot;concert&quot;
+16) &quot;eor&quot;
+17) &quot;ert&quot;
+18) &quot;had&quot;
+19) &quot;hae&quot;
+20) &quot;ich&quot;
+21) &quot;ith&quot;
+22) &quot;nce&quot;
+23) &quot;onc&quot;
+24) &quot;org&quot;
+25) &quot;rge&quot;
+26) &quot;ush&quot;
+27) &quot;wit&quot;
+28) &quot;with&quot;
+29) &quot;x&quot;
+</pre></blockquote>
+
+		<h3>See Also:</h3>
+		<ul>
+			<li><a href="#M::MINDEX">MINDEX</a> module</li>
+			<li><a href="#M::TINDEX">TINDEX</a> module</li>
+			<li><a href="#M::AUTOCOMPLETE">AUTOCOMPLETE</a> module</li>
+		</ul>
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::IXHADD_UTF8">IXHADD_UTF8</a></li>
+			<li><a href="#C::IXHADD_BIN">IXHADD_BIN</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="IXHADD_UTF8">
+			<a name="C::IXHADD_UTF8"></a>
+			<h4>IXHADD_UTF8</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXHADD_UTF8		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>HYBRID INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXHADD_UTF8 key key_sub delimiter &quot;words,words&quot; sort_key value</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or UTF8</td>
+				</tr>
+				<tr>
+					<td>sort_key</td>
+					<td>influences the sorting of the results of IXTRANGE* commands</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>value of the key_sub. If you do not want to influence the sort just pass &quot;x&quot;, &quot;0&quot; or &quot;1&quot;.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *words,words* separated by *delimiter* into the tindex object *key*, with *sub_key* and *sort_key*, value *value*
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>IXHADD</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXHADD mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXHADD mykey Pete , &quot;london,boston&quot;   x &quot;Data for Pete&quot;
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXHADD_BIN">IXHADD_BIN</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXHADD_BIN">
+			<a name="C::IXHADD_BIN"></a>
+			<h4>IXHADD_BIN</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXHADD_BIN		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>HYBRID INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXHADD_BIN key key_sub delimiter &quot;words,words&quot; sort_key value</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the tindex object</td>
+				</tr>
+				<tr>
+					<td>key_sub</td>
+					<td>sub key</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>delimiter, for example &quot;,&quot; (coma)</td>
+				</tr>
+				<tr>
+					<td>words,words</td>
+					<td>words, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.</td>
+				</tr>
+				<tr>
+					<td>sort_key</td>
+					<td>influences the sorting of the results of IXTRANGE* commands</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>value of the key_sub. If you do not want to influence the sort just pass &quot;x&quot;, &quot;0&quot; or &quot;1&quot;.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Insert *words,words* separated by *delimiter* into the tindex object *key*, with *sub_key* and *sort_key*, value *value*
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; IXHADD_BIN mykey John , &quot;london,new york&quot; x &quot;Data for John&quot;
+(integer) 1
+127.0.0.1:6379&gt; IXHADD_BIN mykey Pete , &quot;london,boston&quot;   x &quot;Data for Pete&quot;
+(integer) 1
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXHADD_UTF8">IXHADD_UTF8</a></li>
 			</ul>
 		</div>
 
@@ -11189,7 +12407,7 @@ OK
 
 
 			<h4>Description:</h4>
-			<blockquote>Returns number of keys.
+			<blockquote>Returns server time
 </blockquote>
 
 			<h4>Return type:</h4>

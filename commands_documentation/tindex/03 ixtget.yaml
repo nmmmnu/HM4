@@ -1,0 +1,32 @@
+- id:          IXTGET
+  name:        IXTGET
+  usage:       IXTGET key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the tindex object
+    - k: key_sub
+      v: sub key
+
+  description: |
+    Get the value from tindex object *key*, with *sub_key*
+
+  return_type: string
+  return:      the value or empty string, if the *sub_key* not exists
+  version:     1.3.14.2
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ixmget mykey John
+    "Data for John"
+    127.0.0.1:6379> ixmget mykey Pete
+    "Data for Pete"
+    127.0.0.1:6379> ixmget mykey Ivan
+    ""
+
+  see_also:
+    items:
+    - IXTMGET
+    - IXTEXISTS
+    - IXTGETINDEXES

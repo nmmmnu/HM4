@@ -32,11 +32,9 @@
     127.0.0.1:6379> IXMRANGEFLEX mykey , 'london,new york' 100 ''
     1) "John"
     2) "Data for John"
-    3) "John"
-    4) "Data for John"
-    5) "Pete"
-    6) "Data for Pete"
-    7) ""
+    3) "Pete"
+    4) "Data for Pete"
+    5) ""
 
   see_also:
     items:
