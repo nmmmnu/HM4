@@ -31,7 +31,7 @@ public:
 	using difference_type	= ptrdiff_t;
 	using value_type	= std::string_view const;
 	using pointer		= value_type *;
-	using reference		= value_type &;
+	using reference		= value_type; // is string_view, copy is cheap
 	using iterator_category	= std::bidirectional_iterator_tag;
 
 public:
@@ -41,7 +41,7 @@ public:
 							last_(last),
 							delimiter_(delimiter){}
 
-	std::string_view operator *(){
+	std::string_view operator *() const{
 		auto size = skipData_(current_) - current_;
 
 		return { current_, size_t(size) };
