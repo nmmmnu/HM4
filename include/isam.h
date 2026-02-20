@@ -1,0 +1,359 @@
+#ifndef ISAM_H_
+#define ISAM_H_
+
+#include "stringtokenizer.h"
+#include "mystring.h"
+#include "staticvector.h"
+
+#include <limits>
+#include <algorithm>
+#include <cassert>
+#include <cstdio>
+
+namespace ISAM_config{
+	// 3:id,10:name,2:country
+
+	constexpr char		DELIMITER1	= ',';
+	constexpr char		DELIMITER2	= ':';
+
+	constexpr char		PADDING		= ' ';
+
+	constexpr size_t	CONTAINER_SIZE	= 128;
+
+	constexpr std::string_view EMPTY_FIELD_NAME = "__FIELD_NAME__";
+} // namespace ISAM_config
+
+namespace ISAM_impl_{
+	using namespace ISAM_config;
+
+
+
+	inline std::string_view trim(std::string_view s){
+		while (!s.empty() && s.back() == PADDING)
+			s.remove_suffix(1);
+
+		return s;
+	}
+
+
+
+	struct Field{
+		size_t			off;
+		size_t			size;
+		std::string_view	name;
+
+		constexpr Field(size_t off, size_t size, std::string_view name) :
+								off	(off	),
+								size	(size	),
+								name	(name	){
+
+			assert(off < std::numeric_limits<size_t>::max() - size);
+		}
+
+		void print() const{
+		//	auto const name  = !this->name.empty() ? this->name : EMPTY_FIELD_NAME;
+
+			printf("%8zu %8zu %.*s\n",
+						off, size,
+						static_cast<int>(name.size()), name.data()
+			);
+		}
+
+		void print(const char *storage) const{
+		//	auto const name  = !this->name.empty() ? this->name : EMPTY_FIELD_NAME;
+			auto const value = load(storage);
+
+			printf("%8zu %8zu [%.*s] => %.*s\n",
+						off, size,
+						static_cast<int>(name.size()),  name.data(),
+						static_cast<int>(value.size()), value.data()
+			);
+		}
+
+		bool store(char *storage, std::string_view value) const{
+			char *pos = storage + off;
+
+			auto const size_value = std::min(size, value.size());
+			auto const size_pad   = size - size_value;
+
+			memcpy(pos, value.data(), size_value);
+			pos += size_value;
+
+			memset(pos, PADDING, size_pad);
+		//	pos += size_pad;
+
+			return true;
+		}
+
+		[[nodiscard]]
+		std::string_view load(const char *storage) const{
+			std::string_view value{ storage + off, size };
+
+			return trim(value);
+		}
+
+		[[nodiscard]]
+		size_t bytes() const{
+			return off + size;
+		}
+	};
+
+
+
+	template<typename F>
+	bool iterateSchema_(std::string_view schema, F &f){
+		// 3:id,10:name,2:country
+
+		using T = size_t;
+
+		StringTokenizer tokenizer{ schema, DELIMITER1 };
+
+		size_t off = 0;
+
+		for(std::string_view s : tokenizer){
+			StringTokenizer tok{ s, DELIMITER2 };
+			auto _          = getForwardTokenizer(tok);
+
+			auto const size = from_string<T>(_());
+
+			if (size == 0)
+				return false;
+
+			if (off >= std::numeric_limits<T>::max() - size)
+				return false;
+
+			auto const name = _();
+
+			Field field{
+				off	,
+				size	,
+				!name.empty() ? name : EMPTY_FIELD_NAME
+			};
+
+			if (f(field))
+				return true;
+
+			off += size;
+		}
+
+		return true;
+	}
+
+
+
+	struct ISAM{
+		template<typename T>
+		using Container		= StaticVector<T, CONTAINER_SIZE>;
+
+		using FieldContainer	= Container<Field>;
+
+	private:
+		FieldContainer container;
+
+	public:
+		class IndexSearcherByName;
+		class LinearSearcherByName;
+		class PrecomputedSearcherByName;
+
+	public:
+		ISAM() = default;
+
+		explicit ISAM(std::string_view schema){
+			parse(schema);
+		}
+
+		void parse(std::string_view schema){
+			auto f = [this](auto const &field){
+				if (container.full()){
+					container.clear();
+					return true;
+				}
+
+				container.push_back(field);
+
+				return false;
+			};
+
+			container.clear();
+			iterateSchema(schema, f);
+		}
+
+		PrecomputedSearcherByName parseAndSearchByName(std::string_view schema, std::string_view name);
+
+	public:
+		[[nodiscard]]
+		size_t size() const{
+			return container.size();
+		}
+
+		[[nodiscard]]
+		size_t bytes() const{
+			if (container.empty())
+				return 0;
+
+			return container.back().bytes();
+		}
+
+	public:
+		IndexSearcherByName	getIndexSearcherByName()  const;
+		LinearSearcherByName	getLinearSearcherByName() const;
+
+	public:
+		bool store(char *storage, size_t id, std::string_view value) const{
+			return container[id].store(storage, value);
+		}
+
+		template<typename SearcherByName, typename ...Args>
+		bool store(char *storage, std::string_view value, SearcherByName const &searcher, Args &&...args) const{
+			static_assert(
+				std::is_same_v<SearcherByName, IndexSearcherByName		> ||
+				std::is_same_v<SearcherByName, LinearSearcherByName		> ||
+				std::is_same_v<SearcherByName, PrecomputedSearcherByName	>
+			);
+
+			if (const auto *field = searcher(std::forward<Args>(args)...); field)
+				return field->store(storage, value);
+
+			return false;
+		}
+
+	public:
+		[[nodiscard]]
+		std::string_view load(const char *storage, size_t id) const{
+			return container[id].load(storage);
+		}
+
+		template<typename SearcherByName, typename ...Args>
+		[[nodiscard]]
+		std::string_view load(const char *storage, SearcherByName const &searcher, Args &&...args) const{
+			static_assert(
+				std::is_same_v<SearcherByName, IndexSearcherByName		> ||
+				std::is_same_v<SearcherByName, LinearSearcherByName		> ||
+				std::is_same_v<SearcherByName, PrecomputedSearcherByName	>
+			);
+
+			if (const auto *field = searcher(std::forward<Args>(args)...); field)
+				return field->load(storage);
+
+			return {};
+		}
+
+	public:
+		void print() const{
+			for(auto &x : container)
+				x.print();
+		}
+
+		void print(const char *storage) const{
+			for(auto &x : container)
+				x.print(storage);
+		}
+
+	public:
+		template<typename F>
+		static bool iterateSchema(std::string_view schema, F &f){
+			return iterateSchema_(schema, f);
+		}
+	}; // class ISAM
+
+
+
+	class ISAM::IndexSearcherByName{
+		friend struct ISAM;
+
+		Container<const Field *> ix;
+
+		IndexSearcherByName(FieldContainer const &container){
+			for(auto const &field : container)
+				ix.push_back(&field);
+
+			auto cmp = [](const Field *a, const Field *b){
+				return a->name < b->name;
+			};
+
+			std::sort(ix.begin(), ix.end(), cmp);
+		}
+
+		const Field *operator()(std::string_view name) const{
+			auto cmp = [](const Field *a, std::string_view b){
+				return a->name < b;
+			};
+
+			auto it = std::lower_bound(ix.begin(), ix.end(), name, cmp);
+
+			if (it != ix.end() && (*it)->name == name)
+				return *it;
+
+			return nullptr;
+		}
+	};
+
+	class ISAM::LinearSearcherByName{
+		friend struct ISAM;
+
+		const FieldContainer *container;
+
+		constexpr LinearSearcherByName(FieldContainer const &container) : container(&container){}
+
+		const Field *operator()(std::string_view name) const{
+			for(auto const &field : *container)
+				if (field.name == name)
+					return &field;
+
+			return nullptr;
+		}
+	};
+
+	class ISAM::PrecomputedSearcherByName{
+		friend struct ISAM;
+
+		const FieldContainer	*container;
+		size_t			id		= std::numeric_limits<size_t>::max();
+
+		constexpr PrecomputedSearcherByName(FieldContainer const &container) : container(&container){}
+
+		const Field *operator()() const{
+			if (id >= container->size())
+				return nullptr;
+
+			return & (*container)[id];
+		}
+	};
+
+	auto ISAM::getIndexSearcherByName() const -> IndexSearcherByName{
+		return IndexSearcherByName{ container };
+	}
+
+	auto ISAM::getLinearSearcherByName() const -> LinearSearcherByName{
+		return LinearSearcherByName{ container };
+	}
+
+	auto ISAM::parseAndSearchByName(std::string_view schema, std::string_view name) -> PrecomputedSearcherByName{
+		PrecomputedSearcherByName searcher{ container };
+
+		auto f = [&](auto const &field){
+			if (container.full()){
+				container.clear();
+				return true;
+			}
+
+			container.push_back(field);
+
+			if (searcher.id == std::numeric_limits<size_t>::max() && field.name == name)
+				searcher.id = container.size() - 1;
+
+			return false;
+		};
+
+		container.clear();
+		iterateSchema(schema, f);
+
+		return searcher;
+	}
+
+} // namespace ISAM_impl_
+
+using ISAM = ISAM_impl_::ISAM;
+
+#endif
+

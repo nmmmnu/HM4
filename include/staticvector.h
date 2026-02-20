@@ -239,7 +239,6 @@ public:
 		assign_(begin, end);
 	}
 
-	template<typename ...Args>
 	constexpr StaticVector(std::initializer_list<value_type> const &list){
 		assign_(list.begin(), list.end());
 	}

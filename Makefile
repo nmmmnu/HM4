@@ -15,7 +15,7 @@ UNAME		= $(shell uname -s)
 
 CF_DEPS		= -MMD -MP
 CF_INCL		= -Iinclude -Imyallocator $(EXTRA_INCL)
-CF_OPTIM	= -O3 -g
+CF_OPTIM	= -O0 -g
 #CF_LTO		= -flto
 #CF_OPTIM	= -O3 -DNDEBUG
 CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
