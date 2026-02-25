@@ -26,6 +26,10 @@ inline namespace version_4_00_00{
 			constexpr IFactoryAction(std::string_view const key, size_t const val_size) :
 							IFactoryAction(key, val_size, nullptr){}
 
+			constexpr void setFill(char c){
+				fill = c;
+			}
+
 			[[nodiscard]]
 			constexpr_virtual std::string_view getKey() const final{
 				return key;
@@ -101,7 +105,7 @@ inline namespace version_4_00_00{
 					if (old_pair){
 						smart_memcpy(data, val_size, old_pair->getVal());
 					}else{
-						memset(data, '\0', val_size);
+						memset(data, fill, val_size);
 					}
 				}
 			}
@@ -110,6 +114,7 @@ inline namespace version_4_00_00{
 			std::string_view	key;
 			size_t			val_size;
 			const Pair		*old_pair;
+			char			fill = '\0';
 		};
 
 
