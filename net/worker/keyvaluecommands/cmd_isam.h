@@ -66,7 +66,7 @@ namespace net::worker::commands::ISAM_cmd{
 			return std::end(cmd);
 		};
 
-		// iget schema key column
+		// iget schema key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -116,7 +116,7 @@ namespace net::worker::commands::ISAM_cmd{
 			return std::end(cmd);
 		};
 
-		// imget schema key column column...
+		// imget schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
@@ -366,6 +366,145 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct IDEL : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// idel schema key subkey subkey...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			auto const varg = 3;
+
+			if (p.size() < 4)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			ISAM const isam{ schema };
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+
+			if (isam.size() <= LINEAR_SEARCH_MAX){
+				auto searcher = isam.getLinearSearcherByName();
+
+				return process__(db, result,
+							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+			}else{
+				auto searcher = isam.getLinearSearcherByName();
+
+				return process__(db, result,
+							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+			}
+		}
+
+	private:
+		template<typename Searcher, typename It>
+		static void process__(DBAdapter &db, Result<Protocol> &result,
+				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
+
+			using MyIDEL_Factory = IDEL_Factory<Searcher, ParamContainer::iterator>;
+
+			MyIDEL_Factory factory{ key, pair, isam, searcher, begin, end };
+
+			insertHintVFactory(pair, *db, factory);
+
+			return result.set();
+		}
+
+		template<typename Searcher, typename It>
+		struct IDEL_Factory : hm4::PairFactory::IFactoryAction<1,1, IDEL_Factory<Searcher, It> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, IDEL_Factory<Searcher, It> >;
+
+			constexpr IDEL_Factory(std::string_view const key, const Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end) :
+							Base::IFactoryAction	(key, isam.bytes(), pair),
+							isam			(isam		),
+							searcher		(searcher	),
+							it			(begin		){
+
+				this->setFill(ISAM::PADDING);
+
+				(void) end;
+			}
+
+			void action(Pair *pair) const{
+				char *storage = pair->getValC();
+
+				std::string_view const value = "";
+
+				for (size_t i = 0; i < isam.size(); ++i){
+					auto const &key   = *(it + i);
+
+					isam.store(storage, value, searcher, key);
+				}
+			}
+
+		private:
+			ISAM const	&isam;
+			Searcher const	&searcher;
+			It		it;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"idel",		"IDEL"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			ISAM const isam{ schema };
+
+			hm4::PairFactory::Reserve factory{ key, isam.bytes() };
+
+			factory.setFill(ISAM::PADDING);
+
+			hm4::insert<hm4::PairFactory::IFactory>(*db, factory);
+
+			return result.set_1();
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ireserve",	"IRESERVE"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "isam";
@@ -376,7 +515,9 @@ namespace net::worker::commands::ISAM_cmd{
 				IGET		,
 				IMGET		,
 				ISETALL		,
-				ISET
+				ISET		,
+				IDEL		,
+				IRESERVE
 			>(pack);
 		}
 	};

@@ -184,7 +184,7 @@ InsertResult erase(List &list, std::string_view const key){
 	return list.erase_(key);
 }
 
-template<class List, class PairFactory>
+template<class PairFactory, class List>
 InsertResult insert(List &list, PairFactory &factory) noexcept{
 	static_assert(!std::is_same_v<PairFactory, Pair>);
 	static_assert(!std::is_same_v<PairFactory, std::basic_string_view<char, std::char_traits<char> > const>);
