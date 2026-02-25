@@ -244,7 +244,7 @@ namespace net::worker::commands::ISAM_cmd{
 							it			(begin	){
 
 				// double check, just in case
-				assert(static_cast<size_t>(std::distance(begin, end)) == isam.size());
+				assert(isam.size() == static_cast<size_t>(std::distance(begin, end)));
 			}
 
 			void action(Pair *pair) const{
@@ -267,6 +267,105 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct ISET : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// iset schema key subkey value subkey value ...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			auto const varg = 3;
+
+			if (p.size() < 5 || (p.size() - varg) % 2 != 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			ISAM const isam{ schema };
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+
+			if (isam.size() <= LINEAR_SEARCH_MAX){
+				auto searcher = isam.getLinearSearcherByName();
+
+				return process__(db, result,
+							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+			}else{
+				auto searcher = isam.getLinearSearcherByName();
+
+				return process__(db, result,
+							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+			}
+		}
+
+	private:
+		template<typename Searcher, typename It>
+		static void process__(DBAdapter &db, Result<Protocol> &result,
+				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
+
+			using MyISET_Factory = ISET_Factory<Searcher, ParamContainer::iterator>;
+
+			MyISET_Factory factory{ key, pair, isam, searcher, begin, end };
+
+			insertHintVFactory(pair, *db, factory);
+
+			return result.set();
+		}
+
+		template<typename Searcher, typename It>
+		struct ISET_Factory : hm4::PairFactory::IFactoryAction<1,1, ISET_Factory<Searcher, It> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, ISET_Factory<Searcher, It> >;
+
+			constexpr ISET_Factory(std::string_view const key, const Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end) :
+							Base::IFactoryAction	(key, isam.bytes(), pair),
+							isam			(isam		),
+							searcher		(searcher	),
+							it			(begin		){
+
+				this->setFill(ISAM::PADDING);
+
+				(void) end;
+			}
+
+			void action(Pair *pair) const{
+				char *storage = pair->getValC();
+
+				for (size_t i = 0; i < isam.size(); ++i){
+					auto const &key   = *(it + i * 2 + 0);
+					auto const &value = *(it + i * 2 + 1);
+
+					isam.store(storage, value, searcher, key);
+				}
+			}
+
+		private:
+			ISAM const	&isam;
+			Searcher const	&searcher;
+			It		it;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"iset",		"ISET"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "isam";
@@ -276,7 +375,8 @@ namespace net::worker::commands::ISAM_cmd{
 				IGETALL		,
 				IGET		,
 				IMGET		,
-				ISETALL
+				ISETALL		,
+				ISET
 			>(pack);
 		}
 	};

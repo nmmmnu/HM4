@@ -98,9 +98,11 @@ namespace ISAM_impl_{
 
 	struct ISAM{
 		template<typename T>
-		using Container		= StaticVector<T, config::CONTAINER_SIZE>;
+		using Container			= StaticVector<T, config::CONTAINER_SIZE>;
 
-		using FieldContainer	= Container<Field>;
+		using FieldContainer		= Container<Field>;
+
+		constexpr static char PADDING	= config::PADDING;
 
 	private:
 		FieldContainer container;
