@@ -10,26 +10,25 @@
 #include <cassert>
 #include <cstdio>
 
-namespace ISAM_config{
-	// 3:id,10:name,2:country
-
-	constexpr char		DELIMITER1	= ',';
-	constexpr char		DELIMITER2	= ':';
-
-	constexpr char		PADDING		= ' ';
-
-	constexpr size_t	CONTAINER_SIZE	= 128;
-
-	constexpr std::string_view EMPTY_FIELD_NAME = "__FIELD_NAME__";
-} // namespace ISAM_config
 
 namespace ISAM_impl_{
-	using namespace ISAM_config;
+	namespace config{
+		// 3:id,10:name,2:country
+
+		constexpr char		DELIMITER1	= ',';
+		constexpr char		DELIMITER2	= ':';
+
+		constexpr char		PADDING		= ' ';
+
+		constexpr size_t	CONTAINER_SIZE	= 128;
+
+		constexpr std::string_view EMPTY_FIELD_NAME = "__FIELD_NAME__";
+	} // namespace ISAM_config
 
 
 
-	inline std::string_view trim(std::string_view s){
-		while (!s.empty() && s.back() == PADDING)
+	constexpr std::string_view trim(std::string_view s){
+		while (!s.empty() && s.back() == config::PADDING)
 			s.remove_suffix(1);
 
 		return s;
@@ -51,8 +50,6 @@ namespace ISAM_impl_{
 		}
 
 		void print() const{
-		//	auto const name  = !this->name.empty() ? this->name : EMPTY_FIELD_NAME;
-
 			printf("%8zu %8zu %.*s\n",
 						off, size,
 						static_cast<int>(name.size()), name.data()
@@ -60,7 +57,6 @@ namespace ISAM_impl_{
 		}
 
 		void print(const char *storage) const{
-		//	auto const name  = !this->name.empty() ? this->name : EMPTY_FIELD_NAME;
 			auto const value = load(storage);
 
 			printf("%8zu %8zu [%.*s] => %.*s\n",
@@ -79,7 +75,7 @@ namespace ISAM_impl_{
 			memcpy(pos, value.data(), size_value);
 			pos += size_value;
 
-			memset(pos, PADDING, size_pad);
+			memset(pos, config::PADDING, size_pad);
 		//	pos += size_pad;
 
 			return true;
@@ -100,50 +96,9 @@ namespace ISAM_impl_{
 
 
 
-	template<typename F>
-	bool iterateSchema_(std::string_view schema, F &f){
-		// 3:id,10:name,2:country
-
-		using T = size_t;
-
-		StringTokenizer tokenizer{ schema, DELIMITER1 };
-
-		size_t off = 0;
-
-		for(std::string_view s : tokenizer){
-			StringTokenizer tok{ s, DELIMITER2 };
-			auto _          = getForwardTokenizer(tok);
-
-			auto const size = from_string<T>(_());
-
-			if (size == 0)
-				return false;
-
-			if (off >= std::numeric_limits<T>::max() - size)
-				return false;
-
-			auto const name = _();
-
-			Field field{
-				off	,
-				size	,
-				!name.empty() ? name : EMPTY_FIELD_NAME
-			};
-
-			if (f(field))
-				return true;
-
-			off += size;
-		}
-
-		return true;
-	}
-
-
-
 	struct ISAM{
 		template<typename T>
-		using Container		= StaticVector<T, CONTAINER_SIZE>;
+		using Container		= StaticVector<T, config::CONTAINER_SIZE>;
 
 		using FieldContainer	= Container<Field>;
 
@@ -192,6 +147,10 @@ namespace ISAM_impl_{
 				return 0;
 
 			return container.back().bytes();
+		}
+
+		auto getName(size_t id) const{
+			return container[id].name;
 		}
 
 	public:
@@ -251,9 +210,8 @@ namespace ISAM_impl_{
 
 	public:
 		template<typename F>
-		static bool iterateSchema(std::string_view schema, F &f){
-			return iterateSchema_(schema, f);
-		}
+		static bool iterateSchema(std::string_view schema, F &f);
+
 	}; // class ISAM
 
 
@@ -320,11 +278,11 @@ namespace ISAM_impl_{
 		}
 	};
 
-	auto ISAM::getIndexSearcherByName() const -> IndexSearcherByName{
+	inline auto ISAM::getIndexSearcherByName() const -> IndexSearcherByName{
 		return IndexSearcherByName{ container };
 	}
 
-	auto ISAM::getLinearSearcherByName() const -> LinearSearcherByName{
+	inline auto ISAM::getLinearSearcherByName() const -> LinearSearcherByName{
 		return LinearSearcherByName{ container };
 	}
 
@@ -349,6 +307,45 @@ namespace ISAM_impl_{
 		iterateSchema(schema, f);
 
 		return searcher;
+	}
+
+	template<typename F>
+	bool ISAM::iterateSchema(std::string_view schema, F &f){
+		// 3:id,10:name,2:country
+
+		using T = size_t;
+
+		StringTokenizer tokenizer{ schema, config::DELIMITER1 };
+
+		size_t off = 0;
+
+		for(std::string_view s : tokenizer){
+			StringTokenizer tok{ s, config::DELIMITER2 };
+			auto _          = getForwardTokenizer(tok);
+
+			auto const size = from_string<T>(_());
+
+			if (size == 0)
+				return false;
+
+			if (off >= std::numeric_limits<T>::max() - size)
+				return false;
+
+			auto const name = _();
+
+			Field field{
+				off	,
+				size	,
+				!name.empty() ? name : config::EMPTY_FIELD_NAME
+			};
+
+			if (f(field))
+				return true;
+
+			off += size;
+		}
+
+		return true;
 	}
 
 } // namespace ISAM_impl_

@@ -17,9 +17,12 @@
 							// HSET, HDEL
 #include "keyvaluecommands/cmd_mutable_x.h"		// DELX, DELXR, EXPIREX, EXPIREXR, PERSISTX, PERSISTXR
 							// HDELALL, HPERSISTALL, HEXPIREALL
+
 #include "keyvaluecommands/cmd_cas.h"			// CAS, CAD
 #include "keyvaluecommands/cmd_copy.h"			// COPY, COPYNX, RENAME, RENAMENX
 #include "keyvaluecommands/cmd_counter.h"		// INCR, DECR
+
+#include "keyvaluecommands/cmd_isam.h"			// IGETALL
 
 #include "keyvaluecommands/cmd_queue.h"			// SADD, SPOP
 #include "keyvaluecommands/cmd_bitset.h"		// SETBIT, GETBIT, BITCOUNT, BITMAX
@@ -108,6 +111,7 @@ namespace net::worker{
 				CAS		::RegisterModule,
 				Copy		::RegisterModule,
 				Counter		::RegisterModule,
+				ISAM_cmd	::RegisterModule,
 
 				Queue		::RegisterModule,
 				BITSET		::RegisterModule,

@@ -1,0 +1,286 @@
+#include "base.h"
+#include "isam.h"
+
+namespace net::worker::commands::ISAM_cmd{
+
+	constexpr size_t LINEAR_SEARCH_MAX = 4;
+
+	template<class Protocol, class DBAdapter>
+	struct IGETALL : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// igetall schema key
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			ISAM const isam{ schema };
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			if (container.capacity() < isam.size() * 2)
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+
+			if (!pair)
+				return result.set_container(container);
+
+			const char *storage  = pair->getValC();
+
+			for(size_t i = 0; i < isam.size(); ++i){
+				container.push_back(isam.getName(i)		);
+				container.push_back(isam.load(storage, i)	);
+			}
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"igetall",		"IGETALL"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IGET : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// iget schema key column
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &column = p[3];
+
+			if (!hm4::Pair::isKeyValid(column))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &storage  = hm4::getPairVal(*db, key);
+
+			// IMGET::collect_1__
+
+			ISAM isam;
+
+			auto const searcher = isam.parseAndSearchByName(schema, column);
+
+			if (isam.bytes() != storage.size())
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			return result.set(
+				isam.load(storage.data(), searcher)
+			);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"iget",		"IGET"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IMGET : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// imget schema key column column...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() < 4)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			auto const varg = 3;
+
+			if (container.capacity() < p.size() - varg)
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &storage  = hm4::getPairVal(*db, key);
+
+			if (p.size() - varg == 1)
+				return collect_1__(result, container, schema, storage, p[3]);
+			else
+				return collect_N__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
+		}
+
+	private:
+		template<typename Container>
+		static void collect_1__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, std::string_view column){
+			ISAM isam;
+
+			auto searcher = isam.parseAndSearchByName(schema, column);
+
+			if (isam.bytes() != storage.size())
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+
+			container.push_back(isam.load(storage.data(), searcher));
+
+			return result.set_container(container);
+		}
+
+		template<typename Container, typename It>
+		static void collect_N__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, It begin, It end){
+			ISAM const isam{ schema };
+
+			if (isam.bytes() != storage.size())
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (isam.size() <= LINEAR_SEARCH_MAX){
+				auto searcher = isam.getLinearSearcherByName();
+				return collect__(isam, searcher, result, container, storage, begin, end);
+			}else{
+				auto searcher = isam.getIndexSearcherByName();
+				return collect__(isam, searcher, result, container, storage, begin, end);
+			}
+		}
+
+		template<typename Container, typename It, typename Searcher>
+		static void collect__(ISAM const &isam, Searcher const &searcher, Result<Protocol> &result, Container &container, std::string_view storage, It begin, It end){
+			for(auto itk = begin; itk != end; ++itk)
+				container.push_back( isam.load(storage.data(), searcher, *itk) );
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"imget",		"IMGET"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct ISETALL : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// isetall schema key value value ...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() < 4)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const varg = 3;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			ISAM const isam{ schema };
+
+			if (isam.size() != p.size() - varg)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			using MyISETALL_Factory = ISETALL_Factory<ParamContainer::iterator>;
+
+			hm4::insertV<MyISETALL_Factory>(*db, key, isam, std::begin(p) + varg, std::end(p));
+
+			return result.set();
+		}
+
+
+		template<typename It>
+		struct ISETALL_Factory : hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory<It> >{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory<It> >;
+
+			constexpr ISETALL_Factory(std::string_view const key, ISAM const &isam, It begin, It end) :
+							Base::IFactoryAction	(key, isam.bytes()),
+							isam			(isam	),
+							it			(begin	){
+
+				// double check, just in case
+				assert(static_cast<size_t>(std::distance(begin, end)) == isam.size());
+			}
+
+			void action(Pair *pair) const{
+				char *storage = pair->getValC();
+
+				for (size_t i = 0; i < isam.size(); ++i)
+					isam.store(storage, i, *(it + i));
+			}
+
+		private:
+			ISAM const	&isam;
+			It		it;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"isetall",		"ISETALL"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter, class RegisterPack>
+	struct RegisterModule{
+		constexpr inline static std::string_view name	= "isam";
+
+		static void load(RegisterPack &pack){
+			return registerCommands<Protocol, DBAdapter, RegisterPack,
+				IGETALL		,
+				IGET		,
+				IMGET		,
+				ISETALL
+			>(pack);
+		}
+	};
+
+} // namespace
+
+
