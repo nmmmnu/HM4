@@ -331,12 +331,12 @@ namespace net::worker::commands::ISAM_cmd{
 			using Base = hm4::PairFactory::IFactoryAction<1,1, ISET_Factory<Searcher, It> >;
 
 			constexpr ISET_Factory(std::string_view const key, const Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end) :
-							Base::IFactoryAction	(key, isam.bytes(), pair),
+							Base::IFactoryAction	(key, isam.bytes(), pair, ISAM::PADDING),
 							isam			(isam		),
 							searcher		(searcher	),
 							it			(begin		){
 
-				this->setFill(ISAM::PADDING);
+				// this->setFill(ISAM::PADDING);
 
 				(void) end;
 			}
@@ -430,12 +430,12 @@ namespace net::worker::commands::ISAM_cmd{
 			using Base = hm4::PairFactory::IFactoryAction<1,1, IDEL_Factory<Searcher, It> >;
 
 			constexpr IDEL_Factory(std::string_view const key, const Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end) :
-							Base::IFactoryAction	(key, isam.bytes(), pair),
+							Base::IFactoryAction	(key, isam.bytes(), pair, ISAM::PADDING),
 							isam			(isam		),
 							searcher		(searcher	),
 							it			(begin		){
 
-				this->setFill(ISAM::PADDING);
+				// this->setFill(ISAM::PADDING);
 
 				(void) end;
 			}
@@ -488,11 +488,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 			ISAM const isam{ schema };
 
-			hm4::PairFactory::Reserve factory{ key, isam.bytes() };
-
-			factory.setFill(ISAM::PADDING);
-
-			hm4::insert<hm4::PairFactory::IFactory>(*db, factory);
+			hm4::insertV<hm4::PairFactory::Reserve>(*db, key, isam.bytes(), ISAM::PADDING);
 
 			return result.set_1();
 		}

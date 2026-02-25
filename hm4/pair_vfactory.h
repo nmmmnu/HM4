@@ -16,19 +16,21 @@ inline namespace version_4_00_00{
 		template<bool copy_value, bool same_size, typename Child, typename VBase = IFactory>
 		struct IFactoryAction : VBase{
 
+			constexpr static char FILL = '\0';
+
 			static_assert(std::is_base_of_v<IFactory, VBase>, "VBase must derive from IFactory");
 
-			constexpr IFactoryAction(std::string_view const key, size_t const val_size, const Pair *old_pair) :
+			constexpr IFactoryAction(std::string_view const key, size_t const val_size, const Pair *old_pair, char fill = FILL) :
 							key		(key		),
 							val_size	(val_size	),
-							old_pair	(old_pair	){}
+							old_pair	(old_pair	),
+							fill		(fill		){}
+
+			constexpr IFactoryAction(std::string_view const key, size_t const val_size, char fill) :
+							IFactoryAction(key, val_size, nullptr, fill){}
 
 			constexpr IFactoryAction(std::string_view const key, size_t const val_size) :
-							IFactoryAction(key, val_size, nullptr){}
-
-			constexpr void setFill(char c){
-				fill = c;
-			}
+							IFactoryAction(key, val_size, nullptr, FILL){}
 
 			[[nodiscard]]
 			constexpr_virtual std::string_view getKey() const final{
@@ -114,7 +116,7 @@ inline namespace version_4_00_00{
 			std::string_view	key;
 			size_t			val_size;
 			const Pair		*old_pair;
-			char			fill = '\0';
+			char			fill		= FILL;
 		};
 
 
