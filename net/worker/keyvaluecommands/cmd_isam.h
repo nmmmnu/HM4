@@ -229,7 +229,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 			hm4::insertV<MyISETALL_Factory>(*db, key, isam, std::begin(p) + varg, std::end(p));
 
-			return result.set();
+			return result.set_1();
 		}
 
 
@@ -322,7 +322,9 @@ namespace net::worker::commands::ISAM_cmd{
 
 			insertHintVFactory(pair, *db, factory);
 
-			return result.set();
+			return result.set(
+				factory.getResult()
+			);
 		}
 
 		template<typename Searcher, typename It>
@@ -341,21 +343,26 @@ namespace net::worker::commands::ISAM_cmd{
 				(void) end;
 			}
 
-			void action(Pair *pair) const{
+			void action(Pair *pair){
 				char *storage = pair->getValC();
 
 				for (size_t i = 0; i < isam.size(); ++i){
 					auto const &key   = *(it + i * 2 + 0);
 					auto const &value = *(it + i * 2 + 1);
 
-					isam.store(storage, value, searcher, key);
+					status |= isam.store(storage, value, searcher, key);
 				}
+			}
+
+			bool getResult() const{
+				return status;
 			}
 
 		private:
 			ISAM const	&isam;
 			Searcher const	&searcher;
 			It		it;
+			bool		status		= false;
 		};
 
 	private:
@@ -421,7 +428,9 @@ namespace net::worker::commands::ISAM_cmd{
 
 			insertHintVFactory(pair, *db, factory);
 
-			return result.set();
+			return result.set(
+				factory.getResult()
+			);
 		}
 
 		template<typename Searcher, typename It>
@@ -440,7 +449,7 @@ namespace net::worker::commands::ISAM_cmd{
 				(void) end;
 			}
 
-			void action(Pair *pair) const{
+			void action(Pair *pair){
 				char *storage = pair->getValC();
 
 				std::string_view const value = "";
@@ -448,14 +457,19 @@ namespace net::worker::commands::ISAM_cmd{
 				for (size_t i = 0; i < isam.size(); ++i){
 					auto const &key   = *(it + i);
 
-					isam.store(storage, value, searcher, key);
+					status |= isam.store(storage, value, searcher, key);
 				}
+			}
+
+			bool getResult() const{
+				return status;
 			}
 
 		private:
 			ISAM const	&isam;
 			Searcher const	&searcher;
 			It		it;
+			bool		status		= false;
 		};
 
 	private:
