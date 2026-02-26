@@ -1,22 +1,22 @@
 #include "base.h"
 #include "isam.h"
+#include "my_type_traits.h"
 
 namespace net::worker::commands::ISAM_cmd{
 
 	constexpr size_t LINEAR_SEARCH_MAX = 4;
 
-	template<class Protocol, class DBAdapter>
-	struct IGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
+
+	namespace ISAM_impl_{
+
+		enum class IGETALLOutput{
+			KEYS,
+			VALS,
+			BOTH
 		};
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// igetall schema key
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		template<IGETALLOutput Out, class Protocol, class DBAdapter>
+		void IGETALL_process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -30,27 +30,117 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto &container = blob.construct<OutputBlob::Container>();
 
-			if (container.capacity() < isam.size() * 2)
+			constexpr size_t multiplier = [](){
+				switch(Out){
+				default:
+				case IGETALLOutput::BOTH : return 2;
+				case IGETALLOutput::KEYS :
+				case IGETALLOutput::VALS : return 1;
+				}
+			}();
+
+			if (container.capacity() < isam.size() * multiplier)
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+			if constexpr(Out == IGETALLOutput::KEYS){
+				// no need fetching the info
 
-			if (!pair)
-				return result.set_container(container);
+				for(size_t i = 0; i < isam.size(); ++i)
+					container.push_back(isam.getName(i));
 
-			const char *storage  = pair->getValC();
+			}else{
+				const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
 
-			for(size_t i = 0; i < isam.size(); ++i){
-				container.push_back(isam.getName(i)		);
-				container.push_back(isam.load(storage, i)	);
+				if (!pair)
+					return result.set_container(container);
+
+				const char *storage  = pair->getValC();
+
+				for(size_t i = 0; i < isam.size(); ++i){
+					if constexpr(is_any_of(Out, IGETALLOutput::BOTH, IGETALLOutput::KEYS))
+						container.push_back(isam.getName(i));
+
+					if constexpr(is_any_of(Out, IGETALLOutput::BOTH, IGETALLOutput::VALS))
+						container.push_back(isam.load(storage, i));
+				}
 			}
 
 			return result.set_container(container);
 		}
 
+	} // namespace ISAM_impl_
+
+
+	template<class Protocol, class DBAdapter>
+	struct IGETALL : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// igetall schema key
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace ISAM_impl_;
+
+			return IGETALL_process<IGETALLOutput::BOTH>(p, db, result, blob);
+		}
+
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"igetall",		"IGETALL"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IGETKEYS: BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// igetall schema key
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace ISAM_impl_;
+
+			return IGETALL_process<IGETALLOutput::KEYS>(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"igetkeys",		"IGETKEYS"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IGETVALS: BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// igetall schema key
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace ISAM_impl_;
+
+			return IGETALL_process<IGETALLOutput::VALS>(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"igetvals",		"IGETVALS"
 		};
 	};
 
@@ -84,11 +174,9 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto const &storage  = hm4::getPairVal(*db, key);
 
-			// IMGET::collect_1__
+			// similar to IMGET::collect_1__
 
-			ISAM isam;
-
-			auto const searcher = isam.parseAndSearchByName(schema, column);
+			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, column);
 
 			if (isam.bytes() != storage.size())
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -141,24 +229,20 @@ namespace net::worker::commands::ISAM_cmd{
 			auto const &storage  = hm4::getPairVal(*db, key);
 
 			if (p.size() - varg == 1)
-				return collect_1__(result, container, schema, storage, p[varg]);
+				return collect_1__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
 			else
 				return collect_N__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
 		}
 
 	private:
-		template<typename Container>
-		static void collect_1__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, std::string_view column){
-			ISAM isam;
-
-			auto searcher = isam.parseAndSearchByName(schema, column);
+		template<typename Container, typename It>
+		static void collect_1__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, It begin, It end){
+			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
 			if (isam.bytes() != storage.size())
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
-			container.push_back(isam.load(storage.data(), searcher));
-
-			return result.set_container(container);
+			return collect__(isam, searcher, result, container, storage, begin, end);
 		}
 
 		template<typename Container, typename It>
@@ -304,9 +388,8 @@ namespace net::worker::commands::ISAM_cmd{
 		template<typename It>
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key, It begin, It end){
-			ISAM isam;
 
-			auto searcher = isam.parseAndSearchByName(schema, *begin);
+			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
 
@@ -426,9 +509,8 @@ namespace net::worker::commands::ISAM_cmd{
 		template<typename It>
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key, It begin, It end){
-			ISAM isam;
 
-			auto searcher = isam.parseAndSearchByName(schema, *begin);
+			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
 
@@ -555,6 +637,8 @@ namespace net::worker::commands::ISAM_cmd{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				IGETALL		,
+				IGETKEYS	,
+				IGETVALS	,
 				IGET		,
 				IMGET		,
 				ISETALL		,

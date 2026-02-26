@@ -112,14 +112,11 @@ namespace ISAM_impl_{
 		class LinearSearcherByName;
 		class PrecomputedSearcherByName;
 
-	public:
+	private:
 		ISAM() = default;
 
+	public:
 		explicit ISAM(std::string_view schema){
-			parse(schema);
-		}
-
-		void parse(std::string_view schema){
 			auto f = [this](auto const &field){
 				if (container.full()){
 					container.clear();
@@ -131,11 +128,13 @@ namespace ISAM_impl_{
 				return false;
 			};
 
-			container.clear();
 			iterateSchema(schema, f);
 		}
 
-		PrecomputedSearcherByName parseAndSearchByName(std::string_view schema, std::string_view name);
+
+		struct ResultCreateAndSearchByName;
+
+		static ResultCreateAndSearchByName createAndSearchByName(std::string_view schema, std::string_view name);
 
 	public:
 		[[nodiscard]]
@@ -267,8 +266,10 @@ namespace ISAM_impl_{
 	class ISAM::PrecomputedSearcherByName{
 		friend struct ISAM;
 
+		constexpr static size_t MAX = std::numeric_limits<size_t>::max();
+
 		const FieldContainer	*container;
-		size_t			id		= std::numeric_limits<size_t>::max();
+		size_t			id		= MAX;
 
 		constexpr PrecomputedSearcherByName(FieldContainer const &container) : container(&container){}
 
@@ -292,6 +293,14 @@ namespace ISAM_impl_{
 
 			return & item;
 		}
+
+		constexpr bool empty() const{
+			return id == MAX;
+		}
+
+		void reset(){
+			id = MAX;
+		}
 	};
 
 	inline auto ISAM::getIndexSearcherByName() const -> IndexSearcherByName{
@@ -302,27 +311,36 @@ namespace ISAM_impl_{
 		return LinearSearcherByName{ container };
 	}
 
-	auto ISAM::parseAndSearchByName(std::string_view schema, std::string_view name) -> PrecomputedSearcherByName{
-		PrecomputedSearcherByName searcher{ container };
+	struct ISAM::ResultCreateAndSearchByName{
+		ISAM				isam;
+		PrecomputedSearcherByName	searcher{ isam.container };
 
-		auto f = [&](auto const &field){
-			if (container.full()){
-				container.clear();
-				return true;
-			}
+	public:
+		ResultCreateAndSearchByName(std::string_view schema, std::string_view name){
+			auto &container = isam.container;
 
-			container.push_back(field);
+			auto f = [&](auto const &field){
+				if (container.full()){
+					container.clear();
+					searcher.reset();
 
-			if (searcher.id == std::numeric_limits<size_t>::max() && field.name == name)
-				searcher.id = container.size() - 1;
+					return true;
+				}
 
-			return false;
-		};
+				container.push_back(field);
 
-		container.clear();
-		iterateSchema(schema, f);
+				if (searcher.empty() && field.name == name)
+					searcher.id = container.size() - 1;
 
-		return searcher;
+				return false;
+			};
+
+			iterateSchema(schema, f);
+		}
+	};
+
+	auto ISAM::createAndSearchByName(std::string_view schema, std::string_view name) -> ResultCreateAndSearchByName{
+		return ResultCreateAndSearchByName{ schema, name };
 	}
 
 	template<typename F>
