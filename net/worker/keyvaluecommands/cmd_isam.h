@@ -141,7 +141,7 @@ namespace net::worker::commands::ISAM_cmd{
 			auto const &storage  = hm4::getPairVal(*db, key);
 
 			if (p.size() - varg == 1)
-				return collect_1__(result, container, schema, storage, p[3]);
+				return collect_1__(result, container, schema, storage, p[varg]);
 			else
 				return collect_N__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
 		}
@@ -294,6 +294,28 @@ namespace net::worker::commands::ISAM_cmd{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			if (p.size() - varg == 2)
+				return process_1__(db, result, schema, key, std::begin(p) + varg, std::end(p));
+			else
+				return process_N__(db, result, schema, key, std::begin(p) + varg, std::end(p));
+		}
+
+	private:
+		template<typename It>
+		static void process_1__(DBAdapter &db, Result<Protocol> &result,
+				std::string_view const schema, std::string_view const key, It begin, It end){
+			ISAM isam;
+
+			auto searcher = isam.parseAndSearchByName(schema, *begin);
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+
+			return process__(db, result, key, pair, isam, searcher, begin, end);
+		}
+
+		template<typename It>
+		static void process_N__(DBAdapter &db, Result<Protocol> &result,
+				std::string_view const schema, std::string_view const key, It begin, It end){
 			ISAM const isam{ schema };
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
@@ -301,17 +323,14 @@ namespace net::worker::commands::ISAM_cmd{
 			if (isam.size() <= LINEAR_SEARCH_MAX){
 				auto searcher = isam.getLinearSearcherByName();
 
-				return process__(db, result,
-							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
 				auto searcher = isam.getLinearSearcherByName();
 
-				return process__(db, result,
-							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}
 		}
 
-	private:
 		template<typename Searcher, typename It>
 		static void process__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
@@ -336,19 +355,15 @@ namespace net::worker::commands::ISAM_cmd{
 							Base::IFactoryAction	(key, isam.bytes(), pair, ISAM::PADDING),
 							isam			(isam		),
 							searcher		(searcher	),
-							it			(begin		){
-
-				// this->setFill(ISAM::PADDING);
-
-				(void) end;
-			}
+							begin			(begin		),
+							end			(end		){}
 
 			void action(Pair *pair){
 				char *storage = pair->getValC();
 
-				for (size_t i = 0; i < isam.size(); ++i){
-					auto const &key   = *(it + i * 2 + 0);
-					auto const &value = *(it + i * 2 + 1);
+				for (auto itk = begin; itk != end; itk += 2){
+					auto const &key   = *(itk + 0);
+					auto const &value = *(itk + 1);
 
 					status |= isam.store(storage, value, searcher, key);
 				}
@@ -361,7 +376,8 @@ namespace net::worker::commands::ISAM_cmd{
 		private:
 			ISAM const	&isam;
 			Searcher const	&searcher;
-			It		it;
+			It		begin;
+			It		end;
 			bool		status		= false;
 		};
 
@@ -400,6 +416,28 @@ namespace net::worker::commands::ISAM_cmd{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			if (p.size() - varg == 1)
+				return process_1__(db, result, schema, key, std::begin(p) + varg, std::end(p));
+			else
+				return process_N__(db, result, schema, key, std::begin(p) + varg, std::end(p));
+		}
+
+	private:
+		template<typename It>
+		static void process_1__(DBAdapter &db, Result<Protocol> &result,
+				std::string_view const schema, std::string_view const key, It begin, It end){
+			ISAM isam;
+
+			auto searcher = isam.parseAndSearchByName(schema, *begin);
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+
+			return process__(db, result, key, pair, isam, searcher, begin, end);
+		}
+
+		template<typename It>
+		static void process_N__(DBAdapter &db, Result<Protocol> &result,
+				std::string_view const schema, std::string_view const key, It begin, It end){
 			ISAM const isam{ schema };
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
@@ -407,17 +445,14 @@ namespace net::worker::commands::ISAM_cmd{
 			if (isam.size() <= LINEAR_SEARCH_MAX){
 				auto searcher = isam.getLinearSearcherByName();
 
-				return process__(db, result,
-							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
 				auto searcher = isam.getLinearSearcherByName();
 
-				return process__(db, result,
-							key, pair, isam, searcher, std::begin(p) + varg, std::end(p));
+				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}
 		}
 
-	private:
 		template<typename Searcher, typename It>
 		static void process__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
@@ -442,20 +477,17 @@ namespace net::worker::commands::ISAM_cmd{
 							Base::IFactoryAction	(key, isam.bytes(), pair, ISAM::PADDING),
 							isam			(isam		),
 							searcher		(searcher	),
-							it			(begin		){
-
-				// this->setFill(ISAM::PADDING);
-
-				(void) end;
-			}
+							begin			(begin		),
+							end			(end		){}
 
 			void action(Pair *pair){
 				char *storage = pair->getValC();
 
-				std::string_view const value = "";
 
-				for (size_t i = 0; i < isam.size(); ++i){
-					auto const &key   = *(it + i);
+
+				for (auto itk = begin; itk != end; ++itk){
+					auto const &key   = *itk;
+					auto const &value = std::string_view{};
 
 					status |= isam.store(storage, value, searcher, key);
 				}
@@ -468,7 +500,8 @@ namespace net::worker::commands::ISAM_cmd{
 		private:
 			ISAM const	&isam;
 			Searcher const	&searcher;
-			It		it;
+			It		begin;
+			It		end;
 			bool		status		= false;
 		};
 

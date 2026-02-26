@@ -276,7 +276,21 @@ namespace ISAM_impl_{
 			if (id >= container->size())
 				return nullptr;
 
-			return & (*container)[id];
+			auto &item = (*container)[id];
+
+			return & item;
+		}
+
+		const Field *operator()(std::string_view name) const{
+			if (id >= container->size())
+				return nullptr;
+
+			auto &item = (*container)[id];
+
+			if (item.name != name)
+				return nullptr;
+
+			return & item;
 		}
 	};
 
