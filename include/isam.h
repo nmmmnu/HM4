@@ -339,7 +339,7 @@ namespace ISAM_impl_{
 		}
 	};
 
-	auto ISAM::createAndSearchByName(std::string_view schema, std::string_view name) -> ResultCreateAndSearchByName{
+	inline auto ISAM::createAndSearchByName(std::string_view schema, std::string_view name) -> ResultCreateAndSearchByName{
 		return ResultCreateAndSearchByName{ schema, name };
 	}
 

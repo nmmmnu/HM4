@@ -4,10 +4,21 @@
 
 namespace net::worker::commands::ISAM_cmd{
 
-	constexpr size_t LINEAR_SEARCH_MAX = 4;
-
-
 	namespace ISAM_impl_{
+
+		constexpr bool selectLogarithmic(size_t size, size_t searches){
+			constexpr size_t M    = std::numeric_limits<size_t>::max();
+			constexpr size_t SIZE = 4;
+			constexpr size_t LINEAR[SIZE + 1] { M, M, 10, 4, 3 };
+
+			auto const id = searches < SIZE ? searches : SIZE;
+
+			return size >= LINEAR[id];
+		}
+
+		inline void logme_(std::string_view component, std::string_view searcher, ISAM const &isam, size_t expected){
+			logger<Logger::DEBUG>() << component << searcher << isam.size() << expected;
+		}
 
 		enum class IGETALLOutput{
 			KEYS,
@@ -237,25 +248,38 @@ namespace net::worker::commands::ISAM_cmd{
 	private:
 		template<typename Container, typename It>
 		static void collect_1__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, It begin, It end){
+			using namespace ISAM_impl_;
+
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
 			if (isam.bytes() != storage.size())
 				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+
+			logme_("IMGET", "single", isam, 1);
 
 			return collect__(isam, searcher, result, container, storage, begin, end);
 		}
 
 		template<typename Container, typename It>
 		static void collect_N__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, It begin, It end){
+			using namespace ISAM_impl_;
+
 			ISAM const isam{ schema };
 
 			if (isam.bytes() != storage.size())
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			if (isam.size() <= LINEAR_SEARCH_MAX){
+			auto const expected = std::distance(begin, end);
+
+			if (!selectLogarithmic(isam.size(), expected)){
+				logme_("IMGET", "linear", isam, expected);
+
+
 				auto searcher = isam.getLinearSearcherByName();
 				return collect__(isam, searcher, result, container, storage, begin, end);
 			}else{
+				logme_("IMGET", "log", isam, expected);
+
 				auto searcher = isam.getIndexSearcherByName();
 				return collect__(isam, searcher, result, container, storage, begin, end);
 			}
@@ -388,10 +412,13 @@ namespace net::worker::commands::ISAM_cmd{
 		template<typename It>
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key, It begin, It end){
+			using namespace ISAM_impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+
+			logme_("ISET", "single", isam, 1);
 
 			return process__(db, result, key, pair, isam, searcher, begin, end);
 		}
@@ -399,15 +426,23 @@ namespace net::worker::commands::ISAM_cmd{
 		template<typename It>
 		static void process_N__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key, It begin, It end){
+			using namespace ISAM_impl_;
+
 			ISAM const isam{ schema };
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
 
-			if (isam.size() <= LINEAR_SEARCH_MAX){
+			auto const expected = std::distance(begin, end);
+
+			if (!selectLogarithmic(isam.size(), expected)){
+				logme_("ISET", "linear", isam, expected);
+
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
+				logme_("ISET", "log", isam, expected);
+
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
@@ -509,10 +544,13 @@ namespace net::worker::commands::ISAM_cmd{
 		template<typename It>
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key, It begin, It end){
+			using namespace ISAM_impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
+
+			logme_("IDEL", "single", isam, 1);
 
 			return process__(db, result, key, pair, isam, searcher, begin, end);
 		}
@@ -520,15 +558,23 @@ namespace net::worker::commands::ISAM_cmd{
 		template<typename It>
 		static void process_N__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key, It begin, It end){
+			using namespace ISAM_impl_;
+
 			ISAM const isam{ schema };
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
 
-			if (isam.size() <= LINEAR_SEARCH_MAX){
+			auto const expected = std::distance(begin, end);
+
+			if (!selectLogarithmic(isam.size(), expected)){
+				logme_("IDEL", "linear", isam, expected);
+
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
+				logme_("IDEL", "log", isam, expected);
+
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
