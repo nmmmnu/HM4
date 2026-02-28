@@ -334,6 +334,11 @@ namespace net::worker::commands{
 				map_.emplace(key, x.get());
 		}
 
+		void infoPrint() const{
+			logger<Logger::NOTICES>() << "Total commands" << storage_.size();
+			logger<Logger::NOTICES>() << "Total aliases " << map_.size();
+		}
+
 	private:
 		static void debugPrint(BaseObject const &x){
 			if constexpr(!RegisterDebugPrint)

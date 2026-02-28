@@ -377,6 +377,12 @@ Changelog
 -	fix feature with assest() for composite keys in vectors module
 -	new module AUTOCOMPLETE: ACADD_XXX, ACDEL_XXX, ACRANGE
 -	refactor sharedAccumulateResults / sharedAccumulatePairs
--	fix ignoring the hotline index if index is very small.
+-	fix ignoring the hotline index if index is very small
 -	implement skipping in search in both AVLList and DiskList
+-	new module Trigram Index: IXTADD*, IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM,
+	IXTRANGEFLEX*, IXTRANGESTRICT*
+-	new module Hybrid Index: IXADD_*
+-	module ISAM: IGETALL, IGET, IMGET, ISETALL, ISET, IDEL, IRESERVE
+-	number of registered commands is printed in the start log
+
 

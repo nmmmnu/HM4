@@ -160,6 +160,8 @@ namespace net::worker{
 
 				Test		::RegisterModule
 			>(pack);
+
+			pack.storageCommands.infoPrint();
 		}
 	}
 
