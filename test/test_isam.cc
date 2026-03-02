@@ -63,9 +63,7 @@ int main(int argc, const char **argv){
 	// storage still valid and populated...
 
 	{
-		ISAM isam;
-
-		auto searcher = isam.parseAndSearchByName(schema, "name");
+		auto [isam,searcher] = ISAM::createAndSearchByName(schema, "name");
 
 		isam.store(storage, "Sofia", searcher);
 
