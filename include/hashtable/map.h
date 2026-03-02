@@ -10,7 +10,7 @@
 
 namespace myhashtable{
 
-	template<typename K, typename T, size_t Size, template<typename,size_t> typename Storage = ArrayStorage, typename Hash = std::hash<K> >
+	template<typename K, typename T, size_t MaxItems, size_t Size, template<typename,size_t,size_t> typename Storage = ArrayStorage, typename Hash = std::hash<K> >
 	struct Map{
 		using key_type		= K;
 		using mapped_type	= T;
@@ -71,7 +71,7 @@ namespace myhashtable{
 		}
 
 	private:
-		Storage<value_type, Size> data_;
+		Storage<value_type, MaxItems, Size> data_;
 	};
 
 } // namespace myhashtable

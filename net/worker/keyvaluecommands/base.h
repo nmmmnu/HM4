@@ -308,13 +308,10 @@ namespace net::worker::commands{
 		using BasePtr		= std::unique_ptr<BaseObject>;
 		using Storage		= StaticVector<BasePtr, MaxCommands>;
 
-		template<typename T>
-		using MyStorageContainer = StaticVector<T, MaxCommandsAliases>;
+		template<typename T, size_t MaxItems, size_t Size>
+		using MyStorage		= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
-		template<typename T, size_t Size>
-		using MyStorage		= myhashtable::CompactStorage<T,Size,MyStorageContainer>;
-
-		using Map		= myhashtable::EasyMap<std::string_view, BaseObject *, HashtableSize, myhashtable::CompactStorage>;
+		using Map		= myhashtable::EasyMap<std::string_view, BaseObject *, MaxCommandsAliases, HashtableSize, myhashtable::CompactStorage>;
 
 		constexpr static bool RegisterDebugPrint = true;
 
@@ -365,8 +362,8 @@ namespace net::worker::commands{
 		}
 
 	private:
-		Storage	storage_			;
-		Map	map_{ MaxCommandsAliases }	;
+		Storage	storage_	;
+		Map	map_		;
 
 		size_t	aliases_		= 0;
 	};
