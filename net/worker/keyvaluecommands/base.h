@@ -11,16 +11,14 @@
 #include "logger.h"
 
 #include <memory>
-#include <vector>
-#include <unordered_map>
 
-//#include "allocatedbuffer.h"
+#include "hashtable/easymap.h"
+#include "hashtable/compactstorage.h"
+
 #include "mmapbuffer.h"
 #include "arenaallocator.h"
 
 namespace net::worker::commands{
-
-
 
 	enum class Status{
 		OK,
@@ -29,7 +27,9 @@ namespace net::worker::commands{
 		SHUTDOWN
 	};
 
-
+	constexpr size_t HashtableSize		= 8192; // hashtable will be 16K + data
+	constexpr size_t MaxCommands		=  350;
+	constexpr size_t MaxCommandsAliases	=  900;
 
 	struct OutputBlob{
 		constexpr static size_t ContainerSize		= 0xFFFF;
@@ -306,20 +306,25 @@ namespace net::worker::commands{
 	struct StorageCommands{
 		using BaseObject	= BaseCommand<Protocol, DBAdapter>;
 		using BasePtr		= std::unique_ptr<BaseObject>;
-		using Storage		= std::vector<BasePtr>;
-		using Map		= std::unordered_map<std::string_view, BaseObject *>;
+		using Storage		= StaticVector<BasePtr, MaxCommands>;
+
+		template<typename T>
+		using MyStorageContainer = StaticVector<T, MaxCommandsAliases>;
+
+		template<typename T, size_t Size>
+		using MyStorage		= myhashtable::CompactStorage<T,Size,MyStorageContainer>;
+
+		using Map		= myhashtable::EasyMap<std::string_view, BaseObject *, HashtableSize, myhashtable::CompactStorage>;
 
 		constexpr static bool RegisterDebugPrint = true;
 
 		BaseObject *operator()(std::string_view key){
-			auto it = map_.find(key);
+			BaseObject **command = map_.find(key);
 
-			if (it == std::end(map_))
+			if (!command)
 				return nullptr;
 
-			auto &command = *it->second;
-
-			return & command;
+			return *command;
 		}
 
 		template<typename Object>
@@ -328,15 +333,26 @@ namespace net::worker::commands{
 
 			auto &x = storage_.back();
 
+			// will trigger only if commands are more than HashtableSize.
 			debugPrint(*x);
 
-			for(auto const &key : *x)
-				map_.emplace(key, x.get());
+			for(auto const &key : *x){
+				bool const b = map_.insert(key, x.get());
+
+				assert(b);
+
+				++aliases_;
+			}
 		}
 
 		void infoPrint() const{
-			logger<Logger::NOTICES>() << "Total commands" << storage_.size();
-			logger<Logger::NOTICES>() << "Total aliases " << map_.size();
+			logger<Logger::NOTICE>() << "Total commands" << storage_.size();
+			logger<Logger::NOTICE>() << "Total aliases " << aliases_;
+
+			if (auto const chain = map_.longestChain(); chain >= 10)
+				logger<Logger::WARNING>() << "Hashtable longest chain " << map_.longestChain() << "(chain too long)";
+			else
+				logger<Logger::NOTICE>()  << "Hashtable longest chain " << map_.longestChain() << "(good)";
 		}
 
 	private:
@@ -349,8 +365,10 @@ namespace net::worker::commands{
 		}
 
 	private:
-		Storage	storage_	;
-		Map	map_		;
+		Storage	storage_			;
+		Map	map_{ MaxCommandsAliases }	;
+
+		size_t	aliases_		= 0;
 	};
 
 
