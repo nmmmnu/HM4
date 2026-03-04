@@ -1,12 +1,17 @@
 #include "base.h"
-#include "isam.h"
+
+//#include "isam.h"
+#include "isam_hashsearcher.h"
+
 #include "my_type_traits.h"
 
 namespace net::worker::commands::ISAM_cmd{
 
+	constexpr bool UseHashSearcher = true;
+
 	namespace ISAM_impl_{
 
-		constexpr bool selectLogarithmic(size_t size, size_t searches){
+		constexpr bool selectFastSearcher(size_t size, size_t searches){
 			constexpr size_t M    = std::numeric_limits<size_t>::max();
 			constexpr size_t SIZE = 4;
 			constexpr size_t LINEAR[SIZE + 1] { M, M, 10, 4, 3 };
@@ -18,6 +23,16 @@ namespace net::worker::commands::ISAM_cmd{
 
 		inline void logme_(std::string_view component, std::string_view searcher, ISAM const &isam, size_t expected){
 			logger<Logger::DEBUG>() << component << searcher << isam.size() << expected;
+		}
+
+		inline auto getFastSearcher(ISAM const &isam, std::string_view component, size_t expected){
+			if constexpr(UseHashSearcher){
+				logme_(component, "hash", isam, expected);
+				return isam.getHashSearcherByName();
+			}else{
+				logme_(component, "log", isam, expected);
+				return isam.getIndexSearcherByName();
+			}
 		}
 
 		enum class IGETALLOutput{
@@ -271,16 +286,14 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto const expected = std::distance(begin, end);
 
-			if (!selectLogarithmic(isam.size(), expected)){
+			if (!selectFastSearcher(isam.size(), expected)){
 				logme_("IMGET", "linear", isam, expected);
-
-
 				auto searcher = isam.getLinearSearcherByName();
+
 				return collect__(isam, searcher, result, container, storage, begin, end);
 			}else{
-				logme_("IMGET", "log", isam, expected);
+				auto searcher = getFastSearcher(isam, "IMGET", expected);
 
-				auto searcher = isam.getIndexSearcherByName();
 				return collect__(isam, searcher, result, container, storage, begin, end);
 			}
 		}
@@ -434,16 +447,13 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto const expected = std::distance(begin, end);
 
-			if (!selectLogarithmic(isam.size(), expected)){
+			if (!selectFastSearcher(isam.size(), expected)){
 				logme_("ISET", "linear", isam, expected);
-
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
-				logme_("ISET", "log", isam, expected);
-
-				auto searcher = isam.getLinearSearcherByName();
+				auto searcher = getFastSearcher(isam, "ISET", expected);
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}
@@ -566,16 +576,13 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto const expected = std::distance(begin, end);
 
-			if (!selectLogarithmic(isam.size(), expected)){
+			if (!selectFastSearcher(isam.size(), expected)){
 				logme_("IDEL", "linear", isam, expected);
-
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
-				logme_("IDEL", "log", isam, expected);
-
-				auto searcher = isam.getLinearSearcherByName();
+				auto searcher = getFastSearcher(isam, "IDEL", expected);
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}

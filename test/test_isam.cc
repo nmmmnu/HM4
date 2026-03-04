@@ -1,11 +1,7 @@
 #include "isam.h"
+#include "isam_hashsearcher.h"
 
 
-namespace{
-
-
-
-} // anonymous namespace
 
 size_t const storage_size = 1024;
 char storage[storage_size];
@@ -54,6 +50,7 @@ int main(int argc, const char **argv){
 
 		isam.store(storage, "London", isam.getLinearSearcherByName(), "name");
 
+		searchTest(isam, isam.getHashSearcherByName(),   "name");
 		searchTest(isam, isam.getIndexSearcherByName(),  "name");
 		searchTest(isam, isam.getLinearSearcherByName(), "name");
 

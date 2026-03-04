@@ -20,7 +20,7 @@ namespace ISAM_impl_{
 
 		constexpr char		PADDING		= ' ';
 
-		constexpr size_t	CONTAINER_SIZE	= 128;
+		constexpr size_t	CONTAINER_SIZE	= 250; // don't do it 255 because of the hashtable
 
 		constexpr std::string_view EMPTY_FIELD_NAME = "__FIELD_NAME__";
 	} // namespace ISAM_config
@@ -108,6 +108,7 @@ namespace ISAM_impl_{
 		FieldContainer container;
 
 	public:
+		class HashSearcherByName;
 		class IndexSearcherByName;
 		class LinearSearcherByName;
 		class PrecomputedSearcherByName;
@@ -155,6 +156,7 @@ namespace ISAM_impl_{
 		}
 
 	public:
+		HashSearcherByName	getHashSearcherByName()  const;
 		IndexSearcherByName	getIndexSearcherByName()  const;
 		LinearSearcherByName	getLinearSearcherByName() const;
 
@@ -166,6 +168,7 @@ namespace ISAM_impl_{
 		template<typename SearcherByName, typename ...Args>
 		bool store(char *storage, std::string_view value, SearcherByName const &searcher, Args &&...args) const{
 			static_assert(
+				std::is_same_v<SearcherByName, HashSearcherByName		> ||
 				std::is_same_v<SearcherByName, IndexSearcherByName		> ||
 				std::is_same_v<SearcherByName, LinearSearcherByName		> ||
 				std::is_same_v<SearcherByName, PrecomputedSearcherByName	>
@@ -187,6 +190,7 @@ namespace ISAM_impl_{
 		[[nodiscard]]
 		std::string_view load(const char *storage, SearcherByName const &searcher, Args &&...args) const{
 			static_assert(
+				std::is_same_v<SearcherByName, HashSearcherByName		> ||
 				std::is_same_v<SearcherByName, IndexSearcherByName		> ||
 				std::is_same_v<SearcherByName, LinearSearcherByName		> ||
 				std::is_same_v<SearcherByName, PrecomputedSearcherByName	>

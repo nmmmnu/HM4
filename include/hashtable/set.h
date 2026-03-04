@@ -59,7 +59,7 @@ namespace myhashtable{
 
 	public:
 		constexpr bool equal(size_t id, key_type const &key) const{
-			return data_[id] == key;
+			return getKey(data_[id]) == key;
 		}
 
 		constexpr void stats() const{
