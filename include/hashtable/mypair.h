@@ -19,6 +19,7 @@ namespace myhashtable{
 					first	(std::forward<UT1>(first	)),
 					second	(std::forward<UT2>(second	)){}
 
+		[[nodiscard]]
 		constexpr bool operator ==(MyPair const &other) const{
 			return first == other.first && second == other.second;
 		}

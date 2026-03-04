@@ -14,6 +14,7 @@ namespace myhashtable{
 		constexpr EasyHashtable(Ts &&...ts) : controller_(std::forward<Ts>(ts)...){}
 
 		template<typename... Ts>
+		[[nodiscard]]
 		constexpr bool insert(key_type const &key, Ts &&...ts){
 			return myhashtable::insert(controller_, key, std::forward<Ts>(ts)...);
 		}
@@ -26,14 +27,17 @@ namespace myhashtable{
 			return myhashtable::insert(controller_, std::move(data));
 		}
 
+		[[nodiscard]]
 		constexpr const typename Controller::mapped_type *find(key_type const &key) const{
 			return myhashtable::find(controller_, key);
 		}
 
+		[[nodiscard]]
 		constexpr typename Controller::mapped_type *find(key_type const &key){
 			return myhashtable::findMut(controller_, key);
 		}
 
+		[[nodiscard]]
 		constexpr bool exists(key_type const &key) const{
 			return myhashtable::exists(controller_, key);
 		}
@@ -42,6 +46,7 @@ namespace myhashtable{
 			return controller_.stats();
 		}
 
+		[[nodiscard]]
 		constexpr size_t longestChain() const{
 			return myhashtable::longestChain(controller_);
 		}

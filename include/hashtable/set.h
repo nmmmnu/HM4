@@ -22,48 +22,42 @@ namespace myhashtable{
 		constexpr Set(Ts &&...ts) : data_(std::forward<Ts>(ts)...){}
 
 	public:
+		[[nodiscard]]
 		constexpr static size_t size(){
 			return Size;
 		}
 
+		[[nodiscard]]
 		constexpr static size_t hash(key_type const &key){
 			return Hash{}(key);
 		}
 
+		[[nodiscard]]
 		constexpr static key_type    const &getKey(key_type const &data){
 			return data;
 		}
 
 		// there is no non-const version, because hashtable can be ruined
+		[[nodiscard]]
 		constexpr static mapped_type const &getVal(key_type const &data){
 			return data;
 		}
 
 	public:
-		constexpr bool operator()(size_t id) const{
-			return data_(id);
+		[[nodiscard]]
+		constexpr auto const &getStorage() const{
+			return data_;
 		}
 
-		constexpr value_type const &operator[](size_t id) const{
-			return data_[id];
-		}
-
-		template<typename... Ts>
-		constexpr void emplace(size_t id, Ts &&...ts){
-			data_.emplace(id, std::forward<Ts>(ts)...);
-		}
-
-		constexpr static mapped_type &getVal(value_type &data){
-			return data.second;
+		[[nodiscard]]
+		constexpr auto       &getStorage(){
+			return data_;
 		}
 
 	public:
+		[[nodiscard]]
 		constexpr bool equal(size_t id, key_type const &key) const{
 			return getKey(data_[id]) == key;
-		}
-
-		constexpr void stats() const{
-			return data_.stats();
 		}
 
 	private:

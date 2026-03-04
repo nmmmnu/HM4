@@ -36,18 +36,22 @@ namespace myhashtable{
 		}
 
 	public:
+		[[nodiscard]]
 		constexpr static size_t size(){
 			return Size;
 		}
 
+		[[nodiscard]]
 		constexpr bool operator()(size_t id) const{
 			return link_[id] == sentinel__;
 		}
 
+		[[nodiscard]]
 		constexpr T const &operator[](size_t id) const{
 			return data_[ link_[id] ];
 		}
 
+		[[nodiscard]]
 		constexpr T &operator[](size_t id){
 			return data_[ link_[id] ];
 		}

@@ -20,6 +20,7 @@ namespace myhashtable{
 		};
 
 		template<typename Controller>
+		[[nodiscard]]
 		constexpr Locator locate_(Controller const &controller, typename Controller::key_type const &key){
 			static_assert(Controller::size() > 0, "Size must be positive number");
 
@@ -34,7 +35,7 @@ namespace myhashtable{
 			for (size_t i = 0; i < controller.size(); ++i){
 				size_t const id = (cell + i) & mask;
 
-				if (controller(id))
+				if (controller.getStorage()(id))
 					return { LocateType::EMPTY, id };
 
 				if (controller.equal(id, key))
@@ -45,6 +46,7 @@ namespace myhashtable{
 		}
 
 		template<typename Controller, typename... Ts>
+		[[nodiscard]]
 		constexpr bool insertT_(Controller &controller, typename Controller::key_type const &key, Ts &&...ts){
 			using namespace impl_;
 
@@ -53,11 +55,12 @@ namespace myhashtable{
 			if (type == LocateType::ERROR)
 				return false;
 
-			controller.emplace(id, key, std::forward<Ts>(ts)...);
+			controller.getStorage().emplace(id, key, std::forward<Ts>(ts)...);
 			return true;
 		}
 
 		template<typename Controller, typename u_value_type>
+		[[nodiscard]]
 		constexpr bool insertF_(Controller &controller, u_value_type &&data){
 			auto const &key = controller.getKey(data);
 
@@ -68,7 +71,7 @@ namespace myhashtable{
 			if (type == LocateType::ERROR)
 				return false;
 
-			controller.emplace(id, std::forward<u_value_type>(data));
+			controller.getStorage().emplace(id, std::forward<u_value_type>(data));
 			return true;
 		}
 
@@ -92,6 +95,7 @@ namespace myhashtable{
 	}
 
 	template<typename Controller>
+	[[nodiscard]]
 	constexpr const typename Controller::mapped_type *find(Controller const &controller, typename Controller::key_type const &key){
 		using namespace impl_;
 
@@ -100,10 +104,11 @@ namespace myhashtable{
 		if (type != LocateType::FOUND)
 			return nullptr;
 
-		return & controller.getVal(controller[id]);
+		return & controller.getVal(controller.getStorage()[id]);
 	}
 
 	template<typename Controller>
+	[[nodiscard]]
 	constexpr typename Controller::mapped_type *findMut(Controller &controller, typename Controller::key_type const &key){
 		using namespace impl_;
 
@@ -112,10 +117,11 @@ namespace myhashtable{
 		if (type != LocateType::FOUND)
 			return nullptr;
 
-		return & controller.getVal(controller[id]);
+		return & controller.getVal(controller.getStorage()[id]);
 	}
 
 	template<typename Controller>
+	[[nodiscard]]
 	constexpr bool exists(Controller const &controller, typename Controller::key_type const &key){
 		using namespace impl_;
 
@@ -125,12 +131,13 @@ namespace myhashtable{
 	}
 
 	template<typename Controller>
+	[[nodiscard]]
 	constexpr size_t longestChain(Controller const &controller){
 		size_t longest = 0;
 		size_t chain   = 0;
 
 		for(size_t i = 0; i < controller.size(); ++i){
-			if (controller(i)){
+			if (controller.getStorage()(i)){
 				if (chain > longest)
 					longest = chain;
 
