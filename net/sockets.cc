@@ -3,6 +3,7 @@
 #include <sys/socket.h>		// EAGAIN
 #include <arpa/inet.h>		// AF_INET
 #include <sys/un.h>		// AF_UNIX
+#include <sys/resource.h>	// getrlimit / setrlimit
 #include <netinet/tcp.h>	// TCP_NODELAY
 #include <netinet/in.h>		// IPPROTO_TCP for FreeBSD
 #include <fcntl.h>		// fcntl
@@ -160,6 +161,27 @@ int socket_create(SOCKET_UNIX, const char *path, uint16_t const backlog, options
 	unlink(address.sun_path);
 
 	return socket_server_(fd, address, backlog);
+}
+
+size_t socket_get_rlimit_nofile() noexcept{
+	struct rlimit rl;
+
+	if (getrlimit(RLIMIT_NOFILE, &rl))
+		return 0;
+
+	return rl.rlim_cur;
+}
+
+size_t socket_set_rlimit_nofile(size_t newLimit) noexcept{
+	struct rlimit rl;
+
+	rl.rlim_cur = newLimit;
+	rl.rlim_max = newLimit;
+
+	if (setrlimit(RLIMIT_NOFILE, &rl))
+		return 0;		// error set
+
+	return newLimit;		// ok
 }
 
 // ===========================

@@ -477,16 +477,27 @@ namespace{
 		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS		);
 		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
 
+		auto const rlimit_nofile	= [&](){
+				auto const x	= std::max(opt.rlimit_nofile,	MyLoop::RLIMIT_NOFILE		);
+				return x > max_clients ? x : max_clients * 2;
+		}();
+
 		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
+
+		auto const rlimit_nofile_result	= net::socket_set_rlimit_nofile(rlimit_nofile);
+
+		if (rlimit_nofile_result < rlimit_nofile)
+			printError("Can not adjust rlimit_nofile (ulimit -n)...");
 
 		MyLoop loop{
 				/* selector */	MySelector	{ max_clients },
 				/* worker */	MyWorker	{ adapter_factory(), buffer_capacity },
 				/* server fd */	{ fd },
-				max_clients,
-				opt.min_spare_pool, opt.max_spare_pool,
-				opt.timeout,
-				buffer_capacity,
+				rlimit_nofile				,
+				max_clients				,
+				opt.min_spare_pool, opt.max_spare_pool	,
+				opt.timeout				,
+				buffer_capacity				,
 				max_packet_size
 		};
 

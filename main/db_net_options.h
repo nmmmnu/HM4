@@ -35,6 +35,7 @@ public:
 	uint16_t	tcp_backlog			= 0;
 	uint16_t	tcp_reuseport			= 0;
 
+	uint32_t	rlimit_nofile			= 1024;
 	uint32_t	max_clients			= 512;
 	uint32_t	min_spare_pool			= 32;
 	uint32_t	max_spare_pool			= 64;
@@ -75,6 +76,7 @@ public:
 		case hash("tcp_backlog"			)	: return assign_(tcp_backlog,			value);
 		case hash("tcp_reuseport"		)	: return assign_(tcp_reuseport,			value);
 
+		case hash("rlimit_nofile"		)	: return assign_(rlimit_nofile,			value);
 		case hash("max_clients"			)	: return assign_(max_clients,			value);
 		case hash("min_spare_pool"		)	: return assign_(min_spare_pool,		value);
 		case hash("max_spare_pool"		)	: return assign_(max_spare_pool,		value);
@@ -120,7 +122,8 @@ public:
 		put("tcp_backlog",			tcp_backlog,			"TCP backlog"									);
 		put("tcp_reuseport",			tcp_reuseport,			"TCP Activate SO_REUSEPORT"							);
 
-		put("max_clients",			max_clients,			"Max Clients"									);
+		put("rlimit_nofile",			rlimit_nofile,			"Max Open Files (each file   takes  8 bytes of memory)"				);
+		put("max_clients",			max_clients,			"Max Clients    (each client takes 32 bytes of memory)"				);
 		put("min_spare_pool",			min_spare_pool,			"Min Spare Pool Buffers"							);
 		put("max_spare_pool",			max_spare_pool,			"Max Spare Pool Buffers"							);
 

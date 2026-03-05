@@ -10,7 +10,7 @@
 
 #include "nullsparepool.h"
 
-#include <unordered_map>
+#include <vector>
 #include <algorithm>	// min, find
 
 #include "logger.h"
@@ -25,6 +25,7 @@ class AsyncLoop{
 public:
 	constexpr static uint32_t	MIN_CLIENTS		= 4;
 	constexpr static uint32_t	MAX_CLIENTS		= 32;
+	constexpr static uint32_t	RLIMIT_NOFILE		= 1024;
 
 	constexpr static uint32_t	CONNECTION_TIMEOUT	= 20;
 	constexpr static int		WAIT_TIMEOUT		= 5;
@@ -38,13 +39,12 @@ private:
 		IOBuffer	buffer;
 		MyTimer 	timer;
 
-		Client(size_t conf_buffer_spare_pool) : buffer(conf_buffer_spare_pool){
-		}
+		Client(size_t conf_buffer_spare_pool) : buffer(conf_buffer_spare_pool){ }
 
 		Client(IOBuffer::container_type &&b) : buffer(std::move(b)){}
 	};
 
-	using ClientContainer		= std::unordered_map<int, Client>;
+	using ClientContainer		= std::vector<Client *>;
 
 	using WorkerStatus		= worker::WorkerStatus;
 
@@ -54,20 +54,26 @@ private:
 
 public:
 	AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
-				uint32_t conf_maxClients		= MAX_CLIENTS,
-				uint32_t conf_minSparePoolSize		= MIN_CLIENTS,
-				uint32_t conf_maxSparePoolSize		= MIN_CLIENTS,
-				uint32_t conf_connectionTimeout		= CONNECTION_TIMEOUT,
-				size_t   conf_buffer_capacity		= IO_BUFFER_CAPACITY,
+				uint32_t conf_rlimitNoFile		= RLIMIT_NOFILE		,
+				uint32_t conf_maxClients		= MAX_CLIENTS		,
+				uint32_t conf_minSparePoolSize		= MIN_CLIENTS		,
+				uint32_t conf_maxSparePoolSize		= MIN_CLIENTS		,
+				uint32_t conf_connectionTimeout		= CONNECTION_TIMEOUT	,
+				size_t   conf_buffer_capacity		= IO_BUFFER_CAPACITY	,
 				size_t   conf_maxRequestSize		= IO_BUFFER_CAPACITY
 	);
+
+	~AsyncLoop(){
+		for(auto *it : clients_)
+			delete it;
+	}
 
 	bool process();
 
 	void idle_loop();
 
 	auto connectedClients() const{
-		return clients_.size();
+		return connectedClients_;
 	}
 
 	auto sparePoolSize() const{
@@ -128,6 +134,14 @@ private:
 	}
 
 private:
+	Client *getFD_(int fd){
+		return clients_[fd];
+	};
+
+	// const Client *getFD_(int fd) const{
+	// 	return clients_[fd];
+	// };
+
 	bool insertFD_(int fd);
 	void removeFD_(int fd);
 	void expireFD_();
@@ -148,17 +162,20 @@ private:
 	Worker			worker_;
 	SmallVector<int, 8>	serverFD_;
 	ClientContainer		clients_;
-	bool			keepProcessing_ = true;
 
-	uint32_t		conf_maxClients_;
+	uint32_t		connectedClients_	= 0;
+	bool			keepProcessing_		= true;
 
-	uint32_t		conf_minSparePoolSize_;
-	uint32_t		conf_maxSparePoolSize_;
+	uint32_t		conf_rlimitNoFile_	;
+	uint32_t		conf_maxClients_	;
 
-	uint32_t		conf_connectionTimeout_;
+	uint32_t		conf_minSparePoolSize_	;
+	uint32_t		conf_maxSparePoolSize_	;
 
-	size_t			conf_bufferCapacity_;
-	size_t			conf_maxRequestSize_;
+	uint32_t		conf_connectionTimeout_	;
+
+	size_t			conf_bufferCapacity_	;
+	size_t			conf_maxRequestSize_	;
 
 	SparePool		sparePool_{ conf_minSparePoolSize_, conf_maxSparePoolSize_, conf_bufferCapacity_ };
 };

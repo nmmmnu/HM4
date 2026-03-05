@@ -62,6 +62,9 @@ ssize_t socket_write(int fd, const void *buf, size_t count, int timeout) noexcep
 
 bool socket_check_eagain() noexcept;
 
+size_t socket_get_rlimit_nofile() noexcept;
+size_t socket_set_rlimit_nofile(size_t newLimit) noexcept;
+
 }
 
 #endif

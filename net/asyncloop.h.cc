@@ -17,6 +17,7 @@ namespace impl_{
 template<class Selector, class Worker, class SparePool>
 AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
 			Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
+			uint32_t const conf_rlimitNoFile	,
 			uint32_t const conf_maxClients		,
 			uint32_t const conf_minSparePoolSize	,
 			uint32_t const conf_maxSparePoolSize	,
@@ -28,12 +29,17 @@ AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
 					worker_			(std::move(worker)	),
 					serverFD_		(serverFD		),
 
+					conf_rlimitNoFile_	( 		(conf_rlimitNoFile								) ),
 					conf_maxClients_	( std::max	(conf_maxClients,		MIN_CLIENTS					) ),
 					conf_minSparePoolSize_	( std::clamp	(conf_minSparePoolSize,		MIN_CLIENTS,		conf_maxClients_	) ),
 					conf_maxSparePoolSize_	( std::clamp	(conf_maxSparePoolSize,		conf_minSparePoolSize_,	conf_maxClients_	) ),
 					conf_connectionTimeout_	( 		(conf_connectionTimeout								) ),
 					conf_bufferCapacity_	( std::max	(conf_buffer_capacity,		IO_BUFFER_CAPACITY				) ),
 					conf_maxRequestSize_	( std::max	(conf_maxRequestSize,		conf_bufferCapacity_				) ){
+
+	assert(conf_maxClients_ < conf_rlimitNoFile_);
+
+	clients_.resize(conf_maxClients_); // also set to nullptr
 
 	// fixParameters();
 
@@ -49,6 +55,7 @@ void AsyncLoop<Selector, Worker, SparePool>::print() const{
 		logger_fmt<Logger::STARTUP>("{:20} = {:12}", k, v);
 	};
 
+	_("rlimit nofile"	, conf_rlimitNoFile_		);
 	_("max clients"		, conf_maxClients_		);
 	_("min spare pool"	, conf_minSparePoolSize_	);
 	_("max spare pool"	, conf_maxSparePoolSize_	);
@@ -136,12 +143,12 @@ void AsyncLoop<Selector, Worker, SparePool>::client_Read_(int const fd, std::fal
 
 template<class Selector, class Worker, class SparePool>
 void AsyncLoop<Selector, Worker, SparePool>::client_Read_(int const fd, std::true_type){
-	auto it = clients_.find(fd);
+	Client *it = getFD_(fd);
 
-	if (it == clients_.end())
+	if (!it)
 		return client_Disconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
 
-	auto &client = it->second;
+	auto &client = *it;
 
 	// -------------------------------------
 
@@ -198,12 +205,12 @@ void AsyncLoop<Selector, Worker, SparePool>::client_Write_(int, std::false_type)
 
 template<class Selector, class Worker, class SparePool>
 void AsyncLoop<Selector, Worker, SparePool>::client_Write_(int const fd, std::true_type){
-	auto it = clients_.find(fd);
+	Client *it = getFD_(fd);
 
-	if (it == clients_.end())
+	if (!it)
 		return client_Disconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
 
-	auto &client = it->second;
+	auto &client = *it;
 
 	// -------------------------------------
 
@@ -276,7 +283,7 @@ bool AsyncLoop<Selector, Worker, SparePool>::client_Connect_(int const fd){
 	if (newFD < 0)
 		return false;
 
-	if ( clients_.size() < conf_maxClients_ && insertFD_(newFD) ){
+	if ( connectedClients_ < conf_maxClients_ && insertFD_(newFD) ){
 		// socket_options_setNonBlocking(newFD);
 
 		if constexpr(NL)
@@ -343,7 +350,9 @@ bool AsyncLoop<Selector, Worker, SparePool>::insertFD_(int const fd){
 	if ( ! selector_.insertFD(fd) )
 		return false;
 
-	clients_.emplace(fd, sparePool_.pop() );
+	clients_[fd] = new Client( sparePool_.pop() );
+
+	++connectedClients_;
 
 	return true;
 }
@@ -354,28 +363,37 @@ void AsyncLoop<Selector, Worker, SparePool>::removeFD_(int const fd){
 
 	// Find and steal
 
-	auto it = clients_.find(fd);
+	Client *it = clients_[fd];
 
-	if (it == clients_.end()){
+	if (!it){
 		// do nothing, error is already reported.
 		return;
 	}
 
-	IOBuffer &buffer = it->second.buffer;
+	IOBuffer &buffer = it->buffer;
 
 	// steal
 	sparePool_.push(std::move(buffer.getBuffer()));
 
+	// call d-tor
+	delete it;
+
 	// erase
-	clients_.erase(it);
+	clients_[fd] = nullptr;
+
+	--connectedClients_;
 }
 
 template<class Selector, class Worker, class SparePool>
 void AsyncLoop<Selector, Worker, SparePool>::expireFD_(){
-	for(const auto &[fd, c] : clients_){
-		if (c.timer.expired(conf_connectionTimeout_)){
+	for(int fd = 0; fd < static_cast<int>(clients_.size()); ++fd){
+		Client *it = getFD_(fd);
+		if (!it)
+			continue;
+
+		if (Client &client = *it; client.timer.expired(conf_connectionTimeout_)){
 			client_Disconnect_<0>(fd, DisconnectStatus::TIMEOUT);
-			// iterator is invalid now...
+			// index is still valid, but lets stop
 			return;
 		}
 	}
