@@ -384,5 +384,5 @@ Changelog
 -	new module Hybrid Index: IXADD_*
 -	module ISAM: IGETALL, IGET, IMGET, ISETALL, ISET, IDEL, IRESERVE
 -	number of registered commands is printed in the start log
-
+-	new Compat module command "COMMAND" to monitor redis-cli.
 

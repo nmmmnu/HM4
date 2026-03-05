@@ -107,6 +107,29 @@ namespace net::worker::commands::Compat{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct COMMAND : BaseCommandRO<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			// deliberatly send error
+			return result.set_error(ResultErrorMessages::SYS_NOT_IMPLEMENTED);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"command",	"COMMAND"
+		};
+	};
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "compat";
@@ -116,7 +139,8 @@ namespace net::worker::commands::Compat{
 				SELECT	,
 				RESET	,
 				TYPE	,
-				TOUCH
+				TOUCH	,
+				COMMAND
 			>(pack);
 		}
 	};
