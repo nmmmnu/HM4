@@ -13,8 +13,6 @@ public:
 	using DiskList	= hm4::disk::DiskList;
 	using List 	= const impl_::ContainerHelper::CollectionList;
 
-	using NoSlabAllocator = DiskList::NoVMAllocator;
-
 public:
 	template<typename UString>
 	DirectoryListLoader(UString &&path, DiskList::VMAllocator *allocator, DiskList::OpenMode const mode = DiskList::DEFAULT_MODE) :

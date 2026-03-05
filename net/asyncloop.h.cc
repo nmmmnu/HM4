@@ -50,6 +50,13 @@ AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
 }
 
 template<class Selector, class Worker, class SparePool>
+AsyncLoop<Selector, Worker, SparePool>::~AsyncLoop(){
+	if constexpr(Allocator::need_deallocate())
+		for(auto *it : clients_)
+			MyAllocator::destruct(allocator_, it);
+}
+
+template<class Selector, class Worker, class SparePool>
 void AsyncLoop<Selector, Worker, SparePool>::print() const{
 	auto _ = [](auto k, auto v){
 		logger_fmt<Logger::STARTUP>("{:20} = {:12}", k, v);
@@ -350,7 +357,7 @@ bool AsyncLoop<Selector, Worker, SparePool>::insertFD_(int const fd){
 	if ( ! selector_.insertFD(fd) )
 		return false;
 
-	clients_[fd] = new Client( sparePool_.pop() );
+	clients_[fd] = MyAllocator::construct<Client>(allocator_, sparePool_.pop());
 
 	++connectedClients_;
 
@@ -376,7 +383,7 @@ void AsyncLoop<Selector, Worker, SparePool>::removeFD_(int const fd){
 	sparePool_.push(std::move(buffer.getBuffer()));
 
 	// call d-tor
-	delete it;
+	MyAllocator::destruct(allocator_, it);
 
 	// erase
 	clients_[fd] = nullptr;

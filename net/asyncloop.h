@@ -10,6 +10,8 @@
 
 #include "nullsparepool.h"
 
+#include "stdallocator.h"
+
 #include <vector>
 #include <algorithm>	// min, find
 
@@ -31,6 +33,8 @@ public:
 	constexpr static int		WAIT_TIMEOUT		= 5;
 
 	constexpr static size_t		IO_BUFFER_CAPACITY	= 1024 * 4;
+
+	using Allocator = MyAllocator::STDAllocator;
 
 private:
 	constexpr static int		WAIT_TIMEOUT_MS		=  WAIT_TIMEOUT * 1000;
@@ -63,10 +67,7 @@ public:
 				size_t   conf_maxRequestSize		= IO_BUFFER_CAPACITY
 	);
 
-	~AsyncLoop(){
-		for(auto *it : clients_)
-			delete it;
-	}
+	~AsyncLoop();
 
 	bool process();
 
@@ -178,6 +179,8 @@ private:
 	size_t			conf_maxRequestSize_	;
 
 	SparePool		sparePool_{ conf_minSparePoolSize_, conf_maxSparePoolSize_, conf_bufferCapacity_ };
+
+	Allocator		allocator_;
 };
 
 
