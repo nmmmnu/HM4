@@ -54,6 +54,9 @@ namespace MyAllocator{
 
 	template<typename T, class Allocator>
 	void destruct(Allocator &allocator, T *p){
+		if (!p)
+			return;
+
 		p->~T();
 
 		allocator.xdeallocate(p);
