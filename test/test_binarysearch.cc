@@ -60,6 +60,7 @@ private:
 	}
 
 	void test(int const key, bool const found, int const result) const{
+		[[maybe_unused]]
 		bool const ok = test_do(T(key), found, T(result) );
 
 		assert(ok);

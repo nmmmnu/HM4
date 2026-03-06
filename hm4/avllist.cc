@@ -997,7 +997,7 @@ namespace avl_impl_{
 	}
 
 	template<bool CheckHeight = false, typename Node>
-	void testALVTreeIntegrity(const Node *node, const Node *parent = nullptr){
+	void testALVTreeIntegrity(const Node *node, [[maybe_unused]] const Node *parent = nullptr){
 		// not important, so it stay recursive.
 
 		if (!node)

@@ -191,7 +191,7 @@ private:
 	}
 
 	constexpr
-	void validateIndexCheck_(size_type const index) const{
+	void validateIndexCheck_([[maybe_unused]] size_type const index) const{
 		if constexpr(RangeCheck){
 			assert(validateIx_(index));
 		}

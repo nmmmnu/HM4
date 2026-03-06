@@ -10,6 +10,7 @@ int main(){
 		for(uint32_t i = 0; i < 0xFFFFFFFF; ++i){
 			{
 				auto const zzz = splitBits2D32(i);
+				[[maybe_unused]]
 				auto const b = combineBits2D32(zzz);
 				assert(i == b);
 			}
@@ -18,12 +19,14 @@ int main(){
 
 			{
 				auto const zzz = splitBits3D32(i);
+				[[maybe_unused]]
 				auto const b = combineBits3D32(zzz);
 				assert(i == b);
 			}
 
 			{
 				auto const zzz = splitBits4D32(i);
+				[[maybe_unused]]
 				auto const b = combineBits4D32(zzz);
 				assert(i == b);
 			}
@@ -41,6 +44,7 @@ int main(){
 
 			{
 				auto const zzz = splitBits16D8(i);
+				[[maybe_unused]]
 				auto const b = combineBits16D8(zzz);
 				assert(i == b);
 			}

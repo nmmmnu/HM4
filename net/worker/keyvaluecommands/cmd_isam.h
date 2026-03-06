@@ -359,7 +359,7 @@ namespace net::worker::commands::ISAM_cmd{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory<It> >;
 
-			constexpr ISETALL_Factory(std::string_view const key, ISAM const &isam, It begin, It end) :
+			constexpr ISETALL_Factory(std::string_view const key, ISAM const &isam, It begin, [[maybe_unused]] It end) :
 							Base::IFactoryAction	(key, isam.bytes()),
 							isam			(isam	),
 							it			(begin	){
