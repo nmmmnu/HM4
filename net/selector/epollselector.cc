@@ -107,24 +107,23 @@ bool EPollSelector::removeFD(int const fd){
 }
 
 
-namespace {
-	FDResult getFDStatus(epoll_event const &ev){
-		int const fd = ev.data.fd;
+FDResult getFDStatus(epoll_event const &ev){
+	int const fd = ev.data.fd;
 
-		if (ev.events & EPOLLERR)
-			return { fd, FDStatus::ERROR };
+	if (ev.events & EPOLLERR)
+		return { fd, FDStatus::ERROR };
 
-		if ((ev.events & EPOLLIN) || (ev.events & EPOLLHUP))
-			return { fd, FDStatus::READ };
+	if ((ev.events & EPOLLIN) || (ev.events & EPOLLHUP))
+		return { fd, FDStatus::READ };
 
-		if (ev.events & EPOLLOUT)
-			return { fd, FDStatus::WRITE };
+	if (ev.events & EPOLLOUT)
+		return { fd, FDStatus::WRITE };
 
-		// the function can not come here,
-		// but we will return FDStatus::NONE
-		return { fd, FDStatus::NONE };
-	}
+	// the function can not come here,
+	// but we will return FDStatus::NONE
+	return { fd, FDStatus::NONE };
 }
+
 
 
 

@@ -334,6 +334,7 @@ namespace net::worker::commands{
 			debugPrint(*x);
 
 			for(auto const &key : *x){
+				[[maybe_unused]]
 				bool const b = map_.insert(key, x.get());
 
 				assert(b);
