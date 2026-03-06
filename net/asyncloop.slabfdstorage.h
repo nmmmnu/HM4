@@ -1,20 +1,23 @@
-#ifndef _NET_ASYNC_LOOP_DYNAMIC_ARRAY_FD_STORAGE_H_
-#define _NET_ASYNC_LOOP_DYNAMIC_ARRAY_FD_STORAGE_H_
+#ifndef _NET_ASYNC_LOOP_SLAB_FD_STORAGE_H_
+#define _NET_ASYNC_LOOP_SLAB_FD_STORAGE_H_
 
-#include "stdallocator.h"
+#include "slaballocator.h"
+#include "allocatedbuffer.h"
 
 #include <vector>
 
 namespace net{
 
-	struct DynamicArrayFDStorage{
-		DynamicArrayFDStorage(uint32_t conf_rlimitNoFile, uint32_t /* conf_maxClients */){
+	struct SlabFDStorage{
+		SlabFDStorage(uint32_t conf_rlimitNoFile, uint32_t conf_maxClients) :
+								buffer_(ClientSize * conf_maxClients){
+
 			clients_.resize(conf_rlimitNoFile); // also set to nullptr
 		}
 
-		~DynamicArrayFDStorage(){
+		~SlabFDStorage(){
 			for(auto *it : clients_)
-				MyAllocator::destruct(allocator__, it);
+				MyAllocator::destruct(allocator_, it);
 		}
 
 	public:
@@ -32,7 +35,7 @@ namespace net{
 
 		template<typename... Args>
 		bool insert(int fd, Args&&... args){
-			clients_[fd] = MyAllocator::construct<Client>(allocator__, std::forward<Args>(args)...);
+			clients_[fd] = MyAllocator::construct<Client>(allocator_, std::forward<Args>(args)...);
 
 			++size_;
 
@@ -40,7 +43,7 @@ namespace net{
 		}
 
 		void remove(int fd){
-			MyAllocator::destruct(allocator__, clients_[fd]);
+			MyAllocator::destruct(allocator_, clients_[fd]);
 
 			clients_[fd] = nullptr;
 
@@ -56,13 +59,18 @@ namespace net{
 		}
 
 	private:
+		constexpr static size_t ClientSize = sizeof(Client);
+
 		using ClientContainer	= std::vector<Client *>;
-		using Allocator		= MyAllocator::STDAllocator;
+		using Allocator		= MyAllocator::SlabAllocator<ClientSize>;
 
-		ClientContainer				clients_;
-		size_t					size_		= 0;
+		ClientContainer	clients_;
+		size_t		size_		= 0;
 
-		constexpr inline static Allocator	allocator__{};
+		MyBuffer::AllocatedMemoryResourceOwned<>
+				buffer_;
+
+		Allocator	allocator_{ buffer_ };
 	};
 
 } // namespace net

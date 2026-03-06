@@ -1,5 +1,5 @@
-#ifndef _NET_ASYNC_LOOP_MAP_STORAGE_H_
-#define _NET_ASYNC_LOOP_MAP_STORAGE_H_
+#ifndef _NET_ASYNC_LOOP_MAP_FD_STORAGE_H_
+#define _NET_ASYNC_LOOP_MAP_FD_STORAGE_H_
 
 #include "stdallocator.h"
 

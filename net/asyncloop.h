@@ -7,7 +7,8 @@
 
 #include "nullsparepool.h"
 #include "asyncloop.client.h"
-#include "asyncloop.dynamicarrayfdstorage.h"
+//#include "asyncloop.dynamicarrayfdstorage.h"
+#include "asyncloop.slabfdstorage.h"
 
 #include <algorithm>	// min, find
 
@@ -17,8 +18,10 @@
 #include "fmt/core.h"
 
 namespace net{
+//	using MyFDStorage = DynamicArrayFDStorage;
+	using MyFDStorage = SlabFDStorage;
 
-	template<class Selector, class Worker, class SparePool = NullSparePool, class FDStorage = DynamicArrayFDStorage>
+	template<class Selector, class Worker, class SparePool = NullSparePool, class FDStorage = MyFDStorage>
 	class AsyncLoop{
 	public:
 		constexpr static uint32_t	MIN_CLIENTS		= 4;
@@ -29,8 +32,6 @@ namespace net{
 		constexpr static int		WAIT_TIMEOUT		= 5;
 
 		constexpr static size_t		IO_BUFFER_CAPACITY	= 1024 * 4;
-
-		using Allocator = MyAllocator::STDAllocator;
 
 	private:
 		constexpr static int		WAIT_TIMEOUT_MS		=  WAIT_TIMEOUT * 1000;

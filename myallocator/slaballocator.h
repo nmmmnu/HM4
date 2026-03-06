@@ -6,7 +6,7 @@
 
 namespace MyAllocator{
 
-	template<size_t BlockSize = 2048>
+	template<size_t BlockSize>
 	struct SlabAllocator{
 		static_assert(BlockSize > sizeof(void *), "No room for the free list");
 
@@ -56,20 +56,28 @@ namespace MyAllocator{
 			freeList_ = p;
 		}
 
-		size_t getFreeMemory() const noexcept{
+		size_t getFreeBlocks() const noexcept{
 			size_t n = 0;
 
 			for(const void *block = freeList_; block; block = *reinterpret_cast<const void * const *>(block))
 				++n;
 
-			return n * BlockSize;
+			return n;
+		}
+
+		size_t getUsedBlocks() const noexcept{
+			return getNumBlocks() - getFreeBlocks();
+		}
+
+		size_t getFreeMemory() const noexcept{
+			return getFreeBlocks() * BlockSize;
 		}
 
 		size_t getUsedMemory() const noexcept{
-			return getNumBlocks() * BlockSize - getFreeMemory();
+			return getUsedBlocks() * BlockSize;
 		}
 
-		constexpr auto getNumBlocks() const{
+		constexpr auto getNumBlocks() const noexcept{
 			return buffer_.size() / BlockSize;
 		}
 
