@@ -385,4 +385,9 @@ Changelog
 -	module ISAM: IGETALL, IGET, IMGET, ISETALL, ISET, IDEL, IRESERVE
 -	number of registered commands is printed in the start log
 -	new Compat module command "COMMAND" to monitor redis-cli.
+-	fix issue with MyAllocator::destruct with nullptr. This is not a bug because default behavour is unlear.
+
+### 1.3.15
+-	migrate commands to "MyHashtable" and async loop to nginx-like array
+
 

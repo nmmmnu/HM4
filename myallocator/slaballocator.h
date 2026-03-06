@@ -15,7 +15,7 @@ namespace MyAllocator{
 		}
 
 		constexpr static bool need_deallocate() noexcept{
-			return true;
+			return false;
 		}
 
 		constexpr static bool knownMemoryUsage() noexcept{
@@ -66,20 +66,20 @@ namespace MyAllocator{
 		}
 
 		size_t getUsedMemory() const noexcept{
-			return numBlocks_() * BlockSize - getFreeMemory();
+			return getNumBlocks() * BlockSize - getFreeMemory();
+		}
+
+		constexpr auto getNumBlocks() const{
+			return buffer_.size() / BlockSize;
 		}
 
 	private:
 		void createFreeList_(){
-			for (size_t i = 0; i < numBlocks_(); ++i){
+			for (size_t i = 0; i < getNumBlocks(); ++i){
 				void *block = buffer_.data() + i * BlockSize;
 				*reinterpret_cast<void **>(block) = freeList_;
 				freeList_ = block;
 			}
-		}
-
-		constexpr auto numBlocks_() const{
-			return buffer_.size() / BlockSize;
 		}
 
 	private:

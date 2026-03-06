@@ -90,5 +90,5 @@ Changelog
 -	fix feature with assest() for composite keys in vectors module
 -	fix sharedAccumulateResults() loop count to more correct ITERATIONS_LOOPS_MAX
 -	fix ignoring the hotline index if index is very small.
--	fix db_mkbtree
-
+-	fix db_mkbtree.
+-	fix issue with MyAllocator::destruct with nullptr. This is not a bug because default behavour is unlear.

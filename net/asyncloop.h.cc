@@ -7,15 +7,8 @@
 
 namespace net{
 
-namespace impl_{
-	template<class Container>
-	bool findFD(Container const &c, int const fd){
-		return std::find(std::begin(c), std::end(c), fd) != std::end(c);
-	}
-}
-
-template<class Selector, class Worker, class SparePool>
-AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
+template<class Selector, class Worker, class SparePool, class Storage>
+AsyncLoop<Selector, Worker, SparePool, Storage>::AsyncLoop(
 			Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
 			uint32_t const conf_rlimitNoFile	,
 			uint32_t const conf_maxClients		,
@@ -39,8 +32,6 @@ AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
 
 	assert(conf_maxClients_ < conf_rlimitNoFile_);
 
-	clients_.resize(conf_maxClients_); // also set to nullptr
-
 	// fixParameters();
 
 	for(int const fd : serverFD_){
@@ -49,15 +40,8 @@ AsyncLoop<Selector, Worker, SparePool>::AsyncLoop(
 	}
 }
 
-template<class Selector, class Worker, class SparePool>
-AsyncLoop<Selector, Worker, SparePool>::~AsyncLoop(){
-	if constexpr(Allocator::need_deallocate())
-		for(auto *it : clients_)
-			MyAllocator::destruct(allocator_, it);
-}
-
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::print() const{
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::print() const{
 	auto _ = [](auto k, auto v){
 		logger_fmt<Logger::STARTUP>("{:20} = {:12}", k, v);
 	};
@@ -73,8 +57,8 @@ void AsyncLoop<Selector, Worker, SparePool>::print() const{
 
 // ===========================
 
-template<class Selector, class Worker, class SparePool>
-bool AsyncLoop<Selector, Worker, SparePool>::process(){
+template<class Selector, class Worker, class SparePool, class Storage>
+bool AsyncLoop<Selector, Worker, SparePool, Storage>::process(){
 	using WaitStatus = selector::WaitStatus;
 	using FDStatus   = selector::FDStatus;
 
@@ -124,8 +108,8 @@ bool AsyncLoop<Selector, Worker, SparePool>::process(){
 	return keepProcessing_;
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::idle_loop(){
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::idle_loop(){
 	expireFD_();
 
 	sparePool_.balance();
@@ -135,22 +119,22 @@ void AsyncLoop<Selector, Worker, SparePool>::idle_loop(){
 
 // ===========================
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::client_Read_(int fd){
-	if ( impl_::findFD(serverFD_, fd) )
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Read_(int fd){
+	if ( isServerFD_(fd) )
 		client_Read_(fd, std::false_type{});
 	else
 		client_Read_(fd, std::true_type{});
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::client_Read_(int const fd, std::false_type){
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Read_(int const fd, std::false_type){
 	while (client_Connect_(fd));
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::client_Read_(int const fd, std::true_type){
-	Client *it = getFD_(fd);
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Read_(int const fd, std::true_type){
+	Client *it = clients_[fd];
 
 	if (!it)
 		return client_Disconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
@@ -197,22 +181,22 @@ void AsyncLoop<Selector, Worker, SparePool>::client_Read_(int const fd, std::tru
 	client_Worker_(fd, client.buffer);
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::client_Write_(int fd){
-if ( impl_::findFD(serverFD_, fd) )
-	client_Write_(fd, std::false_type{});
-else
-	client_Write_(fd, std::true_type{});
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Write_(int fd){
+	if ( isServerFD_(fd) )
+		client_Write_(fd, std::false_type{});
+	else
+		client_Write_(fd, std::true_type{});
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::client_Write_(int, std::false_type){
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Write_(int, std::false_type){
 	// WTF?!? Should never happen...
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::client_Write_(int const fd, std::true_type){
-	Client *it = getFD_(fd);
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Write_(int const fd, std::true_type){
+	Client *it = clients_[fd];
 
 	if (!it)
 		return client_Disconnect_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
@@ -243,8 +227,8 @@ void AsyncLoop<Selector, Worker, SparePool>::client_Write_(int const fd, std::tr
 	}
 }
 
-template<class Selector, class Worker, class SparePool>
-bool AsyncLoop<Selector, Worker, SparePool>::client_Worker_(int const fd, IOBuffer &buffer){
+template<class Selector, class Worker, class SparePool, class Storage>
+bool AsyncLoop<Selector, Worker, SparePool, Storage>::client_Worker_(int const fd, IOBuffer &buffer){
 	const WorkerStatus status = worker_( buffer );
 
 	switch(status){
@@ -280,9 +264,9 @@ bool AsyncLoop<Selector, Worker, SparePool>::client_Worker_(int const fd, IOBuff
 	}
 }
 
-template<class Selector, class Worker, class SparePool>
+template<class Selector, class Worker, class SparePool, class Storage>
 template<bool NL>
-bool AsyncLoop<Selector, Worker, SparePool>::client_Connect_(int const fd){
+bool AsyncLoop<Selector, Worker, SparePool, Storage>::client_Connect_(int const fd){
 	// fd is same as serverFD_
 	int const newFD = socket_accept(fd);
 
@@ -290,7 +274,7 @@ bool AsyncLoop<Selector, Worker, SparePool>::client_Connect_(int const fd){
 	if (newFD < 0)
 		return false;
 
-	if ( connectedClients_ < conf_maxClients_ && insertFD_(newFD) ){
+	if ( clients_.size() < conf_maxClients_ && insertFD_(newFD) ){
 		// socket_options_setNonBlocking(newFD);
 
 		if constexpr(NL)
@@ -306,9 +290,9 @@ bool AsyncLoop<Selector, Worker, SparePool>::client_Connect_(int const fd){
 	return true;
 }
 
-template<class Selector, class Worker, class SparePool>
+template<class Selector, class Worker, class SparePool, class Storage>
 template<bool NL>
-void AsyncLoop<Selector, Worker, SparePool>::client_Disconnect_(int const fd, const DisconnectStatus error){
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Disconnect_(int const fd, const DisconnectStatus error){
 	removeFD_(fd);
 
 	socket_close(fd);
@@ -332,8 +316,8 @@ void AsyncLoop<Selector, Worker, SparePool>::client_Disconnect_(int const fd, co
 
 // ===========================
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::client_SocketOps_(int const fd, ssize_t const size){
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::client_SocketOps_(int const fd, ssize_t const size){
 	if (size < 0){
 		if ( socket_check_eagain() ){
 			// try again
@@ -352,20 +336,16 @@ void AsyncLoop<Selector, Worker, SparePool>::client_SocketOps_(int const fd, ssi
 
 // ===========================
 
-template<class Selector, class Worker, class SparePool>
-bool AsyncLoop<Selector, Worker, SparePool>::insertFD_(int const fd){
+template<class Selector, class Worker, class SparePool, class Storage>
+bool AsyncLoop<Selector, Worker, SparePool, Storage>::insertFD_(int const fd){
 	if ( ! selector_.insertFD(fd) )
 		return false;
 
-	clients_[fd] = MyAllocator::construct<Client>(allocator_, sparePool_.pop());
-
-	++connectedClients_;
-
-	return true;
+	return clients_.insert(fd, sparePool_.pop());
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::removeFD_(int const fd){
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::removeFD_(int const fd){
 	selector_.removeFD(fd);
 
 	// Find and steal
@@ -382,28 +362,19 @@ void AsyncLoop<Selector, Worker, SparePool>::removeFD_(int const fd){
 	// steal
 	sparePool_.push(std::move(buffer.getBuffer()));
 
-	// call d-tor
-	MyAllocator::destruct(allocator_, it);
-
-	// erase
-	clients_[fd] = nullptr;
-
-	--connectedClients_;
+	clients_.remove(fd);
 }
 
-template<class Selector, class Worker, class SparePool>
-void AsyncLoop<Selector, Worker, SparePool>::expireFD_(){
-	for(int fd = 0; fd < static_cast<int>(clients_.size()); ++fd){
-		Client *it = getFD_(fd);
-		if (!it)
-			continue;
-
-		if (Client &client = *it; client.timer.expired(conf_connectionTimeout_)){
+template<class Selector, class Worker, class SparePool, class Storage>
+void AsyncLoop<Selector, Worker, SparePool, Storage>::expireFD_(){
+	clients_.for_each([this](int fd, Client &client){
+		if (client.timer.expired(conf_connectionTimeout_)){
 			client_Disconnect_<0>(fd, DisconnectStatus::TIMEOUT);
-			// index is still valid, but lets stop
-			return;
+			return true;
 		}
-	}
+
+		return false;
+	});
 }
 
 } // namespace
