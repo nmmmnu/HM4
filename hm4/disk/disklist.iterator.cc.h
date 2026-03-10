@@ -65,7 +65,7 @@ public:
 	random_access_iterator(DiskList const &list, size_type const ptr) :
 				random_access_iterator(list, static_cast<difference_type>(ptr)){}
 
-	random_access_iterator(DiskList const &list, int const ptr) :
+	random_access_iterator(DiskList const &list, size_t const ptr) :
 				random_access_iterator(list, static_cast<difference_type>(ptr)){}
 
 	explicit
