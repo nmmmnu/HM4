@@ -26,7 +26,7 @@ namespace net{
 	public:
 		constexpr static uint32_t	MIN_CLIENTS		= 4;
 		constexpr static uint32_t	MAX_CLIENTS		= 32;
-		constexpr static uint32_t	RLIMIT_NOFILE		= 1024;
+		constexpr static uint32_t	LIMIT_NO_FILES		= 1024;
 
 		constexpr static uint32_t	CONNECTION_TIMEOUT	= 20;
 		constexpr static int		WAIT_TIMEOUT		= 5;
@@ -44,7 +44,7 @@ namespace net{
 
 	public:
 		AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
-					uint32_t conf_rlimitNoFile		= RLIMIT_NOFILE		,
+					uint32_t conf_rlimitNoFile		= LIMIT_NO_FILES	,
 					uint32_t conf_maxClients		= MAX_CLIENTS		,
 					uint32_t conf_minSparePoolSize		= MIN_CLIENTS		,
 					uint32_t conf_maxSparePoolSize		= MIN_CLIENTS		,

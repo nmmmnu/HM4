@@ -478,7 +478,7 @@ namespace{
 		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
 
 		auto const rlimit_nofile	= [&](){
-				auto const x	= std::max(opt.rlimit_nofile,	MyLoop::RLIMIT_NOFILE		);
+				auto const x	= std::max(opt.rlimit_nofile,	MyLoop::LIMIT_NO_FILES		);
 				return x > max_clients ? x : max_clients * 2;
 		}();
 
