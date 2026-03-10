@@ -130,7 +130,7 @@ int main(){
 
 		constexpr P(uint64_t zzz, std::array<uint8_t, 8> const &v) : zzz(zzz), v(v){}
 
-		constexpr bool operator <(P const &other){
+		constexpr bool operator <(P const &other) const{
 			return zzz < other.zzz;
 		}
 	};

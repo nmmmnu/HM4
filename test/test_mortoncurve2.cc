@@ -113,7 +113,7 @@ int main(){
 
 		constexpr P(uint64_t zzz, uint32_t x, uint32_t y) : zzz(zzz), x(x), y(y){}
 
-		constexpr bool operator <(P const &other){
+		constexpr bool operator <(P const &other) const{
 			return zzz < other.zzz;
 		}
 	};

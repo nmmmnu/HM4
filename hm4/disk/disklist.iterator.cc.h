@@ -65,8 +65,10 @@ public:
 	random_access_iterator(DiskList const &list, size_type const ptr) :
 				random_access_iterator(list, static_cast<difference_type>(ptr)){}
 
+	#ifdef SIZE_T_SEPARATE_FROM_UINT64_T
 	random_access_iterator(DiskList const &list, uint64_t const ptr) :
 				random_access_iterator(list, static_cast<difference_type>(ptr)){}
+	#endif
 
 	explicit
 	operator forward_iterator(){
