@@ -497,9 +497,10 @@ namespace net::worker::commands::Vectors{
 		} // anonymous namespace
 
 
-
-		#pragma clang diagnostic push
-		#pragma clang diagnostic ignored "-Wpass-failed"
+		#ifdef __clang__
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wpass-failed"
+		#endif
 
 		template<typename T, bool Norm, typename Protocol>
 		void process_VGET_(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
@@ -556,7 +557,9 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-		#pragma clang diagnostic pop
+		#ifdef __clang__
+			#pragma clang diagnostic pop
+		#endif
 
 		template<typename T, typename Protocol>
 		void process_VGET(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
