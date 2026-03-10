@@ -498,6 +498,9 @@ namespace net::worker::commands::Vectors{
 
 
 
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored "-Wpass-failed"
+
 		template<typename T, bool Norm, typename Protocol>
 		void process_VGET_(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
 			using namespace MyVectors;
@@ -552,6 +555,8 @@ namespace net::worker::commands::Vectors{
 				return result.set_container(container);
 			}
 		}
+
+		#pragma clang diagnostic pop
 
 		template<typename T, typename Protocol>
 		void process_VGET(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix){
