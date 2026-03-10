@@ -201,7 +201,10 @@ class StaticVector : public static_vector_implementation_::StaticVectorBase_<
 
 	using Base::IS_POD;
 
-	template <typename, typename, std::size_t, bool>
+//	template <typename, typename, std::size_t, bool>
+//	friend struct static_vector_implementation_::StaticVectorBase_;
+
+	template <typename, typename, std::size_t, bool, bool>
 	friend struct static_vector_implementation_::StaticVectorBase_;
 
 public:

@@ -26,16 +26,16 @@ namespace net{
 		}
 
 		auto *operator[](int fd){
-			return clients_[fd];
-		}
+			auto const ix = static_cast<std::size_t>(fd);
 
-	//	const auto *operator[](int fd) const{
-	//		return clients_[fd];
-	//	}
+			return clients_[ix];
+		}
 
 		template<typename... Args>
 		bool insert(int fd, Args&&... args){
-			clients_[fd] = MyAllocator::construct<Client>(allocator_, std::forward<Args>(args)...);
+			auto const ix = static_cast<std::size_t>(fd);
+
+			clients_[ix] = MyAllocator::construct<Client>(allocator_, std::forward<Args>(args)...);
 
 			++size_;
 
@@ -43,32 +43,37 @@ namespace net{
 		}
 
 		void remove(int fd){
-			MyAllocator::destruct(allocator_, clients_[fd]);
+			auto const ix = static_cast<std::size_t>(fd);
 
-			clients_[fd] = nullptr;
+			MyAllocator::destruct(allocator_, clients_[ix]);
+
+			clients_[ix] = nullptr;
 
 			--size_;
 		}
 
 		template<typename F>
 		void for_each(F f){
-			for(int fd = 0; fd < static_cast<int>(clients_.size()); ++fd)
-				if (auto *it = clients_[fd]; it)
+			for(int fd = 0; fd < static_cast<int>(clients_.size()); ++fd){
+				auto const ix = static_cast<std::size_t>(fd);
+
+				if (auto *it = clients_[ix]; it)
 					if (f(fd, *it))
 						return;
+			}
 		}
 
 	private:
 		constexpr static size_t ClientSize = sizeof(Client);
 
 		using ClientContainer	= std::vector<Client *>;
+		using Buffer		= MyBuffer::AllocatedMemoryResourceOwned<>;
 		using Allocator		= MyAllocator::SlabAllocator<ClientSize>;
 
 		ClientContainer	clients_;
 		size_t		size_		= 0;
 
-		MyBuffer::AllocatedMemoryResourceOwned<>
-				buffer_;
+		Buffer		buffer_;
 
 		Allocator	allocator_{ buffer_ };
 	};

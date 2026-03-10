@@ -40,7 +40,7 @@ public:
 
 private:
 	constexpr size_t psize_(iterator it) const{
-		return it - begin() + 1;
+		return static_cast<size_t>(it - begin() + 1);
 	}
 };
 

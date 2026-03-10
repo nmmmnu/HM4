@@ -278,6 +278,8 @@ namespace net::worker::shared::zsetmulti{
 			auto const [A, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a){
+				auto const [A, S] = indexes;
+
 				hm4::PairBufferKey bufferKey;
 
 				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, S);
@@ -389,6 +391,8 @@ namespace net::worker::shared::zsetmulti{
 			auto const [A, B, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b){
+				auto const [A, B, S] = indexes;
+
 				hm4::PairBufferKey bufferKey;
 
 				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, S);
@@ -516,6 +520,8 @@ namespace net::worker::shared::zsetmulti{
 			auto const [A, B, C, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c){
+				auto const [A, B, C, S] = indexes;
+
 				hm4::PairBufferKey bufferKey;
 
 				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, S);
@@ -663,6 +669,8 @@ namespace net::worker::shared::zsetmulti{
 			auto const [A, B, C, D, S] = indexes;
 
 			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c, std::string_view d){
+				auto const [A, B, C, D, S] = indexes;
+
 				hm4::PairBufferKey bufferKey;
 
 				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, S);
@@ -846,6 +854,8 @@ namespace net::worker::shared::zsetmulti{
 			auto _ = [&](std::string_view txt,
 							std::string_view a, std::string_view b, std::string_view c,
 							std::string_view d, std::string_view e){
+
+				auto const [A, B, C, D, E, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
 
@@ -1145,6 +1155,8 @@ namespace net::worker::shared::zsetmulti{
 			auto _ = [&](std::string_view txt,
 							std::string_view a, std::string_view b, std::string_view c,
 							std::string_view d, std::string_view e, std::string_view f){
+
+				auto const [A, B, C, D, E, F, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
 

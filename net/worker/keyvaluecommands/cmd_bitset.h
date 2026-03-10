@@ -281,14 +281,18 @@ namespace net::worker::commands::BITSET{
 
 				const uint64_t *bits64 = reinterpret_cast<const uint64_t *>(val.data());
 
-				#pragma GCC ivdep
+				#if defined(__clang__)
+					#pragma clang loop vectorize(enable) interleave(enable)
+				#elif defined(__GNUC__)
+					#pragma GCC ivdep
+				#endif
 				for (size_t i = 0; i < size64; ++i)
-				    count += __builtin_popcountll(bits64[i]);
+					count += static_cast<uint64_t>( __builtin_popcountll(bits64[i]) );
 
 				const uint8_t  *bits8  = reinterpret_cast<const uint8_t *>(bits64 + size64);
 
 				for (size_t i = 0; i < val.size() % sizeof(uint64_t); ++i)
-				    count += __builtin_popcount(bits8[i]);
+					count += static_cast<uint64_t>( __builtin_popcount(bits8[i]) );
 
 
 

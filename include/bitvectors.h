@@ -67,15 +67,19 @@ namespace MyVectors{
 		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
 		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for (size_t i = 0; i < size64; ++i)
-		    result += __builtin_popcountll(pa64[i] ^ pb64[i]);
+		    result += static_cast<size_t>( __builtin_popcountll(pa64[i] ^ pb64[i]) );
 
 		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
 		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
 
 		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
-		    result += __builtin_popcount(pa8[i] ^ pb8[i]);
+		    result += static_cast<size_t>( __builtin_popcount(pa8[i] ^ pb8[i]) );
 
 
 
@@ -102,14 +106,18 @@ namespace MyVectors{
 		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
 		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for (size_t i = 0; i < size64; ++i){
 			auto const byteA = pa64[i];
 			auto const byteB = pb64[i];
 
-			dot   += __builtin_popcountll(byteA & byteB);
-			normA += __builtin_popcountll(byteA);
-			normB += __builtin_popcountll(byteB);
+			dot   += static_cast<size_t>( __builtin_popcountll(byteA & byteB) );
+			normA += static_cast<size_t>( __builtin_popcountll(byteA) );
+			normB += static_cast<size_t>( __builtin_popcountll(byteB) );
 		}
 
 		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
@@ -119,9 +127,9 @@ namespace MyVectors{
 			auto const byteA = pa8[i];
 			auto const byteB = pb8[i];
 
-			dot   += __builtin_popcount(byteA & byteB);
-			normA += __builtin_popcount(byteA);
-			normB += __builtin_popcount(byteB);
+			dot   += static_cast<size_t>( __builtin_popcount(byteA & byteB) );
+			normA += static_cast<size_t>( __builtin_popcount(byteA) );
+			normB += static_cast<size_t>( __builtin_popcount(byteB) );
 		}
 
 
@@ -141,14 +149,18 @@ namespace MyVectors{
 
 		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for (size_t i = 0; i < size64; ++i)
-		    result += __builtin_popcountll(pa64[i]);
+		    result += static_cast<size_t>( __builtin_popcountll(pa64[i]) );
 
 		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
 
 		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
-		    result += __builtin_popcount(pa8[i]);
+		    result += static_cast<size_t>( __builtin_popcount(pa8[i]) );
 
 
 
@@ -167,15 +179,19 @@ namespace MyVectors{
 		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
 		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for (size_t i = 0; i < size64; ++i)
-		    result += __builtin_popcountll(pa64[i] & pb64[i]);
+		    result += static_cast<size_t>( __builtin_popcountll(pa64[i] & pb64[i]) );
 
 		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
 		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
 
 		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
-		    result += __builtin_popcount(pa8[i] & pb8[i]);
+		    result += static_cast<size_t>( __builtin_popcount(pa8[i] & pb8[i]) );
 
 
 

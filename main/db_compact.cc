@@ -28,7 +28,7 @@
 
 using hm4::disk::DiskList;
 
-constexpr auto DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
+//constexpr auto DEFAULT_ADVICE	= MMAPFile::Advice::SEQUENTIAL;
 constexpr auto DEFAULT_MODE	= DiskList::OpenMode::FORWARD;
 
 using IDGenerator = idgenerator::IDGeneratorDate;

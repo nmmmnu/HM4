@@ -453,7 +453,11 @@ namespace net::worker::commands::Vectors{
 				case VType::BINARY_LE :
 				case VType::HEX_LE    : {
 
-						#pragma GCC ivdep
+						#if defined(__clang__)
+							#pragma clang loop vectorize(enable) interleave(enable)
+						#elif defined(__GNUC__)
+							#pragma GCC ivdep
+						#endif
 						for(size_t i = 0; i < fvectorOriginal.size(); ++i)
 							fvectorOriginal[i] = letoh(fvectorOriginal[i]);
 
@@ -463,7 +467,11 @@ namespace net::worker::commands::Vectors{
 				case VType::BINARY_BE :
 				case VType::HEX_BE    : {
 
-						#pragma GCC ivdep
+						#if defined(__clang__)
+							#pragma clang loop vectorize(enable) interleave(enable)
+						#elif defined(__GNUC__)
+							#pragma GCC ivdep
+						#endif
 						for(size_t i = 0; i < fvectorOriginal.size(); ++i)
 							fvectorOriginal[i] = betoh(fvectorOriginal[i]);
 
@@ -588,11 +596,19 @@ namespace net::worker::commands::Vectors{
 						// fvector is denormalized and in machine order now.
 
 						if (vtype == VType::BINARY_BE){
-							#pragma GCC ivdep
+							#if defined(__clang__)
+								#pragma clang loop vectorize(enable) interleave(enable)
+							#elif defined(__GNUC__)
+								#pragma GCC ivdep
+							#endif
 							for(size_t i = 0; i < fvector.size(); ++i)
 								fvector[i] = htobe(fvector[i]);
 						}else{
-							#pragma GCC ivdep
+							#if defined(__clang__)
+								#pragma clang loop vectorize(enable) interleave(enable)
+							#elif defined(__GNUC__)
+								#pragma GCC ivdep
+							#endif
 							for(size_t i = 0; i < fvector.size(); ++i)
 								fvector[i] = htole(fvector[i]);
 						}
@@ -1079,7 +1095,7 @@ namespace net::worker::commands::Vectors{
 			}
 
 			[[nodiscard]]
-			constexpr_virtual std::string_view getIndex() const{
+			constexpr_virtual std::string_view getIndex() const override{
 				return hash;
 			}
 

@@ -62,7 +62,11 @@ namespace MyVectors{
 
 		float l2 = 0.0f;
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for(size_t i = 0; i < cvector.size(); ++i)
 			l2 += cvector[i] * cvector[i];
 
@@ -84,7 +88,11 @@ namespace MyVectors{
 
 		auto const fix = 1 / magnitude;
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for(size_t i = 0; i < fvector.size(); ++i)
 			fvector[i] *= fix;
 
@@ -122,20 +130,20 @@ namespace MyVectors{
 	constexpr T quantizeComponent(float v){
 		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
-		if (std::is_same_v<T, float>){
+		if constexpr(std::is_same_v<T, float>){
 			return v;
 		}
 
-		if (std::is_same_v<T, int16_t>){
+		if constexpr(std::is_same_v<T, int16_t>){
 			float const scale = 32767;
 
-			return static_cast<int16_t>( std::round(v * scale) );
+			return static_cast<T>( std::round(v * scale) );
 		}
 
-		if (std::is_same_v<T, int8_t>){
+		if constexpr(std::is_same_v<T, int8_t>){
 			float const scale = 127;
 
-			return static_cast<int8_t>( std::round(v * scale) );
+			return static_cast<T>( std::round(v * scale) );
 		}
 	}
 
@@ -161,7 +169,11 @@ namespace MyVectors{
 	constexpr void dequantizeF(CVector const &cvector, F f, FProj fpr){
 		static_assert(checkVector <CVector>(), "Only float, int8_t and int16_t supported");
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for(size_t i = 0; i < cvector.size(); ++i)
 			f(i, dequantizeComponent(fpr(cvector[i])));
 	}
@@ -182,7 +194,11 @@ namespace MyVectors{
 
 		assert(cvector.size() == fvector.size());
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for(size_t i = 0; i < cvector.size(); ++i)
 			fvector[i] = denormalizeComponent(cvector[i], magnitude);
 	}
@@ -191,7 +207,11 @@ namespace MyVectors{
 	constexpr void denormalizeF(CVector const &cvector, float const magnitude, F f, FProj fpr){
 		static_assert(checkVector<CVector>(), "Only float, int8_t and int16_t supported");
 
-		#pragma GCC ivdep
+		#if defined(__clang__)
+			#pragma clang loop vectorize(enable) interleave(enable)
+		#elif defined(__GNUC__)
+			#pragma GCC ivdep
+		#endif
 		for(size_t i = 0; i < cvector.size(); ++i)
 			f(i, denormalizeComponent(fpr(cvector[i]), magnitude));
 	}
@@ -212,7 +232,11 @@ namespace MyVectors{
 
 			float dot = 0;
 
-			#pragma GCC ivdep
+			#if defined(__clang__)
+				#pragma clang loop vectorize(enable) interleave(enable)
+			#elif defined(__GNUC__)
+				#pragma GCC ivdep
+			#endif
 			for (size_t i = 0; i < a.size(); ++i){
 				// dequantize float is a no op
 				float const a_i = dequantizeComponent(fpr1(a[i]));
@@ -433,7 +457,11 @@ namespace MyVectors{
 		for (size_t x = 0; x < fresult.size(); ++x){
 			float sum = 0.0f;
 
-			#pragma GCC ivdep
+			#if defined(__clang__)
+				#pragma clang loop vectorize(enable) interleave(enable)
+			#elif defined(__GNUC__)
+				#pragma GCC ivdep
+			#endif
 			for (size_t y = 0; y < cfvector.size(); ++y)
 				sum += cfvector[y] * MD(x, y, seed);
 
@@ -464,7 +492,11 @@ namespace MyVectors{
 		for (size_t x = 0; x < bits; ++x){
 			float sum = 0.0f;
 
-			#pragma GCC ivdep
+			#if defined(__clang__)
+				#pragma clang loop vectorize(enable) interleave(enable)
+			#elif defined(__GNUC__)
+				#pragma GCC ivdep
+			#endif
 			for (size_t y = 0; y < cfvector.size(); ++y)
 				sum += cfvector[y] * MD(x, y, seed);
 

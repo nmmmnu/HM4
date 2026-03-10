@@ -21,7 +21,8 @@ namespace net::worker::commands::ISAM_cmd{
 			return size >= LINEAR[id];
 		}
 
-		inline void logme_(std::string_view component, std::string_view searcher, ISAM const &isam, size_t expected){
+		template<typename size_type>
+		void logme_(std::string_view component, std::string_view searcher, ISAM const &isam, size_type expected){
 			logger<Logger::DEBUG>() << component << searcher << isam.size() << expected;
 		}
 
@@ -286,13 +287,13 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto const expected = std::distance(begin, end);
 
-			if (!selectFastSearcher(isam.size(), expected)){
+			if (!selectFastSearcher(isam.size(), static_cast<size_t>(expected))){
 				logme_("IMGET", "linear", isam, expected);
 				auto searcher = isam.getLinearSearcherByName();
 
 				return collect__(isam, searcher, result, container, storage, begin, end);
 			}else{
-				auto searcher = getFastSearcher(isam, "IMGET", expected);
+				auto searcher = getFastSearcher(isam, "IMGET", static_cast<size_t>(expected));
 
 				return collect__(isam, searcher, result, container, storage, begin, end);
 			}
@@ -447,13 +448,13 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto const expected = std::distance(begin, end);
 
-			if (!selectFastSearcher(isam.size(), expected)){
+			if (!selectFastSearcher(isam.size(), static_cast<size_t>(expected))){
 				logme_("ISET", "linear", isam, expected);
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
-				auto searcher = getFastSearcher(isam, "ISET", expected);
+				auto searcher = getFastSearcher(isam, "ISET", static_cast<size_t>(expected));
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}
@@ -576,13 +577,13 @@ namespace net::worker::commands::ISAM_cmd{
 
 			auto const expected = std::distance(begin, end);
 
-			if (!selectFastSearcher(isam.size(), expected)){
+			if (!selectFastSearcher(isam.size(), static_cast<size_t>(expected))){
 				logme_("IDEL", "linear", isam, expected);
 				auto searcher = isam.getLinearSearcherByName();
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}else{
-				auto searcher = getFastSearcher(isam, "IDEL", expected);
+				auto searcher = getFastSearcher(isam, "IDEL", static_cast<size_t>(expected));
 
 				return process__(db, result, key, pair, isam, searcher, begin, end);
 			}
