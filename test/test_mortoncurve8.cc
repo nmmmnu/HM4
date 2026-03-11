@@ -78,7 +78,7 @@ namespace{
 				if constexpr(BigMinOptimized){
 					if (++out_of_range > max_out_of_range){
 
-						printf("Values for BIGMIN: %lu %lu %lu\n", (uint64_t) zzz, (uint64_t) zzz1, (uint64_t) zzz2);
+						printf("Values for BIGMIN: %" PRIu64 " %" PRIu64 " %" PRIu64 "\n", (uint64_t) zzz, (uint64_t) zzz1, (uint64_t) zzz2);
 
 						auto const bigmin = computeBigMinFromMorton8D8(zzz, zzz1, zzz2);
 
@@ -101,7 +101,7 @@ namespace{
 			}
 
 			if constexpr(BigMinOptimized)
-				printf("%6lu" PRIu64 ""
+				printf("%6" PRIu64 ""
 						"[ %u %u %u %u ]"
 						"[ %u %u %u %u ] %s\n",
 							(uint64_t) zzz,

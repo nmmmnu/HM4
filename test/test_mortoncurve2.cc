@@ -176,9 +176,9 @@ int main(){
 	);
 
 	if (count1 == count2)
-		printf("ALL OK! %" PRIu64 " Results\n", count1);
+		printf("ALL OK! %zu Results\n", count1);
 	else
-		printf("ERROR! %zu vs %" PRIu64 " Results\n", count1, count2);
+		printf("ERROR! %zu vs %zu Results\n", count1, count2);
 }
 
 

@@ -372,7 +372,7 @@ void SkipList<T_Allocator>::printLanesSummary() const{
 			++count;
 		}
 
-		printf("Lane # %5u -> %8" PRIu64 "\n", lane, count);
+		printf("Lane # %5u -> %8zu\n", lane, count);
 	}
 }
 
