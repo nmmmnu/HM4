@@ -1,6 +1,7 @@
 #include "mortoncurve.h"
 
 #include <cstdio>
+#include <cinttypes>	// PRI
 
 #ifdef HAVE_UINT128_T
 
@@ -35,7 +36,7 @@ namespace{
 		auto const zzz1 = toMorton3D32({x_min, y_min, z_min});
 		auto const zzz2 = toMorton3D32({x_max, y_max, z_max});
 
-		printf("zzz -> %6lu %6lu\n", (uint64_t) zzz1, (uint64_t) zzz2);
+		printf("zzz -> %6" PRIu64 " %6" PRIu64 "\n", (uint64_t) zzz1, (uint64_t) zzz2);
 
 		size_t skips  = 1;
 		auto it = skipUntil(begin, end, zzz1, zzz2);
@@ -67,11 +68,11 @@ namespace{
 				if constexpr(BigMinOptimized){
 					if (++out_of_range > max_out_of_range){
 
-						printf("Values for BIGMIN: %lu %lu %lu\n", (uint64_t) zzz, (uint64_t) zzz1, (uint64_t) zzz2);
+						printf("Values for BIGMIN: %" PRIu64 " %" PRIu64 " %" PRIu64 "\n", (uint64_t) zzz, (uint64_t) zzz1, (uint64_t) zzz2);
 
 						auto const bigmin = computeBigMinFromMorton3D32(zzz, zzz1, zzz2);
 
-						printf("BIGMIN: %lu\n", (uint64_t) bigmin);
+						printf("BIGMIN: %" PRIu64 "\n", (uint64_t) bigmin);
 						printf("Skips : %zu\n", skips);
 
 						if (bigmin <= zzz)
@@ -90,7 +91,7 @@ namespace{
 			}
 
 			if constexpr(BigMinOptimized)
-				printf("%6lu %4u %4u %4u %s\n", (uint64_t) zzz, x, y, z, s);
+				printf("%6" PRIu64 " %4" PRIu32 " %4" PRIu32 " %4" PRIu32 " %s\n", (uint64_t) zzz, x, y, z, s);
 
 			++it;
 		}
@@ -158,7 +159,7 @@ int main(){
 		using namespace morton_curve;
 
 		for(auto const &[zzz, x, y, z] : container){
-			printf("%6lu %4u %4u %4u\n", (uint64_t) zzz, x, y, z);
+			printf("%6" PRIu64 " %4" PRIu32 " %4" PRIu32 " %4" PRIu32 "\n", (uint64_t) zzz, x, y, z);
 		}
 	}
 

@@ -1,8 +1,11 @@
 #include "mortoncurve.h"
 
+#include <cstdio>
+#include <cinttypes>	// PRI
+
 #include <vector>
 #include <algorithm>
-#include <cstdio>
+
 #include <random>
 
 namespace{
@@ -43,7 +46,7 @@ namespace{
 		auto const zzz1 = toMorton8D8(v_min);
 		auto const zzz2 = toMorton8D8(v_max);
 
-		printf("zzz -> %6lu %6lu\n", (uint64_t) zzz1, (uint64_t) zzz2);
+		printf("zzz -> %6" PRIu64 " %6" PRIu64 "\n", (uint64_t) zzz1, (uint64_t) zzz2);
 
 		size_t skips  = 1;
 		auto it = skipUntil(begin, end, zzz1, zzz2);
@@ -79,7 +82,7 @@ namespace{
 
 						auto const bigmin = computeBigMinFromMorton8D8(zzz, zzz1, zzz2);
 
-						printf("BIGMIN: %lu\n", (uint64_t) bigmin);
+						printf("BIGMIN: %" PRIu64 "\n", (uint64_t) bigmin);
 						printf("Skips : %zu\n", skips);
 
 						if (bigmin <= zzz)
@@ -98,7 +101,7 @@ namespace{
 			}
 
 			if constexpr(BigMinOptimized)
-				printf("%6lu"
+				printf("%6lu" PRIu64 ""
 						"[ %u %u %u %u ]"
 						"[ %u %u %u %u ] %s\n",
 							(uint64_t) zzz,

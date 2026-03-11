@@ -389,5 +389,7 @@ Changelog
 
 ### 1.3.15
 -	migrate commands to "MyHashtable" and async loop to nginx-like array
+-	compilation on Intel Macs without warnings
+-	compilation on Apple Silicon Macs without warnings
 
 

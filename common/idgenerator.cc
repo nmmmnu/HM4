@@ -5,27 +5,28 @@
 #include <cstdio>
 
 namespace{
-	std::string_view idgeneratorTS(char *buffer, const char *format){
+	template<size_t N>
+	std::string_view idgeneratorTS(std::array<char, N> &buffer, const char *format){
 		auto const now = mytime::now();
 
-		sprintf(buffer,
+		snprintf(buffer.data(), buffer.size(),
 				format,
 					mytime::to32(now),
 					mytime::toUsec(now)
 		);
 
-		return buffer;
+		return buffer.data();
 	}
 }
 
 namespace idgenerator{
 
 	std::string_view IDGeneratorTS_HEX::operator()(to_string_buffer_t &buffer) const{
-		return idgeneratorTS(buffer.data(), "%08x.%08x");
+		return idgeneratorTS(buffer, "%08x.%08x");
 	}
 
 	std::string_view IDGeneratorTS_DEC::operator()(to_string_buffer_t &buffer) const{
-		return idgeneratorTS(buffer.data(), "%010u.%010u");
+		return idgeneratorTS(buffer, "%010u.%010u");
 	}
 
 	std::string_view IDGeneratorDate::operator()(to_string_buffer_t &buffer) const{
@@ -35,7 +36,7 @@ namespace idgenerator{
 
 		mytime::to_string_buffer_t time_buffer;
 
-		sprintf(buffer.data(),
+		snprintf(buffer.data(), buffer.size(),
 				"%s.%010u",
 					mytime::toString(now, FORMAT, time_buffer).data(),
 					mytime::toUsec(now)

@@ -6,7 +6,10 @@
 
 #include <stdexcept>
 #include <random>	// mt19937, bernoulli_distribution
+
 #include <cassert>
+#include <cstdio>
+#include <cinttypes>	// PRI
 
 #include "pmallocator.h"
 #include "stdallocator.h"
@@ -361,14 +364,15 @@ void SkipList<T_Allocator>::printLane(height_size_type const lane) const{
 template<class T_Allocator>
 void SkipList<T_Allocator>::printLanesSummary() const{
 	for(height_size_type lane = MAX_HEIGHT; lane --> 0;){
-		uint64_t count = 0;
+		size_t count = 0;
+
 		for(const Node *node = heads_[lane]; node; node = node->next[lane]){
 			// no prefetch here.
 
 			++count;
 		}
 
-		printf("Lane # %5u -> %8zu\n", lane, count);
+		printf("Lane # %5u -> %8" PRIu64 "\n", lane, count);
 	}
 }
 

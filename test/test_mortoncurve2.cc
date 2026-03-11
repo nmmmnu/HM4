@@ -1,6 +1,8 @@
 #include "mortoncurve.h"
 
 #include <cstdio>
+#include <cinttypes>	// PRI
+
 #include <vector>
 #include <algorithm>
 
@@ -31,7 +33,7 @@ namespace{
 		auto const zzz1 = toMorton2D32({x_min, y_min});
 		auto const zzz2 = toMorton2D32({x_max, y_max});
 
-		printf("zzz -> %6lu %6lu\n", zzz1, zzz2);
+		printf("zzz -> %6" PRIu64 " %6" PRIu64 "\n", zzz1, zzz2);
 
 		size_t skips  = 1;
 		auto it = skipUntil(begin, end, zzz1, zzz2);
@@ -63,11 +65,11 @@ namespace{
 				if constexpr(BigMinOptimized){
 					if (++out_of_range > max_out_of_range){
 
-						printf("Values for BIGMIN: %lu %lu %lu\n", zzz, zzz1, zzz2);
+						printf("Values for BIGMIN: %" PRIu64 " %" PRIu64 " %" PRIu64 "\n", zzz, zzz1, zzz2);
 
 						auto const bigmin = computeBigMinFromMorton2D32(zzz, zzz1, zzz2);
 
-						printf("BIGMIN: %lu\n", bigmin);
+						printf("BIGMIN: %" PRIu64 "\n", bigmin);
 						printf("Skips : %zu\n", skips);
 
 						if (bigmin <= zzz)
@@ -86,7 +88,7 @@ namespace{
 			}
 
 			if constexpr(BigMinOptimized)
-				printf("%6lu %4u %4u %s\n", zzz, x, y, s);
+				printf("%6" PRIu64 " %4" PRIu32 " %4" PRIu32 " %s\n", zzz, x, y, s);
 
 			++it;
 		}
@@ -147,7 +149,7 @@ int main(){
 		using namespace morton_curve;
 
 		for(auto const &[zzz, x, y] : container){
-			printf("%6lu %4zu %4zu\n", zzz, size_t{x}, size_t{y});
+			printf("%6" PRIu64 " %4" PRIu32 " %4" PRIu32 "\n", zzz, x, y);
 		}
 	}
 
@@ -174,9 +176,9 @@ int main(){
 	);
 
 	if (count1 == count2)
-		printf("ALL OK! %zu Results\n", count1);
+		printf("ALL OK! %" PRIu64 " Results\n", count1);
 	else
-		printf("ERROR! %zu vs %zu Results\n", count1, count2);
+		printf("ERROR! %zu vs %" PRIu64 " Results\n", count1, count2);
 }
 
 

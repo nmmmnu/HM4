@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <cstdio>
+#include <cinttypes>	// PRI
 #include <numeric>	// accumulate
 
 #include "myendian.h"
@@ -51,7 +52,7 @@ struct Centroid{
 	}
 
 	void print() const{
-		printf("> Addr %p | mean: %10.4f | weight: %5zu\n", (void *) this, mean(), weight());
+		printf("> Addr %p | mean: %10.4f | weight: %" PRIu64 "\n", (void *) this, mean(), weight());
 	}
 
 	friend constexpr bool operator<(Centroid const &a, Centroid const &b){

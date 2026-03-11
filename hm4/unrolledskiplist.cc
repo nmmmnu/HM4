@@ -2,9 +2,12 @@
 
 #include "hpair.h"
 
-#include <cassert>
 #include <stdexcept>
 #include <random>	// mt19937, bernoulli_distribution
+
+#include <cassert>
+#include <cstdio>
+#include <cinttypes>	// PRI
 
 #include "pmallocator.h"
 #include "stdallocator.h"
@@ -442,7 +445,7 @@ void UnrolledSkipList<T_Allocator>::printLanesSummary() const{
 			++count;
 		}
 
-		printf("Lane # %5u -> %8zu\n", lane, count);
+		printf("Lane # %5u -> %8" PRIu64 "\n", lane, count);
 	}
 }
 
