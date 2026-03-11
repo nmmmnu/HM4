@@ -498,6 +498,7 @@ namespace net::worker::commands::Vectors{
 
 
 		#ifdef __clang__
+			// last time, clang Linux / MacOS did NOT vectorize it.
 			#pragma clang diagnostic push
 			#pragma clang diagnostic ignored "-Wpass-failed"
 		#endif
@@ -572,6 +573,8 @@ namespace net::worker::commands::Vectors{
 		}
 
 		#ifdef __clang__
+			// last time, clang Linux / MacOS x86   did     vectorize it.
+			// last time, clang MacOS Apple Silicon did NOT vectorize it.
 			#pragma clang diagnostic push
 			#pragma clang diagnostic ignored "-Wpass-failed"
 		#endif
