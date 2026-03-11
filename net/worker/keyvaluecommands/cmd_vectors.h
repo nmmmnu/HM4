@@ -571,6 +571,11 @@ namespace net::worker::commands::Vectors{
 			return process_VGET_<T, 1>(result, blob, wectorSV, dim_ix);
 		}
 
+		#ifdef __clang__
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wpass-failed"
+		#endif
+
 		template<typename T, typename Protocol>
 		void process_VGETRAW(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix, vectors_impl_::VType vtype){
 			using namespace MyVectors;
@@ -705,7 +710,9 @@ namespace net::worker::commands::Vectors{
 			} // switch vtype
 		}
 
-
+		#ifdef __clang__
+			#pragma clang diagnostic pop
+		#endif
 
 		struct VSIMHeapData{
 			std::string_view	key;
