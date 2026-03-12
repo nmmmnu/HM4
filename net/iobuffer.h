@@ -70,7 +70,7 @@ public:
 		return buffer_.size() - head_;
 	}
 
-	explicit operator std::string_view(){
+	explicit operator std::string_view() const{
 		return std::string_view{ data(), size() };
 	}
 
@@ -95,22 +95,39 @@ public:
 		return push(sv.size(), sv.data());
 	}
 
-	bool push(size_t const len, const char *ptr){
-		if (!len)
+	bool push(size_t const size, const char *ptr){
+		if (!size)
 			return false;
 
 		if constexpr(false){
-			buffer_.insert(std::end(buffer_), ptr, ptr + len);
+			buffer_.insert(std::end(buffer_), ptr, ptr + size);
 			return true;
 		}else{
-			return push(std::false_type{}, len, [ptr,len](void *dest){
-				memcpy(dest, ptr, len);
+			return push(std::false_type{}, size, [ptr,size](void *dest){
+				memcpy(dest, ptr, size);
 
-				return len;
+				return size;
 			});
 		}
 	}
 
+	template<class Lazy>
+	bool push(std::false_type, size_t const size, Lazy f){
+		if (!size)
+			return false;
+
+		auto const bufferSize = buffer_.size();
+
+		buffer_.resize(bufferSize + size);
+
+		char *dest = & buffer_[bufferSize];
+
+		f(dest);
+
+		return true;
+	}
+
+#if 0
 	template<class Lazy>
 	bool push(std::true_type, size_t const desired_len, Lazy f){
 		if (!desired_len)
@@ -128,40 +145,57 @@ public:
 
 		return true;
 	}
+#endif
 
 	template<class Lazy>
-	bool push(std::false_type, size_t const len, Lazy f){
-		if (!len)
+	bool push(std::true_type, size_t const desiredSize, Lazy f){
+		assert(!desiredSize);
+
+		char *dest = provideWriteBuffer(desiredSize);
+
+		if (!dest)
 			return false;
 
-		auto const size = buffer_.size();
+		auto const finalSize = f(dest);
 
-		buffer_.resize(size + len);
+		return finalizeWriteBuffer(dest, finalSize);
+	}
 
-		char *dest = & buffer_[size];
+	// ==================================
 
-		f(dest);
+	char *provideWriteBuffer(size_t const size){
+		assert(!size);
+
+		auto const bufferSize = buffer_.size();
+
+		buffer_.resize(bufferSize + size);
+
+		return & buffer_[bufferSize];
+	}
+
+	bool finalizeWriteBuffer(const char *offset, size_t const size){
+		buffer_.resize((offset - buffer_.data()) + size);
 
 		return true;
 	}
 
 	// ==================================
 
-	bool pop(size_t const len){
-		if (len == 0)
+	bool pop(size_t const size){
+		if (!size)
 			return false;
 
-		auto const available = size();
+		auto const availableSize = this->size();
 
-		if (available < len)
+		if (availableSize < size)
 			return false;
 
-		if (available == len){
+		if (availableSize == size){
 			clear();
 			return true;
 		}
 
-		head_ = head_ + len;
+		head_ = head_ + size;
 
 		return true;
 	}
