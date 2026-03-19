@@ -393,3 +393,5 @@ Changelog
 -	compilation on Apple Silicon Macs without warnings
 -	change IDGenerator microseconds to HEX to generate short ID's
 -	add configuration option server_id
+-	new command UNIQUEID
+

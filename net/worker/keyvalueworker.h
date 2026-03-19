@@ -63,6 +63,7 @@
 
 #include "keyvaluecommands/cmd_murmur.h"		// MURMUR
 #include "keyvaluecommands/cmd_random.h"		// RANDOM
+#include "keyvaluecommands/cmd_uniqueid.h"		// UNIQUEID
 
 #include "keyvaluecommands/cmd_reload.h"		// SAVE, RELOAD
 #include "keyvaluecommands/cmd_system.h"		// EXIT, SHUTDOWN
@@ -151,6 +152,7 @@ namespace net::worker{
 
 				Murmur		::RegisterModule,
 				Random		::RegisterModule,
+				UniqueID	::RegisterModule,
 
 				Info		::RegisterModule,
 				Compat		::RegisterModule,
