@@ -149,7 +149,7 @@ public:
 
 	template<class Lazy>
 	bool push(std::true_type, size_t const desiredSize, Lazy f){
-		assert(!desiredSize);
+		assert(desiredSize && "Size must be great than zero");
 
 		char *dest = provideWriteBuffer(desiredSize);
 
@@ -164,7 +164,7 @@ public:
 	// ==================================
 
 	char *provideWriteBuffer(size_t const size){
-		assert(!size);
+		assert(size && "Size must be great than zero");
 
 		auto const bufferSize = buffer_.size();
 
