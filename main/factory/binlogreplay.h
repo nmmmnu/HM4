@@ -12,7 +12,7 @@ namespace DBAdapterFactory{
 		using MyList		= hm4::FlushList<MemList,Predicate, Flush>;
 
 		template<typename UString>
-		BinLogReplay(UString &&path, typename MemList::Allocator &allocator,
+		BinLogReplay(uint8_t serverID, UString &&path, typename MemList::Allocator &allocator,
 						hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite,
 						MyBuffer::ByteBufferView bufferPair) :
 					memlist{ allocator },
@@ -22,7 +22,7 @@ namespace DBAdapterFactory{
 						bufferPair	,
 						{}		, // bufferHash
 						Predicate{}	,
-						Flush{ IDGenerator{}, std::forward<UString>(path) }
+						Flush{ IDGenerator{ serverID }, std::forward<UString>(path) }
 					}{}
 
 		MyList &operator()(){

@@ -220,16 +220,16 @@ namespace{
 		return MyBuffer::MMapMemoryResource{ hm4::Pair::maxBytes() };
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair);
+	void replayBinlogFile(std::string_view file, uint8_t serverID, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair);
 
-	void checkBinLogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
+	void checkBinLogFile(std::string_view file, uint8_t serverID, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
 		if (file.empty())
 			return;
 
 		if (!fileExists(hm4::disk::filenameData(file)))
 			return;
 
-		return replayBinlogFile(file, path, allocator, bufferPair);
+		return replayBinlogFile(file, serverID, path, allocator, bufferPair);
 	}
 
 	int select_MutableLists(MyOptions const &opt){
@@ -267,13 +267,15 @@ namespace{
 				// can be done in parallel,
 				// but then it will make preasure to the disk
 
-				checkBinLogFile(opt.binlog_path1, opt.db_path, allocator1, bufferPair);
-				checkBinLogFile(opt.binlog_path2, opt.db_path, allocator2, bufferPair);
+				checkBinLogFile(opt.binlog_path1, opt.server_id, opt.db_path, allocator1, bufferPair);
+				checkBinLogFile(opt.binlog_path2, opt.server_id, opt.db_path, allocator2, bufferPair);
 
 				using MyFactory = DBAdapterFactory::MutableBinLogConcurrent<ET, MyMemList>;
 
 				return fLists(	opt,
 						MyFactory{
+							opt.server_id		,
+
 							opt.db_path		,
 							vmAllocator		,
 
@@ -299,6 +301,8 @@ namespace{
 
 				return fLists(	opt,
 						MyFactory{
+							opt.server_id		,
+
 							opt.db_path		,
 							vmAllocator		,
 
@@ -340,6 +344,8 @@ namespace{
 
 				return fLists(	opt,
 						MyFactory{
+							opt.server_id		,
+
 							opt.db_path		,
 							vmAllocator		,
 
@@ -363,6 +369,8 @@ namespace{
 
 				return fLists(	opt,
 						MyFactory{
+							opt.server_id		,
+
 							opt.db_path		,
 							vmAllocator		,
 
@@ -616,7 +624,7 @@ namespace{
 
 
 
-	void replayBinlogFile_(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
+	void replayBinlogFile_(std::string_view file, uint8_t serverID, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
 		logger<Logger::WARNING>() << "Binlog file exists. Trying to replay...";
 
 		using hm4::disk::DiskList;
@@ -632,7 +640,7 @@ namespace{
 
 		/* nested scope for the d-tor */
 		{
-			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ path, allocator, g_buffersWrite, bufferPair };
+			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ serverID, path, allocator, g_buffersWrite, bufferPair };
 
 			auto &list = factory();
 
@@ -645,8 +653,8 @@ namespace{
 		logger<Logger::NOTICE>() << "Replay done.";
 	}
 
-	void replayBinlogFile(std::string_view file, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
-		replayBinlogFile_(file, path, allocator, bufferPair);
+	void replayBinlogFile(std::string_view file, uint8_t serverID, std::string_view path, Allocator &allocator, MyBuffer::MMapMemoryResource &bufferPair){
+		replayBinlogFile_(file, serverID, path, allocator, bufferPair);
 		allocator.reset();
 	}
 

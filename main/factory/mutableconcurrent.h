@@ -15,6 +15,7 @@ namespace DBAdapterFactory{
 
 		template<typename UStringPathData>
 		MutableConcurrent(
+				uint8_t				serverID	,
 				UStringPathData			&&path_data	,
 
 				DiskList::VMAllocator		&slabAllocator	,
@@ -30,6 +31,7 @@ namespace DBAdapterFactory{
 					memList1_{ allocator1 },
 					memList2_{ allocator2 },
 					base_{
+						serverID	,
 						std::forward<UStringPathData>(path_data),
 						slabAllocator	,
 						memList1_	,

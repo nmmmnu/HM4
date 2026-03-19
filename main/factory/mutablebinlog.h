@@ -18,6 +18,7 @@ namespace DBAdapterFactory{
 
 		template<typename UStringPathData, typename UStringPathBinLog>
 		MutableBinLog(
+				uint8_t				serverID	,
 				UStringPathData			&&path_data	,
 
 				DiskList::VMAllocator		&slabAllocator	,
@@ -43,6 +44,7 @@ namespace DBAdapterFactory{
 						}
 					},
 					base_{
+						serverID	,
 						std::forward<UStringPathData>(path_data),
 						slabAllocator	,
 						binLogList_	,

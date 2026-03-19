@@ -42,8 +42,11 @@ LL_LTO		= -flto
 
 LINK		= $(MYCC) $(LL_LTO) $(LD_ALL) -o $@ $^ $(LL_ALL)
 
+LINK		+= -static
+
 # https://stackoverflow.com/questions/9002264/starting-a-stdthread-with-static-linking-causes-segmentation-fault
-LINK		+= -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
+#LINK		+= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
+# gcc 15 works without it
 #LINK		+= -lpthread
 
 # ======================================================

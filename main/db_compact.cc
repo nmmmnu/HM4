@@ -176,12 +176,12 @@ namespace{
 		return opt;
 	}
 
-	std::string getNewFilename(std::string_view db_path){
+	std::string getNewFilename(std::string_view db_path, uint8_t serverID){
 		constexpr std::string_view DIR_WILDCARD = "*";
 
 		IDGenerator::to_string_buffer_t buffer;
 
-		IDGenerator idGenerator;
+		IDGenerator idGenerator{ serverID };
 
 		return StringReplace::replaceByCopy(db_path, DIR_WILDCARD, idGenerator(buffer));
 	}
@@ -329,7 +329,7 @@ namespace{
 	int compact(MyOptions const &opt, hm4::disk::FileBuilder::FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferHash){
 
 		auto merge = [&opt, &buffersWrite, &bufferHash](std::string_view what, auto &&factory){
-			auto const output_file = getNewFilename(opt.db_path);
+			auto const output_file = getNewFilename(opt.db_path, opt.server_id);
 
 			fmt::print("Merging {} tables into {}\n", what, output_file);
 

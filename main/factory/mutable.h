@@ -13,7 +13,8 @@ namespace DBAdapterFactory{
 
 		template<typename UStringPathData>
 		Mutable(
-				UStringPathData			 &&path_data	,
+				uint8_t				serverID	,
+				UStringPathData			&&path_data	,
 
 				DiskList::VMAllocator		&slabAllocator	,
 
@@ -26,6 +27,7 @@ namespace DBAdapterFactory{
 			) :
 					memList_{ allocator },
 					base_{
+						serverID	,
 						std::forward<UStringPathData>(path_data),
 						slabAllocator	,
 						memList_	,

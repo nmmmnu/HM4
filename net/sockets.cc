@@ -12,6 +12,9 @@
 
 #include <errno.h>		// errno
 
+#include <cstdio>		// perror
+#include <cstdlib>		// exit
+
 #include <poll.h>
 
 namespace net{
@@ -218,6 +221,37 @@ int socket_server_(int const fd, SOCKADDR &address, uint16_t const backlog){
 inline int socket_error_(int const fd, int const error){
 	::close(fd);
 	return error;
+}
+
+// ===========================
+
+void perrorExit(int exitCode, const char *descr) noexcept{
+	perror(descr);
+	exit(exitCode);
+}
+
+int perrorReturn(int exitCode, const char *descr) noexcept{
+	perror(descr);
+	return exitCode;
+}
+
+inline void printError_(int error, const char *descr) noexcept{
+	if (descr)
+		fprintf(stderr, "%s: %s\n", descr, strerror(-error));
+	else
+		fprintf(stderr, "%s\n",           strerror(-error));
+}
+
+void perrorExit(int exitCode, int error, const char *descr) noexcept{
+	printError_(error, descr);
+
+	exit(exitCode);
+}
+
+int perrorReturn(int exitCode, int error, const char *descr) noexcept{
+	printError_(error, descr);
+
+	return exitCode;
 }
 
 } // namespace

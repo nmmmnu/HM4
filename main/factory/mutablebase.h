@@ -64,7 +64,7 @@ namespace DBAdapterFactory{
 		using MyDBAdapter		= DBAdapter;
 
 		template<typename UStringPathData, typename... FlushListArgs>
-		MutableBase(UStringPathData &&path_data, DiskList::VMAllocator &slabAllocator, FlushListArgs&&... args) :
+		MutableBase(uint8_t serverID, UStringPathData &&path_data, DiskList::VMAllocator &slabAllocator, FlushListArgs&&... args) :
 						loader_{
 							std::forward<UStringPathData>(path_data),
 							&slabAllocator
@@ -72,7 +72,7 @@ namespace DBAdapterFactory{
 						muFlushList_{
 							std::forward<FlushListArgs>(args)...,
 							Predicate{},
-							Flush{ IDGenerator{}, path_data },
+							Flush{ IDGenerator{ serverID }, path_data },
 							loader_
 						},
 						list_{

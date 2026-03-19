@@ -65,6 +65,12 @@ bool socket_check_eagain() noexcept;
 size_t socket_get_rlimit_nofile() noexcept;
 size_t socket_set_rlimit_nofile(size_t newLimit) noexcept;
 
+void perrorExit (int exitCode, const char *descr = nullptr) noexcept;
+int perrorReturn(int exitCode, const char *descr = nullptr) noexcept;
+
+void perrorExit (int exitCode, int error, const char *descr = nullptr) noexcept;
+int perrorReturn(int exitCode, int error, const char *descr = nullptr) noexcept;
+
 }
 
 #endif

@@ -21,6 +21,8 @@ namespace impl_{
 
 class MyOptions{
 public:
+	uint8_t		server_id			= 0;
+
 	uint16_t	immutable			= 1;
 	std::string	db_path;
 
@@ -61,6 +63,8 @@ public:
 public:
 	void operator()(std::string_view const name, std::string_view const value){
 		switch( hash(name) ){
+		case hash("server_id"			)	: return assign_(server_id,			value);
+
 		case hash("immutable"			)	: return assign_(immutable,			value);
 		case hash("db_path"			)	: return assign_(db_path,			value);
 
@@ -106,6 +110,8 @@ public:
 
 	void printOptions() const{
 		using impl_::put;
+
+		put("server_id",			uint16_t{ server_id },		"Server ID used for randomness in unique ID generation 0-255"			);
 
 		put("immutable",			immutable,			"Start mutable=0, immutable=1"							);
 		put("db_path",								"Path to database"								);

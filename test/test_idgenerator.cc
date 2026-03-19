@@ -20,8 +20,12 @@ void test(T id, const char *name, unsigned count = 10){
 int main(){
 	namespace idg = idgenerator;
 
-	test( idg::IDGeneratorTS_HEX{},	"IDGeneratorTS@Hex"	);
-	test( idg::IDGeneratorTS_DEC{},	"IDGeneratorTS@Dec"	);
-	test( idg::IDGeneratorDate{},	"IDGeneratorDate"	);
+	uint8_t const serverID = 0xA5;
+
+	test( idg::IDGeneratorTS_HEX		{ serverID },	"IDGeneratorTS@Hex"	);
+	test( idg::IDGeneratorTS_HEXMono	{ serverID },	"IDGeneratorTS@HexMono"	);
+	test( idg::IDGeneratorTS_DEC		{ serverID },	"IDGeneratorTS@Dec"	);
+	test( idg::IDGeneratorDate		{ serverID },	"IDGeneratorDate"	);
+	test( idg::IDGeneratorDateMono		{ serverID },	"IDGeneratorDateMono"	);
 }
 

@@ -21,6 +21,8 @@ namespace impl_{
 
 class MyOptions{
 public:
+	uint8_t		server_id		= 0;
+
 	std::string	db_path;
 
 	std::nullptr_t	compaction_percent;
@@ -38,6 +40,8 @@ public:
 public:
 	void operator()(std::string_view const name, std::string_view const value){
 		switch( hash(name) ){
+		case hash("server_id"			)	: return assign_(server_id,			value);
+
 		case hash("db_path"			)	: return assign_(db_path,			value);
 
 		case hash("compaction_percent"		)	: return assign_(compaction_percent,		value);
@@ -62,6 +66,8 @@ public:
 
 	void printOptions() const{
 		using impl_::put;
+
+		put("server_id",		uint16_t{ server_id },	"Server ID used for randomness in unique ID generation 0-255"		);
 
 		put("db_path",						"Path to database"							);
 

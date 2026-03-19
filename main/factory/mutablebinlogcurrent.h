@@ -20,6 +20,7 @@ namespace DBAdapterFactory{
 
 		template<typename UStringPathData, typename UStringPathBinLog1, typename UStringPathBinLog2>
 		MutableBinLogConcurrent(
+				uint8_t				serverID	,
 				UStringPathData			&&path_data	,
 
 				DiskList::VMAllocator		&slabAllocator	,
@@ -57,6 +58,7 @@ namespace DBAdapterFactory{
 						}
 					},
 					base_{
+						serverID	,
 						std::forward<UStringPathData>(path_data),
 						slabAllocator	,
 						binLogList1_	,

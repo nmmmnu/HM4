@@ -391,5 +391,5 @@ Changelog
 -	migrate commands to "MyHashtable" and async loop to nginx-like array
 -	compilation on Intel Macs without warnings
 -	compilation on Apple Silicon Macs without warnings
-
-
+-	change IDGenerator microseconds to HEX to generate short ID's
+-	add configuration option server_id
