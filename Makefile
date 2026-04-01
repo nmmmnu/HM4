@@ -63,18 +63,16 @@ ifeq ($(UNAME), Linux)
 
 ##### LINUX #####
 
-#CF_MISC	+= -DNOT_HAVE_CHARCONV
-
 $(info Linux detected				)
 $(info  - epoll support...			)
 $(info  - commit support...			)
 $(info  - hugetlb support...			)
 $(info						)
 
+#CF_MISC	+= -DNOT_HAVE_CHARCONV
 
 EXTRA_INCL	+= -Iinclude.linux/
-CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB
-# -DHAVE_SO_REUSEPORT
+CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB -DSET_RLIMIT_NOFILE
 
 ifeq ($(STATIC_LINK), YES)
 LINK		+= -static
@@ -100,8 +98,7 @@ $(info						)
 EXTRA_INCL	+= -Iinclude.freebsd/
 CF_MISC		+= -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1
 
-# -DHAVE_SO_REUSEPORT
-CF_MISC		+= -DNOT_HAVE_CHARCONV
+CF_MISC		+= -DNOT_HAVE_CHARCONV -DSET_RLIMIT_NOFILE
 LL_ALL		+= -lm
 
 # add kqueue support...
@@ -122,8 +119,7 @@ $(info						)
 
 
 EXTRA_INCL	+= -Iinclude.darwin/
-CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T
-# -DHAVE_SO_REUSEPORT
+CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T -DSET_RLIMIT_NOFILE
 
 # add kqueue support...
 

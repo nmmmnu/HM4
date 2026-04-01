@@ -485,17 +485,23 @@ namespace{
 		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS		);
 		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
 
+		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
+
 		auto const rlimit_nofile	= [&](){
 				auto const x	= std::max(opt.rlimit_nofile,	MyLoop::LIMIT_NO_FILES		);
 				return x > max_clients ? x : max_clients * 2;
 		}();
 
-		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
+		#ifdef SET_RLIMIT_NOFILE
 
-		auto const rlimit_nofile_result	= net::socket_set_rlimit_nofile(rlimit_nofile);
+			// Set rlimit_nofile
 
-		if (rlimit_nofile_result < rlimit_nofile)
-			printError("Can not adjust rlimit_nofile (ulimit -n)...");
+			auto const rlimit_nofile_result	= net::socket_set_rlimit_nofile(rlimit_nofile);
+
+			if (rlimit_nofile_result < rlimit_nofile)
+				printError("Can not adjust rlimit_nofile (ulimit -n)...");
+
+		#endif
 
 		MyLoop loop{
 				/* selector */	MySelector	{ max_clients },
