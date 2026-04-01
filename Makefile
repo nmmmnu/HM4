@@ -20,7 +20,7 @@ CF_OPTIM	= -O0 -g
 #CF_OPTIM	= -O3 -DNDEBUG
 CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
 #CF_OPTIM	+= -fassociative-math -freciprocal-math -fno-signed-zeros
-CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation
+CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation -fopt-info-vec-missed
 
 #CF_MISC	= -DNOT_HAVE_CHARCONV
 
@@ -42,7 +42,8 @@ LL_LTO		= -flto
 
 LINK		= $(MYCC) $(LL_LTO) $(LD_ALL) -o $@ $^ $(LL_ALL)
 
-LINK		+= -static
+STATIC_LINK	= YES
+#STATIC_LINK	= NO
 
 # https://stackoverflow.com/questions/9002264/starting-a-stdthread-with-static-linking-causes-segmentation-fault
 #LINK		+= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
@@ -56,29 +57,49 @@ O		= obj/
 
 # ======================================================
 
+
+
 ifeq ($(UNAME), Linux)
 
 ##### LINUX #####
 
 #CF_MISC	+= -DNOT_HAVE_CHARCONV
 
-# add epoll support...
-# add commit support...
-# add hugetlb support...
+$(info Linux detected				)
+$(info  - epoll support...			)
+$(info  - commit support...			)
+$(info  - hugetlb support...			)
+$(info						)
+
 
 EXTRA_INCL	+= -Iinclude.linux/
 CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB
 # -DHAVE_SO_REUSEPORT
+
+ifeq ($(STATIC_LINK), YES)
+LINK		+= -static
+endif
+
+# add epoll support...
+
 LL_SELECTOR	 = $(O)epollselector.o
+
+
 
 else ifeq ($(UNAME), FreeBSD)
 
 ##### FreeBSD #####
 
+$(info FreeBSD detected				)
+$(info  - kqueue support...			)
+$(info						)
+
+
+
 # add correct endian for FreeBSD
-# fix compilation for FreeBSD
 EXTRA_INCL	+= -Iinclude.freebsd/
 CF_MISC		+= -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1
+
 # -DHAVE_SO_REUSEPORT
 CF_MISC		+= -DNOT_HAVE_CHARCONV
 LL_ALL		+= -lm
@@ -88,9 +109,17 @@ LL_ALL		+= -lm
 CF_MISC		+= -DSELECTOR_KQUEUE
 LL_SELECTOR	 = $(O)kqueueselector.o
 
+
+
 else ifeq ($(UNAME), Darwin)
 
 ##### MAC OS #####
+
+$(info MAC OS detected				)
+$(info  - kqueue support...			)
+$(info						)
+
+
 
 EXTRA_INCL	+= -Iinclude.darwin/
 CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T
@@ -101,7 +130,38 @@ CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T
 CF_MISC		+= -DSELECTOR_KQUEUE
 LL_SELECTOR	 = $(O)kqueueselector.o
 
+
+
+else ifeq ($(UNAME), Haiku)
+
+##### Haiku #####
+
+$(info Haiku detected				)
+$(info  - standard poll support... for now...	)
+$(info						)
+
+
+
+EXTRA_INCL	+= -Iinclude.haiku/
+
+LL_ALL		+= -lnetwork
+
+# add poll support...
+
+CF_MISC		+= -DSELECTOR_POLL
+LL_SELECTOR	 = $(O)pollselector.o
+
+
+
 else
+
+##### Posix OS #####
+
+$(info fallback to standard Posix OS		)
+$(info  - standard poll support...		)
+$(info						)
+
+
 
 # add poll support...
 
@@ -109,6 +169,8 @@ CF_MISC		+= -DSELECTOR_POLL
 LL_SELECTOR	 = $(O)pollselector.o
 
 endif
+
+
 
 # ======================================================
 
