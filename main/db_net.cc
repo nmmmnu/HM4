@@ -487,19 +487,29 @@ namespace{
 
 		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
 
-		auto const rlimit_nofile	= [&](){
-				auto const x	= std::max(opt.rlimit_nofile,	MyLoop::LIMIT_NO_FILES		);
-				return x > max_clients ? x : max_clients * 2;
-		}();
+		#ifdef HARD_RLIMIT_NO_FILES
 
-		#ifdef SET_RLIMIT_NOFILE
+			auto const rlimit_nofile = HARD_RLIMIT_NO_FILES;
+
+			logger<Logger::STARTUP>() << "Hard rlimit_nofile, set to" << rlimit_nofile;
+
+		#else
+
+			auto const rlimit_nofile	= [&](){
+					auto const x	= std::max(opt.rlimit_nofile,	MyLoop::LIMIT_NO_FILES		);
+					return x > max_clients ? x : max_clients * 2;
+			}();
 
 			// Set rlimit_nofile
 
-			auto const rlimit_nofile_result	= net::socket_set_rlimit_nofile(rlimit_nofile);
+			{
+				auto const rlimit_nofile_result	= net::socket_set_rlimit_nofile(rlimit_nofile);
 
-			if (rlimit_nofile_result < rlimit_nofile)
-				printError("Can not adjust rlimit_nofile (ulimit -n)...");
+				if (rlimit_nofile_result < rlimit_nofile)
+					printError("Can not adjust rlimit_nofile (ulimit -n)...");
+			}
+
+			logger<Logger::STARTUP>() << "Set rlimit_nofile to" << rlimit_nofile;
 
 		#endif
 

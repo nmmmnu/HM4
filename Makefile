@@ -72,7 +72,7 @@ $(info						)
 #CF_MISC	+= -DNOT_HAVE_CHARCONV
 
 EXTRA_INCL	+= -Iinclude.linux/
-CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB -DSET_RLIMIT_NOFILE
+CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB
 
 ifeq ($(STATIC_LINK), YES)
 LINK		+= -static
@@ -98,7 +98,7 @@ $(info						)
 EXTRA_INCL	+= -Iinclude.freebsd/
 CF_MISC		+= -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH -D_GLIBCXX_USE_C99_MATH_TR1
 
-CF_MISC		+= -DNOT_HAVE_CHARCONV -DSET_RLIMIT_NOFILE
+CF_MISC		+= -DNOT_HAVE_CHARCONV
 LL_ALL		+= -lm
 
 # add kqueue support...
@@ -119,7 +119,7 @@ $(info						)
 
 
 EXTRA_INCL	+= -Iinclude.darwin/
-CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T -DSET_RLIMIT_NOFILE
+CF_MISC		+= -DNOT_HAVE_CHARCONV -DSIZE_T_SEPARATE_FROM_UINT64_T
 
 # add kqueue support...
 
@@ -134,6 +134,7 @@ else ifeq ($(UNAME), Haiku)
 
 $(info Haiku detected				)
 $(info  - standard poll support... for now...	)
+$(info  - hard rlimit_nofile			)
 $(info						)
 
 
@@ -144,7 +145,7 @@ LL_ALL		+= -lnetwork
 
 # add poll support...
 
-CF_MISC		+= -DSELECTOR_POLL
+CF_MISC		+= -DSELECTOR_POLL -DHARD_RLIMIT_NO_FILES=512
 LL_SELECTOR	 = $(O)pollselector.o
 
 

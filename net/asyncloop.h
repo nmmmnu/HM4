@@ -44,13 +44,13 @@ namespace net{
 
 	public:
 		AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
-					uint32_t conf_rlimitNoFile		= LIMIT_NO_FILES	,
-					uint32_t conf_maxClients		= MAX_CLIENTS		,
-					uint32_t conf_minSparePoolSize		= MIN_CLIENTS		,
-					uint32_t conf_maxSparePoolSize		= MIN_CLIENTS		,
-					uint32_t conf_connectionTimeout		= CONNECTION_TIMEOUT	,
-					size_t   conf_buffer_capacity		= IO_BUFFER_CAPACITY	,
-					size_t   conf_maxRequestSize		= IO_BUFFER_CAPACITY
+					uint32_t conf_rlimitNoFile	= LIMIT_NO_FILES	,
+					uint32_t conf_maxClients	= MAX_CLIENTS		,
+					uint32_t conf_minSparePoolSize	= MIN_CLIENTS		,
+					uint32_t conf_maxSparePoolSize	= MIN_CLIENTS		,
+					uint32_t conf_connectionTimeout	= CONNECTION_TIMEOUT	,
+					size_t   conf_buffer_capacity	= IO_BUFFER_CAPACITY	,
+					size_t   conf_maxRequestSize	= IO_BUFFER_CAPACITY
 		);
 
 		//~AsyncLoop();
@@ -100,7 +100,7 @@ namespace net{
 
 		void client_Write_(int fd);
 		void client_Write_(int fd, std::true_type);
-		void client_Write_(int, std::false_type);
+		void client_Write_(int,    std::false_type);
 
 		bool client_Worker_(int fd, IOBuffer &buffer);
 

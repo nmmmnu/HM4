@@ -34,7 +34,7 @@ struct NullSparePool{
 	}
 
 private:
-	size_t				conf_bufferCapacity_	;
+	size_t conf_bufferCapacity_	;
 };
 
 } // namespace
