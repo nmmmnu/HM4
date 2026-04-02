@@ -491,44 +491,40 @@ namespace{
 
 		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
 
-		#ifdef HARD_RLIMIT_NO_FILES
+		auto const rlimit_nofile = [&]() ->uint32_t{
+			if (opt.rlimit_nofile){
+				// limit is set in the conf file, try to set it
 
-			auto const rlimit_nofile = static_cast<uint32_t>(net::socket_get_rlimit_nofile());
+				auto const limit = std::max(opt.rlimit_nofile, max_clients + FD_MIN_RESERVE);
 
-			if (rlimit_nofile == 0)
-				printError("Can not get rlimit_nofile.");
+				logger<Logger::STARTUP>() << "Set rlimit_nofile to" << limit;
 
-			logger<Logger::STARTUP>() << "Hard rlimit_nofile, set to" << rlimit_nofile;
+				auto const limit_result = net::socket_set_rlimit_nofile(limit);
 
-			if (rlimit_nofile < max_clients + FD_MIN_RESERVE){
-				logger<Logger::FATAL>() << "max_clients can be up to" << (rlimit_nofile - FD_MIN_RESERVE);
+				if (limit_result != limit)
+					printError("Can not set rlimit_nofile (ulimit -n)...");
 
-				printError("You need to decrease max_clients.");
+				return limit;
+
+			}else{
+				// limit is not set, try using current limit
+
+				auto const limit = static_cast<uint32_t>(net::socket_get_rlimit_nofile());
+
+				if (!limit)
+					printError("Can not get rlimit_nofile.");
+
+				if (limit < max_clients + FD_MIN_RESERVE){
+					logger<Logger::FATAL>() << "max_clients can be up to" << (limit - FD_MIN_RESERVE);
+
+					printError("You need to decrease max_clients.");
+				}
+
+				logger<Logger::STARTUP>() << "Fixed rlimit_nofile" << limit;
+
+				return limit;
 			}
-
-		#else
-
-			auto const rlimit_nofile = [&]() -> uint32_t{
-				auto const rlimit_nofile = std::max(opt.rlimit_nofile, MyLoop::LIMIT_NO_FILES);
-
-				if (rlimit_nofile < max_clients + FD_MIN_RESERVE)
-					return max_clients + FD_MIN_RESERVE;
-				else
-					return rlimit_nofile;
-			}();
-
-			// Set rlimit_nofile
-
-			{
-				auto const rlimit_nofile_result	= net::socket_set_rlimit_nofile(rlimit_nofile);
-
-				if (rlimit_nofile_result < rlimit_nofile)
-					printError("Can not adjust rlimit_nofile (ulimit -n)...");
-			}
-
-			logger<Logger::STARTUP>() << "Set rlimit_nofile to" << rlimit_nofile;
-
-		#endif
+		}();
 
 		MyLoop loop{
 				/* selector */	MySelector	{ max_clients },

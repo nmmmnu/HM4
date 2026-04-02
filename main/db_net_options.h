@@ -37,7 +37,7 @@ public:
 	uint16_t	tcp_backlog			= 0;
 	uint16_t	tcp_reuseport			= 0;
 
-	uint32_t	rlimit_nofile			= 1024;
+	uint32_t	rlimit_nofile			= 0;
 	uint32_t	max_clients			= 512;
 	uint32_t	min_spare_pool			= 32;
 	uint32_t	max_spare_pool			= 64;

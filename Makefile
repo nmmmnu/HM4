@@ -135,7 +135,6 @@ else ifeq ($(UNAME), Haiku)
 
 $(info Haiku detected				)
 $(info  - standard poll support... for now	)
-$(info  - hard rlimit_nofile			)
 $(info						)
 
 
@@ -146,7 +145,7 @@ LL_ALL		+= -lnetwork
 
 # add poll support...
 
-CF_MISC		+= -DSELECTOR_POLL -DHARD_RLIMIT_NO_FILES
+CF_MISC		+= -DSELECTOR_POLL
 LL_SELECTOR	 = $(O)pollselector.o
 
 
