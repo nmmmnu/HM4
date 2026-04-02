@@ -394,4 +394,5 @@ Changelog
 -	change IDGenerator microseconds to HEX to generate short ID's
 -	add configuration option server_id
 -	new command UNIQUEID
+-	new OS support - Haiku
 

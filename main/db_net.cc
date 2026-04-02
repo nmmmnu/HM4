@@ -118,6 +118,10 @@ constexpr size_t MIN_HASH_ARENA_SIZE	= 8;
 
 // ----------------------------------
 
+constexpr uint32_t FD_MIN_RESERVE		= 128; // minimum FD for the disktables
+
+// ----------------------------------
+
 #include "disk/filebuilder.misc.h"
 auto g_buffersWrite = g_fbwb();
 
@@ -496,17 +500,21 @@ namespace{
 
 			logger<Logger::STARTUP>() << "Hard rlimit_nofile, set to" << rlimit_nofile;
 
-			if (rlimit_nofile < max_clients * 2){
-				logger<Logger::FATAL>() << "max_clients can be up to" << (rlimit_nofile / 2);
+			if (rlimit_nofile < max_clients + FD_MIN_RESERVE){
+				logger<Logger::FATAL>() << "max_clients can be up to" << (rlimit_nofile - FD_MIN_RESERVE);
 
 				printError("You need to decrease max_clients.");
 			}
 
 		#else
 
-			auto const rlimit_nofile	= [&](){
-					auto const x	= std::max(opt.rlimit_nofile,	MyLoop::LIMIT_NO_FILES		);
-					return x > max_clients ? x : max_clients * 2;
+			auto const rlimit_nofile = [&]() -> uint32_t{
+				auto const rlimit_nofile = std::max(opt.rlimit_nofile, MyLoop::LIMIT_NO_FILES);
+
+				if (rlimit_nofile < max_clients + FD_MIN_RESERVE)
+					return max_clients + FD_MIN_RESERVE;
+				else
+					return rlimit_nofile;
 			}();
 
 			// Set rlimit_nofile

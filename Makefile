@@ -65,7 +65,7 @@ ifeq ($(UNAME), Linux)
 
 $(info Linux detected				)
 $(info  - epoll support				)
-$(info  - commit support			)
+$(info  - map pages support			)
 $(info  - hugetlb support			)
 $(info						)
 
