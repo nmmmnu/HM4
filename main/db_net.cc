@@ -489,9 +489,18 @@ namespace{
 
 		#ifdef HARD_RLIMIT_NO_FILES
 
-			auto const rlimit_nofile = HARD_RLIMIT_NO_FILES;
+			auto const rlimit_nofile = static_cast<uint32_t>(net::socket_get_rlimit_nofile());
+
+			if (rlimit_nofile == 0)
+				printError("Can not get rlimit_nofile.");
 
 			logger<Logger::STARTUP>() << "Hard rlimit_nofile, set to" << rlimit_nofile;
+
+			if (rlimit_nofile < max_clients * 2){
+				logger<Logger::FATAL>() << "max_clients can be up to" << (rlimit_nofile / 2);
+
+				printError("You need to decrease max_clients.");
+			}
 
 		#else
 

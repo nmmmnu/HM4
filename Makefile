@@ -64,9 +64,9 @@ ifeq ($(UNAME), Linux)
 ##### LINUX #####
 
 $(info Linux detected				)
-$(info  - epoll support...			)
-$(info  - commit support...			)
-$(info  - hugetlb support...			)
+$(info  - epoll support				)
+$(info  - commit support			)
+$(info  - hugetlb support			)
 $(info						)
 
 #CF_MISC	+= -DNOT_HAVE_CHARCONV
@@ -89,7 +89,7 @@ else ifeq ($(UNAME), FreeBSD)
 ##### FreeBSD #####
 
 $(info FreeBSD detected				)
-$(info  - kqueue support...			)
+$(info  - kqueue support			)
 $(info						)
 
 
@@ -113,7 +113,8 @@ else ifeq ($(UNAME), Darwin)
 ##### MAC OS #####
 
 $(info MAC OS detected				)
-$(info  - kqueue support...			)
+$(info  - kqueue support			)
+$(info  - charconv missing			)
 $(info						)
 
 
@@ -133,7 +134,7 @@ else ifeq ($(UNAME), Haiku)
 ##### Haiku #####
 
 $(info Haiku detected				)
-$(info  - standard poll support... for now...	)
+$(info  - standard poll support... for now	)
 $(info  - hard rlimit_nofile			)
 $(info						)
 
@@ -145,7 +146,7 @@ LL_ALL		+= -lnetwork
 
 # add poll support...
 
-CF_MISC		+= -DSELECTOR_POLL -DHARD_RLIMIT_NO_FILES=512
+CF_MISC		+= -DSELECTOR_POLL -DHARD_RLIMIT_NO_FILES
 LL_SELECTOR	 = $(O)pollselector.o
 
 
