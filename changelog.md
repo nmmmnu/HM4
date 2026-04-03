@@ -396,4 +396,5 @@ Changelog
 -	add configuration option rlimit_nofile
 -	new command UNIQUEID
 -	new OS support - Haiku
+-	improve PollSelector
 

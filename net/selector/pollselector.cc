@@ -1,6 +1,6 @@
 #include "pollselector.h"
 
-#include <unistd.h>	// close, for closeStatusData_()
+#include <unistd.h>	// close
 #include <errno.h>	// errno
 #include <poll.h>	// poll
 
@@ -28,17 +28,21 @@ namespace{
 		});
 	}
 
-	pollfd createEmptyItem(){
-		pollfd item;
-		item.fd = -1;
-		return item;
-	}
+	// pollfd createEmptyItem(){
+	// 	pollfd item;
+	// 	item.fd = -1;
+	// 	return item;
+	// }
 
 }
 
 
 
-PollSelector::PollSelector(uint32_t const maxFD) : fds_(maxFD, createEmptyItem()){}
+PollSelector::PollSelector(uint32_t const maxFD){
+	fds_.reserve(maxFD);
+
+	//fds_(maxFD, createEmptyItem())
+}
 
 PollSelector::PollSelector(PollSelector &&other) = default;
 
@@ -72,14 +76,15 @@ auto PollSelector::wait(int const timeout) -> WaitStatus{
 
 
 bool PollSelector::insertFD(int const fd, FDEvent const event){
-	auto it = std::find_if(std::begin(fds_), std::end(fds_), [](pollfd const &item){
-		return item.fd == -1;
-	});
+	if (fds_.size() < fds_.capacity()){
+		pollfd item;
 
-	if (it != std::end(fds_)){
-		it->fd      = fd;
-		it->events  = event2native(event);
-		it->revents = 0;
+		item.fd		= fd;
+		item.events	= event2native(event);
+		item.revents	= 0;
+
+		fds_.push_back(std::move(item));
+
 		return true;
 	}
 
@@ -92,8 +97,9 @@ bool PollSelector::updateFD(int const fd, FDEvent const event){
 	});
 
 	if (it != std::end(fds_)){
-		it->events = event2native(event);
-		it->revents = 0;
+		it->events	= event2native(event);
+		it->revents	= 0;
+
 		return true;
 	}
 
@@ -105,8 +111,12 @@ bool PollSelector::removeFD(int const fd){
 		return item.fd == fd;
 	});
 
-	if (it != std::end(fds_)){
-		it->fd = -1;
+	if (it != fds_.end()){
+		if (it != std::prev(fds_.end()))
+			*it = std::move(fds_.back());
+
+		fds_.pop_back();
+
 		return true;
 	}
 
