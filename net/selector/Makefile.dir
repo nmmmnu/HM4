@@ -34,3 +34,12 @@ EXTRA_CLEAN += $(O)kqueueselector.o
 endif
 
 # ===========================================================
+
+ifeq ($(UNAME), Haiku)
+# add wait_for_objects support...
+all: $(O)haikuselector.o
+
+EXTRA_CLEAN += $(O)haikuselector.o
+endif
+
+# ===========================================================

@@ -89,6 +89,7 @@ using Allocator		= MyAllocator::ArenaAllocator;
 	#error "No net::replaylist selected!"
 #endif
 
+
 // ----------------------------------
 
 #if defined SELECTOR_EPOLL
@@ -99,6 +100,10 @@ using Allocator		= MyAllocator::ArenaAllocator;
 	#include "selector/kqueueselector.h"
 
 	using MySelector	= net::selector::KQueueSelector;
+#elif defined SELECTOR_HAIKU
+	#include "selector/haikuselector.h"
+
+	using MySelector	= net::selector::HaikuSelector;
 #elif defined SELECTOR_POLL
 	#include "selector/pollselector.h"
 

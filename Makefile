@@ -134,7 +134,7 @@ else ifeq ($(UNAME), Haiku)
 ##### Haiku #####
 
 $(info Haiku detected				)
-$(info  - standard poll support... for now	)
+$(info  - wait_for_objects support		)
 $(info						)
 
 
@@ -143,10 +143,10 @@ EXTRA_INCL	+= -Iinclude.haiku/
 
 LL_ALL		+= -lnetwork
 
-# add poll support...
+# add wait_for_objects support...
 
-CF_MISC		+= -DSELECTOR_POLL
-LL_SELECTOR	 = $(O)pollselector.o
+CF_MISC		+= -DSELECTOR_HAIKU
+LL_SELECTOR	 = $(O)haikuselector.o
 
 
 
