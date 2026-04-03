@@ -2,7 +2,7 @@
 
 #include <unistd.h>	// close, for closeStatusData_()
 #include <errno.h>	// errno
-#include <OS.h>		// 
+#include <OS.h>		//
 
 #include <cassert>
 
@@ -27,22 +27,12 @@ namespace{
 				::close(item.object);
 		});
 	}
-
-	//object_wait_info createEmptyItem(){
-	//	object_wait_info item;
-	//	item.object	= -1;             
-	//	item.type	= B_OBJECT_TYPE_FD; 
-	//	item.events	= 0;              
-	//	return item;
-	//}
 }
 
 
 
 HaikuSelector::HaikuSelector(uint32_t const maxFD){
 	fds_.reserve(maxFD);
-
-	//fds_(maxFD, createEmptyItem())
 }
 
 HaikuSelector::HaikuSelector(HaikuSelector &&other) = default;
@@ -58,16 +48,15 @@ HaikuSelector::~HaikuSelector(){
 auto HaikuSelector::wait(int const timeout) -> WaitStatus{
 	auto const status = wait_for_objects_etc(fds_.data(), (int) fds_.size(), B_RELATIVE_TIMEOUT, bigtime_t{ timeout } * 1'000);
 
-	if (status < B_OK){ 
+	if (status < B_OK){
 		switch(status) {
-		// EINTR
-		case B_INTERRUPTED: 
-		// EAGAIN
-		case B_WOULD_BLOCK: return WaitStatus::OK;
+
+		case B_INTERRUPTED:
+		case B_WOULD_BLOCK: 	return WaitStatus::OK;
 		case B_TIMED_OUT:	return WaitStatus::NONE;
 
 		// B_BAD_VALUE etc.
-		default:  			return WaitStatus::ERROR;
+		default:  		return WaitStatus::ERROR;
 		}
 	}
 
@@ -80,9 +69,9 @@ bool HaikuSelector::insertFD(int const fd, FDEvent const event){
 	if (fds_.size() < fds_.capacity()){
 		object_wait_info item;
 
-		item.object		= fd;
-		item.type		= B_OBJECT_TYPE_FD; 
-		item.events		= event2native(event);
+		item.object	= fd;
+		item.type	= B_OBJECT_TYPE_FD;
+		item.events	= event2native(event);
 
 		fds_.push_back(std::move(item));
 
@@ -99,6 +88,7 @@ bool HaikuSelector::updateFD(int const fd, FDEvent const event){
 
 	if (it != std::end(fds_)){
 		it->events = event2native(event);
+
 		return true;
 	}
 
@@ -126,18 +116,18 @@ bool HaikuSelector::removeFD(int const fd){
 
 namespace{
 	FDResult getFDStatus(object_wait_info const &p){
-		int const fd = p.object; 
+		int const fd = p.object;
 
-		if (fd >= 0) {
-			if (p.events & (B_EVENT_INVALID | B_EVENT_ERROR))
-				return { fd, FDStatus::ERROR };
+		assert(fd >= 0);
 
-			if (p.events & B_EVENT_READ)
-				return { fd, FDStatus::READ };
+		if (p.events & (B_EVENT_INVALID | B_EVENT_ERROR))
+			return { fd, FDStatus::ERROR };
 
-			if (p.events & B_EVENT_WRITE)
-				return { fd, FDStatus::WRITE };
-		}
+		if (p.events & B_EVENT_READ)
+			return { fd, FDStatus::READ };
+
+		if (p.events & B_EVENT_WRITE)
+			return { fd, FDStatus::WRITE };
 
 		return { fd, FDStatus::NONE };
 	}

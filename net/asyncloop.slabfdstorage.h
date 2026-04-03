@@ -16,6 +16,10 @@ namespace net{
 		}
 
 		~SlabFDStorage(){
+			// if constexpr(allocator_.need_deallocate())
+
+			// we have to do it, because we want the buffers to be destructed
+
 			for(auto *it : clients_)
 				MyAllocator::destruct(allocator_, it);
 		}

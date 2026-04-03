@@ -9,8 +9,8 @@ int main(){
 	int const fd2 = net::socket_create(net::SOCKET_TCP{},  "localhost.not.used.yet", 2002);
 	int const fd3 = net::socket_create(net::SOCKET_UNIX{}, "/tmp/echo");
 
-	size_t const conf_rlimitNoFile = 1024;
-	size_t const conf_max_clients  = 4;
+	uint32_t const conf_rlimitNoFile = static_cast<uint32_t>(net::socket_get_rlimit_nofile());
+	size_t   const conf_max_clients  = 6;
 
 	using MyWorker = MyWorkerFactory::Worker;
 

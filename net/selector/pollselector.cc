@@ -27,21 +27,12 @@ namespace{
 				::close(item.fd);
 		});
 	}
-
-	// pollfd createEmptyItem(){
-	// 	pollfd item;
-	// 	item.fd = -1;
-	// 	return item;
-	// }
-
 }
 
 
 
 PollSelector::PollSelector(uint32_t const maxFD){
 	fds_.reserve(maxFD);
-
-	//fds_(maxFD, createEmptyItem())
 }
 
 PollSelector::PollSelector(PollSelector &&other) = default;
@@ -129,21 +120,20 @@ namespace{
 	FDResult getFDStatus(pollfd const &p){
 		int const fd = p.fd;
 
-		if (fd >= 0){
-			if (p.revents & POLLERR)
-				return { fd, FDStatus::ERROR };
+		assert(fd >= 0);
 
-			if (p.revents & POLLIN)
-				return { fd, FDStatus::READ };
+		if (p.revents & POLLERR)
+			return { fd, FDStatus::ERROR };
 
-			if (p.revents & POLLOUT)
-				return { fd, FDStatus::WRITE };
-		}
+		if (p.revents & POLLIN)
+			return { fd, FDStatus::READ };
+
+		if (p.revents & POLLOUT)
+			return { fd, FDStatus::WRITE };
 
 		return { fd, FDStatus::NONE };
 	}
 }
-
 
 
 
