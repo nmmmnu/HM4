@@ -89,7 +89,6 @@ using Allocator		= MyAllocator::ArenaAllocator;
 	#error "No net::replaylist selected!"
 #endif
 
-
 // ----------------------------------
 
 #if defined SELECTOR_EPOLL

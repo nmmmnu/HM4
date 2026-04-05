@@ -8,7 +8,8 @@
 #include "nullsparepool.h"
 #include "asyncloop.client.h"
 //#include "asyncloop.dynamicarrayfdstorage.h"
-#include "asyncloop.slabfdstorage.h"
+//#include "asyncloop.slabfdstorage.h"
+#include "asyncloop.sparsefdstorage.h"
 
 #include <algorithm>	// min, find
 
@@ -19,7 +20,8 @@
 
 namespace net{
 //	using MyFDStorage = DynamicArrayFDStorage;
-	using MyFDStorage = SlabFDStorage;
+//	using MyFDStorage = SlabFDStorage;
+	using MyFDStorage = SparseFDStorage;
 
 	template<class Selector, class Worker, class SparePool = NullSparePool, class FDStorage = MyFDStorage>
 	class AsyncLoop{

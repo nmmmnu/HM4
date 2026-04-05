@@ -48,8 +48,6 @@ namespace myhashtable{
 		template<typename Controller, typename... Ts>
 		[[nodiscard]]
 		constexpr bool insertT_(Controller &controller, typename Controller::key_type const &key, Ts &&...ts){
-			using namespace impl_;
-
 			auto [type, id] = locate_(controller, key);
 
 			if (type == LocateType::ERROR)
@@ -63,8 +61,6 @@ namespace myhashtable{
 		[[nodiscard]]
 		constexpr bool insertF_(Controller &controller, u_value_type &&data){
 			auto const &key = controller.getKey(data);
-
-			using namespace impl_;
 
 			auto [type, id] = locate_(controller, key);
 
