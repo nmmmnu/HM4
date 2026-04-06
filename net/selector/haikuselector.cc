@@ -31,9 +31,22 @@ namespace{
 
 
 
-HaikuSelector::HaikuSelector(uint32_t const maxFD){
-	fds_.reserve(maxFD);
+auto PollSelector::SparseMapController::getKey(mapped_type const &value) -> key_type{
+	return value.object;
 }
+
+auto PollSelector::SparseMapController::getVal(mapped_type const &value) -> value_type const &{
+	return value;
+}
+
+auto PollSelector::SparseMapController::getVal(mapped_type       &value) -> value_type &{
+	return value;
+}
+
+
+
+HaikuSelector::HaikuSelector(uint32_t const conf_rlimitNoFile, uint32_t const conf_max_clients) :
+					fds_(conf_rlimitNoFile, conf_max_clients){}
 
 HaikuSelector::HaikuSelector(HaikuSelector &&other) = default;
 
@@ -82,12 +95,8 @@ bool HaikuSelector::insertFD(int const fd, FDEvent const event){
 }
 
 bool HaikuSelector::updateFD(int const fd, FDEvent const event){
-	auto it = std::find_if(std::begin(fds_), std::end(fds_), [ fd ](object_wait_info const &item){
-		return item.object == fd;
-	});
-
-	if (it != std::end(fds_)){
-		it->events = event2native(event);
+	if (auto *it = fds_.find(static_cast<uint32_t>(fd)); it){
+		it->events	= event2native(event);
 
 		return true;
 	}
@@ -96,20 +105,7 @@ bool HaikuSelector::updateFD(int const fd, FDEvent const event){
 }
 
 bool HaikuSelector::removeFD(int const fd){
-	auto it = std::find_if(std::begin(fds_), std::end(fds_), [ fd ](object_wait_info const &item){
-		return item.object == fd;
-	});
-
-	if (it != fds_.end()){
-		if (it != std::prev(fds_.end()))
-			*it = std::move(fds_.back());
-
-		fds_.pop_back();
-
-		return true;
-	}
-
-	return false;
+	return fds_.remove(static_cast<uint32_t>(fd));
 }
 
 

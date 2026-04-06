@@ -8,7 +8,7 @@
 
 using namespace net::selector;
 
-KQueueSelector::KQueueSelector(size_t const server_limit) : fds_(server_limit){
+KQueueSelector::KQueueSelector(uint32_t, uint32_t const conf_max_clients) : fds_(conf_max_clients){
 	kqueueFD_ = kqueue();
 }
 

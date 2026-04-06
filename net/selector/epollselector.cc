@@ -30,7 +30,7 @@ namespace{
 
 
 
-EPollSelector::EPollSelector(size_t const server_limit) : fds_(server_limit){
+EPollSelector::EPollSelector(uint32_t, uint32_t const conf_max_clients) : fds_(conf_max_clients){
 	epollFD_ = epoll_create( /* epoll_ignores_this_argument */ 1 );
 }
 

@@ -17,7 +17,7 @@ int main(){
 	MyWorkerFactory wf;
 
 	net::AsyncLoop<MySelector, MyWorker> loop(
-					/* selector */	MySelector{ conf_max_clients },
+					/* selector */	MySelector{ conf_rlimitNoFile, conf_max_clients },
 					/* worker */	wf()			,
 					/* server fd */	{ fd1, fd2, fd3 }	,
 					conf_rlimitNoFile			,

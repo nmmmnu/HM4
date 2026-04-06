@@ -31,7 +31,7 @@ public:
 
 	static inline constexpr std::string_view NAME = "kqueue";
 
-	KQueueSelector(size_t server_limit = DEFAULT_SERVER_LIMIT);
+	KQueueSelector(uint32_t const conf_rlimitNoFile, uint32_t const conf_max_clients);
 	KQueueSelector(KQueueSelector &&other) /* = default */;
 	KQueueSelector &operator =(KQueueSelector &&other) /* = default */;
 	~KQueueSelector() /* = default */;

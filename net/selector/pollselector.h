@@ -3,8 +3,8 @@
 
 #include "selectordefs.h"
 #include "hidden_pointer_iterator.h"
+#include "sparsearray/sparsearray.h"
 
-#include <vector>
 #include <string_view>
 
 struct pollfd;
@@ -25,12 +25,27 @@ class PollSelector{
 		static convert_type conv(const value_type *a)	__attribute__((pure));
 	};
 
+	struct SparseMapController{
+		using key_type		= uint32_t;
+		using value_type	= pollfd;
+		using mapped_type	= pollfd;
+
+		[[nodiscard]]
+		static key_type getKey(mapped_type const &value);
+
+		[[nodiscard]]
+		static value_type const &getVal(mapped_type const &value);
+
+		[[nodiscard]]
+		static value_type       &getVal(mapped_type       &value);
+	};
+
 public:
 	using iterator = hidden_pointer_iterator<HPI>;
 
 	static inline constexpr std::string_view NAME = "poll";
 
-	PollSelector(uint32_t maxFD);
+	PollSelector(uint32_t const conf_rlimitNoFile, uint32_t const conf_max_clients);
 	PollSelector(PollSelector &&other) /* = default */;
 	PollSelector &operator =(PollSelector &&other) /* = default */;
 	~PollSelector() /* = default */;
@@ -45,7 +60,7 @@ public:
 	iterator end() const;
 
 private:
-	std::vector<struct pollfd>	fds_;
+	mysparsearray::SparseArray<uint32_t, SparseMapController> fds_;
 };
 
 

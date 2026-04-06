@@ -531,7 +531,7 @@ namespace{
 		}();
 
 		MyLoop loop{
-				/* selector */	MySelector	{ max_clients },
+				/* selector */	MySelector	{ rlimit_nofile, max_clients },
 				/* worker */	MyWorker	{ adapter_factory(), buffer_capacity },
 				/* server fd */	{ fd },
 				rlimit_nofile				,

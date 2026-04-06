@@ -31,7 +31,7 @@ public:
 
 	static inline constexpr std::string_view NAME = "epoll";
 
-	EPollSelector(size_t server_limit = DEFAULT_SERVER_LIMIT);
+	EPollSelector(uint32_t const conf_rlimitNoFile, uint32_t const conf_max_clients);
 	EPollSelector(EPollSelector &&other);
 	EPollSelector &operator =(EPollSelector &&other);
 	~EPollSelector();

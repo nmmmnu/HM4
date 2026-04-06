@@ -1,39 +1,15 @@
-#ifndef MY_SPARSE_MAP
-#define MY_SPARSE_MAP
+#ifndef MY_SPARSE_ARRAY_
+#define MY_SPARSE_ARRAY_
 
 #include <vector>
 #include <limits>
 #include <cstdint>
 #include <cassert>
 
-namespace mysparsemap{
+namespace mysparsearray{
 
-	namespace impl_{
-
-		template<typename T>
-		struct SparseSetController{
-			static_assert(
-				std::is_same_v<T, uint8_t>  ||
-				std::is_same_v<T, uint16_t> ||
-				std::is_same_v<T, uint32_t> ||
-				std::is_same_v<T, uint64_t>
-			);
-
-			using key_type		= T;
-			using mapped_type	= T;
-
-			[[nodiscard]]
-			static constexpr key_type const &getKey(mapped_type const &value){
-				return value;
-			}
-		};
-
-	} // sparse_set_impl_
-
-
-
-	template<typename K, typename Controller = impl_::SparseSetController<K>, template<typename> typename Vector = std::vector>
-	class SparseMap{
+	template<typename K, typename Controller, template<typename> typename Vector = std::vector>
+	class SparseArray{
 		static_assert(
 			std::is_same_v<K, uint8_t>  ||
 			std::is_same_v<K, uint16_t> ||
@@ -44,6 +20,7 @@ namespace mysparsemap{
 		using size_type			= K;
 		using key_type			= K;
 		using mapped_type		= typename Controller::mapped_type;
+		using value_type		= typename Controller::value_type;
 
 		constexpr static key_type	MAX_SIZE = std::numeric_limits<key_type>::max();
 
@@ -52,7 +29,7 @@ namespace mysparsemap{
 		size_type			capacity_; // we do not know if Vector::capacity() works
 
 	public:
-		constexpr SparseMap(size_type size, size_type capacity = 0) :
+		constexpr SparseArray(size_type size, size_type capacity = 0) :
 					capacity_(capacity ? capacity : size){
 
 			assert(size <= MAX_SIZE);
@@ -131,23 +108,23 @@ namespace mysparsemap{
 		}
 
 		[[nodiscard]]
-		constexpr const mapped_type *find(key_type key) const{
+		constexpr const auto *find(key_type key) const{
 			if (!exists(key))
 				return nullptr;
 
 			auto const index = sparse_[key];
 
-			return &dense_[index];
+			return & Controller::getVal(dense_[index]);
 		}
 
 		[[nodiscard]]
-		constexpr mapped_type *find(key_type key){
+		constexpr value_type *find(key_type key){
 			if (!exists(key))
 				return nullptr;
 
 			auto const index = sparse_[key];
 
-			return &dense_[index];
+			return & Controller::getVal(dense_[index]);
 		}
 
 	public:
@@ -241,11 +218,6 @@ namespace mysparsemap{
 			}
 		}
 	};
-
-
-
-	template<typename K, typename Controller = impl_::SparseSetController<K>, template<typename> typename Vector = std::vector>
-	using SparseSet = SparseMap<K, Controller, Vector>;
 
 } // namespace mysparcemap
 

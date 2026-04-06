@@ -3,8 +3,8 @@
 
 #include "selectordefs.h"
 #include "hidden_pointer_iterator.h"
+#include "sparsearray/sparsearray.h"
 
-#include <vector>
 #include <string_view>
 
 struct object_wait_info;
@@ -25,12 +25,27 @@ class HaikuSelector{
 		static convert_type conv(const value_type *a)	__attribute__((pure));
 	};
 
+	struct SparseMapController{
+		using key_type		= uint32_t;
+		using value_type	= object_wait_info;
+		using mapped_type	= object_wait_info;
+
+		[[nodiscard]]
+		static key_type getKey(mapped_type const &value);
+
+		[[nodiscard]]
+		static value_type const &getVal(mapped_type const &value);
+
+		[[nodiscard]]
+		static value_type       &getVal(mapped_type       &value);
+	};
+
 public:
 	using iterator = hidden_pointer_iterator<HPI>;
 
 	static inline constexpr std::string_view NAME = "wait_for_objects";
 
-	HaikuSelector(uint32_t maxFD);
+	HaikuSelector(uint32_t const conf_rlimitNoFile, uint32_t const conf_max_clients);
 	HaikuSelector(HaikuSelector &&other) /* = default */;
 	HaikuSelector &operator =(HaikuSelector &&other) /* = default */;
 	~HaikuSelector() /* = default */;
@@ -45,7 +60,7 @@ public:
 	iterator end() const;
 
 private:
-	std::vector<struct object_wait_info>	fds_;
+	mysparsearray::SparseArray<uint32_t, SparseMapController> fds_;
 };
 
 

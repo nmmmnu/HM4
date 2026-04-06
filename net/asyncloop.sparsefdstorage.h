@@ -1,39 +1,9 @@
 #ifndef _NET_ASYNC_LOOP_SPARSE_FD_STORAGE_H_
 #define _NET_ASYNC_LOOP_SPARSE_FD_STORAGE_H_
 
-#include "sparsemap.h"
+#include "sparsearray/easymap.h"
 
 namespace net{
-
-	namespace sparse_fd_storage_impl_{
-
-		struct ClientFD{
-			uint32_t	fd;
-			Client		client;
-
-			template<typename... Ts>
-			ClientFD(uint32_t fd, Ts &&...ts) : fd(fd), client(std::forward<Ts>(ts)...){}
-
-			constexpr auto const &operator *() const{
-				return client;
-			}
-
-			constexpr auto       &operator *(){
-				return client;
-			}
-		};
-
-		struct SparseFDController{
-			using key_type		= uint32_t;
-			using mapped_type	= ClientFD;
-
-			[[nodiscard]]
-			static constexpr key_type const &getKey(mapped_type const &value){
-				return value.fd;
-			}
-		};
-
-	} // namespace sparse_fd_storage_impl_
 
 	struct SparseFDStorage{
 		SparseFDStorage(uint32_t conf_rlimitNoFile, uint32_t conf_maxClients) :
@@ -45,11 +15,7 @@ namespace net{
 		}
 
 		auto *operator[](int fd){
-			using namespace sparse_fd_storage_impl_;
-
-			ClientFD *cfd = clients_.find(static_cast<uint32_t>(fd));
-
-			return cfd ? & cfd->client : nullptr;
+			return clients_.find(static_cast<uint32_t>(fd));
 		}
 
 		template<typename... Args>
@@ -64,12 +30,12 @@ namespace net{
 		template<typename F>
 		void for_each(F f){
 			for(auto &x : clients_)
-				if (f(static_cast<int>(x.fd), x.client))
+				if (f(static_cast<int>(x.first), x.second))
 					return;
 		}
 
 	private:
-		using ClientContainer = mysparsemap::SparseMap<uint32_t, sparse_fd_storage_impl_::SparseFDController>;
+		using ClientContainer = mysparsearray::EasyMap<uint32_t, Client>;
 
 		ClientContainer	clients_;
 	};
