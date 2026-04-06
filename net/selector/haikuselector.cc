@@ -31,15 +31,15 @@ namespace{
 
 
 
-auto PollSelector::SparseMapController::getKey(mapped_type const &value) -> key_type{
+auto HaikuSelector::SparseMapController::getKey(mapped_type const &value) -> key_type{
 	return value.object;
 }
 
-auto PollSelector::SparseMapController::getVal(mapped_type const &value) -> value_type const &{
+auto HaikuSelector::SparseMapController::getVal(mapped_type const &value) -> value_type const &{
 	return value;
 }
 
-auto PollSelector::SparseMapController::getVal(mapped_type       &value) -> value_type &{
+auto HaikuSelector::SparseMapController::getVal(mapped_type       &value) -> value_type &{
 	return value;
 }
 
@@ -86,7 +86,7 @@ bool HaikuSelector::insertFD(int const fd, FDEvent const event){
 		item.type	= B_OBJECT_TYPE_FD;
 		item.events	= event2native(event);
 
-		fds_.push_back(std::move(item));
+		fds_.insert(std::move(item));
 
 		return true;
 	}
