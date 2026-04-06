@@ -32,7 +32,7 @@ namespace{
 
 
 auto HaikuSelector::SparseMapController::getKey(mapped_type const &value) -> key_type{
-	return value.object;
+	return static_cast<key_type>(value.object);
 }
 
 auto HaikuSelector::SparseMapController::getVal(mapped_type const &value) -> value_type const &{

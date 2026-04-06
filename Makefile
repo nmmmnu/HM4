@@ -20,7 +20,8 @@ CF_OPTIM	= -O0 -g
 #CF_OPTIM	= -O3 -DNDEBUG
 CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
 #CF_OPTIM	+= -fassociative-math -freciprocal-math -fno-signed-zeros
-CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation -fopt-info-vec-missed
+CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation
+						#-fopt-info-vec-missed
 
 #CF_MISC	= -DNOT_HAVE_CHARCONV
 

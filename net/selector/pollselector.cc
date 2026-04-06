@@ -32,7 +32,7 @@ namespace{
 
 
 auto PollSelector::SparseMapController::getKey(mapped_type const &value) -> key_type{
-	return value.fd;
+	return static_cast<key_type>(value.fd);
 }
 
 auto PollSelector::SparseMapController::getVal(mapped_type const &value) -> value_type const &{
