@@ -9,6 +9,7 @@ namespace net{
 
 	// Historical Storage using unordered_map, made for completness.
 
+	template<typename Client>
 	struct FDMapStorage{
 		FDMapStorage(uint32_t /* conf_rlimitNoFile */, uint32_t /* conf_maxClients */){}
 

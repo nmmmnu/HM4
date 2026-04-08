@@ -5,6 +5,7 @@
 
 namespace net{
 
+	template<typename Client>
 	struct SparseFDStorage{
 		SparseFDStorage(uint32_t conf_rlimitNoFile, uint32_t conf_maxClients) :
 							clients_(conf_rlimitNoFile, conf_maxClients){}

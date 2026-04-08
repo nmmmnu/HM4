@@ -19,9 +19,9 @@
 #include "fmt/core.h"
 
 namespace net{
-//	using MyFDStorage = DynamicArrayFDStorage;
-//	using MyFDStorage = SlabFDStorage;
-	using MyFDStorage = SparseFDStorage;
+//	using MyFDStorage = DynamicArrayFDStorage<Client>;
+//	using MyFDStorage = SlabFDStorage<Client>;
+	using MyFDStorage = SparseFDStorage<Client>;
 
 	template<class Selector, class Worker, class SparePool = NullSparePool, class FDStorage = MyFDStorage>
 	class AsyncLoop{

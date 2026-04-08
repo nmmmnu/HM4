@@ -8,6 +8,7 @@
 
 namespace net{
 
+	template<typename Client>
 	struct SlabFDStorage{
 		SlabFDStorage(uint32_t conf_rlimitNoFile, uint32_t conf_maxClients) :
 								buffer_(ClientSize * conf_maxClients){
