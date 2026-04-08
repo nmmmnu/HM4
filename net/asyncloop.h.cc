@@ -93,17 +93,12 @@ bool AsyncLoop<Selector, Worker, SparePool, Storage>::process(){
 			client_Disconnect_( t.fd, DisconnectStatus::ERROR );
 			break;
 
-		case FDStatus::STOP:
-			goto break2;
-
 		case FDStatus::NONE:
 		default:
 			break;
 
 		}
 	}
-
-	break2: // label for goto... ;)
 
 	return keepProcessing_;
 }

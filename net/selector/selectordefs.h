@@ -1,5 +1,5 @@
-#ifndef _NET_STATUS_H
-#define _NET_STATUS_H
+#ifndef _NET_SELECTOR_DEFS_H
+#define _NET_SELECTOR_DEFS_H
 
 #include <cstdint>
 
@@ -22,8 +22,9 @@ enum class FDStatus : uint8_t{
 	NONE,
 	READ,
 	WRITE,
-	ERROR,
-	STOP
+	ERROR
+//	,
+//	STOP
 };
 
 struct FDResult{
