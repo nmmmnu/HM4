@@ -15,9 +15,11 @@ all: $(MY_TARGETS)
 
 ifeq ($(UNAME), Linux)
 # add epoll support...
-all: $(A)test_echo_epoll $(A)test_redis_epoll
+all: $(A)test_echo_epoll   $(A)test_redis_epoll
+all: $(A)test_echo_iouring $(A)test_redis_iouring
 
-EXTRA_CLEAN += $(A)test_echo_epoll $(A)test_redis_epoll
+EXTRA_CLEAN += $(A)test_echo_epoll   $(A)test_redis_epoll
+EXTRA_CLEAN += $(A)test_echo_iouring $(A)test_redis_iouring
 endif
 
 # ===========================================================
@@ -68,6 +70,9 @@ $(A)test_echo_poll: $(O)test_echo_poll.o	$(O)pollselector.o				$(SOCK_OBJ)
 $(A)test_echo_epoll: $(O)test_echo_epoll.o	$(O)epollselector.o				$(SOCK_OBJ)
 	$(LINK)
 
+$(A)test_echo_iouring: $(O)test_echo_iouring.o	$(O)iouringengine.o				$(SOCK_OBJ)
+	$(LINK) -luring
+
 $(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o				$(SOCK_OBJ)
 	$(LINK)
 
@@ -81,6 +86,9 @@ $(A)test_redis_poll: $(O)test_redis_poll.o	$(O)pollselector.o	$(O)redisprotocol.
 
 $(A)test_redis_epoll: $(O)test_redis_epoll.o	$(O)epollselector.o	$(O)redisprotocol.o	$(SOCK_OBJ)	$(LIST_OBJ)
 	$(LINK)
+
+$(A)test_redis_iouring: $(O)test_redis_iouring.o $(O)iouringengine.o	$(O)redisprotocol.o	$(SOCK_OBJ)	$(LIST_OBJ)
+	$(LINK) -luring
 
 $(A)test_redis_kqueue: $(O)test_redis_kqueue.o	$(O)kqueueselector.o	$(O)redisprotocol.o	$(SOCK_OBJ)	$(LIST_OBJ)
 	$(LINK)

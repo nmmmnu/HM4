@@ -1,0 +1,17 @@
+SRC_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+#EXTRA_INCL += -I$(SRC_DIR)
+
+include Makefile.sub
+
+# ===========================================================
+
+ifeq ($(UNAME), Linux)
+# add epoll support...
+all: $(O)iouringengine.o
+
+EXTRA_CLEAN += $(O)iouringengine.o
+endif
+
+# ===========================================================
+

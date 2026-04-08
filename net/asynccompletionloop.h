@@ -1,11 +1,11 @@
-#ifndef _NET_ASYNC_LOOP_H
-#define _NET_ASYNC_LOOP_H
+#ifndef _NET_ASYNC_COMPLETION_LOOP_H
+#define _NET_ASYNC_COMPLETION_LOOP_H
 
-#include "selector/selectordefs.h"
+#include "ioengine/ioenginedefs.h"
 
 #include "smallvector.h"
 
-#include "asyncloop.client.h"
+#include "asynccompletionloop.client.h"
 
 #include "nullsparepool.h"
 //#include "asyncloop.dynamicarrayfdstorage.h"
@@ -24,20 +24,21 @@ namespace net{
 //	using MyFDStorage = SlabFDStorage<Client>;
 	using MyFDStorage = SparseFDStorage<Client>;
 
-	template<class Selector, class Worker, class SparePool = NullSparePool, class FDStorage = MyFDStorage>
-	class AsyncLoop{
+	template<class IOEngine, class Worker, class SparePool = NullSparePool, class FDStorage = MyFDStorage>
+	class AsyncCompletionLoop{
 	public:
 		constexpr static uint32_t	MIN_CLIENTS		= 4;
 		constexpr static uint32_t	MAX_CLIENTS		= 32;
 		constexpr static uint32_t	LIMIT_NO_FILES		= 1024;
 
 		constexpr static uint32_t	CONNECTION_TIMEOUT	= 20;
-		constexpr static int		WAIT_TIMEOUT		= 5;
 
 		constexpr static size_t		IO_BUFFER_CAPACITY	= 1024 * 4;
 
 	private:
-		constexpr static int		WAIT_TIMEOUT_MS		=  WAIT_TIMEOUT * 1000;
+		constexpr static int32_t	WAIT_TIMEOUT		= 5;
+		constexpr static int32_t	READ_TIMEOUT		= 2 * 60;
+		constexpr static int32_t	WRITE_TIMEOUT		= 2 * 60;
 
 		using WorkerStatus		= worker::WorkerStatus;
 
@@ -46,17 +47,16 @@ namespace net{
 		constexpr static const char *FMT_MASK_2 = "{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}"	;
 
 	public:
-		AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
+		AsyncCompletionLoop(IOEngine &&ioEngine, Worker &&worker, const std::initializer_list<int> &serverFD,
 					uint32_t conf_rlimitNoFile	= LIMIT_NO_FILES	,
 					uint32_t conf_maxClients	= MAX_CLIENTS		,
 					uint32_t conf_minSparePoolSize	= MIN_CLIENTS		,
 					uint32_t conf_maxSparePoolSize	= MIN_CLIENTS		,
-					uint32_t conf_connectionTimeout	= CONNECTION_TIMEOUT	,
 					size_t   conf_buffer_capacity	= IO_BUFFER_CAPACITY	,
 					size_t   conf_maxRequestSize	= IO_BUFFER_CAPACITY
 		);
 
-		//~AsyncLoop();
+		//~AsyncCompletionLoop();
 
 		bool process();
 
@@ -92,18 +92,31 @@ namespace net{
 
 	private:
 		template<bool NL = true>
-		bool client_Connect_(int fd);
+		bool done_Accept_(int fd);
+
+		void done_Read_  (int fd, int result);
+		void done_Write_ (int fd, int result);
 
 		template<bool NL = true>
-		void client_Disconnect_(int fd, DisconnectStatus error);
+		void done_Close_(int fd);
 
-		void client_Read_(int fd);
-		void client_Read_(int fd, std::true_type);
-		void client_Read_(int fd, std::false_type);
 
+
+		void req_Read_   (int fd,                 size_t size = IO_BUFFER_CAPACITY);
+		void req_Write_  (int fd);
+		void req_Close_  (int fd, DisconnectStatus error);
+
+		void req_Read_   (int fd, Client &client, size_t size = IO_BUFFER_CAPACITY);
+		void req_Write_  (int fd, Client &client);
+
+
+
+		template<bool NL = true>
+		bool client_Connect_(int fd);
+
+
+		void client_Read_ (int fd);
 		void client_Write_(int fd);
-		void client_Write_(int fd, std::true_type);
-		void client_Write_(int,    std::false_type);
 
 		bool client_Worker_(int fd, IOBuffer &buffer);
 
@@ -126,7 +139,9 @@ namespace net{
 	private:
 		bool insertFD_(int fd);
 		void removeFD_(int fd);
-		void expireFD_();
+
+		constexpr static
+		void expireFD_(){};
 
 	private:
 		template<Logger::Level level = Logger::DEBUG>
@@ -140,12 +155,12 @@ namespace net{
 		}
 
 	private:
-		bool isServerFD_(int const fd) const{
-			return std::find(std::begin(serverFD_), std::end(serverFD_), fd) != std::end(serverFD_);
-		}
+	//	bool isServerFD_(int const fd) const{
+	//		return std::find(std::begin(serverFD_), std::end(serverFD_), fd) != std::end(serverFD_);
+	//	}
 
 	private:
-		Selector		selector_;
+		IOEngine		ioEngine_;
 		Worker			worker_;
 		SmallVector<int, 8>	serverFD_;
 
@@ -156,8 +171,6 @@ namespace net{
 
 		uint32_t		conf_minSparePoolSize_	;
 		uint32_t		conf_maxSparePoolSize_	;
-
-		uint32_t		conf_connectionTimeout_	;
 
 		size_t			conf_bufferCapacity_	;
 		size_t			conf_maxRequestSize_	;
@@ -171,7 +184,7 @@ namespace net{
 
 // ===========================
 
-#include "asyncloop.h.cc"
+#include "asynccompletionloop.h.cc"
 
 #endif
 

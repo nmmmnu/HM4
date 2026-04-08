@@ -6,6 +6,7 @@ SUBDIRS = test common	\
 			hm4/test hm4/main		\
 		net					\
 			net/selector			\
+			net/ioengine			\
 			net/protocol			\
 			net/test			\
 		main
