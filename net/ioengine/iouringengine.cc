@@ -16,50 +16,51 @@ static_assert(std::is_same_v<int,       int32_t>);
 namespace net{
 namespace ioengine{
 
-template<bool AssumeSQEHaveFreeSpace>
-bool add_timeout(struct io_uring *ring, __kernel_timespec *timeout){
-	struct io_uring_sqe *sqe = io_uring_get_sqe(ring);
+// no need but to show the non class functions...
+namespace{
 
-	if constexpr(!AssumeSQEHaveFreeSpace){
-		if (!sqe)
-			return false;
-	}
+	template<bool AssumeSQEHaveFreeSpace>
+	bool add_timeout(struct io_uring *ring, __kernel_timespec *timeout){
+		struct io_uring_sqe *sqe = io_uring_get_sqe(ring);
 
-	sqe->flags |= IOSQE_CQE_SKIP_SUCCESS;
+		if constexpr(!AssumeSQEHaveFreeSpace){
+			if (!sqe)
+				return false;
+		}
 
-	io_uring_prep_link_timeout(sqe, timeout, 0);
+		sqe->flags |= IOSQE_CQE_SKIP_SUCCESS;
 
-	io_uring_sqe_set_data64(sqe, io_uring_user_pack::DATA_IGNORE);
+		io_uring_prep_link_timeout(sqe, timeout, 0);
 
-	return true;
-}
+		io_uring_sqe_set_data64(sqe, io_uring_user_pack::DATA_IGNORE);
 
-bool chain_timeout(bool hasTimeout, struct io_uring *ring, __kernel_timespec *timeout, struct io_uring_sqe *sqe){
-	if (!hasTimeout)
 		return true;
-
-	add_timeout<true>(ring, timeout);
-
-	sqe->flags |= IOSQE_IO_LINK;
-
-	return true;
-}
-
-
-
-constexpr auto convertOp(io_uring_user_pack::Op op){
-	using UOp = io_uring_user_pack::Op;
-
-	switch(op){
-	default:
-	case UOp::CLOSE	 	: return FDOperation::CLOSE	;
-	case UOp::ACCEPT	: return FDOperation::ACCEPT	;
-	case UOp::READ		: return FDOperation::READ	;
-	case UOp::WRITE	 	: return FDOperation::WRITE	;
 	}
-}
 
+	bool chain_timeout(bool hasTimeout, struct io_uring *ring, __kernel_timespec *timeout, struct io_uring_sqe *sqe){
+		if (!hasTimeout)
+			return true;
 
+		add_timeout<true>(ring, timeout);
+
+		sqe->flags |= IOSQE_IO_LINK;
+
+		return true;
+	}
+
+	constexpr auto convertOp(io_uring_user_pack::Op op){
+		using UOp = io_uring_user_pack::Op;
+
+		switch(op){
+		default:
+		case UOp::CLOSE	 	: return FDOperation::CLOSE	;
+		case UOp::ACCEPT	: return FDOperation::ACCEPT	;
+		case UOp::READ		: return FDOperation::READ	;
+		case UOp::WRITE	 	: return FDOperation::WRITE	;
+		}
+	}
+
+} // anonymous namespace
 
 struct IOURingEngine::Control{
 	struct io_uring		ring;
@@ -74,24 +75,23 @@ struct IOURingEngine::Control{
 
 
 IOURingEngine::IOURingEngine(
-			uint32_t conf_maxClients	,
-			uint32_t conf_maxServerFD	,
+			uint32_t /* conf_rlimitNoFile */	,
+			uint32_t conf_maxClients		,
+			uint32_t conf_maxServersFD		,
 
-			int32_t conf_timeoutWait	,
-			int32_t conf_timeoutRead	,
+			int32_t conf_timeoutWait		,
+			int32_t conf_timeoutRead		,
 			int32_t conf_timeoutWrite
 		) :
-				conf_maxClients_	(conf_maxClients	),
-				conf_rlimitNoFile_	(conf_maxServerFD	){
+				conf_maxClients_	(conf_maxClients		),
+				conf_maxServersFD_	(conf_maxServersFD		),
+				control_		(std::make_unique<Control>()	){
 
 	events_.reserve(MAX_EVENT_PER_LOOP);
 
-	control_ = std::make_unique<Control>();
-
 	{
 		// init io_uring
-
-		auto const qsize = (conf_maxClients + conf_maxServerFD) * 2 + std::max(RESERVED_FD, conf_maxServerFD);
+		auto const qsize = (conf_maxClients + conf_maxServersFD) * 2 + std::max(RESERVED_FD, conf_maxServersFD);
 
 		struct io_uring_params params;
 		memset(&params, 0, sizeof(params));
@@ -183,7 +183,7 @@ bool IOURingEngine::add_close(int fd) {
 	return true;
 }
 
-bool IOURingEngine::add_read(int fd, void *buffer, uint32_t size, bool timeout){
+bool IOURingEngine::add_read(int fd, void *buffer, uint32_t size, bool const timeout){
 	if (uint32_t const needed = timeout ? 2 : 1; io_uring_sq_space_left(&control_->ring) < needed)
     		return false;
 
@@ -205,7 +205,7 @@ bool IOURingEngine::add_read(int fd, void *buffer, uint32_t size, bool timeout){
 	return chain_timeout(timeout, &control_->ring, &control_->timeoutRead, sqe);
 }
 
-bool IOURingEngine::add_write(int fd, const void *buffer, uint32_t size, bool timeout){
+bool IOURingEngine::add_write(int fd, const void *buffer, uint32_t size, bool const timeout){
 	if (uint32_t const needed = timeout ? 2 : 1; io_uring_sq_space_left(&control_->ring) < needed)
     		return false;
 
@@ -227,7 +227,7 @@ bool IOURingEngine::add_write(int fd, const void *buffer, uint32_t size, bool ti
 	return chain_timeout(timeout, &control_->ring, &control_->timeoutWrite, sqe);
 }
 
-WaitStatus IOURingEngine::wait(bool timeout){
+WaitStatus IOURingEngine::wait(bool const timeout){
 	io_uring_submit(&control_->ring);
 
 	struct io_uring_cqe *cqe;
@@ -286,18 +286,18 @@ WaitStatus IOURingEngine::wait(bool timeout){
 	return WaitStatus::OK;
 }
 
-bool IOURingEngine::addServerFD(int fd, size_t count){
+bool IOURingEngine::addServerFD(int fd, size_t const count){
 	if (!count)
 		return false;
 
 	for(size_t i = 0; i < count; ++i){
-		if (!conf_rlimitNoFile_)
+		if (!conf_maxServersFD_)
 			return false;
 
 		if (!add_accept(fd))
 			return false;
 
-		--conf_rlimitNoFile_;
+		--conf_maxServersFD_;
 	}
 
 	return true;

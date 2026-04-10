@@ -14,10 +14,17 @@ namespace net{
 
 class IOBuffer{
 public:
-	using container_type	= std::vector<char>;
+	struct UninitializedChar{
+		char v;
+
+		UninitializedChar(){}
+		constexpr UninitializedChar(char v) : v(v){}
+	};
+
+	using container_type	= std::vector<UninitializedChar>;
 	using size_type		= container_type::size_type;
 
-	constexpr static size_type INITIAL_RESERVE = 64;
+	constexpr static size_type INITIAL_RESERVE = 4096;
 
 private:
 	size_type		head_	= 0;
@@ -62,10 +69,16 @@ public:
 	// ==================================
 
 	const char *data() const{
-		const char *s = buffer_.data();
+		const char *s = reinterpret_cast<const char *>(buffer_.data());
 		return & s[head_];
 	}
 
+private:
+	char *getIndex_(size_t index){
+		return reinterpret_cast<char *>(buffer_.data()) + index;
+	}
+
+public:
 	size_t size() const{
 		return buffer_.size() - head_;
 	}
@@ -116,45 +129,20 @@ public:
 		if (!size)
 			return false;
 
-		auto const bufferSize = buffer_.size();
-
-		buffer_.resize(bufferSize + size);
-
-		char *dest = & buffer_[bufferSize];
+		char *dest = provideWriteBuffer(size);
 
 		f(dest);
 
-		return true;
-	}
-
-#if 0
-	template<class Lazy>
-	bool push(std::true_type, size_t const desired_len, Lazy f){
-		if (!desired_len)
-			return false;
-
-		auto const size = buffer_.size();
-
-		buffer_.resize(size + desired_len);
-
-		char *dest = & buffer_[size];
-
-		auto const final_len = f(dest);
-
-		buffer_.resize(size + final_len);
+		// no need to finalizeWriteBuffer
 
 		return true;
 	}
-#endif
 
 	template<class Lazy>
 	bool push(std::true_type, size_t const desiredSize, Lazy f){
 		assert(desiredSize && "Size must be great than zero");
 
 		char *dest = provideWriteBuffer(desiredSize);
-
-		if (!dest)
-			return false;
 
 		auto const finalSize = f(dest);
 
@@ -166,15 +154,17 @@ public:
 	char *provideWriteBuffer(size_t const size){
 		assert(size && "Size must be great than zero");
 
-		auto const bufferSize = buffer_.size();
+		auto const oldSize = buffer_.size();
 
-		buffer_.resize(bufferSize + size);
+		buffer_.resize(oldSize + size);
 
-		return & buffer_[bufferSize];
+		return getIndex_(oldSize);
 	}
 
-	bool finalizeWriteBuffer(const char *offset, size_t const size){
-		buffer_.resize((offset - buffer_.data()) + size);
+	bool finalizeWriteBuffer(const char *offsetCh, size_t const actualSize){
+		const auto *offset = reinterpret_cast<const UninitializedChar *>(offsetCh);
+
+		buffer_.resize((offset - buffer_.data()) + actualSize);
 
 		return true;
 	}
@@ -195,7 +185,7 @@ public:
 			return true;
 		}
 
-		head_ = head_ + size;
+		head_ += size;
 
 		return true;
 	}
@@ -208,7 +198,7 @@ public:
 			size()		,
 			capacity()	,
 			(int) size()	,
-			body ? buffer_.data() : "[data]"
+			body ? data() : "[data]"
 		);
 	}
 };

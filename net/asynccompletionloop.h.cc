@@ -3,7 +3,7 @@
 
 #include "worker/workerdefs.h"
 
-//#include <unistd.h>	// read
+#include <cassert>
 
 namespace net{
 
@@ -19,7 +19,6 @@ AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::AsyncCompletionLoop(
 		) :
 					ioEngine_		(std::move(ioEngine)	),
 					worker_			(std::move(worker)	),
-					serverFD_		(serverFD		),
 
 					conf_rlimitNoFile_	( 		(conf_rlimitNoFile								) ),
 					conf_maxClients_	( std::max	(conf_maxClients,		MIN_CLIENTS					) ),
@@ -30,9 +29,7 @@ AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::AsyncCompletionLoop(
 
 	assert(conf_maxClients_ < conf_rlimitNoFile_);
 
-	// fixParameters();
-
-	for(int const fd : serverFD_){
+	for(int const fd : serverFD){
 		socket_options_setNonBlocking(fd);
 		ioEngine_.addServerFD(fd);
 	}
@@ -106,7 +103,6 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::process(){
 
 template<class IOEngine, class Worker, class SparePool, class Storage>
 void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::idle_loop(){
-	// this do nothing...
 	expireFD_();
 
 	sparePool_.balance();
@@ -164,6 +160,9 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Read_(int f
 	if (result < 0)
 		return req_Close_(fd, DisconnectStatus::ERROR);
 
+	if (result == 0)
+		return req_Close_(fd, DisconnectStatus::NORMAL);
+
 	// -------------------------------------
 
 	if (client.buffer.size() > conf_maxRequestSize_)
@@ -173,7 +172,9 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Read_(int f
 
 	client.buffer.finalizeWriteBuffer(client.offcet, size);
 
-	client_Worker_(fd, client.buffer);
+	client_Worker_(fd, client);
+
+	// req_Read_, req_Write_, req_Close_ is sent from the client_Worker_
 }
 
 template<class IOEngine, class Worker, class SparePool, class Storage>
@@ -187,8 +188,14 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Write_(int 
 
 	// -------------------------------------
 
+	if (result == -ECANCELED)
+		return req_Close_(fd, DisconnectStatus::TIMEOUT);
+
 	if (result < 0)
 		return req_Close_(fd, DisconnectStatus::ERROR);
+
+	if (result == 0)
+		return req_Close_(fd, DisconnectStatus::NORMAL);
 
 	// -------------------------------------
 
@@ -201,61 +208,16 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Write_(int 
 	if (client.buffer.size() == 0){
 		client.buffer.clear();
 
-		req_Read_(fd, client);
-
+		req_Read_ (fd, client);
 	}else{
 		req_Write_(fd, client);
 	}
 }
 
-
-
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::req_Read_(int const fd, size_t size){
-	Client *it = clients_[fd];
-
-	if (!it)
-		return req_Close_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
-
-	auto &client = *it;
-
-	return req_Read_(fd, client, size);
-}
+// ===========================
 
 template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::req_Write_(int const fd){
-	Client *it = clients_[fd];
-
-	if (!it)
-		return req_Close_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
-
-	auto &client = *it;
-
-	return req_Write_(fd, client);
-}
-
-
-
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::req_Read_(int const fd, Client &client, size_t size){
-	auto *p = client.buffer.provideWriteBuffer(size);
-
-	client.offcet = p;
-
-	ioEngine_.add_read(fd, p, static_cast<uint32_t>(size), true);
-}
-
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::req_Write_(int const fd, Client &client){
-	ioEngine_.add_write(fd, client.buffer.data(), static_cast<uint32_t>(client.buffer.size()), true);
-}
-
-
-
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::req_Close_(int const fd, const DisconnectStatus error){
-	ioEngine_.add_close(fd);
-
+void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::log_Close_(int const fd, const DisconnectStatus error){
 	switch(error){
 	case DisconnectStatus::NORMAL			: return log_("Request Normal  Disconnect",				fd);
 	case DisconnectStatus::ERROR			: return log_("Request Error   Disconnect",				fd);
@@ -270,23 +232,34 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::req_Close_(int c
 	};
 }
 
-
+// ===========================
 
 template<class IOEngine, class Worker, class SparePool, class Storage>
-bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::client_Worker_(int const fd, IOBuffer &buffer){
-	const WorkerStatus status = worker_( buffer );
+bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::client_Worker_(int const fd, Client &client){
+	const WorkerStatus status = worker_( client.buffer );
+
+	#if 0
+		switch(status){
+		case WorkerStatus::PASS		: printf("PASS		\n"); break;
+		case WorkerStatus::READ		: printf("READ		\n"); break;
+		case WorkerStatus::WRITE	: printf("WRITE		\n"); break;
+		default				: printf("<other>	\n"); break;
+		}
+	#endif
 
 	switch(status){
 	case WorkerStatus::PASS:
+		req_Read_(fd, client);
+
 		return false;
 
 	case WorkerStatus::READ:
-		req_Read_(fd);
+		req_Read_(fd, client);
 
 		return true;
 
 	case WorkerStatus::WRITE:
-		req_Write_(fd);
+		req_Write_(fd, client);
 
 		return true;
 
@@ -309,27 +282,6 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::client_Worker_(i
 	}
 }
 
-
-// ===========================
-
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::client_SocketOps_(int const fd, ssize_t const size){
-	if (size < 0){
-		if ( socket_check_eagain() ){
-			// try again
-			return;
-		}else{
-			// error, disconnect.
-			return client_Disconnect_(fd, DisconnectStatus::ERROR);
-		}
-	}
-
-	if (size == 0){
-		// normal, disconnect.
-		return client_Disconnect_(fd, DisconnectStatus::NORMAL);
-	}
-}
-
 // ===========================
 
 template<class IOEngine, class Worker, class SparePool, class Storage>
@@ -337,7 +289,13 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::insertFD_(int co
 	if ( !clients_.insert(fd, sparePool_.pop()) )
 		return false;
 
-	req_Read_(fd);
+	// this is guaranteed not null,
+	// because we just inserted it.
+	Client *it = clients_[fd];
+
+	auto &client = *it;
+
+	req_Read_(fd, client);
 
 	return true;
 }

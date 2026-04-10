@@ -28,8 +28,9 @@ class IOURingEngine{
 public:
 	static inline constexpr std::string_view NAME = "io_uring";
 
-	IOURingEngine(	uint32_t conf_maxClients	,
-			uint32_t conf_maxServerFD	,
+	IOURingEngine(	uint32_t conf_rlimitNoFile	,
+			uint32_t conf_maxClients	,
+			uint32_t conf_maxServersFD	,
 
 			int32_t conf_timeoutWait	= DEFAULT_TIMEOUT_WAIT	,
 			int32_t conf_timeoutRead	= DEFAULT_TIMEOUT_READ	,
@@ -75,7 +76,7 @@ private:
 
 private:
 	uint32_t	conf_maxClients_	;
-	uint32_t	conf_rlimitNoFile_	;
+	uint32_t	conf_maxServersFD_	;
 
 	EventVector	events_			;
 

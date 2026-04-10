@@ -34,6 +34,7 @@ namespace net{
 		constexpr static uint32_t	CONNECTION_TIMEOUT	= 20;
 
 		constexpr static size_t		IO_BUFFER_CAPACITY	= 1024 * 4;
+		constexpr static size_t		MAX_REQUEST_SIZE	= IO_BUFFER_CAPACITY * 4;
 
 	private:
 		constexpr static int32_t	WAIT_TIMEOUT		= 5;
@@ -53,19 +54,20 @@ namespace net{
 					uint32_t conf_minSparePoolSize	= MIN_CLIENTS		,
 					uint32_t conf_maxSparePoolSize	= MIN_CLIENTS		,
 					size_t   conf_buffer_capacity	= IO_BUFFER_CAPACITY	,
-					size_t   conf_maxRequestSize	= IO_BUFFER_CAPACITY
+					size_t   conf_maxRequestSize	= MAX_REQUEST_SIZE
 		);
 
-		//~AsyncCompletionLoop();
-
+		[[nodiscard]]
 		bool process();
 
 		void idle_loop();
 
+		[[nodiscard]]
 		auto connectedClients() const{
 			return clients_.size();
 		}
 
+		[[nodiscard]]
 		auto sparePoolSize() const{
 			return sparePool_.size();
 		}
@@ -100,27 +102,30 @@ namespace net{
 		template<bool NL = true>
 		void done_Close_(int fd);
 
+	private:
+		void req_Read_   (int fd, Client &client, size_t size = IO_BUFFER_CAPACITY){
+			auto *p = client.buffer.provideWriteBuffer(size);
 
+			client.offcet = p;
 
-		void req_Read_   (int fd,                 size_t size = IO_BUFFER_CAPACITY);
-		void req_Write_  (int fd);
-		void req_Close_  (int fd, DisconnectStatus error);
+			ioEngine_.add_read(fd, p, static_cast<uint32_t>(size), true);
+		}
 
-		void req_Read_   (int fd, Client &client, size_t size = IO_BUFFER_CAPACITY);
-		void req_Write_  (int fd, Client &client);
+		void req_Write_  (int fd, Client &client){
+			ioEngine_.add_write(fd, client.buffer.data(), static_cast<uint32_t>(client.buffer.size()), true);
+		}
 
+		void req_Close_  (int fd, DisconnectStatus error){
+			ioEngine_.add_close(fd);
 
+			log_Close_(fd, error);
+		}
 
-		template<bool NL = true>
-		bool client_Connect_(int fd);
+	private:
+		void log_Close_  (int fd, DisconnectStatus error);
 
-
-		void client_Read_ (int fd);
-		void client_Write_(int fd);
-
-		bool client_Worker_(int fd, IOBuffer &buffer);
-
-		void client_SocketOps_(int fd, ssize_t size);
+	private:
+		bool client_Worker_(int fd, Client &client);
 
 		struct ConnectionNotification{
 			uint64_t clients;
@@ -155,14 +160,8 @@ namespace net{
 		}
 
 	private:
-	//	bool isServerFD_(int const fd) const{
-	//		return std::find(std::begin(serverFD_), std::end(serverFD_), fd) != std::end(serverFD_);
-	//	}
-
-	private:
 		IOEngine		ioEngine_;
 		Worker			worker_;
-		SmallVector<int, 8>	serverFD_;
 
 		bool			keepProcessing_		= true;
 

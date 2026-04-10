@@ -35,6 +35,7 @@ namespace net{
 		constexpr static int		WAIT_TIMEOUT		= 5;
 
 		constexpr static size_t		IO_BUFFER_CAPACITY	= 1024 * 4;
+		constexpr static size_t		MAX_REQUEST_SIZE	= IO_BUFFER_CAPACITY * 4;
 
 	private:
 		constexpr static int		WAIT_TIMEOUT_MS		=  WAIT_TIMEOUT * 1000;
@@ -53,7 +54,7 @@ namespace net{
 					uint32_t conf_maxSparePoolSize	= MIN_CLIENTS		,
 					uint32_t conf_connectionTimeout	= CONNECTION_TIMEOUT	,
 					size_t   conf_buffer_capacity	= IO_BUFFER_CAPACITY	,
-					size_t   conf_maxRequestSize	= IO_BUFFER_CAPACITY
+					size_t   conf_maxRequestSize	= MAX_REQUEST_SIZE
 		);
 
 		//~AsyncLoop();

@@ -398,4 +398,6 @@ Changelog
 -	new OS support - Haiku
 -	improve PollSelector
 -	migrate AsyncLoop, PollSelector, HaikuSelector to SparseMap
+-	optimize iOBuffer
+-	Linux io_uring support
 

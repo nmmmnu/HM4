@@ -15,7 +15,7 @@ enum class WaitStatus : uint8_t{
 };
 
 enum class FDOperation : uint8_t{
-	NONE	,	// not used
+	NONE	,
 	ACCEPT	,
 	CLOSE	,
 	READ	,
