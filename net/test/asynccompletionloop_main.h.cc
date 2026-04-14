@@ -3,6 +3,7 @@
 
 #include "sockets.h"
 #include "asynccompletionloop.h"
+#include "heapsparepool.h"
 
 int main(){
 	uint32_t serverFDs = 3;
@@ -17,7 +18,7 @@ int main(){
 
 	MyWorkerFactory wf;
 
-	net::AsyncCompletionLoop<MySelector, MyWorker> loop(
+	net::AsyncCompletionLoop<MySelector, MyWorker, net::HeapSparePool> loop(
 					/* selector */	MySelector{
 								conf_rlimitNoFile	,
 								conf_max_clients	,

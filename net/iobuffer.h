@@ -161,6 +161,25 @@ public:
 		return getIndex_(oldSize);
 	}
 
+	auto provideWriteBufferAtLeast(size_t const size){
+		assert(size && "Size must be great than zero");
+
+		struct Result{
+			char	*buffer;
+			size_t	size;
+		};
+
+		auto const oldSize = buffer_.size();
+
+		buffer_.resize(oldSize + size);
+		buffer_.resize(buffer_.capacity());
+
+		return Result{
+			getIndex_(oldSize),
+			buffer_.size() - oldSize
+		};
+	}
+
 	bool finalizeWriteBuffer(const char *offsetCh, size_t const actualSize){
 		const auto *offset = reinterpret_cast<const UninitializedChar *>(offsetCh);
 

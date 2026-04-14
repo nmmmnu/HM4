@@ -400,4 +400,6 @@ Changelog
 -	migrate AsyncLoop, PollSelector, HaikuSelector to SparseMap
 -	optimize iOBuffer
 -	Linux io_uring support
+-	Fix issue with clearing the buffer in specific cases
+
 

@@ -165,12 +165,12 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Read_(int f
 
 	// -------------------------------------
 
-	if (client.buffer.size() > conf_maxRequestSize_)
-		return req_Close_(fd, DisconnectStatus::PROBLEM_BUFFER_READ);
-
 	size_t const size = static_cast<size_t>(result);
 
 	client.buffer.finalizeWriteBuffer(client.offcet, size);
+
+	if (client.buffer.size() > conf_maxRequestSize_)
+		return req_Close_(fd, DisconnectStatus::PROBLEM_BUFFER_READ);
 
 	client_Worker_(fd, client);
 
@@ -206,9 +206,8 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Write_(int 
 	}
 
 	if (client.buffer.size() == 0){
-		client.buffer.clear();
-
-		req_Read_ (fd, client);
+		// no need req_FreshRead_, size is zero already
+		req_Read_(fd, client);
 	}else{
 		req_Write_(fd, client);
 	}
@@ -238,14 +237,7 @@ template<class IOEngine, class Worker, class SparePool, class Storage>
 bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::client_Worker_(int const fd, Client &client){
 	const WorkerStatus status = worker_( client.buffer );
 
-	#if 0
-		switch(status){
-		case WorkerStatus::PASS		: printf("PASS		\n"); break;
-		case WorkerStatus::READ		: printf("READ		\n"); break;
-		case WorkerStatus::WRITE	: printf("WRITE		\n"); break;
-		default				: printf("<other>	\n"); break;
-		}
-	#endif
+	// buffer is cleared unless PASS
 
 	switch(status){
 	case WorkerStatus::PASS:
@@ -295,6 +287,7 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::insertFD_(int co
 
 	auto &client = *it;
 
+	// no need req_FreshRead_, size is zero already
 	req_Read_(fd, client);
 
 	return true;
@@ -307,7 +300,7 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::removeFD_(int co
 	Client *it = clients_[fd];
 
 	if (!it){
-		// do nothing, error is already reported.
+		// do nothing, error is already removed.
 		return;
 	}
 

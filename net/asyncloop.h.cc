@@ -228,6 +228,8 @@ template<class Selector, class Worker, class SparePool, class Storage>
 bool AsyncLoop<Selector, Worker, SparePool, Storage>::client_Worker_(int const fd, IOBuffer &buffer){
 	const WorkerStatus status = worker_( buffer );
 
+	// buffer is cleared unless PASS
+
 	switch(status){
 	case WorkerStatus::PASS:
 		return false;
@@ -350,7 +352,7 @@ void AsyncLoop<Selector, Worker, SparePool, Storage>::removeFD_(int const fd){
 	Client *it = clients_[fd];
 
 	if (!it){
-		// do nothing, error is already reported.
+		// do nothing, error is already removed.
 		return;
 	}
 

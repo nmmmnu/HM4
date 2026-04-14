@@ -95,6 +95,8 @@ private:
 		data_type item = std::move(sparePool_.back().data);
 		sparePool_.pop_back();
 
+		item.clear();
+
 		log__("get", item.capacity());
 
 		return item;

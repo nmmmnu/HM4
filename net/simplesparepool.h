@@ -53,6 +53,8 @@ public:
 
 			sparePool_.pop_back();
 
+			x.clear();
+
 			return x;
 		}else{
 			return construct_();

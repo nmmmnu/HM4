@@ -103,12 +103,17 @@ namespace net{
 		void done_Close_(int fd);
 
 	private:
+		// void req_FreshRead_(int fd, Client &client, size_t size = IO_BUFFER_CAPACITY){
+		// 	client.buffer.clear();
+		// 	req_Read_(fd, client, size);
+		// }
+
 		void req_Read_   (int fd, Client &client, size_t size = IO_BUFFER_CAPACITY){
-			auto *p = client.buffer.provideWriteBuffer(size);
+			auto [p, sizeNew] = client.buffer.provideWriteBufferAtLeast(size);
 
 			client.offcet = p;
 
-			ioEngine_.add_read(fd, p, static_cast<uint32_t>(size), true);
+			ioEngine_.add_read(fd, p, static_cast<uint32_t>(sizeNew), true);
 		}
 
 		void req_Write_  (int fd, Client &client){

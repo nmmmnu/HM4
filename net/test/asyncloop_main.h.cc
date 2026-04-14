@@ -3,6 +3,7 @@
 
 #include "sockets.h"
 #include "asyncloop.h"
+#include "heapsparepool.h"
 
 int main(){
 	int const fd1 = net::socket_create(net::SOCKET_TCP{},  "localhost.not.used.yet", 2000);
@@ -16,7 +17,7 @@ int main(){
 
 	MyWorkerFactory wf;
 
-	net::AsyncLoop<MySelector, MyWorker> loop(
+	net::AsyncLoop<MySelector, MyWorker, net::HeapSparePool> loop(
 					/* selector */	MySelector{ conf_rlimitNoFile, conf_max_clients },
 					/* worker */	wf()			,
 					/* server fd */	{ fd1, fd2, fd3 }	,

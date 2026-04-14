@@ -92,3 +92,7 @@ Changelog
 -	fix ignoring the hotline index if index is very small.
 -	fix db_mkbtree.
 -	fix issue with MyAllocator::destruct with nullptr. This is not a bug because default behavour is unlear.
+
+### 1.3.15
+-	Fix issue with clearing the buffer in specific cases
+
