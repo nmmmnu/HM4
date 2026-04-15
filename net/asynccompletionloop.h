@@ -2,6 +2,7 @@
 #define _NET_ASYNC_COMPLETION_LOOP_H
 
 #include "ioengine/ioenginedefs.h"
+#include "worker/workerdefs.h"
 
 #include "smallvector.h"
 
@@ -132,12 +133,12 @@ namespace net{
 	private:
 		bool client_Worker_(int fd, Client &client);
 
-		struct ConnectionNotification{
-			uint64_t clients;
-			uint64_t spare;
-		};
-
 		void notify_worker_(){
+			struct ConnectionNotification{
+				uint64_t clients;
+				uint64_t spare;
+			};
+
 			worker_.connection_notify(
 				ConnectionNotification{
 					connectedClients(),

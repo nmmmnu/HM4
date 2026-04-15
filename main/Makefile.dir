@@ -6,9 +6,18 @@ EXTRA_CLEAN += $(A)db_net $(A)db_compact $(A)db_compact_tombstones
 
 include Makefile.sub
 
-all: $(LL_SELECTOR)
+
 
 all: $(A)db_net $(A)db_compact $(A)db_compact_tombstones
+
+ifeq ($(IOURING_ENGINE), YES)
+
+LL_IOURING_ENGINE = $(O)iouringengine.o
+
+all: $(A)db_net_iouring
+
+endif
+
 
 PAIR_OBJ = $(O)pair.o $(O)mytime.o $(O)logger.o
 DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)mmapfilesbo.o $(O)filemeta.o $(O)filemetablob.o $(O)mmapbuffer.o $(O)murmur_hash_64a.o $(PAIR_OBJ)
@@ -16,6 +25,7 @@ DISKLIST_OBJ = $(O)disklist.o $(O)mmapfile.o $(O)mmapfilesbo.o $(O)filemeta.o $(
 $(A)db_net: $(O)db_net.o	\
 			$(DISKLIST_OBJ)				\
 			$(LL_SELECTOR)				\
+								\
 			$(O)filebuilder.o			\
 								\
 			$(O)skiplist.o $(O)avllist.o		\
@@ -32,6 +42,27 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)redisprotocol.o $(O)sockets.o	\
 			$(O)myprocess.o
 	$(LINK)
+
+$(A)db_net_iouring: $(O)db_net_iouring.o	\
+			$(DISKLIST_OBJ)				\
+			$(LL_IOURING_ENGINE)			\
+								\
+			$(O)filebuilder.o			\
+								\
+			$(O)skiplist.o $(O)avllist.o		\
+			$(O)idgenerator.o			\
+								\
+			$(O)directorylistloader.o 		\
+			$(O)myglob.o $(O)myfs.o			\
+								\
+			$(O)hyperloglog.o			\
+			$(O)geohash.o $(O)mortoncurve.o		\
+			$(O)tdigest.o				\
+								\
+			$(O)signalguard.o			\
+			$(O)redisprotocol.o $(O)sockets.o	\
+			$(O)myprocess.o
+	$(LINK) -luring
 
 $(A)db_compact: $(O)db_compact.o	\
 			$(DISKLIST_OBJ)				\

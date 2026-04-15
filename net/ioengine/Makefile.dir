@@ -7,10 +7,14 @@ include Makefile.sub
 # ===========================================================
 
 ifeq ($(UNAME), Linux)
-# add epoll support...
+
+ifeq ($(IOURING_ENGINE), YES)
+# add io_uring support...
 all: $(O)iouringengine.o
 
 EXTRA_CLEAN += $(O)iouringengine.o
+endif
+
 endif
 
 # ===========================================================

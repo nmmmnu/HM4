@@ -2,6 +2,7 @@
 #define _NET_ASYNC_LOOP_H
 
 #include "selector/selectordefs.h"
+#include "worker/workerdefs.h"
 
 #include "smallvector.h"
 
@@ -110,12 +111,12 @@ namespace net{
 
 		void client_SocketOps_(int fd, ssize_t size);
 
-		struct ConnectionNotification{
-			uint64_t clients;
-			uint64_t spare;
-		};
-
 		void notify_worker_(){
+			struct ConnectionNotification{
+				uint64_t clients;
+				uint64_t spare;
+			};
+
 			worker_.connection_notify(
 				ConnectionNotification{
 					connectedClients(),

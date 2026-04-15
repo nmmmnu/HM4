@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include <string_view>
+
 namespace net::worker{
 
 	enum class WorkerStatus : uint8_t{

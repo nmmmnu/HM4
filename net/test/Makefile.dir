@@ -4,10 +4,11 @@ EXTRA_INCL += -I$(SRC_DIR)
 
 include Makefile.sub
 
-MY_TARGETS = $(A)test_iobuffer $(A)test_redisprotocol	\
+MY_TARGETS	=	\
+			$(A)test_iobuffer $(A)test_redisprotocol	\
 			$(A)test_echo_poll $(A)test_redis_poll
 
-EXTRA_CLEAN +=	$(MY_TARGETS)
+EXTRA_CLEAN	+=	$(MY_TARGETS)
 
 all: $(MY_TARGETS)
 
@@ -16,10 +17,16 @@ all: $(MY_TARGETS)
 ifeq ($(UNAME), Linux)
 # add epoll support...
 all: $(A)test_echo_epoll   $(A)test_redis_epoll
+
+EXTRA_CLEAN	+= $(A)test_echo_epoll   $(A)test_redis_epoll
+
+ifeq ($(IOURING_ENGINE), YES)
+# add io_uring support...
 all: $(A)test_echo_iouring $(A)test_redis_iouring
 
-EXTRA_CLEAN += $(A)test_echo_epoll   $(A)test_redis_epoll
-EXTRA_CLEAN += $(A)test_echo_iouring $(A)test_redis_iouring
+EXTRA_CLEAN	+= $(A)test_echo_iouring $(A)test_redis_iouring
+
+endif
 endif
 
 # ===========================================================
@@ -28,7 +35,7 @@ ifeq ($(UNAME), Darwin)
 # add kqueue support...
 all: $(A)test_echo_kqueue $(A)test_redis_kqueue
 
-EXTRA_CLEAN += $(A)test_echo_kqueue $(A)test_redis_kqueue
+EXTRA_CLEAN	+= $(A)test_echo_kqueue $(A)test_redis_kqueue
 endif
 
 # ===========================================================
@@ -37,7 +44,7 @@ ifeq ($(UNAME), FreeBSD)
 # add kqueue support...
 all: $(A)test_echo_kqueue $(A)test_redis_kqueue
 
-EXTRA_CLEAN += $(A)test_echo_kqueue $(A)test_redis_kqueue
+EXTRA_CLEAN	+= $(A)test_echo_kqueue $(A)test_redis_kqueue
 endif
 
 # ===========================================================
@@ -46,7 +53,7 @@ ifeq ($(UNAME), Haiku)
 # add wait_for_objects support...
 all: $(A)test_echo_haiku $(A)test_redis_haiku
 
-EXTRA_CLEAN += $(A)test_echo_haiku $(A)test_redis_haiku
+EXTRA_CLEAN	+= $(A)test_echo_haiku $(A)test_redis_haiku
 endif
 
 # ===========================================================

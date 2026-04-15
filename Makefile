@@ -2,6 +2,13 @@ MYCC		= clang++
 MYCC		= g++
 #MYCC		= /usr/bin/../lib/clang/c++-analyzer
 
+STATIC_LINK	= YES
+#STATIC_LINK	= NO
+
+CF_OPTIM	= -O0 -g
+#CF_OPTIM	= -O3 -DNDEBUG
+CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
+
 # ======================================================
 
 EXTRA_CLEAN	:=
@@ -15,11 +22,7 @@ UNAME		= $(shell uname -s)
 
 CF_DEPS		= -MMD -MP
 CF_INCL		= -Iinclude -Imyallocator $(EXTRA_INCL)
-CF_OPTIM	= -O0 -g
 #CF_LTO		= -flto
-#CF_OPTIM	= -O3 -DNDEBUG
-CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
-#CF_OPTIM	+= -fassociative-math -freciprocal-math -fno-signed-zeros
 CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation
 						#-fopt-info-vec-missed
 
@@ -43,9 +46,6 @@ LL_LTO		= -flto
 
 LINK		= $(MYCC) $(LL_LTO) $(LD_ALL) -o $@ $^ $(LL_ALL)
 
-STATIC_LINK	= YES
-#STATIC_LINK	= NO
-
 # https://stackoverflow.com/questions/9002264/starting-a-stdthread-with-static-linking-causes-segmentation-fault
 #LINK		+= -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 # gcc 15 works without it
@@ -64,16 +64,25 @@ ifeq ($(UNAME), Linux)
 
 ##### LINUX #####
 
+IOURING_ENGINE	= $(shell pkg-config --exists liburing && echo YES)
+
 $(info Linux detected				)
 $(info  - epoll support				)
+ifeq ($(IOURING_ENGINE), YES)
+$(info  - iouring support			)
+else
+$(info  - ***NO*** iouring support		)
+endif
 $(info  - map pages support			)
 $(info  - hugetlb support			)
 $(info						)
 
+
+
 #CF_MISC	+= -DNOT_HAVE_CHARCONV
 
 EXTRA_INCL	+= -Iinclude.linux/
-CF_MISC		+= -DSELECTOR_EPOLL -DUSE_MAP_PAGES -DUSE_HUGETLB
+CF_MISC		+= -DUSE_MAP_PAGES -DUSE_HUGETLB
 
 ifeq ($(STATIC_LINK), YES)
 LINK		+= -static
@@ -81,6 +90,7 @@ endif
 
 # add epoll support...
 
+CF_MISC		+= -DSELECTOR_EPOLL
 LL_SELECTOR	 = $(O)epollselector.o
 
 
