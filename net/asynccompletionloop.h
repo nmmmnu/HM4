@@ -104,11 +104,6 @@ namespace net{
 		void done_Close_(int fd);
 
 	private:
-		// void req_FreshRead_(int fd, Client &client, size_t size = IO_BUFFER_CAPACITY){
-		// 	client.buffer.clear();
-		// 	req_Read_(fd, client, size);
-		// }
-
 		void req_Read_   (int fd, Client &client, size_t size = IO_BUFFER_CAPACITY){
 			auto [p, sizeNew] = client.buffer.provideWriteBufferAtLeast(size);
 

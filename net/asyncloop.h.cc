@@ -138,7 +138,7 @@ void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Read_(int const fd,
 
 	// -------------------------------------
 
-	if constexpr(false){
+	#if 0
 		char buffer[IO_BUFFER_CAPACITY];
 
 		ssize_t const size = ::read(fd, buffer, IO_BUFFER_CAPACITY);
@@ -151,7 +151,7 @@ void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Read_(int const fd,
 
 		// size is checked already
 		client.buffer.push( static_cast<size_t>(size), buffer);
-	}else{
+	#elif 0
 		// set to zero, because if push() operation fails,
 		// the size might be not initialized.
 		ssize_t size = 0;
@@ -167,7 +167,15 @@ void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Read_(int const fd,
 
 		if (client.buffer.size() > conf_maxRequestSize_)
 			return client_Disconnect_(fd, DisconnectStatus::ERROR);
-	}
+	#else
+		auto [p, sizeNew] = client.buffer.provideWriteBufferAtLeast(IO_BUFFER_CAPACITY);
+
+		ssize_t const ssize = ::read(fd, p, sizeNew);
+
+		size_t  const size  = static_cast<size_t>(ssize);
+
+		client.buffer.finalizeWriteBuffer(p, size);
+	#endif
 
 	if constexpr(false){
 		client.buffer.print(false);

@@ -117,6 +117,7 @@ public:
 		return true;
 	}
 
+#if 0
 	template<class Lazy>
 	bool push(std::true_type, size_t const desiredSize, Lazy f){
 		assert(desiredSize && "Size must be great than zero");
@@ -127,6 +128,7 @@ public:
 
 		return finalizeWriteBuffer(dest, finalSize);
 	}
+#endif
 
 	// ==================================
 
