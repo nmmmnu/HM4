@@ -175,6 +175,12 @@ void AsyncLoop<Selector, Worker, SparePool, Storage>::client_Read_(int const fd,
 		size_t  const size  = static_cast<size_t>(ssize);
 
 		client.buffer.finalizeWriteBuffer(p, size);
+
+		if (size <= 0)
+			return client_SocketOps_(fd, size);
+
+		if (client.buffer.size() > conf_maxRequestSize_)
+			return client_Disconnect_(fd, DisconnectStatus::ERROR);
 	#endif
 
 	if constexpr(false){
