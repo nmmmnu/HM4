@@ -1,0 +1,13 @@
+id:          UNIQUEID
+name:        UNIQUEID
+
+version:     1.3.0
+
+description: |
+  <p>This module provides fast and reliable <b>non-cryptographic</b>, <time based</b>, <b>sortable</b> unique identifier</p>
+
+example_module:     |
+  127.0.0.1:6379> uniqueid
+  "69e090d0011c5900"
+  127.0.0.1:6379> uniqueid 56
+  "69e0917c0d50a938"
