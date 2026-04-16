@@ -3,6 +3,8 @@
 
 #include "myfastbuffer.h"
 
+#include <string_view>
+
 #include <cstdio>
 #include <cassert>
 
@@ -12,7 +14,6 @@ struct IOBuffer{
 	using container_type	= MyFastBuffer;
 	using size_type		= container_type::size_type;
 
-private:
 	constexpr static size_type INITIAL_RESERVE = 4096;
 
 private:

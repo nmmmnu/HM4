@@ -5,6 +5,7 @@
 #include <cstdlib>	// free
 
 #include <new>		// std::bad_alloc
+#include <utility>	// std::swap
 
 class MyFastBuffer{
 	char	*data_		= nullptr;	// realloc is OK with nullptr
