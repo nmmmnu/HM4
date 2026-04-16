@@ -1,29 +1,18 @@
 #ifndef _IO_BUFFER_H
 #define _IO_BUFFER_H
 
-#include <vector>
-#include <string_view>
+#include "myfastbuffer.h"
 
-#include <limits>
-
-#include <cstring>
 #include <cstdio>
 #include <cassert>
 
 namespace net{
 
-class IOBuffer{
-public:
-	struct UninitializedChar{
-		char v;
-
-		UninitializedChar(){}
-		constexpr UninitializedChar(char v) : v(v){}
-	};
-
-	using container_type	= std::vector<UninitializedChar>;
+struct IOBuffer{
+	using container_type	= MyFastBuffer;
 	using size_type		= container_type::size_type;
 
+private:
 	constexpr static size_type INITIAL_RESERVE = 4096;
 
 private:
@@ -31,29 +20,24 @@ private:
 	container_type		buffer_;
 
 public:
-	IOBuffer(size_type const size = INITIAL_RESERVE){
-		reserve(size);
+	IOBuffer(size_type const size = INITIAL_RESERVE) : buffer_(size){
 	}
 
-	IOBuffer(container_type &&buffer) : buffer_(std::move(buffer)){
+	IOBuffer(container_type &&buffer) noexcept : buffer_(std::move(buffer)){
 	}
-
-//	IOBuffer(container_type &buffer){
-//		swap(buffer_, buffer);
-//	}
 
 	void clear(){
 		buffer_.clear();
 		head_ = 0;
 	}
 
-	void swap(container_type &buffer){
-		using std::swap;
-		swap(buffer_	, buffer	);
+	void swap(container_type &buffer) noexcept{
+		buffer_.swap(buffer);
 	}
 
 	void swap(IOBuffer &other){
 		using std::swap;
+
 		swap(head_	, other.head_	);
 		swap(buffer_	, other.buffer_	);
 	}
@@ -69,13 +53,13 @@ public:
 	// ==================================
 
 	const char *data() const{
-		const char *s = reinterpret_cast<const char *>(buffer_.data());
+		const char *s = buffer_.data();
 		return & s[head_];
 	}
 
 private:
 	char *getIndex_(size_t index){
-		return reinterpret_cast<char *>(buffer_.data()) + index;
+		return buffer_.data() + index;
 	}
 
 public:
@@ -100,28 +84,22 @@ public:
 	// ==================================
 
 	bool push(const char c){
-		buffer_.push_back(c);
+		buffer_.push(c);
 		return true;
 	}
 
-	bool push(std::string_view const sv){
-		return push(sv.size(), sv.data());
+	bool push(std::string_view const s){
+		buffer_.push(s.data(), s.size());
+		return true;
 	}
 
 	bool push(size_t const size, const char *ptr){
 		if (!size)
 			return false;
 
-		if constexpr(false){
-			buffer_.insert(std::end(buffer_), ptr, ptr + size);
-			return true;
-		}else{
-			return push(std::false_type{}, size, [ptr,size](void *dest){
-				memcpy(dest, ptr, size);
+		buffer_.push(ptr, size);
 
-				return size;
-			});
-		}
+		return true;
 	}
 
 	template<class Lazy>
@@ -129,7 +107,7 @@ public:
 		if (!size)
 			return false;
 
-		char *dest = provideWriteBuffer(size);
+		char *dest = buffer_.push(size);
 
 		f(dest);
 
@@ -142,7 +120,7 @@ public:
 	bool push(std::true_type, size_t const desiredSize, Lazy f){
 		assert(desiredSize && "Size must be great than zero");
 
-		char *dest = provideWriteBuffer(desiredSize);
+		char *dest = buffer_.push(desiredSize);
 
 		auto const finalSize = f(dest);
 
@@ -180,10 +158,8 @@ public:
 		};
 	}
 
-	bool finalizeWriteBuffer(const char *offsetCh, size_t const actualSize){
-		const auto *offset = reinterpret_cast<const UninitializedChar *>(offsetCh);
-
-		buffer_.resize((offset - buffer_.data()) + actualSize);
+	bool finalizeWriteBuffer(const char *offset, size_t const actualSize){
+		buffer_.resize(offset - buffer_.data() + actualSize);
 
 		return true;
 	}
@@ -227,8 +203,6 @@ public:
 void swap(IOBuffer &a, IOBuffer &b){
 	a.swap(b);
 }
-
-
 
 } // namespace
 

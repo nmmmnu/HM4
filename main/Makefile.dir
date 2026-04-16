@@ -43,6 +43,27 @@ $(A)db_net: $(O)db_net.o	\
 			$(O)myprocess.o
 	$(LINK)
 
+$(A)db_net_poll: $(O)db_net_poll.o	\
+			$(DISKLIST_OBJ)				\
+			$(O)pollselector.o			\
+								\
+			$(O)filebuilder.o			\
+								\
+			$(O)skiplist.o $(O)avllist.o		\
+			$(O)idgenerator.o			\
+								\
+			$(O)directorylistloader.o 		\
+			$(O)myglob.o $(O)myfs.o			\
+								\
+			$(O)hyperloglog.o			\
+			$(O)geohash.o $(O)mortoncurve.o		\
+			$(O)tdigest.o				\
+								\
+			$(O)signalguard.o			\
+			$(O)redisprotocol.o $(O)sockets.o	\
+			$(O)myprocess.o
+	$(LINK)
+
 $(A)db_net_iouring: $(O)db_net_iouring.o	\
 			$(DISKLIST_OBJ)				\
 			$(LL_IOURING_ENGINE)			\
