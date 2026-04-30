@@ -372,8 +372,8 @@ Changelog
 -	optimize XNDEL, XRDEL, HDELALL to take advantage of bigger ArenaAllocator.
 	The query never reloads, even if the memtable flushes.
 	XNEXPIRE et others still reload the query, if the memtable flushes.
--	new module MINDEX (FTS): IXMADD, IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM, IXMRANGE,
-	IXMRANGEFLEX, IXMRANGESTRICT
+-	new module MINDEX (Full Text Search): IXMADD, IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES,
+	IXMREM, IXMRANGE, IXMRANGEFLEX, IXMRANGESTRICT
 -	fix feature with assest() for composite keys in vectors module
 -	new module AUTOCOMPLETE: ACADD_XXX, ACDEL_XXX, ACRANGE
 -	refactor sharedAccumulateResults / sharedAccumulatePairs
@@ -385,7 +385,7 @@ Changelog
 -	module ISAM: IGETALL, IGET, IMGET, ISETALL, ISET, IDEL, IRESERVE
 -	number of registered commands is printed in the start log
 -	new Compat module command "COMMAND" to monitor redis-cli.
--	fix issue with MyAllocator::destruct with nullptr. This is not a bug because default behavour is unlear.
+-	fix issue with MyAllocator::destruct with nullptr. This is not a bug because default behavour is unclear.
 
 ### 1.3.15
 -	migrate commands to "MyHashtable" and async loop to nginx-like array
@@ -395,11 +395,13 @@ Changelog
 -	add configuration option server_id
 -	add configuration option rlimit_nofile
 -	new command UNIQUEID
--	new OS support - Haiku
+-	new OS support - Haiku with wait_for_objects_etc()
 -	improve PollSelector
 -	migrate AsyncLoop, PollSelector, HaikuSelector to SparseMap
 -	optimize IOBuffer for 8x speedup
 -	Linux io_uring support
 -	Fix issue with clearing the buffer in specific cases
+-	Allow non automatic building db_net_poll on all supported platforms
+-	Release
 
 

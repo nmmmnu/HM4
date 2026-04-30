@@ -3,8 +3,6 @@
 
 namespace hm4{
 	namespace version{
-		using V = short unsigned int;
-
 		constexpr const char *str = "1.3.15";
 
 		constexpr int major	= 1;
