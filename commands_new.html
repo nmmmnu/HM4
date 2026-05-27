@@ -188,7 +188,7 @@
 			</ul>
 		</div>
 		<div>
-			<a href="#M::VECTOR">VECTOR</a>
+			<a href="#M::VECTORS">VECTORS</a>
 			<ul>
 				<li><a href="#C::VADD">VADD</a></li>
 				<li><a href="#C::VREM">VREM</a></li>
@@ -250,6 +250,20 @@
 				<li><a href="#C::ACDEL_BIN">ACDEL_BIN</a></li>
 				<li><a href="#C::ACRANGE">ACRANGE</a></li>
 				<li><a href="#C::ACRANGEALL">ACRANGEALL</a></li>
+			</ul>
+		</div>
+		<div>
+			<a href="#M::ISAM">ISAM</a>
+			<ul>
+				<li><a href="#C::IRESERVE">IRESERVE</a></li>
+				<li><a href="#C::IGETALL">IGETALL</a></li>
+				<li><a href="#C::IGETKEYS">IGETKEYS</a></li>
+				<li><a href="#C::IGETVALS">IGETVALS</a></li>
+				<li><a href="#C::IGET">IGET</a></li>
+				<li><a href="#C::IMGET">IMGET</a></li>
+				<li><a href="#C::ISETALL">ISETALL</a></li>
+				<li><a href="#C::ISET">ISET</a></li>
+				<li><a href="#C::IDEL">IDEL</a></li>
 			</ul>
 		</div>
 		<div>
@@ -6327,8 +6341,8 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 
 		<p><a href="#top">top</a></p>
 		<hr />
-		<a name="M::VECTOR"></a>
-		<h2>Module VECTOR</h2>
+		<a name="M::VECTORS"></a>
+		<h2>Module VECTORS</h2>
 
 		<h3><b>Description:</b></h3>
 		<blockquote><p>HM4 can be used as a <b>vector database</b>.
@@ -6545,7 +6559,7 @@ Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Localit
 				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -6745,7 +6759,7 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -6800,7 +6814,7 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -7065,7 +7079,7 @@ Quantization types:
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -7331,7 +7345,7 @@ Quantization types:
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -7495,7 +7509,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -7815,7 +7829,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 9, 8 }		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -8136,7 +8150,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 				<tr><td>Data lookup complexity	</td><td>WRITE		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -8333,7 +8347,7 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -8594,7 +8608,7 @@ Quantization types:
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -8856,7 +8870,7 @@ Quantization types:
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -9016,7 +9030,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
-				<tr><td>Module			</td><td>VECTOR	</td></tr>
+				<tr><td>Module			</td><td>VECTORS	</td></tr>
 			</table>
 
 			<h4>Usage:</h4>
@@ -11662,6 +11676,638 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<ul>
 				<li><a href="#C::ACRANGE">ACRANGE</a></li>
 			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::ISAM"></a>
+		<h2>Module ISAM</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides commands for working with <b>structured objects</b> stored as a single, space-padded string of fixed-width fields.
+It mimics a lightweight key-value or hash structure without the memory overhead of storing field names inside every record.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Dynamic Schema Definition</b></p>
+<p>Every command requires a schema definition passed as its first argument. The schema format is: <code>size:field_name,size:field_name,...</code>.
+Sizes are evaluated in <b>bytes</b>. If a value is shorter than the allocated size, it is padded with spaces. If it is longer, it gets truncated automatically.</p>
+
+<p><b>2. Modifying fields</b></p>
+<p>The module allows setting all fields at once or updating specific fields selectively without altering the rest of the string layout.</p>
+<ul>
+  <li><i>isetall</i> - overwrites or initializes all fields sequentially based on the schema layout.</li>
+  <li><i>iset</i> - selectively updates only the specified fields at their exact byte offsets.</li>
+  <li><i>idel</i> - "clears" the specified fields by replacing their contents with space padding.</li>
+</ul>
+
+<p><b>3. Retrieving data</b></p>
+<p>Data can be fetched as flat lists of key-value pairs, standalone keys, or standalone values. All returned values are automatically stripped of their trailing space padding.</p>
+<ul>
+  <li><i>igetall</i> - returns an array of all field names and their corresponding values (similar to HGETALL).</li>
+  <li><i>igetkeys</i> - returns an array containing only the field names.</li>
+  <li><i>igetvals</i> - returns an array containing only the actual data values.</li>
+  <li><i>imget</i> - fetches values for specific requested fields in any order, supporting duplicates and returning an empty string for non-existent fields.</li>
+</ul>
+
+<p><b>4. UTF-8 and Multi-byte Characters</b></p>
+<p>Since field sizes are strictly byte-based, multi-byte characters (like Cyrillic UTF-8) consume 2 to 4 bytes per character.
+It is recommended to place variable-length UTF-8 text fields at the end of the schema to prevent unintended byte truncation or offsetting.</p>
+
+<p><b>Tip:</b> Use <i>igetall</i> when you need a full object dump, and <i>imget</i> to quickly cherry-pick specific fields in a single network round-trip.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1  Niki      BG&quot;
+127.0.0.1:6379&gt; igetall 3:id,10:name,2:country a
+1) &quot;id&quot;
+2) &quot;1&quot;
+3) &quot;name&quot;
+4) &quot;Niki&quot;
+5) &quot;country&quot;
+6) &quot;BG&quot;
+127.0.0.1:6379&gt; igetkeys 3:id,10:name,2:country a
+1) &quot;id&quot;
+2) &quot;name&quot;
+3) &quot;country&quot;
+127.0.0.1:6379&gt; igetvals 3:id,10:name,2:country a
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name
+1) &quot;Niki&quot;
+127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name country id
+1) &quot;Niki&quot;
+2) &quot;BG&quot;
+3) &quot;1&quot;
+127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name country id id non_existent id
+1) &quot;Niki&quot;
+2) &quot;BG&quot;
+3) &quot;1&quot;
+4) &quot;1&quot;
+5) &quot;&quot;
+6) &quot;1&quot;
+127.0.0.1:6379&gt; iset 3:id,10:name,2:country a name John
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1  John      BG&quot;
+127.0.0.1:6379&gt; iset 3:id,10:name,2:country a name Niki id 5
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;5  Niki      BG&quot;
+127.0.0.1:6379&gt; idel 3:id,10:name,2:country a country id
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;   Niki        &quot;
+127.0.0.1:6379&gt; del a
+(integer) 1
+</pre></blockquote>
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::IRESERVE">IRESERVE</a></li>
+			<li><a href="#C::IGETALL">IGETALL</a></li>
+			<li><a href="#C::IGETKEYS">IGETKEYS</a></li>
+			<li><a href="#C::IGETVALS">IGETVALS</a></li>
+			<li><a href="#C::IGET">IGET</a></li>
+			<li><a href="#C::IMGET">IMGET</a></li>
+			<li><a href="#C::ISETALL">ISETALL</a></li>
+			<li><a href="#C::ISET">ISET</a></li>
+			<li><a href="#C::IDEL">IDEL</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="IRESERVE">
+			<a name="C::IRESERVE"></a>
+			<h4>IRESERVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IRESERVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IRESERVE schema key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Create new, empty isam object *key*
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ireserve 3:id,10:name,2:country a
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;               &quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IGETALL">
+			<a name="C::IGETALL"></a>
+			<h4>IGETALL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IGETALL		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IGETALL schema key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns all fields and values of isam object stored in *key*.<br />
+The data is parsed using the provided schema. Trailing spaces (padding) are automatically stripped from the returned values.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>flat array of field names and their corresponding values (field1, value1, field2, value2, ...)</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; igetall 3:id,10:name,2:country a
+1) &quot;id&quot;
+2) &quot;1&quot;
+3) &quot;name&quot;
+4) &quot;Niki&quot;
+5) &quot;country&quot;
+6) &quot;BG&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IGETKEYS">
+			<a name="C::IGETKEYS"></a>
+			<h4>IGETKEYS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IGETKEYS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IGETKEYS schema key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns only fields of the structured object stored in *key*.<br />
+The data is parsed using the provided schema. Trailing spaces (padding) are automatically stripped from the returned values.<br />
+The command does not touch the *key*, but retrieve the keys from the field definitions, so lookup complexity is constant.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of field names</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; igetkeys 3:id,10:name,2:country a
+1) &quot;id&quot;
+2) &quot;name&quot;
+3) &quot;country&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IGETVALS">
+			<a name="C::IGETVALS"></a>
+			<h4>IGETVALS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IGETVALS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IGETVALS schema key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns only values of the structured object stored in *key*.<br />
+The data is parsed using the provided schema. Trailing spaces (padding) are automatically stripped from the returned values.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of field names</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; igetkeys 3:id,10:name,2:country a
+1) &quot;id&quot;
+2) &quot;name&quot;
+3) &quot;country&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IGET">
+			<a name="C::IGET"></a>
+			<h4>IGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IGET schema key field</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>field</td>
+					<td>the specific field name to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Retrieves the value of a single specified *field* from the isam object stored in *key*.<br />
+The data is parsed using the provided schema. Trailing spaces (padding) are automatically stripped from the returned values.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the stripped value of the field, or an empty string if the field does not exist in the schema</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; iget 3:id,10:name,2:country a name
+&quot;Niki&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IMGET">
+			<a name="C::IMGET"></a>
+			<h4>IMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IMGET schema key field [field ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>field</td>
+					<td>one or more field names to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Retrieves the value of the specified *field*, *field* from the isam object stored in *key*.<br />
+The data is parsed using the provided schema. Trailing spaces (padding) are automatically stripped from the returned values.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of stripped values corresponding to the requested fields</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name country id id non_existent id
+1) &quot;Niki&quot;
+2) &quot;BG&quot;
+3) &quot;1&quot;
+4) &quot;1&quot;
+5) &quot;&quot;
+6) &quot;1&quot;
+127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name
+1) &quot;Niki&quot;
+127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name name
+1) &quot;Niki&quot;
+2) &quot;Niki&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="ISETALL">
+			<a name="C::ISETALL"></a>
+			<h4>ISETALL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ISETALL		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ISETALL schema key val [val ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>val</td>
+					<td>values for all fields, provided sequentially in the schema order</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Initializes or completely overwrites the isam object at the specified *key*.<br />
+Values are packed into a single string according to the schema byte sizes.<br />
+Shorter values are padded with trailing spaces. Values exceeding their allocated field size are truncated automatically.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1  Niki      BG&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="ISET">
+			<a name="C::ISET"></a>
+			<h4>ISET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>ISET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>ISET schema key field val [field val ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>field</td>
+					<td>the name of the field to update</td>
+				</tr>
+				<tr>
+					<td>val</td>
+					<td>the new value for the field</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Selectively updates one or more *field* within the isam object at the specified *key*.<br />
+The new values are written directly onto their exact byte positions inside the existing string layout, leaving unspecified fields untouched.<br />
+Shorter values are padded with trailing spaces. Values exceeding their allocated field size are truncated automatically.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1  Niki      BG&quot;
+127.0.0.1:6379&gt; iset 3:id,10:name,2:country a name Robert country US
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1  Robert    US&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IDEL">
+			<a name="C::IDEL"></a>
+			<h4>IDEL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IDEL		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IDEL schema key field [field ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>field</td>
+					<td>one or more field names to clear</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>"Deletes" data from specified *field*, *field* within the isam object at the specified *key*.<br />
+The new empty values are written directly onto their exact byte positions inside the existing string layout, leaving unspecified fields untouched.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1  Niki      BG&quot;
+127.0.0.1:6379&gt; idel 3:id,10:name,2:country a name country
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1              &quot;
+</pre></blockquote>
+
+
 		</div>
 
 		<p><a href="#top">top</a></p>

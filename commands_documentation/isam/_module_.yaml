@@ -1,0 +1,87 @@
+id:          ISAM
+name:        ISAM
+
+version:     1.3.14.1
+
+description: |
+  <p>This module provides commands for working with <b>structured objects</b> stored as a single, space-padded string of fixed-width fields.
+  It mimics a lightweight key-value or hash structure without the memory overhead of storing field names inside every record.</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Dynamic Schema Definition</b></p>
+  <p>Every command requires a schema definition passed as its first argument. The schema format is: <code>size:field_name,size:field_name,...</code>.
+  Sizes are evaluated in <b>bytes</b>. If a value is shorter than the allocated size, it is padded with spaces. If it is longer, it gets truncated automatically.</p>
+
+  <p><b>2. Modifying fields</b></p>
+  <p>The module allows setting all fields at once or updating specific fields selectively without altering the rest of the string layout.</p>
+  <ul>
+    <li><i>isetall</i> - overwrites or initializes all fields sequentially based on the schema layout.</li>
+    <li><i>iset</i> - selectively updates only the specified fields at their exact byte offsets.</li>
+    <li><i>idel</i> - "clears" the specified fields by replacing their contents with space padding.</li>
+  </ul>
+
+  <p><b>3. Retrieving data</b></p>
+  <p>Data can be fetched as flat lists of key-value pairs, standalone keys, or standalone values. All returned values are automatically stripped of their trailing space padding.</p>
+  <ul>
+    <li><i>igetall</i> - returns an array of all field names and their corresponding values (similar to HGETALL).</li>
+    <li><i>igetkeys</i> - returns an array containing only the field names.</li>
+    <li><i>igetvals</i> - returns an array containing only the actual data values.</li>
+    <li><i>imget</i> - fetches values for specific requested fields in any order, supporting duplicates and returning an empty string for non-existent fields.</li>
+  </ul>
+
+  <p><b>4. UTF-8 and Multi-byte Characters</b></p>
+  <p>Since field sizes are strictly byte-based, multi-byte characters (like Cyrillic UTF-8) consume 2 to 4 bytes per character.
+  It is recommended to place variable-length UTF-8 text fields at the end of the schema to prevent unintended byte truncation or offsetting.</p>
+
+  <p><b>Tip:</b> Use <i>igetall</i> when you need a full object dump, and <i>imget</i> to quickly cherry-pick specific fields in a single network round-trip.</p>
+
+example_module:     |
+  127.0.0.1:6379> isetall 3:id,10:name,2:country a 1 Niki BG
+  (integer) 1
+  127.0.0.1:6379> get a
+  "1  Niki      BG"
+  127.0.0.1:6379> igetall 3:id,10:name,2:country a
+  1) "id"
+  2) "1"
+  3) "name"
+  4) "Niki"
+  5) "country"
+  6) "BG"
+  127.0.0.1:6379> igetkeys 3:id,10:name,2:country a
+  1) "id"
+  2) "name"
+  3) "country"
+  127.0.0.1:6379> igetvals 3:id,10:name,2:country a
+  1) "1"
+  2) "Niki"
+  3) "BG"
+  127.0.0.1:6379> imget 3:id,10:name,2:country a name
+  1) "Niki"
+  127.0.0.1:6379> imget 3:id,10:name,2:country a name country id
+  1) "Niki"
+  2) "BG"
+  3) "1"
+  127.0.0.1:6379> imget 3:id,10:name,2:country a name country id id non_existent id
+  1) "Niki"
+  2) "BG"
+  3) "1"
+  4) "1"
+  5) ""
+  6) "1"
+  127.0.0.1:6379> iset 3:id,10:name,2:country a name John
+  (integer) 1
+  127.0.0.1:6379> get a
+  "1  John      BG"
+  127.0.0.1:6379> iset 3:id,10:name,2:country a name Niki id 5
+  (integer) 1
+  127.0.0.1:6379> get a
+  "5  Niki      BG"
+  127.0.0.1:6379> idel 3:id,10:name,2:country a country id
+  (integer) 1
+  127.0.0.1:6379> get a
+  "   Niki        "
+  127.0.0.1:6379> del a
+  (integer) 1
+
+

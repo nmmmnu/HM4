@@ -404,4 +404,5 @@ Changelog
 -	Allow non automatic building db_net_poll on all supported platforms
 -	Release
 
-
+### 1.3.15.1
+-	add documentation for module ISAM
