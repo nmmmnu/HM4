@@ -111,6 +111,7 @@ namespace net::worker::commands::RS{
 		struct RSADDFactory : hm4::PairFactory::IFactoryAction<1,1,RSADDFactory<MyReservoirSampling> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,RSADDFactory>;
+
 			using It   = ParamContainer::const_iterator;
 
 			RSADDFactory(std::string_view const key, const Pair *pair, MyReservoirSampling rs, It begin, It end, std::mt19937_64 &rand64) :

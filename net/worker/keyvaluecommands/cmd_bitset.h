@@ -90,6 +90,7 @@ namespace net::worker::commands::BITSET{
 		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory>;
+
 			using It     = ParamContainer::const_iterator;
 
 			constexpr BITSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :

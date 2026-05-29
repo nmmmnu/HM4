@@ -44,6 +44,7 @@ namespace net::worker::commands::HH{
 		struct HHADDFactory : hm4::PairFactory::IFactoryAction<1,1,HHADDFactory<Up, MyRawHeavyHitter> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,HHADDFactory>;
+
 			using It   = ParamContainer::const_iterator;
 
 			HHADDFactory(std::string_view const key, const Pair *pair, MyRawHeavyHitter hh, It begin, It end) :

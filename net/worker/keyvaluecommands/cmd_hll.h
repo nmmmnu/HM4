@@ -112,7 +112,7 @@ namespace net::worker::commands::HLL{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>;
 
-			using It = ParamContainer::iterator;
+			using It   = ParamContainer::iterator;
 
 			PFADDFactoryBits(std::string_view const key, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair	),
@@ -341,7 +341,7 @@ namespace net::worker::commands::HLL{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>;
 
-			using It = ParamContainer::iterator;
+			using It   = ParamContainer::iterator;
 
 			PFADDFactoryCount(std::string_view const key, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair	),

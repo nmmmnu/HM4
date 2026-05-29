@@ -163,8 +163,8 @@ namespace net::worker::commands::CBF{
 			struct CBFADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T> >{
 				using Pair = hm4::Pair;
 				using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T> >;
-				using It     = ParamContainer::const_iterator;
 
+				using It     = ParamContainer::const_iterator;
 				using CBFT = cbf_impl_::CBF<T>;
 
 				constexpr CBFADD_Factory(std::string_view const key, const Pair *pair, CBFT cbf, It begin, It end) :

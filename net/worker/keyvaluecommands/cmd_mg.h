@@ -116,6 +116,7 @@ namespace net::worker::commands::MG{
 		struct MGADDFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDFactory<MyRawMisraGries> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,MGADDFactory>;
+
 			using It   = ParamContainer::const_iterator;
 
 			MGADDFactory(std::string_view const key, const Pair *pair, MyRawMisraGries mg, It begin, It end) :
