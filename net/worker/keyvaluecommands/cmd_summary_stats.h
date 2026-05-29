@@ -12,10 +12,10 @@ namespace net::worker::commands::SummaryStats{
 	namespace summary_stats_impl_{
 
 		struct SSADDFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>{
-			using It = ParamContainer::iterator;
-
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>;
+
+			using It = ParamContainer::const_iterator;
 
 			SSADDFactory(std::string_view const key, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, sizeof(AccData), pair	),
@@ -35,6 +35,46 @@ namespace net::worker::commands::SummaryStats{
 			It	begin;
 			It	end;
 		};
+
+
+
+		template<typename List>
+		auto const &mergeLoadContainer(ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
+						List const &list, OutputBlob::PairContainer &pcontainer){
+			for(auto it = begin; it != end; ++it){
+				auto const &key = *it;
+				const auto *pair = hm4::getPairPtrWithSize(list, key, sizeof(AccData));
+
+				if (pair)
+					pcontainer.push_back(pair);
+			}
+
+			auto sortF = [](const hm4::Pair *a, const hm4::Pair *b){
+				return a->cmpTime(*b) > 0;
+			};
+
+			// max 0xFF - 1 items
+			std::sort(std::begin(pcontainer), std::end(pcontainer), sortF);
+
+			return pcontainer;
+		}
+
+
+
+		void merge(AccData &acc, OutputBlob::PairContainer::const_iterator begin, OutputBlob::PairContainer::const_iterator end){
+			for(auto it = begin; it != end; ++it){
+				const auto *accSub = hm4::getValAs<AccData>(*it);
+				acc.merge(*accSub);
+			}
+		}
+
+		AccData merge(OutputBlob::PairContainer::const_iterator begin, OutputBlob::PairContainer::const_iterator end){
+			AccData acc;
+
+			merge(acc, begin, end);
+
+			return acc;
+		}
 
 	} // namespace summary_stats_impl_
 
@@ -118,6 +158,85 @@ namespace net::worker::commands::SummaryStats{
 
 
 	template<class Protocol, class DBAdapter>
+	struct SSMERGE : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// ssmerge key key_to_merge key_to_merge key_to_merge...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() < 3)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+
+			auto const &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
+
+			using namespace summary_stats_impl_;
+
+			auto const &pcontainer = mergeLoadContainer(
+				std::begin(p) + varg	,
+				std::end(p)		,
+				*db			,
+				blob.construct<OutputBlob::PairContainer>()
+			);
+
+			SSMERGEFactory factory{ key, pair, std::begin(pcontainer), std::end(pcontainer) };
+
+			insertHintVFactory(pair, *db, factory);
+
+			return result.set_1();
+		}
+
+	private:
+		struct SSMERGEFactory : hm4::PairFactory::IFactoryAction<0 /* DO NOT COPY VALUE */,1,SSMERGEFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<0,1,SSMERGEFactory>;
+
+			using It = OutputBlob::PairContainer::const_iterator;
+
+			SSMERGEFactory(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, sizeof(AccData), pair	),
+							begin			(begin				),
+							end			(end				){}
+
+			void action(Pair *pair){
+				auto *acc = hm4::getValAs<AccData>(pair);
+
+				acc->clear();
+
+				using namespace summary_stats_impl_;
+
+				merge(*acc, begin, end);
+			}
+
+		private:
+			It	begin;
+			It	end;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ssmerge",		"SSMERGE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct SSGETALL : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
@@ -138,12 +257,16 @@ namespace net::worker::commands::SummaryStats{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			AccData acc = merge__(
-						std::cbegin(p) + varg	,
-						std::cend(p)		,
-						*db			,
-						blob.construct<OutputBlob::PairContainer>()
+			using namespace summary_stats_impl_;
+
+			auto const &pcontainer = mergeLoadContainer(
+				std::begin(p) + varg	,
+				std::end(p)		,
+				*db			,
+				blob.construct<OutputBlob::PairContainer>()
 			);
+
+			AccData acc = merge(std::cbegin(pcontainer), std::cend(pcontainer));
 
 			blob.resetAllocator();
 
@@ -192,34 +315,6 @@ namespace net::worker::commands::SummaryStats{
 			_("cvar"	, a.cvar	());
 
 			return result.set_container(container);
-		}
-
-	private:
-		template<typename It, typename List>
-		static AccData merge__(It first, It last, List const &list, OutputBlob::PairContainer &pcontainer){
-			AccData acc;
-
-			for(auto itk = first; itk != last; ++itk){
-				auto const &key = *itk;
-				const auto *pair = hm4::getPairPtrWithSize(list, key, sizeof(AccData));
-
-				if (pair)
-					pcontainer.push_back(pair);
-			}
-
-			auto sortF = [](const hm4::Pair *a, const hm4::Pair *b){
-				return a->cmpTime(*b) > 0;
-			};
-
-			// max 0xFF - 1 items
-			std::sort(std::begin(pcontainer), std::end(pcontainer), sortF);
-
-			for(auto const &pair : pcontainer){
-				const auto *accSub = hm4::getValAs<AccData>(pair);
-				acc.merge(*accSub);
-			}
-
-			return acc;
 		}
 
 	private:
@@ -359,7 +454,7 @@ namespace net::worker::commands::SummaryStats{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				SSRESERVE	,
-			//	SSMERGE		,
+				SSMERGE		,
 				SSGETALL	,
 				SSGET		,
 				SSMGET		,

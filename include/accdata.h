@@ -73,6 +73,10 @@ private:
 	}
 
 public:
+	constexpr void clear(){
+		count_ = 0;
+	}
+
 	constexpr void init(double x){
 		if (std::isnan(x) || std::isinf(x))
 			return;

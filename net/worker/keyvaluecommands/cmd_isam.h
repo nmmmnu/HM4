@@ -262,8 +262,10 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 	private:
-		template<typename Container, typename It>
-		static void collect_1__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, It begin, It end){
+		template<typename Container>
+		static void collect_1__(Result<Protocol> &result, Container &container,
+							std::string_view schema, std::string_view storage,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace ISAM_impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
@@ -276,8 +278,10 @@ namespace net::worker::commands::ISAM_cmd{
 			return collect__(isam, searcher, result, container, storage, begin, end);
 		}
 
-		template<typename Container, typename It>
-		static void collect_N__(Result<Protocol> &result, Container &container, std::string_view schema, std::string_view storage, It begin, It end){
+		template<typename Container>
+		static void collect_N__(Result<Protocol> &result, Container &container,
+							std::string_view schema, std::string_view storage,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace ISAM_impl_;
 
 			ISAM const isam{ schema };
@@ -299,8 +303,11 @@ namespace net::worker::commands::ISAM_cmd{
 			}
 		}
 
-		template<typename Container, typename It, typename Searcher>
-		static void collect__(ISAM const &isam, Searcher const &searcher, Result<Protocol> &result, Container &container, std::string_view storage, It begin, It end){
+		template<typename Container, typename Searcher>
+		static void collect__(ISAM const &isam, Searcher const &searcher,
+						Result<Protocol> &result, Container &container,
+							std::string_view storage,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			for(auto itk = begin; itk != end; ++itk)
 				container.push_back( isam.load(storage.data(), searcher, *itk) );
 
@@ -421,9 +428,9 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 	private:
-		template<typename It>
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
-				std::string_view const schema, std::string_view const key, It begin, It end){
+				std::string_view const schema, std::string_view const key,
+								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace ISAM_impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
@@ -435,9 +442,9 @@ namespace net::worker::commands::ISAM_cmd{
 			return process__(db, result, key, pair, isam, searcher, begin, end);
 		}
 
-		template<typename It>
 		static void process_N__(DBAdapter &db, Result<Protocol> &result,
-				std::string_view const schema, std::string_view const key, It begin, It end){
+				std::string_view const schema, std::string_view const key,
+								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace ISAM_impl_;
 
 			ISAM const isam{ schema };
@@ -458,9 +465,10 @@ namespace net::worker::commands::ISAM_cmd{
 			}
 		}
 
-		template<typename Searcher, typename It>
+		template<typename Searcher>
 		static void process__(DBAdapter &db, Result<Protocol> &result,
-				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
+				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher,
+								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 
 			using MyISET_Factory = ISET_Factory<Searcher>;
 
@@ -551,9 +559,9 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 	private:
-		template<typename It>
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
-				std::string_view const schema, std::string_view const key, It begin, It end){
+				std::string_view const schema, std::string_view const key,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace ISAM_impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
@@ -565,9 +573,9 @@ namespace net::worker::commands::ISAM_cmd{
 			return process__(db, result, key, pair, isam, searcher, begin, end);
 		}
 
-		template<typename It>
 		static void process_N__(DBAdapter &db, Result<Protocol> &result,
-				std::string_view const schema, std::string_view const key, It begin, It end){
+				std::string_view const schema, std::string_view const key,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace ISAM_impl_;
 
 			ISAM const isam{ schema };
@@ -588,9 +596,10 @@ namespace net::worker::commands::ISAM_cmd{
 			}
 		}
 
-		template<typename Searcher, typename It>
+		template<typename Searcher>
 		static void process__(DBAdapter &db, Result<Protocol> &result,
-				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
+				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher,
+						ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 
 			using MyIDEL_Factory = IDEL_Factory<Searcher>;
 

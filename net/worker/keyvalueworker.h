@@ -51,7 +51,7 @@
 #include "keyvaluecommands/cmd_hindex.h"		// IXHADD_*
 
 #include "keyvaluecommands/cmd_ac.h"			// ACADD_*, ACDEL_*, ACRANGE
-#include "keyvaluecommands/cmd_summary_stats.h"		// SSRESERVE, SSADD
+#include "keyvaluecommands/cmd_summary_stats.h"		// SSRESERVE, SSADD, SSMERGE, SSGETALL, SSGET, SSMGET, SSADDGETALL, SSADDGET, SSADDMGET
 
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
