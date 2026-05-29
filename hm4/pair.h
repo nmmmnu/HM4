@@ -411,6 +411,14 @@ inline namespace version_4_00_00{
 			);
 		}
 
+		[[nodiscard]]
+		int cmpTime(uint64_t created) const noexcept{
+			return comparator::comp(
+				getCreated(),
+				created
+			);
+		}
+
 		template<bool B>
 		[[nodiscard]]
 		int cmpWithTime(Pair const &pair, std::bool_constant<B>) const noexcept{

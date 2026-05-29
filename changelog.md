@@ -406,3 +406,8 @@ Changelog
 
 ### 1.3.15.1
 -	add documentation for module ISAM
+-	new module summary stats : SSRESERVE, SSADD, SSGETALL, SSGET, SSMGET
+
+
+
+

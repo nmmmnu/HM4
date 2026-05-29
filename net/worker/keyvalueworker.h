@@ -50,12 +50,8 @@
 #include "keyvaluecommands/cmd_tindex.h"		// IXTADD_*,         IXTRANGEFLEX_*, IXTRANGESTRICT_*
 #include "keyvaluecommands/cmd_hindex.h"		// IXHADD_*
 
-#include "keyvaluecommands/cmd_mindex_shared.h"		// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
-							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
-
-#include "keyvaluecommands/cmd_exists_shared.h"		// MC*EXISTS, IX*EXISTS
-
 #include "keyvaluecommands/cmd_ac.h"			// ACADD_*, ACDEL_*, ACRANGE
+#include "keyvaluecommands/cmd_summary_stats.h"		// SSRESERVE, SSADD
 
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
 
@@ -69,6 +65,11 @@
 #include "keyvaluecommands/cmd_system.h"		// EXIT, SHUTDOWN
 
 #include "keyvaluecommands/cmd_test.h"			// TEST
+
+#include "keyvaluecommands/cmd_mindex_shared.h"		// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
+							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
+
+#include "keyvaluecommands/cmd_exists_shared.h"		// MC*EXISTS, IX*EXISTS
 
 #include "protocol/protocoldefs.h"
 
@@ -144,11 +145,9 @@ namespace net::worker{
 				MultiIndex	::RegisterModule,
 				TrigramIndex	::RegisterModule,
 				HybridIndex	::RegisterModule,
-				MIndexShared	::RegisterModule, // has to be included, if any of MIndex / TIndex are included
-
-				ExistsShared	::RegisterModule, // has to be included, if any of LinearCurve / MortonCurve* / *Index are included
 
 				AC		::RegisterModule,
+				SummaryStats	::RegisterModule,
 
 				Murmur		::RegisterModule,
 				Random		::RegisterModule,
@@ -160,7 +159,10 @@ namespace net::worker{
 				Reload		::RegisterModule,
 				System		::RegisterModule,
 
-				Test		::RegisterModule
+				Test		::RegisterModule,
+
+				MIndexShared	::RegisterModule, // has to be included, if any of MIndex / TIndex are included
+				ExistsShared	::RegisterModule  // has to be included, if any of LinearCurve / MortonCurve* / *Index are included
 			>(pack);
 
 			pack.storageCommands.infoPrint();
