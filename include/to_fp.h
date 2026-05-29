@@ -3,6 +3,7 @@
 
 #include <string_view>
 #include <limits>
+#include <cstdint>
 
 // based on http://www.jbox.dk/sanos/source/lib/strtod.c.html
 
@@ -24,8 +25,8 @@ namespace to_fp_impl_{
 
 	template<typename FP>
 	struct ResultFP{
-		FP		num;
-		const char	*ep;
+		FP	num;
+		bool	err;
 	};
 
 	constexpr uint8_t exp_lookup_size = 32;
@@ -125,7 +126,7 @@ auto to_fp(std::string_view const str){
 		uint8_t num_digits = 0;
 		while (it != end && isdigit(*it)){
 			if (num_digits >= digits)
-				return Result{ 0, nullptr };
+				return Result{ 0, false };
 
 			add_char(number, *it);
 			++num_digits;
@@ -158,7 +159,7 @@ auto to_fp(std::string_view const str){
 
 	// -----
 
-	return Result{ number * sign, has_digits ? it : nullptr };
+	return Result{ number * sign, has_digits };
 }
 
 template<
