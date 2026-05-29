@@ -458,7 +458,6 @@ namespace net::worker::commands::SummaryStats{
 				SSGETALL	,
 				SSGET		,
 				SSMGET		,
-			//
 			//	SSADDGETALL	,
 			//	SSADDGET	,
 			//	SSADDMGET

@@ -71,7 +71,7 @@ private:
 	using FlushContext = flushlist_impl_::FlushContext;
 
 	template<class FlushList1, class PFactory>
-	friend InsertResult flushlist_impl_::flushThenInsert(FlushList1 &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair);
+	friend InsertResult flushlist_impl_::insertF_create_flush_clone_insert(FlushList1 &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair);
 
 	template<class FlushList1, class InsertList, class Predicate1, class PFactory>
 	friend InsertResult flushlist_impl_::insertF(FlushList1 &flushList, InsertList const &insertList, Predicate1 &predicate, PFactory &factory, FlushContext &context);

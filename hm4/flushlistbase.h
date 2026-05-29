@@ -72,7 +72,7 @@ namespace hm4::flushlist_impl_{
 
 
 	template<class FlushList, class PFactory>
-	InsertResult flushThenInsert(FlushList &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair){
+	InsertResult insertF_create_flush_clone_insert(FlushList &flushList, PFactory &factory, MyBuffer::ByteBufferView bufferPair){
 		// this is single thread, no guard needed
 
 		Pair *pair = reinterpret_cast<Pair *>(bufferPair.data());
@@ -95,7 +95,7 @@ namespace hm4::flushlist_impl_{
 	}
 
 	template<class FlushList, class PFactory>
-	InsertResult flushThenInsertWithContext(FlushList &flushList, PFactory &factory, FlushContext &context){
+	InsertResult insertF_create_flush_clone_insert_withContext(FlushList &flushList, PFactory &factory, FlushContext &context){
 		// this is single thread, no guard needed
 
 		constexpr size_t microBufferSize = 4096;
@@ -105,7 +105,7 @@ namespace hm4::flushlist_impl_{
 
 			MyBuffer::StaticMemoryResource<microBufferSize> bufferPair;
 
-			return flushThenInsert(flushList, factory, bufferPair);
+			return insertF_create_flush_clone_insert(flushList, factory, bufferPair);
 		}else{
 			// using MMAP buffer from the context
 
@@ -113,7 +113,7 @@ namespace hm4::flushlist_impl_{
 
 			MyBuffer::MMapAdviceGuard guard{ bufferPair };
 
-			return flushThenInsert(flushList, factory, bufferPair);
+			return insertF_create_flush_clone_insert(flushList, factory, bufferPair);
 		}
 	}
 
@@ -125,7 +125,7 @@ namespace hm4::flushlist_impl_{
 			return InsertResult::errorInvalid();
 
 		if (predicate(insertList, factory.bytes()))
-			return flushThenInsertWithContext(flushList, factory, context);
+			return insertF_create_flush_clone_insert_withContext(flushList, factory, context);
 
 		if (auto const result = flushList.insertF_(factory); result.status != result.ERROR_NO_MEMORY)
 			return result;
@@ -136,7 +136,7 @@ namespace hm4::flushlist_impl_{
 		//
 		// The list guarantee, no changes on the list are done, if ERROR_NO_MEMORY
 
-		return flushThenInsertWithContext(flushList, factory, context);
+		return insertF_create_flush_clone_insert_withContext(flushList, factory, context);
 	}
 
 } // namespace namespace hm4::flushlist_impl_
