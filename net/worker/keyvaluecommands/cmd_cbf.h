@@ -149,7 +149,7 @@ namespace net::worker::commands::CBF{
 
 				const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
-				using MyCBFADD_Factory = CBFADD_Factory<T, ParamContainer::iterator>;
+				using MyCBFADD_Factory = CBFADD_Factory<T>;
 
 				MyCBFADD_Factory factory{ key, pair, cbf, std::begin(p) + varg, std::end(p) };
 
@@ -159,10 +159,11 @@ namespace net::worker::commands::CBF{
 			}
 
 		private:
-			template<typename T, typename It>
-			struct CBFADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >{
+			template<typename T>
+			struct CBFADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T> >{
 				using Pair = hm4::Pair;
-				using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T, It> >;
+				using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADD_Factory<T> >;
+				using It     = ParamContainer::const_iterator;
 
 				using CBFT = cbf_impl_::CBF<T>;
 
@@ -239,7 +240,7 @@ namespace net::worker::commands::CBF{
 
 				const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
-				using MyCBFADDCOUNT_Factory = CBFADDCOUNT_Factory<T, ParamContainer::iterator>;
+				using MyCBFADDCOUNT_Factory = CBFADDCOUNT_Factory<T>;
 
 				MyCBFADDCOUNT_Factory factory{ key, pair, cbf, item, itemCount };
 
@@ -251,10 +252,11 @@ namespace net::worker::commands::CBF{
 			}
 
 		private:
-			template<typename T, typename It>
-			struct CBFADDCOUNT_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >{
+			template<typename T>
+			struct CBFADDCOUNT_Factory : hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T> >{
 				using Pair = hm4::Pair;
-				using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T, It> >;
+				using Base = hm4::PairFactory::IFactoryAction<1,1, CBFADDCOUNT_Factory<T> >;
+				using It   = ParamContainer::const_iterator;
 
 				using CBFT = cbf_impl_::CBF<T>;
 

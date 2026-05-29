@@ -95,7 +95,7 @@ namespace net::worker::commands::RS{
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, rs.bytes());
 
-			using MyRSADDFactory = RSADDFactory<ParamContainer::iterator, MyReservoirSampling>;
+			using MyRSADDFactory = RSADDFactory<MyReservoirSampling>;
 
 			MyRSADDFactory factory{ key, pair, rs, std::begin(p) + varg, std::end(p), rand64 };
 
@@ -107,10 +107,11 @@ namespace net::worker::commands::RS{
 		}
 
 	private:
-		template<typename It, typename MyReservoirSampling>
-		struct RSADDFactory : hm4::PairFactory::IFactoryAction<1,1,RSADDFactory<It, MyReservoirSampling> >{
+		template<typename MyReservoirSampling>
+		struct RSADDFactory : hm4::PairFactory::IFactoryAction<1,1,RSADDFactory<MyReservoirSampling> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,RSADDFactory>;
+			using It   = ParamContainer::const_iterator;
 
 			RSADDFactory(std::string_view const key, const Pair *pair, MyReservoirSampling rs, It begin, It end, std::mt19937_64 &rand64) :
 							Base::IFactoryAction	(key, rs.bytes(), pair),

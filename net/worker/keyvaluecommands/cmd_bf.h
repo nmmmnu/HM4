@@ -78,9 +78,7 @@ namespace net::worker::commands::BF{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, max_size);
 
-			using MyBFADD_Factory = BFADD_Factory<ParamContainer::iterator>;
-
-			MyBFADD_Factory factory{ key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p) };
+			BFADD_Factory factory{ key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p) };
 
 			insertHintVFactory(pair, *db, factory);
 
@@ -88,11 +86,11 @@ namespace net::worker::commands::BF{
 		}
 
 	private:
-		template<typename It>
-		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory<It> >{
+		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory>{
 			using Pair   = hm4::Pair;
-			using Base   = hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory<It> >;
+			using Base   = hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory>;
 			using BitOps = bf_impl_::BitOps;
+			using It     = ParamContainer::const_iterator;
 
 			constexpr BFADD_Factory(std::string_view const key, const Pair *pair, uint64_t max_bits, size_t max_hash, It begin, It end) :
 							Base::IFactoryAction	(key, BitOps::size(max_bits - 1), pair),

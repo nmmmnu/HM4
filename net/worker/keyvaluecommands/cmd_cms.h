@@ -132,7 +132,7 @@ namespace net::worker::commands::CMS{
 
 				const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
 
-				using MyCMSADD_Factory = CMSADD_Factory<T, ParamContainer::iterator>;
+				using MyCMSADD_Factory = CMSADD_Factory<T>;
 
 				MyCMSADD_Factory factory{ key, pair, cms, std::begin(p) + varg, std::end(p) };
 
@@ -142,10 +142,11 @@ namespace net::worker::commands::CMS{
 			}
 
 		private:
-			template<typename T, typename It>
-			struct CMSADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T, It> >{
+			template<typename T>
+			struct CMSADD_Factory : hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T> >{
 				using Pair = hm4::Pair;
-				using Base = hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T, It> >;
+				using Base = hm4::PairFactory::IFactoryAction<1,1, CMSADD_Factory<T> >;
+				using It   = ParamContainer::const_iterator;
 
 				using CMST = cms_impl_::CMS<T>;
 

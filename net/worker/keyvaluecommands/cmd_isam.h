@@ -347,18 +347,16 @@ namespace net::worker::commands::ISAM_cmd{
 			if (isam.size() != p.size() - varg)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			using MyISETALL_Factory = ISETALL_Factory<ParamContainer::iterator>;
-
-			hm4::insertV<MyISETALL_Factory>(*db, key, isam, std::begin(p) + varg, std::end(p));
+			hm4::insertV<ISETALL_Factory>(*db, key, isam, std::begin(p) + varg, std::end(p));
 
 			return result.set_1();
 		}
 
-
-		template<typename It>
-		struct ISETALL_Factory : hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory<It> >{
+	private:
+		struct ISETALL_Factory : hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory<It> >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory>;
+			using It   = ParamContainer::const_iterator;
 
 			constexpr ISETALL_Factory(std::string_view const key, ISAM const &isam, It begin, [[maybe_unused]] It end) :
 							Base::IFactoryAction	(key, isam.bytes()),
@@ -464,7 +462,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void process__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
 
-			using MyISET_Factory = ISET_Factory<Searcher, ParamContainer::iterator>;
+			using MyISET_Factory = ISET_Factory<Searcher>;
 
 			MyISET_Factory factory{ key, pair, isam, searcher, begin, end };
 
@@ -475,10 +473,11 @@ namespace net::worker::commands::ISAM_cmd{
 			);
 		}
 
-		template<typename Searcher, typename It>
-		struct ISET_Factory : hm4::PairFactory::IFactoryAction<1,1, ISET_Factory<Searcher, It> >{
+		template<typename Searcher>
+		struct ISET_Factory : hm4::PairFactory::IFactoryAction<1,1, ISET_Factory<Searcher> >{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1, ISET_Factory<Searcher, It> >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, ISET_Factory<Searcher> >;
+			using It   = ParamContainer::const_iterator;
 
 			constexpr ISET_Factory(std::string_view const key, const Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end) :
 							Base::IFactoryAction	(key, isam.bytes(), pair, ISAM::PADDING),
@@ -593,7 +592,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void process__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end){
 
-			using MyIDEL_Factory = IDEL_Factory<Searcher, ParamContainer::iterator>;
+			using MyIDEL_Factory = IDEL_Factory<Searcher>;
 
 			MyIDEL_Factory factory{ key, pair, isam, searcher, begin, end };
 
@@ -604,10 +603,11 @@ namespace net::worker::commands::ISAM_cmd{
 			);
 		}
 
-		template<typename Searcher, typename It>
-		struct IDEL_Factory : hm4::PairFactory::IFactoryAction<1,1, IDEL_Factory<Searcher, It> >{
+		template<typename Searcher>
+		struct IDEL_Factory : hm4::PairFactory::IFactoryAction<1,1, IDEL_Factory<Searcher> >{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1, IDEL_Factory<Searcher, It> >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1, IDEL_Factory<Searcher> >;
+			using It   = ParamContainer::const_iterator;
 
 			constexpr IDEL_Factory(std::string_view const key, const Pair *pair, ISAM const &isam, Searcher const &searcher, It begin, It end) :
 							Base::IFactoryAction	(key, isam.bytes(), pair, ISAM::PADDING),

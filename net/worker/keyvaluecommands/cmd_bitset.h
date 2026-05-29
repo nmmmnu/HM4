@@ -47,21 +47,19 @@ namespace net::worker::commands::BITSET{
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
-			using MyBITSET_Factory = BITSET_Factory<ParamContainer::iterator>;
-
 			auto const new_bytes = bytes;
 
 			if (pair && hm4::canInsertHintValSize(*db, pair, new_bytes)){
 				auto const val_size = pair->getVal().size();
 
-				hm4::proceedInsertHintV<MyBITSET_Factory>(*db, const_cast<Pair *>(pair), key, val_size, pair, std::begin(p) + varg, std::end(p));
+				hm4::proceedInsertHintV<BITSET_Factory>(*db, const_cast<Pair *>(pair), key, val_size, pair, std::begin(p) + varg, std::end(p));
 			}else{
 				auto const val_size = std::max(
 							new_bytes,
 							pair ? pair->getVal().size() : 0
 				);
 
-				hm4::insertV<MyBITSET_Factory>(*db, key, val_size, pair, std::begin(p) + varg, std::end(p));
+				hm4::insertV<BITSET_Factory>(*db, key, val_size, pair, std::begin(p) + varg, std::end(p));
 			}
 
 			return result.set();
@@ -89,10 +87,10 @@ namespace net::worker::commands::BITSET{
 		}
 
 	private:
-		template<typename It>
-		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory<It> >{
+		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory<It> >;
+			using Base = hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory>;
+			using It     = ParamContainer::const_iterator;
 
 			constexpr BITSET_Factory(std::string_view const key, uint64_t val_size, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, val_size, pair),

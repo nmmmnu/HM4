@@ -45,7 +45,7 @@ namespace net::worker::commands::TDigest{
 			using Pair	= hm4::Pair;
 			using Base	= hm4::PairFactory::IFactoryAction<1, 1, TDADD_Factory>;
 
-			using It	= TDItemVector::iterator;
+			using It	= TDItemVector::const_iterator;
 
 			constexpr TDADD_Factory(std::string_view const key, const Pair *pair, RawTDigest &tdigest, double delta, It begin, It end) :
 							Base::IFactoryAction	(key, tdigest.bytes(), pair),
@@ -88,7 +88,7 @@ namespace net::worker::commands::TDigest{
 			using Pair	= hm4::Pair;
 			using Base	= hm4::PairFactory::IFactoryAction<1, 1, TDMERGE_Factory>;
 
-			using It	= TDPairVector::iterator;
+			using It	= TDPairVector::const_iterator;
 
 			constexpr TDMERGE_Factory(std::string_view const key, const Pair *pair, RawTDigest &tdigest, double delta, It begin, It end) :
 							Base::IFactoryAction	(key, tdigest.bytes(), pair),

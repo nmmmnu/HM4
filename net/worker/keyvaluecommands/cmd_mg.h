@@ -100,7 +100,7 @@ namespace net::worker::commands::MG{
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, mg.bytes());
 
-			using MyMGADDFactory = MGADDFactory<ParamContainer::iterator, MyRawMisraGries>;
+			using MyMGADDFactory = MGADDFactory<MyRawMisraGries>;
 
 			MyMGADDFactory factory{ key, pair, mg, std::begin(p) + varg, std::end(p) };
 
@@ -112,10 +112,11 @@ namespace net::worker::commands::MG{
 		}
 
 	private:
-		template<typename It, typename MyRawMisraGries>
-		struct MGADDFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDFactory<It, MyRawMisraGries> >{
+		template<typename MyRawMisraGries>
+		struct MGADDFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDFactory<MyRawMisraGries> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,MGADDFactory>;
+			using It   = ParamContainer::const_iterator;
 
 			MGADDFactory(std::string_view const key, const Pair *pair, MyRawMisraGries mg, It begin, It end) :
 							Base::IFactoryAction	(key, mg.bytes(), pair),

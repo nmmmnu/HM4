@@ -40,10 +40,11 @@ namespace net::worker::commands::HH{
 
 
 
-		template<typename It, bool Up, class MyRawHeavyHitter>
-		struct HHADDFactory : hm4::PairFactory::IFactoryAction<1,1,HHADDFactory<It, Up, MyRawHeavyHitter> >{
+		template<bool Up, class MyRawHeavyHitter>
+		struct HHADDFactory : hm4::PairFactory::IFactoryAction<1,1,HHADDFactory<Up, MyRawHeavyHitter> >{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,HHADDFactory>;
+			using It   = ParamContainer::const_iterator;
 
 			HHADDFactory(std::string_view const key, const Pair *pair, MyRawHeavyHitter hh, It begin, It end) :
 							Base::IFactoryAction	(key, hh.bytes(), pair),
@@ -121,7 +122,7 @@ namespace net::worker::commands::HH{
 
 					const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
 
-					using MyHHADDFactory = HHADDFactory<ParamContainer::iterator, Up, MyRawHeavyHitter>;
+					using MyHHADDFactory = HHADDFactory<Up, MyRawHeavyHitter>;
 
 					MyHHADDFactory factory{ key, pair, hh, std::begin(p) + varg, std::end(p) };
 

@@ -444,9 +444,9 @@ namespace net::worker::commands::HLL{
 		using HLLVector = StaticVector<const uint8_t *, OutputBlob::ParamContainerSize>;
 
 	private:
-		struct PFMergeFactory : hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory >{
+		struct PFMergeFactory : hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory >;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>;
 
 			PFMergeFactory(std::string_view const key, const Pair *pair, HLLVector::iterator begin, HLLVector::iterator end) :
 							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
