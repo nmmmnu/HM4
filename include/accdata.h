@@ -73,6 +73,10 @@ private:
 	}
 
 public:
+	constexpr bool ok() const{
+		return count_;
+	}
+
 	constexpr void clear(){
 		count_ = 0;
 	}
@@ -237,6 +241,12 @@ public:
 	}
 
 	constexpr double operator[](std::string_view s) const;
+
+	template<typename F>
+	constexpr void for_each(F f) const;
+
+	template<typename F>
+	constexpr static void for_each_key(F f);
 };
 
 
@@ -303,6 +313,52 @@ constexpr double AccData::operator[](std::string_view s) const{
 
 	default: return 0.;
 	}
+}
+
+template<typename F>
+constexpr void AccData::for_each(F f) const{
+	f("count"	, count		());
+	f("open"	, first		());
+	f("close"	, last		());
+	f("first"	, first		());
+	f("last"	, last		());
+	f("min"		, min		());
+	f("max"		, max		());
+	f("sum"		, sum		());
+	f("sumsq"	, sum2		());
+	f("sum2"	, sum2		());
+	f("range"	, range		());
+	f("change"	, change	());
+	f("avg"		, avg		());
+	f("harm"	, harm		());
+	f("geom"	, geom		());
+	f("vari"	, vari		());
+	f("sdev"	, sdev		());
+	f("rms"		, rms		());
+	f("cvar"	, cvar		());
+}
+
+template<typename F>
+constexpr void AccData::for_each_key(F f){
+	f("count"	);
+	f("open"	);
+	f("close"	);
+	f("first"	);
+	f("last"	);
+	f("min"		);
+	f("max"		);
+	f("sum"		);
+	f("sumsq"	);
+	f("sum2"	);
+	f("range"	);
+	f("change"	);
+	f("avg"		);
+	f("harm"	);
+	f("geom"	);
+	f("vari"	);
+	f("sdev"	);
+	f("rms"		);
+	f("cvar"	);
 }
 
 #endif

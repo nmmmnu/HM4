@@ -47,10 +47,10 @@ namespace net::worker::commands{
 
 		using BufferKContainer	= StaticVector	<hm4::PairBufferKey	, ContainerSize>;	// ~64  MB
 
-		constexpr static size_t MaxMemory =	sizeof(Container	)	+	//   1 MB
-							sizeof(BufferContainer	)	+	//   8 MB
-							sizeof(PairContainer	)	+
-							hm4::Pair::maxBytes()		+	// 256 MB !!!, bit bigger than hm4::PairBufferVal
+		constexpr static size_t MaxMemory =	sizeof(Container	)	+	//   1   MB
+							sizeof(BufferContainer	)	+	//   8   MB
+							sizeof(PairContainer	)	+	//   0.5 MB
+							hm4::Pair::maxBytes()		+	// 256   MB !!!, bit bigger than hm4::PairBufferVal
 							64
 		;
 

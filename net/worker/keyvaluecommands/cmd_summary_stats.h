@@ -7,40 +7,13 @@
 
 namespace net::worker::commands::SummaryStats{
 
-	constexpr bool UseHashSearcher = true;
-
 	namespace summary_stats_impl_{
-
-		struct SSADDFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>;
-
-			using It = ParamContainer::const_iterator;
-
-			SSADDFactory(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, sizeof(AccData), pair	),
-							begin			(begin				),
-							end			(end				){}
-
-			void action(Pair *pair){
-				auto *acc = hm4::getValAs<AccData>(pair);
-
-				for(auto itk = begin; itk != end; ++itk){
-					double const d = to_double_def(*itk);
-					acc->accumulate(d);
-				}
-			}
-
-		private:
-			It	begin;
-			It	end;
-		};
-
-
+		constexpr std::string_view ZERO = "+0.0000000000";
 
 		template<typename List>
 		auto const &mergeLoadContainer(ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
 						List const &list, OutputBlob::PairContainer &pcontainer){
+
 			for(auto it = begin; it != end; ++it){
 				auto const &key = *it;
 				const auto *pair = hm4::getPairPtrWithSize(list, key, sizeof(AccData));
@@ -59,8 +32,6 @@ namespace net::worker::commands::SummaryStats{
 			return pcontainer;
 		}
 
-
-
 		void merge(AccData &acc, OutputBlob::PairContainer::const_iterator begin, OutputBlob::PairContainer::const_iterator end){
 			for(auto it = begin; it != end; ++it){
 				const auto *accSub = hm4::getValAs<AccData>(*it);
@@ -74,6 +45,76 @@ namespace net::worker::commands::SummaryStats{
 			merge(acc, begin, end);
 
 			return acc;
+		}
+
+		std::string_view convertData(double const d, OutputBlob::buffer_t &buffer){
+			constexpr static std::string_view fmt_mask = "{:+.10f}";
+
+			auto const r = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
+
+			if (r.out == std::end(buffer))
+				return ZERO;
+			else
+				return { buffer.data(), r.size };
+		}
+
+		std::string_view getData(AccData const &acc,
+						std::string_view sub,
+							OutputBlob::buffer_t &buffer){
+			return convertData(acc[sub], buffer);
+		}
+
+		auto const &getData(AccData const &acc,
+						ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
+							OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer){
+
+			for(auto it = begin; it != end; ++it){
+				const auto &sub = *it;
+
+				bcontainer.push_back();
+
+				auto &buffer = bcontainer.back();
+
+				container.emplace_back(
+					getData(acc, sub, buffer)
+				);
+			}
+
+			return container;
+		}
+
+		auto const &getDataAllZeroes(OutputBlob::Container &container){
+
+			auto f = [&container](std::string_view sub){
+				container.push_back(sub);
+				container.push_back(ZERO);
+			};
+
+			AccData::for_each_key(f);
+
+			return container;
+		}
+
+		auto const &getDataAll(AccData const &acc,
+							OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer){
+			if (!acc.ok())
+				return getDataAllZeroes(container);
+
+			auto f = [&container, &bcontainer](std::string_view sub, double const d){
+
+				bcontainer.push_back();
+
+				auto &buffer = bcontainer.back();
+
+				container.push_back(sub);
+				container.push_back(
+					convertData(d, buffer)
+				);
+			};
+
+			acc.for_each(f);
+
+			return container;
 		}
 
 	} // namespace summary_stats_impl_
@@ -140,14 +181,38 @@ namespace net::worker::commands::SummaryStats{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
 
-			using namespace summary_stats_impl_;
-
 			SSADDFactory factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
 			insertHintVFactory(pair, *db, factory);
 
 			return result.set_1();
 		}
+
+	private:
+		struct SSADDFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>;
+
+			using It = ParamContainer::const_iterator;
+
+			SSADDFactory(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, sizeof(AccData), pair	),
+							begin			(begin				),
+							end			(end				){}
+
+			void action(Pair *pair){
+				auto *acc = hm4::getValAs<AccData>(pair);
+
+				for(auto itk = begin; itk != end; ++itk){
+					double const d = to_double_def(*itk);
+					acc->accumulate(d);
+				}
+			}
+
+		private:
+			It	begin;
+			It	end;
+		};
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
@@ -257,14 +322,46 @@ namespace net::worker::commands::SummaryStats{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			if (p.size() - varg == 1)
+				return process_1_(p[varg], db, result, blob);
+			else
+				return process_N_(std::begin(p) + varg, std::end(p), db, result, blob);
+		}
+
+	private:
+		static void process_1_(std::string_view key,
+						DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+
 			using namespace summary_stats_impl_;
 
-			auto const &pcontainer = mergeLoadContainer(
-				std::begin(p) + varg	,
-				std::end(p)		,
-				*db			,
-				blob.construct<OutputBlob::PairContainer>()
-			);
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
+
+			if (!pair){
+				auto &container  = blob.construct<OutputBlob::Container>();
+
+				return result.set_container(
+					getDataAllZeroes(container)
+				);
+			}else{
+				const auto *acc = hm4::getValAs<AccData>(pair);
+
+				auto &container  = blob.construct<OutputBlob::Container>();
+				auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+				return result.set_container(
+					getDataAll(*acc, container, bcontainer)
+				);
+			}
+		}
+
+		static void process_N_(ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
+						DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+
+			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
+
+			using namespace summary_stats_impl_;
+
+			mergeLoadContainer(begin, end, *db, pcontainer);
 
 			AccData acc = merge(std::cbegin(pcontainer), std::cend(pcontainer));
 
@@ -273,48 +370,9 @@ namespace net::worker::commands::SummaryStats{
 			auto &container  = blob.construct<OutputBlob::Container>();
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
-			auto _ = [&container, &bcontainer, &acc](std::string_view key, double const d){
-
-				constexpr static std::string_view fmt_mask = "{:+.10f}";
-
-				bcontainer.push_back();
-
-				auto &buffer = bcontainer.back();
-
-				auto const r = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
-
-				if (r.out == std::end(buffer)){
-					container.push_back(key);
-					container.push_back("error");
-				}else{
-					container.push_back(key);
-					container.emplace_back( buffer.data(), r.size );
-				}
-			};
-
-			auto &a = acc;
-
-			_("count"	, a.count	());
-			_("open"	, a.first	());
-			_("close"	, a.last	());
-			_("first"	, a.first	());
-			_("last"	, a.last	());
-			_("min"		, a.min		());
-			_("max"		, a.max		());
-			_("sum"		, a.sum		());
-			_("sumsq"	, a.sum2	());
-			_("sum2"	, a.sum2	());
-			_("range"	, a.range	());
-			_("change"	, a.change	());
-			_("avg"		, a.avg		());
-			_("harm"	, a.harm	());
-			_("geom"	, a.geom	());
-			_("vari"	, a.vari	());
-			_("sdev"	, a.sdev	());
-			_("rms"		, a.rms		());
-			_("cvar"	, a.cvar	());
-
-			return result.set_container(container);
+			return result.set_container(
+				getDataAll(acc, container, bcontainer)
+			);
 		}
 
 	private:
@@ -347,28 +405,23 @@ namespace net::worker::commands::SummaryStats{
 
 			auto const &sub = p[2];
 
-			if (!hm4::Pair::isKeyValid(key))
+			if (sub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			using namespace summary_stats_impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
 
+			if (!pair)
+				return result.set(ZERO);
+
 			const auto *acc  = hm4::getValAs<AccData>(pair);
-
-			auto const d = (*acc)[sub];
-
-			constexpr static std::string_view fmt_mask = "{:+.10f}";
 
 			OutputBlob::buffer_t buffer;
 
-			auto const r = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
-
-			if (r.out == std::end(buffer)){
-				constexpr std::string_view s = "0.0";
-				return result.set(s);
-			}else{
-				std::string_view s{ buffer.data(), r.size };
-				return result.set(s);
-			}
+			return result.set(
+				getData(*acc, sub, buffer)
+			);
 		}
 
 	private:
@@ -399,49 +452,292 @@ namespace net::worker::commands::SummaryStats{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container  = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
-
 			auto const varg = 2;
 
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const &sub = *itk; sub.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			// for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-			// 	const auto &subN = *itk;
-			//
-			// 	// no need to check
-			// }
+			using namespace summary_stats_impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
 
-			const auto *acc  = hm4::getValAs<AccData>(pair);
+			if (!pair){
+				auto &container  = blob.construct<OutputBlob::Container>();
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto &sub = *itk;
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+					container.push_back(ZERO);
 
-				auto const d = (*acc)[sub];
-
-				constexpr static std::string_view fmt_mask = "{:+.10f}";
-
-				bcontainer.push_back();
-
-				auto &buffer = bcontainer.back();
-
-				auto const r = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
-
-				if (r.out == std::end(buffer))
-					container.push_back("error");
-				else
-					container.emplace_back(buffer.data(), r.size);
+				return result.set_container(container);
 			}
 
-			return result.set_container(container);
+			const auto *acc  = hm4::getValAs<AccData>(pair);
+
+			auto &container  = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			return result.set_container(
+				getData(*acc, std::begin(p) + varg, std::end(p), container, bcontainer)
+			);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"ssmget",		"SSMGET"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct SSADDGETALL : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// ssaddgetall key value value value...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() < 3)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+
+			auto const &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &val = *itk; val.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
+
+			SSADDGETALLFactory &factory = blob.construct<SSADDGETALLFactory>(key, pair, std::begin(p) + varg, std::end(p));
+
+			insertHintVFactory(pair, *db, factory);
+
+			return result.set_container(
+				factory.getResult()
+			);
+		}
+
+	private:
+		struct SSADDGETALLFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETALLFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDGETALLFactory>;
+
+			using It = ParamContainer::const_iterator;
+
+			SSADDGETALLFactory(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, sizeof(AccData), pair	),
+							begin			(begin				),
+							end			(end				){}
+
+			void action(Pair *pair){
+				auto *acc = hm4::getValAs<AccData>(pair);
+
+				for(auto itk = begin; itk != end; ++itk){
+					double const d = to_double_def(*itk);
+					acc->accumulate(d);
+				}
+
+				using namespace summary_stats_impl_;
+
+				// fill the result
+				getDataAll(*acc, container, bcontainer);
+			}
+
+			auto const &getResult() const{
+				return container;
+			}
+
+		private:
+			It				begin;
+			It				end;
+			OutputBlob::Container		container;
+			OutputBlob::BufferContainer	bcontainer;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ssaddgetall",		"SSADDGETALL"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct SSADDGET : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// ssaddget key value sub
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+
+			auto const &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &val = p[2];
+
+			if (val.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
+			auto const &sub = p[3];
+
+			if (sub.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
+
+			SSADDGETFactory factory{ key, pair, val, sub };
+
+			insertHintVFactory(pair, *db, factory);
+
+			return result.set(
+				factory.getResult()
+			);
+		}
+
+	private:
+		struct SSADDGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>;
+
+			SSADDGETFactory(std::string_view const key, const Pair *pair, std::string_view val, std::string_view sub) :
+							Base::IFactoryAction	(key, sizeof(AccData), pair	),
+							val			(val				),
+							sub			(sub				){}
+
+			void action(Pair *pair){
+				auto *acc = hm4::getValAs<AccData>(pair);
+
+				double const d = to_double_def(val);
+				acc->accumulate(d);
+
+				using namespace summary_stats_impl_;
+
+				// fill the result
+				result = getData(*acc, sub, buffer);
+			}
+
+			auto const &getResult() const{
+				return result;
+			}
+
+		private:
+			std::string_view	val;
+			std::string_view	sub;
+
+			std::string_view	result;
+			OutputBlob::buffer_t	buffer;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ssaddget",		"SSADDGET"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct SSADDMGET : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// ssaddget key value sub sub sub...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			if (p.size() < 4)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			auto const &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &val = p[2];
+
+			if (val.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
+			auto const varg = 3;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const &sub = *itk; sub.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
+
+			SSADDMGETFactory &factory = blob.construct<SSADDMGETFactory>(key, pair, val, std::begin(p) + varg, std::end(p));
+
+			insertHintVFactory(pair, *db, factory);
+
+			return result.set_container(
+				factory.getResult()
+			);
+		}
+
+	private:
+		struct SSADDMGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDMGETFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDMGETFactory>;
+
+			using It = ParamContainer::const_iterator;
+
+			SSADDMGETFactory(std::string_view const key, const Pair *pair, std::string_view val, It begin, It end) :
+							Base::IFactoryAction	(key, sizeof(AccData), pair	),
+							val			(val				),
+							begin			(begin				),
+							end			(end				){}
+
+			void action(Pair *pair){
+				auto *acc = hm4::getValAs<AccData>(pair);
+
+				double const d = to_double_def(val);
+				acc->accumulate(d);
+
+				using namespace summary_stats_impl_;
+
+				// fill the result
+				getData(*acc, begin, end, container, bcontainer);
+			}
+
+			auto const &getResult() const{
+				return container;
+			}
+
+		private:
+			std::string_view		val;
+
+			It				begin;
+			It				end;
+
+			OutputBlob::Container		container;
+			OutputBlob::BufferContainer	bcontainer;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"ssaddmget",		"SSADDMGET"
 		};
 	};
 
@@ -454,14 +750,14 @@ namespace net::worker::commands::SummaryStats{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				SSRESERVE	,
+				SSADD		,
 				SSMERGE		,
 				SSGETALL	,
 				SSGET		,
 				SSMGET		,
-			//	SSADDGETALL	,
-			//	SSADDGET	,
-			//	SSADDMGET
-				SSADD
+				SSADDGETALL	,
+				SSADDGET	,
+				SSADDMGET
 			>(pack);
 		}
 	};
