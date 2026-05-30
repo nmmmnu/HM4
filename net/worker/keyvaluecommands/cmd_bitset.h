@@ -200,12 +200,7 @@ namespace net::worker::commands::BITSET{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.construct<OutputBlob::Container>();
-
 			auto const varg = 2;
-
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			const char *data = hm4::getPairOK_(*db, key, [](bool b, const auto *p) -> const char *{
 				if (b)
@@ -213,6 +208,8 @@ namespace net::worker::commands::BITSET{
 				else
 					return nullptr;
 			});
+
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (data){
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){

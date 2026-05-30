@@ -242,18 +242,15 @@ namespace net::worker::commands::ISAM_cmd{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.construct<OutputBlob::Container>();
-
 			auto const varg = 3;
-
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			auto const &storage  = hm4::getPairVal(*db, key);
+
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (p.size() - varg == 1)
 				return collect_1__(result, container, schema, storage, std::begin(p) + varg, std::end(p));

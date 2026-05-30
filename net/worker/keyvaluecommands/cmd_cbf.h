@@ -586,9 +586,6 @@ namespace net::worker::commands::CBF{
 
 			Container container;
 
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
-
 			if (! pair){
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					container.push_back("0");

@@ -259,8 +259,6 @@ namespace net::worker::commands::Geo{
 
 			using namespace geo_impl_;
 
-			auto &container = blob.construct<OutputBlob::Container>();
-
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
@@ -273,8 +271,7 @@ namespace net::worker::commands::Geo{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const &name = *itk;

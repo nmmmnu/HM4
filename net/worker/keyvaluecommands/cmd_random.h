@@ -52,13 +52,10 @@ namespace net::worker::commands::Random{
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
-			auto &container  = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
-
 			auto const varg = 1;
 
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+			auto &container  = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const index = from_string<uint64_t>(*itk);

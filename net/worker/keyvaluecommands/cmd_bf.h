@@ -242,9 +242,6 @@ namespace net::worker::commands::BF{
 
 			auto &container = blob.construct<OutputBlob::Container>();
 
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
-
 			if (data.empty()){
 				// no set-size yet :)
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){

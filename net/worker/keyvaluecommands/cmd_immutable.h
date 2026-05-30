@@ -51,16 +51,13 @@ namespace net::worker::commands::Immutable{
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
-			auto &container = blob.construct<OutputBlob::Container>();
-
 			auto const varg = 1;
-
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				container.emplace_back(
@@ -348,12 +345,7 @@ namespace net::worker::commands::Immutable{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.construct<OutputBlob::Container>();
-
 			auto const varg = 2;
-
-			if (container.capacity() < p.size() - varg)
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
@@ -361,6 +353,8 @@ namespace net::worker::commands::Immutable{
 				if (!hm4::Pair::isCompositeKeyValid(1, keyN, subN))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
+
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				const auto &subN = *itk;
