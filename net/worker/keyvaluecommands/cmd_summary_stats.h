@@ -39,6 +39,7 @@ namespace net::worker::commands::SummaryStats{
 			}
 		}
 
+		[[nodiscard]]
 		AccData merge(OutputBlob::PairContainer::const_iterator begin, OutputBlob::PairContainer::const_iterator end){
 			AccData acc;
 
@@ -47,6 +48,7 @@ namespace net::worker::commands::SummaryStats{
 			return acc;
 		}
 
+		[[nodiscard]]
 		std::string_view convertData(double const d, OutputBlob::buffer_t &buffer){
 			constexpr static std::string_view fmt_mask = "{:+.10f}";
 
@@ -58,6 +60,7 @@ namespace net::worker::commands::SummaryStats{
 				return { buffer.data(), r.size };
 		}
 
+		[[nodiscard]]
 		std::string_view getData(AccData const &acc,
 						std::string_view sub,
 							OutputBlob::buffer_t &buffer){
@@ -83,6 +86,7 @@ namespace net::worker::commands::SummaryStats{
 			return container;
 		}
 
+		[[nodiscard]]
 		auto const &getDataAllZeroes(OutputBlob::Container &container){
 
 			auto f = [&container](std::string_view sub){
@@ -552,6 +556,7 @@ namespace net::worker::commands::SummaryStats{
 				getDataAll(*acc, container, bcontainer);
 			}
 
+			[[nodiscard]]
 			auto const &getResult() const{
 				return container;
 			}
@@ -634,6 +639,7 @@ namespace net::worker::commands::SummaryStats{
 				result = getData(*acc, sub, buffer);
 			}
 
+			[[nodiscard]]
 			auto const &getResult() const{
 				return result;
 			}
@@ -721,6 +727,7 @@ namespace net::worker::commands::SummaryStats{
 				getData(*acc, begin, end, container, bcontainer);
 			}
 
+			[[nodiscard]]
 			auto const &getResult() const{
 				return container;
 			}
