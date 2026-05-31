@@ -77,7 +77,6 @@ example_module:     |
   127.0.0.1:6379> ssadd a 1
   (integer) 1
   127.0.0.1:6379> ssgetall a
-  127.0.0.1:6379> ssgetall a
    1) "count"
    2) "+2.0000000000"
    3) "open"
