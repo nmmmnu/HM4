@@ -1,0 +1,30 @@
+- id:        SSMERGE
+  name:      SSMERGE
+  usage:     SSMERGE key key_to_merge [key_to_merge ...]
+  params:
+    items:
+    - k: key
+      v: name of the destination summary_stats object
+    - k: key_to_merge
+      v: name of the source summary_stats object to be merged
+
+  description: |
+    <p>Merge multiple statistical blocks into the destination *key*.</p>
+    <p>The command collects all valid source objects, automatically sorts them chronologically using their internal timestamps,
+    and performs parallel statistical reduction.<br />
+    The destination *key* is completely overwritten with the newly combined statistical dataset.</p>
+
+  return_type: bool
+  return:      always returns 1
+  version:     1.3.15.1
+  complexity:  "[number of keys] * READ + WRITE"
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ssadd a 1 1
+    (integer) 1
+    127.0.0.1:6379> ssadd b 2 2
+    (integer) 1
+    127.0.0.1:6379> ssmerge c a b
+    (integer) 1
+

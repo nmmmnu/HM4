@@ -267,6 +267,20 @@
 			</ul>
 		</div>
 		<div>
+			<a href="#M::SS">summary_stats</a>
+			<ul>
+				<li><a href="#C::SSRESERVE">SSRESERVE</a></li>
+				<li><a href="#C::SSADD">SSADD</a></li>
+				<li><a href="#C::SSMERGE">SSMERGE</a></li>
+				<li><a href="#C::SSGETALL">SSGETALL</a></li>
+				<li><a href="#C::SSGET">SSGET</a></li>
+				<li><a href="#C::SSMGET">SSMGET</a></li>
+				<li><a href="#C::SSADDGETALL">SSADDGETALL</a></li>
+				<li><a href="#C::SSADDGET">SSADDGET</a></li>
+				<li><a href="#C::SSADDMGET">SSADDMGET</a></li>
+			</ul>
+		</div>
+		<div>
 			<a href="#M::MURMUR">MURMUR</a>
 			<ul>
 				<li><a href="#C::MURMUR">MURMUR</a></li>
@@ -11900,6 +11914,7 @@ The data is parsed using the provided schema. Trailing spaces (padding) are auto
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IGETKEYS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -12306,6 +12321,938 @@ The new empty values are written directly onto their exact byte positions inside
 (integer) 1
 127.0.0.1:6379&gt; get a
 &quot;1              &quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::SS"></a>
+		<h2>Module summary_stats</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides commands for working with <b>online stream statistics</b> over numeric data sets.
+It allows high-throughput, memory-efficient accumulation of data points and extracts multi-variable statistical properties without storing individual samples.</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Fixed-Size Statistical Accumulator</b></p>
+<p>Every statistics key allocates a fixed-size internal structure (AccData) that tracks counts, chronological markers, extremes, and sum products.
+Statistical operations run strictly inside a pre-allocated memory pool with <b>zero heap allocations</b> during query execution.</p>
+
+<p>Following stats are collected / calculated.</p>
+
+<table border="1" class="x">
+    <tr>
+      <th>Metric Name</th>
+      <th>Mathematical Meaning</th>
+    </tr>
+    <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+    <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+    <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+    <tr><td>first	</td><td>Alias of open									</td></tr>
+    <tr><td>last	</td><td>Alias of close									</td></tr>
+    <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+    <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+    <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+    <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+    <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+    <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+    <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+    <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+    <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+    <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+    <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+    <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+    <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+    <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+</table>
+
+<p><b>2. Modifying and Merging Data</b></p>
+<p>Data can be pushed into an accumulator individually or combined from multiple separate historical streams.</p>
+<ul>
+  <li><i>ssreserve</i> - explicitly pre-allocates and initializes an empty statistical block.</li>
+  <li><i>ssadd</i> - appends one or multiple numeric values to a statistical accumulator.</li>
+  <li><i>ssmerge</i> - loads and atomically aggregates multiple statistical blocks into a destination key, sorting components chronologically using internal timestamps.</li>
+</ul>
+
+<p><b>3. Retrieving Data</b></p>
+<p>Metrics can be fetched as a complete 19-variable analytical report or selectively cherry-picked via specific subkey names. All metrics are formatted with sign signs and a fixed-width precision of 10 decimal places.</p>
+<ul>
+  <li><i>ssgetall</i> - returns a flat list of 38 elements containing all calculated statistical variables (e.g. min, max, avg, standard deviation, geometric/harmonic means).</li>
+  <li><i>ssget</i> - fetches only a single specific metric string for the requested subkey.</li>
+  <li><i>ssmget</i> - multi-key variant that returns an array of specific requested subkeys.</li>
+</ul>
+
+<p><b>4. Atomic Read-Modify-Write (RMW) Pipelines</b></p>
+<p>For high-frequency logging streams, the module offers combined commands that accept new data points and immediately return updated results in a single, atomic network transaction.</p>
+<ul>
+  <li><i>ssaddgetall</i> - pushes values and instantly returns the full updated 38-element statistical report.</li>
+  <li><i>ssaddget</i> - pushes a value and instantly returns only the requested single metric.</li>
+  <li><i>ssaddmget</i> - pushes a value and instantly returns an array of specific requested subkeys.</li>
+</ul>
+
+<p><b>5. NaN and Division-by-Zero Protection</b></p>
+<p>Empty state evaluations (when count is 0 or 1 for variance) are safely intercepted by the module's math layer.
+Instead of generating corrupted CPU NaN or Infinity states, uninitialized metrics safely return <code>0.0</code> or <code>+0.0000000000</code>.</p>
+
+<p><b>Tip:</b> Use <i>ssaddgetall</i> in production logs to update your data streams and paint live charts using a single network round-trip.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1
+(integer) 1
+127.0.0.1:6379&gt; ssadd a 1
+(integer) 1
+127.0.0.1:6379&gt; ssgetall a
+127.0.0.1:6379&gt; ssgetall a
+ 1) &quot;count&quot;
+ 2) &quot;+2.0000000000&quot;
+ 3) &quot;open&quot;
+ 4) &quot;+1.0000000000&quot;
+ 5) &quot;close&quot;
+ 6) &quot;+1.0000000000&quot;
+ 7) &quot;first&quot;
+ 8) &quot;+1.0000000000&quot;
+ 9) &quot;last&quot;
+10) &quot;+1.0000000000&quot;
+11) &quot;min&quot;
+12) &quot;+1.0000000000&quot;
+13) &quot;max&quot;
+14) &quot;+1.0000000000&quot;
+15) &quot;sum&quot;
+16) &quot;+2.0000000000&quot;
+17) &quot;sumsq&quot;
+18) &quot;+2.0000000000&quot;
+19) &quot;sum2&quot;
+20) &quot;+2.0000000000&quot;
+21) &quot;range&quot;
+22) &quot;+0.0000000000&quot;
+23) &quot;change&quot;
+24) &quot;+0.0000000000&quot;
+25) &quot;avg&quot;
+26) &quot;+1.0000000000&quot;
+27) &quot;harm&quot;
+28) &quot;+1.0000000000&quot;
+29) &quot;geom&quot;
+30) &quot;+1.0000000000&quot;
+31) &quot;vari&quot;
+32) &quot;+0.0000000000&quot;
+33) &quot;sdev&quot;
+34) &quot;+0.0000000000&quot;
+35) &quot;rms&quot;
+36) &quot;+1.0000000000&quot;
+37) &quot;cvar&quot;
+38) &quot;+0.0000000000&quot;
+127.0.0.1:6379&gt; ssadd b 2
+(integer) 1
+127.0.0.1:6379&gt; ssadd b 2
+(integer) 1
+127.0.0.1:6379&gt; ssgetall a b
+ 1) &quot;count&quot;
+ 2) &quot;+4.0000000000&quot;
+ 3) &quot;open&quot;
+ 4) &quot;+1.0000000000&quot;
+ 5) &quot;close&quot;
+ 6) &quot;+2.0000000000&quot;
+ 7) &quot;first&quot;
+ 8) &quot;+1.0000000000&quot;
+ 9) &quot;last&quot;
+10) &quot;+2.0000000000&quot;
+11) &quot;min&quot;
+12) &quot;+1.0000000000&quot;
+13) &quot;max&quot;
+14) &quot;+2.0000000000&quot;
+15) &quot;sum&quot;
+16) &quot;+6.0000000000&quot;
+17) &quot;sumsq&quot;
+18) &quot;+10.0000000000&quot;
+19) &quot;sum2&quot;
+20) &quot;+10.0000000000&quot;
+21) &quot;range&quot;
+22) &quot;+1.0000000000&quot;
+23) &quot;change&quot;
+24) &quot;+1.0000000000&quot;
+25) &quot;avg&quot;
+26) &quot;+1.5000000000&quot;
+27) &quot;harm&quot;
+28) &quot;+1.3333333333&quot;
+29) &quot;geom&quot;
+30) &quot;+1.4142135624&quot;
+31) &quot;vari&quot;
+32) &quot;+0.2500000000&quot;
+33) &quot;sdev&quot;
+34) &quot;+0.5000000000&quot;
+35) &quot;rms&quot;
+36) &quot;+1.5811388301&quot;
+37) &quot;cvar&quot;
+38) &quot;+0.3333333333&quot;
+127.0.0.1:6379&gt; ssaddget a 10 sum
+&quot;+12.0000000000&quot;
+127.0.0.1:6379&gt; ssaddmget a 20 count sum
+1) &quot;+3.0000000000&quot;
+2) &quot;+32.0000000000&quot;
+</pre></blockquote>
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::SSRESERVE">SSRESERVE</a></li>
+			<li><a href="#C::SSADD">SSADD</a></li>
+			<li><a href="#C::SSMERGE">SSMERGE</a></li>
+			<li><a href="#C::SSGETALL">SSGETALL</a></li>
+			<li><a href="#C::SSGET">SSGET</a></li>
+			<li><a href="#C::SSMGET">SSMGET</a></li>
+			<li><a href="#C::SSADDGETALL">SSADDGETALL</a></li>
+			<li><a href="#C::SSADDGET">SSADDGET</a></li>
+			<li><a href="#C::SSADDMGET">SSADDMGET</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="SSRESERVE">
+			<a name="C::SSRESERVE"></a>
+			<h4>SSRESERVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSRESERVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSRESERVE key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Create new, empty summary_stats object *key*.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssreserve a
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSADD">
+			<a name="C::SSADD"></a>
+			<h4>SSADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSADD key value [value ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>numeric value to be accumulated into the statistical block</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Accumulate one or multiple numeric values into the summary_stats object *key*.</p>
+<p>If the target *key* does not exist, it will be implicitly created and initialized before the accumulation begins.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1
+(integer) 1
+127.0.0.1:6379&gt; ssadd a 2 3 4
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSMERGE">
+			<a name="C::SSMERGE"></a>
+			<h4>SSMERGE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSMERGE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSMERGE key key_to_merge [key_to_merge ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the destination summary_stats object</td>
+				</tr>
+				<tr>
+					<td>key_to_merge</td>
+					<td>name of the source summary_stats object to be merged</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Merge multiple statistical blocks into the destination *key*.</p>
+<p>The command collects all valid source objects, automatically sorts them chronologically using their internal timestamps,
+and performs parallel statistical reduction.<br />
+The destination *key* is completely overwritten with the newly combined statistical dataset.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1 1
+(integer) 1
+127.0.0.1:6379&gt; ssadd b 2 2
+(integer) 1
+127.0.0.1:6379&gt; ssmerge c a b
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSGETALL">
+			<a name="C::SSGETALL"></a>
+			<h4>SSGETALL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSGETALL		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSGETALL key [key ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object to read and extract metrics from</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Extract the complete multi-variable statistical report for the given key(s).</p>
+
+<p>If a single key is provided, the command executes a fast O(1) single-read path.<br />
+If multiple keys are provided, they are loaded and dynamically merged in-memory, without modifying the data in the database.</p>
+
+<p>The command returns a flat list of 38 elements (19 Key-Value pairs).</p>
+
+<table border="1" class="x">
+    <tr>
+      <th>Metric Name</th>
+      <th>Mathematical Meaning</th>
+    </tr>
+    <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+    <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+    <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+    <tr><td>first	</td><td>Alias of open									</td></tr>
+    <tr><td>last	</td><td>Alias of close									</td></tr>
+    <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+    <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+    <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+    <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+    <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+    <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+    <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+    <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+    <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+    <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+    <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+    <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+    <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+    <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of the formatted values of all supported metrics</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1 1
+(integer) 1
+127.0.0.1:6379&gt; ssadd b 2 2
+(integer) 1
+127.0.0.1:6379&gt; ssgetall a b
+ 1) &quot;count&quot;
+ 2) &quot;+4.0000000000&quot;
+ 3) &quot;open&quot;
+ 4) &quot;+1.0000000000&quot;
+ 5) &quot;close&quot;
+ 6) &quot;+2.0000000000&quot;
+ 7) &quot;first&quot;
+ 8) &quot;+1.0000000000&quot;
+ 9) &quot;last&quot;
+10) &quot;+2.0000000000&quot;
+11) &quot;min&quot;
+12) &quot;+1.0000000000&quot;
+13) &quot;max&quot;
+14) &quot;+2.0000000000&quot;
+15) &quot;sum&quot;
+16) &quot;+6.0000000000&quot;
+17) &quot;sumsq&quot;
+18) &quot;+10.0000000000&quot;
+19) &quot;sum2&quot;
+20) &quot;+10.0000000000&quot;
+21) &quot;range&quot;
+22) &quot;+1.0000000000&quot;
+23) &quot;change&quot;
+24) &quot;+1.0000000000&quot;
+25) &quot;avg&quot;
+26) &quot;+1.5000000000&quot;
+27) &quot;harm&quot;
+28) &quot;+1.3333333333&quot;
+29) &quot;geom&quot;
+30) &quot;+1.4142135624&quot;
+31) &quot;vari&quot;
+32) &quot;+0.2500000000&quot;
+33) &quot;sdev&quot;
+34) &quot;+0.5000000000&quot;
+35) &quot;rms&quot;
+36) &quot;+1.5811388301&quot;
+37) &quot;cvar&quot;
+38) &quot;+0.3333333333&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSGET">
+			<a name="C::SSGET"></a>
+			<h4>SSGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSGET key subkey</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object</td>
+				</tr>
+				<tr>
+					<td>subkey</td>
+					<td>specific metric name to extract (e.g., count, avg, min, max, sdev, etc.)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Extract only a single, specific statistical metric from the given *key*.</p>
+<p>The <code>subkey</code> argument must be one of the valid metric names supported by the module.<br />
+If the target *key* does not exist or is empty, the command safely returns zero value.</p>
+
+<table border="1" class="x">
+    <tr>
+      <th>Metric Name</th>
+      <th>Mathematical Meaning</th>
+    </tr>
+    <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+    <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+    <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+    <tr><td>first	</td><td>Alias of open									</td></tr>
+    <tr><td>last	</td><td>Alias of close									</td></tr>
+    <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+    <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+    <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+    <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+    <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+    <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+    <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+    <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+    <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+    <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+    <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+    <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+    <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+    <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the formatted value of the requested metric</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1 1 3
+(integer) 1
+127.0.0.1:6379&gt; ssget a min
+&quot;+1.0000000000&quot;
+127.0.0.1:6379&gt; ssget a max
+&quot;+3.0000000000&quot;
+127.0.0.1:6379&gt; ssget a non_existent_key
+&quot;+0.0000000000&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSMGET">
+			<a name="C::SSMGET"></a>
+			<h4>SSMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSMGET key subkey [subkey ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object</td>
+				</tr>
+				<tr>
+					<td>subkey</td>
+					<td>specific metric name to extract (e.g., count, avg, min, max, sdev, etc.)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Extract several, specific statistical metric from the given *key*.</p>
+<p>The <code>subkey</code> argument must be one of the valid metric names supported by the module.<br />
+If the target *key* does not exist or is empty, the command safely returns zero value.</p>
+
+<table border="1" class="x">
+    <tr>
+      <th>Metric Name</th>
+      <th>Mathematical Meaning</th>
+    </tr>
+    <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+    <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+    <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+    <tr><td>first	</td><td>Alias of open									</td></tr>
+    <tr><td>last	</td><td>Alias of close									</td></tr>
+    <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+    <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+    <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+    <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+    <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+    <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+    <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+    <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+    <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+    <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+    <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+    <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+    <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+    <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of the formatted values of the requested metrics</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1 1 3
+(integer) 1
+127.0.0.1:6379&gt; ssget a min
+&quot;+1.0000000000&quot;
+127.0.0.1:6379&gt; ssget a max
+&quot;+3.0000000000&quot;
+127.0.0.1:6379&gt; ssmget a max min non_existent_key avg
+1) &quot;+3.0000000000&quot;
+2) &quot;+1.0000000000&quot;
+3) &quot;+0.0000000000&quot;
+4) &quot;+1.6666666667&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSADDGETALL">
+			<a name="C::SSADDGETALL"></a>
+			<h4>SSADDGETALL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSADDGETALL		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSADDGETALL key value [value ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>numeric value(s) to be accumulated into the statistical block before reading</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Atomic Read-Modify-Write operation. Pushes one or multiple numeric values into the statistical accumulator of the *key*,
+and instantly returns the full updated 38-element statistical report.</p>
+
+<p>This command optimizes high-throughput logging pipelines by combining data submission and immediate full metrics retrieval in a single, atomic network transaction,
+eliminating double disk read and network round-trip overhead.</p>
+
+<p>Note unlike SSGETALL this command works on single key.</p>
+
+<p>The command returns a flat list of 38 elements (19 Key-Value pairs).</p>
+
+<table border="1" class="x">
+    <tr>
+      <th>Metric Name</th>
+      <th>Mathematical Meaning</th>
+    </tr>
+    <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+    <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+    <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+    <tr><td>first	</td><td>Alias of open									</td></tr>
+    <tr><td>last	</td><td>Alias of close									</td></tr>
+    <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+    <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+    <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+    <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+    <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+    <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+    <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+    <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+    <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+    <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+    <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+    <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+    <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+    <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of the formatted values of all supported metrics</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1 1
+(integer) 1
+127.0.0.1:6379&gt; ssadd a 2 2
+(integer) 1
+127.0.0.1:6379&gt; ssaddgetall a 3
+ 1) &quot;count&quot;
+ 2) &quot;+5.0000000000&quot;
+ 3) &quot;open&quot;
+ 4) &quot;+1.0000000000&quot;
+ 5) &quot;close&quot;
+ 6) &quot;+3.0000000000&quot;
+ 7) &quot;first&quot;
+ 8) &quot;+1.0000000000&quot;
+ 9) &quot;last&quot;
+10) &quot;+3.0000000000&quot;
+11) &quot;min&quot;
+12) &quot;+1.0000000000&quot;
+13) &quot;max&quot;
+14) &quot;+3.0000000000&quot;
+15) &quot;sum&quot;
+16) &quot;+9.0000000000&quot;
+17) &quot;sumsq&quot;
+18) &quot;+19.0000000000&quot;
+19) &quot;sum2&quot;
+20) &quot;+19.0000000000&quot;
+21) &quot;range&quot;
+22) &quot;+2.0000000000&quot;
+23) &quot;change&quot;
+24) &quot;+2.0000000000&quot;
+25) &quot;avg&quot;
+26) &quot;+1.8000000000&quot;
+27) &quot;harm&quot;
+28) &quot;+1.5000000000&quot;
+29) &quot;geom&quot;
+30) &quot;+1.6437518295&quot;
+31) &quot;vari&quot;
+32) &quot;+0.5600000000&quot;
+33) &quot;sdev&quot;
+34) &quot;+0.7483314774&quot;
+35) &quot;rms&quot;
+36) &quot;+1.9493588690&quot;
+37) &quot;cvar&quot;
+38) &quot;+0.4157397096&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSADDGET">
+			<a name="C::SSADDGET"></a>
+			<h4>SSADDGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSADDGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSADDGET key value subkey</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>numeric value to be accumulated into the statistical block before reading</td>
+				</tr>
+				<tr>
+					<td>subkey</td>
+					<td>specific metric name to extract (e.g., count, avg, min, max, sdev, etc.)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Atomic Read-Modify-Write operation. Pushes one or multiple numeric values into the statistical accumulator of the *key*,
+and instantly returns only the requested single metric specified by *subkey*.</p>
+
+<p>This command optimizes high-throughput logging pipelines by combining data submission and immediate single metrics retrieval in a single, atomic network transaction,
+eliminating double disk read and network round-trip overhead.</p>
+
+<table border="1" class="x">
+    <tr>
+      <th>Metric Name</th>
+      <th>Mathematical Meaning</th>
+    </tr>
+    <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+    <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+    <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+    <tr><td>first	</td><td>Alias of open									</td></tr>
+    <tr><td>last	</td><td>Alias of close									</td></tr>
+    <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+    <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+    <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+    <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+    <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+    <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+    <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+    <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+    <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+    <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+    <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+    <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+    <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+    <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the formatted value of the requested metric</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1 1
+(integer) 1
+127.0.0.1:6379&gt; ssadd a 2 2
+(integer) 1
+127.0.0.1:6379&gt; ssaddget a 3 avg
+&quot;+1.8000000000&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="SSADDMGET">
+			<a name="C::SSADDMGET"></a>
+			<h4>SSADDMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>SSADDMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>summary_stats	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>SSADDMGET key value subkey [subkey ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the summary_stats object</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>numeric value to be accumulated into the statistical block before reading</td>
+				</tr>
+				<tr>
+					<td>subkey</td>
+					<td>specific metric name to extract (e.g., count, avg, min, max, sdev, etc.)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Atomic Read-Modify-Write operation. Pushes a single numeric value into the statistical accumulator of the *key*,
+and instantly returns an array of the requested multiple metrics specified by *subkey* arguments.</p>
+
+<p>This command optimizes high-throughput logging pipelines by combining data submission and immediate multiple metrics retrieval in a single, atomic network transaction,
+eliminating double disk read and network round-trip overhead.</p>
+
+<table border="1" class="x">
+    <tr>
+      <th>Metric Name</th>
+      <th>Mathematical Meaning</th>
+    </tr>
+    <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+    <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+    <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+    <tr><td>first	</td><td>Alias of open									</td></tr>
+    <tr><td>last	</td><td>Alias of close									</td></tr>
+    <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+    <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+    <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+    <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+    <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+    <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+    <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+    <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+    <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+    <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+    <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+    <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+    <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+    <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+</table>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of the formatted values of all requested metrics</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ssadd a 1 1
+(integer) 1
+127.0.0.1:6379&gt; ssadd a 2 2
+(integer) 1
+127.0.0.1:6379&gt; ssaddmget a 3 count sum avg
+1) &quot;+5.0000000000&quot;
+2) &quot;+9.0000000000&quot;
+3) &quot;+1.8000000000&quot;
 </pre></blockquote>
 
 

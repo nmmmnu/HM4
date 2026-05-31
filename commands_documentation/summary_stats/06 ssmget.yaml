@@ -1,0 +1,61 @@
+- id:        SSMGET
+  name:      SSMGET
+  usage:     SSMGET key subkey [subkey ...]
+  params:
+    items:
+    - k: key
+      v: name of the summary_stats object
+    - k: subkey
+      v: specific metric name to extract (e.g., count, avg, min, max, sdev, etc.)
+
+  description: |
+    <p>Extract several, specific statistical metric from the given *key*.</p>
+    <p>The <code>subkey</code> argument must be one of the valid metric names supported by the module.<br />
+    If the target *key* does not exist or is empty, the command safely returns zero value.</p>
+
+    <table border="1" class="x">
+        <tr>
+          <th>Metric Name</th>
+          <th>Mathematical Meaning</th>
+        </tr>
+        <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+        <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+        <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+        <tr><td>first	</td><td>Alias of open									</td></tr>
+        <tr><td>last	</td><td>Alias of close									</td></tr>
+        <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+        <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+        <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+        <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+        <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+        <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+        <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+        <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+        <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+        <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+        <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+        <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+        <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+        <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+    </table>
+
+  return_type: array
+  return:      array of the formatted values of the requested metrics
+  version:     1.3.15.1
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ssadd a 1 1 3
+    (integer) 1
+    127.0.0.1:6379> ssget a min
+    "+1.0000000000"
+    127.0.0.1:6379> ssget a max
+    "+3.0000000000"
+    127.0.0.1:6379> ssmget a max min non_existent_key avg
+    1) "+3.0000000000"
+    2) "+1.0000000000"
+    3) "+0.0000000000"
+    4) "+1.6666666667"
+
+

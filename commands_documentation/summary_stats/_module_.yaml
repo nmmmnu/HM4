@@ -1,0 +1,167 @@
+id:          SS
+name:        summary_stats
+
+version:     1.3.15.1
+
+description: |
+  <p>This module provides commands for working with <b>online stream statistics</b> over numeric data sets.
+  It allows high-throughput, memory-efficient accumulation of data points and extracts multi-variable statistical properties without storing individual samples.</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Fixed-Size Statistical Accumulator</b></p>
+  <p>Every statistics key allocates a fixed-size internal structure (AccData) that tracks counts, chronological markers, extremes, and sum products.
+  Statistical operations run strictly inside a pre-allocated memory pool with <b>zero heap allocations</b> during query execution.</p>
+
+  <p>Following stats are collected / calculated.</p>
+
+  <table border="1" class="x">
+      <tr>
+        <th>Metric Name</th>
+        <th>Mathematical Meaning</th>
+      </tr>
+      <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+      <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+      <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+      <tr><td>first	</td><td>Alias of open									</td></tr>
+      <tr><td>last	</td><td>Alias of close									</td></tr>
+      <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+      <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+      <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+      <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+      <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+      <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+      <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+      <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+      <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+      <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+      <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+      <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+      <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+      <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+  </table>
+
+  <p><b>2. Modifying and Merging Data</b></p>
+  <p>Data can be pushed into an accumulator individually or combined from multiple separate historical streams.</p>
+  <ul>
+    <li><i>ssreserve</i> - explicitly pre-allocates and initializes an empty statistical block.</li>
+    <li><i>ssadd</i> - appends one or multiple numeric values to a statistical accumulator.</li>
+    <li><i>ssmerge</i> - loads and atomically aggregates multiple statistical blocks into a destination key, sorting components chronologically using internal timestamps.</li>
+  </ul>
+
+  <p><b>3. Retrieving Data</b></p>
+  <p>Metrics can be fetched as a complete 19-variable analytical report or selectively cherry-picked via specific subkey names. All metrics are formatted with sign signs and a fixed-width precision of 10 decimal places.</p>
+  <ul>
+    <li><i>ssgetall</i> - returns a flat list of 38 elements containing all calculated statistical variables (e.g. min, max, avg, standard deviation, geometric/harmonic means).</li>
+    <li><i>ssget</i> - fetches only a single specific metric string for the requested subkey.</li>
+    <li><i>ssmget</i> - multi-key variant that returns an array of specific requested subkeys.</li>
+  </ul>
+
+  <p><b>4. Atomic Read-Modify-Write (RMW) Pipelines</b></p>
+  <p>For high-frequency logging streams, the module offers combined commands that accept new data points and immediately return updated results in a single, atomic network transaction.</p>
+  <ul>
+    <li><i>ssaddgetall</i> - pushes values and instantly returns the full updated 38-element statistical report.</li>
+    <li><i>ssaddget</i> - pushes a value and instantly returns only the requested single metric.</li>
+    <li><i>ssaddmget</i> - pushes a value and instantly returns an array of specific requested subkeys.</li>
+  </ul>
+
+  <p><b>5. NaN and Division-by-Zero Protection</b></p>
+  <p>Empty state evaluations (when count is 0 or 1 for variance) are safely intercepted by the module's math layer.
+  Instead of generating corrupted CPU NaN or Infinity states, uninitialized metrics safely return <code>0.0</code> or <code>+0.0000000000</code>.</p>
+
+  <p><b>Tip:</b> Use <i>ssaddgetall</i> in production logs to update your data streams and paint live charts using a single network round-trip.</p>
+
+example_module:     |
+  127.0.0.1:6379> ssadd a 1
+  (integer) 1
+  127.0.0.1:6379> ssadd a 1
+  (integer) 1
+  127.0.0.1:6379> ssgetall a
+  127.0.0.1:6379> ssgetall a
+   1) "count"
+   2) "+2.0000000000"
+   3) "open"
+   4) "+1.0000000000"
+   5) "close"
+   6) "+1.0000000000"
+   7) "first"
+   8) "+1.0000000000"
+   9) "last"
+  10) "+1.0000000000"
+  11) "min"
+  12) "+1.0000000000"
+  13) "max"
+  14) "+1.0000000000"
+  15) "sum"
+  16) "+2.0000000000"
+  17) "sumsq"
+  18) "+2.0000000000"
+  19) "sum2"
+  20) "+2.0000000000"
+  21) "range"
+  22) "+0.0000000000"
+  23) "change"
+  24) "+0.0000000000"
+  25) "avg"
+  26) "+1.0000000000"
+  27) "harm"
+  28) "+1.0000000000"
+  29) "geom"
+  30) "+1.0000000000"
+  31) "vari"
+  32) "+0.0000000000"
+  33) "sdev"
+  34) "+0.0000000000"
+  35) "rms"
+  36) "+1.0000000000"
+  37) "cvar"
+  38) "+0.0000000000"
+  127.0.0.1:6379> ssadd b 2
+  (integer) 1
+  127.0.0.1:6379> ssadd b 2
+  (integer) 1
+  127.0.0.1:6379> ssgetall a b
+   1) "count"
+   2) "+4.0000000000"
+   3) "open"
+   4) "+1.0000000000"
+   5) "close"
+   6) "+2.0000000000"
+   7) "first"
+   8) "+1.0000000000"
+   9) "last"
+  10) "+2.0000000000"
+  11) "min"
+  12) "+1.0000000000"
+  13) "max"
+  14) "+2.0000000000"
+  15) "sum"
+  16) "+6.0000000000"
+  17) "sumsq"
+  18) "+10.0000000000"
+  19) "sum2"
+  20) "+10.0000000000"
+  21) "range"
+  22) "+1.0000000000"
+  23) "change"
+  24) "+1.0000000000"
+  25) "avg"
+  26) "+1.5000000000"
+  27) "harm"
+  28) "+1.3333333333"
+  29) "geom"
+  30) "+1.4142135624"
+  31) "vari"
+  32) "+0.2500000000"
+  33) "sdev"
+  34) "+0.5000000000"
+  35) "rms"
+  36) "+1.5811388301"
+  37) "cvar"
+  38) "+0.3333333333"
+  127.0.0.1:6379> ssaddget a 10 sum
+  "+12.0000000000"
+  127.0.0.1:6379> ssaddmget a 20 count sum
+  1) "+3.0000000000"
+  2) "+32.0000000000"
+

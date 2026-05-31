@@ -1,0 +1,97 @@
+- id:        SSADDGETALL
+  name:      SSADDGETALL
+  usage:     SSADDGETALL key value [value ...]
+  params:
+    items:
+    - k: key
+      v: name of the summary_stats object
+    - k: value
+      v: numeric value(s) to be accumulated into the statistical block before reading
+
+  description: |
+    <p>Atomic Read-Modify-Write operation. Pushes one or multiple numeric values into the statistical accumulator of the *key*,
+    and instantly returns the full updated 38-element statistical report.</p>
+
+    <p>This command optimizes high-throughput logging pipelines by combining data submission and immediate full metrics retrieval in a single, atomic network transaction,
+    eliminating double disk read and network round-trip overhead.</p>
+
+    <p>Note unlike SSGETALL this command works on single key.</p>
+
+    <p>The command returns a flat list of 38 elements (19 Key-Value pairs).</p>
+
+    <table border="1" class="x">
+        <tr>
+          <th>Metric Name</th>
+          <th>Mathematical Meaning</th>
+        </tr>
+        <tr><td>count	</td><td>Total number of accumulated samples (represented as floating point).		</td></tr>
+        <tr><td>open	</td><td>Value of the absolute first accumulated sample in this stream.			</td></tr>
+        <tr><td>close	</td><td>Value of the absolute last accumulated sample in this stream.			</td></tr>
+        <tr><td>first	</td><td>Alias of open									</td></tr>
+        <tr><td>last	</td><td>Alias of close									</td></tr>
+        <tr><td>min	</td><td>Minimum value observed in the dataset.						</td></tr>
+        <tr><td>max	</td><td>Maximum value observed in the dataset.						</td></tr>
+        <tr><td>sum	</td><td>Raw sum of all accumulated values.						</td></tr>
+        <tr><td>sumsq	</td><td>Raw sum of squares of all accumulated values.					</td></tr>
+        <tr><td>sum2	</td><td>Alias of sumsq.								</td></tr>
+        <tr><td>range	</td><td>The distance between extremes.							</td></tr>
+        <tr><td>change	</td><td>Net progression or difference between chronological bounds.			</td></tr>
+        <tr><td>avg	</td><td>Arithmetic mean.								</td></tr>
+        <tr><td>harm	</td><td>Harmonic mean  - useful for rates and ratios.					</td></tr>
+        <tr><td>geom	</td><td>Geometric mean - useful for growth rates.					</td></tr>
+        <tr><td>vari	</td><td>Population variance. Safely handles zero values to avoid division by zero.	</td></tr>
+        <tr><td>sdev	</td><td>Standard deviation.								</td></tr>
+        <tr><td>rms	</td><td>Root Mean Square.								</td></tr>
+        <tr><td>cvar	</td><td>Coefficient of variation.							</td></tr>
+    </table>
+
+  return_type: array
+  return:      array of the formatted values of all supported metrics
+  version:     1.3.15.1
+  complexity:  READ + WRITE
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> ssadd a 1 1
+    (integer) 1
+    127.0.0.1:6379> ssadd a 2 2
+    (integer) 1
+    127.0.0.1:6379> ssaddgetall a 3
+     1) "count"
+     2) "+5.0000000000"
+     3) "open"
+     4) "+1.0000000000"
+     5) "close"
+     6) "+3.0000000000"
+     7) "first"
+     8) "+1.0000000000"
+     9) "last"
+    10) "+3.0000000000"
+    11) "min"
+    12) "+1.0000000000"
+    13) "max"
+    14) "+3.0000000000"
+    15) "sum"
+    16) "+9.0000000000"
+    17) "sumsq"
+    18) "+19.0000000000"
+    19) "sum2"
+    20) "+19.0000000000"
+    21) "range"
+    22) "+2.0000000000"
+    23) "change"
+    24) "+2.0000000000"
+    25) "avg"
+    26) "+1.8000000000"
+    27) "harm"
+    28) "+1.5000000000"
+    29) "geom"
+    30) "+1.6437518295"
+    31) "vari"
+    32) "+0.5600000000"
+    33) "sdev"
+    34) "+0.7483314774"
+    35) "rms"
+    36) "+1.9493588690"
+    37) "cvar"
+    38) "+0.4157397096"
