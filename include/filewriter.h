@@ -79,9 +79,9 @@ struct FileWriterFOpen{
 	}
 
 	bool write(const void *vdata, size_t size){
-		const char *data = static_cast<const char *>(vdata);
+		assert(vdata);
 
-		assert(data);
+		const char *data = static_cast<const char *>(vdata);
 
 		return f && fwrite(data, size, 1, f);
 	}

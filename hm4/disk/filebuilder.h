@@ -130,7 +130,7 @@ namespace FileBuilder{
 					"data" << buffersWrite.data.size() <<
 					"indx" << buffersWrite.indx.size() <<
 					"line" << buffersWrite.line.size() <<
-					"line" << buffersWrite.hash.size()
+					"hash" << buffersWrite.hash.size()
 			;
 		}
 
