@@ -69,7 +69,8 @@ namespace reservoir_sampling{
 				this->count = htobe(count + 1);
 				return count;
 			}
-		};
+		} __attribute__((__packed__));
+
 	} // namespace reservoir_sampling_impl_
 
 	template<size_t MaxItemSize>
