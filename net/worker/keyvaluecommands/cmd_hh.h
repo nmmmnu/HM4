@@ -28,13 +28,15 @@ namespace net::worker::commands::HH{
 			using namespace heavy_hitter;
 
 			switch(t){
-			case  16 : return f(type_identity<RawHeavyHitter16	>{});
-			case  32 : return f(type_identity<RawHeavyHitter32	>{});
-			case  40 : return f(type_identity<RawHeavyHitter40	>{});
-			case  64 : return f(type_identity<RawHeavyHitter64	>{});
-			case 128 : return f(type_identity<RawHeavyHitter128	>{});
-			case 256 : return f(type_identity<RawHeavyHitter256	>{});
-			default  : return f(type_identity<std::nullptr_t	>{});
+			case   16 : return f(type_identity<RawHeavyHitter16	>{});
+			case   32 : return f(type_identity<RawHeavyHitter32	>{});
+			case   40 : return f(type_identity<RawHeavyHitter40	>{});
+			case   64 : return f(type_identity<RawHeavyHitter64	>{});
+			case  128 : return f(type_identity<RawHeavyHitter128	>{});
+			case  256 : return f(type_identity<RawHeavyHitter256	>{});
+			case  512 : return f(type_identity<RawHeavyHitter512	>{});
+			case 1024 : return f(type_identity<RawHeavyHitter1024	>{});
+			default   : return f(type_identity<std::nullptr_t	>{});
 			}
 		}
 
@@ -63,9 +65,9 @@ namespace net::worker::commands::HH{
 
 		private:
 			bool action_(Pair *pair) const{
-				using Item = typename MyRawHeavyHitter::Item;
+				using List = typename MyRawHeavyHitter::List;
 
-				auto *hh_data = hm4::getValAs<Item>(pair);
+				auto *hh_data = hm4::getValAs<List>(pair);
 
 				bool result = false;
 
@@ -73,7 +75,7 @@ namespace net::worker::commands::HH{
 					auto const &item = *itk;
 					auto const score = from_string<int64_t>(*std::next(itk));
 
-					result |= hh. template add<Up>(hh_data, item, score);
+					result |= hh. template add<Up>(*hh_data, item, score);
 				}
 
 				return result;
@@ -310,12 +312,12 @@ namespace net::worker::commands::HH{
 
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
-			using Item = typename MyRawHeavyHitter::Item;
+			using List = typename MyRawHeavyHitter::List;
 
-			const auto *hh_data = hm4::getValAs<Item>(pair);
+			const auto *hh_data = hm4::getValAs<List>(pair);
 
 			for(size_t i = 0; i < hh.size(); ++i)
-				if(auto const &x = hh_data[i]; x){
+				if(auto const &x = hh_data->items[i]; x){
 					bcontainer.push_back();
 
 					auto const item  = x.getItem();

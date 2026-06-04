@@ -11,23 +11,25 @@
 
 namespace misra_gries{
 	namespace misra_gries_impl_{
+		template <std::size_t N>
+		using size_type_ =
+			std::conditional_t<N <= std::numeric_limits<std::uint8_t >::max() - 1,	std::uint8_t	,
+			std::conditional_t<N <= std::numeric_limits<std::uint16_t>::max() - 1,	std::uint16_t	,
+			std::conditional_t<N <= std::numeric_limits<std::uint32_t>::max() - 1,	std::uint32_t	,
+												std::uint64_t
+			> > >;
+
 		template<size_t MaxItemSize>
-		struct Item{
-			static_assert(MaxItemSize <= std::numeric_limits<uint8_t>::max() );
+		struct Item_{
+			using size_type = size_type_<MaxItemSize>;
 
 			uint64_t	score;			//  8
-			uint8_t		size;			//  1
+			size_type	size;			//  1, 2, 4, 8
 			char		item[MaxItemSize];	// 63, 127...
 
 			constexpr static uint64_t ZERO = htobe( uint64_t{0} );
 			constexpr static uint64_t ONE  = htobe( uint64_t{1} );
 			constexpr static uint64_t MAX  = htobe( std::numeric_limits<uint64_t>::max() );
-
-			// -----
-
-			constexpr static bool isItemValid(std::string_view item){
-				return item.size() >= 1 && item.size() <= MaxItemSize;
-			}
 
 			// -----
 
@@ -50,7 +52,7 @@ namespace misra_gries{
 			constexpr auto getItem() const{
 				return std::string_view{
 						item,
-						size
+						betoh(size)
 				};
 			}
 
@@ -58,14 +60,16 @@ namespace misra_gries{
 				return s == getItem();
 			}
 
-			uint64_t setItem(std::string_view item){
-				assert(item.size() <= MaxItemSize);
+			uint64_t setItem(std::string_view sv){
+				assert(sv.size() <= MaxItemSize);
 
 				score = ONE;
 
-				size  = static_cast<uint8_t>(item.size());
+				size  = htobe(
+						static_cast<size_type>(sv.size())
+				);
 
-				memcpy(this->item, item.data(), item.size());
+				memcpy(item, sv.data(), sv.size());
 
 				return 1;
 			}
@@ -101,14 +105,22 @@ namespace misra_gries{
 
 		} __attribute__((__packed__));
 
+		template<size_t MaxItemSize>
+		struct List{
+			using Item		= Item_<MaxItemSize>;
+
+			Item			items[1];
+		} __attribute__((__packed__));
+
 	} // namespace misra_gries_impl_
 
 	template<size_t MaxItemSize>
 	struct RawMisraGries{
-		using Item		= misra_gries_impl_::Item<MaxItemSize>;
+		using List		= misra_gries_impl_::List<MaxItemSize>;
+		using Item		= typename List::Item;
 
-		static_assert( sizeof(Item) == sizeof(int64_t) + MaxItemSize + 1 );
-		static_assert( sizeof(Item[10]) % sizeof(int64_t) == 0 );
+		static_assert(std::is_trivial<List>::value, "List must be POD type");
+		// sstatic_assert( sizeof(List) % sizeof(int64_t) == 0 );
 
 		// --------------------------
 
@@ -118,8 +130,8 @@ namespace misra_gries{
 
 		// --------------------------
 
-		constexpr static bool isItemValid(std::string_view item){
-			return Item::isItemValid(item);
+		constexpr static bool isItemValid(std::string_view sv){
+			return sv.size() >= 1 && sv.size() <= MaxItemSize;
 		}
 
 		// --------------------------
@@ -129,30 +141,30 @@ namespace misra_gries{
 		}
 
 		constexpr size_t bytes() const{
-			return sizeof(Item) * size();
+			return sizeof(List) - sizeof(Item) + sizeof(Item) * size();
 		}
 
 		// --------------------------
 
-		void clear(Item *M) const{
-			memset(M, 0, bytes());
+		void clear(List *mg) const{
+			memset(mg, 0, bytes());
 		}
 
-		void load(Item *M, const void *src) const{
-			memcpy(M, src, bytes());
+		void load(List *mg, const void *src) const{
+			memcpy(mg, src, bytes());
 		}
 
-		void store(const Item *M, void *dest) const{
-			memcpy(dest, M, bytes());
+		void store(const List *mg, void *dest) const{
+			memcpy(dest, mg, bytes());
 		}
 
 		// --------------------------
 
-		uint64_t add(Item *M, std::string_view item) const{
+		uint64_t add(List &mg, std::string_view item) const{
 			size_t indexEmptySlot = NOT_FOUND;
 
 			for(size_t i = 0; i < size(); ++i){
-				auto &x = M[i];
+				auto &x = mg.items[i];
 
 				if (!x){
 					indexEmptySlot = i;
@@ -167,12 +179,12 @@ namespace misra_gries{
 
 			// insert into empty slot
 			if (indexEmptySlot != NOT_FOUND){
-				auto &x = M[indexEmptySlot];
+				auto &x = mg.items[indexEmptySlot];
 				return x.setItem(item);
 			}
 
 			for(size_t i = 0; i < size(); ++i){
-				auto &x = M[i];
+				auto &x = mg.items[i];
 				x.decr();
 			}
 
@@ -187,12 +199,14 @@ namespace misra_gries{
 
 
 
-	using RawMisraGries16  = RawMisraGries< 16 - 1>; //  2 x 8
-	using RawMisraGries32  = RawMisraGries< 32 - 1>; //  4 x 8
-	using RawMisraGries40  = RawMisraGries< 40 - 1>; //  5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
-	using RawMisraGries64  = RawMisraGries< 64 - 1>; //  8 x 8
-	using RawMisraGries128 = RawMisraGries<128 - 1>; // 16 x 8
-	using RawMisraGries256 = RawMisraGries<256 - 1>; // 32 x 8
+	using RawMisraGries16   = RawMisraGries<  16 - 1>; //   2 x 8
+	using RawMisraGries32   = RawMisraGries<  32 - 1>; //   4 x 8
+	using RawMisraGries40   = RawMisraGries<  40 - 1>; //   5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
+	using RawMisraGries64   = RawMisraGries<  64 - 1>; //   8 x 8
+	using RawMisraGries128  = RawMisraGries< 128 - 1>; //  16 x 8
+	using RawMisraGries256  = RawMisraGries< 256 - 1>; //  32 x 8
+	using RawMisraGries512  = RawMisraGries< 512 - 1>; //  64 x 8
+	using RawMisraGries1024 = RawMisraGries<1024 - 1>; // 128 x 8
 
 } // namespace misra_gries
 

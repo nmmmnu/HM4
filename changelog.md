@@ -408,6 +408,6 @@ Changelog
 -	add documentation for module ISAM
 -	new module summary stats : SSRESERVE, SSADD, SSMERGE, SSGETALL, SSGET, SSMGET,
 	SSADDGETALL, SSADDGET, SSADDMGET
-
+-	HH*, MG* and RS* now accepts sizes of 512 and 1024
 
 

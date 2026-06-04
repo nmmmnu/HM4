@@ -24,13 +24,15 @@ namespace net::worker::commands::RS{
 			using namespace reservoir_sampling;
 
 			switch(t){
-			case  16 : return f(type_identity<RawReservoirSampling16	>{});
-			case  32 : return f(type_identity<RawReservoirSampling32	>{});
-			case  40 : return f(type_identity<RawReservoirSampling40	>{});
-			case  64 : return f(type_identity<RawReservoirSampling64	>{});
-			case 128 : return f(type_identity<RawReservoirSampling128	>{});
-			case 256 : return f(type_identity<RawReservoirSampling256	>{});
-			default  : return f(type_identity<std::nullptr_t		>{});
+			case   16 : return f(type_identity<RawReservoirSampling16	>{});
+			case   32 : return f(type_identity<RawReservoirSampling32	>{});
+			case   40 : return f(type_identity<RawReservoirSampling40	>{});
+			case   64 : return f(type_identity<RawReservoirSampling64	>{});
+			case  128 : return f(type_identity<RawReservoirSampling128	>{});
+			case  256 : return f(type_identity<RawReservoirSampling256	>{});
+			case  512 : return f(type_identity<RawReservoirSampling512	>{});
+			case 1024 : return f(type_identity<RawReservoirSampling1024	>{});
+			default   : return f(type_identity<std::nullptr_t		>{});
 			}
 		}
 
@@ -152,7 +154,7 @@ namespace net::worker::commands::RS{
 				for(auto itk = begin; itk != end; ++itk){
 					auto const &item = *itk;
 
-					result |= chk( rs.add(rs_data, item, rand64) );
+					result |= chk( rs.add(*rs_data, item, rand64) );
 				}
 
 				return result;

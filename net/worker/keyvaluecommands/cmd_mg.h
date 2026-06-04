@@ -28,13 +28,15 @@ namespace net::worker::commands::MG{
 			using namespace misra_gries;
 
 			switch(t){
-			case  16 : return f(type_identity<RawMisraGries16	>{});
-			case  32 : return f(type_identity<RawMisraGries32	>{});
-			case  40 : return f(type_identity<RawMisraGries40	>{});
-			case  64 : return f(type_identity<RawMisraGries64	>{});
-			case 128 : return f(type_identity<RawMisraGries128	>{});
-			case 256 : return f(type_identity<RawMisraGries256	>{});
-			default  : return f(type_identity<std::nullptr_t	>{});
+			case   16 : return f(type_identity<RawMisraGries16	>{});
+			case   32 : return f(type_identity<RawMisraGries32	>{});
+			case   40 : return f(type_identity<RawMisraGries40	>{});
+			case   64 : return f(type_identity<RawMisraGries64	>{});
+			case  128 : return f(type_identity<RawMisraGries128	>{});
+			case  256 : return f(type_identity<RawMisraGries256	>{});
+			case  512 : return f(type_identity<RawMisraGries512	>{});
+			case 1024 : return f(type_identity<RawMisraGries1024	>{});
+			default   : return f(type_identity<std::nullptr_t	>{});
 			}
 		}
 	} // namespace mg_impl_
@@ -135,16 +137,16 @@ namespace net::worker::commands::MG{
 
 		private:
 			bool action_(Pair *pair) const{
-				using Item = typename MyRawMisraGries::Item;
+				using List = typename MyRawMisraGries::List;
 
-				Item *mg_data = hm4::getValAs<Item>(pair);
+				auto *mg_data = hm4::getValAs<List>(pair);
 
 				bool result = false;
 
 				for(auto itk = begin; itk != end; ++itk){
 					auto const &item = *itk;
 
-					result |= mg.add(mg_data, item);
+					result |= mg.add(*mg_data, item);
 				}
 
 				return result;
@@ -255,11 +257,11 @@ namespace net::worker::commands::MG{
 
 		private:
 			uint64_t action_(Pair *pair) const{
-				using Item = typename MyRawMisraGries::Item;
+				using List = typename MyRawMisraGries::List;
 
-				Item *mg_data = hm4::getValAs<Item>(pair);
+				auto *mg_data = hm4::getValAs<List>(pair);
 
-				return mg.add(mg_data, item);
+				return mg.add(*mg_data, item);
 			}
 
 		private:
@@ -393,12 +395,12 @@ namespace net::worker::commands::MG{
 
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
-			using Item = typename MyRawMisraGries::Item;
+			using List = typename MyRawMisraGries::List;
 
-			const auto *mg_data = hm4::getValAs<Item>(pair);
+			const auto *mg_data = hm4::getValAs<List>(pair);
 
 			for(size_t i = 0; i < mg.size(); ++i)
-				if (auto const &x = mg_data[i]; x){
+				if (auto const &x = mg_data->items[i]; x){
 					bcontainer.push_back();
 
 					auto const item  = x.getItem();

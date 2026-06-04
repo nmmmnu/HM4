@@ -13,38 +13,42 @@
 
 namespace reservoir_sampling{
 	namespace reservoir_sampling_impl_{
+		template <std::size_t N>
+		using size_type_ =
+			std::conditional_t<N <= std::numeric_limits<std::uint8_t >::max() - 1,	std::uint8_t	,
+			std::conditional_t<N <= std::numeric_limits<std::uint16_t>::max() - 1,	std::uint16_t	,
+			std::conditional_t<N <= std::numeric_limits<std::uint32_t>::max() - 1,	std::uint32_t	,
+												std::uint64_t
+			> > >;
+
 		template<size_t MaxItemSize>
 		struct Item_{
-			static_assert(MaxItemSize <= std::numeric_limits<uint8_t>::max() );
+			using size_type = size_type_<MaxItemSize>;
 
-			uint8_t		size;			//  1
+			size_type	size;			//  1, 2, 4, 8
 			char		item[MaxItemSize];	// 63, 127...
-
-			constexpr static bool isItemValid(std::string_view item){
-				return item.size() >= 1 && item.size() <= MaxItemSize;
-			}
 
 			constexpr operator bool() const{
 				return size;
 			}
 
-			constexpr std::string_view getItem() const{
-				return { item, size };
+			constexpr auto getItem() const{
+				return std::string_view{
+						item,
+						betoh(size)
+				};
 			}
 
-		//	constexpr bool cmp(std::string_view s) const{
-		//		return s == operator std::string_view();
-		//	}
+			void setItem(std::string_view sv){
+				assert(sv.size() <= MaxItemSize);
 
-			Item_ &operator=(std::string_view item){
-				assert(item.size() <= MaxItemSize);
+				size  = htobe(
+						static_cast<size_type>(sv.size())
+				);
 
-				size  = static_cast<uint8_t>(item.size());
-
-				memcpy(this->item, item.data(), item.size());
-
-				return *this;
+				memcpy(item, sv.data(), sv.size());
 			}
+
 		} __attribute__((__packed__));
 
 		template<size_t MaxItemSize>
@@ -57,11 +61,6 @@ namespace reservoir_sampling{
 			constexpr auto getCount() const{
 				return betoh(count);
 			}
-
-		//	constexpr
-		//	void setCount(uint64_t count){
-		//		this->count = htobe(count);
-		//	}
 
 			constexpr
 			auto incrCount(){
@@ -79,6 +78,7 @@ namespace reservoir_sampling{
 		using Item		= typename List::Item;
 
 		static_assert(std::is_trivial<List>::value, "List must be POD type");
+		// static_assert( sizeof(List) % sizeof(int64_t) == 0 );
 
 		enum class Added{
 			INIT,
@@ -86,20 +86,14 @@ namespace reservoir_sampling{
 			NO
 		};
 
-		// check if structs are packed
-		static_assert( sizeof(Item) == MaxItemSize + 1 );
-		static_assert( sizeof(Item[10]) % sizeof(int64_t) == 0 );
-		static_assert( sizeof(List) == sizeof(int64_t) + sizeof(Item) );
+		// --------------------------
+
+		explicit constexpr RawReservoirSampling(size_t size) : size_(size){}
 
 		// --------------------------
 
-		explicit constexpr RawReservoirSampling(size_t size) : size_(size){
-		}
-
-		// --------------------------
-
-		constexpr static bool isItemValid(std::string_view item){
-			return Item::isItemValid(item);
+		constexpr static bool isItemValid(std::string_view sv){
+			return sv.size() >= 1 && sv.size() <= MaxItemSize;
 		}
 
 		// --------------------------
@@ -109,7 +103,7 @@ namespace reservoir_sampling{
 		}
 
 		constexpr size_t bytes() const{
-			return sizeof(int64_t) + sizeof(Item) * size();
+			return sizeof(List) - sizeof(Item) + sizeof(Item) * size();
 		}
 
 		// --------------------------
@@ -130,7 +124,7 @@ namespace reservoir_sampling{
 
 		Added add(List &rs, std::string_view item, std::mt19937_64 &gen64) const{
 			auto put = [&rs, item](size_t pos, Added status){
-				rs.items[pos] = item;
+				rs.items[pos].setItem(item);
 				return status;
 			};
 
@@ -148,16 +142,8 @@ namespace reservoir_sampling{
 			return Added::NO;
 		}
 
-		Added add(List *rs, std::string_view item, std::mt19937_64 &gen64) const{
-			return add(*rs, item, gen64);
-		}
-
 		std::string_view get(List const &rs, size_t index) const{
 			return rs.items[index];
-		}
-
-		std::string_view get(const List *rs, size_t index) const{
-			return get(*rs, index);
 		}
 
 	private:
@@ -166,12 +152,14 @@ namespace reservoir_sampling{
 
 
 
-	using RawReservoirSampling16  = RawReservoirSampling< 16 - 1>; //  2 x 8
-	using RawReservoirSampling32  = RawReservoirSampling< 32 - 1>; //  4 x 8
-	using RawReservoirSampling40  = RawReservoirSampling< 40 - 1>; //  5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
-	using RawReservoirSampling64  = RawReservoirSampling< 64 - 1>; //  8 x 8
-	using RawReservoirSampling128 = RawReservoirSampling<128 - 1>; // 16 x 8
-	using RawReservoirSampling256 = RawReservoirSampling<256 - 1>; // 32 x 8
+	using RawReservoirSampling16   = RawReservoirSampling<  16 - 1>; //   2 x 8
+	using RawReservoirSampling32   = RawReservoirSampling<  32 - 1>; //   4 x 8
+	using RawReservoirSampling40   = RawReservoirSampling<  40 - 1>; //   5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
+	using RawReservoirSampling64   = RawReservoirSampling<  64 - 1>; //   8 x 8
+	using RawReservoirSampling128  = RawReservoirSampling< 128 - 1>; //  16 x 8
+	using RawReservoirSampling256  = RawReservoirSampling< 256 - 1>; //  32 x 8
+	using RawReservoirSampling512  = RawReservoirSampling< 512 - 1>; //  64 x 8
+	using RawReservoirSampling1024 = RawReservoirSampling<1024 - 1>; // 128 x 8
 
 } // namespace reservoir_sampling
 
