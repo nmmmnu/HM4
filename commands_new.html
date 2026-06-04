@@ -5080,15 +5080,17 @@ The object has a fixed size (<i>hh_count</i>) and each value has a fixed byte si
 <p>Each item stored in the heavy hitters has a predefined size (<b>hh_value_size</b>).</p>
 <p>This keeps the structure compact and guarantees stable memory usage.</p></p>
 
-<table border="1" class="x">
-  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
-</table>
+  <table border="1" class="x">
+    <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+    <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+    <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+    <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+    <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+    <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+    <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+    <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+    <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
+  </table>
 
 <p><b>3. Getting top items</b></p>
 <p>Use the <b>HHGET</b> command to retrieve the top items and their counts from the object.</p>
@@ -5262,12 +5264,14 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5335,12 +5339,14 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5429,12 +5435,14 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5514,12 +5522,14 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5572,15 +5582,17 @@ The object has a fixed size (<i>mg_count</i>) and each value has a fixed byte si
 <p>Each item stored in the Misra-Gries heavy hitters has a predefined size (<b>mg_value_size</b>).</p>
 <p>This keeps the structure compact and guarantees stable memory usage.</p></p>
 
-<table border="1" class="x">
-  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
-</table>
+  <table border="1" class="x">
+    <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+    <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+    <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+    <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+    <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+    <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+    <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+    <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+    <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
+  </table>
 
 <p><b>3. Getting top items</b></p>
 <p>Use the <b>MGGET</b> command to retrieve the top items and their counts from the object.</p>
@@ -5672,12 +5684,14 @@ This allows you to track frequency while inserting.</p>
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5740,12 +5754,14 @@ This allows you to track frequency while inserting.</p>
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5839,12 +5855,14 @@ This allows you to track frequency while inserting.</p>
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5924,12 +5942,14 @@ score of the item = if the item is qualified for insert
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -5989,15 +6009,17 @@ but ensures that every item from the stream has an equal chance to appear in the
 <p>Each item stored in the reservoir has a predefined size (<b>rs_value_size</b>).
 This keeps the structure compact and guarantees stable memory usage.</p>
 
-<table border="1" class="x">
-  <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
-</table>
+  <table border="1" class="x">
+    <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
+    <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+    <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+    <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+    <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+    <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+    <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+    <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+    <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
+  </table>
 
 <p><b>3. Randomized insertion logic</b></p>
 <p>When adding items, some values will replace existing samples while others will be skipped. <b>RSADD</b> returns:</p>
@@ -6090,12 +6112,14 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -6158,12 +6182,14 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -6238,12 +6264,14 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 
@@ -6316,12 +6344,14 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 
 <table border="1" class="x">
   <tr><th>Value</th><th>Size</th><th>Comment</th></tr>
-  <tr><td align="right"> 16</td><td align="right"> 15</td><td>IP4</td></tr>
-  <tr><td align="right"> 32</td><td align="right"> 31</td><td>&nbsp;</td></tr>
-  <tr><td align="right"> 40</td><td align="right"> 39</td><td>IP6</td></tr>
-  <tr><td align="right"> 64</td><td align="right"> 64</td><td></td></tr>
-  <tr><td align="right">128</td><td align="right">127</td><td></td></tr>
-  <tr><td align="right">256</td><td align="right">255</td><td>Pascal string</td></tr>
+  <tr><td align="right">  16</td><td align="right">  15</td><td>IP4</td></tr>
+  <tr><td align="right">  32</td><td align="right">  31</td><td>&nbsp;</td></tr>
+  <tr><td align="right">  40</td><td align="right">  39</td><td>IP6</td></tr>
+  <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
+  <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
+  <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
+  <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
+  <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
 </table>
 </blockquote>
 

@@ -9,11 +9,13 @@ return array(
 			"Bigger values are 'better'<br />" .
 			"<i>hh_count</i> can be from 1 to 200.<br />" .
 			"Supported sizes are:<br />".
-			"-  32 (gives you string size of  31)<br />".
-			"-  40 (gives you string size of  39) - IP6 compatible<br />".
-			"-  64 (gives you string size of  63)<br />".
-			"- 128 (gives you string size of 127)<br />".
-			"- 256 (gives you string size of 255) - Pascal string compatible :)<br />".
+			"-   32 (gives you string size of   31)<br />".
+			"-   40 (gives you string size of   39) - IP6 compatible<br />".
+			"-   64 (gives you string size of   63)<br />".
+			"-  128 (gives you string size of  127)<br />".
+			"-  256 (gives you string size of  255) - Pascal string compatible :)<br />".
+			"-  512 (gives you string size of  511) - accepted after version 1.3.15.1<br />".
+			"- 1024 (gives you string size of 1023) - accepted after version 1.3.15.1<br />".
 			"Read HH information document.",
 			"bool",
 			"0 if all the items is not qualified for insert<br />" .
