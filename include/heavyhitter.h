@@ -32,17 +32,15 @@ namespace heavy_hitter{
 			}
 		};
 
-
 		template<typename SizeType, SizeType MaxItemSize>
-		struct Item_{
+		class Item_{
 			using size_type = SizeType;
 
 			uint64_t	score;			//  8
 			size_type	size;			//  1, 2, 4, 8
 			char		item[MaxItemSize];	// 63, 127...
 
-			// -----
-
+		public:
 			constexpr operator bool() const{
 				return size;
 			}
@@ -64,10 +62,10 @@ namespace heavy_hitter{
 			// -----
 
 			constexpr auto getItem() const{
-				return std::string_view{
-						item,
-						betoh(size)
-				};
+				if (auto const s = betoh(size); s <= MaxItemSize)
+					return std::string_view{ item, s };
+				else
+					return std::string_view{};
 			}
 
 			constexpr bool cmpItem(std::string_view s) const{

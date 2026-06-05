@@ -12,7 +12,7 @@
 namespace misra_gries{
 	namespace misra_gries_impl_{
 		template<typename SizeType, SizeType MaxItemSize>
-		struct Item_{
+		class Item_{
 			using size_type = SizeType;
 
 			uint64_t	score;			//  8
@@ -23,8 +23,7 @@ namespace misra_gries{
 			constexpr static uint64_t ONE  = htobe( uint64_t{1} );
 			constexpr static uint64_t MAX  = htobe( std::numeric_limits<uint64_t>::max() );
 
-			// -----
-
+		public:
 			constexpr operator bool() const{
 				return score;
 			}
@@ -42,10 +41,10 @@ namespace misra_gries{
 			// -----
 
 			constexpr auto getItem() const{
-				return std::string_view{
-						item,
-						betoh(size)
-				};
+				if (auto const s = betoh(size); s <= MaxItemSize)
+					return std::string_view{ item, s };
+				else
+					return std::string_view{};
 			}
 
 			constexpr bool cmpItem(std::string_view s) const{

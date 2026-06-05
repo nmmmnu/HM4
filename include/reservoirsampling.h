@@ -14,21 +14,22 @@
 namespace reservoir_sampling{
 	namespace reservoir_sampling_impl_{
 		template<typename SizeType, SizeType MaxItemSize>
-		struct Item_{
+		class Item_{
 			using size_type = SizeType;
 
 			size_type	size;			//  1, 2, 4, 8
 			char		item[MaxItemSize];	// 63, 127...
 
+		public:
 			constexpr operator bool() const{
 				return size;
 			}
 
 			constexpr auto getItem() const{
-				return std::string_view{
-						item,
-						betoh(size)
-				};
+				if (auto const s = betoh(size); s <= MaxItemSize)
+					return std::string_view{ item, s };
+				else
+					return std::string_view{};
 			}
 
 			void setItem(std::string_view sv){
