@@ -27,8 +27,8 @@
       <tr><td align="right">  64</td><td align="right">  64</td><td></td></tr>
       <tr><td align="right"> 128</td><td align="right"> 127</td><td></td></tr>
       <tr><td align="right"> 256</td><td align="right"> 255</td><td>Pascal string</td></tr>
-      <tr><td align="right"> 512</td><td align="right"> 511</td><td>Accepted after 1.3.15.1</td></tr>
-      <tr><td align="right">1024</td><td align="right">1023</td><td>Accepted after 1.3.15.1</td></tr>
+      <tr><td align="right"> 512</td><td align="right"> 510</td><td>Accepted after 1.3.15.1</td></tr>
+      <tr><td align="right">1024</td><td align="right">1022</td><td>Accepted after 1.3.15.1</td></tr>
     </table>
 
   return_type: bool

@@ -13,17 +13,9 @@
 
 namespace reservoir_sampling{
 	namespace reservoir_sampling_impl_{
-		template <std::size_t N>
-		using size_type_ =
-			std::conditional_t<N <= std::numeric_limits<std::uint8_t >::max() - 1,	std::uint8_t	,
-			std::conditional_t<N <= std::numeric_limits<std::uint16_t>::max() - 1,	std::uint16_t	,
-			std::conditional_t<N <= std::numeric_limits<std::uint32_t>::max() - 1,	std::uint32_t	,
-												std::uint64_t
-			> > >;
-
-		template<size_t MaxItemSize>
+		template<typename SizeType, SizeType MaxItemSize>
 		struct Item_{
-			using size_type = size_type_<MaxItemSize>;
+			using size_type = SizeType;
 
 			size_type	size;			//  1, 2, 4, 8
 			char		item[MaxItemSize];	// 63, 127...
@@ -51,9 +43,9 @@ namespace reservoir_sampling{
 
 		} __attribute__((__packed__));
 
-		template<size_t MaxItemSize>
+		template<typename SizeType, size_t MaxItemSize>
 		struct List{
-			using Item		= Item_<MaxItemSize>;
+			using Item		= Item_<SizeType,MaxItemSize>;
 
 			uint64_t		count;
 			Item			items[1];
@@ -72,13 +64,13 @@ namespace reservoir_sampling{
 
 	} // namespace reservoir_sampling_impl_
 
-	template<size_t MaxItemSize>
+	template<typename SizeType, SizeType MaxItemSize>
 	struct RawReservoirSampling{
-		using List		= reservoir_sampling_impl_::List<MaxItemSize>;
+		using List		= reservoir_sampling_impl_::List<SizeType,MaxItemSize>;
 		using Item		= typename List::Item;
 
 		static_assert(std::is_trivial<List>::value, "List must be POD type");
-		// static_assert( sizeof(List) % sizeof(int64_t) == 0 );
+		static_assert( sizeof(List) % sizeof(int64_t) == 0 );
 
 		enum class Added{
 			INIT,
@@ -152,14 +144,17 @@ namespace reservoir_sampling{
 
 
 
-	using RawReservoirSampling16   = RawReservoirSampling<  16 - 1>; //   2 x 8
-	using RawReservoirSampling32   = RawReservoirSampling<  32 - 1>; //   4 x 8
-	using RawReservoirSampling40   = RawReservoirSampling<  40 - 1>; //   5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
-	using RawReservoirSampling64   = RawReservoirSampling<  64 - 1>; //   8 x 8
-	using RawReservoirSampling128  = RawReservoirSampling< 128 - 1>; //  16 x 8
-	using RawReservoirSampling256  = RawReservoirSampling< 256 - 1>; //  32 x 8
-	using RawReservoirSampling512  = RawReservoirSampling< 512 - 1>; //  64 x 8
-	using RawReservoirSampling1024 = RawReservoirSampling<1024 - 1>; // 128 x 8
+	template<typename T, size_t N>
+	using RawReservoirSampling__   = RawReservoirSampling<T, N - sizeof(T)>;
+
+	using RawReservoirSampling16   = RawReservoirSampling__< uint8_t,   16>; //   2 x 8
+	using RawReservoirSampling32   = RawReservoirSampling__< uint8_t,   32>; //   4 x 8
+	using RawReservoirSampling40   = RawReservoirSampling__< uint8_t,   40>; //   5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
+	using RawReservoirSampling64   = RawReservoirSampling__< uint8_t,   64>; //   8 x 8
+	using RawReservoirSampling128  = RawReservoirSampling__< uint8_t,  128>; //  16 x 8
+	using RawReservoirSampling256  = RawReservoirSampling__< uint8_t,  256>; //  32 x 8
+	using RawReservoirSampling512  = RawReservoirSampling__<uint16_t,  512>; //  64 x 8
+	using RawReservoirSampling1024 = RawReservoirSampling__<uint16_t, 1024>; // 128 x 8
 
 } // namespace reservoir_sampling
 

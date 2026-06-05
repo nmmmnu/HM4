@@ -13,8 +13,8 @@ return array(
 			"-   64 (gives you string size of   63)<br />".
 			"-  128 (gives you string size of  127)<br />".
 			"-  256 (gives you string size of  255) - Pascal string compatible :)<br />".
-			"-  512 (gives you string size of  511) - accepted after version 1.3.15.1<br />".
-			"- 1024 (gives you string size of 1023) - accepted after version 1.3.15.1<br />".
+			"-  512 (gives you string size of  510) - accepted after version 1.3.15.1<br />".
+			"- 1024 (gives you string size of 1022) - accepted after version 1.3.15.1<br />".
 			"Read Misra Gries information document.",
 			"int",
 			"0 if all the items is not qualified for insert<br />" .

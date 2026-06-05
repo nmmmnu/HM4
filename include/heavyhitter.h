@@ -32,17 +32,10 @@ namespace heavy_hitter{
 			}
 		};
 
-		template <std::size_t N>
-		using size_type_ =
-			std::conditional_t<N <= std::numeric_limits<std::uint8_t >::max() - 1,	std::uint8_t	,
-			std::conditional_t<N <= std::numeric_limits<std::uint16_t>::max() - 1,	std::uint16_t	,
-			std::conditional_t<N <= std::numeric_limits<std::uint32_t>::max() - 1,	std::uint32_t	,
-												std::uint64_t
-			> > >;
 
-		template<size_t MaxItemSize>
+		template<typename SizeType, SizeType MaxItemSize>
 		struct Item_{
-			using size_type = size_type_<MaxItemSize>;
+			using size_type = SizeType;
 
 			uint64_t	score;			//  8
 			size_type	size;			//  1, 2, 4, 8
@@ -107,24 +100,24 @@ namespace heavy_hitter{
 			}
 		} __attribute__((__packed__));
 
-		template<size_t MaxItemSize>
+		template<typename SizeType, SizeType MaxItemSize>
 		struct List{
-			using Item		= Item_<MaxItemSize>;
+			using Item		= Item_<SizeType,MaxItemSize>;
 
 			Item			items[1];
 		} __attribute__((__packed__));
 
 	} // namespace heavy_hitter_impl_
 
-	template<size_t MaxItemSize>
+	template<typename SizeType, SizeType MaxItemSize>
 	struct RawHeavyHitter{
 		template<bool Up>
 		using Comparator	= heavy_hitter_impl_::Comparator<Up>;
-		using List		= heavy_hitter_impl_::List<MaxItemSize>;
+		using List		= heavy_hitter_impl_::List<SizeType,MaxItemSize>;
 		using Item		= typename List::Item;
 
 		static_assert(std::is_trivial<List>::value, "List must be POD type");
-		// static_assert( sizeof(List) % sizeof(int64_t) == 0 );
+		static_assert( sizeof(List) % sizeof(int64_t) == 0 );
 
 		// --------------------------
 
@@ -229,14 +222,17 @@ namespace heavy_hitter{
 
 
 
-	using RawHeavyHitter16   = RawHeavyHitter<  16 - 1>; //   2 x 8
-	using RawHeavyHitter32   = RawHeavyHitter<  32 - 1>; //   4 x 8
-	using RawHeavyHitter40   = RawHeavyHitter<  40 - 1>; //   5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
-	using RawHeavyHitter64   = RawHeavyHitter<  64 - 1>; //   8 x 8
-	using RawHeavyHitter128  = RawHeavyHitter< 128 - 1>; //  16 x 8
-	using RawHeavyHitter256  = RawHeavyHitter< 256 - 1>; //  32 x 8
-	using RawHeavyHitter512  = RawHeavyHitter< 512 - 1>; //  64 x 8
-	using RawHeavyHitter1024 = RawHeavyHitter<1024 - 1>; // 128 x 8
+	template<typename T, size_t N>
+	using RawHeavyHitter__   = RawHeavyHitter<T, N - sizeof(T)>;
+
+	using RawHeavyHitter16   = RawHeavyHitter__< uint8_t,   16>; //   2 x 8
+	using RawHeavyHitter32   = RawHeavyHitter__< uint8_t,   32>; //   4 x 8
+	using RawHeavyHitter40   = RawHeavyHitter__< uint8_t,   40>; //   5 x 8, IP6 is 8 sets x 4 chars = 32 chars, separated by a colon = 39 chars.
+	using RawHeavyHitter64   = RawHeavyHitter__< uint8_t,   64>; //   8 x 8
+	using RawHeavyHitter128  = RawHeavyHitter__< uint8_t,  128>; //  16 x 8
+	using RawHeavyHitter256  = RawHeavyHitter__< uint8_t,  256>; //  32 x 8
+	using RawHeavyHitter512  = RawHeavyHitter__<uint16_t,  512>; //  64 x 8
+	using RawHeavyHitter1024 = RawHeavyHitter__<uint16_t, 1024>; // 128 x 8
 
 } // namespace heavy_hitter
 
