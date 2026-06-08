@@ -304,7 +304,7 @@ namespace net::worker::commands::HH{
 
 	private:
 		template<class MyRawHeavyHitter>
-		void process_(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
+		void process_(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (pair == nullptr)

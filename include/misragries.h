@@ -98,9 +98,9 @@ namespace misra_gries{
 
 		template<typename SizeType, SizeType MaxItemSize>
 		struct List{
-			using Item		= Item_<SizeType,MaxItemSize>;
+			using Item	= Item_<SizeType,MaxItemSize>;
 
-			Item			items[1];
+			Item		items[1];
 		} __attribute__((__packed__));
 
 	} // namespace misra_gries_impl_
@@ -110,8 +110,9 @@ namespace misra_gries{
 		using List		= misra_gries_impl_::List<SizeType,MaxItemSize>;
 		using Item		= typename List::Item;
 
-		static_assert(std::is_trivial<List>::value, "List must be POD type");
-		static_assert( sizeof(List) % sizeof(int64_t) == 0 );
+		static_assert(MaxItemSize >= 1,				"Size must be equalo ro greater than 1"	);
+		static_assert(std::is_trivial<List>::value,		"List must be POD type"			);
+		static_assert(sizeof(List) % sizeof(int64_t) == 0,	"List has to be multiple of 8"		);
 
 		// --------------------------
 
@@ -190,7 +191,7 @@ namespace misra_gries{
 
 
 
-	template<typename T, size_t N>
+	template<typename T, auto N>
 	using RawMisraGries__   = RawMisraGries<T, N - sizeof(T)>;
 
 	using RawMisraGries16   = RawMisraGries__< uint8_t,   16>; //   2 x 8

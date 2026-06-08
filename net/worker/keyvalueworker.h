@@ -32,7 +32,8 @@
 #include "keyvaluecommands/cmd_cms.h"			// CMSADD, CMSADDCOUNT, CMSRESERVE, CMSCOUNT, CMSMCOUNT
 #include "keyvaluecommands/cmd_hh.h"			// HHINCR, HHDECR, HHRESERVE, HHGET
 #include "keyvaluecommands/cmd_mg.h"			// MGADD, MGRESERVE, MGGET
-#include "keyvaluecommands/cmd_rs.h"			// RSADD, RSRESERVE, RSGET, RSGETCOUNT
+#include "keyvaluecommands/cmd_rs.h"			// RSADD, RSRESERVE, RSGET,        RSGETCOUNT
+#include "keyvaluecommands/cmd_rb.h"			// RBADD, RBRESERVE, RBGET, RBPOP, RBGETCOUNT
 #include "keyvaluecommands/cmd_geo.h"			// GEOADD, GEOREM, GEOGET, GEOMGET, GEOENCODE, GEODECODE
 #include "keyvaluecommands/cmd_linearcurve.h"		// MC1GET, MC1MGET, MC1SCORE, MC1ADD, MC1REM, MC1POINT, MC1RANGE
 #include "keyvaluecommands/cmd_mortoncurve2d.h"		// MC2GET, MC2MGET, MC2SCORE, MC2ADD, MC2REM, MC2POINT, MC2RANGENAIVE, MC2RANGE, MC2ENCODE, MC2DECODE
@@ -122,8 +123,9 @@ namespace net::worker{
 				CBF		::RegisterModule,
 				CMS		::RegisterModule,
 				HH		::RegisterModule,
-				RS		::RegisterModule,
 				MG		::RegisterModule,
+				RS		::RegisterModule,
+				RB		::RegisterModule,
 				Geo		::RegisterModule,
 
 				LinearCurve	::RegisterModule,

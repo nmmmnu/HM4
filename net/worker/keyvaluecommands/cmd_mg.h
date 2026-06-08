@@ -387,7 +387,7 @@ namespace net::worker::commands::MG{
 
 	private:
 		template<class MyRawMisraGries>
-		void process_(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
+		void process_(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (pair == nullptr)

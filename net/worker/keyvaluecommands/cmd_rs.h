@@ -286,7 +286,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<class MyReservoirSampling>
-		void process_(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
+		void process_(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (pair == nullptr)
@@ -362,7 +362,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<class MyReservoirSampling>
-		void process_(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol> &result){
+		void process_(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol> &result) const{
 			if (pair == nullptr)
 				return result.set_0();
 
@@ -383,7 +383,7 @@ namespace net::worker::commands::RS{
 
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
-		constexpr inline static std::string_view name	= "hh";
+		constexpr inline static std::string_view name	= "rs";
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,

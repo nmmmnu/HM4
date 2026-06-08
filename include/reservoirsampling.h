@@ -46,10 +46,10 @@ namespace reservoir_sampling{
 
 		template<typename SizeType, size_t MaxItemSize>
 		struct List{
-			using Item		= Item_<SizeType,MaxItemSize>;
+			using Item	= Item_<SizeType,MaxItemSize>;
 
-			uint64_t		count;
-			Item			items[1];
+			uint64_t	count;
+			Item		items[1];
 
 			constexpr auto getCount() const{
 				return betoh(count);
@@ -61,6 +61,7 @@ namespace reservoir_sampling{
 				this->count = htobe(count + 1);
 				return count;
 			}
+
 		} __attribute__((__packed__));
 
 	} // namespace reservoir_sampling_impl_
@@ -70,8 +71,9 @@ namespace reservoir_sampling{
 		using List		= reservoir_sampling_impl_::List<SizeType,MaxItemSize>;
 		using Item		= typename List::Item;
 
-		static_assert(std::is_trivial<List>::value, "List must be POD type");
-		static_assert( sizeof(List) % sizeof(int64_t) == 0 );
+		static_assert(MaxItemSize >= 1,				"Size must be equalo ro greater than 1"	);
+		static_assert(std::is_trivial<List>::value,		"List must be POD type"			);
+		static_assert(sizeof(List) % sizeof(int64_t) == 0,	"List has to be multiple of 8"		);
 
 		enum class Added{
 			INIT,
@@ -145,7 +147,7 @@ namespace reservoir_sampling{
 
 
 
-	template<typename T, size_t N>
+	template<typename T, auto N>
 	using RawReservoirSampling__   = RawReservoirSampling<T, N - sizeof(T)>;
 
 	using RawReservoirSampling16   = RawReservoirSampling__< uint8_t,   16>; //   2 x 8
