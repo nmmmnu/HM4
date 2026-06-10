@@ -27,7 +27,7 @@ void DirectoryListLoader::refresh(){
 
 	MyGlob files;
 	if (files.open(path_))
-		container_.copy(std::begin(files), std::end(files));
+		container_.copy(std::begin(files), std::end(files), /* sort */ true);
 	else
 		container_.copy();
 }

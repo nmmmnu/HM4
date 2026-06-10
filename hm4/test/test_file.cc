@@ -88,7 +88,7 @@ namespace{
 
 	template <class List>
 	void listSearch(const List &list, std::string_view const key){
-		if (const auto *p = list.getPair(key); p)
+		if (const auto *p = hm4::getPair(list, key); p)
 			print(*p);
 		else
 			fmt::print("Key '{}' not found...\n", key);

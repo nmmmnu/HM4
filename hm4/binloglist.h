@@ -65,10 +65,10 @@ public:
 		return result;
 	}
 
-	InsertResult erase_(std::string_view const key){
+	InsertResult erase___(std::string_view const key){
 		assert(!key.empty());
 
-		auto result = list_->erase_(key);
+		auto result = list_->erase___(key);
 
 		if (result.status == result.DELETED){
 			// this will be on the stack, so need to be small-ish.

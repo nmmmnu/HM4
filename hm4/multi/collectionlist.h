@@ -54,34 +54,25 @@ public:
 		return { std::begin(*list_), std::end(*list_), key };
 	}
 
-	const Pair *getPair(std::string_view const key) const{
+	const Pair *getPair___(std::string_view const key) const{
+		return getPair___(key, nullptr);
+	}
+
+	const Pair *getPair___(std::string_view const key, const Pair *best) const{
 		auto first = std::begin(*list_);
-		auto last  = std::end(*list_);
+		auto last  = std::end  (*list_);
 
 		// this is simillar to std::min_element...
 
 		if (first == last){
 			// not found. done.
-			return nullptr;
+			return best;
 		}
 
-		const Pair *smallest = nullptr;
+		for(; first != last; ++first)
+			best = first->getPair___(key, best);
 
-		for(; first != last; ++first){
-			if (!smallest){
-				smallest = first->getPair(key);
-				continue;
-			}
-
-			const auto *p = first->getPair(key);
-
-			if (!p)
-				continue;
-
-			smallest = smallest->cmpTime(*p) > 0 ? smallest : p;
-		}
-
-		return smallest;
+		return best;
 	}
 
 public:

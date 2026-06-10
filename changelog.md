@@ -246,7 +246,7 @@ Changelog
 ### 1.3.7.6
 -	new module mutable_get
 -	new command GETEX, GETEXAT, GETPERSIST
--	make DiskList not open empty files
+-	make disktables not open empty files
 -	add List::empty() for future development
 -	differentiate hm4::insert from hm4::insertTS and hm4::erase
 -	new command DBSIZEMUTABLE
@@ -410,5 +410,5 @@ Changelog
 	SSADDGETALL, SSADDGET, SSADDMGET
 -	HH*, MG* and RS* now accepts sizes of 512 and 1024
 -	new module ring buffer: RBRESERVE, RBADD, RBPOP, RBGET, RBGETCOUNT
-
+-	implement time sensitive on disktables, when using getPair()
 

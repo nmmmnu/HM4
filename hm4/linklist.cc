@@ -182,7 +182,7 @@ auto LinkList<T_Allocator>::insertF(PFactory &factory) -> InsertResult{
 }
 
 template<class T_Allocator>
-InsertResult LinkList<T_Allocator>::erase_(std::string_view const key){
+InsertResult LinkList<T_Allocator>::erase___(std::string_view const key){
 	// better Pair::check(key), but might fail because of the caller.
 	assert(!key.empty());
 
@@ -273,7 +273,7 @@ auto LinkList<T_Allocator>::find(std::string_view const key) const -> iterator{
 }
 
 template<class T_Allocator>
-const Pair *LinkList<T_Allocator>::getPair(std::string_view const key) const{
+const Pair *LinkList<T_Allocator>::getPair___(std::string_view const key) const{
 	if (const Node *node = find_<1>(key); node)
 		return node->data;
 	else

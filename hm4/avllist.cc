@@ -242,7 +242,7 @@ size_t const AVLList<T_Allocator>::INTERNAL_NODE_SIZE = checkInternalNodeSize<
 
 
 template<class T_Allocator>
-InsertResult AVLList<T_Allocator>::erase_(std::string_view const key){
+InsertResult AVLList<T_Allocator>::erase___(std::string_view const key){
 	MyPairCompare comp;
 
 	auto *node = root_;
@@ -543,7 +543,7 @@ auto AVLList<T_Allocator>::find(std::string_view const key) const -> iterator{
 
 
 template<class T_Allocator>
-const Pair *AVLList<T_Allocator>::getPair(std::string_view const key) const{
+const Pair *AVLList<T_Allocator>::getPair___(std::string_view const key) const{
 	assert(!key.empty());
 
 	MyPairCompare comp;

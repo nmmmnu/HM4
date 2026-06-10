@@ -34,7 +34,7 @@ public:
 	}
 
 	constexpr static
-	InsertResult erase_(std::string_view ){
+	InsertResult erase___(std::string_view ){
 		return InsertResult::skipDeleted();
 	}
 
@@ -75,8 +75,13 @@ public:
 	}
 
 	constexpr static
-	const Pair *getPair(std::string_view){
+	const Pair *getPair___(std::string_view){
 		return nullptr;
+	}
+
+	constexpr static
+	const Pair *getPair___(std::string_view, const Pair *best){
+		return best;
 	}
 
 	constexpr static

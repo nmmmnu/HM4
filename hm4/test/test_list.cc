@@ -78,7 +78,7 @@ bool iteratorDereference(Iterator const &it, Iterator const &et, const char *val
 template <bool Exact, class List>
 bool getCheck(List const &list, const char *key, const char *value){
 	if constexpr(Exact){
-		const auto *p = list.getPair(key);
+		const auto *p = hm4::getPair(list, key);
 
 		if (value)
 			return p && p->getVal() == value;
@@ -349,7 +349,7 @@ void list_test(hm4::BlackHoleList &list){
 
 	mytest("put",			insert(list, "key", "val").ok					);
 	mytest("find",			list.find   ("key") == std::end(list)				);
-	mytest("find",			list.getPair("key") == std::end(list)				);
+	mytest("find",			hm4::getPair(list, "key") == nullptr			);
 	mytest("remove",		erase(list, "key").status == hm4::InsertResult::SKIP_DELETED	);
 }
 

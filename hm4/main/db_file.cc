@@ -37,7 +37,7 @@ namespace{
 		if (key.empty())
 			return 1;
 
-		if (const auto *p = list.getPair(key); p)
+		if (const auto *p = hm4::getPair(list, key); p)
 			print(*p);
 
 		return 0;

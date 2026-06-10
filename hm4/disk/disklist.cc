@@ -591,10 +591,26 @@ auto DiskList::ra_find(std::string_view const key) const -> random_access_iterat
 	return result.it;
 }
 
-const Pair *DiskList::getPair(std::string_view const key) const{
+const Pair *DiskList::getPair___(std::string_view const key) const{
 	auto const result = ra_find_<FindMode::EXACT>(key);
 
 	return result.found ? & *result.it : nullptr;
+}
+
+const Pair *DiskList::getPair___(std::string_view const key, const Pair *best) const{
+	if (!best)
+		return getPair___(key);
+
+	if (best->getCreated() > createdMax()){
+		logger<Logger::DEBUG>() << "Skipping search on disktable" << id_ << "because preferred pair is better.";
+
+		return best;
+	}
+
+	return getNewestPair_(
+		getPair___(key),
+		best
+	);
 }
 
 

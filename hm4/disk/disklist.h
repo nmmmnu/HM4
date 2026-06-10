@@ -76,7 +76,8 @@ private:
 public:
 	DiskList() = default;
 
-	DiskList(DiskList &&other) = default;
+	DiskList(DiskList &&other) noexcept = default;
+	// DiskList &operator=(DiskList &&other) noexcept = default;
 
 	// no need d-tor,
 	// MMAPFile-s will be closed automatically
@@ -210,8 +211,10 @@ public:
 	forward_iterator begin() const;
 	constexpr forward_iterator end() const;
 
-	forward_iterator find   (std::string_view key) const;
-	const Pair      *getPair(std::string_view key) const;
+	forward_iterator find      (std::string_view key) const;
+	const Pair      *getPair___(std::string_view key) const;
+
+	const Pair      *getPair___(std::string_view const key, const Pair *best) const;
 
 private:
 	bool openNormal_	(std::string_view filename, OpenController oc);
@@ -259,8 +262,6 @@ private:
 
 	uint64_t	id_		= 0;
 };
-
-
 
 } // namespace disk
 

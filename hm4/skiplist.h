@@ -41,7 +41,7 @@ public:
 public:
 	bool clear();
 
-	InsertResult erase_(std::string_view const key);
+	InsertResult erase___(std::string_view const key);
 
 	template<class PFactory>
 	InsertResult insertF(PFactory &factory);
@@ -78,8 +78,12 @@ public:
 	}
 
 public:
-	iterator    find   (std::string_view const key) const;
-	const Pair *getPair(std::string_view const key) const;
+	iterator    find      (std::string_view const key) const;
+	const Pair *getPair___(std::string_view const key) const;
+
+	const Pair *getPair___(std::string_view const key, const Pair *best) const{
+		return hm4::getPairBestHelper_(*this, key, best);
+	}
 
 	iterator begin() const;
 	static constexpr iterator end();

@@ -90,14 +90,15 @@ public:
 		return { *list1_, *list2_, key };
 	}
 
-	const Pair *getPair(std::string_view const key) const{
-		const auto *p1 = list1_->getPair(key);
-		const auto *p2 = list2_->getPair(key);
+	const Pair *getPair___(std::string_view const key, const Pair *best) const{
+		best = list1_->getPair___(key, best);
+		best = list2_->getPair___(key, best);
 
-		if (!p1) return p2;
-		if (!p2) return p1;
+		return best;
+	}
 
-		return p1->cmpTime(*p2) > 0 ? p1 : p2;
+	const Pair *getPair___(std::string_view const key) const{
+		return getPair___(key, nullptr);
 	}
 
 protected:
@@ -141,7 +142,7 @@ public:
 		return list1_->clear();
 	}
 
-	InsertResult erase_(std::string_view const key){
+	InsertResult erase___(std::string_view const key){
 		assert(!key.empty());
 
 		// will never come here.

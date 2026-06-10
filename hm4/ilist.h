@@ -181,7 +181,7 @@ using PairFactoryMutableNotifyMessage = PairFactory::MutableNotifyMessage;
 
 template<class List>
 InsertResult erase(List &list, std::string_view const key){
-	return list.erase_(key);
+	return list.erase___(key);
 }
 
 template<class PairFactory, class List>
@@ -352,14 +352,34 @@ auto insertHintV(List &list, const Pair *pair, Args &&...args){
 
 // ==============================
 
-// template<typename List>
-// auto getPairPtrNC(List const &list, std::string_view key){
-// 	return list.getPair(key);
-// }
+template<typename List>
+const Pair *getPair(List const &list, std::string_view key){
+	return list.getPair___(key, nullptr);
+}
+
+constexpr const Pair *getNewestPair_(const Pair *p1, const Pair *p2){
+	if (!p1)
+		return p2;
+
+	if (!p2)
+		return p1;
+
+	return p1->cmpTime(*p2) > 0 ? p1 : p2;
+}
+
+template<typename List>
+const Pair *getPairBestHelper_(List const &list, std::string_view key, const Pair *best){
+	return getNewestPair_(
+		list.getPair___(key),
+		best
+	);
+}
+
+// ==============================
 
 template<typename List, typename Predicate>
 auto getPairOK_(List const &list, std::string_view key, Predicate pred){
-	const auto *p = list.getPair(key);
+	const auto *p = getPair(list, key);
 
 	return pred(p && p->isOK(), p);
 }

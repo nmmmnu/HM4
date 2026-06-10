@@ -132,7 +132,7 @@ namespace hm4{
 		template<class PFactory>
 		InsertResult insertF(HPair::HKey const hkey, PFactory &factory, Allocator &allocator, ListCounter &lc);
 
-		bool erase_(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc);
+		bool erase___(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc);
 
 		void split(PairVector &other){
 			assert(other.size() == 0);
@@ -168,7 +168,7 @@ namespace hm4{
 		// used for testing
 		bool xErase_(std::string_view const &key, Allocator &allocator, ListCounter &lc){
 			auto const hkey = HPair::SS::create(key);
-			return erase_(hkey, key, allocator, lc);
+			return erase___(hkey, key, allocator, lc);
 		}
 
 		// used for testing
@@ -338,7 +338,7 @@ namespace hm4{
 	}
 
 	template<class Allocator, size_t Capacity>
-	bool PairVector<Allocator,Capacity>::erase_(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc){
+	bool PairVector<Allocator,Capacity>::erase___(HPair::HKey const hkey, std::string_view const &key, Allocator &allocator, ListCounter &lc){
 		auto [found, it] = locateM_(hkey, key);
 
 		if (!found)

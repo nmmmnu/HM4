@@ -57,8 +57,12 @@ public:
 		return list_->find(key);
 	}
 
-	const Pair *getPair(std::string_view const key) const{
-		return list_->getPair(key);
+	const Pair *getPair___(std::string_view const key) const{
+		return list_->getPair___(key);
+	}
+
+	const Pair *getPair___(std::string_view const key, const Pair *best) const{
+		return list_->getPair___(key, best);
 	}
 
 public:
@@ -123,7 +127,7 @@ public:
 		return list_->clear();
 	}
 
-	auto erase_(std::string_view const key){
+	auto erase___(std::string_view const key){
 		// better Pair::check(key), but might fail because of the caller.
 		assert(!key.empty());
 

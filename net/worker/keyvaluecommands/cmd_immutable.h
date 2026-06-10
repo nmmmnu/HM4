@@ -193,7 +193,7 @@ namespace net::worker::commands::Immutable{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (const auto *p = db->getPair(key); p){
+			if (const auto *p = hm4::getPair(*db, key); p){
 				std::string_view const x{
 					reinterpret_cast<const char *>(p),
 					p->bytes()
