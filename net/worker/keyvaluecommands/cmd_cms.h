@@ -136,7 +136,7 @@ namespace net::worker::commands::CMS{
 
 				MyCMSADD_Factory factory{ key, pair, cms, std::begin(p) + varg, std::end(p) };
 
-				insertHintVFactory(pair, list, factory);
+				insertHintVFactory(list, pair, factory);
 
 				return result.set();
 			}
@@ -225,7 +225,7 @@ namespace net::worker::commands::CMS{
 
 				MyCMSADD_Factory factory{ key, pair, cms, item, itemCount };
 
-				insertHintVFactory(pair, list, factory);
+				insertHintVFactory(list, pair, factory);
 
 				return result.set(
 					factory.getScore()

@@ -101,7 +101,7 @@ namespace net::worker::commands::RS{
 
 			MyRSADDFactory factory{ key, pair, rs, std::begin(p) + varg, std::end(p), rand64 };
 
-			insertHintVFactory(pair, list, factory);
+			insertHintVFactory(list, pair, factory);
 
 			return result.set(
 				factory.getResult()

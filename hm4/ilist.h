@@ -241,14 +241,21 @@ auto insert(List &list, Pair &src) noexcept{
 
 // ==============================
 
+// canInsertHint family:
+//
+//	Pair is valid (this assumes not nullptr)
+//
+//	Pair has to be checked if is in the memlist
+//	data size has to be checked if can fit
+
 template<class Allocator>
-constexpr bool canInsertHintAllocator(Allocator const &allocator, const Pair *pair){
+constexpr bool canInsertHintAllocator_(Allocator const &allocator, const Pair *pair){
 	return allocator.owns(pair);
 }
 
 template<class List>
 constexpr bool canInsertHintList(List const &list, const Pair *pair){
-	return canInsertHintAllocator(list.getAllocator(), pair);
+	return canInsertHintAllocator_(list.getAllocator(), pair);
 }
 
 template<class List>
@@ -262,15 +269,16 @@ constexpr bool canInsertHintValSize(List const &list, const Pair *pair, size_t v
 template<class Allocator, class PairFactory>
 constexpr bool canInsertHintAllocatorF(Allocator const &allocator, const Pair *pair, PairFactory const &factory){
 	return
-		canInsertHintAllocator(allocator, pair) &&
+		canInsertHintAllocator_(allocator, pair) &&
 		pair->bytes() >= factory.bytes()
 	;
 }
 
 // ==============================
 
-// proceedInsertHint:
-// 	Pair is in the memlist,
+// proceedInsertHint family:
+//
+// 	Pair is in the memlist (this assumes not nullptr)
 // 	data size is already checked and it is safe to be overwitten.
 //
 // 	The create time is not updated, but this is not that important,
@@ -290,8 +298,6 @@ constexpr void proceedInsertHint(List &list, Pair *pair, PairFactory &factory){
 	proceedInsertHint_skipMutableNotify(pair, factory);
 
 	PairFactoryMutableNotifyMessage msg{ pair, bytes_old, pair->bytes() };
-
-	msg.bytes_new = pair->bytes();
 
 	list.mutable_notify(msg);
 }
@@ -319,7 +325,9 @@ auto proceedInsertHintV(List &list, Pair *pair, Args &&...args){
 
 // ==============================
 
-// insertHint - standard insert, but uses hint, if possible
+// insertHint family - standard insert, but uses hint, if possible
+//
+//	Pair is valid (this assumes not nullptr)
 
 template<class List, class PairFactory>
 void insertHint(List &list, const Pair *pair, PairFactory &factory){

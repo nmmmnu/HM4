@@ -158,7 +158,7 @@ namespace net::worker::commands::RB{
 
 			MyRBADDFactory factory{ key, pair, rb, std::begin(p) + varg, std::end(p) };
 
-			insertHintVFactory(pair, list, factory);
+			insertHintVFactory(list, pair, factory);
 
 			return result.set_1();
 		}
@@ -260,7 +260,7 @@ namespace net::worker::commands::RB{
 
 			MyRBADDFactory factory{ key, pair, rb };
 
-			insertHintVFactory(pair, list, factory);
+			insertHintVFactory(list, pair, factory);
 
 			return result.set(
 				factory.getResult()

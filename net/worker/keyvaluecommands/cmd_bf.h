@@ -80,7 +80,7 @@ namespace net::worker::commands::BF{
 
 			BFADD_Factory factory{ key, pair, max_bits, max_hash, std::begin(p) + varg, std::end(p) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set();
 		}

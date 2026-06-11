@@ -102,7 +102,7 @@ namespace net::worker::commands::HLL{
 
 			PFADDFactoryBits factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set(factory.getBits());
 		}
@@ -326,7 +326,7 @@ namespace net::worker::commands::HLL{
 
 			PFADDFactoryCount factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			uint64_t const n = hll_op_round(
 						factory.getCount()
@@ -435,7 +435,7 @@ namespace net::worker::commands::HLL{
 
 			PFMergeFactory factory{ key, pair, std::begin(container), std::end(container) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set();
 		}

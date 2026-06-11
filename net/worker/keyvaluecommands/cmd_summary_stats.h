@@ -187,7 +187,7 @@ namespace net::worker::commands::SummaryStats{
 
 			SSADDFactory factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_1();
 		}
@@ -265,7 +265,7 @@ namespace net::worker::commands::SummaryStats{
 
 			SSMERGEFactory factory{ key, pair, std::begin(pcontainer), std::end(pcontainer) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_1();
 		}
@@ -523,7 +523,7 @@ namespace net::worker::commands::SummaryStats{
 
 			SSADDGETALLFactory &factory = blob.construct<SSADDGETALLFactory>(key, pair, std::begin(p) + varg, std::end(p));
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_container(
 				factory.getResult()
@@ -610,7 +610,7 @@ namespace net::worker::commands::SummaryStats{
 
 			SSADDGETFactory factory{ key, pair, val, sub };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set(
 				factory.getResult()
@@ -695,7 +695,7 @@ namespace net::worker::commands::SummaryStats{
 
 			SSADDMGETFactory &factory = blob.construct<SSADDMGETFactory>(key, pair, val, std::begin(p) + varg, std::end(p));
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_container(
 				factory.getResult()

@@ -3,8 +3,12 @@
 
 namespace hm4{
 
+	// insertHint family - standard insert, but uses hint, if possible
+	//
+	//	Pair is not assumed to be valid
+
 	template<class List, class Factory>
-	void insertHintVFactory(const Pair *pair, List &list, Factory &factory){
+	void insertHintVFactory(List &list, const Pair *pair, Factory &factory){
 		using VBase = hm4::PairFactory::IFactory;
 
 		// lost the type and skip one virtual call

@@ -214,7 +214,7 @@ namespace net::worker::commands::TDigest{
 
 			TDADD_Factory factory{ key, pair, td, d, std::begin(container), std::end(container) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_1();
 		}
@@ -273,7 +273,7 @@ namespace net::worker::commands::TDigest{
 
 			TDADD_Factory factory{ key, pair, td, d, std::begin(container), std::end(container) };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_1();
 		}
@@ -347,7 +347,7 @@ namespace net::worker::commands::TDigest{
 
 			// This is fine, because flush list give guarantees now.
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_1();
 		}
@@ -422,7 +422,7 @@ namespace net::worker::commands::TDigest{
 
 			// This is fine, because flush list give guarantees now.
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set_1();
 		}

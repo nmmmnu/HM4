@@ -471,7 +471,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 			MyISET_Factory factory{ key, pair, isam, searcher, begin, end };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set(
 				factory.getResult()
@@ -602,7 +602,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 			MyIDEL_Factory factory{ key, pair, isam, searcher, begin, end };
 
-			insertHintVFactory(pair, *db, factory);
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set(
 				factory.getResult()

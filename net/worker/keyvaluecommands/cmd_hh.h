@@ -129,7 +129,7 @@ namespace net::worker::commands::HH{
 
 					MyHHADDFactory factory{ key, pair, hh, std::begin(p) + varg, std::end(p) };
 
-					insertHintVFactory(pair, *db, factory);
+					insertHintVFactory(*db, pair, factory);
 
 					return result.set(
 						factory.getResult()

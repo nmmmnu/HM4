@@ -153,7 +153,7 @@ namespace net::worker::commands::CBF{
 
 				MyCBFADD_Factory factory{ key, pair, cbf, std::begin(p) + varg, std::end(p) };
 
-				insertHintVFactory(pair, list, factory);
+				insertHintVFactory(list, pair, factory);
 
 				return result.set();
 			}
@@ -244,7 +244,7 @@ namespace net::worker::commands::CBF{
 
 				MyCBFADDCOUNT_Factory factory{ key, pair, cbf, item, itemCount };
 
-				insertHintVFactory(pair, list, factory);
+				insertHintVFactory(list, pair, factory);
 
 				return result.set(
 					factory.getScore()

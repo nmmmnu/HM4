@@ -106,7 +106,7 @@ namespace net::worker::commands::MG{
 
 			MyMGADDFactory factory{ key, pair, mg, std::begin(p) + varg, std::end(p) };
 
-			insertHintVFactory(pair, list, factory);
+			insertHintVFactory(list, pair, factory);
 
 			return result.set(
 				factory.getResult()
@@ -229,7 +229,7 @@ namespace net::worker::commands::MG{
 
 			MyMGADDFactory factory{ key, pair, mg, item };
 
-			insertHintVFactory(pair, list, factory);
+			insertHintVFactory(list, pair, factory);
 
 			return result.set(
 				factory.getScore()
