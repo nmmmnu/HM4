@@ -96,3 +96,6 @@ Changelog
 ### 1.3.15
 -	Fix issue with clearing the buffer in specific cases
 
+### 1.3.15.1
+-	Prevent possible issue in APPEND that may appear in future version. This is not a bug in current releases.
+

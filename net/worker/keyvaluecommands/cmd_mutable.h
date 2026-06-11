@@ -587,17 +587,16 @@ namespace net::worker::commands::Mutable{
 			// HINT
 			// will not work, but who knows in the future.
 			const auto *hint = pair;
-			hm4::insertHintV<APPEND_Factory>(*db, hint, key, val_old, val_new);
 
-			// return
+			hm4::insertHintV<APPEND_Factory>(*db, hint, key, pair, val_old, val_new);
 
 			result.set(val_old.size() + val_new.size());
 		}
 
 	private:
-		struct APPEND_Factory : hm4::PairFactory::IFactoryAction<0,0,APPEND_Factory>{
+		struct APPEND_Factory : hm4::PairFactory::IFactoryAction<1,0,APPEND_Factory>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<0,0,APPEND_Factory>;
+			using Base = hm4::PairFactory::IFactoryAction<1,0,APPEND_Factory>;
 
 			std::string_view key;
 			std::string_view val1;
@@ -605,14 +604,16 @@ namespace net::worker::commands::Mutable{
 
 			constexpr APPEND_Factory(
 				std::string_view const key,
+				const Pair *pair,
 				std::string_view const val1,
 				std::string_view const val2) :
-					Base::IFactoryAction	(key, val1.size() + val2.size()),
+					Base::IFactoryAction	(key, val1.size() + val2.size(), pair),
 					val1				(val1		),
 					val2				(val2		){}
 
 			void action(Pair *pair) const{
-				memcpy(pair->getValC() + 0,		val1.data(), val1.size());
+				// this is already copied in:
+			//	memcpy(pair->getValC() + 0,		val1.data(), val1.size());
 				memcpy(pair->getValC() + val1.size(),	val2.data(), val2.size());
 			}
 		};
