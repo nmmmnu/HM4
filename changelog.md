@@ -411,5 +411,6 @@ Changelog
 -	HH*, MG* and RS* now accepts sizes of 512 and 1024
 -	new module ring buffer: RBRESERVE, RBADD, RBPOP, RBGET, RBGETCOUNT
 -	implement time sensitive on disktables, when using getPair()
--	optimize APPEND
+-	optimize APPEND, BITSET
+
 

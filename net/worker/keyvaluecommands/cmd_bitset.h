@@ -47,20 +47,14 @@ namespace net::worker::commands::BITSET{
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
-			auto const new_bytes = bytes;
+			auto const val_size = std::max(
+					bytes,
+					pair ? pair->getVal().size() : 0
+			);
 
-			if (pair && hm4::canInsertHintValSize(*db, pair, new_bytes)){
-				auto const val_size = pair->getVal().size();
+			BITSET_Factory factory{ key, val_size, pair, std::begin(p) + varg, std::end(p) };
 
-				hm4::proceedInsertHintV<BITSET_Factory>(*db, const_cast<Pair *>(pair), key, val_size, pair, std::begin(p) + varg, std::end(p));
-			}else{
-				auto const val_size = std::max(
-							new_bytes,
-							pair ? pair->getVal().size() : 0
-				);
-
-				hm4::insertV<BITSET_Factory>(*db, key, val_size, pair, std::begin(p) + varg, std::end(p));
-			}
+			insertHintVFactory(*db, pair, factory);
 
 			return result.set();
 		}
