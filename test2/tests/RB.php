@@ -31,15 +31,15 @@ function cmd_RB($redis){
 		$redis->del("a");
 
 		rawCommand($redis, "rbadd", "a", $size, $bytes, 1, 2, 3, 4);
-		expect("RBCOUNT", rawCommand($redis, "rbgetcount", "a", $size, $bytes) == 4);
+		expect("RBCOUNT", rawCommand($redis, "rbcount", "a", $size, $bytes) == 4);
 
 		rawCommand($redis, "rbadd", "a", $size, $bytes, 1, 2, 3, 4);
-		expect("RBCOUNT", rawCommand($redis, "rbgetcount", "a", $size, $bytes) == 5);
+		expect("RBCOUNT", rawCommand($redis, "rbcount", "a", $size, $bytes) == 5);
 
 		expect("RBPOP", rawCommand($redis, "rbpop", "a", $size, $bytes) == 4);
 		expect("RBPOP", rawCommand($redis, "rbpop", "a", $size, $bytes) == 1);
 
-		expect("RBCOUNT_AFTER_POPS_$bytes", rawCommand($redis, "rbgetcount", "a", $size, $bytes) == 3);
+		expect("RBCOUNT_AFTER_POPS_$bytes", rawCommand($redis, "rbcount", "a", $size, $bytes) == 3);
 
 		$redis->del("a");
 	}

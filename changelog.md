@@ -409,8 +409,9 @@ Changelog
 -	new module summary stats : SSRESERVE, SSADD, SSMERGE, SSGETALL, SSGET, SSMGET,
 	SSADDGETALL, SSADDGET, SSADDMGET
 -	HH*, MG* and RS* now accepts sizes of 512 and 1024
--	new module ring buffer: RBRESERVE, RBADD, RBPOP, RBGET, RBGETCOUNT
+-	new module ring buffer: RBRESERVE, RBADD, RBPOP, RBGET, RBCOUNT
 -	implement time sensitive on disktables, when using getPair()
 -	optimize APPEND, BITSET
+-	new helper module string list: SLAD, SLGETALL, SLCOUNT
 
 
