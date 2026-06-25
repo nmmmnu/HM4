@@ -194,7 +194,7 @@
 				<li><a href="#C::RBADD">RBADD</a></li>
 				<li><a href="#C::RBPOP">RBPOP</a></li>
 				<li><a href="#C::RBGET">RBGET</a></li>
-				<li><a href="#C::RBGETCOUNT">RBGETCOUNT</a></li>
+				<li><a href="#C::RBCOUNT">RBCOUNT</a></li>
 			</ul>
 		</div>
 		<div>
@@ -6437,7 +6437,7 @@ This guarantees zero memory fragmentation and deterministic performance under he
 If the buffer is empty, it safely returns an empty string (<b>""</b>) to prevent underflow errors.</p>
 
 <p><b>6. Tracking active elements</b></p>
-<p><b>RBGETCOUNT</b> (alias <b>RBLEN</b>) returns the exact number of active elements currently held in the buffer (ranging from 0 up to <b>rb_count</b>).</p>
+<p><b>RBCOUNT</b> (alias <b>RBLEN</b>) returns the exact number of active elements currently held in the buffer (ranging from 0 up to <b>rb_count</b>).</p>
 
 <p><b>Use Cases:</b></p>
 <ul>
@@ -6465,7 +6465,7 @@ If the buffer is empty, it safely returns an empty string (<b>""</b>) to prevent
 5) &quot;softlayer&quot;
 127.0.0.1:6379&gt; rbadd myrb 5 64 wikipedia
 (integer) 1
-127.0.0.1:6379&gt; rbgetcount myrb 5 64
+127.0.0.1:6379&gt; rbcount myrb 5 64
 (integer) 5
 127.0.0.1:6379&gt; rbpop myrb 5 64
 &quot;amazon&quot;
@@ -6490,7 +6490,7 @@ If the buffer is empty, it safely returns an empty string (<b>""</b>) to prevent
 			<li><a href="#C::RBADD">RBADD</a></li>
 			<li><a href="#C::RBPOP">RBPOP</a></li>
 			<li><a href="#C::RBGET">RBGET</a></li>
-			<li><a href="#C::RBGETCOUNT">RBGETCOUNT</a></li>
+			<li><a href="#C::RBCOUNT">RBCOUNT</a></li>
 		</ul>
 
 		<p><a href="#top">top</a></p>
@@ -6643,7 +6643,7 @@ If the buffer reaches its maximum capacity (<b>rb_count</b>), new incoming items
 3) &quot;hotmail&quot;
 4) &quot;softlayer&quot;
 5) &quot;wikipedia&quot;
-127.0.0.1:6379&gt; rbgetcount myrb 5 64
+127.0.0.1:6379&gt; rbcount myrb 5 64
 (integer) 5
 </pre></blockquote>
 
@@ -6725,7 +6725,7 @@ An empty string ("") if the buffer is empty.
 3) &quot;hotmail&quot;
 4) &quot;softlayer&quot;
 5) &quot;wikipedia&quot;
-127.0.0.1:6379&gt; rbgetcount myrb 5 64
+127.0.0.1:6379&gt; rbcount myrb 5 64
 (integer) 5
 127.0.0.1:6379&gt; rbpop myrb 5 64
 &quot;amazon&quot;
@@ -6735,7 +6735,7 @@ An empty string ("") if the buffer is empty.
 1) &quot;hotmail&quot;
 2) &quot;softlayer&quot;
 3) &quot;wikipedia&quot;
-127.0.0.1:6379&gt; rbgetcount myrb 5 64
+127.0.0.1:6379&gt; rbcount myrb 5 64
 (integer) 3
 </pre></blockquote>
 
@@ -6825,11 +6825,11 @@ This is a non-destructive peek operation and does not remove items from the buff
 
 		<p><a href="#top">top</a></p>
 		<hr />
-		<div class="cmd" id="RBGETCOUNT">
-			<a name="C::RBGETCOUNT"></a>
-			<h4>RBGETCOUNT</h4>
+		<div class="cmd" id="RBCOUNT">
+			<a name="C::RBCOUNT"></a>
+			<h4>RBCOUNT</h4>
 			<table border="1" class="x">
-				<tr><td>Command			</td><td>RBGETCOUNT		</td></tr>
+				<tr><td>Command			</td><td>RBCOUNT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
 				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
@@ -6838,7 +6838,7 @@ This is a non-destructive peek operation and does not remove items from the buff
 			</table>
 
 			<h4>Usage:</h4>
-			<blockquote>RBGETCOUNT key rb_count rb_value_size</blockquote>
+			<blockquote>RBCOUNT key rb_count rb_value_size</blockquote>
 
 			<h4>Parameters:</h4>
 			<blockquote>
@@ -6881,6 +6881,10 @@ The returned value will be an integer between 0 and <b>rb_count</b>.</p>
 			<h4>Return value:</h4>
 			<blockquote>number of items</blockquote>
 
+			<h4>Aliases:</h4>
+			<ul>
+				<li>RBLEN</li>
+			</ul>
 
 			<h4>Example:</h4>
 			<blockquote><pre class="x">127.0.0.1:6379&gt; del myrs
@@ -6897,7 +6901,7 @@ The returned value will be an integer between 0 and <b>rb_count</b>.</p>
 3) &quot;cloudflare&quot;
 4) &quot;outlook&quot;
 5) &quot;facebook&quot;
-127.0.0.1:6379&gt; rsgetcount myrs 5 64
+127.0.0.1:6379&gt; rscount myrs 5 64
 (integer) 9
 </pre></blockquote>
 

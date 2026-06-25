@@ -54,6 +54,6 @@
     3) "hotmail"
     4) "softlayer"
     5) "wikipedia"
-    127.0.0.1:6379> rbgetcount myrb 5 64
+    127.0.0.1:6379> rbcount myrb 5 64
     (integer) 5
 

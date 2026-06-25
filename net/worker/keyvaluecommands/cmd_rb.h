@@ -383,7 +383,7 @@ namespace net::worker::commands::RB{
 
 
 	template<class Protocol, class DBAdapter>
-	struct RBGETCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	struct RBCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -446,7 +446,8 @@ namespace net::worker::commands::RB{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"rbgetcount",	"RBGETCOUNT"
+			"rbcount",	"RBCOUNT",
+			"rblen",	"RBLEN"
 		};
 	};
 
@@ -462,7 +463,7 @@ namespace net::worker::commands::RB{
 				RBADD		,
 				RBPOP		,
 				RBGET		,
-				RBGETCOUNT
+				RBCOUNT
 			>(pack);
 		}
 	};

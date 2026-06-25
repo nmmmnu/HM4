@@ -7,7 +7,8 @@ STATIC_LINK	= YES
 
 CF_OPTIM	= -O0 -g
 #CF_OPTIM	= -O3 -DNDEBUG
-CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
+#CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
+CF_OPTIM	+= -march=sandybridge
 
 # ======================================================
 

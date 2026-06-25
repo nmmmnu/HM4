@@ -41,7 +41,7 @@ description: |
   If the buffer is empty, it safely returns an empty string (<b>""</b>) to prevent underflow errors.</p>
 
   <p><b>6. Tracking active elements</b></p>
-  <p><b>RBGETCOUNT</b> (alias <b>RBLEN</b>) returns the exact number of active elements currently held in the buffer (ranging from 0 up to <b>rb_count</b>).</p>
+  <p><b>RBCOUNT</b> (alias <b>RBLEN</b>) returns the exact number of active elements currently held in the buffer (ranging from 0 up to <b>rb_count</b>).</p>
 
   <p><b>Use Cases:</b></p>
   <ul>
@@ -68,7 +68,7 @@ example_module:     |
   5) "softlayer"
   127.0.0.1:6379> rbadd myrb 5 64 wikipedia
   (integer) 1
-  127.0.0.1:6379> rbgetcount myrb 5 64
+  127.0.0.1:6379> rbcount myrb 5 64
   (integer) 5
   127.0.0.1:6379> rbpop myrb 5 64
   "amazon"

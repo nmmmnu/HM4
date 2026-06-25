@@ -1,5 +1,5 @@
-#ifndef ring_buffer_h_
-#define ring_buffer_h_
+#ifndef RING_BUFFER_H_
+#define RING_BUFFER_H_
 
 #include <cstdint>
 #include <cassert>

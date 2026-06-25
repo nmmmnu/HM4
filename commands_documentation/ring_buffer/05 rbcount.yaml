@@ -1,6 +1,9 @@
-- id:      RBGETCOUNT
-  name:    RBGETCOUNT
-  usage:   RBGETCOUNT key rb_count rb_value_size
+- id:      RBCOUNT
+  name:    RBCOUNT
+  aliases:
+    items:
+      - RBLEN
+  usage:   RBCOUNT key rb_count rb_value_size
   params:
     items:
     - k: key
@@ -47,5 +50,5 @@
     3) "cloudflare"
     4) "outlook"
     5) "facebook"
-    127.0.0.1:6379> rsgetcount myrs 5 64
+    127.0.0.1:6379> rscount myrs 5 64
     (integer) 9
