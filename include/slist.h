@@ -110,10 +110,10 @@ namespace s_list{
 
 		using size_type	= typename List::size_type;
 
-		RawSListBase(TList *list, size_t capacity) : list_(list), capacityFull_(capacity){}
+		constexpr RawSListBase(TList *list, size_t capacity) : list_(list), capacityFull_(capacity){}
 
 		[[nodiscard]]
-		size_type size() const{
+		constexpr size_type size() const{
 			if (!stable_(std::false_type{}))
 				return 0;
 
@@ -255,7 +255,7 @@ namespace s_list{
 
 	public:
 		template<typename F>
-		bool for_each(F f) const{
+		constexpr bool for_each(F f) const{
 			if (!stable_(std::true_type{})){
 				// invalid state
 				return false;

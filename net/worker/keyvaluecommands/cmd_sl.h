@@ -14,19 +14,24 @@ namespace net::worker::commands::SL{
 		using namespace s_list;
 
 
-
+		template<typename MyRawSList, typename Pair>
 		[[nodiscard]]
-		auto make_sl(hm4::Pair *pair){
-			auto *sl_data = hm4::getValAs<typename RawSList::List>(pair);
+		constexpr auto make_sl_(Pair *pair){
+			static_assert(std::is_same_v<std::remove_const_t<Pair>, hm4::Pair>);
 
-			return RawSList{ sl_data, pair->getValLen() };
+			auto *sl_data = hm4::getValAs<typename MyRawSList::List>(pair);
+
+			return MyRawSList{ sl_data, pair->getValLen() };
 		}
 
 		[[nodiscard]]
-		auto make_sl(const hm4::Pair *pair){
-			const auto *sl_data = hm4::getValAs<typename RawSListConst::List>(pair);
+		constexpr auto make_sl(hm4::Pair *pair){
+			return make_sl_<RawSList>(pair);
+		}
 
-			return RawSListConst{ sl_data, pair->getValLen() };
+		[[nodiscard]]
+		constexpr auto make_sl(const hm4::Pair *pair){
+			return make_sl_<RawSListConst>(pair);
 		}
 
 
