@@ -109,15 +109,15 @@ namespace net::worker::commands::SL{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"sladd",	"SLADD"	,
-			"slpush",	"SLPUSH"
+			"sladd"		,	"SLADD"		,
+			"slpush"	,	"SLPUSH"
 		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct SLADDSHORT : BaseCommandRW<Protocol,DBAdapter>{
+	struct SLADDPACK : BaseCommandRW<Protocol,DBAdapter>{
 		const std::string_view *begin() const final{
 			return std::begin(cmd);
 		};
@@ -134,8 +134,10 @@ namespace net::worker::commands::SL{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"sladdshort",	"SLADDSHORT"	,
-			"slpushshort",	"SLPUSHSHORT"
+			"sladdpack"	,	"SLADDPACK"	,
+			"slpushpack"	,	"SLPUSHPACK"	,
+			"sladdshort"	,	"SLADDSHORT"	,
+			"slpushshort"	,	"SLPUSHSHORT"
 		};
 	};
 
@@ -260,7 +262,7 @@ namespace net::worker::commands::SL{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				SLADD		,
-				SLADDSHORT	,
+				SLADDPACK	,
 				SLGETALL	,
 				SLCOUNT
 			>(pack);
