@@ -316,6 +316,11 @@ inline namespace version_4_00_00{
 		}
 
 		[[nodiscard]]
+		constexpr size_t getValLen() const noexcept{
+			return getValLen_();
+		}
+
+		[[nodiscard]]
 		uint64_t getCreated() const noexcept{
 			return betoh<uint64_t>(created);
 		}

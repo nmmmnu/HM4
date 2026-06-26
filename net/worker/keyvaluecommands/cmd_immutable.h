@@ -276,7 +276,7 @@ namespace net::worker::commands::Immutable{
 
 			return result.set(
 				hm4::getPairOK_(*db, key, [](bool b, const auto *p) -> uint64_t{
-					return b ? p->getVal().size() : 0;
+					return b ? p->getValLen() : 0;
 				})
 			);
 		}

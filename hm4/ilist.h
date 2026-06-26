@@ -262,7 +262,7 @@ template<class List>
 constexpr bool canInsertHintValSize(List const &list, const Pair *pair, size_t val_size){
 	return
 		canInsertHintList(list, pair) &&
-		pair->getVal().size() >= val_size
+		pair->getValLen() >= val_size
 	;
 }
 
@@ -416,7 +416,7 @@ auto getPairVal(List const &list, std::string_view key){
 template<typename List>
 auto getPairPtrWithSize(List const &list, std::string_view key, size_t size){
 	return getPairOK_(list, key, [size](bool b, const auto *p) -> const Pair *{
-		if (b && p->getVal().size() == size)
+		if (b && p->getValLen() == size)
 			return p;
 		else
 			return nullptr;

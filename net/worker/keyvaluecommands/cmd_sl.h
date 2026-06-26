@@ -261,7 +261,7 @@ namespace net::worker::commands::SL{
 			logger<Logger::NOTICE>() << "SLMGET" << "args" << d << "count" << s;
 
 			if ( d <= 1 || s <= 1 || d * s < SEARCH_NAIVE)
-				return processNaive__(result, blob, std::begin(p) + varg, std::end(p), container, sl, sl_data);
+				return processNaive__(result,      std::begin(p) + varg, std::end(p), container, sl, sl_data);
 
 			if (s < SEARCH_MINI)
 				return processMini__(result, blob, std::begin(p) + varg, std::end(p), container, sl, sl_data);
@@ -284,7 +284,7 @@ namespace net::worker::commands::SL{
 		using MyMap = myhashtable::EasyMap<uint64_t, std::string_view, HTMax, HTSize, myhashtable::CompactStorage>;
 
 	private:
-		static void processNaive__(Result<Protocol> &result, OutputBlob &,
+		static void processNaive__(Result<Protocol> &result,
 					ParamContainer::iterator first, ParamContainer::iterator last,
 						SContainer &container, s_list::RawSList const &sl, typename s_list::RawSList::List const &sl_data){
 
@@ -308,6 +308,29 @@ namespace net::worker::commands::SL{
 
 				if (!found)
 					container.push_back();
+			}
+
+			return result.set_container(container);
+		}
+
+		static void processMini__(Result<Protocol> &result, OutputBlob &blob,
+					ParamContainer::iterator first, ParamContainer::iterator last,
+						SContainer &container, s_list::RawSList const &sl, typename s_list::RawSList::List const &sl_data){
+
+			logger<Logger::NOTICE>() << "SLMGET" << "mini";
+
+			auto &map = blob.construct<SContainer>();
+
+			sl.for_each(sl_data, [&map](auto const &item){
+				map.push_back(item.getItem());
+
+				return true;
+			});
+
+			for(auto itk = first; itk != last; ++itk){
+				auto const n = from_string<uint64_t>(*itk);
+
+				container.push_back(n < map.size() ? map[n] : "");
 			}
 
 			return result.set_container(container);
@@ -346,29 +369,6 @@ namespace net::worker::commands::SL{
 				const auto *s = map.find(n);
 
 				container.push_back(s ? *s : "");
-			}
-
-			return result.set_container(container);
-		}
-
-		static void processMini__(Result<Protocol> &result, OutputBlob &blob,
-					ParamContainer::iterator first, ParamContainer::iterator last,
-						SContainer &container, s_list::RawSList const &sl, typename s_list::RawSList::List const &sl_data){
-
-			logger<Logger::NOTICE>() << "SLMGET" << "mini";
-
-			auto &map = blob.construct<SContainer>();
-
-			sl.for_each(sl_data, [&map](auto const &item){
-				map.push_back(item.getItem());
-
-				return true;
-			});
-
-			for(auto itk = first; itk != last; ++itk){
-				auto const n = from_string<uint64_t>(*itk);
-
-				container.push_back(n < map.size() ? map[n] : "");
 			}
 
 			return result.set_container(container);

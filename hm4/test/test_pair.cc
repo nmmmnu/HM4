@@ -220,7 +220,7 @@ namespace{
 
 			const OPair p = Pair::create( key, val );
 
-		//	printf("%10zu | %10zu | %10zu\n", i, p->getKey().size(), p->getVal().size() );
+		//	printf("%10zu | %10zu | %10zu\n", i, p->getKey().size(), p->getValLen() );
 
 			if (p->getKey() != key)
 				f("size error key ", i, key, p);

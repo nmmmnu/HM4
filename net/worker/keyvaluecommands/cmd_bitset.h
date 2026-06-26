@@ -49,7 +49,7 @@ namespace net::worker::commands::BITSET{
 
 			auto const val_size = std::max(
 					bytes,
-					pair ? pair->getVal().size() : 0
+					pair ? pair->getValLen() : 0
 			);
 
 			BITSET_Factory factory{ key, val_size, pair, std::begin(p) + varg, std::end(p) };
@@ -149,7 +149,7 @@ namespace net::worker::commands::BITSET{
 			BitOps const bitops{ n };
 
 			const char *data = hm4::getPairOK_(*db, key, [size = bitops.size()](bool b, const auto *p) -> const char *{
-				if (b && p->getVal().size() >= size)
+				if (b && p->getValLen() >= size)
 					return p->getVal().data();
 				else
 					return nullptr;
