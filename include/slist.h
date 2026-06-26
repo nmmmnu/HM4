@@ -272,7 +272,7 @@ namespace s_list{
 			bytes += foot;
 
 			return bytes_(
-				bytes <= capacity_ ? capacity_ : bytes
+				bytes <= capacity_ ? capacity_ : bytes * CAPACITY_MULTIPLIER
 			);
 		}
 
@@ -306,6 +306,8 @@ namespace s_list{
 
 	private:
 		size_type capacity_;
+
+		constexpr static size_type CAPACITY_MULTIPLIER = 2;
 	};
 
 } // namespace s_list
