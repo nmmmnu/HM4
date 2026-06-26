@@ -97,35 +97,50 @@ namespace s_list{
 
 	} // namespace s_list_impl_
 
-	struct RawSList{
+
+
+	template<bool Mutable>
+	struct RawSListBase{
 		using Item	= s_list_impl_::Item;
 		using List	= s_list_impl_::List;
 
-		static_assert(std::is_trivial<List>::value, "List must be POD type");
+		static_assert(std::is_trivial_v<List>, "List must be POD type");
+
+		using TList = std::conditional_t<Mutable, List, const List>;
 
 		using size_type	= typename List::size_type;
 
-		RawSList(size_type capacity) : capacity_(capacity - List::bytes(0)){
-			assert(capacity > List::bytes(1));
+		RawSListBase(TList *list, size_t capacity) : list_(list), capacityFull_(capacity){}
+
+		[[nodiscard]]
+		size_type size() const{
+			if (!stable_(std::false_type{}))
+				return 0;
+
+			return betoh(list_->size);
 		}
 
-		RawSList(size_t capacity) : RawSList(static_cast<size_type>(capacity)){
-			assert(capacity < List::max_size());
+		[[nodiscard]]
+		constexpr size_t capacity() const{
+			if (capacityFull_ < List::bytes(0))
+				return 0;
+
+			return capacityFull_ - List::bytes(0);
 		}
 
-		size_type size(List const &list) const{
-			return betoh(list.size);
+		template <bool M = Mutable, typename = std::enable_if_t<M> >
+		[[nodiscard]]
+		constexpr bool clear(){
+			if (!stable_(std::false_type{}))
+				return false;
+
+			list_->size = 0;
+			list_->foot = 0;
+
+			return true;
 		}
 
-		constexpr size_type capacity() const{
-			return capacity_;
-		}
-
-		constexpr void clear(List &list) const{
-			list.size = 0;
-			list.foot = 0;
-		}
-
+		[[nodiscard]]
 		constexpr static bool isItemValid(std::string_view sv){
 			return sv.size() >= 1 && sv.size() <= Item::max_size();
 		}
@@ -133,17 +148,20 @@ namespace s_list{
 	public:
 		// calculate the size of new object
 
+		[[nodiscard]]
 		constexpr static size_t bytes(size_t size){
 			assert(size < Item::max_size());
 
 			return bytes_(Item::bytes(size));
 		}
 
+		[[nodiscard]]
 		constexpr static size_t bytes(std::string_view sv){
 			return bytes(sv.size());
 		}
 
 		template<typename It, typename Projection>
+		[[nodiscard]]
 		constexpr static size_t bytes(It first, It last, Projection proj){
 			assert(std::distance(first, last) < List::max_size());
 
@@ -153,6 +171,7 @@ namespace s_list{
 		}
 
 		template<typename It>
+		[[nodiscard]]
 		constexpr static size_t bytes(It first, It last){
 			return bytes(first, last, s_list_impl_::Projection{});
 		}
@@ -160,86 +179,92 @@ namespace s_list{
 	public:
 		// calculate the size of existing object
 
-		constexpr size_t bytes(List const &list, size_t size, bool capacityMultiply) const{
+		[[nodiscard]]
+		constexpr size_t bytes(size_t size, bool capacityMultiply) const{
 			assert(size < Item::max_size());
 
-			return bytes_(list, Item::bytes(size), capacityMultiply);
+			return bytes_(Item::bytes(size), capacityMultiply);
 		}
 
-		constexpr size_t bytes(List const &list, std::string_view sv, bool capacityMultiply) const{
-			return bytes(list, sv.size(), capacityMultiply);
+		[[nodiscard]]
+		constexpr size_t bytes(std::string_view sv, bool capacityMultiply) const{
+			return bytes(sv.size(), capacityMultiply);
 		}
 
 		template<typename It, typename Projection>
-		constexpr size_t bytes(List const &list, It first, It last, bool capacityMultiply, Projection proj) const{
+		[[nodiscard]]
+		constexpr size_t bytes(It first, It last, bool capacityMultiply, Projection proj) const{
 			assert(std::distance(first, last) < List::max_size());
 
 			return bytes_(
-				list,
 				s_list_impl_::constexprAccumulate(first, last, proj),
 				capacityMultiply
 			);
 		}
 
 		template<typename It>
-		constexpr size_t bytes(List const &list, It first, It last, bool capacityMultiply) const{
-			return bytes(list, first, last, capacityMultiply, s_list_impl_::Projection{});
+		[[nodiscard]]
+		constexpr size_t bytes(It first, It last, bool capacityMultiply) const{
+			return bytes(first, last, capacityMultiply, s_list_impl_::Projection{});
 		}
 
 	public:
-		bool push(List &list, std::string_view sv) const{
+		template <bool M = Mutable, typename = std::enable_if_t<M> >
+		bool push(std::string_view sv){
 			assert(sv.size() < Item::max_size());
 
-			if (!safe_(list)){
-				// invalid state
-				clear(list);
+			if (!stable_(std::true_type{})){
+				// invalid state, try to repair
+				if (!clear())
+					return false;
 			}
 
-			auto const listSize = betoh(list.size);
+			auto const listSize = betoh(list_->size);
 
 			if (listSize == List::max_size())
 				return false;
 
-			auto const foot  = betoh(list.foot);
+			auto const foot  = betoh(list_->foot);
 
-			char *mem = &list.data[foot];
+			char *mem = &list_->data[foot];
 
 			// positioned at the end
 
 			size_type const need = static_cast<size_type>(Item::bytes(sv));
 
-			if (!safeNext_(list, mem, need))
+			if (!safeNext_(mem, need))
 				return false;
 
 			auto *item = reinterpret_cast<Item *>(mem);
 
 			item->setItem(sv);
 
-			list.size = htobe(listSize + 1);
-			list.foot = htobe(foot + need);
+			list_->size = htobe(listSize + 1);
+			list_->foot = htobe(foot + need);
 
 			return true;
 		}
 
-		bool push(List &list, std::string_view sv, size_t maxSize) const{
+		template <bool M = Mutable, typename = std::enable_if_t<M> >
+		bool push(std::string_view sv, size_t maxSize){
 			if (sv.size() > maxSize)
 				return false;
 
-			return push(list, sv);
+			return push(sv);
 		}
 
 	public:
 		template<typename F>
-		bool for_each(List const &list, F f) const{
-			if (!safe_(list)){
+		bool for_each(F f) const{
+			if (!stable_(std::true_type{})){
 				// invalid state
 				return false;
 			}
 
-			auto const foot = betoh(list.foot);
+			auto const foot = betoh(list_->foot);
 
-			for(const char *mem  = list.data; mem < list.data + foot;){
-				const char *next = safeNext_(list, mem);
+			for(const char *mem  = list_->data; mem < list_->data + foot;){
+				const char *next = safeNext_(mem);
 
 				if (!next){
 					// invalid state
@@ -256,60 +281,78 @@ namespace s_list{
 		}
 
 	private:
+		[[nodiscard]]
 		constexpr static size_t bytes_(size_t bytes){
 			return List::bytes(0) + bytes;
 		}
 
-		constexpr size_t bytes_(List const &list, size_t bytes, bool capacityMultiply) const{
-			if (!safe_(list)){
+		[[nodiscard]]
+		constexpr size_t bytes_(size_t bytes, bool capacityMultiply) const{
+			if (!stable_(std::true_type{})){
 				// invalid state, push will do clear()
 				return bytes_(
-					bytes <= capacity_ ? capacity_ : bytes
+					bytes <= capacity() ? capacity() : bytes
 				);
 			}
 
-			auto const foot = betoh(list.foot);
+			auto const foot = betoh(list_->foot);
 
 			bytes += foot;
 
 			size_type const cm = capacityMultiply ? 2 : 1;
 
 			return bytes_(
-				bytes <= capacity_ ? capacity_ : bytes * cm
+				bytes <= capacity() ? capacity() : bytes * cm
 			);
 		}
 
 	private:
-		constexpr bool safe_(List const &list) const{
-			//auto const size = betoh(list.size);
+		template<bool B>
+		[[nodiscard]]
+		constexpr bool stable_(std::bool_constant<B>) const{
+			if (!list_)
+				return false;
 
-			auto const foot = betoh(list.foot);
+			if (!capacity())
+				return false;
 
-			return foot <= capacity_;
+			if constexpr(B){
+				auto const foot = betoh(list_->foot);
+
+				return foot <= capacity();
+			}else{
+				return true;
+			}
 		}
 
 		template<typename Char>
-		Char *safeNext_(List const &list, Char *mem, size_t size) const{
-			const char *max = list.data + capacity_;
+		[[nodiscard]]
+		Char *safeNext_(Char *mem, size_t size) const{
+			const char *max = list_->data + capacity();
 
 			return mem + size <= max ? mem + size : nullptr;
 		}
 
 		template<typename Char>
-		Char *safeNext_(List const &list, Char *mem) const{
-			const char *max = list.data + capacity_;
+		[[nodiscard]]
+		Char *safeNext_(Char *mem) const{
+			const char *max = list_->data + capacity();
 
 			if (mem + Item::bytes(0) > max)
 				return nullptr;
 
 			const auto *item = reinterpret_cast<const Item *>(mem);
 
-			return safeNext_(list, mem, item->bytes());
+			return safeNext_(mem, item->bytes());
 		}
 
 	private:
-		size_type capacity_;
+		TList	*list_;
+		size_t	capacityFull_;
 	};
+
+	using RawSListConst	= RawSListBase<false>;
+	using RawSList		= RawSListBase<true>;
 
 } // namespace s_list
 

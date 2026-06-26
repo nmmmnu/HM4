@@ -21,6 +21,8 @@ function cmd_SL($redis) {
 
 	$redis->del("a");
 
+
+
 	for($i = 0; $i < 250; ++$i){
 		rawCommand($redis, "sladd", "a", $i);
 	}
@@ -33,6 +35,19 @@ function cmd_SL($redis) {
 	}
 
 	expect("SLMGET",	rawCommand($redis, "slmget", "a", 1, 2, 3, 4, 5 ) == [1, 2, 3, 4, 5]	);	// huge
+
+	$redis->del("a");
+
+
+
+	$redis->set("a", 1);	// invalid input
+
+	expect("SLCOUNT",	rawCommand($redis, "slcount", "a") == 0		);
+
+	expect("SLGETALL",	rawCommand($redis, "slgetall", "a") == []	);
+
+	expect("SLGET",		rawCommand($redis, "slget", "a", 1) == ""	);
+	expect("SLMGET",	rawCommand($redis, "slmget", "a", 1, 3, 33 ) == ["", "", ""]	);
 
 	$redis->del("a");
 }

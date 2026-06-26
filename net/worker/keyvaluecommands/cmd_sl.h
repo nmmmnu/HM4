@@ -15,6 +15,22 @@ namespace net::worker::commands::SL{
 
 
 
+		[[nodiscard]]
+		auto make_sl(hm4::Pair *pair){
+			auto *sl_data = hm4::getValAs<typename RawSList::List>(pair);
+
+			return RawSList{ sl_data, pair->getValLen() };
+		}
+
+		[[nodiscard]]
+		auto make_sl(const hm4::Pair *pair){
+			const auto *sl_data = hm4::getValAs<typename RawSListConst::List>(pair);
+
+			return RawSListConst{ sl_data, pair->getValLen() };
+		}
+
+
+
 		struct SLADDFactory : hm4::PairFactory::IFactoryAction<1,0,SLADDFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,0,SLADDFactory>;
@@ -23,30 +39,26 @@ namespace net::worker::commands::SL{
 
 			SLADDFactory(std::string_view const key, const Pair *pair, size_t bytes, It begin, It end) :
 							Base::IFactoryAction	(key, bytes, pair),
-							sl			(bytes	),
 							begin			(begin	),
 							end			(end	){}
 
 			void action(Pair *pair){
-				using List = typename RawSList::List;
-
-				auto *sl_data = hm4::getValAs<List>(pair);
+				auto sl = make_sl(pair);
 
 				for(auto itk = begin; itk != end; ++itk){
-					if (sl.size(*sl_data) == OutputBlob::ContainerSize)
+					if (sl.size() == OutputBlob::ContainerSize)
 						break;
 
-					auto const &item = *itk;
-
-					sl.push(*sl_data, item);
+					sl.push(*itk);
 				}
 			}
 
 		private:
-			RawSList	sl;
-			It			begin;
-			It			end;
+			It	begin;
+			It	end;
 		};
+
+
 
 		// SLADD key val val val
 
@@ -63,7 +75,7 @@ namespace net::worker::commands::SL{
 			auto const varg = 2;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &item = *itk; !RawSList::isItemValid(item))
+				if (const auto &item = *itk; !RawSListConst::isItemValid(item))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			const auto *pair = hm4::getPairPtr(*db, key);
@@ -71,19 +83,13 @@ namespace net::worker::commands::SL{
 			auto const bytes = [&](){
 				// new pair
 				if (!pair)
-					return RawSList::bytes(std::begin(p) + varg, std::end(p));
+					return RawSListConst::bytes(std::begin(p) + varg, std::end(p));
 
 				// existing pair
 
-				auto const capacity = pair->getVal().size();
+				auto const sl = make_sl(pair);
 
-				RawSList sl{ capacity };
-
-				using List = typename RawSList::List;
-
-				const auto &sl_data = *hm4::getValAs<List>(pair);
-
-				return sl.bytes(sl_data, std::begin(p) + varg, std::end(p), capacityMultiplier );
+				return sl.bytes(std::begin(p) + varg, std::end(p), capacityMultiplier );
 			}();
 
 			SLADDFactory factory{ key, pair, bytes, std::begin(p) + varg, std::end(p) };
@@ -162,7 +168,7 @@ namespace net::worker::commands::SL{
 		// SLGET key n
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace s_list;
+			using namespace sl_impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -179,18 +185,11 @@ namespace net::worker::commands::SL{
 
 			const auto n = from_string<uint64_t>(p[2]);
 
-			auto const capacity = pair->getVal().size();
+			auto const sl = make_sl(pair);
 
-			RawSList sl{ capacity };
-
-			using List = typename RawSList::List;
-
-			const auto &sl_data = *hm4::getValAs<List>(pair);
-
-			uint64_t i = 0;
 			std::string_view sv = "";
 
-			sl.for_each(sl_data, [&n, &i, &sv](auto const &item){
+			auto f = [i = uint64_t{0}, &n, &sv](auto const &item) mutable{
 				if (n == i){
 					sv = item.getItem();
 					return false;
@@ -199,7 +198,9 @@ namespace net::worker::commands::SL{
 				++i;
 
 				return true;
-			});
+			};
+
+			sl.for_each(f);
 
 			return result.set(sv);
 		}
@@ -225,7 +226,7 @@ namespace net::worker::commands::SL{
 		// SLMGET key val val val
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace s_list;
+			using namespace sl_impl_;
 
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
@@ -247,26 +248,20 @@ namespace net::worker::commands::SL{
 				return result.set_container(container);
 			}
 
-			auto const capacity = pair->getVal().size();
-
-			RawSList sl{ capacity };
-
-			using List = typename RawSList::List;
-
-			const auto &sl_data = *hm4::getValAs<List>(pair);
+			auto const sl = make_sl(pair);
 
 			auto const d = std::distance(std::begin(p) + varg, std::end(p));
-			auto const s = sl.size(sl_data);
+			auto const s = sl.size();
 
 			logger<Logger::NOTICE>() << "SLMGET" << "args" << d << "count" << s;
 
 			if ( d <= 1 || s <= 1 || d * s < SEARCH_NAIVE)
-				return processNaive__(result,      std::begin(p) + varg, std::end(p), container, sl, sl_data);
+				return processNaive__(result,      std::begin(p) + varg, std::end(p), container, sl);
 
 			if (s < SEARCH_MINI)
-				return processMini__(result, blob, std::begin(p) + varg, std::end(p), container, sl, sl_data);
+				return processMini__(result, blob, std::begin(p) + varg, std::end(p), container, sl);
 			else
-				return processHuge__(result, blob, std::begin(p) + varg, std::end(p), container, sl, sl_data);
+				return processHuge__(result, blob, std::begin(p) + varg, std::end(p), container, sl);
 		}
 
 	private:
@@ -286,7 +281,7 @@ namespace net::worker::commands::SL{
 	private:
 		static void processNaive__(Result<Protocol> &result,
 					ParamContainer::iterator first, ParamContainer::iterator last,
-						SContainer &container, s_list::RawSList const &sl, typename s_list::RawSList::List const &sl_data){
+						SContainer &container, s_list::RawSListConst const &sl){
 
 			logger<Logger::NOTICE>() << "SLMGET" << "quadratic";
 
@@ -295,7 +290,7 @@ namespace net::worker::commands::SL{
 
 				bool found = false;
 
-				sl.for_each(sl_data, [i = uint64_t{0}, &n, &container, &found](auto const &item) mutable{
+				auto f = [i = uint64_t{0}, &n, &container, &found](auto const &item) mutable{
 					if (i == n){
 						container.push_back(item.getItem());
 						found = true;
@@ -304,7 +299,9 @@ namespace net::worker::commands::SL{
 					++i;
 
 					return true;
-				});
+				};
+
+				sl.for_each(f);
 
 				if (!found)
 					container.push_back();
@@ -315,17 +312,19 @@ namespace net::worker::commands::SL{
 
 		static void processMini__(Result<Protocol> &result, OutputBlob &blob,
 					ParamContainer::iterator first, ParamContainer::iterator last,
-						SContainer &container, s_list::RawSList const &sl, typename s_list::RawSList::List const &sl_data){
+						SContainer &container, s_list::RawSListConst const &sl){
 
 			logger<Logger::NOTICE>() << "SLMGET" << "mini";
 
 			auto &map = blob.construct<SContainer>();
 
-			sl.for_each(sl_data, [&map](auto const &item){
+			auto f = [&map](auto const &item){
 				map.push_back(item.getItem());
 
 				return true;
-			});
+			};
+
+			sl.for_each(f);
 
 			for(auto itk = first; itk != last; ++itk){
 				auto const n = from_string<uint64_t>(*itk);
@@ -338,7 +337,7 @@ namespace net::worker::commands::SL{
 
 		static void processHuge__(Result<Protocol> &result, OutputBlob &blob,
 					ParamContainer::iterator first, ParamContainer::iterator last,
-						SContainer &container, s_list::RawSList const &sl, typename s_list::RawSList::List const &sl_data){
+						SContainer &container, s_list::RawSListConst const &sl){
 
 			logger<Logger::NOTICE>() << "SLMGET" << "huge";
 
@@ -354,7 +353,7 @@ namespace net::worker::commands::SL{
 				set.insert(n);
 			}
 
-			sl.for_each(sl_data, [i = uint64_t{0}, &set, &map](auto const &item) mutable{
+			auto f = [i = uint64_t{0}, &set, &map](auto const &item) mutable{
 				if (set.exists(i)){
 					[[maybe_unused]]
 					auto const u = map.insert(i, item.getItem());
@@ -363,7 +362,9 @@ namespace net::worker::commands::SL{
 				++i;
 
 				return true;
-			});
+			};
+
+			sl.for_each(f);
 
 			for(auto const &n : ncontainer){
 				const auto *s = map.find(n);
@@ -395,7 +396,7 @@ namespace net::worker::commands::SL{
 		// SLGETALL key
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace s_list;
+			using namespace sl_impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -412,22 +413,18 @@ namespace net::worker::commands::SL{
 			if (!pair)
 				return result.set_container(container);
 
-			auto const capacity = pair->getVal().size();
+			auto const sl = make_sl(pair);
 
-			RawSList sl{ capacity };
-
-			using List = typename RawSList::List;
-
-			const auto &sl_data = *hm4::getValAs<List>(pair);
-
-			sl.for_each(sl_data, [&container](auto const &item){
+			auto f = [&container](auto const &item){
 				if (container.full())
 					return false;
 
 				container.push_back(item.getItem());
 
 				return true;
-			});
+			};
+
+			sl.for_each(f);
 
 			return result.set_container(container);
 		}
@@ -453,6 +450,8 @@ namespace net::worker::commands::SL{
 		// SLCOUNT key
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			using namespace sl_impl_;
+
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -466,20 +465,10 @@ namespace net::worker::commands::SL{
 			if (!pair)
 				return result.set_0();
 
-			using namespace s_list;
-
-			using List = typename RawSList::List;
-
-			auto const capacity = pair->getVal().size();
-
-			RawSList sl{ capacity };
-
-			using List = typename RawSList::List;
-
-			const auto &sl_data = *hm4::getValAs<List>(pair);
+			auto const sl = make_sl(pair);
 
 			return result.set(
-				uint64_t{ sl.size(sl_data) }
+				uint64_t{ sl.size() }
 			);
 		}
 
