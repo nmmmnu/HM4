@@ -1,0 +1,36 @@
+- id:      SLMGET
+  name:    SLMGET
+  usage:   SLMGET key index [index ...]
+  params:
+    items:
+    - k: key
+      v: name of the string list object
+    - k: index
+      v: one or more 0-based chronological indices to retrieve
+
+  description: |
+    <p>Retrieves multiple items from the string list *key* by their zero-based chronological indices in a single request.</p>
+    <p>This command uses an optimized internal query planner to select the fastest execution strategy based on the list size and number of requested indices,
+    ensuring high performance even with large lists.</p>
+    <p>The returned array preserves the exact order of indices specified in the arguments.
+    Any out-of-bounds or non-existent index safely returns an empty string (<b>""</b>) at its respective position.</p>
+
+  return_type: array
+  return:      array containing the requested strings in the specified order
+  version:     1.3.15.1
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> sladd a Germany USA UK Denmark
+    (integer) 1
+    127.0.0.1:6379> slmget a 0 3 102 1
+    1) "Germany"
+    2) "Denmark"
+    3) ""
+    4) "USA"
+
+  see_also:
+    items:
+      - SLGET
+      - SLGETALL

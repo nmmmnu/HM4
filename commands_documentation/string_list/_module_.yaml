@@ -1,0 +1,59 @@
+id:          STRING_LIST
+name:        STRING_LIST
+
+version:     1.3.15.1
+
+description: |
+  <p>This module implements a <b>high-performance packed string list</b> - a data structure that sequentially stores variable-length strings into a contiguous block of memory.
+  It is highly optimized for extreme memory efficiency and fast index-based retrieval.</p>
+
+  <p><b>What It Does:</b></p>
+
+  <p><b>1. Sequential appending with smart capacity</b></p>
+  <p>You can push any number of variable-length strings into the list using <b>SLADD</b> (aliase <b>SLPUSH</b>).
+  This command may reserve a slight memory buffer (advance capacity) under the hood to make subsequent insertions incredibly fast without constantly reallocating memory.</p>
+
+  <p><b>2. Exact-fit memory compaction</b></p>
+  <p>For strictly memory-constrained scenarios or finalized lists, <b>SLADDPACK</b> (aliases <b>SLADDSHORT</b>, <b>SLPUSHPACK</b>, <b>SLPUSHSHORT</b>) adds the new elements and
+  tightly compacts the memory footprint exactly to the required bytes, leaving absolutely zero wasted space.</p>
+
+  <p><b>3. Multi-item insertion</b></p>
+  <p>Both insertion commands support batch appending, allowing multiple strings to be pushed in a single command. They return <b>1</b> upon successful processing.</p>
+
+  <p><b>4. Fast single and multiple index retrieval</b></p>
+  <p>You can retrieve specific items by their 0-based chronological index using <b>SLGET</b>. For bulk fetching, <b>SLMGET</b> accepts multiple indices and
+  uses a highly optimized internal query planner to resolve the request instantly. Out-of-bounds indices safely return an empty string (<b>""</b>).</p>
+
+  <p><b>5. Complete list retrieval</b></p>
+  <p><b>SLGETALL</b> extracts and returns all elements currently stored in the list in their exact chronological order of insertion.</p>
+
+  <p><b>6. Tracking list size</b></p>
+  <p><b>SLCOUNT</b> returns the exact number of elements currently stored in the list.</p>
+
+  <p><b>Use Cases:</b></p>
+  <ul>
+    <li>Tracking user behavior or history trails (e.g., sequentially visited URLs or IPs)</li>
+    <li>Memory-restricted data aggregation</li>
+    <li>Storing tightly packed, sequential, variable-length events</li>
+  </ul>
+
+  <p><b>Tip:</b> To clear or reset the list completely, use the global <b>DEL</b> command on the key. This will instantly release the allocated memory.</p>
+
+example_module:     |
+  127.0.0.1:6379> sladd a Germany USA
+  (integer) 1
+  127.0.0.1:6379> sladdpack a UK Denmark
+  (integer) 1
+  127.0.0.1:6379> slcount a
+  (integer) 4
+  127.0.0.1:6379> slget a 3
+  "Denmark"
+  127.0.0.1:6379> slmget a 0 3 102
+  1) "Germany"
+  2) "Denmark"
+  3) ""
+  127.0.0.1:6379> slgetall a
+  1) "Germany"
+  2) "USA"
+  3) "UK"
+  4) "Denmark"

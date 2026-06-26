@@ -1,0 +1,32 @@
+- id:      SLGETALL
+  name:    SLGETALL
+  usage:   SLGETALL key
+  params:
+    items:
+    - k: key
+      v: name of the string list object
+
+  description: |
+    <p>Retrieves all items currently stored in the string list <i>key</i> in their exact chronological order (from oldest to newest).</p>
+    <p>This is a non-destructive read operation that returns the entire contents of the packed memory allocation as a flat array.</p>
+
+  return_type: array
+  return:      array containing all strings in the list, or an empty array if the key does not exist
+  version:     1.3.15.1
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> sladd a Germany USA UK Denmark
+    (integer) 1
+    127.0.0.1:6379> slgetall a
+    1) "Germany"
+    2) "USA"
+    3) "UK"
+    4) "Denmark"
+
+  see_also:
+    items:
+      - SLGET
+      - SLMGET
+
