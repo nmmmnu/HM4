@@ -6,21 +6,46 @@
 
 namespace net::worker::commands::SL{
 
-	template<class Protocol, class DBAdapter>
-	struct SLADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
+	namespace sl_impl_{
+		using namespace s_list;
+
+
+
+		struct SLADDFactory : hm4::PairFactory::IFactoryAction<1,0,SLADDFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,0,SLADDFactory>;
+
+			using It   = ParamContainer::const_iterator;
+
+			SLADDFactory(std::string_view const key, const Pair *pair, size_t bytes, It begin, It end) :
+							Base::IFactoryAction	(key, bytes, pair),
+							sl			(bytes	),
+							begin			(begin	),
+							end			(end	){}
+
+			void action(Pair *pair){
+				using List = typename RawSList::List;
+
+				auto *sl_data = hm4::getValAs<List>(pair);
+
+				for(auto itk = begin; itk != end; ++itk){
+					if (sl.size(*sl_data) == OutputBlob::ContainerSize)
+						break;
+
+					auto const &item = *itk;
+
+					sl.push(*sl_data, item);
+				}
+			}
+
+		private:
+			RawSList	sl;
+			It			begin;
+			It			end;
 		};
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
-
-		// SLADD key item item
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace s_list;
-
+		template<class Protocol, class DBAdapter>
+		void processADD(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, bool capacityMultiplier){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
 
@@ -52,7 +77,7 @@ namespace net::worker::commands::SL{
 
 				const auto &sl_data = *hm4::getValAs<List>(pair);
 
-				return sl.bytes(sl_data, std::begin(p) + varg, std::end(p));
+				return sl.bytes(sl_data, std::begin(p) + varg, std::end(p), capacityMultiplier );
 			}();
 
 			SLADDFactory factory{ key, pair, bytes, std::begin(p) + varg, std::end(p) };
@@ -62,46 +87,55 @@ namespace net::worker::commands::SL{
 			return result.set_1();
 		}
 
-	private:
-		struct SLADDFactory : hm4::PairFactory::IFactoryAction<1,0,SLADDFactory>{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,0,SLADDFactory>;
+	} // namespace sl_impl_
 
-			using It   = ParamContainer::const_iterator;
 
-			SLADDFactory(std::string_view const key, const Pair *pair, size_t bytes, It begin, It end) :
-							Base::IFactoryAction	(key, bytes, pair),
-							sl			(bytes	),
-							begin			(begin	),
-							end			(end	){}
 
-			void action(Pair *pair){
-				using namespace s_list;
-
-				using List = typename RawSList::List;
-
-				auto *sl_data = hm4::getValAs<List>(pair);
-
-				for(auto itk = begin; itk != end; ++itk){
-					if (sl.size(*sl_data) == OutputBlob::ContainerSize)
-						break;
-
-					auto const &item = *itk;
-
-					sl.push(*sl_data, item);
-				}
-			}
-
-		private:
-			s_list::RawSList	sl;
-			It			begin;
-			It			end;
+	template<class Protocol, class DBAdapter>
+	struct SLADD : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
 		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// SLADD key item item
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return sl_impl_::processADD(p, db, result, true);
+		}
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
 			"sladd",	"SLADD"	,
 			"slpush",	"SLPUSH"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct SLADDSHORT : BaseCommandRW<Protocol,DBAdapter>{
+		const std::string_view *begin() const final{
+			return std::begin(cmd);
+		};
+
+		const std::string_view *end()   const final{
+			return std::end(cmd);
+		};
+
+		// SLADD key item item
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return sl_impl_::processADD(p, db, result, false);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd[]	= {
+			"sladdshort",	"SLADDSHORT"	,
+			"slpushshort",	"SLPUSHSHORT"
 		};
 	};
 
@@ -226,6 +260,7 @@ namespace net::worker::commands::SL{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				SLADD		,
+				SLADDSHORT	,
 				SLGETALL	,
 				SLCOUNT
 			>(pack);

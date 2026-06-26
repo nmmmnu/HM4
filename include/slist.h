@@ -160,29 +160,30 @@ namespace s_list{
 	public:
 		// calculate the size of existing object
 
-		constexpr size_t bytes(List const &list, size_t size) const{
+		constexpr size_t bytes(List const &list, size_t size, bool capacityMultiply) const{
 			assert(size < Item::max_size());
 
-			return bytes_(list, Item::bytes(size));
+			return bytes_(list, Item::bytes(size), capacityMultiply);
 		}
 
-		constexpr size_t bytes(List const &list, std::string_view sv) const{
-			return bytes(list, sv.size());
+		constexpr size_t bytes(List const &list, std::string_view sv, bool capacityMultiply) const{
+			return bytes(list, sv.size(), capacityMultiply);
 		}
 
 		template<typename It, typename Projection>
-		constexpr size_t bytes(List const &list, It first, It last, Projection proj) const{
+		constexpr size_t bytes(List const &list, It first, It last, bool capacityMultiply, Projection proj) const{
 			assert(std::distance(first, last) < List::max_size());
 
 			return bytes_(
 				list,
-				s_list_impl_::constexprAccumulate(first, last, proj)
+				s_list_impl_::constexprAccumulate(first, last, proj),
+				capacityMultiply
 			);
 		}
 
 		template<typename It>
-		constexpr size_t bytes(List const &list, It first, It last) const{
-			return bytes(list, first, last, s_list_impl_::Projection{});
+		constexpr size_t bytes(List const &list, It first, It last, bool capacityMultiply) const{
+			return bytes(list, first, last, capacityMultiply, s_list_impl_::Projection{});
 		}
 
 	public:
@@ -259,7 +260,7 @@ namespace s_list{
 			return List::bytes(0) + bytes;
 		}
 
-		constexpr size_t bytes_(List const &list, size_t bytes) const{
+		constexpr size_t bytes_(List const &list, size_t bytes, bool capacityMultiply) const{
 			if (!safe_(list)){
 				// invalid state, push will do clear()
 				return bytes_(
@@ -271,8 +272,10 @@ namespace s_list{
 
 			bytes += foot;
 
+			size_type const cm = capacityMultiply ? 2 : 1;
+
 			return bytes_(
-				bytes <= capacity_ ? capacity_ : bytes * CAPACITY_MULTIPLIER
+				bytes <= capacity_ ? capacity_ : bytes * cm
 			);
 		}
 
@@ -307,7 +310,7 @@ namespace s_list{
 	private:
 		size_type capacity_;
 
-		constexpr static size_type CAPACITY_MULTIPLIER = 2;
+	//	constexpr static size_type CAPACITY_MULTIPLIER = 2;
 	};
 
 } // namespace s_list
