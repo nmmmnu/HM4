@@ -309,8 +309,6 @@ namespace s_list{
 
 	private:
 		size_type capacity_;
-
-	//	constexpr static size_type CAPACITY_MULTIPLIER = 2;
 	};
 
 } // namespace s_list

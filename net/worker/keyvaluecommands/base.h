@@ -29,11 +29,12 @@ namespace net::worker::commands{
 
 	constexpr size_t HashtableSize		= 8192; // hashtable will be 16K + data
 	constexpr size_t MaxCommands		=  350;
-	constexpr size_t MaxCommandsAliases	=  900;
+	constexpr size_t MaxCommandsAliases	= 1024;
 
 	struct OutputBlob{
-		constexpr static size_t ContainerSize		= 0xFFFF;
-		constexpr static size_t ParamContainerSize	= 0xFF;
+		constexpr static size_t ContainerSize			= 0xFFFF;
+		constexpr static size_t ParamContainerSize		= 0xFF;
+		constexpr static size_t ParamContainerSizeHTSize	= 1024;
 
 		static_assert(OutputBlob::ContainerSize > OutputBlob::ParamContainerSize);
 

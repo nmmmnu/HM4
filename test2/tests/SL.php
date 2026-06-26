@@ -16,5 +16,23 @@ function cmd_SL($redis) {
 
 	expect("SLGETALL",	rawCommand($redis, "slgetall", "a") == ["Germany", "Poland", "USA", "UK", "Bulgaria"]	);
 
+	expect("SLGET",		rawCommand($redis, "slget", "a", 1) == "Poland"	);
+	expect("SLMGET",	rawCommand($redis, "slmget", "a", 1, 3, 33 ) == ["Poland", "UK", ""]	);
+
+	$redis->del("a");
+
+	for($i = 0; $i < 250; ++$i){
+		rawCommand($redis, "sladd", "a", $i);
+	}
+
+	expect("SLMGET",	rawCommand($redis, "slmget", "a", 1    ) == [1]				);	// naive
+	expect("SLMGET",	rawCommand($redis, "slmget", "a", 1, 2, 3, 4, 5 ) == [1, 2, 3, 4, 5]	);	// small
+
+	for($i = 0; $i < 250; ++$i){
+		rawCommand($redis, "sladd", "a", $i);
+	}
+
+	expect("SLMGET",	rawCommand($redis, "slmget", "a", 1, 2, 3, 4, 5 ) == [1, 2, 3, 4, 5]	);	// huge
+
 	$redis->del("a");
 }
