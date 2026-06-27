@@ -5,6 +5,8 @@
 #include "hashtable/hashtable.h"
 #include "hashtable/compactstorage.h"
 
+#include "staticvector.h"
+
 namespace ISAM_impl_{
 
 	struct FieldMapController{
@@ -20,7 +22,7 @@ namespace ISAM_impl_{
 		// for 128 = 2 KB
 		// for 250 = 4 KB
 
-		using MyStorage = myhashtable::CompactStorage<value_type, HT_ITEMS, HT_CELLS>;
+		using MyStorage = myhashtable::CompactStorage<value_type, HT_ITEMS, HT_CELLS, StaticVector>;
 
 	public:
 		[[nodiscard]]

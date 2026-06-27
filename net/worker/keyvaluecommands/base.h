@@ -311,10 +311,10 @@ namespace net::worker::commands{
 		using BasePtr		= std::unique_ptr<BaseObject>;
 		using Storage		= StaticVector<BasePtr, MaxCommands>;
 
-		template<typename T, size_t MaxItems, size_t Size>
-		using MyStorage		= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
+		// template<typename T, size_t MaxItems, size_t Size>
+		// using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
-		using Map		= myhashtable::EasyMap<std::string_view, BaseObject *, MaxCommandsAliases, HashtableSize, myhashtable::CompactStorage>;
+		using Map		= myhashtable::EasyMap<std::string_view, BaseObject *, MaxCommandsAliases, HashtableSize>;
 
 		constexpr static bool RegisterDebugPrint = true;
 

@@ -278,11 +278,8 @@ namespace net::worker::commands::SL{
 
 		using ItemPtr    = const s_list::RawSListConst::Item *;
 
-		using SContainer = StaticVector<ItemPtr,  HTMax>;
-		using NContainer = StaticVector<uint64_t, HTMax>;
-
-		using MySet = myhashtable::EasySet<uint64_t,          HTMax, HTSize, myhashtable::CompactStorage>;
-		using MyMap = myhashtable::EasyMap<uint64_t, ItemPtr, HTMax, HTSize, myhashtable::CompactStorage>;
+		template<typename T, size_t MaxItems, size_t Size>
+		using MyStorage = myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
 	private:
 		static void processNaive__(Result<Protocol> &result,
@@ -322,10 +319,12 @@ namespace net::worker::commands::SL{
 
 			logger<Logger::NOTICE>() << "SLMGET" << "mini";
 
-			auto &map = blob.construct<SContainer>();
+			using ItemContainer = StaticVector<ItemPtr,  HTMax>;
 
-			auto f = [&map](auto const &item){
-				map.push_back(&item);
+			auto &icontainer = blob.construct<ItemContainer>();
+
+			auto f = [&icontainer](auto const &item){
+				icontainer.push_back(&item);
 
 				return true;
 			};
@@ -335,7 +334,7 @@ namespace net::worker::commands::SL{
 			for(auto itk = first; itk != last; ++itk){
 				auto const n = from_string<uint64_t>(*itk);
 
-				container.push_back(n < map.size() ? (map[n])->getItem() : "");
+				container.push_back(n < icontainer.size() ? (icontainer[n])->getItem() : "");
 			}
 
 			return result.set_container(container);
@@ -346,6 +345,11 @@ namespace net::worker::commands::SL{
 						OutputBlob::Container &container, s_list::RawSListConst const &sl){
 
 			logger<Logger::NOTICE>() << "SLMGET" << "huge";
+
+			using NContainer = StaticVector<uint64_t, HTMax>;
+
+			using MySet = myhashtable::EasySet<uint64_t,          HTMax, HTSize, MyStorage>;
+			using MyMap = myhashtable::EasyMap<uint64_t, ItemPtr, HTMax, HTSize, MyStorage>;
 
 			auto &ncontainer = blob.construct<NContainer>();
 
