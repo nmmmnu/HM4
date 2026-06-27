@@ -241,7 +241,7 @@ namespace net::worker::commands::SL{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto &container = blob.construct<SContainer>();
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
@@ -276,17 +276,18 @@ namespace net::worker::commands::SL{
 		constexpr static ssize_t SEARCH_NAIVE = 1024;
 		constexpr static size_t  SEARCH_MINI  = HTMax;
 
+		using ItemPtr    = const s_list::RawSListConst::Item *;
 
-		using SContainer = StaticVector<std::string_view, HTMax>;
+		using SContainer = StaticVector<ItemPtr,  HTMax>;
 		using NContainer = StaticVector<uint64_t, HTMax>;
 
-		using MySet = myhashtable::EasySet<uint64_t,                   HTMax, HTSize, myhashtable::CompactStorage>;
-		using MyMap = myhashtable::EasyMap<uint64_t, std::string_view, HTMax, HTSize, myhashtable::CompactStorage>;
+		using MySet = myhashtable::EasySet<uint64_t,          HTMax, HTSize, myhashtable::CompactStorage>;
+		using MyMap = myhashtable::EasyMap<uint64_t, ItemPtr, HTMax, HTSize, myhashtable::CompactStorage>;
 
 	private:
 		static void processNaive__(Result<Protocol> &result,
 					ParamContainer::iterator first, ParamContainer::iterator last,
-						SContainer &container, s_list::RawSListConst const &sl){
+						OutputBlob::Container &container, s_list::RawSListConst const &sl){
 
 			logger<Logger::NOTICE>() << "SLMGET" << "quadratic";
 
@@ -317,14 +318,14 @@ namespace net::worker::commands::SL{
 
 		static void processMini__(Result<Protocol> &result, OutputBlob &blob,
 					ParamContainer::iterator first, ParamContainer::iterator last,
-						SContainer &container, s_list::RawSListConst const &sl){
+						OutputBlob::Container &container, s_list::RawSListConst const &sl){
 
 			logger<Logger::NOTICE>() << "SLMGET" << "mini";
 
 			auto &map = blob.construct<SContainer>();
 
 			auto f = [&map](auto const &item){
-				map.push_back(item.getItem());
+				map.push_back(&item);
 
 				return true;
 			};
@@ -334,7 +335,7 @@ namespace net::worker::commands::SL{
 			for(auto itk = first; itk != last; ++itk){
 				auto const n = from_string<uint64_t>(*itk);
 
-				container.push_back(n < map.size() ? map[n] : "");
+				container.push_back(n < map.size() ? (map[n])->getItem() : "");
 			}
 
 			return result.set_container(container);
@@ -342,7 +343,7 @@ namespace net::worker::commands::SL{
 
 		static void processHuge__(Result<Protocol> &result, OutputBlob &blob,
 					ParamContainer::iterator first, ParamContainer::iterator last,
-						SContainer &container, s_list::RawSListConst const &sl){
+						OutputBlob::Container &container, s_list::RawSListConst const &sl){
 
 			logger<Logger::NOTICE>() << "SLMGET" << "huge";
 
@@ -361,7 +362,7 @@ namespace net::worker::commands::SL{
 			auto f = [i = uint64_t{0}, &set, &map](auto const &item) mutable{
 				if (set.exists(i)){
 					[[maybe_unused]]
-					auto const u = map.insert(i, item.getItem());
+					auto const u = map.insert(i, &item);
 				}
 
 				++i;
@@ -372,9 +373,9 @@ namespace net::worker::commands::SL{
 			sl.for_each(f);
 
 			for(auto const &n : ncontainer){
-				const auto *s = map.find(n);
+				const auto *item = map.find(n);
 
-				container.push_back(s ? *s : "");
+				container.push_back(item ? (*item)->getItem() : "");
 			}
 
 			return result.set_container(container);
