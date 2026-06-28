@@ -276,10 +276,10 @@ namespace net::worker::commands::SL{
 		constexpr static ssize_t SEARCH_NAIVE = 1024;
 		constexpr static size_t  SEARCH_MINI  = HTMax;
 
-		using ItemPtr    = const s_list::RawSListConst::Item *;
+		using ItemPtr	= const s_list::RawSListConst::Item *;
 
 		template<typename T, size_t MaxItems, size_t Size>
-		using MyStorage = myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
+		using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
 	private:
 		static void processNaive__(Result<Protocol> &result,
@@ -348,23 +348,20 @@ namespace net::worker::commands::SL{
 
 			using NContainer = StaticVector<uint64_t, HTMax>;
 
-			using MySet = myhashtable::EasySet<uint64_t,          HTMax, HTSize, MyStorage>;
 			using MyMap = myhashtable::EasyMap<uint64_t, ItemPtr, HTMax, HTSize, MyStorage>;
 
-			auto &ncontainer = blob.construct<NContainer>();
-
-			auto &set        = blob.construct<MySet>();
-			auto &map        = blob.construct<MyMap>();
+			auto &ncontainer	= blob.construct<NContainer>();
+			auto &map		= blob.construct<MyMap>();
 
 			for(auto itk = first; itk != last; ++itk){
 				auto const n = from_string<uint64_t>(*itk);
 
 				ncontainer.push_back(n);
-				set.insert(n);
+				map.insert(n, nullptr);
 			}
 
-			auto f = [i = uint64_t{0}, &set, &map](auto const &item) mutable{
-				if (set.exists(i)){
+			auto f = [i = uint64_t{0}, &map](auto const &item) mutable{
+				if (map.exists(i)){
 					[[maybe_unused]]
 					auto const u = map.insert(i, &item);
 				}
