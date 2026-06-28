@@ -30,8 +30,12 @@ namespace myhashtable{
 	private:
 		template<typename Dep = Container<int, 1> >
 		constexpr CompactStorage(std::false_type) : CompactStorage(std::true_type{}){
-			static_assert(!std::is_same_v<Dep, compact_storage_impl_::Container<int, 1> >,
-					"CompactStorage created with std::vector! I am sure you probably do not want this! If you need this, use the other constructor.");
+			static_assert(
+				!std::is_same_v<Dep, compact_storage_impl_::Container<int, 1> >,
+					"CompactStorage created with std::vector! "
+					"I am sure you probably do not want this! "
+					"If you need this, use the other constructor."
+			);
 		}
 
 	public:

@@ -1,6 +1,8 @@
 #ifndef MY_HASHTABLE_MYPAIR_H_
 #define MY_HASHTABLE_MYPAIR_H_
 
+#include <utility>	// std::forward
+
 namespace myhashtable{
 
 	template<typename T1, typename T2>
@@ -19,7 +21,6 @@ namespace myhashtable{
 					first	(std::forward<UT1>(first	)),
 					second	(std::forward<UT2>(second	)){}
 
-		[[nodiscard]]
 		constexpr bool operator ==(MyPair const &other) const{
 			return first == other.first && second == other.second;
 		}

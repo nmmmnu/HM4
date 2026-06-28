@@ -2,7 +2,7 @@
 #define ISAM_HASH_SEARCHER_H_
 
 #include "isam.h"
-#include "hashtable/hashtable.h"
+#include "hashtable/easyhashtable.h"
 #include "hashtable/compactstorage.h"
 
 #include "staticvector.h"
@@ -14,6 +14,32 @@ namespace ISAM_impl_{
 		using mapped_type	= const Field *;
 		using value_type	= const Field *;
 
+	public:
+		static size_t hash(key_type const &key){
+			return std::hash<key_type>{}(key);
+		}
+
+		constexpr static key_type    const &getKey(value_type const &data){
+			return data->name;
+		}
+
+		constexpr static mapped_type const &getVal(value_type const &data){
+			return data;
+		}
+
+		// constexpr static mapped_type &getVal(value_type &data){
+		// 	return data;
+		// }
+	};
+
+	template<size_t MaxItems, size_t Size>
+	using MyHashtable = myhashtable::EasyHashtable<FieldMapController, myhashtable::CompactStorage<FieldMapController::value_type, MaxItems, Size, StaticVector> >;
+
+
+
+	class ISAM::HashSearcherByName{
+		friend struct ISAM;
+
 	private:
 		constexpr static auto HT_ITEMS = config::CONTAINER_SIZE;
 		constexpr static auto HT_CELLS = 1024;
@@ -22,64 +48,16 @@ namespace ISAM_impl_{
 		// for 128 = 2 KB
 		// for 250 = 4 KB
 
-		using MyStorage = myhashtable::CompactStorage<value_type, HT_ITEMS, HT_CELLS, StaticVector>;
-
-	public:
-		[[nodiscard]]
-		constexpr static size_t size(){
-			return HT_CELLS;
-		}
-
-		[[nodiscard]]
-		static size_t hash(key_type const &key){
-			return std::hash<key_type>{}(key);
-		}
-
-		[[nodiscard]]
-		constexpr static key_type    const &getKey(value_type const &data){
-			return data->name;
-		}
-
-		[[nodiscard]]
-		constexpr static mapped_type const &getVal(value_type const &data){
-			return data;
-		}
-
-	public:
-		[[nodiscard]]
-		constexpr auto const &getStorage() const{
-			return data_;
-		}
-
-		[[nodiscard]]
-		constexpr auto       &getStorage(){
-			return data_;
-		}
-
-	public:
-		[[nodiscard]]
-		constexpr bool equal(size_t id, key_type const &key) const{
-			return getKey(data_[id]) == key;
-		}
+		MyHashtable<HT_ITEMS, HT_CELLS> ht;
 
 	private:
-		MyStorage data_;
-	};
-
-
-
-	class ISAM::HashSearcherByName{
-		friend struct ISAM;
-
-		FieldMapController mapController;
-
 		HashSearcherByName(FieldContainer const &container){
 			for(auto const &field : container)
-				myhashtable::insert(mapController, &field);
+				ht.insert(&field);
 		}
 
 		const Field *operator()(std::string_view name) const{
-			const Field * const *field = myhashtable::find(mapController, name);
+			const Field * const *field = ht.find(name);
 
 			return field ? *field : nullptr;
 		}
