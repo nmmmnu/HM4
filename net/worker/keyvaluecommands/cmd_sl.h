@@ -361,9 +361,8 @@ namespace net::worker::commands::SL{
 			}
 
 			auto f = [i = uint64_t{0}, &map](auto const &item) mutable{
-				if (map.exists(i)){
-					[[maybe_unused]]
-					auto const u = map.insert(i, &item);
+				if (ItemPtr *p = map.find(i); p){
+					*p = &item;
 				}
 
 				++i;

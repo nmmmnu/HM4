@@ -16,15 +16,18 @@ namespace myhashtable{
 			using value_type	= MyPair<key_type, mapped_type>;
 
 		public:
+			[[nodiscard]]
 			constexpr static key_type    const &getKey(value_type const &data){
 				return data.first;
 			}
 
+			[[nodiscard]]
 			constexpr static mapped_type const &getVal(value_type const &data){
 				return data.second;
 			}
 
-			constexpr static mapped_type &getVal(value_type &data){
+			[[nodiscard]]
+			constexpr static mapped_type       &getVal(value_type &data){
 				return data.second;
 			}
 		};

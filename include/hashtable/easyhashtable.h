@@ -33,6 +33,7 @@ namespace myhashtable{
 		}
 
 	public:
+		[[nodiscard]]
 		constexpr const mapped_type *find(key_type const &key) const{
 			auto [type, id] = locate_(key);
 
@@ -42,6 +43,7 @@ namespace myhashtable{
 			return & Adapter::getVal(storage_[id]);
 		}
 
+		[[nodiscard]]
 		constexpr mapped_type *find(key_type const &key){
 			auto [type, id] = locate_(key);
 
@@ -51,6 +53,7 @@ namespace myhashtable{
 			return & Adapter::getVal(storage_[id]);
 		}
 
+		[[nodiscard]]
 		constexpr bool exists(key_type const &key) const{
 			auto [type, id] = locate_(key);
 
@@ -62,6 +65,7 @@ namespace myhashtable{
 			return storage_.stats();
 		}
 
+		[[nodiscard]]
 		constexpr size_t longestChain() const{
 			size_t longest = 0;
 			size_t chain   = 0;
@@ -83,6 +87,7 @@ namespace myhashtable{
 		}
 
 	private:
+		[[nodiscard]]
 		constexpr bool equals_(size_t id, key_type const &key) const{
 			return Adapter::getKey(storage_[id]) == key;
 		}
@@ -98,6 +103,7 @@ namespace myhashtable{
 			size_t		id;
 		};
 
+		[[nodiscard]]
 		constexpr Locator locate_(key_type const &key) const{
 			size_t const mask = storage_.size() - 1;
 			size_t const cell = Hash{}(key) & mask;

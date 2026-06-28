@@ -15,11 +15,13 @@ namespace myhashtable{
 			using value_type	= key_type;
 
 		public:
+			[[nodiscard]]
 			constexpr static key_type    const &getKey(key_type const &data){
 				return data;
 			}
 
 			// there is no non-const version, because hashtable can be ruined
+			[[nodiscard]]
 			constexpr static mapped_type const &getVal(key_type const &data){
 				return data;
 			}
