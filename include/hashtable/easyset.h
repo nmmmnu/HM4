@@ -4,31 +4,29 @@
 #include "easyhashtable.h"
 #include "arraystorage.h"
 
-#include <functional>	// std::hash
-
 namespace myhashtable{
 
-	template<typename K, typename Hash = std::hash<K> >
-	struct Set{
-		using key_type		= K;
-		using mapped_type	= key_type;
-		using value_type	= key_type;
+	namespace myhashtable_impl_{
 
-	public:
-		constexpr static size_t hash(key_type const &key){
-			return Hash{}(key);
-		}
+		template<typename K>
+		struct SetAdapter{
+			using key_type		= K;
+			using mapped_type	= key_type;
+			using value_type	= key_type;
 
-		constexpr static key_type    const &getKey(key_type const &data){
-			return data;
-		}
+		public:
+			constexpr static key_type    const &getKey(key_type const &data){
+				return data;
+			}
 
-		// there is no non-const version, because hashtable can be ruined
-		constexpr static mapped_type const &getVal(key_type const &data){
-			return data;
-		}
+			// there is no non-const version, because hashtable can be ruined
+			constexpr static mapped_type const &getVal(key_type const &data){
+				return data;
+			}
 
-	};
+		};
+
+	} // namespace myhashtable_impl_
 
 
 
@@ -40,12 +38,13 @@ namespace myhashtable{
 		typename	Hash = std::hash<K>
 	>
 	using EasySet = EasyHashtable<
-				Set<K, Hash>,
+				myhashtable_impl_::SetAdapter<K>,
 				Storage<
-					typename Set<K, Hash>::value_type,
+					typename myhashtable_impl_::SetAdapter<K>::value_type,
 					MaxItems,
 					Size
-				>
+				>,
+				Hash
 			>;
 
 } // namespace myhashtable

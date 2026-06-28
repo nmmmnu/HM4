@@ -26,10 +26,6 @@ namespace ISAM_impl_{
 		constexpr static mapped_type const &getVal(value_type const &data){
 			return data;
 		}
-
-		// constexpr static mapped_type &getVal(value_type &data){
-		// 	return data;
-		// }
 	};
 
 	template<size_t MaxItems, size_t Size>

@@ -5,33 +5,31 @@
 #include "easyhashtable.h"
 #include "arraystorage.h"
 
-#include <functional>	// std::hash
-
 namespace myhashtable{
 
-	template<typename K, typename T, typename Hash = std::hash<K> >
-	struct Map{
-		using key_type		= K;
-		using mapped_type	= T;
-		using value_type	= MyPair<key_type, mapped_type>;
+	namespace myhashtable_impl_{
 
-	public:
-		constexpr static size_t hash(key_type const &key){
-			return Hash{}(key);
-		}
+		template<typename K, typename T>
+		struct MapAdapter{
+			using key_type		= K;
+			using mapped_type	= T;
+			using value_type	= MyPair<key_type, mapped_type>;
 
-		constexpr static key_type    const &getKey(value_type const &data){
-			return data.first;
-		}
+		public:
+			constexpr static key_type    const &getKey(value_type const &data){
+				return data.first;
+			}
 
-		constexpr static mapped_type const &getVal(value_type const &data){
-			return data.second;
-		}
+			constexpr static mapped_type const &getVal(value_type const &data){
+				return data.second;
+			}
 
-		constexpr static mapped_type &getVal(value_type &data){
-			return data.second;
-		}
-	};
+			constexpr static mapped_type &getVal(value_type &data){
+				return data.second;
+			}
+		};
+
+	} // namespace myhashtable_impl_
 
 
 
@@ -44,12 +42,13 @@ namespace myhashtable{
 		typename	Hash = std::hash<K>
 	>
 	using EasyMap = EasyHashtable<
-				Map<K, T, Hash>,
+				myhashtable_impl_::MapAdapter<K, T>,
 				Storage<
-					typename Map<K, T, Hash>::value_type,
+					typename myhashtable_impl_::MapAdapter<K, T>::value_type,
 					MaxItems,
 					Size
-				>
+				>,
+				Hash
 			>;
 
 } // namespace myhashtable

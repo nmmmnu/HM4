@@ -2,16 +2,17 @@
 #define MY_HASHTABLE_EASY_HASHTABLE_H_
 
 #include <utility>	// std::forward
+#include <functional>	// std::hash
 
 #include <cstddef>
 
 namespace myhashtable{
 
-	template<typename Controller, typename Storage>
+	template<typename Adapter, typename Storage, typename Hash = std::hash<typename Adapter::key_type> >
 	struct EasyHashtable{
-		using key_type		= typename Controller::key_type		; // K
-		using mapped_type	= typename Controller::mapped_type	; // V    or K
-		using value_type	= typename Controller::value_type	; // pair or K
+		using key_type		= typename Adapter::key_type	; // K
+		using mapped_type	= typename Adapter::mapped_type	; // V    or K
+		using value_type	= typename Adapter::value_type	; // pair or K
 
 	public:
 		template<typename... Ts>
@@ -38,7 +39,7 @@ namespace myhashtable{
 			if (type != LocateType::FOUND)
 				return nullptr;
 
-			return & Controller::getVal(storage_[id]);
+			return & Adapter::getVal(storage_[id]);
 		}
 
 		constexpr mapped_type *find(key_type const &key){
@@ -47,7 +48,7 @@ namespace myhashtable{
 			if (type != LocateType::FOUND)
 				return nullptr;
 
-			return & Controller::getVal(storage_[id]);
+			return & Adapter::getVal(storage_[id]);
 		}
 
 		constexpr bool exists(key_type const &key) const{
@@ -83,7 +84,7 @@ namespace myhashtable{
 
 	private:
 		constexpr bool equals_(size_t id, key_type const &key) const{
-			return Controller::getKey(storage_[id]) == key;
+			return Adapter::getKey(storage_[id]) == key;
 		}
 
 		enum class LocateType{
@@ -99,7 +100,7 @@ namespace myhashtable{
 
 		constexpr Locator locate_(key_type const &key) const{
 			size_t const mask = storage_.size() - 1;
-			size_t const cell = Controller::hash(key) & mask;
+			size_t const cell = Hash{}(key) & mask;
 
 			for (size_t i = 0; i < storage_.size(); ++i){
 				size_t const id = (cell + i) & mask;
@@ -129,7 +130,7 @@ namespace myhashtable{
 
 		template<typename u_value_type>
 		constexpr bool insertF_(u_value_type &&data){
-			auto const &key = Controller::getKey(data);
+			auto const &key = Adapter::getKey(data);
 
 			auto [type, id] = locate_(key);
 
