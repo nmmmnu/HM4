@@ -25,7 +25,7 @@ namespace myhashtable{
 
 	template<typename T, size_t MaxItems, size_t Size, template<typename, size_t> typename Container = compact_storage_impl_::Container>
 	struct CompactStorage{
-		static_assert(MaxItems < Size / 2, "MaxItems must be less than Size, optimally 20%");
+		static_assert(MaxItems <= Size / 2, "MaxItems must be less than Size, optimally 20%");
 
 	private:
 		template<typename Dep = Container<int, 1> >

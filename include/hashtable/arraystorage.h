@@ -9,7 +9,7 @@ namespace myhashtable{
 
 	template<typename T, size_t MaxItems, size_t Size>
 	struct ArrayStorage{
-		static_assert(MaxItems < Size / 2, "MaxItems must be less than Size, optimally 20%");
+		static_assert(MaxItems <= Size / 2, "MaxItems must be less than Size, optimally 20%");
 
 	public:
 		constexpr ArrayStorage() = default;

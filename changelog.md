@@ -413,5 +413,6 @@ Changelog
 -	implement time sensitive on disktables, when using getPair()
 -	optimize APPEND, BITSET
 -	new helper module string list: SLADD, SLADDPACK, SLGET, SLMGET, SLGETALL, SLCOUNT
+-	update to new version of "MyHashtable" with Swisstable-like TopHash
 -	prevent "MyHashtable" to use dynamic memory allocations in SLMGET and ISAM module.
 

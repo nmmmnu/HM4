@@ -4,6 +4,8 @@
 #include "mypair.h"
 #include "easyhashtable.h"
 #include "arraystorage.h"
+#include "tophashindex.h"
+#include "indexselector.h"
 
 namespace myhashtable{
 
@@ -46,6 +48,7 @@ namespace myhashtable{
 	>
 	using EasyMap = EasyHashtable<
 				myhashtable_impl_::MapAdapter<K, T>,
+				IndexSelector<TopHashIndex, K, Size>,
 				Storage<
 					typename myhashtable_impl_::MapAdapter<K, T>::value_type,
 					MaxItems,

@@ -3,6 +3,8 @@
 
 #include "easyhashtable.h"
 #include "arraystorage.h"
+#include "tophashindex.h"
+#include "indexselector.h"
 
 namespace myhashtable{
 
@@ -41,6 +43,7 @@ namespace myhashtable{
 	>
 	using EasySet = EasyHashtable<
 				myhashtable_impl_::SetAdapter<K>,
+				IndexSelector<TopHashIndex, K, Size>,
 				Storage<
 					typename myhashtable_impl_::SetAdapter<K>::value_type,
 					MaxItems,

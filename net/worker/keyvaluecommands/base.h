@@ -27,7 +27,7 @@ namespace net::worker::commands{
 		SHUTDOWN
 	};
 
-	constexpr size_t HashtableSize		= 8192; // hashtable will be 16K + data
+	constexpr size_t HashtableSize		= 4096;
 	constexpr size_t MaxCommands		=  350;
 	constexpr size_t MaxCommandsAliases	= 1024;
 
@@ -350,7 +350,7 @@ namespace net::worker::commands{
 			logger<Logger::NOTICE>() << "Total commands" << storage_.size();
 			logger<Logger::NOTICE>() << "Total aliases " << aliases_;
 
-			if (auto const chain = map_.longestChain(); chain >= 10)
+			if (auto const chain = map_.longestChain(); chain >= 16)
 				logger<Logger::WARNING>() << "Hashtable longest chain " << map_.longestChain() << "(chain too long)";
 			else
 				logger<Logger::NOTICE>()  << "Hashtable longest chain " << map_.longestChain() << "(good)";

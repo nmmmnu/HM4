@@ -4,6 +4,8 @@
 #include "isam.h"
 #include "hashtable/easyhashtable.h"
 #include "hashtable/compactstorage.h"
+#include "hashtable/tophashindex.h"
+#include "hashtable/indexselector.h"
 
 #include "staticvector.h"
 
@@ -29,7 +31,11 @@ namespace ISAM_impl_{
 	};
 
 	template<size_t MaxItems, size_t Size>
-	using MyHashtable = myhashtable::EasyHashtable<FieldMapController, myhashtable::CompactStorage<FieldMapController::value_type, MaxItems, Size, StaticVector> >;
+	using MyHashtable = myhashtable::EasyHashtable<
+					FieldMapController,
+					myhashtable::IndexSelector<myhashtable::TopHashIndex, FieldMapController::key_type, Size>,
+					myhashtable::CompactStorage<FieldMapController::value_type, MaxItems, Size, StaticVector>
+				>;
 
 
 

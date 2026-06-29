@@ -8,15 +8,25 @@
 
 namespace myhashtable{
 
-	template<typename Adapter, typename Storage, typename Hash = std::hash<typename Adapter::key_type> >
+	template<typename Adapter, typename Index, typename Storage, typename Hash = std::hash<typename Adapter::key_type> >
 	struct EasyHashtable{
 		using key_type		= typename Adapter::key_type	; // K
 		using mapped_type	= typename Adapter::mapped_type	; // V    or K
 		using value_type	= typename Adapter::value_type	; // pair or K
 
+	private:
+		constexpr static bool UseIndex = !std::is_same_v<Index, std::nullptr_t>;
+
+	static_assert(
+		(Storage::size() & (Storage::size() - 1)) == 0,
+		"Storage::size() must be power of two"
+	);
+
 	public:
 		template<typename... Ts>
-		constexpr EasyHashtable(Ts &&...ts) : storage_(std::forward<Ts>(ts)...){}
+		constexpr EasyHashtable(Ts &&...ts) :
+						index_(),
+						storage_(std::forward<Ts>(ts)...){}
 
 	public:
 		template<typename... Ts>
@@ -35,9 +45,9 @@ namespace myhashtable{
 	public:
 		[[nodiscard]]
 		constexpr const mapped_type *find(key_type const &key) const{
-			auto [type, id] = locate_(key);
+			auto [type, id, _] = locate_(key);
 
-			if (type != LocateType::FOUND)
+			if (type != Locator::FOUND)
 				return nullptr;
 
 			return & Adapter::getVal(storage_[id]);
@@ -45,9 +55,9 @@ namespace myhashtable{
 
 		[[nodiscard]]
 		constexpr mapped_type *find(key_type const &key){
-			auto [type, id] = locate_(key);
+			auto [type, id, _] = locate_(key);
 
-			if (type != LocateType::FOUND)
+			if (type != Locator::FOUND)
 				return nullptr;
 
 			return & Adapter::getVal(storage_[id]);
@@ -55,9 +65,9 @@ namespace myhashtable{
 
 		[[nodiscard]]
 		constexpr bool exists(key_type const &key) const{
-			auto [type, id] = locate_(key);
+			auto [type, id, _] = locate_(key);
 
-			return type == LocateType::FOUND;
+			return type == Locator::FOUND;
 		}
 
 	public:
@@ -92,63 +102,104 @@ namespace myhashtable{
 			return Adapter::getKey(storage_[id]) == key;
 		}
 
-		enum class LocateType{
-			FOUND	,
-			EMPTY	,
-			ERROR
-		};
+
 
 		struct Locator{
-			LocateType	type;
-			size_t		id;
+			constexpr static int ERROR = 0;
+			constexpr static int EMPTY = 1;
+			constexpr static int FOUND = 2;
+		};
+
+		template<typename Token>
+		struct TokenLocator{
+			int	result		;
+			size_t	id	{}	;
+			Token	token	{}	;
 		};
 
 		[[nodiscard]]
-		constexpr Locator locate_(key_type const &key) const{
-			size_t const mask = storage_.size() - 1;
-			size_t const cell = Hash{}(key) & mask;
+		constexpr auto locate_(key_type const &key) const{
+			auto const mask = storage_.size() - 1;
+			auto const hash = Hash{}(key);
+			auto const cell = hash & mask;
 
-			for (size_t i = 0; i < storage_.size(); ++i){
-				size_t const id = (cell + i) & mask;
+			if constexpr(!UseIndex){
+				// Standard
 
-				if (storage_(id))
-					return { LocateType::EMPTY, id };
+				using MyLocator = TokenLocator<std::nullptr_t>;
 
-				if (equals_(id, key))
-					return { LocateType::FOUND, id };
+				for (size_t i = 0; i < storage_.size(); ++i){
+					size_t const id = (cell + i) & mask;
+
+					if (storage_(id))
+						return MyLocator{ Locator::EMPTY, id };
+
+					if (equals_(id, key))
+						return MyLocator{ Locator::FOUND, id };
+				}
+
+				return MyLocator{ Locator::ERROR };
+
+			}else{
+				// TopHash or similar
+
+				using MyLocator = TokenLocator<typename Index::token_type>;
+
+				auto const token = index_.getToken(hash, key);
+
+				for (size_t i = 0; i < storage_.size(); ++i){
+					size_t const id = (cell + i) & mask;
+
+					auto const ch = index_.check(id, token);
+
+					if (ch == index_.EMPTY)
+						return MyLocator{ Locator::EMPTY, id, token };
+
+					if (ch == index_.FOUND && equals_(id, key))
+						return MyLocator{ Locator::FOUND, id, token };
+				}
+
+				return MyLocator{ Locator::ERROR };
 			}
-
-			return { LocateType::ERROR, 0 };
 		}
 
 	private:
 		template<typename... Ts>
+		[[nodiscard]]
 		constexpr bool insertT_(key_type const &key, Ts &&...ts){
-			auto [type, id] = locate_(key);
+			auto [type, id, token] = locate_(key);
 
-			if (type == LocateType::ERROR)
+			if (type == Locator::ERROR)
 				return false;
 
 			storage_.emplace(id, key, std::forward<Ts>(ts)...);
+
+			if constexpr(UseIndex)
+				index_.emplace(id, token);
 
 			return true;
 		}
 
 		template<typename u_value_type>
+		[[nodiscard]]
 		constexpr bool insertF_(u_value_type &&data){
 			auto const &key = Adapter::getKey(data);
 
-			auto [type, id] = locate_(key);
+			auto [type, id, token] = locate_(key);
 
-			if (type == LocateType::ERROR)
+			if (type == Locator::ERROR)
 				return false;
 
 			storage_.emplace(id, std::forward<u_value_type>(data));
+
+			if constexpr(UseIndex)
+				index_.emplace(id, token);
 
 			return true;
 		}
 
 	private:
+		Index		index_;
 		Storage		storage_;
 	};
 
