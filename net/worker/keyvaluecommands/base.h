@@ -337,8 +337,12 @@ namespace net::worker::commands{
 			debugPrint(*x);
 
 			for(auto const &key : *x){
+				if (map_.find(key)){
+					logger<Logger::FATAL>() << "Duplicate command" << key << "Please report a bug!";
+				}
+
 				[[maybe_unused]]
-				bool const b = map_.insert(key, x.get());
+				auto const b = map_.insert(key, x.get());
 
 				assert(b);
 

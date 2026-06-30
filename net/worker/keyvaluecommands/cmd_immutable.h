@@ -168,7 +168,7 @@ namespace net::worker::commands::Immutable{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"expireat",	"EXPIRETIME"
+			"expiretime",	"EXPIRETIME"
 		};
 	};
 

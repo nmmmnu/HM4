@@ -350,7 +350,7 @@ namespace net::worker::commands::MortonCurve3D{
 
 	private:
 		constexpr inline static std::string_view cmd[]	= {
-			"mc2get",	"MC2GET"
+			"mc3get",	"MC3GET"
 		};
 	};
 
