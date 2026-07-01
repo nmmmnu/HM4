@@ -126,13 +126,9 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDRESERVE() : BaseCommandRW<Protocol,DBAdapter>("TDRESERVE", {
+			"tdreserve",	"TDRESERVE"
+		}){}
 
 		// TDRESERVE key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -160,23 +156,15 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdreserve",	"TDRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
+		TDADD() : BaseCommandRW<Protocol,DBAdapter>("TDADD", {
+			"tdadd",	"TDADD"
+		}){}
 
 		// TDADD key capacity delta value [value]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -219,23 +207,15 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdadd",	"TDADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDADDWEIGHT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
+		TDADDWEIGHT() : BaseCommandRW<Protocol,DBAdapter>("TDADDWEIGHT", {
+			"tdaddweight",	"TDADDWEIGHT"
+		}){}
 
 		// TDADDWEIGHT key capacity delta value weight [value weight]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -278,24 +258,15 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdaddweight",	"TDADDWEIGHT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDMERGE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
-
+		TDMERGE() : BaseCommandRW<Protocol,DBAdapter>("TDMERGE", {
+			"tdmerge",	"TDMERGE"
+		}){}
 
 		// TDMERGE key capacity delta src_key [src_key]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -352,26 +323,19 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-	private:
+	
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdmerge",	"TDMERGE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDMERGECAPACITY : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
+		TDMERGECAPACITY() : BaseCommandRW<Protocol,DBAdapter>("TDMERGECAPACITY", {
+			"tdmergecapacity",	"TDMERGECAPACITY"	,
+			"tdmergecap",		"TDMERGECAP"
+		}){}
 
 		// TDMERGE key capacity delta src_key [src_key src_capacity]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -427,27 +391,19 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-	private:
+	
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdmergecapacity",	"TDMERGECAPACITY"	,
-			"tdmergecap",		"TDMERGECAP"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDPERCENTILE", {
+			"tdpercentile",	"TDPERCENTILE",
+			"thquantile",	"TDQUANTILE"
+		}){}
 
 		// TDPERCENTILE key capacity percentile
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -486,28 +442,20 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
+	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdpercentile",	"TDPERCENTILE",
-			"thquantile",	"TDQUANTILE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDMPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDMPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDMPERCENTILE", {
+			"tdmpercentile",	"TDMPERCENTILE",
+			"thmquantile",		"TDMQUANTILE"
+		}){}
 
 		// TDMPERCENTILE key capacity percentile [percentile]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -558,28 +506,19 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
+	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdmpercentile",	"TDMPERCENTILE",
-			"thmquantile",		"TDMQUANTILE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDMEDIAN : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDMEDIAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEDIAN", {
+			"tdmedian",	"TDMEDIAN"
+		}){}
 
 		// TDMEDIAN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -613,27 +552,19 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
+	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdmedian",	"TDMEDIAN"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDTRIMMEDMEAN : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDTRIMMEDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDTRIMMEDMEAN", {
+			"tdtrimmedmean",	"TDTRIMMEDMEAN"
+		}){}
 
 		// TDTRIMMEDMEAN key capacity from_percentile to_percentile
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -669,27 +600,19 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
+	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdtrimmedmean",	"TDTRIMMEDMEAN"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDMEAN : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEAN", {
+			"tdmean",	"TDMEAN"
+		}){}
 
 		// TDMEAN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -722,27 +645,19 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
+	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdmean",	"TDMEAN"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDMIN : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDMIN() : BaseCommandRO<Protocol,DBAdapter>("TDMIN", {
+			"tdmin",	"TDMIN"
+		}){}
 
 		// TDMIN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -774,23 +689,15 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdmin",	"TDMIN"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDMAX : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDMAX() : BaseCommandRO<Protocol,DBAdapter>("TDMAX", {
+			"tdmax",	"TDMAX"
+		}){}
 
 		// TDMAX key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -822,23 +729,15 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdmax",	"TDMAX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDSIZE() : BaseCommandRO<Protocol,DBAdapter>("TDSIZE", {
+			"tdsize",	"TDSIZE"
+		}){}
 
 		// TDSIZE key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -865,23 +764,15 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdsize",	"TDSIZE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDINFO : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		TDINFO() : BaseCommandRO<Protocol,DBAdapter>("TDINFO", {
+			"tdinfo",	"TDINFO"
+		}){}
 
 		// TDCENTROIDCOUNT key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -924,10 +815,6 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"tdinfo",	"TDINFO"
-		};
 	};
 
 

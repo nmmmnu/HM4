@@ -9,13 +9,9 @@ namespace net::worker::commands::Mutable{
 
 	template<class Protocol, class DBAdapter>
 	struct SET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SET() : BaseCommandRW<Protocol,DBAdapter>("SET", {
+			"set",		"SET"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
@@ -36,23 +32,15 @@ namespace net::worker::commands::Mutable{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"set",		"SET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MSET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MSET() : BaseCommandRW<Protocol,DBAdapter>("MSET", {
+			"mset",		"MSET"
+		}){}
 
 		// MSET a 5 b 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -83,23 +71,15 @@ namespace net::worker::commands::Mutable{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mset",		"MSET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MSETNX : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MSETNX() : BaseCommandRW<Protocol,DBAdapter>("MSETNX", {
+			"msetnx",		"MSETNX"
+		}){}
 
 		// MSET a 5 b 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -139,23 +119,15 @@ namespace net::worker::commands::Mutable{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"msetnx",		"MSETNX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MSETXX : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MSETXX() : BaseCommandRW<Protocol,DBAdapter>("MSETXX", {
+			"msetxx",		"MSETXX"
+		}){}
 
 		// MSETXX a 5 b 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -223,26 +195,18 @@ namespace net::worker::commands::Mutable{
 			return result.set_1();
 		}
 
-	private:
+	
 		using PairVector = StaticVector<const hm4::Pair *, OutputBlob::ParamContainerSize>;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"msetxx",		"MSETXX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SETEX : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SETEX() : BaseCommandRW<Protocol,DBAdapter>("SETEX", {
+			"setex",	"SETEX"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
@@ -263,23 +227,15 @@ namespace net::worker::commands::Mutable{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"setex",	"SETEX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HSET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HSET() : BaseCommandRW<Protocol,DBAdapter>("HSET", {
+			"hset",		"HSET"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4 && p.size() != 5)
@@ -305,23 +261,15 @@ namespace net::worker::commands::Mutable{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hset",		"HSET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HMSET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HMSET() : BaseCommandRW<Protocol,DBAdapter>("HMSET", {
+			"hmset",		"HMSET"
+		}){}
 
 		// HMSET a sub1 5 sub2 6
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -361,23 +309,15 @@ namespace net::worker::commands::Mutable{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hmset",		"HMSET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SETNX : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SETNX() : BaseCommandRW<Protocol,DBAdapter>("SETNX", {
+			"setnx",	"SETNX"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
@@ -406,23 +346,15 @@ namespace net::worker::commands::Mutable{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"setnx",	"SETNX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SETXX : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SETXX() : BaseCommandRW<Protocol,DBAdapter>("SETXX", {
+			"setxx",	"SETXX"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3 && p.size() != 4)
@@ -453,23 +385,16 @@ namespace net::worker::commands::Mutable{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"setxx",	"SETXX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DEL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		DEL() : BaseCommandRW<Protocol,DBAdapter>("DEL", {
+			"del",		"DEL"	,
+			"unlink",	"UNLINK"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2)
@@ -493,24 +418,15 @@ namespace net::worker::commands::Mutable{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"del",		"DEL"	,
-			"unlink",	"UNLINK"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HDEL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HDEL() : BaseCommandRW<Protocol,DBAdapter>("HDEL", {
+			"hdel",		"HDEL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
@@ -545,23 +461,15 @@ namespace net::worker::commands::Mutable{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hdel",		"HDEL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct APPEND : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		APPEND() : BaseCommandRW<Protocol,DBAdapter>("APPEND", {
+			"append",	"APPEND"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -593,7 +501,7 @@ namespace net::worker::commands::Mutable{
 			result.set(val_old.size() + val_new.size());
 		}
 
-	private:
+	
 		struct APPEND_Factory : hm4::PairFactory::IFactoryAction<1,0,APPEND_Factory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,0,APPEND_Factory>;
@@ -618,23 +526,15 @@ namespace net::worker::commands::Mutable{
 			}
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"append",	"APPEND"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct EXPIRE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		EXPIRE() : BaseCommandRW<Protocol,DBAdapter>("EXPIRE", {
+			"expire",	"EXPIRE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -660,23 +560,15 @@ namespace net::worker::commands::Mutable{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"expire",	"EXPIRE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct EXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		EXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("EXPIREAT", {
+			"expireat",	"EXPIREAT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -714,23 +606,15 @@ namespace net::worker::commands::Mutable{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"expireat",	"EXPIREAT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PERSIST : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PERSIST() : BaseCommandRW<Protocol,DBAdapter>("PERSIST", {
+			"persist",	"PERSIST"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -760,23 +644,16 @@ namespace net::worker::commands::Mutable{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"persist",	"PERSIST"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PERSISTDELETED : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PERSISTDELETED() : BaseCommandRW<Protocol,DBAdapter>("PERSISTDELETED", {
+			"persistdeleted",	"PERSISTDELETED"	,
+			"persistexpired",	"PERSISTEXPIRED"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -798,11 +675,6 @@ namespace net::worker::commands::Mutable{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"persistdeleted",	"PERSISTDELETED"	,
-			"persistexpired",	"PERSISTEXPIRED"
-		};
 	};
 
 

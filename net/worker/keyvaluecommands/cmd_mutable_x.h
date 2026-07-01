@@ -301,13 +301,9 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNDEL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XNDEL() : BaseCommandRW<Protocol,DBAdapter>("XNDEL", {
+			"xndel",	"XNDEL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
@@ -328,23 +324,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, container, bcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xndel",	"XNDEL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XRDEL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XRDEL() : BaseCommandRW<Protocol,DBAdapter>("XRDEL", {
+			"xrdel",	"XRDEL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
@@ -365,23 +353,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, container, bcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xrdel",	"XRDEL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HDELALL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HDELALL() : BaseCommandRW<Protocol,DBAdapter>("HDELALL", {
+			"hdelall",		"HDELALL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
@@ -406,23 +386,15 @@ namespace net::worker::commands::MutableX{
 			return process_h(pred, *db, prefix, result, container, bcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hdelall",		"HDELALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XNPERSIST : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XNPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XNPERSIST", {
+			"xnpersist",		"XNPERSIST"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
@@ -442,23 +414,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xnpersist",		"XNPERSIST"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XRPERSIST : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XRPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XRPERSIST", {
+			"xrpersist",		"XRPERSIST"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
@@ -478,23 +442,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xrpersist",		"XRPERSIST"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HPERSISTALL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HPERSISTALL() : BaseCommandRW<Protocol,DBAdapter>("HPERSISTALL", {
+			"hpersistall",		"HPERSISTALL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 2)
@@ -518,23 +474,15 @@ namespace net::worker::commands::MutableX{
 			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hpersistall",		"HPERSISTALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XNEXPIRE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XNEXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIRE", {
+			"xnexpire",		"XNEXPIRE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
@@ -555,23 +503,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xnexpire",		"XNEXPIRE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XREXPIRE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XREXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XREXPIRE", {
+			"xrexpire",		"XREXPIRE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
@@ -592,23 +532,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xrexpire",		"XREXPIRE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HEXPIREALL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HEXPIREALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREALL", {
+			"hexpireall",		"HEXPIREALL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
@@ -634,23 +566,15 @@ namespace net::worker::commands::MutableX{
 			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hexpireall",		"HEXPIREALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XNEXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XNEXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIREAT", {
+			"xnexpireat",		"XNEXPIREAT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
@@ -671,23 +595,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xnexpireat",		"XNEXPIREAT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XREXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		XREXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XREXPIREAT", {
+			"xrexpireay",		"XREXPIREAT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 4)
@@ -708,23 +624,15 @@ namespace net::worker::commands::MutableX{
 			return process_x(pred, stop, *db, key, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"xrexpireay",		"XREXPIREAT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HEXPIREATALL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HEXPIREATALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREATALL", {
+			"hexpireatall",		"HEXPIREATALL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 3)
@@ -750,10 +658,6 @@ namespace net::worker::commands::MutableX{
 			return process_h(pred, *db, prefix, result, pcontainer);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hexpireatall",		"HEXPIREATALL"
-		};
 	};
 
 

@@ -115,13 +115,10 @@ namespace net::worker::commands::HybridIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXHADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IXHADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("IXHADD_UTF8", {
+			"ixhadd_utf8"	,	"IXHADD_UTF8"	,
+			"ixhadd"	,	"IXHADD"
+		}){}
 
 		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
@@ -134,22 +131,13 @@ namespace net::worker::commands::HybridIndex{
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixhadd_utf8"	,	"IXHADD_UTF8"	,
-			"ixhadd"	,	"IXHADD"
-		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct IXHADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IXHADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("IXHADD_BIN", {
+			"ixhadd_bin"	,	"IXHADD_BIN"
+		}){}
 
 		// IXTADD_BIN a keySub delimiter "words,words" sort value
 
@@ -162,10 +150,6 @@ namespace net::worker::commands::HybridIndex{
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixhadd_bin"	,	"IXHADD_BIN"
-		};
 	};
 
 

@@ -322,13 +322,9 @@ namespace net::worker::commands::MortonCurve4D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC4GET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4GET() : BaseCommandRO<Protocol,DBAdapter>("MC4GET", {
+			"mc4get",	"MC4GET"
+		}){}
 
 		// MC4GET key subkey
 
@@ -352,23 +348,15 @@ namespace net::worker::commands::MortonCurve4D{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4get",	"MC4GET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4MGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4MGET() : BaseCommandRO<Protocol,DBAdapter>("MC4MGET", {
+			"mc4mget",	"MC4MGET"
+		}){}
 
 		// MC4GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -411,23 +399,15 @@ namespace net::worker::commands::MortonCurve4D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4mget",	"MC4MGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4SCORE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC4SCORE", {
+			"mc4score",	"MC4SCORE"
+		}){}
 
 		// MC4SCORE key subkey
 
@@ -476,23 +456,15 @@ namespace net::worker::commands::MortonCurve4D{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4score",	"MC4SCORE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4ADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4ADD() : BaseCommandRW<Protocol,DBAdapter>("MC4ADD", {
+			"mc4add",		"MC4ADD"
+		}){}
 
 		// MC4ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
@@ -553,23 +525,18 @@ namespace net::worker::commands::MortonCurve4D{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4add",		"MC4ADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4REM : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
+		MC4REM() : BaseCommandRW<Protocol,DBAdapter>("MC4REM", {
+			"mc4rem",		"MC4REM"	,
+			"mc4remove",		"MC4REMOVE"	,
+			"mc4del",		"MC4DEL"
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		}){}
 
 		// MC4DEL a subkey0 subkey1 ...
 
@@ -582,26 +549,15 @@ namespace net::worker::commands::MortonCurve4D{
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4rem",		"MC4REM"	,
-			"mc4remove",		"MC4REMOVE"	,
-			"mc4del",		"MC4DEL"
-
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4POINT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4POINT() : BaseCommandRO<Protocol,DBAdapter>("MC4POINT", {
+			"mc4point",	"MC4POINT"
+		}){}
 
 		// MC4POINT morton 10 20 30 40 10000 [key]
 
@@ -650,23 +606,16 @@ namespace net::worker::commands::MortonCurve4D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4point",	"MC4POINT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC4RANGENAIVE", {
+			"mc4rangenaive",	"MC4RANGENAIVE",
+			"mc4rangeflat",		"MC4RANGEFLAT"
+		}){}
 
 		// MC4RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
@@ -720,24 +669,15 @@ namespace net::worker::commands::MortonCurve4D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4rangenaive",	"MC4RANGENAIVE",
-			"mc4rangeflat",		"MC4RANGEFLAT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC4RANGE", {
+			"mc4range",	"MC4RANGE"
+		}){}
 
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
@@ -790,23 +730,15 @@ namespace net::worker::commands::MortonCurve4D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4range",	"MC4RANGE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4ENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC4ENCODE", {
+			"mc4encode",	"MC4ENCODE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -830,23 +762,15 @@ namespace net::worker::commands::MortonCurve4D{
 			return result.set(hex);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4encode",	"MC4ENCODE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC4DECODE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC4DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC4DECODE", {
+			"mc4decode",	"MC4DECODE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -872,10 +796,6 @@ namespace net::worker::commands::MortonCurve4D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc4decode",	"MC4DECODE"
-		};
 	};
 
 

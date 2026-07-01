@@ -68,13 +68,9 @@ namespace net::worker::commands::MultiIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IXMADD() : BaseCommandRW<Protocol,DBAdapter>("IXMADD", {
+			"ixmadd",	"IXMADD"
+		}){}
 
 		// IXMADD a keySub delimiter "words,words" sort value
 
@@ -86,23 +82,15 @@ namespace net::worker::commands::MultiIndex{
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixmadd",	"IXMADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXMRANGE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IXMRANGE() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGE", {
+			"ixmrange",	"IXMRANGE"
+		}){}
 
 		// IXMRANGE key txt count from
 
@@ -129,23 +117,15 @@ namespace net::worker::commands::MultiIndex{
 									db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixmrange",	"IXMRANGE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXMRANGEFLEX : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IXMRANGEFLEX() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGEFLEX", {
+			"ixmrangeflex",	"IXMRANGEFLEX"
+		}){}
 
 		// IXMRANGEFLEX key delimiter "words,words" count from
 
@@ -158,23 +138,15 @@ namespace net::worker::commands::MultiIndex{
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixmrangeflex",	"IXMRANGEFLEX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXMRANGESTRICT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IXMRANGESTRICT() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGESTRICT", {
+			"ixmrangestrict",	"IXMRANGESTRICT"
+		}){}
 
 		// IXMRANGESTRICT key delimiter "words,words" count from
 
@@ -187,10 +159,6 @@ namespace net::worker::commands::MultiIndex{
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ixmrangestrict",	"IXMRANGESTRICT"
-		};
 	};
 
 

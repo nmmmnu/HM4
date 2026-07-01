@@ -8,13 +8,9 @@ namespace net::worker::commands::CAS{
 
 	template<class Protocol, class DBAdapter>
 	struct CAS : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		CAS() : BaseCommandRW<Protocol,DBAdapter>("CAS", {
+			"cas",	"CAS"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4 && p.size() != 5)
@@ -53,23 +49,15 @@ namespace net::worker::commands::CAS{
 			return result.set(false);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cas",	"CAS"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CAD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		CAD() : BaseCommandRW<Protocol,DBAdapter>("CAD", {
+			"cad",	"CAD"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -101,10 +89,6 @@ namespace net::worker::commands::CAS{
 			return result.set(false);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cad",	"CAD"
-		};
 	};
 
 

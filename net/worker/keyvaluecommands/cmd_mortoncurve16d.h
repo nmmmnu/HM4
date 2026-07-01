@@ -396,13 +396,9 @@ namespace net::worker::commands::MortonCurve16D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC16GET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16GET() : BaseCommandRO<Protocol,DBAdapter>("MC16GET", {
+			"mc16get",	"MC16GET"
+		}){}
 
 		// MC16GET key subkey
 
@@ -426,23 +422,15 @@ namespace net::worker::commands::MortonCurve16D{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16get",	"MC16GET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16MGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16MGET() : BaseCommandRO<Protocol,DBAdapter>("MC16MGET", {
+			"mc16mget",	"MC16MGET"
+		}){}
 
 		// MC16GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -485,23 +473,15 @@ namespace net::worker::commands::MortonCurve16D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16mget",	"MC16MGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16SCORE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC16SCORE", {
+			"mc16score",	"MC16SCORE"
+		}){}
 
 		// MC16SCORE key subkey
 
@@ -565,23 +545,15 @@ namespace net::worker::commands::MortonCurve16D{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16score",	"MC16SCORE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16ADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16ADD() : BaseCommandRW<Protocol,DBAdapter>("MC16ADD", {
+			"mc16add",		"MC16ADD"
+		}){}
 
 		// MC16ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
@@ -674,23 +646,18 @@ namespace net::worker::commands::MortonCurve16D{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16add",		"MC16ADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16REM : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
+		MC16REM() : BaseCommandRW<Protocol,DBAdapter>("MC16REM", {
+			"mc16rem",		"MC16REM"	,
+			"mc16remove",		"MC16REMOVE"	,
+			"mc16del",		"MC16DEL"
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		}){}
 
 		// MC16DEL a subkey0 subkey1 ...
 
@@ -703,26 +670,15 @@ namespace net::worker::commands::MortonCurve16D{
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16rem",		"MC16REM"	,
-			"mc16remove",		"MC16REMOVE"	,
-			"mc16del",		"MC16DEL"
-
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16POINT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16POINT() : BaseCommandRO<Protocol,DBAdapter>("MC16POINT", {
+			"mc16point",	"MC16POINT"
+		}){}
 
 		// MC16POINT morton 10 20 30 40 10000 [key]
 
@@ -786,23 +742,16 @@ namespace net::worker::commands::MortonCurve16D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16point",	"MC16POINT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC16RANGENAIVE", {
+			"mc16rangenaive",	"MC16RANGENAIVE",
+			"mc16rangeflat",	"MC16RANGEFLAT"
+		}){}
 
 		// MC16RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
@@ -886,24 +835,15 @@ namespace net::worker::commands::MortonCurve16D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16rangenaive",	"MC16RANGENAIVE",
-			"mc16rangeflat",	"MC16RANGEFLAT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC16RANGE", {
+			"mc16range",	"MC16RANGE"
+		}){}
 
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
@@ -986,23 +926,15 @@ namespace net::worker::commands::MortonCurve16D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16range",	"MC16RANGE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16ENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC16ENCODE", {
+			"mc16encode",	"MC16ENCODE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -1041,23 +973,15 @@ namespace net::worker::commands::MortonCurve16D{
 			return result.set(hex);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16encode",	"MC16ENCODE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC16DECODE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC16DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC16DECODE", {
+			"mc16decode",	"MC16DECODE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -1098,10 +1022,6 @@ namespace net::worker::commands::MortonCurve16D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc16decode",	"MC16DECODE"
-		};
 	};
 
 

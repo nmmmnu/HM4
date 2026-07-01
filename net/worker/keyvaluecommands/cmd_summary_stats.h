@@ -127,13 +127,9 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("SSRESERVE", {
+			"ssreserve",	"SSRESERVE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2)
@@ -149,23 +145,15 @@ namespace net::worker::commands::SummaryStats{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssreserve",	"SSRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSADD() : BaseCommandRW<Protocol,DBAdapter>("SSADD", {
+			"ssadd",		"SSADD"
+		}){}
 
 		// ssadd key value value value...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -192,7 +180,7 @@ namespace net::worker::commands::SummaryStats{
 			return result.set_1();
 		}
 
-	private:
+	
 		struct SSADDFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>;
@@ -213,28 +201,20 @@ namespace net::worker::commands::SummaryStats{
 				}
 			}
 
-		private:
+		
 			It	begin;
 			It	end;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssadd",		"SSADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSMERGE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSMERGE() : BaseCommandRW<Protocol,DBAdapter>("SSMERGE", {
+			"ssmerge",		"SSMERGE"
+		}){}
 
 		// ssmerge key key_to_merge key_to_merge key_to_merge...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -270,7 +250,7 @@ namespace net::worker::commands::SummaryStats{
 			return result.set_1();
 		}
 
-	private:
+	
 		struct SSMERGEFactory : hm4::PairFactory::IFactoryAction<0 /* DO NOT COPY VALUE */,1,SSMERGEFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<0,1,SSMERGEFactory>;
@@ -292,28 +272,20 @@ namespace net::worker::commands::SummaryStats{
 				merge(*acc, begin, end);
 			}
 
-		private:
+		
 			It	begin;
 			It	end;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssmerge",		"SSMERGE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSGETALL() : BaseCommandRO<Protocol,DBAdapter>("SSGETALL", {
+			"ssgetall",		"SSGETALL"
+		}){}
 
 		// ssgetall key key key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -332,7 +304,7 @@ namespace net::worker::commands::SummaryStats{
 				return process_N_(std::begin(p) + varg, std::end(p), db, result, blob);
 		}
 
-	private:
+	
 		static void process_1_(std::string_view key,
 						DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
@@ -379,23 +351,15 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssgetall",		"SSGETALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSGET() : BaseCommandRO<Protocol,DBAdapter>("SSGET", {
+			"ssget",		"SSGET"
+		}){}
 
 		// ssgetall key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -428,23 +392,15 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssget",		"SSGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSMGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSMGET() : BaseCommandRO<Protocol,DBAdapter>("SSMGET", {
+			"ssmget",		"SSMGET"
+		}){}
 
 		// ssmget key subkey subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -485,23 +441,15 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssmget",		"SSMGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDGETALL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSADDGETALL() : BaseCommandRW<Protocol,DBAdapter>("SSADDGETALL", {
+			"ssaddgetall",		"SSADDGETALL"
+		}){}
 
 		// ssaddgetall key value value value...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -530,7 +478,7 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	private:
+	
 		struct SSADDGETALLFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETALLFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDGETALLFactory>;
@@ -561,30 +509,22 @@ namespace net::worker::commands::SummaryStats{
 				return container;
 			}
 
-		private:
+		
 			It				begin;
 			It				end;
 			OutputBlob::Container		container;
 			OutputBlob::BufferContainer	bcontainer;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssaddgetall",		"SSADDGETALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDGET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSADDGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDGET", {
+			"ssaddget",		"SSADDGET"
+		}){}
 
 		// ssaddget key value sub
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -617,7 +557,7 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	private:
+	
 		struct SSADDGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>;
@@ -644,7 +584,7 @@ namespace net::worker::commands::SummaryStats{
 				return result;
 			}
 
-		private:
+		
 			std::string_view	val;
 			std::string_view	sub;
 
@@ -652,23 +592,15 @@ namespace net::worker::commands::SummaryStats{
 			OutputBlob::buffer_t	buffer;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssaddget",		"SSADDGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDMGET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SSADDMGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDMGET", {
+			"ssaddmget",		"SSADDMGET"
+		}){}
 
 		// ssaddget key value sub sub sub...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -702,7 +634,7 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	private:
+	
 		struct SSADDMGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDMGETFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDMGETFactory>;
@@ -732,7 +664,7 @@ namespace net::worker::commands::SummaryStats{
 				return container;
 			}
 
-		private:
+		
 			std::string_view		val;
 
 			It				begin;
@@ -742,10 +674,6 @@ namespace net::worker::commands::SummaryStats{
 			OutputBlob::BufferContainer	bcontainer;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ssaddmget",		"SSADDMGET"
-		};
 	};
 
 

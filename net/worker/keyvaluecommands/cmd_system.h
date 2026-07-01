@@ -8,43 +8,27 @@ namespace net::worker::commands::System{
 
 	template<class Protocol, class DBAdapter>
 	struct EXIT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		EXIT() : BaseCommandRO<Protocol,DBAdapter>("EXIT", {
+			"exit",		"EXIT",
+			"quit",		"QUIT"
+		}){}
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set_system(Status::DISCONNECT);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"exit",		"EXIT",
-			"quit",		"QUIT"
-		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct SHUTDOWN : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SHUTDOWN() : BaseCommandRO<Protocol,DBAdapter>("SHUTDOWN", {
+			"shutdown",	"SHUTDOWN"
+		}){}
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set_system(Status::SHUTDOWN);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"shutdown",	"SHUTDOWN"
-		};
 	};
 
 

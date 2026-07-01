@@ -47,13 +47,9 @@ namespace net::worker::commands::BF{
 
 	template<class Protocol, class DBAdapter>
 	struct BFADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		BFADD() : BaseCommandRW<Protocol,DBAdapter>("BFADD", {
+			"bfadd",	"BFADD"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 5)
@@ -85,7 +81,7 @@ namespace net::worker::commands::BF{
 			return result.set();
 		}
 
-	private:
+	
 		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory>{
 			using Pair   = hm4::Pair;
 			using Base   = hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory>;
@@ -109,30 +105,22 @@ namespace net::worker::commands::BF{
 					bf_add(max_bits, max_hash, data, *it);
 			}
 
-		private:
+		
 			uint64_t		max_bits;
 			size_t			max_hash;
 			It			begin;
 			It			end;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"bfadd",	"BFADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		BFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("BFRESERVE", {
+			"bfreserve",	"BFRESERVE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
@@ -154,23 +142,15 @@ namespace net::worker::commands::BF{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"bfreserve",	"BFRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BFEXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		BFEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFEXISTS", {
+			"bfexists",	"BFEXISTS"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 5)
@@ -201,23 +181,15 @@ namespace net::worker::commands::BF{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"bfexists",	"BFEXISTS"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BFMEXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		BFMEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFMEXISTS", {
+			"bfmexists",	"BFMEXISTS"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 5)
@@ -260,10 +232,6 @@ namespace net::worker::commands::BF{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"bfmexists",	"BFMEXISTS"
-		};
 	};
 
 

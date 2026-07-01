@@ -110,13 +110,10 @@ namespace net::worker::commands::SL{
 
 	template<class Protocol, class DBAdapter>
 	struct SLADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SLADD() : BaseCommandRW<Protocol,DBAdapter>("SLADD", {
+			"sladd"		,	"SLADD"		,
+			"slpush"	,	"SLPUSH"
+		}){}
 
 		// SLADD key item item
 
@@ -124,24 +121,18 @@ namespace net::worker::commands::SL{
 			return sl_impl_::processADD(p, db, result, true);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"sladd"		,	"SLADD"		,
-			"slpush"	,	"SLPUSH"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SLADDPACK : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SLADDPACK() : BaseCommandRW<Protocol,DBAdapter>("SLADDPACK", {
+			"sladdpack"	,	"SLADDPACK"	,
+			"slpushpack"	,	"SLPUSHPACK"	,
+			"sladdshort"	,	"SLADDSHORT"	,
+			"slpushshort"	,	"SLPUSHSHORT"
+		}){}
 
 		// SLADD key item item
 
@@ -149,26 +140,15 @@ namespace net::worker::commands::SL{
 			return sl_impl_::processADD(p, db, result, false);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"sladdpack"	,	"SLADDPACK"	,
-			"slpushpack"	,	"SLPUSHPACK"	,
-			"sladdshort"	,	"SLADDSHORT"	,
-			"slpushshort"	,	"SLPUSHSHORT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SLGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SLGET() : BaseCommandRO<Protocol,DBAdapter>("SLGET", {
+			"slget",	"SLGET"
+		}){}
 
 		// SLGET key n
 
@@ -210,23 +190,15 @@ namespace net::worker::commands::SL{
 			return result.set(sv);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"slget",	"SLGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SLMGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SLMGET() : BaseCommandRO<Protocol,DBAdapter>("SLMGET", {
+			"slmget",	"SLMGET"
+		}){}
 
 		// SLMGET key val val val
 
@@ -269,7 +241,7 @@ namespace net::worker::commands::SL{
 				return processHuge__(result, blob, std::begin(p) + varg, std::end(p), container, sl);
 		}
 
-	private:
+	
 		constexpr static size_t HTMax  = OutputBlob::ParamContainerSize;
 		constexpr static size_t HTSize = OutputBlob::ParamContainerSizeHTSize;
 
@@ -281,7 +253,7 @@ namespace net::worker::commands::SL{
 		template<typename T, size_t MaxItems, size_t Size>
 		using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
-	private:
+	
 		static void processNaive__(Result<Protocol> &result,
 					ParamContainer::iterator first, ParamContainer::iterator last,
 						OutputBlob::Container &container, s_list::RawSListConst const &sl){
@@ -381,23 +353,15 @@ namespace net::worker::commands::SL{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"slmget",	"SLMGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SLGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SLGETALL() : BaseCommandRO<Protocol,DBAdapter>("SLGETALL", {
+			"slgetall",	"SLGETALL"
+		}){}
 
 		// SLGETALL key
 
@@ -435,23 +399,16 @@ namespace net::worker::commands::SL{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"slgetall",	"SLGETALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SLCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SLCOUNT() : BaseCommandRO<Protocol,DBAdapter>("SLCOUNT", {
+			"slcount",	"SLCOUNT",
+			"sllen",	"SLLEN"
+		}){}
 
 		// SLCOUNT key
 
@@ -478,11 +435,6 @@ namespace net::worker::commands::SL{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"slcount",	"SLCOUNT",
-			"sllen",	"SLLEN"
-		};
 	};
 
 

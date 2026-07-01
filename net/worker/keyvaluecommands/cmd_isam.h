@@ -100,13 +100,9 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IGETALL() : BaseCommandRO<Protocol,DBAdapter>("IGETALL", {
+			"igetall",		"IGETALL"
+		}){}
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -115,23 +111,15 @@ namespace net::worker::commands::ISAM_cmd{
 			return IGETALL_process<IGETALLOutput::BOTH>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"igetall",		"IGETALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IGETKEYS: BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("IGETKEYS", {
+			"igetkeys",		"IGETKEYS"
+		}){}
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -140,23 +128,15 @@ namespace net::worker::commands::ISAM_cmd{
 			return IGETALL_process<IGETALLOutput::KEYS>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"igetkeys",		"IGETKEYS"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IGETVALS: BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IGETVALS() : BaseCommandRO<Protocol,DBAdapter>("IGETVALS", {
+			"igetvals",		"IGETVALS"
+		}){}
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -165,23 +145,15 @@ namespace net::worker::commands::ISAM_cmd{
 			return IGETALL_process<IGETALLOutput::VALS>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"igetvals",		"IGETVALS"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IGET() : BaseCommandRO<Protocol,DBAdapter>("IGET", {
+			"iget",		"IGET"
+		}){}
 
 		// iget schema key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -213,23 +185,15 @@ namespace net::worker::commands::ISAM_cmd{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"iget",		"IGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IMGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IMGET() : BaseCommandRO<Protocol,DBAdapter>("IMGET", {
+			"imget",		"IMGET"
+		}){}
 
 		// imget schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -258,7 +222,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return collect_N__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
 		}
 
-	private:
+	
 		template<typename Container>
 		static void collect_1__(Result<Protocol> &result, Container &container,
 							std::string_view schema, std::string_view storage,
@@ -311,23 +275,15 @@ namespace net::worker::commands::ISAM_cmd{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"imget",		"IMGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ISETALL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ISETALL() : BaseCommandRW<Protocol,DBAdapter>("ISETALL", {
+			"isetall",		"ISETALL"
+		}){}
 
 		// isetall schema key value value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -356,7 +312,7 @@ namespace net::worker::commands::ISAM_cmd{
 			return result.set_1();
 		}
 
-	private:
+	
 		struct ISETALL_Factory : hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory>;
@@ -378,28 +334,20 @@ namespace net::worker::commands::ISAM_cmd{
 					isam.store(storage, i, *(it + i));
 			}
 
-		private:
+		
 			ISAM const	&isam;
 			It		it;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"isetall",		"ISETALL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ISET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ISET() : BaseCommandRW<Protocol,DBAdapter>("ISET", {
+			"iset",		"ISET"
+		}){}
 
 		// iset schema key subkey value subkey value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -424,7 +372,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return process_N__(db, result, schema, key, std::begin(p) + varg, std::end(p));
 		}
 
-	private:
+	
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
@@ -506,7 +454,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return status;
 			}
 
-		private:
+		
 			ISAM const	&isam;
 			Searcher const	&searcher;
 			It		begin;
@@ -514,23 +462,15 @@ namespace net::worker::commands::ISAM_cmd{
 			bool		status		= false;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"iset",		"ISET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IDEL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IDEL() : BaseCommandRW<Protocol,DBAdapter>("IDEL", {
+			"idel",		"IDEL"
+		}){}
 
 		// idel schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -555,7 +495,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return process_N__(db, result, schema, key, std::begin(p) + varg, std::end(p));
 		}
 
-	private:
+	
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
@@ -639,7 +579,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return status;
 			}
 
-		private:
+		
 			ISAM const	&isam;
 			Searcher const	&searcher;
 			It		begin;
@@ -647,23 +587,15 @@ namespace net::worker::commands::ISAM_cmd{
 			bool		status		= false;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"idel",		"IDEL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		IRESERVE() : BaseCommandRW<Protocol,DBAdapter>("IRESERVE", {
+			"ireserve",	"IRESERVE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -682,10 +614,6 @@ namespace net::worker::commands::ISAM_cmd{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"ireserve",	"IRESERVE"
-		};
 	};
 
 

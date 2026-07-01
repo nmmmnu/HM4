@@ -347,13 +347,9 @@ namespace net::worker::commands::MortonCurve8D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC8GET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8GET() : BaseCommandRO<Protocol,DBAdapter>("MC8GET", {
+			"mc8get",	"MC8GET"
+		}){}
 
 		// MC8GET key subkey
 
@@ -377,23 +373,15 @@ namespace net::worker::commands::MortonCurve8D{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8get",	"MC8GET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8MGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8MGET() : BaseCommandRO<Protocol,DBAdapter>("MC8MGET", {
+			"mc8mget",	"MC8MGET"
+		}){}
 
 		// MC8GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -436,23 +424,15 @@ namespace net::worker::commands::MortonCurve8D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8mget",	"MC8MGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8SCORE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC8SCORE", {
+			"mc8score",	"MC8SCORE"
+		}){}
 
 		// MC8SCORE key subkey
 
@@ -504,23 +484,15 @@ namespace net::worker::commands::MortonCurve8D{
 			}
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8score",	"MC8SCORE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8ADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8ADD() : BaseCommandRW<Protocol,DBAdapter>("MC8ADD", {
+			"mc8add",		"MC8ADD"
+		}){}
 
 		// MC8ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
@@ -593,23 +565,18 @@ namespace net::worker::commands::MortonCurve8D{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8add",		"MC8ADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8REM : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
+		MC8REM() : BaseCommandRW<Protocol,DBAdapter>("MC8REM", {
+			"mc8rem",		"MC8REM"	,
+			"mc8remove",		"MC8REMOVE"	,
+			"mc8del",		"MC8DEL"
 
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		}){}
 
 		// MC8DEL a subkey0 subkey1 ...
 
@@ -622,26 +589,15 @@ namespace net::worker::commands::MortonCurve8D{
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8rem",		"MC8REM"	,
-			"mc8remove",		"MC8REMOVE"	,
-			"mc8del",		"MC8DEL"
-
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8POINT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8POINT() : BaseCommandRO<Protocol,DBAdapter>("MC8POINT", {
+			"mc8point",	"MC8POINT"
+		}){}
 
 		// MC8POINT morton 10 20 30 40 10000 [key]
 
@@ -695,23 +651,16 @@ namespace net::worker::commands::MortonCurve8D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8point",	"MC8POINT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC8RANGENAIVE", {
+			"mc8rangenaive",	"MC8RANGENAIVE",
+			"mc8rangeflat",	"MC8RANGEFLAT"
+		}){}
 
 		// MC8RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
@@ -775,24 +724,15 @@ namespace net::worker::commands::MortonCurve8D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8rangenaive",	"MC8RANGENAIVE",
-			"mc8rangeflat",	"MC8RANGEFLAT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC8RANGE", {
+			"mc8range",	"MC8RANGE"
+		}){}
 
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
@@ -855,23 +795,15 @@ namespace net::worker::commands::MortonCurve8D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8range",	"MC8RANGE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8ENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC8ENCODE", {
+			"mc8encode",	"MC8ENCODE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -900,23 +832,15 @@ namespace net::worker::commands::MortonCurve8D{
 			return result.set(hex);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8encode",	"MC8ENCODE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC8DECODE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC8DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC8DECODE", {
+			"mc8decode",	"MC8DECODE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -947,10 +871,6 @@ namespace net::worker::commands::MortonCurve8D{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc8decode",	"MC8DECODE"
-		};
 	};
 
 

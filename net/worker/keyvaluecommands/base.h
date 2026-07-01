@@ -261,18 +261,19 @@ namespace net::worker::commands{
 
 
 
-	using ParamContainer  = MySpan<const std::string_view>;
+	using ParamContainer		= MySpan<const std::string_view>;
+	using CommandAliasesContainer	= std::array<std::string_view, 32>;
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BaseCommand{
-		bool mut() const{
-			return mut_();
+		BaseCommand(std::string_view name, CommandAliasesContainer const &cmd, bool mut) :
+							name_	{ name	},
+							cmd_	{ cmd	},
+							mut_	{ mut	}{
+			assert(!cmd_[0].empty());
 		}
-
-		virtual const std::string_view *begin() const = 0;
-		virtual const std::string_view *end()   const = 0;
 
 		virtual ~BaseCommand() = default;
 
@@ -280,28 +281,53 @@ namespace net::worker::commands{
 			return process(params, db, result, blob);
 		}
 
+		constexpr bool mut() const{
+			return mut_;
+		}
+
+		constexpr std::string_view getName() const{
+			return name_;
+		}
+
+		constexpr const std::string_view *begin() const{
+			return std::begin(cmd_);
+		}
+
+		constexpr const std::string_view *end() const{
+			// no need to be fast
+			// size guaranteed to be at least 1
+
+			size_t i = 1;
+
+			for (; i < cmd_.size(); ++i)
+				if (cmd_[i].empty())
+					break;
+
+			return begin() + i;
+		}
+
+	private:
+		std::string_view	name_;
+		CommandAliasesContainer		cmd_;
+		bool			mut_;
+
 	private:
 		virtual void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) = 0;
-		virtual bool mut_() const = 0;
 	};
 
 
 
-	template<class Protocol, class DBAdapter, bool Mutable>
-	struct BaseCommand_ : BaseCommand<Protocol,DBAdapter>{
-		constexpr static bool MUTABLE = Mutable;
-
-	private:
-		virtual bool mut_() const final{
-			return MUTABLE;
-		}
+	template<class Protocol, class DBAdapter, bool B>
+	struct BaseCommandMM : BaseCommand<Protocol,DBAdapter>{
+		BaseCommandMM(std::string_view name, CommandAliasesContainer const &cmd) :
+					BaseCommand<Protocol,DBAdapter>(name, cmd, B){}
 	};
 
 	template<class Protocol, class DBAdapter>
-	using BaseCommandRO = BaseCommand_<Protocol,DBAdapter,false>;
+	using BaseCommandRO = BaseCommandMM<Protocol,DBAdapter, 0>;
 
 	template<class Protocol, class DBAdapter>
-	using BaseCommandRW = BaseCommand_<Protocol,DBAdapter,true>;
+	using BaseCommandRW = BaseCommandMM<Protocol,DBAdapter, 1>;
 
 
 
@@ -346,13 +372,13 @@ namespace net::worker::commands{
 
 				assert(b);
 
-				++aliases_;
+				++CommandAliasesContainer_;
 			}
 		}
 
 		void infoPrint() const{
 			logger<Logger::NOTICE>() << "Total commands" << storage_.size();
-			logger<Logger::NOTICE>() << "Total aliases " << aliases_;
+			logger<Logger::NOTICE>() << "Total CommandAliasesContainer " << CommandAliasesContainer_;
 
 			if (auto const chain = map_.longestChain(); chain >= 16)
 				logger<Logger::WARNING>() << "Hashtable longest chain " << map_.longestChain() << "(chain too long)";
@@ -373,7 +399,7 @@ namespace net::worker::commands{
 		Storage	storage_	;
 		Map	map_		;
 
-		size_t	aliases_		= 0;
+		size_t	CommandAliasesContainer_		= 0;
 	};
 
 

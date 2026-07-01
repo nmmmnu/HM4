@@ -21,13 +21,9 @@ namespace net::worker::commands::Queue{
 
 	template<class Protocol, class DBAdapter>
 	struct SADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SADD() : BaseCommandRW<Protocol,DBAdapter>("SADD", {
+			"sadd",		"SADD"
+		}){}
 
 		using MyIDGenerator = queue_impl_::MyIDGenerator;
 
@@ -60,23 +56,15 @@ namespace net::worker::commands::Queue{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"sadd",		"SADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SPOP : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		SPOP() : BaseCommandRW<Protocol,DBAdapter>("SPOP", {
+			"spop",	"SPOP"
+		}){}
 
 		using MyIDGenerator = queue_impl_::MyIDGenerator;
 
@@ -157,7 +145,7 @@ namespace net::worker::commands::Queue{
 			);
 		}
 
-	private:
+	
 		static void collect_(std::string_view keyControl, typename DBAdapter::List::iterator it, typename DBAdapter::List::iterator eit, typename DBAdapter::List &list, Result<Protocol> &result){
 			using namespace queue_impl_;
 
@@ -252,10 +240,6 @@ namespace net::worker::commands::Queue{
 			return result.set("");
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"spop",	"SPOP"
-		};
 	};
 
 

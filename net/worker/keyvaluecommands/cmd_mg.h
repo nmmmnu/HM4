@@ -45,13 +45,10 @@ namespace net::worker::commands::MG{
 
 	template<class Protocol, class DBAdapter>
 	struct MGADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MGADD() : BaseCommandRW<Protocol,DBAdapter>("MGADD", {
+			"mgadd",	"MGADD"	,
+			"mgincr",	"MGINCR"
+		}){}
 
 		// MGADD key slots bytes item item
 
@@ -92,7 +89,7 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
+	
 		template<typename MyRawMisraGries>
 		void process_(MyRawMisraGries &mg, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			auto const varg = 4;
@@ -113,7 +110,7 @@ namespace net::worker::commands::MG{
 			);
 		}
 
-	private:
+	
 		template<typename MyRawMisraGries>
 		struct MGADDFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDFactory<MyRawMisraGries> >{
 			using Pair = hm4::Pair;
@@ -135,7 +132,7 @@ namespace net::worker::commands::MG{
 				return result;
 			}
 
-		private:
+		
 			bool action_(Pair *pair) const{
 				using List = typename MyRawMisraGries::List;
 
@@ -152,31 +149,22 @@ namespace net::worker::commands::MG{
 				return result;
 			}
 
-		private:
+		
 			MyRawMisraGries		mg;
 			It			begin;
 			It			end;
 			bool			result = false;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mgadd",	"MGADD"	,
-			"mgincr",	"MGINCR"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MGADDGET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MGADDGET() : BaseCommandRW<Protocol,DBAdapter>("MGADDGET", {
+			"mgaddget",	"MGADDGET"
+		}){}
 
 		// MGADDGET key slots bytes item
 
@@ -217,7 +205,7 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
+	
 		template<typename MyRawMisraGries>
 		void process_(MyRawMisraGries &mg, std::string_view const key, std::string_view const item, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			if (!mg.isItemValid(item))
@@ -236,7 +224,7 @@ namespace net::worker::commands::MG{
 			);
 		}
 
-	private:
+	
 		template<typename MyRawMisraGries>
 		struct MGADDGETFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDGETFactory<MyRawMisraGries> >{
 			using Pair = hm4::Pair;
@@ -255,7 +243,7 @@ namespace net::worker::commands::MG{
 				return score;
 			}
 
-		private:
+		
 			uint64_t action_(Pair *pair) const{
 				using List = typename MyRawMisraGries::List;
 
@@ -264,16 +252,12 @@ namespace net::worker::commands::MG{
 				return mg.add(*mg_data, item);
 			}
 
-		private:
+		
 			MyRawMisraGries		mg;
 			std::string_view	item;
 			uint64_t		score = 0;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mgaddget",	"MGADDGET"
-		};
 	};
 
 
@@ -281,13 +265,9 @@ namespace net::worker::commands::MG{
 
 	template<class Protocol, class DBAdapter>
 	struct MGRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MGRESERVE() : BaseCommandRW<Protocol,DBAdapter>("MGRESERVE", {
+			"mgreserve",	"MGRESERVE"
+		}){}
 
 		// MGRESERVE key slots bytes
 
@@ -328,23 +308,15 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mgreserve",	"MGRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MGGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MGGET() : BaseCommandRO<Protocol,DBAdapter>("MGGET", {
+			"mgget",	"MGGET"
+		}){}
 
 		// MGGET key slots bytes
 
@@ -385,7 +357,7 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
+	
 		template<class MyRawMisraGries>
 		void process_(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
@@ -413,10 +385,6 @@ namespace net::worker::commands::MG{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mgget",	"MGGET"
-		};
 	};
 
 

@@ -105,13 +105,9 @@ namespace net::worker::commands::MutableGET{
 
 	template<class Protocol, class DBAdapter>
 	struct GETSET : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		GETSET() : BaseCommandRW<Protocol,DBAdapter>("GETSET", {
+			"getset",	"GETSET"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -132,23 +128,15 @@ namespace net::worker::commands::MutableGET{
 			return processGet(pred, *db, key, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"getset",	"GETSET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GETDEL : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		GETDEL() : BaseCommandRW<Protocol,DBAdapter>("GETDEL", {
+			"getdel",	"GETDEL"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -165,23 +153,15 @@ namespace net::worker::commands::MutableGET{
 			return processGet(pred, *db, key, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"getdel",	"GETDEL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GETEX : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		GETEX() : BaseCommandRW<Protocol,DBAdapter>("GETEX", {
+			"getex",	"GETEX"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -200,23 +180,15 @@ namespace net::worker::commands::MutableGET{
 			return processGet(pred, *db, key, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"getex",	"GETEX"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GETEXAT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		GETEXAT() : BaseCommandRW<Protocol,DBAdapter>("GETEXAT", {
+			"getexat",	"GETEXAT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -235,23 +207,15 @@ namespace net::worker::commands::MutableGET{
 			return processGet(pred, *db, key, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"getexat",	"GETEXAT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GETPERSIST : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		GETPERSIST() : BaseCommandRW<Protocol,DBAdapter>("GETPERSIST", {
+			"getpersist",	"GETPERSIST"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -268,10 +232,6 @@ namespace net::worker::commands::MutableGET{
 			return processGet(pred, *db, key, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"getpersist",	"GETPERSIST"
-		};
 	};
 
 

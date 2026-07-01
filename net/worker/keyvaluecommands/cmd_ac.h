@@ -272,13 +272,10 @@ namespace net::worker::commands::AC{
 
 	template<class Protocol, class DBAdapter>
 	struct ACADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ACADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACADD_UTF8", {
+			"acadd_utf8"	,	"ACADD_UTF8"	,
+			"acadd"		,	"ACADD"
+		}){}
 
 		// ACADD_UTF8 a text exp
 
@@ -288,24 +285,15 @@ namespace net::worker::commands::AC{
 			return do_processACADD<UTF8Tokenizer>(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"acadd_utf8"	,	"ACADD_UTF8"	,
-			"acadd"		,	"ACADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ACADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ACADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACADD_BIN", {
+			"acadd_bin",	"ACADD_BIN"
+		}){}
 
 		// ACADD_BIN a text exp
 
@@ -315,23 +303,17 @@ namespace net::worker::commands::AC{
 			return do_processACADD<ASCIITokenizer>(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"acadd_bin",	"ACADD_BIN"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ACDEL_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ACDEL_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_UTF8", {
+			"acdel_utf8"	,	"ACDEL_UTF8"	,	"acdel"		,	"ACDEL"		,
+			"acrem_utf8"	,	"ACREM_UTF8"	,	"acrem"		,	"ACREM"		,
+			"acremove_utf8"	,	"ACREMOVE_UTF8"	,	"acremove"	,	"ACREMOVE"
+		}){}
 
 		// ACADD_UTF8 a text exp
 
@@ -341,25 +323,17 @@ namespace net::worker::commands::AC{
 			return do_processACDEL<UTF8Tokenizer>(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"acdel_utf8"	,	"ACDEL_UTF8"	,	"acdel"		,	"ACDEL"		,
-			"acrem_utf8"	,	"ACREM_UTF8"	,	"acrem"		,	"ACREM"		,
-			"acremove_utf8"	,	"ACREMOVE_UTF8"	,	"acremove"	,	"ACREMOVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ACDEL_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ACDEL_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_BIN", {
+			"acdel_bin"	,		"ACDEL_BIN"	,
+			"acrem_bin"	,		"ACREM_BIN"	,
+			"acremove_bin"	,		"ACREMOVE_BIN"
+		}){}
 
 		// ACADD_BIN a text exp
 
@@ -369,25 +343,17 @@ namespace net::worker::commands::AC{
 			return do_processACDEL<ASCIITokenizer>(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"acdel_bin"	,		"ACDEL_BIN"	,
-			"acrem_bin"	,		"ACREM_BIN"	,
-			"acremove_bin"	,		"ACREMOVE_BIN"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ACRANGE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ACRANGE() : BaseCommandRO<Protocol,DBAdapter>("ACRANGE", {
+			"acrange"	,	"ACRANGE"	,
+			"acrange_bin"	,	"ACRANGE_BIN"	,
+			"acrange_utf8"	,	"ACRANGE_UTF8"
+		}){}
 
 		// ACRANGE a text count keyStart
 
@@ -417,25 +383,17 @@ namespace net::worker::commands::AC{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"acrange"	,	"ACRANGE"	,
-			"acrange_bin"	,	"ACRANGE_BIN"	,
-			"acrange_utf8"	,	"ACRANGE_UTF8"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ACRANGEALL : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		ACRANGEALL() : BaseCommandRO<Protocol,DBAdapter>("ACRANGEALL", {
+			"acrangeall"		,	"ACRANGEALL"		,
+			"acrangeall_bin"	,	"ACRANGEALL_BIN"	,
+			"acrangeall_utf8"	,	"ACRANGEALL_UTF8"
+		}){}
 
 		// ACRANGEALL a count keyStart
 
@@ -465,12 +423,6 @@ namespace net::worker::commands::AC{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"acrangeall"		,	"ACRANGEALL"		,
-			"acrangeall_bin"	,	"ACRANGEALL_BIN"	,
-			"acrangeall_utf8"	,	"ACRANGEALL_UTF8"
-		};
 	};
 
 

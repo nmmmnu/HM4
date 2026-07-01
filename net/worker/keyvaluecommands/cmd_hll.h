@@ -73,13 +73,10 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFADD() : BaseCommandRW<Protocol,DBAdapter>("PFADD", {
+			"pfadd",	"PFADD"		,
+			"hlladd",	"HLLADD"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
@@ -107,7 +104,7 @@ namespace net::worker::commands::HLL{
 			return result.set(factory.getBits());
 		}
 
-	private:
+	
 		struct PFADDFactoryBits : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>;
@@ -127,7 +124,7 @@ namespace net::worker::commands::HLL{
 				return bits;
 			}
 
-		private:
+		
 			bool action_(Pair *pair) const{
 				using namespace hll_impl_;
 
@@ -144,31 +141,23 @@ namespace net::worker::commands::HLL{
 				return result;
 			}
 
-		private:
+		
 			It	begin;
 			It	end;
 
 			bool	bits = false;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pfadd",	"PFADD"		,
-			"hlladd",	"HLLADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("PFRESERVE", {
+			"pfreserve",	"PFRESERVE"		,
+			"hllreserve",	"HLLRESERVE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2)
@@ -186,24 +175,16 @@ namespace net::worker::commands::HLL{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pfreserve",	"PFRESERVE"		,
-			"hllreserve",	"HLLRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFINTERSECT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFINTERSECT() : BaseCommandRO<Protocol,DBAdapter>("PFINTERSECT", {
+			"pfintersect",	"PFINTERSECT"		,
+			"hllintersect",	"HLLINTERSECT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 
@@ -232,24 +213,16 @@ namespace net::worker::commands::HLL{
 			return result.set(n);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pfintersect",	"PFINTERSECT"		,
-			"hllintersect",	"HLLINTERSECT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("PFCOUNT", {
+			"pfcount",	"PFCOUNT"		,
+			"hllcount",	"HLLCOUNT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 
@@ -283,27 +256,19 @@ namespace net::worker::commands::HLL{
 			return result.set( n );
 		}
 
-	private:
+	
 		uint8_t hll_[hll_impl_::HLL_M];
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pfcount",	"PFCOUNT"		,
-			"hllcount",	"HLLCOUNT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("PFADDCOUNT", {
+			"pfaddcount",	"PFADDCOUNT"		,
+			"hlladdcount",	"HLLADDCOUNT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
@@ -335,7 +300,7 @@ namespace net::worker::commands::HLL{
 			return result.set(n);
 		}
 
-	private:
+	
 		// mostly copy of PFADDFactory but add some operations
 		struct PFADDFactoryCount : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>{
 			using Pair = hm4::Pair;
@@ -356,7 +321,7 @@ namespace net::worker::commands::HLL{
 				return count;
 			}
 
-		private:
+		
 			double action_(Pair *pair) const{
 				using namespace hll_impl_;
 
@@ -372,31 +337,23 @@ namespace net::worker::commands::HLL{
 				return getHLL().estimate(hll_data);
 			}
 
-		private:
+		
 			It	begin;
 			It	end;
 
 			double	count = 0;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pfaddcount",	"PFADDCOUNT"		,
-			"hlladdcount",	"HLLADDCOUNT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFMERGE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFMERGE() : BaseCommandRW<Protocol,DBAdapter>("PFMERGE", {
+			"pfmerge",	"PFMERGE"		,
+			"hllmerge",	"HLLMERGE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 3)
@@ -440,10 +397,10 @@ namespace net::worker::commands::HLL{
 			return result.set();
 		}
 
-	private:
+	
 		using HLLVector = StaticVector<const uint8_t *, OutputBlob::ParamContainerSize>;
 
-	private:
+	
 		struct PFMergeFactory : hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>;
@@ -466,29 +423,21 @@ namespace net::worker::commands::HLL{
 					getHLL().merge(hll, *it);
 			}
 
-		private:
+		
 			HLLVector::iterator	begin;
 			HLLVector::iterator	end;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pfmerge",	"PFMERGE"		,
-			"hllmerge",	"HLLMERGE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFBITS : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFBITS() : BaseCommandRO<Protocol,DBAdapter>("PFBITS", {
+			"pfbits",	"PFBITS"		,
+			"hllbits",	"HLLBITS"
+		}){}
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hll_impl_;
@@ -496,24 +445,16 @@ namespace net::worker::commands::HLL{
 			return result.set(uint64_t{HLL_Bits});
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pfbits",	"PFBITS"		,
-			"hllbits",	"HLLBITS"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFERROR : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		PFERROR() : BaseCommandRO<Protocol,DBAdapter>("PFERROR", {
+			"pferror",	"PFERROR"		,
+			"hllerror",	"HLLERROR"
+		}){}
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace hll_impl_;
@@ -521,11 +462,6 @@ namespace net::worker::commands::HLL{
 			return result.set(static_cast<uint64_t>(getHLL().error() * 10000));
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"pferror",	"PFERROR"		,
-			"hllerror",	"HLLERROR"
-		};
 	};
 
 

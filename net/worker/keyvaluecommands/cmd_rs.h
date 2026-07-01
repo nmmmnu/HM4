@@ -42,13 +42,9 @@ namespace net::worker::commands::RS{
 
 	template<class Protocol, class DBAdapter>
 	struct RSADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		RSADD() : BaseCommandRW<Protocol,DBAdapter>("RSADD", {
+			"rsadd",	"RSADD"
+		}){}
 
 		// RSADD key slots bytes item item
 
@@ -87,7 +83,7 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
+	
 		template<typename MyReservoirSampling>
 		void process_(MyReservoirSampling const &rs, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result){
 			auto const varg = 4;
@@ -108,7 +104,7 @@ namespace net::worker::commands::RS{
 			);
 		}
 
-	private:
+	
 		template<typename MyReservoirSampling>
 		struct RSADDFactory : hm4::PairFactory::IFactoryAction<1,1,RSADDFactory<MyReservoirSampling> >{
 			using Pair = hm4::Pair;
@@ -131,7 +127,7 @@ namespace net::worker::commands::RS{
 				return result;
 			}
 
-		private:
+		
 			bool action_(Pair *pair){
 				using List = typename MyReservoirSampling::List;
 
@@ -160,7 +156,7 @@ namespace net::worker::commands::RS{
 				return result;
 			}
 
-		private:
+		
 			MyReservoirSampling	rs;
 			It			begin;
 			It			end;
@@ -168,11 +164,7 @@ namespace net::worker::commands::RS{
 			std::mt19937_64		&rand64;
 		};
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"rsadd",	"RSADD"
-		};
-
+	
 		std::mt19937_64 rand64{ static_cast<uint32_t>(time(nullptr)) };
 	};
 
@@ -180,13 +172,9 @@ namespace net::worker::commands::RS{
 
 	template<class Protocol, class DBAdapter>
 	struct RSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		RSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RSRESERVE", {
+			"rsreserve",	"RSRESERVE"
+		}){}
 
 		// RSRESERVE key slots bytes
 
@@ -227,23 +215,15 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"rsreserve",	"RSRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RSGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		RSGET() : BaseCommandRO<Protocol,DBAdapter>("RSGET", {
+			"rsget",	"RSGET"
+		}){}
 
 		// RSGET key slots bytes
 
@@ -284,7 +264,7 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
+	
 		template<class MyReservoirSampling>
 		void process_(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
@@ -303,23 +283,15 @@ namespace net::worker::commands::RS{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"rsget",	"RSGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RSGETCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		RSGETCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RSGETCOUNT", {
+			"rsgetcount",	"RSGETCOUNT"
+		}){}
 
 		// RSGETCOUNT key slots bytes
 
@@ -360,7 +332,7 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
+	
 		template<class MyReservoirSampling>
 		void process_(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol> &result) const{
 			if (pair == nullptr)
@@ -373,10 +345,6 @@ namespace net::worker::commands::RS{
 			return result.set(rs_data->getCount());
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"rsgetcount",	"RSGETCOUNT"
-		};
 	};
 
 

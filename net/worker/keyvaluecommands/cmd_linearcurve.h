@@ -175,13 +175,9 @@ namespace net::worker::commands::LinearCurve{
 
 	template<class Protocol, class DBAdapter>
 	struct MC1GET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC1GET() : BaseCommandRO<Protocol,DBAdapter>("MC1GET", {
+			"mc1get",	"MC1GET"
+		}){}
 
 		// MC1GET key subkey
 
@@ -205,23 +201,15 @@ namespace net::worker::commands::LinearCurve{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1get",	"MC1GET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC1MGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC1MGET() : BaseCommandRO<Protocol,DBAdapter>("MC1MGET", {
+			"mc1mget",	"MC1MGET"
+		}){}
 
 		// MC1GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -264,23 +252,15 @@ namespace net::worker::commands::LinearCurve{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1mget",	"MC1MGET"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC1SCORE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC1SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC1SCORE", {
+			"mc1score",	"MC1SCORE"
+		}){}
 
 		// MC1SCORE key subkey
 
@@ -304,23 +284,15 @@ namespace net::worker::commands::LinearCurve{
 			);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1score",	"MC1SCORE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC1ADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC1ADD() : BaseCommandRW<Protocol,DBAdapter>("MC1ADD", {
+			"mc1add",		"MC1ADD"
+		}){}
 
 		// MC1ADD a keySub0 x0 val0 keySub1 x1 val1 ...
 
@@ -371,23 +343,17 @@ namespace net::worker::commands::LinearCurve{
 			return result.set();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1add",		"MC1ADD"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC1REM : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC1REM() : BaseCommandRW<Protocol,DBAdapter>("MC1REM", {
+			"mc1rem",		"MC1REM"	,
+			"mc1remove",		"MC1REMOVE"	,
+			"mc1del",		"MC1DEL"
+		}){}
 
 		// MC1DEL a subkey0 subkey1 ...
 
@@ -400,25 +366,15 @@ namespace net::worker::commands::LinearCurve{
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1rem",		"MC1REM"	,
-			"mc1remove",		"MC1REMOVE"	,
-			"mc1del",		"MC1DEL"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC1POINT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC1POINT() : BaseCommandRO<Protocol,DBAdapter>("MC1POINT", {
+			"mc1point",	"MC1POINT"
+		}){}
 
 		// MC1POINT linear 10 10000 [key]
 
@@ -456,23 +412,15 @@ namespace net::worker::commands::LinearCurve{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1point",	"MC1POINT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC1RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MC1RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC1RANGE", {
+			"mc1range",	"MC1RANGE"
+		}){}
 
 		// MC1RANGENAIVE linear 10 10 10000 [key]
 
@@ -510,10 +458,6 @@ namespace net::worker::commands::LinearCurve{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"mc1range",	"MC1RANGE"
-		};
 	};
 
 

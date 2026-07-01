@@ -275,13 +275,11 @@ namespace net::worker::commands::CMS{
 
 	template<class Protocol, class DBAdapter>
 	struct CMSADD : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
+		CMSADD() : BaseCommandRW<Protocol,DBAdapter>("CMSADD", {
+			"cmsadd",	"CMSADD",
+			"cmsincr",	"CMSINCR",
+			"cmsincrby",	"CMSINCRBY"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -291,25 +289,17 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cmsadd",	"CMSADD",
-			"cmsincr",	"CMSINCR",
-			"cmsincrby",	"CMSINCRBY"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSREM : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
+		CMSREM() : BaseCommandRW<Protocol,DBAdapter>("CMSREM", {
+			"cmsrem",	"CMSREM",
+			"cmsdecr",	"CMSDECR",
+			"cmsdecrby",	"CMSDECRBY"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -319,25 +309,15 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cmsrem",	"CMSREM",
-			"cmsdecr",	"CMSDECR",
-			"cmsdecrby",	"CMSDECRBY"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
+		CMSADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSADDCOUNT", {
+			"cmsaddcount",	"CMSADDCOUNT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -347,23 +327,15 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cmsaddcount",	"CMSADDCOUNT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSREMCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		}
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		}
+		CMSREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSREMCOUNT", {
+			"cmsremcount",	"CMSREMCOUNT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -373,23 +345,15 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cmsremcount",	"CMSREMCOUNT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		CMSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CMSRESERVE", {
+			"cmsreserve",	"CMSRESERVE"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -422,7 +386,7 @@ namespace net::worker::commands::CMS{
 			return type_dispatch(t, f);
 		}
 
-	private:
+	
 		template<typename T>
 		void process_(std::string_view key, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cms_impl_;
@@ -437,23 +401,15 @@ namespace net::worker::commands::CMS{
 			return result.set_1();
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cmsreserve",	"CMSRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		CMSCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSCOUNT", {
+			"cmscount",	"CMSCOUNT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -488,7 +444,7 @@ namespace net::worker::commands::CMS{
 			return type_dispatch(t, f);
 		}
 
-	private:
+	
 		template<typename T>
 		void process_(std::string_view key, std::string_view item, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cms_impl_;
@@ -503,23 +459,15 @@ namespace net::worker::commands::CMS{
 			return result.set( count );
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cmscount",	"CMSCOUNT"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSMCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		CMSMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSMCOUNT", {
+			"cmsmcount",	"CMSMCOUNT"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -552,7 +500,7 @@ namespace net::worker::commands::CMS{
 			return type_dispatch(t, f);
 		}
 
-	private:
+	
 		template<typename T>
 		void process_(std::string_view key, ParamContainer const &p, cms_impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			using namespace cms_impl_;
@@ -587,14 +535,10 @@ namespace net::worker::commands::CMS{
 			return result.set_container(container);
 		}
 
-	private:
+	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"cmsmcount",	"CMSMCOUNT"
-		};
 	};
 
 

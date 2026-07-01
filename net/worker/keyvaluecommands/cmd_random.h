@@ -6,13 +6,9 @@ namespace net::worker::commands::Random{
 
 	template<class Protocol, class DBAdapter>
 	struct RANDOM : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		RANDOM() : BaseCommandRO<Protocol,DBAdapter>("RANDOM", {
+				"random",	"RANDOM",	"rand",	"RAND"
+		}){}
 
 		// RANDOM / RANDOM 0
 
@@ -30,23 +26,15 @@ namespace net::worker::commands::Random{
 			return result.set(r);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[] = {
-				"random",	"RANDOM",	"rand",	"RAND"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MRANDOM : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		MRANDOM() : BaseCommandRO<Protocol,DBAdapter>("MRANDOM", {
+				"mrandom",	"MRANDOM",	"mrand",	"MRAND"
+		}){}
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 2)
@@ -72,10 +60,6 @@ namespace net::worker::commands::Random{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[] = {
-				"mrandom",	"MRANDOM",	"mrand",	"MRAND"
-		};
 	};
 
 

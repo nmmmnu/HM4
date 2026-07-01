@@ -146,13 +146,9 @@ namespace net::worker::commands::HH{
 
 	template<class Protocol, class DBAdapter>
 	struct HHINCR : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HHINCR() : BaseCommandRW<Protocol,DBAdapter>("HHINCR", {
+			"hhincr",	"HHINCR"
+		}){}
 
 		// HHADD key slots bytes item score item score
 
@@ -162,23 +158,15 @@ namespace net::worker::commands::HH{
 			return do_hh_incr_decr(p, db, result, std::true_type{});
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hhincr",	"HHINCR"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HHDECR : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HHDECR() : BaseCommandRW<Protocol,DBAdapter>("HHDECR", {
+			"hhdecr",	"HHDECR"
+		}){}
 
 		// HHADD key slots bytes item score item score
 
@@ -188,23 +176,15 @@ namespace net::worker::commands::HH{
 			return do_hh_incr_decr(p, db, result, std::false_type{});
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hhdecr",	"HHDECR"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HHRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HHRESERVE() : BaseCommandRW<Protocol,DBAdapter>("HHRESERVE", {
+			"hhreserve",	"HHRESERVE"
+		}){}
 
 		// HHRESERVE key slots bytes
 
@@ -245,23 +225,15 @@ namespace net::worker::commands::HH{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hhreserve",	"HHRESERVE"
-		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HHGET : BaseCommandRO<Protocol,DBAdapter>{
-		const std::string_view *begin() const final{
-			return std::begin(cmd);
-		};
-
-		const std::string_view *end()   const final{
-			return std::end(cmd);
-		};
+		HHGET() : BaseCommandRO<Protocol,DBAdapter>("HHGET", {
+			"hhget",	"HHGET"
+		}){}
 
 		// HHGET key slots bytes
 
@@ -302,7 +274,7 @@ namespace net::worker::commands::HH{
 			return type_dispatch(bytes, f);
 		}
 
-	private:
+	
 		template<class MyRawHeavyHitter>
 		void process_(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
@@ -330,10 +302,6 @@ namespace net::worker::commands::HH{
 			return result.set_container(container);
 		}
 
-	private:
-		constexpr inline static std::string_view cmd[]	= {
-			"hhget",	"HHGET"
-		};
 	};
 
 
