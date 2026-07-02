@@ -345,7 +345,7 @@ namespace net::worker::commands{
 		using BasePtr		= std::unique_ptr<BaseObject>;
 		using Storage		= StaticVector<BasePtr, MaxCommands>;
 
-		constexpr static bool RegisterDebugPrint = true;
+		constexpr static bool RegisterDebugPrint = false;
 
 		#ifndef USE_GPERF
 
@@ -382,7 +382,6 @@ namespace net::worker::commands{
 
 			auto &x = storage_.back();
 
-			// will trigger only if commands are more than HashtableSize.
 			debugPrint(*x);
 
 			#ifndef USE_GPERF
