@@ -1,0 +1,11 @@
+bfadd,		"BFADD"
+BFADD,		"BFADD"
+# ---
+bfreserve,	"BFRESERVE"
+BFRESERVE,	"BFRESERVE"
+# ---
+bfexists,	"BFEXISTS"
+BFEXISTS,	"BFEXISTS"
+# ---
+bfmexists,	"BFMEXISTS"
+BFMEXISTS,	"BFMEXISTS"

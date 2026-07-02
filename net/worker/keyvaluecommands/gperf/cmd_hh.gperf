@@ -1,0 +1,11 @@
+hhincr,		"HHINCR"
+HHINCR,		"HHINCR"
+# ---
+hhdecr,		"HHDECR"
+HHDECR,		"HHDECR"
+# ---
+hhreserve,	"HHRESERVE"
+HHRESERVE,	"HHRESERVE"
+# ---
+hhget,		"HHGET"
+HHGET,		"HHGET"

@@ -1,0 +1,14 @@
+getset,		"GETSET"
+GETSET,		"GETSET"
+# ---
+getdel,		"GETDEL"
+GETDEL,		"GETDEL"
+# ---
+getex,		"GETEX"
+GETEX,		"GETEX"
+# ---
+getexat,	"GETEXAT"
+GETEXAT,	"GETEXAT"
+# ---
+getpersist,	"GETPERSIST"
+GETPERSIST,	"GETPERSIST"

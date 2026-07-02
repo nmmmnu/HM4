@@ -416,3 +416,5 @@ Changelog
 -	update to new version of "MyHashtable" with Swisstable-like TopHash
 -	prevent "MyHashtable" to use dynamic memory allocations in SLMGET and ISAM module.
 -	Refactor of BaseCommand - add getName(), devirtualize begin(), end(), mut(). AI assisted update of all existing commands.
+-	Implement perfect hashing on commands. Fix few incorrect command aliases.
+

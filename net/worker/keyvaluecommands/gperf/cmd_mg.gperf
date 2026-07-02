@@ -1,0 +1,14 @@
+mgadd,		"MGADD"
+MGADD,		"MGADD"
+# ---
+mgincr,		"MGADD"
+MGINCR,		"MGADD"
+# ---
+mgaddget,	"MGADDGET"
+MGADDGET,	"MGADDGET"
+# ---
+mgreserve,	"MGRESERVE"
+MGRESERVE,	"MGRESERVE"
+# ---
+mgget,		"MGGET"
+MGGET,		"MGGET"

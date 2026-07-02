@@ -1,0 +1,15 @@
+rename,		"RENAME"
+RENAME,		"RENAME"
+move,		"RENAME"
+MOVE,		"RENAME"
+# ---
+renamenx,	"RENAMENX"
+RENAMENX,	"RENAMENX"
+movenx,		"RENAMENX"
+MOVENX,		"RENAMENX"
+# ---
+copy,		"COPY"
+COPY,		"COPY"
+# ---
+copynx,		"COPYNX"
+COPYNX,		"COPYNX"

@@ -1,0 +1,38 @@
+%{
+
+/*
+cat	\
+	net/worker/keyvaluecommands/gperf/head.gperf		\
+	net/worker/keyvaluecommands/gperf/cmd_*.gperf		\
+	net/worker/keyvaluecommands/gperf/foot.gperf		| \
+	grep -v '^$'						| \
+	gperf --multiple-iterations=100 > net/worker/keyvaluecommands/gperf.h
+
+seems multiple-iterations=100 have same result as 1024
+*/
+
+#include <string_view>
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
+namespace net::worker::commands::gperf{
+
+%}
+
+struct data{
+	const char	*name;
+	const char	*group;
+	void		*ptr;
+};
+
+%struct-type
+%global-table
+%enum
+%language=C++
+%define class-name CommandPerfectHash
+%compare-strncmp
+
+%%

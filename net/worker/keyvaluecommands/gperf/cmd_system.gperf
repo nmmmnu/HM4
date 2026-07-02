@@ -1,0 +1,8 @@
+exit,		"EXIT"
+EXIT,		"EXIT"
+# ---
+quit,		"EXIT"
+QUIT,		"EXIT"
+# ---
+shutdown,	"SHUTDOWN"
+SHUTDOWN,	"SHUTDOWN"

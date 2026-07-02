@@ -47,7 +47,7 @@ namespace net::worker::commands::Compat{
 
 	template<class Protocol, class DBAdapter>
 	struct RESET : compat_impl_::OK<Protocol,DBAdapter>{
-		RESET() : compat_impl_::OK<Protocol,DBAdapter>("SELECT",  {
+		RESET() : compat_impl_::OK<Protocol,DBAdapter>("RESET",  {
 				"reset",	"RESET"
 		}){}
 	};

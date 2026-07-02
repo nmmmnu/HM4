@@ -1,0 +1,11 @@
+listmaintainance,	"LISTMAINTAINANCE"
+LISTMAINTAINANCE,	"LISTMAINTAINANCE"
+# ---
+save,			"SAVE"
+SAVE,			"SAVE"
+# ---
+bgsave,			"SAVE"
+BGSAVE,			"SAVE"
+# ---
+reload,			"RELOAD"
+RELOAD,			"RELOAD"

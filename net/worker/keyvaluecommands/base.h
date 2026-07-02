@@ -1,6 +1,8 @@
 #ifndef _KEY_VALUE_COMMANDS_BASE_H
 #define _KEY_VALUE_COMMANDS_BASE_H
 
+#define USE_GPERF
+
 #include "myspan.h"
 #include "iobuffer.h"
 #include "../workerdefs.h"
@@ -12,11 +14,17 @@
 
 #include <memory>
 
-#include "hashtable/easymap.h"
-#include "hashtable/compactstorage.h"
+#ifndef USE_GPERF
+	#include "hashtable/easymap.h"
+	#include "hashtable/compactstorage.h"
+#else
+	#include "gperf.h"
+#endif
 
 #include "mmapbuffer.h"
 #include "arenaallocator.h"
+
+
 
 namespace net::worker::commands{
 
@@ -289,11 +297,11 @@ namespace net::worker::commands{
 			return name_;
 		}
 
-		constexpr const std::string_view *begin() const{
+		constexpr auto begin() const{
 			return std::begin(cmd_);
 		}
 
-		constexpr const std::string_view *end() const{
+		constexpr auto end() const{
 			// no need to be fast
 			// size guaranteed to be at least 1
 
@@ -308,7 +316,7 @@ namespace net::worker::commands{
 
 	private:
 		std::string_view	name_;
-		CommandAliasesContainer		cmd_;
+		CommandAliasesContainer	cmd_;
 		bool			mut_;
 
 	private:
@@ -337,12 +345,14 @@ namespace net::worker::commands{
 		using BasePtr		= std::unique_ptr<BaseObject>;
 		using Storage		= StaticVector<BasePtr, MaxCommands>;
 
-		// template<typename T, size_t MaxItems, size_t Size>
-		// using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
+		constexpr static bool RegisterDebugPrint = true;
+
+		#ifndef USE_GPERF
+
+		template<typename T, size_t MaxItems, size_t Size>
+		using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
 		using Map		= myhashtable::EasyMap<std::string_view, BaseObject *, MaxCommandsAliases, HashtableSize>;
-
-		constexpr static bool RegisterDebugPrint = true;
 
 		BaseObject *operator()(std::string_view key){
 			BaseObject **command = map_.find(key);
@@ -353,6 +363,19 @@ namespace net::worker::commands{
 			return *command;
 		}
 
+		#else
+
+		BaseObject *operator()(std::string_view key){
+			const auto *row = gperf::CommandPerfectHash::in_word_set(key.data(), key.size());
+
+			if (!row)
+				return nullptr;
+
+			return static_cast<BaseObject *>(row->ptr);
+		}
+
+		#endif
+
 		template<typename Object>
 		void push(){
 			storage_.push_back( std::make_unique<Object>() );
@@ -362,28 +385,65 @@ namespace net::worker::commands{
 			// will trigger only if commands are more than HashtableSize.
 			debugPrint(*x);
 
-			for(auto const &key : *x){
-				if (map_.find(key)){
-					logger<Logger::FATAL>() << "Duplicate command" << key << "Please report a bug!";
+			#ifndef USE_GPERF
+
+				for(auto const &key : *x){
+					if (map_.find(key)){
+						logger<Logger::FATAL>() << "Duplicate command" << key << "Please report a bug!";
+						assert(false);
+					}
+
+					[[maybe_unused]]
+					auto const b = map_.insert(key, x.get());
+
+					assert(b);
+
+					++CommandAliases_;
 				}
 
-				[[maybe_unused]]
-				auto const b = map_.insert(key, x.get());
+			#else
 
-				assert(b);
+				// fill perfect hashtable with pointers
+				for(auto itk = std::begin(*x); itk != std::end(*x); ++itk){
+					size_t found = 0;
 
-				++CommandAliasesContainer_;
-			}
+					for(auto &row : gperf::wordlist)
+						if (		row.name  && row.name  == *itk		&&
+								row.group && row.group == x->getName()	){
+
+							++found;
+							row.ptr	= x.get();
+						}
+
+					++CommandAliases_;
+
+					if (found != 1){
+						logger<Logger::FATAL>() << "Command" << x->getName() << "::" << *itk << "not found in perfect hashtable. Please report a bug!";
+						assert(false);
+					}
+				}
+
+			#endif
 		}
 
 		void infoPrint() const{
 			logger<Logger::NOTICE>() << "Total commands" << storage_.size();
-			logger<Logger::NOTICE>() << "Total CommandAliasesContainer " << CommandAliasesContainer_;
+			logger<Logger::NOTICE>() << "Total CommandAliases " << CommandAliases_;
 
-			if (auto const chain = map_.longestChain(); chain >= 16)
-				logger<Logger::WARNING>() << "Hashtable longest chain " << map_.longestChain() << "(chain too long)";
-			else
-				logger<Logger::NOTICE>()  << "Hashtable longest chain " << map_.longestChain() << "(good)";
+			#ifndef USE_GPERF
+
+				if (auto const chain = map_.longestChain(); chain >= 16)
+					logger<Logger::WARNING>() << "Hashtable longest chain " << map_.longestChain() << "(chain too long)";
+				else
+					logger<Logger::NOTICE>()  << "Hashtable longest chain " << map_.longestChain() << "(good)";
+
+			#else
+
+				auto const size = sizeof(gperf::wordlist) / sizeof(gperf::wordlist[0]);
+
+				logger<Logger::NOTICE>()  << "Using perfect hashtable with size " << size;
+
+			#endif
 		}
 
 	private:
@@ -397,9 +457,12 @@ namespace net::worker::commands{
 
 	private:
 		Storage	storage_	;
-		Map	map_		;
 
-		size_t	CommandAliasesContainer_		= 0;
+		#ifndef USE_GPERF
+		Map	map_		;
+		#endif
+
+		size_t	CommandAliases_	= 0;
 	};
 
 

@@ -1,0 +1,14 @@
+select,		"SELECT"
+SELECT,		"SELECT"
+# ---
+reset,		"RESET"
+RESET,		"RESET"
+# ---
+type,		"TYPE"
+TYPE,		"TYPE"
+# ---
+touch,		"TOUCH"
+TOUCH,		"TOUCH"
+# ---
+command,	"COMMAND"
+COMMAND,	"COMMAND"

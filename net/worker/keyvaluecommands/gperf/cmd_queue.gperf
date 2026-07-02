@@ -1,0 +1,4 @@
+sadd,	"SADD"
+SADD,	"SADD"
+spop,	"SPOP"
+SPOP,	"SPOP"

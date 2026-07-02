@@ -197,5 +197,13 @@ clean:
 		$(O)*.d		\
 		$(EXTRA_CLEAN)
 
-.PHONY: all clean
+.PHONY: all clean gperf
+
+gperf:
+	cat	\
+		net/worker/keyvaluecommands/gperf/head.gperf		\
+		net/worker/keyvaluecommands/gperf/cmd_*.gperf		\
+		net/worker/keyvaluecommands/gperf/foot.gperf		| \
+		grep -v '^$$'						| \
+		gperf --multiple-iterations=100 > net/worker/keyvaluecommands/gperf.h
 

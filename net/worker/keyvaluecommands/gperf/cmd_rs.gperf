@@ -1,0 +1,11 @@
+rsadd,		"RSADD"
+RSADD,		"RSADD"
+# ---
+rsreserve,	"RSRESERVE"
+RSRESERVE,	"RSRESERVE"
+# ---
+rsget,		"RSGET"
+RSGET,		"RSGET"
+# ---
+rsgetcount,	"RSGETCOUNT"
+RSGETCOUNT,	"RSGETCOUNT"
