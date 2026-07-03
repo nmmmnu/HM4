@@ -38,7 +38,7 @@ AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::AsyncCompletionLoop(
 template<class IOEngine, class Worker, class SparePool, class Storage>
 void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::print() const{
 	auto _ = [](auto k, auto v){
-		logger_fmt<Logger::STARTUP>("{:20} = {:12}", k, v);
+		logger_fmt<Logger::STARTUP>("{:25} = {:12}", k, v);
 	};
 
 	_("rlimit nofile"	, conf_rlimitNoFile_		);

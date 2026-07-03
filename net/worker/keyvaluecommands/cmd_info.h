@@ -9,9 +9,8 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct INFO : BaseCommandRO<Protocol,DBAdapter>{
-		
-		INFO() : BaseCommandRO<Protocol,DBAdapter>("INFO", std::begin(cmd__), std::end(cmd__)){}
 
+		INFO() : BaseCommandRO<Protocol,DBAdapter>("INFO", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			std::array<char, 2048> buffer;
@@ -32,9 +31,8 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct DBSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		
-		DBSIZE() : BaseCommandRO<Protocol,DBAdapter>("DBSIZE", std::begin(cmd__), std::end(cmd__)){}
 
+		DBSIZE() : BaseCommandRO<Protocol,DBAdapter>("DBSIZE", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
@@ -53,9 +51,8 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct DBSIZEMUTABLE : BaseCommandRW<Protocol,DBAdapter>{
-		
-		DBSIZEMUTABLE() : BaseCommandRW<Protocol,DBAdapter>("DBSIZEMUTABLE", std::begin(cmd__), std::end(cmd__)){}
 
+		DBSIZEMUTABLE() : BaseCommandRW<Protocol,DBAdapter>("DBSIZEMUTABLE", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
@@ -73,9 +70,8 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct VERSION : BaseCommandRO<Protocol,DBAdapter>{
-		
-		VERSION() : BaseCommandRO<Protocol,DBAdapter>("VERSION", std::begin(cmd__), std::end(cmd__)){}
 
+		VERSION() : BaseCommandRO<Protocol,DBAdapter>("VERSION", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
@@ -94,7 +90,7 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct MAXKEYSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MAXKEYSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXKEYSIZE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -113,7 +109,7 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct MAXVALSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MAXVALSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXVALSIZE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -132,7 +128,7 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct PING : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		PING() : BaseCommandRO<Protocol,DBAdapter>("PING", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -151,7 +147,7 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct ECHO : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		ECHO() : BaseCommandRO<Protocol,DBAdapter>("ECHO", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -178,7 +174,7 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct REM : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		REM() : BaseCommandRO<Protocol,DBAdapter>("REM", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -198,7 +194,7 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct TIME : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TIME() : BaseCommandRO<Protocol,DBAdapter>("TIME", std::begin(cmd__), std::end(cmd__)){}
 
 

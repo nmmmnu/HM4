@@ -43,7 +43,7 @@ AsyncLoop<Selector, Worker, SparePool, Storage>::AsyncLoop(
 template<class Selector, class Worker, class SparePool, class Storage>
 void AsyncLoop<Selector, Worker, SparePool, Storage>::print() const{
 	auto _ = [](auto k, auto v){
-		logger_fmt<Logger::STARTUP>("{:20} = {:12}", k, v);
+		logger_fmt<Logger::STARTUP>("{:25} = {:12}", k, v);
 	};
 
 	_("rlimit nofile"	, conf_rlimitNoFile_		);

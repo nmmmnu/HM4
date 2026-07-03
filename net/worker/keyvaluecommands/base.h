@@ -413,8 +413,13 @@ namespace net::worker::commands{
 
 					++CommandAliases_;
 
-					if (found != 1){
+					if (found == 0){
 						logger<Logger::FATAL>() << "Command" << x->getName() << "::" << *itk << "not found in perfect hashtable. Please report a bug!";
+						assert(false);
+					}
+
+					if (found > 1){
+						logger<Logger::FATAL>() << "Duplicate Command" << x->getName() << "::" << *itk << "Please report a bug!";
 						assert(false);
 					}
 				}
@@ -423,21 +428,25 @@ namespace net::worker::commands{
 		}
 
 		void infoPrint() const{
-			logger<Logger::NOTICE>() << "Total commands" << storage_.size();
-			logger<Logger::NOTICE>() << "Total CommandAliases " << CommandAliases_;
+			const char *mask  = "{:25} = {:12}";
+
+			logger_fmt<Logger::STARTUP>(mask, "Total commands",		storage_.size());
+			logger_fmt<Logger::STARTUP>(mask, "Total CommandAliases",	CommandAliases_);
 
 			#ifndef USE_GPERF
 
-				if (auto const chain = map_.longestChain(); chain >= 16)
-					logger<Logger::WARNING>() << "Hashtable longest chain " << map_.longestChain() << "(chain too long)";
+				const char *mask2 = "{:25} = {:12} ({})";
+
+				if (auto const chain = map_.longestChain(); chain > 16)
+					logger_fmt<Logger::STARTUP>(mask2, "Hashtable longest chain",	map_.longestChain(), "(chain too long)");
 				else
-					logger<Logger::NOTICE>()  << "Hashtable longest chain " << map_.longestChain() << "(good)";
+					logger_fmt<Logger::STARTUP>(mask2, "Hashtable longest chain",	map_.longestChain(), "(good)");
 
 			#else
 
 				auto const size = sizeof(gperf::wordlist) / sizeof(gperf::wordlist[0]);
 
-				logger<Logger::NOTICE>()  << "Using perfect hashtable with size " << size;
+				logger_fmt<Logger::STARTUP>(mask, "Perfect hashtable size",	size);
 
 			#endif
 		}
