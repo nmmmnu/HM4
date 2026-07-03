@@ -127,9 +127,9 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		SSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("SSRESERVE", {
-			"ssreserve",	"SSRESERVE"
-		}){}
+		
+		SSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("SSRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2)
@@ -145,15 +145,20 @@ namespace net::worker::commands::SummaryStats{
 			return result.set_1();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssreserve",	"SSRESERVE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADD : BaseCommandRW<Protocol,DBAdapter>{
-		SSADD() : BaseCommandRW<Protocol,DBAdapter>("SSADD", {
-			"ssadd",		"SSADD"
-		}){}
+		
+		SSADD() : BaseCommandRW<Protocol,DBAdapter>("SSADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssadd key value value value...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -206,15 +211,20 @@ namespace net::worker::commands::SummaryStats{
 			It	end;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssadd",		"SSADD"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSMERGE : BaseCommandRW<Protocol,DBAdapter>{
-		SSMERGE() : BaseCommandRW<Protocol,DBAdapter>("SSMERGE", {
-			"ssmerge",		"SSMERGE"
-		}){}
+		
+		SSMERGE() : BaseCommandRW<Protocol,DBAdapter>("SSMERGE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssmerge key key_to_merge key_to_merge key_to_merge...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -277,15 +287,20 @@ namespace net::worker::commands::SummaryStats{
 			It	end;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssmerge",		"SSMERGE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		SSGETALL() : BaseCommandRO<Protocol,DBAdapter>("SSGETALL", {
-			"ssgetall",		"SSGETALL"
-		}){}
+		
+		SSGETALL() : BaseCommandRO<Protocol,DBAdapter>("SSGETALL", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssgetall key key key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -351,15 +366,20 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssgetall",		"SSGETALL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSGET : BaseCommandRO<Protocol,DBAdapter>{
-		SSGET() : BaseCommandRO<Protocol,DBAdapter>("SSGET", {
-			"ssget",		"SSGET"
-		}){}
+		
+		SSGET() : BaseCommandRO<Protocol,DBAdapter>("SSGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssgetall key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -392,15 +412,20 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssget",		"SSGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSMGET : BaseCommandRO<Protocol,DBAdapter>{
-		SSMGET() : BaseCommandRO<Protocol,DBAdapter>("SSMGET", {
-			"ssmget",		"SSMGET"
-		}){}
+		
+		SSMGET() : BaseCommandRO<Protocol,DBAdapter>("SSMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssmget key subkey subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -441,15 +466,20 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssmget",		"SSMGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDGETALL : BaseCommandRW<Protocol,DBAdapter>{
-		SSADDGETALL() : BaseCommandRW<Protocol,DBAdapter>("SSADDGETALL", {
-			"ssaddgetall",		"SSADDGETALL"
-		}){}
+		
+		SSADDGETALL() : BaseCommandRW<Protocol,DBAdapter>("SSADDGETALL", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssaddgetall key value value value...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -516,15 +546,20 @@ namespace net::worker::commands::SummaryStats{
 			OutputBlob::BufferContainer	bcontainer;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssaddgetall",		"SSADDGETALL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDGET : BaseCommandRW<Protocol,DBAdapter>{
-		SSADDGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDGET", {
-			"ssaddget",		"SSADDGET"
-		}){}
+		
+		SSADDGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssaddget key value sub
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -592,15 +627,20 @@ namespace net::worker::commands::SummaryStats{
 			OutputBlob::buffer_t	buffer;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssaddget",		"SSADDGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDMGET : BaseCommandRW<Protocol,DBAdapter>{
-		SSADDMGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDMGET", {
-			"ssaddmget",		"SSADDMGET"
-		}){}
+		
+		SSADDMGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// ssaddget key value sub sub sub...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -672,6 +712,11 @@ namespace net::worker::commands::SummaryStats{
 
 			OutputBlob::Container		container;
 			OutputBlob::BufferContainer	bcontainer;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ssaddmget",		"SSADDMGET"
 		};
 
 	};

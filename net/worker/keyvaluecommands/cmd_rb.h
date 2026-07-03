@@ -42,9 +42,9 @@ namespace net::worker::commands::RB{
 
 	template<class Protocol, class DBAdapter>
 	struct RBRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		RBRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RBRESERVE", {
-			"rbreserve",	"RBRESERVE"
-		}){}
+		
+		RBRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RBRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RBRESERVE key slots bytes
 
@@ -85,16 +85,20 @@ namespace net::worker::commands::RB{
 			return type_dispatch(bytes, f);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rbreserve",	"RBRESERVE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RBADD : BaseCommandRW<Protocol,DBAdapter>{
-		RBADD() : BaseCommandRW<Protocol,DBAdapter>("RBADD", {
-			"rbadd",	"RBADD"	,
-			"rbpush",	"RBpUSH"
-		}){}
+		
+		RBADD() : BaseCommandRW<Protocol,DBAdapter>("RBADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RBADD key slots bytes item item
 
@@ -184,15 +188,21 @@ namespace net::worker::commands::RB{
 			It		end;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rbadd",	"RBADD"	,
+			"rbpush",	"RBpUSH"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RBPOP : BaseCommandRW<Protocol,DBAdapter>{
-		RBPOP() : BaseCommandRW<Protocol,DBAdapter>("RBPOP", {
-			"rbpop",	"RBPOP"
-		}){}
+		
+		RBPOP() : BaseCommandRW<Protocol,DBAdapter>("RBPOP", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RBPOP key slots bytes
 
@@ -276,15 +286,20 @@ namespace net::worker::commands::RB{
 			std::string_view	result;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rbpop",	"RBPOP"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RBGET : BaseCommandRO<Protocol,DBAdapter>{
-		RBGET() : BaseCommandRO<Protocol,DBAdapter>("RBGET", {
-			"rbget",	"RBGET"
-		}){}
+		
+		RBGET() : BaseCommandRO<Protocol,DBAdapter>("RBGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RBGET key slots bytes
 
@@ -346,16 +361,20 @@ namespace net::worker::commands::RB{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rbget",	"RBGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RBCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		RBCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RBCOUNT", {
-			"rbcount",	"RBCOUNT",
-			"rblen",	"RBLEN"
-		}){}
+		
+		RBCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RBCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RBGETCOUNT key slots bytes
 
@@ -408,6 +427,12 @@ namespace net::worker::commands::RB{
 
 			return result.set(rb.count(*rb_data));
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rbcount",	"RBCOUNT",
+			"rblen",	"RBLEN"
+		};
 
 	};
 

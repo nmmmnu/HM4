@@ -318,9 +318,9 @@ namespace net::worker::commands::MortonCurve3D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC3GET : BaseCommandRO<Protocol,DBAdapter>{
-		MC3GET() : BaseCommandRO<Protocol,DBAdapter>("MC3GET", {
-			"mc3get",	"MC3GET"
-		}){}
+		
+		MC3GET() : BaseCommandRO<Protocol,DBAdapter>("MC3GET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC3GET key subkey
 
@@ -344,15 +344,20 @@ namespace net::worker::commands::MortonCurve3D{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3get",	"MC3GET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3MGET : BaseCommandRO<Protocol,DBAdapter>{
-		MC3MGET() : BaseCommandRO<Protocol,DBAdapter>("MC3MGET", {
-			"mc3mget",	"MC3MGET"
-		}){}
+		
+		MC3MGET() : BaseCommandRO<Protocol,DBAdapter>("MC3MGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC3GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -395,15 +400,20 @@ namespace net::worker::commands::MortonCurve3D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3mget",	"MC3MGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3SCORE : BaseCommandRO<Protocol,DBAdapter>{
-		MC3SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC3SCORE", {
-			"mc3score",	"MC3SCORE"
-		}){}
+		
+		MC3SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC3SCORE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC3SCORE key subkey
 
@@ -450,15 +460,20 @@ namespace net::worker::commands::MortonCurve3D{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3score",	"MC3SCORE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3ADD : BaseCommandRW<Protocol,DBAdapter>{
-		MC3ADD() : BaseCommandRW<Protocol,DBAdapter>("MC3ADD", {
-			"mc3add",		"MC3ADD"
-		}){}
+		
+		MC3ADD() : BaseCommandRW<Protocol,DBAdapter>("MC3ADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC3ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
@@ -517,18 +532,20 @@ namespace net::worker::commands::MortonCurve3D{
 			return result.set();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3add",		"MC3ADD"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3REM : BaseCommandRW<Protocol,DBAdapter>{
-		MC3REM() : BaseCommandRW<Protocol,DBAdapter>("MC3REM", {
-			"mc3rem",		"MC3REM"	,
-			"mc3remove",		"MC3REMOVE"	,
-			"mc3del",		"MC3DEL"
+		
+		MC3REM() : BaseCommandRW<Protocol,DBAdapter>("MC3REM", std::begin(cmd__), std::end(cmd__)){}
 
-		}){}
 
 		// MC3DEL a subkey0 subkey1 ...
 
@@ -541,15 +558,23 @@ namespace net::worker::commands::MortonCurve3D{
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3rem",		"MC3REM"	,
+			"mc3remove",		"MC3REMOVE"	,
+			"mc3del",		"MC3DEL"
+
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3POINT : BaseCommandRO<Protocol,DBAdapter>{
-		MC3POINT() : BaseCommandRO<Protocol,DBAdapter>("MC3POINT", {
-			"mc3point",	"MC3POINT"
-		}){}
+		
+		MC3POINT() : BaseCommandRO<Protocol,DBAdapter>("MC3POINT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC3POINT morton 10 20 30 10000 [key]
 
@@ -597,16 +622,20 @@ namespace net::worker::commands::MortonCurve3D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3point",	"MC3POINT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
-		MC3RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC3RANGENAIVE", {
-			"mc3rangenaive",	"MC3RANGENAIVE"	,
-			"mc3rangeflat",		"MC3RANGEFLAT"
-		}){}
+		
+		MC3RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC3RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC3RANGENAIVE morton 10 10 20 20 30 30 10000 [key]
 
@@ -658,15 +687,21 @@ namespace net::worker::commands::MortonCurve3D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3rangenaive",	"MC3RANGENAIVE"	,
+			"mc3rangeflat",		"MC3RANGEFLAT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		MC3RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC3RANGE", {
-			"mc3range",	"MC3RANGE"
-		}){}
+		
+		MC3RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC3RANGE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2RANGE morton 10 10 20 20 30 30 10000 [key]
 
@@ -717,15 +752,20 @@ namespace net::worker::commands::MortonCurve3D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3range",	"MC3RANGE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3ENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		MC3ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC3ENCODE", {
-			"mc3encode",	"MC3ENCODE"
-		}){}
+		
+		MC3ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC3ENCODE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -748,15 +788,20 @@ namespace net::worker::commands::MortonCurve3D{
 			return result.set(hex);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3encode",	"MC3ENCODE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC3DECODE : BaseCommandRO<Protocol,DBAdapter>{
-		MC3DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC3DECODE", {
-			"mc3decode",	"MC3DECODE"
-		}){}
+		
+		MC3DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC3DECODE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -780,6 +825,11 @@ namespace net::worker::commands::MortonCurve3D{
 
 			return result.set_container(container);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc3decode",	"MC3DECODE"
+		};
 
 	};
 

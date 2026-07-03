@@ -42,9 +42,9 @@ namespace net::worker::commands::RS{
 
 	template<class Protocol, class DBAdapter>
 	struct RSADD : BaseCommandRW<Protocol,DBAdapter>{
-		RSADD() : BaseCommandRW<Protocol,DBAdapter>("RSADD", {
-			"rsadd",	"RSADD"
-		}){}
+		
+		RSADD() : BaseCommandRW<Protocol,DBAdapter>("RSADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RSADD key slots bytes item item
 
@@ -166,15 +166,20 @@ namespace net::worker::commands::RS{
 
 	
 		std::mt19937_64 rand64{ static_cast<uint32_t>(time(nullptr)) };
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rsadd",	"RSADD"
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		RSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RSRESERVE", {
-			"rsreserve",	"RSRESERVE"
-		}){}
+		
+		RSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RSRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RSRESERVE key slots bytes
 
@@ -215,15 +220,20 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rsreserve",	"RSRESERVE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RSGET : BaseCommandRO<Protocol,DBAdapter>{
-		RSGET() : BaseCommandRO<Protocol,DBAdapter>("RSGET", {
-			"rsget",	"RSGET"
-		}){}
+		
+		RSGET() : BaseCommandRO<Protocol,DBAdapter>("RSGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RSGET key slots bytes
 
@@ -283,15 +293,20 @@ namespace net::worker::commands::RS{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rsget",	"RSGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RSGETCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		RSGETCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RSGETCOUNT", {
-			"rsgetcount",	"RSGETCOUNT"
-		}){}
+		
+		RSGETCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RSGETCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// RSGETCOUNT key slots bytes
 
@@ -344,6 +359,11 @@ namespace net::worker::commands::RS{
 
 			return result.set(rs_data->getCount());
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rsgetcount",	"RSGETCOUNT"
+		};
 
 	};
 

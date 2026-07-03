@@ -7,9 +7,9 @@ namespace net::worker::commands::Immutable{
 
 	template<class Protocol, class DBAdapter>
 	struct GET : BaseCommandRO<Protocol,DBAdapter>{
-		GET() : BaseCommandRO<Protocol,DBAdapter>("GET", {
-			"get",	"GET"
-		}){}
+		
+		GET() : BaseCommandRO<Protocol,DBAdapter>("GET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -25,15 +25,20 @@ namespace net::worker::commands::Immutable{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"get",	"GET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MGET : BaseCommandRO<Protocol,DBAdapter>{
-		MGET() : BaseCommandRO<Protocol,DBAdapter>("MGET", {
-			"mget",	"MGET"
-		}){}
+		
+		MGET() : BaseCommandRO<Protocol,DBAdapter>("MGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 2)
@@ -55,14 +60,19 @@ namespace net::worker::commands::Immutable{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mget",	"MGET"
+		};
+
 	};
 
 
 	template<class Protocol, class DBAdapter>
 	struct EXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", {
-			"exists",	"EXISTS"
-		}){}
+		
+		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -78,15 +88,20 @@ namespace net::worker::commands::Immutable{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"exists",	"EXISTS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TTL : BaseCommandRO<Protocol,DBAdapter>{
-		TTL() : BaseCommandRO<Protocol,DBAdapter>("TTL", {
-			"ttl",	"TTL"
-		}){}
+		
+		TTL() : BaseCommandRO<Protocol,DBAdapter>("TTL", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -104,15 +119,20 @@ namespace net::worker::commands::Immutable{
 			return result.set(ttl);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ttl",	"TTL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct EXPIRETIME : BaseCommandRO<Protocol,DBAdapter>{
-		EXPIRETIME() : BaseCommandRO<Protocol,DBAdapter>("EXPIRETIME", {
-			"expiretime",	"EXPIRETIME"
-		}){}
+		
+		EXPIRETIME() : BaseCommandRO<Protocol,DBAdapter>("EXPIRETIME", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -130,15 +150,20 @@ namespace net::worker::commands::Immutable{
 			return result.set(time);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"expiretime",	"EXPIRETIME"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DUMP : BaseCommandRO<Protocol,DBAdapter>{
-		DUMP() : BaseCommandRO<Protocol,DBAdapter>("DUMP", {
-			"dump",	"DUMP"
-		}){}
+		
+		DUMP() : BaseCommandRO<Protocol,DBAdapter>("DUMP", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -161,15 +186,20 @@ namespace net::worker::commands::Immutable{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"dump",	"DUMP"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GETRANGE : BaseCommandRO<Protocol,DBAdapter>{
-		GETRANGE() : BaseCommandRO<Protocol,DBAdapter>("GETRANGE", {
-			"getrange",	"GETRANGE"
-		}){}
+		
+		GETRANGE() : BaseCommandRO<Protocol,DBAdapter>("GETRANGE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
@@ -195,16 +225,20 @@ namespace net::worker::commands::Immutable{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"getrange",	"GETRANGE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct STRLEN : BaseCommandRO<Protocol,DBAdapter>{
-		STRLEN() : BaseCommandRO<Protocol,DBAdapter>("STRLEN", {
-			"strlen",	"STRLEN"	,
-			"size",		"SIZE"
-		}){}
+		
+		STRLEN() : BaseCommandRO<Protocol,DBAdapter>("STRLEN", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -222,15 +256,21 @@ namespace net::worker::commands::Immutable{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"strlen",	"STRLEN"	,
+			"size",		"SIZE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HGET : BaseCommandRO<Protocol,DBAdapter>{
-		HGET() : BaseCommandRO<Protocol,DBAdapter>("HGET", {
-			"hget",	"HGET"
-		}){}
+		
+		HGET() : BaseCommandRO<Protocol,DBAdapter>("HGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -250,15 +290,20 @@ namespace net::worker::commands::Immutable{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hget",	"HGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HMGET : BaseCommandRO<Protocol,DBAdapter>{
-		HMGET() : BaseCommandRO<Protocol,DBAdapter>("HMGET", {
-			"hmget",	"HMGET"
-		}){}
+		
+		HMGET() : BaseCommandRO<Protocol,DBAdapter>("HMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
@@ -294,15 +339,20 @@ namespace net::worker::commands::Immutable{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hmget",	"HMGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HEXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		HEXISTS() : BaseCommandRO<Protocol,DBAdapter>("HEXISTS", {
-			"hexists",	"HEXISTS"
-		}){}
+		
+		HEXISTS() : BaseCommandRO<Protocol,DBAdapter>("HEXISTS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -321,6 +371,11 @@ namespace net::worker::commands::Immutable{
 				hm4::getPairOK(*db, key)
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hexists",	"HEXISTS"
+		};
 
 	};
 

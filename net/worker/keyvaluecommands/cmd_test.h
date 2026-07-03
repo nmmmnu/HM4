@@ -8,13 +8,18 @@ namespace net::worker::commands::Test{
 
 	template<class Protocol, class DBAdapter>
 	struct TEST : BaseCommandRW<Protocol,DBAdapter>{
-		TEST() : BaseCommandRW<Protocol,DBAdapter>("TEST", {
-			"test",	"TEST"
-		}){}
+		
+		TEST() : BaseCommandRW<Protocol,DBAdapter>("TEST", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set();
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"test",	"TEST"
+		};
 
 	};
 

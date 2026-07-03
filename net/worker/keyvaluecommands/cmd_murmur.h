@@ -9,10 +9,9 @@ namespace net::worker::commands::Murmur{
 
 	template<class Protocol, class DBAdapter>
 	struct MURMUR : BaseCommandRO<Protocol,DBAdapter>{
-		MURMUR() : BaseCommandRO<Protocol,DBAdapter>("MURMUR", {
-			"murmur",		"MURMUR",
-			"murmurhash64a",	"MURMURHASH64A"
-		}){}
+		
+		MURMUR() : BaseCommandRO<Protocol,DBAdapter>("MURMUR", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() < 2 || p.size() > 4)
@@ -31,6 +30,12 @@ namespace net::worker::commands::Murmur{
 			else
 				return result.set(hash);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"murmur",		"MURMUR",
+			"murmurhash64a",	"MURMURHASH64A"
+		};
 
 	};
 

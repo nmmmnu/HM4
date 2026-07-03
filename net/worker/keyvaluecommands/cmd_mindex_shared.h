@@ -6,11 +6,9 @@ namespace net::worker::commands::MIndexShared{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMGET : BaseCommandRO<Protocol,DBAdapter>{
-		IXMGET() : BaseCommandRO<Protocol,DBAdapter>("IXMGET", {
-			"ixmget"	,	"IXMGET"	,
-			"ixtget"	,	"IXTGET"	,
-			"ixhget"	,	"IXHGET"
-		}){}
+		
+		IXMGET() : BaseCommandRO<Protocol,DBAdapter>("IXMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXMGET key subkey
 
@@ -18,30 +16,40 @@ namespace net::worker::commands::MIndexShared{
 			return shared::msetmulti::cmdProcessGet(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixmget"	,	"IXMGET"	,
+			"ixtget"	,	"IXTGET"	,
+			"ixhget"	,	"IXHGET"
+		};
+
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct IXMMGET : BaseCommandRO<Protocol,DBAdapter>{
-		IXMMGET() : BaseCommandRO<Protocol,DBAdapter>("IXMMGET", {
-			"ixmmget"	,	"IXMMGET"	,
-			"ixtmget"	,	"IXTMGET"	,
-			"ixhmget"	,	"IXHMGET"
-		}){}
+		
+		IXMMGET() : BaseCommandRO<Protocol,DBAdapter>("IXMMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXMMGET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return shared::msetmulti::cmdProcessMGet(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixmmget"	,	"IXMMGET"	,
+			"ixtmget"	,	"IXTMGET"	,
+			"ixhmget"	,	"IXHMGET"
+		};
+
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct IXMGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
-		IXMGETINDEXES() : BaseCommandRO<Protocol,DBAdapter>("IXMGETINDEXES", {
-			"ixmgetindexes"	,	"IXMGETINDEXES"	,
-			"ixtgetindexes"	,	"IXTGETINDEXES"	,
-			"ixhgetindexes"	,	"IXHGETINDEXES"
-		}){}
+		
+		IXMGETINDEXES() : BaseCommandRO<Protocol,DBAdapter>("IXMGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXMGETINDEXES key subkey
 
@@ -49,11 +57,29 @@ namespace net::worker::commands::MIndexShared{
 			return shared::msetmulti::cmdProcessGetIndexes(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixmgetindexes"	,	"IXMGETINDEXES"	,
+			"ixtgetindexes"	,	"IXTGETINDEXES"	,
+			"ixhgetindexes"	,	"IXHGETINDEXES"
+		};
+
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct IXMREM : BaseCommandRW<Protocol,DBAdapter>{
-		IXMREM() : BaseCommandRW<Protocol,DBAdapter>("IXMREM", {
+		
+		IXMREM() : BaseCommandRW<Protocol,DBAdapter>("IXMREM", std::begin(cmd__), std::end(cmd__)){}
+
+
+		// IXMDEL a subkey0 subkey1 ...
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return shared::msetmulti::cmdProcessRem(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
 			"ixmrem"	,	"IXMREM"	,
 			"ixmremove"	,	"IXMREMOVE"	,
 			"ixmdel"	,	"IXMDEL"	,
@@ -65,13 +91,7 @@ namespace net::worker::commands::MIndexShared{
 			"ixhrem"	,	"IXHREM"	,
 			"ixhremove"	,	"IXHREMOVE"	,
 			"ixhdel"	,	"IXHDEL"
-		}){}
-
-		// IXMDEL a subkey0 subkey1 ...
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return shared::msetmulti::cmdProcessRem(p, db, result, blob);
-		}
+		};
 
 	};
 

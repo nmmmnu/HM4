@@ -9,9 +9,9 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct INFO : BaseCommandRO<Protocol,DBAdapter>{
-		INFO() : BaseCommandRO<Protocol,DBAdapter>("INFO", {
-			"info",	"INFO"
-		}){}
+		
+		INFO() : BaseCommandRO<Protocol,DBAdapter>("INFO", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			std::array<char, 2048> buffer;
@@ -21,15 +21,20 @@ namespace net::worker::commands::Info{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"info",	"INFO"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DBSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		DBSIZE() : BaseCommandRO<Protocol,DBAdapter>("DBSIZE", {
-			"dbsize",	"DBSIZE"
-		}){}
+		
+		DBSIZE() : BaseCommandRO<Protocol,DBAdapter>("DBSIZE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
@@ -37,15 +42,20 @@ namespace net::worker::commands::Info{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"dbsize",	"DBSIZE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DBSIZEMUTABLE : BaseCommandRW<Protocol,DBAdapter>{
-		DBSIZEMUTABLE() : BaseCommandRW<Protocol,DBAdapter>("DBSIZEMUTABLE", {
-			"dbsizemutable",	"DBSIZEMUTABLE"
-		}){}
+		
+		DBSIZEMUTABLE() : BaseCommandRW<Protocol,DBAdapter>("DBSIZEMUTABLE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
@@ -53,14 +63,19 @@ namespace net::worker::commands::Info{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"dbsizemutable",	"DBSIZEMUTABLE"
+		};
+
 	};
 
 
 	template<class Protocol, class DBAdapter>
 	struct VERSION : BaseCommandRO<Protocol,DBAdapter>{
-		VERSION() : BaseCommandRO<Protocol,DBAdapter>("VERSION", {
-			"version",	"VERSION"
-		}){}
+		
+		VERSION() : BaseCommandRO<Protocol,DBAdapter>("VERSION", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
@@ -68,19 +83,29 @@ namespace net::worker::commands::Info{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"version",	"VERSION"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MAXKEYSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		MAXKEYSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXKEYSIZE", {
-			"maxkeysize",	"MAXKEYSIZE"
-		}){}
+		
+		MAXKEYSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXKEYSIZE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(uint64_t{ hm4::PairConf::MAX_KEY_SIZE });
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"maxkeysize",	"MAXKEYSIZE"
+		};
 
 	};
 
@@ -88,13 +113,18 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct MAXVALSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		MAXVALSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXVALSIZE", {
-			"maxvalsize",	"MAXVALSIZE"
-		}){}
+		
+		MAXVALSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXVALSIZE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(uint64_t{ hm4::PairConf::MAX_VAL_SIZE });
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"maxvalsize",	"MAXVALSIZE"
+		};
 
 	};
 
@@ -102,13 +132,18 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct PING : BaseCommandRO<Protocol,DBAdapter>{
-		PING() : BaseCommandRO<Protocol,DBAdapter>("PING", {
-			"ping",	"PING"
-		}){}
+		
+		PING() : BaseCommandRO<Protocol,DBAdapter>("PING", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set_simple_string("pong");
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ping",	"PING"
+		};
 
 	};
 
@@ -116,9 +151,9 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct ECHO : BaseCommandRO<Protocol,DBAdapter>{
-		ECHO() : BaseCommandRO<Protocol,DBAdapter>("ECHO", {
-			"echo",	"ECHO"
-		}){}
+		
+		ECHO() : BaseCommandRO<Protocol,DBAdapter>("ECHO", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -132,20 +167,30 @@ namespace net::worker::commands::Info{
 			return result.set(message);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"echo",	"ECHO"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct REM : BaseCommandRO<Protocol,DBAdapter>{
-		REM() : BaseCommandRO<Protocol,DBAdapter>("REM", {
-			"rem",	"REM",
-			"//",	"#",	";"
-		}){}
+		
+		REM() : BaseCommandRO<Protocol,DBAdapter>("REM", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set();
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rem",	"REM",
+			"//",	"#",	";"
+		};
 
 	};
 
@@ -153,9 +198,9 @@ namespace net::worker::commands::Info{
 
 	template<class Protocol, class DBAdapter>
 	struct TIME : BaseCommandRO<Protocol,DBAdapter>{
-		TIME() : BaseCommandRO<Protocol,DBAdapter>("TIME", {
-			"time",	"TIME"
-		}){}
+		
+		TIME() : BaseCommandRO<Protocol,DBAdapter>("TIME", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			to_string_buffer_t buffer[2];
@@ -167,6 +212,11 @@ namespace net::worker::commands::Info{
 				to_string(time[1], buffer[1])
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"time",	"TIME"
+		};
 
 	};
 

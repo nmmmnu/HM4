@@ -109,10 +109,9 @@ namespace net::worker::commands::TrigramIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXTADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		IXTADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("IXTADD_UTF8", {
-			"ixtadd_utf8"	,	"IXTADD_UTF8"	,
-			"ixtadd"	,	"IXTADD"
-		}){}
+		
+		IXTADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("IXTADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
@@ -125,13 +124,19 @@ namespace net::worker::commands::TrigramIndex{
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixtadd_utf8"	,	"IXTADD_UTF8"	,
+			"ixtadd"	,	"IXTADD"
+		};
+
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct IXTADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		IXTADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("IXTADD_BIN", {
-			"ixtadd_bin"	,	"IXTADD_BIN"
-		}){}
+		
+		IXTADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("IXTADD_BIN", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXTADD_BIN a keySub delimiter "words,words" sort value
 
@@ -144,16 +149,20 @@ namespace net::worker::commands::TrigramIndex{
 			return shared::msetmulti::cmdProcessAdd<MyMDecoder>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixtadd_bin"	,	"IXTADD_BIN"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGEFLEX_UTF8 : BaseCommandRO<Protocol,DBAdapter>{
-		IXTRANGEFLEX_UTF8() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGEFLEX_UTF8", {
-			"ixtrangeflex_utf8"	,	"IXTRANGEFLEX_UTF8"	,
-			"ixtrangeflex"		,	"IXTRANGEFLEX"
-		}){}
+		
+		IXTRANGEFLEX_UTF8() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGEFLEX_UTF8", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXTRANGEFLEX_UTF8 key "words words" count from
 
@@ -167,15 +176,21 @@ namespace net::worker::commands::TrigramIndex{
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixtrangeflex_utf8"	,	"IXTRANGEFLEX_UTF8"	,
+			"ixtrangeflex"		,	"IXTRANGEFLEX"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGEFLEX_BIN : BaseCommandRO<Protocol,DBAdapter>{
-		IXTRANGEFLEX_BIN() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGEFLEX_BIN", {
-			"ixtrangeflex_bin"	,	"IXTRANGEFLEX_BIN"
-		}){}
+		
+		IXTRANGEFLEX_BIN() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGEFLEX_BIN", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXTRANGEFLEX_BIN key delimiter "words words" count from
 
@@ -189,16 +204,20 @@ namespace net::worker::commands::TrigramIndex{
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixtrangeflex_bin"	,	"IXTRANGEFLEX_BIN"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGESTRICT_UTF8 : BaseCommandRO<Protocol,DBAdapter>{
-		IXTRANGESTRICT_UTF8() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGESTRICT_UTF8", {
-			"ixtrangestrict_utf8"	,	"IXTRANGESTRICT_UTF8"	,
-			"ixtrangestrict"	,	"IXTRANGESTRICT"
-		}){}
+		
+		IXTRANGESTRICT_UTF8() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGESTRICT_UTF8", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXTRANGESTRICT_UTF8 key delimiter "words words" count from
 
@@ -212,15 +231,21 @@ namespace net::worker::commands::TrigramIndex{
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixtrangestrict_utf8"	,	"IXTRANGESTRICT_UTF8"	,
+			"ixtrangestrict"	,	"IXTRANGESTRICT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGESTRICT_BIN : BaseCommandRO<Protocol,DBAdapter>{
-		IXTRANGESTRICT_BIN() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGESTRICT_BIN", {
-			"ixtrangestrict_bin"	,	"IXTRANGESTRICT_BIN"
-		}){}
+		
+		IXTRANGESTRICT_BIN() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGESTRICT_BIN", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// IXTRANGESTRICT_BIN key delimiter "words words" count from
 
@@ -233,6 +258,11 @@ namespace net::worker::commands::TrigramIndex{
 
 			return shared::msetmulti::cmdProcessRangeMulti<MyMDecoder, MyFTS>(p, db, result, blob);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixtrangestrict_bin"	,	"IXTRANGESTRICT_BIN"
+		};
 
 	};
 

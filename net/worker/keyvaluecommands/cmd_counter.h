@@ -207,10 +207,9 @@ namespace net::worker::commands::Counter{
 
 	template<class Protocol, class DBAdapter>
 	struct INCR : BaseCommandRW<Protocol,DBAdapter>{
-		INCR() : BaseCommandRW<Protocol,DBAdapter>("INCR", {
-			"incr",		"INCR",
-			"incrby",	"INCRBY"
-		}){}
+		
+		INCR() : BaseCommandRW<Protocol,DBAdapter>("INCR", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
@@ -218,16 +217,21 @@ namespace net::worker::commands::Counter{
 			return do_incr_decr<+1>(params, *db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"incr",		"INCR",
+			"incrby",	"INCRBY"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DECR : BaseCommandRW<Protocol,DBAdapter>{
-		DECR() : BaseCommandRW<Protocol,DBAdapter>("DECR", {
-			"decr",		"DECR",
-			"decrby",	"DECRBY"
-		}){}
+		
+		DECR() : BaseCommandRW<Protocol,DBAdapter>("DECR", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
@@ -235,15 +239,21 @@ namespace net::worker::commands::Counter{
 			return do_incr_decr<-1>(params, *db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"decr",		"DECR",
+			"decrby",	"DECRBY"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct INCRLIMIT : BaseCommandRW<Protocol,DBAdapter>{
-		INCRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("INCRLIMIT", {
-			"incrlimit",	"INCRLIMIT"
-		}){}
+		
+		INCRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("INCRLIMIT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
@@ -251,15 +261,20 @@ namespace net::worker::commands::Counter{
 			return do_incr_decr_limit<+1>(params, *db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"incrlimit",	"INCRLIMIT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DECRLIMIT : BaseCommandRW<Protocol,DBAdapter>{
-		DECRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("DECRLIMIT", {
-			"decrlimit",	"DECRLIMIT"
-		}){}
+		
+		DECRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("DECRLIMIT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
@@ -267,15 +282,20 @@ namespace net::worker::commands::Counter{
 			return do_incr_decr_limit<-1>(params, *db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"decrlimit",	"DECRLIMIT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct INCRTO : BaseCommandRW<Protocol,DBAdapter>{
-		INCRTO() : BaseCommandRW<Protocol,DBAdapter>("INCRTO", {
-			"incrto",	"INCRTO"
-		}){}
+		
+		INCRTO() : BaseCommandRW<Protocol,DBAdapter>("INCRTO", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
@@ -283,21 +303,31 @@ namespace net::worker::commands::Counter{
 			return do_incr_to(params, *db, result, std::greater{});
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"incrto",	"INCRTO"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct DECRTO : BaseCommandRW<Protocol,DBAdapter>{
-		DECRTO() : BaseCommandRW<Protocol,DBAdapter>("DECRTO", {
-			"decrto",	"DECRTO"
-		}){}
+		
+		DECRTO() : BaseCommandRW<Protocol,DBAdapter>("DECRTO", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace counter_impl_;
 
 			return do_incr_to(params, *db, result, std::less{});
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"decrto",	"DECRTO"
+		};
 
 	};
 

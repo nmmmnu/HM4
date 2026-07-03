@@ -61,7 +61,20 @@ namespace net::worker::commands::ExistsShared{
 
 	template<class Protocol, class DBAdapter>
 	struct EXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", {
+		
+		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
+
+
+		// XXXEXISTS key subkey
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace impl_;
+
+			return cmdProcessExists(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
 			"mc1exists"	,	"MC1EXISTS"	,
 			"mc2exists"	,	"MC2EXISTS"	,
 			"mc3exists"	,	"MC3EXISTS"	,
@@ -78,15 +91,7 @@ namespace net::worker::commands::ExistsShared{
 
 			"ixmexists"	,	"IXMEXISTS"	,
 			"ixtexists"	,	"IXTEXISTS"
-		}){}
-
-		// XXXEXISTS key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace impl_;
-
-			return cmdProcessExists(p, db, result, blob);
-		}
+		};
 
 	};
 

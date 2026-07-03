@@ -8,9 +8,9 @@ namespace net::worker::commands::Reload{
 
 	template<class Protocol, class DBAdapter>
 	struct LISTMAINTAINANCE : BaseCommandRO<Protocol,DBAdapter>{
-		LISTMAINTAINANCE() : BaseCommandRO<Protocol,DBAdapter>("LISTMAINTAINANCE", {
-			"listmaintainance",		"LISTMAINTAINANCE"
-		}){}
+		
+		LISTMAINTAINANCE() : BaseCommandRO<Protocol,DBAdapter>("LISTMAINTAINANCE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
@@ -21,14 +21,18 @@ namespace net::worker::commands::Reload{
 			return result.set();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"listmaintainance",		"LISTMAINTAINANCE"
+		};
+
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct SAVE : BaseCommandRO<Protocol,DBAdapter>{
-		SAVE() : BaseCommandRO<Protocol,DBAdapter>("SAVE", {
-			"save",		"SAVE",
-			"bgsave",	"BGSAVE"
-		}){}
+		
+		SAVE() : BaseCommandRO<Protocol,DBAdapter>("SAVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
@@ -39,13 +43,19 @@ namespace net::worker::commands::Reload{
 			return result.set();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"save",		"SAVE",
+			"bgsave",	"BGSAVE"
+		};
+
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct RELOAD : BaseCommandRO<Protocol,DBAdapter>{
-		RELOAD() : BaseCommandRO<Protocol,DBAdapter>("RELOAD", {
-			"reload",	"RELOAD"
-		}){}
+		
+		RELOAD() : BaseCommandRO<Protocol,DBAdapter>("RELOAD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1)
@@ -55,6 +65,11 @@ namespace net::worker::commands::Reload{
 
 			return result.set();
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"reload",	"RELOAD"
+		};
 
 	};
 

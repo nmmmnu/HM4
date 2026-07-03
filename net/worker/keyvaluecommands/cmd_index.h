@@ -71,7 +71,7 @@ namespace net::worker::commands::Index{
 
 	template<int N, class Protocol, class DBAdapter>
 	struct IX_GET : BaseCommandRO<Protocol,DBAdapter>{
-		IX_GET() : BaseCommandRO<Protocol,DBAdapter>(getName__(), getCmd__()){}
+		IX_GET() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXGET key subkey
 
@@ -98,30 +98,30 @@ namespace net::worker::commands::Index{
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
-		constexpr static const char *getName__(){
-			if constexpr(N == 1) return "IX1GET";
-			if constexpr(N == 2) return "IX2GET";
-			if constexpr(N == 3) return "IX3GET";
-			if constexpr(N == 4) return "IX4GET";
-			if constexpr(N == 5) return "IX5GET";
-			if constexpr(N == 6) return "IX6GET";
-		}
+		constexpr inline static std::string_view name__[] = {
+			"IX1GET",
+			"IX2GET",
+			"IX3GET",
+			"IX4GET",
+			"IX5GET",
+			"IX6GET"
+		};
 
-		constexpr static CommandAliasesContainer getCmd__(){
-			if constexpr(N == 1) return { "ix1get", "IX1GET" };
-			if constexpr(N == 2) return { "ix2get", "IX2GET" };
-			if constexpr(N == 3) return { "ix3get", "IX3GET" };
-			if constexpr(N == 4) return { "ix4get", "IX4GET" };
-			if constexpr(N == 5) return { "ix5get", "IX5GET" };
-			if constexpr(N == 6) return { "ix6get", "IX6GET" };
-		}
+		constexpr inline static std::string_view cmd__[][2] = {
+			{ "ix1get", "IX1GET" },
+			{ "ix2get", "IX2GET" },
+			{ "ix3get", "IX3GET" },
+			{ "ix4get", "IX4GET" },
+			{ "ix5get", "IX5GET" },
+			{ "ix6get", "IX6GET" }
+		};
 	};
 
 
 
 	template<int N, class Protocol, class DBAdapter>
 	struct IX_MGET : BaseCommandRO<Protocol,DBAdapter>{
-		IX_MGET() : BaseCommandRO<Protocol,DBAdapter>(getName__(), getCmd__()){}
+		IX_MGET() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXGET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -167,30 +167,30 @@ namespace net::worker::commands::Index{
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
-		constexpr static const char *getName__(){
-			if constexpr(N == 1) return "IX1MGET";
-			if constexpr(N == 2) return "IX2MGET";
-			if constexpr(N == 3) return "IX3MGET";
-			if constexpr(N == 4) return "IX4MGET";
-			if constexpr(N == 5) return "IX5MGET";
-			if constexpr(N == 6) return "IX6MGET";
-		}
+		constexpr inline static std::string_view name__[] = {
+			"IX1MGET",
+			"IX2MGET",
+			"IX3MGET",
+			"IX4MGET",
+			"IX5MGET",
+			"IX6MGET"
+		};
 
-		constexpr static CommandAliasesContainer getCmd__(){
-			if constexpr(N == 1) return { "ix1mget", "IX1MGET" };
-			if constexpr(N == 2) return { "ix2mget", "IX2MGET" };
-			if constexpr(N == 3) return { "ix3mget", "IX3MGET" };
-			if constexpr(N == 4) return { "ix4mget", "IX4MGET" };
-			if constexpr(N == 5) return { "ix5mget", "IX5MGET" };
-			if constexpr(N == 6) return { "ix6mget", "IX6MGET" };
-		}
+		constexpr inline static std::string_view cmd__[][2] = {
+			{ "ix1mget", "IX1MGET" },
+			{ "ix2mget", "IX2MGET" },
+			{ "ix3mget", "IX3MGET" },
+			{ "ix4mget", "IX4MGET" },
+			{ "ix5mget", "IX5MGET" },
+			{ "ix6mget", "IX6MGET" }
+		};
 	};
 
 
 
 	template<int N, class Protocol, class DBAdapter>
 	struct IX_GETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
-		IX_GETINDEXES() : BaseCommandRO<Protocol,DBAdapter>(getName__(), getCmd__()){}
+		IX_GETINDEXES() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXGETIXES key subkey
 
@@ -217,30 +217,30 @@ namespace net::worker::commands::Index{
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
-		constexpr static const char *getName__(){
-			if constexpr(N == 1) return "IX1GETINDEXES";
-			if constexpr(N == 2) return "IX2GETINDEXES";
-			if constexpr(N == 3) return "IX3GETINDEXES";
-			if constexpr(N == 4) return "IX4GETINDEXES";
-			if constexpr(N == 5) return "IX5GETINDEXES";
-			if constexpr(N == 6) return "IX6GETINDEXES";
-		}
+		constexpr inline static std::string_view name__[] = {
+			"IX1GETINDEXES",
+			"IX2GETINDEXES",
+			"IX3GETINDEXES",
+			"IX4GETINDEXES",
+			"IX5GETINDEXES",
+			"IX6GETINDEXES"
+		};
 
-		constexpr static CommandAliasesContainer getCmd__(){
-			if constexpr(N == 1) return { "ix1getindexes", "IX1GETINDEXES" };
-			if constexpr(N == 2) return { "ix2getindexes", "IX2GETINDEXES" };
-			if constexpr(N == 3) return { "ix3getindexes", "IX3GETINDEXES" };
-			if constexpr(N == 4) return { "ix4getindexes", "IX4GETINDEXES" };
-			if constexpr(N == 5) return { "ix5getindexes", "IX5GETINDEXES" };
-			if constexpr(N == 6) return { "ix6getindexes", "IX6GETINDEXES" };
-		}
+		constexpr inline static std::string_view cmd__[][2] = {
+			{ "ix1getindexes", "IX1GETINDEXES" },
+			{ "ix2getindexes", "IX2GETINDEXES" },
+			{ "ix3getindexes", "IX3GETINDEXES" },
+			{ "ix4getindexes", "IX4GETINDEXES" },
+			{ "ix5getindexes", "IX5GETINDEXES" },
+			{ "ix6getindexes", "IX6GETINDEXES" }
+		};
 	};
 
 
 
 	template<int N, class Protocol, class DBAdapter>
 	struct IX_ADD : BaseCommandRW<Protocol,DBAdapter>{
-		IX_ADD() : BaseCommandRW<Protocol,DBAdapter>(getName__(), getCmd__()){}
+		IX_ADD() : BaseCommandRW<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXADD a keySub0 x0 sort0 val0 keySub1 x1 sort1 val1 ...
 
@@ -358,30 +358,30 @@ namespace net::worker::commands::Index{
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
-		constexpr static const char *getName__(){
-			if constexpr(N == 1) return "IX1ADD";
-			if constexpr(N == 2) return "IX2ADD";
-			if constexpr(N == 3) return "IX3ADD";
-			if constexpr(N == 4) return "IX4ADD";
-			if constexpr(N == 5) return "IX5ADD";
-			if constexpr(N == 6) return "IX6ADD";
-		}
+		constexpr inline static std::string_view name__[] = {
+			"IX1ADD",
+			"IX2ADD",
+			"IX3ADD",
+			"IX4ADD",
+			"IX5ADD",
+			"IX6ADD"
+		};
 
-		constexpr static CommandAliasesContainer getCmd__(){
-			if constexpr(N == 1) return { "ix1add", "IX1ADD" };
-			if constexpr(N == 2) return { "ix2add", "IX2ADD" };
-			if constexpr(N == 3) return { "ix3add", "IX3ADD" };
-			if constexpr(N == 4) return { "ix4add", "IX4ADD" };
-			if constexpr(N == 5) return { "ix5add", "IX5ADD" };
-			if constexpr(N == 6) return { "ix6add", "IX6ADD" };
-		}
+		constexpr inline static std::string_view cmd__[][2] = {
+			{ "ix1add", "IX1ADD" },
+			{ "ix2add", "IX2ADD" },
+			{ "ix3add", "IX3ADD" },
+			{ "ix4add", "IX4ADD" },
+			{ "ix5add", "IX5ADD" },
+			{ "ix6add", "IX6ADD" }
+		};
 	};
 
 
 
 	template<int N, class Protocol, class DBAdapter>
 	struct IX_REM : BaseCommandRW<Protocol,DBAdapter>{
-		IX_REM() : BaseCommandRW<Protocol,DBAdapter>(getName__(), getCmd__()){}
+		IX_REM() : BaseCommandRW<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXDEL a subkey0 subkey1 ...
 
@@ -397,30 +397,30 @@ namespace net::worker::commands::Index{
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
-		constexpr static const char *getName__(){
-			if constexpr(N == 1) return "IX1REM";
-			if constexpr(N == 2) return "IX2REM";
-			if constexpr(N == 3) return "IX3REM";
-			if constexpr(N == 4) return "IX4REM";
-			if constexpr(N == 5) return "IX5REM";
-			if constexpr(N == 6) return "IX6REM";
-		}
+		constexpr inline static std::string_view name__[] = {
+			"IX1REM",
+			"IX2REM",
+			"IX3REM",
+			"IX4REM",
+			"IX5REM",
+			"IX6REM"
+		};
 
-		constexpr static CommandAliasesContainer getCmd__(){
-			if constexpr(N == 1) return { "ix1rem", "IX1REM", "ix1remove", "IX1REMOVE", "ix1del", "IX1DEL" };
-			if constexpr(N == 2) return { "ix2rem", "IX2REM", "ix2remove", "IX2REMOVE", "ix2del", "IX2DEL" };
-			if constexpr(N == 3) return { "ix3rem", "IX3REM", "ix3remove", "IX3REMOVE", "ix3del", "IX3DEL" };
-			if constexpr(N == 4) return { "ix4rem", "IX4REM", "ix4remove", "IX4REMOVE", "ix4del", "IX4DEL" };
-			if constexpr(N == 5) return { "ix5rem", "IX5REM", "ix5remove", "IX5REMOVE", "ix5del", "IX5DEL" };
-			if constexpr(N == 6) return { "ix6rem", "IX6REM", "ix6remove", "IX6REMOVE", "ix6del", "IX6DEL" };
-		}
+		constexpr inline static std::string_view cmd__[][6] = {
+			{ "ix1rem", "IX1REM", "ix1remove", "IX1REMOVE", "ix1del", "IX1DEL" },
+			{ "ix2rem", "IX2REM", "ix2remove", "IX2REMOVE", "ix2del", "IX2DEL" },
+			{ "ix3rem", "IX3REM", "ix3remove", "IX3REMOVE", "ix3del", "IX3DEL" },
+			{ "ix4rem", "IX4REM", "ix4remove", "IX4REMOVE", "ix4del", "IX4DEL" },
+			{ "ix5rem", "IX5REM", "ix5remove", "IX5REMOVE", "ix5del", "IX5DEL" },
+			{ "ix6rem", "IX6REM", "ix6remove", "IX6REMOVE", "ix6del", "IX6DEL" }
+		};
 	};
 
 
 
 	template<int N, class Protocol, class DBAdapter>
 	struct IX_RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		IX_RANGE() : BaseCommandRO<Protocol,DBAdapter>(getName__(), getCmd__()){}
+		IX_RANGE() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IX_RANGE key ABC a  b  c  count from
 		// IX_RANGE key ABC a  b  '' count from
@@ -532,23 +532,23 @@ namespace net::worker::commands::Index{
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
-		constexpr static const char *getName__(){
-			if constexpr(N == 1) return "IX1RANGE";
-			if constexpr(N == 2) return "IX2RANGE";
-			if constexpr(N == 3) return "IX3RANGE";
-			if constexpr(N == 4) return "IX4RANGE";
-			if constexpr(N == 5) return "IX5RANGE";
-			if constexpr(N == 6) return "IX6RANGE";
-		}
+		constexpr inline static std::string_view name__[] = {
+			"IX1RANGE",
+			"IX2RANGE",
+			"IX3RANGE",
+			"IX4RANGE",
+			"IX5RANGE",
+			"IX6RANGE"
+		};
 
-		constexpr static CommandAliasesContainer getCmd__(){
-			if constexpr(N == 1) return { "ix1range", "IX1RANGE" };
-			if constexpr(N == 2) return { "ix2range", "IX2RANGE" };
-			if constexpr(N == 3) return { "ix3range", "IX3RANGE" };
-			if constexpr(N == 4) return { "ix4range", "IX4RANGE" };
-			if constexpr(N == 5) return { "ix5range", "IX5RANGE" };
-			if constexpr(N == 6) return { "ix6range", "IX6RANGE" };
-		}
+		constexpr inline static std::string_view cmd__[][2] = {
+			{ "ix1range", "IX1RANGE" },
+			{ "ix2range", "IX2RANGE" },
+			{ "ix3range", "IX3RANGE" },
+			{ "ix4range", "IX4RANGE" },
+			{ "ix5range", "IX5RANGE" },
+			{ "ix6range", "IX6RANGE" }
+		};
 	};
 
 

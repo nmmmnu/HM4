@@ -100,9 +100,9 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		IGETALL() : BaseCommandRO<Protocol,DBAdapter>("IGETALL", {
-			"igetall",		"IGETALL"
-		}){}
+		
+		IGETALL() : BaseCommandRO<Protocol,DBAdapter>("IGETALL", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -111,15 +111,20 @@ namespace net::worker::commands::ISAM_cmd{
 			return IGETALL_process<IGETALLOutput::BOTH>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"igetall",		"IGETALL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IGETKEYS: BaseCommandRO<Protocol,DBAdapter>{
-		IGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("IGETKEYS", {
-			"igetkeys",		"IGETKEYS"
-		}){}
+		
+		IGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("IGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -128,15 +133,20 @@ namespace net::worker::commands::ISAM_cmd{
 			return IGETALL_process<IGETALLOutput::KEYS>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"igetkeys",		"IGETKEYS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IGETVALS: BaseCommandRO<Protocol,DBAdapter>{
-		IGETVALS() : BaseCommandRO<Protocol,DBAdapter>("IGETVALS", {
-			"igetvals",		"IGETVALS"
-		}){}
+		
+		IGETVALS() : BaseCommandRO<Protocol,DBAdapter>("IGETVALS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -145,15 +155,20 @@ namespace net::worker::commands::ISAM_cmd{
 			return IGETALL_process<IGETALLOutput::VALS>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"igetvals",		"IGETVALS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IGET : BaseCommandRO<Protocol,DBAdapter>{
-		IGET() : BaseCommandRO<Protocol,DBAdapter>("IGET", {
-			"iget",		"IGET"
-		}){}
+		
+		IGET() : BaseCommandRO<Protocol,DBAdapter>("IGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// iget schema key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -185,15 +200,20 @@ namespace net::worker::commands::ISAM_cmd{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"iget",		"IGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IMGET : BaseCommandRO<Protocol,DBAdapter>{
-		IMGET() : BaseCommandRO<Protocol,DBAdapter>("IMGET", {
-			"imget",		"IMGET"
-		}){}
+		
+		IMGET() : BaseCommandRO<Protocol,DBAdapter>("IMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// imget schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -275,15 +295,20 @@ namespace net::worker::commands::ISAM_cmd{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"imget",		"IMGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ISETALL : BaseCommandRW<Protocol,DBAdapter>{
-		ISETALL() : BaseCommandRW<Protocol,DBAdapter>("ISETALL", {
-			"isetall",		"ISETALL"
-		}){}
+		
+		ISETALL() : BaseCommandRW<Protocol,DBAdapter>("ISETALL", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// isetall schema key value value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -339,15 +364,20 @@ namespace net::worker::commands::ISAM_cmd{
 			It		it;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"isetall",		"ISETALL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct ISET : BaseCommandRW<Protocol,DBAdapter>{
-		ISET() : BaseCommandRW<Protocol,DBAdapter>("ISET", {
-			"iset",		"ISET"
-		}){}
+		
+		ISET() : BaseCommandRW<Protocol,DBAdapter>("ISET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// iset schema key subkey value subkey value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -462,15 +492,20 @@ namespace net::worker::commands::ISAM_cmd{
 			bool		status		= false;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"iset",		"ISET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IDEL : BaseCommandRW<Protocol,DBAdapter>{
-		IDEL() : BaseCommandRW<Protocol,DBAdapter>("IDEL", {
-			"idel",		"IDEL"
-		}){}
+		
+		IDEL() : BaseCommandRW<Protocol,DBAdapter>("IDEL", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// idel schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -587,15 +622,20 @@ namespace net::worker::commands::ISAM_cmd{
 			bool		status		= false;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"idel",		"IDEL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		IRESERVE() : BaseCommandRW<Protocol,DBAdapter>("IRESERVE", {
-			"ireserve",	"IRESERVE"
-		}){}
+		
+		IRESERVE() : BaseCommandRW<Protocol,DBAdapter>("IRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -613,6 +653,11 @@ namespace net::worker::commands::ISAM_cmd{
 
 			return result.set_1();
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ireserve",	"IRESERVE"
+		};
 
 	};
 

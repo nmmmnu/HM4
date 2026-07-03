@@ -276,11 +276,13 @@ namespace net::worker::commands{
 
 	template<class Protocol, class DBAdapter>
 	struct BaseCommand{
-		BaseCommand(std::string_view name, CommandAliasesContainer const &cmd, bool mut) :
-							name_	{ name	},
-							cmd_	{ cmd	},
-							mut_	{ mut	}{
-			assert(!cmd_[0].empty());
+		BaseCommand(std::string_view name, const std::string_view *cmd_begin, const std::string_view *cmd_end, bool mut) :
+							name_		{ name		},
+							cmd_begin_	{ cmd_begin	},
+							cmd_end_	{ cmd_end	},
+							mut_		{ mut		}{
+
+			assert(std::distance(cmd_begin_, cmd_end_) > 0);
 		}
 
 		virtual ~BaseCommand() = default;
@@ -293,30 +295,22 @@ namespace net::worker::commands{
 			return mut_;
 		}
 
-		constexpr std::string_view getName() const{
+		constexpr auto getName() const{
 			return name_;
 		}
 
 		constexpr auto begin() const{
-			return std::begin(cmd_);
+			return cmd_begin_;
 		}
 
 		constexpr auto end() const{
-			// no need to be fast
-			// size guaranteed to be at least 1
-
-			size_t i = 1;
-
-			for (; i < cmd_.size(); ++i)
-				if (cmd_[i].empty())
-					break;
-
-			return begin() + i;
+			return cmd_end_;
 		}
 
 	private:
 		std::string_view	name_;
-		CommandAliasesContainer	cmd_;
+		const std::string_view	*cmd_begin_;
+		const std::string_view	*cmd_end_;
 		bool			mut_;
 
 	private:
@@ -327,8 +321,8 @@ namespace net::worker::commands{
 
 	template<class Protocol, class DBAdapter, bool B>
 	struct BaseCommandMM : BaseCommand<Protocol,DBAdapter>{
-		BaseCommandMM(std::string_view name, CommandAliasesContainer const &cmd) :
-					BaseCommand<Protocol,DBAdapter>(name, cmd, B){}
+		BaseCommandMM(std::string_view name, const std::string_view *cmd_begin, const std::string_view *cmd_end) :
+					BaseCommand<Protocol,DBAdapter>(name, cmd_begin, cmd_end, B){}
 	};
 
 	template<class Protocol, class DBAdapter>
@@ -406,13 +400,16 @@ namespace net::worker::commands{
 				for(auto itk = std::begin(*x); itk != std::end(*x); ++itk){
 					size_t found = 0;
 
-					for(auto &row : gperf::wordlist)
-						if (		row.name  && row.name  == *itk		&&
-								row.group && row.group == x->getName()	){
+					for(auto &row : gperf::wordlist){
+						if (	row.name  && row.group	&&
+							row.name  == *itk	&&
+							row.group == x->getName()
+								){
 
 							++found;
 							row.ptr	= x.get();
 						}
+					}
 
 					++CommandAliases_;
 

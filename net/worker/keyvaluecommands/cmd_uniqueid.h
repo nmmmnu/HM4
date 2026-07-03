@@ -9,10 +9,9 @@ namespace net::worker::commands::UniqueID{
 
 	template<class Protocol, class DBAdapter>
 	struct UNIQUEID : BaseCommandRO<Protocol,DBAdapter>{
-		UNIQUEID() : BaseCommandRO<Protocol,DBAdapter>("UNIQUEID", {
-			"uniqueid",		"UNIQUEID",
-			"uniqid",		"UNIQID"
-		}){}
+		
+		UNIQUEID() : BaseCommandRO<Protocol,DBAdapter>("UNIQUEID", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 1 && p.size() != 2)
@@ -28,6 +27,12 @@ namespace net::worker::commands::UniqueID{
 
 			return result.set(gen(buffer));
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"uniqueid",		"UNIQUEID",
+			"uniqid",		"UNIQID"
+		};
 
 	};
 

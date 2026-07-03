@@ -275,11 +275,9 @@ namespace net::worker::commands::CMS{
 
 	template<class Protocol, class DBAdapter>
 	struct CMSADD : BaseCommandRW<Protocol,DBAdapter>{
-		CMSADD() : BaseCommandRW<Protocol,DBAdapter>("CMSADD", {
-			"cmsadd",	"CMSADD",
-			"cmsincr",	"CMSINCR",
-			"cmsincrby",	"CMSINCRBY"
-		}){}
+		
+		CMSADD() : BaseCommandRW<Protocol,DBAdapter>("CMSADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -289,17 +287,22 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cmsadd",	"CMSADD",
+			"cmsincr",	"CMSINCR",
+			"cmsincrby",	"CMSINCRBY"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSREM : BaseCommandRW<Protocol,DBAdapter>{
-		CMSREM() : BaseCommandRW<Protocol,DBAdapter>("CMSREM", {
-			"cmsrem",	"CMSREM",
-			"cmsdecr",	"CMSDECR",
-			"cmsdecrby",	"CMSDECRBY"
-		}){}
+		
+		CMSREM() : BaseCommandRW<Protocol,DBAdapter>("CMSREM", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -309,15 +312,22 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cmsrem",	"CMSREM",
+			"cmsdecr",	"CMSDECR",
+			"cmsdecrby",	"CMSDECRBY"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		CMSADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSADDCOUNT", {
-			"cmsaddcount",	"CMSADDCOUNT"
-		}){}
+		
+		CMSADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -327,15 +337,20 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cmsaddcount",	"CMSADDCOUNT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSREMCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		CMSREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSREMCOUNT", {
-			"cmsremcount",	"CMSREMCOUNT"
-		}){}
+		
+		CMSREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSREMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -345,15 +360,20 @@ namespace net::worker::commands::CMS{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cmsremcount",	"CMSREMCOUNT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		CMSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CMSRESERVE", {
-			"cmsreserve",	"CMSRESERVE"
-		}){}
+		
+		CMSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CMSRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -401,15 +421,20 @@ namespace net::worker::commands::CMS{
 			return result.set_1();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cmsreserve",	"CMSRESERVE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		CMSCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSCOUNT", {
-			"cmscount",	"CMSCOUNT"
-		}){}
+		
+		CMSCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -459,15 +484,20 @@ namespace net::worker::commands::CMS{
 			return result.set( count );
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cmscount",	"CMSCOUNT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CMSMCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		CMSMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSMCOUNT", {
-			"cmsmcount",	"CMSMCOUNT"
-		}){}
+		
+		CMSMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cms_impl_;
@@ -538,6 +568,11 @@ namespace net::worker::commands::CMS{
 	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cmsmcount",	"CMSMCOUNT"
+		};
 
 	};
 

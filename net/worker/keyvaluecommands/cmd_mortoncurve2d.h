@@ -309,9 +309,9 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2GET : BaseCommandRO<Protocol,DBAdapter>{
-		MC2GET() : BaseCommandRO<Protocol,DBAdapter>("MC2GET", {
-			"mc2get",	"MC2GET"
-		}){}
+		
+		MC2GET() : BaseCommandRO<Protocol,DBAdapter>("MC2GET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2GET key subkey
 
@@ -335,15 +335,20 @@ namespace net::worker::commands::MortonCurve2D{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2get",	"MC2GET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2MGET : BaseCommandRO<Protocol,DBAdapter>{
-		MC2MGET() : BaseCommandRO<Protocol,DBAdapter>("MC2MGET", {
-			"mc2mget",	"MC2MGET"
-		}){}
+		
+		MC2MGET() : BaseCommandRO<Protocol,DBAdapter>("MC2MGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -386,15 +391,20 @@ namespace net::worker::commands::MortonCurve2D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2mget",	"MC2MGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2SCORE : BaseCommandRO<Protocol,DBAdapter>{
-		MC2SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC2SCORE", {
-			"mc2score",	"MC2SCORE"
-		}){}
+		
+		MC2SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC2SCORE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2SCORE key subkey
 
@@ -439,15 +449,20 @@ namespace net::worker::commands::MortonCurve2D{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2score",	"MC2SCORE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2ADD : BaseCommandRW<Protocol,DBAdapter>{
-		MC2ADD() : BaseCommandRW<Protocol,DBAdapter>("MC2ADD", {
-			"mc2add",		"MC2ADD"
-		}){}
+		
+		MC2ADD() : BaseCommandRW<Protocol,DBAdapter>("MC2ADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2ADD a keySub0 x0 y0 val0 keySub1 x1 y1 val1 ...
 
@@ -504,18 +519,20 @@ namespace net::worker::commands::MortonCurve2D{
 			return result.set();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2add",		"MC2ADD"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2REM : BaseCommandRW<Protocol,DBAdapter>{
-		MC2REM() : BaseCommandRW<Protocol,DBAdapter>("MC2REM", {
-			"mc2rem",		"MC2REM"	,
-			"mc2remove",		"MC2REMOVE"	,
-			"mc2del",		"MC2DEL"
+		
+		MC2REM() : BaseCommandRW<Protocol,DBAdapter>("MC2REM", std::begin(cmd__), std::end(cmd__)){}
 
-		}){}
 
 		// MC2DEL a subkey0 subkey1 ...
 
@@ -528,15 +545,23 @@ namespace net::worker::commands::MortonCurve2D{
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2rem",		"MC2REM"	,
+			"mc2remove",		"MC2REMOVE"	,
+			"mc2del",		"MC2DEL"
+
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2POINT : BaseCommandRO<Protocol,DBAdapter>{
-		MC2POINT() : BaseCommandRO<Protocol,DBAdapter>("MC2POINT", {
-			"mc2point",	"MC2POINT"
-		}){}
+		
+		MC2POINT() : BaseCommandRO<Protocol,DBAdapter>("MC2POINT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2POINT morton 10 20 10000 [key]
 
@@ -583,16 +608,20 @@ namespace net::worker::commands::MortonCurve2D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2point",	"MC2POINT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
-		MC2RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC2RANGENAIVE", {
-			"mc2rangenaive",	"MC2RANGENAIVE" ,
-			"mc2rangeflat",		"MC2RANGEFLAT"
-		}){}
+		
+		MC2RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC2RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2RANGENAIVE morton 10 10 20 20 10000 [key]
 
@@ -642,15 +671,21 @@ namespace net::worker::commands::MortonCurve2D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2rangenaive",	"MC2RANGENAIVE" ,
+			"mc2rangeflat",		"MC2RANGEFLAT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		MC2RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC2RANGE", {
-			"mc2range",	"MC2RANGE"
-		}){}
+		
+		MC2RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC2RANGE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MC2RANGE morton 10 10 20 20 10000 [key]
 
@@ -699,15 +734,20 @@ namespace net::worker::commands::MortonCurve2D{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2range",	"MC2RANGE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2ENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		MC2ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC2ENCODE", {
-			"mc2encode",	"MC2ENCODE"
-		}){}
+		
+		MC2ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC2ENCODE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -729,15 +769,20 @@ namespace net::worker::commands::MortonCurve2D{
 			return result.set(hex);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2encode",	"MC2ENCODE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2DECODE : BaseCommandRO<Protocol,DBAdapter>{
-		MC2DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC2DECODE", {
-			"mc2decode",	"MC2DECODE"
-		}){}
+		
+		MC2DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC2DECODE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace morton_curve_impl_;
@@ -760,6 +805,11 @@ namespace net::worker::commands::MortonCurve2D{
 
 			return result.set_container(container);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mc2decode",	"MC2DECODE"
+		};
 
 	};
 

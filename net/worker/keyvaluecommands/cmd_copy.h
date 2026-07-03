@@ -67,15 +67,20 @@ namespace net::worker::commands::Copy{
 
 	template<class Protocol, class DBAdapter>
 	struct RENAME : BaseCommandRW<Protocol,DBAdapter>{
-		RENAME() : BaseCommandRW<Protocol,DBAdapter>("RENAME", {
-			"rename",	"RENAME"	,
-			"move",		"MOVE"		,
-		}){}
+		
+		RENAME() : BaseCommandRW<Protocol,DBAdapter>("RENAME", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace copy_impl_;
 			return cpmv<CPMVOperation::MV>(p, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"rename",	"RENAME"	,
+			"move",		"MOVE"		,
+		};
 
 	};
 
@@ -83,15 +88,20 @@ namespace net::worker::commands::Copy{
 
 	template<class Protocol, class DBAdapter>
 	struct RENAMENX : BaseCommandRW<Protocol,DBAdapter>{
-		RENAMENX() : BaseCommandRW<Protocol,DBAdapter>("RENAMENX", {
-			"renamenx",	"RENAMENX"	,
-			"movenx",	"MOVENX"
-		}){}
+		
+		RENAMENX() : BaseCommandRW<Protocol,DBAdapter>("RENAMENX", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace copy_impl_;
 			return cpmv<CPMVOperation::MV_NX>(p, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"renamenx",	"RENAMENX"	,
+			"movenx",	"MOVENX"
+		};
 
 	};
 
@@ -99,14 +109,19 @@ namespace net::worker::commands::Copy{
 
 	template<class Protocol, class DBAdapter>
 	struct COPY : BaseCommandRW<Protocol,DBAdapter>{
-		COPY() : BaseCommandRW<Protocol,DBAdapter>("COPY", {
-			"copy",	"COPY"
-		}){}
+		
+		COPY() : BaseCommandRW<Protocol,DBAdapter>("COPY", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace copy_impl_;
 			return cpmv<CPMVOperation::CP>(p, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"copy",	"COPY"
+		};
 
 	};
 
@@ -114,14 +129,19 @@ namespace net::worker::commands::Copy{
 
 	template<class Protocol, class DBAdapter>
 	struct COPYNX : BaseCommandRW<Protocol,DBAdapter>{
-		COPYNX() : BaseCommandRW<Protocol,DBAdapter>("COPYNX", {
-			"copynx",	"COPYNX"
-		}){}
+		
+		COPYNX() : BaseCommandRW<Protocol,DBAdapter>("COPYNX", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace copy_impl_;
 			return cpmv<CPMVOperation::CP_NX>(p, *db, result);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"copynx",	"COPYNX"
+		};
 
 	};
 

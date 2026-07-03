@@ -295,11 +295,9 @@ namespace net::worker::commands::CBF{
 
 	template<class Protocol, class DBAdapter>
 	struct CBFADD : BaseCommandRW<Protocol,DBAdapter>{
-		CBFADD() : BaseCommandRW<Protocol,DBAdapter>("CBFADD", {
-			"cbfadd",	"CBFADD"	,
-			"cbfincr",	"CBFINCR"	,
-			"cbfincrby",	"CBFINCRBY"
-		}){}
+		
+		CBFADD() : BaseCommandRW<Protocol,DBAdapter>("CBFADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
@@ -309,17 +307,22 @@ namespace net::worker::commands::CBF{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cbfadd",	"CBFADD"	,
+			"cbfincr",	"CBFINCR"	,
+			"cbfincrby",	"CBFINCRBY"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CBFREM : BaseCommandRW<Protocol,DBAdapter>{
-		CBFREM() : BaseCommandRW<Protocol,DBAdapter>("CBFREM", {
-			"cbfrem",	"CBFREM"	,
-			"cbfdecr",	"CBFDECR"	,
-			"cbfdecrby",	"CBFDECRBY"
-		}){}
+		
+		CBFREM() : BaseCommandRW<Protocol,DBAdapter>("CBFREM", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
@@ -329,15 +332,22 @@ namespace net::worker::commands::CBF{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cbfrem",	"CBFREM"	,
+			"cbfdecr",	"CBFDECR"	,
+			"cbfdecrby",	"CBFDECRBY"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CBFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		CBFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFADDCOUNT", {
-			"cbfaddcount",	"CBFADDCOUNT"
-		}){}
+		
+		CBFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
@@ -347,15 +357,20 @@ namespace net::worker::commands::CBF{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cbfaddcount",	"CBFADDCOUNT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CBFREMCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		CBFREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFREMCOUNT", {
-			"cbfremcount",	"CBFREMCOUNT"
-		}){}
+		
+		CBFREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFREMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
@@ -365,15 +380,20 @@ namespace net::worker::commands::CBF{
 			return mut(p, db, result);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cbfremcount",	"CBFREMCOUNT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CBFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		CBFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CBFRESERVE", {
-			"cbfreserve",	"CBFRESERVE"
-		}){}
+		
+		CBFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CBFRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
@@ -421,15 +441,20 @@ namespace net::worker::commands::CBF{
 			return result.set_1();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cbfreserve",	"CBFRESERVE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CBFCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		CBFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFCOUNT", {
-			"cbfcount",	"CBFCOUNT"
-		}){}
+		
+		CBFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
@@ -479,15 +504,20 @@ namespace net::worker::commands::CBF{
 			return result.set( count );
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cbfcount",	"CBFCOUNT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CBFMCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		CBFMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFMCOUNT", {
-			"cbfmcount",	"CBFMCOUNT"
-		}){}
+		
+		CBFMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace cbf_impl_;
@@ -558,6 +588,11 @@ namespace net::worker::commands::CBF{
 	
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cbfmcount",	"CBFMCOUNT"
+		};
 
 	};
 

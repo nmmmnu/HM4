@@ -8,9 +8,9 @@ namespace net::worker::commands::CAS{
 
 	template<class Protocol, class DBAdapter>
 	struct CAS : BaseCommandRW<Protocol,DBAdapter>{
-		CAS() : BaseCommandRW<Protocol,DBAdapter>("CAS", {
-			"cas",	"CAS"
-		}){}
+		
+		CAS() : BaseCommandRW<Protocol,DBAdapter>("CAS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4 && p.size() != 5)
@@ -49,15 +49,20 @@ namespace net::worker::commands::CAS{
 			return result.set(false);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cas",	"CAS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct CAD : BaseCommandRW<Protocol,DBAdapter>{
-		CAD() : BaseCommandRW<Protocol,DBAdapter>("CAD", {
-			"cad",	"CAD"
-		}){}
+		
+		CAD() : BaseCommandRW<Protocol,DBAdapter>("CAD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -88,6 +93,11 @@ namespace net::worker::commands::CAS{
 
 			return result.set(false);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"cad",	"CAD"
+		};
 
 	};
 

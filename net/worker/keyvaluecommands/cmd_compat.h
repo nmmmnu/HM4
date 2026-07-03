@@ -21,8 +21,8 @@ namespace net::worker::commands::Compat{
 
 		template<class Protocol, class DBAdapter, typename T, ResultType RT = ResultType::NORMAL>
 		struct VAL : BaseCommandRO<Protocol,DBAdapter>{
-			VAL(std::string_view name, CommandAliasesContainer const &cmd, T const &n) :
-									BaseCommandRO<Protocol,DBAdapter>(name, cmd),
+			VAL(std::string_view name, const std::string_view *cmd_begin, const std::string_view *cmd_end, T const &n) :
+									BaseCommandRO<Protocol,DBAdapter>(name, cmd_begin, cmd_end),
 									n(n){}
 
 			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
@@ -31,6 +31,7 @@ namespace net::worker::commands::Compat{
 				else
 					return result.set(n);
 			}
+
 		private:
 			T n;
 		};
@@ -40,48 +41,60 @@ namespace net::worker::commands::Compat{
 
 	template<class Protocol, class DBAdapter>
 	struct SELECT : compat_impl_::OK<Protocol,DBAdapter>{
-		SELECT() : compat_impl_::OK<Protocol,DBAdapter>("SELECT",  {
-				"select",	"SELECT"
-		}){}
+		SELECT() : compat_impl_::OK<Protocol,DBAdapter>("SELECT", std::begin(cmd__), std::end(cmd__)){}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"select",	"SELECT"
+		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct RESET : compat_impl_::OK<Protocol,DBAdapter>{
-		RESET() : compat_impl_::OK<Protocol,DBAdapter>("RESET",  {
-				"reset",	"RESET"
-		}){}
+		RESET() : compat_impl_::OK<Protocol,DBAdapter>("RESET", std::begin(cmd__), std::end(cmd__)){}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"reset",		"RESET"
+		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct TYPE : compat_impl_::VAL<Protocol,DBAdapter,std::string_view, compat_impl_::ResultType::SIMPLE_STRING>{
 		constexpr TYPE() : compat_impl_::VAL<Protocol,DBAdapter,std::string_view, compat_impl_::ResultType::SIMPLE_STRING>(
-			"TYPE", {
-				"type",		"TYPE"
-			},
-			"string"
-		){}
+			"TYPE", std::begin(cmd__), std::end(cmd__), "string"){}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"type",		"TYPE"
+		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct TOUCH : compat_impl_::VAL<Protocol,DBAdapter,bool>{
-		constexpr TOUCH() : compat_impl_::VAL<Protocol,DBAdapter,bool>(
-			"TOUCH", {
-				"touch",	"TOUCH"
-			},
-			true
-		){}
+		constexpr TOUCH() : compat_impl_::VAL<Protocol,DBAdapter,bool>("TOUCH", std::begin(cmd__), std::end(cmd__), true){}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"touch",	"TOUCH"
+		};
 	};
 
 	template<class Protocol, class DBAdapter>
 	struct COMMAND : BaseCommandRO<Protocol,DBAdapter>{
-		COMMAND() : BaseCommandRO<Protocol,DBAdapter>("COMMAND", {
-				"command",	"COMMAND"
-		}){}
+
+		COMMAND() : BaseCommandRO<Protocol,DBAdapter>("COMMAND", std::begin(cmd__), std::end(cmd__)){}
+
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			// deliberatly send error
 			return result.set_error(ResultErrorMessages::SYS_NOT_IMPLEMENTED);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+				"command",	"COMMAND"
+		};
 
 	};
 

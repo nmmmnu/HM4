@@ -19,11 +19,9 @@ namespace net::worker::commands::BITSET{
 
 	template<class Protocol, class DBAdapter>
 	struct BITSET : BaseCommandRW<Protocol,DBAdapter>{
-		BITSET() : BaseCommandRW<Protocol,DBAdapter>("BITSET", {
-			"setbit",	"SETBIT"	,
-			"bitset",	"BITSET"	,
-			"bitmset",	"BITMSET"
-		}){}
+		
+		BITSET() : BaseCommandRW<Protocol,DBAdapter>("BITSET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// BITSET key 5 1 6 0
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -111,16 +109,22 @@ namespace net::worker::commands::BITSET{
 			It			begin;
 			It			end;
 		};
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"setbit",	"SETBIT"	,
+			"bitset",	"BITSET"	,
+			"bitmset",	"BITMSET"
+		};
 			};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BITGET : BaseCommandRO<Protocol,DBAdapter>{
-		BITGET() : BaseCommandRO<Protocol,DBAdapter>("BITGET", {
-			"getbit",	"GETBIT"	,
-			"bitget",	"BITGET"
-		}){}
+		
+		BITGET() : BaseCommandRO<Protocol,DBAdapter>("BITGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -153,15 +157,21 @@ namespace net::worker::commands::BITSET{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"getbit",	"GETBIT"	,
+			"bitget",	"BITGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BITMGET : BaseCommandRO<Protocol,DBAdapter>{
-		BITMGET() : BaseCommandRO<Protocol,DBAdapter>("BITMGET", {
-			"bitmget",	"BITMGET"
-		}){}
+		
+		BITMGET() : BaseCommandRO<Protocol,DBAdapter>("BITMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
@@ -205,15 +215,20 @@ namespace net::worker::commands::BITSET{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"bitmget",	"BITMGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BITCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		BITCOUNT() : BaseCommandRO<Protocol,DBAdapter>("BITCOUNT", {
-			"bitcount",	"BITCOUNT"
-		}){}
+		
+		BITCOUNT() : BaseCommandRO<Protocol,DBAdapter>("BITCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -264,21 +279,31 @@ namespace net::worker::commands::BITSET{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"bitcount",	"BITCOUNT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BITMAX : BaseCommandRO<Protocol,DBAdapter>{
-		BITMAX() : BaseCommandRO<Protocol,DBAdapter>("BITMAX", {
-			"bitmax",	"BITMAX"
-		}){}
+		
+		BITMAX() : BaseCommandRO<Protocol,DBAdapter>("BITMAX", std::begin(cmd__), std::end(cmd__)){}
+
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace bit_impl_;
 
 			return result.set(BIT_MAX);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"bitmax",	"BITMAX"
+		};
 
 	};
 

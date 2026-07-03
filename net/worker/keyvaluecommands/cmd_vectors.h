@@ -955,9 +955,9 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VADD : BaseCommandRW<Protocol,DBAdapter>{
-		VADD() : BaseCommandRW<Protocol,DBAdapter>("VADD", {
-			"vadd",	"VADD"
-		}){}
+		
+		VADD() : BaseCommandRW<Protocol,DBAdapter>("VADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VADD key   DIM_VE DIM_IX QUANTIZE_TYPE VEC_TYPE BLOB  name BLOB  name ...
 		// VADD words 300    150    F             b        BLOB0 frog BLOB1 cat
@@ -1118,17 +1118,20 @@ namespace net::worker::commands::Vectors{
 			std::string_view	hash;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vadd",	"VADD"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VREM : BaseCommandRW<Protocol,DBAdapter>{
-		VREM() : BaseCommandRW<Protocol,DBAdapter>("VREM", {
-			"vrem",		"VREM",
-			"vremove",	"VREMOVE",
-			"vdel",		"VDEL"
-		}){}
+		
+		VREM() : BaseCommandRW<Protocol,DBAdapter>("VREM", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace vectors_impl_;
@@ -1139,15 +1142,22 @@ namespace net::worker::commands::Vectors{
 			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vrem",		"VREM",
+			"vremove",	"VREMOVE",
+			"vdel",		"VDEL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VGET : BaseCommandRO<Protocol,DBAdapter>{
-		VGET() : BaseCommandRO<Protocol,DBAdapter>("VGET", {
-			"vget",		"VGET"
-		}){}
+		
+		VGET() : BaseCommandRO<Protocol,DBAdapter>("VGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VGET key   DIM_IX QUANTIZE_TYPE name
 		// VGET words 300    F             frog
@@ -1201,16 +1211,20 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vget",		"VGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VGETRAW : BaseCommandRO<Protocol,DBAdapter>{
-		VGETRAW() : BaseCommandRO<Protocol,DBAdapter>("VGETRAW", {
-			"vgetraw",	"VGETRAW",
-			"vgetblob",	"VGETBLOB"
-		}){}
+		
+		VGETRAW() : BaseCommandRO<Protocol,DBAdapter>("VGETRAW", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VGETRAW key   DIM_IX QUANTIZE_TYPE OUT_VEC_TYPE name
 		// VGETRAW words 300    F             b            frog
@@ -1275,16 +1289,21 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vgetraw",	"VGETRAW",
+			"vgetblob",	"VGETBLOB"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VGETNORMALIZED : BaseCommandRO<Protocol,DBAdapter>{
-		VGETNORMALIZED() : BaseCommandRO<Protocol,DBAdapter>("VGETNORMALIZED", {
-			"vgetnormalized",	"VGETNORMALIZED",
-			"vgetnorm",		"VGETNORM"
-		}){}
+		
+		VGETNORMALIZED() : BaseCommandRO<Protocol,DBAdapter>("VGETNORMALIZED", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VGETNORMALIZED key   DIM_IX QUANTIZE_TYPE name
 		// VGETNORMALIZED words 300    F             frog
@@ -1338,15 +1357,21 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vgetnormalized",	"VGETNORMALIZED",
+			"vgetnorm",		"VGETNORM"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VSIMFLAT : BaseCommandRO<Protocol,DBAdapter>{
-		VSIMFLAT() : BaseCommandRO<Protocol,DBAdapter>("VSIMFLAT", {
-			"vsimflat",	"VSIMFLAT"
-		}){}
+		
+		VSIMFLAT() : BaseCommandRO<Protocol,DBAdapter>("VSIMFLAT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VSIMFLAT key   DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS START
 		// VSIMFLAT words 300    300    F             C             b        BLOB 100     ''
@@ -1545,15 +1570,20 @@ namespace net::worker::commands::Vectors{
 	
 		constexpr static std::string_view rangeHash__ = "00";
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vsimflat",	"VSIMFLAT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VSIMLSH : BaseCommandRO<Protocol,DBAdapter>{
-		VSIMLSH() : BaseCommandRO<Protocol,DBAdapter>("VSIMLSH", {
-			"vsimlsh",	"VSIMLSH"
-		}){}
+		
+		VSIMLSH() : BaseCommandRO<Protocol,DBAdapter>("VSIMLSH", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VSIMLSH key   DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS START
 		// VSIMLSH words 300    300    F             C             b        BLOB 100     ''
@@ -1833,15 +1863,20 @@ namespace net::worker::commands::Vectors{
 
 		using RangeBuffer = std::array<char, rangeHashSize__ + 1>; // 00FF\0
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vsimlsh",	"VSIMLSH"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VKSET : BaseCommandRW<Protocol,DBAdapter>{
-		VKSET() : BaseCommandRW<Protocol,DBAdapter>("VKSET", {
-			"vkset",	"VKSET"
-		}){}
+		
+		VKSET() : BaseCommandRW<Protocol,DBAdapter>("VKSET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VKSET key  DIM_VE DIM_IX QUANTIZE_TYPE VEC_TYPE BLOB
 		// VKSET word 300    150    F             b        BLOB
@@ -1960,15 +1995,20 @@ namespace net::worker::commands::Vectors{
 			FVector			fvector;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vkset",	"VKSET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VKGET : BaseCommandRO<Protocol,DBAdapter>{
-		VKGET() : BaseCommandRO<Protocol,DBAdapter>("VKGET", {
-			"vkget",	"VKGET"
-		}){}
+		
+		VKGET() : BaseCommandRO<Protocol,DBAdapter>("VKGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VKGET key      DIM_IX QUANTIZE_TYPE
 		// VKGET word:cat 300    F
@@ -2014,16 +2054,20 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vkget",	"VKGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VKGETRAW : BaseCommandRO<Protocol,DBAdapter>{
-		VKGETRAW() : BaseCommandRO<Protocol,DBAdapter>("VKGETRAW", {
-			"vkgetraw",	"VKGETRAW",
-			"vkgetblob",	"VKGETBLOB"
-		}){}
+		
+		VKGETRAW() : BaseCommandRO<Protocol,DBAdapter>("VKGETRAW", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VKGETHEX key   DIM_IX QUANTIZE_TYPE OUT_VEC_TYPE
 		// VKGETHEX words 300    F             b
@@ -2080,16 +2124,21 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vkgetraw",	"VKGETRAW",
+			"vkgetblob",	"VKGETBLOB"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VKGETNORMALIZED : BaseCommandRO<Protocol,DBAdapter>{
-		VKGETNORMALIZED() : BaseCommandRO<Protocol,DBAdapter>("VKGETNORMALIZED", {
-			"vkgetnormalized",	"VKGETNORMALIZED",
-			"vkgetnorm",		"VKGETNORM"
-		}){}
+		
+		VKGETNORMALIZED() : BaseCommandRO<Protocol,DBAdapter>("VKGETNORMALIZED", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VKGETNORMALIZED key   DIM_IX QUANTIZE_TYPE
 		// VKGETNORMALIZED words 300    F
@@ -2135,15 +2184,21 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vkgetnormalized",	"VKGETNORMALIZED",
+			"vkgetnorm",		"VKGETNORM"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VKSIMFLAT : BaseCommandRO<Protocol,DBAdapter>{
-		VKSIMFLAT() : BaseCommandRO<Protocol,DBAdapter>("VKSIMFLAT", {
-			"vksimflat",	"VKSIMFLAT"
-		}){}
+		
+		VKSIMFLAT() : BaseCommandRO<Protocol,DBAdapter>("VKSIMFLAT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// VSIMFLAT prefix DIM_VE DIM_IX QUANTIZE_TYPE DISTANCE_TYPE VEC_TYPE BLOB RESULTS START
 		// VSIMFLAT words: 300    300    F             C             b        BLOB 100     ''
@@ -2331,6 +2386,11 @@ namespace net::worker::commands::Vectors{
 
 			return process_VSIM_finish<bool, 1>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vksimflat",	"VKSIMFLAT"
+		};
 
 	};
 

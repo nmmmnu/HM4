@@ -68,10 +68,9 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNGET : BaseCommandRO<Protocol,DBAdapter>{
-		XNGET() : BaseCommandRO<Protocol,DBAdapter>("XNGET", {
-			"xnget",	"XNGET",
-			"getx",		"GETX"
-		}){}
+		
+		XNGET() : BaseCommandRO<Protocol,DBAdapter>("XNGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -103,15 +102,21 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xnget",	"XNGET",
+			"getx",		"GETX"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XNNEXT : BaseCommandRO<Protocol,DBAdapter>{
-		XNNEXT() : BaseCommandRO<Protocol,DBAdapter>("XNNEXT", {
-			"xnnext",	"XNNEXT"
-		}){}
+		
+		XNNEXT() : BaseCommandRO<Protocol,DBAdapter>("XNNEXT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace immutablex_impl_;
@@ -142,15 +147,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xnnext",	"XNNEXT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XRGET : BaseCommandRO<Protocol,DBAdapter>{
-		XRGET() : BaseCommandRO<Protocol,DBAdapter>("XRGET", {
-			"xrget",	"XRGET"
-		}){}
+		
+		XRGET() : BaseCommandRO<Protocol,DBAdapter>("XRGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -182,15 +192,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xrget",	"XRGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XRNEXT : BaseCommandRO<Protocol,DBAdapter>{
-		XRNEXT() : BaseCommandRO<Protocol,DBAdapter>("XRNEXT", {
-			"xrnext",	"XRNEXT"
-		}){}
+		
+		XRNEXT() : BaseCommandRO<Protocol,DBAdapter>("XRNEXT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace immutablex_impl_;
@@ -221,15 +236,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xrnext",	"XRNEXT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XUGET : BaseCommandRO<Protocol,DBAdapter>{
-		XUGET() : BaseCommandRO<Protocol,DBAdapter>("XUGET", {
-			"xuget",	"XUGET"
-		}){}
+		
+		XUGET() : BaseCommandRO<Protocol,DBAdapter>("XUGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -257,15 +277,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xuget",	"XUGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XUNEXT : BaseCommandRO<Protocol,DBAdapter>{
-		XUNEXT() : BaseCommandRO<Protocol,DBAdapter>("XUNEXT", {
-			"xunext",	"XUNEXT"
-		}){}
+		
+		XUNEXT() : BaseCommandRO<Protocol,DBAdapter>("XUNEXT", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace immutablex_impl_;
@@ -292,15 +317,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xunext",	"XUNEXT"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XNGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		XNGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XNGETKEYS", {
-			"xngetkeys",	"XNGETKEYS"
-		}){}
+		
+		XNGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XNGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -332,15 +362,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xngetkeys",	"XNGETKEYS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XRGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		XRGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XRGETKEYS", {
-			"xrgetkeys",	"XRGETKEYS"
-		}){}
+		
+		XRGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XRGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -372,15 +407,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xrgetkeys",	"XRGETKEYS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XUGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		XUGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XUGETKEYS", {
-			"xugetkeys",	"XUGETKEYS"
-		}){}
+		
+		XUGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XUGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -408,15 +448,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"xugetkeys",	"XUGETKEYS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		HGETALL() : BaseCommandRO<Protocol,DBAdapter>("HGETALL", {
-			"hgetall",	"HGETALL"
-		}){}
+		
+		HGETALL() : BaseCommandRO<Protocol,DBAdapter>("HGETALL", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -450,15 +495,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hgetall",	"HGETALL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		HGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("HGETKEYS", {
-			"hgetkeys",	"HGETKEYS"
-		}){}
+		
+		HGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("HGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -492,15 +542,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hgetkeys",	"HGETKEYS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HGETVALS : BaseCommandRO<Protocol,DBAdapter>{
-		HGETVALS() : BaseCommandRO<Protocol,DBAdapter>("HGETVALS", {
-			"hgetvals",	"HGETVALS"
-		}){}
+		
+		HGETVALS() : BaseCommandRO<Protocol,DBAdapter>("HGETVALS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace immutablex_impl_;
@@ -534,15 +589,20 @@ namespace net::worker::commands::ImmutableX{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hgetvals",	"HGETVALS"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HLEN : BaseCommandRO<Protocol,DBAdapter>{
-		HLEN() : BaseCommandRO<Protocol,DBAdapter>("HLEN", {
-			"hlen",	"HLEN"
-		}){}
+		
+		HLEN() : BaseCommandRO<Protocol,DBAdapter>("HLEN", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -570,6 +630,11 @@ namespace net::worker::commands::ImmutableX{
 
 			return result.set( uint64_t{ n } );
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hlen",	"HLEN"
+		};
 
 	};
 

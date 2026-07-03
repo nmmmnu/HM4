@@ -146,9 +146,9 @@ namespace net::worker::commands::HH{
 
 	template<class Protocol, class DBAdapter>
 	struct HHINCR : BaseCommandRW<Protocol,DBAdapter>{
-		HHINCR() : BaseCommandRW<Protocol,DBAdapter>("HHINCR", {
-			"hhincr",	"HHINCR"
-		}){}
+		
+		HHINCR() : BaseCommandRW<Protocol,DBAdapter>("HHINCR", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// HHADD key slots bytes item score item score
 
@@ -158,15 +158,20 @@ namespace net::worker::commands::HH{
 			return do_hh_incr_decr(p, db, result, std::true_type{});
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hhincr",	"HHINCR"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HHDECR : BaseCommandRW<Protocol,DBAdapter>{
-		HHDECR() : BaseCommandRW<Protocol,DBAdapter>("HHDECR", {
-			"hhdecr",	"HHDECR"
-		}){}
+		
+		HHDECR() : BaseCommandRW<Protocol,DBAdapter>("HHDECR", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// HHADD key slots bytes item score item score
 
@@ -176,15 +181,20 @@ namespace net::worker::commands::HH{
 			return do_hh_incr_decr(p, db, result, std::false_type{});
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hhdecr",	"HHDECR"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HHRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		HHRESERVE() : BaseCommandRW<Protocol,DBAdapter>("HHRESERVE", {
-			"hhreserve",	"HHRESERVE"
-		}){}
+		
+		HHRESERVE() : BaseCommandRW<Protocol,DBAdapter>("HHRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// HHRESERVE key slots bytes
 
@@ -225,15 +235,20 @@ namespace net::worker::commands::HH{
 			return type_dispatch(bytes, f);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hhreserve",	"HHRESERVE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HHGET : BaseCommandRO<Protocol,DBAdapter>{
-		HHGET() : BaseCommandRO<Protocol,DBAdapter>("HHGET", {
-			"hhget",	"HHGET"
-		}){}
+		
+		HHGET() : BaseCommandRO<Protocol,DBAdapter>("HHGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// HHGET key slots bytes
 
@@ -301,6 +316,11 @@ namespace net::worker::commands::HH{
 
 			return result.set_container(container);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"hhget",	"HHGET"
+		};
 
 	};
 

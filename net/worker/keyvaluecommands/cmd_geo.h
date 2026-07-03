@@ -103,9 +103,9 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEOADD : BaseCommandRW<Protocol,DBAdapter>{
-		GEOADD() : BaseCommandRW<Protocol,DBAdapter>("GEOADD", {
-			"geoadd",	"GEOADD"
-		}){}
+		
+		GEOADD() : BaseCommandRW<Protocol,DBAdapter>("GEOADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			auto const varg  = 2;
@@ -154,17 +154,20 @@ namespace net::worker::commands::Geo{
 			return result.set();
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"geoadd",	"GEOADD"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEOREM : BaseCommandRW<Protocol,DBAdapter>{
-		GEOREM() : BaseCommandRW<Protocol,DBAdapter>("GEOREM", {
-			"georem",	"GEOREM"	,
-			"georemove",	"GEOREMOVE"	,
-			"geodel",	"GEODEL"
-		}){}
+		
+		GEOREM() : BaseCommandRW<Protocol,DBAdapter>("GEOREM", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace geo_impl_;
@@ -175,16 +178,22 @@ namespace net::worker::commands::Geo{
 			return shared::zsetmulti::cmdProcessRem<P1, GeoIndexController>(p, db, result, blob);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"georem",	"GEOREM"	,
+			"georemove",	"GEOREMOVE"	,
+			"geodel",	"GEODEL"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEOGET : BaseCommandRO<Protocol,DBAdapter>{
-		GEOGET() : BaseCommandRO<Protocol,DBAdapter>("GEOGET", {
-			"geoget",	"GEOGET"	,
-			"geoscore",	"GEOSCORE"
-		}){}
+		
+		GEOGET() : BaseCommandRO<Protocol,DBAdapter>("GEOGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -210,15 +219,21 @@ namespace net::worker::commands::Geo{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"geoget",	"GEOGET"	,
+			"geoscore",	"GEOSCORE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEOMGET : BaseCommandRO<Protocol,DBAdapter>{
-		GEOMGET() : BaseCommandRO<Protocol,DBAdapter>("GEOMGET", {
-			"geomget",	"GEOMGET"
-		}){}
+		
+		GEOMGET() : BaseCommandRO<Protocol,DBAdapter>("GEOMGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() < 3)
@@ -256,16 +271,20 @@ namespace net::worker::commands::Geo{
 			return result.set_container(container);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"geomget",	"GEOMGET"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEORADIUS : BaseCommandRO<Protocol,DBAdapter>{
-		GEORADIUS() : BaseCommandRO<Protocol,DBAdapter>("GEORADIUS", {
-			"georadius",	"GEORADIUS",
-			"georadius_ro",	"GEORADIUS_RO",
-		}){}
+		
+		GEORADIUS() : BaseCommandRO<Protocol,DBAdapter>("GEORADIUS", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			if (p.size() != 5)
@@ -355,15 +374,21 @@ namespace net::worker::commands::Geo{
 
 	
 		constexpr static auto &sphere =  GeoHash::EARTH_METERS;
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"georadius",	"GEORADIUS",
+			"georadius_ro",	"GEORADIUS_RO",
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEODIST : BaseCommandRO<Protocol,DBAdapter>{
-		GEODIST() : BaseCommandRO<Protocol,DBAdapter>("GEODIST", {
-			"geodist",	"GEODIST",
-		}){}
+		
+		GEODIST() : BaseCommandRO<Protocol,DBAdapter>("GEODIST", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 4)
@@ -431,15 +456,20 @@ namespace net::worker::commands::Geo{
 
 	
 		constexpr static auto &sphere =  GeoHash::EARTH_METERS;
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"geodist",	"GEODIST",
+		};
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEOENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		GEOENCODE() : BaseCommandRO<Protocol,DBAdapter>("GEOENCODE", {
-			"geoencode",	"GEOENCODE"
-		}){}
+		
+		GEOENCODE() : BaseCommandRO<Protocol,DBAdapter>("GEOENCODE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)
@@ -462,15 +492,20 @@ namespace net::worker::commands::Geo{
 			);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"geoencode",	"GEOENCODE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEODECODE : BaseCommandRO<Protocol,DBAdapter>{
-		GEODECODE() : BaseCommandRO<Protocol,DBAdapter>("GEODECODE", {
-			"geodecode",	"GEODECODE"
-		}){}
+		
+		GEODECODE() : BaseCommandRO<Protocol,DBAdapter>("GEODECODE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
@@ -490,6 +525,11 @@ namespace net::worker::commands::Geo{
 				formatLine(lat, lon, hash, line_buffer)
 			);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"geodecode",	"GEODECODE"
+		};
 
 	};
 

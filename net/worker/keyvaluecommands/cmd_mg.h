@@ -45,10 +45,9 @@ namespace net::worker::commands::MG{
 
 	template<class Protocol, class DBAdapter>
 	struct MGADD : BaseCommandRW<Protocol,DBAdapter>{
-		MGADD() : BaseCommandRW<Protocol,DBAdapter>("MGADD", {
-			"mgadd",	"MGADD"	,
-			"mgincr",	"MGINCR"
-		}){}
+		
+		MGADD() : BaseCommandRW<Protocol,DBAdapter>("MGADD", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MGADD key slots bytes item item
 
@@ -156,15 +155,21 @@ namespace net::worker::commands::MG{
 			bool			result = false;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mgadd",	"MGADD"	,
+			"mgincr",	"MGINCR"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MGADDGET : BaseCommandRW<Protocol,DBAdapter>{
-		MGADDGET() : BaseCommandRW<Protocol,DBAdapter>("MGADDGET", {
-			"mgaddget",	"MGADDGET"
-		}){}
+		
+		MGADDGET() : BaseCommandRW<Protocol,DBAdapter>("MGADDGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MGADDGET key slots bytes item
 
@@ -258,6 +263,11 @@ namespace net::worker::commands::MG{
 			uint64_t		score = 0;
 		};
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mgaddget",	"MGADDGET"
+		};
+
 	};
 
 
@@ -265,9 +275,9 @@ namespace net::worker::commands::MG{
 
 	template<class Protocol, class DBAdapter>
 	struct MGRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		MGRESERVE() : BaseCommandRW<Protocol,DBAdapter>("MGRESERVE", {
-			"mgreserve",	"MGRESERVE"
-		}){}
+		
+		MGRESERVE() : BaseCommandRW<Protocol,DBAdapter>("MGRESERVE", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MGRESERVE key slots bytes
 
@@ -308,15 +318,20 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mgreserve",	"MGRESERVE"
+		};
+
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MGGET : BaseCommandRO<Protocol,DBAdapter>{
-		MGGET() : BaseCommandRO<Protocol,DBAdapter>("MGGET", {
-			"mgget",	"MGGET"
-		}){}
+		
+		MGGET() : BaseCommandRO<Protocol,DBAdapter>("MGGET", std::begin(cmd__), std::end(cmd__)){}
+
 
 		// MGGET key slots bytes
 
@@ -384,6 +399,11 @@ namespace net::worker::commands::MG{
 
 			return result.set_container(container);
 		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mgget",	"MGGET"
+		};
 
 	};
 
