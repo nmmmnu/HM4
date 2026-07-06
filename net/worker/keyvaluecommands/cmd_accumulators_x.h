@@ -46,7 +46,7 @@ namespace net::worker::commands::Accumulators{
 
 		template<class Protocol>
 		void execCommandSet_(Result<Protocol> &result, std::string_view data, std::string_view lastKey){
-			return result.set_dual(
+			return result.set_container2(
 				data,
 				lastKey
 			);
@@ -56,7 +56,7 @@ namespace net::worker::commands::Accumulators{
 		void execCommandSet_(Result<Protocol> &result, Int data, std::string_view lastKey){
 			to_string_buffer_t buffer;
 
-			return result.set_dual(
+			return result.set_container2(
 				to_string(data, buffer),
 				lastKey
 			);

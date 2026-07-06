@@ -375,16 +375,17 @@ namespace net::worker::commands::MG{
 	
 		template<class MyRawMisraGries>
 		void process_(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
-			auto &container = blob.construct<OutputBlob::Container>();
 
-			if (pair == nullptr)
-				return result.set_container(container);
+			if (!pair)
+				return result.set_container0();
 
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			using List = typename MyRawMisraGries::List;
 
 			const auto *mg_data = hm4::getValAs<List>(pair);
+
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			for(size_t i = 0; i < mg.size(); ++i)
 				if (auto const &x = mg_data->items[i]; x){

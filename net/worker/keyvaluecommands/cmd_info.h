@@ -203,7 +203,7 @@ namespace net::worker::commands::Info{
 
 			auto const time = mytime::nowMix();
 
-			return result.set_dual(
+			return result.set_container2(
 				to_string(time[0], buffer[0]),
 				to_string(time[1], buffer[1])
 			);

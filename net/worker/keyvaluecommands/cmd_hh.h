@@ -292,16 +292,17 @@ namespace net::worker::commands::HH{
 	
 		template<class MyRawHeavyHitter>
 		void process_(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
-			auto &container = blob.construct<OutputBlob::Container>();
 
-			if (pair == nullptr)
-				return result.set_container(container);
+			if (!pair)
+				return result.set_container0();
 
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
 			using List = typename MyRawHeavyHitter::List;
 
 			const auto *hh_data = hm4::getValAs<List>(pair);
+
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			for(size_t i = 0; i < hh.size(); ++i)
 				if(auto const &x = hh_data->items[i]; x){

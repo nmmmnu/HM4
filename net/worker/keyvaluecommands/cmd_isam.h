@@ -79,7 +79,7 @@ namespace net::worker::commands::ISAM_cmd{
 				const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
 
 				if (!pair)
-					return result.set_container(container);
+					return result.set_container0();
 
 				const char *storage  = pair->getValC();
 
@@ -100,9 +100,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		
-		IGETALL() : BaseCommandRO<Protocol,DBAdapter>("IGETALL", std::begin(cmd__), std::end(cmd__)){}
 
+		IGETALL() : BaseCommandRO<Protocol,DBAdapter>("IGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -122,9 +121,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IGETKEYS: BaseCommandRO<Protocol,DBAdapter>{
-		
-		IGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("IGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
+		IGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("IGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -144,9 +142,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IGETVALS: BaseCommandRO<Protocol,DBAdapter>{
-		
-		IGETVALS() : BaseCommandRO<Protocol,DBAdapter>("IGETVALS", std::begin(cmd__), std::end(cmd__)){}
 
+		IGETVALS() : BaseCommandRO<Protocol,DBAdapter>("IGETVALS", std::begin(cmd__), std::end(cmd__)){}
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -166,9 +163,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IGET : BaseCommandRO<Protocol,DBAdapter>{
-		
-		IGET() : BaseCommandRO<Protocol,DBAdapter>("IGET", std::begin(cmd__), std::end(cmd__)){}
 
+		IGET() : BaseCommandRO<Protocol,DBAdapter>("IGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// iget schema key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -211,9 +207,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IMGET : BaseCommandRO<Protocol,DBAdapter>{
-		
-		IMGET() : BaseCommandRO<Protocol,DBAdapter>("IMGET", std::begin(cmd__), std::end(cmd__)){}
 
+		IMGET() : BaseCommandRO<Protocol,DBAdapter>("IMGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// imget schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -242,7 +237,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return collect_N__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
 		}
 
-	
+
 		template<typename Container>
 		static void collect_1__(Result<Protocol> &result, Container &container,
 							std::string_view schema, std::string_view storage,
@@ -306,9 +301,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct ISETALL : BaseCommandRW<Protocol,DBAdapter>{
-		
-		ISETALL() : BaseCommandRW<Protocol,DBAdapter>("ISETALL", std::begin(cmd__), std::end(cmd__)){}
 
+		ISETALL() : BaseCommandRW<Protocol,DBAdapter>("ISETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// isetall schema key value value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -337,7 +331,7 @@ namespace net::worker::commands::ISAM_cmd{
 			return result.set_1();
 		}
 
-	
+
 		struct ISETALL_Factory : hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory>;
@@ -359,7 +353,7 @@ namespace net::worker::commands::ISAM_cmd{
 					isam.store(storage, i, *(it + i));
 			}
 
-		
+
 			ISAM const	&isam;
 			It		it;
 		};
@@ -375,9 +369,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct ISET : BaseCommandRW<Protocol,DBAdapter>{
-		
-		ISET() : BaseCommandRW<Protocol,DBAdapter>("ISET", std::begin(cmd__), std::end(cmd__)){}
 
+		ISET() : BaseCommandRW<Protocol,DBAdapter>("ISET", std::begin(cmd__), std::end(cmd__)){}
 
 		// iset schema key subkey value subkey value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -402,7 +395,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return process_N__(db, result, schema, key, std::begin(p) + varg, std::end(p));
 		}
 
-	
+
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
@@ -484,7 +477,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return status;
 			}
 
-		
+
 			ISAM const	&isam;
 			Searcher const	&searcher;
 			It		begin;
@@ -503,9 +496,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IDEL : BaseCommandRW<Protocol,DBAdapter>{
-		
-		IDEL() : BaseCommandRW<Protocol,DBAdapter>("IDEL", std::begin(cmd__), std::end(cmd__)){}
 
+		IDEL() : BaseCommandRW<Protocol,DBAdapter>("IDEL", std::begin(cmd__), std::end(cmd__)){}
 
 		// idel schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -530,7 +522,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return process_N__(db, result, schema, key, std::begin(p) + varg, std::end(p));
 		}
 
-	
+
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
@@ -614,7 +606,7 @@ namespace net::worker::commands::ISAM_cmd{
 				return status;
 			}
 
-		
+
 			ISAM const	&isam;
 			Searcher const	&searcher;
 			It		begin;
@@ -633,9 +625,8 @@ namespace net::worker::commands::ISAM_cmd{
 
 	template<class Protocol, class DBAdapter>
 	struct IRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
-		IRESERVE() : BaseCommandRW<Protocol,DBAdapter>("IRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
+		IRESERVE() : BaseCommandRW<Protocol,DBAdapter>("IRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 3)

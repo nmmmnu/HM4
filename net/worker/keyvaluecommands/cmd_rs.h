@@ -42,9 +42,8 @@ namespace net::worker::commands::RS{
 
 	template<class Protocol, class DBAdapter>
 	struct RSADD : BaseCommandRW<Protocol,DBAdapter>{
-		
-		RSADD() : BaseCommandRW<Protocol,DBAdapter>("RSADD", std::begin(cmd__), std::end(cmd__)){}
 
+		RSADD() : BaseCommandRW<Protocol,DBAdapter>("RSADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// RSADD key slots bytes item item
 
@@ -83,7 +82,7 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
-	
+	private:
 		template<typename MyReservoirSampling>
 		void process_(MyReservoirSampling const &rs, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result){
 			auto const varg = 4;
@@ -104,7 +103,6 @@ namespace net::worker::commands::RS{
 			);
 		}
 
-	
 		template<typename MyReservoirSampling>
 		struct RSADDFactory : hm4::PairFactory::IFactoryAction<1,1,RSADDFactory<MyReservoirSampling> >{
 			using Pair = hm4::Pair;
@@ -127,7 +125,7 @@ namespace net::worker::commands::RS{
 				return result;
 			}
 
-		
+		private:
 			bool action_(Pair *pair){
 				using List = typename MyReservoirSampling::List;
 
@@ -156,7 +154,6 @@ namespace net::worker::commands::RS{
 				return result;
 			}
 
-		
 			MyReservoirSampling	rs;
 			It			begin;
 			It			end;
@@ -164,7 +161,6 @@ namespace net::worker::commands::RS{
 			std::mt19937_64		&rand64;
 		};
 
-	
 		std::mt19937_64 rand64{ static_cast<uint32_t>(time(nullptr)) };
 
 	private:
@@ -177,9 +173,8 @@ namespace net::worker::commands::RS{
 
 	template<class Protocol, class DBAdapter>
 	struct RSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
-		RSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RSRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
+		RSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RSRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// RSRESERVE key slots bytes
 
@@ -224,16 +219,14 @@ namespace net::worker::commands::RS{
 		constexpr inline static std::string_view cmd__[] = {
 			"rsreserve",	"RSRESERVE"
 		};
-
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RSGET : BaseCommandRO<Protocol,DBAdapter>{
-		
-		RSGET() : BaseCommandRO<Protocol,DBAdapter>("RSGET", std::begin(cmd__), std::end(cmd__)){}
 
+		RSGET() : BaseCommandRO<Protocol,DBAdapter>("RSGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// RSGET key slots bytes
 
@@ -274,17 +267,17 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
-	
+	private:
 		template<class MyReservoirSampling>
 		void process_(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
-			auto &container = blob.construct<OutputBlob::Container>();
-
-			if (pair == nullptr)
-				return result.set_container(container);
+			if (!pair)
+				return result.set_container0();
 
 			using List = typename MyReservoirSampling::List;
 
 			const auto *rs_data = hm4::getValAs<List>(pair);
+
+			auto &container = blob.construct<OutputBlob::Container>();
 
 			for(size_t i = 0; i < rs.size(); ++i)
 				if (auto const &x = rs_data->items[i]; x)
@@ -297,14 +290,13 @@ namespace net::worker::commands::RS{
 		constexpr inline static std::string_view cmd__[] = {
 			"rsget",	"RSGET"
 		};
-
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RSGETCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		RSGETCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RSGETCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -347,10 +339,10 @@ namespace net::worker::commands::RS{
 			return type_dispatch(bytes, f);
 		}
 
-	
+	private:
 		template<class MyReservoirSampling>
 		void process_(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol> &result) const{
-			if (pair == nullptr)
+			if (!pair)
 				return result.set_0();
 
 			using List = typename MyReservoirSampling::List;
@@ -364,7 +356,6 @@ namespace net::worker::commands::RS{
 		constexpr inline static std::string_view cmd__[] = {
 			"rsgetcount",	"RSGETCOUNT"
 		};
-
 	};
 
 

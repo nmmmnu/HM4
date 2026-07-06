@@ -450,7 +450,7 @@ namespace net::worker::commands::TDigest{
 			if (val.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				return result.set("0.0");
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
@@ -510,7 +510,7 @@ namespace net::worker::commands::TDigest{
 
 			Container container;
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 					container.push_back("0.0");
 
@@ -571,7 +571,7 @@ namespace net::worker::commands::TDigest{
 
 			RawTDigest td{ c };
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				return result.set("0.0");
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
@@ -625,7 +625,7 @@ namespace net::worker::commands::TDigest{
 			auto const p1 = std::clamp<double>(to_double_def(p[3]), 0.0, 1.0);
 			auto const p2 = std::clamp<double>(to_double_def(p[4]), 0.0, 1.0);
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				return result.set("0.0");
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
@@ -675,7 +675,7 @@ namespace net::worker::commands::TDigest{
 
 			RawTDigest td{ c };
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				return result.set("0.0");
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
@@ -725,7 +725,7 @@ namespace net::worker::commands::TDigest{
 
 			RawTDigest td{ c };
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				return result.set("0.0");
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
@@ -770,7 +770,7 @@ namespace net::worker::commands::TDigest{
 
 			RawTDigest td{ c };
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				return result.set("0.0");
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
@@ -815,8 +815,8 @@ namespace net::worker::commands::TDigest{
 
 			RawTDigest td{ c };
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
-				return result.set(uint64_t{0});
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
+				return result.set_0();
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
@@ -856,12 +856,11 @@ namespace net::worker::commands::TDigest{
 			RawTDigest td{ c };
 
 
-			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); pair == nullptr){
-				std::array<std::string_view, 2> const container{
-					"state"	,	"invalid"
-				};
-
-				return result.set_container(container);
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
+				return result.set_container2(
+					"state", 
+					"invalid"
+				);
 			}else{
 				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 

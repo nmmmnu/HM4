@@ -1,9 +1,9 @@
-- id:      RBADD
-  name:    RBADD
+- id:      SLADD
+  name:    SLADD
   aliases:
     items:
       - rbpush
-  usage:   RBADD key item0 [item1]...
+  usage:   SLADD key item0 [item1]...
   params:
     items:
     - k: key

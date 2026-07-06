@@ -2,9 +2,7 @@
 #include "slist.h"
 #include "logger.h"
 #include "pair_vfactory.h"
-//#include "shared_hint.h"
 
-#include "hashtable/easyset.h"
 #include "hashtable/easymap.h"
 #include "hashtable/compactstorage.h"
 
@@ -12,7 +10,6 @@ namespace net::worker::commands::SL{
 
 	namespace sl_impl_{
 		using namespace s_list;
-
 
 		template<typename MyRawSList, typename Pair>
 		[[nodiscard]]
@@ -110,9 +107,8 @@ namespace net::worker::commands::SL{
 
 	template<class Protocol, class DBAdapter>
 	struct SLADD : BaseCommandRW<Protocol,DBAdapter>{
-		
-		SLADD() : BaseCommandRW<Protocol,DBAdapter>("SLADD", std::begin(cmd__), std::end(cmd__)){}
 
+		SLADD() : BaseCommandRW<Protocol,DBAdapter>("SLADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLADD key item item
 
@@ -132,9 +128,8 @@ namespace net::worker::commands::SL{
 
 	template<class Protocol, class DBAdapter>
 	struct SLADDPACK : BaseCommandRW<Protocol,DBAdapter>{
-		
-		SLADDPACK() : BaseCommandRW<Protocol,DBAdapter>("SLADDPACK", std::begin(cmd__), std::end(cmd__)){}
 
+		SLADDPACK() : BaseCommandRW<Protocol,DBAdapter>("SLADDPACK", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLADD key item item
 
@@ -156,9 +151,8 @@ namespace net::worker::commands::SL{
 
 	template<class Protocol, class DBAdapter>
 	struct SLGET : BaseCommandRO<Protocol,DBAdapter>{
-		
-		SLGET() : BaseCommandRO<Protocol,DBAdapter>("SLGET", std::begin(cmd__), std::end(cmd__)){}
 
+		SLGET() : BaseCommandRO<Protocol,DBAdapter>("SLGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLGET key n
 
@@ -211,9 +205,8 @@ namespace net::worker::commands::SL{
 
 	template<class Protocol, class DBAdapter>
 	struct SLMGET : BaseCommandRO<Protocol,DBAdapter>{
-		
-		SLMGET() : BaseCommandRO<Protocol,DBAdapter>("SLMGET", std::begin(cmd__), std::end(cmd__)){}
 
+		SLMGET() : BaseCommandRO<Protocol,DBAdapter>("SLMGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLMGET key val val val
 
@@ -256,7 +249,7 @@ namespace net::worker::commands::SL{
 				return processHuge__(result, blob, std::begin(p) + varg, std::end(p), container, sl);
 		}
 
-	
+
 		constexpr static size_t HTMax  = OutputBlob::ParamContainerSize;
 		constexpr static size_t HTSize = OutputBlob::ParamContainerSizeHTSize;
 
@@ -268,7 +261,7 @@ namespace net::worker::commands::SL{
 		template<typename T, size_t MaxItems, size_t Size>
 		using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
-	
+
 		static void processNaive__(Result<Protocol> &result,
 					ParamContainer::iterator first, ParamContainer::iterator last,
 						OutputBlob::Container &container, s_list::RawSListConst const &sl){
@@ -379,9 +372,8 @@ namespace net::worker::commands::SL{
 
 	template<class Protocol, class DBAdapter>
 	struct SLGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		
-		SLGETALL() : BaseCommandRO<Protocol,DBAdapter>("SLGETALL", std::begin(cmd__), std::end(cmd__)){}
 
+		SLGETALL() : BaseCommandRO<Protocol,DBAdapter>("SLGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLGETALL key
 
@@ -430,9 +422,8 @@ namespace net::worker::commands::SL{
 
 	template<class Protocol, class DBAdapter>
 	struct SLCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		
-		SLCOUNT() : BaseCommandRO<Protocol,DBAdapter>("SLCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
+		SLCOUNT() : BaseCommandRO<Protocol,DBAdapter>("SLCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLCOUNT key
 
