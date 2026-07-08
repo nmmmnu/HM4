@@ -5,7 +5,7 @@
 #include "shared_hint.h"
 
 namespace net::worker::commands::HLL{
-	namespace hll_impl_{
+	namespace impl_{
 		using Pair = hm4::Pair;
 
 		constexpr uint8_t HLL_Bits = 12;
@@ -67,13 +67,13 @@ namespace net::worker::commands::HLL{
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
 		}
 
-	} // namespace hll_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct PFADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		PFADD() : BaseCommandRW<Protocol,DBAdapter>("PFADD", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -92,7 +92,7 @@ namespace net::worker::commands::HLL{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
@@ -103,7 +103,7 @@ namespace net::worker::commands::HLL{
 			return result.set(factory.getBits());
 		}
 
-	
+
 		struct PFADDFactoryBits : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>;
@@ -111,7 +111,7 @@ namespace net::worker::commands::HLL{
 			using It   = ParamContainer::iterator;
 
 			PFADDFactoryBits(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair	),
+							Base::IFactoryAction	(key, impl_::HLL_M, pair	),
 							begin			(begin				),
 							end			(end				){}
 
@@ -123,9 +123,9 @@ namespace net::worker::commands::HLL{
 				return bits;
 			}
 
-		
+
 			bool action_(Pair *pair) const{
-				using namespace hll_impl_;
+				using namespace impl_;
 
 				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
 
@@ -140,7 +140,7 @@ namespace net::worker::commands::HLL{
 				return result;
 			}
 
-		
+
 			It	begin;
 			It	end;
 
@@ -159,7 +159,7 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		PFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("PFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -172,7 +172,7 @@ namespace net::worker::commands::HLL{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			hm4::insertV<hm4::PairFactory::Reserve>(*db, key, HLL_M);
 
@@ -191,7 +191,7 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFINTERSECT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		PFINTERSECT() : BaseCommandRO<Protocol,DBAdapter>("PFINTERSECT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -213,7 +213,7 @@ namespace net::worker::commands::HLL{
 
 			MySpan<const std::string_view> const &keys{ p.data() + 1, p.size() - 1 };
 
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			uint64_t const n = hll_op_round(
 						hll_op_intersect(keys, db)
@@ -234,7 +234,7 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		PFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("PFCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -253,7 +253,7 @@ namespace net::worker::commands::HLL{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			uint8_t *hll = hll_;
 
@@ -270,8 +270,8 @@ namespace net::worker::commands::HLL{
 			return result.set( n );
 		}
 
-	
-		uint8_t hll_[hll_impl_::HLL_M];
+
+		uint8_t hll_[impl_::HLL_M];
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -285,7 +285,7 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		PFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("PFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -304,7 +304,7 @@ namespace net::worker::commands::HLL{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
@@ -319,7 +319,7 @@ namespace net::worker::commands::HLL{
 			return result.set(n);
 		}
 
-	
+
 		// mostly copy of PFADDFactory but add some operations
 		struct PFADDFactoryCount : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>{
 			using Pair = hm4::Pair;
@@ -328,7 +328,7 @@ namespace net::worker::commands::HLL{
 			using It   = ParamContainer::iterator;
 
 			PFADDFactoryCount(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair	),
+							Base::IFactoryAction	(key, impl_::HLL_M, pair	),
 							begin			(begin				),
 							end			(end				){}
 
@@ -340,9 +340,9 @@ namespace net::worker::commands::HLL{
 				return count;
 			}
 
-		
+
 			double action_(Pair *pair) const{
-				using namespace hll_impl_;
+				using namespace impl_;
 
 				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
 
@@ -356,7 +356,7 @@ namespace net::worker::commands::HLL{
 				return getHLL().estimate(hll_data);
 			}
 
-		
+
 			It	begin;
 			It	end;
 
@@ -375,7 +375,7 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFMERGE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		PFMERGE() : BaseCommandRW<Protocol,DBAdapter>("PFMERGE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -394,7 +394,7 @@ namespace net::worker::commands::HLL{
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			HLLVector container;
 
@@ -421,21 +421,21 @@ namespace net::worker::commands::HLL{
 			return result.set();
 		}
 
-	
+
 		using HLLVector = StaticVector<const uint8_t *, OutputBlob::ParamContainerSize>;
 
-	
+
 		struct PFMergeFactory : hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>;
 
 			PFMergeFactory(std::string_view const key, const Pair *pair, HLLVector::iterator begin, HLLVector::iterator end) :
-							Base::IFactoryAction	(key, hll_impl_::HLL_M, pair),
+							Base::IFactoryAction	(key, impl_::HLL_M, pair),
 							begin			(begin		),
 							end			(end		){}
 
 			void action(Pair *pair) const{
-				using namespace hll_impl_;
+				using namespace impl_;
 
 				auto *hll = hm4::getValAs<uint8_t>(pair);
 
@@ -447,7 +447,7 @@ namespace net::worker::commands::HLL{
 					getHLL().merge(hll, *it);
 			}
 
-		
+
 			HLLVector::iterator	begin;
 			HLLVector::iterator	end;
 		};
@@ -464,12 +464,12 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFBITS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		PFBITS() : BaseCommandRO<Protocol,DBAdapter>("PFBITS", std::begin(cmd__), std::end(cmd__)){}
 
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			return result.set(uint64_t{HLL_Bits});
 		}
@@ -486,12 +486,12 @@ namespace net::worker::commands::HLL{
 
 	template<class Protocol, class DBAdapter>
 	struct PFERROR : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		PFERROR() : BaseCommandRO<Protocol,DBAdapter>("PFERROR", std::begin(cmd__), std::end(cmd__)){}
 
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			using namespace hll_impl_;
+			using namespace impl_;
 
 			return result.set(static_cast<uint64_t>(getHLL().error() * 10000));
 		}

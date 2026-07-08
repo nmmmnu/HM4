@@ -8,7 +8,7 @@
 
 namespace net::worker::commands::SL{
 
-	namespace sl_impl_{
+	namespace impl_{
 		using namespace s_list;
 
 		template<typename MyRawSList, typename Pair>
@@ -101,7 +101,7 @@ namespace net::worker::commands::SL{
 			return result.set_1();
 		}
 
-	} // namespace sl_impl_
+	} // namespace impl_
 
 
 
@@ -113,7 +113,7 @@ namespace net::worker::commands::SL{
 		// SLADD key item item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return sl_impl_::processADD(p, db, result, true);
+			return impl_::processADD(p, db, result, true);
 		}
 
 	private:
@@ -134,7 +134,7 @@ namespace net::worker::commands::SL{
 		// SLADD key item item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return sl_impl_::processADD(p, db, result, false);
+			return impl_::processADD(p, db, result, false);
 		}
 
 	private:
@@ -157,7 +157,7 @@ namespace net::worker::commands::SL{
 		// SLGET key n
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace sl_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -211,7 +211,7 @@ namespace net::worker::commands::SL{
 		// SLMGET key val val val
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace sl_impl_;
+			using namespace impl_;
 
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
@@ -378,7 +378,7 @@ namespace net::worker::commands::SL{
 		// SLGETALL key
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace sl_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -428,7 +428,7 @@ namespace net::worker::commands::SL{
 		// SLCOUNT key
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace sl_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);

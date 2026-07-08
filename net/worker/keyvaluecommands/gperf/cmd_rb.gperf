@@ -4,7 +4,7 @@ RBRESERVE,	"RBRESERVE"
 rbadd,		"RBADD"
 RBADD,		"RBADD"
 rbpush,		"RBADD"
-RBpUSH,		"RBADD"
+RBPUSH,		"RBADD"
 # ---
 rbpop,		"RBPOP"
 RBPOP,		"RBPOP"

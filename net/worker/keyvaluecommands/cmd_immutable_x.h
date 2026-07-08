@@ -9,7 +9,7 @@
 #include "shared_accumulateresults.h"
 
 namespace net::worker::commands::ImmutableX{
-	namespace immutablex_impl_{
+	namespace impl_{
 
 		using namespace net::worker::shared::accumulate_results;
 		using namespace net::worker::shared::config;
@@ -62,18 +62,18 @@ namespace net::worker::commands::ImmutableX{
 			return results;
 		}
 
-	} // namespace immutablex_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct XNGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XNGET() : BaseCommandRO<Protocol,DBAdapter>("XNGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -114,12 +114,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNNEXT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XNNEXT() : BaseCommandRO<Protocol,DBAdapter>("XNNEXT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -158,12 +158,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XRGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XRGET() : BaseCommandRO<Protocol,DBAdapter>("XRGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -203,12 +203,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XRNEXT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XRNEXT() : BaseCommandRO<Protocol,DBAdapter>("XRNEXT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -247,12 +247,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XUGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XUGET() : BaseCommandRO<Protocol,DBAdapter>("XUGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -288,12 +288,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XUNEXT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XUNEXT() : BaseCommandRO<Protocol,DBAdapter>("XUNEXT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -328,12 +328,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XNGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XNGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -373,12 +373,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XRGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XRGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XRGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -418,12 +418,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XUGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		XUGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XUGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -459,12 +459,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		HGETALL() : BaseCommandRO<Protocol,DBAdapter>("HGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -506,12 +506,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		HGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("HGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -553,12 +553,12 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HGETVALS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		HGETVALS() : BaseCommandRO<Protocol,DBAdapter>("HGETVALS", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -600,7 +600,7 @@ namespace net::worker::commands::ImmutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HLEN : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		HLEN() : BaseCommandRO<Protocol,DBAdapter>("HLEN", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -610,7 +610,7 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-			using namespace immutablex_impl_;
+			using namespace impl_;
 
 
 

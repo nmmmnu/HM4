@@ -22,7 +22,7 @@ namespace net::worker::commands::MortonCurve2D{
 
 	static_assert(sizeof(ElemType) * DIM <= sizeof(ZZZType));
 
-	namespace morton_curve_impl_{
+	namespace impl_{
 
 		using namespace net::worker::shared::stop_predicate;
 		using namespace net::worker::shared::config;
@@ -303,20 +303,20 @@ namespace net::worker::commands::MortonCurve2D{
 		#endif
 
 
-	} // namespace morton_curve_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MC2GET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2GET() : BaseCommandRO<Protocol,DBAdapter>("MC2GET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -346,13 +346,13 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2MGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2MGET() : BaseCommandRO<Protocol,DBAdapter>("MC2MGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
@@ -402,14 +402,14 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2SCORE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC2SCORE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2SCORE key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -460,14 +460,14 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2ADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		MC2ADD() : BaseCommandRW<Protocol,DBAdapter>("MC2ADD", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2ADD a keySub0 x0 y0 val0 keySub1 x1 y1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			auto const varg  = 2;
 			auto const vstep = varg + DIM;
@@ -530,14 +530,14 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2REM : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		MC2REM() : BaseCommandRW<Protocol,DBAdapter>("MC2REM", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2DEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -559,14 +559,14 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2POINT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2POINT() : BaseCommandRO<Protocol,DBAdapter>("MC2POINT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2POINT morton 10 20 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_45);
@@ -619,14 +619,14 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC2RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2RANGENAIVE morton 10 10 20 20 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_67);
@@ -683,14 +683,14 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC2RANGE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MC2RANGE morton 10 10 20 20 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_67);
@@ -745,12 +745,12 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2ENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC2ENCODE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() != 1 + DIM)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -780,12 +780,12 @@ namespace net::worker::commands::MortonCurve2D{
 
 	template<class Protocol, class DBAdapter>
 	struct MC2DECODE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MC2DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC2DECODE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			using namespace morton_curve_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);

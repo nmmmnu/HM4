@@ -11,7 +11,7 @@
 #include "shared_accumulateresults.h"
 
 namespace net::worker::commands::AC{
-	namespace ac_impl_{
+	namespace impl_{
 		using namespace net::worker::shared::accumulate_results;
 		using namespace net::worker::shared::config;
 		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
@@ -272,14 +272,14 @@ namespace net::worker::commands::AC{
 
 	template<class Protocol, class DBAdapter>
 	struct ACADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		ACADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// ACADD_UTF8 a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace ac_impl_;
+			using namespace impl_;
 
 			return do_processACADD<UTF8Tokenizer>(p, db, result);
 		}
@@ -296,14 +296,14 @@ namespace net::worker::commands::AC{
 
 	template<class Protocol, class DBAdapter>
 	struct ACADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		ACADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACADD_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// ACADD_BIN a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace ac_impl_;
+			using namespace impl_;
 
 			return do_processACADD<ASCIITokenizer>(p, db, result);
 		}
@@ -319,14 +319,14 @@ namespace net::worker::commands::AC{
 
 	template<class Protocol, class DBAdapter>
 	struct ACDEL_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		ACDEL_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// ACADD_UTF8 a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace ac_impl_;
+			using namespace impl_;
 
 			return do_processACDEL<UTF8Tokenizer>(p, db, result);
 		}
@@ -344,14 +344,14 @@ namespace net::worker::commands::AC{
 
 	template<class Protocol, class DBAdapter>
 	struct ACDEL_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		ACDEL_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// ACADD_BIN a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace ac_impl_;
+			using namespace impl_;
 
 			return do_processACDEL<ASCIITokenizer>(p, db, result);
 		}
@@ -369,14 +369,14 @@ namespace net::worker::commands::AC{
 
 	template<class Protocol, class DBAdapter>
 	struct ACRANGE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		ACRANGE() : BaseCommandRO<Protocol,DBAdapter>("ACRANGE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// ACRANGE a text count keyStart
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace ac_impl_;
+			using namespace impl_;
 
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
@@ -414,14 +414,14 @@ namespace net::worker::commands::AC{
 
 	template<class Protocol, class DBAdapter>
 	struct ACRANGEALL : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		ACRANGEALL() : BaseCommandRO<Protocol,DBAdapter>("ACRANGEALL", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// ACRANGEALL a count keyStart
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace ac_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);

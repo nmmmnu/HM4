@@ -5,7 +5,7 @@
 #include "shared_hint.h"
 
 namespace net::worker::commands::MG{
-	namespace mg_impl_{
+	namespace impl_{
 		constexpr char   DELIMITER	= ',';
 
 		constexpr uint8_t MIN_SLOTS	=   1;
@@ -14,8 +14,6 @@ namespace net::worker::commands::MG{
 		constexpr bool isSlotsValid(uint8_t slots){
 			return slots >= MIN_SLOTS && slots <= MAX_SLOTS;
 		}
-
-
 
 		template<typename T>
 		struct type_identity{
@@ -39,20 +37,20 @@ namespace net::worker::commands::MG{
 			default   : return f(type_identity<std::nullptr_t	>{});
 			}
 		}
-	} // namespace mg_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct MGADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		MGADD() : BaseCommandRW<Protocol,DBAdapter>("MGADD", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MGADD key slots bytes item item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace mg_impl_;
+			using namespace impl_;
 
 		//	auto const varg = 4;
 
@@ -88,7 +86,7 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<typename MyRawMisraGries>
 		void process_(MyRawMisraGries &mg, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			auto const varg = 4;
@@ -109,7 +107,7 @@ namespace net::worker::commands::MG{
 			);
 		}
 
-	
+
 		template<typename MyRawMisraGries>
 		struct MGADDFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDFactory<MyRawMisraGries> >{
 			using Pair = hm4::Pair;
@@ -131,7 +129,7 @@ namespace net::worker::commands::MG{
 				return result;
 			}
 
-		
+
 			bool action_(Pair *pair) const{
 				using List = typename MyRawMisraGries::List;
 
@@ -148,7 +146,7 @@ namespace net::worker::commands::MG{
 				return result;
 			}
 
-		
+
 			MyRawMisraGries		mg;
 			It			begin;
 			It			end;
@@ -167,14 +165,14 @@ namespace net::worker::commands::MG{
 
 	template<class Protocol, class DBAdapter>
 	struct MGADDGET : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		MGADDGET() : BaseCommandRW<Protocol,DBAdapter>("MGADDGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MGADDGET key slots bytes item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace mg_impl_;
+			using namespace impl_;
 
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
@@ -210,7 +208,7 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<typename MyRawMisraGries>
 		void process_(MyRawMisraGries &mg, std::string_view const key, std::string_view const item, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			if (!mg.isItemValid(item))
@@ -229,7 +227,7 @@ namespace net::worker::commands::MG{
 			);
 		}
 
-	
+
 		template<typename MyRawMisraGries>
 		struct MGADDGETFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDGETFactory<MyRawMisraGries> >{
 			using Pair = hm4::Pair;
@@ -248,7 +246,7 @@ namespace net::worker::commands::MG{
 				return score;
 			}
 
-		
+
 			uint64_t action_(Pair *pair) const{
 				using List = typename MyRawMisraGries::List;
 
@@ -257,7 +255,7 @@ namespace net::worker::commands::MG{
 				return mg.add(*mg_data, item);
 			}
 
-		
+
 			MyRawMisraGries		mg;
 			std::string_view	item;
 			uint64_t		score = 0;
@@ -275,14 +273,14 @@ namespace net::worker::commands::MG{
 
 	template<class Protocol, class DBAdapter>
 	struct MGRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		MGRESERVE() : BaseCommandRW<Protocol,DBAdapter>("MGRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MGRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace mg_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -329,14 +327,14 @@ namespace net::worker::commands::MG{
 
 	template<class Protocol, class DBAdapter>
 	struct MGGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MGGET() : BaseCommandRO<Protocol,DBAdapter>("MGGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// MGGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace mg_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -372,7 +370,7 @@ namespace net::worker::commands::MG{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<class MyRawMisraGries>
 		void process_(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 

@@ -2,110 +2,108 @@
 
 namespace net::worker::commands::MutableGET{
 
-	namespace mutable_get_impl_{
-		namespace{
+	namespace impl_{
 
-			template<class DBAdapter>
-			struct SetPredicate{
-				using List = typename DBAdapter::List;
+		template<class DBAdapter>
+		struct SetPredicate{
+			using List = typename DBAdapter::List;
 
-				std::string_view key;
-				std::string_view val;
+			std::string_view key;
+			std::string_view val;
 
-				void process(List &list){
-					hm4::insert(list, key, val);
-				}
-
-				void processHint(List &list, const hm4::Pair *hint){
-					assert(key ==  hint->getKey());
-					hm4::insertHintF<hm4::PairFactory::Normal>(list, hint, hint->getKey(), val);
-				}
-			};
-
-			template<class DBAdapter>
-			struct DeletePredicate{
-				using List = typename DBAdapter::List;
-
-				static void process(List &){
-				}
-
-				static void processHint(List &list, const hm4::Pair *hint){
-					hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
-				}
-			};
-
-			template<class DBAdapter>
-			struct PersistPredicate{
-				using List = typename DBAdapter::List;
-
-				constexpr static uint32_t expires = 0;
-
-				static void process(List &){
-				}
-
-				static void processHint(List &list, const hm4::Pair *hint){
-					hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
-				}
-			};
-
-			template<class DBAdapter>
-			struct ExpirePredicate{
-				using List = typename DBAdapter::List;
-
-				uint32_t expires;
-
-				static void process(List &){
-				}
-
-				void processHint(List &list, const hm4::Pair *hint) const{
-					hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
-				}
-			};
-
-			template<class DBAdapter>
-			struct ExpireAtPredicate{
-				using List = typename DBAdapter::List;
-
-				uint32_t time;
-
-				static void process(List &){
-				}
-
-				void processHint(List &list, const hm4::Pair *hint) const{
-					if (auto const now = mytime::now32(); now >= time){
-						hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
-					}else{
-						// this will not overflow
-						auto const expires = time - mytime::now32();
-
-						hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
-					}
-				}
-			};
-
-
-
-			template<class Predicate, class List, class Result>
-			void processGet(Predicate p, List &list, std::string_view key, Result &result){
-				if (auto *it = hm4::getPairPtr(list, key); it){
-					result.set(it->getVal());
-
-					return p.processHint(list, it);
-				}else{
-					result.set("");
-
-					return p.process(list);
-				}
+			void process(List &list){
+				hm4::insert(list, key, val);
 			}
 
-		} // namespace
-	} // namespace mutable_get_impl_
+			void processHint(List &list, const hm4::Pair *hint){
+				assert(key ==  hint->getKey());
+				hm4::insertHintF<hm4::PairFactory::Normal>(list, hint, hint->getKey(), val);
+			}
+		};
+
+		template<class DBAdapter>
+		struct DeletePredicate{
+			using List = typename DBAdapter::List;
+
+			static void process(List &){
+			}
+
+			static void processHint(List &list, const hm4::Pair *hint){
+				hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
+			}
+		};
+
+		template<class DBAdapter>
+		struct PersistPredicate{
+			using List = typename DBAdapter::List;
+
+			constexpr static uint32_t expires = 0;
+
+			static void process(List &){
+			}
+
+			static void processHint(List &list, const hm4::Pair *hint){
+				hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
+			}
+		};
+
+		template<class DBAdapter>
+		struct ExpirePredicate{
+			using List = typename DBAdapter::List;
+
+			uint32_t expires;
+
+			static void process(List &){
+			}
+
+			void processHint(List &list, const hm4::Pair *hint) const{
+				hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
+			}
+		};
+
+		template<class DBAdapter>
+		struct ExpireAtPredicate{
+			using List = typename DBAdapter::List;
+
+			uint32_t time;
+
+			static void process(List &){
+			}
+
+			void processHint(List &list, const hm4::Pair *hint) const{
+				if (auto const now = mytime::now32(); now >= time){
+					hm4::insertHintF<hm4::PairFactory::Tombstone>(list, hint, hint->getKey());
+				}else{
+					// this will not overflow
+					auto const expires = time - mytime::now32();
+
+					hm4::insertHintF<hm4::PairFactory::Expires>(list, hint, hint->getKey(), hint->getVal(), expires);
+				}
+			}
+		};
+
+
+
+		template<class Predicate, class List, class Result>
+		void processGet(Predicate p, List &list, std::string_view key, Result &result){
+			if (auto *it = hm4::getPairPtr(list, key); it){
+				result.set(it->getVal());
+
+				return p.processHint(list, it);
+			}else{
+				result.set("");
+
+				return p.process(list);
+			}
+		}
+
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GETSET : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		GETSET() : BaseCommandRW<Protocol,DBAdapter>("GETSET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -121,7 +119,7 @@ namespace net::worker::commands::MutableGET{
 			if (!hm4::Pair::isValValid(val))
 				return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			using namespace mutable_get_impl_;
+			using namespace impl_;
 
 			SetPredicate<DBAdapter>	pred{ key, val };
 
@@ -139,7 +137,7 @@ namespace net::worker::commands::MutableGET{
 
 	template<class Protocol, class DBAdapter>
 	struct GETDEL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		GETDEL() : BaseCommandRW<Protocol,DBAdapter>("GETDEL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -151,7 +149,7 @@ namespace net::worker::commands::MutableGET{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace mutable_get_impl_;
+			using namespace impl_;
 
 			DeletePredicate<DBAdapter>	pred;
 
@@ -169,7 +167,7 @@ namespace net::worker::commands::MutableGET{
 
 	template<class Protocol, class DBAdapter>
 	struct GETEX : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		GETEX() : BaseCommandRW<Protocol,DBAdapter>("GETEX", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -183,7 +181,7 @@ namespace net::worker::commands::MutableGET{
 
 			auto const exp		= from_string<uint32_t>(p[2]);
 
-			using namespace mutable_get_impl_;
+			using namespace impl_;
 
 			ExpirePredicate<DBAdapter>	pred{ exp };
 
@@ -201,7 +199,7 @@ namespace net::worker::commands::MutableGET{
 
 	template<class Protocol, class DBAdapter>
 	struct GETEXAT : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		GETEXAT() : BaseCommandRW<Protocol,DBAdapter>("GETEXAT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -215,7 +213,7 @@ namespace net::worker::commands::MutableGET{
 
 			auto const time		= from_string<uint32_t>(p[2]);
 
-			using namespace mutable_get_impl_;
+			using namespace impl_;
 
 			ExpireAtPredicate<DBAdapter>	pred{ time };
 
@@ -233,7 +231,7 @@ namespace net::worker::commands::MutableGET{
 
 	template<class Protocol, class DBAdapter>
 	struct GETPERSIST : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		GETPERSIST() : BaseCommandRW<Protocol,DBAdapter>("GETPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -245,7 +243,7 @@ namespace net::worker::commands::MutableGET{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace mutable_get_impl_;
+			using namespace impl_;
 
 			PersistPredicate<DBAdapter>	pred;
 

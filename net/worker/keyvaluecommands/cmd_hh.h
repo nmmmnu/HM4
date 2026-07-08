@@ -5,7 +5,7 @@
 #include "shared_hint.h"
 
 namespace net::worker::commands::HH{
-	namespace hh_impl_{
+	namespace impl_{
 		constexpr char   DELIMITER	= ',';
 
 		constexpr uint8_t MIN_SLOTS	=   1;
@@ -14,8 +14,6 @@ namespace net::worker::commands::HH{
 		constexpr bool isSlotsValid(uint8_t slots){
 			return slots >= MIN_SLOTS && slots <= MAX_SLOTS;
 		}
-
-
 
 		template<typename T>
 		struct type_identity{
@@ -140,20 +138,20 @@ namespace net::worker::commands::HH{
 			return type_dispatch(bytes, f);
 		}
 
-	} // namespace hh_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct HHINCR : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		HHINCR() : BaseCommandRW<Protocol,DBAdapter>("HHINCR", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// HHADD key slots bytes item score item score
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace hh_impl_;
+			using namespace impl_;
 
 			return do_hh_incr_decr(p, db, result, std::true_type{});
 		}
@@ -169,14 +167,14 @@ namespace net::worker::commands::HH{
 
 	template<class Protocol, class DBAdapter>
 	struct HHDECR : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		HHDECR() : BaseCommandRW<Protocol,DBAdapter>("HHDECR", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// HHADD key slots bytes item score item score
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace hh_impl_;
+			using namespace impl_;
 
 			return do_hh_incr_decr(p, db, result, std::false_type{});
 		}
@@ -192,14 +190,14 @@ namespace net::worker::commands::HH{
 
 	template<class Protocol, class DBAdapter>
 	struct HHRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		HHRESERVE() : BaseCommandRW<Protocol,DBAdapter>("HHRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// HHRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace hh_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -246,14 +244,14 @@ namespace net::worker::commands::HH{
 
 	template<class Protocol, class DBAdapter>
 	struct HHGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		HHGET() : BaseCommandRO<Protocol,DBAdapter>("HHGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// HHGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace hh_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -289,7 +287,7 @@ namespace net::worker::commands::HH{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<class MyRawHeavyHitter>
 		void process_(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 

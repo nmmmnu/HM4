@@ -8,7 +8,7 @@
 #include "ilist/txguard.h"
 
 namespace net::worker::commands::Index{
-	namespace index_impl_{
+	namespace impl_{
 		using namespace net::worker::shared::accumulate_results;
 		using namespace net::worker::shared::config;
 
@@ -65,7 +65,7 @@ namespace net::worker::commands::Index{
 			template<class Protocol, class DBAdapter>
 			using cmd6 = Cmd<6, Protocol, DBAdapter>;
 		};
-	} // namespace index_impl_
+	} // namespace impl_
 
 
 
@@ -94,7 +94,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(index_impl_::assertN(N));
+		static_assert(impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -163,7 +163,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(index_impl_::assertN(N));
+		static_assert(impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -213,7 +213,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(index_impl_::assertN(N));
+		static_assert(impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -354,7 +354,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(index_impl_::assertN(N));
+		static_assert(impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -393,7 +393,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(index_impl_::assertN(N));
+		static_assert(impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -428,7 +428,7 @@ namespace net::worker::commands::Index{
 		// IX_RANGE key ABC '' '' '' count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace index_impl_;
+			using namespace impl_;
 
 			if (p.size() != 1 + 2 + N + 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS[4 + N]);
@@ -528,7 +528,7 @@ namespace net::worker::commands::Index{
 		}
 
 	private:
-		static_assert(index_impl_::assertN(N));
+		static_assert(impl_::assertN(N));
 
 		using PN = shared::zsetmulti::Permutation<N>;
 
@@ -560,7 +560,7 @@ namespace net::worker::commands::Index{
 		constexpr inline static std::string_view name	= "index";
 
 		static void load(RegisterPack &pack){
-			using namespace index_impl_;
+			using namespace impl_;
 
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				LH<IX_GET		>::cmd1	,

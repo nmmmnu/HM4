@@ -3,7 +3,7 @@
 
 
 namespace net::worker::commands::Compat{
-	namespace compat_impl_{
+	namespace impl_{
 
 		template<class Protocol, class DBAdapter>
 		struct OK : BaseCommandRO<Protocol,DBAdapter>{
@@ -36,12 +36,12 @@ namespace net::worker::commands::Compat{
 			T n;
 		};
 
-	} // namespace compat_impl_
+	} // namespace impl_
 
 
 	template<class Protocol, class DBAdapter>
-	struct SELECT : compat_impl_::OK<Protocol,DBAdapter>{
-		SELECT() : compat_impl_::OK<Protocol,DBAdapter>("SELECT", std::begin(cmd__), std::end(cmd__)){}
+	struct SELECT : impl_::OK<Protocol,DBAdapter>{
+		SELECT() : impl_::OK<Protocol,DBAdapter>("SELECT", std::begin(cmd__), std::end(cmd__)){}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -50,8 +50,8 @@ namespace net::worker::commands::Compat{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct RESET : compat_impl_::OK<Protocol,DBAdapter>{
-		RESET() : compat_impl_::OK<Protocol,DBAdapter>("RESET", std::begin(cmd__), std::end(cmd__)){}
+	struct RESET : impl_::OK<Protocol,DBAdapter>{
+		RESET() : impl_::OK<Protocol,DBAdapter>("RESET", std::begin(cmd__), std::end(cmd__)){}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -60,8 +60,8 @@ namespace net::worker::commands::Compat{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct TYPE : compat_impl_::VAL<Protocol,DBAdapter,std::string_view, compat_impl_::ResultType::SIMPLE_STRING>{
-		constexpr TYPE() : compat_impl_::VAL<Protocol,DBAdapter,std::string_view, compat_impl_::ResultType::SIMPLE_STRING>(
+	struct TYPE : impl_::VAL<Protocol,DBAdapter,std::string_view, impl_::ResultType::SIMPLE_STRING>{
+		constexpr TYPE() : impl_::VAL<Protocol,DBAdapter,std::string_view, impl_::ResultType::SIMPLE_STRING>(
 			"TYPE", std::begin(cmd__), std::end(cmd__), "string"){}
 
 	private:
@@ -71,8 +71,8 @@ namespace net::worker::commands::Compat{
 	};
 
 	template<class Protocol, class DBAdapter>
-	struct TOUCH : compat_impl_::VAL<Protocol,DBAdapter,bool>{
-		constexpr TOUCH() : compat_impl_::VAL<Protocol,DBAdapter,bool>("TOUCH", std::begin(cmd__), std::end(cmd__), true){}
+	struct TOUCH : impl_::VAL<Protocol,DBAdapter,bool>{
+		constexpr TOUCH() : impl_::VAL<Protocol,DBAdapter,bool>("TOUCH", std::begin(cmd__), std::end(cmd__), true){}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {

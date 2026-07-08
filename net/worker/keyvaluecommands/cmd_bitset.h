@@ -5,7 +5,7 @@
 #include "smart_memcpy.h"
 
 namespace net::worker::commands::BITSET{
-	namespace bit_impl_{
+	namespace impl_{
 		using namespace shared::bit;
 
 		using Pair = hm4::Pair;
@@ -19,7 +19,7 @@ namespace net::worker::commands::BITSET{
 
 	template<class Protocol, class DBAdapter>
 	struct BITSET : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		BITSET() : BaseCommandRW<Protocol,DBAdapter>("BITSET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -29,7 +29,7 @@ namespace net::worker::commands::BITSET{
 			if (p.size() < 4 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
 
-			using namespace bit_impl_;
+			using namespace impl_;
 
 			const auto &key = p[1];
 
@@ -55,9 +55,9 @@ namespace net::worker::commands::BITSET{
 			return result.set();
 		}
 
-	
+
 		static auto getBytes__(ParamContainer const &p){
-			using namespace bit_impl_;
+			using namespace impl_;
 
 			bool ok = false;
 			size_type max = 0;
@@ -76,7 +76,7 @@ namespace net::worker::commands::BITSET{
 			return std::make_pair(ok, BitOps::size(max));
 		}
 
-	
+
 		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory>;
@@ -89,7 +89,7 @@ namespace net::worker::commands::BITSET{
 							end				(end		){}
 
 			void action(Pair *pair) const{
-				using namespace bit_impl_;
+				using namespace impl_;
 
 				char *data = pair->getValC();
 
@@ -105,7 +105,7 @@ namespace net::worker::commands::BITSET{
 				}
 			}
 
-		
+
 			It			begin;
 			It			end;
 		};
@@ -122,7 +122,7 @@ namespace net::worker::commands::BITSET{
 
 	template<class Protocol, class DBAdapter>
 	struct BITGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		BITGET() : BaseCommandRO<Protocol,DBAdapter>("BITGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -130,7 +130,7 @@ namespace net::worker::commands::BITSET{
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
-			using namespace bit_impl_;
+			using namespace impl_;
 
 			const auto &key		= p[1];
 
@@ -169,7 +169,7 @@ namespace net::worker::commands::BITSET{
 
 	template<class Protocol, class DBAdapter>
 	struct BITMGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		BITMGET() : BaseCommandRO<Protocol,DBAdapter>("BITMGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -177,7 +177,7 @@ namespace net::worker::commands::BITSET{
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
-			using namespace bit_impl_;
+			using namespace impl_;
 
 			const auto &key = p[1];
 
@@ -226,7 +226,7 @@ namespace net::worker::commands::BITSET{
 
 	template<class Protocol, class DBAdapter>
 	struct BITCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		BITCOUNT() : BaseCommandRO<Protocol,DBAdapter>("BITCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -290,12 +290,12 @@ namespace net::worker::commands::BITSET{
 
 	template<class Protocol, class DBAdapter>
 	struct BITMAX : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		BITMAX() : BaseCommandRO<Protocol,DBAdapter>("BITMAX", std::begin(cmd__), std::end(cmd__)){}
 
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
-			using namespace bit_impl_;
+			using namespace impl_;
 
 			return result.set(BIT_MAX);
 		}

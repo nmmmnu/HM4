@@ -38,7 +38,7 @@ namespace net::worker::commands::Vectors{
 
 
 
-	namespace vectors_impl_{
+	namespace impl_{
 
 		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
 			size_t count = 0;
@@ -580,7 +580,7 @@ namespace net::worker::commands::Vectors{
 		#endif
 
 		template<typename T, typename Protocol>
-		void process_VGETRAW(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix, vectors_impl_::VType vtype){
+		void process_VGETRAW(Result<Protocol> &result, OutputBlob &blob, std::string_view const wectorSV, uint32_t const dim_ix, impl_::VType vtype){
 			using namespace MyVectors;
 
 			if (wectorSV.size() != Wector<T>::bytes(dim_ix))
@@ -949,13 +949,13 @@ namespace net::worker::commands::Vectors{
 			return result.set_container(container);
 		}
 
-	} // namespace vectors_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct VADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		VADD() : BaseCommandRW<Protocol,DBAdapter>("VADD", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -978,7 +978,7 @@ namespace net::worker::commands::Vectors{
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const varg  = 6;
 			auto const vstep = 2;
@@ -1021,10 +1021,10 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-	
+
 		template<typename T, typename IT>
-		static void process_(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype){
-			using namespace vectors_impl_;
+		static void process_(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, uint32_t const dim_ve, uint32_t const dim_ix, impl_::VType vtype){
+			using namespace impl_;
 
 			auto const vstep = 2;
 
@@ -1083,19 +1083,19 @@ namespace net::worker::commands::Vectors{
 		}
 
 
-	
+
 		template<typename T>
 		struct VADD_Factory : hm4::PairFactory::IFactoryAction<0, 0, VADD_Factory<T>, shared::zsetmulti::IZSetMultyFactory >{
 			using Pair  = hm4::Pair;
 			using Base  = hm4::PairFactory::IFactoryAction<0, 0, VADD_Factory<T>, shared::zsetmulti::IZSetMultyFactory >;
 
 			constexpr VADD_Factory(FVector fvector, std::string_view hash) :
-							Base::IFactoryAction	(/* key */ {}, vectors_impl_::Wector<T>::bytes(fvector.size()) ),
+							Base::IFactoryAction	(/* key */ {}, impl_::Wector<T>::bytes(fvector.size()) ),
 							fvector				(fvector	),
 							hash				(hash		){}
 
 			void action(Pair *pair) const{
-				using namespace vectors_impl_;
+				using namespace impl_;
 
 				auto &wectorBuffer = *reinterpret_cast<WectorBuffer<T> *>(pair->getValC());
 
@@ -1113,7 +1113,7 @@ namespace net::worker::commands::Vectors{
 				return hash;
 			}
 
-		
+
 			FVector			fvector;
 			std::string_view	hash;
 		};
@@ -1129,12 +1129,12 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VREM : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		VREM() : BaseCommandRW<Protocol,DBAdapter>("VREM", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -1155,7 +1155,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VGET() : BaseCommandRO<Protocol,DBAdapter>("VGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -1180,7 +1180,7 @@ namespace net::worker::commands::Vectors{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const &name = p[4];
 
@@ -1222,7 +1222,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VGETRAW : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VGETRAW() : BaseCommandRO<Protocol,DBAdapter>("VGETRAW", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -1253,7 +1253,7 @@ namespace net::worker::commands::Vectors{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const &name = p[5];
 
@@ -1301,7 +1301,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VGETNORMALIZED : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VGETNORMALIZED() : BaseCommandRO<Protocol,DBAdapter>("VGETNORMALIZED", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -1326,7 +1326,7 @@ namespace net::worker::commands::Vectors{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const &name = p[4];
 
@@ -1369,7 +1369,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VSIMFLAT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VSIMFLAT() : BaseCommandRO<Protocol,DBAdapter>("VSIMFLAT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -1398,7 +1398,7 @@ namespace net::worker::commands::Vectors{
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			if (p.size() != 9 && p.size() != 10)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
@@ -1466,15 +1466,15 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-	
+
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
-				vectors_impl_::DType dtype,
+				impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
 				uint32_t const results ){
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto &heap = blob.construct<VSIMHeap>();
 			// heap.clear();
@@ -1514,11 +1514,11 @@ namespace net::worker::commands::Vectors{
 
 		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
-				vectors_impl_::DType dtype,
+				impl_::DType dtype,
 				CFVector const original_fvector,
 				uint32_t const results ){
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const bitVectorBytesMax = Wector<bool>::bytes(MaxDimensions);
 
@@ -1567,7 +1567,7 @@ namespace net::worker::commands::Vectors{
 			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
 
-	
+
 		constexpr static std::string_view rangeHash__ = "00";
 
 	private:
@@ -1581,7 +1581,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VSIMLSH : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VSIMLSH() : BaseCommandRO<Protocol,DBAdapter>("VSIMLSH", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -1610,7 +1610,7 @@ namespace net::worker::commands::Vectors{
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			if (p.size() != 9 && p.size() != 10)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
@@ -1682,15 +1682,15 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-	
+
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
-				vectors_impl_::DType dtype,
+				impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude, uint8_t const lsh,
 				uint32_t const results ){
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto &heap = blob.construct<VSIMHeap>();
 			// heap_.clear();
@@ -1768,11 +1768,11 @@ namespace net::worker::commands::Vectors{
 
 		static void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view keyN, std::string_view startKey, uint32_t const dim_ix,
-				vectors_impl_::DType dtype,
+				impl_::DType dtype,
 				CFVector const original_fvector, uint8_t const lsh,
 				uint32_t const results ){
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const bitVectorBytesMax = Wector<bool>::bytes(MaxDimensions);
 
@@ -1858,7 +1858,7 @@ namespace net::worker::commands::Vectors{
 			return process_VSIM_finish<bool>(db, result, blob, dtype, heap, tail, original_fvector, bitVector);
 		}
 
-	
+
 		constexpr static size_t rangeHashSize__ = 4; // 00FF
 
 		using RangeBuffer = std::array<char, rangeHashSize__ + 1>; // 00FF\0
@@ -1874,7 +1874,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VKSET : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		VKSET() : BaseCommandRW<Protocol,DBAdapter>("VKSET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -1897,7 +1897,7 @@ namespace net::worker::commands::Vectors{
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			if (p.size() != 7)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
@@ -1944,10 +1944,10 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-	
+
 		template<typename T>
-		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, vectors_impl_::VType vtype){
-			using namespace vectors_impl_;
+		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view key, std::string_view vectorSV, uint32_t const dim_ve, uint32_t const dim_ix, impl_::VType vtype){
+			using namespace impl_;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -1969,19 +1969,19 @@ namespace net::worker::commands::Vectors{
 			return result.set();
 		}
 
-	
+
 		template<typename T>
 		struct VKADD_Factory : hm4::PairFactory::IFactoryAction<0, 0, VKADD_Factory<T> >{
 			using Pair   = hm4::Pair;
 			using Base   = hm4::PairFactory::IFactoryAction<0, 0, VKADD_Factory<T> >;
 
 			constexpr VKADD_Factory(std::string_view key, FVector fvector) :
-							Base::IFactoryAction	(key, vectors_impl_::Wector<T>::bytes(fvector.size()) ),
+							Base::IFactoryAction	(key, impl_::Wector<T>::bytes(fvector.size()) ),
 							key				(key		),
 							fvector				(fvector	){}
 
 			void action(Pair *pair) const{
-				using namespace vectors_impl_;
+				using namespace impl_;
 
 				auto &wectorBuffer = *reinterpret_cast<WectorBuffer<T> *>(pair->getValC());
 
@@ -1990,7 +1990,7 @@ namespace net::worker::commands::Vectors{
 				Wector<T>::createInRawMemory(mem, fvector);
 			}
 
-		
+
 			std::string_view	key;
 			FVector			fvector;
 		};
@@ -2006,7 +2006,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VKGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VKGET() : BaseCommandRO<Protocol,DBAdapter>("VKGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -2031,7 +2031,7 @@ namespace net::worker::commands::Vectors{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
@@ -2065,7 +2065,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VKGETRAW : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VKGETRAW() : BaseCommandRO<Protocol,DBAdapter>("VKGETRAW", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -2096,7 +2096,7 @@ namespace net::worker::commands::Vectors{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
@@ -2136,7 +2136,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VKGETNORMALIZED : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VKGETNORMALIZED() : BaseCommandRO<Protocol,DBAdapter>("VKGETNORMALIZED", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -2161,7 +2161,7 @@ namespace net::worker::commands::Vectors{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
@@ -2196,7 +2196,7 @@ namespace net::worker::commands::Vectors{
 
 	template<class Protocol, class DBAdapter>
 	struct VKSIMFLAT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		VKSIMFLAT() : BaseCommandRO<Protocol,DBAdapter>("VKSIMFLAT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -2225,7 +2225,7 @@ namespace net::worker::commands::Vectors{
 		*/
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			if (p.size() != 9 && p.size() != 10)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_89);
@@ -2292,16 +2292,16 @@ namespace net::worker::commands::Vectors{
 			}
 		}
 
-	
+
 		template<typename T>
 		static void process_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view prefix, std::string_view startKey,
 				uint32_t const dim_ix,
-				vectors_impl_::DType dtype,
+				impl_::DType dtype,
 				CFVector const original_fvector, float const original_magnitude,
 				uint32_t const results){
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto &heap = blob.construct<VSIMHeap>();
 			// heap_.clear();
@@ -2338,11 +2338,11 @@ namespace net::worker::commands::Vectors{
 		void process_bit_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 				std::string_view prefix, std::string_view startKey,
 				uint32_t const dim_ix,
-				vectors_impl_::DType dtype,
+				impl_::DType dtype,
 				CFVector const original_fvector,
 				uint32_t const results){
 
-			using namespace vectors_impl_;
+			using namespace impl_;
 
 			auto const bitVectorBytesMax = Wector<bool>::bytes(MaxDimensions);
 

@@ -4,7 +4,7 @@
 #include "stringtokenizer.h"
 
 namespace net::worker::commands::MultiIndex{
-	namespace multi_index_impl_{
+	namespace impl_{
 
 		// constexpr uint8_t NGram	=  3;
 		constexpr size_t  MaxTokens	= 32;
@@ -62,20 +62,20 @@ namespace net::worker::commands::MultiIndex{
 			using shared::msetmulti::FTS::BaseMDecoder<DBAdapter>::sort__;
 		};
 
-	} // namespace multi_index_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXMADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		IXMADD() : BaseCommandRW<Protocol,DBAdapter>("IXMADD", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXMADD a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace multi_index_impl_;
+			using namespace impl_;
 
 			using MyMDecoder = MDecoder<DBAdapter>;
 
@@ -93,7 +93,7 @@ namespace net::worker::commands::MultiIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMRANGE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXMRANGE() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -133,14 +133,14 @@ namespace net::worker::commands::MultiIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMRANGEFLEX : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXMRANGEFLEX() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGEFLEX", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXMRANGEFLEX key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace multi_index_impl_;
+			using namespace impl_;
 
 			using MyMDecoder	= MDecoder<DBAdapter>;
 			using MyFTS		= shared::msetmulti::FTS::FTSFlex<DBAdapter, MaxTokens>;
@@ -159,14 +159,14 @@ namespace net::worker::commands::MultiIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMRANGESTRICT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXMRANGESTRICT() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGESTRICT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXMRANGESTRICT key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace multi_index_impl_;
+			using namespace impl_;
 
 			using MyMDecoder	= MDecoder<DBAdapter>;
 			using MyFTS		= shared::msetmulti::FTS::FTSStrict<DBAdapter, MaxTokens>;

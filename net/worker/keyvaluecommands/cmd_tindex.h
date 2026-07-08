@@ -6,7 +6,7 @@
 #include "utf8slidingwindow.h"
 
 namespace net::worker::commands::TrigramIndex{
-	namespace trigram_index_impl_{
+	namespace impl_{
 
 		constexpr uint8_t NGram		=  3;
 		constexpr size_t  MaxTokens	= 32;
@@ -103,20 +103,20 @@ namespace net::worker::commands::TrigramIndex{
 			using shared::msetmulti::FTS::BaseMDecoder<DBAdapter>::sort__;
 		};
 
-	} // namespace trigram_index_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct IXTADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		IXTADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("IXTADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace trigram_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= UTF8SlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -134,14 +134,14 @@ namespace net::worker::commands::TrigramIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXTADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		IXTADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("IXTADD_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTADD_BIN a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace trigram_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= BinarySlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -160,14 +160,14 @@ namespace net::worker::commands::TrigramIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGEFLEX_UTF8 : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXTRANGEFLEX_UTF8() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGEFLEX_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTRANGEFLEX_UTF8 key "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace trigram_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= UTF8SlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -188,14 +188,14 @@ namespace net::worker::commands::TrigramIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGEFLEX_BIN : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXTRANGEFLEX_BIN() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGEFLEX_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTRANGEFLEX_BIN key delimiter "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace trigram_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= BinarySlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -215,14 +215,14 @@ namespace net::worker::commands::TrigramIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGESTRICT_UTF8 : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXTRANGESTRICT_UTF8() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGESTRICT_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTRANGESTRICT_UTF8 key delimiter "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace trigram_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= UTF8SlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -243,14 +243,14 @@ namespace net::worker::commands::TrigramIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXTRANGESTRICT_BIN : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXTRANGESTRICT_BIN() : BaseCommandRO<Protocol,DBAdapter>("IXTRANGESTRICT_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTRANGESTRICT_BIN key delimiter "words words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace trigram_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= BinarySlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;

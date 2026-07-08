@@ -5,7 +5,7 @@
 #include "shared_hint.h"
 
 namespace net::worker::commands::RS{
-	namespace rs_impl_{
+	namespace impl_{
 		constexpr uint16_t MIN_SLOTS	=    1;
 		constexpr uint16_t MAX_SLOTS	= 4096;
 
@@ -36,7 +36,7 @@ namespace net::worker::commands::RS{
 			}
 		}
 
-	} // namespace rs_impl_
+	} // namespace impl_
 
 
 
@@ -48,7 +48,7 @@ namespace net::worker::commands::RS{
 		// RSADD key slots bytes item item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace rs_impl_;
+			using namespace impl_;
 
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
@@ -179,7 +179,7 @@ namespace net::worker::commands::RS{
 		// RSRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace rs_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -231,7 +231,7 @@ namespace net::worker::commands::RS{
 		// RSGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace rs_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -303,7 +303,7 @@ namespace net::worker::commands::RS{
 		// RSGETCOUNT key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace rs_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);

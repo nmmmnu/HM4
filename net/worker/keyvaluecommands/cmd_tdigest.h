@@ -5,7 +5,7 @@
 #include "shared_hint.h"
 
 namespace net::worker::commands::TDigest{
-	namespace td_impl_{
+	namespace impl_{
 
 		using Pair = hm4::Pair;
 
@@ -55,7 +55,7 @@ namespace net::worker::commands::TDigest{
 							end			(end		){}
 
 			void action(Pair *pair) const{
-				using namespace td_impl_;
+				using namespace impl_;
 
 				auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
@@ -98,7 +98,7 @@ namespace net::worker::commands::TDigest{
 							end			(end		){}
 
 			void action(Pair *pair) const{
-				using namespace td_impl_;
+				using namespace impl_;
 
 				auto const compression = RawTDigest::Compression::AGGRESSIVE;
 
@@ -120,19 +120,19 @@ namespace net::worker::commands::TDigest{
 			It		end;
 		};
 
-	} // namespace td_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct TDRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		TDRESERVE() : BaseCommandRW<Protocol,DBAdapter>("TDRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDRESERVE key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -167,13 +167,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		TDADD() : BaseCommandRW<Protocol,DBAdapter>("TDADD", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDADD key capacity delta value [value]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
@@ -223,13 +223,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDADDWEIGHT : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		TDADDWEIGHT() : BaseCommandRW<Protocol,DBAdapter>("TDADDWEIGHT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDADDWEIGHT key capacity delta value weight [value weight]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			auto const varg = 4;
 
@@ -279,13 +279,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDMERGE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		TDMERGE() : BaseCommandRW<Protocol,DBAdapter>("TDMERGE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMERGE key capacity delta src_key [src_key]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
@@ -338,7 +338,7 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-	
+
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
 	private:
@@ -352,13 +352,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDMERGECAPACITY : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		TDMERGECAPACITY() : BaseCommandRW<Protocol,DBAdapter>("TDMERGECAPACITY", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMERGE key capacity delta src_key [src_key src_capacity]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() < 6)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
@@ -410,7 +410,7 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-	
+
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
 	private:
@@ -425,13 +425,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDPERCENTILE key capacity percentile
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -466,7 +466,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	
+
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -482,13 +482,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDMPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDMPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMPERCENTILE key capacity percentile [percentile]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
@@ -535,7 +535,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	
+
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -551,13 +551,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDMEDIAN : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDMEDIAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEDIAN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMEDIAN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -587,7 +587,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	
+
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -602,13 +602,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDTRIMMEDMEAN : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDTRIMMEDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDTRIMMEDMEAN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDTRIMMEDMEAN key capacity from_percentile to_percentile
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
@@ -640,7 +640,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	
+
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -655,13 +655,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDMEAN : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEAN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMEAN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
@@ -690,7 +690,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-	
+
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -705,13 +705,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDMIN : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDMIN() : BaseCommandRO<Protocol,DBAdapter>("TDMIN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMIN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -750,13 +750,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDMAX : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDMAX() : BaseCommandRO<Protocol,DBAdapter>("TDMAX", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMAX key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -795,13 +795,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDSIZE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDSIZE() : BaseCommandRO<Protocol,DBAdapter>("TDSIZE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDSIZE key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -835,13 +835,13 @@ namespace net::worker::commands::TDigest{
 
 	template<class Protocol, class DBAdapter>
 	struct TDINFO : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		TDINFO() : BaseCommandRO<Protocol,DBAdapter>("TDINFO", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDCENTROIDCOUNT key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace td_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -858,7 +858,7 @@ namespace net::worker::commands::TDigest{
 
 			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
 				return result.set_container2(
-					"state", 
+					"state",
 					"invalid"
 				);
 			}else{

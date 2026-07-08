@@ -6,7 +6,7 @@
 #include <algorithm>
 
 namespace net::worker::commands::BF{
-	namespace bf_impl_{
+	namespace impl_{
 
 		using namespace shared::bit;
 
@@ -41,13 +41,13 @@ namespace net::worker::commands::BF{
 			return true;
 		}
 
-	} // namespace bf_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct BFADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		BFADD() : BaseCommandRW<Protocol,DBAdapter>("BFADD", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -55,7 +55,7 @@ namespace net::worker::commands::BF{
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
-			using namespace bf_impl_;
+			using namespace impl_;
 
 			const auto &key		= p[1];
 
@@ -81,13 +81,13 @@ namespace net::worker::commands::BF{
 			return result.set();
 		}
 
-	
+
 		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory>{
 			using Pair   = hm4::Pair;
 			using Base   = hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory>;
 
 			using It     = ParamContainer::const_iterator;
-			using BitOps = bf_impl_::BitOps;
+			using BitOps = impl_::BitOps;
 
 			constexpr BFADD_Factory(std::string_view const key, const Pair *pair, uint64_t max_bits, size_t max_hash, It begin, It end) :
 							Base::IFactoryAction	(key, BitOps::size(max_bits - 1), pair),
@@ -97,7 +97,7 @@ namespace net::worker::commands::BF{
 							end				(end		){}
 
 			void action(Pair *pair) const{
-				using namespace bf_impl_;
+				using namespace impl_;
 
 				char *data = pair->getValC();
 
@@ -105,7 +105,7 @@ namespace net::worker::commands::BF{
 					bf_add(max_bits, max_hash, data, *it);
 			}
 
-		
+
 			uint64_t		max_bits;
 			size_t			max_hash;
 			It			begin;
@@ -123,7 +123,7 @@ namespace net::worker::commands::BF{
 
 	template<class Protocol, class DBAdapter>
 	struct BFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		BFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("BFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -136,7 +136,7 @@ namespace net::worker::commands::BF{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace bf_impl_;
+			using namespace impl_;
 
 			auto const max_bits = std::clamp<uint64_t	>(from_string<uint64_t	>(p[2]), BIT_MIN,	BIT_MAX		);
 		//	auto const max_hash = std::clamp<size_t		>(from_string<size_t	>(p[3]), 1,		HASH_MAX	);
@@ -158,7 +158,7 @@ namespace net::worker::commands::BF{
 
 	template<class Protocol, class DBAdapter>
 	struct BFEXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		BFEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -166,7 +166,7 @@ namespace net::worker::commands::BF{
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
-			using namespace bf_impl_;
+			using namespace impl_;
 
 			const auto &key		= p[1];
 
@@ -202,7 +202,7 @@ namespace net::worker::commands::BF{
 
 	template<class Protocol, class DBAdapter>
 	struct BFMEXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		BFMEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFMEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -210,7 +210,7 @@ namespace net::worker::commands::BF{
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
-			using namespace bf_impl_;
+			using namespace impl_;
 
 			const auto &key		= p[1];
 

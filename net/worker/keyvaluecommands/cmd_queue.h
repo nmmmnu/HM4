@@ -6,7 +6,7 @@
 
 
 namespace net::worker::commands::Queue{
-	namespace queue_impl_{
+	namespace impl_{
 		using namespace net::worker::shared::config;
 
 		using MyIDGenerator = idgenerator::IDGeneratorTS_HEX;
@@ -21,14 +21,14 @@ namespace net::worker::commands::Queue{
 
 	template<class Protocol, class DBAdapter>
 	struct SADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SADD() : BaseCommandRW<Protocol,DBAdapter>("SADD", std::begin(cmd__), std::end(cmd__)){}
 
 
-		using MyIDGenerator = queue_impl_::MyIDGenerator;
+		using MyIDGenerator = impl_::MyIDGenerator;
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace queue_impl_;
+			using namespace impl_;
 
 			if (p.size() != 3 && p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
@@ -67,14 +67,14 @@ namespace net::worker::commands::Queue{
 
 	template<class Protocol, class DBAdapter>
 	struct SPOP : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SPOP() : BaseCommandRW<Protocol,DBAdapter>("SPOP", std::begin(cmd__), std::end(cmd__)){}
 
 
-		using MyIDGenerator = queue_impl_::MyIDGenerator;
+		using MyIDGenerator = impl_::MyIDGenerator;
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace queue_impl_;
+			using namespace impl_;
 
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -150,9 +150,9 @@ namespace net::worker::commands::Queue{
 			);
 		}
 
-	
+
 		static void collect_(std::string_view keyControl, typename DBAdapter::List::iterator it, typename DBAdapter::List::iterator eit, typename DBAdapter::List &list, Result<Protocol> &result){
-			using namespace queue_impl_;
+			using namespace impl_;
 
 			uint32_t iterations = 0;
 
@@ -189,7 +189,7 @@ namespace net::worker::commands::Queue{
 		}
 
 		static void finalizeOK_(std::string_view keyControl, std::string_view key, std::string_view val, typename DBAdapter::List &list, Result<Protocol> &result, uint32_t const iterations){
-			using namespace queue_impl_;
+			using namespace impl_;
 
 			// seamlessly send value to output buffer...
 			result.set(val);

@@ -7,7 +7,7 @@
 
 namespace net::worker::commands::SummaryStats{
 
-	namespace summary_stats_impl_{
+	namespace impl_{
 		constexpr std::string_view ZERO = "+0.0000000000";
 
 		template<typename List>
@@ -121,13 +121,13 @@ namespace net::worker::commands::SummaryStats{
 			return container;
 		}
 
-	} // namespace summary_stats_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct SSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("SSRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -156,7 +156,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SSADD() : BaseCommandRW<Protocol,DBAdapter>("SSADD", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -185,7 +185,7 @@ namespace net::worker::commands::SummaryStats{
 			return result.set_1();
 		}
 
-	
+
 		struct SSADDFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>;
@@ -206,7 +206,7 @@ namespace net::worker::commands::SummaryStats{
 				}
 			}
 
-		
+
 			It	begin;
 			It	end;
 		};
@@ -222,7 +222,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSMERGE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SSMERGE() : BaseCommandRW<Protocol,DBAdapter>("SSMERGE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -244,7 +244,7 @@ namespace net::worker::commands::SummaryStats{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
 
-			using namespace summary_stats_impl_;
+			using namespace impl_;
 
 			auto const &pcontainer = mergeLoadContainer(
 				std::begin(p) + varg	,
@@ -260,7 +260,7 @@ namespace net::worker::commands::SummaryStats{
 			return result.set_1();
 		}
 
-	
+
 		struct SSMERGEFactory : hm4::PairFactory::IFactoryAction<0 /* DO NOT COPY VALUE */,1,SSMERGEFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<0,1,SSMERGEFactory>;
@@ -277,12 +277,12 @@ namespace net::worker::commands::SummaryStats{
 
 				acc->clear();
 
-				using namespace summary_stats_impl_;
+				using namespace impl_;
 
 				merge(*acc, begin, end);
 			}
 
-		
+
 			It	begin;
 			It	end;
 		};
@@ -298,7 +298,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSGETALL : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		SSGETALL() : BaseCommandRO<Protocol,DBAdapter>("SSGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -319,11 +319,11 @@ namespace net::worker::commands::SummaryStats{
 				return process_N_(std::begin(p) + varg, std::end(p), db, result, blob);
 		}
 
-	
+
 		static void process_1_(std::string_view key,
 						DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
-			using namespace summary_stats_impl_;
+			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
 
@@ -350,7 +350,7 @@ namespace net::worker::commands::SummaryStats{
 
 			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 
-			using namespace summary_stats_impl_;
+			using namespace impl_;
 
 			mergeLoadContainer(begin, end, *db, pcontainer);
 
@@ -377,7 +377,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		SSGET() : BaseCommandRO<Protocol,DBAdapter>("SSGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -396,7 +396,7 @@ namespace net::worker::commands::SummaryStats{
 			if (sub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace summary_stats_impl_;
+			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
 
@@ -423,7 +423,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSMGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		SSMGET() : BaseCommandRO<Protocol,DBAdapter>("SSMGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -443,7 +443,7 @@ namespace net::worker::commands::SummaryStats{
 				if (auto const &sub = *itk; sub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace summary_stats_impl_;
+			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, sizeof(AccData));
 
@@ -477,7 +477,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDGETALL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SSADDGETALL() : BaseCommandRW<Protocol,DBAdapter>("SSADDGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -508,7 +508,7 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	
+
 		struct SSADDGETALLFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETALLFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDGETALLFactory>;
@@ -528,7 +528,7 @@ namespace net::worker::commands::SummaryStats{
 					acc->accumulate(d);
 				}
 
-				using namespace summary_stats_impl_;
+				using namespace impl_;
 
 				// fill the result
 				getDataAll(*acc, container, bcontainer);
@@ -539,7 +539,7 @@ namespace net::worker::commands::SummaryStats{
 				return container;
 			}
 
-		
+
 			It				begin;
 			It				end;
 			OutputBlob::Container		container;
@@ -557,7 +557,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDGET : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SSADDGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -592,7 +592,7 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	
+
 		struct SSADDGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>;
@@ -608,7 +608,7 @@ namespace net::worker::commands::SummaryStats{
 				double const d = to_double_def(val);
 				acc->accumulate(d);
 
-				using namespace summary_stats_impl_;
+				using namespace impl_;
 
 				// fill the result
 				result = getData(*acc, sub, buffer);
@@ -619,7 +619,7 @@ namespace net::worker::commands::SummaryStats{
 				return result;
 			}
 
-		
+
 			std::string_view	val;
 			std::string_view	sub;
 
@@ -638,7 +638,7 @@ namespace net::worker::commands::SummaryStats{
 
 	template<class Protocol, class DBAdapter>
 	struct SSADDMGET : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		SSADDMGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDMGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -674,7 +674,7 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-	
+
 		struct SSADDMGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDMGETFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDMGETFactory>;
@@ -693,7 +693,7 @@ namespace net::worker::commands::SummaryStats{
 				double const d = to_double_def(val);
 				acc->accumulate(d);
 
-				using namespace summary_stats_impl_;
+				using namespace impl_;
 
 				// fill the result
 				getData(*acc, begin, end, container, bcontainer);
@@ -704,7 +704,7 @@ namespace net::worker::commands::SummaryStats{
 				return container;
 			}
 
-		
+
 			std::string_view		val;
 
 			It				begin;

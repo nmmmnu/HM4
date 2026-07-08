@@ -9,7 +9,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 	constexpr bool UseHashSearcher = true;
 
-	namespace ISAM_impl_{
+	namespace impl_{
 
 		constexpr bool selectFastSearcher(size_t size, size_t searches){
 			constexpr size_t M    = std::numeric_limits<size_t>::max();
@@ -95,7 +95,7 @@ namespace net::worker::commands::ISAM_cmd{
 			return result.set_container(container);
 		}
 
-	} // namespace ISAM_impl_
+	} // namespace impl_
 
 
 	template<class Protocol, class DBAdapter>
@@ -105,7 +105,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			return IGETALL_process<IGETALLOutput::BOTH>(p, db, result, blob);
 		}
@@ -126,7 +126,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			return IGETALL_process<IGETALLOutput::KEYS>(p, db, result, blob);
 		}
@@ -147,7 +147,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// igetall schema key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			return IGETALL_process<IGETALLOutput::VALS>(p, db, result, blob);
 		}
@@ -242,7 +242,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void collect_1__(Result<Protocol> &result, Container &container,
 							std::string_view schema, std::string_view storage,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
@@ -258,7 +258,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void collect_N__(Result<Protocol> &result, Container &container,
 							std::string_view schema, std::string_view storage,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			ISAM const isam{ schema };
 
@@ -399,7 +399,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
@@ -413,7 +413,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void process_N__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			ISAM const isam{ schema };
 
@@ -526,7 +526,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void process_1__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
 
@@ -540,7 +540,7 @@ namespace net::worker::commands::ISAM_cmd{
 		static void process_N__(DBAdapter &db, Result<Protocol> &result,
 				std::string_view const schema, std::string_view const key,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			using namespace ISAM_impl_;
+			using namespace impl_;
 
 			ISAM const isam{ schema };
 

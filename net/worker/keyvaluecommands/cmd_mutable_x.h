@@ -13,7 +13,7 @@ namespace net::worker::commands::MutableX{
 	using ContainerX  = typename OutputBlob::Container;
 	using BufferX     = typename OutputBlob::BufferKContainer;
 
-	namespace mutablex_impl_{
+	namespace impl_{
 
 		using namespace net::worker::shared::stop_predicate;
 
@@ -291,7 +291,7 @@ namespace net::worker::commands::MutableX{
 				}
 			};
 		} // namespace
-	} // namespace mutablex_impl_
+	} // namespace impl_
 
 
 
@@ -301,7 +301,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNDEL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XNDEL() : BaseCommandRW<Protocol,DBAdapter>("XNDEL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -315,7 +315,7 @@ namespace net::worker::commands::MutableX{
 			if (prefix.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			DeletePredicate<DBAdapter>	pred;
 			StopPrefixPredicate		stop{ prefix };
@@ -335,7 +335,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XRDEL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XRDEL() : BaseCommandRW<Protocol,DBAdapter>("XRDEL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -349,7 +349,7 @@ namespace net::worker::commands::MutableX{
 			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			DeletePredicate<DBAdapter>	pred;
 			StopRangePredicate		stop{ keyEnd };
@@ -369,7 +369,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HDELALL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		HDELALL() : BaseCommandRW<Protocol,DBAdapter>("HDELALL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -388,7 +388,7 @@ namespace net::worker::commands::MutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const &prefix	= concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			DeletePredicate<DBAdapter>	pred;
 			auto &container  = blob.construct<ContainerX>();
@@ -407,7 +407,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNPERSIST : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XNPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XNPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -421,7 +421,7 @@ namespace net::worker::commands::MutableX{
 			if (prefix.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			PersistPredicate<DBAdapter>	pred;
 			StopPrefixPredicate		stop{ prefix };
@@ -440,7 +440,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XRPERSIST : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XRPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XRPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -454,7 +454,7 @@ namespace net::worker::commands::MutableX{
 			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			PersistPredicate<DBAdapter>	pred;
 			StopRangePredicate		stop{ keyEnd };
@@ -473,7 +473,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HPERSISTALL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		HPERSISTALL() : BaseCommandRW<Protocol,DBAdapter>("HPERSISTALL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -492,7 +492,7 @@ namespace net::worker::commands::MutableX{
 			hm4::PairBufferKey bufferKey;
 			auto const &prefix	= concatenateBuffer(bufferKey, keyN, DBAdapter::SEPARATOR);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			PersistPredicate<DBAdapter>	pred;
 			auto &pcontainer = blob.construct<PContainerX>();
@@ -510,7 +510,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNEXPIRE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XNEXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIRE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -525,7 +525,7 @@ namespace net::worker::commands::MutableX{
 			if (prefix.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
 			StopPrefixPredicate		stop{ prefix };
@@ -544,7 +544,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XREXPIRE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XREXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XREXPIRE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -559,7 +559,7 @@ namespace net::worker::commands::MutableX{
 			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
 			StopRangePredicate		stop{ keyEnd };
@@ -578,7 +578,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HEXPIREALL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		HEXPIREALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREALL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -599,7 +599,7 @@ namespace net::worker::commands::MutableX{
 
 			auto const exp		= from_string<uint32_t>(p[2]);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			ExpirePredicate<DBAdapter>	pred{exp};
 			auto &pcontainer = blob.construct<PContainerX>();
@@ -617,7 +617,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XNEXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XNEXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIREAT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -632,7 +632,7 @@ namespace net::worker::commands::MutableX{
 			if (prefix.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_PREFIX);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
 			StopPrefixPredicate		stop{ prefix };
@@ -651,7 +651,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct XREXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		XREXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XREXPIREAT", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -666,7 +666,7 @@ namespace net::worker::commands::MutableX{
 			if (!hm4::Pair::isKeyValid(keyEnd))
 				return result.set_error(ResultErrorMessages::EMPTY_ENDCOND);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
 			StopRangePredicate		stop{ keyEnd };
@@ -685,7 +685,7 @@ namespace net::worker::commands::MutableX{
 
 	template<class Protocol, class DBAdapter>
 	struct HEXPIREATALL : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		HEXPIREATALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREATALL", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -706,7 +706,7 @@ namespace net::worker::commands::MutableX{
 
 			auto const time		= from_string<uint32_t>(p[2]);
 
-			using namespace mutablex_impl_;
+			using namespace impl_;
 
 			ExpireAtPredicate<DBAdapter>	pred{time};
 			auto &pcontainer = blob.construct<PContainerX>();

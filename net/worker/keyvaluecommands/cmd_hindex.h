@@ -6,7 +6,7 @@
 #include "utf8slidingwindow.h"
 
 namespace net::worker::commands::HybridIndex{
-	namespace hybrid_index_impl_{
+	namespace impl_{
 
 		constexpr uint8_t NGram		=  3;
 		constexpr size_t  MaxTokens	= 32;
@@ -115,14 +115,14 @@ namespace net::worker::commands::HybridIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXHADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		IXHADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("IXHADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace hybrid_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= UTF8SlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;
@@ -140,14 +140,14 @@ namespace net::worker::commands::HybridIndex{
 
 	template<class Protocol, class DBAdapter>
 	struct IXHADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		IXHADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("IXHADD_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// IXTADD_BIN a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace hybrid_index_impl_;
+			using namespace impl_;
 
 			using MySlidingWindow	= BinarySlidingWindow;
 			using MyMDecoder	= MDecoder<DBAdapter, MySlidingWindow>;

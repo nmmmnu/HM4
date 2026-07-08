@@ -17,7 +17,7 @@
 #include <array>
 
 namespace net::worker::commands::Geo{
-	namespace geo_impl_{
+	namespace impl_{
 		namespace {
 			auto to_geo(std::string_view s){
 				return to_double_def<3, 10>(s);
@@ -97,13 +97,13 @@ namespace net::worker::commands::Geo{
 			}
 		};
 
-	} // namespace geo_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct GEOADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		GEOADD() : BaseCommandRW<Protocol,DBAdapter>("GEOADD", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -119,7 +119,7 @@ namespace net::worker::commands::Geo{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const &name = *(itk + 2);
@@ -165,12 +165,12 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEOREM : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		GEOREM() : BaseCommandRW<Protocol,DBAdapter>("GEOREM", std::begin(cmd__), std::end(cmd__)){}
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -191,7 +191,7 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEOGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		GEOGET() : BaseCommandRO<Protocol,DBAdapter>("GEOGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -204,7 +204,7 @@ namespace net::worker::commands::Geo{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			auto const &name = p[2];
 
@@ -231,7 +231,7 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEOMGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		GEOMGET() : BaseCommandRO<Protocol,DBAdapter>("GEOMGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -244,7 +244,7 @@ namespace net::worker::commands::Geo{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			auto const varg = 2;
 
@@ -282,7 +282,7 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEORADIUS : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		GEORADIUS() : BaseCommandRO<Protocol,DBAdapter>("GEORADIUS", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -295,7 +295,7 @@ namespace net::worker::commands::Geo{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			if (!isGeoKeyValid(keyN, "x"))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
@@ -372,7 +372,7 @@ namespace net::worker::commands::Geo{
 			return result.set_container(container);
 		}
 
-	
+
 		constexpr static auto &sphere =  GeoHash::EARTH_METERS;
 
 	private:
@@ -386,7 +386,7 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEODIST : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		GEODIST() : BaseCommandRO<Protocol,DBAdapter>("GEODIST", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -399,7 +399,7 @@ namespace net::worker::commands::Geo{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			auto const &name1 = p[2];
 
@@ -454,7 +454,7 @@ namespace net::worker::commands::Geo{
 			return result.set(dist_sv);
 		}
 
-	
+
 		constexpr static auto &sphere =  GeoHash::EARTH_METERS;
 
 	private:
@@ -467,7 +467,7 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEOENCODE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		GEOENCODE() : BaseCommandRO<Protocol,DBAdapter>("GEOENCODE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -475,7 +475,7 @@ namespace net::worker::commands::Geo{
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			auto const lat = to_geo(p[1]);
 			auto const lon = to_geo(p[2]);
@@ -503,7 +503,7 @@ namespace net::worker::commands::Geo{
 
 	template<class Protocol, class DBAdapter>
 	struct GEODECODE : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		GEODECODE() : BaseCommandRO<Protocol,DBAdapter>("GEODECODE", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -511,7 +511,7 @@ namespace net::worker::commands::Geo{
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
-			using namespace geo_impl_;
+			using namespace impl_;
 
 			auto const &hash = p[1];
 
