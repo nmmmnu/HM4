@@ -191,7 +191,7 @@ namespace net::worker::commands::RB{
 	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"rbadd",	"RBADD"	,
-			"rbpush",	"RBpUSH"
+			"rbpush",	"RBPUSH"
 		};
 
 	};
