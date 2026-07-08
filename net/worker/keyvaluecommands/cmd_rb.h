@@ -5,7 +5,7 @@
 #include "shared_hint.h"
 
 namespace net::worker::commands::RB{
-	namespace rb_impl_{
+	namespace impl_{
 		constexpr uint16_t MIN_SLOTS	=    1;
 		constexpr uint16_t MAX_SLOTS	= 4096;
 
@@ -36,20 +36,20 @@ namespace net::worker::commands::RB{
 			}
 		}
 
-	} // namespace rb_impl_
+	} // namespace impl_
 
 
 
 	template<class Protocol, class DBAdapter>
 	struct RBRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		RBRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RBRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace rb_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -96,14 +96,14 @@ namespace net::worker::commands::RB{
 
 	template<class Protocol, class DBAdapter>
 	struct RBADD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		RBADD() : BaseCommandRW<Protocol,DBAdapter>("RBADD", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBADD key slots bytes item item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace rb_impl_;
+			using namespace impl_;
 
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
@@ -137,7 +137,7 @@ namespace net::worker::commands::RB{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<typename MyRingBuffer>
 		void process_(MyRingBuffer const &rb, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			auto const varg = 4;
@@ -156,7 +156,7 @@ namespace net::worker::commands::RB{
 			return result.set_1();
 		}
 
-	
+
 		template<typename MyRingBuffer>
 		struct RBADDFactory : hm4::PairFactory::IFactoryAction<1,1,RBADDFactory<MyRingBuffer> >{
 			using Pair = hm4::Pair;
@@ -182,7 +182,7 @@ namespace net::worker::commands::RB{
 				}
 			}
 
-		
+
 			MyRingBuffer	rb;
 			It		begin;
 			It		end;
@@ -200,14 +200,14 @@ namespace net::worker::commands::RB{
 
 	template<class Protocol, class DBAdapter>
 	struct RBPOP : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		RBPOP() : BaseCommandRW<Protocol,DBAdapter>("RBPOP", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBPOP key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace rb_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -241,7 +241,7 @@ namespace net::worker::commands::RB{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<typename MyRingBuffer>
 		void process_(MyRingBuffer const &rb, std::string_view const key, typename DBAdapter::List &list, Result<Protocol> &result) const{
 			const auto *pair = hm4::getPairPtrWithSize(list, key, rb.bytes());
@@ -257,7 +257,7 @@ namespace net::worker::commands::RB{
 			);
 		}
 
-	
+
 		template<typename MyRingBuffer>
 		struct RBPOPFactory : hm4::PairFactory::IFactoryAction<1,1,RBPOPFactory<MyRingBuffer> >{
 			using Pair = hm4::Pair;
@@ -281,7 +281,7 @@ namespace net::worker::commands::RB{
 				return result;
 			}
 
-		
+
 			MyRingBuffer		rb;
 			std::string_view	result;
 		};
@@ -297,14 +297,14 @@ namespace net::worker::commands::RB{
 
 	template<class Protocol, class DBAdapter>
 	struct RBGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		RBGET() : BaseCommandRO<Protocol,DBAdapter>("RBGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			using namespace rb_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -340,7 +340,7 @@ namespace net::worker::commands::RB{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<class MyRingBuffer>
 		void process_(MyRingBuffer const &rb, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
@@ -372,14 +372,14 @@ namespace net::worker::commands::RB{
 
 	template<class Protocol, class DBAdapter>
 	struct RBCOUNT : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		RBCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RBCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBGETCOUNT key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			using namespace rb_impl_;
+			using namespace impl_;
 
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
@@ -415,7 +415,7 @@ namespace net::worker::commands::RB{
 			return type_dispatch(bytes, f);
 		}
 
-	
+
 		template<class MyRingBuffer>
 		void process_(MyRingBuffer const &rb, const hm4::Pair *pair, Result<Protocol> &result) const{
 			if (pair == nullptr)
