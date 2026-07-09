@@ -304,8 +304,12 @@ namespace net::worker::commands::MutableX{
 
 		XNDEL() : BaseCommandRW<Protocol,DBAdapter>("XNDEL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -338,8 +342,12 @@ namespace net::worker::commands::MutableX{
 
 		XRDEL() : BaseCommandRW<Protocol,DBAdapter>("XRDEL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -372,8 +380,12 @@ namespace net::worker::commands::MutableX{
 
 		HDELALL() : BaseCommandRW<Protocol,DBAdapter>("HDELALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -410,8 +422,12 @@ namespace net::worker::commands::MutableX{
 
 		XNPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XNPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -443,8 +459,12 @@ namespace net::worker::commands::MutableX{
 
 		XRPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XRPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -476,8 +496,12 @@ namespace net::worker::commands::MutableX{
 
 		HPERSISTALL() : BaseCommandRW<Protocol,DBAdapter>("HPERSISTALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -513,8 +537,12 @@ namespace net::worker::commands::MutableX{
 
 		XNEXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIRE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -547,8 +575,12 @@ namespace net::worker::commands::MutableX{
 
 		XREXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XREXPIRE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -581,8 +613,12 @@ namespace net::worker::commands::MutableX{
 
 		HEXPIREALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -620,8 +656,12 @@ namespace net::worker::commands::MutableX{
 
 		XNEXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIREAT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -654,8 +694,12 @@ namespace net::worker::commands::MutableX{
 
 		XREXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XREXPIREAT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -688,8 +732,12 @@ namespace net::worker::commands::MutableX{
 
 		HEXPIREATALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREATALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 

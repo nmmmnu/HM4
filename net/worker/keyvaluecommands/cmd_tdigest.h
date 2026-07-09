@@ -129,9 +129,13 @@ namespace net::worker::commands::TDigest{
 
 		TDRESERVE() : BaseCommandRW<Protocol,DBAdapter>("TDRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDRESERVE key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -173,6 +177,11 @@ namespace net::worker::commands::TDigest{
 
 		// TDADD key capacity delta value [value]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -226,9 +235,13 @@ namespace net::worker::commands::TDigest{
 
 		TDADDWEIGHT() : BaseCommandRW<Protocol,DBAdapter>("TDADDWEIGHT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDADDWEIGHT key capacity delta value weight [value weight]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg = 4;
@@ -285,6 +298,11 @@ namespace net::worker::commands::TDigest{
 
 		// TDMERGE key capacity delta src_key [src_key]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -338,7 +356,7 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-
+	private:
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
 	private:
@@ -355,9 +373,13 @@ namespace net::worker::commands::TDigest{
 
 		TDMERGECAPACITY() : BaseCommandRW<Protocol,DBAdapter>("TDMERGECAPACITY", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDMERGE key capacity delta src_key [src_key src_capacity]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -410,7 +432,7 @@ namespace net::worker::commands::TDigest{
 			return result.set_1();
 		}
 
-
+	private:
 		constexpr static auto compression = RawTDigest::Compression::AGGRESSIVE;
 
 	private:
@@ -428,9 +450,13 @@ namespace net::worker::commands::TDigest{
 
 		TDPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDPERCENTILE key capacity percentile
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -466,7 +492,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-
+	private:
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -485,9 +511,13 @@ namespace net::worker::commands::TDigest{
 
 		TDMPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDMPERCENTILE key capacity percentile [percentile]
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 4)
@@ -535,7 +565,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-
+	private:
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -554,9 +584,13 @@ namespace net::worker::commands::TDigest{
 
 		TDMEDIAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEDIAN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDMEDIAN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -587,7 +621,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-
+	private:
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -605,9 +639,13 @@ namespace net::worker::commands::TDigest{
 
 		TDTRIMMEDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDTRIMMEDMEAN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDTRIMMEDMEAN key capacity from_percentile to_percentile
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -640,7 +678,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-
+	private:
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -658,9 +696,13 @@ namespace net::worker::commands::TDigest{
 
 		TDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEAN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDMEAN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -690,7 +732,7 @@ namespace net::worker::commands::TDigest{
 			}
 		}
 
-
+	private:
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
@@ -708,9 +750,13 @@ namespace net::worker::commands::TDigest{
 
 		TDMIN() : BaseCommandRO<Protocol,DBAdapter>("TDMIN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDMIN key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -753,9 +799,13 @@ namespace net::worker::commands::TDigest{
 
 		TDMAX() : BaseCommandRO<Protocol,DBAdapter>("TDMAX", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDMAX key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -798,9 +848,13 @@ namespace net::worker::commands::TDigest{
 
 		TDSIZE() : BaseCommandRO<Protocol,DBAdapter>("TDSIZE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDSIZE key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -838,9 +892,13 @@ namespace net::worker::commands::TDigest{
 
 		TDINFO() : BaseCommandRO<Protocol,DBAdapter>("TDINFO", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// TDCENTROIDCOUNT key capacity
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)

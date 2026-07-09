@@ -71,8 +71,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XNGET() : BaseCommandRO<Protocol,DBAdapter>("XNGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -117,8 +121,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XNNEXT() : BaseCommandRO<Protocol,DBAdapter>("XNNEXT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -161,8 +169,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XRGET() : BaseCommandRO<Protocol,DBAdapter>("XRGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -206,8 +218,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XRNEXT() : BaseCommandRO<Protocol,DBAdapter>("XRNEXT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -250,8 +266,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XUGET() : BaseCommandRO<Protocol,DBAdapter>("XUGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -291,8 +311,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XUNEXT() : BaseCommandRO<Protocol,DBAdapter>("XUNEXT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -331,8 +355,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XNGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XNGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -376,8 +404,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XRGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XRGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -421,8 +453,12 @@ namespace net::worker::commands::ImmutableX{
 
 		XUGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XUGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -462,8 +498,12 @@ namespace net::worker::commands::ImmutableX{
 
 		HGETALL() : BaseCommandRO<Protocol,DBAdapter>("HGETALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -509,8 +549,12 @@ namespace net::worker::commands::ImmutableX{
 
 		HGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("HGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -556,8 +600,12 @@ namespace net::worker::commands::ImmutableX{
 
 		HGETVALS() : BaseCommandRO<Protocol,DBAdapter>("HGETVALS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -603,8 +651,12 @@ namespace net::worker::commands::ImmutableX{
 
 		HLEN() : BaseCommandRO<Protocol,DBAdapter>("HLEN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 

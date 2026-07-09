@@ -118,7 +118,6 @@ namespace net::worker::commands::HybridIndex{
 
 		IXHADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("IXHADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// IXTADD_UTF8 a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -142,7 +141,6 @@ namespace net::worker::commands::HybridIndex{
 	struct IXHADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
 
 		IXHADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("IXHADD_BIN", std::begin(cmd__), std::end(cmd__)){}
-
 
 		// IXTADD_BIN a keySub delimiter "words,words" sort value
 

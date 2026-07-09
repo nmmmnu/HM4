@@ -9,11 +9,15 @@ namespace net::worker::commands::UniqueID{
 
 	template<class Protocol, class DBAdapter>
 	struct UNIQUEID : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		UNIQUEID() : BaseCommandRO<Protocol,DBAdapter>("UNIQUEID", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, Result<Protocol> &result){
 			if (p.size() != 1 && p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_01);
 

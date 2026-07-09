@@ -147,7 +147,6 @@ namespace net::worker::commands::HH{
 
 		HHINCR() : BaseCommandRW<Protocol,DBAdapter>("HHINCR", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// HHADD key slots bytes item score item score
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -169,7 +168,6 @@ namespace net::worker::commands::HH{
 	struct HHDECR : BaseCommandRW<Protocol,DBAdapter>{
 
 		HHDECR() : BaseCommandRW<Protocol,DBAdapter>("HHDECR", std::begin(cmd__), std::end(cmd__)){}
-
 
 		// HHADD key slots bytes item score item score
 
@@ -193,10 +191,14 @@ namespace net::worker::commands::HH{
 
 		HHRESERVE() : BaseCommandRW<Protocol,DBAdapter>("HHRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// HHRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -251,6 +253,11 @@ namespace net::worker::commands::HH{
 		// HHGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -280,7 +287,7 @@ namespace net::worker::commands::HH{
 
 					const auto *pair = hm4::getPairPtrWithSize(*db, key, hh.bytes());
 
-					return process_(hh, pair, result, blob);
+					return processT__(hh, pair, result, blob);
 				}
 			};
 
@@ -289,7 +296,7 @@ namespace net::worker::commands::HH{
 
 
 		template<class MyRawHeavyHitter>
-		void process_(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
+		static void processT__(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
 
 			if (!pair)
 				return result.set_container0();

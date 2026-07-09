@@ -106,8 +106,12 @@ namespace net::worker::commands::Geo{
 
 		GEOADD() : BaseCommandRW<Protocol,DBAdapter>("GEOADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			auto const varg  = 2;
 			auto const vstep = 3;
 
@@ -168,7 +172,6 @@ namespace net::worker::commands::Geo{
 
 		GEOREM() : BaseCommandRW<Protocol,DBAdapter>("GEOREM", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
@@ -194,8 +197,12 @@ namespace net::worker::commands::Geo{
 
 		GEOGET() : BaseCommandRO<Protocol,DBAdapter>("GEOGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -234,8 +241,12 @@ namespace net::worker::commands::Geo{
 
 		GEOMGET() : BaseCommandRO<Protocol,DBAdapter>("GEOMGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -285,8 +296,12 @@ namespace net::worker::commands::Geo{
 
 		GEORADIUS() : BaseCommandRO<Protocol,DBAdapter>("GEORADIUS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
@@ -372,7 +387,7 @@ namespace net::worker::commands::Geo{
 			return result.set_container(container);
 		}
 
-
+	private:
 		constexpr static auto &sphere =  GeoHash::EARTH_METERS;
 
 	private:
@@ -389,8 +404,12 @@ namespace net::worker::commands::Geo{
 
 		GEODIST() : BaseCommandRO<Protocol,DBAdapter>("GEODIST", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -470,8 +489,12 @@ namespace net::worker::commands::Geo{
 
 		GEOENCODE() : BaseCommandRO<Protocol,DBAdapter>("GEOENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -506,8 +529,12 @@ namespace net::worker::commands::Geo{
 
 		GEODECODE() : BaseCommandRO<Protocol,DBAdapter>("GEODECODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 

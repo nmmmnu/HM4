@@ -130,8 +130,11 @@ namespace net::worker::commands::SummaryStats{
 
 		SSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("SSRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
@@ -159,9 +162,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSADD() : BaseCommandRW<Protocol,DBAdapter>("SSADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssadd key value value value...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -184,7 +190,6 @@ namespace net::worker::commands::SummaryStats{
 
 			return result.set_1();
 		}
-
 
 		struct SSADDFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDFactory>{
 			using Pair = hm4::Pair;
@@ -225,9 +230,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSMERGE() : BaseCommandRW<Protocol,DBAdapter>("SSMERGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssmerge key key_to_merge key_to_merge key_to_merge...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -301,9 +309,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSGETALL() : BaseCommandRO<Protocol,DBAdapter>("SSGETALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssgetall key key key
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -318,7 +329,6 @@ namespace net::worker::commands::SummaryStats{
 			else
 				return process_N_(std::begin(p) + varg, std::end(p), db, result, blob);
 		}
-
 
 		static void process_1_(std::string_view key,
 						DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
@@ -380,9 +390,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSGET() : BaseCommandRO<Protocol,DBAdapter>("SSGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssgetall key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -426,9 +439,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSMGET() : BaseCommandRO<Protocol,DBAdapter>("SSMGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssmget key subkey subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -480,9 +496,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSADDGETALL() : BaseCommandRW<Protocol,DBAdapter>("SSADDGETALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssaddgetall key value value value...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -507,7 +526,6 @@ namespace net::worker::commands::SummaryStats{
 				factory.getResult()
 			);
 		}
-
 
 		struct SSADDGETALLFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETALLFactory>{
 			using Pair = hm4::Pair;
@@ -560,9 +578,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSADDGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssaddget key value sub
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -592,7 +613,6 @@ namespace net::worker::commands::SummaryStats{
 			);
 		}
 
-
 		struct SSADDGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,SSADDGETFactory>;
@@ -619,7 +639,6 @@ namespace net::worker::commands::SummaryStats{
 				return result;
 			}
 
-
 			std::string_view	val;
 			std::string_view	sub;
 
@@ -641,9 +660,12 @@ namespace net::worker::commands::SummaryStats{
 
 		SSADDMGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDMGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ssaddget key value sub sub sub...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -673,7 +695,6 @@ namespace net::worker::commands::SummaryStats{
 				factory.getResult()
 			);
 		}
-
 
 		struct SSADDMGETFactory : hm4::PairFactory::IFactoryAction<1,1,SSADDMGETFactory>{
 			using Pair = hm4::Pair;

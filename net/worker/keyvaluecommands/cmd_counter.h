@@ -210,7 +210,6 @@ namespace net::worker::commands::Counter{
 
 		INCR() : BaseCommandRW<Protocol,DBAdapter>("INCR", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -231,7 +230,6 @@ namespace net::worker::commands::Counter{
 	struct DECR : BaseCommandRW<Protocol,DBAdapter>{
 
 		DECR() : BaseCommandRW<Protocol,DBAdapter>("DECR", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -254,7 +252,6 @@ namespace net::worker::commands::Counter{
 
 		INCRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("INCRLIMIT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -274,7 +271,6 @@ namespace net::worker::commands::Counter{
 	struct DECRLIMIT : BaseCommandRW<Protocol,DBAdapter>{
 
 		DECRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("DECRLIMIT", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -296,7 +292,6 @@ namespace net::worker::commands::Counter{
 
 		INCRTO() : BaseCommandRW<Protocol,DBAdapter>("INCRTO", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -316,7 +311,6 @@ namespace net::worker::commands::Counter{
 	struct DECRTO : BaseCommandRW<Protocol,DBAdapter>{
 
 		DECRTO() : BaseCommandRW<Protocol,DBAdapter>("DECRTO", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;

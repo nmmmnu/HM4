@@ -325,10 +325,14 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4GET() : BaseCommandRO<Protocol,DBAdapter>("MC4GET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC4GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -362,9 +366,13 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4MGET() : BaseCommandRO<Protocol,DBAdapter>("MC4MGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC4GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -418,10 +426,14 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC4SCORE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC4SCORE key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -480,10 +492,14 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4ADD() : BaseCommandRW<Protocol,DBAdapter>("MC4ADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC4ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -554,7 +570,6 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4REM() : BaseCommandRW<Protocol,DBAdapter>("MC4REM", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC4DEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -583,10 +598,14 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4POINT() : BaseCommandRO<Protocol,DBAdapter>("MC4POINT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC4POINT morton 10 20 30 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
@@ -645,10 +664,14 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC4RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC4RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -713,10 +736,14 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC4RANGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -779,8 +806,12 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC4ENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 1 + DIM)
@@ -816,8 +847,12 @@ namespace net::worker::commands::MortonCurve4D{
 
 		MC4DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC4DECODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)

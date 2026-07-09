@@ -71,7 +71,6 @@ namespace net::worker::commands::MultiIndex{
 
 		IXMADD() : BaseCommandRW<Protocol,DBAdapter>("IXMADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// IXMADD a keySub delimiter "words,words" sort value
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -96,10 +95,14 @@ namespace net::worker::commands::MultiIndex{
 
 		IXMRANGE() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// IXMRANGE key txt count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace shared::accumulate_results;
 			namespace PM = shared::msetmulti;
 
@@ -136,7 +139,6 @@ namespace net::worker::commands::MultiIndex{
 
 		IXMRANGEFLEX() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGEFLEX", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// IXMRANGEFLEX key delimiter "words,words" count from
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -161,7 +163,6 @@ namespace net::worker::commands::MultiIndex{
 	struct IXMRANGESTRICT : BaseCommandRO<Protocol,DBAdapter>{
 
 		IXMRANGESTRICT() : BaseCommandRO<Protocol,DBAdapter>("IXMRANGESTRICT", std::begin(cmd__), std::end(cmd__)){}
-
 
 		// IXMRANGESTRICT key delimiter "words,words" count from
 

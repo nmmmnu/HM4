@@ -76,8 +76,12 @@ namespace net::worker::commands::HLL{
 
 		PFADD() : BaseCommandRW<Protocol,DBAdapter>("PFADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -102,7 +106,6 @@ namespace net::worker::commands::HLL{
 
 			return result.set(factory.getBits());
 		}
-
 
 		struct PFADDFactoryBits : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>{
 			using Pair = hm4::Pair;
@@ -162,8 +165,12 @@ namespace net::worker::commands::HLL{
 
 		PFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("PFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
@@ -194,8 +201,12 @@ namespace net::worker::commands::HLL{
 
 		PFINTERSECT() : BaseCommandRO<Protocol,DBAdapter>("PFINTERSECT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
 			// we support just "PFINTERSECT" without arguments
 			if (p.size() == 1)
@@ -237,8 +248,12 @@ namespace net::worker::commands::HLL{
 
 		PFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("PFCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
 			// we support just "PFCOUNT" without arguments
 			if (p.size() == 1)
@@ -270,7 +285,7 @@ namespace net::worker::commands::HLL{
 			return result.set( n );
 		}
 
-
+	private:
 		uint8_t hll_[impl_::HLL_M];
 
 	private:
@@ -288,8 +303,12 @@ namespace net::worker::commands::HLL{
 
 		PFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("PFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -318,7 +337,6 @@ namespace net::worker::commands::HLL{
 
 			return result.set(n);
 		}
-
 
 		// mostly copy of PFADDFactory but add some operations
 		struct PFADDFactoryCount : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>{
@@ -378,8 +396,12 @@ namespace net::worker::commands::HLL{
 
 		PFMERGE() : BaseCommandRW<Protocol,DBAdapter>("PFMERGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -421,9 +443,7 @@ namespace net::worker::commands::HLL{
 			return result.set();
 		}
 
-
 		using HLLVector = StaticVector<const uint8_t *, OutputBlob::ParamContainerSize>;
-
 
 		struct PFMergeFactory : hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>{
 			using Pair = hm4::Pair;
@@ -467,7 +487,6 @@ namespace net::worker::commands::HLL{
 
 		PFBITS() : BaseCommandRO<Protocol,DBAdapter>("PFBITS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -488,7 +507,6 @@ namespace net::worker::commands::HLL{
 	struct PFERROR : BaseCommandRO<Protocol,DBAdapter>{
 
 		PFERROR() : BaseCommandRO<Protocol,DBAdapter>("PFERROR", std::begin(cmd__), std::end(cmd__)){}
-
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;

@@ -48,6 +48,11 @@ namespace net::worker::commands::RS{
 		// RSADD key slots bytes item item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -75,7 +80,7 @@ namespace net::worker::commands::RS{
 
 					MyReservoirSampling const rs{ slots };
 
-					return process_(rs, key, p, *db, result);
+					return processT_(rs, key, p, *db, result);
 				}
 			};
 
@@ -84,7 +89,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<typename MyReservoirSampling>
-		void process_(MyReservoirSampling const &rs, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result){
+		void processT_(MyReservoirSampling const &rs, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result){
 			auto const varg = 4;
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &item = *itk; !rs.isItemValid(item))
@@ -179,6 +184,11 @@ namespace net::worker::commands::RS{
 		// RSRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -231,6 +241,11 @@ namespace net::worker::commands::RS{
 		// RSGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -260,7 +275,7 @@ namespace net::worker::commands::RS{
 
 					const auto *pair = hm4::getPairPtrWithSize(*db, key, rs.bytes());
 
-					return process_(rs, pair, result, blob);
+					return processT__(rs, pair, result, blob);
 				}
 			};
 
@@ -269,7 +284,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<class MyReservoirSampling>
-		void process_(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
+		static void processT__(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
 			if (!pair)
 				return result.set_container0();
 
@@ -299,10 +314,14 @@ namespace net::worker::commands::RS{
 
 		RSGETCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RSGETCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// RSGETCOUNT key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -332,7 +351,7 @@ namespace net::worker::commands::RS{
 
 					const auto *pair = hm4::getPairPtrWithSize(*db, key, rs.bytes());
 
-					return process_(rs, pair, result);
+					return processT__(rs, pair, result);
 				}
 			};
 
@@ -341,7 +360,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<class MyReservoirSampling>
-		void process_(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol> &result) const{
+		static void processT__(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol> &result){
 			if (!pair)
 				return result.set_0();
 

@@ -350,10 +350,14 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8GET() : BaseCommandRO<Protocol,DBAdapter>("MC8GET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC8GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -387,9 +391,13 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8MGET() : BaseCommandRO<Protocol,DBAdapter>("MC8MGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC8GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -443,10 +451,14 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC8SCORE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC8SCORE key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -508,10 +520,14 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8ADD() : BaseCommandRW<Protocol,DBAdapter>("MC8ADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC8ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -594,7 +610,6 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8REM() : BaseCommandRW<Protocol,DBAdapter>("MC8REM", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC8DEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -623,10 +638,14 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8POINT() : BaseCommandRO<Protocol,DBAdapter>("MC8POINT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC8POINT morton 10 20 30 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
@@ -690,10 +709,14 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC8RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC8RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -768,10 +791,14 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC8RANGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -844,8 +871,12 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC8ENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 1 + DIM)
@@ -886,8 +917,12 @@ namespace net::worker::commands::MortonCurve8D{
 
 		MC8DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC8DECODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)

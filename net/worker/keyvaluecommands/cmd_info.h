@@ -93,7 +93,6 @@ namespace net::worker::commands::Info{
 
 		MAXKEYSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXKEYSIZE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(uint64_t{ hm4::PairConf::MAX_KEY_SIZE });
 		}
@@ -150,7 +149,6 @@ namespace net::worker::commands::Info{
 
 		ECHO() : BaseCommandRO<Protocol,DBAdapter>("ECHO", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
@@ -177,7 +175,6 @@ namespace net::worker::commands::Info{
 
 		REM() : BaseCommandRO<Protocol,DBAdapter>("REM", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			return result.set();
 		}
@@ -196,7 +193,6 @@ namespace net::worker::commands::Info{
 	struct TIME : BaseCommandRO<Protocol,DBAdapter>{
 
 		TIME() : BaseCommandRO<Protocol,DBAdapter>("TIME", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			to_string_buffer_t buffer[2];

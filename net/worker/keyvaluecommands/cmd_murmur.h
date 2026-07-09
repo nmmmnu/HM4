@@ -9,11 +9,15 @@ namespace net::worker::commands::Murmur{
 
 	template<class Protocol, class DBAdapter>
 	struct MURMUR : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MURMUR() : BaseCommandRO<Protocol,DBAdapter>("MURMUR", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, Result<Protocol> &result){
 			if (p.size() < 2 || p.size() > 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_234);
 

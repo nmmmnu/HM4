@@ -69,7 +69,6 @@ namespace net::worker::commands::Copy{
 
 		RENAME() : BaseCommandRW<Protocol,DBAdapter>("RENAME", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::MV>(p, *db, result);
@@ -89,7 +88,6 @@ namespace net::worker::commands::Copy{
 	struct RENAMENX : BaseCommandRW<Protocol,DBAdapter>{
 
 		RENAMENX() : BaseCommandRW<Protocol,DBAdapter>("RENAMENX", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -111,7 +109,6 @@ namespace net::worker::commands::Copy{
 
 		COPY() : BaseCommandRW<Protocol,DBAdapter>("COPY", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::CP>(p, *db, result);
@@ -130,7 +127,6 @@ namespace net::worker::commands::Copy{
 	struct COPYNX : BaseCommandRW<Protocol,DBAdapter>{
 
 		COPYNX() : BaseCommandRW<Protocol,DBAdapter>("COPYNX", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;

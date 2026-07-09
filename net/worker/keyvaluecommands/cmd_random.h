@@ -6,13 +6,18 @@ namespace net::worker::commands::Random{
 
 	template<class Protocol, class DBAdapter>
 	struct RANDOM : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		RANDOM() : BaseCommandRO<Protocol,DBAdapter>("RANDOM", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RANDOM / RANDOM 0
 
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, Result<Protocol> &result){
 			if (p.size() != 1 && p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_01);
 
@@ -37,11 +42,15 @@ namespace net::worker::commands::Random{
 
 	template<class Protocol, class DBAdapter>
 	struct MRANDOM : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		MRANDOM() : BaseCommandRO<Protocol,DBAdapter>("MRANDOM", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 

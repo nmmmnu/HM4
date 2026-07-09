@@ -22,9 +22,13 @@ namespace net::worker::commands::BITSET{
 
 		BITSET() : BaseCommandRW<Protocol,DBAdapter>("BITSET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// BITSET key 5 1 6 0
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			auto const varg = 2;
 			if (p.size() < 4 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
@@ -55,7 +59,6 @@ namespace net::worker::commands::BITSET{
 			return result.set();
 		}
 
-
 		static auto getBytes__(ParamContainer const &p){
 			using namespace impl_;
 
@@ -75,7 +78,6 @@ namespace net::worker::commands::BITSET{
 
 			return std::make_pair(ok, BitOps::size(max));
 		}
-
 
 		struct BITSET_Factory : hm4::PairFactory::IFactoryAction<1, 0, BITSET_Factory>{
 			using Pair = hm4::Pair;
@@ -125,8 +127,12 @@ namespace net::worker::commands::BITSET{
 
 		BITGET() : BaseCommandRO<Protocol,DBAdapter>("BITGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -172,8 +178,12 @@ namespace net::worker::commands::BITSET{
 
 		BITMGET() : BaseCommandRO<Protocol,DBAdapter>("BITMGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -229,8 +239,12 @@ namespace net::worker::commands::BITSET{
 
 		BITCOUNT() : BaseCommandRO<Protocol,DBAdapter>("BITCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -292,7 +306,6 @@ namespace net::worker::commands::BITSET{
 	struct BITMAX : BaseCommandRO<Protocol,DBAdapter>{
 
 		BITMAX() : BaseCommandRO<Protocol,DBAdapter>("BITMAX", std::begin(cmd__), std::end(cmd__)){}
-
 
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;

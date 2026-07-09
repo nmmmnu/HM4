@@ -298,7 +298,6 @@ namespace net::worker::commands::CBF{
 
 		CBFADD() : BaseCommandRW<Protocol,DBAdapter>("CBFADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -322,7 +321,6 @@ namespace net::worker::commands::CBF{
 	struct CBFREM : BaseCommandRW<Protocol,DBAdapter>{
 
 		CBFREM() : BaseCommandRW<Protocol,DBAdapter>("CBFREM", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -348,7 +346,6 @@ namespace net::worker::commands::CBF{
 
 		CBFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -370,7 +367,6 @@ namespace net::worker::commands::CBF{
 	struct CBFREMCOUNT : BaseCommandRW<Protocol,DBAdapter>{
 
 		CBFREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFREMCOUNT", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -394,8 +390,12 @@ namespace net::worker::commands::CBF{
 
 		CBFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CBFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -419,16 +419,15 @@ namespace net::worker::commands::CBF{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, CBF<T>{ w, d }, *db, result);
+					return processT__(key, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
 			return type_dispatch(t, f);
 		}
 
-
 		template<typename T>
-		void process_(std::string_view key, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(std::string_view key, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (cbf.bytes() > MAX_SIZE){
@@ -455,8 +454,12 @@ namespace net::worker::commands::CBF{
 
 		CBFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 6)
@@ -482,16 +485,15 @@ namespace net::worker::commands::CBF{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_<T>(key, val, CBF<T>{ w, d }, *db, result);
+					return processT__<T>(key, val, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
 			return type_dispatch(t, f);
 		}
 
-
 		template<typename T>
-		void process_(std::string_view key, std::string_view item, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(std::string_view key, std::string_view item, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result){
 			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
@@ -518,8 +520,12 @@ namespace net::worker::commands::CBF{
 
 		CBFMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -543,16 +549,15 @@ namespace net::worker::commands::CBF{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_<T>(key, p, CBF<T>{ w, d }, *db, result);
+					return processT__<T>(key, p, CBF<T>{ w, d }, *db, result);
 				}
 			};
 
 			return type_dispatch(t, f);
 		}
 
-
 		template<typename T>
-		void process_(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg = 5;
@@ -584,7 +589,6 @@ namespace net::worker::commands::CBF{
 
 			return result.set_container(container);
 		}
-
 
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;

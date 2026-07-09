@@ -275,7 +275,6 @@ namespace net::worker::commands::AC{
 
 		ACADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ACADD_UTF8 a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -299,7 +298,6 @@ namespace net::worker::commands::AC{
 
 		ACADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACADD_BIN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ACADD_BIN a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -321,7 +319,6 @@ namespace net::worker::commands::AC{
 	struct ACDEL_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
 
 		ACDEL_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_UTF8", std::begin(cmd__), std::end(cmd__)){}
-
 
 		// ACADD_UTF8 a text exp
 
@@ -347,7 +344,6 @@ namespace net::worker::commands::AC{
 
 		ACDEL_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_BIN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ACADD_BIN a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
@@ -372,10 +368,14 @@ namespace net::worker::commands::AC{
 
 		ACRANGE() : BaseCommandRO<Protocol,DBAdapter>("ACRANGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ACRANGE a text count keyStart
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -417,10 +417,14 @@ namespace net::worker::commands::AC{
 
 		ACRANGEALL() : BaseCommandRO<Protocol,DBAdapter>("ACRANGEALL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// ACRANGEALL a count keyStart
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)

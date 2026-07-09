@@ -24,10 +24,12 @@ namespace net::worker::commands::Queue{
 
 		SADD() : BaseCommandRW<Protocol,DBAdapter>("SADD", std::begin(cmd__), std::end(cmd__)){}
 
-
-		using MyIDGenerator = impl_::MyIDGenerator;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3 && p.size() != 4)
@@ -57,6 +59,9 @@ namespace net::worker::commands::Queue{
 		}
 
 	private:
+		using MyIDGenerator = impl_::MyIDGenerator;
+
+	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"sadd",		"SADD"
 		};
@@ -70,10 +75,12 @@ namespace net::worker::commands::Queue{
 
 		SPOP() : BaseCommandRW<Protocol,DBAdapter>("SPOP", std::begin(cmd__), std::end(cmd__)){}
 
-
-		using MyIDGenerator = impl_::MyIDGenerator;
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -244,6 +251,9 @@ namespace net::worker::commands::Queue{
 
 			return result.set("");
 		}
+
+	private:
+		using MyIDGenerator = impl_::MyIDGenerator;
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {

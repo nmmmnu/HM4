@@ -399,10 +399,14 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16GET() : BaseCommandRO<Protocol,DBAdapter>("MC16GET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC16GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -436,9 +440,13 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16MGET() : BaseCommandRO<Protocol,DBAdapter>("MC16MGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC16GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -492,10 +500,14 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC16SCORE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC16SCORE key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -569,10 +581,14 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16ADD() : BaseCommandRW<Protocol,DBAdapter>("MC16ADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC16ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -704,10 +720,14 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16POINT() : BaseCommandRO<Protocol,DBAdapter>("MC16POINT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC16POINT morton 10 20 30 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
@@ -781,10 +801,14 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC16RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC16RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -879,10 +903,14 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC16RANGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -975,8 +1003,12 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC16ENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 1 + DIM)
@@ -1027,8 +1059,12 @@ namespace net::worker::commands::MortonCurve16D{
 
 		MC16DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC16DECODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)

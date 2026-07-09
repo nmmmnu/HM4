@@ -46,10 +46,14 @@ namespace net::worker::commands::MG{
 
 		MGADD() : BaseCommandRW<Protocol,DBAdapter>("MGADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MGADD key slots bytes item item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 		//	auto const varg = 4;
@@ -79,7 +83,7 @@ namespace net::worker::commands::MG{
 
 					MyRawMisraGries const mg{ slots };
 
-					return process_(mg, key, p, *db, result);
+					return processT__(mg, key, p, *db, result);
 				}
 			};
 
@@ -88,7 +92,7 @@ namespace net::worker::commands::MG{
 
 
 		template<typename MyRawMisraGries>
-		void process_(MyRawMisraGries &mg, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(MyRawMisraGries &mg, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result){
 			auto const varg = 4;
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &item = *itk; !mg.isItemValid(item))
@@ -106,7 +110,6 @@ namespace net::worker::commands::MG{
 				factory.getResult()
 			);
 		}
-
 
 		template<typename MyRawMisraGries>
 		struct MGADDFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDFactory<MyRawMisraGries> >{
@@ -168,10 +171,14 @@ namespace net::worker::commands::MG{
 
 		MGADDGET() : BaseCommandRW<Protocol,DBAdapter>("MGADDGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MGADDGET key slots bytes item
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -201,7 +208,7 @@ namespace net::worker::commands::MG{
 
 					MyRawMisraGries const mg{ slots };
 
-					return process_(mg, key, item, *db, result);
+					return processT__(mg, key, item, *db, result);
 				}
 			};
 
@@ -210,7 +217,7 @@ namespace net::worker::commands::MG{
 
 
 		template<typename MyRawMisraGries>
-		void process_(MyRawMisraGries &mg, std::string_view const key, std::string_view const item, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(MyRawMisraGries &mg, std::string_view const key, std::string_view const item, typename DBAdapter::List &list, Result<Protocol> &result){
 			if (!mg.isItemValid(item))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
@@ -226,7 +233,6 @@ namespace net::worker::commands::MG{
 				factory.getScore()
 			);
 		}
-
 
 		template<typename MyRawMisraGries>
 		struct MGADDGETFactory : hm4::PairFactory::IFactoryAction<1,1,MGADDGETFactory<MyRawMisraGries> >{
@@ -276,10 +282,14 @@ namespace net::worker::commands::MG{
 
 		MGRESERVE() : BaseCommandRW<Protocol,DBAdapter>("MGRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MGRESERVE key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -330,10 +340,14 @@ namespace net::worker::commands::MG{
 
 		MGGET() : BaseCommandRO<Protocol,DBAdapter>("MGGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MGGET key slots bytes
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -363,16 +377,15 @@ namespace net::worker::commands::MG{
 
 					const auto *pair = hm4::getPairPtrWithSize(*db, key, mg.bytes());
 
-					return process_(mg, pair, result, blob);
+					return processT__(mg, pair, result, blob);
 				}
 			};
 
 			return type_dispatch(bytes, f);
 		}
 
-
 		template<class MyRawMisraGries>
-		void process_(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
+		static void processT__(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
 
 			if (!pair)
 				return result.set_container0();

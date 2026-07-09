@@ -6,9 +6,8 @@ namespace net::worker::commands::MIndexShared{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMGET : BaseCommandRO<Protocol,DBAdapter>{
-		
-		IXMGET() : BaseCommandRO<Protocol,DBAdapter>("IXMGET", std::begin(cmd__), std::end(cmd__)){}
 
+		IXMGET() : BaseCommandRO<Protocol,DBAdapter>("IXMGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// IXMGET key subkey
 
@@ -27,7 +26,7 @@ namespace net::worker::commands::MIndexShared{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMMGET : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXMMGET() : BaseCommandRO<Protocol,DBAdapter>("IXMMGET", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -47,7 +46,7 @@ namespace net::worker::commands::MIndexShared{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
-		
+
 		IXMGETINDEXES() : BaseCommandRO<Protocol,DBAdapter>("IXMGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
 
 
@@ -68,7 +67,7 @@ namespace net::worker::commands::MIndexShared{
 
 	template<class Protocol, class DBAdapter>
 	struct IXMREM : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		IXMREM() : BaseCommandRW<Protocol,DBAdapter>("IXMREM", std::begin(cmd__), std::end(cmd__)){}
 
 

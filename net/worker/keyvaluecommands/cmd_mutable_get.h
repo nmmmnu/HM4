@@ -106,8 +106,12 @@ namespace net::worker::commands::MutableGET{
 
 		GETSET() : BaseCommandRW<Protocol,DBAdapter>("GETSET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -140,8 +144,12 @@ namespace net::worker::commands::MutableGET{
 
 		GETDEL() : BaseCommandRW<Protocol,DBAdapter>("GETDEL", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -170,8 +178,12 @@ namespace net::worker::commands::MutableGET{
 
 		GETEX() : BaseCommandRW<Protocol,DBAdapter>("GETEX", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -202,8 +214,12 @@ namespace net::worker::commands::MutableGET{
 
 		GETEXAT() : BaseCommandRW<Protocol,DBAdapter>("GETEXAT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -234,8 +250,12 @@ namespace net::worker::commands::MutableGET{
 
 		GETPERSIST() : BaseCommandRW<Protocol,DBAdapter>("GETPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 

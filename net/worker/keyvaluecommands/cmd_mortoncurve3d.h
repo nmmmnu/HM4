@@ -321,10 +321,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3GET() : BaseCommandRO<Protocol,DBAdapter>("MC3GET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC3GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -358,9 +362,13 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3MGET() : BaseCommandRO<Protocol,DBAdapter>("MC3MGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC3GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -414,10 +422,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC3SCORE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC3SCORE key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -474,10 +486,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3ADD() : BaseCommandRW<Protocol,DBAdapter>("MC3ADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC3ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -575,10 +591,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3POINT() : BaseCommandRO<Protocol,DBAdapter>("MC3POINT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC3POINT morton 10 20 30 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
@@ -636,10 +656,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC3RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC3RANGENAIVE morton 10 10 20 20 30 30 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -702,10 +726,14 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC3RANGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC2RANGE morton 10 10 20 20 30 30 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -766,8 +794,12 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC3ENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 1 + DIM)
@@ -802,8 +834,12 @@ namespace net::worker::commands::MortonCurve3D{
 
 		MC3DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC3DECODE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)

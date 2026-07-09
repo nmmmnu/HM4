@@ -157,6 +157,10 @@ namespace net::worker::commands::SL{
 		// SLGET key n
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -211,6 +215,10 @@ namespace net::worker::commands::SL{
 		// SLMGET key val val val
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -249,7 +257,7 @@ namespace net::worker::commands::SL{
 				return processHuge__(result, blob, std::begin(p) + varg, std::end(p), container, sl);
 		}
 
-
+	private:
 		constexpr static size_t HTMax  = OutputBlob::ParamContainerSize;
 		constexpr static size_t HTSize = OutputBlob::ParamContainerSizeHTSize;
 
@@ -261,7 +269,7 @@ namespace net::worker::commands::SL{
 		template<typename T, size_t MaxItems, size_t Size>
 		using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
-
+	private:
 		static void processNaive__(Result<Protocol> &result,
 					ParamContainer::iterator first, ParamContainer::iterator last,
 						OutputBlob::Container &container, s_list::RawSListConst const &sl){
@@ -378,6 +386,10 @@ namespace net::worker::commands::SL{
 		// SLGETALL key
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -428,6 +440,10 @@ namespace net::worker::commands::SL{
 		// SLCOUNT key
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)

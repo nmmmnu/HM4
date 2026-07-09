@@ -50,8 +50,12 @@ namespace net::worker::commands::BF{
 
 		BFADD() : BaseCommandRW<Protocol,DBAdapter>("BFADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
@@ -80,7 +84,6 @@ namespace net::worker::commands::BF{
 
 			return result.set();
 		}
-
 
 		struct BFADD_Factory : hm4::PairFactory::IFactoryAction<1, 1, BFADD_Factory>{
 			using Pair   = hm4::Pair;
@@ -126,8 +129,12 @@ namespace net::worker::commands::BF{
 
 		BFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("BFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -161,8 +168,12 @@ namespace net::worker::commands::BF{
 
 		BFEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
@@ -205,8 +216,12 @@ namespace net::worker::commands::BF{
 
 		BFMEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFMEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 

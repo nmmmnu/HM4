@@ -8,11 +8,15 @@ namespace net::worker::commands::CAS{
 
 	template<class Protocol, class DBAdapter>
 	struct CAS : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		CAS() : BaseCommandRW<Protocol,DBAdapter>("CAS", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
@@ -60,11 +64,15 @@ namespace net::worker::commands::CAS{
 
 	template<class Protocol, class DBAdapter>
 	struct CAD : BaseCommandRW<Protocol,DBAdapter>{
-		
+
 		CAD() : BaseCommandRW<Protocol,DBAdapter>("CAD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 

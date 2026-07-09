@@ -168,6 +168,11 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// iget schema key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -212,6 +217,11 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// imget schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -306,6 +316,11 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// isetall schema key value value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -330,7 +345,6 @@ namespace net::worker::commands::ISAM_cmd{
 
 			return result.set_1();
 		}
-
 
 		struct ISETALL_Factory : hm4::PairFactory::IFactoryAction<1,1, ISETALL_Factory>{
 			using Pair = hm4::Pair;
@@ -374,6 +388,11 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// iset schema key subkey value subkey value ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			auto const varg = 3;
 
 			if (p.size() < 5 || (p.size() - varg) % 2 != 0)
@@ -501,6 +520,11 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// idel schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			auto const varg = 3;
 
 			if (p.size() < 4)
@@ -629,6 +653,11 @@ namespace net::worker::commands::ISAM_cmd{
 		IRESERVE() : BaseCommandRW<Protocol,DBAdapter>("IRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 

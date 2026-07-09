@@ -178,10 +178,14 @@ namespace net::worker::commands::LinearCurve{
 
 		MC1GET() : BaseCommandRO<Protocol,DBAdapter>("MC1GET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC1GET key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -215,9 +219,13 @@ namespace net::worker::commands::LinearCurve{
 
 		MC1MGET() : BaseCommandRO<Protocol,DBAdapter>("MC1MGET", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC1GET key subkey0 subkey1 ...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -271,10 +279,14 @@ namespace net::worker::commands::LinearCurve{
 
 		MC1SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC1SCORE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC1SCORE key subkey
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -308,10 +320,14 @@ namespace net::worker::commands::LinearCurve{
 
 		MC1ADD() : BaseCommandRW<Protocol,DBAdapter>("MC1ADD", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC1ADD a keySub0 x0 val0 keySub1 x1 val1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -372,7 +388,6 @@ namespace net::worker::commands::LinearCurve{
 
 		MC1REM() : BaseCommandRW<Protocol,DBAdapter>("MC1REM", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC1DEL a subkey0 subkey1 ...
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
@@ -400,10 +415,14 @@ namespace net::worker::commands::LinearCurve{
 
 		MC1POINT() : BaseCommandRO<Protocol,DBAdapter>("MC1POINT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC1POINT linear 10 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4 && p.size() != 5)
@@ -451,10 +470,14 @@ namespace net::worker::commands::LinearCurve{
 
 		MC1RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC1RANGE", std::begin(cmd__), std::end(cmd__)){}
 
-
 		// MC1RANGENAIVE linear 10 10 10000 [key]
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 5 && p.size() != 6)

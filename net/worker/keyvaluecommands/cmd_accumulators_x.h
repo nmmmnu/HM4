@@ -224,7 +224,6 @@ namespace net::worker::commands::Accumulators{
 
 		COUNT() : BaseCommandRO<Protocol,DBAdapter>("COUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -244,7 +243,6 @@ namespace net::worker::commands::Accumulators{
 	struct SUM : BaseCommandRO<Protocol,DBAdapter>{
 
 		SUM() : BaseCommandRO<Protocol,DBAdapter>("SUM", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -266,7 +264,6 @@ namespace net::worker::commands::Accumulators{
 
 		XNCOUNT() : BaseCommandRO<Protocol,DBAdapter>("XNCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -286,7 +283,6 @@ namespace net::worker::commands::Accumulators{
 	struct XRCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 
 		XRCOUNT() : BaseCommandRO<Protocol,DBAdapter>("XRCOUNT", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -308,7 +304,6 @@ namespace net::worker::commands::Accumulators{
 
 		XNSUM() : BaseCommandRO<Protocol,DBAdapter>("XNSUM", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -328,7 +323,6 @@ namespace net::worker::commands::Accumulators{
 	struct XRSUM : BaseCommandRO<Protocol,DBAdapter>{
 
 		XRSUM() : BaseCommandRO<Protocol,DBAdapter>("XRSUM", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -350,7 +344,6 @@ namespace net::worker::commands::Accumulators{
 
 		XNMIN() : BaseCommandRO<Protocol,DBAdapter>("XNMIN", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -370,7 +363,6 @@ namespace net::worker::commands::Accumulators{
 	struct XRMIN : BaseCommandRO<Protocol,DBAdapter>{
 
 		XRMIN() : BaseCommandRO<Protocol,DBAdapter>("XRMIN", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -392,7 +384,6 @@ namespace net::worker::commands::Accumulators{
 
 		XNMAX() : BaseCommandRO<Protocol,DBAdapter>("XNMAX", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -405,7 +396,6 @@ namespace net::worker::commands::Accumulators{
 		};
 
 	};
-
 
 
 	template<class Protocol, class DBAdapter>
@@ -434,7 +424,6 @@ namespace net::worker::commands::Accumulators{
 
 		XNFIRST() : BaseCommandRO<Protocol,DBAdapter>("XNFIRST", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -454,7 +443,6 @@ namespace net::worker::commands::Accumulators{
 	struct XRFIRST : BaseCommandRO<Protocol,DBAdapter>{
 
 		XRFIRST() : BaseCommandRO<Protocol,DBAdapter>("XRFIRST", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -476,7 +464,6 @@ namespace net::worker::commands::Accumulators{
 
 		XNLAST() : BaseCommandRO<Protocol,DBAdapter>("XNLAST", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -496,7 +483,6 @@ namespace net::worker::commands::Accumulators{
 	struct XRLAST : BaseCommandRO<Protocol,DBAdapter>{
 
 		XRLAST() : BaseCommandRO<Protocol,DBAdapter>("XRLAST", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
@@ -518,7 +504,6 @@ namespace net::worker::commands::Accumulators{
 
 		XNAVG() : BaseCommandRO<Protocol,DBAdapter>("XNAVG", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
@@ -538,7 +523,6 @@ namespace net::worker::commands::Accumulators{
 	struct XRAVG : BaseCommandRO<Protocol,DBAdapter>{
 
 		XRAVG() : BaseCommandRO<Protocol,DBAdapter>("XRAVG", std::begin(cmd__), std::end(cmd__)){}
-
 
 		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;

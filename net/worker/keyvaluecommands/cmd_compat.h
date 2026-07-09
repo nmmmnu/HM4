@@ -85,7 +85,6 @@ namespace net::worker::commands::Compat{
 
 		COMMAND() : BaseCommandRO<Protocol,DBAdapter>("COMMAND", std::begin(cmd__), std::end(cmd__)){}
 
-
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			// deliberatly send error
 			return result.set_error(ResultErrorMessages::SYS_NOT_IMPLEMENTED);

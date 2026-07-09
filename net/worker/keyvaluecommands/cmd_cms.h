@@ -376,6 +376,11 @@ namespace net::worker::commands::CMS{
 
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -399,7 +404,7 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, CMS<T>{ w, d }, *db, result);
+					return processT__(key, CMS<T>{ w, d }, *db, result);
 				}
 			};
 
@@ -408,7 +413,7 @@ namespace net::worker::commands::CMS{
 
 
 		template<typename T>
-		void process_(std::string_view key, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(std::string_view key, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (cms.bytes() > MAX_SIZE){
@@ -435,8 +440,12 @@ namespace net::worker::commands::CMS{
 
 		CMSCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 6)
@@ -462,7 +471,7 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, val, CMS<T>{ w, d }, *db, result);
+					return processT__(key, val, CMS<T>{ w, d }, *db, result);
 				}
 			};
 
@@ -471,7 +480,7 @@ namespace net::worker::commands::CMS{
 
 
 		template<typename T>
-		void process_(std::string_view key, std::string_view item, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(std::string_view key, std::string_view item, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result){
 			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
@@ -498,8 +507,12 @@ namespace net::worker::commands::CMS{
 
 		CMSMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -523,16 +536,15 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return process_(key, p, CMS<T>{ w, d }, *db, result);
+					return processT__(key, p, CMS<T>{ w, d }, *db, result);
 				}
 			};
 
 			return type_dispatch(t, f);
 		}
 
-
 		template<typename T>
-		void process_(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		static void processT__(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result){
 			using namespace impl_;
 
 			auto const varg = 5;
@@ -565,7 +577,7 @@ namespace net::worker::commands::CMS{
 			return result.set_container(container);
 		}
 
-
+	private:
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
