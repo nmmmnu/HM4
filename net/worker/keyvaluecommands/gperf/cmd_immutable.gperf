@@ -16,6 +16,11 @@ EXPIRETIME,	"EXPIRETIME"
 dump,		"DUMP"
 DUMP,		"DUMP"
 # ---
+sizeof,		"SIZEOF"
+SIZEOF,		"SIZEOF"
+size_of,	"SIZEOF"
+SIZE_OF,	"SIZEOF"
+# ---
 getrange,	"GETRANGE"
 GETRANGE,	"GETRANGE"
 # ---

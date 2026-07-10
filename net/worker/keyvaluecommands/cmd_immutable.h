@@ -220,6 +220,42 @@ namespace net::worker::commands::Immutable{
 
 
 	template<class Protocol, class DBAdapter>
+	struct SIZEOF : BaseCommandRO<Protocol,DBAdapter>{
+
+		SIZEOF() : BaseCommandRO<Protocol,DBAdapter>("SIZEOF", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			if (p.size() != 2)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			return result.set(
+				hm4::getPairOK_(*db, key, [](bool b, const auto *p) -> uint64_t{
+					return b ? p->bytes() : 0;
+				})
+			);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"sizeof",	"SIZEOF"	,
+			"size_of",	"SIZE_OF"
+		};
+
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct GETRANGE : BaseCommandRO<Protocol,DBAdapter>{
 
 		GETRANGE() : BaseCommandRO<Protocol,DBAdapter>("GETRANGE", std::begin(cmd__), std::end(cmd__)){}
@@ -436,6 +472,7 @@ namespace net::worker::commands::Immutable{
 				EXISTS		,
 				TTL		,
 				EXPIRETIME	,
+				SIZEOF		,
 				DUMP		,
 				GETRANGE	,
 				STRLEN		,
