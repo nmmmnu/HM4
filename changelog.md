@@ -418,5 +418,5 @@ Changelog
 -	Refactor of BaseCommand - add getName(), devirtualize begin(), end(), mut(). AI assisted update of all existing commands.
 -	Implement perfect hashing on commands. Fix few incorrect command aliases.
 -	new function SIZEOF / SIZE_OF
-
+-	inlining of murmur_hash_64a
 
