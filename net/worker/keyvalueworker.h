@@ -30,6 +30,7 @@
 #include "keyvaluecommands/cmd_bf.h"			// BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
 #include "keyvaluecommands/cmd_cbf.h"			// CBFADD, CBFADDCOUNT, CBFRESERVE, CBFCOUNT, CBFMCOUNT
 #include "keyvaluecommands/cmd_cms.h"			// CMSADD, CMSADDCOUNT, CMSRESERVE, CMSCOUNT, CMSMCOUNT
+#include "keyvaluecommands/cmd_cf.h"			// CFRESERVE, CFADD, CFMADD, CFREM, CFMREM, CFEXISTS, CFMEXISTS
 #include "keyvaluecommands/cmd_hh.h"			// HHINCR, HHDECR, HHRESERVE, HHGET
 #include "keyvaluecommands/cmd_mg.h"			// MGADD, MGRESERVE, MGGET
 #include "keyvaluecommands/cmd_rs.h"			// RSADD, RSRESERVE, RSGET,        RSGETCOUNT
@@ -123,6 +124,7 @@ namespace net::worker{
 				BF		::RegisterModule,
 				CBF		::RegisterModule,
 				CMS		::RegisterModule,
+				CF		::RegisterModule,
 				HH		::RegisterModule,
 				MG		::RegisterModule,
 				RS		::RegisterModule,
