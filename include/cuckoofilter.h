@@ -9,6 +9,7 @@
 
 #include "murmur_hash_64a.h"
 #include "murmur_hash_mixer.h"
+#include "myendian.h"
 
 namespace cuckoo_filter{
 
@@ -28,6 +29,20 @@ namespace cuckoo_filter{
 			uint64_t const hash = murmur_hash64a(&fp, sizeof(FPT), seed);
 
 			return (index ^ hash) % size;
+		}
+
+		template <typename T>
+		constexpr void swapHostToBE(T &a, T &b){
+			static_assert(
+				std::is_same_v<T, uint8_t > ||
+				std::is_same_v<T, uint16_t> ||
+				std::is_same_v<T, uint32_t> ||
+				std::is_same_v<T, uint64_t>
+			);
+
+			T const tmp = a;
+			a = betoh(b);
+			b = htobe(tmp);
 		}
 
 		// ============================
@@ -117,9 +132,7 @@ namespace cuckoo_filter{
 				for (size_t i = 0; i < MaxKicks; ++i){
 					auto const slot = rand__(fp, i);
 
-					using std::swap;
-
-					swap(fp, *ix(table, index, slot));
+					swapHostToBE(fp, *ix(table, index, slot));
 
 					rollback[i] = { index, fp, slot };
 
@@ -132,7 +145,7 @@ namespace cuckoo_filter{
 				// rollback
 
 				for (auto it = std::rbegin(rollback); it != std::rend(rollback); ++it)
-					*ix(table, it->index, it->slot) = it->fp;
+					*ix(table, it->index, it->slot) = htobe(it->fp);
 
 				return false;
 			}
@@ -211,14 +224,16 @@ namespace cuckoo_filter{
 			template<bool Initial = false>
 			[[nodiscard]]
 			static bool tryInsert__(FPT fp, FPT *bucket){
+				auto const fp_be = htobe(fp);
+
 				for (auto it = bucket; it < bucket + Slots; ++it){
 					if constexpr(Initial){
-						if (*it == fp)
+						if (*it == fp_be)
 							return true;
 					}
 
 					if (*it == 0){
-						*it = fp;
+						*it = fp_be;
 						return true;
 					}
 				}
@@ -228,8 +243,10 @@ namespace cuckoo_filter{
 
 			[[nodiscard]]
 			constexpr static const FPT *tryFind__(FPT fp, const FPT *bucket){
+				auto const fp_be = htobe(fp);
+
 				for (auto it = bucket; it < bucket + Slots; ++it)
-					if (*it == fp)
+					if (*it == fp_be)
 						return it;
 
 				return nullptr;
@@ -237,8 +254,10 @@ namespace cuckoo_filter{
 
 			[[nodiscard]]
 			constexpr static FPT *tryFind__(FPT fp, FPT *bucket){
+				auto const fp_be = htobe(fp);
+
 				for (auto it = bucket; it < bucket + Slots; ++it)
-					if (*it == fp)
+					if (*it == fp_be)
 						return it;
 
 				return nullptr;
