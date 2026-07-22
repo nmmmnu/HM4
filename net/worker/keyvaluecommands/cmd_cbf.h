@@ -118,6 +118,10 @@ namespace net::worker::commands::CBF{
 				if (w == 0 || d == 0)
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
+					if (const auto &val = *itk; val.empty())
+						return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
 				auto f = [&](auto x) {
 					using T = typename decltype(x)::type;
 
@@ -134,18 +138,12 @@ namespace net::worker::commands::CBF{
 		private:
 			template<typename T>
 			void process_(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
-				using namespace impl_;
-
 				if (cbf.bytes() > MAX_SIZE){
 					// emit an error
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 				}
 
 				auto const varg = 5;
-
-				for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2)
-					if (const auto &val = *itk; val.empty())
-						return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 				const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
@@ -459,7 +457,7 @@ namespace net::worker::commands::CBF{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 6)
@@ -525,7 +523,7 @@ namespace net::worker::commands::CBF{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() < 6)

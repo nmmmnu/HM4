@@ -55,7 +55,7 @@ namespace net::worker::commands::BF{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
@@ -134,7 +134,7 @@ namespace net::worker::commands::BF{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -173,7 +173,7 @@ namespace net::worker::commands::BF{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
@@ -221,7 +221,7 @@ namespace net::worker::commands::BF{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 

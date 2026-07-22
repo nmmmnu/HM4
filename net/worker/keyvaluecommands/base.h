@@ -44,7 +44,7 @@ namespace net::worker::commands{
 		constexpr static size_t ParamContainerSize		= 0xFF;
 		constexpr static size_t ParamContainerSizeHTSize	= 1024;
 
-		static_assert(OutputBlob::ContainerSize > OutputBlob::ParamContainerSize);
+		static_assert(ContainerSize > ParamContainerSize);
 
 		// KeyValue worker checks the size against Protocol::MAX_PARAMS
 

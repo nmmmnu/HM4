@@ -28,7 +28,7 @@ namespace net::worker::commands::BITSET{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			auto const varg = 2;
 			if (p.size() < 4 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
@@ -132,7 +132,7 @@ namespace net::worker::commands::BITSET{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -183,7 +183,7 @@ namespace net::worker::commands::BITSET{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -244,7 +244,7 @@ namespace net::worker::commands::BITSET{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 

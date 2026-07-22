@@ -16,7 +16,7 @@ namespace net::worker::commands::CAS{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
@@ -72,7 +72,7 @@ namespace net::worker::commands::CAS{
 		}
 
 	private:
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
