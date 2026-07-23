@@ -68,6 +68,18 @@
 	<h2>Modules</h2>
 	<div class="menurow">
 		<div>
+			<a href="#M::CUCKOO_FILTER">CUCKOO_FILTER</a>
+			<ul>
+				<li><a href="#C::CFRESERVE">CFRESERVE</a></li>
+				<li><a href="#C::CFADD">CFADD</a></li>
+				<li><a href="#C::CFMADD">CFMADD</a></li>
+				<li><a href="#C::CFREM">CFREM</a></li>
+				<li><a href="#C::CFMREM">CFMREM</a></li>
+				<li><a href="#C::CFEXISTS">CFEXISTS</a></li>
+				<li><a href="#C::CFMEXISTS">CFMEXISTS</a></li>
+			</ul>
+		</div>
+		<div>
 			<a href="#M::LINEARCURVE">LINEAR CURVE</a>
 			<ul>
 				<li><a href="#C::MC1ADD">MC1ADD</a></li>
@@ -369,6 +381,552 @@
 	</div>
 	<hr />
 
+		<a name="M::CUCKOO_FILTER"></a>
+		<h2>Module CUCKOO_FILTER</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module implements a <b>high-performance Cuckoo Filter</b> - a space-efficient probabilistic data structure
+used to test whether an element is a member of a set. It serves as a modern alternative to traditional Bloom filters,
+offering support for <b>item deletions</b>, higher lookup performance, and better memory efficiency at low false-positive rates.</p>
+
+<p>The total capacity of a Cuckoo Filter (the number of buckets) is defined by the user. <b>Each bucket contains a fixed number of 4 slots.</b><br />
+This means that at a typical 95% fill factor, a filter configured with 1024 buckets can store approximately 3891 elements (calculated as 1024 × 4 × 0.95).</p>
+
+<p><b>What It Does:</b></p>
+
+<p><b>1. Probabilistic Set Membership</b></p>
+<p>Checking membership via <b>CFEXISTS</b> or <b>CFMEXISTS</b> returns <b>1</b> (item is likely in the set) or <b>0</b> (item is definitely not in the set).
+Like Bloom filters, false positives are possible, but false negatives are impossible.</p>
+
+<p><b>2. Dynamic Item Deletion</b></p>
+<p>Unlike standard Bloom filters, the Cuckoo Filter supports true item removal via <b>CFREM</b> and <b>CFMREM</b> without corrupting or degrading the filter's dataset state.</p>
+
+<p><b>3. Configurable Fingerprint & Bucket Dimensions</b></p>
+<p>Each filter instance is tuned using two primary parameters:
+<ul>
+  <li><b>width</b> (bucket count/capacity configuration)</li>
+  <li><b>integer_size</b> (fingerprint size in bits: <b>8</b>, <b>16</b>, or <b>32</b> bits)</li>
+</ul>
+Selecting a higher <b>integer_size</b> drastically reduces the false-positive probability at the cost of slightly more memory per slot.</p>
+
+<p><b>4. Fixed Memory Footprint & Explicit Allocation</b></p>
+<p>Use <b>CFRESERVE</b> to create a new empty cuckoo filter.</p>
+
+<p><b>5. Single & Multi-Item Operations</b></p>
+<p>To maximize throughput and minimize network round-trips, the module provides batch counterparts for insertion, deletion, and membership checks:
+<ul>
+  <li><b>CFADD</b>    / <b>CFMADD</b>    for inserting single or multiple values.</li>
+  <li><b>CFREM</b>    / <b>CFMREM</b>    for removing  single or multiple values.</li>
+  <li><b>CFEXISTS</b> / <b>CFMEXISTS</b> for querying  single or multiple values.</li>
+</ul>
+</p>
+
+<p><b>Use Cases:</b></p>
+<ul>
+  <li>High-speed cache pollution defense (preventing disk lookups for non-existent keys)</li>
+  <li>Deduplication in continuous data streams</li>
+  <li>Web crawler visit checks with real-time URL eviction/deletion</li>
+  <li>Real-time rate-limiting and anti-abuse systems</li>
+</ul>
+
+<p><b>Tip:</b> To destroy or reset a Cuckoo Filter, use the global <b>DEL</b> command on the key. This instantly reclaims the underlying filter memory.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; del mycf
+(integer) 1
+127.0.0.1:6379&gt; cfadd mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfmadd mycf 1024 16 user:1002 user:1003 user:1004
+1) &quot;1&quot;
+2) &quot;1&quot;
+3) &quot;1&quot;
+127.0.0.1:6379&gt; cfexists mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfexists mycf 1024 16 user:9999
+(integer) 0
+127.0.0.1:6379&gt; cfmexists mycf 1024 16 user:1002 user:9999 user:1004
+1) &quot;1&quot;
+2) &quot;0&quot;
+3) &quot;1&quot;
+127.0.0.1:6379&gt; cfrem mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfexists mycf 1024 16 user:1001
+(integer) 0
+127.0.0.1:6379&gt; cfmrem mycf 1024 16 user:1002 user:1003
+1) &quot;1&quot;
+2) &quot;1&quot;
+</pre></blockquote>
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::CFRESERVE">CFRESERVE</a></li>
+			<li><a href="#C::CFADD">CFADD</a></li>
+			<li><a href="#C::CFMADD">CFMADD</a></li>
+			<li><a href="#C::CFREM">CFREM</a></li>
+			<li><a href="#C::CFMREM">CFMREM</a></li>
+			<li><a href="#C::CFEXISTS">CFEXISTS</a></li>
+			<li><a href="#C::CFMEXISTS">CFMEXISTS</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="CFRESERVE">
+			<a name="C::CFRESERVE"></a>
+			<h4>CFRESERVE</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>CFRESERVE		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>CFRESERVE key width fingerprint_size</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the cuckoo filter object</td>
+				</tr>
+				<tr>
+					<td>width</td>
+					<td>size of the object</td>
+				</tr>
+				<tr>
+					<td>fingerprint_size</td>
+					<td>fingerprint size - 8, 16 or 32 bits are supported.</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Create new, empty cuckoo filter object *key*</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always returns 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; cfreserve mycf 1024 16
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="CFADD">
+			<a name="C::CFADD"></a>
+			<h4>CFADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>CFADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>CFADD key width fingerprint_size item</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the cuckoo filter object</td>
+				</tr>
+				<tr>
+					<td>width</td>
+					<td>size of the object</td>
+				</tr>
+				<tr>
+					<td>fingerprint_size</td>
+					<td>fingerprint size - 8, 16 or 32 bits are supported.</td>
+				</tr>
+				<tr>
+					<td>item</td>
+					<td>item to add to the cuckoo filter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Adds one item to the cuckoo filter object *key*. If the object does not exist, it will be automatically created with the given *width* and *fingerprint_size*.</p>
+
+<p>The total capacity of a Cuckoo Filter (the number of buckets) is defined by the user. <b>Each bucket contains a fixed number of 4 slots.</b><br />
+This means that at a typical 95% fill factor, a filter configured with 1024 buckets can store approximately 3891 elements (calculated as 1024 × 4 × 0.95).</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1 if processing succeeds, 0 otherwise</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; cfadd mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfmadd mycf 1024 16 user:1002 user:1003
+1) &quot;1&quot;
+2) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::CFMADD">CFMADD</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="CFMADD">
+			<a name="C::CFMADD"></a>
+			<h4>CFMADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>CFMADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>CFMADD key width fingerprint_size item [item]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the cuckoo filter object</td>
+				</tr>
+				<tr>
+					<td>width</td>
+					<td>size of the object</td>
+				</tr>
+				<tr>
+					<td>fingerprint_size</td>
+					<td>fingerprint size - 8, 16 or 32 bits are supported.</td>
+				</tr>
+				<tr>
+					<td>item</td>
+					<td>item(s) to add to the cuckoo filter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Adds one or more items to the cuckoo filter object *key*. If the object does not exist, it will be automatically created with the given *width* and *fingerprint_size*.</p>
+
+<p>The total capacity of a Cuckoo Filter (the number of buckets) is defined by the user. <b>Each bucket contains a fixed number of 4 slots.</b><br />
+This means that at a typical 95% fill factor, a filter configured with 1024 buckets can store approximately 3891 elements (calculated as 1024 × 4 × 0.95).</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of results</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; cfadd mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfmadd mycf 1024 16 user:1002 user:1003
+1) &quot;1&quot;
+2) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::CFADD">CFADD</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="CFREM">
+			<a name="C::CFREM"></a>
+			<h4>CFREM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>CFREM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>CFREM key width fingerprint_size item</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the cuckoo filter object</td>
+				</tr>
+				<tr>
+					<td>width</td>
+					<td>size of the object</td>
+				</tr>
+				<tr>
+					<td>fingerprint_size</td>
+					<td>fingerprint size - 8, 16 or 32 bits are supported.</td>
+				</tr>
+				<tr>
+					<td>item</td>
+					<td>item to remove from the cuckoo filter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Removes one item from the cuckoo filter object *key* without corrupting the filter's state.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>returns 1 if processing succeeds, 0 otherwise</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; cfrem mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfmrem mycf 1024 16 user:1002 user:1003
+1) &quot;1&quot;
+2) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::CFMREM">CFMREM</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="CFMREM">
+			<a name="C::CFMREM"></a>
+			<h4>CFMREM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>CFMREM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>CFMREM key width fingerprint_size item [item]...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the cuckoo filter object</td>
+				</tr>
+				<tr>
+					<td>width</td>
+					<td>size of the object</td>
+				</tr>
+				<tr>
+					<td>fingerprint_size</td>
+					<td>fingerprint size - 8, 16 or 32 bits are supported.</td>
+				</tr>
+				<tr>
+					<td>item</td>
+					<td>item(s) to remove from the cuckoo filter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Removes one or more items from the cuckoo filter object *key* without corrupting the filter's state.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of results</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; cfrem mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfmrem mycf 1024 16 user:1002 user:1003
+1) &quot;1&quot;
+2) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::CFREM">CFREM</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="CFEXISTS">
+			<a name="C::CFEXISTS"></a>
+			<h4>CFEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>CFEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>CFEXISTS key width fingerprint_size item</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the cuckoo filter object</td>
+				</tr>
+				<tr>
+					<td>width</td>
+					<td>size of the object</td>
+				</tr>
+				<tr>
+					<td>fingerprint_size</td>
+					<td>fingerprint size - 8, 16 or 32 bits are supported.</td>
+				</tr>
+				<tr>
+					<td>item</td>
+					<td>item to check in the cuckoo filter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Checks whether one item exist in the cuckoo filter object *key*. Returns 1 if an item is likely in the set, and 0 if it is definitely not.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1 if the item likely exists, 0 if it definitely does not</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; cfexists mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfexists mycf 1024 16 user:9999
+(integer) 0
+127.0.0.1:6379&gt; cfmexists mycf 1024 16 user:1001 user:9999
+1) &quot;1&quot;
+2) &quot;0&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::CFMEXISTS">CFMEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="CFMEXISTS">
+			<a name="C::CFMEXISTS"></a>
+			<h4>CFMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>CFMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>CFMEXISTS key width fingerprint_size item [item]...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the cuckoo filter object</td>
+				</tr>
+				<tr>
+					<td>width</td>
+					<td>size of the object</td>
+				</tr>
+				<tr>
+					<td>fingerprint_size</td>
+					<td>fingerprint size - 8, 16 or 32 bits are supported.</td>
+				</tr>
+				<tr>
+					<td>item</td>
+					<td>item(s) to check in the cuckoo filter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Checks whether one or more items exist in the cuckoo filter object *key*. Returns 1 if an item is likely in the set, and 0 if it is definitely not.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of results</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; cfexists mycf 1024 16 user:1001
+(integer) 1
+127.0.0.1:6379&gt; cfexists mycf 1024 16 user:9999
+(integer) 0
+127.0.0.1:6379&gt; cfmexists mycf 1024 16 user:1001 user:9999
+1) &quot;1&quot;
+2) &quot;0&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::CFEXISTS">CFEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
 		<a name="M::LINEARCURVE"></a>
 		<h2>Module LINEAR CURVE</h2>
 

@@ -282,6 +282,7 @@ def generate():
 
 
 
+load_module("cuckoo_filter"		)
 load_module("linearcurve"		)
 load_module("mortoncurve2d"		)
 load_module("mortoncurve3d"		)

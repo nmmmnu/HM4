@@ -1,0 +1,36 @@
+- id:          CFMADD
+  name:        CFMADD
+  usage:       CFMADD key width fingerprint_size item [item]...
+  params:
+    items:
+    - k: key
+      v: name of the cuckoo filter object
+    - k: width
+      v: size of the object
+    - k: fingerprint_size
+      v: fingerprint size - 8, 16 or 32 bits are supported.
+    - k: item
+      v: item(s) to add to the cuckoo filter
+
+  return_type: array
+  return:      array of results
+  version:     1.3.15.1
+  complexity:  READ + WRITE
+  mutable:     true
+  compatible:  false
+  description: |
+    <p>Adds one or more items to the cuckoo filter object *key*. If the object does not exist, it will be automatically created with the given *width* and *fingerprint_size*.</p>
+
+    <p>The total capacity of a Cuckoo Filter (the number of buckets) is defined by the user. <b>Each bucket contains a fixed number of 4 slots.</b><br />
+    This means that at a typical 95% fill factor, a filter configured with 1024 buckets can store approximately 3891 elements (calculated as 1024 × 4 × 0.95).</p>
+
+  example:     |
+    127.0.0.1:6379> cfadd mycf 1024 16 user:1001
+    (integer) 1
+    127.0.0.1:6379> cfmadd mycf 1024 16 user:1002 user:1003
+    1) "1"
+    2) "1"
+
+  see_also:
+    items:
+      - CFADD

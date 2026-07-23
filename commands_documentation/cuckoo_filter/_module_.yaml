@@ -1,0 +1,77 @@
+id:          CUCKOO_FILTER
+name:        CUCKOO_FILTER
+
+version:     1.3.15.1
+
+description: |
+  <p>This module implements a <b>high-performance Cuckoo Filter</b> - a space-efficient probabilistic data structure
+  used to test whether an element is a member of a set. It serves as a modern alternative to traditional Bloom filters,
+  offering support for <b>item deletions</b>, higher lookup performance, and better memory efficiency at low false-positive rates.</p>
+
+  <p>The total capacity of a Cuckoo Filter (the number of buckets) is defined by the user. <b>Each bucket contains a fixed number of 4 slots.</b><br />
+  This means that at a typical 95% fill factor, a filter configured with 1024 buckets can store approximately 3891 elements (calculated as 1024 × 4 × 0.95).</p>
+
+  <p><b>What It Does:</b></p>
+
+  <p><b>1. Probabilistic Set Membership</b></p>
+  <p>Checking membership via <b>CFEXISTS</b> or <b>CFMEXISTS</b> returns <b>1</b> (item is likely in the set) or <b>0</b> (item is definitely not in the set).
+  Like Bloom filters, false positives are possible, but false negatives are impossible.</p>
+
+  <p><b>2. Dynamic Item Deletion</b></p>
+  <p>Unlike standard Bloom filters, the Cuckoo Filter supports true item removal via <b>CFREM</b> and <b>CFMREM</b> without corrupting or degrading the filter's dataset state.</p>
+
+  <p><b>3. Configurable Fingerprint & Bucket Dimensions</b></p>
+  <p>Each filter instance is tuned using two primary parameters:
+  <ul>
+    <li><b>width</b> (bucket count/capacity configuration)</li>
+    <li><b>integer_size</b> (fingerprint size in bits: <b>8</b>, <b>16</b>, or <b>32</b> bits)</li>
+  </ul>
+  Selecting a higher <b>integer_size</b> drastically reduces the false-positive probability at the cost of slightly more memory per slot.</p>
+
+  <p><b>4. Fixed Memory Footprint & Explicit Allocation</b></p>
+  <p>Use <b>CFRESERVE</b> to create a new empty cuckoo filter.</p>
+
+  <p><b>5. Single & Multi-Item Operations</b></p>
+  <p>To maximize throughput and minimize network round-trips, the module provides batch counterparts for insertion, deletion, and membership checks:
+  <ul>
+    <li><b>CFADD</b>    / <b>CFMADD</b>    for inserting single or multiple values.</li>
+    <li><b>CFREM</b>    / <b>CFMREM</b>    for removing  single or multiple values.</li>
+    <li><b>CFEXISTS</b> / <b>CFMEXISTS</b> for querying  single or multiple values.</li>
+  </ul>
+  </p>
+
+  <p><b>Use Cases:</b></p>
+  <ul>
+    <li>High-speed cache pollution defense (preventing disk lookups for non-existent keys)</li>
+    <li>Deduplication in continuous data streams</li>
+    <li>Web crawler visit checks with real-time URL eviction/deletion</li>
+    <li>Real-time rate-limiting and anti-abuse systems</li>
+  </ul>
+
+  <p><b>Tip:</b> To destroy or reset a Cuckoo Filter, use the global <b>DEL</b> command on the key. This instantly reclaims the underlying filter memory.</p>
+
+example_module:     |
+  127.0.0.1:6379> del mycf
+  (integer) 1
+  127.0.0.1:6379> cfadd mycf 1024 16 user:1001
+  (integer) 1
+  127.0.0.1:6379> cfmadd mycf 1024 16 user:1002 user:1003 user:1004
+  1) "1"
+  2) "1"
+  3) "1"
+  127.0.0.1:6379> cfexists mycf 1024 16 user:1001
+  (integer) 1
+  127.0.0.1:6379> cfexists mycf 1024 16 user:9999
+  (integer) 0
+  127.0.0.1:6379> cfmexists mycf 1024 16 user:1002 user:9999 user:1004
+  1) "1"
+  2) "0"
+  3) "1"
+  127.0.0.1:6379> cfrem mycf 1024 16 user:1001
+  (integer) 1
+  127.0.0.1:6379> cfexists mycf 1024 16 user:1001
+  (integer) 0
+  127.0.0.1:6379> cfmrem mycf 1024 16 user:1002 user:1003
+  1) "1"
+  2) "1"
+
