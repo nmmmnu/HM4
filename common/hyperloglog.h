@@ -5,6 +5,8 @@
 #include <cassert>
 #include <cstring>
 #include <string_view>
+#include <algorithm>	// std::clamp
+#include <type_traits>
 
 #include <cmath>
 
@@ -22,14 +24,7 @@ namespace hyperloglog{
 
 
 
-
-
 	struct HyperLogLogOperationsRaw;
-
-	template<uint8_t Bits>
-	struct HyperLogLogOperations;
-
-
 
 
 
@@ -107,93 +102,6 @@ namespace hyperloglog{
 
 
 
-
-
-	template<uint8_t Bits>
-	struct HyperLogLog{
-		constexpr static auto getRaw(){
-			return HyperLogLogRaw{Bits};
-		}
-
-		// --------------------------
-
-		constexpr static uint8_t  bits       = getRaw().bits;
-		constexpr static uint32_t m          = getRaw().m;
-
-		static_assert(bits > 4 && bits < 30);
-
-		// --------------------------
-
-		uint8_t M[m];
-
-		// --------------------------
-
-		constexpr HyperLogLog(){
-			clear();
-		}
-
-		constexpr HyperLogLog(std::nullptr_t){
-			// no clear.
-		}
-
-		constexpr HyperLogLog(const void *src){
-			load(src);
-		}
-
-		constexpr static double error(){
-			return getRaw().error();
-		}
-
-		// --------------------------
-
-		void clear(){
-			return getRaw().clear(std::data(M));
-		}
-
-		void load(const void *src){
-			return getRaw().load(std::data(M), src);
-		}
-
-		void store(void *dest) const{
-			return getRaw().load(std::data(M), dest);
-		}
-
-		// --------------------------
-
-		template<typename ...Args>
-		void add(Args &&...args){
-			return getRaw().add(std::data(M), std::forward<Args>(args)...);
-		}
-
-		// --------------------------
-
-		double estimate() const{
-			return getRaw().estimate(std::data(M));
-		}
-
-		void merge(HyperLogLog const &other){
-			return getRaw().merge(std::data(M), std::data(other.M));
-		}
-
-		// --------------------------
-
-		operator uint8_t *(){
-			return M;
-		}
-
-		operator const uint8_t *() const{
-			return M;
-		}
-
-		// --------------------------
-
-		constexpr static HyperLogLogOperations<Bits> getOperations();
-	};
-
-
-
-
-
 	struct HyperLogLogOperationsRaw{
 		uint8_t bits;
 
@@ -202,59 +110,24 @@ namespace hyperloglog{
 			assert(bits > 4 && bits < 30);
 		}
 
-	public:
-		constexpr static double merge(uint8_t *){
+	private:
+		// copy paste in order to save parameter types.
+
+		constexpr static double e(uint8_t *){
 			return 0;
 		}
 
-		double merge(uint8_t *, const uint8_t *A) const{
-			HyperLogLogRaw hll{bits};
-
-			return hll.estimate(A);
-		}
-
-		double merge(uint8_t *_, const uint8_t *A, const uint8_t *B) const{
-			HyperLogLogRaw hll{bits};
-
-			hll.load (_, A);
-			hll.merge(_, B);
-			return hll.estimate(_);
-		}
-
-		double merge(uint8_t *_, const uint8_t *A, const uint8_t *B, const uint8_t *C) const{
-			HyperLogLogRaw hll{bits};
-
-			hll.load (_, A);
-			hll.merge(_, B);
-			hll.merge(_, C);
-			return hll.estimate(_);
-		}
-
-		double merge(uint8_t *_, const uint8_t *A, const uint8_t *B, const uint8_t *C, const uint8_t *D) const{
-			HyperLogLogRaw hll{bits};
-
-			hll.load (_, A);
-			hll.merge(_, B);
-			hll.merge(_, C);
-			hll.merge(_, D);
-			return hll.estimate(_);
-		}
-
-		double merge(uint8_t *_, const uint8_t *A, const uint8_t *B, const uint8_t *C, const uint8_t *D, const uint8_t *E) const{
-			HyperLogLogRaw hll{bits};
-
-			hll.load (_, A);
-			hll.merge(_, B);
-			hll.merge(_, C);
-			hll.merge(_, D);
-			hll.merge(_, E);
-			return hll.estimate(_);
-		}
-
-	private:
 		template<typename ...Args>
-		auto e(uint8_t *_, Args &&...args) const{
-			return merge(_, std::forward<Args>(args)...);
+		double e(uint8_t *_, const uint8_t *first, const Args *...rest) const{
+			static_assert((std::is_same_v<Args, uint8_t> && ...), "All elements to estimate must be 'const uint8_t *'");
+
+			HyperLogLogRaw hll{bits};
+
+			hll.load(_, first);
+
+			((hll.merge(_, rest)), ...);
+
+			return hll.estimate(_);
 		}
 
 	public:
@@ -344,107 +217,55 @@ namespace hyperloglog{
 				+ e(_, A, B, C, D, E)
 			;
 		}
-	};
-
-
-
-
-
-	template<uint8_t Bits>
-	struct HyperLogLogOperations{
-		using HLL = HyperLogLog<Bits>;
-
-		constexpr static uint8_t  bits = HLL::getRaw().bits;
-		constexpr static uint32_t m    = HLL::getRaw().m;
-
-		static_assert(bits > 4 && bits < 30);
 
 	public:
-		constexpr static double merge(){
-			return 0;
+		double jaccard(uint8_t *_, const uint8_t *A, const uint8_t *B) const{
+		//	^ = intersect, u = union
+
+		//	naive:
+		//	J = (A ^ B) / (A u B)
+		//	return ( intersect(_, A, B) ) / e(_, A, B);
+
+		//	better with single intersect
+		//	J = (A ^ B) / (A u B)
+		//	J = ( (A) + (B) - (A u B) ) / (A u B)
+
+			auto const U = e(_, A, B);
+
+			if (std::abs(U) < 0.001)
+				return 0.;
+
+			auto const J = ( e(_, A) + e(_, B) - U ) / U;
+
+			return std::clamp(J, 0.00, 1.00);
 		}
 
-		static double merge(const uint8_t *a){
-			// if we go via merge__,
-			// a buffer will be allocated...
-			return HLL::getRaw().estimate(a);
-		}
+		double overlap(uint8_t *_, const uint8_t *A, const uint8_t *B) const{
+		//	^ = intersect, u = union
 
-		static double merge(const uint8_t *a, const uint8_t *b){
-			return merge__(a, b);
-		}
+		//	J = (A ^ B) / min(A, B)
+		//	J = ( (A) + (B) - (A u B) ) / min(A, B)
 
-		static double merge(const uint8_t *a, const uint8_t *b, const uint8_t *c){
-			return merge__(a, b, c);
-		}
+			auto const U = e(_, A, B);
 
-		static double merge(const uint8_t *a, const uint8_t *b, const uint8_t *c, const uint8_t *d){
-			return merge__(a, b, c, d);
-		}
+			auto const a = e(_, A);
+			auto const b = e(_, B);
 
-	public:
-		constexpr static double intersect(){
-			return merge();
-		}
+			auto const mab = std::min(a, b);
 
-		static double intersect(const uint8_t *a){
-			return merge(a);
-		}
+			if (std::abs(mab) < 0.001)
+				return 0.;
 
-		static double intersect(const uint8_t *a, const uint8_t *b){
-			return intersect__(a, b);
-		}
+			auto const O = (a + b - U) / mab;
 
-		static double intersect(const uint8_t *a, const uint8_t *b, const uint8_t *c){
-			return intersect__(a, b, c);
-		}
-
-		static double intersect(const uint8_t *a, const uint8_t *b, const uint8_t *c, const uint8_t *d){
-			return intersect__(a, b, c, d);
-		}
-
-	private:
-		template<typename F, typename ...Args>
-		static auto op__(F f, Args &&...args){
-			static_assert(sizeof...(args) >= 0 && sizeof...(args) <= 5);
-
-			uint8_t tmp[m];
-
-			auto operations = HLL::getRaw().getOperations();
-
-			return f(operations, tmp, std::forward<Args>(args)...);
-		}
-
-		template<typename ...Args>
-		static auto merge__(Args &&...args){
-			auto f = [](HyperLogLogOperationsRaw &operations, uint8_t *buffer, auto &&...args){
-				return operations.merge(buffer, std::forward<Args>(args)...);
-			};
-
-			return op__(f, args...);
-		}
-
-		template<typename ...Args>
-		static auto intersect__(Args &&...args){
-			auto f = [](HyperLogLogOperationsRaw &operations, uint8_t *buffer, auto &&...args){
-				return operations.intersect(buffer, std::forward<Args>(args)...);
-			};
-
-			return op__(f, args...);
+			return std::clamp(O, 0.00, 1.00);
 		}
 	};
-
-
 
 
 
 	constexpr auto HyperLogLogRaw::getOperations() const -> HyperLogLogOperationsRaw{
 		return HyperLogLogOperationsRaw{bits};
-	}
-
-	template<uint8_t Bits>
-	constexpr auto HyperLogLog<Bits>::getOperations() -> HyperLogLogOperations<Bits>{
-		return HyperLogLogOperations<Bits>{};
 	}
 
 } // namespace hyperloglog

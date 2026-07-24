@@ -10,11 +10,11 @@ namespace net::worker::commands::HLL{
 
 		constexpr uint8_t HLL_Bits = 12;
 
-		constexpr auto getHLL(){
+		constexpr auto createHLL(){
 			return hyperloglog::HyperLogLogRaw{HLL_Bits};
 		}
 
-		constexpr uint32_t HLL_M = getHLL().m;
+		constexpr uint32_t HLL_M = createHLL().m;
 
 		template<class List>
 		auto store(List &list, std::string_view key, const uint8_t *hll){
@@ -35,36 +35,22 @@ namespace net::worker::commands::HLL{
 			return nullptr;
 		}
 
-		template<class DBAdapter>
-		double hll_op_intersect(MySpan<const std::string_view> const &keys, DBAdapter &db){
-			StaticVector<const uint8_t *, 5> b;
-
-			for(auto it = std::begin(keys); it != std::end(keys); ++it)
-				if (const auto *x = load_ptr(*db, *it); x){
-					b.push_back(x);
-
-					logger<Logger::DEBUG>() << "HLL Operation" << "intersect" << *it;
-				}
-
-			logger<Logger::DEBUG>() << "HLL Operation count" << b.size();
-
-			auto hll_ops = getHLL().getOperations();
-
-			uint8_t _[HLL_M];
-
-			switch(b.size()){
-			default:
-			case 0: return hll_ops.intersect(_	 				);
-			case 1: return hll_ops.intersect(_, b[0]				);
-			case 2: return hll_ops.intersect(_, b[0], b[1]				);
-			case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
-			case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
-			case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
-			}
-		}
-
 		constexpr uint64_t hll_op_round(double const estimate){
 			return estimate < 0.1 ? 0 : static_cast<uint64_t>(round(estimate));
+		}
+
+
+
+		template<size_t N>
+		static std::string_view formatDouble(double n, std::array<char, N> &buffer){
+			constexpr static std::string_view fmt_mask = "{:+.10f}";
+
+			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, n);
+
+			if (result.out == std::end(buffer))
+				return {};
+			else
+				return { buffer.data(), result.size };
 		}
 
 	} // namespace impl_
@@ -100,26 +86,26 @@ namespace net::worker::commands::HLL{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
-			PFADDFactoryBits factory{ key, pair, std::begin(p) + varg, std::end(p) };
+			PFADDFactory factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
 			insertHintVFactory(*db, pair, factory);
 
 			return result.set(factory.getBits());
 		}
 
-		struct PFADDFactoryBits : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>{
+		struct PFADDFactory : hm4::PairFactory::IFactoryAction<1,1,PFADDFactory>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryBits>;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactory>;
 
 			using It   = ParamContainer::iterator;
 
-			PFADDFactoryBits(std::string_view const key, const Pair *pair, It begin, It end) :
+			PFADDFactory(std::string_view const key, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, impl_::HLL_M, pair	),
 							begin			(begin				),
 							end			(end				){}
 
 			void action(Pair *pair){
-				bits = action_(pair);;
+				bits = action_(pair);
 			}
 
 			constexpr auto getBits() const{
@@ -137,12 +123,11 @@ namespace net::worker::commands::HLL{
 				for(auto itk = begin; itk != end; ++itk){
 					const auto &val = *itk;
 
-					result |= getHLL().add(hll_data, val);
+					result |= createHLL().add(hll_data, val);
 				}
 
 				return result;
 			}
-
 
 			It	begin;
 			It	end;
@@ -155,7 +140,6 @@ namespace net::worker::commands::HLL{
 			"pfadd",	"PFADD"		,
 			"hlladd",	"HLLADD"
 		};
-
 	};
 
 
@@ -191,7 +175,6 @@ namespace net::worker::commands::HLL{
 			"pfreserve",	"PFRESERVE"		,
 			"hllreserve",	"HLLRESERVE"
 		};
-
 	};
 
 
@@ -202,11 +185,11 @@ namespace net::worker::commands::HLL{
 		PFINTERSECT() : BaseCommandRO<Protocol,DBAdapter>("PFINTERSECT", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+			return process_(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
 			// we support just "PFINTERSECT" without arguments
 			if (p.size() == 1)
@@ -227,16 +210,206 @@ namespace net::worker::commands::HLL{
 			using namespace impl_;
 
 			uint64_t const n = hll_op_round(
-						hll_op_intersect(keys, db)
+						intersect_(keys, db)
 			);
 
 			return result.set(n);
 		}
 
+		double intersect_(MySpan<const std::string_view> const &keys, DBAdapter &db){
+			using namespace impl_;
+
+			StaticVector<const uint8_t *, 5> b;
+
+			for(auto it = std::begin(keys); it != std::end(keys); ++it)
+				if (const auto *x = load_ptr(*db, *it); x){
+					b.push_back(x);
+
+					logger<Logger::DEBUG>() << "HLL Operation" << "intersect" << *it;
+				}else{
+					// empty set = guaranteed zero
+
+					return 0;
+				}
+
+			logger<Logger::DEBUG>() << "HLL Operation count" << b.size();
+
+			auto hll_ops = createHLL().getOperations();
+
+			auto &_ = buffer_;
+
+			switch(b.size()){
+			default:
+			case 0: return hll_ops.intersect(_	 				);
+			case 1: return hll_ops.intersect(_, b[0]				);
+			case 2: return hll_ops.intersect(_, b[0], b[1]				);
+			case 3: return hll_ops.intersect(_, b[0], b[1], b[2]			);
+			case 4: return hll_ops.intersect(_, b[0], b[1], b[2], b[3]		);
+			case 5: return hll_ops.intersect(_, b[0], b[1], b[2], b[3], b[4]	);
+			}
+		}
+
+	private:
+		uint8_t buffer_[impl_::HLL_M];
+
 	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"pfintersect",	"PFINTERSECT"		,
 			"hllintersect",	"HLLINTERSECT"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct PFJACCARD : BaseCommandRO<Protocol,DBAdapter>{
+
+		PFJACCARD() : BaseCommandRO<Protocol,DBAdapter>("PFJACCARD", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process_(p, db, result, blob);
+		}
+
+	private:
+		// PFJACCARD key otherkey...
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+
+			if (p.size() < 3)
+				return result.set_0();
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg - 1; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			using namespace impl_;
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			const auto *a = load_ptr(*db, p[varg - 1]);
+
+			if (!a){
+				// main HLL does not exists
+
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+					container.push_back("0");
+
+				return result.set_container(container);
+			}
+
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			auto hll_ops = createHLL().getOperations();
+
+			auto &_ = buffer_;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				const auto *b = load_ptr(*db, *itk);
+
+				if (!b){
+					container.push_back("0");
+
+					continue;
+				}
+
+				bcontainer.push_back();
+
+				container.push_back(
+					formatDouble(
+						hll_ops.jaccard(_, a, b),
+						bcontainer.back()
+					)
+				);
+			}
+
+			return result.set_container(container);
+		}
+
+	private:
+		uint8_t buffer_[impl_::HLL_M];
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"pfjaccard",	"PFJACCARD"		,
+			"hlljaccard",	"HLLJACCARD"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct PFOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+
+		PFOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("PFOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process_(p, db, result, blob);
+		}
+
+	private:
+		// PFOVERLAP key otherkey...
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+
+			if (p.size() < 3)
+				return result.set_0();
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg - 1; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			using namespace impl_;
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			const auto *a = load_ptr(*db, p[varg - 1]);
+
+			if (!a){
+				// main HLL does not exists
+
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+					container.push_back("0");
+
+				return result.set_container(container);
+			}
+
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			auto hll_ops = createHLL().getOperations();
+
+			auto &_ = buffer_;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				const auto *b = load_ptr(*db, *itk);
+
+				if (!b){
+					container.push_back("0");
+
+					continue;
+				}
+
+				bcontainer.push_back();
+
+				container.push_back(
+					formatDouble(
+						hll_ops.overlap(_, a, b),
+						bcontainer.back()
+					)
+				);
+			}
+
+			return result.set_container(container);
+		}
+
+	private:
+		uint8_t buffer_[impl_::HLL_M];
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"pfoverlap",	"PFOVERLAP"		,
+			"hlloverlap",	"HLLOVERLAP"
 		};
 
 	};
@@ -270,16 +443,14 @@ namespace net::worker::commands::HLL{
 
 			using namespace impl_;
 
-			uint8_t *hll = hll_;
-
-			getHLL().clear(hll);
+			createHLL().clear(hll_);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto *b = load_ptr(*db, *itk); b)
-					getHLL().merge(hll, b);
+					createHLL().merge(hll_, b);
 
 			uint64_t const n = hll_op_round(
-						getHLL().estimate(hll)
+						createHLL().estimate(hll_)
 			);
 
 			return result.set( n );
@@ -327,7 +498,7 @@ namespace net::worker::commands::HLL{
 
 			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
 
-			PFADDFactoryCount factory{ key, pair, std::begin(p) + varg, std::end(p) };
+			PFADDCOUNTFactory factory{ key, pair, std::begin(p) + varg, std::end(p) };
 
 			insertHintVFactory(*db, pair, factory);
 
@@ -339,13 +510,13 @@ namespace net::worker::commands::HLL{
 		}
 
 		// mostly copy of PFADDFactory but add some operations
-		struct PFADDFactoryCount : hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>{
+		struct PFADDCOUNTFactory : hm4::PairFactory::IFactoryAction<1,1,PFADDCOUNTFactory>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDFactoryCount>;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDCOUNTFactory>;
 
 			using It   = ParamContainer::iterator;
 
-			PFADDFactoryCount(std::string_view const key, const Pair *pair, It begin, It end) :
+			PFADDCOUNTFactory(std::string_view const key, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, impl_::HLL_M, pair	),
 							begin			(begin				),
 							end			(end				){}
@@ -358,7 +529,6 @@ namespace net::worker::commands::HLL{
 				return count;
 			}
 
-
 			double action_(Pair *pair) const{
 				using namespace impl_;
 
@@ -368,10 +538,10 @@ namespace net::worker::commands::HLL{
 					const auto &val = *itk;
 
 					[[maybe_unused]]
-					auto bits = getHLL().add(hll_data, val);
+					auto const bits = createHLL().add(hll_data, val);
 				}
 
-				return getHLL().estimate(hll_data);
+				return createHLL().estimate(hll_data);
 			}
 
 
@@ -459,12 +629,12 @@ namespace net::worker::commands::HLL{
 
 				auto *hll = hm4::getValAs<uint8_t>(pair);
 
-				// getHLL().clear(hll);
+				// createHLL().clear(hll);
 
 				// This is fine, because flush list give guarantees now.
 
 				for(auto it = begin; it != end; ++it)
-					getHLL().merge(hll, *it);
+					createHLL().merge(hll, *it);
 			}
 
 
@@ -511,7 +681,7 @@ namespace net::worker::commands::HLL{
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			return result.set(static_cast<uint64_t>(getHLL().error() * 10000));
+			return result.set(static_cast<uint64_t>(createHLL().error() * 10000));
 		}
 
 	private:
@@ -535,6 +705,8 @@ namespace net::worker::commands::HLL{
 				PFCOUNT		,
 				PFADDCOUNT	,
 				PFINTERSECT	,
+				PFJACCARD	,
+				PFOVERLAP	,
 				PFMERGE		,
 				PFBITS		,
 				PFERROR
