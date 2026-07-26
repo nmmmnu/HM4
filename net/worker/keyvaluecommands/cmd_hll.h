@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "pair_vfactory.h"
 #include "shared_hint.h"
+#include "stringtokenizer.h"
 
 namespace net::worker::commands::HLL{
 	namespace impl_{
@@ -118,12 +119,14 @@ namespace net::worker::commands::HLL{
 
 				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
 
+				auto hll = createHLL();
+
 				bool result = false;
 
 				for(auto itk = begin; itk != end; ++itk){
 					const auto &val = *itk;
 
-					result |= createHLL().add(hll_data, val);
+					result |= hll.add(hll_data, val);
 				}
 
 				return result;
@@ -139,6 +142,197 @@ namespace net::worker::commands::HLL{
 		constexpr inline static std::string_view cmd__[] = {
 			"pfadd",	"PFADD"		,
 			"hlladd",	"HLLADD"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct PFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
+
+		PFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("PFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			if (p.size() < 3)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+
+			auto const &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &val = *itk; val.empty())
+					return result.set_error(ResultErrorMessages::EMPTY_VAL);
+
+			using namespace impl_;
+
+			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
+
+			PFADDCOUNTFactory factory{ key, pair, std::begin(p) + varg, std::end(p) };
+
+			insertHintVFactory(*db, pair, factory);
+
+			uint64_t const n = hll_op_round(
+						factory.getCount()
+			);
+
+			return result.set(n);
+		}
+
+		// mostly copy of PFADDFactory but add some operations
+		struct PFADDCOUNTFactory : hm4::PairFactory::IFactoryAction<1,1,PFADDCOUNTFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDCOUNTFactory>;
+
+			using It   = ParamContainer::iterator;
+
+			PFADDCOUNTFactory(std::string_view const key, const Pair *pair, It begin, It end) :
+							Base::IFactoryAction	(key, impl_::HLL_M, pair	),
+							begin			(begin				),
+							end			(end				){}
+
+			void action(Pair *pair){
+				this->count = action_(pair);
+			}
+
+			constexpr auto getCount() const{
+				return count;
+			}
+
+			double action_(Pair *pair) const{
+				using namespace impl_;
+
+				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
+
+				auto hll = createHLL();
+
+				for(auto itk = begin; itk != end; ++itk){
+					const auto &val = *itk;
+
+					[[maybe_unused]]
+					auto const bits = hll.add(hll_data, val);
+				}
+
+				return hll.estimate(hll_data);
+			}
+
+			It	begin;
+			It	end;
+
+			double	count = 0;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"pfaddcount",	"PFADDCOUNT"		,
+			"hlladdcount",	"HLLADDCOUNT"
+		};
+
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct PFSET : BaseCommandRW<Protocol,DBAdapter>{
+
+		PFSET() : BaseCommandRW<Protocol,DBAdapter>("PFSET", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		// PFSET key delimiter "words,words"
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			if (p.size() < 4)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			auto const &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const delimiter = p[2];
+
+			if (delimiter.size() != 1)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto const tokens = p[3];
+
+			// not checking size
+
+			using namespace impl_;
+
+			const Pair *pair = nullptr;
+
+			PFSETFactory factory{ key, pair, delimiter[0], tokens };
+
+			insertHintVFactory(*db, pair, factory);
+
+			uint64_t const n = hll_op_round(
+						factory.getCount()
+			);
+
+			return result.set(n);
+		}
+
+		struct PFSETFactory : hm4::PairFactory::IFactoryAction<0,1,PFSETFactory>{
+			using Pair = hm4::Pair;
+			using Base = hm4::PairFactory::IFactoryAction<0,1,PFSETFactory>;
+
+			PFSETFactory(std::string_view const key, const Pair *pair, char delimiter, std::string_view tokens) :
+							Base::IFactoryAction	(key, impl_::HLL_M, pair	),
+							delimiter		(delimiter			),
+							tokens			(tokens				){}
+
+			void action(Pair *pair){
+				this->count = action_(pair);
+			}
+
+			constexpr auto getCount() const{
+				return count;
+			}
+
+			double action_(Pair *pair) const{
+				using namespace impl_;
+
+				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
+
+				auto hll = createHLL();
+
+				hll.clear(hll_data);
+
+				StringTokenizer const tok{ tokens, delimiter };
+
+				for(auto const &val : tok){
+					if (!val.size())
+						continue;
+
+					[[maybe_unused]]
+					auto const bits = hll.add(hll_data, val);
+				}
+
+				return hll.estimate(hll_data);
+			}
+
+			char			delimiter;
+			std::string_view	tokens;
+
+			double			count = 0;
+		};
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"pfset",	"PFSET"		,
+			"hllset",	"HLLSET"
 		};
 	};
 
@@ -266,64 +460,51 @@ namespace net::worker::commands::HLL{
 
 		PFJACCARD() : BaseCommandRO<Protocol,DBAdapter>("PFJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return process_(p, db, result, blob);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
 		}
 
 	private:
-		// PFJACCARD key otherkey...
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		// PFJACCARD key otherkey
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
-			if (p.size() < 3)
-				return result.set_0();
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
-			auto const varg = 2;
+			const auto &key = p[1];
 
-			for(auto itk = std::begin(p) + varg - 1; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			const auto &otherKey = p[2];
+
+			if (!hm4::Pair::isKeyValid(otherKey))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace impl_;
 
-			auto &container = blob.construct<OutputBlob::Container>();
+			const auto *hllA = load_ptr(*db, key);
 
-			const auto *a = load_ptr(*db, p[varg - 1]);
+			if (!hllA)
+				return result.set_0();
 
-			if (!a){
-				// main HLL does not exists
+			const auto *hllB = load_ptr(*db, otherKey);
 
-				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-					container.push_back("0");
-
-				return result.set_container(container);
-			}
-
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			if (!hllB)
+				return result.set_0();
 
 			auto hll_ops = createHLL().getOperations();
 
 			auto &_ = buffer_;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto *b = load_ptr(*db, *itk);
+			to_string_buffer_t buffer;
 
-				if (!b){
-					container.push_back("0");
-
-					continue;
-				}
-
-				bcontainer.push_back();
-
-				container.push_back(
-					formatDouble(
-						hll_ops.jaccard(_, a, b),
-						bcontainer.back()
-					)
-				);
-			}
-
-			return result.set_container(container);
+			return result.set(
+				formatDouble(
+					hll_ops.jaccard(_, hllA, hllB),
+					buffer
+				)
+			);
 		}
 
 	private:
@@ -339,24 +520,29 @@ namespace net::worker::commands::HLL{
 
 
 	template<class Protocol, class DBAdapter>
-	struct PFOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+	struct PFMJACCARD : BaseCommandRO<Protocol,DBAdapter>{
 
-		PFOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("PFOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+		PFMJACCARD() : BaseCommandRO<Protocol,DBAdapter>("PFMJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return process_(p, db, result, blob);
 		}
 
 	private:
-		// PFOVERLAP key otherkey...
+		// PFJACCARD key otherkey...
 		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
 			if (p.size() < 3)
-				return result.set_0();
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
 			auto const varg = 2;
 
-			for(auto itk = std::begin(p) + varg - 1; itk != std::end(p); ++itk)
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
@@ -364,9 +550,9 @@ namespace net::worker::commands::HLL{
 
 			auto &container = blob.construct<OutputBlob::Container>();
 
-			const auto *a = load_ptr(*db, p[varg - 1]);
+			const auto *hllA = load_ptr(*db, key);
 
-			if (!a){
+			if (!hllA){
 				// main HLL does not exists
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
@@ -382,9 +568,9 @@ namespace net::worker::commands::HLL{
 			auto &_ = buffer_;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto *b = load_ptr(*db, *itk);
+				const auto *hllB = load_ptr(*db, *itk);
 
-				if (!b){
+				if (!hllB){
 					container.push_back("0");
 
 					continue;
@@ -394,7 +580,7 @@ namespace net::worker::commands::HLL{
 
 				container.push_back(
 					formatDouble(
-						hll_ops.overlap(_, a, b),
+						hll_ops.jaccard(_, hllA, hllB),
 						bcontainer.back()
 					)
 				);
@@ -408,8 +594,156 @@ namespace net::worker::commands::HLL{
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
+			"pfmjaccard",	"PFMJACCARD"		,
+			"hllmjaccard",	"HLLMJACCARD"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct PFOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+
+		PFOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("PFOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process_(p, db, result);
+		}
+
+	private:
+		// PFOVERLAP key otherkey
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+
+
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			const auto &otherKey = p[2];
+
+			if (!hm4::Pair::isKeyValid(otherKey))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			using namespace impl_;
+
+			const auto *hllA = load_ptr(*db, key);
+
+			if (!hllA)
+				return result.set_0();
+
+			const auto *hllB = load_ptr(*db, otherKey);
+
+			if (!hllB)
+				return result.set_0();
+
+			auto hll_ops = createHLL().getOperations();
+
+			auto &_ = buffer_;
+
+			to_string_buffer_t buffer;
+
+			return result.set(
+				formatDouble(
+					hll_ops.overlap(_, hllA, hllB),
+					buffer
+				)
+			);
+		}
+
+	private:
+		uint8_t buffer_[impl_::HLL_M];
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
 			"pfoverlap",	"PFOVERLAP"		,
 			"hlloverlap",	"HLLOVERLAP"
+		};
+
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct PFMOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+
+		PFMOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("PFMOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process_(p, db, result, blob);
+		}
+
+	private:
+		// PFOVERLAP key otherkey...
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+
+			if (p.size() < 3)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+
+			auto const varg = 2;
+
+			const auto &key = p[1];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			using namespace impl_;
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			const auto *hllA = load_ptr(*db, key);
+
+			if (!hllA){
+				// main HLL does not exists
+
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+					container.push_back("0");
+
+				return result.set_container(container);
+			}
+
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			auto hll_ops = createHLL().getOperations();
+
+			auto &_ = buffer_;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				const auto *hllB = load_ptr(*db, *itk);
+
+				if (!hllB){
+					container.push_back("0");
+
+					continue;
+				}
+
+				bcontainer.push_back();
+
+				container.push_back(
+					formatDouble(
+						hll_ops.overlap(_, hllA, hllB),
+						bcontainer.back()
+					)
+				);
+			}
+
+			return result.set_container(container);
+		}
+
+	private:
+		uint8_t buffer_[impl_::HLL_M];
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"pfmoverlap",	"PFMOVERLAP"		,
+			"hllmoverlap",	"HLLMOVERLAP"
 		};
 
 	};
@@ -463,98 +797,6 @@ namespace net::worker::commands::HLL{
 		constexpr inline static std::string_view cmd__[] = {
 			"pfcount",	"PFCOUNT"		,
 			"hllcount",	"HLLCOUNT"
-		};
-
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct PFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
-
-		PFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("PFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
-		}
-
-	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() < 3)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
-
-			auto const &key = p[1];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const varg = 2;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &val = *itk; val.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_VAL);
-
-			using namespace impl_;
-
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, HLL_M);
-
-			PFADDCOUNTFactory factory{ key, pair, std::begin(p) + varg, std::end(p) };
-
-			insertHintVFactory(*db, pair, factory);
-
-			uint64_t const n = hll_op_round(
-						factory.getCount()
-			);
-
-			return result.set(n);
-		}
-
-		// mostly copy of PFADDFactory but add some operations
-		struct PFADDCOUNTFactory : hm4::PairFactory::IFactoryAction<1,1,PFADDCOUNTFactory>{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,PFADDCOUNTFactory>;
-
-			using It   = ParamContainer::iterator;
-
-			PFADDCOUNTFactory(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, impl_::HLL_M, pair	),
-							begin			(begin				),
-							end			(end				){}
-
-			void action(Pair *pair){
-				this->count = action_(pair);
-			}
-
-			constexpr auto getCount() const{
-				return count;
-			}
-
-			double action_(Pair *pair) const{
-				using namespace impl_;
-
-				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
-
-				for(auto itk = begin; itk != end; ++itk){
-					const auto &val = *itk;
-
-					[[maybe_unused]]
-					auto const bits = createHLL().add(hll_data, val);
-				}
-
-				return createHLL().estimate(hll_data);
-			}
-
-
-			It	begin;
-			It	end;
-
-			double	count = 0;
-		};
-
-	private:
-		constexpr inline static std::string_view cmd__[] = {
-			"pfaddcount",	"PFADDCOUNT"		,
-			"hlladdcount",	"HLLADDCOUNT"
 		};
 
 	};
@@ -681,7 +923,14 @@ namespace net::worker::commands::HLL{
 		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			return result.set(static_cast<uint64_t>(createHLL().error() * 10000));
+			to_string_buffer_t buffer;
+
+			return result.set(
+				formatDouble(
+					createHLL().error(),
+					buffer
+				)
+			);
 		}
 
 	private:
@@ -701,12 +950,15 @@ namespace net::worker::commands::HLL{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				PFADD		,
+				PFADDCOUNT	,
+				PFSET		,
 				PFRESERVE	,
 				PFCOUNT		,
-				PFADDCOUNT	,
 				PFINTERSECT	,
 				PFJACCARD	,
+				PFMJACCARD	,
 				PFOVERLAP	,
+				PFMOVERLAP	,
 				PFMERGE		,
 				PFBITS		,
 				PFERROR

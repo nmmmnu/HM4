@@ -419,5 +419,6 @@ Changelog
 -	Implement perfect hashing on commands. Fix few incorrect command aliases.
 -	new function SIZEOF / SIZE_OF
 -	inlining of murmur_hash_64a
--	new commands: PFJACCARD and PFOVERLAP
+-	new commands: PFJACCARD, PFMJACCARD, PFOVERLAP and PFMOVERLAP
+-	BREAKING CHANGE: PFERROR now return float
 
