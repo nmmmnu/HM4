@@ -36,8 +36,8 @@ namespace net::worker::commands{
 	};
 
 	constexpr size_t HashtableSize		= 4096;
-	constexpr size_t MaxCommands		=  350;
-	constexpr size_t MaxCommandsAliases	= 1024;
+	constexpr size_t MaxCommands		=  512;
+	constexpr size_t MaxCommandsAliases	= 1024 + 256;
 
 	struct OutputBlob{
 		constexpr static size_t ContainerSize			= 0xFFFF;

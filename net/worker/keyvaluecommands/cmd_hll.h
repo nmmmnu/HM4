@@ -114,6 +114,7 @@ namespace net::worker::commands::HLL{
 			}
 
 
+
 			bool action_(Pair *pair) const{
 				using namespace impl_;
 
@@ -123,11 +124,8 @@ namespace net::worker::commands::HLL{
 
 				bool result = false;
 
-				for(auto itk = begin; itk != end; ++itk){
-					const auto &val = *itk;
-
-					result |= hll.add(hll_data, val);
-				}
+				for(auto itk = begin; itk != end; ++itk)
+					result |= hll.add(hll_data, *itk);
 
 				return result;
 			}
@@ -861,7 +859,9 @@ namespace net::worker::commands::HLL{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<1,1,PFMergeFactory>;
 
-			PFMergeFactory(std::string_view const key, const Pair *pair, HLLVector::iterator begin, HLLVector::iterator end) :
+			using It = HLLVector::iterator;
+
+			PFMergeFactory(std::string_view const key, const Pair *pair, It begin, It end) :
 							Base::IFactoryAction	(key, impl_::HLL_M, pair),
 							begin			(begin		),
 							end			(end		){}
@@ -869,19 +869,18 @@ namespace net::worker::commands::HLL{
 			void action(Pair *pair) const{
 				using namespace impl_;
 
-				auto *hll = hm4::getValAs<uint8_t>(pair);
+				uint8_t *hll_data = hm4::getValAs<uint8_t>(pair);
 
-				// createHLL().clear(hll);
+				auto hll = createHLL();
 
 				// This is fine, because flush list give guarantees now.
 
 				for(auto it = begin; it != end; ++it)
-					createHLL().merge(hll, *it);
+					hll.merge(hll_data, *it);
 			}
 
-
-			HLLVector::iterator	begin;
-			HLLVector::iterator	end;
+			It	begin;
+			It	end;
 		};
 
 	private:
