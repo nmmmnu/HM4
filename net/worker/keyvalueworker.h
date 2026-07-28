@@ -26,7 +26,8 @@
 
 #include "keyvaluecommands/cmd_queue.h"			// SADD, SPOP
 #include "keyvaluecommands/cmd_bitset.h"		// SETBIT, GETBIT, BITCOUNT, BITMAX
-#include "keyvaluecommands/cmd_hll.h"			// PFADD, PFCOUNT, PFINTERSECT, PFMERGE, PFBITS, PFERROR
+#include "keyvaluecommands/cmd_hll.h"			// PFADD, PFSET, PFCOUNT, PFJACCARD, PFMJACCARD, PFOVERLAP, PFMOVERLAP, PFINTERSECT, PFMERGE, PFBITS, PFERROR
+#include "keyvaluecommands/cmd_mh.h"			// MHADD, MHSET,          MHJACCARD, MHMJACCARD,                                     MHMERGE, MHBITSs
 #include "keyvaluecommands/cmd_bf.h"			// BFADD, BFRESERVE, BFEXISTS, BFMEXISTS
 #include "keyvaluecommands/cmd_cbf.h"			// CBFADD, CBFADDCOUNT, CBFRESERVE, CBFCOUNT, CBFMCOUNT
 #include "keyvaluecommands/cmd_cms.h"			// CMSADD, CMSADDCOUNT, CMSRESERVE, CMSCOUNT, CMSMCOUNT
@@ -121,6 +122,7 @@ namespace net::worker{
 				Queue		::RegisterModule,
 				BITSET		::RegisterModule,
 				HLL		::RegisterModule,
+				MH		::RegisterModule,
 				BF		::RegisterModule,
 				CBF		::RegisterModule,
 				CMS		::RegisterModule,
