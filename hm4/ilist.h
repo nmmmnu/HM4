@@ -192,6 +192,18 @@ InsertResult insert(List &list, PairFactory &factory) noexcept{
 	return list.insertF(factory);
 }
 
+template<class VPairFactory, class List>
+InsertResult insertVF(List &list, VPairFactory &factory) noexcept{
+	using VBase = PairFactory::IFactory;
+
+	static_assert(std::is_base_of_v<VBase, VPairFactory>, "VPairFactory must derive from PairFactory::IFactory");
+
+	// lost the type
+	VBase &vbase = factory;
+
+	return list.insertF(vbase);
+}
+
 template<class PairFactory, class List, typename ...Args>
 auto insertF(List &list, Args &&...args) noexcept {
 	PairFactory factory{ std::forward<Args>(args)... };

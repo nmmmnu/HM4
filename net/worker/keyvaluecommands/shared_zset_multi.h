@@ -8,7 +8,6 @@
 namespace net::worker::shared::zsetmulti{
 
 	struct IZSetMultyFactory : hm4::PairFactory::IFactory{
-		virtual void setKey(std::string_view key) = 0;
 		virtual std::string_view getIndex() const = 0;
 	};
 

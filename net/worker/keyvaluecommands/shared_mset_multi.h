@@ -6,7 +6,6 @@
 
 #include "shared_accumulateresults.h"
 #include "pair_vfactory.h"
-#include "ilist/txguard.h"
 
 namespace net::worker::shared::msetmulti{
 
@@ -23,12 +22,12 @@ namespace net::worker::shared::msetmulti{
 		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub, keySort);
 	}
 
-	constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::string_view keySort, std::string_view txt, size_t more = 0){
+	constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::string_view keySort, std::string_view word, size_t more = 0){
 		// keyN~word~sort~keySub, 3 * ~
-		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub, keySort, txt);
+		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub, keySort, word);
 	}
 
-	std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
+	inline std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
 				std::string_view keyN,
 				std::string_view keySub){
 
@@ -42,7 +41,7 @@ namespace net::worker::shared::msetmulti{
 	inline std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
 				std::string_view keyN,
 				std::string_view keySub,
-					std::string_view txt,
+					std::string_view word,
 					std::string_view sort
 			){
 
@@ -50,7 +49,7 @@ namespace net::worker::shared::msetmulti{
 
 		return concatenateBuffer(bufferKey,
 				keyN	,	separator	,
-				txt	,	separator	,
+				word	,	separator	,
 				sort	,	separator	,
 				keySub
 		);
@@ -58,14 +57,14 @@ namespace net::worker::shared::msetmulti{
 
 	inline std::string_view makeKeyDataSearch(hm4::PairBufferKey &bufferKey, std::string_view separator,
 				std::string_view keyN,
-					std::string_view txt
+					std::string_view word
 			){
 
 		// keyN~word~
 
 		return concatenateBuffer(bufferKey,
 				keyN	,	separator	,
-				txt	,	separator
+				word	,	separator
 		);
 	}
 
@@ -117,10 +116,10 @@ namespace net::worker::shared::msetmulti{
 
 
 
-	template<typename Decoder, typename Container, typename BufferVal, typename DBAdapter>
+	template<typename Decoder, typename Container, typename DBAdapter>
 	bool add(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub, std::string_view tokens, char separator, std::string_view keySort, std::string_view value,
-						Container &containerNew, Container &containerOld, BufferVal &buferVal){
+						Container &containerNew, Container &containerOld, hm4::PairBufferVal &buferVal){
 
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
@@ -406,7 +405,7 @@ namespace net::worker::shared::msetmulti{
 		using FTSStrict = strict_impl_::FTS<DBAdapter, MaxTokens>;
 	}
 
-} // namespace net::worker::shared::zsetmulti
+} // namespace net::worker::shared::msetmulti
 
 #endif
 

@@ -1104,15 +1104,10 @@ namespace net::worker::commands::Vectors{
 				Wector<T>::createInRawMemory(mem, fvector);
 			}
 
-			constexpr_virtual void setKey(std::string_view key) override{
-				this->key = key;
-			}
-
 			[[nodiscard]]
-			constexpr_virtual std::string_view getIndex() const override{
+			constexpr_virtual std::string_view getIndex() const final{
 				return hash;
 			}
-
 
 			FVector			fvector;
 			std::string_view	hash;

@@ -69,6 +69,23 @@ namespace net::worker::commands{
 		}
 
 		template<typename T>
+		auto &allocate(size_t size){
+			if (auto *p = MyAllocator::allocate<T>(allocator_, size); p){
+				logAllocatorStatus_<Logger::DEBUG, T>(false);
+
+				++allocations_;
+
+				return *p;
+			}else{
+				logAllocatorStatus_<Logger::FATAL, T>(false, "PLEASE REPORT THIS:");
+
+				++allocations_;
+
+				throw std::bad_alloc();
+			}
+		}
+
+		template<typename T>
 		auto &allocate(){
 			if (auto *p = MyAllocator::allocate<T>(allocator_); p){
 				logAllocatorStatus_<Logger::DEBUG, T>(false);

@@ -61,9 +61,8 @@ namespace net::worker::commands::ExistsShared{
 
 	template<class Protocol, class DBAdapter>
 	struct EXISTS : BaseCommandRO<Protocol,DBAdapter>{
-		
-		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
 
+		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
 
 		// XXXEXISTS key subkey
 

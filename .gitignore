@@ -33,3 +33,4 @@ obj
 
 test.*
 
+*.txt.gz

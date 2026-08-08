@@ -32,6 +32,10 @@ inline namespace version_4_00_00{
 			constexpr IFactoryAction(std::string_view const key, size_t const val_size) :
 							IFactoryAction(key, val_size, nullptr, FILL){}
 
+			constexpr void setKey(std::string_view key){
+				this->key = key;
+			}
+
 			[[nodiscard]]
 			constexpr_virtual std::string_view getKey() const final{
 				return key;

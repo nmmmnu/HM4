@@ -3,9 +3,11 @@
 
 #include <string_view>
 #include <limits>
+#include <algorithm>	// std::all_of
 
 #include <cstdint>
 #include <cstring>
+#include <cassert>
 
 #include "murmur_hash_64a.h"
 #include "myendian.h"
@@ -134,11 +136,34 @@ namespace minhash{
 
 			return static_cast<double>(matches) / static_cast<double>(valid);
 		}
+
+		template<typename F>
+		void bands(const MHT *table, size_t bandSize, F f){
+			static_assert(bytes() <= std::numeric_limits<uint16_t>::max());
+
+			assert(bandSize > 0 || bytes() % bandSize != 0);
+
+			const auto *data = reinterpret_cast<const char *>(table);
+
+			for (uint16_t i = 0; i < bytes() / bandSize; ++i){
+				auto begin = data + i * bandSize;
+				auto end   = data + i * bandSize + bandSize;
+
+				if (std::all_of(begin, end, [](auto const b){ return b == 0; })){
+				//	container.push_back();
+					continue;
+				}
+
+				f(i, murmur_hash64a(begin, bandSize));
+			}
+		}
 	};
 
-	using MinHash8  = MinHash<12, uint8_t	>;
-	using MinHash16 = MinHash<12, uint16_t	>;
-	using MinHash32 = MinHash<12, uint32_t	>;
+	constexpr size_t DefaultBits = 12;
+
+	using MinHash8  = MinHash<DefaultBits, uint8_t	>;
+	using MinHash16 = MinHash<DefaultBits, uint16_t	>;
+	using MinHash32 = MinHash<DefaultBits, uint32_t	>;
 
 } // namespace minhash
 

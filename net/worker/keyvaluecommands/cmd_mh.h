@@ -4,26 +4,43 @@
 #include "pair_vfactory.h"
 #include "shared_hint.h"
 #include "stringtokenizer.h"
+#include "hexconvert.h"
+#include "topheap.h"
+
+#include "shared_rset_multi.h"
+#include "shared_accumulateresults.h"
 
 namespace net::worker::commands::MH{
 	namespace impl_{
 		using Pair = hm4::Pair;
 
-		constexpr auto MHBits = 12u;
+		constexpr size_t MHBits			= 12;
+
+		constexpr size_t keySortSize		= 16; // uint64 as hex
+
+		// 0031.6A796090E2DBB95E
+		constexpr size_t keyBandSize		= 4 + 1 + 16; // uint32 as hex + '.' + uint64 as hex
+
+		// keyN~keyBand~keySort~keySub
+		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + keySortSize   /* ~keySub */;
+
+		constexpr size_t tokenMinSize		= 0;
 
 		using MHT = uint16_t;
 		using MH  = minhash::MinHash<MHBits, MHT>;
 
-
+		inline std::string_view MHT2sv(const MHT *mh){
+			return {
+				reinterpret_cast<const char *>(mh),
+				MH::bytes()
+			};
+		}
 
 		template<class List>
 		auto store(List &list, std::string_view key, const MHT *mh){
 			return hm4::insert( list,
 				key,
-				std::string_view{
-					reinterpret_cast<const char *>(mh),
-					MH::bytes()
-				}
+				MHT2sv(mh)
 			);
 		}
 
@@ -33,6 +50,14 @@ namespace net::worker::commands::MH{
 				return hm4::getValAs<MHT>(pair);
 
 			return nullptr;
+		}
+
+		template<class DBAdapter>
+		const MHT *load_ptr(DBAdapter &db, std::string_view keyN, std::string_view keySub){
+			hm4::PairBufferKey bufferKeyCtrl;
+			auto const keyCtrl = shared::rsetmulti::makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
+
+			return load_ptr(*db, keyCtrl);
 		}
 
 		template<size_t N>
@@ -47,6 +72,93 @@ namespace net::worker::commands::MH{
 				return { buffer.data(), result.size };
 		}
 
+		void bandsHexToContainer(const MHT *mh_data, uint32_t bandSize, OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer){
+			static_assert(MH::bytes() <= OutputBlob::ContainerSize);
+
+			MH mh;
+
+			auto f = [&container, &bcontainer](uint16_t id, uint64_t hash){
+				bcontainer.push_back();
+
+				char *buffer = bcontainer.back().data();
+
+				size_t p = 0;
+
+				// 1A421A42F0BF967F.0000 has better entropy than 0000.1A421A42F0BF967F
+				// also line index works much better
+
+				hex_convert::toHex(hash, buffer + p);	p += sizeof(uint64_t) * 2;
+				buffer[p] = '.';			p += 1;
+				hex_convert::toHex(id,   buffer + p);	p += sizeof(uint16_t) * 2;
+
+				container.emplace_back(buffer, p);
+			};
+
+			mh.bands(mh_data, bandSize, f);
+		}
+
+		template<size_t N>
+		auto makeKeySort(std::string_view keySub, std::array<char, N> &buffer){
+			static_assert(N > keySortSize);
+
+			return hex_convert::toHex(murmur_hash64a(keySub), buffer);
+		}
+
+		struct Decoder{
+			Decoder(uint32_t bandSize) : bandSize(bandSize){}
+
+			constexpr static auto bytes(){
+				return MH::bytes();
+			}
+
+			bool operator()(std::string_view data,
+						OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) const{
+
+				if (data.size() != MH::bytes())
+					return false;
+
+				icontainer.clear();
+				bcontainer.clear();
+
+				const MHT *mh_data = reinterpret_cast<const MHT *>(data.data());
+
+				bandsHexToContainer(mh_data, bandSize, icontainer, bcontainer);
+
+				return true;
+			}
+
+		private:
+			uint32_t bandSize;
+		};
+
+		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
+			size_t count = 0;
+
+			for (size_t i = 0; i < s.size(); ++i)
+				if (s[i] == separator)
+					if (++count; count == nth)
+						return s.substr(i + 1);
+
+			return "INVALID_DATA";
+		}
+
+		inline size_t insertTokens(MH mh, MHT *mh_data, char delimiter, std::string_view tokens){
+			mh.clear(mh_data);
+
+			StringTokenizer const tok{ tokens, delimiter };
+
+			size_t result = 0;
+
+			for(auto const &val : tok){
+				if (val.size() <= tokenMinSize)
+					continue;
+
+				result += mh.add(mh_data, val);
+			}
+
+			return result;
+		}
+
 	} // namespace impl_
 
 
@@ -56,78 +168,118 @@ namespace net::worker::commands::MH{
 
 		MHADD() : BaseCommandRW<Protocol,DBAdapter>("MHADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		// MHADD key val val...
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() < 3)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+		// MHADD key bands	keySub delimiter "words,words"
+		//			keySub delimiter "words,words"
 
-			auto const &key = p[1];
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			auto const varg  = 3;
+			auto const vstep = 3;
 
-			if (!hm4::Pair::isKeyValid(key))
+			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
+
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
+
+			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const varg = 2;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &val = *itk; val.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
 			using namespace impl_;
 
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, MH::bytes());
+			if (!bandSize || MH::bytes() % bandSize != 0)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			MHADDFactory factory{ key, pair, std::begin(p) + varg, std::end(p) };
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
+				auto const keySub	= *(itk + 0);
+				auto const delimiter	= *(itk + 1);
+			//	auto const tokens	= *(itk + 2);
 
-			insertHintVFactory(*db, pair, factory);
+				if (delimiter.size() != 1)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			return result.set(factory.getBits());
+				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+
+			auto &icontainer = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			Decoder decoder{ bandSize };
+
+			const Pair *pair = nullptr;
+
+			constexpr std::string_view key = ""; // will be replaces later.
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
+				auto const keySub	= *(itk + 0);
+				auto const delimiter	= *(itk + 1);
+				auto const tokens	= *(itk + 2);
+
+				to_string_buffer_t buffer;
+				auto const keySort	= makeKeySort(keySub, buffer);
+
+				MHSETFactory factory{ key, pair, delimiter[0], tokens, decoder, icontainer, bcontainer };
+
+				[[maybe_unused]]
+				bool const b = shared::rsetmulti::add(db, decoder,
+								keyN, keySub, keySort,
+									icontainer, bcontainer,
+										factory);
+			}
+
+			return result.set_1();
 		}
 
-		struct MHADDFactory : hm4::PairFactory::IFactoryAction<1,1,MHADDFactory>{
+		struct MHSETFactory : hm4::PairFactory::IFactoryAction<0,1,MHSETFactory>{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,MHADDFactory>;
+			using Base = hm4::PairFactory::IFactoryAction<0,1,MHSETFactory>;
 
-			using It   = ParamContainer::iterator;
-
-			MHADDFactory(std::string_view const key, const Pair *pair, It begin, It end) :
+			MHSETFactory(std::string_view const key, const Pair *pair, char delimiter, std::string_view tokens,
+								impl_::Decoder decoder,
+									OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) :
 							Base::IFactoryAction	(key, impl_::MH::bytes(), pair	),
-							begin			(begin				),
-							end			(end				){}
+							delimiter		(delimiter			),
+							tokens			(tokens				),
+							decoder			(decoder			),
+							icontainer		(icontainer			),
+							bcontainer		(bcontainer			){}
 
 			void action(Pair *pair){
-				bits = action_(pair);
+				countBits = action_(pair);
 			}
 
-			constexpr auto getBits() const{
-				return bits;
+			constexpr auto getCount() const{
+				return countBits;
 			}
 
+			auto const &getIndexes() const{
+				return icontainer;
+			}
 
-
-			bool action_(Pair *pair) const{
+			size_t action_(Pair *pair) const{
 				using namespace impl_;
 
 				MHT *mh_data = hm4::getValAs<MHT>(pair);
 
-				auto mh = MH{};
+				auto const result = insertTokens(MH{}, mh_data, delimiter, tokens);
 
-				bool result = false;
-
-				for(auto itk = begin; itk != end; ++itk)
-					result |= mh.add(mh_data, *itk);
+				decoder(pair->getVal(), icontainer, bcontainer);
 
 				return result;
 			}
 
-			It	begin;
-			It	end;
+			char				delimiter;
+			std::string_view		tokens;
+			impl_::Decoder 			decoder;
+			OutputBlob::Container		&icontainer;
+			OutputBlob::BufferContainer	&bcontainer;
 
-			bool	bits = false;
+			size_t				countBits = 0;
 		};
 
 	private:
@@ -139,130 +291,298 @@ namespace net::worker::commands::MH{
 
 
 	template<class Protocol, class DBAdapter>
-	struct MHSET : BaseCommandRW<Protocol,DBAdapter>{
+	struct MHREM : BaseCommandRW<Protocol,DBAdapter>{
 
-		MHSET() : BaseCommandRW<Protocol,DBAdapter>("MHSET", std::begin(cmd__), std::end(cmd__)){}
+		MHREM() : BaseCommandRW<Protocol,DBAdapter>("MHREM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		// MHSET key delimiter "words,words"
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		// MHREM key bands keySub keySub..
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			auto const varg  = 3;
+
 			if (p.size() < 4)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
 
-			auto const &key = p[1];
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
 
-			if (!hm4::Pair::isKeyValid(key))
+			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const delimiter = p[2];
+			using namespace impl_;
 
-			if (delimiter.size() != 1)
+			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const tokens = p[3];
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const keySub = *itk; !shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			// not checking size
+			auto &icontainer = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
-			using namespace impl_;
+			Decoder decoder{ bandSize };
 
-			const Pair *pair = nullptr;
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto const keySub	= *itk;
 
-			MHSETFactory factory{ key, pair, delimiter[0], tokens };
+				to_string_buffer_t buffer;
+				auto const keySort	= makeKeySort(keySub, buffer);
 
-			insertHintVFactory(*db, pair, factory);
-
-			return result.set(factory.getCount());
-		}
-
-		struct MHSETFactory : hm4::PairFactory::IFactoryAction<0,1,MHSETFactory>{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<0,1,MHSETFactory>;
-
-			MHSETFactory(std::string_view const key, const Pair *pair, char delimiter, std::string_view tokens) :
-							Base::IFactoryAction	(key, impl_::MH::bytes(), pair	),
-							delimiter		(delimiter			),
-							tokens			(tokens				){}
-
-			void action(Pair *pair){
-				countBits = action_(pair);
+				[[maybe_unused]]
+				bool const b = shared::rsetmulti::rem(db, decoder,
+								keyN, keySub, keySort,
+									icontainer, bcontainer);
 			}
-
-			constexpr auto getCount() const{
-				return countBits;
-			}
-
-
-
-			size_t action_(Pair *pair) const{
-				using namespace impl_;
-
-				MHT *mh_data = hm4::getValAs<MHT>(pair);
-
-				auto mh = MH{};
-
-				mh.clear(mh_data);
-
-				StringTokenizer const tok{ tokens, delimiter };
-
-				bool result = 0;
-
-				for(auto const &val : tok){
-					if (!val.size())
-						continue;
-
-					result += mh.add(mh_data, val) ? 1 : 0;
-				}
-
-				return result;
-			}
-
-			char			delimiter;
-			std::string_view	tokens;
-
-			size_t			countBits = 0;
-		};
-
-	private:
-		constexpr inline static std::string_view cmd__[] = {
-			"mhset",	"MHSET"
-		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct MHRESERVE : BaseCommandRW<Protocol,DBAdapter>{
-
-		MHRESERVE() : BaseCommandRW<Protocol,DBAdapter>("MHRESERVE", std::begin(cmd__), std::end(cmd__)){}
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
-		}
-
-	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() < 2)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
-
-			auto const &key = p[1];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			using namespace impl_;
-
-			hm4::insertV<hm4::PairFactory::Reserve>(*db, key, MH::bytes());
 
 			return result.set_1();
 		}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
-			"mhreserve",	"MHRESERVE"
+			"mhrem",	"MHREM"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MHGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
+
+		MHGETINDEXES() : BaseCommandRO<Protocol,DBAdapter>("MHGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		// MHGETINDEXES key bands keySub
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
+			auto const keySub	= p[3];
+
+			using namespace impl_;
+
+			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (!bandSize || MH::bytes() % bandSize != 0)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto &icontainer = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			Decoder decoder{ bandSize };
+
+			[[maybe_unused]]
+			bool const b = shared::rsetmulti::getIndexes(db, decoder,
+							keyN, keySub,
+								icontainer, bcontainer);
+
+			auto const &container = icontainer;
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mhgetindexes",	"MHGETINDEXES"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct MHSIM : BaseCommandRO<Protocol,DBAdapter>{
+
+		MHSIM() : BaseCommandRO<Protocol,DBAdapter>("MHSIM", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		// MHSIM key bands keySub
+		// MHSIM key bands delimiter "words,words"
+		//
+		// using:
+		//	icontainer, reused as result  container
+		//	bcontainer, reused as result bcontainer
+		//	keySub_container
+		//	heap
+		//	MHT[MH::size()];
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			if (p.size() != 4 && p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+
+			bool const inputTypeIsKey = p.size() == 4;
+
+			if (inputTypeIsKey)
+				return process2__<1>(p, db, result, blob);
+			else
+				return process2__<0>(p, db, result, blob);
+		}
+
+		template<bool inputTypeIsKey>
+		static void process2__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
+
+			auto const keySub	=  inputTypeIsKey ? p[3] : "";
+			auto const delimiter	= !inputTypeIsKey ? p[3] : "";
+			auto const tokens	= !inputTypeIsKey ? p[4] : "";
+
+			using namespace impl_;
+
+			if (!bandSize || MH::bytes() % bandSize != 0)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if constexpr(inputTypeIsKey){
+				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}else{
+
+				if (delimiter.size() != 1)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+
+			auto &icontainer = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			Decoder decoder{ bandSize };
+
+			MH mh;
+
+			const MHT *mhA = [&]() -> const MHT *{
+				if constexpr(inputTypeIsKey){
+					return load_ptr(db, keyN, keySub);
+				}else{
+					MHT *mh_data = & blob.allocate<MHT>(MH::bytes());
+
+					if (insertTokens(mh, mh_data, delimiter[0], tokens))
+						return mh_data;
+					else
+						return nullptr;
+				}
+			}();
+
+			if (!mhA)
+				return result.set_container0();
+
+			// getIndexes - decode indexes manually, to avoid disk operation
+			if (!decoder(MHT2sv(mhA), icontainer, bcontainer))
+				return result.set_container0();
+
+			auto &keySub_container  = blob.construct<OutputBlob::Container>();
+
+			for(auto const &index : icontainer){
+				hm4::PairBufferKey bufferKey;
+				auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+
+				scanIndex__(db, prefix, count__, keySub_container);
+			}
+
+			// icontainer and bcontainer no longer need.
+
+			std::sort(std::begin(keySub_container), std::end(keySub_container));
+			auto uniq_end = std::unique(std::begin(keySub_container), std::end(keySub_container));
+
+			using HeapNode = std::pair<double, std::string_view>;
+			auto &heap = blob.construct<top_heap::TopKLargest<HeapNode, results__> >();
+
+			for(auto it = std::begin(keySub_container); it != uniq_end; ++it){
+				auto const &text = *it;
+
+				if constexpr(inputTypeIsKey){
+					if (text == keySub)
+						continue;
+				}
+
+				const auto *mhB = load_ptr(db, keyN, text);
+
+				if (!mhB)
+					continue;
+
+				auto const jaccard = mh.jaccard(mhA, mhB);
+
+				if (jaccard < minScore__)
+					continue;
+
+				heap.push(HeapNode{ jaccard, text });
+			}
+
+			// keySub_container, icontainer and bcontainer no longer need.
+
+			auto &container  = icontainer;
+
+			container.clear();
+			bcontainer.clear();
+
+			while(!heap.empty()){
+				auto const &[jaccard, text] = heap.pop();
+
+				container.push_back(text);
+
+				bcontainer.push_back();
+
+				container.push_back(
+					formatDouble(
+						jaccard,
+						bcontainer.back()
+					)
+				);
+			}
+
+			return result.set_container(container);
+		}
+
+		static void scanIndex__(DBAdapter &db, std::string_view prefix, uint32_t count, OutputBlob::Container &container){
+			using namespace shared::accumulate_results;
+
+			auto const &key = prefix;
+
+			logger<Logger::DEBUG>() << "MHSIM" << "prefix" << prefix << "key" << key;
+
+			StopPrefixPredicate stop{ prefix };
+
+			auto proj = [](std::string_view x){
+				[[maybe_unused]]
+				auto const separator = DBAdapter::SEPARATOR[0];
+
+				// keyN~word~keySort~keySub
+				return impl_::extractNth_(3, separator, x);
+			};
+
+			auto const Out = AccumulateOutput::KEYS;
+
+			sharedAccumulateResults<Out>(
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
+				container	,
+				proj
+			);
+		}
+
+	private:
+		constexpr static size_t count__		= 25;
+		constexpr static size_t results__	= 25;
+		constexpr static double minScore__	= 0.05;
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"mhsim",	"MHSIM"
 		};
 	};
 
@@ -274,39 +594,43 @@ namespace net::worker::commands::MH{
 		MHJACCARD() : BaseCommandRO<Protocol,DBAdapter>("MHJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process_(p, db, result);
+			return process__(p, db, result);
 		}
 
 	private:
-		// MHJACCARD key otherkey
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		// MHGETINDEXES key bands keySub keySub2
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+			if (p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
-			const auto &key = p[1];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			const auto &otherKey = p[2];
-
-			if (!hm4::Pair::isKeyValid(otherKey))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
+			auto const keySubA	= p[3];
+			auto const keySubB	= p[4];
 
 			using namespace impl_;
 
-			const auto *mhA = load_ptr(*db, key);
+			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (!shared::rsetmulti::valid(keyN, keySubB, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (!bandSize || MH::bytes() % bandSize != 0)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			const auto *mhA = load_ptr(db, keyN, keySubA);
 
 			if (!mhA)
 				return result.set_0();
 
-			const auto *mhB = load_ptr(*db, otherKey);
+			const auto *mhB = load_ptr(db, keyN, keySubB);
 
 			if (!mhB)
 				return result.set_0();
 
-			auto mh = MH{};
+			MH mh;
 
 			to_string_buffer_t buffer;
 
@@ -332,32 +656,40 @@ namespace net::worker::commands::MH{
 		MHMJACCARD() : BaseCommandRO<Protocol,DBAdapter>("MHMJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return process_(p, db, result, blob);
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		// MHJACCARD key otherkey...
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		// MHGETINDEXES key bands keySub keySub2...
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
-			if (p.size() < 3)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+			if (p.size() < 5)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
-			auto const varg = 2;
+			auto const varg = 4;
 
-			const auto &key = p[1];
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
+			auto const keySubA	= p[3];
 
-			if (!hm4::Pair::isKeyValid(key))
+			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace impl_;
 
+			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (!bandSize || MH::bytes() % bandSize != 0)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &keySub = *itk; !shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
 			auto &container = blob.construct<OutputBlob::Container>();
 
-			const auto *mhA = load_ptr(*db, key);
+			const auto *mhA = load_ptr(db, keyN, keySubA);
 
 			if (!mhA){
 				// main MinHash does not exists
@@ -370,10 +702,10 @@ namespace net::worker::commands::MH{
 
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
-			auto mh = MH{};
+			MH mh;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto *mhB = load_ptr(*db, *itk);
+				const auto *mhB = load_ptr(db, keyN, *itk);
 
 				if (!mhB){
 					container.push_back("0");
@@ -408,39 +740,43 @@ namespace net::worker::commands::MH{
 		MHOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("MHOVERLAP", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process_(p, db, result);
+			return process__(p, db, result);
 		}
 
 	private:
-		// MHOVERLAP key otherkey
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		// MHGETINDEXES key bands keySub keySub2
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+			if (p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
-			const auto &key = p[1];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			const auto &otherKey = p[2];
-
-			if (!hm4::Pair::isKeyValid(otherKey))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
+			auto const keySubA	= p[3];
+			auto const keySubB	= p[4];
 
 			using namespace impl_;
 
-			const auto *mhA = load_ptr(*db, key);
+			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (!shared::rsetmulti::valid(keyN, keySubB, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (!bandSize || MH::bytes() % bandSize != 0)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			const auto *mhA = load_ptr(db, keyN, keySubA);
 
 			if (!mhA)
 				return result.set_0();
 
-			const auto *mhB = load_ptr(*db, otherKey);
+			const auto *mhB = load_ptr(db, keyN, keySubB);
 
 			if (!mhB)
 				return result.set_0();
 
-			auto mh = MH{};
+			MH mh;
 
 			to_string_buffer_t buffer;
 
@@ -466,32 +802,40 @@ namespace net::worker::commands::MH{
 		MHMOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("MHMOVERLAP", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return process_(p, db, result, blob);
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		// MHMOVERLAP key otherkey...
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		// MHGETINDEXES key bands keySub keySub2...
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
-			if (p.size() < 3)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
+			if (p.size() < 5)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
-			auto const varg = 2;
+			auto const varg = 4;
 
-			const auto &key = p[1];
+			auto const keyN		= p[1];
+			auto const bandSize	= from_string<uint32_t>(p[2]);
+			auto const keySubA	= p[3];
 
-			if (!hm4::Pair::isKeyValid(key))
+			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace impl_;
 
+			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			if (!bandSize || MH::bytes() % bandSize != 0)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &keySub = *itk; !shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
 			auto &container = blob.construct<OutputBlob::Container>();
 
-			const auto *mhA = load_ptr(*db, key);
+			const auto *mhA = load_ptr(db, keyN, keySubA);
 
 			if (!mhA){
 				// main MinHash does not exists
@@ -504,10 +848,10 @@ namespace net::worker::commands::MH{
 
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 
-			auto mh = MH{};
+			MH mh;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto *mhB = load_ptr(*db, *itk);
+				const auto *mhB = load_ptr(db, keyN, *itk);
 
 				if (!mhB){
 					container.push_back("0");
@@ -532,98 +876,6 @@ namespace net::worker::commands::MH{
 		constexpr inline static std::string_view cmd__[] = {
 			"mhmoverlap",	"MHMOVERLAP"
 		};
-	};
-
-
-
-	template<class Protocol, class DBAdapter>
-	struct MHMERGE : BaseCommandRW<Protocol,DBAdapter>{
-
-		MHMERGE() : BaseCommandRW<Protocol,DBAdapter>("MHMERGE", std::begin(cmd__), std::end(cmd__)){}
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
-		}
-
-	private:
-		// MHMERGE key otherkey otherkey...
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() < 3)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
-
-			const auto &key = p[1];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const varg = 2;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			using namespace impl_;
-
-			MHVector container;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &src_key = *itk;
-
-				// prevent merge with itself.
-				if (src_key == key)
-					continue;
-
-				if (const auto *b = load_ptr(*db, src_key); b)
-					container.push_back(b);
-			}
-
-			if (container.empty())
-				return result.set();
-
-			const auto *pair = hm4::getPairPtrWithSize(*db, key, MH::bytes());
-
-			MHMergeFactory factory{ key, pair, std::begin(container), std::end(container) };
-
-			insertHintVFactory(*db, pair, factory);
-
-			return result.set();
-		}
-
-		using MHVector = StaticVector<const impl_::MHT *, OutputBlob::ParamContainerSize>;
-
-		struct MHMergeFactory : hm4::PairFactory::IFactoryAction<1,1,MHMergeFactory>{
-			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<1,1,MHMergeFactory>;
-
-			using It = MHVector::iterator;
-
-			MHMergeFactory(std::string_view const key, const Pair *pair, It begin, It end) :
-							Base::IFactoryAction	(key, impl_::MH::bytes(), pair	),
-							begin			(begin				),
-							end			(end				){}
-
-			void action(Pair *pair) const{
-				using namespace impl_;
-
-				MHT *mh_data = hm4::getValAs<MHT>(pair);
-
-				auto mh = MH{};
-
-				// This is fine, because flush list give guarantees now.
-
-				for(auto it = begin; it != end; ++it)
-					mh.merge(mh_data, *it);
-			}
-
-			It	begin;
-			It	end;
-		};
-
-	private:
-		constexpr inline static std::string_view cmd__[] = {
-			"mhmerge",	"MHMERGE"
-		};
-
 	};
 
 
@@ -655,18 +907,17 @@ namespace net::worker::commands::MH{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				MHADD		,
-				MHSET		,
-				MHRESERVE	,
+				MHREM		,
+				MHGETINDEXES	,
+				MHSIM		,
 				MHJACCARD	,
 				MHMJACCARD	,
 				MHOVERLAP	,
 				MHMOVERLAP	,
-				MHMERGE		,
 				MHBITS
 			>(pack);
 		}
 	};
-
 
 } // namespace
 
