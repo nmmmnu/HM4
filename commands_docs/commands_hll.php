@@ -158,21 +158,6 @@ return array(
 			"hll"
 	),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	new Cmd(
 			"PFMERGE",
 
@@ -213,9 +198,9 @@ return array(
 			"PFERROR / HLLERROR",
 
 			"return HLL error rate",
-			"string (int)",
+			"string (float)",
 			"HLL error rate as percent, but multiplied to 1'00'00",
-			"1.2.17",
+			"1.2.17<br />1.3.15.1",
 			"n/a",
 			false,
 			null,
