@@ -111,6 +111,24 @@ return array(
 	),
 
 	new Cmd(
+			"SIZEOF",
+
+			"SIZEOF / SIZE_OF key",
+
+			"Get internal <i>key</i> size",
+
+			"int",
+			"internal <i>key</i> size",
+
+			"1.3.4",
+			"READ",
+			false,
+			false,
+
+			"immutable"
+	),
+
+	new Cmd(
 			"GETRANGE",
 
 			"GETRANGE key index_start index_finish",
