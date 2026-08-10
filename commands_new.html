@@ -221,6 +221,20 @@
 			</ul>
 		</div>
 		<div>
+			<a href="#M::MINHASH">MINHASH</a>
+			<ul>
+				<li><a href="#C::MHADD">MHADD</a></li>
+				<li><a href="#C::MHREM">MHREM</a></li>
+				<li><a href="#C::MHGETINDEXES">MHGETINDEXES</a></li>
+				<li><a href="#C::MHSIM">MHSIM</a></li>
+				<li><a href="#C::MHJACCARD">MHJACCARD</a></li>
+				<li><a href="#C::MHMJACCARD">MHMJACCARD</a></li>
+				<li><a href="#C::MHOVERLAP">MHOVERLAP</a></li>
+				<li><a href="#C::MHMOVERLAP">MHMOVERLAP</a></li>
+				<li><a href="#C::MHBITS">MHBITS</a></li>
+			</ul>
+		</div>
+		<div>
 			<a href="#M::VECTORS">VECTORS</a>
 			<ul>
 				<li><a href="#C::VADD">VADD</a></li>
@@ -479,7 +493,7 @@ Selecting a higher <b>integer_size</b> drastically reduces the false-positive pr
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>CFRESERVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
@@ -533,7 +547,7 @@ Selecting a higher <b>integer_size</b> drastically reduces the false-positive pr
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>CFADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
@@ -601,7 +615,7 @@ This means that at a typical 95% fill factor, a filter configured with 1024 buck
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>CFMADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
@@ -669,7 +683,7 @@ This means that at a typical 95% fill factor, a filter configured with 1024 buck
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>CFREM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
@@ -734,7 +748,7 @@ This means that at a typical 95% fill factor, a filter configured with 1024 buck
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>CFMREM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
@@ -799,7 +813,7 @@ This means that at a typical 95% fill factor, a filter configured with 1024 buck
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>CFEXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
@@ -866,7 +880,7 @@ This means that at a typical 95% fill factor, a filter configured with 1024 buck
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>CFMEXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>CUCKOO_FILTER	</td></tr>
@@ -968,7 +982,7 @@ This structure allows you to store and query points in 1D by mapping.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1ADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1022,7 +1036,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1REM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1085,7 +1099,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1GET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1142,7 +1156,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1MGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1202,7 +1216,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1EXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1259,7 +1273,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1SCORE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1314,7 +1328,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1POINT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1427,7 +1441,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC1RANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>LINEAR CURVE	</td></tr>
@@ -1707,7 +1721,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2ADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -1761,7 +1775,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2REM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -1824,7 +1838,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2GET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -1881,7 +1895,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2MGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -1941,7 +1955,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2EXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -1998,7 +2012,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2SCORE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -2055,7 +2069,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2POINT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -2172,7 +2186,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2RANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -2329,7 +2343,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC2RANGENAIVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 2D	</td></tr>
@@ -2541,7 +2555,7 @@ Where:</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3ADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -2595,7 +2609,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3REM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -2658,7 +2672,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3GET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -2715,7 +2729,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3MGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -2775,7 +2789,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3EXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -2832,7 +2846,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3SCORE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -2891,7 +2905,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3POINT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -2983,7 +2997,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3RANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -3086,7 +3100,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC3RANGENAIVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 3D	</td></tr>
@@ -3302,7 +3316,7 @@ Where:</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4ADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3356,7 +3370,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4REM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3419,7 +3433,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4GET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3476,7 +3490,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4MGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3536,7 +3550,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4EXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3593,7 +3607,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4SCORE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3654,7 +3668,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4POINT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3747,7 +3761,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4RANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -3849,7 +3863,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC4RANGENAIVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 4D	</td></tr>
@@ -4069,7 +4083,7 @@ Where:</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8ADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4123,7 +4137,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8REM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4186,7 +4200,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8GET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4243,7 +4257,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8MGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4303,7 +4317,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8EXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4360,7 +4374,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8SCORE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4429,7 +4443,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8POINT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4527,7 +4541,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8RANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4630,7 +4644,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC8RANGENAIVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 8D	</td></tr>
@@ -4866,7 +4880,7 @@ Where:</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16ADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -4920,7 +4934,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16REM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * (READ + 2 * WRITE), TX	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -4983,7 +4997,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16GET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -5040,7 +5054,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16MGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of items] * 2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -5100,7 +5114,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16EXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>2 * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -5157,7 +5171,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16SCORE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -5242,7 +5256,7 @@ OK
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16POINT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -5336,7 +5350,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16RANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 1 .. 9 }	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -5439,7 +5453,7 @@ limit [count]
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MC16RANGENAIVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MORTON CURVE 16D	</td></tr>
@@ -5811,7 +5825,7 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>HHRESERVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
@@ -5877,7 +5891,7 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>HHINCR		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
@@ -5973,7 +5987,7 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>HHDECR		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
@@ -6069,7 +6083,7 @@ However unlike similar modules such <b>Misra-Gries heavy hitters</b>, you have t
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>HHGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.7	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>HEAVY HEATERS	</td></tr>
@@ -6231,7 +6245,7 @@ This allows you to track frequency while inserting.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MGRESERVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
@@ -6297,7 +6311,7 @@ This allows you to track frequency while inserting.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MGADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
@@ -6398,7 +6412,7 @@ This allows you to track frequency while inserting.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MGADDGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
@@ -6489,7 +6503,7 @@ score of the item = if the item is qualified for insert
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>MGGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MISRA-GRIES HEAVY HEATERS	</td></tr>
@@ -6659,7 +6673,7 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RSRESERVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
@@ -6725,7 +6739,7 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RSADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
@@ -6811,7 +6825,7 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RSGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
@@ -6891,7 +6905,7 @@ This keeps the structure compact and guarantees stable memory usage.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RSGETCOUNT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.7.8	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>RESERVOIR SAMPLING	</td></tr>
@@ -7071,7 +7085,7 @@ If the buffer is empty, it safely returns an empty string (<b>""</b>) to prevent
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RBRESERVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>RING_BUFFER	</td></tr>
@@ -7137,7 +7151,7 @@ If the buffer is empty, it safely returns an empty string (<b>""</b>) to prevent
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RBADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>RING_BUFFER	</td></tr>
@@ -7227,7 +7241,7 @@ If the buffer reaches its maximum capacity (<b>rb_count</b>), new incoming items
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RBPOP		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>RING_BUFFER	</td></tr>
@@ -7319,7 +7333,7 @@ An empty string ("") if the buffer is empty.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RBGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>RING_BUFFER	</td></tr>
@@ -7400,7 +7414,7 @@ This is a non-destructive peek operation and does not remove items from the buff
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>RBCOUNT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>RING_BUFFER	</td></tr>
@@ -7559,7 +7573,7 @@ uses a highly optimized internal query planner to resolve the request instantly.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SLADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>STRING_LIST	</td></tr>
@@ -7620,7 +7634,7 @@ to <b>RBADD</b> and <b>RBADDPACK</b> in the future. This behaviour is similar to
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SLADDPACK		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>STRING_LIST	</td></tr>
@@ -7682,7 +7696,7 @@ to <b>RBADD</b> and <b>RBADDPACK</b> in the future. This behaviour is similar to
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SLGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>STRING_LIST	</td></tr>
@@ -7742,7 +7756,7 @@ to <b>RBADD</b> and <b>RBADDPACK</b> in the future. This behaviour is similar to
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SLMGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>STRING_LIST	</td></tr>
@@ -7806,7 +7820,7 @@ Any out-of-bounds or non-existent index safely returns an empty string (<b>""</b
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SLGETALL		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>STRING_LIST	</td></tr>
@@ -7863,7 +7877,7 @@ Any out-of-bounds or non-existent index safely returns an empty string (<b>""</b
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SLCOUNT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>STRING_LIST	</td></tr>
@@ -7906,6 +7920,711 @@ Any out-of-bounds or non-existent index safely returns an empty string (<b>""</b
 </pre></blockquote>
 
 
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MINHASH"></a>
+		<h2>Module MINHASH</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module implements a <b>high-performance MinHash & Locality-Sensitive Hashing (LSH) engine</b> - a space-efficient data structure
+designed for ultra-fast <b>near-duplicate detection</b>, document similarity estimation, and real-time text deduplication.</p>
+
+<p><b>Core Architecture & Fixed Specifications:</b></p>
+<ul>
+  <li><b>Fixed Signature Size:</b> The MinHash signature length is fixed at <b>4096 hashes</b> per document (12 bits). Each hash element is stored as a 16-bit integer.</li>
+  <li><b>Stateless & Flexible LSH Banding:</b> LSH index partitioning is dynamically controlled via the <code>bands</code> parameter provided during command execution,
+  eliminating the need for complex persistent index state configuration.</li>
+  <li><b>Zero-Allocation Read-Only Ad-hoc Queries:</b> Supports evaluating both pre-indexed document keys and raw, unindexed text streams entirely in RAM without modifying
+  disk or triggering database writes.</li>
+</ul>
+
+<p><b>What It Does:</b></p>
+
+<p><b>1. Fast Subkey Indexing & Bucket Distribution</b></p>
+<p>Via <b>MHADD</b>, text tokens are converted into a 4096-element MinHash signature, segmented into <code>bands</code> LSH buckets, and indexed under specified subkeys.</p>
+
+<p><b>2. Subkey & Ad-hoc Text Similarity Search</b></p>
+<p><b>MHSIM</b> performs candidate retrieval via LSH bucket matching followed by exact similarity ranking.
+It works seamlessly for both existing <code>keySub</code> targets and on-the-fly token inputs.</p>
+
+<p><b>3. Exact Pairwise & Multi-Key Distance Metrics</b></p>
+<p>Provides exact score evaluations directly against 4096-hash MinHash signatures:
+<ul>
+  <li><b>MHJACCARD</b> / <b>MHMJACCARD</b>: Calculates standard Jaccard Similarity (1:1 or 1:N pairwise batch against the first subkey).</li>
+  <li><b>MHOVERLAP</b> / <b>MHMOVERLAP</b>: Calculates Szymkiewicz–Simpson Overlap Coefficient (1:1 or 1:N pairwise batch, ideal for containment and quote matching).</li>
+</ul>
+</p>
+
+<p><b>4. Inspection & Maintenance</b></p>
+<p>Use <b>MHGETINDEXES</b> to inspect calculated LSH band bucket hashes, <b>MHREM</b> to purge subkeys from both LSH buckets and document storage and
+<b>MHBITS</b> to query module configuration parameters.</p>
+
+<p><b>Use Cases:</b></p>
+<ul>
+  <li>Real-time news article plagiarism and duplicate clustering</li>
+  <li>Content recommendation systems ("More on this topic") - however it does not work very well for this.</li>
+  <li>Web crawler deduplication before indexing</li>
+  <li>Large-scale log and text message stream canonicalization</li>
+</ul>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; mhbits
+(integer) 12
+127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology,news&quot; doc:1002 , &quot;apple,iphone,mobile,news&quot; doc:1003 , &quot;football,sports,stadium&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhgetindexes articles:i 16 doc:1001
+1) &quot;D7E162CCF730779D.0031&quot;
+2) &quot;38E520B28743100B.0121&quot;
+3) &quot;D902CFEEB62FA943.0143&quot;
+4) &quot;E2C16FFA0DCCE287.01FD&quot;
+127.0.0.1:6379&gt; mhsim articles:i 16 doc:1001
+1) &quot;doc:1002&quot;
+2) &quot;+0.6000000000&quot;
+127.0.0.1:6379&gt; mhsim articles:i 16 , &quot;apple,iphone,technology,gadgets&quot;
+1) &quot;doc:1001&quot;
+2) &quot;+0.6000000000&quot;
+3) &quot;doc:1002&quot;
+4) &quot;+0.3333333333&quot;
+127.0.0.1:6379&gt; mhjaccard articles:i 16 doc:1001 doc:1002
+&quot;+0.6000000000&quot;
+127.0.0.1:6379&gt; mhmjaccard articles:i 16 doc:1001 doc:1002 doc:1003
+1) &quot;+0.6000000000&quot;
+2) &quot;+0.0000000000&quot;
+127.0.0.1:6379&gt; mhoverlap articles:i 16 doc:1001 doc:1002
+&quot;+0.7500000000&quot;
+127.0.0.1:6379&gt; mhmoverlap articles:i 16 doc:1001 doc:1002 doc:1003
+2) &quot;+0.7500000000&quot;
+4) &quot;+0.0000000000&quot;
+127.0.0.1:6379&gt; mhrem articles:i 16 doc:1003
+(integer) 1
+</pre></blockquote>
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::MHADD">MHADD</a></li>
+			<li><a href="#C::MHREM">MHREM</a></li>
+			<li><a href="#C::MHGETINDEXES">MHGETINDEXES</a></li>
+			<li><a href="#C::MHSIM">MHSIM</a></li>
+			<li><a href="#C::MHJACCARD">MHJACCARD</a></li>
+			<li><a href="#C::MHMJACCARD">MHMJACCARD</a></li>
+			<li><a href="#C::MHOVERLAP">MHOVERLAP</a></li>
+			<li><a href="#C::MHMOVERLAP">MHMOVERLAP</a></li>
+			<li><a href="#C::MHBITS">MHBITS</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="MHADD">
+			<a name="C::MHADD"></a>
+			<h4>MHADD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHADD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * (READ + (1 + BANDS * 2) * WRITE)	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHADD key bands keySub delimiter tokens [keySub2 delimiter tokens2 ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>unique document identifier / subkey</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>single-character token separator (e.g. &quot;,&quot;)</td>
+				</tr>
+				<tr>
+					<td>tokens</td>
+					<td>delimited string of text tokens or shingle words</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Generates a fixed <b>4096-hash MinHash signature</b> from the provided text tokens and inserts the document under <i>keySub</i> into the LSH index space.</p>
+<p>The signature is split into LSH buckets according to the <i>bands</i> parameter and written alongside the subkey signature metadata,
+enabling fast candidate lookup during similarity searches.</p>
+<p>Supports batching multiple <code>keySub delimiter tokens</code> sets in a single invocation for maximum throughput.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot; doc:1002 , &quot;apple,iphone,mobile&quot;
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHREM">
+			<a name="C::MHREM"></a>
+			<h4>MHREM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHREM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * (READ + (1 + BANDS * 2) * WRITE)	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHREM key bands keySub [keySub2 ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>unique document identifier / subkey to remove</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Removes one or more documents specified by <i>keySub</i> from the MinHash index space.</p>
+<p>The command reads the stored MinHash signature for each <i>keySub</i>, cleans up all associated LSH bucket entries generated by the specified <i>bands</i> parameter and
+reclaims the underlying document metadata memory.</p>
+<p>Supports removing multiple subkeys in a single call for batch cleanup.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>always return 1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot; doc:1002 , &quot;apple,iphone,mobile&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhrem articles:i 16 doc:1001 doc:1002
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHGETINDEXES">
+			<a name="C::MHGETINDEXES"></a>
+			<h4>MHGETINDEXES</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHGETINDEXES		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHGETINDEXES key bands keySub</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>unique document identifier / subkey</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Inspects the stored MinHash signature for <i>keySub</i> and decodes the exact LSH bucket index keys according to the specified <i>bands</i> configuration.</p>
+<p>This command is diagnostic (Read-Only) and does not modify the database state. It is useful for inspecting internal prefix structures,
+debugging bucket collision distributions, or verifying index layout.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>returns an array of formatted LSH bucket keys generated for the subkey</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhgetindexes articles:i 16 doc:1001
+1) &quot;38E520B28743100B.0121&quot;
+2) &quot;D902CFEEB62FA943.0143&quot;
+3) &quot;E2C16FFA0DCCE287.01FD&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHSIM">
+			<a name="C::MHSIM"></a>
+			<h4>MHSIM</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHSIM		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>slow &rarr; (1 + BANDS * (1 + 25 - 1)) * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHSIM key bands keySub | MHSIM key bands delimiter tokens</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>target document identifier / subkey (for indexed lookups)</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>single-character token separator (for ad-hoc raw text lookups)</td>
+				</tr>
+				<tr>
+					<td>tokens</td>
+					<td>delimited string of text tokens or shingle words (for ad-hoc lookups)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Performs <b>Locality-Sensitive Hashing (LSH) similarity search</b> to find top near-duplicate candidate documents within the specified index space.</p>
+
+<p><b>Dual Operating Modes:</b></p>
+<ul>
+  <li><b>Indexed Subkey Search:</b> Accepts an existing <i>keySub</i> to locate similar documents stored in the database.</li>
+  <li><b>Ad-hoc Raw Text Search:</b> Accepts a raw token string with a <i>delimiter</i>. Evaluates similarity dynamically in RAM without writing to disk or
+  modifying database state (100% Read-Replica safe).</li>
+</ul>
+
+<p><b>Internal Search Execution Pipeline:</b></p>
+<ol>
+  <li>Generates LSH bucket keys according to the <i>bands</i> factor.</li>
+  <li>Fetches up to <b>25 candidates per band</b> to protect memory and thread latency.</li>
+  <li>Deduplicates candidate keys (25 - 1 per band) and evaluates their exact MinHash Jaccard similarity.</li>
+  <li>Filters out candidates below a <b>0.05 (5%) similarity threshold</b>.</li>
+  <li>Returns the <b>Top 25 most similar documents</b> ranked in descending order.<br />
+  In realistic usage, usually returns 0 - 3 results.</li>
+</ol>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>returns an array of matched target subkeys paired with their Jaccard similarity scores, ordered by highest score</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhmoverlap articles:i 16 doc:1001 doc:1002 doc:1003
+1) &quot;+0.6666666667&quot;
+2) &quot;0&quot;
+127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot; doc:1002 , &quot;apple,iphone,mobile&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhsim articles:i 16 doc:1001
+1) &quot;doc:1002&quot;
+2) &quot;+0.5000000000&quot;
+127.0.0.1:6379&gt; mhsim articles:i 16 , &quot;apple,iphone,technology,news&quot;
+1) &quot;doc:1001&quot;
+2) &quot;+0.7500000000&quot;
+3) &quot;doc:1002&quot;
+4) &quot;+0.4000000000&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHJACCARD">
+			<a name="C::MHJACCARD"></a>
+			<h4>MHJACCARD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHJACCARD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHJACCARD key bands keySub keySub2</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>primary document identifier / subkey</td>
+				</tr>
+				<tr>
+					<td>keySub2</td>
+					<td>target document identifier / subkey to compare against</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Calculates the exact <b>Jaccard Similarity</b> coefficient between two stored document signatures (<i>keySub</i> and <i>keySub2</i>) using their MinHash arrays.</p>
+<p>J(A, B) = |A &cap; B| / |A &cup; B|)</p>
+<p>The resulting score ranges from <code>0.0</code> (completely distinct) to <code>1.0</code> (identical signatures).</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string (float)</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>returns the exact Jaccard similarity score formatted as a floating-point string</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot; doc:1002 , &quot;apple,iphone,mobile&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhjaccard articles:i 16 doc:1001 doc:1002
+&quot;+0.5000000000&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MHMJACCARD">MHMJACCARD</a></li>
+				<li><a href="#C::MHOVERLAP">MHOVERLAP</a></li>
+				<li><a href="#C::MHMOVERLAP">MHMOVERLAP</a></li>
+				<li><a href="#C::PFJACCARD">PFJACCARD</a></li>
+				<li><a href="#C::PFMJACCARD">PFMJACCARD</a></li>
+				<li><a href="#C::PFOVERLAP">PFOVERLAP</a></li>
+				<li><a href="#C::PFMOVERLAP">PFMOVERLAP</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHMJACCARD">
+			<a name="C::MHMJACCARD"></a>
+			<h4>MHMJACCARD</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHMJACCARD		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHMJACCARD key bands keySub keySub2 [keySub3 ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>primary document identifier / subkey</td>
+				</tr>
+				<tr>
+					<td>keySub2</td>
+					<td>target document identifier / subkey to compare against</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Calculates the exact <b>Jaccard Similarity</b> coefficient between a primary document (<i>keySub</i>) and multiple target documents in a single call.</p>
+<p>J(A, B) = |A &cap; B| / |A &cup; B|)</p>
+<p>Minimizes network round-trips by batching 1:N pairwise MinHash signature comparisons.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>returns an array containing target subkeys paired with their Jaccard similarity scores</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot; doc:1002 , &quot;apple,iphone,mobile&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhmjaccard articles:i 16 doc:1001 doc:1002 doc:1003
+1) &quot;+0.5000000000&quot;
+2) &quot;0&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MHJACCARD">MHJACCARD</a></li>
+				<li><a href="#C::MHOVERLAP">MHOVERLAP</a></li>
+				<li><a href="#C::MHMOVERLAP">MHMOVERLAP</a></li>
+				<li><a href="#C::PFJACCARD">PFJACCARD</a></li>
+				<li><a href="#C::PFMJACCARD">PFMJACCARD</a></li>
+				<li><a href="#C::PFOVERLAP">PFOVERLAP</a></li>
+				<li><a href="#C::PFMOVERLAP">PFMOVERLAP</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHOVERLAP">
+			<a name="C::MHOVERLAP"></a>
+			<h4>MHOVERLAP</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHOVERLAP		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHOVERLAP key bands keySub keySub2</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>primary document identifier / subkey</td>
+				</tr>
+				<tr>
+					<td>keySub2</td>
+					<td>target document identifier / subkey to compare against</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Calculates the <b>Szymkiewicz–Simpson Overlap Coefficient</b> between two stored document signatures (<i>keySub</i> and <i>keySub2</i>).</p>
+<p>Overlap(A, B) = |A &cap; B| / min(|A|, |B|)</p>
+<p>Unlike Jaccard similarity, Overlap evaluates set intersection relative to the size of the smaller document, making it ideal for detecting short quotes, citations, or summary containment inside longer articles.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string (float)</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>returns the exact Overlap coefficient formatted as a floating-point string</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot; doc:1002 , &quot;apple,iphone,mobile&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhoverlap articles:i 16 doc:1001 doc:1002
+&quot;+0.6666666667&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MHJACCARD">MHJACCARD</a></li>
+				<li><a href="#C::MHMJACCARD">MHMJACCARD</a></li>
+				<li><a href="#C::MHMOVERLAP">MHMOVERLAP</a></li>
+				<li><a href="#C::PFJACCARD">PFJACCARD</a></li>
+				<li><a href="#C::PFMJACCARD">PFMJACCARD</a></li>
+				<li><a href="#C::PFOVERLAP">PFOVERLAP</a></li>
+				<li><a href="#C::PFMOVERLAP">PFMOVERLAP</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHMOVERLAP">
+			<a name="C::MHMOVERLAP"></a>
+			<h4>MHMOVERLAP</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHMOVERLAP		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHMOVERLAP key bands keySub keySub2 [keySub3 ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the MinHash index space</td>
+				</tr>
+				<tr>
+					<td>bands</td>
+					<td>size/partitioning factor for LSH bands</td>
+				</tr>
+				<tr>
+					<td>keySub</td>
+					<td>primary document identifier / subkey</td>
+				</tr>
+				<tr>
+					<td>keySub2</td>
+					<td>target document identifier / subkey to compare against</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Calculates the <b>Szymkiewicz–Simpson Overlap Coefficient</b> between a primary document (<i>keySub</i>) and multiple target documents in a single batch operation.</p>
+<p>Overlap(A, B) = |A &cap; B| / min(|A|, |B|)</p>
+<p>Allows efficient evaluation of text inclusion and containment across multiple targets simultaneously.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>returns an array containing target subkeys paired with their Overlap coefficients</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhadd articles:i 16 doc:1001 , &quot;apple,iphone,technology&quot; doc:1002 , &quot;apple,iphone,mobile&quot;
+(integer) 1
+127.0.0.1:6379&gt; mhmoverlap articles:i 16 doc:1001 doc:1002 doc:1003
+1) &quot;+0.6666666667&quot;
+2) &quot;0&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MHJACCARD">MHJACCARD</a></li>
+				<li><a href="#C::MHMJACCARD">MHMJACCARD</a></li>
+				<li><a href="#C::MHOVERLAP">MHOVERLAP</a></li>
+				<li><a href="#C::PFJACCARD">PFJACCARD</a></li>
+				<li><a href="#C::PFMJACCARD">PFMJACCARD</a></li>
+				<li><a href="#C::PFOVERLAP">PFOVERLAP</a></li>
+				<li><a href="#C::PFMOVERLAP">PFMOVERLAP</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHBITS">
+			<a name="C::MHBITS"></a>
+			<h4>MHBITS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHBITS		</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHBITS</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Returns the internal bit exponent configuration (<code>MHBITS</code>) used by the MinHash engine, e.g.12</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>integer (always returns 12)</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhbits
+(integer) 12
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::PFBITS">PFBITS</a></li>
+			</ul>
 		</div>
 
 		<p><a href="#top">top</a></p>
@@ -8125,7 +8844,7 @@ Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Localit
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -8325,7 +9044,7 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VREM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -8380,7 +9099,7 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -8645,7 +9364,7 @@ Quantization types:
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VGETNORMALIZED		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -8911,7 +9630,7 @@ Quantization types:
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VGETRAW		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -9075,7 +9794,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VSIMFLAT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -9395,7 +10114,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VSIMLSH		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 9, 8 }		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ, were N ∈ { 9, 8 }	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -9716,7 +10435,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VKSET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -9913,7 +10632,7 @@ BDA95E9DBDC504813E88C155BC1A0275BEE9FBE73DF3B6463E2113403DE94467BE61FF2DBE046738
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VKGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -10174,7 +10893,7 @@ Quantization types:
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VKGETNORMALIZED		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -10436,7 +11155,7 @@ Quantization types:
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VGETRAW		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -10596,7 +11315,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>VKSIMFLAT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>VECTORS	</td></tr>
@@ -10999,7 +11718,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11067,7 +11786,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11127,7 +11846,7 @@ BF5A271FC002E446C018B4FC3EAE85B23F2E85B2C06FF7D6C002E446BF02E4463FAE85B2C018B4FC
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMMGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11185,7 +11904,7 @@ The command is same as IXMGET, except it returns several values.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMEXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11243,7 +11962,7 @@ The command is same as IXMGET, except it returns several values.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMGETINDEXES		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11306,7 +12025,7 @@ If the *sub_key* not exists, returns an empty array<br />
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMREM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11367,7 +12086,7 @@ If the *sub_key* not exists, returns an empty array<br />
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMRANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11438,7 +12157,7 @@ If the *sub_key* not exists, returns an empty array<br />
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMRANGEFLEX		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11514,7 +12233,7 @@ The results apears, if contains at least one of the words. The result that conta
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXMRANGESTRICT		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
@@ -11727,7 +12446,7 @@ The results apears, if contains ALL of the words.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTADD_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -11803,7 +12522,7 @@ The results apears, if contains ALL of the words.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTADD_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -11875,7 +12594,7 @@ The results apears, if contains ALL of the words.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -11935,7 +12654,7 @@ The results apears, if contains ALL of the words.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTMGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -11993,7 +12712,7 @@ The command is same as IXTGET, except it returns several values.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTEXISTS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -12051,7 +12770,7 @@ The command is same as IXTGET, except it returns several values.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTGETINDEXES		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -12114,7 +12833,7 @@ If the *sub_key* not exists, returns an empty array<br />
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTREM		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -12175,7 +12894,7 @@ If the *sub_key* not exists, returns an empty array<br />
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTRANGEFLEX_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -12256,7 +12975,7 @@ The results apears, if contains at least one of the trigram. The result that con
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTRANGEFLEX_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -12333,7 +13052,7 @@ The results apears, if contains at least one of the trigram. The result that con
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTRANGESTRICT_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -12416,7 +13135,7 @@ The results apears, if contains ALL of the words.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXTRANGESTRICT_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of words] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of words] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>TRIGRAM INDEX	</td></tr>
@@ -12639,7 +13358,7 @@ The results apears, if contains ALL of the words.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXHADD_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>HYBRID INDEX	</td></tr>
@@ -12715,7 +13434,7 @@ The results apears, if contains ALL of the words.
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IXHADD_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>HYBRID INDEX	</td></tr>
@@ -12856,7 +13575,7 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACADD_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
@@ -12918,7 +13637,7 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACDEL_UTF8		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
@@ -12980,7 +13699,7 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACADD_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + 2 * (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
@@ -13038,7 +13757,7 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACDEL_BIN		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + (N + 1) * WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
@@ -13097,7 +13816,7 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACRANGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
@@ -13180,7 +13899,7 @@ The commands <b>ACADD</b> and <b>ACRANGE</b> work for any type of search, not on
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ACRANGEALL		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.2	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>AUTOCOMPLETE	</td></tr>
@@ -13358,7 +14077,7 @@ It is recommended to place variable-length UTF-8 text fields at the end of the s
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IRESERVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13410,7 +14129,7 @@ It is recommended to place variable-length UTF-8 text fields at the end of the s
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IGETALL		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13468,7 +14187,7 @@ The data is parsed using the provided schema. Trailing spaces (padding) are auto
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IGETKEYS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>n/a		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>n/a	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13524,7 +14243,7 @@ The command does not touch the *key*, but retrieve the keys from the field defin
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IGETVALS		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13579,7 +14298,7 @@ The data is parsed using the provided schema. Trailing spaces (padding) are auto
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13636,7 +14355,7 @@ The data is parsed using the provided schema. Trailing spaces (padding) are auto
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IMGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13703,7 +14422,7 @@ The data is parsed using the provided schema. Trailing spaces (padding) are auto
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ISETALL		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13761,7 +14480,7 @@ Shorter values are padded with trailing spaces. Values exceeding their allocated
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>ISET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -13827,7 +14546,7 @@ Shorter values are padded with trailing spaces. Values exceeding their allocated
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>IDEL		</td></tr>
 				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>ISAM	</td></tr>
@@ -14071,7 +14790,7 @@ Instead of generating corrupted CPU NaN or Infinity states, uninitialized metric
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSRESERVE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14117,7 +14836,7 @@ Instead of generating corrupted CPU NaN or Infinity states, uninitialized metric
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSADD		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14170,7 +14889,7 @@ Instead of generating corrupted CPU NaN or Infinity states, uninitialized metric
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSMERGE		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14227,7 +14946,7 @@ The destination *key* is completely overwritten with the newly combined statisti
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSGETALL		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>[number of keys] * READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14345,7 +15064,7 @@ If multiple keys are provided, they are loaded and dynamically merged in-memory,
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14429,7 +15148,7 @@ If the target *key* does not exist or is empty, the command safely returns zero 
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSMGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>		N		</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14516,7 +15235,7 @@ If the target *key* does not exist or is empty, the command safely returns zero 
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSADDGETALL		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14641,7 +15360,7 @@ eliminating double disk read and network round-trip overhead.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSADDGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -14729,7 +15448,7 @@ eliminating double disk read and network round-trip overhead.</p>
 			<table border="1" class="x">
 				<tr><td>Command			</td><td>SSADDMGET		</td></tr>
 				<tr><td>Available since		</td><td>1.3.15.1	</td></tr>
-				<tr><td>Data lookup complexity	</td><td>READ + WRITE		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
 				<tr><td>Redis compatible	</td><td>	N		</td></tr>
 				<tr><td>Mutable			</td><td>Y				</td></tr>
 				<tr><td>Module			</td><td>summary_stats	</td></tr>
@@ -16087,7 +16806,7 @@ Command arguments and return type can be changed any time.<br />
 		<p><a href="#top">top</a></p>
 		<hr />
 
-	<h6 align="center">Copyleft 2017 - 2025, Nikolay Mihaylov<br />
+	<h6 align="center">Copyleft 2017 - 2026, Nikolay Mihaylov<br />
 	<a href="https://github.com/nmmmnu/HM4/">https://github.com/nmmmnu/HM4/</a></h6>
 </body>
 </html>

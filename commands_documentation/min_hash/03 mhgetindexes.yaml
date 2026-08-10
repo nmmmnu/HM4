@@ -1,0 +1,29 @@
+- id:          MHGETINDEXES
+  name:        MHGETINDEXES
+  usage:       MHGETINDEXES key bands keySub
+  params:
+    items:
+    - k: key
+      v: name of the MinHash index space
+    - k: bands
+      v: size/partitioning factor for LSH bands
+    - k: keySub
+      v: unique document identifier / subkey
+  return_type: array
+  return:      returns an array of formatted LSH bucket keys generated for the subkey
+  version:     1.3.15.1
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  description: |
+    <p>Inspects the stored MinHash signature for <i>keySub</i> and decodes the exact LSH bucket index keys according to the specified <i>bands</i> configuration.</p>
+    <p>This command is diagnostic (Read-Only) and does not modify the database state. It is useful for inspecting internal prefix structures,
+    debugging bucket collision distributions, or verifying index layout.</p>
+  example:     |
+    127.0.0.1:6379> mhadd articles:i 16 doc:1001 , "apple,iphone,technology"
+    (integer) 1
+    127.0.0.1:6379> mhgetindexes articles:i 16 doc:1001
+    1) "38E520B28743100B.0121"
+    2) "D902CFEEB62FA943.0143"
+    3) "E2C16FFA0DCCE287.01FD"
+

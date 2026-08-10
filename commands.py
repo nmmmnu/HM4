@@ -180,7 +180,7 @@ def generate():
 				<tr><td>Command			</td><td>{{id}}		</td></tr>
 				<tr><td>Available since		</td><td>{{version}}	</td></tr>
 				{{#complexity}}
-				<tr><td>Data lookup complexity	</td><td>{{.}}		</td></tr>
+				<tr><td>Data lookup complexity	</td><td>{{{.}}}	</td></tr>
 				{{/complexity}}
 				<tr><td>Redis compatible	</td><td>{{#compatible}}Y{{/compatible}}	{{^compatible}}N{{/compatible}}		</td></tr>
 				<tr><td>Mutable			</td><td>{{#mutable}}Y{{/mutable}}		{{^mutable}}N{{/mutable}}		</td></tr>
@@ -251,7 +251,7 @@ def generate():
 		{{/commands}}
 	{{/modules}}
 
-	<h6 align="center">Copyleft 2017 - 2025, Nikolay Mihaylov<br />
+	<h6 align="center">Copyleft 2017 - 2026, Nikolay Mihaylov<br />
 	<a href="https://github.com/nmmmnu/HM4/">https://github.com/nmmmnu/HM4/</a></h6>
 </body>
 </html>
@@ -294,6 +294,7 @@ load_module("misra_gries_heavy_hitters"	)
 load_module("reservoir_sampling"	)
 load_module("ring_buffer"		)
 load_module("string_list"		)
+load_module("min_hash"			)
 load_module("vectors"			)
 load_module("mindex"			)
 load_module("tindex"			)

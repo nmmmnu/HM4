@@ -598,7 +598,7 @@ namespace net::worker::commands::MH{
 		}
 
 	private:
-		// MHGETINDEXES key bands keySub keySub2
+		// MHJACCARD key bands keySub keySub2
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
 			if (p.size() != 5)
@@ -660,7 +660,7 @@ namespace net::worker::commands::MH{
 		}
 
 	private:
-		// MHGETINDEXES key bands keySub keySub2...
+		// MHMJACCARD key bands keySub keySub2...
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
 			if (p.size() < 5)
@@ -744,7 +744,7 @@ namespace net::worker::commands::MH{
 		}
 
 	private:
-		// MHGETINDEXES key bands keySub keySub2
+		// MHOVERLAP key bands keySub keySub2
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 
 			if (p.size() != 5)
@@ -806,7 +806,7 @@ namespace net::worker::commands::MH{
 		}
 
 	private:
-		// MHGETINDEXES key bands keySub keySub2...
+		// MHMOVERLAP key bands keySub keySub2...
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 
 			if (p.size() < 5)

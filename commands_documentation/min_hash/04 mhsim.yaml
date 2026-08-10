@@ -1,0 +1,56 @@
+- id:          MHSIM
+  name:        MHSIM
+  usage:       MHSIM key bands keySub | MHSIM key bands delimiter tokens
+  params:
+    items:
+    - k: key
+      v: name of the MinHash index space
+    - k: bands
+      v: size/partitioning factor for LSH bands
+    - k: keySub
+      v: target document identifier / subkey (for indexed lookups)
+    - k: delimiter
+      v: single-character token separator (for ad-hoc raw text lookups)
+    - k: tokens
+      v: delimited string of text tokens or shingle words (for ad-hoc lookups)
+  return_type: array
+  return:      returns an array of matched target subkeys paired with their Jaccard similarity scores, ordered by highest score
+  version:     1.3.15.1
+  complexity:  slow &rarr; (1 + BANDS * (1 + 25 - 1)) * READ
+  mutable:     false
+  compatible:  false
+  description: |
+    <p>Performs <b>Locality-Sensitive Hashing (LSH) similarity search</b> to find top near-duplicate candidate documents within the specified index space.</p>
+
+    <p><b>Dual Operating Modes:</b></p>
+    <ul>
+      <li><b>Indexed Subkey Search:</b> Accepts an existing <i>keySub</i> to locate similar documents stored in the database.</li>
+      <li><b>Ad-hoc Raw Text Search:</b> Accepts a raw token string with a <i>delimiter</i>. Evaluates similarity dynamically in RAM without writing to disk or
+      modifying database state (100% Read-Replica safe).</li>
+    </ul>
+
+    <p><b>Internal Search Execution Pipeline:</b></p>
+    <ol>
+      <li>Generates LSH bucket keys according to the <i>bands</i> factor.</li>
+      <li>Fetches up to <b>25 candidates per band</b> to protect memory and thread latency.</li>
+      <li>Deduplicates candidate keys (25 - 1 per band) and evaluates their exact MinHash Jaccard similarity.</li>
+      <li>Filters out candidates below a <b>0.05 (5%) similarity threshold</b>.</li>
+      <li>Returns the <b>Top 25 most similar documents</b> ranked in descending order.<br />
+      In realistic usage, usually returns 0 - 3 results.</li>
+    </ol>
+
+  example:     |
+    127.0.0.1:6379> mhmoverlap articles:i 16 doc:1001 doc:1002 doc:1003
+    1) "+0.6666666667"
+    2) "0"
+    127.0.0.1:6379> mhadd articles:i 16 doc:1001 , "apple,iphone,technology" doc:1002 , "apple,iphone,mobile"
+    (integer) 1
+    127.0.0.1:6379> mhsim articles:i 16 doc:1001
+    1) "doc:1002"
+    2) "+0.5000000000"
+    127.0.0.1:6379> mhsim articles:i 16 , "apple,iphone,technology,news"
+    1) "doc:1001"
+    2) "+0.7500000000"
+    3) "doc:1002"
+    4) "+0.4000000000"
+
