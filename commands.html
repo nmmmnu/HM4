@@ -262,6 +262,10 @@
 				<li><a href="#PFCOUNT">PFCOUNT</a></li>
 				<li><a href="#PFADDCOUNT">PFADDCOUNT</a></li>
 				<li><a href="#PFINTERSECT">PFINTERSECT</a></li>
+				<li><a href="#PFJACCARD">PFJACCARD</a></li>
+				<li><a href="#PFMJACCARD">PFMJACCARD</a></li>
+				<li><a href="#PFOVERLAP">PFOVERLAP</a></li>
+				<li><a href="#PFMOVERLAP">PFMOVERLAP</a></li>
 				<li><a href="#PFMERGE">PFMERGE</a></li>
 				<li><a href="#PFBITS">PFBITS</a></li>
 				<li><a href="#PFERROR">PFERROR</a></li>
@@ -3027,6 +3031,98 @@
 			string (int)
 			<h3>Return value:</h3>
 			estimated count of intersection
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFJACCARD">
+
+			<h2>PFJACCARD / HLLJACCARD [key1] [key2]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFJACCARD</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate jaccard similarity of two sets, e.g.<br />J(A, B) = |A &cap; B| / |A &cup; B|)
+			<h3>Return type:</h3>
+			string (float)
+			<h3>Return value:</h3>
+			estimated jaccard similarity of two sets
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFMJACCARD">
+
+			<h2>PFMJACCARD / HLLMJACCARD [key] [key]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFMJACCARD</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate jaccard similarity of multiple sets, e.g.<br />J(A, B) = |A &cap; B| / |A &cup; B|)
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			estimated jaccard similarity of two sets - first key against second, then first key against third and so on
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFOVERLAP">
+
+			<h2>PFOVERLAP / HLLOVERLAP [key1] [key2]</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFOVERLAP</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>2 * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate 'overlap' similarity of two sets, e.g.<br />Overlap(A, B) = |A &cap; B| / min(|A|, |B|)
+			<h3>Return type:</h3>
+			string (float)
+			<h3>Return value:</h3>
+			estimated 'overlap' similarity of two sets
+			
+			
+			<p class="top"><a href="#top">top</a></p>
+		</div>
+				<div class="cmd" id="PFMOVERLAP">
+
+			<h2>PFMOVERLAP / HLLMOVERLAP [key] [key]...</h2>
+
+			<table border="1">
+				<tr><td>Command			</td><td>PFMOVERLAP</td></tr>
+				<tr><td>Available since		</td><td>1.3.15.1</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ</td></tr>
+				<tr><td>Redis compatible	</td><td>No</td></tr>
+				<tr><td>Mutable			</td><td>No</td></tr>
+				<tr><td>Module			</td><td>hll.h</td></tr>
+			</table>
+
+			<h3>Description:</h3>
+			Estimate 'overlap' similarity of multiple sets, e.g.<br />Overlap(A, B) = |A &cap; B| / min(|A|, |B|)
+			<h3>Return type:</h3>
+			array
+			<h3>Return value:</h3>
+			estimated 'overlap' similarity of two sets - first key against second, then first key against third and so on
 			
 			
 			<p class="top"><a href="#top">top</a></p>
@@ -5968,7 +6064,7 @@ limit [number]</pre>
 			</table>
 
 			<h3>Description:</h3>
-			Add (insert) <i>value</i>'s into the heavy hitter with size <i>hh_count</i> and fixed value size of <i>hh_value_size</i>.<br />Bigger values are 'better'<br /><i>hh_count</i> can be from 1 to 200.<br />Supported sizes are:<br />-   32 (gives you string size of   31)<br />-   40 (gives you string size of   39) - IP6 compatible<br />-   64 (gives you string size of   63)<br />-  128 (gives you string size of  127)<br />-  256 (gives you string size of  255) - Pascal string compatible :)<br />-  512 (gives you string size of  511) - accepted after version 1.3.15.1<br />- 1024 (gives you string size of 1023) - accepted after version 1.3.15.1<br />Read HH information document.
+			Add (insert) <i>value</i>'s into the heavy hitter with size <i>hh_count</i> and fixed value size of <i>hh_value_size</i>.<br />Bigger values are 'better'<br /><i>hh_count</i> can be from 1 to 200.<br />Supported sizes are:<br />-   32 (gives you string size of   31)<br />-   40 (gives you string size of   39) - IP6 compatible<br />-   64 (gives you string size of   63)<br />-  128 (gives you string size of  127)<br />-  256 (gives you string size of  255) - Pascal string compatible :)<br />-  512 (gives you string size of  510) - accepted after version 1.3.15.1<br />- 1024 (gives you string size of 1022) - accepted after version 1.3.15.1<br />Read HH information document.
 			<h3>Return type:</h3>
 			bool
 			<h3>Return value:</h3>
@@ -6060,7 +6156,7 @@ limit [number]</pre>
 			</table>
 
 			<h3>Description:</h3>
-			Add <i>value</i>'s into the Misra Gries heavy hitter with size <i>mg_count</i> and fixed value size of <i>mg_value_size</i>.<br /><i>mg_count</i> can be from 1 to 200.<br />Supported sizes are:<br />-   32 (gives you string size of   31)<br />-   40 (gives you string size of   39) - IP6 compatible<br />-   64 (gives you string size of   63)<br />-  128 (gives you string size of  127)<br />-  256 (gives you string size of  255) - Pascal string compatible :)<br />-  512 (gives you string size of  511) - accepted after version 1.3.15.1<br />- 1024 (gives you string size of 1023) - accepted after version 1.3.15.1<br />Read Misra Gries information document.
+			Add <i>value</i>'s into the Misra Gries heavy hitter with size <i>mg_count</i> and fixed value size of <i>mg_value_size</i>.<br /><i>mg_count</i> can be from 1 to 200.<br />Supported sizes are:<br />-   32 (gives you string size of   31)<br />-   40 (gives you string size of   39) - IP6 compatible<br />-   64 (gives you string size of   63)<br />-  128 (gives you string size of  127)<br />-  256 (gives you string size of  255) - Pascal string compatible :)<br />-  512 (gives you string size of  510) - accepted after version 1.3.15.1<br />- 1024 (gives you string size of 1022) - accepted after version 1.3.15.1<br />Read Misra Gries information document.
 			<h3>Return type:</h3>
 			int
 			<h3>Return value:</h3>
@@ -6152,7 +6248,7 @@ limit [number]</pre>
 			</table>
 
 			<h3>Description:</h3>
-			Add <i>value</i>'s into the Reservoir Sampling with size <i>rs_count</i> and fixed value size of <i>rs_value_size</i>.<br /><i>rs_count</i> can be from 1 to 4096.<br />Supported sizes are:<br />-   32 (gives you string size of   31)<br />-   40 (gives you string size of   39) - IP6 compatible<br />-   64 (gives you string size of   63)<br />-  128 (gives you string size of  127)<br />-  256 (gives you string size of  255) - Pascal string compatible :)<br />-  512 (gives you string size of  511) - accepted after version 1.3.15.1<br />- 1024 (gives you string size of 1023) - accepted after version 1.3.15.1<br />Read Reservoir Sampling information document.
+			Add <i>value</i>'s into the Reservoir Sampling with size <i>rs_count</i> and fixed value size of <i>rs_value_size</i>.<br /><i>rs_count</i> can be from 1 to 4096.<br />Supported sizes are:<br />-   32 (gives you string size of   31)<br />-   40 (gives you string size of   39) - IP6 compatible<br />-   64 (gives you string size of   63)<br />-  128 (gives you string size of  127)<br />-  256 (gives you string size of  255) - Pascal string compatible :)<br />-  512 (gives you string size of  510) - accepted after version 1.3.15.1<br />- 1024 (gives you string size of 1022) - accepted after version 1.3.15.1<br />Read Reservoir Sampling information document.
 			<h3>Return type:</h3>
 			int
 			<h3>Return value:</h3>
