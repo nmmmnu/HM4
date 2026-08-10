@@ -425,3 +425,6 @@ Changelog
 	MHJACCARD, MHMJACCARD, MHOVERLAP, MHMOVERLAP, MHBITS
 -	vector module will have breaking changes in next release
 
+### 1.3.16
+-	Release
+
