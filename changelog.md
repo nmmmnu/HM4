@@ -423,5 +423,5 @@ Changelog
 -	BREAKING CHANGE: PFERROR now return float
 -	new module MinHash: MHADD, MHREM, MHGETINDEXES, MHSIM,
 	MHJACCARD, MHMJACCARD, MHOVERLAP, MHMOVERLAP, MHBITS
-
+-	vector module will have breaking changes in next release
 
