@@ -422,11 +422,11 @@ namespace MyVectors{
 	// ------------------------
 
 	namespace random_projection_impl_{
-		constexpr uint32_t M(uint32_t x, uint32_t y){
-			uint64_t const result = (uint64_t{x} << 32) | y;
+		constexpr uint32_t M(uint32_t x, uint32_t y, uint64_t seed){
+			uint64_t const zz = (uint64_t{x} << 32) | y;
 
 			return static_cast<uint32_t>(
-					murmur_hash_mixer64_nz(result)
+					murmur_hash_mixer64_nz(zz, seed)
 			);
 		}
 
@@ -437,11 +437,12 @@ namespace MyVectors{
 			return static_cast<float>(h) * scale2 - 1.f;
 		}
 
-		constexpr float MD(size_t x, size_t y, size_t seed = 0){
+		constexpr float MD(size_t x, size_t y, size_t seed){
 			return distribution(
 				M(
-					static_cast<uint32_t>(x + seed),
-					static_cast<uint32_t>(y + seed)
+					static_cast<uint32_t>(x),
+					static_cast<uint32_t>(y),
+					seed
 				)
 			);
 		}
