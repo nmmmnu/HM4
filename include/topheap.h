@@ -31,7 +31,7 @@ namespace top_heap{
 				return true;
 			}
 
-			if (comp__()(data_.front(), value)){
+			if (comp__()(value, data_.front())){
 				std::pop_heap (std::begin(data_), std::end(data_), comp__());
 
 				data_.back() = std::move(value);
@@ -72,6 +72,11 @@ namespace top_heap{
 			return data_;
 		}
 
+		auto &sort(){
+			std::sort_heap(std::begin(data_), std::end(data_), comp__());
+			return data_;
+		}
+
 	private:
 		constexpr static auto comp__(){
 			return Compare{};
@@ -83,10 +88,10 @@ namespace top_heap{
 	};
 
 	template<typename T, size_t Size>
-	using TopKSmallest = TopKHeap<T, Size, std::greater<T> >;
+	using TopKSmallest = TopKHeap<T, Size, std::less<T>	>; // max heap
 
 	template<typename T, size_t Size>
-	using TopKLargest  = TopKHeap<T, Size, std::less<T> >;
+	using TopKLargest  = TopKHeap<T, Size, std::greater<T>	>; // min heap
 
 } // namespace top_heap
 

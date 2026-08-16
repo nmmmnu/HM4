@@ -428,3 +428,6 @@ Changelog
 ### 1.3.16
 -	Release
 
+### 1.3.16.1
+-	Fix bug in MHSIM, when there are too many results
+

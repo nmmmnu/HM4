@@ -242,7 +242,6 @@ namespace net::worker::commands{
 			set_status_(Status::OK);
 
 			buffer_.clear();
-
 			protocol_.response_strings(buffer_, container);
 		}
 
