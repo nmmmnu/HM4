@@ -77,7 +77,17 @@ namespace net::worker::shared::rsetmulti{
 		);
 	}
 
+	inline std::string_view makeKeyDataSearchFlat(hm4::PairBufferKey &bufferKey, std::string_view separator,
+				std::string_view keyN
+			){
 
+		// keyN~~
+
+		return concatenateBuffer(bufferKey,
+				keyN		,	separator	,
+							separator
+		);
+	}
 
 
 
@@ -161,7 +171,8 @@ namespace net::worker::shared::rsetmulti{
 					std::string_view keyCtrl, Container &icontainer, BContainer &bcontainer){
 
 			auto const pair = [&](){
-				if constexpr(auto const bytes = Decoder::bytes(); bytes){
+				if (auto const bytes = decoder.bytes(); bytes){
+			//	if constexpr(auto const bytes = Decoder::bytes(); bytes){
 					return hm4::getPairPtrWithSize(*db, keyCtrl, bytes);
 				}else{
 					return hm4::getPairPtr(*db, keyCtrl);
@@ -321,6 +332,40 @@ namespace net::worker::shared::rsetmulti{
 		// logger<Logger::DEBUG>() << "MSetMulti::GET_INDEXES: ctrl key" << keyCtrl;
 
 		return impl_::getIndexes(db, decoder, keyN, keySub, icontainer, bcontainer);
+	}
+
+#if 0
+	template<typename DBAdapter, typename Decoder>
+	std::string_view getData_DECODER(DBAdapter &db, Decoder decoder,
+				std::string_view keyN, std::string_view keySub){
+
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
+
+		auto const pair = [&](){
+			if (auto const bytes = decoder.bytes(); bytes){
+		//	if constexpr(auto const bytes = Decoder::bytes(); bytes){
+				return hm4::getPairPtrWithSize(*db, keyCtrl, bytes);
+			}else{
+				return hm4::getPairPtr(*db, keyCtrl);
+			}
+		}();
+
+		if (pair)
+			return pair->getVal();
+		else
+			return "";
+	}
+#endif
+
+	template<typename DBAdapter>
+	std::string_view getData(DBAdapter &db,
+				std::string_view keyN, std::string_view keySub){
+
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
+
+		return hm4::getPairVal(*db, keyCtrl);
 	}
 
 } // namespace net::worker::shared::msetmulti_better

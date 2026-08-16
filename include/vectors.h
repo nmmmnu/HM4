@@ -6,29 +6,33 @@
 #include <cmath>
 #include <limits>
 
+#include "mybufferview.h"
+
 #include "murmur_hash_mixer.h"
 
 namespace MyVectors{
-	template<typename T2>
+
+	template<typename T>
+	using TVector = MyBuffer::BufferView<T>;
+
+	template<typename T>
+	using CTVector = TVector<T const>;
+
+	using FVector  = TVector<float>;
+
+	using CFVector = CTVector<float const>;
+
+	template<typename VE>
 	constexpr bool checkVectorElement(){
-		using T = std::remove_cv_t<T2>;
+		using T = std::remove_cv_t<VE>;
 
 		return	std::is_same_v<T, float  > ||
 			std::is_same_v<T, int8_t > ||
 			std::is_same_v<T, int16_t >;
 	}
 
-	template<typename Vector>
-	constexpr bool checkVector(){
-		using VE = typename Vector::value_type;
-
-		return checkVectorElement<VE>();
-	}
-
-	template<typename Vector>
-	constexpr bool checkFVector(){
-		using VE = typename Vector::value_type;
-
+	template<typename VE>
+	constexpr bool checkFVectorElement(){
 		using T = std::remove_cv_t<VE>;
 
 		return	std::is_same_v<T, float>;
@@ -56,9 +60,9 @@ namespace MyVectors{
 
 	// ------------------------
 
-	template<typename CVector>
-	constexpr float getMagnitude(CVector const &cvector){
-		static_assert(checkVector<CVector>(), "Only float, int8_t and int16_t supported");
+	template<typename T>
+	constexpr float getMagnitude(TVector<T> const ctvector){
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 		float l2 = 0.0f;
 
@@ -67,18 +71,15 @@ namespace MyVectors{
 		#elif defined(__GNUC__)
 			#pragma GCC ivdep
 		#endif
-		for(size_t i = 0; i < cvector.size(); ++i)
-			l2 += cvector[i] * cvector[i];
+		for(size_t i = 0; i < ctvector.size(); ++i)
+			l2 += ctvector[i] * ctvector[i];
 
 		return std::sqrt(l2);
 	}
 
 	// ------------------------
 
-	template<typename FVector>
-	constexpr float normalizeInline(FVector &fvector){
-		static_assert(checkFVector<FVector>(), "Only float supported");
-
+	constexpr float normalizeInline(FVector fvector){
 		constexpr float ZERO = 1E-6f;
 
 		auto const magnitude = getMagnitude(fvector);
@@ -99,10 +100,8 @@ namespace MyVectors{
 		return magnitude;
 	}
 
-	template<typename CFVector, typename F>
-	constexpr float normalizeF(CFVector const &cfvector, F f){
-		static_assert(checkFVector<CFVector>(), "Only float supported");
-
+	template<typename F>
+	constexpr float normalizeF(CFVector const cfvector, F f){
 		constexpr float ZERO = 1E-6f;
 
 		auto const magnitude = getMagnitude(cfvector);
@@ -165,17 +164,17 @@ namespace MyVectors{
 		return v * scale;
 	}
 
-	template<typename CVector, typename F, typename FProj = DefaultValueProjection>
-	constexpr void dequantizeF(CVector const &cvector, F f, FProj fpr){
-		static_assert(checkVector <CVector>(), "Only float, int8_t and int16_t supported");
+	template<typename T, typename F, typename FProj = DefaultValueProjection>
+	constexpr void dequantizeF(CTVector<T> const ctvector, F f, FProj fpr){
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 		#if defined(__clang__)
 			#pragma clang loop vectorize(enable) interleave(enable)
 		#elif defined(__GNUC__)
 			#pragma GCC ivdep
 		#endif
-		for(size_t i = 0; i < cvector.size(); ++i)
-			f(i, dequantizeComponent(fpr(cvector[i])));
+		for(size_t i = 0; i < ctvector.size(); ++i)
+			f(i, dequantizeComponent(fpr(ctvector[i])));
 	}
 
 	// ------------------------
@@ -187,46 +186,47 @@ namespace MyVectors{
 		return dequantizeComponent(v) * magnitude;
 	}
 
-	template<typename CVector, typename FVector>
-	constexpr void denormalizeInline(CVector const &cvector, float const magnitude, FVector &fvector){
-		static_assert(checkVector <CVector>(), "Only float, int8_t and int16_t supported");
-		static_assert(checkFVector<FVector>(), "Only float supported");
+/*
+	template<typename T, typename FVector>
+	constexpr void denormalizeInline(CTVector<T> const ctvector, float const magnitude, FVector fvector){
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
-		assert(cvector.size() == fvector.size());
+		assert(ctvector.size() == fvector.size());
 
 		#if defined(__clang__)
 			#pragma clang loop vectorize(enable) interleave(enable)
 		#elif defined(__GNUC__)
 			#pragma GCC ivdep
 		#endif
-		for(size_t i = 0; i < cvector.size(); ++i)
-			fvector[i] = denormalizeComponent(cvector[i], magnitude);
+		for(size_t i = 0; i < ctvector.size(); ++i)
+			fvector[i] = denormalizeComponent(ctvector[i], magnitude);
 	}
+*/
 
-	template<typename CVector, typename F, typename FProj = DefaultValueProjection>
-	constexpr void denormalizeF(CVector const &cvector, float const magnitude, F f, FProj fpr){
-		static_assert(checkVector<CVector>(), "Only float, int8_t and int16_t supported");
+	template<typename T, typename F, typename FProj = DefaultValueProjection>
+	constexpr void denormalizeF(CTVector<T> const ctvector, float const magnitude, F f, FProj fpr){
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 		#if defined(__clang__)
 			#pragma clang loop vectorize(enable) interleave(enable)
 		#elif defined(__GNUC__)
 			#pragma GCC ivdep
 		#endif
-		for(size_t i = 0; i < cvector.size(); ++i)
-			f(i, denormalizeComponent(fpr(cvector[i]), magnitude));
+		for(size_t i = 0; i < ctvector.size(); ++i)
+			f(i, denormalizeComponent(fpr(ctvector[i]), magnitude));
 	}
 
 	// ------------------------
 
 	namespace distance_cosine_impl_{
 
-		template<typename CVector1, typename CVector2,
+		template<typename T1, typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-		float dotProduct(CVector1 const &a, CVector2 const &b,
+		float dotProduct(CTVector<T1> const a, CTVector<T2> const b,
 									FProj1 fpr1, FProj2 fpr2){
 
-			static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
-			static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
+			static_assert(checkVectorElement<T1>(), "Only float, int8_t and int16_t supported");
+			static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 			assert(a.size() == b.size());
 
@@ -250,13 +250,13 @@ namespace MyVectors{
 			return dot;
 		}
 
-		template<typename CVector1, typename CVector2,
+		template<typename T1, typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-		float cosineSimilarity(CVector1 const &a, CVector2 const &b,
+		float cosineSimilarity(CTVector<T1> const a, CTVector<T2> const b,
 									FProj1 aFpr, FProj2 bFpr){
 
-			static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
-			static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
+			static_assert(checkVectorElement<T1>(), "Only float, int8_t and int16_t supported");
+			static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 			auto const dot = dotProduct(a, b, aFpr, bFpr);
 
@@ -271,13 +271,13 @@ namespace MyVectors{
 
 	} // namespace distance_cosine_impl_
 
-	template<typename CVector1, typename CVector2,
+	template<typename T1, typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceCosine(CVector1 const &a, CVector2 const &b,
+	float distanceCosine(CTVector<T1> const a, CTVector<T2> const b,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
-		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 		using namespace distance_cosine_impl_;
 
@@ -286,13 +286,13 @@ namespace MyVectors{
 		return 1 - cosineSimilarity(a, b, aFpr, bFpr);
 	}
 
-	template<typename CVector1, typename CVector2,
+	template<typename T1, typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceEuclideanSquared(CVector1 const &a, CVector2 const &b, float aM, float bM,
+	float distanceEuclideanSquared(CTVector<T1> const a, CTVector<T2> const b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
-		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 		using namespace distance_cosine_impl_;
 
@@ -307,13 +307,13 @@ namespace MyVectors{
 		return result > ZERO ? result : 0;
 	}
 
-	template<typename CVector1, typename CVector2,
+	template<typename T1, typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceEuclidean(CVector1 const &a, CVector2 const &b, float aM, float bM,
+	float distanceEuclidean(CTVector<T1> const a, CTVector<T2> const b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
-		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 		auto const result = distanceEuclideanSquared(a, b, aM, bM, aFpr, bFpr);
 
@@ -322,13 +322,13 @@ namespace MyVectors{
 		return std::sqrt(result);
 	}
 
-	template<typename CVector1, typename CVector2,
+	template<typename T1, typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceCanberra(CVector1 const &a, CVector2 const &b, float aM, float bM,
+	float distanceCanberra(CTVector<T1> const a, CTVector<T2> const b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
-		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 
@@ -348,13 +348,12 @@ namespace MyVectors{
 		return result;
 	}
 
-	template<typename CFVector1, typename CVector2,
+	template<typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceCanberraPrepared(CFVector1 const &a, CVector2 const &b, float bM,
+	float distanceCanberraPrepared(CFVector const a, CTVector<T2> const b, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkFVector<CFVector1>(), "Only float supported");
-		static_assert(checkVector <CVector2>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 
@@ -374,13 +373,13 @@ namespace MyVectors{
 		return result;
 	}
 
-	template<typename CVector1, typename CVector2,
+	template<typename T1, typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceManhattan(CVector1 const &a, CVector2 const &b, float aM, float bM,
+	float distanceManhattan(CTVector<T1> const a, CTVector<T2> const b, float aM, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkVector<CVector1>(), "Only float, int8_t and int16_t supported");
-		static_assert(checkVector<CVector2>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T1>(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 
@@ -396,13 +395,12 @@ namespace MyVectors{
 		return result;
 	}
 
-	template<typename CFVector1, typename CVector2,
+	template<typename T2,
 				typename FProj1 = DefaultValueProjection, typename FProj2 = DefaultValueProjection>
-	float distanceManhattanPrepared(CFVector1 const &a, CVector2 const &b, float bM,
+	float distanceManhattanPrepared(CFVector const a, CTVector<T2> const b, float bM,
 									FProj1 aFpr, FProj2 bFpr){
 
-		static_assert(checkFVector<CFVector1>(), "Only float supported");
-		static_assert(checkVector <CVector2 >(), "Only float, int8_t and int16_t supported");
+		static_assert(checkVectorElement<T2>(), "Only float, int8_t and int16_t supported");
 
 		float result = 0.0f;
 
@@ -448,10 +446,7 @@ namespace MyVectors{
 		}
 	}
 
-	template<typename CFVector, typename FVector>
-	void randomProjection(CFVector const &cfvector, FVector &fresult, size_t seed = 0){
-		static_assert(checkFVector<CFVector>(), "Only float supported");
-		static_assert(checkFVector<FVector >(), "Only float supported");
+	void randomProjection(CFVector const cfvector, FVector fresult, size_t seed = 0){
 
 		using namespace random_projection_impl_;
 
@@ -470,18 +465,16 @@ namespace MyVectors{
 		}
 	}
 
-	template<typename CFVector, typename FVector>
-	void randomProjectionNormalize(CFVector const &cfvector, FVector &fresult){
-		static_assert(checkFVector<CFVector>(), "Only float supported");
-		static_assert(checkFVector<FVector >(), "Only float supported");
+	void randomProjectionNormalize(CFVector const cfvector, FVector fresult){
 
 		randomProjection(cfvector, fresult);
 
 		normalizeInline(fresult);
 	}
 
-	template<typename T, typename CFVector>
-	T randomProjectionBit(CFVector const &cfvector, size_t seed = 0){
+/*
+	template<typename T>
+	T randomProjectionBit(CFVector const scfvector, size_t seed = 0){
 		static_assert(checkFVector<CFVector>(), "Only float supported");
 
 		using namespace random_projection_impl_;
@@ -508,6 +501,7 @@ namespace MyVectors{
 
 		return result;
 	}
+*/
 
 } // namspace MyVectors
 
