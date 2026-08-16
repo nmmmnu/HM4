@@ -601,7 +601,7 @@ namespace net::worker::commands::Mutable{
 
 			hm4::insertHintV<APPEND_Factory>(*db, hint, key, pair, val_old, val_new);
 
-			result.set(val_old.size() + val_new.size());
+			return result.set(val_old.size() + val_new.size());
 		}
 
 		struct APPEND_Factory : hm4::PairFactory::IFactoryAction<1,0,APPEND_Factory>{

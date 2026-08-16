@@ -45,7 +45,7 @@ namespace net::worker::commands::Counter{
 
 				hm4::insertHintF<hm4::PairFactory::Normal>(list, hint, key, val);
 
-				result.set_number_sv(val);
+				return result.set_number_sv(val);
 			}else{
 				// Case 2: Old data does not exists
 
@@ -56,7 +56,7 @@ namespace net::worker::commands::Counter{
 
 				hm4::insert(list, key, val);
 
-				result.set_number_sv(val);
+				return result.set_number_sv(val);
 			}
 		}
 
@@ -124,11 +124,11 @@ namespace net::worker::commands::Counter{
 
 					hm4::insertHintF<hm4::PairFactory::Normal>(list, hint, key, val);
 
-					result.set(true);
+					return result.set(true);
 				}else{
 					// Case 1.2: limit not OK
 
-					result.set(false);
+					return result.set(false);
 				}
 			}else{
 				// Case 2: Old data does not exists, assuming 0
@@ -143,11 +143,11 @@ namespace net::worker::commands::Counter{
 
 					hm4::insert(list, key, val);
 
-					result.set(true);
+					return result.set(true);
 				}else{
 					// Case 2.2: limit not OK
 
-					result.set(false);
+					return result.set(false);
 				}
 			}
 		}
@@ -187,7 +187,7 @@ namespace net::worker::commands::Counter{
 				}else{
 					// Case 1.2: no need to update
 
-					result.set_number_sv(val);
+					return result.set_number_sv(val);
 				}
 			}else{
 				// Case 2: Old data does not exists
