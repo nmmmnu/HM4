@@ -152,7 +152,7 @@ namespace{
 		if (DirectoryListLoader::checkIfLoaderNeed(opt.db_path)){
 			MyBuffer::MMapMemoryResource vmBuffer{ opt.vm_arena * 2048 };
 
-			hm4::disk::DiskList::VMAllocator vmAllocator{ vmBuffer };
+			hm4::disk::DiskList::VMAllocator vmAllocator{ vmBuffer, MyBuffer::from_bytes{} };
 
 			return fLists(opt, DBAdapterFactory::Immutable { opt.db_path, vmAllocator },
 					"Starting {} server...", "immutable"
@@ -189,7 +189,7 @@ namespace{
 		// uncomment for virtual Allocator
 		static_assert(Allocator::knownMemoryUsage(), "Allocator must know its memory usage");
 
-		Allocator allocator{ buffer };
+		Allocator allocator{ buffer, MyBuffer::from_bytes{} };
 
 		logger_fmt<Logger::NOTICE>("{} creating with size of {} bytes", allocator.getName(), buffer.size());
 
@@ -220,7 +220,7 @@ namespace{
 	int select_MutableLists(MyOptions const &opt){
 		MyBuffer::MMapMemoryResource vmBuffer{ opt.vm_arena * 2048 };
 
-		hm4::disk::DiskList::VMAllocator vmAllocator{ vmBuffer };
+		hm4::disk::DiskList::VMAllocator vmAllocator{ vmBuffer, MyBuffer::from_bytes{} };
 
 		constexpr std::string_view starting_server_with = "Starting {} server with {} and {}...";
 
@@ -273,8 +273,8 @@ namespace{
 							allocator2		,
 
 							g_buffersWrite		,
-							bufferPair		,
-							bufferHash
+							{ bufferPair		, MyBuffer::from_bytes{} }	,
+							{ bufferHash		, MyBuffer::from_bytes{} }
 						},
 						starting_server_with,
 							"mutable concurrent binlog",
@@ -295,8 +295,8 @@ namespace{
 							allocator2		,
 
 							g_buffersWrite		,
-							bufferPair		,
-							bufferHash
+							{ bufferPair		, MyBuffer::from_bytes{} }	,
+							{ bufferHash		, MyBuffer::from_bytes{} }
 						},
 						starting_server_with,
 							"mutable concurrent",
@@ -341,8 +341,8 @@ namespace{
 							allocator		,
 
 							g_buffersWrite		,
-							bufferPair		,
-							bufferHash
+							{ bufferPair		, MyBuffer::from_bytes{} }	,
+							{ bufferHash		, MyBuffer::from_bytes{} }
 						},
 						starting_server_with,
 							"mutable binlog",
@@ -362,8 +362,8 @@ namespace{
 							allocator		,
 
 							g_buffersWrite		,
-							bufferPair		,
-							bufferHash
+							{ bufferPair		, MyBuffer::from_bytes{} }	,
+							{ bufferHash		, MyBuffer::from_bytes{} }
 						},
 						starting_server_with,
 							"mutable",
@@ -682,7 +682,7 @@ namespace{
 
 		/* nested scope for the d-tor */
 		{
-			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ serverID, path, allocator, g_buffersWrite, bufferPair };
+			DBAdapterFactory::BinLogReplay<MyReplayList> factory{ serverID, path, allocator, g_buffersWrite, { bufferPair, MyBuffer::from_bytes{} } };
 
 			auto &list = factory();
 

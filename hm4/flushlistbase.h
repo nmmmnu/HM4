@@ -105,7 +105,7 @@ namespace hm4::flushlist_impl_{
 
 			MyBuffer::StaticMemoryResource<microBufferSize> bufferPair;
 
-			return insertF_create_flush_clone_insert(flushList, factory, bufferPair);
+			return insertF_create_flush_clone_insert(flushList, factory, { bufferPair, MyBuffer::from_bytes{} } );
 		}else{
 			// using MMAP buffer from the context
 

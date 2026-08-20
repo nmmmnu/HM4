@@ -432,5 +432,5 @@ Changelog
 -	fix bug in MHSIM, when there are too many results
 -	new module vectors2
 -	optimization - skip zeroing buffers when not need
-
+-	refactor buffers to be difficult to use wrong size
 

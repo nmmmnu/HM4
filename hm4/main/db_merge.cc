@@ -156,7 +156,7 @@ int main(int argc, char **argv){
 	int const table_count	= argc - 4;
 	const char **path	= (const char **) &argv[4];
 
-	DiskList::VMAllocator allocator{ g_slabBuffer };
+	DiskList::VMAllocator allocator{ g_slabBuffer, MyBuffer::from_bytes{} };
 
 	auto buffersWrite = g_fbwb();
 
@@ -172,7 +172,7 @@ int main(int argc, char **argv){
 			output,
 			tombstoneOptions,
 			buffersWrite,
-			bufferHash
+			{ bufferHash	, MyBuffer::from_bytes{} }
 		);
 
 	case 2:
@@ -187,7 +187,7 @@ int main(int argc, char **argv){
 			output,
 			tombstoneOptions,
 			buffersWrite,
-			bufferHash
+			{ bufferHash	, MyBuffer::from_bytes{} }
 		);
 
 	default:
@@ -198,7 +198,7 @@ int main(int argc, char **argv){
 			output,
 			tombstoneOptions,
 			buffersWrite,
-			bufferHash
+			{ bufferHash	, MyBuffer::from_bytes{} }
 		);
 	}
 }

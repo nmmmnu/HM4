@@ -132,14 +132,18 @@ int main(int argc, char **argv){
 
 	MMapMemoryResource	buffer{ arenaListSize * MB };
 
-	Allocator		allocator{ buffer };
+	Allocator		allocator{ buffer, MyBuffer::from_bytes{} };
 
 	MMapMemoryResource	bufferPair{ hm4::Pair::maxBytes() };
 	MMapMemoryResource	bufferHash{ arenaHashSize * MB };
 
 	auto buffersWrite = g_fbwb();
 
-	MyListFactory<MyReplayList> factory{ path, allocator, buffersWrite, bufferPair, bufferHash };
+	MyListFactory<MyReplayList> factory{ path, allocator,
+						buffersWrite,
+						{ bufferPair, MyBuffer::from_bytes{} },
+						{ bufferHash, MyBuffer::from_bytes{} }
+					};
 
 	auto &mylist = factory();
 

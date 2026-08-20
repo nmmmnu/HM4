@@ -18,10 +18,10 @@ namespace hm4::disk::FileBuilder{
 	public:
 		auto operator()(){
 			return FileBuilderWriteBuffers{
-				data,
-				indx,
-				line,
-				hash
+				{ data, MyBuffer::from_bytes{} },
+				{ indx, MyBuffer::from_bytes{} },
+				{ line, MyBuffer::from_bytes{} },
+				{ hash, MyBuffer::from_bytes{} }
 			};
 		}
 	};

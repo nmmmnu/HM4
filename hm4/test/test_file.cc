@@ -198,7 +198,7 @@ namespace {
 		case 'Z':
 		case 'A': {
 				ArenaBuffer	arena_buffer{ ARENA_SIZE };
-				Allocator_arena	allocator{ arena_buffer };
+				Allocator_arena	allocator{ arena_buffer, MyBuffer::from_bytes{} };
 
 				return file_search(type, filename, key, it, allocator);
 			}

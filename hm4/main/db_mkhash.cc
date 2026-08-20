@@ -60,7 +60,7 @@ int main(int argc, char **argv){
 
 	MyBuffer::MMapMemoryResource buffer{ bufferSize };
 
-	HashIndexBuilder builder{ output_file, g_bufferHash, list.size(), buffer };
+	HashIndexBuilder builder{ output_file, { g_bufferHash, MyBuffer::from_bytes{} }, list.size(), { buffer, MyBuffer::from_bytes{} } };
 
 	for(auto const &p : list)
 		builder(p);

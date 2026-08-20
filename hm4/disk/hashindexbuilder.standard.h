@@ -20,7 +20,7 @@ namespace hm4::disk::hash::algo{
 	template<typename T>
 	struct HashIndexStandardBuilder{
 		HashIndexStandardBuilder(std::string_view filename, MyBuffer::ByteBufferView bufferWrite, size_t nodesCount, MyBuffer::ByteBufferView buffer) :
-								buffer_		(buffer		),
+								buffer_		(buffer, MyBuffer::from_bytes{}),
 								nodesCount_	(nodesCount	),
 								filename_	(filename	),
 								bufferWrite_	(bufferWrite	){

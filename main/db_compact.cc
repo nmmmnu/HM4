@@ -122,7 +122,7 @@ int main(int argc, char **argv){
 
 	auto buffersWrite = g_fbwb();
 
-	return compact(opt, buffersWrite, bufferHash);
+	return compact(opt, buffersWrite, { bufferHash, MyBuffer::from_bytes{} } );
 }
 
 namespace{
@@ -333,10 +333,10 @@ namespace{
 
 			fmt::print("Merging {} tables into {}\n", what, output_file);
 
-			mergeFromFactory(factory, output_file, buffersWrite, bufferHash);
+			mergeFromFactory(factory, output_file, buffersWrite, { bufferHash, MyBuffer::from_bytes{} } );
 		};
 
-		DiskList::VMAllocator allocator{ g_slabBuffer };
+		DiskList::VMAllocator allocator{ g_slabBuffer, MyBuffer::from_bytes{} };
 
 		while(true){
 			auto const out = prepareSmartMergeFileList(opt);

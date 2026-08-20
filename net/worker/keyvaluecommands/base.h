@@ -141,9 +141,9 @@ namespace net::worker::commands{
 		}
 
 	private:
-		MyBuffer::MMapMemoryResource			buffer_		{ MaxMemory };
-	//	MyBuffer::AllocatedMemoryResourceOwned<>	buffer_		{ MaxMemory };
-		MyAllocator::ArenaAllocator			allocator_	{ buffer_   };
+		MyBuffer::MMapMemoryResource			buffer_		{ MaxMemory				};
+	//	MyBuffer::AllocatedMemoryResourceOwned<>	buffer_		{ MaxMemory				};
+		MyAllocator::ArenaAllocator			allocator_	{ buffer_, MyBuffer::from_bytes{}	};
 
 		size_t						allocations_	= 0;
 	};

@@ -60,7 +60,10 @@ int main(int argc, char **argv){
 
 	BTreeIndexBuilder builder(output_file, list);
 
-	bool const result = builder.build(g_bufferIndx, g_bufferData);
+	bool const result = builder.build(
+				{ g_bufferIndx, MyBuffer::from_bytes{} },
+				{ g_bufferData, MyBuffer::from_bytes{} }
+			);
 
 	return result ? 0 : 1;
 }

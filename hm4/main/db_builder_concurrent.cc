@@ -96,8 +96,8 @@ int main(int argc, char **argv){
 	MMapMemoryResource	buffer1{ arenaListSize * MB };
 	MMapMemoryResource	buffer2{ arenaListSize * MB };
 
-	Allocator		allocator1{ buffer1 };
-	Allocator		allocator2{ buffer2 };
+	Allocator		allocator1{ buffer1, MyBuffer::from_bytes{} };
+	Allocator		allocator2{ buffer2, MyBuffer::from_bytes{} };
 
 	MMapMemoryResource	bufferPair{ hm4::Pair::maxBytes() };
 	MMapMemoryResource	bufferHash{ arenaHashSize * MB };
@@ -105,7 +105,10 @@ int main(int argc, char **argv){
 	auto buffersWrite = g_fbwb();
 
 	return process<FileReader>(
-			MyListFactory{ path, allocator1, allocator2, buffersWrite, bufferPair, bufferHash },
+			MyListFactory{ path, allocator1, allocator2, buffersWrite,
+						{ bufferPair, MyBuffer::from_bytes{} },
+						{ bufferHash, MyBuffer::from_bytes{} }
+					 },
 			filename,
 			blob
 	);
