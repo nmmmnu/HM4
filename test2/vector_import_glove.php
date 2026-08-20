@@ -25,10 +25,17 @@ while (($line = fgets($F)) !== false){
 
 	$vector = array_map("floatval", $parts);
 
+	// for($i = 0; $i < count($vector); ++$i)
+	//	printf("%4d %.8f\n", $i, $vector[$i]);
+
 	// if (strlen($word) < 3)
 	// 	continue;
 
 	process_vector($word, $vector);
+
+	if ($i == 0){
+		exit;
+	}
 
 	if (++$i % 25000 == 0)
 		printf("Processed %10d...\n", $i);
@@ -49,8 +56,8 @@ function process_vector($key, & $vector){
 	if (0){
 		$x = $redis->rawCommand(
 			"VADD",
-			"gb150",
-			300, 150, "b",
+			"gi300",
+			300, 300, "i",
 			"h", vhex($vector),
 			$key
 		);
@@ -58,48 +65,12 @@ function process_vector($key, & $vector){
 
 	if (1){
 		$x = $redis->rawCommand(
-			"VKSET",
-			"gkf150:$key",
-			300, 150, "f",
-			"h", vhex($vector)
-		);
-	}
-
-	if (0){
-		$x = $redis->rawCommand(
-			"VKSET",
-			"gkb150:$key",
-			300, 150, "b",
-			"h", vhex($vector)
-		);
-	}
-
-	if (0){
-		$times = 14;
-
-		$v2 = [];
-
-		for ($i = 0; $i < $times; ++$i)
-			$v2 = array_merge($v2, $vector);
-
-		$x = $redis->rawCommand(
 			"VADD",
-			"b4200",
-			4200, 4200, "b",
-			"b", vbin($v2),
+			"gi150",
+			300, 100, "i",
+			"b", vbin($vector),
 			$key
 		);
-
-		if ($key == "frog"){
-			$x = $redis->rawCommand(
-				"VKSET",
-				"b4200_$key",
-				4200, 4200, "f",
-				"b", vbin($v2),
-			);
-		}
-
-		unset($v2);
 	}
 
 }

@@ -1,12 +1,12 @@
 MYCC		= clang++
-MYCC		= g++
+#MYCC		= g++
 #MYCC		= /usr/bin/../lib/clang/c++-analyzer
 
 STATIC_LINK	= YES
 #STATIC_LINK	= NO
 
-CF_OPTIM	= -O0 -g
-#CF_OPTIM	= -O3 -DNDEBUG
+#CF_OPTIM	= -O0 -g
+CF_OPTIM	= -O3 -DNDEBUG -g
 #CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
 CF_OPTIM	+= -march=sandybridge
 
@@ -24,7 +24,8 @@ UNAME		= $(shell uname -s)
 CF_DEPS		= -MMD -MP
 CF_INCL		= -Iinclude -Imyallocator $(EXTRA_INCL)
 #CF_LTO		= -flto
-CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation
+CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation \
+					-Wno-pass-failed
 						#-fopt-info-vec-missed
 
 #CF_MISC	= -DNOT_HAVE_CHARCONV

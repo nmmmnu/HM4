@@ -236,7 +236,9 @@ namespace net::worker::commands::SL{
 			auto const varg = 2;
 
 			if (!pair){
-				container.assign(std::distance(std::begin(p) + varg, std::end(p)), "");
+				auto const size = static_cast<size_t>(std::distance(std::begin(p) + varg, std::end(p)));
+
+				container.assign(size, "");
 
 				return result.set_container(container);
 			}

@@ -429,5 +429,8 @@ Changelog
 -	Release
 
 ### 1.3.16.1
--	Fix bug in MHSIM, when there are too many results
+-	fix bug in MHSIM, when there are too many results
+-	new module vectors2
+-	optimization - skip zeroing buffers when not need
+
 

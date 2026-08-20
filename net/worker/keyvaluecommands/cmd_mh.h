@@ -72,12 +72,12 @@ namespace net::worker::commands::MH{
 				return { buffer.data(), result.size };
 		}
 
-		void bandsHexToContainer(const MHT *mh_data, uint32_t bandSize, OutputBlob::Container &container, OutputBlob::BufferContainer &bcontainer){
+		void bandsHexToContainer(const MHT *mh_data, uint32_t bandSize, OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer){
 			static_assert(MH::bytes() <= OutputBlob::ContainerSize);
 
 			MH mh;
 
-			auto f = [&container, &bcontainer](uint16_t id, uint64_t hash){
+			auto f = [&icontainer, &bcontainer](uint16_t id, uint64_t hash){
 				bcontainer.push_back();
 
 				char *buffer = bcontainer.back().data();
@@ -91,7 +91,7 @@ namespace net::worker::commands::MH{
 				buffer[p] = '.';			p += 1;
 				hex_convert::toHex(id,   buffer + p);	p += sizeof(uint16_t) * 2;
 
-				container.emplace_back(buffer, p);
+				icontainer.emplace_back(buffer, p);
 			};
 
 			mh.bands(mh_data, bandSize, f);
@@ -478,7 +478,7 @@ namespace net::worker::commands::MH{
 				if constexpr(inputTypeIsKey){
 					return load_ptr(db, keyN, keySub);
 				}else{
-					MHT *mh_data = & blob.allocate<MHT>(MH::bytes());
+					MHT *mh_data = blob.allocateBytes<MHT>(MH::bytes());
 
 					if (insertTokens(mh, mh_data, delimiter[0], tokens))
 						return mh_data;
@@ -540,8 +540,6 @@ namespace net::worker::commands::MH{
 			bcontainer.clear();
 
 			auto &data = heap.sort();
-
-		//	std::sort(std::begin(data), std::end(data), std::greater{});
 
 			for(auto &[jaccard, text] : data){
 				container.push_back(text);

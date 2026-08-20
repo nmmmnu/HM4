@@ -205,6 +205,78 @@ namespace net::worker::commands::Vectors2{
 			}
 		}
 
+		constexpr float distanceFix(DType dtype, float distance){
+			switch(dtype){
+			case DType::EUCLIDEAN		: return std::sqrt(distance);
+			default				: return distance;
+			}
+		}
+
+		template<typename T, class DBAdapter>
+		auto prepareFVector(DBAdapter &db, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t const dim_ix, DType dtype){
+			struct Result{
+				bool			ok		= false;
+				MyVectors::FVector	vector		= {};
+				float			magnitude	= {};
+			};
+
+			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
+
+			const auto *storedVector = MyVectors::toStoredVector<T>(sv, dim_ix);
+
+			if (!storedVector)
+				return Result{};
+
+			float *buffer = blob.allocateBytes<float>(dim_ix * sizeof(float) );
+
+			MyVectors::FVector vector{ buffer, dim_ix };
+
+			auto const magnitude = [&]() -> float{
+				switch(dtype){
+				default:
+				case DType::COSINE	:
+				case DType::EUCLIDEAN	: {
+
+						// in:  normalized vector of T
+						// out:
+						//      - normalized vector of float
+						//      - fixed host order
+
+						auto f = [&vector](size_t i, float const value){
+							vector[i] = value;
+						};
+
+						MyVectors::dequantizeF(storedVector->toVector(), f, valueProjBE);
+
+						return storedVector->magnitude();
+					}
+
+				case DType::MANHATTAN	:
+				case DType::CANBERRA	: {
+
+						// in:  normalized vector of T
+						// out:
+						//      - denormalized vector of float
+						//      - fixed host order
+
+						auto f = [&vector](size_t i, float const value){
+							vector[i] = value;
+						};
+
+						MyVectors::denormalizeF(storedVector->toVector(), storedVector->magnitude(), f, valueProjBE);
+
+						return 1.f;
+					}
+				}
+			}();
+
+			return Result{
+				true		,
+				vector		,
+				magnitude
+			};
+		}
+
 
 
 		struct CreateFloatVector{
@@ -226,7 +298,7 @@ namespace net::worker::commands::Vectors2{
 				bool const needsToBeProjected = dim_ix > 1 && dim_ix < dim_ve;
 
 				if (needsToBeProjected){
-					MyVectors::FVector vectorProj{ vectorBufferProj.data(), dim_ix * sizeof(float) };
+					MyVectors::FVector vectorProj{ reinterpret_cast<float *>(vectorBufferProj.data()), dim_ix };
 
 					MyVectors::randomProjection(vector, vectorProj);
 
@@ -252,11 +324,7 @@ namespace net::worker::commands::Vectors2{
 						MyVectors::CFVector in	{ reinterpret_cast<const float *>(fdata.data()  ), dim };
 						MyVectors::FVector  out	{ reinterpret_cast<      float *>(buffer.data() ), dim };
 
-						#if defined(__clang__)
-							#pragma clang loop vectorize(enable) interleave(enable)
-						#elif defined(__GNUC__)
-							#pragma GCC ivdep
-						#endif
+						FORCE_VECTORIZE
 						for(size_t i = 0; i < dim; ++i)
 							out[i] = in[i];
 
@@ -280,11 +348,7 @@ namespace net::worker::commands::Vectors2{
 				case VType::BINARY_LE :
 				case VType::HEX_LE    : {
 
-						#if defined(__clang__)
-							#pragma clang loop vectorize(enable) interleave(enable)
-						#elif defined(__GNUC__)
-							#pragma GCC ivdep
-						#endif
+						FORCE_VECTORIZE
 						for(size_t i = 0; i < vector.size(); ++i)
 							vector[i] = letoh(vector[i]);
 
@@ -294,11 +358,7 @@ namespace net::worker::commands::Vectors2{
 				case VType::BINARY_BE :
 				case VType::HEX_BE    : {
 
-						#if defined(__clang__)
-							#pragma clang loop vectorize(enable) interleave(enable)
-						#elif defined(__GNUC__)
-							#pragma GCC ivdep
-						#endif
+						FORCE_VECTORIZE
 						for(size_t i = 0; i < vector.size(); ++i)
 							vector[i] = betoh(vector[i]);
 
@@ -334,16 +394,49 @@ namespace net::worker::commands::Vectors2{
 				if (data.size() != bytes())
 					return false;
 
-				icontainer.clear();
-				bcontainer.clear();
 
-				icontainer.push_back("00");
-				icontainer.push_back("01");
-				icontainer.push_back("02");
-				icontainer.push_back("03");
+				const auto *storedVector = MyVectors::toStoredVector<T>(data, dim_ix);
+
+				if (!storedVector)
+					return false;
+
+				int8_t bufferVectorI8[MaxDimensions]; // 8 KB, should be OK.
+
+				MyVectors::TVector<int8_t> vectorI8{ bufferVectorI8, dim_ix };
+
+				MyVectors::CTVector<T>     vectorT = storedVector->toVector();
+
+
+				FORCE_VECTORIZE
+				for(uint32_t i = 0; i < dim_ix; ++i)
+					vectorI8[i] = MyVectors::quantizeComponentToI8(vectorT[i]);
+
+
+				auto f = [&icontainer, &bcontainer](uint8_t id, BandType hash){
+					bcontainer.push_back();
+
+					char *buffer = bcontainer.back().data();
+
+					size_t p = 0;
+
+					// 1A42.05
+
+					hex_convert::toHex(hash, buffer + p);	p += sizeof(BandType	) * 2;
+					buffer[p] = '.';			p += 1;
+					hex_convert::toHex(id,   buffer + p);	p += sizeof(uint8_t	) * 2;
+
+					icontainer.emplace_back(buffer, p);
+				};
+
+				MyVectors::simhashBands<MaxDimensions, BandType>(vectorI8, 12, BANDS, f);
 
 				return true;
 			}
+
+		private:
+			using BandType = uint16_t;
+
+			constexpr static uint8_t BANDS = 128;
 
 		private:
 			uint32_t dim_ix;
@@ -402,6 +495,9 @@ namespace net::worker::commands::Vectors2{
 					auto const s = formatV(value,             bcontainer.back());
 
 					container.push_back(s);
+
+					// clang
+					(void) magnitude;
 				}else{
 					auto const s = formatV(value * magnitude, bcontainer.back());
 
@@ -980,7 +1076,6 @@ namespace net::worker::commands::Vectors2{
 			}
 		}
 
-
 		template<typename T>
 		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix, impl_::VType vtype){
 			using namespace impl_;
@@ -1001,7 +1096,7 @@ namespace net::worker::commands::Vectors2{
 			case VType::BINARY_BE : {
 					auto &fVectorBuffer = blob.allocate<VectorMaxBuffer>();
 
-					MyVectors::FVector fvector{ fVectorBuffer };
+					MyVectors::FVector fvector{ reinterpret_cast<float *>(fVectorBuffer.data()), dim_ix };
 
 				//	if constexpr(!std::is_same_v<T, bool>){
 
@@ -1014,20 +1109,12 @@ namespace net::worker::commands::Vectors2{
 						// fvector is denormalized and in host order now.
 
 						if (vtype == VType::BINARY_BE){
-							#if defined(__clang__)
-								#pragma clang loop vectorize(enable) interleave(enable)
-							#elif defined(__GNUC__)
-								#pragma GCC ivdep
-							#endif
-							for(size_t i = 0; i < fvector.size(); ++i)
+							FORCE_VECTORIZE
+							for(size_t i = 0; i < dim_ix; ++i)
 								fvector[i] = htobe(fvector[i]);
 						}else{
-							#if defined(__clang__)
-								#pragma clang loop vectorize(enable) interleave(enable)
-							#elif defined(__GNUC__)
-								#pragma GCC ivdep
-							#endif
-							for(size_t i = 0; i < fvector.size(); ++i)
+							FORCE_VECTORIZE
+							for(size_t i = 0; i < dim_ix; ++i)
 								fvector[i] = htole(fvector[i]);
 						}
 				//	}else{
@@ -1202,36 +1289,28 @@ namespace net::worker::commands::Vectors2{
 
 			Decoder<T> decoder{ dim_ix };
 
-			std::string_view sv;
 
+			std::string_view svA = shared::rsetmulti::getData(db, keyN, keySubA);
 
-			sv = shared::rsetmulti::getData(db, keyN, keySubA);
-
-			const auto *storedVectorA = MyVectors::toStoredVector<T>(sv, dim_ix);
+			const auto *storedVectorA = MyVectors::toStoredVector<T>(svA, dim_ix);
 
 			if (!storedVectorA)
 				return result.set(false);
 
 
-			sv = shared::rsetmulti::getData(db, keyN, keySubB);
+			std::string_view svB = shared::rsetmulti::getData(db, keyN, keySubB);
 
-			const auto *storedVectorB = MyVectors::toStoredVector<T>(sv, dim_ix);
+			const auto *storedVectorB = MyVectors::toStoredVector<T>(svB, dim_ix);
 
 			if (!storedVectorB)
 				return result.set(false);
 
-
-			float const dist = [&](){
-				float const dist = distance(dtype,
-								storedVectorA->toVector(),	storedVectorB->toVector(),
-								storedVectorA->magnitude(),	storedVectorB->magnitude()
-				);
-
-				switch(dtype){
-				case DType::EUCLIDEAN	: return sqrtf(dist);
-				default			: return dist;
-				}
-			}();
+			float const dist = distanceFix(dtype,
+						distance(dtype,
+							storedVectorA->toVector(),	storedVectorB->toVector(),
+							storedVectorA->magnitude(),	storedVectorB->magnitude()
+						)
+			);
 
 			to_string_buffer_t buffer;
 
@@ -1385,18 +1464,13 @@ namespace net::worker::commands::Vectors2{
 					continue;
 				}
 
-
-				float const dist = [&](){
-					float const dist = distance(dtype,
-								storedVectorA->toVector(),	storedVectorB->toVector(),
-								storedVectorA->magnitude(),	storedVectorB->magnitude()
+				float const dist = distanceFix(dtype,
+						distance(dtype,
+							storedVectorA->toVector(),	storedVectorB->toVector(),
+							storedVectorA->magnitude(),	storedVectorB->magnitude()
+						)
 					);
 
-					switch(dtype){
-					case DType::EUCLIDEAN	: return sqrtf(dist);
-					default			: return dist;
-					}
-				}();
 
 				bcontainer.push_back();
 
@@ -1417,28 +1491,19 @@ namespace net::worker::commands::Vectors2{
 
 			Decoder<T> decoder{ dim_ix };
 
-			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySubA);
 
-			const auto *storedVectorA = MyVectors::toStoredVector<T>(sv, dim_ix);
+			auto const pp = prepareFVector<T>(db, blob, keyN, keySubA, dim_ix, dtype);
 
-			if (!storedVectorA){
+			if (!pp.ok){
 				for(auto itk = first; itk != last; ++itk)
 					container.push_back(INF);
 
 				return result.set_container(container);
 			}
 
-			float *bufferPrepared		= & blob.allocate<float>(dim_ix);
+			auto const vectorPrepared	= pp.vector;
+			auto const magnitudePrepared	= pp.magnitude;
 
-			auto vectorPrepared		= MyVectors::FVector(bufferPrepared, dim_ix);
-
-			auto const magnitudePrepared	= storedVectorA->magnitude();
-
-			auto f = [&vectorPrepared](size_t i, float const value){
-				vectorPrepared[i] = value;
-			};
-
-			MyVectors::denormalizeF(storedVectorA->toVector(), magnitudePrepared, f, valueProjBE);
 
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySubB	= *itk;
@@ -1452,17 +1517,13 @@ namespace net::worker::commands::Vectors2{
 					continue;
 				}
 
-				float const dist = [&](){
-					float const dist = distancePrepared(dtype,
+				float const dist = distanceFix(dtype,
+						distancePrepared(dtype,
 							vectorPrepared,		storedVectorB->toVector(),
 							magnitudePrepared,	storedVectorB->magnitude()
+						)
 					);
 
-					switch(dtype){
-					case DType::EUCLIDEAN	: return sqrtf(dist);
-					default			: return dist;
-					}
-				}();
 
 				bcontainer.push_back();
 
@@ -1565,42 +1626,6 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static auto prepareFVector(DBAdapter &db, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t const dim_ix){
-			using namespace impl_;
-
-			struct Result{
-				bool			ok		= false;
-				MyVectors::FVector	vector		= {};
-				float			magnitude	= 0.0;
-			};
-
-			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
-
-			const auto *storedVector = MyVectors::toStoredVector<T>(sv, dim_ix);
-
-			if (!storedVector)
-				return Result{};
-
-			float *buffer = & blob.allocate<float>(dim_ix);
-
-			MyVectors::FVector vector{ buffer, dim_ix };
-
-			auto const magnitude = storedVector->magnitude();
-
-			auto f = [&vector](size_t i, float const value){
-				vector[i] = value;
-			};
-
-			MyVectors::denormalizeF(storedVector->toVector(), magnitude, f, valueProjBE);
-
-			return Result{
-				true		,
-				vector		,
-				magnitude
-			};
-		}
-
-		template<typename T>
 		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
@@ -1608,20 +1633,15 @@ namespace net::worker::commands::Vectors2{
 
 			using namespace impl_;
 
-		//	auto [ok, vectorPrepared, magnitudePrepared] = prepareFVector<T>(db, blob, keyN, keySub, dim_ix);
-		//
-		//	if (!ok)
-		//		return result.set_container0();
 
-			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
+			auto const pp = prepareFVector<T>(db, blob, keyN, keySub, dim_ix, dtype);
 
-			const auto *storedVector = MyVectors::toStoredVector<T>(sv, dim_ix);
-
-			if (!storedVector)
+			if (!pp.ok)
 				return result.set_container0();
 
-			auto vectorPrepared	= storedVector->toVector();
-			auto magnitudePrepared	= storedVector->magnitude();
+			auto const vectorPrepared	= pp.vector;
+			auto const magnitudePrepared	= pp.magnitude;
+
 
 			auto &heap = blob.construct<VSIMHeap>();
 
@@ -1644,6 +1664,7 @@ namespace net::worker::commands::Vectors2{
 						db,
 						stop,
 						startKey,
+						keyN, keySub,
 						dim_ix,
 						dtype,
 						vectorPrepared, magnitudePrepared,
@@ -1663,7 +1684,7 @@ namespace net::worker::commands::Vectors2{
 		using VSIMHeap		= top_heap::TopKSmallest<VSIMHeapNode, results__>;
 
 		constexpr static uint32_t ITERATIONS_LOOPS_VSIM
-					= 5'000'000;
+					= 1'000'000;
 				//	= shared::config::ITERATIONS_LOOPS_MAX;
 
 	private:
@@ -1671,10 +1692,10 @@ namespace net::worker::commands::Vectors2{
 		static std::string_view process_range__(DBAdapter &db,
 					StopPredicate predicate,
 					std::string_view startKey,
-					uint32_t const dim_ix,
-					impl_::DType dtype,
-					MyVectors::CTVector<T> const vectorPrepared, float const magnitudePrepared,
-					VSIMHeap &heap, uint32_t &iterations){
+					std::string_view /* keyN */, std::string_view keySub,
+						uint32_t const dim_ix, impl_::DType dtype,
+							MyVectors::CFVector    const vectorPrepared, float const magnitudePrepared,
+								VSIMHeap &heap, uint32_t &iterations){
 
 			using namespace impl_;
 
@@ -1693,7 +1714,6 @@ namespace net::worker::commands::Vectors2{
 					continue;
 
 
-
 				std::string_view sv = it->getVal();
 
 				const auto *storedVectorB = MyVectors::toStoredVector<T>(sv, dim_ix);
@@ -1702,13 +1722,17 @@ namespace net::worker::commands::Vectors2{
 					continue;
 
 
+				auto const text = extractNth_(2, DBAdapter::SEPARATOR[0], key);
 
-				float const dist = distance(dtype,
+				if (text == keySub)
+					continue;
+
+				float const dist = distancePrepared(dtype,
 							vectorPrepared,		storedVectorB->toVector(),
 							magnitudePrepared,	storedVectorB->magnitude()
 				);
 
-				heap.push(VSIMHeapNode{ dist, key });
+				heap.push(VSIMHeapNode{ dist, text });
 			}
 
 			return "";
@@ -1716,8 +1740,9 @@ namespace net::worker::commands::Vectors2{
 
 		template<typename T>
 		static void process_range_finish(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
-					impl_::DType dtype, VSIMHeap &heap,
-					std::string_view tail){
+						impl_::DType dtype,
+							VSIMHeap &heap,
+								std::string_view tail){
 
 			using namespace impl_;
 
@@ -1726,24 +1751,14 @@ namespace net::worker::commands::Vectors2{
 
 			auto &data = heap.sort();
 
-		//	std::sort(std::begin(data), std::end(data));
-
-			for(auto &[distPop, keyPop] : data){
-				auto const key = extractNth_(2, DBAdapter::SEPARATOR[0], keyPop);
-
-				container.push_back(key);
+			for(auto [distPop, text] : data){
+				container.push_back(text);
 
 				bcontainer.push_back();
 
-				// SEARCH POST-CONDITION
-				auto const dist = [&](auto dist) -> float{
-					switch(dtype){
-					case DType::EUCLIDEAN	: return sqrtf(dist);
-					default			: return dist;
-					}
-				}(distPop);
+				auto const dist = distanceFix(dtype, distPop);
 
-				auto const val = formatV(dist, bcontainer.back());
+				auto const val  = formatV(dist, bcontainer.back());
 
 				container.push_back(val);
 			}

@@ -162,7 +162,9 @@ public:
 	}
 
 	bool finalizeWriteBuffer(const char *offset, size_t const actualSize){
-		buffer_.resize(offset - buffer_.data() + actualSize);
+		auto const size = static_cast<size_t>(offset - buffer_.data()) + actualSize;
+
+		buffer_.resize(size);
 
 		return true;
 	}

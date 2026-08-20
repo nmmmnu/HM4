@@ -6,21 +6,12 @@
 #include <cmath>
 #include <limits>
 
-#include "mybufferview.h"
+#include "vectors_buffer.h"
+#include "forcevectorize.h"
 
 #include "murmur_hash_mixer.h"
 
 namespace MyVectors{
-
-	template<typename T>
-	using TVector = MyBuffer::BufferView<T>;
-
-	template<typename T>
-	using CTVector = TVector<T const>;
-
-	using FVector  = TVector<float>;
-
-	using CFVector = CTVector<float const>;
 
 	template<typename VE>
 	constexpr bool checkVectorElement(){
@@ -66,11 +57,7 @@ namespace MyVectors{
 
 		float l2 = 0.0f;
 
-		#if defined(__clang__)
-			#pragma clang loop vectorize(enable) interleave(enable)
-		#elif defined(__GNUC__)
-			#pragma GCC ivdep
-		#endif
+		FORCE_VECTORIZE
 		for(size_t i = 0; i < ctvector.size(); ++i)
 			l2 += ctvector[i] * ctvector[i];
 
@@ -79,6 +66,7 @@ namespace MyVectors{
 
 	// ------------------------
 
+/*
 	constexpr float normalizeInline(FVector fvector){
 		constexpr float ZERO = 1E-6f;
 
@@ -89,16 +77,13 @@ namespace MyVectors{
 
 		auto const fix = 1 / magnitude;
 
-		#if defined(__clang__)
-			#pragma clang loop vectorize(enable) interleave(enable)
-		#elif defined(__GNUC__)
-			#pragma GCC ivdep
-		#endif
+		FORCE_VECTORIZE
 		for(size_t i = 0; i < fvector.size(); ++i)
 			fvector[i] *= fix;
 
 		return magnitude;
 	}
+*/
 
 	template<typename F>
 	constexpr float normalizeF(CFVector const cfvector, F f){
@@ -148,6 +133,37 @@ namespace MyVectors{
 
 	// ------------------------
 
+	template<typename T>
+	constexpr int8_t quantizeComponentToI8(T v){
+		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
+
+		if constexpr(std::is_same_v<T, float>){
+			float const scale = 127;
+
+			return static_cast<int8_t>( std::round(v * scale) );
+		}
+
+		if constexpr(std::is_same_v<T, int16_t> && 0){
+			int16_t const maxI8  =   127;
+			int16_t const maxI16 = 32767;
+			return static_cast<int8_t>((v * maxI8) / maxI16);
+		}
+
+		if constexpr(std::is_same_v<T, int16_t> && 1){
+			int8_t const minI8 = -128;
+			int8_t const min   = -127;
+			int8_t const res   = static_cast<int8_t>(v >> 8);
+
+			return res == minI8 ? min : res;
+		}
+
+		if constexpr(std::is_same_v<T, int8_t>){
+			return v;
+		}
+	}
+
+	// ------------------------
+
 	constexpr float dequantizeComponent(float v){
 		return v;
 	}
@@ -168,11 +184,7 @@ namespace MyVectors{
 	constexpr void dequantizeF(CTVector<T> const ctvector, F f, FProj fpr){
 		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
-		#if defined(__clang__)
-			#pragma clang loop vectorize(enable) interleave(enable)
-		#elif defined(__GNUC__)
-			#pragma GCC ivdep
-		#endif
+		FORCE_VECTORIZE
 		for(size_t i = 0; i < ctvector.size(); ++i)
 			f(i, dequantizeComponent(fpr(ctvector[i])));
 	}
@@ -193,11 +205,7 @@ namespace MyVectors{
 
 		assert(ctvector.size() == fvector.size());
 
-		#if defined(__clang__)
-			#pragma clang loop vectorize(enable) interleave(enable)
-		#elif defined(__GNUC__)
-			#pragma GCC ivdep
-		#endif
+		FORCE_VECTORIZE
 		for(size_t i = 0; i < ctvector.size(); ++i)
 			fvector[i] = denormalizeComponent(ctvector[i], magnitude);
 	}
@@ -207,11 +215,7 @@ namespace MyVectors{
 	constexpr void denormalizeF(CTVector<T> const ctvector, float const magnitude, F f, FProj fpr){
 		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
-		#if defined(__clang__)
-			#pragma clang loop vectorize(enable) interleave(enable)
-		#elif defined(__GNUC__)
-			#pragma GCC ivdep
-		#endif
+		FORCE_VECTORIZE
 		for(size_t i = 0; i < ctvector.size(); ++i)
 			f(i, denormalizeComponent(fpr(ctvector[i]), magnitude));
 	}
@@ -232,11 +236,7 @@ namespace MyVectors{
 
 			float dot = 0;
 
-			#if defined(__clang__)
-				#pragma clang loop vectorize(enable) interleave(enable)
-			#elif defined(__GNUC__)
-				#pragma GCC ivdep
-			#endif
+			FORCE_VECTORIZE
 			for (size_t i = 0; i < a.size(); ++i){
 				// dequantize float is a no op
 				float const a_i = dequantizeComponent(fpr1(a[i]));
@@ -333,7 +333,6 @@ namespace MyVectors{
 		float result = 0.0f;
 
 		for (size_t i = 0; i < a.size(); ++i) {
-			// dequantize float is a no op
 			float const a_i = denormalizeComponent(aFpr(a[i]), aM);
 			float const b_i = denormalizeComponent(bFpr(b[i]), bM);
 
@@ -358,7 +357,6 @@ namespace MyVectors{
 		float result = 0.0f;
 
 		for (size_t i = 0; i < a.size(); ++i) {
-			// dequantize float is a no op
 			float const a_i =                      aFpr(a[i])     ;
 			float const b_i = denormalizeComponent(bFpr(b[i]), bM);
 
@@ -405,7 +403,6 @@ namespace MyVectors{
 		float result = 0.0f;
 
 		for (size_t i = 0; i < a.size(); ++i) {
-			// fpr1 is a no op
 			float const a_i =                      aFpr(a[i])     ;
 			float const b_i = denormalizeComponent(bFpr(b[i]), bM);
 
@@ -419,89 +416,136 @@ namespace MyVectors{
 
 	// ------------------------
 
-	namespace random_projection_impl_{
-		constexpr uint32_t M(uint32_t x, uint32_t y, uint64_t seed){
-			uint64_t const zz = (uint64_t{x} << 32) | y;
+	namespace MD{
 
-			return static_cast<uint32_t>(
-					murmur_hash_mixer64_nz(zz, seed)
-			);
+		template<typename T>
+		T distribution(uint64_t a64);
+
+		template<>
+		constexpr float distribution<float>(uint64_t a){
+			float const scale  = 1.0f / static_cast<float>(std::numeric_limits<uint64_t>::max());
+			float const scale2 = scale * 2;
+
+			return static_cast<float>(a) * scale2 - 1.0f;
 		}
 
-		constexpr float scale  = 1.0f / static_cast<float>(std::numeric_limits<uint32_t>::max());
-		constexpr float scale2 = scale * 2;
+		template<>
+		constexpr int8_t distribution<int8_t>(uint64_t a){
+			int8_t const minI8 = -128;
+			int8_t const min   = -127;
+			int8_t const res   = static_cast<int8_t>(a);
 
-		constexpr float distribution(uint32_t h){
-			return static_cast<float>(h) * scale2 - 1.f;
+			return res == minI8 ? min : res;
 		}
 
-		constexpr float MD(size_t x, size_t y, size_t seed){
-			return distribution(
-				M(
-					static_cast<uint32_t>(x),
-					static_cast<uint32_t>(y),
-					seed
-				)
-			);
-		}
 	}
 
-	void randomProjection(CFVector const cfvector, FVector fresult, size_t seed = 0){
-
-		using namespace random_projection_impl_;
+	void randomProjection(CFVector const cfvector, FVector fresult, uint64_t seed = 0){
+		MurmurHashMixer64 generator{ seed };
 
 		for (size_t x = 0; x < fresult.size(); ++x){
 			float sum = 0.0f;
 
-			#if defined(__clang__)
-				#pragma clang loop vectorize(enable) interleave(enable)
-			#elif defined(__GNUC__)
-				#pragma GCC ivdep
-			#endif
 			for (size_t y = 0; y < cfvector.size(); ++y)
-				sum += cfvector[y] * MD(x, y, seed);
+				sum += cfvector[y] * MD::distribution<float>(generator());
 
 			fresult[x] = sum;
 		}
 	}
 
+/*
 	void randomProjectionNormalize(CFVector const cfvector, FVector fresult){
 
 		randomProjection(cfvector, fresult);
 
 		normalizeInline(fresult);
 	}
+*/
 
-/*
-	template<typename T>
-	T randomProjectionBit(CFVector const scfvector, size_t seed = 0){
-		static_assert(checkFVector<CFVector>(), "Only float supported");
+	template <size_t MaxDimensions, typename T, typename Generator>
+	struct MultiHyperplaneProjector{
+		static_assert(
+			std::is_same_v<T, uint8_t > ||
+			std::is_same_v<T, uint16_t> ||
+			std::is_same_v<T, uint32_t> ||
+			std::is_same_v<T, uint64_t>
+		);
 
-		using namespace random_projection_impl_;
-
-		constexpr auto bits = sizeof(T) * 8;
-
-		T result = 0;
-
-		for (size_t x = 0; x < bits; ++x){
-			float sum = 0.0f;
-
-			#if defined(__clang__)
-				#pragma clang loop vectorize(enable) interleave(enable)
-			#elif defined(__GNUC__)
-				#pragma GCC ivdep
-			#endif
-			for (size_t y = 0; y < cfvector.size(); ++y)
-				sum += cfvector[y] * MD(x, y, seed);
-
-			T const I = sum > 0 ? 1 : 0;
-
-			result |= I << x;
+		constexpr MultiHyperplaneProjector(CTVector<int8_t> vector, size_t bits, uint64_t seed = 0) :
+								vector_		(vector	),
+								bits_		(bits	),
+								generator_	(seed	){
+			assert(bits_ <= MaxBits);
 		}
 
-		return result;
+		constexpr T operator()(){
+			uint64_t random64[MaxCapacity64]; // for 8K -> 1K
+
+			// 1. Generate random numbers (bits)
+			const T *randomT = generateRandom_(random64);
+
+			// 2. Single pass simplified dot product of all bits
+			int32_t dots[MaxBits]{};
+
+			for (size_t i = 0; i < vector_.size(); ++i){
+				auto const v	= vector_[i];
+
+				#pragma GCC diagnostic push
+				#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+				auto const mask	= randomT[i];
+				#pragma GCC diagnostic pop
+
+				// cycle to MaxBits is *way* faster,
+				// than cycle to bits_
+
+				FORCE_VECTORIZE
+				for (size_t h = 0; h < MaxBits; ++h){
+					const bool bit = (mask >> h) & 1;
+					dots[h] += bit ? +v : -v;
+				}
+			}
+
+			// 3. Result
+			T result = 0;
+
+			for (size_t i = 0; i < bits_; ++i)
+				if (dots[i] > 0)
+					result |= static_cast<T>(1u << i);
+
+			return result;
+		}
+
+	private:
+		constexpr const T *generateRandom_(uint64_t *random64){
+			size_t const needed64 = size64__(vector_.size());
+
+			for (size_t i = 0; i < needed64; ++i)
+				random64[i] = generator_();
+
+			return reinterpret_cast<const T *>(random64);
+		}
+
+		constexpr static size_t size64__(size_t size){
+			return (size * sizeof(T) + sizeof(uint64_t) - 1) / sizeof(uint64_t);
+		}
+
+	private:
+		constexpr static size_t MaxBits		= sizeof(T) * 8;
+		constexpr static size_t MaxCapacity64	= size64__(MaxDimensions);
+
+	private:
+		CTVector<int8_t>	vector_;
+		size_t			bits_;
+		Generator		generator_;
+	};
+
+	template<size_t MaxDimensions, typename T, typename F>
+	void simhashBands(CTVector<int8_t> const vector, uint8_t bits, uint8_t bands, F f, uint64_t seed = 0){
+		MultiHyperplaneProjector<MaxDimensions, T, MurmurHashMixer64> mhpp{ vector, bits, seed };
+
+		for(uint8_t id = 0; id < bands; ++id)
+			f(id, mhpp());
 	}
-*/
 
 } // namspace MyVectors
 

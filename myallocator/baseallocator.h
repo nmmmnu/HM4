@@ -46,8 +46,18 @@ namespace MyAllocator{
 
 	template<typename T, class Allocator, typename ...Args>
 	T *construct(Allocator &allocator, Args &&...args){
-		if (auto *p = allocate<T>(allocator); p)
-			return new(p) T(std::forward<Args>(args)...);
+		#if 0
+			if (auto *p = allocate<T>(allocator); p)
+				return new(p) T(std::forward<Args>(args)...);
+		#else
+			if (auto *p = allocate<T>(allocator); p){
+				if constexpr (sizeof...(args) == 0) {
+					return new(p) T; // <-- no brakets
+				} else {
+					return new(p) T(std::forward<Args>(args)...);
+				}
+			}
+		#endif
 
 		return nullptr;
 	}
