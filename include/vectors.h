@@ -6,12 +6,23 @@
 #include <cmath>
 #include <limits>
 
-#include "vectors_buffer.h"
 #include "forcevectorize.h"
+#include "mybufferview.h"
 
 #include "murmur_hash_mixer.h"
 
 namespace MyVectors{
+	using from_bytes = MyBuffer::from_bytes;
+
+	template<typename T>
+	using TVector = MyBuffer::BufferView<T>;
+
+	template<typename T>
+	using CTVector = TVector<T const>;
+
+	using FVector  = TVector<float>;
+
+	using CFVector = CTVector<float const>;
 
 	template<typename VE>
 	constexpr bool checkVectorElement(){
