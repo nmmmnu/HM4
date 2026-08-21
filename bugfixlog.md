@@ -99,3 +99,8 @@ Changelog
 ### 1.3.15.1
 -	Prevent possible issue in APPEND that may appear in future version. This is not a bug in current releases.
 
+### 1.3.16.1
+-	bugfix in AVLList - when (real) delete happens, the server may segfault.
+	this does not affects 99.99% of the production servers.
+
+

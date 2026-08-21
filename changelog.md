@@ -428,3 +428,7 @@ Changelog
 ### 1.3.16
 -	Release
 
+### 1.3.16.1
+-	bugfix in AVLList - when (real) delete happens, the server may segfault.
+	this does not affects 99.99% of the production servers.
+
