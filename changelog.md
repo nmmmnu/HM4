@@ -429,6 +429,8 @@ Changelog
 -	Release
 
 ### 1.3.16.1
+-	fix in AVLList - when (real) delete happens, the server may segfault.
+	this does not affects 99.99% of the production servers.
 -	fix bug in MHSIM, when there are too many results
 -	new module vectors2
 -	optimization - skip zeroing buffers when not need

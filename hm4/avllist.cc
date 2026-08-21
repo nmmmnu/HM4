@@ -303,7 +303,7 @@ InsertResult AVLList<T_Allocator>::erase___(std::string_view const key){
 			lc_.dec(node->data.bytes());
 			deallocate_(node);
 
-			if (parent->setBalance(+1)){
+			if (parent->getBalance() == +1){
 				return InsertResult::deleted();
 			}else{
 				rebalanceAfterErase_(parent);
@@ -316,7 +316,7 @@ InsertResult AVLList<T_Allocator>::erase___(std::string_view const key){
 			lc_.dec(node->data.bytes());
 			deallocate_(node);
 
-			if (parent->setBalance(-1)){
+			if (parent->getBalance() == -1){
 				return InsertResult::deleted();
 			}else{
 				rebalanceAfterErase_(parent);
@@ -711,16 +711,20 @@ void AVLList<T_Allocator>::swapLinksRelative_(Node *a, Node *b){
 	 *   d*  e*       d*  e*
 	 */
 
-
 	assert(a->l == b || a->r == b);
 	assert(b->getP() == a);
 
 	using std::swap;
 
-//	swap(a->balance	, b->balance	);
+	auto const bal_a = a->getBalance();
+	auto const bal_b = b->getBalance();
+
 	swap(a->l	, b->l		);
 	swap(a->r	, b->r		);
 	swap(a->p_	, b->p_		);
+
+	a->setBalance(bal_a);
+	b->setBalance(bal_b);
 
 	fixParentAndChildren_<1,0,0>(b, a);
 	fixParentAndChildren_<0,1,1>(a);
@@ -740,10 +744,15 @@ template<class T_Allocator>
 void AVLList<T_Allocator>::swapLinksNormal_(Node *a, Node *b){
 	using std::swap;
 
-//	swap(a->balance	, b->balance	);
+	auto const bal_a = a->getBalance();
+	auto const bal_b = b->getBalance();
+
 	swap(a->l	, b->l		);
 	swap(a->r	, b->r		);
 	swap(a->p_	, b->p_		);
+
+	a->setBalance(bal_a);
+	b->setBalance(bal_b);
 
 	fixParentAndChildren_<1,1,1>(a, b);
 	fixParentAndChildren_<1,1,1>(b, a);
@@ -973,7 +982,7 @@ void AVLList<T_Allocator>::rebalanceAfterErase_(Node *node){
 				return;
 		}
 
-		node = node->getP();
+		node = parent;
 	}
 }
 

@@ -94,11 +94,13 @@ Changelog
 -	fix issue with MyAllocator::destruct with nullptr. This is not a bug because default behavour is unlear.
 
 ### 1.3.15
--	Fix issue with clearing the buffer in specific cases
+-	fix issue with clearing the buffer in specific cases
 
 ### 1.3.15.1
 -	Prevent possible issue in APPEND that may appear in future version. This is not a bug in current releases.
 
 ### 1.3.16.1
--	Fix bug in MHSIM, when there are too many results
+-	fix in AVLList - when (real) delete happens, the server may segfault.
+	this does not affects 99.99% of the production servers.
+-	fix bug in MHSIM, when there are too many results
 
