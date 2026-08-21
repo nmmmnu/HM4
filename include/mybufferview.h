@@ -13,6 +13,21 @@ namespace MyBuffer{
 		using value_type	= T;
 		using size_type		= std::size_t;
 
+	private:
+		value_type	*data_	= nullptr;
+		size_type	size_	= 0;
+
+	private:
+		template<typename U>
+		constexpr static bool is_byte_v__(){
+			return	std::is_same_v<std::remove_cv_t<U>,          char>	||
+				std::is_same_v<std::remove_cv_t<U>, signed   char>	||
+				std::is_same_v<std::remove_cv_t<U>, unsigned char>	||
+				std::is_same_v<std::remove_cv_t<U>, void>
+			;
+		}
+
+	public:
 		constexpr BufferView()	= default;
 
 		constexpr BufferView(value_type *data, size_type size) :
@@ -25,7 +40,10 @@ namespace MyBuffer{
 					// T is same as U	and
 					// U may not be const
 					std::is_const_v<T> &&
-					std::is_same_v<T, U const>,
+					std::is_same_v<
+						std::remove_cv_t<T>,
+						std::remove_cv_t<U>
+					>,
 				int> = 0
 		>
 		constexpr BufferView(BufferView<U> const &buffer) :
@@ -39,10 +57,7 @@ namespace MyBuffer{
 					// U is char
 					!std::is_const_v<T> &&
 					!std::is_const_v<U> &&
-					(
-					  std::is_same_v<std::remove_cv_t<U>, char> ||
-					  std::is_same_v<std::remove_cv_t<U>, void>
-					),
+					 is_byte_v__<U>(),
 				int> = 0
 		>
 		constexpr BufferView(U *data, size_type size, from_bytes) :
@@ -55,10 +70,7 @@ namespace MyBuffer{
 					// U may be non const	and
 					// U is char
 					std::is_const_v<T> &&
-					(
-					  std::is_same_v<std::remove_cv_t<U>, char> ||
-					  std::is_same_v<std::remove_cv_t<U>, void>
-					),
+					is_byte_v__<U>(),
 				int> = 0
 		>
 		constexpr BufferView(U *data, size_type size, from_bytes) :
@@ -133,10 +145,6 @@ namespace MyBuffer{
 		constexpr size_type size() const noexcept{
 			return size_;
 		}
-
-	private:
-		value_type	*data_	= nullptr;
-		size_type	size_	= 0;
 	};
 
 
@@ -161,7 +169,6 @@ namespace MyBuffer{
 		static_assert( std::is_constructible_v<BufferView<int const>,       BufferView<int  const> >);
 
 		static_assert(!std::is_constructible_v<BufferView<int      >,       BufferView<long const> >);
-
 
 		// from char
 		static_assert( std::is_constructible_v<BufferView<int      >,       char *, std::size_t, from_bytes>);
