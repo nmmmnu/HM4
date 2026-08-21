@@ -341,6 +341,18 @@ inline namespace version_4_00_00{
 		[[nodiscard]]
 		uint32_t getExpiresAt() const noexcept;
 
+		constexpr char getBufferOverflowDetect() const noexcept{
+			return getVal_()[ getValLen_() ];
+		}
+
+		constexpr void setBufferOverflowDetect(char ch) noexcept{
+			getVal_()[ getValLen_() ] = ch;
+		}
+
+		constexpr void setBufferOverflowDetect() noexcept{
+			return setBufferOverflowDetect(0x00);
+		}
+
 	public:
 		[[nodiscard]]
 		int cmp(std::string_view const key) const noexcept{

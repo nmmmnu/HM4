@@ -14,13 +14,13 @@ namespace MyVectors{
 		static_assert(MyVectors::checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
 		float		magnitudeBE;	// 4
-		uint32_t	dimBE;		// 4
+		uint32_t	sizeBE;		// 4
 		T		vdata[1];	// flexible member
 
 		constexpr static const StoredVector *createInRawMemory(void *mem, CFVector const vector){
 			auto *self = static_cast<StoredVector *>(mem);
 
-			self->dimBE = htobe( static_cast<uint32_t>(vector.size()) );
+			self->sizeBE = htobe( static_cast<uint32_t>(vector.size()) );
 
 			auto normF_BE = [self](size_t const index, float const value){
 				self->vdata[index] = htobe(quantizeComponent<T>(value));
@@ -33,12 +33,8 @@ namespace MyVectors{
 			return self;
 		}
 
-		constexpr auto dim() const{
-			return betoh(dimBE);
-		}
-
 		constexpr auto size() const{
-			return dim();
+			return betoh(sizeBE);
 		}
 
 		constexpr auto magnitude() const{
@@ -56,17 +52,17 @@ namespace MyVectors{
 			#pragma GCC diagnostic push
 			#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
 
-			return { vdata, dim() };
+			return { vdata, size() };
 
 			#pragma GCC diagnostic pop
 		}
 
 		constexpr size_t bytes() const{
-			return bytes(dim());
+			return bytes(size());
 		}
 
-		constexpr static size_t bytes(size_t dim){
-			return sizeof(StoredVector<T>) - sizeof(T) + dim * sizeof(T);
+		constexpr static size_t bytes(size_t size){
+			return sizeof(StoredVector<T>) - sizeof(T) + size * sizeof(T);
 		}
 	} __attribute__((__packed__));
 
@@ -150,7 +146,7 @@ namespace MyVectors{
 		if (sv.size() != StoredVector<T>::bytes(dim))
 			return nullptr;
 
-		if (const auto *v = toStoredVector<T>(sv); v->dim() != dim)
+		if (const auto *v = toStoredVector<T>(sv); v->size() != dim)
 			return nullptr;
 		else
 			return v;

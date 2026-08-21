@@ -36,17 +36,17 @@ namespace net::worker::commands::MH{
 			};
 		}
 
-		template<class List>
-		auto store(List &list, std::string_view key, const MHT *mh){
-			return hm4::insert( list,
-				key,
-				MHT2sv(mh)
-			);
-		}
+	//	template<class DBAdapter>
+	//	auto store(DBAdapter &db, std::string_view key, const MHT *mh){
+	//		return hm4::insert(*db,
+	//			key,
+	//			MHT2sv(mh)
+	//		);
+	//	}
 
-		template<class List>
-		const MHT *load_ptr(List &list, std::string_view key){
-			if (const auto *pair = hm4::getPairPtrWithSize(list, key, MH::bytes()); pair)
+		template<class DBAdapter>
+		const MHT *load_ptr(DBAdapter &db, std::string_view key){
+			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, MH::bytes()); pair)
 				return hm4::getValAs<MHT>(pair);
 
 			return nullptr;
@@ -57,7 +57,7 @@ namespace net::worker::commands::MH{
 			hm4::PairBufferKey bufferKeyCtrl;
 			auto const keyCtrl = shared::rsetmulti::makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
 
-			return load_ptr(*db, keyCtrl);
+			return load_ptr(db, keyCtrl);
 		}
 
 		template<size_t N>
@@ -114,11 +114,11 @@ namespace net::worker::commands::MH{
 			bool operator()(std::string_view data,
 						OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) const{
 
-				if (data.size() != bytes())
-					return false;
-
 				icontainer.clear();
 				bcontainer.clear();
+
+				if (data.size() != bytes())
+					return false;
 
 				const MHT *mh_data = reinterpret_cast<const MHT *>(data.data());
 
@@ -541,14 +541,14 @@ namespace net::worker::commands::MH{
 
 			auto &data = heap.sort();
 
-			for(auto &[jaccard, text] : data){
+			for(auto &[score, text] : data){
 				container.push_back(text);
 
 				bcontainer.push_back();
 
 				container.push_back(
 					formatDouble(
-						jaccard,
+						score,
 						bcontainer.back()
 					)
 				);

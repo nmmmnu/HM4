@@ -12,13 +12,18 @@ namespace net::worker::shared::rsetmulti{
 	using ParamContainer = commands::ParamContainer;
 
 	constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-		// keyN~word~keySub, 2 * ~
-		return hm4::Pair::isCompositeKeyValid(2 + more, keyN, keySub);
+		// keyN~word~keySort~keySub, 3 * ~
+		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub);
 	}
 
-	constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::string_view text, size_t more = 0){
-		// keyN~word~keySub, 2 * ~
-		return hm4::Pair::isCompositeKeyValid(2 + more, keyN, keySub, text);
+	constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::string_view keySort, size_t more = 0){
+		// keyN~word~keySort~keySub, 3 * ~
+		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub, keySort);
+	}
+
+	constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::string_view keySort, std::string_view text, size_t more = 0){
+		// keyN~word~keySort~keySub, 3 * ~
+		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub, keySort, text);
 	}
 
 	inline std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
@@ -107,13 +112,18 @@ namespace net::worker::shared::rsetmulti{
 								text
 				);
 
-				logger<Logger::DEBUG>() << msg << keyData;
+if (keyData == "gi150~013E.01~7F070016959AB1B5~,"){
+	logger<Logger::DEBUG>() << "OK...";
+}
 
+				logger<Logger::DEBUG>() << msg << keyData;
+db->mutable_list().testIntegrity(std::true_type{});
 				if constexpr(Insert){
 					insert(*db, keyData, value);
 				}else{
 					erase(*db, keyData);
 				}
+db->mutable_list().testIntegrity(std::true_type{});
 			}
 
 			template<typename DBAdapter>
@@ -135,21 +145,22 @@ namespace net::worker::shared::rsetmulti{
 		} // namespace mut
 
 		template<typename DBAdapter, typename Container>
-		void removeKeys(DBAdapter &db, Container &icontainer,
+		void removeKeys(DBAdapter &db, Container const &icontainer,
 					std::string_view keyN, std::string_view keySub, std::string_view keySort){
 
 			using namespace mut;
 
 			for(auto const &txt : icontainer){
-				if (valid(keyN, keySub, keySort)) // check consistency
+				if (valid(keyN, keySub, keySort, txt)){ // check consistency
 					mutate(db, keyN, keySub, keySort, txt, "MSetMulti::ADD/REM: del index key");
-				else
+				}else{
 					logger<Logger::DEBUG>() << "MSetMulti::ADD/REM: invalid index key";
+				}
 			}
 		}
 
 		template<typename DBAdapter, typename Container>
-		void insertKeys(DBAdapter &db, Container &icontainer,
+		void insertKeys(DBAdapter &db, Container const &icontainer,
 					std::string_view keyN, std::string_view keySub, std::string_view keySort){
 
 			using namespace mut;
@@ -157,18 +168,25 @@ namespace net::worker::shared::rsetmulti{
 			auto const value = keySub;
 
 			for(auto const &txt : icontainer){
-				if (valid(keyN, keySub)) // check consistency
+				if (valid(keyN, keySub, keySort, txt)) // check consistency
 					mutate(db, keyN, keySub, keySort, txt, value, "MSetMulti::ADD: set index key");
 				else
 					logger<Logger::DEBUG>() << "MSetMulti::ADD: invalid set index key";
 			}
 		}
 
+		template<typename Decoder, typename Container, typename BContainer>
+		bool getIndexes(Decoder decoder,
+					std::string_view data,
+						Container &icontainer, BContainer &bcontainer){
 
+			return decoder(data, icontainer, bcontainer);
+		}
 
 		template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(DBAdapter &db, Decoder decoder,
-					std::string_view keyCtrl, Container &icontainer, BContainer &bcontainer){
+					std::string_view keyCtrl,
+						Container &icontainer, BContainer &bcontainer){
 
 			auto const pair = [&](){
 				if (auto const bytes = decoder.bytes(); bytes){
@@ -182,12 +200,13 @@ namespace net::worker::shared::rsetmulti{
 			if (!pair)
 				return false;
 
-			return decoder(pair->getVal(), icontainer, bcontainer);
+			return getIndexes(decoder, pair->getVal(), icontainer, bcontainer);
 		}
 
 		template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(DBAdapter &db, Decoder decoder,
-					std::string_view keyN, std::string_view keySub, Container &icontainer, BContainer &bcontainer){
+					std::string_view keyN, std::string_view keySub,
+						Container &icontainer, BContainer &bcontainer){
 
 			hm4::PairBufferKey bufferKeyCtrl;
 			auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
@@ -207,6 +226,8 @@ namespace net::worker::shared::rsetmulti{
 						Container &icontainer, BContainer &bcontainer,
 							Factory &factory){
 
+db->mutable_list().testIntegrity(std::true_type{});
+
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
 
@@ -223,11 +244,13 @@ namespace net::worker::shared::rsetmulti{
 		// because we do not know the new keys yet, we have to delete all
 		if (old)
 			impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
+db->mutable_list().testIntegrity(std::true_type{});
 
 		// icontainer, bcontainer no longer used.
 
 		factory.setKey(keyCtrl);
 		hm4::insertVF(*db, factory);
+db->mutable_list().testIntegrity(std::true_type{});
 
 		if constexpr(0){
 			// get indexes again.
@@ -241,6 +264,7 @@ namespace net::worker::shared::rsetmulti{
 
 		// insert all keys
 		impl_::insertKeys(db, factory.getIndexes(), keyN, keySub, keySort);
+db->mutable_list().testIntegrity(std::true_type{});
 
 		return true;
 	}
@@ -303,9 +327,6 @@ namespace net::worker::shared::rsetmulti{
 				std::string_view keyN, std::string_view keySub, std::string_view keySort,
 					Container &icontainer, BContainer &bcontainer){
 
-		icontainer.clear();
-		bcontainer.clear();
-
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
 
@@ -324,6 +345,14 @@ namespace net::worker::shared::rsetmulti{
 		return true;
 	}
 
+	template<typename Decoder, typename Container, typename BContainer>
+	bool getIndexes(Decoder decoder,
+				std::string_view data,
+					Container &icontainer, BContainer &bcontainer){
+
+		return impl_::getIndexes(decoder, data, icontainer, bcontainer);
+	}
+
 	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 	bool getIndexes(DBAdapter &db, Decoder decoder,
 				std::string_view keyN, std::string_view keySub,
@@ -333,30 +362,6 @@ namespace net::worker::shared::rsetmulti{
 
 		return impl_::getIndexes(db, decoder, keyN, keySub, icontainer, bcontainer);
 	}
-
-#if 0
-	template<typename DBAdapter, typename Decoder>
-	std::string_view getData_DECODER(DBAdapter &db, Decoder decoder,
-				std::string_view keyN, std::string_view keySub){
-
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
-
-		auto const pair = [&](){
-			if (auto const bytes = decoder.bytes(); bytes){
-		//	if constexpr(auto const bytes = Decoder::bytes(); bytes){
-				return hm4::getPairPtrWithSize(*db, keyCtrl, bytes);
-			}else{
-				return hm4::getPairPtr(*db, keyCtrl);
-			}
-		}();
-
-		if (pair)
-			return pair->getVal();
-		else
-			return "";
-	}
-#endif
 
 	template<typename DBAdapter>
 	std::string_view getData(DBAdapter &db,

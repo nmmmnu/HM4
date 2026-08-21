@@ -14,22 +14,11 @@
 
 #include "shared_rset_multi.h"
 
-// #include "shared_zset_multi.h"
-// #include "shared_iterations.h"
 #include "shared_stoppredicate.h"
-//
-//
-//
-// #include "stringtokenizer.h"
-//
-// #include "myhamming.h"
-//
 
 #include "logger.h"
 
 #include "pair_vfactory.h"
-
-
 
 namespace net::worker::commands::Vectors2{
 
@@ -212,17 +201,15 @@ namespace net::worker::commands::Vectors2{
 			}
 		}
 
-		template<typename T, class DBAdapter>
-		auto prepareFVector(DBAdapter &db, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t const dim_ix, DType dtype){
+		template<typename T>
+		auto prepareFVector(OutputBlob &blob, std::string_view data, uint32_t const dim_ix, DType dtype){
 			struct Result{
 				bool			ok		= false;
 				MyVectors::FVector	vector		= {};
 				float			magnitude	= {};
 			};
 
-			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
-
-			const auto *storedVector = MyVectors::toStoredVector<T>(sv, dim_ix);
+			const auto *storedVector = MyVectors::toStoredVector<T>(data, dim_ix);
 
 			if (!storedVector)
 				return Result{};
@@ -275,6 +262,16 @@ namespace net::worker::commands::Vectors2{
 				vector		,
 				magnitude
 			};
+		}
+
+		template<typename T, class DBAdapter>
+		auto prepareFVector(DBAdapter &db, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t const dim_ix, DType dtype){
+			return prepareFVector<T>(
+					blob,
+					shared::rsetmulti::getData(db, keyN, keySub),
+					dim_ix,
+					dtype
+			);
 		}
 
 
@@ -391,9 +388,12 @@ namespace net::worker::commands::Vectors2{
 			bool operator()(std::string_view data,
 						OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) const{
 
-				if (data.size() != bytes())
-					return false;
+				icontainer.clear();
+				bcontainer.clear();
 
+				// size will be checked in a moment
+			//	if (data.size() != bytes())
+			//		return false;
 
 				const auto *storedVector = MyVectors::toStoredVector<T>(data, dim_ix);
 
@@ -412,7 +412,7 @@ namespace net::worker::commands::Vectors2{
 					vectorI8[i] = MyVectors::quantizeComponentToI8(vectorT[i]);
 
 
-				auto f = [&icontainer, &bcontainer](uint8_t id, BandType hash){
+				auto f = [&icontainer, &bcontainer](uint8_t id, band_type hash){
 					bcontainer.push_back();
 
 					char *buffer = bcontainer.back().data();
@@ -421,22 +421,22 @@ namespace net::worker::commands::Vectors2{
 
 					// 1A42.05
 
-					hex_convert::toHex(hash, buffer + p);	p += sizeof(BandType	) * 2;
+					hex_convert::toHex(hash, buffer + p);	p += sizeof(band_type	) * 2;
 					buffer[p] = '.';			p += 1;
 					hex_convert::toHex(id,   buffer + p);	p += sizeof(uint8_t	) * 2;
 
 					icontainer.emplace_back(buffer, p);
 				};
 
-				MyVectors::simhashBands<MaxDimensions, BandType>(vectorI8, 12, BANDS, f);
+				MyVectors::simhashBands<MaxDimensions, band_type>(vectorI8, 12, band_count, f);
 
 				return true;
 			}
 
-		private:
-			using BandType = uint16_t;
+		public:
+			using band_type = uint16_t;
 
-			constexpr static uint8_t BANDS = 128;
+			constexpr static uint8_t band_count = 4;
 
 		private:
 			uint32_t dim_ix;
@@ -445,7 +445,7 @@ namespace net::worker::commands::Vectors2{
 
 
 		template<size_t N>
-		std::string_view formatV(float d, std::array<char, N> &buffer){
+		std::string_view formatDouble(float d, std::array<char, N> &buffer){
 			constexpr static std::string_view fmt_mask = "{:+015.15f}";
 
 			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
@@ -483,7 +483,7 @@ namespace net::worker::commands::Vectors2{
 			if constexpr(Norm){
 				bcontainer.push_back();
 
-				auto const s = formatV(magnitude, bcontainer.back());
+				auto const s = formatDouble(magnitude, bcontainer.back());
 
 				container.push_back(s);
 			}
@@ -492,14 +492,14 @@ namespace net::worker::commands::Vectors2{
 				bcontainer.push_back();
 
 				if constexpr(Norm){
-					auto const s = formatV(value,             bcontainer.back());
+					auto const s = formatDouble(value,             bcontainer.back());
 
 					container.push_back(s);
 
 					// clang
 					(void) magnitude;
 				}else{
-					auto const s = formatV(value * magnitude, bcontainer.back());
+					auto const s = formatDouble(value * magnitude, bcontainer.back());
 
 					container.push_back(s);
 				}
@@ -737,11 +737,15 @@ namespace net::worker::commands::Vectors2{
 
 		private:
 			void action_(Pair *pair) const{
-			//	using namespace impl_;
-
 				auto *mem = hm4::getValAs<MyVectors::StoredVector<T> >(pair);
 
+				// char const cd = 0xFF;
+				// pair->setBufferOverflowDetect(cd);
+
 				MyVectors::StoredVector<T>::createInRawMemory(mem, cfvector);
+
+				// assert(pair->getBufferOverflowDetect() == cd);
+				// pair->setBufferOverflowDetect();
 
 				decoder(pair->getVal(), icontainer, bcontainer);
 			}
@@ -1314,7 +1318,7 @@ namespace net::worker::commands::Vectors2{
 
 			to_string_buffer_t buffer;
 
-			return result.set(formatV(dist, buffer));
+			return result.set(formatDouble(dist, buffer));
 		}
 
 	private:
@@ -1474,7 +1478,7 @@ namespace net::worker::commands::Vectors2{
 
 				bcontainer.push_back();
 
-				container.push_back(formatV(dist, bcontainer.back()));
+				container.push_back(formatDouble(dist, bcontainer.back()));
 			}
 
 
@@ -1527,7 +1531,7 @@ namespace net::worker::commands::Vectors2{
 
 				bcontainer.push_back();
 
-				container.push_back(formatV(dist, bcontainer.back()));
+				container.push_back(formatDouble(dist, bcontainer.back()));
 			}
 
 			return result.set_container(container);
@@ -1758,7 +1762,7 @@ namespace net::worker::commands::Vectors2{
 
 				auto const dist = distanceFix(dtype, distPop);
 
-				auto const val  = formatV(dist, bcontainer.back());
+				auto const val  = formatDouble(dist, bcontainer.back());
 
 				container.push_back(val);
 			}
@@ -1771,6 +1775,225 @@ namespace net::worker::commands::Vectors2{
 	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"vsimflat",	"VSIMFLAT"
+		};
+
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct VSIM : BaseCommandRO<Protocol,DBAdapter>{
+
+		VSIM() : BaseCommandRO<Protocol,DBAdapter>("VSIM", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		// VSIM key   DIM_IX QUANTIZE_TYPE DISTANCE_TYPE name START
+		// VSIM words 300    F             C             frog ''
+		// VSIM words 300    I             C             frog dfssdhg
+
+		/*
+		QUANTIZE_TYPE:
+		F = float	e.g. do not quantize
+		S = int16
+		I = int8
+		B = bit
+
+		VEC_TYPE:
+		B = binary BE
+		b = binary LE
+		H = hex BE
+		h = hex LE
+
+		DISTANCE_TYPE:
+		E = Euclidean L2
+		M = Manhattan L1
+		C = Cosine
+		K = Canberra
+		*/
+
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			using namespace impl_;
+
+			if (p.size() != 6)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+
+			auto const keyN = p[1];
+
+			if (keyN.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const dim_ix = from_string<uint32_t>(p[2]);
+
+			if (dim_ix <= 1 || dim_ix > MaxDimensions)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto const qtype = translateQType(p[3]);
+
+			if (qtype == QType::UNKNOWN)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto const dtype = translateDType(p[4]);
+
+			if (!checkDType(dtype, qtype))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto const keySub = p[5];
+
+			if (keySub.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+			switch(qtype){
+			case QType::F32	: return process__<float	>(db, result, blob, keyN, keySub, dim_ix, dtype);
+			case QType::I16	: return process__<int16_t	>(db, result, blob, keyN, keySub, dim_ix, dtype);
+			case QType::I8	: return process__<int8_t	>(db, result, blob, keyN, keySub, dim_ix, dtype);
+		//	case QType::BIT	: return process__bit_		 (db, result, blob, keyN, keySub, dim_ix, dtype);
+
+			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+		}
+
+		template<typename T>
+		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+						std::string_view keyN, std::string_view keySub,
+							uint32_t const dim_ix, impl_::DType dtype){
+
+			using namespace impl_;
+
+			std::string_view vectorSV = shared::rsetmulti::getData(db, keyN, keySub);
+
+			auto const pp = prepareFVector<T>(blob, vectorSV, dim_ix, dtype);
+
+			if (!pp.ok)
+				return result.set_container0();
+
+			auto const vectorPrepared	= pp.vector;
+			auto const magnitudePrepared	= pp.magnitude;
+
+
+
+			auto &icontainer = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			Decoder<T> decoder{ dim_ix };
+
+			bool const b = shared::rsetmulti::getIndexes(decoder, vectorSV,
+								icontainer, bcontainer);
+
+			if (!b)
+				return result.set_container0();
+
+
+
+			auto &keySub_container  = blob.construct<OutputBlob::Container>();
+
+			for(auto const &index : icontainer){
+				hm4::PairBufferKey bufferKey;
+				auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+
+				scanIndex__(db, prefix, count__, keySub_container);
+			}
+
+			// icontainer and bcontainer no longer need.
+
+			std::sort(std::begin(keySub_container), std::end(keySub_container));
+			auto uniq_end = std::unique(std::begin(keySub_container), std::end(keySub_container));
+
+			using HeapNode = std::pair<float, std::string_view>;
+			auto &heap = blob.construct<top_heap::TopKSmallest<HeapNode, results__> >();
+
+			logger<Logger::DEBUG>() << "VSIM" << "total candidates" << std::distance(std::begin(keySub_container), uniq_end);
+
+			for(auto it = std::begin(keySub_container); it != uniq_end; ++it){
+				auto const &text = *it;
+
+				if (text == keySub)
+					continue;
+
+				std::string_view sv = shared::rsetmulti::getData(db, keyN, text);
+
+				const auto *storedVectorB = MyVectors::toStoredVector<T>(sv, dim_ix);
+
+				if (!storedVectorB)
+					continue;
+
+				float const dist = distancePrepared(dtype,
+							vectorPrepared,		storedVectorB->toVector(),
+							magnitudePrepared,	storedVectorB->magnitude()
+				);
+
+				heap.push(HeapNode{ dist, text });
+			}
+
+			// keySub_container, icontainer and bcontainer no longer need.
+
+			auto &container  = icontainer;
+
+			container.clear();
+			bcontainer.clear();
+
+			auto &data = heap.sort();
+
+			for(auto &[score, text] : data){
+				container.push_back(text);
+
+				bcontainer.push_back();
+
+				container.push_back(
+					formatDouble(
+						score,
+						bcontainer.back()
+					)
+				);
+			}
+
+			return result.set_container(container);
+		}
+
+		static void scanIndex__(DBAdapter &db, std::string_view prefix, uint32_t count, OutputBlob::Container &container){
+			using namespace shared::accumulate_results;
+
+			auto const &key = prefix;
+
+			logger<Logger::DEBUG>() << "VSIM" << "prefix" << prefix << "key" << key;
+
+			StopPrefixPredicate stop{ prefix };
+
+			auto proj = [](std::string_view x){
+				[[maybe_unused]]
+				auto const separator = DBAdapter::SEPARATOR[0];
+
+				// keyN~word~keySort~keySub
+				return impl_::extractNth_(3, separator, x);
+			};
+
+			auto const Out = AccumulateOutput::KEYS;
+
+			sharedAccumulateResults<Out>(
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
+				container	,
+				proj
+			);
+
+			logger<Logger::DEBUG>() << "VSIM" << "prefix" << container.size() << "candidates";
+		}
+
+	private:
+		constexpr static size_t results__	= 32;
+		constexpr static size_t count__		= OutputBlob::ContainerSize / impl_::Decoder<float>::band_count;
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"vsim",		"VSIM"
 		};
 
 	};
@@ -1791,8 +2014,8 @@ namespace net::worker::commands::Vectors2{
 				VGETRAW		,
 				VDISTANCE	,
 				VMDISTANCE	,
-				VSIMFLAT
-			//	VSIM
+				VSIMFLAT	,
+				VSIM
 			>(pack);
 		}
 	};

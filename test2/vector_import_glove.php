@@ -1,7 +1,7 @@
 <?php
 
 $redis = new Redis();
-$redis->connect("127.0.0.1");
+$redis->connect("127.0.0.1", 6379);
 
 
 
@@ -25,16 +25,17 @@ while (($line = fgets($F)) !== false){
 
 	$vector = array_map("floatval", $parts);
 
-	// for($i = 0; $i < count($vector); ++$i)
-	//	printf("%4d %.8f\n", $i, $vector[$i]);
-
 	// if (strlen($word) < 3)
 	// 	continue;
 
 	process_vector($word, $vector);
 
 	if ($i == 0){
-		exit;
+	//	exit;
+	}
+
+	if ($i == 1000){
+	//	exit;
 	}
 
 	if (++$i % 25000 == 0)
@@ -67,7 +68,15 @@ function process_vector($key, & $vector){
 		$x = $redis->rawCommand(
 			"VADD",
 			"gi150",
-			300, 100, "i",
+			300, 150, "i",
+			"b", vbin($vector),
+			$key
+		);
+
+		$x = $redis->rawCommand(
+			"VADD",
+			"gi150",
+			300, 150, "i",
 			"b", vbin($vector),
 			$key
 		);
