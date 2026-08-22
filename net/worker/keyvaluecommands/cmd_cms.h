@@ -507,12 +507,12 @@ namespace net::worker::commands::CMS{
 
 		CMSMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -536,7 +536,7 @@ namespace net::worker::commands::CMS{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return processT__(key, p, CMS<T>{ w, d }, *db, result);
+					return processT__(key, p, CMS<T>{ w, d }, *db, result, blob);
 				}
 			};
 
@@ -544,7 +544,7 @@ namespace net::worker::commands::CMS{
 		}
 
 		template<typename T>
-		static void processT__(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg = 5;
@@ -554,14 +554,16 @@ namespace net::worker::commands::CMS{
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
 
-			Container container;
-
 			if (! pair){
-				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto &container  = blob.construct<Container>();
+
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 					container.push_back("0");
-				}
+
+				return result.set_container(container);
 			}else{
-				BContainer bcontainer;
+				auto &container  = blob.construct<Container>();
+				auto &bcontainer = blob.construct<BContainer>();
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const &item = *itk;
@@ -572,9 +574,9 @@ namespace net::worker::commands::CMS{
 
 					container.push_back( to_string(n, bcontainer.back()) );
 				}
-			}
 
-			return result.set_container(container);
+				return result.set_container(container);
+			}
 		}
 
 	private:

@@ -19,7 +19,8 @@ namespace net::worker::commands::TDigest{
 
 
 
-		std::string_view formatLine(double d, to_string_buffer_t &buffer){
+		template<size_t N>
+		std::string_view formatLine(double d, std::array<char, N> &buffer){
 			constexpr static std::string_view fmt_mask = "{:+015.15f}";
 
 			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
@@ -176,12 +177,12 @@ namespace net::worker::commands::TDigest{
 
 
 		// TDADD key capacity delta value [value]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -201,7 +202,7 @@ namespace net::worker::commands::TDigest{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			TDItemVector container;
+			auto &container = blob.construct<TDItemVector>();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const value  = to_double_def(*itk);
@@ -236,12 +237,12 @@ namespace net::worker::commands::TDigest{
 		TDADDWEIGHT() : BaseCommandRW<Protocol,DBAdapter>("TDADDWEIGHT", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDADDWEIGHT key capacity delta value weight [value weight]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg = 4;
@@ -261,7 +262,7 @@ namespace net::worker::commands::TDigest{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			TDItemVector container;
+			auto &container = blob.construct<TDItemVector>();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += 2){
 				auto const value  = to_double_def(*itk);
@@ -493,10 +494,6 @@ namespace net::worker::commands::TDigest{
 		}
 
 	private:
-		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
-		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
-
-	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"tdpercentile",	"TDPERCENTILE",
 			"thquantile",	"TDQUANTILE"
@@ -512,12 +509,12 @@ namespace net::worker::commands::TDigest{
 		TDMPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDMPERCENTILE key capacity percentile [percentile]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 4)
@@ -538,17 +535,18 @@ namespace net::worker::commands::TDigest{
 				if (const auto &val = *itk; val.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 
-			Container container;
-
 			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
+				auto &container  = blob.construct<Container>();
+
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 					container.push_back("0.0");
 
 				return result.set_container(container);
 			}else{
-				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
+				auto &container  = blob.construct<Container>();
+				auto &bcontainer = blob.construct<BContainer>();
 
-				BContainer bcontainer;
+				const auto *data = hm4::getValAs<RawTDigest::TDigest>(pair);
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const p = std::clamp<double>(to_double_def(*itk), 0.0, 1.0);
@@ -622,10 +620,6 @@ namespace net::worker::commands::TDigest{
 		}
 
 	private:
-		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
-		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
-
-	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"tdmedian",	"TDMEDIAN"
 		};
@@ -679,10 +673,6 @@ namespace net::worker::commands::TDigest{
 		}
 
 	private:
-		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
-		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
-
-	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"tdtrimmedmean",	"TDTRIMMEDMEAN"
 		};
@@ -731,10 +721,6 @@ namespace net::worker::commands::TDigest{
 				return result.set(line);
 			}
 		}
-
-	private:
-		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
-		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {

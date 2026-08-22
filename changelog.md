@@ -435,4 +435,4 @@ Changelog
 -	new module vectors2
 -	optimization - skip zeroing buffers when not need
 -	refactor buffers to be difficult to use wrong size
-
+-	fix bug and refactor CBFMCOUNT, CMSMCOUNT, TDMPERCENTILE

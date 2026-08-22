@@ -518,12 +518,12 @@ namespace net::worker::commands::CBF{
 
 		CBFMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -547,7 +547,7 @@ namespace net::worker::commands::CBF{
 				if constexpr(std::is_same_v<T, std::nullptr_t>){
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS); // emit an error
 				}else{
-					return processT__<T>(key, p, CBF<T>{ w, d }, *db, result);
+					return processT__<T>(key, p, CBF<T>{ w, d }, *db, result, blob);
 				}
 			};
 
@@ -555,7 +555,7 @@ namespace net::worker::commands::CBF{
 		}
 
 		template<typename T>
-		static void processT__(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg = 5;
@@ -565,14 +565,17 @@ namespace net::worker::commands::CBF{
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
-			Container container;
-
 			if (! pair){
-				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				auto &container  = blob.construct<Container>();
+
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 					container.push_back("0");
-				}
+
+				return result.set_container(container);
+
 			}else{
-				BContainer bcontainer;
+				auto &container  = blob.construct<Container>();
+				auto &bcontainer = blob.construct<BContainer>();
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const &item = *itk;
@@ -583,11 +586,12 @@ namespace net::worker::commands::CBF{
 
 					container.push_back( to_string(n, bcontainer.back()) );
 				}
-			}
 
-			return result.set_container(container);
+				return result.set_container(container);
+			}
 		}
 
+	private:
 		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
 		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
