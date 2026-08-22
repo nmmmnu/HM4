@@ -104,4 +104,6 @@ Changelog
 	this does not affects 99.99% of the production servers.
 -	fix bug in MHSIM, when there are too many results
 -	fix bug in CBFMCOUNT, CMSMCOUNT, TDMPERCENTILE
+-	fix bug in zsetmulti::add, when there is no NRVO.
+	this does not affects production servers.
 

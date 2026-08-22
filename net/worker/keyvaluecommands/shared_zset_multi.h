@@ -23,21 +23,6 @@ namespace net::worker::shared::zsetmulti{
 			return true;
 		}
 
-		template<size_t N>
-		auto makeACopy(std::array<std::string_view, N> const &src){
-			struct Storage{
-				std::array<std::string_view,   N> copy;
-				std::array<hm4::PairBufferKey, N> buffer;
-			};
-
-			Storage x;
-
-			for(size_t i = 0; i < N; ++i)
-				x.copy[i] = concatenateBuffer(x.buffer[i], src[i]);
-
-			return x;
-		}
-
 		template<typename Permutation, typename IndexController>
 		std::string_view encodeIndex(hm4::PairBufferKey &bufferVal, std::string_view separator, std::array<std::string_view, Permutation::N> const &indexes,
 							std::string_view value){
@@ -1416,8 +1401,31 @@ namespace net::worker::shared::zsetmulti{
 
 	namespace impl_{
 
+		template<typename Permutation, typename DBAdapter>
+		void removePreviousIndexes(DBAdapter &db,
+				std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes){
+
+			// make a copy, because values may be invalidated.
+
+			std::array<std::string_view,   Permutation::N> indexesOldSave;
+			std::array<hm4::PairBufferKey, Permutation::N> indexesOldBuffer;
+
+			for(size_t i = 0; i < Permutation::N; ++i)
+				indexesOldSave[i] = concatenateBuffer(indexesOldBuffer[i], indexes[i]);
+
+			// delete indexes
+
+			auto deleteOldKeys = [&](std::string_view key){
+				logger<Logger::DEBUG>() << "ZSetMulti::ADD/REM: DEL old index key" << key;
+
+				erase(*db, key);
+			};
+
+			Permutation::for_each(DBAdapter::SEPARATOR, keyN, keySub, indexesOldSave, deleteOldKeys);
+		}
+
 		template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
-		void add_removePreviousKeys(DBAdapter &db,
+		void removePreviousIndexes(DBAdapter &db,
 				std::string_view keyCtrl,
 				std::string_view keyN, std::string_view keySub, std::array<std::string_view, Permutation::N> const &indexes){
 
@@ -1443,15 +1451,7 @@ namespace net::worker::shared::zsetmulti{
 				}else{
 					// Case 1.2: old ctrl key has to be updated
 
-					auto const save = makeACopy(indexesOld);
-
-					auto deleteOldKeys = [&](std::string_view key){
-						logger<Logger::DEBUG>() << "ZSetMulti::ADD: DEL old index key" << key;
-
-						erase(*db, key);
-					};
-
-					Permutation::for_each(DBAdapter::SEPARATOR, keyN, keySub, save.copy, deleteOldKeys);
+					removePreviousIndexes<Permutation>(db, keyN, keySub, indexesOld);
 				}
 			}else{
 				// Case 2: no ctrl key
@@ -1476,7 +1476,7 @@ namespace net::worker::shared::zsetmulti{
 		logger<Logger::DEBUG>() << "ZSetMulti::ADD: ctrl key" << keyCtrl;
 
 		// Update control key and delete hash key if any
-		add_removePreviousKeys<Permutation, IndexController>(db, keyCtrl, keyN, keySub, indexes);
+		removePreviousIndexes<Permutation, IndexController>(db, keyCtrl, keyN, keySub, indexes);
 
 		auto insertNewKeys = [&](std::string_view key){
 			logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET index key" << key;
@@ -1519,7 +1519,7 @@ namespace net::worker::shared::zsetmulti{
 		auto const index = factory.getIndex();
 		std::array<std::string_view, 1> const indexes{ index };
 
-		add_removePreviousKeys<P1>(db, keyCtrl, keyN, keySub, indexes );
+		removePreviousIndexes<P1>(db, keyCtrl, keyN, keySub, indexes );
 
 		auto insertNewKeys = [&](std::string_view key){
 			logger<Logger::DEBUG>() << "ZSetMulti::ADD: SET index key" << key;
@@ -1573,23 +1573,7 @@ namespace net::worker::shared::zsetmulti{
 			}else{
 				// Case 1.1: old ctrl key has to be removed
 
-				hm4::PairBufferKey bufferKeySave[Permutation::N];
-
-				// make a copy, because values may be invalidated.
-				using ArrayN = std::array<std::string_view, Permutation::N>;
-
-				ArrayN indexesOldSave;
-
-				for(size_t i = 0; i < Permutation::N; ++i)
-					indexesOldSave[i] = concatenateBuffer(bufferKeySave[i], indexesOld[i]);
-
-				auto deleteOldKeys = [&](std::string_view key){
-					logger<Logger::DEBUG>() << "ZSetMulti::REM: DEL old index key" << key;
-
-					erase(*db, key);
-				};
-
-				Permutation::for_each(DBAdapter::SEPARATOR, keyN, keySub, indexesOldSave, deleteOldKeys);
+				removePreviousIndexes<Permutation>(db, keyN, keySub, indexesOld);
 
 				logger<Logger::DEBUG>() << "ZSetMulti::REM: DEL ctrl key" << keyCtrl;
 
