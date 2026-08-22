@@ -1,6 +1,6 @@
 - id:          MHADD
   name:        MHADD
-  usage:       MHADD key bands keySub delimiter tokens [keySub2 delimiter tokens2 ...]
+  usage:       MHADD key bands keySub0 delimiter0 tokens0 [keySub1 delimiter1 tokens1]...
   params:
     items:
     - k: key

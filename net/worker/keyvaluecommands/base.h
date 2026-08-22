@@ -40,19 +40,34 @@ namespace net::worker::commands{
 	constexpr size_t MaxCommandsAliases	= 1024 + 256;
 
 	struct OutputBlob{
-		constexpr static size_t ContainerSize			= 0xFFFF;
-		constexpr static size_t ParamContainerSize		= 0xFF;
-		constexpr static size_t ParamContainerSizeHTSize	= 1024;
 
-		static_assert(ContainerSize > ParamContainerSize);
+		constexpr static size_t SmallContainerSize		= 0xFF;
+		constexpr static size_t ContainerSize			= 0xFFFF;
+		constexpr static size_t LargeContainerSize		= 0xFFFFF;
+
+		constexpr static size_t ParamContainerSize		= SmallContainerSize;
+
+		constexpr static size_t ParamContainerSizeHTSize	= 1024; // used in Small List
+
+		static_assert(ParamContainerSize == SmallContainerSize	);
+		static_assert(SmallContainerSize <  ContainerSize	);
+		static_assert(ContainerSize      <= LargeContainerSize	);
 
 		// KeyValue worker checks the size against Protocol::MAX_PARAMS
 
 		using buffer_t = std::array<char, 128>;
 
-		using Container		= StaticVector<std::string_view		, ContainerSize>;	//  1   MB, if string_view is 16 bytes
-		using BufferContainer	= StaticVector<buffer_t			, ContainerSize>;	//  8   MB
-		using PairContainer	= StaticVector<const hm4::Pair *	, ContainerSize>;	//  0.5 MB
+		using Container			= StaticVector<std::string_view		, ContainerSize>;	//  1   MB, if string_view is 16 bytes
+		using BufferContainer		= StaticVector<buffer_t			, ContainerSize>;	//  8   MB
+		using PairContainer		= StaticVector<const hm4::Pair *	, ContainerSize>;	//  0.5 MB
+
+		using SmallContainer		= StaticVector<std::string_view		, SmallContainerSize>;
+		using SmallBufferContainer	= StaticVector<buffer_t			, SmallContainerSize>;
+		using SmallPairContainer	= StaticVector<const hm4::Pair *	, SmallContainerSize>;
+
+		using LargeContainer		= StaticVector<std::string_view		, LargeContainerSize>;
+		using LargeBufferContainer	= StaticVector<buffer_t			, LargeContainerSize>;
+		using LargePairContainer	= StaticVector<const hm4::Pair *	, LargeContainerSize>;
 
 		using BufferKContainer	= StaticVector	<hm4::PairBufferKey	, ContainerSize>;	// ~64  MB
 

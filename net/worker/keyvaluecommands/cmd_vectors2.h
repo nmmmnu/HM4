@@ -20,6 +20,8 @@
 
 #include "pair_vfactory.h"
 
+#include <algorithm>	// clamp
+
 namespace net::worker::commands::Vectors2{
 
 	namespace impl_{
@@ -377,7 +379,7 @@ namespace net::worker::commands::Vectors2{
 
 
 
-		template<typename T>
+		template<typename T, uint8_t BandCount = 0xFF>
 		struct Decoder{
 			Decoder(uint32_t dim_ix) : dim_ix(dim_ix){}
 
@@ -385,15 +387,15 @@ namespace net::worker::commands::Vectors2{
 				return MyVectors::StoredVector<T>::bytes(dim_ix);
 			}
 
+			template<typename IContainer, typename BContainer>
 			bool operator()(std::string_view data,
-						OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) const{
+						IContainer &icontainer, BContainer &bcontainer,
+							size_t maxIndexes = 0) const{
 
 				icontainer.clear();
 				bcontainer.clear();
 
 				// size will be checked in a moment
-			//	if (data.size() != bytes())
-			//		return false;
 
 				const auto *storedVector = MyVectors::toStoredVector<T>(data, dim_ix);
 
@@ -428,15 +430,24 @@ namespace net::worker::commands::Vectors2{
 					icontainer.emplace_back(buffer, p);
 				};
 
-				MyVectors::simhashBands<MaxDimensions, band_type>(vectorI8, 12, band_count, f);
+				auto const bands = maxIndexes == 0 ?
+								getBandCount() :
+								static_cast<uint8_t>(std::clamp<size_t>(maxIndexes, 1u, getBandCount()) )
+				;
+
+				MyVectors::simhashBands<MaxDimensions, band_type>(vectorI8, band_bits, bands, f);
 
 				return true;
+			}
+
+			constexpr static auto getBandCount(){
+				return BandCount;
 			}
 
 		public:
 			using band_type = uint16_t;
 
-			constexpr static uint8_t band_count = 4;
+			constexpr static uint8_t band_bits = 12;
 
 		private:
 			uint32_t dim_ix;
@@ -583,9 +594,9 @@ namespace net::worker::commands::Vectors2{
 		}
 
 	private:
-		// VADD key   DIM_VE DIM_IX QUANTIZE_TYPE VEC_TYPE BLOB  name BLOB  name ...
-		// VADD words 300    150    F             b        BLOB0 frog BLOB1 cat
-		// VADD words 300    150    I             b        BLOB0 frog BLOB1 cat
+		// VADD key   DIM_VE DIM_IX QUANTIZE_TYPE VEC_TYPE name BLOB  name BLOB  ...
+		// VADD words 300    150    F             b        cat  BLOB0 frog BLOB1
+		// VADD words 300    150    I             b        cat  BLOB0 frog BLOB1
 
 		/*
 		QUANTIZE_TYPE:
@@ -638,18 +649,18 @@ namespace net::worker::commands::Vectors2{
 			auto const sizeM = translateVTypeToSizeM(vtype);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const vectorSV = *(itk + 0);
-
-				if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
-					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-				auto const keySub   = *(itk + 1);
+				auto const keySub   = *(itk + 0);
 
 				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+				auto const vectorSV = *(itk + 1);
+
+				if (!MyVectors::validBlobSizeF(vectorSV.size(), dim_ve * sizeM))
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
 
 			switch(qtype){
@@ -683,8 +694,8 @@ namespace net::worker::commands::Vectors2{
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = first; itk != last; itk += vstep){
-				auto const vectorSV = *(itk + 0);
-				auto const keySub   = *(itk + 1);
+				auto const keySub   = *(itk + 0);
+				auto const vectorSV = *(itk + 1);
 
 				MyVectors::CFVector cfvector = CreateFloatVector{ vtype, vectorSV,
 							dim_ve, dim_ix,
@@ -739,13 +750,7 @@ namespace net::worker::commands::Vectors2{
 			void action_(Pair *pair) const{
 				auto *mem = hm4::getValAs<MyVectors::StoredVector<T> >(pair);
 
-				// char const cd = 0xFF;
-				// pair->setBufferOverflowDetect(cd);
-
 				MyVectors::StoredVector<T>::createInRawMemory(mem, cfvector);
-
-				// assert(pair->getBufferOverflowDetect() == cd);
-				// pair->setBufferOverflowDetect();
 
 				decoder(pair->getVal(), icontainer, bcontainer);
 			}
@@ -1791,9 +1796,9 @@ namespace net::worker::commands::Vectors2{
 		}
 
 	private:
-		// VSIM key   DIM_IX QUANTIZE_TYPE DISTANCE_TYPE name START
-		// VSIM words 300    F             C             frog ''
-		// VSIM words 300    I             C             frog dfssdhg
+		// VSIM key   DIM_IX QUANTIZE_TYPE DISTANCE_TYPE name BANDS
+		// VSIM words 300    F             C             frog 32
+		// VSIM words 300    I             C             frog 32
 
 		/*
 		QUANTIZE_TYPE:
@@ -1818,8 +1823,8 @@ namespace net::worker::commands::Vectors2{
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
-			if (p.size() != 6)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+			if (p.size() != 7)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
 
 			auto const keyN = p[1];
 
@@ -1846,14 +1851,19 @@ namespace net::worker::commands::Vectors2{
 			if (keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			auto const bands = from_string<uint8_t>(p[6]);
+
+			if (dim_ix <= 1 || dim_ix > MAX_BANDS)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
 			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			switch(qtype){
-			case QType::F32	: return process__<float	>(db, result, blob, keyN, keySub, dim_ix, dtype);
-			case QType::I16	: return process__<int16_t	>(db, result, blob, keyN, keySub, dim_ix, dtype);
-			case QType::I8	: return process__<int8_t	>(db, result, blob, keyN, keySub, dim_ix, dtype);
-		//	case QType::BIT	: return process__bit_		 (db, result, blob, keyN, keySub, dim_ix, dtype);
+			case QType::F32	: return process__<float	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands);
+			case QType::I16	: return process__<int16_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands);
+			case QType::I8	: return process__<int8_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands);
+		//	case QType::BIT	: return process__bit_		 (db, result, blob, keyN, keySub, dim_ix, dtype, bands);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1862,7 +1872,8 @@ namespace net::worker::commands::Vectors2{
 		template<typename T>
 		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 						std::string_view keyN, std::string_view keySub,
-							uint32_t const dim_ix, impl_::DType dtype){
+							uint32_t const dim_ix, impl_::DType dtype,
+								uint8_t bands){
 
 			using namespace impl_;
 
@@ -1878,26 +1889,27 @@ namespace net::worker::commands::Vectors2{
 
 
 
-			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			auto &icontainer = blob.construct<OutputBlob::SmallContainer>();
+			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
 
 			Decoder<T> decoder{ dim_ix };
 
 			bool const b = shared::rsetmulti::getIndexes(decoder, vectorSV,
-								icontainer, bcontainer);
+								icontainer, bcontainer,
+									bands);
 
 			if (!b)
 				return result.set_container0();
 
 
 
-			auto &keySub_container  = blob.construct<OutputBlob::Container>();
+			auto &keySub_container  = blob.construct<OutputBlob::LargeContainer>();
 
 			for(auto const &index : icontainer){
 				hm4::PairBufferKey bufferKey;
 				auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
-				scanIndex__(db, prefix, count__, keySub_container);
+				scanIndex__(db, prefix, keySub_container);
 			}
 
 			// icontainer and bcontainer no longer need.
@@ -1956,7 +1968,7 @@ namespace net::worker::commands::Vectors2{
 			return result.set_container(container);
 		}
 
-		static void scanIndex__(DBAdapter &db, std::string_view prefix, uint32_t count, OutputBlob::Container &container){
+		static void scanIndex__(DBAdapter &db, std::string_view prefix, OutputBlob::LargeContainer &container){
 			using namespace shared::accumulate_results;
 
 			auto const &key = prefix;
@@ -1976,7 +1988,7 @@ namespace net::worker::commands::Vectors2{
 			auto const Out = AccumulateOutput::KEYS;
 
 			sharedAccumulateResults<Out>(
-				count		,
+				count__		,
 				stop		,
 				db->find(key)	,
 				std::end(*db)	,
@@ -1988,8 +2000,15 @@ namespace net::worker::commands::Vectors2{
 		}
 
 	private:
+		constexpr static size_t MAX_BANDS	= impl_::Decoder<float>::getBandCount();
+
 		constexpr static size_t results__	= 32;
-		constexpr static size_t count__		= OutputBlob::ContainerSize / impl_::Decoder<float>::band_count;
+		constexpr static size_t count__		= 1000;
+
+		static_assert(MAX_BANDS			<= OutputBlob::SmallContainerSize);
+
+		static_assert(results__			<  OutputBlob::LargeContainerSize);
+		static_assert(MAX_BANDS * count__	<  OutputBlob::LargeContainerSize);
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {

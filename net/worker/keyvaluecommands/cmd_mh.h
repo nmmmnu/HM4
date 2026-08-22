@@ -111,8 +111,10 @@ namespace net::worker::commands::MH{
 				return MH::bytes();
 			}
 
+			template<typename IContainer, typename BContainer>
 			bool operator()(std::string_view data,
-						OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) const{
+						IContainer &icontainer, BContainer &bcontainer,
+							[[maybe_unused]] size_t maxIndexes = 0) const{
 
 				icontainer.clear();
 				bcontainer.clear();
@@ -500,7 +502,7 @@ namespace net::worker::commands::MH{
 				hm4::PairBufferKey bufferKey;
 				auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
-				scanIndex__(db, prefix, count__, keySub_container);
+				scanIndex__(db, prefix, keySub_container);
 			}
 
 			// icontainer and bcontainer no longer need.
@@ -557,7 +559,7 @@ namespace net::worker::commands::MH{
 			return result.set_container(container);
 		}
 
-		static void scanIndex__(DBAdapter &db, std::string_view prefix, uint32_t count, OutputBlob::Container &container){
+		static void scanIndex__(DBAdapter &db, std::string_view prefix, OutputBlob::Container &container){
 			using namespace shared::accumulate_results;
 
 			auto const &key = prefix;
@@ -577,7 +579,7 @@ namespace net::worker::commands::MH{
 			auto const Out = AccumulateOutput::KEYS;
 
 			sharedAccumulateResults<Out>(
-				count		,
+				count__		,
 				stop		,
 				db->find(key)	,
 				std::end(*db)	,
@@ -590,6 +592,11 @@ namespace net::worker::commands::MH{
 		constexpr static size_t count__		= 32;
 		constexpr static size_t results__	= 32;
 		constexpr static double minScore__	= 0.05;
+
+	//	static_assert(0xFF			<= OutputBlob::ContainerSize);
+
+		static_assert(results__			<  OutputBlob::ContainerSize);
+		static_assert(0xFF * count__		<  OutputBlob::ContainerSize);
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -707,7 +714,7 @@ namespace net::worker::commands::MH{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
-			auto &container = blob.construct<OutputBlob::Container>();
+			auto &container = blob.construct<OutputBlob::SmallContainer>();
 
 			const auto *mhA = load_ptr(db, keyN, keySubA);
 
@@ -720,7 +727,7 @@ namespace net::worker::commands::MH{
 				return result.set_container(container);
 			}
 
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
 
 			MH mh;
 
@@ -862,7 +869,7 @@ namespace net::worker::commands::MH{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
-			auto &container = blob.construct<OutputBlob::Container>();
+			auto &container = blob.construct<OutputBlob::SmallContainer>();
 
 			const auto *mhA = load_ptr(db, keyN, keySubA);
 
@@ -875,7 +882,7 @@ namespace net::worker::commands::MH{
 				return result.set_container(container);
 			}
 
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
 
 			MH mh;
 

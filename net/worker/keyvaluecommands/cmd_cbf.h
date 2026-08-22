@@ -566,7 +566,7 @@ namespace net::worker::commands::CBF{
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
 
 			if (! pair){
-				auto &container  = blob.construct<Container>();
+				auto &container  = blob.construct<OutputBlob::SmallContainer>();
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 					container.push_back("0");
@@ -574,8 +574,8 @@ namespace net::worker::commands::CBF{
 				return result.set_container(container);
 
 			}else{
-				auto &container  = blob.construct<Container>();
-				auto &bcontainer = blob.construct<BContainer>();
+				auto &container  = blob.construct<OutputBlob::SmallContainer		>();
+				auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer	>();
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const &item = *itk;
@@ -590,10 +590,6 @@ namespace net::worker::commands::CBF{
 				return result.set_container(container);
 			}
 		}
-
-	private:
-		using Container  = StaticVector<std::string_view,	OutputBlob::ParamContainerSize>;
-		using BContainer = StaticVector<to_string_buffer_t,	OutputBlob::ParamContainerSize>;
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {

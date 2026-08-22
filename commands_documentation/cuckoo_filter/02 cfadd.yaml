@@ -1,6 +1,6 @@
 - id:          CFADD
   name:        CFADD
-  usage:       CFADD key width fingerprint_size item
+  usage:       CFADD key width fingerprint_size item0 [item1]...
   params:
     items:
     - k: key

@@ -112,18 +112,13 @@ namespace net::worker::shared::rsetmulti{
 								text
 				);
 
-if (keyData == "gi150~013E.01~7F070016959AB1B5~,"){
-	logger<Logger::DEBUG>() << "OK...";
-}
-
 				logger<Logger::DEBUG>() << msg << keyData;
-db->mutable_list().testIntegrity(std::true_type{});
+
 				if constexpr(Insert){
 					insert(*db, keyData, value);
 				}else{
 					erase(*db, keyData);
 				}
-db->mutable_list().testIntegrity(std::true_type{});
 			}
 
 			template<typename DBAdapter>
@@ -178,15 +173,17 @@ db->mutable_list().testIntegrity(std::true_type{});
 		template<typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(Decoder decoder,
 					std::string_view data,
-						Container &icontainer, BContainer &bcontainer){
+						Container &icontainer, BContainer &bcontainer,
+							size_t maxIndexes = 0){
 
-			return decoder(data, icontainer, bcontainer);
+			return decoder(data, icontainer, bcontainer, maxIndexes);
 		}
 
 		template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(DBAdapter &db, Decoder decoder,
 					std::string_view keyCtrl,
-						Container &icontainer, BContainer &bcontainer){
+						Container &icontainer, BContainer &bcontainer,
+							size_t maxIndexes = 0){
 
 			auto const pair = [&](){
 				if (auto const bytes = decoder.bytes(); bytes){
@@ -200,23 +197,22 @@ db->mutable_list().testIntegrity(std::true_type{});
 			if (!pair)
 				return false;
 
-			return getIndexes(decoder, pair->getVal(), icontainer, bcontainer);
+			return getIndexes(decoder, pair->getVal(), icontainer, bcontainer, maxIndexes);
 		}
 
 		template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(DBAdapter &db, Decoder decoder,
 					std::string_view keyN, std::string_view keySub,
-						Container &icontainer, BContainer &bcontainer){
+						Container &icontainer, BContainer &bcontainer,
+							size_t maxIndexes = 0){
 
 			hm4::PairBufferKey bufferKeyCtrl;
 			auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
 
-			return getIndexes(db, decoder, keyCtrl, icontainer, bcontainer);
+			return getIndexes(db, decoder, keyCtrl, icontainer, bcontainer, maxIndexes);
 		}
 
 	} // namespace impl_
-
-
 
 
 
@@ -225,8 +221,6 @@ db->mutable_list().testIntegrity(std::true_type{});
 			std::string_view keyN, std::string_view keySub, std::string_view keySort,
 						Container &icontainer, BContainer &bcontainer,
 							Factory &factory){
-
-db->mutable_list().testIntegrity(std::true_type{});
 
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
@@ -244,13 +238,11 @@ db->mutable_list().testIntegrity(std::true_type{});
 		// because we do not know the new keys yet, we have to delete all
 		if (old)
 			impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
-db->mutable_list().testIntegrity(std::true_type{});
 
 		// icontainer, bcontainer no longer used.
 
 		factory.setKey(keyCtrl);
 		hm4::insertVF(*db, factory);
-db->mutable_list().testIntegrity(std::true_type{});
 
 		if constexpr(0){
 			// get indexes again.
@@ -264,7 +256,6 @@ db->mutable_list().testIntegrity(std::true_type{});
 
 		// insert all keys
 		impl_::insertKeys(db, factory.getIndexes(), keyN, keySub, keySort);
-db->mutable_list().testIntegrity(std::true_type{});
 
 		return true;
 	}
@@ -322,6 +313,7 @@ db->mutable_list().testIntegrity(std::true_type{});
 */
 
 
+
 	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 	bool rem(DBAdapter &db, Decoder decoder,
 				std::string_view keyN, std::string_view keySub, std::string_view keySort,
@@ -348,19 +340,21 @@ db->mutable_list().testIntegrity(std::true_type{});
 	template<typename Decoder, typename Container, typename BContainer>
 	bool getIndexes(Decoder decoder,
 				std::string_view data,
-					Container &icontainer, BContainer &bcontainer){
+					Container &icontainer, BContainer &bcontainer,
+						size_t maxIndexes = 0){
 
-		return impl_::getIndexes(decoder, data, icontainer, bcontainer);
+		return impl_::getIndexes(decoder, data, icontainer, bcontainer, maxIndexes);
 	}
 
 	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 	bool getIndexes(DBAdapter &db, Decoder decoder,
 				std::string_view keyN, std::string_view keySub,
-					Container &icontainer, BContainer &bcontainer){
+					Container &icontainer, BContainer &bcontainer,
+						size_t maxIndexes = 0){
 
 		// logger<Logger::DEBUG>() << "MSetMulti::GET_INDEXES: ctrl key" << keyCtrl;
 
-		return impl_::getIndexes(db, decoder, keyN, keySub, icontainer, bcontainer);
+		return impl_::getIndexes(db, decoder, keyN, keySub, icontainer, bcontainer, maxIndexes);
 	}
 
 	template<typename DBAdapter>

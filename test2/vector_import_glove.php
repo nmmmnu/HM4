@@ -31,7 +31,7 @@ while (($line = fgets($F)) !== false){
 	process_vector($word, $vector);
 
 	if ($i == 0){
-	//	exit;
+		exit;
 	}
 
 	if ($i == 1000){
@@ -59,26 +59,20 @@ function process_vector($key, & $vector){
 			"VADD",
 			"gi300",
 			300, 300, "i",
-			"h", vhex($vector),
-			$key
+			"h",
+			$key,
+			vhex($vector)
 		);
 	}
 
 	if (1){
 		$x = $redis->rawCommand(
 			"VADD",
-			"gi150",
-			300, 150, "i",
-			"b", vbin($vector),
-			$key
-		);
-
-		$x = $redis->rawCommand(
-			"VADD",
-			"gi150",
-			300, 150, "i",
-			"b", vbin($vector),
-			$key
+			"f",
+			300, 150, "s",
+			"b",
+			$key,
+			vbin($vector)
 		);
 	}
 

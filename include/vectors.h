@@ -77,25 +77,6 @@ namespace MyVectors{
 
 	// ------------------------
 
-/*
-	constexpr float normalizeInline(FVector fvector){
-		constexpr float ZERO = 1E-6f;
-
-		auto const magnitude = getMagnitude(fvector);
-
-		if (magnitude < ZERO)
-			return magnitude;
-
-		auto const fix = 1 / magnitude;
-
-		FORCE_VECTORIZE
-		for(size_t i = 0; i < fvector.size(); ++i)
-			fvector[i] *= fix;
-
-		return magnitude;
-	}
-*/
-
 	template<typename F>
 	constexpr float normalizeF(CFVector const cfvector, F f){
 		constexpr float ZERO = 1E-6f;
@@ -208,19 +189,6 @@ namespace MyVectors{
 
 		return dequantizeComponent(v) * magnitude;
 	}
-
-/*
-	template<typename T, typename FVector>
-	constexpr void denormalizeInline(CTVector<T> const ctvector, float const magnitude, FVector fvector){
-		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
-
-		assert(ctvector.size() == fvector.size());
-
-		FORCE_VECTORIZE
-		for(size_t i = 0; i < ctvector.size(); ++i)
-			fvector[i] = denormalizeComponent(ctvector[i], magnitude);
-	}
-*/
 
 	template<typename T, typename F, typename FProj = DefaultValueProjection>
 	constexpr void denormalizeF(CTVector<T> const ctvector, float const magnitude, F f, FProj fpr){
@@ -464,94 +432,93 @@ namespace MyVectors{
 		}
 	}
 
-/*
-	void randomProjectionNormalize(CFVector const cfvector, FVector fresult){
+	// ------------------------
 
-		randomProjection(cfvector, fresult);
+	namespace simhash_impl_{
 
-		normalizeInline(fresult);
-	}
-*/
+		template <size_t MaxDimensions, typename T, typename Generator>
+		struct MultiHyperplaneProjector{
+			static_assert(
+				std::is_same_v<T, uint8_t > ||
+				std::is_same_v<T, uint16_t> ||
+				std::is_same_v<T, uint32_t> ||
+				std::is_same_v<T, uint64_t>
+			);
 
-	template <size_t MaxDimensions, typename T, typename Generator>
-	struct MultiHyperplaneProjector{
-		static_assert(
-			std::is_same_v<T, uint8_t > ||
-			std::is_same_v<T, uint16_t> ||
-			std::is_same_v<T, uint32_t> ||
-			std::is_same_v<T, uint64_t>
-		);
-
-		constexpr MultiHyperplaneProjector(CTVector<int8_t> vector, size_t bits, uint64_t seed = 0) :
-								vector_		(vector	),
-								bits_		(bits	),
-								generator_	(seed	){
-			assert(bits_ <= MaxBits);
-		}
-
-		constexpr T operator()(){
-			uint64_t random64[MaxCapacity64]; // for 8K -> 1K
-
-			// 1. Generate random numbers (bits)
-			const T *randomT = generateRandom_(random64);
-
-			// 2. Single pass simplified dot product of all bits
-			int32_t dots[MaxBits]{};
-
-			for (size_t i = 0; i < vector_.size(); ++i){
-				auto const v	= vector_[i];
-
-				#pragma GCC diagnostic push
-				#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-				auto const mask	= randomT[i];
-				#pragma GCC diagnostic pop
-
-				// cycle to MaxBits is *way* faster,
-				// than cycle to bits_
-
-				FORCE_VECTORIZE
-				for (size_t h = 0; h < MaxBits; ++h){
-					const bool bit = (mask >> h) & 1;
-					dots[h] += bit ? +v : -v;
-				}
+			constexpr MultiHyperplaneProjector(CTVector<int8_t> vector, size_t bits, uint64_t seed = 0) :
+									vector_		(vector	),
+									bits_		(bits	),
+									generator_	(seed	){
+				assert(bits_ <= MaxBits);
 			}
 
-			// 3. Result
-			T result = 0;
+			constexpr T operator()(){
+				uint64_t random64[MaxCapacity64]; // for 8K -> 1K
 
-			for (size_t i = 0; i < bits_; ++i)
-				if (dots[i] > 0)
-					result |= static_cast<T>(1u << i);
+				// 1. Generate random numbers (bits)
+				const T *randomT = generateRandom_(random64);
 
-			return result;
-		}
+				// 2. Single pass simplified dot product of all bits
+				int32_t dots[MaxBits]{};
 
-	private:
-		constexpr const T *generateRandom_(uint64_t *random64){
-			size_t const needed64 = size64__(vector_.size());
+				for (size_t i = 0; i < vector_.size(); ++i){
+					auto const v	= vector_[i];
 
-			for (size_t i = 0; i < needed64; ++i)
-				random64[i] = generator_();
+					#pragma GCC diagnostic push
+					#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+					auto const mask	= randomT[i];
+					#pragma GCC diagnostic pop
 
-			return reinterpret_cast<const T *>(random64);
-		}
+					// cycle to MaxBits is *way* faster,
+					// than cycle to bits_
 
-		constexpr static size_t size64__(size_t size){
-			return (size * sizeof(T) + sizeof(uint64_t) - 1) / sizeof(uint64_t);
-		}
+					FORCE_VECTORIZE
+					for (size_t h = 0; h < MaxBits; ++h){
+						const bool bit = (mask >> h) & 1;
+						dots[h] += bit ? +v : -v;
+					}
+				}
 
-	private:
-		constexpr static size_t MaxBits		= sizeof(T) * 8;
-		constexpr static size_t MaxCapacity64	= size64__(MaxDimensions);
+				// 3. Result
+				T result = 0;
 
-	private:
-		CTVector<int8_t>	vector_;
-		size_t			bits_;
-		Generator		generator_;
-	};
+				for (size_t i = 0; i < bits_; ++i)
+					if (dots[i] > 0)
+						result |= static_cast<T>(1u << i);
+
+				return result;
+			}
+
+		private:
+			constexpr const T *generateRandom_(uint64_t *random64){
+				size_t const needed64 = size64__(vector_.size());
+
+				for (size_t i = 0; i < needed64; ++i)
+					random64[i] = generator_();
+
+				return reinterpret_cast<const T *>(random64);
+			}
+
+			constexpr static size_t size64__(size_t size){
+				return (size * sizeof(T) + sizeof(uint64_t) - 1) / sizeof(uint64_t);
+			}
+
+		private:
+			constexpr static size_t MaxBits		= sizeof(T) * 8;
+			constexpr static size_t MaxCapacity64	= size64__(MaxDimensions);
+
+		private:
+			CTVector<int8_t>	vector_;
+			size_t			bits_;
+			Generator		generator_;
+		};
+
+	} // namespace simhash_impl_
 
 	template<size_t MaxDimensions, typename T, typename F>
 	void simhashBands(CTVector<int8_t> const vector, uint8_t bits, uint8_t bands, F f, uint64_t seed = 0){
+		using namespace simhash_impl_;
+
 		MultiHyperplaneProjector<MaxDimensions, T, MurmurHashMixer64> mhpp{ vector, bits, seed };
 
 		for(uint8_t id = 0; id < bands; ++id)
