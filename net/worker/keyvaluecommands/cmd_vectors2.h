@@ -438,16 +438,6 @@ namespace net::worker::commands::Vectors2{
 				if (!storedVector)
 					return false;
 
-				int8_t bufferVectorI8[MaxDimensions]; // 8 KB, should be OK.
-
-				MyVectors::TVector<int8_t> vectorI8{ bufferVectorI8, dim_ix };
-
-				MyVectors::CTVector<T>     vectorT = storedVector->toVector();
-
-				FORCE_VECTORIZE
-				for(uint32_t i = 0; i < dim_ix; ++i)
-					vectorI8[i] = MyVectors::quantizeComponentToI8(vectorT[i]);
-
 				auto f = [this, &icontainer, &bcontainer](size_t id64, band_type hash){
 					assert(id64 < MAX_BANDS);
 
@@ -470,14 +460,14 @@ namespace net::worker::commands::Vectors2{
 					icontainer.emplace_back(buffer, p - skip);
 				};
 
-				MyVectors::simhashBands<MaxDimensions, band_type>(vectorI8, bands, f);
+				MyVectors::simhashBands<MaxDimensions, band_type>(storedVector->toVector(), bands, f, valueProjBE);
 
 				return true;
 			}
 
 			constexpr static size_t fixBits(size_t bits){
 				if (bits == 0)
-					return MIN_BITS;
+					return MAX_BITS;
 				else
 					return std::clamp<size_t>(bits, MIN_BITS, MAX_BITS);
 			}
@@ -561,6 +551,8 @@ namespace net::worker::commands::Vectors2{
 					auto const s = formatDouble(value,             bcontainer.back());
 
 					container.push_back(s);
+
+					// printf("%+8.4f %+5d\n", value, MyVectors::quantizeComponentToI8(value));
 
 					// clang
 					(void) magnitude;
@@ -763,9 +755,7 @@ namespace net::worker::commands::Vectors2{
 				to_string_buffer_t buffer;
 				auto const keySort  = makeKeySort(keySub, buffer);
 
-				using MyVADD_Factory = VADD_Factory<T>;
-
-				MyVADD_Factory factory{ cfvector, decoder, icontainer, bcontainer };
+				VADD_Factory<T> factory{ cfvector, decoder, icontainer, bcontainer };
 
 				[[maybe_unused]]
 				bool const b = shared::rsetmulti::add(db, decoder,
@@ -1363,7 +1353,7 @@ namespace net::worker::commands::Vectors2{
 			const auto *storedVectorA = MyVectors::toStoredVector<T>(svA, dim_ix);
 
 			if (!storedVectorA)
-				return result.set(false);
+				return result.set("INF");
 
 
 			std::string_view svB = shared::rsetmulti::getData(db, keyN, keySubB);
@@ -1371,7 +1361,7 @@ namespace net::worker::commands::Vectors2{
 			const auto *storedVectorB = MyVectors::toStoredVector<T>(svB, dim_ix);
 
 			if (!storedVectorB)
-				return result.set(false);
+				return result.set("INF");
 
 			float const dist = distanceFix(dtype,
 						distance(dtype,
@@ -1548,7 +1538,6 @@ namespace net::worker::commands::Vectors2{
 		static void process__prepared(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
-
 
 			auto const pp = prepareFVector<T>(db, blob, keyN, keySubA, dim_ix, dtype);
 

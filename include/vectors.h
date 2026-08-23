@@ -69,8 +69,10 @@ namespace MyVectors{
 		float l2 = 0.0f;
 
 		FORCE_VECTORIZE
-		for(size_t i = 0; i < ctvector.size(); ++i)
-			l2 += ctvector[i] * ctvector[i];
+		for(size_t i = 0; i < ctvector.size(); ++i){
+			float const f = ctvector[i];
+			l2 += f * f;
+		}
 
 		return std::sqrt(l2);
 	}
@@ -90,7 +92,7 @@ namespace MyVectors{
 
 			return 0.0f;
 		}else{
-			auto const fix = 1 / magnitude;
+			auto const fix = 1.0f / magnitude;
 
 			// normalize values
 			for(size_t i = 0; i < cfvector.size(); ++i)
@@ -113,13 +115,17 @@ namespace MyVectors{
 		if constexpr(std::is_same_v<T, int16_t>){
 			float const scale = 32767;
 
-			return static_cast<T>( std::round(v * scale) );
+			float const f = std::round(v * scale);
+
+			return static_cast<T>(std::clamp(f, -scale, +scale));
 		}
 
 		if constexpr(std::is_same_v<T, int8_t>){
 			float const scale = 127;
 
-			return static_cast<T>( std::round(v * scale) );
+			float const f = std::round(v * scale);
+
+			return static_cast<T>(std::clamp(f, -scale, +scale));
 		}
 	}
 
@@ -129,24 +135,23 @@ namespace MyVectors{
 	constexpr int8_t quantizeComponentToI8(T v){
 		static_assert(checkVectorElement<T>(), "Only float, int8_t and int16_t supported");
 
+		float const clamp8 = 127.0f;
+
 		if constexpr(std::is_same_v<T, float>){
-			float const scale = 127;
+			float const scale  = 127.0f;
 
-			return static_cast<int8_t>( std::round(v * scale) );
+			float const f = std::round(v * scale);
+
+			return static_cast<int8_t>(std::clamp(f, -clamp8, +clamp8));
 		}
 
-		if constexpr(std::is_same_v<T, int16_t> && 0){
-			int16_t const maxI8  =   127;
-			int16_t const maxI16 = 32767;
-			return static_cast<int8_t>((v * maxI8) / maxI16);
-		}
+		if constexpr(std::is_same_v<T, int16_t>){
+			float const scale = 127.0f / 32767.0f;
 
-		if constexpr(std::is_same_v<T, int16_t> && 1){
-			int8_t const minI8 = -128;
-			int8_t const min   = -127;
-			int8_t const res   = static_cast<int8_t>(v >> 8);
+			float const f = std::round(v * scale);
 
-			return res == minI8 ? min : res;
+			return static_cast<int8_t>(std::clamp(f, -clamp8, +clamp8));
+
 		}
 
 		if constexpr(std::is_same_v<T, int8_t>){
@@ -412,6 +417,7 @@ namespace MyVectors{
 		constexpr int8_t distribution<int8_t>(uint64_t a){
 			int8_t const minI8 = -128;
 			int8_t const min   = -127;
+
 			int8_t const res   = static_cast<int8_t>(a);
 
 			return res == minI8 ? min : res;
@@ -436,30 +442,30 @@ namespace MyVectors{
 
 	namespace simhash_impl_{
 
-		template <size_t MaxDimensions, typename T, typename Generator>
+		template <size_t MaxDimensions, typename HashType, typename Generator>
 		struct MultiHyperplaneProjector{
 			static_assert(
-				std::is_same_v<T, uint8_t > ||
-				std::is_same_v<T, uint16_t> ||
-				std::is_same_v<T, uint32_t> ||
-				std::is_same_v<T, uint64_t>
+				std::is_same_v<HashType, uint8_t > ||
+				std::is_same_v<HashType, uint16_t> ||
+				std::is_same_v<HashType, uint32_t> ||
+				std::is_same_v<HashType, uint64_t>
 			);
 
 			constexpr MultiHyperplaneProjector(CTVector<int8_t> vector, uint64_t seed = 0) :
 									vector_		(vector	),
 									generator_	(seed	){}
 
-			constexpr T operator()(){
+			constexpr HashType operator()(){
 				uint64_t random64[MaxCapacity64]; // for 8K -> 1K
 
 				// 1. Generate random numbers (bits)
-				const T *randomT = generateRandom_(random64);
+				const HashType *randomT = generateRandom_(random64);
 
 				// 2. Single pass simplified dot product of all bits
 				int32_t dots[MaxBits]{};
 
 				for (size_t i = 0; i < vector_.size(); ++i){
-					auto const v	= vector_[i];
+					auto const v = vector_[i];
 
 					#pragma GCC diagnostic push
 					#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -474,32 +480,32 @@ namespace MyVectors{
 				}
 
 				// 3. Result
-				T result = 0;
+				HashType result = 0;
 
 				FORCE_VECTORIZE
 				for (size_t i = 0; i < MaxBits; ++i)
 					if (dots[i] > 0)
-						result |= static_cast<T>(1u << i);
+						result |= static_cast<HashType>(1u << i);
 
 				return result;
 			}
 
 		private:
-			constexpr const T *generateRandom_(uint64_t *random64){
+			constexpr const HashType *generateRandom_(uint64_t *random64){
 				size_t const needed64 = size64__(vector_.size());
 
 				for (size_t i = 0; i < needed64; ++i)
 					random64[i] = generator_();
 
-				return reinterpret_cast<const T *>(random64);
+				return reinterpret_cast<const HashType *>(random64);
 			}
 
 			constexpr static size_t size64__(size_t size){
-				return (size * sizeof(T) + sizeof(uint64_t) - 1) / sizeof(uint64_t);
+				return (size * sizeof(HashType) + sizeof(uint64_t) - 1) / sizeof(uint64_t);
 			}
 
 		private:
-			constexpr static size_t MaxBits		= sizeof(T) * 8;
+			constexpr static size_t MaxBits		= sizeof(HashType) * 8;
 			constexpr static size_t MaxCapacity64	= size64__(MaxDimensions);
 
 		private:
@@ -509,16 +515,42 @@ namespace MyVectors{
 
 	} // namespace simhash_impl_
 
-	template<size_t MaxDimensions, typename T, typename F>
+	template<size_t MaxDimensions, typename HashType, typename F>
 	void simhashBands(CTVector<int8_t> const vector, size_t bands, F f, uint64_t seed = 0){
 		using namespace simhash_impl_;
 
 		assert(bands <= std::numeric_limits<uint8_t>::max() + 1);
 
-		MultiHyperplaneProjector<MaxDimensions, T, MurmurHashMixer64> mhpp{ vector, seed };
+		MultiHyperplaneProjector<MaxDimensions, HashType, MurmurHashMixer64> mhpp{ vector, seed };
 
 		for(size_t id = 0; id < bands; ++id)
 			f(id, mhpp());
+	}
+
+	template<size_t MaxDimensions, typename HashType, typename T, typename F, typename FProj = DefaultValueProjection>
+	void simhashBands(CTVector<T> const vector, size_t bands, F f,
+								FProj fpr,
+									uint64_t seed = 0){
+
+		int8_t bufferVectorI8[MaxDimensions]; // 8 KB, should be OK.
+
+		MyVectors::TVector<int8_t> vectorI8{ bufferVectorI8, vector.size() };
+
+		FORCE_VECTORIZE
+		for(uint32_t i = 0; i < vector.size(); ++i){
+			auto const element = fpr(vector[i]);
+
+			vectorI8[i] = MyVectors::quantizeComponentToI8(element);
+
+			if constexpr(0){
+				if constexpr(std::is_same_v<T, float>)
+					printf("%4u %+8.4f %+5d\n", i, element, vectorI8[i]);
+				else
+					printf("%4u %+8d %+5d\n",   i, element, vectorI8[i]);
+			}
+		}
+
+		return simhashBands<MaxDimensions, HashType>(vectorI8, bands, f, seed);
 	}
 
 } // namspace MyVectors
