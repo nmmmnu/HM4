@@ -379,9 +379,46 @@ namespace net::worker::commands::Vectors2{
 
 
 
-		template<typename T, uint8_t BandCount = 0xFF>
+		constexpr size_t hashEncodeSize = 8;
+
+		constexpr std::string_view hashEncode(uint16_t val, char *buffer){
+			constexpr char dot   = '.';
+
+			constexpr char bin[] = "01";
+			constexpr char hex[] = "0123456789ABCDEF";
+
+			buffer[0] = hex[ (val >> (4 * 3)) & 0x0F ];
+			buffer[1] = hex[ (val >> (4 * 2)) & 0x0F ];
+			buffer[2] = hex[ (val >> (4 * 1)) & 0x0F ];
+
+			buffer[3] = dot;
+
+			buffer[4] = (val & (1 << 3)) ? bin[1] : bin[0];
+			buffer[5] = (val & (1 << 2)) ? bin[1] : bin[0];
+			buffer[6] = (val & (1 << 1)) ? bin[1] : bin[0];
+			buffer[7] = (val & (1 << 0)) ? bin[1] : bin[0];
+
+			return std::string_view(buffer, hashEncodeSize);
+		}
+
+		template<size_t N>
+		constexpr std::string_view hashEncode(uint16_t val, std::array<char, N> &buffer) {
+			static_assert(N >= hashEncodeSize); // buffer is ABC.0000
+
+			return hashEncode(val, buffer.size());
+		}
+
+
+
+		template<typename T>
 		struct Decoder{
-			Decoder(uint32_t dim_ix) : dim_ix(dim_ix){}
+			Decoder(uint32_t dim_ix) :
+							dim_ix	(dim_ix			){}
+
+			Decoder(uint32_t dim_ix, size_t bands, size_t bits) :
+							dim_ix	(dim_ix			),
+							bands	(fixBands(bands)	),
+							bits	(fixBits (bits )	){}
 
 			constexpr auto bytes() const{
 				return MyVectors::StoredVector<T>::bytes(dim_ix);
@@ -389,8 +426,7 @@ namespace net::worker::commands::Vectors2{
 
 			template<typename IContainer, typename BContainer>
 			bool operator()(std::string_view data,
-						IContainer &icontainer, BContainer &bcontainer,
-							size_t maxIndexes = 0) const{
+						IContainer &icontainer, BContainer &bcontainer) const{
 
 				icontainer.clear();
 				bcontainer.clear();
@@ -408,49 +444,68 @@ namespace net::worker::commands::Vectors2{
 
 				MyVectors::CTVector<T>     vectorT = storedVector->toVector();
 
-
 				FORCE_VECTORIZE
 				for(uint32_t i = 0; i < dim_ix; ++i)
 					vectorI8[i] = MyVectors::quantizeComponentToI8(vectorT[i]);
 
+				auto f = [this, &icontainer, &bcontainer](size_t id64, band_type hash){
+					assert(id64 < MAX_BANDS);
 
-				auto f = [&icontainer, &bcontainer](uint8_t id, band_type hash){
+					uint8_t const id = static_cast<uint8_t>(id64);
+
 					bcontainer.push_back();
 
 					char *buffer = bcontainer.back().data();
 
 					size_t p = 0;
 
-					// 1A42.05
+					// ABC.0000.05
 
-					hex_convert::toHex(hash, buffer + p);	p += sizeof(band_type	) * 2;
+					hex_convert::toHex(id, buffer + p);	p += sizeof(uint8_t) * 2;
 					buffer[p] = '.';			p += 1;
-					hex_convert::toHex(id,   buffer + p);	p += sizeof(uint8_t	) * 2;
+					hashEncode(hash, buffer + p);		p += hashEncodeSize;
 
-					icontainer.emplace_back(buffer, p);
+					auto const skip = MAX_BITS - bits; // if 12 => 4, if 16 => 0
+
+					icontainer.emplace_back(buffer, p - skip);
 				};
 
-				auto const bands = maxIndexes == 0 ?
-								getBandCount() :
-								static_cast<uint8_t>(std::clamp<size_t>(maxIndexes, 1u, getBandCount()) )
-				;
-
-				MyVectors::simhashBands<MaxDimensions, band_type>(vectorI8, band_bits, bands, f);
+				MyVectors::simhashBands<MaxDimensions, band_type>(vectorI8, bands, f);
 
 				return true;
 			}
 
-			constexpr static auto getBandCount(){
-				return BandCount;
+			constexpr static size_t fixBits(size_t bits){
+				if (bits == 0)
+					return MIN_BITS;
+				else
+					return std::clamp<size_t>(bits, MIN_BITS, MAX_BITS);
+			}
+
+			constexpr static size_t fixBands(size_t bands){
+				if (bands == 0)
+					return MAX_BANDS;
+				else
+					return std::clamp<size_t>(bands, 1, MAX_BANDS);
 			}
 
 		public:
-			using band_type = uint16_t;
+			constexpr static size_t MAX_BANDS = 256; // 00 to FF
 
-			constexpr static uint8_t band_bits = 12;
+		public:
+			using IContainer	= OutputBlob::TContainer	<MAX_BANDS>;
+			using BContainer	= OutputBlob::TBufferContainer	<MAX_BANDS>;
+
+			using band_type		= uint16_t;
 
 		private:
-			uint32_t dim_ix;
+			constexpr static size_t MIN_BITS  =  12;
+			constexpr static size_t MAX_BITS  =  16;
+
+		private:
+			uint32_t	dim_ix;
+			size_t		bands	= fixBands(0);
+			size_t		bits	= fixBits (0);
 		};
 
 
@@ -687,8 +742,12 @@ namespace net::worker::commands::Vectors2{
 			auto &vectorBuffer	= blob.allocate<VectorMaxBuffer>();
 			auto &vectorBufferProj	= blob.allocate<VectorMaxBuffer>();
 
-			auto &icontainer	= blob.construct<OutputBlob::Container>();
-			auto &bcontainer	= blob.construct<OutputBlob::BufferContainer>();
+			using MyDecoder		= Decoder<T>;
+
+			auto &icontainer	= blob.construct<typename MyDecoder::IContainer>();
+			auto &bcontainer	= blob.construct<typename MyDecoder::BContainer>();
+
+			MyDecoder decoder{ dim_ix };
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -703,8 +762,6 @@ namespace net::worker::commands::Vectors2{
 
 				to_string_buffer_t buffer;
 				auto const keySort  = makeKeySort(keySub, buffer);
-
-				Decoder<T> decoder{ dim_ix };
 
 				using MyVADD_Factory = VADD_Factory<T>;
 
@@ -731,7 +788,8 @@ namespace net::worker::commands::Vectors2{
 
 			constexpr VADD_Factory(MyVectors::CFVector cfvector,
 								MyDecoder decoder,
-									OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) :
+									typename MyDecoder::IContainer &icontainer,
+									typename MyDecoder::BContainer &bcontainer) :
 							Base::IFactoryAction	(/* key */ {}, decoder.bytes() ),
 							cfvector		(cfvector	),
 							decoder			(decoder	),
@@ -758,8 +816,8 @@ namespace net::worker::commands::Vectors2{
 		private:
 			MyVectors::CFVector		cfvector;
 			MyDecoder 			decoder;
-			OutputBlob::Container		&icontainer;
-			OutputBlob::BufferContainer	&bcontainer;
+			typename MyDecoder::IContainer	&icontainer;
+			typename MyDecoder::BContainer	&bcontainer;
 		};
 
 	private:
@@ -842,10 +900,12 @@ namespace net::worker::commands::Vectors2{
 		static void process__(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, uint32_t const dim_ix){
 			using namespace impl_;
 
-			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			using MyDecoder		= Decoder<T>;
 
-			Decoder<T> decoder{ dim_ix };
+			auto &icontainer	= blob.construct<typename MyDecoder::IContainer>();
+			auto &bcontainer	= blob.construct<typename MyDecoder::BContainer>();
+
+			MyDecoder decoder{ dim_ix };
 
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySub	= *itk;
@@ -931,10 +991,12 @@ namespace net::worker::commands::Vectors2{
 		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix){
 			using namespace impl_;
 
-			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			using MyDecoder		= Decoder<T>;
 
-			Decoder<T> decoder{ dim_ix };
+			auto &icontainer	= blob.construct<typename MyDecoder::IContainer>();
+			auto &bcontainer	= blob.construct<typename MyDecoder::BContainer>();
+
+			MyDecoder decoder{ dim_ix };
 
 			[[maybe_unused]]
 			bool const b = shared::rsetmulti::getIndexes(db, decoder,
@@ -1296,9 +1358,6 @@ namespace net::worker::commands::Vectors2{
 								std::string_view keyN, std::string_view keySubA, std::string_view keySubB, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
-			Decoder<T> decoder{ dim_ix };
-
-
 			std::string_view svA = shared::rsetmulti::getData(db, keyN, keySubA);
 
 			const auto *storedVectorA = MyVectors::toStoredVector<T>(svA, dim_ix);
@@ -1441,30 +1500,26 @@ namespace net::worker::commands::Vectors2{
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
-			auto &container  = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
-
-			Decoder<T> decoder{ dim_ix };
-
-			std::string_view sv;
-
-
-			sv = shared::rsetmulti::getData(db, keyN, keySubA);
+			auto const sv = shared::rsetmulti::getData(db, keyN, keySubA);
 
 			const auto *storedVectorA = MyVectors::toStoredVector<T>(sv, dim_ix);
 
 			if (!storedVectorA){
+				auto &container = blob.construct<OutputBlob::SmallContainer>();
+
 				for(auto itk = first; itk != last; ++itk)
 					container.push_back(INF);
 
 				return result.set_container(container);
 			}
 
+			auto &container  = blob.construct<OutputBlob::SmallContainer>();
+			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
 
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySubB	= *itk;
 
-				sv = shared::rsetmulti::getData(db, keyN, keySubB);
+				auto const sv = shared::rsetmulti::getData(db, keyN, keySubB);
 
 				const auto *storedVectorB = MyVectors::toStoredVector<T>(sv, dim_ix);
 
@@ -1486,7 +1541,6 @@ namespace net::worker::commands::Vectors2{
 				container.push_back(formatDouble(dist, bcontainer.back()));
 			}
 
-
 			return result.set_container(container);
 		}
 
@@ -1495,24 +1549,23 @@ namespace net::worker::commands::Vectors2{
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
-			auto &container  = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
-
-			Decoder<T> decoder{ dim_ix };
-
 
 			auto const pp = prepareFVector<T>(db, blob, keyN, keySubA, dim_ix, dtype);
 
 			if (!pp.ok){
+				auto &container = blob.construct<OutputBlob::SmallContainer>();
+
 				for(auto itk = first; itk != last; ++itk)
 					container.push_back(INF);
 
 				return result.set_container(container);
 			}
 
+			auto &container  = blob.construct<OutputBlob::SmallContainer>();
+			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
+
 			auto const vectorPrepared	= pp.vector;
 			auto const magnitudePrepared	= pp.magnitude;
-
 
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySubB	= *itk;
@@ -1651,7 +1704,6 @@ namespace net::worker::commands::Vectors2{
 			auto const vectorPrepared	= pp.vector;
 			auto const magnitudePrepared	= pp.magnitude;
 
-
 			auto &heap = blob.construct<VSIMHeap>();
 
 			hm4::PairBufferKey bufferKey;
@@ -1691,10 +1743,6 @@ namespace net::worker::commands::Vectors2{
 
 		using VSIMHeapNode	= std::pair<float, std::string_view>;
 		using VSIMHeap		= top_heap::TopKSmallest<VSIMHeapNode, results__>;
-
-		constexpr static uint32_t ITERATIONS_LOOPS_VSIM
-					= 1'000'000;
-				//	= shared::config::ITERATIONS_LOOPS_MAX;
 
 	private:
 		template<typename T, typename StopPredicate>
@@ -1778,6 +1826,12 @@ namespace net::worker::commands::Vectors2{
 		}
 
 	private:
+		// making this same value as VSIM
+		constexpr static size_t count___		= 1000;
+		constexpr static size_t ITERATIONS_LOOPS_VSIM	=
+						impl_::Decoder<float>::MAX_BANDS * count___;
+
+	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"vsimflat",	"VSIMFLAT"
 		};
@@ -1796,9 +1850,9 @@ namespace net::worker::commands::Vectors2{
 		}
 
 	private:
-		// VSIM key   DIM_IX QUANTIZE_TYPE DISTANCE_TYPE name BANDS
-		// VSIM words 300    F             C             frog 32
-		// VSIM words 300    I             C             frog 32
+		// VSIM key   DIM_IX QUANTIZE_TYPE DISTANCE_TYPE name BANDS BITS
+		// VSIM words 300    F             C             frog 32    12
+		// VSIM words 300    I             C             frog 32    16
 
 		/*
 		QUANTIZE_TYPE:
@@ -1823,8 +1877,8 @@ namespace net::worker::commands::Vectors2{
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
-			if (p.size() != 7)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
+			if (p.size() != 8)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_7);
 
 			auto const keyN = p[1];
 
@@ -1851,19 +1905,21 @@ namespace net::worker::commands::Vectors2{
 			if (keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const bands = from_string<uint8_t>(p[6]);
+			using MyDecoderF = impl_::Decoder<float>;
+			auto const bands = MyDecoderF::fixBands(from_string<uint64_t>(p[6]));
+			auto const bits  = MyDecoderF::fixBits (from_string<uint64_t>(p[7]));
 
-			if (dim_ix <= 1 || dim_ix > MAX_BANDS)
+			if (dim_ix <= 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			switch(qtype){
-			case QType::F32	: return process__<float	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands);
-			case QType::I16	: return process__<int16_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands);
-			case QType::I8	: return process__<int8_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands);
-		//	case QType::BIT	: return process__bit_		 (db, result, blob, keyN, keySub, dim_ix, dtype, bands);
+			case QType::F32	: return process__<float	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
+			case QType::I16	: return process__<int16_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
+			case QType::I8	: return process__<int8_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
+		//	case QType::BIT	: return process__bit_		 (db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1873,7 +1929,7 @@ namespace net::worker::commands::Vectors2{
 		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
-								uint8_t bands){
+								size_t bands, size_t bits){
 
 			using namespace impl_;
 
@@ -1888,15 +1944,17 @@ namespace net::worker::commands::Vectors2{
 			auto const magnitudePrepared	= pp.magnitude;
 
 
+			using MyDecoder  = Decoder<T>;
 
-			auto &icontainer = blob.construct<OutputBlob::SmallContainer>();
-			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
+			static_assert(OutputBlob::Container::capacity() >= MyDecoder::IContainer::capacity());
 
-			Decoder<T> decoder{ dim_ix };
+			auto &icontainer = blob.construct<OutputBlob::Container		>(); // will reuse it later
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer	>(); // will reuse it later
+
+			MyDecoder decoder{ dim_ix, bands, bits };
 
 			bool const b = shared::rsetmulti::getIndexes(decoder, vectorSV,
-								icontainer, bcontainer,
-									bands);
+								icontainer, bcontainer);
 
 			if (!b)
 				return result.set_container0();
@@ -1907,7 +1965,7 @@ namespace net::worker::commands::Vectors2{
 
 			for(auto const &index : icontainer){
 				hm4::PairBufferKey bufferKey;
-				auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+				auto const prefix = shared::rsetmulti::makeKeyDataSearchNS(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
 				scanIndex__(db, prefix, keySub_container);
 			}
@@ -1945,6 +2003,7 @@ namespace net::worker::commands::Vectors2{
 
 			// keySub_container, icontainer and bcontainer no longer need.
 
+			// reusing icontainer and bcontainer
 			auto &container  = icontainer;
 
 			container.clear();
@@ -2000,15 +2059,11 @@ namespace net::worker::commands::Vectors2{
 		}
 
 	private:
-		constexpr static size_t MAX_BANDS	= impl_::Decoder<float>::getBandCount();
-
 		constexpr static size_t results__	= 32;
 		constexpr static size_t count__		= 1000;
 
-		static_assert(MAX_BANDS			<= OutputBlob::SmallContainerSize);
-
-		static_assert(results__			<  OutputBlob::LargeContainerSize);
-		static_assert(MAX_BANDS * count__	<  OutputBlob::LargeContainerSize);
+		static_assert(results__						<  OutputBlob::LargeContainerSize);
+		static_assert(impl_::Decoder<float>::MAX_BANDS * count__	<  OutputBlob::LargeContainerSize);
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {

@@ -445,12 +445,9 @@ namespace MyVectors{
 				std::is_same_v<T, uint64_t>
 			);
 
-			constexpr MultiHyperplaneProjector(CTVector<int8_t> vector, size_t bits, uint64_t seed = 0) :
+			constexpr MultiHyperplaneProjector(CTVector<int8_t> vector, uint64_t seed = 0) :
 									vector_		(vector	),
-									bits_		(bits	),
-									generator_	(seed	){
-				assert(bits_ <= MaxBits);
-			}
+									generator_	(seed	){}
 
 			constexpr T operator()(){
 				uint64_t random64[MaxCapacity64]; // for 8K -> 1K
@@ -469,9 +466,6 @@ namespace MyVectors{
 					auto const mask	= randomT[i];
 					#pragma GCC diagnostic pop
 
-					// cycle to MaxBits is *way* faster,
-					// than cycle to bits_
-
 					FORCE_VECTORIZE
 					for (size_t h = 0; h < MaxBits; ++h){
 						const bool bit = (mask >> h) & 1;
@@ -482,7 +476,8 @@ namespace MyVectors{
 				// 3. Result
 				T result = 0;
 
-				for (size_t i = 0; i < bits_; ++i)
+				FORCE_VECTORIZE
+				for (size_t i = 0; i < MaxBits; ++i)
 					if (dots[i] > 0)
 						result |= static_cast<T>(1u << i);
 
@@ -509,19 +504,20 @@ namespace MyVectors{
 
 		private:
 			CTVector<int8_t>	vector_;
-			size_t			bits_;
 			Generator		generator_;
 		};
 
 	} // namespace simhash_impl_
 
 	template<size_t MaxDimensions, typename T, typename F>
-	void simhashBands(CTVector<int8_t> const vector, uint8_t bits, uint8_t bands, F f, uint64_t seed = 0){
+	void simhashBands(CTVector<int8_t> const vector, size_t bands, F f, uint64_t seed = 0){
 		using namespace simhash_impl_;
 
-		MultiHyperplaneProjector<MaxDimensions, T, MurmurHashMixer64> mhpp{ vector, bits, seed };
+		assert(bands <= std::numeric_limits<uint8_t>::max() + 1);
 
-		for(uint8_t id = 0; id < bands; ++id)
+		MultiHyperplaneProjector<MaxDimensions, T, MurmurHashMixer64> mhpp{ vector, seed };
+
+		for(size_t id = 0; id < bands; ++id)
 			f(id, mhpp());
 	}
 

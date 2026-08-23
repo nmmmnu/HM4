@@ -4,12 +4,22 @@
 #include "pair.h"
 #include "ilist/txguard.h"
 
+/*
+Reverse Set Multi
 
+- One to Many set
+- Automatic keySort
+- Uses Decoder
+
+keyN~~keySub -> encoded data
+
+keyN~INDEX0~keySort~keySub -> keySub
+keyN~INDEX1~keySort~keySub -> keySub
+keyN~INDEX2~keySort~keySub -> keySub
+
+*/
 
 namespace net::worker::shared::rsetmulti{
-
-	using OutputBlob     = commands::OutputBlob;
-	using ParamContainer = commands::ParamContainer;
 
 	constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
 		// keyN~word~keySort~keySub, 3 * ~
@@ -79,6 +89,19 @@ namespace net::worker::shared::rsetmulti{
 		return concatenateBuffer(bufferKey,
 				keyN	,	separator	,
 				text	,	separator
+		);
+	}
+
+	inline std::string_view makeKeyDataSearchNS(hm4::PairBufferKey &bufferKey, std::string_view separator,
+				std::string_view keyN,
+					std::string_view text
+			){
+
+		// keyN~text~
+
+		return concatenateBuffer(bufferKey,
+				keyN	,	separator	,
+				text
 		);
 	}
 
@@ -173,17 +196,15 @@ namespace net::worker::shared::rsetmulti{
 		template<typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(Decoder decoder,
 					std::string_view data,
-						Container &icontainer, BContainer &bcontainer,
-							size_t maxIndexes = 0){
+						Container &icontainer, BContainer &bcontainer){
 
-			return decoder(data, icontainer, bcontainer, maxIndexes);
+			return decoder(data, icontainer, bcontainer);
 		}
 
 		template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(DBAdapter &db, Decoder decoder,
 					std::string_view keyCtrl,
-						Container &icontainer, BContainer &bcontainer,
-							size_t maxIndexes = 0){
+						Container &icontainer, BContainer &bcontainer){
 
 			auto const pair = [&](){
 				if (auto const bytes = decoder.bytes(); bytes){
@@ -197,19 +218,7 @@ namespace net::worker::shared::rsetmulti{
 			if (!pair)
 				return false;
 
-			return getIndexes(decoder, pair->getVal(), icontainer, bcontainer, maxIndexes);
-		}
-
-		template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
-		bool getIndexes(DBAdapter &db, Decoder decoder,
-					std::string_view keyN, std::string_view keySub,
-						Container &icontainer, BContainer &bcontainer,
-							size_t maxIndexes = 0){
-
-			hm4::PairBufferKey bufferKeyCtrl;
-			auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
-
-			return getIndexes(db, decoder, keyCtrl, icontainer, bcontainer, maxIndexes);
+			return getIndexes(decoder, pair->getVal(), icontainer, bcontainer);
 		}
 
 	} // namespace impl_
@@ -340,21 +349,20 @@ namespace net::worker::shared::rsetmulti{
 	template<typename Decoder, typename Container, typename BContainer>
 	bool getIndexes(Decoder decoder,
 				std::string_view data,
-					Container &icontainer, BContainer &bcontainer,
-						size_t maxIndexes = 0){
+					Container &icontainer, BContainer &bcontainer){
 
-		return impl_::getIndexes(decoder, data, icontainer, bcontainer, maxIndexes);
+		return impl_::getIndexes(decoder, data, icontainer, bcontainer);
 	}
 
 	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 	bool getIndexes(DBAdapter &db, Decoder decoder,
 				std::string_view keyN, std::string_view keySub,
-					Container &icontainer, BContainer &bcontainer,
-						size_t maxIndexes = 0){
+					Container &icontainer, BContainer &bcontainer){
 
-		// logger<Logger::DEBUG>() << "MSetMulti::GET_INDEXES: ctrl key" << keyCtrl;
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
 
-		return impl_::getIndexes(db, decoder, keyN, keySub, icontainer, bcontainer, maxIndexes);
+		return impl_::getIndexes(db, decoder, keyCtrl, icontainer, bcontainer);
 	}
 
 	template<typename DBAdapter>

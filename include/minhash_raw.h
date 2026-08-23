@@ -38,6 +38,14 @@ namespace minhash{
 			return sizeof(MHT) * size();
 		}
 
+		constexpr static size_t bandCount(size_t bandSize){
+			return bytes() / bandSize;
+		}
+
+		constexpr static size_t maxBandCount(){
+			return bandCount(1);
+		}
+
 	public:
 		static void clear(MHT *table) {
 			memset(table, 0, bytes());
@@ -145,7 +153,7 @@ namespace minhash{
 
 			const auto *data = reinterpret_cast<const char *>(table);
 
-			for (uint16_t i = 0; i < bytes() / bandSize; ++i){
+			for (uint16_t i = 0; i < bandCount(bandSize); ++i){
 				auto begin = data + i * bandSize;
 				auto end   = data + i * bandSize + bandSize;
 

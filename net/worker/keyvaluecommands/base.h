@@ -57,19 +57,20 @@ namespace net::worker::commands{
 
 		using buffer_t = std::array<char, 128>;
 
-		using Container			= StaticVector<std::string_view		, ContainerSize>;	//  1   MB, if string_view is 16 bytes
-		using BufferContainer		= StaticVector<buffer_t			, ContainerSize>;	//  8   MB
-		using PairContainer		= StaticVector<const hm4::Pair *	, ContainerSize>;	//  0.5 MB
+		template<size_t Size> using TContainer		= StaticVector<std::string_view		, Size>;
+		template<size_t Size> using TBufferContainer	= StaticVector<buffer_t			, Size>;
+		template<size_t Size> using TPairContainer	= StaticVector<const hm4::Pair *	, Size>;
+		template<size_t Size> using TKContainer		= StaticVector<hm4::PairBufferKey	, Size>;
 
-		using SmallContainer		= StaticVector<std::string_view		, SmallContainerSize>;
-		using SmallBufferContainer	= StaticVector<buffer_t			, SmallContainerSize>;
-		using SmallPairContainer	= StaticVector<const hm4::Pair *	, SmallContainerSize>;
+		using Container			= TContainer		<ContainerSize>;	//  1   MB, if string_view is 16 bytes
+		using BufferContainer		= TBufferContainer	<ContainerSize>;	//  3   MB
+		using PairContainer		= TPairContainer	<ContainerSize>;	//  0.5 MB
+		using BufferKContainer		= TKContainer		<ContainerSize>;	// 64   MB
 
-		using LargeContainer		= StaticVector<std::string_view		, LargeContainerSize>;
-		using LargeBufferContainer	= StaticVector<buffer_t			, LargeContainerSize>;
-		using LargePairContainer	= StaticVector<const hm4::Pair *	, LargeContainerSize>;
+		using SmallContainer		= TContainer		<SmallContainerSize>;	//  4   MB, if string_view is 16 bytes
+		using SmallBufferContainer	= TBufferContainer	<SmallContainerSize>;	// 12   KB
 
-		using BufferKContainer	= StaticVector	<hm4::PairBufferKey	, ContainerSize>;	// ~64  MB
+		using LargeContainer		= TContainer		<LargeContainerSize>;	//  256 MB, if string_view is 16 bytes
 
 		constexpr static size_t MaxMemory =	sizeof(Container	)	+	//   1   MB
 							sizeof(BufferContainer	)	+	//   8   MB

@@ -36,14 +36,6 @@ namespace net::worker::commands::MH{
 			};
 		}
 
-	//	template<class DBAdapter>
-	//	auto store(DBAdapter &db, std::string_view key, const MHT *mh){
-	//		return hm4::insert(*db,
-	//			key,
-	//			MHT2sv(mh)
-	//		);
-	//	}
-
 		template<class DBAdapter>
 		const MHT *load_ptr(DBAdapter &db, std::string_view key){
 			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, MH::bytes()); pair)
@@ -72,7 +64,8 @@ namespace net::worker::commands::MH{
 				return { buffer.data(), result.size };
 		}
 
-		void bandsHexToContainer(const MHT *mh_data, uint32_t bandSize, OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer){
+		template<typename IContainer, typename BContainer>
+		void bandsHexToContainer(const MHT *mh_data, uint32_t bandSize, IContainer &icontainer, BContainer &bcontainer){
 			static_assert(MH::bytes() <= OutputBlob::ContainerSize);
 
 			MH mh;
@@ -113,8 +106,7 @@ namespace net::worker::commands::MH{
 
 			template<typename IContainer, typename BContainer>
 			bool operator()(std::string_view data,
-						IContainer &icontainer, BContainer &bcontainer,
-							[[maybe_unused]] size_t maxIndexes = 0) const{
+						IContainer &icontainer, BContainer &bcontainer) const{
 
 				icontainer.clear();
 				bcontainer.clear();
@@ -128,6 +120,10 @@ namespace net::worker::commands::MH{
 
 				return true;
 			}
+
+		public:
+			using IContainer = OutputBlob::TContainer	<MH::maxBandCount()>;
+			using BContainer = OutputBlob::TBufferContainer	<MH::maxBandCount()>;
 
 		private:
 			uint32_t bandSize;
@@ -211,8 +207,8 @@ namespace net::worker::commands::MH{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
-			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			auto &icontainer = blob.construct<typename Decoder::IContainer>();
+			auto &bcontainer = blob.construct<typename Decoder::BContainer>();
 
 			Decoder decoder{ bandSize };
 
@@ -244,9 +240,12 @@ namespace net::worker::commands::MH{
 			using Pair = hm4::Pair;
 			using Base = hm4::PairFactory::IFactoryAction<0,1,MHSETFactory>;
 
+			using Decoder = impl_::Decoder;
+
 			MHSETFactory(std::string_view const key, const Pair *pair, char delimiter, std::string_view tokens,
 								impl_::Decoder decoder,
-									OutputBlob::Container &icontainer, OutputBlob::BufferContainer &bcontainer) :
+									typename Decoder::IContainer &icontainer,
+									typename Decoder::BContainer &bcontainer) :
 							Base::IFactoryAction	(key, impl_::MH::bytes(), pair	),
 							delimiter		(delimiter			),
 							tokens			(tokens				),
@@ -282,9 +281,9 @@ namespace net::worker::commands::MH{
 	private:
 			char				delimiter;
 			std::string_view		tokens;
-			impl_::Decoder 			decoder;
-			OutputBlob::Container		&icontainer;
-			OutputBlob::BufferContainer	&bcontainer;
+			Decoder 			decoder;
+			typename Decoder::IContainer	&icontainer;
+			typename Decoder::BContainer	&bcontainer;
 
 			size_t				countBits = 0;
 		};
@@ -336,8 +335,8 @@ namespace net::worker::commands::MH{
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
-			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			auto &icontainer = blob.construct<typename Decoder::IContainer>();
+			auto &bcontainer = blob.construct<typename Decoder::BContainer>();
 
 			Decoder decoder{ bandSize };
 
@@ -391,8 +390,8 @@ namespace net::worker::commands::MH{
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			auto &icontainer = blob.construct<typename Decoder::IContainer>();
+			auto &bcontainer = blob.construct<typename Decoder::BContainer>();
 
 			Decoder decoder{ bandSize };
 
@@ -469,8 +468,10 @@ namespace net::worker::commands::MH{
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
 
-			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+			static_assert(OutputBlob::Container::capacity() >= Decoder::IContainer::capacity());
+
+			auto &icontainer = blob.construct<OutputBlob::Container		>(); // will reuse it later
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer	>(); // will reuse it later
 
 			Decoder decoder{ bandSize };
 
@@ -536,6 +537,7 @@ namespace net::worker::commands::MH{
 
 			// keySub_container, icontainer and bcontainer no longer need.
 
+			// reusing icontainer and bcontainer
 			auto &container  = icontainer;
 
 			container.clear();
