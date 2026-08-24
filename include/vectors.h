@@ -537,12 +537,13 @@ namespace MyVectors{
 		MyVectors::TVector<int8_t> vectorI8{ bufferVectorI8, vector.size() };
 
 		FORCE_VECTORIZE
-		for(uint32_t i = 0; i < vector.size(); ++i){
-			auto const element = fpr(vector[i]);
+		for(uint32_t i = 0; i < vector.size(); ++i)
+			vectorI8[i] = MyVectors::quantizeComponentToI8(fpr(vector[i]));
 
-			vectorI8[i] = MyVectors::quantizeComponentToI8(element);
+		if constexpr(0){
+			for(uint32_t i = 0; i < vector.size(); ++i){
+				auto const element = fpr(vector[i]);
 
-			if constexpr(0){
 				if constexpr(std::is_same_v<T, float>)
 					printf("%4u %+8.4f %+5d\n", i, element, vectorI8[i]);
 				else

@@ -2,7 +2,7 @@
 #define MY_VECTORS_STORAGE_H_
 
 #include "vectors.h"
-//#include "bitvectors.h"
+#include "bitvectors.h"
 
 #include "myendian.h"
 #include "mybufferview.h"
@@ -62,35 +62,33 @@ namespace MyVectors{
 		}
 
 		constexpr static size_t bytes(size_t size){
-			return sizeof(StoredVector<T>) - sizeof(T) + size * sizeof(T);
+			return sizeof(StoredVector) - sizeof(T) + size * sizeof(T);
 		}
 	} __attribute__((__packed__));
 
-	static_assert(std::is_standard_layout_v<StoredVector<float	> >, "Wector must be POD type");
-	static_assert(std::is_standard_layout_v<StoredVector<int16_t	> >, "Wector must be POD type");
-	static_assert(std::is_standard_layout_v<StoredVector<int8_t	> >, "Wector must be POD type");
+	static_assert(std::is_standard_layout_v<StoredVector<float	> >, "StoredVector must be POD type");
+	static_assert(std::is_standard_layout_v<StoredVector<int16_t	> >, "StoredVector must be POD type");
+	static_assert(std::is_standard_layout_v<StoredVector<int8_t	> >, "StoredVector must be POD type");
 
-/*
+
 
 	template<>
 	struct StoredVector<bool>{
-		uint32_t	dimBE;		// 4
+		uint32_t	sizeBE;		// 4
 		uint8_t		vdata[1];	// flexible member
 
 		static const StoredVector *createInRawMemory(void *mem, CFVector const vector){
-			using namespace MyVectors;
+			auto *self = static_cast<StoredVector *>(mem);
 
-			auto *self = static_cast<TVector<T> *>(mem);
-
-			self->dimBE = htobe( static_cast<uint32_t>(vector.size()) );
+			self->sizeBE = htobe( static_cast<uint32_t>(vector.size()) );
 
 			MyVectors::bitVectorQuantize(vector, self->vdata);
 
 			return self;
 		}
 
-		constexpr auto dim() const{
-			return betoh(dimBE);
+		constexpr auto size() const{
+			return betoh(sizeBE);
 		}
 
 		std::string_view toSV() const{
@@ -103,30 +101,26 @@ namespace MyVectors{
 		std::string_view toBitSV() const{
 			return std::string_view{
 				reinterpret_cast<const char *>(vdata),
-				MyVectors::bitVectorBytes(dim())
+				bitVectorBytes(size())
 			};
 		}
 
 		bool operator[](size_t index) const{
-			using namespace MyVectors;
-
 			return bitVectorGetComponent(vdata, index);
 		}
 
 		constexpr size_t bytes() const{
-			return bytes(dim());
+			return bytes(size());
 		}
 
-		constexpr static size_t bytes(size_t dim){
-			using namespace MyVectors;
-
-			return sizeof(Wector) - sizeof(uint8_t) + MyVectors::bitVectorBytes(dim);
+		constexpr static size_t bytes(size_t size){
+			return sizeof(StoredVector) - sizeof(uint8_t) + bitVectorBytes(size);
 		}
 	} __attribute__((__packed__));
 
-	static_assert(std::is_standard_layout_v<StoredVector<bool	> >, "Wector must be POD type");
+	static_assert(std::is_standard_layout_v<StoredVector<bool	> >, "StoredVector must be POD type");
 
-*/
+
 
 	template<typename T>
 	void toStoredVector(const char *) = delete;
