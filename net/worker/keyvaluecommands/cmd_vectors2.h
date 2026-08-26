@@ -740,7 +740,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[3]);
 
-			if (dim_ix <= 1 || dim_ix > dim_ve)
+			if (dim_ix < 1 || dim_ix > dim_ve)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[4]);
@@ -916,7 +916,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
-			if (dim_ix <= 1 || dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[3]);
@@ -1385,7 +1385,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
-			if (dim_ix <= 1 || dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[3]);
@@ -1522,7 +1522,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
-			if (dim_ix <= 1 || dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[3]);
@@ -1791,7 +1791,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
-			if (dim_ix <= 1 || dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[3]);
@@ -2053,7 +2053,8 @@ namespace net::worker::commands::Vectors2{
 					continue;
 
 				float const dist = distanceBit(dtype,
-							vectorA,		storedVectorB->toVector()
+								vectorA,
+								storedVectorB->toVector()
 				);
 
 				heap.push(VSIMHeapNode{ dist, text });
@@ -2168,7 +2169,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
-			if (dim_ix <= 1 || dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[3]);
@@ -2190,7 +2191,7 @@ namespace net::worker::commands::Vectors2{
 			auto const bands = MyDecoderF::fixBands(from_string<uint64_t>(p[6]));
 			auto const bits  = MyDecoderF::fixBits (from_string<uint64_t>(p[7]));
 
-			if (dim_ix <= 1 || dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
@@ -2290,17 +2291,16 @@ namespace net::worker::commands::Vectors2{
 
 			auto &data = heap.sort();
 
-			for(auto &[score, text] : data){
+			for(auto [distPop, text] : data){
 				container.push_back(text);
 
 				bcontainer.push_back();
 
-				container.push_back(
-					formatDouble(
-						score,
-						bcontainer.back()
-					)
-				);
+				auto const dist = distanceFix(dtype, distPop);
+
+				auto const val  = formatDouble(dist, bcontainer.back());
+
+				container.push_back(val);
 			}
 
 			return result.set_container(container);
@@ -2372,11 +2372,9 @@ namespace net::worker::commands::Vectors2{
 				if (!storedVectorB)
 					continue;
 
-				float const dist = distanceBitFix(dtype,
-							distanceBit(dtype,
-								storedVectorA->toVector(),
+				float const dist = distanceBit(dtype,
+								vectorA,
 								storedVectorB->toVector()
-							), fix
 				);
 
 				heap.push(VSIMHeapNode{ dist, text });
@@ -2392,17 +2390,16 @@ namespace net::worker::commands::Vectors2{
 
 			auto &data = heap.sort();
 
-			for(auto &[score, text] : data){
+			for(auto [distPop, text] : data){
 				container.push_back(text);
 
 				bcontainer.push_back();
 
-				container.push_back(
-					formatDouble(
-						score,
-						bcontainer.back()
-					)
-				);
+				auto const dist = distanceBitFix(dtype, distPop, fix);
+
+				auto const val  = formatDouble(dist, bcontainer.back());
+
+				container.push_back(val);
 			}
 
 			return result.set_container(container);

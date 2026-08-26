@@ -2,7 +2,7 @@
 #define MY_VECTORS_STORAGE_H_
 
 #include "vectors.h"
-#include "bitvectors.h"
+#include "vectors_bit.h"
 
 #include "myendian.h"
 

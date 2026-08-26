@@ -7,7 +7,7 @@
 #include <string_view>
 
 #include "forcevectorize.h"
-#include "mybitbufferview.h"
+#include "mybufferviewbit.h"
 
 #include "mypopcount.h"
 
@@ -166,7 +166,7 @@ namespace MyVectors{
 					bool const dot = h <= vector_.bits() / 2;
 
 					if (dot)
-						result |= static_cast<HashType>(1u << i);
+						result |= static_cast<HashType>(HashType{1} << i);
 				}
 
 				return result;

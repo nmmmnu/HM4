@@ -246,11 +246,9 @@ namespace MyVectors{
 
 			auto const result = (1 + dot) / 2;
 
-			constexpr float ZERO = 1E-6f;
-
 			// returns +1.0 to 0.0
 
-			return result > ZERO ? result : 0;
+			return std::clamp(result, 0.f, 1.f);
 		}
 
 	} // namespace distance_cosine_impl_
@@ -284,11 +282,9 @@ namespace MyVectors{
 
 		auto const result = aM * aM + bM * bM - 2 * aM * bM * dot;
 
-		constexpr float ZERO = 1E-6f;
-
 		// returns 0.0 to INF
 
-		return result > ZERO ? result : 0;
+		return std::max(0.f, result);
 	}
 
 	template<typename T1, typename T2,
@@ -485,7 +481,7 @@ namespace MyVectors{
 				FORCE_VECTORIZE
 				for (size_t i = 0; i < MaxBits; ++i)
 					if (dots[i] > 0)
-						result |= static_cast<HashType>(1u << i);
+						result |= static_cast<HashType>(HashType{1} << i);
 
 				return result;
 			}
