@@ -7,23 +7,34 @@
 #include <string_view>
 
 #include "forcevectorize.h"
+#include "mybitbufferview.h"
+
+#include "mypopcount.h"
 
 namespace MyVectors{
 
-	constexpr bool bitVectorGetComponent(const uint8_t *data, size_t index){
-		size_t  const byte  = index / 8;
-		size_t  const bit   = index % 8;
-		uint8_t const value = data[byte];
+	using BVector = MyBuffer::BitBufferView;
 
-		return (value >> bit) & 1;
-	}
+//	constexpr bool bitVectorGetComponent(const uint8_t *data, size_t index){
+//		size_t  const byte  = index / 8;
+//		size_t  const bit   = index % 8;
+//		uint8_t const value = data[byte];
+//
+//		return (value >> bit) & 1;
+//	}
+
+//	constexpr size_t bitVectorBytes(size_t size){
+//		return (size + 7) / 8;
+//	}
+
+	// ------------------------
 
 	constexpr uint8_t bitVectorQuantizeComponent(float v){
 		return v > 0 ? 1 : 0;
 	}
 
-	template <typename FVector>
-	constexpr void bitVectorQuantize(FVector const &vector, uint8_t *output){
+	template <typename CFVector>
+	constexpr void bitVectorQuantize(CFVector const &vector, uint8_t *output){
 		size_t i   = 0;
 		size_t out = 0;
 
@@ -47,128 +58,155 @@ namespace MyVectors{
 		}
 	}
 
-	constexpr size_t bitVectorBytes(size_t size){
-		return (size + 7) / 8;
-	}
+	// ------------------------
 
-	size_t distanceHamming(std::string_view a, std::string_view b){
-		assert(a.size() == b.size() && "Size of the vectors must be the same");
+	float distanceHamming(BVector a, BVector b){
+		assert(a.bits() == b.bits() && "Size of the vectors must be the same");
 
-		size_t result = 0;
-
-		size_t const size64 = a.size() / sizeof(uint64_t);
-
-		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
-		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
-
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < size64; ++i)
-		    result += static_cast<size_t>( __builtin_popcountll(pa64[i] ^ pb64[i]) );
-
-		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
-		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
-
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
-		    result += static_cast<size_t>( __builtin_popcount(pa8[i] ^ pb8[i]) );
-
-
-
-		return result;
-	}
-
-	float distanceHammingFloat(std::string_view a, std::string_view b){
 		return static_cast<float>(
-			distanceHamming(a, b)
+			MyPopcount::popcountXOR(a.toSV(), b.toSV(), a.bits())
 		);
 	}
 
-	float distanceCosineBit(std::string_view a, std::string_view b){
-		assert(a.size() == b.size() && "Size of the vectors must be the same");
+	constexpr float distanceHammingPrepareFix(BVector a){
+		if (a.bits())
+			return 1.f / static_cast<float>(a.bits());
+		else
+			return 0.f;
+	}
 
-		size_t dot   = 0;
-		size_t normA = 0;
-		size_t normB = 0;
+	constexpr float distanceHammingFix(float distance, float fix){
+		return distance * fix;
+	}
 
-		size_t const size64 = a.size() / sizeof(uint64_t);
+	// ------------------------
 
-		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
-		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
+	constexpr float distanceCosineBitPrepareFix(BVector){
+		return 0;
+	}
 
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < size64; ++i){
-			auto const byteA = pa64[i];
-			auto const byteB = pb64[i];
+	float distanceCosineBit(BVector a, BVector b){
+		assert(a.bits() == b.bits() && "Size of the vectors must be the same");
 
-			dot   += static_cast<size_t>( __builtin_popcountll(byteA & byteB) );
-			normA += static_cast<size_t>( __builtin_popcountll(byteA) );
-			normB += static_cast<size_t>( __builtin_popcountll(byteB) );
-		}
-
-		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
-		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
-
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i){
-			auto const byteA = pa8[i];
-			auto const byteB = pb8[i];
-
-			dot   += static_cast<size_t>( __builtin_popcount(byteA & byteB) );
-			normA += static_cast<size_t>( __builtin_popcount(byteA) );
-			normB += static_cast<size_t>( __builtin_popcount(byteB) );
-		}
+		auto [dot, normA, normB] = MyPopcount::popcountDOT(a.toSV(), b.toSV(), a.bits());
 
 		if (normA == 0 || normB == 0)
-			return 1.0;
+			return 1.f;
 
-		return 1 - static_cast<float>(dot * dot) / static_cast<float>(normA * normB);
+		return 1.f - static_cast<float>(dot * dot) / static_cast<float>(normA * normB);
 	}
 
-	size_t distanceDominatingPrepare(std::string_view a){
-		// popcount
+	// constexpr float distanceCosineBitFix(float distance, float /* fix */){
+	// 	return std::sqrt(std::max(0.f, distance));
+	// }
 
-		size_t result = 0;
-
-		size_t const size64 = a.size() / sizeof(uint64_t);
-
-		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
-
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < size64; ++i)
-		    result += static_cast<size_t>( __builtin_popcountll(pa64[i]) );
-
-		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
-
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
-		    result += static_cast<size_t>( __builtin_popcount(pa8[i]) );
-
-		return result;
+	constexpr float distanceCosineBitFix(float distance, float /* fix */){
+		return distance;
 	}
 
-	float distanceDominatingPrepared(std::string_view a, std::string_view b){
-		assert(a.size() == b.size() && "Size of the vectors must be the same");
+	// ------------------------
 
-		size_t result = 0;
+	float distanceDominatingPrepareFix(BVector a){
+		if (auto const pc = MyPopcount::popcount(a.toSV(), a.bits()); pc)
+			return 1.f / static_cast<float>(pc);
+		else
+			return 0.f;
+	}
 
-		size_t const size64 = a.size() / sizeof(uint64_t);
+	float distanceDominatingPrepared(BVector a, BVector b){
+		assert(a.bits() == b.bits() && "Size of the vectors must be the same");
 
-		const uint64_t *pa64 = reinterpret_cast<const uint64_t *>(a.data());
-		const uint64_t *pb64 = reinterpret_cast<const uint64_t *>(b.data());
-
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < size64; ++i)
-		    result += static_cast<size_t>( __builtin_popcountll(pa64[i] & pb64[i]) );
-
-		const uint8_t  *pa8  = reinterpret_cast<const uint8_t *>(pa64 + size64);
-		const uint8_t  *pb8  = reinterpret_cast<const uint8_t *>(pb64 + size64);
-
-		FORCE_VECTORIZE
-		for (size_t i = 0; i < a.size() % sizeof(uint64_t); ++i)
-		    result += static_cast<size_t>( __builtin_popcount(pa8[i] & pb8[i]) );
+		auto const pc = MyPopcount::popcountAND(a.toSV(), b.toSV(), a.bits());
 
 		// bigger popcount, smaller distance
-		return - static_cast<float>(result);
+		return - static_cast<float>(pc);
+	}
+
+	constexpr float distanceDominatingFix(float distance, float fix){
+		return 1.f + distance * fix;
+	}
+
+
+
+	// ------------------------
+
+	namespace simhash_impl_{
+
+		template <size_t MaxDimensions, typename HashType, typename Generator>
+		struct MultiHyperplaneProjectorBit{
+			static_assert(
+				std::is_same_v<HashType, uint8_t > ||
+				std::is_same_v<HashType, uint16_t> ||
+				std::is_same_v<HashType, uint32_t> ||
+				std::is_same_v<HashType, uint64_t>
+			);
+
+			constexpr MultiHyperplaneProjectorBit(BVector vector, uint64_t seed = 0) :
+									vector_		(vector	),
+									generator_	(seed	){}
+
+			constexpr HashType operator()(){
+				uint64_t random64[MaxCapacity64]; // for 8K -> 1K
+
+				HashType result = 0;
+
+				for (size_t i = 0; i < MaxBits; ++i){
+					// 1. Generate random numbers (bits)
+					generateRandom_(random64);
+
+					BVector rvector{
+						random64,
+						vector_.bits()
+					};
+
+					// 2. generate hamming
+					auto const h   = MyPopcount::popcountXOR(vector_.toSV(), rvector.toSV(), vector_.bits());
+
+					// 3. Result
+					bool const dot = h <= vector_.bits() / 2;
+
+					if (dot)
+						result |= static_cast<HashType>(1u << i);
+				}
+
+				return result;
+			}
+
+		private:
+			constexpr void generateRandom_(uint64_t *random64){
+				size_t const needed64 = size64__(vector_.bits());
+
+				for (size_t i = 0; i < needed64; ++i)
+					random64[i] = generator_();
+			}
+
+			constexpr static size_t size64__(size_t bits){
+				auto const bits64 = sizeof(uint64_t) * 8;
+
+				return (bits + bits64 - 1) / bits64;
+			}
+
+		private:
+			constexpr static size_t MaxBits		= sizeof(HashType) * 8;
+			constexpr static size_t MaxCapacity64	= size64__(MaxDimensions);
+
+		private:
+			BVector		vector_;
+			Generator	generator_;
+		};
+
+	} // namespace simhash_impl_
+
+	template<size_t MaxDimensions, typename HashType, typename F>
+	void simhashBandsBit(BVector vector, size_t bands, F f, uint64_t seed = 0){
+		using namespace simhash_impl_;
+
+		assert(bands <= std::numeric_limits<uint8_t>::max() + 1);
+
+		MultiHyperplaneProjectorBit<MaxDimensions, HashType, MurmurHashMixer64> mhpp{ vector, seed };
+
+		for(size_t id = 0; id < bands; ++id)
+			f(id, mhpp());
 	}
 
 } // namspace MyVectors

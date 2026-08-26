@@ -34,7 +34,7 @@ while (($line = fgets($F)) !== false){
 	//	exit;
 	}
 
-	if ($i == 1000){
+	if ($i == 10000){
 	//	exit;
 	}
 
@@ -54,18 +54,36 @@ printf("Loaded %d vectors\n", $i);
 function process_vector($key, & $vector){
 	global $redis;
 
-	if (0){
+	if (1){
 		$x = $redis->rawCommand(
 			"VADD",
-			"gi300",
-			300, 300, "i",
-			"h",
+			"gb150",
+			300, 150, "b",
+			"b",
 			$key,
-			vhex($vector)
+			vbin($vector)
 		);
 	}
 
-	if (1){
+	if (0){
+	//	$x = $redis->rawCommand(
+	//		"VADD",
+	//		"gf150",
+	//		300, 150, "f",
+	//		"b",
+	//		$key,
+	//		vbin($vector)
+	//	);
+
+	//	$x = $redis->rawCommand(
+	//		"VADD",
+	//		"gs150",
+	//		300, 150, "s",
+	//		"b",
+	//		$key,
+	//		vbin($vector)
+	//	);
+
 		$x = $redis->rawCommand(
 			"VADD",
 			"gi150",

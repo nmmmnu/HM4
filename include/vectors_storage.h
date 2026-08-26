@@ -5,7 +5,6 @@
 #include "bitvectors.h"
 
 #include "myendian.h"
-#include "mybufferview.h"
 
 namespace MyVectors{
 
@@ -98,15 +97,8 @@ namespace MyVectors{
 			};
 		}
 
-		std::string_view toBitSV() const{
-			return std::string_view{
-				reinterpret_cast<const char *>(vdata),
-				bitVectorBytes(size())
-			};
-		}
-
-		bool operator[](size_t index) const{
-			return bitVectorGetComponent(vdata, index);
+		BVector toVector() const{
+			return { vdata, size() };
 		}
 
 		constexpr size_t bytes() const{
@@ -114,7 +106,7 @@ namespace MyVectors{
 		}
 
 		constexpr static size_t bytes(size_t size){
-			return sizeof(StoredVector) - sizeof(uint8_t) + bitVectorBytes(size);
+			return sizeof(StoredVector) - sizeof(uint8_t) + MyBuffer::BitBufferView::bytes(size);
 		}
 	} __attribute__((__packed__));
 

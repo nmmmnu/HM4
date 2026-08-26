@@ -205,43 +205,32 @@ namespace net::worker::commands::Vectors2{
 
 
 
-		constexpr float distanceBitPre(DType dtype, std::string_view const a){
+		constexpr float distanceBitPrepareFix(DType dtype, MyVectors::BVector a){
 			switch(dtype){
-			case DType::BIT_HAMMING : {
-					if (auto const dim = a.size(); dim)
-						return 1.f / static_cast<float>(dim);
-					else
-						return 0.f;
-				}
-
-			case DType::BIT_DOMINATE : {
-					if (auto const popc = MyVectors::distanceDominatingPrepare(a); popc)
-						return 1.f / static_cast<float>(popc);
-					else
-						return 0.f;
-				}
-
-			default : return 0;
+			default:
+			case DType::BIT_HAMMING		: return MyVectors::distanceHammingPrepareFix		(a);
+			case DType::BIT_COSINE		: return MyVectors::distanceCosineBitPrepareFix		(a);
+			case DType::BIT_DOMINATE	: return MyVectors::distanceDominatingPrepareFix	(a);
 			}
 		}
 
-		float distanceBit(DType dtype, std::string_view const a, std::string_view const b){
+		float distanceBit(DType dtype, MyVectors::BVector a, MyVectors::BVector b){
 			using namespace MyVectors;
 
 			switch(dtype){
 			default:
-			case DType::BIT_HAMMING		: return MyVectors::distanceHammingFloat	(a, b);
+			case DType::BIT_HAMMING		: return MyVectors::distanceHamming		(a, b);
 			case DType::BIT_COSINE		: return MyVectors::distanceCosineBit		(a, b);
 			case DType::BIT_DOMINATE	: return MyVectors::distanceDominatingPrepared	(a, b);
 			}
 		}
 
-		constexpr float distanceBitFix(DType dtype, float distance, float scoreFix){
+		constexpr float distanceBitFix(DType dtype, float distance, float fix){
 			switch(dtype){
-			case DType::BIT_HAMMING		: return distance * scoreFix;
-			case DType::BIT_COSINE		: return std::sqrt(distance);
-			case DType::BIT_DOMINATE	: return 1.f + distance * scoreFix;
-			default				: return distance;
+			default:
+			case DType::BIT_HAMMING		: return MyVectors::distanceHammingFix		(distance, fix);
+			case DType::BIT_COSINE		: return MyVectors::distanceCosineBitFix	(distance, fix);
+			case DType::BIT_DOMINATE	: return MyVectors::distanceDominatingFix	(distance, fix);
 			}
 		}
 
@@ -445,19 +434,18 @@ namespace net::worker::commands::Vectors2{
 			return std::string_view(buffer, hashEncodeSize);
 		}
 
-		template<size_t N>
-		constexpr std::string_view hashEncode(uint16_t val, std::array<char, N> &buffer) {
-			static_assert(N >= hashEncodeSize); // buffer is ABC.0000
-
-			return hashEncode(val, buffer.size());
-		}
+	//	template<size_t N>
+	//	constexpr std::string_view hashEncode(uint16_t val, std::array<char, N> &buffer) {
+	//		static_assert(N >= hashEncodeSize); // buffer is ABC.0000
+	//
+	//		return hashEncode(val, buffer.data());
+	//	}
 
 
 
 		template<typename T>
 		struct Decoder{
-			Decoder(uint32_t dim_ix) :
-							dim_ix	(dim_ix			){}
+			Decoder(uint32_t dim_ix) :	dim_ix	(dim_ix			){}
 
 			Decoder(uint32_t dim_ix, size_t bands, size_t bits) :
 							dim_ix	(dim_ix			),
@@ -504,10 +492,11 @@ namespace net::worker::commands::Vectors2{
 					icontainer.emplace_back(buffer, p - skip);
 				};
 
-				if constexpr(!std::is_same_v<T, bool>)
-					MyVectors::simhashBands<MaxDimensions, band_type>(storedVector->toVector(), bands, f, valueProjBE);
-
-				(void) f;
+				if constexpr(!std::is_same_v<T, bool>){
+					MyVectors::simhashBands		<MaxDimensions, band_type>(storedVector->toVector(), bands, f, valueProjBE);
+				}else{
+					MyVectors::simhashBandsBit	<MaxDimensions, band_type>(storedVector->toVector(), bands, f);
+				}
 
 				return true;
 			}
@@ -568,6 +557,57 @@ namespace net::worker::commands::Vectors2{
 
 
 
+		// VGET key   DIM_IX QUANTIZE_TYPE name
+		// VGET words 150    F             frog
+		// VGET words 150    I             frog
+
+		/*
+		QUANTIZE_TYPE:
+		F = float	e.g. do not quantize
+		S = int16
+		I = int8
+		B = bit
+		*/
+
+		template<typename T, bool Norm, typename Protocol, typename DBAdapter>
+		void process__VGET_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix);
+
+		template<bool Norm, typename Protocol, typename DBAdapter>
+		void process__VGET(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			using namespace impl_;
+
+			if (p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
+
+			auto const &keyN   = p[1];
+			auto const &keySub = p[4];
+
+			if (keyN.empty() || keySub.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+			auto const dim_ix = from_string<uint32_t>(p[2]);
+
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto const qtype = translateQType(p[3]);
+
+			if (qtype == QType::UNKNOWN)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			switch(qtype){
+			case QType::F32 : return process__VGET_<float	, Norm>(db, result, blob, keyN, keySub, dim_ix);
+			case QType::I16 : return process__VGET_<int16_t	, Norm>(db, result, blob, keyN, keySub, dim_ix);
+			case QType::I8  : return process__VGET_<int8_t	, Norm>(db, result, blob, keyN, keySub, dim_ix);
+			case QType::BIT : return process__VGET_<bool	, Norm>(db, result, blob, keyN, keySub, dim_ix);
+
+			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+		}
+
 		template<typename T, bool Norm, typename Protocol, typename DBAdapter>
 		void process__VGET_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix){
 			auto const sv = shared::rsetmulti::getData(db, keyN, keySub);
@@ -616,67 +656,21 @@ namespace net::worker::commands::Vectors2{
 
 				return result.set_container(container);
 			}else{
+				auto const vector	= storedVector->toVector();
+
 				auto &container		= blob.construct<OutputBlob::Container>();
 
 				if constexpr(Norm){
 					container.push_back("0");
 				}
 
-				for (size_t i = 0; i < dim_ix; ++i){
-					auto const s = (*storedVector)[i] ? "+1" : "-1";
+				std::string_view const fp = "+1";
+				std::string_view const fn = "-1";
 
-					container.push_back(s);
-				}
+				for (size_t i = 0; i < dim_ix; ++i)
+					container.push_back(vector[i] ? fp : fn);
 
 				return result.set_container(container);
-			}
-		}
-
-		// VGET key   DIM_IX QUANTIZE_TYPE name
-		// VGET words 150    F             frog
-		// VGET words 150    I             frog
-
-		/*
-		QUANTIZE_TYPE:
-		F = float	e.g. do not quantize
-		S = int16
-		I = int8
-		B = bit
-		*/
-
-		template<bool Norm, typename Protocol, typename DBAdapter>
-		void process__VGET(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
-			using namespace impl_;
-
-			if (p.size() != 5)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
-
-			auto const &keyN   = p[1];
-			auto const &keySub = p[4];
-
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			auto const dim_ix = from_string<uint32_t>(p[2]);
-
-			if (dim_ix < 1 && dim_ix > MaxDimensions)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			auto const qtype = translateQType(p[3]);
-
-			if (qtype == QType::UNKNOWN)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			switch(qtype){
-			case QType::F32 : return process__VGET_<float	, Norm>(db, result, blob, keyN, keySub, dim_ix);
-			case QType::I16 : return process__VGET_<int16_t	, Norm>(db, result, blob, keyN, keySub, dim_ix);
-			case QType::I8  : return process__VGET_<int8_t	, Norm>(db, result, blob, keyN, keySub, dim_ix);
-			case QType::BIT : return process__VGET_<bool	, Norm>(db, result, blob, keyN, keySub, dim_ix);
-
-			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
 		}
 
@@ -1025,7 +1019,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
-			if (dim_ix < 1 && dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[3]);
@@ -1180,7 +1174,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
 
-			if (dim_ix < 1 && dim_ix > MaxDimensions)
+			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto const qtype = translateQType(p[3]);
@@ -1245,11 +1239,13 @@ namespace net::worker::commands::Vectors2{
 								fvector[i] = htole(fvector[i]);
 						}
 					}else{
+						auto const vector	= storedVector->toVector();
+
 						float const fp = vtype == VType::BINARY_BE ? htobe(+1.f) : htole(+1.f);
 						float const fn = vtype == VType::BINARY_BE ? htobe(-1.f) : htole(-1.f);
 
 						for (size_t i = 0; i < dim_ix; ++i)
-							fvector[i] = (*storedVector)[i] ? fp : fn;
+							fvector[i] = vector[i] ? fp : fn;
 					}
 
 					return result.set(
@@ -1286,11 +1282,13 @@ namespace net::worker::commands::Vectors2{
 
 							MyVectors::denormalizeF(vector, magnitude, f_be, valueProjBE);
 						}else{
+							auto const vector	= storedVector->toVector();
+
 							float const fp = +1.f;
 							float const fn = -1.f;
 
 							for (size_t i = 0; i < dim_ix; ++i)
-								f_be(i, (*storedVector)[i] ? fp : fn);
+								f_be(i, vector[i] ? fp : fn);
 						}
 					}else{
 						// little endian data
@@ -1311,11 +1309,13 @@ namespace net::worker::commands::Vectors2{
 
 							MyVectors::denormalizeF(vector, magnitude, f_le, valueProjBE);
 						}else{
+							auto const vector	= storedVector->toVector();
+
 							float const fp = +1.f;
 							float const fn = -1.f;
 
 							for (size_t i = 0; i < dim_ix; ++i)
-								f_le(i, (*storedVector)[i] ? fp : fn);
+								f_le(i, vector[i] ? fp : fn);
 						}
 					}
 
@@ -1365,13 +1365,18 @@ namespace net::worker::commands::Vectors2{
 		M = Manhattan L1
 		C = Cosine
 		K = Canberra
+
+		DISTANCE_TYPE for bit vectors:
+		H = Hamming
+		B = Bit Cosine
+		D = Dominate
 		*/
 
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			using namespace impl_;
 
 			if (p.size() != 7)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
 
 			auto const keyN	= p[1];
 
@@ -1446,12 +1451,12 @@ namespace net::worker::commands::Vectors2{
 
 				return result.set(formatDouble(dist, buffer));
 			}else{
-				float const score = distanceBitPre(dtype, storedVectorA->toBitSV());
+				float const fix = distanceBitPrepareFix(dtype, storedVectorA->toVector());
 
 				float const dist = distanceBitFix(dtype,
 							distanceBit(dtype,
-								storedVectorA->toBitSV(),	storedVectorB->toBitSV()
-							), score
+								storedVectorA->toVector(),	storedVectorB->toVector()
+							), fix
 				);
 
 				to_string_buffer_t buffer;
@@ -1495,6 +1500,11 @@ namespace net::worker::commands::Vectors2{
 		M = Manhattan L1
 		C = Cosine
 		K = Canberra
+
+		DISTANCE_TYPE for bit vectors:
+		H = Hamming
+		B = Bit Cosine
+		D = Dominate
 		*/
 
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
@@ -1544,10 +1554,10 @@ namespace net::worker::commands::Vectors2{
 			}
 
 			switch(qtype){
-			case QType::F32	: return process__<float	>	(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
-			case QType::I16	: return process__<int16_t	>	(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
-			case QType::I8	: return process__<int8_t	>	(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
-			case QType::BIT	: return process__bool__		(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
+			case QType::F32	: return process__<float	>(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
+			case QType::I16	: return process__<int16_t	>(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
+			case QType::I8	: return process__<int8_t	>(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
+			case QType::BIT	: return process__<bool		>(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1667,7 +1677,8 @@ namespace net::worker::commands::Vectors2{
 			return result.set_container(container);
 		}
 
-		static void process__bool__(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		template<>
+		/* static */ void process__<bool>(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
@@ -1687,7 +1698,7 @@ namespace net::worker::commands::Vectors2{
 			auto &container  = blob.construct<OutputBlob::SmallContainer>();
 			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
 
-			float const score = distanceBitPre(dtype, storedVectorA->toBitSV());
+			float const fix = distanceBitPrepareFix(dtype, storedVectorA->toVector());
 
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySubB = *itk;
@@ -1703,8 +1714,9 @@ namespace net::worker::commands::Vectors2{
 
 				float const dist = distanceBitFix(dtype,
 							distanceBit(dtype,
-								storedVectorA->toBitSV(),	storedVectorB->toBitSV()
-							), score
+								storedVectorA->toVector(),
+								storedVectorB->toVector()
+							), fix
 				);
 
 				bcontainer.push_back();
@@ -1759,6 +1771,11 @@ namespace net::worker::commands::Vectors2{
 		M = Manhattan L1
 		C = Cosine
 		K = Canberra
+
+		DISTANCE_TYPE for bit vectors:
+		H = Hamming
+		B = Bit Cosine
+		D = Dominate
 		*/
 
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
@@ -1801,7 +1818,7 @@ namespace net::worker::commands::Vectors2{
 			case QType::F32	: return process__<float	>(db, result, blob, keyN, keySub, dim_ix, dtype, startKey);
 			case QType::I16	: return process__<int16_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, startKey);
 			case QType::I8	: return process__<int8_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, startKey);
-		//	case QType::BIT	: return process__bit_		 (db, result, blob, keyN, keySub, dim_ix, dtype, startKey);
+			case QType::BIT	: return process__<bool		>(db, result, blob, keyN, keySub, dim_ix, dtype, startKey);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -1812,9 +1829,7 @@ namespace net::worker::commands::Vectors2{
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
 								std::string_view startKey){
-
 			using namespace impl_;
-
 
 			auto const pp = prepareFVector<T>(db, blob, keyN, keySub, dim_ix, dtype);
 
@@ -1855,24 +1870,73 @@ namespace net::worker::commands::Vectors2{
 
 			logger<Logger::DEBUG>() << "VSIM.FLAT" << "range finish" << iterations << "vectors";
 
-			return process_range_finish<T>(db, result, blob, dtype, heap, tail);
+			return process_range_finish__<T>(db, result, blob, dtype, heap, tail);
 		}
 
-	private:
-		constexpr static size_t results__	= 32;
+		template<>
+		/* static */ void process__<bool>(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+						std::string_view keyN, std::string_view keySub,
+							uint32_t const dim_ix, impl_::DType dtype,
+								std::string_view startKey){
+			using namespace impl_;
 
-		using VSIMHeapNode	= std::pair<float, std::string_view>;
-		using VSIMHeap		= top_heap::TopKSmallest<VSIMHeapNode, results__>;
+			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
+
+			const auto *storedVectorA = MyVectors::toStoredVector<bool>(sv, dim_ix);
+
+			if (!storedVectorA)
+				return result.set_container0();
+
+			auto const vectorA = storedVectorA->toVector();
+
+			auto const fix = distanceBitPrepareFix(dtype, vectorA);
+
+			auto &heap = blob.construct<VSIMHeap>();
+
+			hm4::PairBufferKey bufferKey;
+
+			auto const prefix = shared::rsetmulti::makeKeyDataSearchFlat(bufferKey, DBAdapter::SEPARATOR, keyN);
+
+			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT.BIN" << "range prefix" << prefix << "start key" << (startKey.empty() ? "(none)" : startKey);
+
+			if (startKey.empty()){
+				startKey = prefix;
+				logger<Logger::DEBUG>() << "VSIM.FLAT.BIN" << "start key change" << startKey;
+			}
+
+			uint32_t iterations = 0;
+
+			auto const tail = process_rangeBit__(
+						db,
+						stop,
+						startKey,
+						keyN, keySub,
+						dim_ix,
+						dtype,
+						vectorA,
+						heap,
+						iterations
+			);
+
+			logger<Logger::DEBUG>() << "VSIM.FLAT.BIN" << "range finish" << iterations << "vectors";
+
+			return process_rangeBit_finish__(db, result, blob, dtype, fix, heap, tail);
+		}
+
 
 	private:
-		template<typename T, typename StopPredicate>
+		template<typename T, typename StopPredicate, typename VSIM_Heap>
 		static std::string_view process_range__(DBAdapter &db,
 					StopPredicate predicate,
 					std::string_view startKey,
 					std::string_view /* keyN */, std::string_view keySub,
 						uint32_t const dim_ix, impl_::DType dtype,
-							MyVectors::CFVector    const vectorPrepared, float const magnitudePrepared,
-								VSIMHeap &heap, uint32_t &iterations){
+							MyVectors::CFVector const vectorPreparedA, float const magnitudePreparedA,
+								/* VSIMHeap */ VSIM_Heap &heap, uint32_t &iterations){
+
+			static_assert(std::is_same_v<VSIM_Heap, VSIMHeap>);
 
 			using namespace impl_;
 
@@ -1905,8 +1969,8 @@ namespace net::worker::commands::Vectors2{
 					continue;
 
 				float const dist = distancePrepared(dtype,
-							vectorPrepared,		storedVectorB->toVector(),
-							magnitudePrepared,	storedVectorB->magnitude()
+							vectorPreparedA,	storedVectorB->toVector(),
+							magnitudePreparedA,	storedVectorB->magnitude()
 				);
 
 				heap.push(VSIMHeapNode{ dist, text });
@@ -1915,11 +1979,13 @@ namespace net::worker::commands::Vectors2{
 			return "";
 		}
 
-		template<typename T>
-		static void process_range_finish(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
+		template<typename T, typename VSIM_Heap>
+		static void process_range_finish__(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
 						impl_::DType dtype,
-							VSIMHeap &heap,
+							VSIM_Heap &heap,
 								std::string_view tail){
+
+			static_assert(std::is_same_v<VSIM_Heap, VSIMHeap>);
 
 			using namespace impl_;
 
@@ -1945,11 +2011,101 @@ namespace net::worker::commands::Vectors2{
 			return result.set_container(container);
 		}
 
+		template<typename StopPredicate, typename VSIM_Heap>
+		static std::string_view process_rangeBit__(DBAdapter &db,
+					StopPredicate predicate,
+					std::string_view startKey,
+					std::string_view /* keyN */, std::string_view keySub,
+						uint32_t const dim_ix, impl_::DType dtype,
+							MyVectors::BVector vectorA,
+								VSIM_Heap &heap, uint32_t &iterations){
+
+			static_assert(std::is_same_v<VSIM_Heap, VSIMHeap>);
+
+			using namespace impl_;
+
+			for(auto it = db->find(startKey); it != std::end(*db); ++it){
+				auto const &key = it->getKey();
+
+				if (predicate(key))
+					break;
+
+				++iterations;
+
+				if (iterations > ITERATIONS_LOOPS_VSIM)
+					return key;
+
+				if (!it->isOK())
+					continue;
+
+
+				std::string_view sv = it->getVal();
+
+				const auto *storedVectorB = MyVectors::toStoredVector<bool>(sv, dim_ix);
+
+				if (!storedVectorB)
+					continue;
+
+
+				auto const text = extractNth_(2, DBAdapter::SEPARATOR[0], key);
+
+				if (text == keySub)
+					continue;
+
+				float const dist = distanceBit(dtype,
+							vectorA,		storedVectorB->toVector()
+				);
+
+				heap.push(VSIMHeapNode{ dist, text });
+			}
+
+			return "";
+		}
+
+		template<typename VSIM_Heap>
+		static void process_rangeBit_finish__(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
+						impl_::DType dtype, float fix,
+							VSIM_Heap &heap,
+								std::string_view tail){
+
+			static_assert(std::is_same_v<VSIM_Heap, VSIMHeap>);
+
+			using namespace impl_;
+
+			auto &container  = blob.construct<OutputBlob::Container>();
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
+
+			auto &data = heap.sort();
+
+			for(auto [distPop, text] : data){
+				container.push_back(text);
+
+				bcontainer.push_back();
+
+				auto const dist = distanceBitFix(dtype, distPop, fix);
+
+				auto const val  = formatDouble(dist, bcontainer.back());
+
+				container.push_back(val);
+			}
+
+			container.push_back(tail);
+
+			return result.set_container(container);
+		}
+
 	private:
 		// making this same value as VSIM
+		constexpr static size_t results__ 		= 32;
 		constexpr static size_t count___		= 1000;
 		constexpr static size_t ITERATIONS_LOOPS_VSIM	=
 						impl_::Decoder<float>::MAX_BANDS * count___;
+
+		using VSIMHeapNode	= std::pair<float, std::string_view>;
+		using VSIMHeap		= top_heap::TopKSmallest<VSIMHeapNode, results__>;
+
+	private:
+		static_assert(results__						<  OutputBlob::LargeContainerSize);
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -1992,6 +2148,11 @@ namespace net::worker::commands::Vectors2{
 		M = Manhattan L1
 		C = Cosine
 		K = Canberra
+
+		DISTANCE_TYPE for bit vectors:
+		H = Hamming
+		B = Bit Cosine
+		D = Dominate
 		*/
 
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
@@ -2039,7 +2200,7 @@ namespace net::worker::commands::Vectors2{
 			case QType::F32	: return process__<float	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
 			case QType::I16	: return process__<int16_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
 			case QType::I8	: return process__<int8_t	>(db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
-		//	case QType::BIT	: return process__bit_		 (db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
+			case QType::BIT	: return process__<bool		>(db, result, blob, keyN, keySub, dim_ix, dtype, bands, bits);
 
 			default		: return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			}
@@ -2050,7 +2211,6 @@ namespace net::worker::commands::Vectors2{
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
 								size_t bands, size_t bits){
-
 			using namespace impl_;
 
 			std::string_view vectorSV = shared::rsetmulti::getData(db, keyN, keySub);
@@ -2095,8 +2255,7 @@ namespace net::worker::commands::Vectors2{
 			std::sort(std::begin(keySub_container), std::end(keySub_container));
 			auto uniq_end = std::unique(std::begin(keySub_container), std::end(keySub_container));
 
-			using HeapNode = std::pair<float, std::string_view>;
-			auto &heap = blob.construct<top_heap::TopKSmallest<HeapNode, results__> >();
+			auto &heap = blob.construct<VSIMHeap>();
 
 			logger<Logger::DEBUG>() << "VSIM" << "total candidates" << std::distance(std::begin(keySub_container), uniq_end);
 
@@ -2118,7 +2277,109 @@ namespace net::worker::commands::Vectors2{
 							magnitudePrepared,	storedVectorB->magnitude()
 				);
 
-				heap.push(HeapNode{ dist, text });
+				heap.push(VSIMHeapNode{ dist, text });
+			}
+
+			// keySub_container, icontainer and bcontainer no longer need.
+
+			// reusing icontainer and bcontainer
+			auto &container  = icontainer;
+
+			container.clear();
+			bcontainer.clear();
+
+			auto &data = heap.sort();
+
+			for(auto &[score, text] : data){
+				container.push_back(text);
+
+				bcontainer.push_back();
+
+				container.push_back(
+					formatDouble(
+						score,
+						bcontainer.back()
+					)
+				);
+			}
+
+			return result.set_container(container);
+		}
+
+		template<>
+		/* static */ void process__<bool>(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+						std::string_view keyN, std::string_view keySub,
+							uint32_t const dim_ix, impl_::DType dtype,
+								size_t bands, size_t bits){
+			using namespace impl_;
+
+			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
+
+			const auto *storedVectorA = MyVectors::toStoredVector<bool>(sv, dim_ix);
+
+			if (!storedVectorA)
+				return result.set_container0();
+
+			auto const vectorA = storedVectorA->toVector();
+
+			using MyDecoder  = Decoder<bool>;
+
+			static_assert(OutputBlob::Container::capacity() >= MyDecoder::IContainer::capacity());
+
+			auto &icontainer = blob.construct<OutputBlob::Container		>(); // will reuse it later
+			auto &bcontainer = blob.construct<OutputBlob::BufferContainer	>(); // will reuse it later
+
+			MyDecoder decoder{ dim_ix, bands, bits };
+
+			bool const b = shared::rsetmulti::getIndexes(decoder, sv,
+								icontainer, bcontainer);
+
+			if (!b)
+				return result.set_container0();
+
+
+
+			auto &keySub_container  = blob.construct<OutputBlob::LargeContainer>();
+
+			for(auto const &index : icontainer){
+				hm4::PairBufferKey bufferKey;
+				auto const prefix = shared::rsetmulti::makeKeyDataSearchNS(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+
+				scanIndex__(db, prefix, keySub_container);
+			}
+
+			// icontainer and bcontainer no longer need.
+
+			std::sort(std::begin(keySub_container), std::end(keySub_container));
+			auto uniq_end = std::unique(std::begin(keySub_container), std::end(keySub_container));
+
+			auto &heap = blob.construct<VSIMHeap>();
+
+			logger<Logger::DEBUG>() << "VSIM.BIT" << "total candidates" << std::distance(std::begin(keySub_container), uniq_end);
+
+			auto const fix = distanceBitPrepareFix(dtype, vectorA);
+
+			for(auto it = std::begin(keySub_container); it != uniq_end; ++it){
+				auto const &text = *it;
+
+				if (text == keySub)
+					continue;
+
+				std::string_view sv = shared::rsetmulti::getData(db, keyN, text);
+
+				const auto *storedVectorB = MyVectors::toStoredVector<bool>(sv, dim_ix);
+
+				if (!storedVectorB)
+					continue;
+
+				float const dist = distanceBitFix(dtype,
+							distanceBit(dtype,
+								storedVectorA->toVector(),
+								storedVectorB->toVector()
+							), fix
+				);
+
+				heap.push(VSIMHeapNode{ dist, text });
 			}
 
 			// keySub_container, icontainer and bcontainer no longer need.
@@ -2182,6 +2443,10 @@ namespace net::worker::commands::Vectors2{
 		constexpr static size_t results__	= 32;
 		constexpr static size_t count__		= 1000;
 
+		using VSIMHeapNode	= std::pair<float, std::string_view>;
+		using VSIMHeap		= top_heap::TopKSmallest<VSIMHeapNode, results__>;
+
+	private:
 		static_assert(results__						<  OutputBlob::LargeContainerSize);
 		static_assert(impl_::Decoder<float>::MAX_BANDS * count__	<  OutputBlob::LargeContainerSize);
 

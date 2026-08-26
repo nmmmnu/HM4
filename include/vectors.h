@@ -456,7 +456,7 @@ namespace MyVectors{
 									generator_	(seed	){}
 
 			constexpr HashType operator()(){
-				uint64_t random64[MaxCapacity64]; // for 8K -> 1K
+				uint64_t random64[MaxCapacity64]; // for 8K -> 1K * sizeof(HashType)
 
 				// 1. Generate random numbers (bits)
 				const HashType *randomT = generateRandom_(random64);
@@ -539,17 +539,6 @@ namespace MyVectors{
 		FORCE_VECTORIZE
 		for(uint32_t i = 0; i < vector.size(); ++i)
 			vectorI8[i] = MyVectors::quantizeComponentToI8(fpr(vector[i]));
-
-		if constexpr(0){
-			for(uint32_t i = 0; i < vector.size(); ++i){
-				auto const element = fpr(vector[i]);
-
-				if constexpr(std::is_same_v<T, float>)
-					printf("%4u %+8.4f %+5d\n", i, element, vectorI8[i]);
-				else
-					printf("%4u %+8d %+5d\n",   i, element, vectorI8[i]);
-			}
-		}
 
 		return simhashBands<MaxDimensions, HashType>(vectorI8, bands, f, seed);
 	}
