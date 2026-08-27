@@ -1,0 +1,24 @@
+- id:          VREM
+  name:        VREM
+  usage:       VREM key name [name]...
+  return_type: bool
+  return:      always returns 1
+  version:     1.4.0
+  complexity:  "[number of keys] * WRITE"
+  mutable:     true
+  compatible:  false
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: v*
+      v: vector name
+
+  description: |
+    Remove *key_sub*, *key_sub*... from the index *key*.<br />
+
+  example:     |
+    127.0.0.1:6379> VREM vectors frog
+    (integer) 1
+
+

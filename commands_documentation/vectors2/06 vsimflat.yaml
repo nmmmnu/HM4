@@ -1,0 +1,244 @@
+- id:          VSIMFLAT
+  name:        VSIMFLAT
+  usage:       VSIMFLAT key dim_ix quantize_type distance_type name start
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: dim_ix
+      v: dimention of the index.
+    - k: quantize_type
+      v: quantization, see the table below
+    - k: distance_type
+      v: type of the distance, see the table below
+    - k: raw_vector_type
+      v: type of the vector (stored inside the *BLOB*), see the table below
+    - k: name
+      v: vector name
+    - k: start
+      v: specify starting key (for pagination in the similar way as in XNGET)
+
+  return_type: array
+  return:      list of 32 keys / scores, with "next" key at the end
+  version:     1.4.0
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  description: |
+    <p>Search the index *key* using flat method (e.g. brute force) *name*.</p>
+    <p>The vector you search must be in the index.</p>
+
+    Quantization types:
+    <table border="1" class="x">
+      <tr>
+        <th>Flag</th>
+        <th>Quantization</th>
+        <th>Storage Type</th>
+        <th>Bytes</th>
+        <th>Notes</th>
+        <th>Precision loss</th>
+        <th>Disk size of GloVe set</th>
+      </tr>
+      <tr>
+        <td align="center">F</td>
+        <td>None</td>
+        <td>float</td>
+        <td align="right">4</td>
+        <td>No quantization - store values exactly as 32-bit floats</td>
+        <td align="right">0.00 %</td>
+        <td align="right">1,232 MB</td>
+      </tr>
+      <tr>
+        <td align="center">S</td>
+        <td>Q15</td>
+        <td>int16_t</td>
+        <td align="right">2</td>
+        <td>50% space reduction - near-lossless precision</td>
+        <td align="right">~0.01 %</td>
+        <td align="right">660 MB</td>
+      </tr>
+      <tr>
+        <td align="center">I</td>
+        <td>Q7</td>
+        <td>int8_t</td>
+        <td align="right">1</td>
+        <td>75% space reduction - precision good for most workloads</td>
+        <td align="right">~1.00 %</td>
+        <td align="right">374 MB
+      </td>
+      </tr>
+      <tr>
+        <td align="center">B</td>
+        <td>bit</td>
+        <td>bit</td>
+        <td align="right">1/8</td>
+        <td>97% space reduction - precision probably is lost</td>
+        <td align="right">~~~5.00 %</td>
+        <td align="right">124 MB</td>
+      </tr>
+    </table>
+
+    Distance types:
+    <table border="1" class="x">
+      <tr>
+        <th>Flag</th>
+        <th>Metric Name</th>
+        <th>Range</th>
+        <th>Bit</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td align="center">E</td>
+        <td>Euclidean (L2)</td>
+        <td align="center">0 .. &infin;</td>
+        <td>&nbsp;</td>
+        <td>Standard straight-line distance between two points in Euclidean space.</td>
+      </tr>
+      <tr>
+        <td align="center">M</td>
+        <td>Manhattan (L1)</td>
+        <td align="center">0 .. &infin;</td>
+        <td>&nbsp;</td>
+        <td>Sum of absolute differences across dimensions. Also known as "taxicab" or "city-block" distance.</td>
+      </tr>
+      <tr>
+        <td align="center">C</td>
+        <td>Cosine</td>
+        <td align="center">0 .. 1</td>
+        <td>&nbsp;</td>
+        <td>Measures the cosine of the angle between two vectors (orientation, not magnitude).</td>
+      </tr>
+      <tr>
+        <td align="center">K</td>
+        <td>Canberra</td>
+        <td align="center">0 .. &infin;</td>
+        <td>&nbsp;</td>
+        <td>A weighted version of L1 where each component is normalized by its sum. Useful when components vary greatly in scale.</td>
+      </tr>
+      <tr>
+        <td align="center">B</td>
+        <td>Bit cosine	</td>
+        <td align="center">0 .. 1</td>
+        <td align="center">Yes</td>
+        <td>Works only on bit quantized vectors. Cosine distance for bit vectors.</td>
+      </tr>
+      <tr>
+        <td align="center">H</td>
+        <td>Hamming</td>
+        <td align="center">0 .. 1</td>
+        <td align="center">Yes</td>
+        <td>Works only on bit quantized vectors.</td>
+      </tr>
+      <tr>
+        <td align="center">D</td>
+        <td>Dominating</td>
+        <td align="center">0 .. 1</td>
+        <td align="center">Yes</td>
+        <td>Works only on bit quantized vectors. This is not distance, but checks if the result vector contains query vector.</td>
+      </tr>
+    </table>
+
+    Vector types:
+    <table border="1" class="x">
+      <tr>
+        <th>Flag</th>
+        <th>Output</th>
+        <th>Byte Order</th>
+      </tr>
+      <tr>
+        <td align="center">H</td>
+        <td>hexadecimal</td>
+        <td>big-endian</td>
+      </tr>
+      <tr>
+        <td align="center">h</td>
+        <td>hexadecimal</td>
+        <td>little-endian</td>
+      </tr>
+      <tr>
+        <td align="center">B</td>
+        <td>binary</td>
+        <td>big-endian</td>
+      </tr>
+      <tr>
+        <td align="center">b</td>
+        <td>binary</td>
+        <td>little-endian</td>
+      </tr>
+    </table>
+
+  example:     |
+    127.0.0.1:6379> vsimflat gi150 150 i l frog ''
+     1) "Beelzebufo"
+     2) "+13.865778923034668"
+     3) "Amolops"
+     4) "+14.376290321350098"
+     5) "Elbot"
+     6) "+14.460909843444824"
+     7) "Croaking"
+     8) "+14.773497581481934"
+     9) "Dendrobatidae"
+    10) "+15.002937316894531"
+    11) "Cyclorana"
+    12) "+15.131485939025879"
+    13) "Dicroglossidae"
+    14) "+15.167677879333496"
+    15) "Donburi"
+    16) "+15.220814704895020"
+    17) "Austrochaperina"
+    18) "+15.237731933593750"
+    19) "Burnouf"
+    20) "+15.253121376037598"
+    21) "Craugastoridae"
+    22) "+15.277877807617188"
+    23) "Chatterbot"
+    24) "+15.280129432678223"
+    25) "Bufonidae"
+    26) "+15.304335594177246"
+    27) "Anichka"
+    28) "+15.353246688842773"
+    29) "Durians"
+    30) "+15.368249893188477"
+    31) "Costard"
+    32) "+15.398580551147461"
+    33) "Conraua"
+    34) "+15.416490554809570"
+    35) "Ambystomatidae"
+    36) "+15.417837142944336"
+    37) "Beardfish"
+    38) "+15.425078392028809"
+    39) "Almondine"
+    40) "+15.447362899780273"
+    41) "Centrolenidae"
+    42) "+15.449664115905762"
+    43) "Canap\xc3\xa9"
+    44) "+15.458335876464844"
+    45) "Champignon"
+    46) "+15.479166984558105"
+    47) "Chipa"
+    48) "+15.482855796813965"
+    49) "Fire-bellied"
+    50) "+15.495858192443848"
+    51) "Falkor"
+    52) "+15.498609542846680"
+    53) "Brachycephalus"
+    54) "+15.525016784667969"
+    55) "Elois"
+    56) "+15.533024787902832"
+    57) "Bearnaise"
+    58) "+15.542996406555176"
+    59) "Busaba"
+    60) "+15.544176101684570"
+    61) "B\xc3\xa9chamel"
+    62) "+15.548371315002441"
+    63) "Ecnomiohyla"
+    64) "+15.559138298034668"
+    65) "gi150~~Forristal"
+
+    # note these are not all results, you have to "follow" the last key, e.g.
+    # vsimflat gi150 150 i l frog gi150~~Forristal
+
+  see_also:
+    items:
+      - VSIM
+

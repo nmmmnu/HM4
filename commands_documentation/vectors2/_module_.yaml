@@ -1,18 +1,16 @@
-id:          VECTORS
-name:        VECTORS
+id:          VECTORS2
+name:        VECTORS2
 
-version:     1.3.14
+version:     1.4.0
 
 description: |
-  <h1>This module is deprecated and no longer included.</h1>
   <p>HM4 can be used as a <b>vector database</b>.
   Unlike most vector DBs, HM4 <b>stores data on disk</b>, so memory-heavy algorithms like HNSW are impractical.
   Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Locality-Sensitive Hashing (LSH)</b> (approximate).</p>
 
   <p><b>Modes of Operation:</b></p>
   <ul>
-    <li>With FLAT/LSH indexing:		use <i>VADD</i>, <i>VSIMFLAT</i>, <i>VSIMLSH</i>.</li>
-    <li>With user key-only storage:	use <i>VKSET</i>, <i>VKSIMFLAT</i>. In this mode LSH indexing is not available.</li>
+    <li>With FLAT/LSH indexing:		use <i>VADD</i>, <i>VSIMFLAT</i>, <i>VSIM</i>.</li>
   </ul>
 
   <p><b>Building a Vector Index (VADD)</b></p>
@@ -177,9 +175,6 @@ description: |
     <li><i>VGETNORMALIZED</i> 		- return normalized vector with magnitude.</li>
     <li><i>VGETRAW</i>			- get raw binary/hex representation.</li>
   </ul>
-
-  <p><b>Key-Based Vectors (no LSH)</b></p>
-  <p>Store vectors directly under keys (no index) with <i>VKSET</i> and query with <i>VKSIMFLAT</i> to search over keys sharing a prefix.</p>
 
   <p><b>Notes & Tips</b></p>
   <ul>

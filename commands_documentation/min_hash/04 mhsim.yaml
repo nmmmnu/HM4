@@ -16,7 +16,7 @@
   return_type: array
   return:      returns an array of matched target subkeys paired with their Jaccard similarity scores, ordered by highest score
   version:     1.3.15.1
-  complexity:  slow &rarr; (1 + BANDS * (1 + 25 - 1)) * READ
+  complexity:  slow &rarr; (1 + BANDS * 25) * READ
   mutable:     false
   compatible:  false
   description: |
