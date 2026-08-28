@@ -432,12 +432,12 @@ namespace net::worker::commands::Index{
 		};
 
 		constexpr inline static std::string_view cmd__[][6] = {
-			{ "ix1rem", "IX1REM", "ix1remove", "IX1REMOVE", "ix1del", "IX1DEL" },
-			{ "ix2rem", "IX2REM", "ix2remove", "IX2REMOVE", "ix2del", "IX2DEL" },
-			{ "ix3rem", "IX3REM", "ix3remove", "IX3REMOVE", "ix3del", "IX3DEL" },
-			{ "ix4rem", "IX4REM", "ix4remove", "IX4REMOVE", "ix4del", "IX4DEL" },
-			{ "ix5rem", "IX5REM", "ix5remove", "IX5REMOVE", "ix5del", "IX5DEL" },
-			{ "ix6rem", "IX6REM", "ix6remove", "IX6REMOVE", "ix6del", "IX6DEL" }
+			{ "ix1rem", "IX1REM" },
+			{ "ix2rem", "IX2REM" },
+			{ "ix3rem", "IX3REM" },
+			{ "ix4rem", "IX4REM" },
+			{ "ix5rem", "IX5REM" },
+			{ "ix6rem", "IX6REM" }
 		};
 	};
 
