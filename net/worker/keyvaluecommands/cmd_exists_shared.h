@@ -34,8 +34,8 @@ namespace net::worker::commands::ExistsShared{
 
 
 
-		template<typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
-		void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &){
+		template<typename ParamContainer, typename Result, typename DBAdapter>
+		void cmdProcessExists(ParamContainer const &p, DBAdapter &db, Result &result){
 			// EXISTS key subkey0
 
 			if (p.size() != 3)
@@ -55,6 +55,36 @@ namespace net::worker::commands::ExistsShared{
 			);
 		}
 
+		template<typename ParamContainer, typename OutputBlob, typename Result, typename DBAdapter>
+		void cmdProcessMExists(ParamContainer const &p, DBAdapter &db, Result &result, OutputBlob &blob){
+			// MEXISTS key subkey0 subkey1...
+
+			if (p.size() < 3)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
+
+			const auto &keyN = p[1];
+
+			if (keyN.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const varg = 2;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const &keySub = *itk; !valid(keyN, keySub))
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+			auto &container = blob. template construct<typename OutputBlob::Container>();
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
+				if (auto const &keySub = *itk; exists(db, keyN, keySub))
+					container.push_back("1");
+				else
+					container.push_back("0");
+			}
+
+			return result.set_container(container);
+		}
+
 	} // namespace impl_
 
 
@@ -66,10 +96,10 @@ namespace net::worker::commands::ExistsShared{
 
 		// XXXEXISTS key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			return cmdProcessExists(p, db, result, blob);
+			return cmdProcessExists(p, db, result);
 		}
 
 	private:
@@ -91,6 +121,30 @@ namespace net::worker::commands::ExistsShared{
 			"ixmexists"	,	"IXMEXISTS"	,
 			"ixtexists"	,	"IXTEXISTS"
 		};
+	};
+
+	template<class Protocol, class DBAdapter>
+	struct MEXISTS : BaseCommandRO<Protocol,DBAdapter>{
+
+		MEXISTS() : BaseCommandRO<Protocol,DBAdapter>("MEXISTS", std::begin(cmd__), std::end(cmd__)){}
+
+		// XXXEXISTS key subkey
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			using namespace impl_;
+
+			return cmdProcessMExists(p, db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ix1mexists"	,	"IX1MEXISTS"	,
+			"ix2mexists"	,	"IX2MEXISTS"	,
+			"ix3mexists"	,	"IX3MEXISTS"	,
+			"ix4mexists"	,	"IX4MEXISTS"	,
+			"ix5mexists"	,	"IX5MEXISTS"	,
+			"ix6mexists"	,	"IX6MEXISTS"	,
+		};
 
 	};
 
@@ -102,7 +156,8 @@ namespace net::worker::commands::ExistsShared{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				EXISTS
+				EXISTS	,
+				MEXISTS
 			>(pack);
 		}
 	};

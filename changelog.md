@@ -432,7 +432,8 @@ Changelog
 -	fix in AVLList - when (real) delete happens, the server may segfault.
 	this does not affects 99.99% of the production servers.
 -	fix bug in MHSIM, when there are too many results
--	new module vectors2
+-	BREAKING CHANGE: new module vectors2 : VADD, VREM, VGET, VGETNORMALIZED,
+	VGETRAW, VSIMFLAT, VSIM, VDISTANCE, VMDISTANCE
 -	optimization - skip zeroing buffers when not need
 -	refactor buffers to be difficult to use wrong size
 -	fix bug and refactor CBFMCOUNT, CMSMCOUNT, TDMPERCENTILE
