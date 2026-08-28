@@ -437,3 +437,7 @@ Changelog
 -	optimization - skip zeroing buffers when not need
 -	refactor buffers to be difficult to use wrong size
 -	fix bug and refactor CBFMCOUNT, CMSMCOUNT, TDMPERCENTILE
+-	BREAKING CHANGE: remove the value from IX_ADD / IX_RANGE.
+	Introduce IX_MEXISTS and remove commands IX_GET / IX_MGET.
+	Keeping only IX_REM, remove IX_REMOVE, IX_DEL.
+

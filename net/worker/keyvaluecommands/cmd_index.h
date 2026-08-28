@@ -70,190 +70,6 @@ namespace net::worker::commands::Index{
 
 
 	template<int N, class Protocol, class DBAdapter>
-	struct IX_GET : BaseCommandRO<Protocol,DBAdapter>{
-		IX_GET() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
-
-		// IXGET key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
-		}
-
-	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
-
-			auto const &keyN   = p[1];
-			auto const &keySub = p[2];
-
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!PN::valid(keyN, keySub))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			return result.set(
-				shared::zsetmulti::get<PN>(db, keyN, keySub)
-			);
-		}
-
-	private:
-		static_assert(impl_::assertN(N));
-
-		using PN = shared::zsetmulti::Permutation<N>;
-
-		constexpr inline static std::string_view name__[] = {
-			"IX1GET",
-			"IX2GET",
-			"IX3GET",
-			"IX4GET",
-			"IX5GET",
-			"IX6GET"
-		};
-
-		constexpr inline static std::string_view cmd__[][2] = {
-			{ "ix1get", "IX1GET" },
-			{ "ix2get", "IX2GET" },
-			{ "ix3get", "IX3GET" },
-			{ "ix4get", "IX4GET" },
-			{ "ix5get", "IX5GET" },
-			{ "ix6get", "IX6GET" }
-		};
-	};
-
-
-
-	template<int N, class Protocol, class DBAdapter>
-	struct IX_MGET : BaseCommandRO<Protocol,DBAdapter>{
-		IX_MGET() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
-
-		// IXGET key subkey0 subkey1 ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
-			return process__(p, db, result, blob);
-		}
-
-	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
-			if (p.size() < 3)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
-
-			const auto &keyN = p[1];
-
-			if (keyN.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const varg = 2;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &keySub = *itk;
-
-				if (keySub.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-				if (!PN::valid(keyN, keySub))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
-
-
-
-			auto &container = blob.construct<OutputBlob::Container>();
-
-
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &keySub = *itk;
-
-				container.emplace_back(
-					shared::zsetmulti::get<PN>(db, keyN, keySub)
-				);
-			}
-
-			return result.set_container(container);
-		}
-
-	private:
-		static_assert(impl_::assertN(N));
-
-		using PN = shared::zsetmulti::Permutation<N>;
-
-		constexpr inline static std::string_view name__[] = {
-			"IX1MGET",
-			"IX2MGET",
-			"IX3MGET",
-			"IX4MGET",
-			"IX5MGET",
-			"IX6MGET"
-		};
-
-		constexpr inline static std::string_view cmd__[][2] = {
-			{ "ix1mget", "IX1MGET" },
-			{ "ix2mget", "IX2MGET" },
-			{ "ix3mget", "IX3MGET" },
-			{ "ix4mget", "IX4MGET" },
-			{ "ix5mget", "IX5MGET" },
-			{ "ix6mget", "IX6MGET" }
-		};
-	};
-
-
-
-	template<int N, class Protocol, class DBAdapter>
-	struct IX_GETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
-		IX_GETINDEXES() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
-
-		// IXGETIXES key subkey
-
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
-			return process__(p, db, result);
-		}
-
-	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
-
-			auto const &keyN   = p[1];
-			auto const &keySub = p[2];
-
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!PN::valid(keyN, keySub))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			return result.set_container(
-				shared::zsetmulti::getIndexes<PN>(db, keyN, keySub)
-			);
-		}
-
-	private:
-		static_assert(impl_::assertN(N));
-
-		using PN = shared::zsetmulti::Permutation<N>;
-
-		constexpr inline static std::string_view name__[] = {
-			"IX1GETINDEXES",
-			"IX2GETINDEXES",
-			"IX3GETINDEXES",
-			"IX4GETINDEXES",
-			"IX5GETINDEXES",
-			"IX6GETINDEXES"
-		};
-
-		constexpr inline static std::string_view cmd__[][2] = {
-			{ "ix1getindexes", "IX1GETINDEXES" },
-			{ "ix2getindexes", "IX2GETINDEXES" },
-			{ "ix3getindexes", "IX3GETINDEXES" },
-			{ "ix4getindexes", "IX4GETINDEXES" },
-			{ "ix5getindexes", "IX5GETINDEXES" },
-			{ "ix6getindexes", "IX6GETINDEXES" }
-		};
-	};
-
-
-
-	template<int N, class Protocol, class DBAdapter>
 	struct IX_ADD : BaseCommandRW<Protocol,DBAdapter>{
 		IX_ADD() : BaseCommandRW<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
@@ -266,7 +82,7 @@ namespace net::worker::commands::Index{
 	private:
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			auto const varg  = 2;
-			auto const vstep = 2 + N + 1; // N + 1 for sort
+			auto const vstep = 1 + N + 1; // subkey + N + sort
 
 			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS[4 + N]);
@@ -277,10 +93,7 @@ namespace net::worker::commands::Index{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const X = vstep - 1;
-
-				auto const &keySub	= *(itk + 0);
-				auto const &value	= *(itk + X);
+				auto const keySub = *(itk + 0);
 
 				{
 					auto e = [&result](){
@@ -315,19 +128,13 @@ namespace net::worker::commands::Index{
 						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), _(7) }))
 							return e();
 				}
-
-				if (!hm4::Pair::isValValid(value))
-					return result.set_error(ResultErrorMessages::EMPTY_VAL);
 			}
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const X = vstep - 1;
-
-				auto const &keySub	= *(itk + 0);
-				auto const &value	= *(itk + X);
+				auto const keySub = *(itk + 0);
 
 				auto _ = [&itk](auto i){
 					return *(itk + i);
@@ -336,37 +143,37 @@ namespace net::worker::commands::Index{
 				if constexpr(N == 1)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2) }, value
+							keyN, keySub, { _(1), _(2) }, keySub
 					);
 
 				if constexpr(N == 2)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3) }, value
+							keyN, keySub, { _(1), _(2), _(3) }, keySub
 					);
 
 				if constexpr(N == 3)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4) }, keySub
 					);
 
 				if constexpr(N == 4)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }, keySub
 					);
 
 				if constexpr(N == 5)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }, keySub
 					);
 
 				if constexpr(N == 6)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), _(7) }, value
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), _(7) }, keySub
 					);
 			}
 
@@ -431,13 +238,68 @@ namespace net::worker::commands::Index{
 			"IX6REM"
 		};
 
-		constexpr inline static std::string_view cmd__[][6] = {
+		constexpr inline static std::string_view cmd__[][2] = {
 			{ "ix1rem", "IX1REM" },
 			{ "ix2rem", "IX2REM" },
 			{ "ix3rem", "IX3REM" },
 			{ "ix4rem", "IX4REM" },
 			{ "ix5rem", "IX5REM" },
 			{ "ix6rem", "IX6REM" }
+		};
+	};
+
+
+
+	template<int N, class Protocol, class DBAdapter>
+	struct IX_GETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
+		IX_GETINDEXES() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
+
+		// IXGETIXES key subkey
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			if (p.size() != 3)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+
+			auto const &keyN   = p[1];
+			auto const &keySub = p[2];
+
+			if (keyN.empty() || keySub.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!PN::valid(keyN, keySub))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+			return result.set_container(
+				shared::zsetmulti::getIndexes<PN>(db, keyN, keySub)
+			);
+		}
+
+	private:
+		static_assert(impl_::assertN(N));
+
+		using PN = shared::zsetmulti::Permutation<N>;
+
+		constexpr inline static std::string_view name__[] = {
+			"IX1GETINDEXES",
+			"IX2GETINDEXES",
+			"IX3GETINDEXES",
+			"IX4GETINDEXES",
+			"IX5GETINDEXES",
+			"IX6GETINDEXES"
+		};
+
+		constexpr inline static std::string_view cmd__[][2] = {
+			{ "ix1getindexes", "IX1GETINDEXES" },
+			{ "ix2getindexes", "IX2GETINDEXES" },
+			{ "ix3getindexes", "IX3GETINDEXES" },
+			{ "ix4getindexes", "IX4GETINDEXES" },
+			{ "ix5getindexes", "IX5GETINDEXES" },
+			{ "ix6getindexes", "IX6GETINDEXES" }
 		};
 	};
 
@@ -545,7 +407,7 @@ namespace net::worker::commands::Index{
 
 			auto &container = blob.construct<OutputBlob::Container>();
 
-			accumulateResultsIX_<N, AccumulateOutput::BOTH_WITH_TAIL>(
+			accumulateResultsIX_<N, AccumulateOutput::KEYS_WITH_TAIL>(
 				count			,
 				prefix			,
 				db->find(key)		,
@@ -593,43 +455,31 @@ namespace net::worker::commands::Index{
 			using namespace impl_;
 
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				LH<IX_GET		>::cmd1	,
-				LH<IX_MGET		>::cmd1	,
 				LH<IX_GETINDEXES	>::cmd1	,
 				LH<IX_ADD		>::cmd1	,
 				LH<IX_REM		>::cmd1	,
 				LH<IX_RANGE		>::cmd1	,
 
-				LH<IX_GET		>::cmd2	,
-				LH<IX_MGET		>::cmd2	,
 				LH<IX_GETINDEXES	>::cmd2	,
 				LH<IX_ADD		>::cmd2	,
 				LH<IX_REM		>::cmd2	,
 				LH<IX_RANGE		>::cmd2	,
 
-				LH<IX_GET		>::cmd3	,
-				LH<IX_MGET		>::cmd3	,
 				LH<IX_GETINDEXES	>::cmd3	,
 				LH<IX_ADD		>::cmd3	,
 				LH<IX_REM		>::cmd3	,
 				LH<IX_RANGE		>::cmd3	,
 
-				LH<IX_GET		>::cmd4	,
-				LH<IX_MGET		>::cmd4	,
 				LH<IX_GETINDEXES	>::cmd4	,
 				LH<IX_ADD		>::cmd4	,
 				LH<IX_REM		>::cmd4	,
 				LH<IX_RANGE		>::cmd4	,
 
-				LH<IX_GET		>::cmd5	,
-				LH<IX_MGET		>::cmd5	,
 				LH<IX_GETINDEXES	>::cmd5	,
 				LH<IX_ADD		>::cmd5	,
 				LH<IX_REM		>::cmd5	,
 				LH<IX_RANGE		>::cmd5	,
 
-				LH<IX_GET		>::cmd6	,
-				LH<IX_MGET		>::cmd6	,
 				LH<IX_GETINDEXES	>::cmd6	,
 				LH<IX_ADD		>::cmd6	,
 				LH<IX_REM		>::cmd6	,
