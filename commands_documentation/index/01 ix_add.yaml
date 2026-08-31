@@ -10,7 +10,7 @@
     - k: index1
       v: 1 to 6 indexes depends of command
     - k: sort_key
-      v: influences the sorting of the results of IX*RANGE command
+      v: influences the sorting of the results of IX*RANGE command. If left empty, it falls back to a hash to ensure a more representative statistical sample.
 
   return_type: bool
   return:      always return 1

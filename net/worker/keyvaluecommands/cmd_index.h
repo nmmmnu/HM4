@@ -93,9 +93,16 @@ namespace net::worker::commands::Index{
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const keySub = *(itk + 0);
+				auto const keySub  = *(itk + 0);
 
 				{
+					auto const keySortSize = [&itk](){
+						if (auto const size = (itk + N + 1)->size(); size)
+							return size;
+						else
+							return shared::sortkey::keySortSize;
+					}();
+
 					auto e = [&result](){
 						return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 					};
@@ -104,28 +111,30 @@ namespace net::worker::commands::Index{
 						return *(itk + i);
 					};
 
+					auto const keySort = "x";
+
 					if constexpr(N == 1)
-						if (!PN::valid(keyN, keySub, { _(1), _(2) }))
+						if (!PN::valid(keyN, keySub, { _(1), keySort }, keySortSize))
 							return e();
 
 					if constexpr(N == 2)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), keySort }, keySortSize))
 							return e();
 
 					if constexpr(N == 3)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), keySort }, keySortSize))
 							return e();
 
 					if constexpr(N == 4)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), keySort }, keySortSize))
 							return e();
 
 					if constexpr(N == 5)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), keySort }, keySortSize))
 							return e();
 
 					if constexpr(N == 6)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), _(7) }))
+						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySortSize))
 							return e();
 				}
 			}
@@ -134,7 +143,16 @@ namespace net::worker::commands::Index{
 			hm4::TXGuard guard{ *db };
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
+				to_string_buffer_t buffer;
+
 				auto const keySub = *(itk + 0);
+
+				auto const keySort = [&](){
+					if (auto const k = *(itk + N + 1); k.empty())
+						return shared::sortkey::makeHashKeySort(keySub, buffer);
+					else
+						return k;
+				}();
 
 				auto _ = [&itk](auto i){
 					return *(itk + i);
@@ -143,37 +161,37 @@ namespace net::worker::commands::Index{
 				if constexpr(N == 1)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2) }, keySub
+							keyN, keySub, { _(1), keySort }, keySub
 					);
 
 				if constexpr(N == 2)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3) }, keySub
+							keyN, keySub, { _(1), _(2), keySort }, keySub
 					);
 
 				if constexpr(N == 3)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4) }, keySub
+							keyN, keySub, { _(1), _(2), _(3), keySort }, keySub
 					);
 
 				if constexpr(N == 4)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5) }, keySub
+							keyN, keySub, { _(1), _(2), _(3), _(4), keySort }, keySub
 					);
 
 				if constexpr(N == 5)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6) }, keySub
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), keySort }, keySub
 					);
 
 				if constexpr(N == 6)
 					shared::zsetmulti::add<PN>(
 							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), _(7) }, keySub
+							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySub
 					);
 			}
 

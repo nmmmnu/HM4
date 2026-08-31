@@ -7,7 +7,6 @@
 #include "ilist/txguard.h"
 
 #include "mystring.h"
-#include "hexconvert.h"
 #include "topheap.h"
 
 #include "vectors_storage.h"
@@ -15,6 +14,7 @@
 #include "shared_rset_multi.h"
 
 #include "shared_stoppredicate.h"
+#include "shared_hashsortkey.h"
 
 #include "logger.h"
 
@@ -25,13 +25,11 @@
 namespace net::worker::commands::Vectors2{
 
 	namespace impl_{
-		constexpr size_t keySortSize		= 16; // size of uint64 as hex
-
 		// 00
 		constexpr size_t keyBandSize		= 2;  // size of uint8 as hex
 
 		// keyN~keyBand~keySort~keySub
-		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + keySortSize   /* ~keySub */;
+		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + shared::sortkey::keySortSize   /* ~keySub */;
 
 
 
@@ -548,15 +546,6 @@ namespace net::worker::commands::Vectors2{
 				return { buffer.data(), result.size };
 		}
 
-		template<size_t N>
-		auto makeKeySort(std::string_view keySub, std::array<char, N> &buffer){
-			static_assert(N > keySortSize);
-
-			return hex_convert::toHex(murmur_hash64a(keySub), buffer);
-		}
-
-
-
 		// VGET key   DIM_IX QUANTIZE_TYPE name
 		// VGET words 150    F             frog
 		// VGET words 150    I             frog
@@ -813,7 +802,7 @@ namespace net::worker::commands::Vectors2{
 								vectorBuffer, vectorBufferProj }();
 
 				to_string_buffer_t buffer;
-				auto const keySort  = makeKeySort(keySub, buffer);
+				auto const keySort  = shared::sortkey::makeHashKeySort(keySub, buffer);
 
 				VADD_Factory<T> factory{ cfvector, decoder, icontainer, bcontainer };
 
@@ -961,7 +950,7 @@ namespace net::worker::commands::Vectors2{
 				auto const keySub	= *itk;
 
 				to_string_buffer_t buffer;
-				auto const keySort	= makeKeySort(keySub, buffer);
+				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, buffer);
 
 				[[maybe_unused]]
 				bool const b = shared::rsetmulti::rem(db, decoder,

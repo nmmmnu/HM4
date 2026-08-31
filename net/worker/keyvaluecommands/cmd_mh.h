@@ -4,11 +4,11 @@
 #include "pair_vfactory.h"
 #include "shared_hint.h"
 #include "stringtokenizer.h"
-#include "hexconvert.h"
 #include "topheap.h"
 
 #include "shared_rset_multi.h"
 #include "shared_accumulateresults.h"
+#include "shared_hashsortkey.h"
 
 namespace net::worker::commands::MH{
 	namespace impl_{
@@ -16,13 +16,11 @@ namespace net::worker::commands::MH{
 
 		constexpr size_t MHBits			= 12;
 
-		constexpr size_t keySortSize		= 16; // uint64 as hex
-
 		// 0031.6A796090E2DBB95E
 		constexpr size_t keyBandSize		= 4 + 1 + 16; // uint32 as hex + '.' + uint64 as hex
 
 		// keyN~keyBand~keySort~keySub
-		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + keySortSize   /* ~keySub */;
+		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + shared::sortkey::keySortSize   /* ~keySub */;
 
 		constexpr size_t tokenMinSize		= 0;
 
@@ -88,13 +86,6 @@ namespace net::worker::commands::MH{
 			};
 
 			mh.bands(mh_data, bandSize, f);
-		}
-
-		template<size_t N>
-		auto makeKeySort(std::string_view keySub, std::array<char, N> &buffer){
-			static_assert(N > keySortSize);
-
-			return hex_convert::toHex(murmur_hash64a(keySub), buffer);
 		}
 
 		struct Decoder{
@@ -222,7 +213,7 @@ namespace net::worker::commands::MH{
 				auto const tokens	= *(itk + 2);
 
 				to_string_buffer_t buffer;
-				auto const keySort	= makeKeySort(keySub, buffer);
+				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, buffer);
 
 				MHSETFactory factory{ key, pair, delimiter[0], tokens, decoder, icontainer, bcontainer };
 
@@ -344,7 +335,7 @@ namespace net::worker::commands::MH{
 				auto const keySub	= *itk;
 
 				to_string_buffer_t buffer;
-				auto const keySort	= makeKeySort(keySub, buffer);
+				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, buffer);
 
 				[[maybe_unused]]
 				bool const b = shared::rsetmulti::rem(db, decoder,
