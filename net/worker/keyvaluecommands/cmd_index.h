@@ -177,7 +177,7 @@ namespace net::worker::commands::Index{
 					);
 			}
 
-			return result.set();
+			return result.set_1();
 		}
 
 	private:

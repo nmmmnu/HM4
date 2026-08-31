@@ -1,0 +1,61 @@
+- id:       IX*EXISTS
+  name:     IX*EXISTS
+  usage:    IX*EXISTS key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: sub_key
+      v: sub_key
+
+  return_type: bool
+  return:      value
+  version:     1.4.0
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  description: |
+    <p>Check existance of *sub_key* from index object *key*</p>
+
+  example:     |
+    127.0.0.1:6379> # Adds 3 employes (numbers) - 001 in sofia, 002 in london, 003 in sofia. x is sort key.
+    OK
+    127.0.0.1:6379> ix1add a 001 sofia x 002 london x 003 sofia x
+    (integer) 1
+    127.0.0.1:6379> # Check existance of employe (number) 001
+    OK
+    127.0.0.1:6379> ix1exists a 001
+    (integer) 1
+    127.0.0.1:6379> # Check existance of employes (numbers) 001, 005 and 002
+    OK
+    127.0.0.1:6379> ix1mexists a 001 005 002
+    1) "1"
+    2) "0"
+    3) "1"
+    127.0.0.1:6379> # Remove all indexes:
+    OK
+    127.0.0.1:6379> ix1rem a 001 002 003
+    (integer) 1
+    127.0.0.1:6379> # Adds 3 employes (numbers) - 001 in sofia,IT + 002 in london + IT , 003 in sofia + sales. x is sort key.
+    OK
+    127.0.0.1:6379> ix2add a 001 sofia it x 002 london it x 003 sofia sales x
+    (integer) 1
+    127.0.0.1:6379> # Check existance of employe (number) 001
+    OK
+    127.0.0.1:6379> ix2exists a 001
+    (integer) 1
+    127.0.0.1:6379> # Check existance of employes (numbers) 001, 005 and 002
+    OK
+    127.0.0.1:6379> ix2mexists a 001 005 002
+    1) "1"
+    2) "0"
+    3) "1"
+    127.0.0.1:6379> # Remove all indexes:
+    OK
+    127.0.0.1:6379> ix1rem a 001 002 003
+    (integer) 1
+
+  see_also:
+    items:
+      - IX*MEXISTS
+

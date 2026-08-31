@@ -1,0 +1,145 @@
+id:          INDEX
+name:        INDEX
+
+version:     1.4.0
+
+description: |
+  <p><b>High-performance multi-column secondary indexing engine</b> for key-value datasets.
+  It enables fast point lookups, existence checks, and dynamic lexicographical range/prefix scans
+  across indexed records without scanning the entire dataset.</p>
+
+  <p>The module supports composite indexing from <b>1 up to 6 dimensions</b> via dedicated command families (<b>IX1*</b> through <b>IX6*</b>).
+  Each record maps a unique <b>sub_key</b> to <b>1 to 6 index fields (A through F)</b> and an internal <b>sort_key</b> used for ordering.</p>
+
+  <p>In 1.4.0 this module, drop support for old "value" field.</p>
+
+  <p>Items can be added to the index using <b>IX*ADD</b>.</p>
+
+  <p>Items can be removed from the index using <b>IX*REM</b>.</p>
+
+  <p>You can check if the specific item is in the index using <b>IX*EXISTS</b> or <b>IX*MEXISTS</b>.</p>
+
+  <p>Using <b>IX*RANGE</b>, you can retrieve sorted list of the items. You can add simple filter as well.</p>
+
+example_module:     |
+  127.0.0.1:6379> # Adds 3 employes (numbers) - 001 in sofia, 002 in london, 003 in sofia. x is sort key.
+  OK
+  127.0.0.1:6379> ix1add a 001 sofia x 002 london x 003 sofia x
+  (integer) 1
+  127.0.0.1:6379> # Removes 2 employes (numbers) - 005 and 007
+  OK
+  127.0.0.1:6379> ix1rem a 005 007
+  (integer) 1
+  127.0.0.1:6379> # Check existance of employe (number) 001
+  OK
+  127.0.0.1:6379> ix1exists a 001
+  (integer) 1
+  127.0.0.1:6379> # Check existance of employes (numbers) 001, 005 and 002
+  OK
+  127.0.0.1:6379> ix1mexists a 001 005 002
+  1) "1"
+  2) "0"
+  3) "1"
+  127.0.0.1:6379> # Get indexes of the employe (number) - 001
+  OK
+  127.0.0.1:6379> ix1getindexes a 001
+  1) "sofia"
+  2) "x"
+  127.0.0.1:6379> # Get all employes (numbers), A is permutation, but because is single dimention is always A.
+  OK
+  127.0.0.1:6379> ix1range a A '' 100 ''
+  1) "001"
+  2) "1"
+  3) "003"
+  4) "1"
+  5) "002"
+  6) "1"
+  7) ""
+  127.0.0.1:6379> # Get all employes (numbers), where first index is equal to "sofia"
+  OK
+  127.0.0.1:6379> ix1range a A sofia 100 ''
+  1) "001"
+  2) "1"
+  3) "003"
+  4) "1"
+  5) ""
+  127.0.0.1:6379> # Remove all indexes:
+  OK
+  127.0.0.1:6379> ix1rem a 001 002 003
+  (integer) 1
+  127.0.0.1:6379> # Adds 3 employes (numbers) - 001 in sofia,IT + 002 in london + IT , 003 in sofia + sales. x is sort key.
+  OK
+  127.0.0.1:6379> ix2add a 001 sofia it x 002 london it x 003 sofia sales x
+  (integer) 1
+  127.0.0.1:6379> # Removes 2 employes (numbers) - 005 and 007
+  OK
+  127.0.0.1:6379> ix2rem a 005 007
+  (integer) 1
+  127.0.0.1:6379> # Check existance of employe (number) 001
+  OK
+  127.0.0.1:6379> ix1exists a 001
+  (integer) 1
+  127.0.0.1:6379> # Check existance of employes (numbers) 001, 005 and 002
+  OK
+  127.0.0.1:6379> ix1mexists a 001 005 002
+  1) "1"
+  2) "0"
+  3) "1"
+  127.0.0.1:6379> # Get indexes of the employe (number) - 001
+  OK
+  127.0.0.1:6379> ix2getindexes a 001
+  1) "sofia"
+  2) "it"
+  3) "x"
+  127.0.0.1:6379> # Get all employes (numbers), permutation AB (city, then department)
+  OK
+  127.0.0.1:6379> ix2range a AB '' '' 100 ''
+  1) "001"
+  2) "1"
+  3) "003"
+  4) "1"
+  5) "002"
+  6) "1"
+  7) ""
+  127.0.0.1:6379> # Get all employes (numbers), permutation BA (department, then city)
+  OK
+  127.0.0.1:6379> ix2range a BA '' '' 100 ''
+  1) "001"
+  2) "1"
+  3) "002"
+  4) "1"
+  5) "003"
+  6) "1"
+  7) ""
+  127.0.0.1:6379> # Get all employes (numbers), permutation BA (department, then city), filter "it", any city.
+  OK
+  127.0.0.1:6379> ix2range a BA it '' 100 ''
+  1) "001"
+  2) "1"
+  3) "002"
+  4) "1"
+  5) ""
+  127.0.0.1:6379> # Get all employes (numbers), permutation BA (department, then city), filter "it" + "sofia"
+  OK
+  127.0.0.1:6379> ix2range a BA it sofia 100 ''
+  1) "001"
+  2) "1"
+  3) ""
+  127.0.0.1:6379> # Get all employes (numbers), permutation AB (city, then department), filter "sofia", any department.
+  OK
+  127.0.0.1:6379> ix2range a AB sofia '' 100 ''
+  1) "001"
+  2) "1"
+  3) "003"
+  4) "1"
+  5) ""
+  127.0.0.1:6379> # Get all employes (numbers), permutation AB (city, then department), filter "sofia" + "it"
+  OK
+  127.0.0.1:6379> ix2range a AB sofia it 100 ''
+  1) "001"
+  2) "1"
+  3) ""
+  127.0.0.1:6379> # Remove all indexes:
+  OK
+  127.0.0.1:6379> ix1rem a 001 002 003
+  (integer) 1

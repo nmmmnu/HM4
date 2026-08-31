@@ -1,0 +1,41 @@
+- id:       IX*ADD
+  name:     IX*ADD
+  usage:    IX*ADD key [sub_key index1... sort_key]...
+  params:
+    items:
+    - k: key
+      v: name of the index object
+    - k: sub_key
+      v: sub_key
+    - k: index1
+      v: 1 to 6 indexes depends of command
+    - k: sort_key
+      v: influences the sorting of the results of IX*RANGE command
+
+  return_type: bool
+  return:      always return 1
+  version:     1.4.0
+  complexity:  READ + number_of_indexes * WRITE
+  mutable:     true
+  compatible:  false
+  description: |
+    <p>Add *sub_key* into index object *key* with indexes *index1*... and *sort_key*</p>
+
+  example:     |
+    127.0.0.1:6379> # Adds 3 employes (numbers) - 001 in sofia, 002 in london, 003 in sofia. x is sort key.
+    OK
+    127.0.0.1:6379> ix1add a 001 sofia x 002 london x 003 sofia x
+    (integer) 1
+    127.0.0.1:6379> # Remove all indexes:
+    OK
+    127.0.0.1:6379> ix1rem a 001 002 003
+    (integer) 1
+    127.0.0.1:6379> # Adds 3 employes (numbers) - 001 in sofia,IT + 002 in london + IT , 003 in sofia + sales. x is sort key.
+    OK
+    127.0.0.1:6379> ix2add a 001 sofia it x 002 london it x 003 sofia sales x
+    (integer) 1
+    127.0.0.1:6379> # Remove all indexes:
+    OK
+    127.0.0.1:6379> ix1rem a 001 002 003
+    (integer) 1
+
