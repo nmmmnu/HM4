@@ -11,12 +11,11 @@ Reverse Set Multi
 - Automatic keySort
 - Uses Decoder
 
-keyN~~keySub -> encoded data
+keyN~~keySub			-> encoded data
 
-keyN~INDEX0~keySort~keySub -> keySub
-keyN~INDEX1~keySort~keySub -> keySub
-keyN~INDEX2~keySort~keySub -> keySub
-
+keyN~INDEX0~keySort~keySub	-> keySub
+keyN~INDEX1~keySort~keySub	-> keySub
+keyN~INDEX2~keySort~keySub	-> keySub
 */
 
 namespace net::worker::shared::rsetmulti{

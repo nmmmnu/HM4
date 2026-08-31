@@ -50,9 +50,11 @@
 
 #include "keyvaluecommands/cmd_index.h"			// IXGET, IXMGET, IXGETINDEXES, IXADD, IXREM, IXRANGE
 
-#include "keyvaluecommands/cmd_mindex.h"		// IXMADD, IXMRANGE, IXMRANGEFLEX,   IXMRANGESTRICT
-#include "keyvaluecommands/cmd_tindex.h"		// IXTADD_*,         IXTRANGEFLEX_*, IXTRANGESTRICT_*
-#include "keyvaluecommands/cmd_hindex.h"		// IXHADD_*
+//#include "keyvaluecommands/cmd_mindex.h"		// IXMADD, IXMRANGE, IXMRANGEFLEX,   IXMRANGESTRICT
+//#include "keyvaluecommands/cmd_tindex.h"		// IXTADD_*,         IXTRANGEFLEX_*, IXTRANGESTRICT_*
+//#include "keyvaluecommands/cmd_hindex.h"		// IXHADD_*
+//#include "keyvaluecommands/cmd_mindex_shared.h"	// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
+							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
 
 #include "keyvaluecommands/cmd_ac.h"			// ACADD_*, ACDEL_*, ACRANGE
 #include "keyvaluecommands/cmd_summary_stats.h"		// SSRESERVE, SSADD, SSMERGE, SSGETALL, SSGET, SSMGET, SSADDGETALL, SSADDGET, SSADDMGET
@@ -69,9 +71,6 @@
 #include "keyvaluecommands/cmd_system.h"		// EXIT, SHUTDOWN
 
 #include "keyvaluecommands/cmd_test.h"			// TEST
-
-#include "keyvaluecommands/cmd_mindex_shared.h"		// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
-							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
 
 #include "keyvaluecommands/cmd_exists_shared.h"		// MC*EXISTS, IX*EXISTS
 
@@ -144,15 +143,18 @@ namespace net::worker{
 				MortonCurve16D	::RegisterModule,
 			#endif
 
+				ExistsShared	::RegisterModule,	// has to be included, if any of LinearCurve / MortonCurve* / *Index are included
+
 				Vectors2	::RegisterModule,
 
 				TDigest		::RegisterModule,
 
 				Index		::RegisterModule,
 
-				MultiIndex	::RegisterModule,
-				TrigramIndex	::RegisterModule,
-				HybridIndex	::RegisterModule,
+			//	MultiIndex	::RegisterModule,
+			//	TrigramIndex	::RegisterModule,
+			//	HybridIndex	::RegisterModule,
+			//	MIndexShared	::RegisterModule,	// has to be included, if any of MIndex / TIndex are included
 
 				AC		::RegisterModule,
 				SummaryStats	::RegisterModule,
@@ -167,10 +169,7 @@ namespace net::worker{
 				Reload		::RegisterModule,
 				System		::RegisterModule,
 
-				Test		::RegisterModule,
-
-				MIndexShared	::RegisterModule, // has to be included, if any of MIndex / TIndex are included
-				ExistsShared	::RegisterModule  // has to be included, if any of LinearCurve / MortonCurve* / *Index are included
+				Test		::RegisterModule
 			>(pack);
 
 			pack.storageCommands.infoPrint();

@@ -5,6 +5,28 @@
 #include "stringtokenizer.h"
 #include "pair.h"
 
+/*
+Reverse Set a la Redis ZSET
+
+- One to One set
+- Manual keySort
+
+
+
+Permutation<1 to 6>:
+
+keyN~~keySub			-> index~keySort
+keyN~A~index~keySort~keySub	-> keySub
+
+
+
+Permutation1NoIndex used in AC?, Morton, Geo (with IndexController)
+
+keyN~~keySub			-> index~keySort
+keyN~index~keySort~keySub	-> value
+
+*/
+
 namespace net::worker::shared::zsetmulti{
 
 	struct IZSetMultyFactory : hm4::PairFactory::IFactory{
