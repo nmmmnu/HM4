@@ -1,16 +1,15 @@
-- id:       ACDEL_BIN
-  name:     ACDEL_BIN
+- id:       ACREM_UTF8
+  name:     ACREM_UTF8
   aliases:
     items:
-    - ACREM_BIN
-    - ACREMOVE_BIN
-  usage:    ACDEL_BIN key text
+    - ACREM
+  usage:    ACREM_UTF8 key text
   params:
     items:
     - k: key
       v: name of autocomplete object
     - k: text
-      v: text, must be ASCII or old style 8 bit encodings like CP1250, CP1251, KOI8 etc.
+      v: text, must be ASCII or UTF8
 
   description: |
     Remove *text* from the autocomplete object *key*.
@@ -22,9 +21,9 @@
   mutable:     true
   compatible:  false
   example:     |
-    127.0.0.1:6379> ACDEL_BIN mykey "hello world"
+    127.0.0.1:6379> ACREM_UTF8 mykey "hello world"
     (integer) 1
 
   see_also:
     items:
-    - ACDEL_UTF8
+      - ACREM_BIN

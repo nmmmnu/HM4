@@ -440,4 +440,4 @@ Changelog
 -	BREAKING CHANGE: remove the value from IX_ADD / IX_RANGE.
 	Introduce IX_MEXISTS and remove commands IX_GET / IX_MGET.
 	Keeping only IX_REM, remove IX_REMOVE, IX_DEL.
-
+-	BREAKING CHANGE: Keeping only AC_REM_XXX, remove AC_REMOVE, AC_DEL.

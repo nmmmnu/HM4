@@ -98,10 +98,10 @@ namespace net::worker::commands::AC{
 			return result.set(valueN);
 		}
 
-		// ACDEL_XXX a text
+		// ACREM_XXX a text
 
 		template<typename Tokenizer, class Protocol, class DBAdapter>
-		void do_processACDEL(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void do_processACREM(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
@@ -339,23 +339,22 @@ namespace net::worker::commands::AC{
 
 
 	template<class Protocol, class DBAdapter>
-	struct ACDEL_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
+	struct ACREM_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
 
-		ACDEL_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_UTF8", std::begin(cmd__), std::end(cmd__)){}
+		ACREM_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACREM_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACADD_UTF8 a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			return do_processACDEL<UTF8Tokenizer>(p, db, result);
+			return do_processACREM<UTF8Tokenizer>(p, db, result);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
-			"acdel_utf8"	,	"ACDEL_UTF8"	,	"acdel"		,	"ACDEL"		,
-			"acrem_utf8"	,	"ACREM_UTF8"	,	"acrem"		,	"ACREM"		,
-			"acremove_utf8"	,	"ACREMOVE_UTF8"	,	"acremove"	,	"ACREMOVE"
+			"acrem_utf8"	,	"ACREM_UTF8"	,
+			"acrem"		,	"ACREM"
 		};
 
 	};
@@ -363,23 +362,21 @@ namespace net::worker::commands::AC{
 
 
 	template<class Protocol, class DBAdapter>
-	struct ACDEL_BIN : BaseCommandRW<Protocol,DBAdapter>{
+	struct ACREM_BIN : BaseCommandRW<Protocol,DBAdapter>{
 
-		ACDEL_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACDEL_BIN", std::begin(cmd__), std::end(cmd__)){}
+		ACREM_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACREM_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACADD_BIN a text exp
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			return do_processACDEL<ASCIITokenizer>(p, db, result);
+			return do_processACREM<ASCIITokenizer>(p, db, result);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
-			"acdel_bin"	,		"ACDEL_BIN"	,
-			"acrem_bin"	,		"ACREM_BIN"	,
-			"acremove_bin"	,		"ACREMOVE_BIN"
+			"acrem_bin"	,		"ACREM_BIN"
 		};
 
 	};
@@ -490,8 +487,8 @@ namespace net::worker::commands::AC{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				ACADD_UTF8	,	ACDEL_UTF8	,
-				ACADD_BIN	,	ACDEL_BIN	,
+				ACADD_UTF8	,	ACREM_UTF8	,
+				ACADD_BIN	,	ACREM_BIN	,
 				ACRANGE		,
 				ACRANGEALL
 			>(pack);
