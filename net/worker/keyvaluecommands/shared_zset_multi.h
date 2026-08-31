@@ -20,7 +20,7 @@ keyN~A~index~keySort~keySub	-> keySub
 
 
 
-Permutation1NoIndex used in AC?, Morton, Geo (with IndexController)
+Permutation1NoIndex used in Morton and Geo (with IndexController)
 
 keyN~~keySub			-> index~keySort
 keyN~index~keySort~keySub	-> value

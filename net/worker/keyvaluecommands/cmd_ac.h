@@ -14,7 +14,30 @@ namespace net::worker::commands::AC{
 	namespace impl_{
 		using namespace net::worker::shared::accumulate_results;
 		using namespace net::worker::shared::config;
-		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
+
+
+
+		// this is from zsetmulti::Permutation1NoIndex,
+		// but better copy / paste, because is different context
+
+		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, 1> const &indexes, size_t more = 0){
+			// keyN~A~keySub, 2 * ~ + 0 * _
+			return hm4::Pair::isCompositeKeyValid(2 * 1 + 0 * 1 + more, keyN, keySub,
+						indexes[0]);
+		}
+
+		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+					std::string_view keyN,
+					std::string_view keySub,
+					std::string_view ix0
+				){
+
+			return concatenateBuffer(bufferKey,
+					keyN	,		separator	,
+						ix0	,	separator	,
+					keySub
+			);
+		}
 
 
 
@@ -40,7 +63,7 @@ namespace net::worker::commands::AC{
 			auto const &text	= p[2];
 			auto const expire	= p.size() > 3 ? from_string<uint32_t>(p[3]) : 0;
 
-			if (!P1::valid(keyN, text, { text } ))
+			if (!valid(keyN, text, { text } ))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			[[maybe_unused]]
@@ -49,7 +72,7 @@ namespace net::worker::commands::AC{
 			Tokenizer tok{ text };
 
 			hm4::PairBufferKey bufferKey;
-			auto const key = P1::makeKeyData(bufferKey, DBAdapter::SEPARATOR,
+			auto const key = makeKeyData(bufferKey, DBAdapter::SEPARATOR,
 					keyN		,
 					text		,
 					""
@@ -63,7 +86,7 @@ namespace net::worker::commands::AC{
 			hm4::insert(*db, key, value, expire);
 
 			for(auto it = std::begin(tok); it != std::end(tok); ++it){
-				auto const key = P1::makeKeyData(bufferKey, DBAdapter::SEPARATOR,
+				auto const key = makeKeyData(bufferKey, DBAdapter::SEPARATOR,
 						keyN		,
 						text		,
 						tok.to(it)
@@ -85,7 +108,7 @@ namespace net::worker::commands::AC{
 			auto const &keyN	= p[1];
 			auto const &text	= p[2];
 
-			if (!P1::valid(keyN, text, { text } ))
+			if (!valid(keyN, text, { text } ))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			[[maybe_unused]]
@@ -94,7 +117,7 @@ namespace net::worker::commands::AC{
 			Tokenizer tok{ text };
 
 			hm4::PairBufferKey bufferKey;
-			auto const key = P1::makeKeyData(bufferKey, DBAdapter::SEPARATOR,
+			auto const key = makeKeyData(bufferKey, DBAdapter::SEPARATOR,
 					keyN		,
 					text		,
 					""
@@ -103,7 +126,7 @@ namespace net::worker::commands::AC{
 			hm4::erase(*db, key);
 
 			for(auto it = std::begin(tok); it != std::end(tok); ++it){
-				auto const key = P1::makeKeyData(bufferKey, DBAdapter::SEPARATOR,
+				auto const key = makeKeyData(bufferKey, DBAdapter::SEPARATOR,
 						keyN		,
 						text		,
 						tok.to(it)
