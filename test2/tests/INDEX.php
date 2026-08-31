@@ -13,51 +13,30 @@ function cmd_index1($redis){
 	rawCommand($redis, "xndel", "a", "a");
 
 	rawCommand($redis, "ix1add", "a",
-				"niki",	"sofia",	"s", "nnn1",
-				"ivan",	"varna",	"s", "iii1",
-				"boro", "pernik",	"s", "bbb1"
+				"niki",	"sofia",	"s",
+				"ivan",	"varna",	"s",
+				"boro", "pernik",	"s"
 	);
 
 	expect("IX1ADD",	true									);
-
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "niki"	) == "nnn1"	);
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "ivan"	) == "iii1"	);
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "boro"	) == "bbb1"	);
-
-	expect("IX1MGET",	rawCommand($redis, "ix1mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn1", "iii1", "bbb1"]		);
 
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "niki"	)		);
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "ivan"	)		);
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "boro"	) 		);
 
-	rawCommand($redis, "ix1del", "a", "boro"							);
+	rawCommand($redis, "ix1rem", "a", "boro"							);
 
-	expect("IX1DEL",	true									);
-
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "niki"	) == "nnn1"	);
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "ivan"	) == "iii1"	);
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "boro"	) == ""		);
-
-	expect("IX1MGET",	rawCommand($redis, "ix1mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn1", "iii1", ""]		);
+	expect("IX1REM",	true									);
 
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "niki"	)		);
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "ivan"	)		);
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "boro"	) == false	);
 
 	rawCommand($redis, "ix1add", "a",
-				"niki",	"sofia",	"s",	"nnn2",
-				"gogo",	"bristol",	"s",	"ggg2",
-				"ivan",	"varna",	"s",	"iii2"
+				"niki",	"sofia",	"s",
+				"gogo",	"bristol",	"s",
+				"ivan",	"varna",	"s"
 	);
-
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "niki"	) == "nnn2"	);
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "ivan"	) == "iii2"	);
-	expect("IX1GET",	rawCommand($redis, "ix1get",		"a", "boro"	) == ""	);
-
-	expect("IX1MGET",	rawCommand($redis, "ix1mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn2", "iii2", ""]		);
 
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "niki"	)		);
 	expect("IX1EXISTS",	rawCommand($redis, "ix1exists",		"a", "ivan"	)		);
@@ -68,14 +47,14 @@ function cmd_index1($redis){
 	expect("IX1GETINDEXES",	rawCommand($redis, "ix1getindexes",	"a", "boro"	) == ["", ""]		);
 
 	expect("IX1RANGE",	rawCommand($redis, "ix1range",		"a", "A", '', 100, ''	) == [
-										"gogo", "ggg2",
-										"niki", "nnn2",
-										"ivan", "iii2",
+										"gogo", 1,
+										"niki", 1,
+										"ivan", 1,
 										""
 									]				);
 
 	expect("IX1RANGE",	rawCommand($redis, "ix1range",		"a", "A", "sofia", 100, ''	) == [
-										"niki", "nnn2",
+										"niki", 1,
 										""
 									]				);
 
@@ -86,52 +65,31 @@ function cmd_index2($redis){
 	rawCommand($redis, "xndel", "a", "a");
 
 	rawCommand($redis, "ix2add", "a",
-				"niki",	"BG",	"sofia",	"s",	"nnn1",
-				"ivan",	"BG",	"varna",	"s",	"iii1",
-				"boro", "BG",	"pernik",	"s",	"bbb1"
+				"niki",	"BG",	"sofia",	"s",
+				"ivan",	"BG",	"varna",	"s",
+				"boro", "BG",	"pernik",	"s"
 	);
 
 	expect("IX2ADD",	true									);
-
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "niki"	) == "nnn1"	);
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "ivan"	) == "iii1"	);
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "boro"	) == "bbb1"	);
-
-	expect("IX2MGET",	rawCommand($redis, "ix2mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn1", "iii1", "bbb1"]		);
 
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "niki"	)		);
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "ivan"	)		);
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "boro"	) 		);
 
-	rawCommand($redis, "ix2del", "a", "boro"							);
+	rawCommand($redis, "ix2rem", "a", "boro"							);
 
-	expect("IX2DEL",	true									);
-
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "niki"	) == "nnn1"	);
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "ivan"	) == "iii1"	);
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "boro"	) == ""		);
-
-	expect("IX2MGET",	rawCommand($redis, "ix2mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn1", "iii1", ""]		);
+	expect("IX2REM",	true									);
 
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "niki"	)		);
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "ivan"	)		);
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "boro"	) == false	);
 
 	rawCommand($redis, "ix2add", "a",
-				"niki", "BG",	"sofia",	"s",	"nnn2",
-				"gogo", "UK",	"bristol",	"s",	"ggg2",
-				"john", "UK",	"london",	"s",	"jjj2",
-				"ivan", "BG",	"varna",	"s",	"iii2"
+				"niki", "BG",	"sofia",	"s",
+				"gogo", "UK",	"bristol",	"s",
+				"john", "UK",	"london",	"s",
+				"ivan", "BG",	"varna",	"s"
 	);
-
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "niki"	) == "nnn2"	);
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "ivan"	) == "iii2"	);
-	expect("IX2GET",	rawCommand($redis, "ix2get",		"a", "boro"	) == ""		);
-
-	expect("IX2MGET",	rawCommand($redis, "ix2mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn2", "iii2", ""]		);
 
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "niki"	)		);
 	expect("IX2EXISTS",	rawCommand($redis, "ix2exists",		"a", "ivan"	)		);
@@ -142,26 +100,26 @@ function cmd_index2($redis){
 	expect("IX2GETINDEXES",	rawCommand($redis, "ix2getindexes",	"a", "boro"	) == ["", "", ""]		);
 
 	expect("IX2RANGE",	rawCommand($redis, "ix2range",		"a", "AB", '', '', 100, ''	) == [
-										"niki", "nnn2",
-										"ivan", "iii2",
-										"gogo", "ggg2",
-										"john", "jjj2",
+										"niki", 1,
+										"ivan", 1,
+										"gogo", 1,
+										"john", 1,
 										""
 									]				);
 
 	expect("IX2RANGE",	rawCommand($redis, "ix2range",		"a", "AB", "BG", '', 100, ''	) == [
-										"niki", "nnn2",
-										"ivan", "iii2",
+										"niki", 1,
+										"ivan", 1,
 										""
 									]				);
 
 	expect("IX2RANGE",	rawCommand($redis, "ix2range",		"a", "AB", "BG", "sofia", 100, ''	) == [
-										"niki", "nnn2",
+										"niki", 1,
 										""
 									]				);
 
 	expect("IX2RANGE",	rawCommand($redis, "ix2range",		"a", "BA", "sofia", "BG", 100, ''	) == [
-										"niki", "nnn2",
+										"niki", 1,
 										""
 									]				);
 
@@ -172,53 +130,31 @@ function cmd_index3($redis){
 	rawCommand($redis, "xndel", "a", "a");
 
 	rawCommand($redis, "ix3add", "a",
-				"niki",	"BG",	"sofia",	"it",	"s",	"nnn1",
-				"ivan",	"BG",	"varna",	"it",	"s",	"iii1",
-				"boro", "BG",	"pernik",	"it",	"s",	"bbb1"
+				"niki",	"BG",	"sofia",	"it",	"s",
+				"ivan",	"BG",	"varna",	"it",	"s",
+				"boro", "BG",	"pernik",	"it",	"s"
 	);
 
 	expect("IX3ADD",	true									);
-
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "niki"	) == "nnn1"	);
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "ivan"	) == "iii1"	);
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "boro"	) == "bbb1"	);
-
-	expect("IX3MGET",	rawCommand($redis, "ix3mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn1", "iii1", "bbb1"]		);
 
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "niki"	)		);
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "ivan"	)		);
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "boro"	) 		);
 
-	rawCommand($redis, "ix3del", "a", "boro"							);
+	rawCommand($redis, "ix3rem", "a", "boro"							);
 
-	expect("IX3DEL",	true									);
-
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "niki"	) == "nnn1"	);
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "ivan"	) == "iii1"	);
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "boro"	) == ""		);
-
-	expect("IX3MGET",	rawCommand($redis, "ix3mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn1", "iii1", ""]		);
+	expect("IX3REM",	true									);
 
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "niki"	)		);
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "ivan"	)		);
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "boro"	) == false	);
 
 	rawCommand($redis, "ix3add", "a",
-				"niki", "BG",	"sofia",	"it",	"s",	"nnn2",
-				"gogo", "UK",	"bristol",	"it",	"s",	"ggg2",
-				"john", "UK",	"london",	"hr",	"s",	"jjj2",
-				"ivan", "BG",	"varna",	"hr",	"s",	"iii2"
+				"niki", "BG",	"sofia",	"it",	"s",
+				"gogo", "UK",	"bristol",	"it",	"s",
+				"john", "UK",	"london",	"hr",	"s",
+				"ivan", "BG",	"varna",	"hr",	"s"
 	);
-
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "niki"	) == "nnn2"	);
-
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "ivan"	) == "iii2"	);
-	expect("IX3GET",	rawCommand($redis, "ix3get",		"a", "boro"	) == ""		);
-
-	expect("IX3MGET",	rawCommand($redis, "ix3mget",		"a",
-					"niki", "ivan", "boro"	) == ["nnn2", "iii2", ""]		);
 
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "niki"	)		);
 	expect("IX3EXISTS",	rawCommand($redis, "ix3exists",		"a", "ivan"	)		);
@@ -229,31 +165,31 @@ function cmd_index3($redis){
 	expect("IX3GETINDEXES",	rawCommand($redis, "ix3getindexes",	"a", "boro"	) == ["", "", "", ""]		);
 
 	expect("IX3RANGE",	rawCommand($redis, "ix3range",		"a", "ABC", '', '', '', 100, ''	) == [
-										"niki", "nnn2",
-										"ivan", "iii2",
-										"gogo", "ggg2",
-										"john", "jjj2",
+										"niki", 1,
+										"ivan", 1,
+										"gogo", 1,
+										"john", 1,
 										""
 									]				);
 
 	expect("IX3RANGE",	rawCommand($redis, "ix3range",		"a", "ABC", "BG", '', '', 100, ''		) == [
-										"niki", "nnn2",
-										"ivan", "iii2",
+										"niki", 1,
+										"ivan", 1,
 										""
 									]				);
 
 	expect("IX3RANGE",	rawCommand($redis, "ix3range",		"a", "ABC", "BG", "sofia", '', 100, ''		) == [
-										"niki", "nnn2",
+										"niki", 1,
 										""
 									]				);
 
 	expect("IX3RANGE",	rawCommand($redis, "ix3range",		"a", "ABC", "BG", "sofia", "it", 100, ''	) == [
-										"niki", "nnn2",
+										"niki", 1,
 										""
 									]				);
 
 	expect("IX3RANGE",	rawCommand($redis, "ix3range",		"a", "CAB", "hr", "BG", '', 100, ''	) == [
-										"ivan", "iii2",
+										"ivan", 1,
 										""
 									]				);
 
