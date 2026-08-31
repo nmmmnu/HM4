@@ -723,8 +723,8 @@ void AVLList<T_Allocator>::swapLinksRelative_(Node *a, Node *b){
 	swap(a->r	, b->r		);
 	swap(a->p_	, b->p_		);
 
-	a->setBalance(bal_a);
-	b->setBalance(bal_b);
+	a->setBalance(bal_b);
+	b->setBalance(bal_a);
 
 	fixParentAndChildren_<1,0,0>(b, a);
 	fixParentAndChildren_<0,1,1>(a);
@@ -751,8 +751,8 @@ void AVLList<T_Allocator>::swapLinksNormal_(Node *a, Node *b){
 	swap(a->r	, b->r		);
 	swap(a->p_	, b->p_		);
 
-	a->setBalance(bal_a);
-	b->setBalance(bal_b);
+	a->setBalance(bal_b);
+	b->setBalance(bal_a);
 
 	fixParentAndChildren_<1,1,1>(a, b);
 	fixParentAndChildren_<1,1,1>(b, a);
