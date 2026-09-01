@@ -95,12 +95,64 @@ namespace net::worker::commands::MultiIndex2{
 			}
 
 			template<typename IContainer, typename BContainer>
-			bool operator()(std::string_view data,
+			bool operator()(std::string_view tokens,
 						IContainer &icontainer, BContainer const &) const{
 
-				return validateTokens(std::false_type{}, DBAdapter::SEPARATOR[0], data, icontainer);
+				return validateTokens(std::false_type{}, DBAdapter::SEPARATOR[0], tokens, icontainer);
 			}
 		};
+
+
+
+		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
+			size_t count = 0;
+
+			for (size_t i = 0; i < s.size(); ++i)
+				if (s[i] == separator)
+					if (++count; count == nth)
+						return s.substr(i + 1);
+
+			return "INVALID_DATA";
+		}
+
+
+
+		template<typename DBAdapter, typename Result>
+		void rangeSingle(std::string_view keyN, std::string_view index, uint32_t count, std::string_view keyStart,
+										DBAdapter &db, Result &result, OutputBlob &blob){
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			hm4::PairBufferKey bufferKey;
+			auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+
+			auto const key = keyStart.empty() ? prefix : keyStart;
+
+			logger<Logger::DEBUG>() << "MultiIndex2::rangeSingle" << "prefix" << prefix << "key" << key;
+
+			auto proj = [](std::string_view x){
+				auto const separator = DBAdapter::SEPARATOR[0];
+
+				// keyN~word~
+				return extractNth_(3, separator, x);
+			};
+
+			using namespace shared::accumulate_results;
+
+			StopPrefixPredicate stop{ prefix };
+
+			auto const Out = AccumulateOutput::KEYS_WITH_TAIL;
+
+			sharedAccumulateResults<Out>(
+				count		,
+				stop		,
+				db->find(key)	,
+				std::end(*db)	,
+				container	,
+				proj
+			);
+
+			return result.set_container(container);
+		}
 
 	} // namespace impl_
 
@@ -203,11 +255,9 @@ namespace net::worker::commands::MultiIndex2{
 				}
 
 				// Decoder
-				icontainer.clear();
-				std::copy(std::begin(container), std::end(container), std::back_inserter(icontainer));
 
-				for(size_t i = 0; i < icontainer.size(); ++i)
-					std::cout << i << ' ' << icontainer[i] << '\n';
+				icontainer.clear(); // just in case
+				icontainer.assign(std::begin(container), std::end(container));
 			}
 
 			auto const &getIndexes() const{
@@ -336,6 +386,52 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
+	template<class Protocol, class DBAdapter>
+	struct IXMSIM : BaseCommandRO<Protocol,DBAdapter>{
+
+		IXMSIM() : BaseCommandRO<Protocol,DBAdapter>("IXMSIM", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		// IXMSIM key word count from
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			using namespace impl_;
+
+			if (p.size() != 5)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
+
+			auto const keyN     = p[1];
+			auto const index    = p[2];
+
+			if (keyN.empty() || index.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if (!shared::rsetmulti::valid(keyN, index))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			using namespace shared::accumulate_results;
+
+			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const keyStart = p[4];
+
+			return rangeSingle(keyN, index, count, keyStart,
+									db, result, blob);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixmsim",	"IXMSIM"
+		};
+
+	};
+
+
+
+
+
 	template<class Protocol, class DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mindex2";
@@ -344,7 +440,8 @@ namespace net::worker::commands::MultiIndex2{
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				IXMADD		,
 				IXMREM		,
-				IXMGETINDEXES
+				IXMGETINDEXES	,
+				IXMSIM
 			>(pack);
 		}
 	};

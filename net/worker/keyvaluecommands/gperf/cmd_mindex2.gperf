@@ -1,0 +1,17 @@
+ixmadd,		"IXMADD"
+IXMADD,		"IXMADD"
+# ---
+ixmrem,		"IXMREM"
+IXMREM,		"IXMREM"
+# ---
+ixmgetindexes,	"IXMGETINDEXES"
+IXMGETINDEXES,	"IXMGETINDEXES"
+# ---
+ixmsim,		"IXMSIM"
+IXMSIM,		"IXMSIM"
+# ---
+ixmrangeflex,	"IXMRANGEFLEX"
+IXMRANGEFLEX,	"IXMRANGEFLEX"
+# ---
+ixmsimstrict,	"IXMSIMSTRICT"
+IXMSIMSTRICT,	"IXMSIMSTRICT"
