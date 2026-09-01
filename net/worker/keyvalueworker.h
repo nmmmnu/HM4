@@ -56,6 +56,8 @@
 //#include "keyvaluecommands/cmd_mindex_shared.h"	// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
 							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
 
+#include "keyvaluecommands/cmd_mindex2.h"		// IXMADD
+
 #include "keyvaluecommands/cmd_ac.h"			// ACADD_*, ACDEL_*, ACRANGE
 #include "keyvaluecommands/cmd_summary_stats.h"		// SSRESERVE, SSADD, SSMERGE, SSGETALL, SSGET, SSMGET, SSADDGETALL, SSADDGET, SSADDMGET
 
@@ -155,6 +157,8 @@ namespace net::worker{
 			//	TrigramIndex	::RegisterModule,
 			//	HybridIndex	::RegisterModule,
 			//	MIndexShared	::RegisterModule,	// has to be included, if any of MIndex / TIndex are included
+
+				MultiIndex2	::RegisterModule,
 
 				AC		::RegisterModule,
 				SummaryStats	::RegisterModule,
