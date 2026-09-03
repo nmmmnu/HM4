@@ -83,7 +83,7 @@ IOURingEngine::IOURingEngine(
 			int32_t conf_timeoutRead		,
 			int32_t conf_timeoutWrite
 		) :
-				conf_maxClients_	(conf_maxClients		),
+			//	conf_maxClients_	(conf_maxClients		),
 				conf_maxServersFD_	(conf_maxServersFD		),
 				control_		(std::make_unique<Control>()	){
 
@@ -268,10 +268,10 @@ WaitStatus IOURingEngine::wait(bool const timeout){
 			// Push accept back, but pass it to events too...
 			if constexpr(AUTO_ADD_ACCEPT){
 				if (op == FDOperation::ACCEPT)
-					add_accept(fd);
+					add_accept(static_cast<int>(fd));
 			}
 
-			events_.emplace_back(fd, cqe->res, op);
+			events_.emplace_back(static_cast<int>(fd), cqe->res, op);
 
 			if (events_.full())
 				break;

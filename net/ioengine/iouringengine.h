@@ -75,7 +75,7 @@ private:
 	using EventVector = StaticVector<FDEvent, MAX_EVENT_PER_LOOP>;
 
 private:
-	uint32_t	conf_maxClients_	;
+	// uint32_t	conf_maxClients_	;
 	uint32_t	conf_maxServersFD_	;
 
 	EventVector	events_			;
