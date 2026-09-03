@@ -207,15 +207,7 @@ namespace net::worker::shared::rsetmulti{
 			}
 		}
 
-		template<typename Decoder, typename Container, typename BContainer>
-		bool getIndexes(Decoder decoder,
-					std::string_view data,
-						Container &icontainer, BContainer &bcontainer){
-
-			return decoder(data, icontainer, bcontainer);
-		}
-
-		template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
+		template<bool withAutomaticKeySort = false, typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 		bool getIndexes(DBAdapter &db, Decoder decoder,
 					std::string_view keyCtrl,
 						Container &icontainer, BContainer &bcontainer){
@@ -232,14 +224,18 @@ namespace net::worker::shared::rsetmulti{
 			if (!pair)
 				return false;
 
-			return getIndexes(decoder, pair->getVal(), icontainer, bcontainer);
+			if constexpr(withAutomaticKeySort){
+				return decoder(std::true_type{}, pair->getVal(), icontainer, bcontainer);
+			}else{
+				return decoder(pair->getVal(), icontainer, bcontainer);
+			}
 		}
 
 	} // namespace impl_
 
 
 
-	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer, typename Factory>
+	template<bool withAutomaticKeySort = false, typename DBAdapter, typename Decoder, typename Container, typename BContainer, typename Factory>
 	bool add(DBAdapter &db, Decoder decoder,
 			std::string_view keyN, std::string_view keySub, std::string_view keySort,
 						Container &icontainer, BContainer &bcontainer,
@@ -252,15 +248,25 @@ namespace net::worker::shared::rsetmulti{
 
 		// get indexes
 		// if this returns false then this means, key is new.
-		bool const old = impl_::getIndexes(db, decoder, keyCtrl, icontainer, bcontainer);
+		bool const old = impl_::getIndexes<withAutomaticKeySort>(db, decoder, keyCtrl, icontainer, bcontainer);
 
 		[[maybe_unused]]
 		hm4::TXGuard guard{ *db };
 
 		// remove all old keys,
 		// because we do not know the new keys yet, we have to delete all
-		if (old)
-			impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
+		if (old){
+			if constexpr(withAutomaticKeySort){
+				// use keySort in the array
+				auto const keySort = icontainer.back();
+				icontainer.pop_back();
+
+				impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
+			}else{
+				// use keySort from arguments
+				impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
+			}
+		}
 
 		// icontainer, bcontainer no longer used.
 
@@ -282,6 +288,67 @@ namespace net::worker::shared::rsetmulti{
 
 		return true;
 	}
+
+	template<bool withAutomaticKeySort = false, typename DBAdapter, typename Decoder, typename Container, typename BContainer>
+	bool rem(DBAdapter &db, Decoder decoder,
+				std::string_view keyN, std::string_view keySub, std::string_view keySort,
+					Container &icontainer, BContainer &bcontainer){
+
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
+
+		logger<Logger::DEBUG>() << "MSetMulti::REM: ctrl key" << keyCtrl;
+
+		if (!impl_::getIndexes<withAutomaticKeySort>(db, decoder, keyCtrl, icontainer, bcontainer))
+			return false;
+
+		[[maybe_unused]]
+		hm4::TXGuard guard{ *db };
+
+		if constexpr(withAutomaticKeySort){
+			// use keySort in the array
+			auto const keySort = icontainer.back();
+			icontainer.pop_back();
+
+			impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
+		}else{
+			// use keySort from arguments
+			impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
+		}
+
+		erase(*db, keyCtrl);
+
+		return true;
+	}
+
+	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
+	bool getIndexes(DBAdapter &db, Decoder decoder,
+				std::string_view keyN, std::string_view keySub,
+					Container &icontainer, BContainer &bcontainer){
+
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
+
+		return impl_::getIndexes(db, decoder, keyCtrl, icontainer, bcontainer);
+	}
+
+	template<typename DBAdapter>
+	std::string_view getData(DBAdapter &db,
+				std::string_view keyN, std::string_view keySub){
+
+		hm4::PairBufferKey bufferKeyCtrl;
+		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
+
+		return hm4::getPairVal(*db, keyCtrl);
+	}
+
+} // namespace net::worker::shared::msetmulti_better
+
+#endif
+
+
+
+
 
 
 
@@ -335,61 +402,4 @@ namespace net::worker::shared::rsetmulti{
 		}
 */
 
-
-
-	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
-	bool rem(DBAdapter &db, Decoder decoder,
-				std::string_view keyN, std::string_view keySub, std::string_view keySort,
-					Container &icontainer, BContainer &bcontainer){
-
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
-
-		logger<Logger::DEBUG>() << "MSetMulti::REM: ctrl key" << keyCtrl;
-
-		if (!impl_::getIndexes(db, decoder, keyCtrl, icontainer, bcontainer))
-			return false;
-
-		[[maybe_unused]]
-		hm4::TXGuard guard{ *db };
-
-		impl_::removeKeys(db, icontainer, keyN, keySub, keySort);
-
-		erase(*db, keyCtrl);
-
-		return true;
-	}
-
-	template<typename Decoder, typename Container, typename BContainer>
-	bool getIndexes(Decoder decoder,
-				std::string_view data,
-					Container &icontainer, BContainer &bcontainer){
-
-		return impl_::getIndexes(decoder, data, icontainer, bcontainer);
-	}
-
-	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
-	bool getIndexes(DBAdapter &db, Decoder decoder,
-				std::string_view keyN, std::string_view keySub,
-					Container &icontainer, BContainer &bcontainer){
-
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
-
-		return impl_::getIndexes(db, decoder, keyCtrl, icontainer, bcontainer);
-	}
-
-	template<typename DBAdapter>
-	std::string_view getData(DBAdapter &db,
-				std::string_view keyN, std::string_view keySub){
-
-		hm4::PairBufferKey bufferKeyCtrl;
-		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
-
-		return hm4::getPairVal(*db, keyCtrl);
-	}
-
-} // namespace net::worker::shared::msetmulti_better
-
-#endif
 

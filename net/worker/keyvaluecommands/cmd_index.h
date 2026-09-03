@@ -84,12 +84,7 @@ namespace net::worker::commands::Index{
 				auto const keySub  = *(itk + 0);
 
 				{
-					auto const keySortSize = [&itk](){
-						if (auto const size = (itk + N + 1)->size(); size)
-							return size;
-						else
-							return shared::sortkey::keySortSize;
-					}();
+					auto const keySortSize = shared::sortkey::keySortSize( *(itk + N + 1) );
 
 					auto e = [&result](){
 						return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
@@ -134,13 +129,7 @@ namespace net::worker::commands::Index{
 				to_string_buffer_t buffer;
 
 				auto const keySub = *(itk + 0);
-
-				auto const keySort = [&](){
-					if (auto const k = *(itk + N + 1); k.empty())
-						return shared::sortkey::makeHashKeySort(keySub, buffer);
-					else
-						return k;
-				}();
+				auto const keySort = shared::sortkey::makeHashKeySort(keySub, *(itk + N + 1), buffer);
 
 				auto _ = [&itk](auto i){
 					return *(itk + i);

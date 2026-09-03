@@ -6,7 +6,7 @@
 #include "shared_accumulateresults.h"
 #include "shared_extractnth.h"
 
-#include <algorithm>	// copy
+#include <algorithm>	// copy, accumulate, is_sorted
 
 namespace net::worker::commands::MultiIndex2{
 	namespace impl_{
@@ -19,7 +19,7 @@ namespace net::worker::commands::MultiIndex2{
 
 
 		template<typename Container>
-		bool validateTokens(std::true_type, char delimiter, std::string_view tokens, Container &container){
+		bool validateTokensUser(char delimiter, std::string_view tokens, Container &container){
 			container.clear();
 
 			StringTokenizer const tok{ tokens, delimiter };
@@ -55,7 +55,7 @@ namespace net::worker::commands::MultiIndex2{
 			return true;
 		}
 
-		bool validateTokens(std::false_type, char delimiter, std::string_view tokens, OutputBlob::Container &container){
+		bool validateTokensStored(char delimiter, std::string_view tokens, OutputBlob::Container &container){
 			container.clear();
 
 			StringTokenizer const tok{ tokens, delimiter };
@@ -83,14 +83,80 @@ namespace net::worker::commands::MultiIndex2{
 			return true;
 		}
 
-		size_t sizeTokens(OutputBlob::Container const &container){
+		size_t sizeTokens(OutputBlob::Container const &container, std::string_view keySort){
 			auto f = [](size_t sum, std::string_view sv){
 				return sum + sv.size() + 1;
 			};
 
 			size_t const sum = std::accumulate(std::begin(container), std::end(container), size_t{ 0 }, f);
 
-			return sum - 1;
+			return sum + keySort.size();
+		}
+
+
+
+		template<typename Container>
+		bool validateTokensUser__withKeySort(char delimiter, std::string_view tokens, std::string_view keySort, Container &container){
+			container.clear();
+
+			StringTokenizer const tok{ tokens, delimiter };
+
+			for(auto const &x : tok){
+				if (container.full())
+					return false; // no room for the token
+
+				if (x.empty())
+					continue;
+
+				container.push_back(x);
+			}
+
+			if (container.empty())
+				return false; // need to have at least one token
+
+			std::sort(std::begin(container), std::end(container));
+
+			#if 0
+				container.erase(
+					std::unique( std::begin(container), std::end(container) ),
+					std::end(container)
+				);
+			#else
+				// Quick fix for StaticVector et all
+
+				if (auto it = std::unique(std::begin(container), std::end(container)); it != std::end(container))
+					while (container.end() != it)
+						container.pop_back();
+			#endif
+
+			container.push_back(keySort);
+
+			return true;
+		}
+
+		bool validateTokensStored__withKeySort(char delimiter, std::string_view tokens, OutputBlob::Container &container){
+			container.clear();
+
+			StringTokenizer const tok{ tokens, delimiter };
+
+			std::string_view prev;
+
+			for(auto const &x : tok){
+				if (container.full())
+					return false; // no room for the token
+
+				if (x.empty())
+					return false;
+
+				container.push_back(x);
+
+				prev = x;
+			}
+
+			if (container.size() < 2)
+				return false; // need to have at least one token and keySort
+
+			return std::is_sorted(std::begin(container), std::prev(std::end(container)));
 		}
 
 
@@ -105,7 +171,14 @@ namespace net::worker::commands::MultiIndex2{
 			bool operator()(std::string_view tokens,
 						IContainer &icontainer, BContainer const &) const{
 
-				return validateTokens(std::false_type{}, DBAdapter::SEPARATOR[0], tokens, icontainer);
+				return validateTokensStored(DBAdapter::SEPARATOR[0], tokens, icontainer);
+			}
+
+			template<typename IContainer, typename BContainer>
+			bool operator()(std::true_type, std::string_view tokens,
+						IContainer &icontainer, BContainer const &) const{
+
+				return validateTokensStored__withKeySort(DBAdapter::SEPARATOR[0], tokens, icontainer);
 			}
 		};
 
@@ -148,8 +221,6 @@ namespace net::worker::commands::MultiIndex2{
 				container	,
 				proj
 			);
-
-			container.back() = shared::extractnth::extractNth(2, DBAdapter::SEPARATOR[0], container.back());
 
 			return result.set_container(container);
 		}
@@ -252,22 +323,25 @@ namespace net::worker::commands::MultiIndex2{
 		}
 
 	private:
-		// IXMADD keyN keySub delimiter "words,words"
+		// IXMADD keyN keySub keySort delimiter "words,words"
 
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
-			if (p.size() != 5)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
+			if (p.size() != 6)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
 
 			auto const keyN		= p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
+			to_string_buffer_t bufferKeySort;
+
 			auto const keySub	= p[2];
-			auto const delimiter	= p[3];
-			auto const tokens	= p[4];
+			// auto const keySort	= p[3]; // posponed
+			auto const delimiter	= p[4];
+			auto const tokens	= p[5];
 
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -275,16 +349,14 @@ namespace net::worker::commands::MultiIndex2{
 			if (keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize))
+			auto const keySort	= shared::sortkey::makeHashKeySort(keySub, p[3], bufferKeySort);
+
+			if (!shared::rsetmulti::valid(keyN, keySub, keySort))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			to_string_buffer_t buffer;
-
-			auto const keySort = shared::sortkey::makeHashKeySort(keySub, buffer);
 
 			auto &tokenContainer = blob.construct<OutputBlob::Container>();
 
-			if (!validateTokens(std::true_type{}, delimiter[0], tokens, tokenContainer))
+			if (!validateTokensUser(delimiter[0], tokens, tokenContainer))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			// ---------------------
@@ -299,10 +371,12 @@ namespace net::worker::commands::MultiIndex2{
 			constexpr std::string_view key = ""; // will be replaces later.
 
 			IXMADDFactory factory{ key, pair,
-							tokenContainer, icontainer };
+							tokenContainer, icontainer, keySort };
+
+			bool const withAutomaticKeySort = true;
 
 			[[maybe_unused]]
-			bool const b = shared::rsetmulti::add(db, decoder,
+			bool const b = shared::rsetmulti::add<withAutomaticKeySort>(db, decoder,
 							keyN, keySub, keySort,
 								icontainer, bcontainer,
 									factory);
@@ -317,11 +391,13 @@ namespace net::worker::commands::MultiIndex2{
 			using Base = hm4::PairFactory::IFactoryAction<0,0,IXMADDFactory>;
 
 			IXMADDFactory(std::string_view const key, const Pair *pair,
-											OutputBlob::Container &container,
-											OutputBlob::Container &icontainer) :
-							Base::IFactoryAction	(key, impl_::sizeTokens(container), pair),
+											OutputBlob::Container	&container,
+											OutputBlob::Container	&icontainer,
+											std::string_view	keySort) :
+							Base::IFactoryAction	(key, impl_::sizeTokens(container, keySort), pair),
 							container		(container	),
-							icontainer		(icontainer	){}
+							icontainer		(icontainer	),
+							keySort			(keySort	){}
 
 			void action(Pair *pair){
 				char   *raw = pair->getValC();
@@ -332,10 +408,15 @@ namespace net::worker::commands::MultiIndex2{
 
 					concatenateRawBuffer_(raw + size, sv);		size += sv.size();
 
-					if (i >= container.size() - 1)
-						continue;
+					// if (i >= container.size() - 1)
+					// 	continue;
 
 					*(raw + size) = DBAdapter::SEPARATOR[0];	size += 1;
+				}
+
+				if constexpr(1){
+				//	std::cout << ">>" << keySort << "<<\n";
+					concatenateRawBuffer_(raw + size, keySort);	size += keySort.size();
 				}
 
 				// Decoder
@@ -351,6 +432,7 @@ namespace net::worker::commands::MultiIndex2{
 		private:
 			OutputBlob::Container	&container;
 			OutputBlob::Container	&icontainer;
+			std::string_view	keySort;
 		};
 
 	private:
@@ -392,7 +474,8 @@ namespace net::worker::commands::MultiIndex2{
 				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize))
+				// not 100% correct, because we do not have keySort
+				if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize()))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -404,12 +487,14 @@ namespace net::worker::commands::MultiIndex2{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const keySub	= *itk;
 
-				to_string_buffer_t buffer;
-				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, buffer);
+				// to_string_buffer_t buffer;
+				// auto const keySort	= shared::sortkey::makeHashKeySort(keySub, buffer);
+
+				bool const withAutomaticKeySort = true;
 
 				[[maybe_unused]]
-				bool const b = shared::rsetmulti::rem(db, decoder,
-								keyN, keySub, keySort,
+				bool const b = shared::rsetmulti::rem<withAutomaticKeySort>(db, decoder,
+								keyN, keySub, {},
 									icontainer, bcontainer);
 			}
 
@@ -444,7 +529,8 @@ namespace net::worker::commands::MultiIndex2{
 
 			using namespace impl_;
 
-			if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize))
+			// not 100% correct, because we do not have keySort
+			if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize()))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto &icontainer = blob.construct<OutputBlob::Container>();
@@ -547,7 +633,7 @@ namespace net::worker::commands::MultiIndex2{
 
 			auto &tokenContainer = blob.construct<SearchTokenContainer>();
 
-			if (!validateTokens(std::true_type{}, delimiter[0], tokens, tokenContainer))
+			if (!validateTokensUser(delimiter[0], tokens, tokenContainer))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			// ---------------------

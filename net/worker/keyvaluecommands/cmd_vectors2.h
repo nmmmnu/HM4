@@ -30,7 +30,7 @@ namespace net::worker::commands::Vectors2{
 		constexpr size_t keyBandSize		= 2;  // size of uint8 as hex
 
 		// keyN~keyBand~keySort~keySub
-		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + shared::sortkey::keySortSize   /* ~keySub */;
+		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + shared::sortkey::keySortSize()   /* ~keySub */;
 
 
 
@@ -790,7 +790,7 @@ namespace net::worker::commands::Vectors2{
 								vectorBuffer, vectorBufferProj }();
 
 				to_string_buffer_t buffer;
-				auto const keySort  = shared::sortkey::makeHashKeySort(keySub, buffer);
+				auto const keySort  = shared::sortkey::makeHashKeySort(keySub, {}, buffer);
 
 				VADD_Factory<T> factory{ cfvector, decoder, icontainer, bcontainer };
 
@@ -938,7 +938,7 @@ namespace net::worker::commands::Vectors2{
 				auto const keySub	= *itk;
 
 				to_string_buffer_t buffer;
-				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, buffer);
+				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, {}, buffer);
 
 				[[maybe_unused]]
 				bool const b = shared::rsetmulti::rem(db, decoder,
@@ -2211,8 +2211,7 @@ namespace net::worker::commands::Vectors2{
 
 			MyDecoder decoder{ dim_ix, bands, bits };
 
-			bool const b = shared::rsetmulti::getIndexes(decoder, vectorSV,
-								icontainer, bcontainer);
+			bool const b = decoder(vectorSV, icontainer, bcontainer);
 
 			if (!b)
 				return result.set_container0();
@@ -2308,8 +2307,7 @@ namespace net::worker::commands::Vectors2{
 
 			MyDecoder decoder{ dim_ix, bands, bits };
 
-			bool const b = shared::rsetmulti::getIndexes(decoder, sv,
-								icontainer, bcontainer);
+			bool const b = decoder(sv, icontainer, bcontainer);
 
 			if (!b)
 				return result.set_container0();

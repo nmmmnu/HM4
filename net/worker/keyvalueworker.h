@@ -56,7 +56,7 @@
 //#include "keyvaluecommands/cmd_mindex_shared.h"	// IXMGET, IXMMGET, IXMEXISTS, IXMGETINDEXES, IXMREM
 							// IXTGET, IXTMGET, IXTEXISTS, IXTGETINDEXES, IXTREM
 
-#include "keyvaluecommands/cmd_mindex2.h"		// IXMADD, IXMREM, IXMGETINDEXES
+#include "keyvaluecommands/cmd_mindex2.h"		// IXMADD, IXMREM, IXMGETINDEXES, IXMSIM1, IXMSIM
 
 #include "keyvaluecommands/cmd_ac.h"			// ACADD_*, ACDEL_*, ACRANGE
 #include "keyvaluecommands/cmd_summary_stats.h"		// SSRESERVE, SSADD, SSMERGE, SSGETALL, SSGET, SSMGET, SSADDGETALL, SSADDGET, SSADDMGET
