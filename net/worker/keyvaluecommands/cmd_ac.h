@@ -9,6 +9,7 @@
 
 #include "shared_zset_multi.h"
 #include "shared_accumulateresults.h"
+#include "shared_extractnth.h"
 
 namespace net::worker::commands::AC{
 	namespace impl_{
@@ -138,21 +139,6 @@ namespace net::worker::commands::AC{
 			return result.set(true);
 		}
 
-
-
-		inline std::string_view extractNth(size_t const nth, char const separator, std::string_view const s){
-			size_t count = 0;
-
-			for (size_t i = 0; i < s.size(); ++i)
-				if (s[i] == separator)
-					if (++count; count == nth)
-						return s.substr(i + 1);
-
-			return "INVALID_DATA";
-		}
-
-
-
 		inline std::string_view makeKeyDataSearch(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 						std::string_view txt
@@ -212,7 +198,7 @@ namespace net::worker::commands::AC{
 						auto const separator = DBAdapter::SEPARATOR[0];
 
 						// keyN~word~
-						return extractNth(2, separator, x);
+						return shared::extractnth::extractNth(2, separator, x);
 					};
 
 					auto const pkey = projKey(pair.getKey());

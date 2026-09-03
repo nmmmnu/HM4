@@ -6,7 +6,7 @@ namespace disk{
 class DiskList::forward_iterator {
 public:
 	// begin or specific position
-	forward_iterator(BlobGuard blob, const Pair *pair, bool const aligned) :
+	forward_iterator(BlobGuard blob, const Pair *pair, bool aligned) :
 				blob	(blob		),
 				pair	(pair		),
 				aligned	(aligned	){}
@@ -17,11 +17,11 @@ public:
 	using iterator = forward_iterator;
 
 public:
-	using difference_type = DiskList::difference_type;
-	using value_type = const Pair;
-	using pointer = value_type *;
-	using reference = value_type &;
-	using iterator_category = std::forward_iterator_tag;
+	using difference_type	= DiskList::difference_type;
+	using value_type	= const Pair;
+	using pointer		= value_type *;
+	using reference		= value_type &;
+	using iterator_category	= std::forward_iterator_tag;
 
 public:
 	iterator &operator++(){

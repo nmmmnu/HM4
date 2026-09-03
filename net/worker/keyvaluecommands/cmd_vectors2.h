@@ -15,6 +15,7 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_hashsortkey.h"
+#include "shared_extractnth.h"
 
 #include "logger.h"
 
@@ -661,19 +662,6 @@ namespace net::worker::commands::Vectors2{
 
 				return result.set_container(container);
 			}
-		}
-
-
-
-		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
-			size_t count = 0;
-
-			for (size_t i = 0; i < s.size(); ++i)
-				if (s[i] == separator)
-					if (++count; count == nth)
-						return s.substr(i + 1);
-
-			return "INVALID_DATA";
 		}
 
 	} // namespace impl_
@@ -1952,7 +1940,7 @@ namespace net::worker::commands::Vectors2{
 					continue;
 
 
-				auto const text = extractNth_(2, DBAdapter::SEPARATOR[0], key);
+				auto const text = shared::extractnth::extractNth(2, DBAdapter::SEPARATOR[0], key);
 
 				if (text == keySub)
 					continue;
@@ -2036,7 +2024,7 @@ namespace net::worker::commands::Vectors2{
 					continue;
 
 
-				auto const text = extractNth_(2, DBAdapter::SEPARATOR[0], key);
+				auto const text = shared::extractnth::extractNth(2, DBAdapter::SEPARATOR[0], key);
 
 				if (text == keySub)
 					continue;
@@ -2408,7 +2396,7 @@ namespace net::worker::commands::Vectors2{
 				auto const separator = DBAdapter::SEPARATOR[0];
 
 				// keyN~word~keySort~keySub
-				return impl_::extractNth_(3, separator, x);
+				return shared::extractnth::extractNth(3, separator, x);
 			};
 
 			auto const Out = AccumulateOutput::KEYS;

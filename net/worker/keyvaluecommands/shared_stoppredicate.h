@@ -3,9 +3,27 @@
 
 namespace net::worker::shared::stop_predicate{
 
-	struct StopPrefixPredicate{
+	class StopIterationPredicate{
+		size_t maxIterations;
+		size_t iterations	= 0;
+
+	public:
+		constexpr StopIterationPredicate(size_t maxIterations) :
+						maxIterations(maxIterations){}
+
+		constexpr bool operator()(std::string_view){
+			return ++iterations >= maxIterations;
+		}
+
+		constexpr size_t getIterations() const{
+			return iterations;
+		}
+	};
+
+	class StopPrefixPredicate{
 		std::string_view prefix;
 
+	public:
 		constexpr StopPrefixPredicate(std::string_view prefix) : prefix(prefix){
 			assert(!prefix.empty());
 		}
@@ -15,9 +33,10 @@ namespace net::worker::shared::stop_predicate{
 		}
 	};
 
-	struct StopRangePredicate{
+	class StopRangePredicate{
 		std::string_view end;
 
+	public:
 		constexpr StopRangePredicate(std::string_view end) : end(end){
 			assert(!end.empty());
 		}
@@ -27,9 +46,10 @@ namespace net::worker::shared::stop_predicate{
 		}
 	};
 
-	struct StopRangePrefixPredicate{
+	class StopRangePrefixPredicate{
 		std::string_view end;
 
+	public:
 		constexpr StopRangePrefixPredicate(std::string_view end) : end(end){
 			assert(!end.empty());
 		}

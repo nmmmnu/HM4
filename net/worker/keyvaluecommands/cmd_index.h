@@ -2,6 +2,7 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_accumulateresults.h"
+#include "shared_extractnth.h"
 
 #include "shared_zset_multi.h"
 
@@ -14,26 +15,13 @@ namespace net::worker::commands::Index{
 
 
 
-		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
-			size_t count = 0;
-
-			for (size_t i = 0; i < s.size(); ++i)
-				if (s[i] == separator)
-					if (++count; count == nth)
-						return s.substr(i + 1);
-
-			return "INVALID_DATA";
-		}
-
-
-
 		template<int N, AccumulateOutput Out, class It, class Container>
 		void accumulateResultsIX_(uint32_t const maxResults, std::string_view const prefix, It it, It eit, char const separator, Container &container){
 			StopPrefixPredicate stop{ prefix };
 
 			auto proj = [separator](std::string_view x){
 				// a~ABC~a~b~c~d
-				return extractNth_(N + 2 + 1, separator, x);
+				return shared::extractnth::extractNth(N + 2 + 1, separator, x);
 			};
 
 			return sharedAccumulateResults<Out>(maxResults, stop, it, eit, container, proj);
