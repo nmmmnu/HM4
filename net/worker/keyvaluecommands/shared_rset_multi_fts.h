@@ -82,6 +82,11 @@ namespace net::worker::shared::rsetmulti::fts{
 					cursor_	(separator, it, end	),
 					pstop_	(pstop			),
 					cstop_	(cstop			){
+
+			// we do not know if prefix is OK
+			if (cursor_ && pstop_(cursor_.getKey()))
+				cursor_.invalidate();
+
 			skipTombstones_();
 		}
 

@@ -222,6 +222,9 @@ namespace net::worker::commands::MultiIndex2{
 				proj
 			);
 
+			if (auto &next = container.back(); !next.empty())
+				next = shared::extractnth::extractNth(2, DBAdapter::SEPARATOR[0], next);
+
 			return result.set_container(container);
 		}
 
