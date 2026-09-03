@@ -91,6 +91,21 @@ namespace net::worker::shared::rsetmulti{
 		);
 	}
 
+	inline std::string_view makeKeyDataStart(hm4::PairBufferKey &bufferKey, std::string_view separator,
+				std::string_view keyN,
+					std::string_view text,
+						std::string_view keyStart
+			){
+
+		// keyN~text~SORT+KEYSUB
+
+		return concatenateBuffer(bufferKey,
+				keyN	,	separator	,
+				text	,	separator	,
+				keyStart
+		);
+	}
+
 	inline std::string_view makeKeyDataSearchNS(hm4::PairBufferKey &bufferKey, std::string_view separator,
 				std::string_view keyN,
 					std::string_view text

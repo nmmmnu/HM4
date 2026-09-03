@@ -13,8 +13,8 @@ namespace net::worker::commands::MultiIndex2{
 
 		constexpr size_t  MaxSearchTokens	= 32;
 
-		using SearchTokenContainer		= OutputBlob::TContainer	<MaxSearchTokens>;
-		using SearchTokenBufferKContainer	= OutputBlob::TKContainer	<MaxSearchTokens>;
+		using SearchTokenContainer		= OutputBlob::TContainer	<MaxSearchTokens	>;
+		using SearchTokenBufferKContainer	= OutputBlob::TKContainer	<MaxSearchTokens * 2	>; // for index and keyStart
 
 
 
@@ -116,18 +116,22 @@ namespace net::worker::commands::MultiIndex2{
 							OutputBlob::Container &container,
 								uint32_t count, std::string_view keyStart,
 										DBAdapter &db, Result &result){
-			hm4::PairBufferKey bufferKey;
-			auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+			hm4::PairBufferKey bufferPrefix;
+			auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferPrefix,
+											DBAdapter::SEPARATOR,
+												keyN, index);
 
-			auto const key = keyStart.empty() ? prefix : keyStart;
+			hm4::PairBufferKey bufferKeyStart;
+			auto const key = keyStart.empty() ? prefix :
+						shared::rsetmulti::makeKeyDataStart(bufferKeyStart,
+											DBAdapter::SEPARATOR,
+												keyN, index, keyStart);
 
 			logger<Logger::DEBUG>() << "MultiIndex2::range1" << "prefix" << prefix << "key" << key;
 
 			auto proj = [](std::string_view x){
-				auto const separator = DBAdapter::SEPARATOR[0];
-
 				// keyN~word~
-				return shared::extractnth::extractNth(3, separator, x);
+				return shared::extractnth::extractNth(3, DBAdapter::SEPARATOR[0], x);
 			};
 
 			using namespace shared::accumulate_results;
@@ -144,6 +148,8 @@ namespace net::worker::commands::MultiIndex2{
 				container	,
 				proj
 			);
+
+			container.back() = shared::extractnth::extractNth(2, DBAdapter::SEPARATOR[0], container.back());
 
 			return result.set_container(container);
 		}
@@ -175,10 +181,16 @@ namespace net::worker::commands::MultiIndex2{
 			for(auto const &index : tokenContainer){
 				tokenBKContainer.push_back();
 
-				auto const prefix = shared::rsetmulti::makeKeyDataSearch(tokenBKContainer.back(), DBAdapter::SEPARATOR, keyN, index);
+				auto const prefix = shared::rsetmulti::makeKeyDataSearch(tokenBKContainer.back(),
+											DBAdapter::SEPARATOR,
+												keyN, index);
 
-				(void) keyStart;
-				auto const key = prefix;
+				tokenBKContainer.push_back();
+				auto const key = keyStart.empty() ? prefix :
+							shared::rsetmulti::makeKeyDataStart(tokenBKContainer.back(),
+											DBAdapter::SEPARATOR,
+												keyN, index, keyStart);
+
 				// auto const key = keyStart.empty() ? prefix : keyStart;
 
 				logger<Logger::DEBUG>() << "MultiIndex2::rangeM" << "prefix" << prefix << "key" << key;
@@ -209,7 +221,7 @@ namespace net::worker::commands::MultiIndex2{
 					break;
 				}
 
-				if (++results >= count){
+				if (++results > count){
 					container.push_back(sv);
 
 					logger<Logger::DEBUG>() << "MultiIndex2::walk" << "collected enough keys. break. iterations" << fts.getIterations();
