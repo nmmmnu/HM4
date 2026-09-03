@@ -1,18 +1,25 @@
 #include "base.h"
 
 #include "shared_rset_multi.h"
-#include "stringtokenizer.h"
+#include "shared_rset_multi_fts.h"
+
+#include "shared_accumulateresults.h"
+#include "shared_extractnth.h"
 
 #include <algorithm>	// copy
 
 namespace net::worker::commands::MultiIndex2{
 	namespace impl_{
 
-		constexpr size_t  MaxTokens	= 32;
+		constexpr size_t  MaxSearchTokens	= 32;
+
+		using SearchTokenContainer		= OutputBlob::TContainer	<MaxSearchTokens>;
+		using SearchTokenBufferKContainer	= OutputBlob::TKContainer	<MaxSearchTokens>;
 
 
 
-		bool validateTokens(std::true_type, char delimiter, std::string_view tokens, OutputBlob::Container &container){
+		template<typename Container>
+		bool validateTokens(std::true_type, char delimiter, std::string_view tokens, Container &container){
 			container.clear();
 
 			StringTokenizer const tok{ tokens, delimiter };
@@ -104,36 +111,23 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
-		inline std::string_view extractNth_(size_t const nth, char const separator, std::string_view const s){
-			size_t count = 0;
-
-			for (size_t i = 0; i < s.size(); ++i)
-				if (s[i] == separator)
-					if (++count; count == nth)
-						return s.substr(i + 1);
-
-			return "INVALID_DATA";
-		}
-
-
-
 		template<typename DBAdapter, typename Result>
-		void rangeSingle(std::string_view keyN, std::string_view index, uint32_t count, std::string_view keyStart,
-										DBAdapter &db, Result &result, OutputBlob &blob){
-			auto &container = blob.construct<OutputBlob::Container>();
-
+		void range1(std::string_view keyN, std::string_view index,
+							OutputBlob::Container &container,
+								uint32_t count, std::string_view keyStart,
+										DBAdapter &db, Result &result){
 			hm4::PairBufferKey bufferKey;
 			auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
 
-			logger<Logger::DEBUG>() << "MultiIndex2::rangeSingle" << "prefix" << prefix << "key" << key;
+			logger<Logger::DEBUG>() << "MultiIndex2::range1" << "prefix" << prefix << "key" << key;
 
 			auto proj = [](std::string_view x){
 				auto const separator = DBAdapter::SEPARATOR[0];
 
 				// keyN~word~
-				return extractNth_(3, separator, x);
+				return shared::extractnth::extractNth(3, separator, x);
 			};
 
 			using namespace shared::accumulate_results;
@@ -150,6 +144,84 @@ namespace net::worker::commands::MultiIndex2{
 				container	,
 				proj
 			);
+
+			return result.set_container(container);
+		}
+
+
+
+		template<typename DBAdapter, typename Result>
+		void rangeM(std::string_view keyN,
+							SearchTokenContainer		const	&tokenContainer,
+							SearchTokenBufferKContainer		&tokenBKContainer,
+							OutputBlob::Container			&container,
+								uint32_t count, std::string_view keyStart,
+										DBAdapter &db, Result &result){
+			if (tokenContainer.size() == 1){
+				// go back to single search
+
+				auto const index = tokenContainer.front();
+
+				return 	range1(keyN, index, container,
+								count, keyStart,
+									db, result);
+			}
+
+			using It  = typename DBAdapter::List::iterator;
+			using FTS = shared::rsetmulti::fts::FTSIntersector<It, MaxSearchTokens>;
+
+			FTS fts;
+
+			for(auto const &index : tokenContainer){
+				tokenBKContainer.push_back();
+
+				auto const prefix = shared::rsetmulti::makeKeyDataSearch(tokenBKContainer.back(), DBAdapter::SEPARATOR, keyN, index);
+
+				(void) keyStart;
+				auto const key = prefix;
+				// auto const key = keyStart.empty() ? prefix : keyStart;
+
+				logger<Logger::DEBUG>() << "MultiIndex2::rangeM" << "prefix" << prefix << "key" << key;
+
+				using namespace shared::accumulate_results;
+
+				StopPrefixPredicate stop{ prefix };
+
+				bool const b = fts.push(
+					prefix,
+					DBAdapter::SEPARATOR[0],
+					db->find(key),
+					std::end(*db)
+				);
+
+				if (!b)
+					return result.set_container0();
+			}
+
+			uint32_t results = 0;
+
+			while(fts){
+				auto const sv = fts();
+
+				if (sv.empty()){
+					container.push_back("");
+					logger<Logger::DEBUG>() << "MultiIndex2::walk" << "input stream exhausted. break. iterations" << fts.getIterations();
+					break;
+				}
+
+				if (++results >= count){
+					container.push_back(sv);
+
+					logger<Logger::DEBUG>() << "MultiIndex2::walk" << "collected enough keys. break. iterations" << fts.getIterations();
+
+					break;
+				}
+
+				container.push_back(FTS::fixItem(sv, DBAdapter::SEPARATOR[0]));
+				container.push_back("1");
+
+			//	logger<Logger::DEBUG>() << "MultiIndex2::walk" << "push" << sv;
+			}
 
 			return result.set_container(container);
 		}
@@ -387,16 +459,16 @@ namespace net::worker::commands::MultiIndex2{
 
 
 	template<class Protocol, class DBAdapter>
-	struct IXMSIM : BaseCommandRO<Protocol,DBAdapter>{
+	struct IXMSIM1 : BaseCommandRO<Protocol,DBAdapter>{
 
-		IXMSIM() : BaseCommandRO<Protocol,DBAdapter>("IXMSIM", std::begin(cmd__), std::end(cmd__)){}
+		IXMSIM1() : BaseCommandRO<Protocol,DBAdapter>("IXMSIM1", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		// IXMSIM key word count from
+		// IXMSIM1 key word count from
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
@@ -412,23 +484,81 @@ namespace net::worker::commands::MultiIndex2{
 			if (!shared::rsetmulti::valid(keyN, index))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			using namespace shared::accumulate_results;
+			using namespace shared::config;
 
 			auto const count    = myClamp<uint32_t>(p[3], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart = p[4];
 
-			return rangeSingle(keyN, index, count, keyStart,
-									db, result, blob);
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			return range1(keyN, index,
+							container,
+								count, keyStart,
+									db, result);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"ixmsim1",	"IXMSIM1"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct IXMSIM : BaseCommandRO<Protocol,DBAdapter>{
+
+		IXMSIM() : BaseCommandRO<Protocol,DBAdapter>("IXMSIM", std::begin(cmd__), std::end(cmd__)){}
+
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		// IXMSIM key delimiter "words,words" count from
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			using namespace impl_;
+
+			if (p.size() != 6)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+
+			auto const keyN		= p[1];
+
+			if (keyN.empty())
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const delimiter	= p[2];
+			auto const tokens	= p[3];
+
+			if (delimiter.size() != 1)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto &tokenContainer = blob.construct<SearchTokenContainer>();
+
+			if (!validateTokens(std::true_type{}, delimiter[0], tokens, tokenContainer))
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			// ---------------------
+
+			using namespace shared::config;
+
+			auto const count    = myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const keyStart = p[5];
+
+			auto &tokenBKContainer = blob.construct<SearchTokenBufferKContainer>();
+			auto &container       = blob.construct<OutputBlob::Container>();
+
+			return rangeM(keyN, tokenContainer, tokenBKContainer,
+							container,
+								count, keyStart,
+									db, result);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"ixmsim",	"IXMSIM"
 		};
-
 	};
-
-
 
 
 
@@ -441,6 +571,7 @@ namespace net::worker::commands::MultiIndex2{
 				IXMADD		,
 				IXMREM		,
 				IXMGETINDEXES	,
+				IXMSIM1		,
 				IXMSIM
 			>(pack);
 		}

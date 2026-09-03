@@ -11,14 +11,22 @@ namespace net::worker::shared::stop_predicate{
 		constexpr StopIterationPredicate(size_t maxIterations) :
 						maxIterations(maxIterations){}
 
+		constexpr bool advance(size_t i = 1){
+			iterations += i;
+
+			return iterations >= maxIterations;
+		}
+
 		constexpr bool operator()(std::string_view){
-			return ++iterations >= maxIterations;
+			return advance();
 		}
 
 		constexpr size_t getIterations() const{
 			return iterations;
 		}
 	};
+
+
 
 	class StopPrefixPredicate{
 		std::string_view prefix;
@@ -33,6 +41,8 @@ namespace net::worker::shared::stop_predicate{
 		}
 	};
 
+
+
 	class StopRangePredicate{
 		std::string_view end;
 
@@ -45,6 +55,8 @@ namespace net::worker::shared::stop_predicate{
 			return key > end;
 		}
 	};
+
+
 
 	class StopRangePrefixPredicate{
 		std::string_view end;
@@ -67,6 +79,8 @@ namespace net::worker::shared::stop_predicate{
 			return false;
 		}
 	};
+
+
 
 	struct StopUnboundPredicate{
 		constexpr bool operator()(std::string_view) const{

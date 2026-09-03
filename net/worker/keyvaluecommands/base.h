@@ -69,6 +69,7 @@ namespace net::worker::commands{
 
 		using SmallContainer		= TContainer		<SmallContainerSize>;	//  4   MB, if string_view is 16 bytes
 		using SmallBufferContainer	= TBufferContainer	<SmallContainerSize>;	// 12   KB
+		using SmallBufferKContainer	= TKContainer		<SmallContainerSize>;	// 64   MB
 
 		using LargeContainer		= TContainer		<LargeContainerSize>;	//  256 MB, if string_view is 16 bytes
 

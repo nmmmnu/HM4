@@ -47,7 +47,7 @@ namespace FTS::strict_impl_{
 		// 	return container_.size();
 		// }
 
-		bool empty() const{
+		operator bool() const{
 			return !active_;
 		}
 

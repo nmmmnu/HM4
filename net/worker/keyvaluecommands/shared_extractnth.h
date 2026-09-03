@@ -20,6 +20,7 @@ namespace net::worker::shared::extractnth{
 		return "INVALID_DATA";
 	}
 
+
 } // namespace net::worker::shared::extractnth
 
 #endif
