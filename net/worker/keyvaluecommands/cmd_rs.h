@@ -286,7 +286,7 @@ namespace net::worker::commands::RS{
 		template<class MyReservoirSampling>
 		static void processT__(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
 			if (!pair)
-				return result.set_container0();
+				return result.set_containerN();
 
 			using List = typename MyReservoirSampling::List;
 

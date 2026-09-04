@@ -299,7 +299,7 @@ namespace net::worker::commands::HH{
 		static void processT__(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
 
 			if (!pair)
-				return result.set_container0();
+				return result.set_containerN();
 
 			auto &bcontainer = blob.construct<OutputBlob::BufferContainer>();
 

@@ -199,7 +199,7 @@ namespace net::worker::commands::Info{
 
 			auto const time = mytime::nowMix();
 
-			return result.set_container2(
+			return result.set_containerN(
 				to_string(time[0], buffer[0]),
 				to_string(time[1], buffer[1])
 			);

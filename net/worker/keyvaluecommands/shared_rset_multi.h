@@ -273,15 +273,7 @@ namespace net::worker::shared::rsetmulti{
 		factory.setKey(keyCtrl);
 		hm4::insertVF(*db, factory);
 
-		if constexpr(0){
-			// get indexes again.
-			if (!impl_::getIndexes(db, decoder, keyCtrl, icontainer, bcontainer))
-				return false; // unlikely, because just inserted
-		}else{
-			// get indexes from factory
-
-			// already done!
-		}
+		// indexes are in the factory
 
 		// insert all keys
 		impl_::insertKeys(db, factory.getIndexes(), keyN, keySub, keySort);

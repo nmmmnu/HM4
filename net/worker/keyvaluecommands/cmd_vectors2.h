@@ -1811,7 +1811,7 @@ namespace net::worker::commands::Vectors2{
 			auto const pp = prepareFVector<T>(db, blob, keyN, keySub, dim_ix, dtype);
 
 			if (!pp.ok)
-				return result.set_container0();
+				return result.set_containerN();
 
 			auto const vectorPrepared	= pp.vector;
 			auto const magnitudePrepared	= pp.magnitude;
@@ -1862,7 +1862,7 @@ namespace net::worker::commands::Vectors2{
 			const auto *storedVectorA = MyVectors::toStoredVector<bool>(sv, dim_ix);
 
 			if (!storedVectorA)
-				return result.set_container0();
+				return result.set_containerN();
 
 			auto const vectorA = storedVectorA->toVector();
 
@@ -2196,7 +2196,7 @@ namespace net::worker::commands::Vectors2{
 			auto const pp = prepareFVector<T>(blob, vectorSV, dim_ix, dtype);
 
 			if (!pp.ok)
-				return result.set_container0();
+				return result.set_containerN();
 
 			auto const vectorPrepared	= pp.vector;
 			auto const magnitudePrepared	= pp.magnitude;
@@ -2214,7 +2214,7 @@ namespace net::worker::commands::Vectors2{
 			bool const b = decoder(vectorSV, icontainer, bcontainer);
 
 			if (!b)
-				return result.set_container0();
+				return result.set_containerN();
 
 
 
@@ -2294,7 +2294,7 @@ namespace net::worker::commands::Vectors2{
 			const auto *storedVectorA = MyVectors::toStoredVector<bool>(sv, dim_ix);
 
 			if (!storedVectorA)
-				return result.set_container0();
+				return result.set_containerN();
 
 			auto const vectorA = storedVectorA->toVector();
 
@@ -2310,7 +2310,7 @@ namespace net::worker::commands::Vectors2{
 			bool const b = decoder(sv, icontainer, bcontainer);
 
 			if (!b)
-				return result.set_container0();
+				return result.set_containerN();
 
 
 

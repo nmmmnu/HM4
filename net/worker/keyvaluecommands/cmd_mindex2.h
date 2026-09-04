@@ -83,18 +83,6 @@ namespace net::worker::commands::MultiIndex2{
 			return true;
 		}
 
-		size_t sizeTokens(OutputBlob::Container const &container, std::string_view keySort){
-			auto f = [](size_t sum, std::string_view sv){
-				return sum + sv.size() + 1;
-			};
-
-			size_t const sum = std::accumulate(std::begin(container), std::end(container), size_t{ 0 }, f);
-
-			return sum + keySort.size();
-		}
-
-
-
 		template<typename Container>
 		bool validateTokensUser__withKeySort(char delimiter, std::string_view tokens, std::string_view keySort, Container &container){
 			container.clear();
@@ -161,24 +149,57 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
+		size_t sizeTokens(OutputBlob::Container const &container, std::string_view keySort){
+			auto f = [](size_t sum, std::string_view sv){
+				return sum + sv.size() + 1;
+			};
+
+			size_t const sum = std::accumulate(std::begin(container), std::end(container), size_t{ 0 }, f);
+
+			return sum + keySort.size();
+		}
+
+
+
 		template<typename DBAdapter>
 		struct Decoder{
 			constexpr static size_t bytes(){
 				return 0;
 			}
 
-			template<typename IContainer, typename BContainer>
+			template<typename IContainer, typename BufferVal>
 			bool operator()(std::string_view tokens,
-						IContainer &icontainer, BContainer const &) const{
+						IContainer &icontainer, BufferVal &buferVal) const{
 
-				return validateTokensStored(DBAdapter::SEPARATOR[0], tokens, icontainer);
+				auto const tokensCopy = copy__(tokens, buferVal);
+
+				return validateTokensStored(
+							DBAdapter::SEPARATOR[0], tokensCopy, icontainer);
 			}
 
-			template<typename IContainer, typename BContainer>
+			template<typename IContainer, typename BufferVal>
 			bool operator()(std::true_type, std::string_view tokens,
-						IContainer &icontainer, BContainer const &) const{
+						IContainer &icontainer, BufferVal &buferVal) const{
 
-				return validateTokensStored__withKeySort(DBAdapter::SEPARATOR[0], tokens, icontainer);
+				auto const tokensCopy = copy__(tokens, buferVal);
+
+				return validateTokensStored__withKeySort(
+							DBAdapter::SEPARATOR[0], tokensCopy, icontainer);
+			}
+
+		private:
+			template<typename BufferVal>
+			static std::string_view copy__(std::string_view tokens, BufferVal &buferVal){
+
+				if constexpr(std::is_same_v<BufferVal, std::nullptr_t>){
+					logger<Logger::DEBUG>() << "MultiIndex2::decoder" << "using tokens directly";
+
+					return tokens;
+				}else{
+					logger<Logger::DEBUG>() << "MultiIndex2::decoder" << "using tokens directly via buffer";
+
+					return concatenateBuffer(buferVal, tokens);
+				}
 			}
 		};
 
@@ -281,7 +302,7 @@ namespace net::worker::commands::MultiIndex2{
 				);
 
 				if (!b)
-					return result.set_container0();
+					return result.set_containerN("");
 			}
 
 			uint32_t results = 0;
@@ -365,7 +386,7 @@ namespace net::worker::commands::MultiIndex2{
 			// ---------------------
 
 			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto  bcontainer = std::nullptr_t{ nullptr }; // unused
+			auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
 
 			Decoder<DBAdapter> decoder;
 
@@ -381,7 +402,7 @@ namespace net::worker::commands::MultiIndex2{
 			[[maybe_unused]]
 			bool const b = shared::rsetmulti::add<withAutomaticKeySort>(db, decoder,
 							keyN, keySub, keySort,
-								icontainer, bcontainer,
+								icontainer, bufferVal,
 									factory);
 
 			return result.set_1();
@@ -477,28 +498,25 @@ namespace net::worker::commands::MultiIndex2{
 				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				// not 100% correct, because we do not have keySort
+				// not 100% correct, because we do not have keySort yet
 				if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize()))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
 			auto &icontainer = blob.construct<OutputBlob::Container>();
-			auto  bcontainer = std::nullptr_t{ nullptr }; // unused
+			auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
 
 			Decoder<DBAdapter> decoder;
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 				auto const keySub	= *itk;
 
-				// to_string_buffer_t buffer;
-				// auto const keySort	= shared::sortkey::makeHashKeySort(keySub, buffer);
-
 				bool const withAutomaticKeySort = true;
 
 				[[maybe_unused]]
 				bool const b = shared::rsetmulti::rem<withAutomaticKeySort>(db, decoder,
 								keyN, keySub, {},
-									icontainer, bcontainer);
+									icontainer, bufferVal);
 			}
 
 			return result.set_1();
@@ -532,7 +550,7 @@ namespace net::worker::commands::MultiIndex2{
 
 			using namespace impl_;
 
-			// not 100% correct, because we do not have keySort
+			// not 100% correct, because we do not have keySort yet
 			if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize()))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
@@ -647,7 +665,7 @@ namespace net::worker::commands::MultiIndex2{
 			auto const keyStart = p[5];
 
 			auto &tokenBKContainer = blob.construct<SearchTokenBufferKContainer>();
-			auto &container       = blob.construct<OutputBlob::Container>();
+			auto &container        = blob.construct<OutputBlob::Container>();
 
 			return rangeM(keyN, tokenContainer, tokenBKContainer,
 							container,

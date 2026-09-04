@@ -79,7 +79,7 @@ namespace net::worker::commands::ISAM_cmd{
 				const auto *pair = hm4::getPairPtrWithSize(*db, key, isam.bytes());
 
 				if (!pair)
-					return result.set_container0();
+					return result.set_containerN();
 
 				const char *storage  = pair->getValC();
 

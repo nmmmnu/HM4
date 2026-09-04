@@ -897,7 +897,7 @@ namespace net::worker::commands::TDigest{
 
 
 			if (const auto *pair = hm4::getPairPtrWithSize(*db, key, td.bytes()); !pair){
-				return result.set_container2(
+				return result.set_containerN(
 					"state",
 					"invalid"
 				);

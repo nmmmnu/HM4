@@ -472,11 +472,11 @@ namespace net::worker::commands::MH{
 			}();
 
 			if (!mhA)
-				return result.set_container0();
+				return result.set_containerN();
 
 			// getIndexes - decode indexes manually, to avoid disk operation
 			if (!decoder(MHT2sv(mhA), icontainer, bcontainer))
-				return result.set_container0();
+				return result.set_containerN();
 
 			auto &keySub_container  = blob.construct<OutputBlob::Container>();
 
