@@ -237,6 +237,8 @@
 				<li><a href="#C::MHADD">MHADD</a></li>
 				<li><a href="#C::MHREM">MHREM</a></li>
 				<li><a href="#C::MHGETINDEXES">MHGETINDEXES</a></li>
+				<li><a href="#C::MHEXISTS">MHEXISTS</a></li>
+				<li><a href="#C::MHMEXISTS">MHMEXISTS</a></li>
 				<li><a href="#C::MHSIM">MHSIM</a></li>
 				<li><a href="#C::MHJACCARD">MHJACCARD</a></li>
 				<li><a href="#C::MHMJACCARD">MHMJACCARD</a></li>
@@ -253,6 +255,8 @@
 				<li><a href="#C::VGET">VGET</a></li>
 				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
 				<li><a href="#C::VGETRAW">VGETRAW</a></li>
+				<li><a href="#C::VEXISTS">VEXISTS</a></li>
+				<li><a href="#C::VMEXISTS">VMEXISTS</a></li>
 				<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
 				<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
 				<li><a href="#C::VDISTANCE">VDISTANCE</a></li>
@@ -265,6 +269,8 @@
 				<li><a href="#C::IXMADD">IXMADD</a></li>
 				<li><a href="#C::IXMREM">IXMREM</a></li>
 				<li><a href="#C::IXMGETINDEXES">IXMGETINDEXES</a></li>
+				<li><a href="#C::IXMEXISTS">IXMEXISTS</a></li>
+				<li><a href="#C::IXMMEXISTS">IXMMEXISTS</a></li>
 				<li><a href="#C::IXMSIM1">IXMSIM1</a></li>
 				<li><a href="#C::IXMSIM">IXMSIM</a></li>
 			</ul>
@@ -8674,6 +8680,8 @@ It works seamlessly for both existing <code>keySub</code> targets and on-the-fly
 			<li><a href="#C::MHADD">MHADD</a></li>
 			<li><a href="#C::MHREM">MHREM</a></li>
 			<li><a href="#C::MHGETINDEXES">MHGETINDEXES</a></li>
+			<li><a href="#C::MHEXISTS">MHEXISTS</a></li>
+			<li><a href="#C::MHMEXISTS">MHMEXISTS</a></li>
 			<li><a href="#C::MHSIM">MHSIM</a></li>
 			<li><a href="#C::MHJACCARD">MHJACCARD</a></li>
 			<li><a href="#C::MHMJACCARD">MHMJACCARD</a></li>
@@ -8865,6 +8873,122 @@ debugging bucket collision distributions, or verifying index layout.</p>
 </pre></blockquote>
 
 
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHEXISTS">
+			<a name="C::MHEXISTS"></a>
+			<h4>MHEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHEXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub_key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Check existance of *sub_key* from index object *key*</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhexists a 001
+(integer) 1
+127.0.0.1:6379&gt; mhmexists a 001 005 002
+1) &quot;1&quot;
+2) &quot;0&quot;
+3) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MHMEXISTS">MHMEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="MHMEXISTS">
+			<a name="C::MHMEXISTS"></a>
+			<h4>MHMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>MHMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MINHASH	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>MHMEXISTS key sub_key...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub_key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Check existance of several *sub_key* from index object *key*</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>arrau</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; mhexists a 001
+(integer) 1
+127.0.0.1:6379&gt; mhmexists a 001 005 002
+1) &quot;1&quot;
+2) &quot;0&quot;
+3) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::MHEXISTS">MHEXISTS</a></li>
+			</ul>
 		</div>
 
 		<p><a href="#top">top</a></p>
@@ -9488,6 +9612,8 @@ Instead HM4 provides two alternatives: <b>Flat Search</b> (exact) and <b>Localit
 			<li><a href="#C::VGET">VGET</a></li>
 			<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
 			<li><a href="#C::VGETRAW">VGETRAW</a></li>
+			<li><a href="#C::VEXISTS">VEXISTS</a></li>
+			<li><a href="#C::VMEXISTS">VMEXISTS</a></li>
 			<li><a href="#C::VSIMFLAT">VSIMFLAT</a></li>
 			<li><a href="#C::VSIMLSH">VSIMLSH</a></li>
 			<li><a href="#C::VDISTANCE">VDISTANCE</a></li>
@@ -10432,6 +10558,122 @@ BF0A466500000000BF4F69973F2CD7FEBFF1FB303FE0B263BF4F6997C01B8F31C071FB303E0A4665
 			<ul>
 				<li><a href="#C::VGET">VGET</a></li>
 				<li><a href="#C::VGETNORMALIZED">VGETNORMALIZED</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VEXISTS">
+			<a name="C::VEXISTS"></a>
+			<h4>VEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTORS2	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VEXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub_key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Check existance of *sub_key* from index object *key*</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; vexists a 001
+(integer) 1
+127.0.0.1:6379&gt; vmexists a 001 005 002
+1) &quot;1&quot;
+2) &quot;0&quot;
+3) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VMEXISTS">VMEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="VMEXISTS">
+			<a name="C::VMEXISTS"></a>
+			<h4>VMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>VMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>VECTORS2	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>VMEXISTS key sub_key...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub_key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Check existance of several *sub_key* from index object *key*</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>arrau</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; vexists a 001
+(integer) 1
+127.0.0.1:6379&gt; vmexists a 001 005 002
+1) &quot;1&quot;
+2) &quot;0&quot;
+3) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::VEXISTS">VEXISTS</a></li>
 			</ul>
 		</div>
 
@@ -11523,6 +11765,8 @@ Distance types:
 			<li><a href="#C::IXMADD">IXMADD</a></li>
 			<li><a href="#C::IXMREM">IXMREM</a></li>
 			<li><a href="#C::IXMGETINDEXES">IXMGETINDEXES</a></li>
+			<li><a href="#C::IXMEXISTS">IXMEXISTS</a></li>
+			<li><a href="#C::IXMMEXISTS">IXMMEXISTS</a></li>
 			<li><a href="#C::IXMSIM1">IXMSIM1</a></li>
 			<li><a href="#C::IXMSIM">IXMSIM</a></li>
 		</ul>
@@ -11709,6 +11953,122 @@ If the *sub_key* not exists, returns an empty array<br />
 </pre></blockquote>
 
 
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMEXISTS">
+			<a name="C::IXMEXISTS"></a>
+			<h4>IXMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMEXISTS key sub_key</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub_key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Check existance of *sub_key* from index object *key*</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>bool</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>value</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmexists a 001
+(integer) 1
+127.0.0.1:6379&gt; ixmmexists a 001 005 002
+1) &quot;1&quot;
+2) &quot;0&quot;
+3) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMMEXISTS">IXMMEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IXMMEXISTS">
+			<a name="C::IXMMEXISTS"></a>
+			<h4>IXMMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IXMMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>N * READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MULTI INDEX	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IXMMEXISTS key sub_key...</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the index object</td>
+				</tr>
+				<tr>
+					<td>sub_key</td>
+					<td>sub_key</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Check existance of several *sub_key* from index object *key*</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>arrau</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; ixmexists a 001
+(integer) 1
+127.0.0.1:6379&gt; ixmmexists a 001 005 002
+1) &quot;1&quot;
+2) &quot;0&quot;
+3) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IXMEXISTS">IXMEXISTS</a></li>
+			</ul>
 		</div>
 
 		<p><a href="#top">top</a></p>
