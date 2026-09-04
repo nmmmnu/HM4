@@ -253,35 +253,6 @@ namespace net::worker::commands{
 			protocol_.response_strings(buffer_, container);
 		}
 
-#if 0
-		void set_container0(){
-			std::array<std::string_view, 0> const container;
-
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_strings(buffer_, container);
-		}
-
-		void set_container1(std::string_view s0){
-			std::array<std::string_view, 1> const container{ s0 };
-
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_strings(buffer_, container);
-		}
-
-		void set_container2(std::string_view s0, std::string_view s1){
-			std::array<std::string_view, 2> const container{ s0, s1 };
-
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_strings(buffer_, container);
-		}
-#endif
-
 		template <typename ...Args>
 		void set_containerN(Args &&...args) {
 			static_assert((std::is_convertible_v<Args, std::string_view> && ...),
