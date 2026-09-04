@@ -99,6 +99,15 @@ namespace net::worker::commands::MH{
 			template<typename IContainer, typename BContainer>
 			bool operator()(std::string_view data,
 						IContainer &icontainer, BContainer &bcontainer) const{
+				static_assert(
+					std::is_same_v<IContainer, OutputBlob::Container	> ||
+					std::is_same_v<IContainer, Decoder::IContainer		>
+				);
+
+				static_assert(
+					std::is_same_v<BContainer, OutputBlob::BufferContainer	> ||
+					std::is_same_v<BContainer, Decoder::BContainer		>
+				);
 
 				icontainer.clear();
 				bcontainer.clear();

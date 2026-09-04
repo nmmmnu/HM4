@@ -170,6 +170,7 @@ namespace net::worker::commands::MultiIndex2{
 			template<typename IContainer, typename BufferVal>
 			bool operator()(std::string_view tokens,
 						IContainer &icontainer, BufferVal &buferVal) const{
+				static_assert(staticAssertMe__<IContainer, BufferVal>());
 
 				auto const tokensCopy = copy__(tokens, buferVal);
 
@@ -180,6 +181,7 @@ namespace net::worker::commands::MultiIndex2{
 			template<typename IContainer, typename BufferVal>
 			bool operator()(std::true_type, std::string_view tokens,
 						IContainer &icontainer, BufferVal &buferVal) const{
+				static_assert(staticAssertMe__<IContainer, BufferVal>());
 
 				auto const tokensCopy = copy__(tokens, buferVal);
 
@@ -200,6 +202,21 @@ namespace net::worker::commands::MultiIndex2{
 
 					return concatenateBuffer(buferVal, tokens);
 				}
+			}
+
+		private:
+			template<typename IContainer, typename BufferVal>
+			constexpr static bool staticAssertMe__(){
+				return	(
+						std::is_same_v<IContainer, OutputBlob::Container	> ||
+						std::is_same_v<IContainer, SearchTokenContainer		>
+					)
+					&&
+					(
+						std::is_same_v<BufferVal, hm4::PairBufferVal		> ||
+						std::is_same_v<BufferVal, std::nullptr_t		>
+					)
+				;
 			}
 		};
 
