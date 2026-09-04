@@ -43,12 +43,22 @@ function cmd_MINDEX($redis){
 	$tags1 = "tag1";
 
 	for ($i = 1; $i <= 15; ++$i) {
-		$id = sprintf("%02d", $i);
+		$id      = sprintf("%02d",        $i);
 		$sortKey = sprintf("%04d", 9999 - $i);
 		rawCommand($redis, "ixmadd", "a", $id, $sortKey, ",", $tags);
 	}
 
+	if (0){
+		// create tombstones:
+		rawCommand($redis, "save");
 
+		for ($i = 0; $i <= 15; ++$i) {
+			$id      = sprintf("%02d_t",        $i);
+			$sortKey = sprintf("%04d", 9999 - $i);
+			rawCommand($redis, "ixmadd", "a", $id, $sortKey, ",", $tags);
+			rawCommand($redis, "ixmrem", "a", $id, $sortKey, ",", $tags);
+		}
+	}
 
 	$p1 = rawCommand($redis, "ixmsim", "a", ",", $tags, 10, "");
 	expect("IXMSIM",	count($p1) == (10 * 2 + 1));
