@@ -39,21 +39,24 @@ function cmd_MINDEX($redis){
 
 
 
+	$tags  = "tag1,tag2,tag3,tag4,tag5,tag6";
+	$tags1 = "tag1";
+
 	for ($i = 1; $i <= 15; ++$i) {
 		$id = sprintf("%02d", $i);
 		$sortKey = sprintf("%04d", 9999 - $i);
-		rawCommand($redis, "ixmadd", "a", $id, $sortKey, ",", "common,tag,news");
+		rawCommand($redis, "ixmadd", "a", $id, $sortKey, ",", $tags);
 	}
 
 
 
-	$p1 = rawCommand($redis, "ixmsim", "a", ",", "common,tag,news", 10, "");
+	$p1 = rawCommand($redis, "ixmsim", "a", ",", $tags, 10, "");
 	expect("IXMSIM",	count($p1) == (10 * 2 + 1));
 	expect("IXMSIM",	$p1[0] == "15" && $p1[18] == "06");
 	$cursor = end($p1);
 	expect("IXMSIM",	$cursor == "9994~05");
 
-	$p2 = rawCommand($redis, "ixmsim", "a", ",", "common,tag,news", 10, $cursor);
+	$p2 = rawCommand($redis, "ixmsim", "a", ",", $tags, 10, $cursor);
 	expect("IXMSIM",	count($p2) == (5 * 2 + 1));
 	expect("IXMSIM",	$p2[0] == "05" && $p2[8] == "01");
 	$cursor = end($p2);
@@ -61,13 +64,13 @@ function cmd_MINDEX($redis){
 
 
 
-	$p1 = rawCommand($redis, "ixmsim1", "a", "common", 10, "");
+	$p1 = rawCommand($redis, "ixmsim1", "a", $tags1, 10, "");
 	expect("IXMSIM1",	count($p1) == (10 * 2 + 1));
 	expect("IXMSIM1",	$p1[0] == "15" && $p1[18] == "06");
 	$cursor = end($p1);
 	expect("IXMSIM1",	$cursor == "9994~05");
 
-	$p2 = rawCommand($redis, "ixmsim1", "a", "common", 10, $cursor);
+	$p2 = rawCommand($redis, "ixmsim1", "a", $tags1, 10, $cursor);
 	expect("IXMSIM1",	count($p2) == (5 * 2 + 1));
 	expect("IXMSIM1",	$p2[0] == "05" && $p2[8] == "01");
 	$cursor = end($p2);
