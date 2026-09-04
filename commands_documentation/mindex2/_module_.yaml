@@ -1,0 +1,78 @@
+id:          MINDEX
+name:        MULTI INDEX
+
+version:     1.3.14.2
+
+description: |
+  <p>This module provides a <b>multi-index object</b> that helps in storing and retrieving data efficiently for your application, using word index.</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Storing entries with multiple sub-keys</b></p>
+  <p>You can insert entries into a mindex object using <b>IXMADD</b>. Each entry can have a <i>sub_key</i>, <i>sort_key</i>, and multiple indexes (words). Example:</p>
+  <ul>
+    <li><i>IXMADD mykey John "" , "london,new york"</i> - stores data under <i>sub_key</i> "John" with automatic <i>sort_key</i> and indexes "london" and "new york".</li>
+  </ul>
+
+  <p><b>2. Removing entries</b></p>
+  <p>Remove entries using <b>IXMREM</b>. Example:</p>
+  <ul>
+    <li><i>IXMREM mykey John</i> - deletes the entry for <i>sub_key</i> "John".</li>
+  </ul>
+
+  <p><b>3. Fetching ranges</b></p>
+  <p>You can get a range of indexed results using <b>IXMSIM1</b> and <b>IXMSIM</b>. These commands allow pagination and filtering based on indexes. Example:</p>
+  <ul>
+    <li><i>IXMSIM1 mykey   'london'          100 ''</i> - fetches up to 100 results starting from key "london".</li>
+    <li><i>IXMSIM  mykey , 'london'          100 ''</i> - fetches up to 100 results starting from key "london".</li>
+    <li><i>IXMSIM  mykey , 'london,new york' 100 ''</i> - fetches up to 100 results starting from keys "london" and "new york".</li>
+  </ul>
+
+  <p><b>Tip:</b> This module can be used both for <b>tagging</b> and <b>full-text search</b>. Always add your data correctly before querying ranges to ensure accurate results.</p>
+
+example_module:     |
+  127.0.0.1:6379> IXMADD news 1000 '' , "George,Bush,spokes,in,the,senate"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1001 '' , "New,laptop,from,DELL"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1002 '' , "George,Bush,visits,France"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1003 '' , "Cold,weath,soon"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1003 '' , "Cold,weather,soon"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1004 '' , "George,Michael,had,a,concert,with,Kate,Bush"
+  (integer) 1
+  127.0.0.1:6379> IXMADD news 1005 '' , "Why,you,should,read,1984,from,George,Orwell"
+  (integer) 1
+  127.0.0.1:6379> IXMSIM news , "George,Bush" 20 ''
+  1) "1002"
+  2) "1"
+  3) "1000"
+  4) "1"
+  5) "1004"
+  6) "1"
+  7) ""
+  127.0.0.1:6379> IXMSIM1 news "George" 20 ''
+  1) "1002"
+  2) "1"
+  3) "1000"
+  4) "1"
+  5) "1004"
+  6) "1"
+  7) "1005"
+  8) "1"
+  9) ""
+  127.0.0.1:6379> IXMGETINDEXES news 1004
+  1) "Bush"
+  2) "George"
+  3) "Kate"
+  4) "Michael"
+  5) "a"
+  6) "concert"
+  7) "had"
+  8) "with"
+
+see_also_module:
+  items:
+    - AUTOCOMPLETE

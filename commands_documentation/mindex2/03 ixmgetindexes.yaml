@@ -1,0 +1,39 @@
+- id:          IXMGETINDEXES
+  name:        IXMGETINDEXES
+  usage:       IXMGETINDEXES key sub_key
+  params:
+    items:
+    - k: key
+      v: name of the mindex object
+    - k: key_sub
+      v: sub key
+
+  description: |
+    Get the "indexes" from mindex object *key*, with *sub_key*<br />
+    If the *sub_key* not exists, returns an empty array<br />
+
+  return_type: array
+  return:      the indexes
+  version:     1.4.0
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> IXMADD news 1000 '' , "George,Bush,spokes,in,the,senate"
+    (integer) 1
+    127.0.0.1:6379> IXMADD news 1001 '' , "New,laptop,from,DELL"
+    (integer) 1
+    127.0.0.1:6379> ixmgetindexes news 1000
+    1) "Bush"
+    2) "George"
+    3) "in"
+    4) "senate"
+    5) "spokes"
+    6) "the"
+    127.0.0.1:6379> ixmgetindexes news 1001
+    1) "DELL"
+    2) "New"
+    3) "from"
+    4) "laptop"
+
+
