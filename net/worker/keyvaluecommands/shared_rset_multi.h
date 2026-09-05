@@ -313,7 +313,7 @@ namespace net::worker::shared::rsetmulti{
 		return true;
 	}
 
-	template<typename DBAdapter, typename Decoder, typename Container, typename BContainer>
+	template<bool withAutomaticKeySort = false, typename DBAdapter, typename Decoder, typename Container, typename BContainer>
 	bool getIndexes(DBAdapter &db, Decoder decoder,
 				std::string_view keyN, std::string_view keySub,
 					Container &icontainer, BContainer &bcontainer){
@@ -321,7 +321,7 @@ namespace net::worker::shared::rsetmulti{
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
 
-		return impl_::getIndexes(db, decoder, keyCtrl, icontainer, bcontainer);
+		return impl_::getIndexes<withAutomaticKeySort>(db, decoder, keyCtrl, icontainer, bcontainer);
 	}
 
 	template<typename DBAdapter>

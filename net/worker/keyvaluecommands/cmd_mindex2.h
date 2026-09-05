@@ -576,8 +576,10 @@ namespace net::worker::commands::MultiIndex2{
 
 			Decoder<DBAdapter> decoder;
 
+			bool const withAutomaticKeySort = true;
+
 			[[maybe_unused]]
-			bool const b = shared::rsetmulti::getIndexes(db, decoder,
+			bool const b = shared::rsetmulti::getIndexes<withAutomaticKeySort>(db, decoder,
 							keyN, keySub,
 								icontainer, bcontainer);
 
