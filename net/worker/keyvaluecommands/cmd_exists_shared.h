@@ -116,7 +116,6 @@ namespace net::worker::commands::ExistsShared{
 			"ix3exists"	,	"IX3EXISTS"	,
 			"ix4exists"	,	"IX4EXISTS"	,
 			"ix5exists"	,	"IX5EXISTS"	,
-			"ix6exists"	,	"IX6EXISTS"	,
 
 			"mhexists"	,	"MHEXISTS"	,
 			"vexists"	,	"VEXISTS"	,
@@ -145,7 +144,6 @@ namespace net::worker::commands::ExistsShared{
 			"ix3mexists"	,	"IX3MEXISTS"	,
 			"ix4mexists"	,	"IX4MEXISTS"	,
 			"ix5mexists"	,	"IX5MEXISTS"	,
-			"ix6mexists"	,	"IX6MEXISTS"	,
 
 			"mhmexists"	,	"MHMEXISTS"	,
 			"vmexists"	,	"VMEXISTS"	,

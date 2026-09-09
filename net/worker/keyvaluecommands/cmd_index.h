@@ -30,7 +30,7 @@ namespace net::worker::commands::Index{
 
 
 		constexpr bool assertN(int n){
-			return n > 0 && n <= 6;
+			return n > 0 && n <= 5;
 		}
 
 		template<template<int, class, class> class Cmd>
@@ -50,8 +50,8 @@ namespace net::worker::commands::Index{
 			template<class Protocol, class DBAdapter>
 			using cmd5 = Cmd<5, Protocol, DBAdapter>;
 
-			template<class Protocol, class DBAdapter>
-			using cmd6 = Cmd<6, Protocol, DBAdapter>;
+		//	template<class Protocol, class DBAdapter>
+		//	using cmd6 = Cmd<6, Protocol, DBAdapter>;
 		};
 	} // namespace impl_
 
@@ -116,9 +116,9 @@ namespace net::worker::commands::Index{
 						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), keySort }, keySortSize))
 							return e();
 
-					if constexpr(N == 6)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySortSize))
-							return e();
+				//	if constexpr(N == 6)
+				//		if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySortSize))
+				//			return e();
 				}
 			}
 
@@ -165,11 +165,11 @@ namespace net::worker::commands::Index{
 							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), keySort }, keySub
 					);
 
-				if constexpr(N == 6)
-					shared::zsetmulti::add<PN>(
-							db,
-							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySub
-					);
+			//	if constexpr(N == 6)
+			//		shared::zsetmulti::add<PN>(
+			//				db,
+			//				keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySub
+			//		);
 			}
 
 			return result.set_1();
@@ -185,8 +185,7 @@ namespace net::worker::commands::Index{
 			"IX2ADD",
 			"IX3ADD",
 			"IX4ADD",
-			"IX5ADD",
-			"IX6ADD"
+			"IX5ADD"
 		};
 
 		constexpr inline static std::string_view cmd__[][2] = {
@@ -194,8 +193,7 @@ namespace net::worker::commands::Index{
 			{ "ix2add", "IX2ADD" },
 			{ "ix3add", "IX3ADD" },
 			{ "ix4add", "IX4ADD" },
-			{ "ix5add", "IX5ADD" },
-			{ "ix6add", "IX6ADD" }
+			{ "ix5add", "IX5ADD" }
 		};
 	};
 
@@ -229,8 +227,7 @@ namespace net::worker::commands::Index{
 			"IX2REM",
 			"IX3REM",
 			"IX4REM",
-			"IX5REM",
-			"IX6REM"
+			"IX5REM"
 		};
 
 		constexpr inline static std::string_view cmd__[][2] = {
@@ -238,8 +235,7 @@ namespace net::worker::commands::Index{
 			{ "ix2rem", "IX2REM" },
 			{ "ix3rem", "IX3REM" },
 			{ "ix4rem", "IX4REM" },
-			{ "ix5rem", "IX5REM" },
-			{ "ix6rem", "IX6REM" }
+			{ "ix5rem", "IX5REM" }
 		};
 	};
 
@@ -284,8 +280,7 @@ namespace net::worker::commands::Index{
 			"IX2GETINDEXES",
 			"IX3GETINDEXES",
 			"IX4GETINDEXES",
-			"IX5GETINDEXES",
-			"IX6GETINDEXES"
+			"IX5GETINDEXES"
 		};
 
 		constexpr inline static std::string_view cmd__[][2] = {
@@ -293,8 +288,7 @@ namespace net::worker::commands::Index{
 			{ "ix2getindexes", "IX2GETINDEXES" },
 			{ "ix3getindexes", "IX3GETINDEXES" },
 			{ "ix4getindexes", "IX4GETINDEXES" },
-			{ "ix5getindexes", "IX5GETINDEXES" },
-			{ "ix6getindexes", "IX6GETINDEXES" }
+			{ "ix5getindexes", "IX5GETINDEXES" }
 		};
 	};
 
@@ -362,8 +356,8 @@ namespace net::worker::commands::Index{
 					if constexpr(N == 5)
 						return _(1) + _(2) + _(3) + _(4) + _(5);
 
-					if constexpr(N == 6)
-						return _(1) + _(2) + _(3) + _(4) + _(5) + _(6);
+				//	if constexpr(N == 6)
+				//		return _(1) + _(2) + _(3) + _(4) + _(5) + _(6);
 				};
 
 				if (!PN::valid(keyN, index, size() ))
@@ -392,8 +386,8 @@ namespace net::worker::commands::Index{
 				if constexpr(N == 5)
 					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5));
 
-				if constexpr(N == 6)
-					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5), _(6));
+			//	if constexpr(N == 6)
+			//		return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5), _(6));
 			}();
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
@@ -424,8 +418,7 @@ namespace net::worker::commands::Index{
 			"IX2RANGE",
 			"IX3RANGE",
 			"IX4RANGE",
-			"IX5RANGE",
-			"IX6RANGE"
+			"IX5RANGE"
 		};
 
 		constexpr inline static std::string_view cmd__[][2] = {
@@ -433,8 +426,7 @@ namespace net::worker::commands::Index{
 			{ "ix2range", "IX2RANGE" },
 			{ "ix3range", "IX3RANGE" },
 			{ "ix4range", "IX4RANGE" },
-			{ "ix5range", "IX5RANGE" },
-			{ "ix6range", "IX6RANGE" }
+			{ "ix5range", "IX5RANGE" }
 		};
 	};
 
@@ -473,12 +465,12 @@ namespace net::worker::commands::Index{
 				LH<IX_GETINDEXES	>::cmd5	,
 				LH<IX_ADD		>::cmd5	,
 				LH<IX_REM		>::cmd5	,
-				LH<IX_RANGE		>::cmd5	,
+				LH<IX_RANGE		>::cmd5
 
-				LH<IX_GETINDEXES	>::cmd6	,
-				LH<IX_ADD		>::cmd6	,
-				LH<IX_REM		>::cmd6	,
-				LH<IX_RANGE		>::cmd6
+			//	LH<IX_GETINDEXES	>::cmd6	,
+			//	LH<IX_ADD		>::cmd6	,
+			//	LH<IX_REM		>::cmd6	,
+			//	LH<IX_RANGE		>::cmd6
 			>(pack);
 		}
 	};

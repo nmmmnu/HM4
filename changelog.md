@@ -432,7 +432,7 @@ Changelog
 -	fix in AVLList - when (real) delete happens, the server may segfault.
 	this does not affects 99.99% of the production servers.
 -	fix bug in MHSIM, when there are too many results
--	BREAKING CHANGE: new module vectors2 : VADD, VREM, VGET, VGETNORMALIZED,
+-	BREAKING CHANGE: new module vectors2 replacing vectors : VADD, VREM, VGET, VGETNORMALIZED,
 	VGETRAW, VSIMFLAT, VSIM, VDISTANCE, VMDISTANCE
 -	optimization - skip zeroing buffers when not need
 -	refactor buffers to be difficult to use wrong size
@@ -442,5 +442,8 @@ Changelog
 	Keeping only IX_REM, remove IX_REMOVE, IX_DEL.
 -	BREAKING CHANGE: Keeping only AC_REM_XXX, remove AC_REMOVE, AC_DEL.
 -	BREAKING CHANGE: remove modules mindex, tindex, hindex
--	New module mindex2: IXMADD, IXMREM, IXMGETINDEXES, IXMSIM1 (IXMRANGE1), IXMSIM (IXMRANGE)
+-	New module mindex2 replacing mindex, tindex, hindex: IXMADD, IXMREM, IXMGETINDEXES, IXMSIM1 (IXMRANGE1), IXMSIM (IXMRANGE)
+-	BREAKING CHANGE: remove commands IX6*
+-	BREAKING CHANGE: improve module IX*RANGE, now support shorter masks
+
 
