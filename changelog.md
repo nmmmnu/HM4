@@ -428,7 +428,7 @@ Changelog
 ### 1.3.16
 -	Release
 
-### 1.3.16.1
+### 1.4.0
 -	fix in AVLList - when (real) delete happens, the server may segfault.
 	this does not affects 99.99% of the production servers.
 -	fix bug in MHSIM, when there are too many results
@@ -441,3 +441,6 @@ Changelog
 	Introduce IX_MEXISTS and remove commands IX_GET / IX_MGET.
 	Keeping only IX_REM, remove IX_REMOVE, IX_DEL.
 -	BREAKING CHANGE: Keeping only AC_REM_XXX, remove AC_REMOVE, AC_DEL.
+-	BREAKING CHANGE: remove modules mindex, tindex, hindex
+-	New module mindex2: IXMADD, IXMREM, IXMGETINDEXES, IXMSIM1 (IXMRANGE1), IXMSIM (IXMRANGE)
+

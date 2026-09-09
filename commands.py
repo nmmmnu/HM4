@@ -283,7 +283,6 @@ def generate():
 
 
 load_module("cuckoo_filter"		)
-load_module("index"			)
 load_module("linearcurve"		)
 load_module("mortoncurve2d"		)
 load_module("mortoncurve3d"		)
@@ -297,6 +296,7 @@ load_module("ring_buffer"		)
 load_module("string_list"		)
 load_module("min_hash"			)
 load_module("vectors2"			)
+load_module("index"			)
 load_module("mindex2"			)
 load_module("autocomplete"		)
 load_module("isam"			)

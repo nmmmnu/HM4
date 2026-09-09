@@ -21,7 +21,8 @@ description: |
   </ul>
 
   <p><b>3. Fetching ranges</b></p>
-  <p>You can get a range of indexed results using <b>IXMSIM1</b> and <b>IXMSIM</b>. These commands allow pagination and filtering based on indexes. Example:</p>
+  <p>You can get a range of indexed results using <b>IXMSIM1</b> and <b>IXMSIM</b> (aliases <b>IXMRANGE1</b> and <b>IXMRANGE</b>).
+  These commands allow pagination and filtering based on indexes. Example:</p>
   <ul>
     <li><i>IXMSIM1 mykey   'london'          100 ''</i> - fetches up to 100 results starting from key "london".</li>
     <li><i>IXMSIM  mykey , 'london'          100 ''</i> - fetches up to 100 results starting from key "london".</li>

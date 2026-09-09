@@ -13,6 +13,9 @@
       v: result count
     - k: start
       v: specify starting key (for pagination in the similar way as in XNGET)
+  aliases:
+    items:
+      - IXMRANGE
 
   description: |
     Returns a range mindex object *key* using words *words,words*<br />

@@ -637,7 +637,8 @@ namespace net::worker::commands::MultiIndex2{
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
-			"ixmsim1",	"IXMSIM1"
+			"ixmsim1",	"IXMSIM1",
+			"ixmrange1",	"IXMRANGE1"
 		};
 	};
 
@@ -694,7 +695,8 @@ namespace net::worker::commands::MultiIndex2{
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
-			"ixmsim",	"IXMSIM"
+			"ixmsim",	"IXMSIM",
+			"ixmrange",	"IXMRANGE"
 		};
 	};
 
