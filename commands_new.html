@@ -11003,8 +11003,8 @@ Distance types:
 It enables fast point lookups, existence checks, and dynamic lexicographical range/prefix scans
 across indexed records without scanning the entire dataset.</p>
 
-<p>The module supports composite indexing from <b>1 up to 6 dimensions</b> via dedicated command families (<b>IX1*</b> through <b>IX6*</b>).
-Each record maps a unique <b>sub_key</b> to <b>1 to 6 index fields (A through F)</b> and an internal <b>sort_key</b> used for ordering.</p>
+<p>The module supports composite indexing from <b>1 up to 5 dimensions</b> via dedicated command families (<b>IX1*</b> through <b>IX5*</b>).
+Each record maps a unique <b>sub_key</b> to <b>1 to 5 index fields (A through E)</b> and an internal <b>sort_key</b> used for ordering.</p>
 
 <p>In 1.4.0 this module, drop support for old "value" field.</p>
 
@@ -11183,7 +11183,7 @@ OK
 				</tr>
 				<tr>
 					<td>index1</td>
-					<td>1 to 6 indexes depends of command</td>
+					<td>1 to 5 indexes depends of command</td>
 				</tr>
 				<tr>
 					<td>sort_key</td>
@@ -11581,6 +11581,9 @@ OK
 
 			<h4>Description:</h4>
 			<blockquote><p>Get ordered and filtered data from index object *key*</p>
+
+<p>After version 1.4.0, you can use short permutations. For example for IX3RANGE, you can additionally use A, B, C, AB, AC, BA, BC, CA, CB.<br />
+The idea behind this feature is to use sort key for sorting.</p>
 </blockquote>
 
 			<h4>Return type:</h4>
@@ -11597,6 +11600,8 @@ OK
 (integer) 1
 127.0.0.1:6379&gt; # Get all employes (numbers), A is permutation, but because is single dimention is always A.
 OK
+127.0.0.1:6379&gt; # select * from employes order by A
+OK
 127.0.0.1:6379&gt; ix1range a A &#x27;&#x27; 100 &#x27;&#x27;
 1) &quot;001&quot;
 2) &quot;1&quot;
@@ -11606,6 +11611,8 @@ OK
 6) &quot;1&quot;
 7) &quot;&quot;
 127.0.0.1:6379&gt; # Get all employes (numbers), where first index is equal to &quot;sofia&quot;
+OK
+127.0.0.1:6379&gt; # select * from employes where A = &#x27;sofia&#x27; order by A
 OK
 127.0.0.1:6379&gt; ix1range a A sofia 100 &#x27;&#x27;
 1) &quot;001&quot;
@@ -11623,7 +11630,21 @@ OK
 (integer) 1
 127.0.0.1:6379&gt; # Get all employes (numbers), permutation AB (city, then department)
 OK
+127.0.0.1:6379&gt; # select * from employes order by A, B
+OK
 127.0.0.1:6379&gt; ix2range a AB &#x27;&#x27; &#x27;&#x27; 100 &#x27;&#x27;
+1) &quot;001&quot;
+2) &quot;1&quot;
+3) &quot;003&quot;
+4) &quot;1&quot;
+5) &quot;002&quot;
+6) &quot;1&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; # Get all employes (numbers), permutation A (city). In this case, the result is the same as AB.
+OK
+127.0.0.1:6379&gt; # select * from employes order by A
+OK
+127.0.0.1:6379&gt; ix2range a A &#x27;&#x27; &#x27;&#x27; 100 &#x27;&#x27;
 1) &quot;001&quot;
 2) &quot;1&quot;
 3) &quot;003&quot;
@@ -11633,7 +11654,21 @@ OK
 7) &quot;&quot;
 127.0.0.1:6379&gt; # Get all employes (numbers), permutation BA (department, then city)
 OK
+127.0.0.1:6379&gt; # select * from employes order by B, A
+OK
 127.0.0.1:6379&gt; ix2range a BA &#x27;&#x27; &#x27;&#x27; 100 &#x27;&#x27;
+1) &quot;001&quot;
+2) &quot;1&quot;
+3) &quot;002&quot;
+4) &quot;1&quot;
+5) &quot;003&quot;
+6) &quot;1&quot;
+7) &quot;&quot;
+127.0.0.1:6379&gt; # Get all employes (numbers), permutation B (department). In this case, the result is the same as BA.
+OK
+127.0.0.1:6379&gt; # select * from employes order by B
+OK
+127.0.0.1:6379&gt; ix2range a B &#x27;&#x27; &#x27;&#x27; 100 &#x27;&#x27;
 1) &quot;001&quot;
 2) &quot;1&quot;
 3) &quot;002&quot;
@@ -11643,6 +11678,8 @@ OK
 7) &quot;&quot;
 127.0.0.1:6379&gt; # Get all employes (numbers), permutation BA (department, then city), filter &quot;it&quot;, any city.
 OK
+127.0.0.1:6379&gt; # select * from employes where B = &#x27;it&#x27; order by B, A
+OK
 127.0.0.1:6379&gt; ix2range a BA it &#x27;&#x27; 100 &#x27;&#x27;
 1) &quot;001&quot;
 2) &quot;1&quot;
@@ -11651,11 +11688,15 @@ OK
 5) &quot;&quot;
 127.0.0.1:6379&gt; # Get all employes (numbers), permutation BA (department, then city), filter &quot;it&quot; + &quot;sofia&quot;
 OK
+127.0.0.1:6379&gt; # select * from employes where B = &#x27;it&#x27; and A = &#x27;sofia&#x27; order by B, A
+OK
 127.0.0.1:6379&gt; ix2range a BA it sofia 100 &#x27;&#x27;
 1) &quot;001&quot;
 2) &quot;1&quot;
 3) &quot;&quot;
 127.0.0.1:6379&gt; # Get all employes (numbers), permutation AB (city, then department), filter &quot;sofia&quot;, any department.
+OK
+127.0.0.1:6379&gt; # select * from employes where A = &#x27;sofia&#x27; order by A, B
 OK
 127.0.0.1:6379&gt; ix2range a AB sofia &#x27;&#x27; 100 &#x27;&#x27;
 1) &quot;001&quot;
@@ -11664,6 +11705,8 @@ OK
 4) &quot;1&quot;
 5) &quot;&quot;
 127.0.0.1:6379&gt; # Get all employes (numbers), permutation AB (city, then department), filter &quot;sofia&quot; + &quot;it&quot;
+OK
+127.0.0.1:6379&gt; # select * from employes where A = &#x27;sofia&#x27; and B = &#x27;it&#x27; order by A, B
 OK
 127.0.0.1:6379&gt; ix2range a AB sofia it 100 &#x27;&#x27;
 1) &quot;001&quot;

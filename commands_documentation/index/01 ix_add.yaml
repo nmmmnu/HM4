@@ -8,7 +8,7 @@
     - k: sub_key
       v: sub_key
     - k: index1
-      v: 1 to 6 indexes depends of command
+      v: 1 to 5 indexes depends of command
     - k: sort_key
       v: influences the sorting of the results of IX*RANGE command. If left empty, it falls back to a hash to ensure a more representative statistical sample.
 

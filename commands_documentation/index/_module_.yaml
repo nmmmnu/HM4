@@ -8,8 +8,8 @@ description: |
   It enables fast point lookups, existence checks, and dynamic lexicographical range/prefix scans
   across indexed records without scanning the entire dataset.</p>
 
-  <p>The module supports composite indexing from <b>1 up to 6 dimensions</b> via dedicated command families (<b>IX1*</b> through <b>IX6*</b>).
-  Each record maps a unique <b>sub_key</b> to <b>1 to 6 index fields (A through F)</b> and an internal <b>sort_key</b> used for ordering.</p>
+  <p>The module supports composite indexing from <b>1 up to 5 dimensions</b> via dedicated command families (<b>IX1*</b> through <b>IX5*</b>).
+  Each record maps a unique <b>sub_key</b> to <b>1 to 5 index fields (A through E)</b> and an internal <b>sort_key</b> used for ordering.</p>
 
   <p>In 1.4.0 this module, drop support for old "value" field.</p>
 
