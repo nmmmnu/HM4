@@ -11,7 +11,11 @@
 namespace net::worker::commands::MultiIndex2{
 	namespace impl_{
 
-		constexpr size_t  MaxSearchTokens	= 32;
+		constexpr size_t MaxSearchTokens	= 32;
+
+		constexpr size_t MaxTokenSize		= 128;	// Sphinx - 40 + truncate, MySQL - 84 + ignore
+
+		constexpr size_t keyAdditionalSize	= /*keyN~ */   MaxTokenSize + 1;
 
 		using SearchTokenContainer		= OutputBlob::TContainer	<MaxSearchTokens	>;
 		using SearchTokenBufferKContainer	= OutputBlob::TKContainer	<MaxSearchTokens * 2	>; // for index and keyStart
@@ -28,7 +32,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty())
+				if (x.empty() || x.size() > MaxTokenSize)
 					continue;
 
 				container.push_back(x);
@@ -66,7 +70,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty())
+				if (x.empty() || x.size() > MaxTokenSize)
 					return false;
 
 				if (!prev.empty() && prev >= x)
@@ -93,7 +97,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty())
+				if (x.empty() || x.size() > MaxTokenSize)
 					continue;
 
 				container.push_back(x);
@@ -133,7 +137,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty())
+				if (x.empty() || x.size() > MaxTokenSize)
 					return false;
 
 				container.push_back(x);

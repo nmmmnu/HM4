@@ -204,12 +204,12 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 1 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~A~a~keySub, (N + 2) * ~ + N -> {A}
+			// keyN~A~a~keySort~keySub, (N + 2) * ~ + N -> {A}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~A~a~keySub, (N + 2) * ~ + N -> {A}
+			// keyN~A~a~keySort~keySub, (N + 2) * ~ + N -> {A}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
 						indexes[0],
 						indexes[1]);
@@ -304,12 +304,12 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 2 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~AB~a~b~keySub, (N + 2) * ~ + N -> {AB}
+			// keyN~AB~a~b~keySort~keySub, (N + 2) * ~ + N -> {AB}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~AB~a~b~keySub, (N + 2) * ~ + N -> {AB}
+			// keyN~AB~a~b~keySort~keySub, (N + 2) * ~ + N -> {AB}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
 						indexes[0],
 						indexes[1],
@@ -423,12 +423,12 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 3 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABC~A~B~C~keySub, (N + 2) * ~ + N {ABC}
+			// keyN~ABC~A~B~C~keySort~keySub, (N + 2) * ~ + N {ABC}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABC~A~B~C~keySub, (N + 2) * ~ + N {ABC}
+			// keyN~ABC~A~B~C~keySort~keySub, (N + 2) * ~ + N {ABC}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
 						indexes[0],
 						indexes[1],
@@ -570,12 +570,12 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 4 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABCD~A~B~C~D~keySub, (N + 2) * ~ + N {ABCD}
+			// keyN~ABCD~A~B~C~D~keySort~keySub, (N + 2) * ~ + N {ABCD}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABCD~A~B~C~D~keySub, (N + 2) * ~ + N {ABCD}
+			// keyN~ABCD~A~B~C~D~keySort~keySub, (N + 2) * ~ + N {ABCD}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
 						indexes[0],
 						indexes[1],
@@ -781,12 +781,12 @@ namespace net::worker::shared::zsetmulti{
 		constexpr static size_t N = 5 + 1;
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABCDE~A~B~C~D~E~keySub, (N + 2) * ~ + N {ABCDE}
+			// keyN~ABCDE~A~B~C~D~E~keySort~keySub, (N + 2) * ~ + N {ABCDE}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
 		}
 
 		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABCDE~A~B~C~D~E~keySub, (N + 2) * ~ + N {ABCDE}
+			// keyN~ABCDE~A~B~C~D~E~keySort~keySub, (N + 2) * ~ + N {ABCDE}
 			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
 						indexes[0],
 						indexes[1],
