@@ -77,7 +77,7 @@
     127.0.0.1:6379> ix2add a 001 sofia it x 002 london it x 003 sofia sales x
     (integer) 1
 
-    127.0.0.1:6379> # Get all employes (numbers), permutation _ (permutation _ (keySort))
+    127.0.0.1:6379> # Get all employes (numbers), permutation _ (keySort)
     OK
     127.0.0.1:6379> # select * from employes
     OK

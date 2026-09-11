@@ -446,4 +446,5 @@ Changelog
 -	BREAKING CHANGE: remove commands IX6*
 -	BREAKING CHANGE: improve module IX*RANGE, now support shorter masks
 -	introduce max word size to 104 bytes
+-	introduce mask _ for IX*RANGE
 
