@@ -29,10 +29,7 @@ namespace net::worker::commands::Vectors2{
 		// 00
 		constexpr size_t keyBandSize		= 2;  // size of uint8 as hex
 
-		// keyN~keyBand~keySort~keySub
-		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + shared::sortkey::keySortSize()   /* ~keySub */;
-
-
+		static_assert(keyBandSize < shared::config::INDEX_TOKEN_SIZE);
 
 		constexpr uint32_t MaxDimensions	= 1024 * 8;
 
@@ -581,10 +578,7 @@ namespace net::worker::commands::Vectors2{
 			auto const &keyN   = p[1];
 			auto const &keySub = p[4];
 
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+			if (!shared::index_token::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
@@ -747,7 +741,7 @@ namespace net::worker::commands::Vectors2{
 				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+				if (!shared::index_token::valid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 				auto const vectorSV = *(itk + 1);
@@ -910,15 +904,9 @@ namespace net::worker::commands::Vectors2{
 			if (qtype == QType::UNKNOWN)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const keySub = *itk;
-
-				if (keySub.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const keySub = *itk; !shared::index_token::valid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			switch(qtype){
 			case QType::F32	: return process__<float	>(std::begin(p) + varg, std::end(p), db, result, blob, keyN, dim_ix);
@@ -997,10 +985,7 @@ namespace net::worker::commands::Vectors2{
 			auto const &keyN   = p[1];
 			auto const &keySub = p[4];
 
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+			if (!shared::index_token::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
@@ -1152,10 +1137,7 @@ namespace net::worker::commands::Vectors2{
 			auto const &keyN   = p[1];
 			auto const &keySub = p[5];
 
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+			if (!shared::index_token::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const dim_ix = from_string<uint32_t>(p[2]);
@@ -1387,13 +1369,7 @@ namespace net::worker::commands::Vectors2{
 			auto const keySubA = p[5];
 			auto const keySubB = p[6];
 
-			if (keySubA.empty() || keySubB.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			if (!shared::rsetmulti::valid(keyN, keySubB, keyAdditionalSize))
+			if (!shared::index_token::valid(keyN, keySubA, keySubB))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			switch(qtype){
@@ -1523,21 +1499,12 @@ namespace net::worker::commands::Vectors2{
 
 			auto const keySubA = p[5];
 
-			if (keySubA.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
+			if (!shared::index_token::valid(keyN, keySubA))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const keySub = *itk;
-
-				if (keySub.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const keySub = *itk; !shared::index_token::valid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			switch(qtype){
 			case QType::F32	: return process__<float	>(std::begin(p) + varg, std::end(p), db, result, blob, keyN, keySubA, dim_ix, dtype);
@@ -1792,10 +1759,7 @@ namespace net::worker::commands::Vectors2{
 
 			auto const keySub = p[5];
 
-			if (keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+			if (!shared::index_token::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const startKey = p[6];
@@ -2180,7 +2144,7 @@ namespace net::worker::commands::Vectors2{
 			if (dim_ix < 1 || dim_ix > MaxDimensions)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
+			if (!shared::index_token::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			switch(qtype){

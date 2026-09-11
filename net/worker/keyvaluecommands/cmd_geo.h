@@ -68,8 +68,16 @@ namespace net::worker::commands::Geo{
 
 		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
-		constexpr bool isGeoKeyValid(std::string_view key, std::string_view name){
-			return P1::valid(key, name, GeoHash::MAX_SIZE);
+		constexpr bool isGeoKeyValid(std::string_view key){
+			return	shared::index_token::valid(key);
+		}
+
+		constexpr bool isGeoKeyValid(std::string_view key, std::string_view keySub){
+			return	shared::index_token::valid(key, keySub);
+		}
+
+		constexpr bool isGeoKeyValid(std::string_view key, std::string_view keySub1, std::string_view keySub2){
+			return	shared::index_token::valid(key, keySub1, keySub2);
 		}
 
 		struct GeoIndexController{
@@ -125,15 +133,9 @@ namespace net::worker::commands::Geo{
 
 			using namespace impl_;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const &name = *(itk + 2);
-
-				if (name.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_NAME);
-
-				if (!isGeoKeyValid(keyN, name))
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep)
+				if (auto const &keySub = *(itk + 2); !isGeoKeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
@@ -150,9 +152,9 @@ namespace net::worker::commands::Geo{
 				buffer_t line_buffer;
 				auto const line = formatLine(lat, lon, hash, line_buffer);
 
-				auto const &name = *(itk + 2);
+				auto const keySub = *(itk + 2);
 
-				shared::zsetmulti::add<P1, GeoIndexController>(db, keyN, name, { hash }, line);
+				shared::zsetmulti::add<P1, GeoIndexController>(db, keyN, keySub, { hash }, line);
 			}
 
 			return result.set();
@@ -213,16 +215,13 @@ namespace net::worker::commands::Geo{
 
 			using namespace impl_;
 
-			auto const &name = p[2];
+			auto const keySub = p[2];
 
-			if (name.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_NAME);
-
-			if (!isGeoKeyValid(keyN, name))
+			if (!isGeoKeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name)
+				shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub)
 			);
 		}
 
@@ -259,23 +258,17 @@ namespace net::worker::commands::Geo{
 
 			auto const varg = 2;
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &name = *itk;
-
-				if (name.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_NAME);
-
-				if (!isGeoKeyValid(keyN, name))
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const keySub = *itk; !isGeoKeyValid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			auto &container = blob.construct<OutputBlob::Container>();
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const &name = *itk;
+				auto const keySub = *itk;
 
 				container.emplace_back(
-					shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name)
+					shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub)
 				);
 			}
 
@@ -312,7 +305,7 @@ namespace net::worker::commands::Geo{
 
 			using namespace impl_;
 
-			if (!isGeoKeyValid(keyN, "x"))
+			if (!isGeoKeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			GeoHash::Point me{
@@ -420,33 +413,15 @@ namespace net::worker::commands::Geo{
 
 			using namespace impl_;
 
-			auto const &name1 = p[2];
+			auto const keySub1 = p[2];
+			auto const keySub2 = p[3];
 
-			{
-				auto const &name = name1;
-
-				if (name.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_NAME);
-
-				if (!isGeoKeyValid(keyN, name))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
-
-			auto const &name2 = p[3];
-
-			{
-				auto const &name = name2;
-
-				if (name.empty())
-					return result.set_error(ResultErrorMessages::EMPTY_NAME);
-
-				if (!isGeoKeyValid(keyN, name))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
+			if (!isGeoKeyValid(keyN, keySub1, keySub2))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			// ---
 
-			auto const line1 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name1);
+			auto const line1 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub1);
 
 			if (line1.empty())
 				return result.set(int64_t{-1});
@@ -455,7 +430,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line2 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, name2);
+			auto const line2 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub2);
 
 			if (line2.empty())
 				return result.set(int64_t{-1});

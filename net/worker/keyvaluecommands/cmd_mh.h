@@ -20,8 +20,7 @@ namespace net::worker::commands::MH{
 		// 0031.6A796090E2DBB95E
 		constexpr size_t keyBandSize		= 4 + 1 + 16; // uint32 as hex + '.' + uint64 as hex
 
-		// keyN~keyBand~keySort~keySub
-		constexpr size_t keyAdditionalSize	= /*keyN~ */   keyBandSize + 1 + shared::sortkey::keySortSize()   /* ~keySub */;
+		static_assert(keyBandSize < shared::config::INDEX_TOKEN_SIZE);
 
 		constexpr size_t tokenMinSize		= 0;
 
@@ -174,7 +173,7 @@ namespace net::worker::commands::MH{
 			auto const keyN		= p[1];
 			auto const bandSize	= from_string<uint32_t>(p[2]);
 
-			if (keyN.empty())
+			if (!shared::index_token::valid(keyN))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace impl_;
@@ -190,11 +189,8 @@ namespace net::worker::commands::MH{
 				if (delimiter.size() != 1)
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-				if (keySub.empty())
+				if (!shared::index_token::valid(keySub))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
 			auto &icontainer = blob.construct<typename Decoder::IContainer>();
@@ -307,7 +303,7 @@ namespace net::worker::commands::MH{
 			auto const keyN		= p[1];
 			auto const bandSize	= from_string<uint32_t>(p[2]);
 
-			if (keyN.empty())
+			if (!shared::index_token::valid(keyN))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace impl_;
@@ -315,15 +311,9 @@ namespace net::worker::commands::MH{
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				auto const keySub = *itk;
-
-				if (keySub.empty())
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (auto const keySub = *itk; !shared::index_token::valid(keySub))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			auto &icontainer = blob.construct<typename Decoder::IContainer>();
 			auto &bcontainer = blob.construct<typename Decoder::BContainer>();
@@ -372,10 +362,10 @@ namespace net::worker::commands::MH{
 			auto const bandSize	= from_string<uint32_t>(p[2]);
 			auto const keySub	= p[3];
 
-			using namespace impl_;
+			if (!shared::index_token::valid(keyN, keySub))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+			using namespace impl_;
 
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -444,19 +434,21 @@ namespace net::worker::commands::MH{
 			auto const delimiter	= !inputTypeIsKey ? p[3] : "";
 			auto const tokens	= !inputTypeIsKey ? p[4] : "";
 
+			if (!shared::index_token::valid(keyN))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			if constexpr(inputTypeIsKey){
+				if (!shared::index_token::valid(keySub))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+			}else{
+				if (delimiter.size() != 1)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+
 			using namespace impl_;
 
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			if constexpr(inputTypeIsKey){
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}else{
-
-				if (delimiter.size() != 1)
-					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-			}
 
 			static_assert(OutputBlob::Container::capacity() >= Decoder::IContainer::capacity());
 
@@ -621,14 +613,8 @@ namespace net::worker::commands::MH{
 
 			using namespace impl_;
 
-			if (keyN.empty() || keySubA.empty() || keySubB.empty())
+			if (!shared::index_token::valid(keyN, keySubA, keySubB))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			if (!shared::rsetmulti::valid(keyN, keySubB, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -685,26 +671,17 @@ namespace net::worker::commands::MH{
 			auto const bandSize	= from_string<uint32_t>(p[2]);
 			auto const keySubA	= p[3];
 
-			if (keyN.empty() || keySubA.empty())
+			if (!shared::index_token::valid(keyN, keySubA))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace impl_;
 
-			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto &keySub = *itk;
-
-				if (keySub.empty())
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &keySub = *itk; !shared::index_token::valid(keySub))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			auto &container = blob.construct<OutputBlob::SmallContainer>();
 
@@ -776,14 +753,8 @@ namespace net::worker::commands::MH{
 
 			using namespace impl_;
 
-			if (keyN.empty() || keySubA.empty() || keySubB.empty())
+			if (!shared::index_token::valid(keyN, keySubA, keySubB))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
-			if (!shared::rsetmulti::valid(keyN, keySubB, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -840,26 +811,17 @@ namespace net::worker::commands::MH{
 			auto const bandSize	= from_string<uint32_t>(p[2]);
 			auto const keySubA	= p[3];
 
-			if (keyN.empty() || keySubA.empty())
+			if (!shared::index_token::valid(keyN, keySubA))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace impl_;
 
-			if (!shared::rsetmulti::valid(keyN, keySubA, keyAdditionalSize))
-				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-
 			if (!bandSize || MH::bytes() % bandSize != 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-				const auto &keySub = *itk;
-
-				if (keySub.empty())
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &keySub = *itk; !shared::index_token::valid(keySub))
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-				if (!shared::rsetmulti::valid(keyN, keySub, keyAdditionalSize))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
 
 			auto &container = blob.construct<OutputBlob::SmallContainer>();
 

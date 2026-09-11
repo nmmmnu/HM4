@@ -4,6 +4,8 @@
 #include "pair.h"
 #include "ilist/txguard.h"
 
+#include "shared_index.h"
+
 /*
 Reverse Set Multi
 
@@ -19,21 +21,6 @@ keyN~INDEX2~keySort~keySub	-> keySub
 */
 
 namespace net::worker::shared::rsetmulti{
-
-	constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-		// keyN~word~keySort~keySub, 3 * ~
-		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub);
-	}
-
-	constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::string_view keySort, size_t more = 0){
-		// keyN~word~keySort~keySub, 3 * ~
-		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub, keySort);
-	}
-
-	constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::string_view keySort, std::string_view text, size_t more = 0){
-		// keyN~word~keySort~keySub, 3 * ~
-		return hm4::Pair::isCompositeKeyValid(3 + more, keyN, keySub, keySort, text);
-	}
 
 	inline std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
 				std::string_view keyN,
@@ -183,7 +170,7 @@ namespace net::worker::shared::rsetmulti{
 			using namespace mut;
 
 			for(auto const &txt : icontainer){
-				if (valid(keyN, keySub, keySort, txt)){ // check consistency
+				if (shared::index_token::valid(keyN, keySub, keySort, txt)){ // check consistency
 					mutate(db, keyN, keySub, keySort, txt, "MSetMulti::ADD/REM: del index key");
 				}else{
 					logger<Logger::DEBUG>() << "MSetMulti::ADD/REM: invalid index key";
@@ -200,7 +187,7 @@ namespace net::worker::shared::rsetmulti{
 			auto const value = keySub;
 
 			for(auto const &txt : icontainer){
-				if (valid(keyN, keySub, keySort, txt)) // check consistency
+				if (shared::index_token::valid(keyN, keySub, keySort, txt)) // check consistency
 					mutate(db, keyN, keySub, keySort, txt, value, "MSetMulti::ADD: set index key");
 				else
 					logger<Logger::DEBUG>() << "MSetMulti::ADD: invalid set index key";

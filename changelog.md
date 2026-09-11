@@ -445,5 +445,5 @@ Changelog
 -	New module mindex2 replacing mindex, tindex, hindex: IXMADD, IXMREM, IXMGETINDEXES, IXMSIM1 (IXMRANGE1), IXMSIM (IXMRANGE)
 -	BREAKING CHANGE: remove commands IX6*
 -	BREAKING CHANGE: improve module IX*RANGE, now support shorter masks
--	introduce max word size to 128 bytes
+-	introduce max word size to 104 bytes
 

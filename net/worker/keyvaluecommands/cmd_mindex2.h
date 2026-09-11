@@ -13,10 +13,6 @@ namespace net::worker::commands::MultiIndex2{
 
 		constexpr size_t MaxSearchTokens	= 32;
 
-		constexpr size_t MaxTokenSize		= 128;	// Sphinx - 40 + truncate, MySQL - 84 + ignore
-
-		constexpr size_t keyAdditionalSize	= /*keyN~ */   MaxTokenSize + 1;
-
 		using SearchTokenContainer		= OutputBlob::TContainer	<MaxSearchTokens	>;
 		using SearchTokenBufferKContainer	= OutputBlob::TKContainer	<MaxSearchTokens * 2	>; // for index and keyStart
 
@@ -32,7 +28,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty() || x.size() > MaxTokenSize)
+				if (!shared::index_token::valid(x))
 					continue;
 
 				container.push_back(x);
@@ -70,7 +66,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty() || x.size() > MaxTokenSize)
+				if (!shared::index_token::valid(x))
 					return false;
 
 				if (!prev.empty() && prev >= x)
@@ -97,7 +93,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty() || x.size() > MaxTokenSize)
+				if (!shared::index_token::valid(x))
 					continue;
 
 				container.push_back(x);
@@ -137,7 +133,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (container.full())
 					return false; // no room for the token
 
-				if (x.empty() || x.size() > MaxTokenSize)
+				if (!shared::index_token::valid(x))
 					return false;
 
 				container.push_back(x);
@@ -396,7 +392,7 @@ namespace net::worker::commands::MultiIndex2{
 
 			auto const keySort	= shared::sortkey::makeHashKeySort(keySub, p[3], bufferKeySort);
 
-			if (!shared::rsetmulti::valid(keyN, keySub, keySort))
+			if (!shared::index_token::valid(keyN, keySub, keySort))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto &tokenContainer = blob.construct<OutputBlob::Container>();
@@ -519,8 +515,7 @@ namespace net::worker::commands::MultiIndex2{
 				if (keySub.empty())
 					return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-				// not 100% correct, because we do not have keySort yet
-				if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize()))
+				if (!shared::index_token::valid(keyN, keySub))
 					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 			}
 
@@ -571,8 +566,7 @@ namespace net::worker::commands::MultiIndex2{
 
 			using namespace impl_;
 
-			// not 100% correct, because we do not have keySort yet
-			if (!shared::rsetmulti::valid(keyN, keySub, shared::sortkey::keySortSize()))
+			if (!shared::index_token::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto &icontainer = blob.construct<OutputBlob::Container>();
@@ -623,7 +617,7 @@ namespace net::worker::commands::MultiIndex2{
 			if (keyN.empty() || index.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!shared::rsetmulti::valid(keyN, index))
+			if (!shared::index_token::valid(keyN, index))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			using namespace shared::config;

@@ -5,6 +5,8 @@
 #include "stringtokenizer.h"
 #include "pair.h"
 
+#include "shared_index.h"
+
 /*
 Reverse Set a la Redis ZSET
 
@@ -13,7 +15,7 @@ Reverse Set a la Redis ZSET
 
 
 
-Permutation<1 to 6>:
+Permutation<1 to 5>:
 
 keyN~~keySub			-> index~keySort
 keyN~A~index~keySort~keySub	-> keySub
@@ -36,15 +38,6 @@ namespace net::worker::shared::zsetmulti{
 	struct Permutation1NoIndex;
 
 	namespace impl_{
-		template<size_t N>
-		bool valid(std::array<std::string_view, N> const &indexes){
-			for(auto const &x : indexes)
-				if (x.empty())
-					return false;
-
-			return true;
-		}
-
 		template<typename Permutation, typename IndexController>
 		std::string_view encodeIndex(hm4::PairBufferKey &bufferVal, std::string_view separator, std::array<std::string_view, Permutation::N> const &indexes,
 							std::string_view value){
@@ -94,21 +87,10 @@ namespace net::worker::shared::zsetmulti{
 	struct Permutation1NoIndex{
 		constexpr static size_t N = 1;
 
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~A~keySub, 2 * ~ + 0 * _
-			return hm4::Pair::isCompositeKeyValid(2 * 1 + 0 * 1 + more, keyN, keySub);
-		}
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~A~keySub, 2 * ~ + 0 * _
-			return hm4::Pair::isCompositeKeyValid(2 * 1 + 0 * 1 + more, keyN, keySub,
-						indexes[0]);
-		}
-
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view /* separator */, std::array<std::string_view, N> const &indexes){
 			// no need to copy, but lets do it anyway, because the caller expects it.
 			return concatenateBuffer(bufferKey,
-						indexes[0]
+							indexes[0]
 			);
 		}
 
@@ -203,18 +185,6 @@ namespace net::worker::shared::zsetmulti{
 	struct Permutation<1>{
 		constexpr static size_t N = 1 + 1;
 
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~A~a~keySort~keySub, (N + 2) * ~ + N -> {A}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
-		}
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~A~a~keySort~keySub, (N + 2) * ~ + N -> {A}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
-						indexes[0],
-						indexes[1]);
-		}
-
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
 			// no need to copy, but lets do it anyway, because the caller expects it.
 			return concatenateBuffer(bufferKey,
@@ -303,19 +273,6 @@ namespace net::worker::shared::zsetmulti{
 	struct Permutation<2>{
 		constexpr static size_t N = 2 + 1;
 
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~AB~a~b~keySort~keySub, (N + 2) * ~ + N -> {AB}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
-		}
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~AB~a~b~keySort~keySub, (N + 2) * ~ + N -> {AB}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
-						indexes[0],
-						indexes[1],
-						indexes[2]);
-		}
-
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
 			return concatenateBuffer(bufferKey,
 						indexes[0],	separator	,
@@ -396,7 +353,7 @@ namespace net::worker::shared::zsetmulti{
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, B, S] = indexes;
 
-			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b){
+			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b = ""){
 				auto const [A, B, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
@@ -406,13 +363,11 @@ namespace net::worker::shared::zsetmulti{
 				func(key);
 			};
 
-			std::string_view const o{};
+			_("A",  A	);
+			_("B",  B	);
 
-			_("A",  A, o);
-			_("B",  B, o);
-
-			_("AB", A, B);
-			_("BA", B, A);
+			_("AB", A, B	);
+			_("BA", B, A	);
 		}
 	};
 
@@ -421,20 +376,6 @@ namespace net::worker::shared::zsetmulti{
 	template<>
 	struct Permutation<3>{
 		constexpr static size_t N = 3 + 1;
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABC~A~B~C~keySort~keySub, (N + 2) * ~ + N {ABC}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
-		}
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABC~A~B~C~keySort~keySub, (N + 2) * ~ + N {ABC}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
-						indexes[0],
-						indexes[1],
-						indexes[2],
-						indexes[3]);
-		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
 		//	logger<Logger::DEBUG>() << indexes[0] << indexes[1] << indexes[2];
@@ -530,7 +471,7 @@ namespace net::worker::shared::zsetmulti{
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, B, C, S] = indexes;
 
-			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c){
+			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b = "", std::string_view c = ""){
 				auto const [A, B, C, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
@@ -540,18 +481,16 @@ namespace net::worker::shared::zsetmulti{
 				func(key);
 			};
 
-			std::string_view const o{};
+			_("A",   A	);
+			_("B",   B	);
+			_("C",   C	);
 
-			_("A",   A, o, o);
-			_("B",   B, o, o);
-			_("C",   C, o, o);
-
-			_("AB",  A, B, o);
-			_("BA",  B, A, o);
-			_("AC",  A, C, o);
-			_("CA",  C, A, o);
-			_("BC",  B, C, o);
-			_("CB",  C, B, o);
+			_("AB",  A, B	);
+			_("BA",  B, A	);
+			_("AC",  A, C	);
+			_("CA",  C, A	);
+			_("BC",  B, C	);
+			_("CB",  C, B	);
 
 			_("ABC", A, B, C);
 			_("ACB", A, C, B);
@@ -568,21 +507,6 @@ namespace net::worker::shared::zsetmulti{
 	template<>
 	struct Permutation<4>{
 		constexpr static size_t N = 4 + 1;
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABCD~A~B~C~D~keySort~keySub, (N + 2) * ~ + N {ABCD}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
-		}
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABCD~A~B~C~D~keySort~keySub, (N + 2) * ~ + N {ABCD}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
-						indexes[0],
-						indexes[1],
-						indexes[2],
-						indexes[3],
-						indexes[4]);
-		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
 		//	logger<Logger::DEBUG>() << indexes[0] << indexes[1] << indexes[2];
@@ -692,7 +616,7 @@ namespace net::worker::shared::zsetmulti{
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, B, C, D, S] = indexes;
 
-			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b, std::string_view c, std::string_view d){
+			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b = "", std::string_view c = "", std::string_view d = ""){
 				auto const [A, B, C, D, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
@@ -702,75 +626,73 @@ namespace net::worker::shared::zsetmulti{
 				func(key);
 			};
 
-			std::string_view const o{};
+			_("A",    A		);
+			_("B",    B		);
+			_("C",    C		);
+			_("D",    D		);
 
-			_("A",    A, o, o, o);
-			_("B",    B, o, o, o);
-			_("C",    C, o, o, o);
-			_("D",    D, o, o, o);
+			_("AB",   A, B		);
+			_("BA",   B, A		);
+			_("AC",   A, C		);
+			_("CA",   C, A		);
+			_("AD",   A, D		);
+			_("DA",   D, A		);
+			_("BC",   B, C		);
+			_("CB",   C, B		);
+			_("BD",   B, D		);
+			_("DB",   D, B		);
+			_("CD",   C, D		);
+			_("DC",   D, C		);
 
-			_("AB",   A, B, o, o);
-			_("BA",   B, A, o, o);
-			_("AC",   A, C, o, o);
-			_("CA",   C, A, o, o);
-			_("AD",   A, D, o, o);
-			_("DA",   D, A, o, o);
-			_("BC",   B, C, o, o);
-			_("CB",   C, B, o, o);
-			_("BD",   B, D, o, o);
-			_("DB",   D, B, o, o);
-			_("CD",   C, D, o, o);
-			_("DC",   D, C, o, o);
+			_("ABC",  A, B, C	);
+			_("ACB",  A, C, B	);
+			_("BAC",  B, A, C	);
+			_("BCA",  B, C, A	);
+			_("CAB",  C, A, B	);
+			_("CBA",  C, B, A	);
+			_("ABD",  A, B, D	);
+			_("ADB",  A, D, B	);
+			_("BAD",  B, A, D	);
+			_("BDA",  B, D, A	);
+			_("DAB",  D, A, B	);
+			_("DBA",  D, B, A	);
+			_("ACD",  A, C, D	);
+			_("ADC",  A, D, C	);
+			_("CAD",  C, A, D	);
+			_("CDA",  C, D, A	);
+			_("DAC",  D, A, C	);
+			_("DCA",  D, C, A	);
+			_("BCD",  B, C, D	);
+			_("BDC",  B, D, C	);
+			_("CBD",  C, B, D	);
+			_("CDB",  C, D, B	);
+			_("DBC",  D, B, C	);
+			_("DCB",  D, C, B	);
 
-			_("ABC",  A, B, C, o);
-			_("ACB",  A, C, B, o);
-			_("BAC",  B, A, C, o);
-			_("BCA",  B, C, A, o);
-			_("CAB",  C, A, B, o);
-			_("CBA",  C, B, A, o);
-			_("ABD",  A, B, D, o);
-			_("ADB",  A, D, B, o);
-			_("BAD",  B, A, D, o);
-			_("BDA",  B, D, A, o);
-			_("DAB",  D, A, B, o);
-			_("DBA",  D, B, A, o);
-			_("ACD",  A, C, D, o);
-			_("ADC",  A, D, C, o);
-			_("CAD",  C, A, D, o);
-			_("CDA",  C, D, A, o);
-			_("DAC",  D, A, C, o);
-			_("DCA",  D, C, A, o);
-			_("BCD",  B, C, D, o);
-			_("BDC",  B, D, C, o);
-			_("CBD",  C, B, D, o);
-			_("CDB",  C, D, B, o);
-			_("DBC",  D, B, C, o);
-			_("DCB",  D, C, B, o);
-
-			_("ABCD", A, B, C, D);
-			_("ABDC", A, B, D, C);
-			_("ACBD", A, C, B, D);
-			_("ACDB", A, C, D, B);
-			_("ADBC", A, D, B, C);
-			_("ADCB", A, D, C, B);
-			_("BACD", B, A, C, D);
-			_("BADC", B, A, D, C);
-			_("BCAD", B, C, A, D);
-			_("BCDA", B, C, D, A);
-			_("BDAC", B, D, A, C);
-			_("BDCA", B, D, C, A);
-			_("CABD", C, A, B, D);
-			_("CADB", C, A, D, B);
-			_("CBAD", C, B, A, D);
-			_("CBDA", C, B, D, A);
-			_("CDAB", C, D, A, B);
-			_("CDBA", C, D, B, A);
-			_("DABC", D, A, B, C);
-			_("DACB", D, A, C, B);
-			_("DBAC", D, B, A, C);
-			_("DBCA", D, B, C, A);
-			_("DCAB", D, C, A, B);
-			_("DCBA", D, C, B, A);
+			_("ABCD", A, B, C, D	);
+			_("ABDC", A, B, D, C	);
+			_("ACBD", A, C, B, D	);
+			_("ACDB", A, C, D, B	);
+			_("ADBC", A, D, B, C	);
+			_("ADCB", A, D, C, B	);
+			_("BACD", B, A, C, D	);
+			_("BADC", B, A, D, C	);
+			_("BCAD", B, C, A, D	);
+			_("BCDA", B, C, D, A	);
+			_("BDAC", B, D, A, C	);
+			_("BDCA", B, D, C, A	);
+			_("CABD", C, A, B, D	);
+			_("CADB", C, A, D, B	);
+			_("CBAD", C, B, A, D	);
+			_("CBDA", C, B, D, A	);
+			_("CDAB", C, D, A, B	);
+			_("CDBA", C, D, B, A	);
+			_("DABC", D, A, B, C	);
+			_("DACB", D, A, C, B	);
+			_("DBAC", D, B, A, C	);
+			_("DBCA", D, B, C, A	);
+			_("DCAB", D, C, A, B	);
+			_("DCBA", D, C, B, A	);
 		}
 	};
 
@@ -779,22 +701,6 @@ namespace net::worker::shared::zsetmulti{
 	template<>
 	struct Permutation<5>{
 		constexpr static size_t N = 5 + 1;
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, size_t more = 0){
-			// keyN~ABCDE~A~B~C~D~E~keySort~keySub, (N + 2) * ~ + N {ABCDE}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub);
-		}
-
-		constexpr static bool valid(std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, size_t more = 0){
-			// keyN~ABCDE~A~B~C~D~E~keySort~keySub, (N + 2) * ~ + N {ABCDE}
-			return hm4::Pair::isCompositeKeyValid((N + 2) + N + more, keyN, keySub,
-						indexes[0],
-						indexes[1],
-						indexes[2],
-						indexes[3],
-						indexes[4],
-						indexes[5]);
-		}
 
 		static auto encodeIndex(hm4::PairBufferKey &bufferKey, std::string_view separator, std::array<std::string_view, N> const &indexes){
 		//	logger<Logger::DEBUG>() << indexes[0] << indexes[1] << indexes[2];
@@ -819,8 +725,7 @@ namespace net::worker::shared::zsetmulti{
 		static std::string_view makeKeyRange(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view key,
 					std::string_view txt,
-					std::string_view a = "", std::string_view b = "", std::string_view c = "",
-					std::string_view d = "", std::string_view e = ""){
+					std::string_view a = "", std::string_view b = "", std::string_view c = "", std::string_view d = "", std::string_view e = ""){
 
 			if (a.empty())
 				return concatenateBuffer(bufferKey,
@@ -921,8 +826,7 @@ namespace net::worker::shared::zsetmulti{
 			auto const [A, B, C, D, E, S] = indexes;
 
 			auto _ = [&](std::string_view txt,
-							std::string_view a, std::string_view b, std::string_view c,
-							std::string_view d, std::string_view e){
+							std::string_view a, std::string_view b = "", std::string_view c = "", std::string_view d = "", std::string_view e = ""){
 
 				auto const [A, B, C, D, E, S] = indexes;
 
@@ -940,216 +844,214 @@ namespace net::worker::shared::zsetmulti{
 			// 5 =>  120
 			// Total 325 permutations total
 
-			std::string_view const o{};
+			_("A",     A		);
+			_("B",     B		);
+			_("C",     C		);
+			_("D",     D		);
+			_("E",     E		);
 
-			_("A",     A, o, o, o, o);
-			_("B",     B, o, o, o, o);
-			_("C",     C, o, o, o, o);
-			_("D",     D, o, o, o, o);
-			_("E",     E, o, o, o, o);
+			_("AB",    A, B		);
+			_("BA",    B, A		);
+			_("AC",    A, C		);
+			_("CA",    C, A		);
+			_("AD",    A, D		);
+			_("DA",    D, A		);
+			_("AE",    A, E		);
+			_("EA",    E, A		);
+			_("BC",    B, C		);
+			_("CB",    C, B		);
+			_("BD",    B, D		);
+			_("DB",    D, B		);
+			_("BE",    B, E		);
+			_("EB",    E, B		);
+			_("CD",    C, D		);
+			_("DC",    D, C		);
+			_("CE",    C, E		);
+			_("EC",    E, C		);
+			_("DE",    D, E		);
+			_("ED",    E, D		);
 
-			_("AB",    A, B, o, o, o);
-			_("BA",    B, A, o, o, o);
-			_("AC",    A, C, o, o, o);
-			_("CA",    C, A, o, o, o);
-			_("AD",    A, D, o, o, o);
-			_("DA",    D, A, o, o, o);
-			_("AE",    A, E, o, o, o);
-			_("EA",    E, A, o, o, o);
-			_("BC",    B, C, o, o, o);
-			_("CB",    C, B, o, o, o);
-			_("BD",    B, D, o, o, o);
-			_("DB",    D, B, o, o, o);
-			_("BE",    B, E, o, o, o);
-			_("EB",    E, B, o, o, o);
-			_("CD",    C, D, o, o, o);
-			_("DC",    D, C, o, o, o);
-			_("CE",    C, E, o, o, o);
-			_("EC",    E, C, o, o, o);
-			_("DE",    D, E, o, o, o);
-			_("ED",    E, D, o, o, o);
+			_("ABC",   A, B, C	);
+			_("ACB",   A, C, B	);
+			_("BAC",   B, A, C	);
+			_("BCA",   B, C, A	);
+			_("CAB",   C, A, B	);
+			_("CBA",   C, B, A	);
+			_("ABD",   A, B, D	);
+			_("ADB",   A, D, B	);
+			_("BAD",   B, A, D	);
+			_("BDA",   B, D, A	);
+			_("DAB",   D, A, B	);
+			_("DBA",   D, B, A	);
+			_("ABE",   A, B, E	);
+			_("AEB",   A, E, B	);
+			_("BAE",   B, A, E	);
+			_("BEA",   B, E, A	);
+			_("EAB",   E, A, B	);
+			_("EBA",   E, B, A	);
+			_("ACD",   A, C, D	);
+			_("ADC",   A, D, C	);
+			_("CAD",   C, A, D	);
+			_("CDA",   C, D, A	);
+			_("DAC",   D, A, C	);
+			_("DCA",   D, C, A	);
+			_("ACE",   A, C, E	);
+			_("AEC",   A, E, C	);
+			_("CAE",   C, A, E	);
+			_("CEA",   C, E, A	);
+			_("EAC",   E, A, C	);
+			_("ECA",   E, C, A	);
+			_("ADE",   A, D, E	);
+			_("AED",   A, E, D	);
+			_("DAE",   D, A, E	);
+			_("DEA",   D, E, A	);
+			_("EAD",   E, A, D	);
+			_("EDA",   E, D, A	);
+			_("BCD",   B, C, D	);
+			_("BDC",   B, D, C	);
+			_("CBD",   C, B, D	);
+			_("CDB",   C, D, B	);
+			_("DBC",   D, B, C	);
+			_("DCB",   D, C, B	);
+			_("BCE",   B, C, E	);
+			_("BEC",   B, E, C	);
+			_("CBE",   C, B, E	);
+			_("CEB",   C, E, B	);
+			_("EBC",   E, B, C	);
+			_("ECB",   E, C, B	);
+			_("BDE",   B, D, E	);
+			_("BED",   B, E, D	);
+			_("DBE",   D, B, E	);
+			_("DEB",   D, E, B	);
+			_("EBD",   E, B, D	);
+			_("EDB",   E, D, B	);
+			_("CDE",   C, D, E	);
+			_("CED",   C, E, D	);
+			_("DCE",   D, C, E	);
+			_("DEC",   D, E, C	);
+			_("ECD",   E, C, D	);
+			_("EDC",   E, D, C	);
 
-			_("ABC",   A, B, C, o, o);
-			_("ACB",   A, C, B, o, o);
-			_("BAC",   B, A, C, o, o);
-			_("BCA",   B, C, A, o, o);
-			_("CAB",   C, A, B, o, o);
-			_("CBA",   C, B, A, o, o);
-			_("ABD",   A, B, D, o, o);
-			_("ADB",   A, D, B, o, o);
-			_("BAD",   B, A, D, o, o);
-			_("BDA",   B, D, A, o, o);
-			_("DAB",   D, A, B, o, o);
-			_("DBA",   D, B, A, o, o);
-			_("ABE",   A, B, E, o, o);
-			_("AEB",   A, E, B, o, o);
-			_("BAE",   B, A, E, o, o);
-			_("BEA",   B, E, A, o, o);
-			_("EAB",   E, A, B, o, o);
-			_("EBA",   E, B, A, o, o);
-			_("ACD",   A, C, D, o, o);
-			_("ADC",   A, D, C, o, o);
-			_("CAD",   C, A, D, o, o);
-			_("CDA",   C, D, A, o, o);
-			_("DAC",   D, A, C, o, o);
-			_("DCA",   D, C, A, o, o);
-			_("ACE",   A, C, E, o, o);
-			_("AEC",   A, E, C, o, o);
-			_("CAE",   C, A, E, o, o);
-			_("CEA",   C, E, A, o, o);
-			_("EAC",   E, A, C, o, o);
-			_("ECA",   E, C, A, o, o);
-			_("ADE",   A, D, E, o, o);
-			_("AED",   A, E, D, o, o);
-			_("DAE",   D, A, E, o, o);
-			_("DEA",   D, E, A, o, o);
-			_("EAD",   E, A, D, o, o);
-			_("EDA",   E, D, A, o, o);
-			_("BCD",   B, C, D, o, o);
-			_("BDC",   B, D, C, o, o);
-			_("CBD",   C, B, D, o, o);
-			_("CDB",   C, D, B, o, o);
-			_("DBC",   D, B, C, o, o);
-			_("DCB",   D, C, B, o, o);
-			_("BCE",   B, C, E, o, o);
-			_("BEC",   B, E, C, o, o);
-			_("CBE",   C, B, E, o, o);
-			_("CEB",   C, E, B, o, o);
-			_("EBC",   E, B, C, o, o);
-			_("ECB",   E, C, B, o, o);
-			_("BDE",   B, D, E, o, o);
-			_("BED",   B, E, D, o, o);
-			_("DBE",   D, B, E, o, o);
-			_("DEB",   D, E, B, o, o);
-			_("EBD",   E, B, D, o, o);
-			_("EDB",   E, D, B, o, o);
-			_("CDE",   C, D, E, o, o);
-			_("CED",   C, E, D, o, o);
-			_("DCE",   D, C, E, o, o);
-			_("DEC",   D, E, C, o, o);
-			_("ECD",   E, C, D, o, o);
-			_("EDC",   E, D, C, o, o);
-
-			_("ABCD",  A, B, C, D, o);
-			_("ABDC",  A, B, D, C, o);
-			_("ACBD",  A, C, B, D, o);
-			_("ACDB",  A, C, D, B, o);
-			_("ADBC",  A, D, B, C, o);
-			_("ADCB",  A, D, C, B, o);
-			_("BACD",  B, A, C, D, o);
-			_("BADC",  B, A, D, C, o);
-			_("BCAD",  B, C, A, D, o);
-			_("BCDA",  B, C, D, A, o);
-			_("BDAC",  B, D, A, C, o);
-			_("BDCA",  B, D, C, A, o);
-			_("CABD",  C, A, B, D, o);
-			_("CADB",  C, A, D, B, o);
-			_("CBAD",  C, B, A, D, o);
-			_("CBDA",  C, B, D, A, o);
-			_("CDAB",  C, D, A, B, o);
-			_("CDBA",  C, D, B, A, o);
-			_("DABC",  D, A, B, C, o);
-			_("DACB",  D, A, C, B, o);
-			_("DBAC",  D, B, A, C, o);
-			_("DBCA",  D, B, C, A, o);
-			_("DCAB",  D, C, A, B, o);
-			_("DCBA",  D, C, B, A, o);
-			_("ABCE",  A, B, C, E, o);
-			_("ABEC",  A, B, E, C, o);
-			_("ACBE",  A, C, B, E, o);
-			_("ACEB",  A, C, E, B, o);
-			_("AEBC",  A, E, B, C, o);
-			_("AECB",  A, E, C, B, o);
-			_("BACE",  B, A, C, E, o);
-			_("BAEC",  B, A, E, C, o);
-			_("BCAE",  B, C, A, E, o);
-			_("BCEA",  B, C, E, A, o);
-			_("BEAC",  B, E, A, C, o);
-			_("BECA",  B, E, C, A, o);
-			_("CABE",  C, A, B, E, o);
-			_("CAEB",  C, A, E, B, o);
-			_("CBAE",  C, B, A, E, o);
-			_("CBEA",  C, B, E, A, o);
-			_("CEAB",  C, E, A, B, o);
-			_("CEBA",  C, E, B, A, o);
-			_("EABC",  E, A, B, C, o);
-			_("EACB",  E, A, C, B, o);
-			_("EBAC",  E, B, A, C, o);
-			_("EBCA",  E, B, C, A, o);
-			_("ECAB",  E, C, A, B, o);
-			_("ECBA",  E, C, B, A, o);
-			_("ABDE",  A, B, D, E, o);
-			_("ABED",  A, B, E, D, o);
-			_("ADBE",  A, D, B, E, o);
-			_("ADEB",  A, D, E, B, o);
-			_("AEBD",  A, E, B, D, o);
-			_("AEDB",  A, E, D, B, o);
-			_("BADE",  B, A, D, E, o);
-			_("BAED",  B, A, E, D, o);
-			_("BDAE",  B, D, A, E, o);
-			_("BDEA",  B, D, E, A, o);
-			_("BEAD",  B, E, A, D, o);
-			_("BEDA",  B, E, D, A, o);
-			_("DABE",  D, A, B, E, o);
-			_("DAEB",  D, A, E, B, o);
-			_("DBAE",  D, B, A, E, o);
-			_("DBEA",  D, B, E, A, o);
-			_("DEAB",  D, E, A, B, o);
-			_("DEBA",  D, E, B, A, o);
-			_("EABD",  E, A, B, D, o);
-			_("EADB",  E, A, D, B, o);
-			_("EBAD",  E, B, A, D, o);
-			_("EBDA",  E, B, D, A, o);
-			_("EDAB",  E, D, A, B, o);
-			_("EDBA",  E, D, B, A, o);
-			_("ACDE",  A, C, D, E, o);
-			_("ACED",  A, C, E, D, o);
-			_("ADCE",  A, D, C, E, o);
-			_("ADEC",  A, D, E, C, o);
-			_("AECD",  A, E, C, D, o);
-			_("AEDC",  A, E, D, C, o);
-			_("CADE",  C, A, D, E, o);
-			_("CAED",  C, A, E, D, o);
-			_("CDAE",  C, D, A, E, o);
-			_("CDEA",  C, D, E, A, o);
-			_("CEAD",  C, E, A, D, o);
-			_("CEDA",  C, E, D, A, o);
-			_("DACE",  D, A, C, E, o);
-			_("DAEC",  D, A, E, C, o);
-			_("DCAE",  D, C, A, E, o);
-			_("DCEA",  D, C, E, A, o);
-			_("DEAC",  D, E, A, C, o);
-			_("DECA",  D, E, C, A, o);
-			_("EACD",  E, A, C, D, o);
-			_("EADC",  E, A, D, C, o);
-			_("ECAD",  E, C, A, D, o);
-			_("ECDA",  E, C, D, A, o);
-			_("EDAC",  E, D, A, C, o);
-			_("EDCA",  E, D, C, A, o);
-			_("BCDE",  B, C, D, E, o);
-			_("BCED",  B, C, E, D, o);
-			_("BDCE",  B, D, C, E, o);
-			_("BDEC",  B, D, E, C, o);
-			_("BECD",  B, E, C, D, o);
-			_("BEDC",  B, E, D, C, o);
-			_("CBDE",  C, B, D, E, o);
-			_("CBED",  C, B, E, D, o);
-			_("CDBE",  C, D, B, E, o);
-			_("CDEB",  C, D, E, B, o);
-			_("CEBD",  C, E, B, D, o);
-			_("CEDB",  C, E, D, B, o);
-			_("DBCE",  D, B, C, E, o);
-			_("DBEC",  D, B, E, C, o);
-			_("DCBE",  D, C, B, E, o);
-			_("DCEB",  D, C, E, B, o);
-			_("DEBC",  D, E, B, C, o);
-			_("DECB",  D, E, C, B, o);
-			_("EBCD",  E, B, C, D, o);
-			_("EBDC",  E, B, D, C, o);
-			_("ECBD",  E, C, B, D, o);
-			_("ECDB",  E, C, D, B, o);
-			_("EDBC",  E, D, B, C, o);
-			_("EDCB",  E, D, C, B, o);
+			_("ABCD",  A, B, C, D	);
+			_("ABDC",  A, B, D, C	);
+			_("ACBD",  A, C, B, D	);
+			_("ACDB",  A, C, D, B	);
+			_("ADBC",  A, D, B, C	);
+			_("ADCB",  A, D, C, B	);
+			_("BACD",  B, A, C, D	);
+			_("BADC",  B, A, D, C	);
+			_("BCAD",  B, C, A, D	);
+			_("BCDA",  B, C, D, A	);
+			_("BDAC",  B, D, A, C	);
+			_("BDCA",  B, D, C, A	);
+			_("CABD",  C, A, B, D	);
+			_("CADB",  C, A, D, B	);
+			_("CBAD",  C, B, A, D	);
+			_("CBDA",  C, B, D, A	);
+			_("CDAB",  C, D, A, B	);
+			_("CDBA",  C, D, B, A	);
+			_("DABC",  D, A, B, C	);
+			_("DACB",  D, A, C, B	);
+			_("DBAC",  D, B, A, C	);
+			_("DBCA",  D, B, C, A	);
+			_("DCAB",  D, C, A, B	);
+			_("DCBA",  D, C, B, A	);
+			_("ABCE",  A, B, C, E	);
+			_("ABEC",  A, B, E, C	);
+			_("ACBE",  A, C, B, E	);
+			_("ACEB",  A, C, E, B	);
+			_("AEBC",  A, E, B, C	);
+			_("AECB",  A, E, C, B	);
+			_("BACE",  B, A, C, E	);
+			_("BAEC",  B, A, E, C	);
+			_("BCAE",  B, C, A, E	);
+			_("BCEA",  B, C, E, A	);
+			_("BEAC",  B, E, A, C	);
+			_("BECA",  B, E, C, A	);
+			_("CABE",  C, A, B, E	);
+			_("CAEB",  C, A, E, B	);
+			_("CBAE",  C, B, A, E	);
+			_("CBEA",  C, B, E, A	);
+			_("CEAB",  C, E, A, B	);
+			_("CEBA",  C, E, B, A	);
+			_("EABC",  E, A, B, C	);
+			_("EACB",  E, A, C, B	);
+			_("EBAC",  E, B, A, C	);
+			_("EBCA",  E, B, C, A	);
+			_("ECAB",  E, C, A, B	);
+			_("ECBA",  E, C, B, A	);
+			_("ABDE",  A, B, D, E	);
+			_("ABED",  A, B, E, D	);
+			_("ADBE",  A, D, B, E	);
+			_("ADEB",  A, D, E, B	);
+			_("AEBD",  A, E, B, D	);
+			_("AEDB",  A, E, D, B	);
+			_("BADE",  B, A, D, E	);
+			_("BAED",  B, A, E, D	);
+			_("BDAE",  B, D, A, E	);
+			_("BDEA",  B, D, E, A	);
+			_("BEAD",  B, E, A, D	);
+			_("BEDA",  B, E, D, A	);
+			_("DABE",  D, A, B, E	);
+			_("DAEB",  D, A, E, B	);
+			_("DBAE",  D, B, A, E	);
+			_("DBEA",  D, B, E, A	);
+			_("DEAB",  D, E, A, B	);
+			_("DEBA",  D, E, B, A	);
+			_("EABD",  E, A, B, D	);
+			_("EADB",  E, A, D, B	);
+			_("EBAD",  E, B, A, D	);
+			_("EBDA",  E, B, D, A	);
+			_("EDAB",  E, D, A, B	);
+			_("EDBA",  E, D, B, A	);
+			_("ACDE",  A, C, D, E	);
+			_("ACED",  A, C, E, D	);
+			_("ADCE",  A, D, C, E	);
+			_("ADEC",  A, D, E, C	);
+			_("AECD",  A, E, C, D	);
+			_("AEDC",  A, E, D, C	);
+			_("CADE",  C, A, D, E	);
+			_("CAED",  C, A, E, D	);
+			_("CDAE",  C, D, A, E	);
+			_("CDEA",  C, D, E, A	);
+			_("CEAD",  C, E, A, D	);
+			_("CEDA",  C, E, D, A	);
+			_("DACE",  D, A, C, E	);
+			_("DAEC",  D, A, E, C	);
+			_("DCAE",  D, C, A, E	);
+			_("DCEA",  D, C, E, A	);
+			_("DEAC",  D, E, A, C	);
+			_("DECA",  D, E, C, A	);
+			_("EACD",  E, A, C, D	);
+			_("EADC",  E, A, D, C	);
+			_("ECAD",  E, C, A, D	);
+			_("ECDA",  E, C, D, A	);
+			_("EDAC",  E, D, A, C	);
+			_("EDCA",  E, D, C, A	);
+			_("BCDE",  B, C, D, E	);
+			_("BCED",  B, C, E, D	);
+			_("BDCE",  B, D, C, E	);
+			_("BDEC",  B, D, E, C	);
+			_("BECD",  B, E, C, D	);
+			_("BEDC",  B, E, D, C	);
+			_("CBDE",  C, B, D, E	);
+			_("CBED",  C, B, E, D	);
+			_("CDBE",  C, D, B, E	);
+			_("CDEB",  C, D, E, B	);
+			_("CEBD",  C, E, B, D	);
+			_("CEDB",  C, E, D, B	);
+			_("DBCE",  D, B, C, E	);
+			_("DBEC",  D, B, E, C	);
+			_("DCBE",  D, C, B, E	);
+			_("DCEB",  D, C, E, B	);
+			_("DEBC",  D, E, B, C	);
+			_("DECB",  D, E, C, B	);
+			_("EBCD",  E, B, C, D	);
+			_("EBDC",  E, B, D, C	);
+			_("ECBD",  E, C, B, D	);
+			_("ECDB",  E, C, D, B	);
+			_("EDBC",  E, D, B, C	);
+			_("EDCB",  E, D, C, B	);
 
 			_("ABCDE", A, B, C, D, E);
 			_("ABCED", A, B, C, E, D);
@@ -1313,7 +1215,7 @@ namespace net::worker::shared::zsetmulti{
 
 				auto const indexesOld = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, pair->getVal());
 
-				if (!valid(indexesOld)){
+				if (!shared::index_token::valid(indexesOld)){
 					// Case 1.0: invalid ctrl key, probable attack.
 
 					logger<Logger::DEBUG>() << "ZSetMulti::ADD: INVALID ctrl key" << keyCtrl;
@@ -1439,7 +1341,7 @@ namespace net::worker::shared::zsetmulti{
 
 			auto const indexesOld = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, pair->getVal());
 
-			if (!valid(indexesOld)){
+			if (!shared::index_token::valid(indexesOld)){
 				// Case 1.0: invalid ctrl key, probable attack.
 
 				logger<Logger::DEBUG>() << "ZSetMulti::REM: INVALID ctrl key" << keyCtrl;
@@ -1482,7 +1384,7 @@ namespace net::worker::shared::zsetmulti{
 
 				auto const indexes = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, encodedValue);
 
-				if (Permutation::valid(keyN, keySub, indexes)){
+				if (shared::index_token::valid(keyN, keySub) && shared::index_token::valid(indexes)){
 					hm4::PairBufferKey bufferKeyData;
 					auto const keyData = Permutation::makeKeyDataFirst(bufferKeyData, DBAdapter::SEPARATOR, keyN, keySub, indexes);
 
@@ -1520,7 +1422,7 @@ namespace net::worker::shared::zsetmulti{
 
 			auto const indexes = decodeIndex<Permutation, IndexController>(DBAdapter::SEPARATOR, encodedValue);
 
-			if (Permutation::valid(keyN, keySub, indexes))
+			if (shared::index_token::valid(keyN, keySub) && shared::index_token::valid(indexes))
 				return indexes;
 		}
 
@@ -1538,15 +1440,14 @@ namespace net::worker::shared::zsetmulti{
 
 		const auto &keyN = p[1];
 
-		if (keyN.empty())
-			return result.set_error(ResultErrorMessages::EMPTY_KEY);
+		if (!shared::index_token::valid(keyN))
+			return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 		auto const varg = 2;
 
-		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-			if (auto const &keySub = *itk; !Permutation::valid(keyN, keySub))
+		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+			if (auto const &keySub = *itk; !shared::index_token::valid(keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-		}
 
 		for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 			auto const &keySub = *itk;

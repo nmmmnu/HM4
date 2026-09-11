@@ -83,43 +83,35 @@ namespace net::worker::commands::Index{
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
 				auto const keySub  = *(itk + 0);
 
-				{
-					auto const keySortSize = shared::sortkey::keySortSize( *(itk + N + 1) );
+				// auto const keySortSize = shared::sortkey::keySortSize( *(itk + N + 1) );
 
-					auto e = [&result](){
-						return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-					};
+				auto e = [&result](){
+					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+				};
 
-					auto _ = [&itk](auto i){
-						return *(itk + i);
-					};
+				auto _ = [&itk](auto i){
+					return *(itk + i);
+				};
 
-					auto const keySort = "x";
+				if constexpr(N == 1)
+					if (!shared::index_token::valid(keyN, keySub, _(1)))
+						return e();
 
-					if constexpr(N == 1)
-						if (!PN::valid(keyN, keySub, { _(1), keySort }, keySortSize))
-							return e();
+				if constexpr(N == 2)
+					if (!shared::index_token::valid(keyN, keySub, _(1), _(2)))
+						return e();
 
-					if constexpr(N == 2)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), keySort }, keySortSize))
-							return e();
+				if constexpr(N == 3)
+					if (!shared::index_token::valid(keyN, keySub, _(1), _(2), _(3)))
+						return e();
 
-					if constexpr(N == 3)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), keySort }, keySortSize))
-							return e();
+				if constexpr(N == 4)
+					if (!shared::index_token::valid(keyN, keySub, _(1), _(2), _(3), _(4)))
+						return e();
 
-					if constexpr(N == 4)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), keySort }, keySortSize))
-							return e();
-
-					if constexpr(N == 5)
-						if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), keySort }, keySortSize))
-							return e();
-
-				//	if constexpr(N == 6)
-				//		if (!PN::valid(keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySortSize))
-				//			return e();
-				}
+				if constexpr(N == 5)
+					if (!shared::index_token::valid(keyN, keySub, _(1), _(2), _(3), _(4), _(5)))
+						return e();
 			}
 
 			[[maybe_unused]]
@@ -259,10 +251,7 @@ namespace net::worker::commands::Index{
 			auto const &keyN   = p[1];
 			auto const &keySub = p[2];
 
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			if (!PN::valid(keyN, keySub))
+			if (!shared::index_token::valid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set_container(
@@ -325,44 +314,8 @@ namespace net::worker::commands::Index{
 			auto const count    = myClamp<uint32_t>(p[varg + N + 1], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
 			auto const keyStart = p[varg + N + 2];
 
-			{
-				auto size = [&p](){
-					#if 0
-					size_t size = 0;
-					for(size_t i = 1; i <= N; ++i)
-						size += p[varg + i].size();
-
-					return size;
-					#endif
-
-					// intent is more important
-
-					auto _ = [&p](uint8_t i){
-						return p[varg + i].size();
-					};
-
-					if constexpr(N == 1)
-						return _(1);
-
-					if constexpr(N == 2)
-						return _(1) + _(2);
-
-					if constexpr(N == 3)
-						return _(1) + _(2) + _(3);
-
-					if constexpr(N == 4)
-						return _(1) + _(2) + _(3) + _(4);
-
-					if constexpr(N == 5)
-						return _(1) + _(2) + _(3) + _(4) + _(5);
-
-				//	if constexpr(N == 6)
-				//		return _(1) + _(2) + _(3) + _(4) + _(5) + _(6);
-				};
-
-				if (!PN::valid(keyN, index, size() ))
-					return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
-			}
+			if (!shared::index_token::valid(keyN, index))
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			hm4::PairBufferKey bufferKey;
 

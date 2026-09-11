@@ -19,6 +19,8 @@ namespace net::worker::commands::LinearCurve{
 		constexpr size_t scoreSize		=  8 * 2;	// uint64_t as hex
 		using MC1Buffer = std::array<char, scoreSize>;
 
+		static_assert(scoreSize < shared::config::INDEX_TOKEN_SIZE);
+
 		constexpr std::string_view toHex(uint64_t const x, MC1Buffer &buffer){
 			using namespace hex_convert;
 
@@ -51,8 +53,12 @@ namespace net::worker::commands::LinearCurve{
 
 		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
+		constexpr bool isMC1KeyValid(std::string_view keyN){
+			return shared::index_token::valid(keyN);
+		}
+
 		constexpr bool isMC1KeyValid(std::string_view keyN, std::string_view keySub){
-			return P1::valid(keyN, keySub, scoreSize);
+			return shared::index_token::valid(keyN, keySub);
 		}
 
 		template<class DBAdapter>
@@ -193,9 +199,6 @@ namespace net::worker::commands::LinearCurve{
 
 			auto const &keyN   = p[1];
 			auto const &keySub = p[2];
-
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			if (!isMC1KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
@@ -433,7 +436,7 @@ namespace net::worker::commands::LinearCurve{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC1KeyValid(keyN, "x"))
+			if (!isMC1KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const x		= from_string<uint32_t>(p[2]);

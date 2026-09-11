@@ -38,10 +38,16 @@ namespace net::worker::commands::MortonCurve16D{
 		constexpr size_t scoreSize =  sizeof(ZZZType) * 2;	// ZZZType as hex
 		using MCBuffer = std::array<char, scoreSize>;
 
+		static_assert(scoreSize < shared::config::INDEX_TOKEN_SIZE);
+
 		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
 
+		constexpr bool isMC16KeyValid(std::string_view keyN){
+			return shared::index_token::valid(keyN);
+		}
+
 		constexpr bool isMC16KeyValid(std::string_view keyN, std::string_view keySub){
-			return P1::valid(keyN, keySub, scoreSize);
+			return shared::index_token::valid(keyN, keySub);
 		}
 
 		constexpr std::string_view toHex(ZZZType const z, MCBuffer &buffer){
@@ -516,9 +522,6 @@ namespace net::worker::commands::MortonCurve16D{
 			auto const &keyN   = p[1];
 			auto const &keySub = p[2];
 
-			if (keyN.empty() || keySub.empty())
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
 			if (!isMC16KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
@@ -738,7 +741,7 @@ namespace net::worker::commands::MortonCurve16D{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC16KeyValid(keyN, "x"))
+			if (!isMC16KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const pr = 2;
@@ -819,7 +822,7 @@ namespace net::worker::commands::MortonCurve16D{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC16KeyValid(keyN, "x"))
+			if (!isMC16KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const pr = 2;
@@ -921,7 +924,7 @@ namespace net::worker::commands::MortonCurve16D{
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			if (!isMC16KeyValid(keyN, "x"))
+			if (!isMC16KeyValid(keyN))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			auto const pr = 2;
