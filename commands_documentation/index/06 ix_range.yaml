@@ -6,7 +6,7 @@
     - k: key
       v: name of the index object
     - k: permutation
-      v: how indexes are ordered for example for 1 dimentions - always just A, for 2 dimentions - AB and BA, for 3 dimentions - ABC, ACB, BAC, BCA, CAB ands CBA
+      v: how indexes are ordered for example for 1 dimentions - _ and A, for 2 dimentions - _, A, B, AB and BA, for 3 dimentions - _, A, B, C, AB, AC, BA, BC, CA, CB, ABC, ACB, BAC, BCA, CAB and CBA
     - k: count
       v: result count
     - k: start
@@ -29,7 +29,21 @@
     OK
     127.0.0.1:6379> ix1add a 001 sofia x 002 london x 003 sofia x
     (integer) 1
-    127.0.0.1:6379> # Get all employes (numbers), A is permutation, but because is single dimention is always A.
+
+    127.0.0.1:6379> # Get all employes (numbers), permutation _ (keySort)
+    OK
+    127.0.0.1:6379> # select * from employes
+    OK
+    127.0.0.1:6379> ix1range a _ '' 100 ''
+    1) "001"
+    2) "1"
+    3) "002"
+    4) "1"
+    5) "003"
+    6) "1"
+    7) ""
+
+    127.0.0.1:6379> # Get all employes (numbers), permutation A (city)
     OK
     127.0.0.1:6379> # select * from employes order by A
     OK
@@ -41,6 +55,7 @@
     5) "002"
     6) "1"
     7) ""
+
     127.0.0.1:6379> # Get all employes (numbers), where first index is equal to "sofia"
     OK
     127.0.0.1:6379> # select * from employes where A = 'sofia' order by A
@@ -51,14 +66,30 @@
     3) "003"
     4) "1"
     5) ""
+
     127.0.0.1:6379> # Remove all indexes:
     OK
     127.0.0.1:6379> ix1rem a 001 002 003
     (integer) 1
+
     127.0.0.1:6379> # Adds 3 employes (numbers) - 001 in sofia,IT + 002 in london + IT , 003 in sofia + sales. x is sort key.
     OK
     127.0.0.1:6379> ix2add a 001 sofia it x 002 london it x 003 sofia sales x
     (integer) 1
+
+    127.0.0.1:6379> # Get all employes (numbers), permutation _ (permutation _ (keySort))
+    OK
+    127.0.0.1:6379> # select * from employes
+    OK
+    127.0.0.1:6379> ix2range a _ '' '' 100 ''
+    1) "001"
+    2) "1"
+    3) "002"
+    4) "1"
+    5) "003"
+    6) "1"
+    7) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation AB (city, then department)
     OK
     127.0.0.1:6379> # select * from employes order by A, B
@@ -71,6 +102,7 @@
     5) "002"
     6) "1"
     7) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation A (city). In this case, the result is the same as AB.
     OK
     127.0.0.1:6379> # select * from employes order by A
@@ -83,6 +115,7 @@
     5) "002"
     6) "1"
     7) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation BA (department, then city)
     OK
     127.0.0.1:6379> # select * from employes order by B, A
@@ -95,6 +128,7 @@
     5) "003"
     6) "1"
     7) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation B (department). In this case, the result is the same as BA.
     OK
     127.0.0.1:6379> # select * from employes order by B
@@ -107,6 +141,7 @@
     5) "003"
     6) "1"
     7) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation BA (department, then city), filter "it", any city.
     OK
     127.0.0.1:6379> # select * from employes where B = 'it' order by B, A
@@ -117,6 +152,7 @@
     3) "002"
     4) "1"
     5) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation BA (department, then city), filter "it" + "sofia"
     OK
     127.0.0.1:6379> # select * from employes where B = 'it' and A = 'sofia' order by B, A
@@ -125,6 +161,7 @@
     1) "001"
     2) "1"
     3) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation AB (city, then department), filter "sofia", any department.
     OK
     127.0.0.1:6379> # select * from employes where A = 'sofia' order by A, B
@@ -135,6 +172,7 @@
     3) "003"
     4) "1"
     5) ""
+
     127.0.0.1:6379> # Get all employes (numbers), permutation AB (city, then department), filter "sofia" + "it"
     OK
     127.0.0.1:6379> # select * from employes where A = 'sofia' and B = 'it' order by A, B
@@ -143,6 +181,7 @@
     1) "001"
     2) "1"
     3) ""
+
     127.0.0.1:6379> # Remove all indexes:
     OK
     127.0.0.1:6379> ix1rem a 001 002 003

@@ -219,7 +219,7 @@ namespace net::worker::shared::zsetmulti{
 				);
 		}
 
-		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyData__(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
 						std::string_view txt,
@@ -236,33 +236,23 @@ namespace net::worker::shared::zsetmulti{
 			);
 		}
 
-
-		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
-
-			return makeKeyData(bufferKey, separator, keyN, keySub,
-								"A",
-									indexes[0],
-									indexes[1]
-			);
-		}
-
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, S] = indexes;
 
-			auto _ = [&](std::string_view txt, std::string_view a){
+			auto _ = [&](std::string_view txt,
+						std::string_view a = ""){
+
 				auto const [A, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, S);
+				auto const key = makeKeyData__(bufferKey, separator, keyN, keySub, txt, a, S);
 
 				func(key);
 			};
 
+			_("_"	);
 			_("A", A);
 		}
 	};
@@ -315,7 +305,7 @@ namespace net::worker::shared::zsetmulti{
 				);
 		}
 
-		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyData__(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
 						std::string_view txt,
@@ -334,34 +324,24 @@ namespace net::worker::shared::zsetmulti{
 			);
 		}
 
-
-		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
-
-			return makeKeyData(bufferKey, separator, keyN, keySub,
-								"AB",
-									indexes[0],
-									indexes[1],
-									indexes[2]
-			);
-		}
-
-
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, B, S] = indexes;
 
-			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b = ""){
+			auto _ = [&](std::string_view txt,
+						std::string_view a = "",
+						std::string_view b = ""){
+
 				auto const [A, B, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, S);
+				auto const key = makeKeyData__(bufferKey, separator, keyN, keySub, txt, a, b, S);
 
 				func(key);
 			};
+
+			_("_"		);
 
 			_("A",  A	);
 			_("B",  B	);
@@ -431,7 +411,7 @@ namespace net::worker::shared::zsetmulti{
 				);
 		}
 
-		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyData__(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
 						std::string_view txt,
@@ -452,34 +432,25 @@ namespace net::worker::shared::zsetmulti{
 			);
 		}
 
-
-		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
-
-			return makeKeyData(bufferKey, separator, keyN, keySub,
-								"ABC",
-									indexes[0],
-									indexes[1],
-									indexes[2],
-									indexes[3]
-			);
-		}
-
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, B, C, S] = indexes;
 
-			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b = "", std::string_view c = ""){
+			auto _ = [&](std::string_view txt,
+						std::string_view a = "",
+						std::string_view b = "",
+						std::string_view c = ""){
+
 				auto const [A, B, C, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, S);
+				auto const key = makeKeyData__(bufferKey, separator, keyN, keySub, txt, a, b, c, S);
 
 				func(key);
 			};
+
+			_("_"		);
 
 			_("A",   A	);
 			_("B",   B	);
@@ -498,7 +469,6 @@ namespace net::worker::shared::zsetmulti{
 			_("BCA", B, C, A);
 			_("CAB", C, A, B);
 			_("CBA", C, B, A);
-
 		}
 	};
 
@@ -573,7 +543,7 @@ namespace net::worker::shared::zsetmulti{
 				);
 		}
 
-		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyData__(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
 						std::string_view txt,
@@ -596,35 +566,26 @@ namespace net::worker::shared::zsetmulti{
 			);
 		}
 
-
-		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
-
-			return makeKeyData(bufferKey, separator, keyN, keySub,
-								"ABCD",
-									indexes[0],
-									indexes[1],
-									indexes[2],
-									indexes[3],
-									indexes[4]
-			);
-		}
-
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, B, C, D, S] = indexes;
 
-			auto _ = [&](std::string_view txt, std::string_view a, std::string_view b = "", std::string_view c = "", std::string_view d = ""){
+			auto _ = [&](std::string_view txt,
+						std::string_view a = "",
+						std::string_view b = "",
+						std::string_view c = "",
+						std::string_view d = ""){
+
 				auto const [A, B, C, D, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, S);
+				auto const key = makeKeyData__(bufferKey, separator, keyN, keySub, txt, a, b, c, d, S);
 
 				func(key);
 			};
+
+			_("_"			);
 
 			_("A",    A		);
 			_("B",    B		);
@@ -779,7 +740,7 @@ namespace net::worker::shared::zsetmulti{
 				);
 		}
 
-		static std::string_view makeKeyData(hm4::PairBufferKey &bufferKey, std::string_view separator,
+		static std::string_view makeKeyData__(hm4::PairBufferKey &bufferKey, std::string_view separator,
 					std::string_view keyN,
 					std::string_view keySub,
 						std::string_view txt,
@@ -804,35 +765,22 @@ namespace net::worker::shared::zsetmulti{
 			);
 		}
 
-
-		static std::string_view makeKeyDataFirst(hm4::PairBufferKey &bufferKey, std::string_view separator,
-					std::string_view keyN,
-					std::string_view keySub,
-					std::array<std::string_view, N> const &indexes){
-
-			return makeKeyData(bufferKey, separator, keyN, keySub,
-								"ABCDE",
-									indexes[0],
-									indexes[1],
-									indexes[2],
-									indexes[3],
-									indexes[4],
-									indexes[5]
-			);
-		}
-
 		template<typename Func>
 		static void for_each(std::string_view separator, std::string_view keyN, std::string_view keySub, std::array<std::string_view, N> const &indexes, Func func){
 			auto const [A, B, C, D, E, S] = indexes;
 
 			auto _ = [&](std::string_view txt,
-							std::string_view a, std::string_view b = "", std::string_view c = "", std::string_view d = "", std::string_view e = ""){
+						std::string_view a = "",
+						std::string_view b = "",
+						std::string_view c = "",
+						std::string_view d = "",
+						std::string_view e = ""){
 
 				auto const [A, B, C, D, E, S] = indexes;
 
 				hm4::PairBufferKey bufferKey;
 
-				auto const key = makeKeyData(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e, S);
+				auto const key = makeKeyData__(bufferKey, separator, keyN, keySub, txt, a, b, c, d, e, S);
 
 				func(key);
 			};
@@ -843,6 +791,8 @@ namespace net::worker::shared::zsetmulti{
 			// 4 =>  120
 			// 5 =>  120
 			// Total 325 permutations total
+
+			_("_"			);
 
 			_("A",     A		);
 			_("B",     B		);
@@ -1370,6 +1320,8 @@ namespace net::worker::shared::zsetmulti{
 	template<typename Permutation, typename IndexController = std::nullptr_t, typename DBAdapter>
 	std::string_view get(DBAdapter &db,
 			std::string_view keyN, std::string_view keySub){
+
+		static_assert(std::is_same_v<Permutation, Permutation1NoIndex>);
 
 		hm4::PairBufferKey bufferKeyCtrl;
 		auto const keyCtrl = makeKeyCtrl(bufferKeyCtrl, DBAdapter::SEPARATOR, keyN, keySub);
