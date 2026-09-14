@@ -77,11 +77,12 @@ namespace net::worker::commands::Index{
 
 			const auto &keyN = p[1];
 
-			if (keyN.empty())
+			if (!shared::index_token::valid(keyN))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep){
-				auto const keySub  = *(itk + 0);
+				auto const keySub     = *(itk + 0);
+				auto const keySortRaw = *(itk + N + 1);
 
 				// auto const keySortSize = shared::sortkey::keySortSize( *(itk + N + 1) );
 
@@ -94,23 +95,23 @@ namespace net::worker::commands::Index{
 				};
 
 				if constexpr(N == 1)
-					if (!shared::index_token::valid(keyN, keySub, _(1)))
+					if (!shared::index_token::valid(keySub, _(1), keySortRaw))
 						return e();
 
 				if constexpr(N == 2)
-					if (!shared::index_token::valid(keyN, keySub, _(1), _(2)))
+					if (!shared::index_token::valid(keySub, _(1), _(2), keySortRaw))
 						return e();
 
 				if constexpr(N == 3)
-					if (!shared::index_token::valid(keyN, keySub, _(1), _(2), _(3)))
+					if (!shared::index_token::valid(keySub, _(1), _(2), _(3), keySortRaw))
 						return e();
 
 				if constexpr(N == 4)
-					if (!shared::index_token::valid(keyN, keySub, _(1), _(2), _(3), _(4)))
+					if (!shared::index_token::valid(keySub, _(1), _(2), _(3), _(4), keySortRaw))
 						return e();
 
 				if constexpr(N == 5)
-					if (!shared::index_token::valid(keyN, keySub, _(1), _(2), _(3), _(4), _(5)))
+					if (!shared::index_token::valid(keySub, _(1), _(2), _(3), _(4), _(5), keySortRaw))
 						return e();
 			}
 
@@ -156,12 +157,6 @@ namespace net::worker::commands::Index{
 							db,
 							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), keySort }, keySub
 					);
-
-			//	if constexpr(N == 6)
-			//		shared::zsetmulti::add<PN>(
-			//				db,
-			//				keyN, keySub, { _(1), _(2), _(3), _(4), _(5), _(6), keySort }, keySub
-			//		);
 			}
 
 			return result.set_1();
@@ -317,6 +312,32 @@ namespace net::worker::commands::Index{
 			if (!shared::index_token::valid(keyN, index))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
+
+			auto const checkArgs = [&](){
+				auto _ = [&p](uint8_t i){
+					return shared::index_token::validSize(p[varg + i]);
+				};
+
+				if constexpr(N == 1)
+					return _(1);
+
+				if constexpr(N == 2)
+					return _(1) && _(2);
+
+				if constexpr(N == 3)
+					return _(1) && _(2) && _(3);
+
+				if constexpr(N == 4)
+					return _(1) && _(2) && _(3) && _(4);
+
+				if constexpr(N == 5)
+					return _(1) && _(2) && _(3) && _(4) && _(5);
+			};
+
+			if (!checkArgs())
+				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
+
+
 			hm4::PairBufferKey bufferKey;
 
 			auto const prefix = [&](){
@@ -338,9 +359,6 @@ namespace net::worker::commands::Index{
 
 				if constexpr(N == 5)
 					return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5));
-
-			//	if constexpr(N == 6)
-			//		return PN::makeKeyRange(bufferKey, DBAdapter::SEPARATOR, keyN, index, _(1), _(2), _(3), _(4), _(5), _(6));
 			}();
 
 			auto const key = keyStart.empty() ? prefix : keyStart;
