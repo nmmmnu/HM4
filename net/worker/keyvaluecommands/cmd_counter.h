@@ -17,7 +17,7 @@ namespace net::worker::commands::Counter{
 
 			using T = int64_t;
 
-			T const nx = p.size() == 3 ? from_string<int64_t>(p[2]) : 1;
+			T const nx = p.size() == 3 ? from_string<T>(p[2]) : 1;
 
 			if constexpr(false){
 				// Redis compatibility
@@ -88,7 +88,7 @@ namespace net::worker::commands::Counter{
 
 			using T = int64_t;
 
-			T const nx = from_string<int64_t>(p[2]);
+			T const nx = from_string<T>(p[2]);
 
 			if constexpr(true){
 				if (nx <= 0)
@@ -102,7 +102,7 @@ namespace net::worker::commands::Counter{
 			if (n == 0)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			T const limit = from_string<int64_t>(p[3]);
+			T const limit = from_string<T>(p[3]);
 
 
 
