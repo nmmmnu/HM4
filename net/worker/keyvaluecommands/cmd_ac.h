@@ -7,7 +7,7 @@
 #include "utf8tokenizer.h"
 #include "checkoverflow.h"
 
-#include "shared_zset_multi.h"
+#include "shared_zset.h"
 #include "shared_accumulateresults.h"
 #include "shared_extractnth.h"
 

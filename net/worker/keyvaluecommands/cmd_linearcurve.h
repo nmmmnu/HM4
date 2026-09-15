@@ -5,7 +5,7 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_iterations.h"
-#include "shared_zset_multi.h"
+#include "shared_zset.h"
 
 #include "ilist/txguard.h"
 
@@ -51,7 +51,7 @@ namespace net::worker::commands::LinearCurve{
 				return { buffer.data(), result.size };
 		}
 
-		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
+		using P1 = net::worker::shared::zset::Permutation1NoIndex;
 
 		constexpr bool isMC1KeyValid(std::string_view keyN){
 			return shared::index_token::valid(keyN);
@@ -204,7 +204,7 @@ namespace net::worker::commands::LinearCurve{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zsetmulti::get<P1>(db, keyN, keySub)
+				shared::zset::get<P1>(db, keyN, keySub)
 			);
 		}
 
@@ -261,7 +261,7 @@ namespace net::worker::commands::LinearCurve{
 				auto const &keySub = *itk;
 
 				container.emplace_back(
-					shared::zsetmulti::get<P1>(db, keyN, keySub)
+					shared::zset::get<P1>(db, keyN, keySub)
 				);
 			}
 
@@ -305,7 +305,7 @@ namespace net::worker::commands::LinearCurve{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set_container(
-				shared::zsetmulti::getIndexes<P1>(db, keyN, keySub)
+				shared::zset::getIndexes<P1>(db, keyN, keySub)
 			);
 		}
 
@@ -368,7 +368,7 @@ namespace net::worker::commands::LinearCurve{
 
 				auto const score	= toHex(x, buffer);
 
-				shared::zsetmulti::add<P1>(
+				shared::zset::add<P1>(
 						db,
 						keyN, keySub, { score }, value
 				);
@@ -399,7 +399,7 @@ namespace net::worker::commands::LinearCurve{
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
-			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
+			return shared::zset::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
 	private:

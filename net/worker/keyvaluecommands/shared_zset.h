@@ -29,7 +29,7 @@ keyN~index~keySort~keySub	-> value
 
 */
 
-namespace net::worker::shared::zsetmulti{
+namespace net::worker::shared::zset{
 
 	struct IZSetMultyFactory : hm4::PairFactory::IFactory{
 		virtual std::string_view getIndex() const = 0;

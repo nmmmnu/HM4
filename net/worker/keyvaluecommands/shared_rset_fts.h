@@ -8,7 +8,7 @@
 #include "shared_stoppredicate.h"
 #include "shared_extractnth.h"
 
-namespace net::worker::shared::rsetmulti::fts{
+namespace net::worker::shared::rset::fts{
 
 	template<typename Iterator>
 	class IteratorPair{
@@ -227,7 +227,7 @@ namespace net::worker::shared::rsetmulti::fts{
 		}
 	};
 
-} // namespace net::worker::shared::rsetmulti::fts
+} // namespace net::worker::shared::rset::fts
 
 #endif
 

@@ -6,7 +6,7 @@
 
 #include "fmt/format.h"
 
-#include "shared_zset_multi.h"
+#include "shared_zset.h"
 #include "shared_accumulateresults.h"
 #include "shared_accumulateresults.h"
 
@@ -66,7 +66,7 @@ namespace net::worker::commands::Geo{
 
 		} // anonymous namespace
 
-		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
+		using P1 = net::worker::shared::zset::Permutation1NoIndex;
 
 		constexpr bool isGeoKeyValid(std::string_view key){
 			return	shared::index_token::valid(key);
@@ -154,7 +154,7 @@ namespace net::worker::commands::Geo{
 
 				auto const keySub = *(itk + 2);
 
-				shared::zsetmulti::add<P1, GeoIndexController>(db, keyN, keySub, { hash }, line);
+				shared::zset::add<P1, GeoIndexController>(db, keyN, keySub, { hash }, line);
 			}
 
 			return result.set();
@@ -180,7 +180,7 @@ namespace net::worker::commands::Geo{
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
-			return shared::zsetmulti::cmdProcessRem<P1, GeoIndexController>(p, db, result, blob);
+			return shared::zset::cmdProcessRem<P1, GeoIndexController>(p, db, result, blob);
 		}
 
 	private:
@@ -221,7 +221,7 @@ namespace net::worker::commands::Geo{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub)
+				shared::zset::get<P1, GeoIndexController>(db, keyN, keySub)
 			);
 		}
 
@@ -268,7 +268,7 @@ namespace net::worker::commands::Geo{
 				auto const keySub = *itk;
 
 				container.emplace_back(
-					shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub)
+					shared::zset::get<P1, GeoIndexController>(db, keyN, keySub)
 				);
 			}
 
@@ -421,7 +421,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line1 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub1);
+			auto const line1 = shared::zset::get<P1, GeoIndexController>(db, keyN, keySub1);
 
 			if (line1.empty())
 				return result.set(int64_t{-1});
@@ -430,7 +430,7 @@ namespace net::worker::commands::Geo{
 
 			// ---
 
-			auto const line2 = shared::zsetmulti::get<P1, GeoIndexController>(db, keyN, keySub2);
+			auto const line2 = shared::zset::get<P1, GeoIndexController>(db, keyN, keySub2);
 
 			if (line2.empty())
 				return result.set(int64_t{-1});

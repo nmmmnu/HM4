@@ -11,7 +11,7 @@
 
 #include "vectors_storage.h"
 
-#include "shared_rset_multi.h"
+#include "shared_rset.h"
 
 #include "shared_stoppredicate.h"
 #include "shared_hashsortkey.h"
@@ -299,7 +299,7 @@ namespace net::worker::commands::Vectors2{
 		auto prepareFVector(DBAdapter &db, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t const dim_ix, DType dtype){
 			return prepareFVector<T>(
 					blob,
-					shared::rsetmulti::getData(db, keyN, keySub),
+					shared::rset::getData(db, keyN, keySub),
 					dim_ix,
 					dtype
 			);
@@ -603,7 +603,7 @@ namespace net::worker::commands::Vectors2{
 
 		template<typename T, bool Norm, typename Protocol, typename DBAdapter>
 		void process__VGET_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix){
-			auto const sv = shared::rsetmulti::getData(db, keyN, keySub);
+			auto const sv = shared::rset::getData(db, keyN, keySub);
 
 			const auto *storedVector = MyVectors::toStoredVector<T>(sv, dim_ix);
 
@@ -798,7 +798,7 @@ namespace net::worker::commands::Vectors2{
 				VADD_Factory<T> factory{ cfvector, decoder, icontainer, bcontainer };
 
 				[[maybe_unused]]
-				bool const b = shared::rsetmulti::add(db, decoder,
+				bool const b = shared::rset::add(db, decoder,
 								keyN, keySub, keySort,
 									icontainer, bcontainer,
 										factory);
@@ -938,7 +938,7 @@ namespace net::worker::commands::Vectors2{
 				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, {}, buffer);
 
 				[[maybe_unused]]
-				bool const b = shared::rsetmulti::rem(db, decoder,
+				bool const b = shared::rset::rem(db, decoder,
 								keyN, keySub, keySort,
 									icontainer, bcontainer);
 			}
@@ -1020,7 +1020,7 @@ namespace net::worker::commands::Vectors2{
 			MyDecoder decoder{ dim_ix };
 
 			[[maybe_unused]]
-			bool const b = shared::rsetmulti::getIndexes(db, decoder,
+			bool const b = shared::rset::getIndexes(db, decoder,
 							keyN, keySub,
 								icontainer, bcontainer);
 
@@ -1169,7 +1169,7 @@ namespace net::worker::commands::Vectors2{
 		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix, impl_::VType vtype){
 			using namespace impl_;
 
-			auto const sv = shared::rsetmulti::getData(db, keyN, keySub);
+			auto const sv = shared::rset::getData(db, keyN, keySub);
 
 			const auto *storedVector = MyVectors::toStoredVector<T>(sv, dim_ix);
 
@@ -1387,14 +1387,14 @@ namespace net::worker::commands::Vectors2{
 								std::string_view keyN, std::string_view keySubA, std::string_view keySubB, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
-			std::string_view svA = shared::rsetmulti::getData(db, keyN, keySubA);
+			std::string_view svA = shared::rset::getData(db, keyN, keySubA);
 
 			const auto *storedVectorA = MyVectors::toStoredVector<T>(svA, dim_ix);
 
 			if (!storedVectorA)
 				return result.set("INF");
 
-			std::string_view svB = shared::rsetmulti::getData(db, keyN, keySubB);
+			std::string_view svB = shared::rset::getData(db, keyN, keySubB);
 
 			const auto *storedVectorB = MyVectors::toStoredVector<T>(svB, dim_ix);
 
@@ -1536,7 +1536,7 @@ namespace net::worker::commands::Vectors2{
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
-			auto const sv = shared::rsetmulti::getData(db, keyN, keySubA);
+			auto const sv = shared::rset::getData(db, keyN, keySubA);
 
 			const auto *storedVectorA = MyVectors::toStoredVector<T>(sv, dim_ix);
 
@@ -1555,7 +1555,7 @@ namespace net::worker::commands::Vectors2{
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySubB	= *itk;
 
-				auto const sv = shared::rsetmulti::getData(db, keyN, keySubB);
+				auto const sv = shared::rset::getData(db, keyN, keySubB);
 
 				const auto *storedVectorB = MyVectors::toStoredVector<T>(sv, dim_ix);
 
@@ -1605,7 +1605,7 @@ namespace net::worker::commands::Vectors2{
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySubB	= *itk;
 
-				std::string_view sv = shared::rsetmulti::getData(db, keyN, keySubB);
+				std::string_view sv = shared::rset::getData(db, keyN, keySubB);
 
 				const auto *storedVectorB = MyVectors::toStoredVector<T>(sv, dim_ix);
 
@@ -1635,7 +1635,7 @@ namespace net::worker::commands::Vectors2{
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
-			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySubA);
+			std::string_view sv = shared::rset::getData(db, keyN, keySubA);
 
 			const auto *storedVectorA = MyVectors::toStoredVector<bool>(sv, dim_ix);
 
@@ -1656,7 +1656,7 @@ namespace net::worker::commands::Vectors2{
 			for(auto itk = first; itk != last; ++itk){
 				auto const keySubB = *itk;
 
-				std::string_view sv = shared::rsetmulti::getData(db, keyN, keySubB);
+				std::string_view sv = shared::rset::getData(db, keyN, keySubB);
 
 				const auto *storedVectorB = MyVectors::toStoredVector<bool>(sv, dim_ix);
 
@@ -1793,7 +1793,7 @@ namespace net::worker::commands::Vectors2{
 
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = shared::rsetmulti::makeKeyDataSearchFlat(bufferKey, DBAdapter::SEPARATOR, keyN);
+			auto const prefix = shared::rset::makeKeyDataSearchFlat(bufferKey, DBAdapter::SEPARATOR, keyN);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
@@ -1830,7 +1830,7 @@ namespace net::worker::commands::Vectors2{
 								std::string_view startKey){
 			using namespace impl_;
 
-			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
+			std::string_view sv = shared::rset::getData(db, keyN, keySub);
 
 			const auto *storedVectorA = MyVectors::toStoredVector<bool>(sv, dim_ix);
 
@@ -1845,7 +1845,7 @@ namespace net::worker::commands::Vectors2{
 
 			hm4::PairBufferKey bufferKey;
 
-			auto const prefix = shared::rsetmulti::makeKeyDataSearchFlat(bufferKey, DBAdapter::SEPARATOR, keyN);
+			auto const prefix = shared::rset::makeKeyDataSearchFlat(bufferKey, DBAdapter::SEPARATOR, keyN);
 
 			shared::stop_predicate::StopPrefixPredicate stop{ prefix };
 
@@ -2164,7 +2164,7 @@ namespace net::worker::commands::Vectors2{
 								size_t bands, size_t bits){
 			using namespace impl_;
 
-			std::string_view vectorSV = shared::rsetmulti::getData(db, keyN, keySub);
+			std::string_view vectorSV = shared::rset::getData(db, keyN, keySub);
 
 			auto const pp = prepareFVector<T>(blob, vectorSV, dim_ix, dtype);
 
@@ -2195,7 +2195,7 @@ namespace net::worker::commands::Vectors2{
 
 			for(auto const &index : icontainer){
 				hm4::PairBufferKey bufferKey;
-				auto const prefix = shared::rsetmulti::makeKeyDataSearchNS(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+				auto const prefix = shared::rset::makeKeyDataSearchNS(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
 				scanIndex__(db, prefix, keySub_container);
 			}
@@ -2215,7 +2215,7 @@ namespace net::worker::commands::Vectors2{
 				if (text == keySub)
 					continue;
 
-				std::string_view sv = shared::rsetmulti::getData(db, keyN, text);
+				std::string_view sv = shared::rset::getData(db, keyN, text);
 
 				const auto *storedVectorB = MyVectors::toStoredVector<T>(sv, dim_ix);
 
@@ -2262,7 +2262,7 @@ namespace net::worker::commands::Vectors2{
 								size_t bands, size_t bits){
 			using namespace impl_;
 
-			std::string_view sv = shared::rsetmulti::getData(db, keyN, keySub);
+			std::string_view sv = shared::rset::getData(db, keyN, keySub);
 
 			const auto *storedVectorA = MyVectors::toStoredVector<bool>(sv, dim_ix);
 
@@ -2291,7 +2291,7 @@ namespace net::worker::commands::Vectors2{
 
 			for(auto const &index : icontainer){
 				hm4::PairBufferKey bufferKey;
-				auto const prefix = shared::rsetmulti::makeKeyDataSearchNS(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+				auto const prefix = shared::rset::makeKeyDataSearchNS(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
 				scanIndex__(db, prefix, keySub_container);
 			}
@@ -2313,7 +2313,7 @@ namespace net::worker::commands::Vectors2{
 				if (text == keySub)
 					continue;
 
-				std::string_view sv = shared::rsetmulti::getData(db, keyN, text);
+				std::string_view sv = shared::rset::getData(db, keyN, text);
 
 				const auto *storedVectorB = MyVectors::toStoredVector<bool>(sv, dim_ix);
 

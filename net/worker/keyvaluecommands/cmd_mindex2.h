@@ -1,7 +1,7 @@
 #include "base.h"
 
-#include "shared_rset_multi.h"
-#include "shared_rset_multi_fts.h"
+#include "shared_rset.h"
+#include "shared_rset_fts.h"
 
 #include "shared_accumulateresults.h"
 #include "shared_extractnth.h"
@@ -228,13 +228,13 @@ namespace net::worker::commands::MultiIndex2{
 								uint32_t count, std::string_view keyStart,
 										DBAdapter &db, Result &result){
 			hm4::PairBufferKey bufferPrefix;
-			auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferPrefix,
+			auto const prefix = shared::rset::makeKeyDataSearch(bufferPrefix,
 											DBAdapter::SEPARATOR,
 												keyN, index);
 
 			hm4::PairBufferKey bufferKeyStart;
 			auto const key = keyStart.empty() ? prefix :
-						shared::rsetmulti::makeKeyDataStart(bufferKeyStart,
+						shared::rset::makeKeyDataStart(bufferKeyStart,
 											DBAdapter::SEPARATOR,
 												keyN, index, keyStart);
 
@@ -286,20 +286,20 @@ namespace net::worker::commands::MultiIndex2{
 			}
 
 			using It  = typename DBAdapter::List::iterator;
-			using FTS = shared::rsetmulti::fts::FTSIntersector<It, MaxSearchTokens>;
+			using FTS = shared::rset::fts::FTSIntersector<It, MaxSearchTokens>;
 
 			FTS fts;
 
 			for(auto const &index : tokenContainer){
 				tokenBKContainer.push_back();
 
-				auto const prefix = shared::rsetmulti::makeKeyDataSearch(tokenBKContainer.back(),
+				auto const prefix = shared::rset::makeKeyDataSearch(tokenBKContainer.back(),
 											DBAdapter::SEPARATOR,
 												keyN, index);
 
 				tokenBKContainer.push_back();
 				auto const key = keyStart.empty() ? prefix :
-							shared::rsetmulti::makeKeyDataStart(tokenBKContainer.back(),
+							shared::rset::makeKeyDataStart(tokenBKContainer.back(),
 											DBAdapter::SEPARATOR,
 												keyN, index, keyStart);
 
@@ -417,7 +417,7 @@ namespace net::worker::commands::MultiIndex2{
 			bool const withAutomaticKeySort = true;
 
 			[[maybe_unused]]
-			bool const b = shared::rsetmulti::add<withAutomaticKeySort>(db, decoder,
+			bool const b = shared::rset::add<withAutomaticKeySort>(db, decoder,
 							keyN, keySub, keySort,
 								icontainer, bufferVal,
 									factory);
@@ -530,7 +530,7 @@ namespace net::worker::commands::MultiIndex2{
 				bool const withAutomaticKeySort = true;
 
 				[[maybe_unused]]
-				bool const b = shared::rsetmulti::rem<withAutomaticKeySort>(db, decoder,
+				bool const b = shared::rset::rem<withAutomaticKeySort>(db, decoder,
 								keyN, keySub, {},
 									icontainer, bufferVal);
 			}
@@ -577,7 +577,7 @@ namespace net::worker::commands::MultiIndex2{
 			bool const withAutomaticKeySort = true;
 
 			[[maybe_unused]]
-			bool const b = shared::rsetmulti::getIndexes<withAutomaticKeySort>(db, decoder,
+			bool const b = shared::rset::getIndexes<withAutomaticKeySort>(db, decoder,
 							keyN, keySub,
 								icontainer, bcontainer);
 

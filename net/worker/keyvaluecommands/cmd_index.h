@@ -4,7 +4,7 @@
 #include "shared_accumulateresults.h"
 #include "shared_extractnth.h"
 
-#include "shared_zset_multi.h"
+#include "shared_zset.h"
 
 #include "ilist/txguard.h"
 
@@ -129,31 +129,31 @@ namespace net::worker::commands::Index{
 				};
 
 				if constexpr(N == 1)
-					shared::zsetmulti::add<PN>(
+					shared::zset::add<PN>(
 							db,
 							keyN, keySub, { _(1), keySort }, keySub
 					);
 
 				if constexpr(N == 2)
-					shared::zsetmulti::add<PN>(
+					shared::zset::add<PN>(
 							db,
 							keyN, keySub, { _(1), _(2), keySort }, keySub
 					);
 
 				if constexpr(N == 3)
-					shared::zsetmulti::add<PN>(
+					shared::zset::add<PN>(
 							db,
 							keyN, keySub, { _(1), _(2), _(3), keySort }, keySub
 					);
 
 				if constexpr(N == 4)
-					shared::zsetmulti::add<PN>(
+					shared::zset::add<PN>(
 							db,
 							keyN, keySub, { _(1), _(2), _(3), _(4), keySort }, keySub
 					);
 
 				if constexpr(N == 5)
-					shared::zsetmulti::add<PN>(
+					shared::zset::add<PN>(
 							db,
 							keyN, keySub, { _(1), _(2), _(3), _(4), _(5), keySort }, keySub
 					);
@@ -165,7 +165,7 @@ namespace net::worker::commands::Index{
 	private:
 		static_assert(impl_::assertN(N));
 
-		using PN = shared::zsetmulti::Permutation<N>;
+		using PN = shared::zset::Permutation<N>;
 
 		constexpr inline static std::string_view name__[] = {
 			"IX1ADD",
@@ -201,13 +201,13 @@ namespace net::worker::commands::Index{
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
-			return shared::zsetmulti::cmdProcessRem<PN>(p, db, result, blob);
+			return shared::zset::cmdProcessRem<PN>(p, db, result, blob);
 		}
 
 	private:
 		static_assert(impl_::assertN(N));
 
-		using PN = shared::zsetmulti::Permutation<N>;
+		using PN = shared::zset::Permutation<N>;
 
 		constexpr inline static std::string_view name__[] = {
 			"IX1REM",
@@ -250,14 +250,14 @@ namespace net::worker::commands::Index{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set_container(
-				shared::zsetmulti::getIndexes<PN>(db, keyN, keySub)
+				shared::zset::getIndexes<PN>(db, keyN, keySub)
 			);
 		}
 
 	private:
 		static_assert(impl_::assertN(N));
 
-		using PN = shared::zsetmulti::Permutation<N>;
+		using PN = shared::zset::Permutation<N>;
 
 		constexpr inline static std::string_view name__[] = {
 			"IX1GETINDEXES",
@@ -382,7 +382,7 @@ namespace net::worker::commands::Index{
 	private:
 		static_assert(impl_::assertN(N));
 
-		using PN = shared::zsetmulti::Permutation<N>;
+		using PN = shared::zset::Permutation<N>;
 
 		constexpr inline static std::string_view name__[] = {
 			"IX1RANGE",

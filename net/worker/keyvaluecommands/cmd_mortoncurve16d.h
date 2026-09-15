@@ -6,7 +6,7 @@
 
 #include "shared_stoppredicate.h"
 #include "shared_accumulateresults.h"
-#include "shared_zset_multi.h"
+#include "shared_zset.h"
 
 #include "ilist/txguard.h"
 
@@ -40,7 +40,7 @@ namespace net::worker::commands::MortonCurve16D{
 
 		static_assert(scoreSize < shared::config::INDEX_TOKEN_SIZE);
 
-		using P1 = net::worker::shared::zsetmulti::Permutation1NoIndex;
+		using P1 = net::worker::shared::zset::Permutation1NoIndex;
 
 		constexpr bool isMC16KeyValid(std::string_view keyN){
 			return shared::index_token::valid(keyN);
@@ -428,7 +428,7 @@ namespace net::worker::commands::MortonCurve16D{
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
 			return result.set(
-				shared::zsetmulti::get<P1>(db, keyN, keySub)
+				shared::zset::get<P1>(db, keyN, keySub)
 			);
 		}
 
@@ -485,7 +485,7 @@ namespace net::worker::commands::MortonCurve16D{
 				auto const &keySub = *itk;
 
 				container.emplace_back(
-					shared::zsetmulti::get<P1>(db, keyN, keySub)
+					shared::zset::get<P1>(db, keyN, keySub)
 				);
 			}
 
@@ -525,7 +525,7 @@ namespace net::worker::commands::MortonCurve16D{
 			if (!isMC16KeyValid(keyN, keySub))
 				return result.set_error(ResultErrorMessages::INVALID_KEY_SIZE);
 
-			if (auto const hexA = shared::zsetmulti::getIndexes<P1>(db, keyN, keySub); !hexA[0].empty()){
+			if (auto const hexA = shared::zset::getIndexes<P1>(db, keyN, keySub); !hexA[0].empty()){
 
 				auto const hex = hexA[0];
 
@@ -671,7 +671,7 @@ namespace net::worker::commands::MortonCurve16D{
 
 				auto const score	= toHex(vvvs, buffer);
 
-				shared::zsetmulti::add<P1>(
+				shared::zset::add<P1>(
 						db,
 						keyN, keySub, { score }, value
 				);
@@ -703,7 +703,7 @@ namespace net::worker::commands::MortonCurve16D{
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
-			return shared::zsetmulti::cmdProcessRem<P1>(p, db, result, blob);
+			return shared::zset::cmdProcessRem<P1>(p, db, result, blob);
 		}
 
 	private:

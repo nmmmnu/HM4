@@ -20,7 +20,7 @@ keyN~INDEX1~keySort~keySub	-> keySub
 keyN~INDEX2~keySort~keySub	-> keySub
 */
 
-namespace net::worker::shared::rsetmulti{
+namespace net::worker::shared::rset{
 
 	inline std::string_view makeKeyCtrl(hm4::PairBufferKey &bufferKey, std::string_view separator,
 				std::string_view keyN,
@@ -321,7 +321,7 @@ namespace net::worker::shared::rsetmulti{
 		return hm4::getPairVal(*db, keyCtrl);
 	}
 
-} // namespace net::worker::shared::msetmulti_better
+} // namespace net::worker::shared::rset
 
 #endif
 

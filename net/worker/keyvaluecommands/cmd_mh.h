@@ -6,7 +6,7 @@
 #include "stringtokenizer.h"
 #include "topheap.h"
 
-#include "shared_rset_multi.h"
+#include "shared_rset.h"
 #include "shared_accumulateresults.h"
 #include "shared_hashsortkey.h"
 #include "shared_extractnth.h"
@@ -45,7 +45,7 @@ namespace net::worker::commands::MH{
 		template<class DBAdapter>
 		const MHT *load_ptr(DBAdapter &db, std::string_view keyN, std::string_view keySub){
 			hm4::PairBufferKey bufferKeyCtrl;
-			auto const keyCtrl = shared::rsetmulti::makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
+			auto const keyCtrl = shared::rset::makeKeyCtrl(bufferKeyCtrl,   DBAdapter::SEPARATOR, keyN, keySub);
 
 			return load_ptr(db, keyCtrl);
 		}
@@ -213,7 +213,7 @@ namespace net::worker::commands::MH{
 				MHSETFactory factory{ key, pair, delimiter[0], tokens, decoder, icontainer, bcontainer };
 
 				[[maybe_unused]]
-				bool const b = shared::rsetmulti::add(db, decoder,
+				bool const b = shared::rset::add(db, decoder,
 								keyN, keySub, keySort,
 									icontainer, bcontainer,
 										factory);
@@ -327,7 +327,7 @@ namespace net::worker::commands::MH{
 				auto const keySort	= shared::sortkey::makeHashKeySort(keySub, {}, buffer);
 
 				[[maybe_unused]]
-				bool const b = shared::rsetmulti::rem(db, decoder,
+				bool const b = shared::rset::rem(db, decoder,
 								keyN, keySub, keySort,
 									icontainer, bcontainer);
 			}
@@ -376,7 +376,7 @@ namespace net::worker::commands::MH{
 			Decoder decoder{ bandSize };
 
 			[[maybe_unused]]
-			bool const b = shared::rsetmulti::getIndexes(db, decoder,
+			bool const b = shared::rset::getIndexes(db, decoder,
 							keyN, keySub,
 								icontainer, bcontainer);
 
@@ -483,7 +483,7 @@ namespace net::worker::commands::MH{
 
 			for(auto const &index : icontainer){
 				hm4::PairBufferKey bufferKey;
-				auto const prefix = shared::rsetmulti::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
+				auto const prefix = shared::rset::makeKeyDataSearch(bufferKey, DBAdapter::SEPARATOR, keyN, index);
 
 				scanIndex__(db, prefix, keySub_container);
 			}
