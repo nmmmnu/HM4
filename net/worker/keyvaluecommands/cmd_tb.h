@@ -1,10 +1,10 @@
 #include "base.h"
 #include "mytime.h"
 
-namespace net::worker::commands::CoinBucket{
+namespace net::worker::commands::TokenBucket{
 	namespace impl_{
 
-		uint64_t calcTokens(uint64_t maxTokens, uint32_t maxSeconds, uint32_t created, uint32_t now, uint64_t tokens){
+		constexpr uint64_t calcTokens(uint64_t maxTokens, uint32_t maxSeconds, uint32_t created, uint32_t now, uint64_t tokens){
 			auto const maxTokensF = static_cast<double>(maxTokens);
 			auto const refillRate = maxTokensF / maxSeconds;
 
@@ -23,19 +23,19 @@ namespace net::worker::commands::CoinBucket{
 
 
 	template<class Protocol, class DBAdapter>
-	struct COINBUCKET : BaseCommandRW<Protocol,DBAdapter>{
+	struct TBCONSUME : BaseCommandRW<Protocol,DBAdapter>{
 
-		COINBUCKET() : BaseCommandRW<Protocol,DBAdapter>("COINBUCKET", std::begin(cmd__), std::end(cmd__)){}
+		TBCONSUME() : BaseCommandRW<Protocol,DBAdapter>("TBCONSUME", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		// COINBUCKET key max_tokens max_seconds
+		// TBCONSUME key max_tokens max_seconds price=1
 
 		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() != 4)
+			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
 			const auto key = p[1];
@@ -43,8 +43,13 @@ namespace net::worker::commands::CoinBucket{
 			if (!hm4::Pair::isKeyValid(key))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			uint64_t const maxTokens  = from_string<uint64_t>(p[2], 1);
-			uint32_t const maxSeconds = from_string<uint32_t>(p[3], 1);
+			auto     const maxTokensSV	= p[2];
+			uint64_t const maxTokens	= from_string<uint64_t>(p[2], 1);
+			uint32_t const maxSeconds	= from_string<uint32_t>(p[3], 1);
+			uint16_t const price		= p.size() == 5 ? from_string<uint16_t>(p[4], 1) : 1u;
+
+			if (!price || price > maxTokens)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			if (auto *it = hm4::getPairPtr(*db, key); it){
 				// Case 1: Old data exists
@@ -59,17 +64,29 @@ namespace net::worker::commands::CoinBucket{
 							from_string<uint64_t>(it->getVal())
 				);
 
-				if (tokens == 0)
-					return result.set_0();
+				if (tokens < price){
+					to_string_buffer_t buffer;
+					return result.set_containerN("0", to_string(tokens, buffer));
+				}
 
 				if (auto const expireAt = it->getExpiresAt(); now >= expireAt){
 					// Corner case - we do not need to write at all:
 					//
 					// From first look, it looks like there will be "free" coins,
 					// but this is not true.
-					return result.set(tokens);
+					//
+					// When hm4::getPairPtr() was executed, the pair was NOT expired,
+					// also it had enought coins to pass.
+					//
+					// However at the time of now >= expireAt, the pair expired.
+					//
+					// This means:
+					// 1. the coinbucked is fully refill.
+					// 2. we do not need to update or delete.
+
+					return result.set_containerN("1", maxTokensSV);
 				}else{
-					auto const tokens1 = tokens - 1;
+					auto const tokens1 = tokens - price;
 
 					// this will not overflow
 					to_string_buffer_t buffer;
@@ -80,7 +97,7 @@ namespace net::worker::commands::CoinBucket{
 					const auto *hint = & *it;
 					hm4::insertHintF<hm4::PairFactory::Normal>(*db, hint, key, val, exp);
 
-					return result.set(tokens);
+					return result.set_containerN("1", val);
 				}
 
 			}else{
@@ -88,7 +105,7 @@ namespace net::worker::commands::CoinBucket{
 
 				auto const tokens = maxTokens;
 
-				auto const tokens1 = tokens - 1;
+				auto const tokens1 = tokens - price;
 
 				to_string_buffer_t buffer;
 				auto const val = to_string(tokens1, buffer);
@@ -96,30 +113,29 @@ namespace net::worker::commands::CoinBucket{
 
 				hm4::insert(*db, key, val, exp);
 
-				return result.set(tokens);
+				return result.set_containerN("1", val);
 			}
 		}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
-			"coinbucket",		"COINBUCKET"
+			"tbconsume",		"TBCONSUME"
 		};
-
 	};
 
 
 
 	template<class Protocol, class DBAdapter>
-	struct COINBUCKETGETCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	struct TBCOUNT : BaseCommandRO<Protocol,DBAdapter>{
 
-		COINBUCKETGETCOUNT() : BaseCommandRO<Protocol,DBAdapter>("COINBUCKETGETCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		TBCOUNT() : BaseCommandRO<Protocol,DBAdapter>("TBCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		// COINBUCKET key max_tokens max_seconds
+		// TBCOUNT key max_tokens max_seconds
 
 		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
 			if (p.size() != 4)
@@ -154,9 +170,8 @@ namespace net::worker::commands::CoinBucket{
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
-			"coinbucketgetcount",	"COINBUCKETGETCOUNT"
+			"tbcount",	"TBCOUNT"
 		};
-
 	};
 
 
@@ -167,8 +182,8 @@ namespace net::worker::commands::CoinBucket{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				COINBUCKET,
-				COINBUCKETGETCOUNT
+				TBCONSUME,
+				TBCOUNT
 			>(pack);
 		}
 	};

@@ -21,7 +21,7 @@
 #include "keyvaluecommands/cmd_cas.h"			// CAS, CAD
 #include "keyvaluecommands/cmd_copy.h"			// COPY, COPYNX, RENAME, RENAMENX
 #include "keyvaluecommands/cmd_counter.h"		// INCR, DECR
-#include "keyvaluecommands/cmd_cb.h"			// CBCONSUME
+#include "keyvaluecommands/cmd_tb.h"			// TBCONSUME, TBCOUNT
 
 #include "keyvaluecommands/cmd_isam.h"			// IGETALL
 
@@ -119,7 +119,7 @@ namespace net::worker{
 				CAS		::RegisterModule,
 				Copy		::RegisterModule,
 				Counter		::RegisterModule,
-				CoinBucket	::RegisterModule,
+				TokenBucket	::RegisterModule,
 				ISAM_cmd	::RegisterModule,
 
 				Queue		::RegisterModule,
