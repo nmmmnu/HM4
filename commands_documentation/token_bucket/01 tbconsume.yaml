@@ -1,0 +1,42 @@
+- id:      TBCONSUME
+  name:    TBCONSUME
+  aliases:
+    items:
+      - coinbucket
+  usage:   TBCONSUME key max_tokens max_seconds [price]
+  params:
+    items:
+    - k: key
+      v: name of the rate limiter bucket
+    - k: max_tokens
+      v: bucket capacity and maximum refill ceiling
+    - k: max_seconds
+      v: duration in seconds required to fully refill an empty bucket
+    - k: price
+      v: number of tokens to consume (optional, defaults to 1)
+
+  description: |
+    <p>Atomically consumes tokens from the rate limiter bucket specified by <i>key</i>.</p>
+    <p>Tokens smoothly replenish over time according to the continuous refill rate <code>max_tokens / max_seconds</code>.
+    The consumption follows a strict all-or-nothing guarantee: if the currently available tokens are less than <i>price</i>,
+    no tokens are deducted.</p>
+    <p>Subsequent mutations are performed in-place with zero memory allocation using hint-based updates.</p>
+
+  return_type: array
+  return:      two element array - 0/1 success/failure and available tokens currently present in the bucket
+  version:     1.4.0
+  complexity:  READ + WRITE
+  mutable:     true
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> tbconsume api:user:42 10 300
+    1) "1"
+    2) "9"
+    127.0.0.1:6379> tbconsume api:user:42 10 300 5
+    1) "1"
+    2) "4"
+    127.0.0.1:6379> tbconsume api:user:42 10 300 5
+    1) "0"
+    2) "4"
+    127.0.0.1:6379> tbcount api:user:42 10 300
+    (integer) 4

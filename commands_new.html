@@ -210,6 +210,13 @@
 			</ul>
 		</div>
 		<div>
+			<a href="#M::TOKEN_BUCKET">TOKEN_BUCKET</a>
+			<ul>
+				<li><a href="#C::TBCONSUME">TBCONSUME</a></li>
+				<li><a href="#C::TBCOUNT">TBCOUNT</a></li>
+			</ul>
+		</div>
+		<div>
 			<a href="#M::STRING_LIST">STRING_LIST</a>
 			<ul>
 				<li><a href="#C::SLADD">SLADD</a></li>
@@ -7473,6 +7480,220 @@ The returned value will be an integer between 0 and <b>rb_count</b>.</p>
 5) &quot;facebook&quot;
 127.0.0.1:6379&gt; rscount myrs 5 64
 (integer) 9
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::TOKEN_BUCKET"></a>
+		<h2>Module TOKEN_BUCKET</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module implements an ultra-fast, zero-allocation <b>Token Bucket rate limiter</b> directly within the key-value storage engine.
+It provides atomic, time-aware quota tracking with automatic token replenishment and sub-microsecond in-place memory mutations via placement hints.</p>
+
+<p><b>What It Does:</b></p>
+
+<p><b>1. Smooth, continuous token refill</b></p>
+<p>Tokens regenerate smoothly over time at a fractional rate proportional to <code>max_tokens / max_seconds</code>.
+There are no burst spikes or edge-of-window anomalies common to naive fixed-window limiters.</p>
+
+<p><b>2. Atomic consumption with custom weight/cost</b></p>
+<p><b>TBCONSUME</b> attempts to consume tokens from the specified bucket. By default, it consumes <b>1</b> token,
+but an optional <code>price</code> parameter allows charging variable weights for heavier queries or batch tasks.
+The operation follows a strict <b>all-or-nothing</b> guarantee: if available balance is insufficient, zero tokens are taken.</p>
+
+<p><b>3. Intuitive two-element response format</b></p>
+<p><b>TBCONSUME</b> returns a 2-element array: <code>[status, balance]</code>.</p>
+<ul>
+  <li><b>Allowed:</b>  <code>["1", remaining_balance]</code> confirms successful consumption and yields the post-action token balance.</li>
+  <li><b>Rejected:</b> <code>["0", current_balance]</code> indicates rate limit exhaustion without consuming tokens,
+  exposing current availability for immediate client-side handling.</li>
+</ul>
+
+<p><b>4. Passive inspection (Dry-Run)</b></p>
+<p><b>TBCOUNT</b> provides a read-only snapshot of current token availability without spending tokens, touching the bucket TTL, or triggering writes.
+Non-existent or fully refreshed buckets report <code>max_tokens</code>.</p>
+
+<p><b>5. Zero-overhead lifecycle and reset</b></p>
+<p>Keys naturally expire when empty and abandon storage without manual maintenance.
+Complete manual resets or immediate quota grants are handled by calling the global <b>DEL</b> command on the key.</p>
+
+<p><b>Use Cases:</b></p>
+<ul>
+  <li>API gateway throttling and granular per-route request quotas</li>
+  <li>Cost-weighted rate limiting (e.g., lightweight GET = 1 token, intensive report export = 5 tokens)</li>
+  <li>DDoS mitigation and brute-force login protection</li>
+  <li>Smooth bandwidth or resource leveling for background jobs</li>
+</ul>
+
+<p><b>Tip:</b> If a request is rejected with status <code>"0"</code>, you can pair the returned balance with client-side retry logic, or clear the limiter instantly for privileged operations using <b>DEL</b>.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; tbconsume api:user:42 10 300
+1) &quot;1&quot;
+2) &quot;9&quot;
+127.0.0.1:6379&gt; tbconsume api:user:42 10 300 5
+1) &quot;1&quot;
+2) &quot;4&quot;
+127.0.0.1:6379&gt; tbconsume api:user:42 10 300 5
+1) &quot;0&quot;
+2) &quot;4&quot;
+127.0.0.1:6379&gt; tbcount api:user:42 10 300
+(integer) 4
+</pre></blockquote>
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::TBCONSUME">TBCONSUME</a></li>
+			<li><a href="#C::TBCOUNT">TBCOUNT</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="TBCONSUME">
+			<a name="C::TBCONSUME"></a>
+			<h4>TBCONSUME</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>TBCONSUME		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>TOKEN_BUCKET	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>TBCONSUME key max_tokens max_seconds [price]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the rate limiter bucket</td>
+				</tr>
+				<tr>
+					<td>max_tokens</td>
+					<td>bucket capacity and maximum refill ceiling</td>
+				</tr>
+				<tr>
+					<td>max_seconds</td>
+					<td>duration in seconds required to fully refill an empty bucket</td>
+				</tr>
+				<tr>
+					<td>price</td>
+					<td>number of tokens to consume (optional, defaults to 1)</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Atomically consumes tokens from the rate limiter bucket specified by <i>key</i>.</p>
+<p>Tokens smoothly replenish over time according to the continuous refill rate <code>max_tokens / max_seconds</code>.
+The consumption follows a strict all-or-nothing guarantee: if the currently available tokens are less than <i>price</i>,
+no tokens are deducted.</p>
+<p>Subsequent mutations are performed in-place with zero memory allocation using hint-based updates.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>two element array - 0/1 success/failure and available tokens currently present in the bucket</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>coinbucket</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; tbconsume api:user:42 10 300
+1) &quot;1&quot;
+2) &quot;9&quot;
+127.0.0.1:6379&gt; tbconsume api:user:42 10 300 5
+1) &quot;1&quot;
+2) &quot;4&quot;
+127.0.0.1:6379&gt; tbconsume api:user:42 10 300 5
+1) &quot;0&quot;
+2) &quot;4&quot;
+127.0.0.1:6379&gt; tbcount api:user:42 10 300
+(integer) 4
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="TBCOUNT">
+			<a name="C::TBCOUNT"></a>
+			<h4>TBCOUNT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>TBCOUNT		</td></tr>
+				<tr><td>Available since		</td><td>1.4.0	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>TOKEN_BUCKET	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>TBCOUNT key max_tokens max_seconds</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>name of the rate limiter bucket</td>
+				</tr>
+				<tr>
+					<td>max_tokens</td>
+					<td>bucket capacity and maximum refill ceiling</td>
+				</tr>
+				<tr>
+					<td>max_seconds</td>
+					<td>duration in seconds required to fully refill an empty bucket</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote><p>Inspects the token balance currently available in the bucket without modifying it.</p>
+<p>This command performs a pure read-only calculation, taking elapsed replenishment time into account
+without altering the bucket's TTL or payload. If the key does not exist or has expired, it returns <i>max_tokens</i>.</p>
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>The calculated number of available tokens currently present in the bucket.
+</blockquote>
+
+			<h4>Aliases:</h4>
+			<ul>
+				<li>coinbucketgetcount</li>
+			</ul>
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; tbconsume api:user:42 10 300
+1) &quot;1&quot;
+2) &quot;9&quot;
+127.0.0.1:6379&gt; tbconsume api:user:42 10 300 5
+1) &quot;1&quot;
+2) &quot;4&quot;
+127.0.0.1:6379&gt; tbconsume api:user:42 10 300 5
+1) &quot;0&quot;
+2) &quot;4&quot;
+127.0.0.1:6379&gt; tbcount api:user:42 10 300
+(integer) 4
 </pre></blockquote>
 
 

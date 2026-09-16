@@ -1,0 +1,59 @@
+id:          TOKEN_BUCKET
+name:        TOKEN_BUCKET
+
+version:     1.4.0
+
+description: |
+  <p>This module implements an ultra-fast, zero-allocation <b>Token Bucket rate limiter</b> directly within the key-value storage engine.
+  It provides atomic, time-aware quota tracking with automatic token replenishment and sub-microsecond in-place memory mutations via placement hints.</p>
+
+  <p><b>What It Does:</b></p>
+
+  <p><b>1. Smooth, continuous token refill</b></p>
+  <p>Tokens regenerate smoothly over time at a fractional rate proportional to <code>max_tokens / max_seconds</code>.
+  There are no burst spikes or edge-of-window anomalies common to naive fixed-window limiters.</p>
+
+  <p><b>2. Atomic consumption with custom weight/cost</b></p>
+  <p><b>TBCONSUME</b> attempts to consume tokens from the specified bucket. By default, it consumes <b>1</b> token,
+  but an optional <code>price</code> parameter allows charging variable weights for heavier queries or batch tasks.
+  The operation follows a strict <b>all-or-nothing</b> guarantee: if available balance is insufficient, zero tokens are taken.</p>
+
+  <p><b>3. Intuitive two-element response format</b></p>
+  <p><b>TBCONSUME</b> returns a 2-element array: <code>[status, balance]</code>.</p>
+  <ul>
+    <li><b>Allowed:</b>  <code>["1", remaining_balance]</code> confirms successful consumption and yields the post-action token balance.</li>
+    <li><b>Rejected:</b> <code>["0", current_balance]</code> indicates rate limit exhaustion without consuming tokens,
+    exposing current availability for immediate client-side handling.</li>
+  </ul>
+
+  <p><b>4. Passive inspection (Dry-Run)</b></p>
+  <p><b>TBCOUNT</b> provides a read-only snapshot of current token availability without spending tokens, touching the bucket TTL, or triggering writes.
+  Non-existent or fully refreshed buckets report <code>max_tokens</code>.</p>
+
+  <p><b>5. Zero-overhead lifecycle and reset</b></p>
+  <p>Keys naturally expire when empty and abandon storage without manual maintenance.
+  Complete manual resets or immediate quota grants are handled by calling the global <b>DEL</b> command on the key.</p>
+
+  <p><b>Use Cases:</b></p>
+  <ul>
+    <li>API gateway throttling and granular per-route request quotas</li>
+    <li>Cost-weighted rate limiting (e.g., lightweight GET = 1 token, intensive report export = 5 tokens)</li>
+    <li>DDoS mitigation and brute-force login protection</li>
+    <li>Smooth bandwidth or resource leveling for background jobs</li>
+  </ul>
+
+  <p><b>Tip:</b> If a request is rejected with status <code>"0"</code>, you can pair the returned balance with client-side retry logic, or clear the limiter instantly for privileged operations using <b>DEL</b>.</p>
+
+example_module:     |
+    127.0.0.1:6379> tbconsume api:user:42 10 300
+    1) "1"
+    2) "9"
+    127.0.0.1:6379> tbconsume api:user:42 10 300 5
+    1) "1"
+    2) "4"
+    127.0.0.1:6379> tbconsume api:user:42 10 300 5
+    1) "0"
+    2) "4"
+    127.0.0.1:6379> tbcount api:user:42 10 300
+    (integer) 4
+

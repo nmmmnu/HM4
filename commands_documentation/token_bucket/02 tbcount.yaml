@@ -1,0 +1,41 @@
+
+- id:      TBCOUNT
+  name:    TBCOUNT
+  aliases:
+    items:
+      - coinbucketgetcount
+  usage:   TBCOUNT key max_tokens max_seconds
+  params:
+    items:
+    - k: key
+      v: name of the rate limiter bucket
+    - k: max_tokens
+      v: bucket capacity and maximum refill ceiling
+    - k: max_seconds
+      v: duration in seconds required to fully refill an empty bucket
+
+  description: |
+    <p>Inspects the token balance currently available in the bucket without modifying it.</p>
+    <p>This command performs a pure read-only calculation, taking elapsed replenishment time into account
+    without altering the bucket's TTL or payload. If the key does not exist or has expired, it returns <i>max_tokens</i>.</p>
+
+  return_type: integer
+  return:      |
+    The calculated number of available tokens currently present in the bucket.
+
+  version:     1.4.0
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> tbconsume api:user:42 10 300
+    1) "1"
+    2) "9"
+    127.0.0.1:6379> tbconsume api:user:42 10 300 5
+    1) "1"
+    2) "4"
+    127.0.0.1:6379> tbconsume api:user:42 10 300 5
+    1) "0"
+    2) "4"
+    127.0.0.1:6379> tbcount api:user:42 10 300
+    (integer) 4
