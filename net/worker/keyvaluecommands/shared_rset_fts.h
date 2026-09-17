@@ -84,10 +84,8 @@ namespace net::worker::shared::rset::fts{
 					cstop_	(cstop			){
 
 			// we do not know, if prefix is OK
-			if (cursor_ && pstop_(cursor_.getKey()))
-				cursor_.invalidate();
-
-			skipTombstones_();
+			// skipTombstones_ checks it.
+			skipInvalidPairs_();
 		}
 
 		constexpr operator bool() const{
@@ -100,19 +98,13 @@ namespace net::worker::shared::rset::fts{
 
 		constexpr TombstoneIteratorPair &operator++(){
 			++cursor_;
-			skipTombstones_();
+    			skipInvalidPairs_();
 			return *this;
 		}
 
 		constexpr int seek(std::string_view target){
-			while(cursor_ && *cursor_ < target){
-				if (stop_()){
-					cursor_.invalidate();
-					return -1;
-				}
-
+			while(cursor_ && *cursor_ < target)
 				operator++();
-			}
 
 			if (!cursor_)
 				return -1;
@@ -121,21 +113,24 @@ namespace net::worker::shared::rset::fts{
 		}
 
 	private:
-		constexpr bool stop_(){
-			return pstop_(cursor_.getKey()) || cstop_(*cursor_);
-		}
+		constexpr bool skipInvalidPairs_(){
+			auto stop = [this]{
+				return pstop_(cursor_.getKey()) || cstop_(*cursor_);
+			};
 
-		constexpr bool skipTombstones_(){
-			while(cursor_ && !cursor_.isOK()){
-				if (stop_()){
+			while(cursor_){
+				if (stop()){
 					cursor_.invalidate();
 					return false;
 				}
 
+				if (cursor_.isOK())
+					return true;
+
 				++cursor_;
 			}
 
-			return cursor_;
+			return false;
 		}
 	};
 

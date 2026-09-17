@@ -19,19 +19,31 @@ namespace net::worker::commands::MultiIndex2{
 
 
 		template<typename Container>
-		bool validateTokensUser(char delimiter, std::string_view tokens, Container &container){
-			container.clear();
+		void validateTokensUser_(char delimiter, std::string_view tokens, Container &container){
+			// container.clear();
 
 			StringTokenizer const tok{ tokens, delimiter };
 
 			for(auto const &x : tok){
 				if (container.full())
-					return false; // no room for the token
+					return; // no room for the token
 
 				if (!shared::index_token::valid(x))
 					continue;
 
 				container.push_back(x);
+			}
+		}
+
+		template<typename Container>
+		bool validateTokensUser(ParamContainer::iterator first, ParamContainer::iterator last, Container &container){
+			container.clear();
+
+			for(auto it = first; it != last; it += 2){
+				auto const delimiter = *(it + 0);
+				auto const tokens    = *(it + 1);
+
+				validateTokensUser_(delimiter[0], tokens, container);
 			}
 
 			if (container.empty())
@@ -83,44 +95,7 @@ namespace net::worker::commands::MultiIndex2{
 			return true;
 		}
 
-		template<typename Container>
-		bool validateTokensUser__withKeySort(char delimiter, std::string_view tokens, std::string_view keySort, Container &container){
-			container.clear();
 
-			StringTokenizer const tok{ tokens, delimiter };
-
-			for(auto const &x : tok){
-				if (container.full())
-					return false; // no room for the token
-
-				if (!shared::index_token::valid(x))
-					continue;
-
-				container.push_back(x);
-			}
-
-			if (container.empty())
-				return false; // need to have at least one token
-
-			std::sort(std::begin(container), std::end(container));
-
-			#if 0
-				container.erase(
-					std::unique( std::begin(container), std::end(container) ),
-					std::end(container)
-				);
-			#else
-				// Quick fix for StaticVector et all
-
-				if (auto it = std::unique(std::begin(container), std::end(container)); it != std::end(container))
-					while (container.end() != it)
-						container.pop_back();
-			#endif
-
-			container.push_back(keySort);
-
-			return true;
-		}
 
 		bool validateTokensStored__withKeySort(char delimiter, std::string_view tokens, OutputBlob::Container &container){
 			container.clear();
@@ -290,9 +265,11 @@ namespace net::worker::commands::MultiIndex2{
 
 			FTS fts;
 
+for(auto x : tokenContainer)
+	logger<Logger::DEBUG>() << ">>>>" << x;
+
 			for(auto const &index : tokenContainer){
 				tokenBKContainer.push_back();
-
 				auto const prefix = shared::rset::makeKeyDataSearch(tokenBKContainer.back(),
 											DBAdapter::SEPARATOR,
 												keyN, index);
@@ -305,7 +282,7 @@ namespace net::worker::commands::MultiIndex2{
 
 				// auto const key = keyStart.empty() ? prefix : keyStart;
 
-				logger<Logger::DEBUG>() << "MultiIndex2::rangeM" << "prefix" << prefix << "key" << key;
+				logger<Logger::DEBUG>() << "MultiIndex2::rangeM" << "prefix" << prefix << "key" << key << "[eol]";
 
 				using namespace shared::accumulate_results;
 
@@ -364,13 +341,16 @@ namespace net::worker::commands::MultiIndex2{
 		}
 
 	private:
-		// IXMADD keyN keySub keySort delimiter "words,words"
+		// IXMADD keyN keySub keySort [delimiter "words,words"]...
 
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
-			if (p.size() != 6)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+			auto const varg  = 4;
+			auto const vstep = 2;
+
+			if (p.size() < varg + vstep || (p.size() - varg) % vstep != 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
 
 			auto const keyN		= p[1];
 
@@ -381,11 +361,10 @@ namespace net::worker::commands::MultiIndex2{
 
 			auto const keySub	= p[2];
 			// auto const keySort	= p[3]; // posponed
-			auto const delimiter	= p[4];
-			auto const tokens	= p[5];
 
-			if (delimiter.size() != 1)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); itk += vstep)
+				if (auto const delimiter = *itk; delimiter.size() != 1)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			if (keySub.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
@@ -397,7 +376,7 @@ namespace net::worker::commands::MultiIndex2{
 
 			auto &tokenContainer = blob.construct<OutputBlob::Container>();
 
-			if (!validateTokensUser(delimiter[0], tokens, tokenContainer))
+			if (!validateTokensUser(std::begin(p) + varg, std::end(p), tokenContainer))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			// ---------------------
@@ -656,31 +635,33 @@ namespace net::worker::commands::MultiIndex2{
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
 			using namespace impl_;
 
-			if (p.size() != 6)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_5);
+			auto const varg  = 2;
+			auto const vstep = 2;
+			auto const vend  = 2;
+
+			if (p.size() < varg + vstep + vend || (p.size() - varg - vend) % vstep != 0)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_5);
 
 			auto const keyN		= p[1];
 
 			if (keyN.empty())
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
-			auto const delimiter	= p[2];
-			auto const tokens	= p[3];
-
-			if (delimiter.size() != 1)
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			for(auto itk = std::begin(p) + varg; itk != std::end(p) - vend; itk += vstep)
+				if (auto const delimiter = *itk; delimiter.size() != 1)
+					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			auto &tokenContainer = blob.construct<SearchTokenContainer>();
 
-			if (!validateTokensUser(delimiter[0], tokens, tokenContainer))
+			if (!validateTokensUser(std::begin(p) + varg, std::end(p) - vend, tokenContainer))
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			// ---------------------
 
 			using namespace shared::config;
 
-			auto const count    = myClamp<uint32_t>(p[4], ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
-			auto const keyStart = p[5];
+			auto const count    = myClamp<uint32_t>(*(std::end(p) - vend + 0), ITERATIONS_RESULTS_MIN, ITERATIONS_RESULTS_MAX);
+			auto const keyStart = *(std::end(p) - vend + 1);
 
 			auto &tokenBKContainer = blob.construct<SearchTokenBufferKContainer>();
 			auto &container        = blob.construct<OutputBlob::Container>();
@@ -716,4 +697,52 @@ namespace net::worker::commands::MultiIndex2{
 	};
 
 } // namespace net::worker::commands::MultiIndex2
+
+
+
+
+
+#if 0
+
+		template<typename Container>
+		bool validateTokensUser__withKeySort(char delimiter, std::string_view tokens, std::string_view keySort, Container &container){
+			container.clear();
+
+			StringTokenizer const tok{ tokens, delimiter };
+
+			for(auto const &x : tok){
+				if (container.full())
+					return false; // no room for the token
+
+				if (!shared::index_token::valid(x))
+					continue;
+
+				container.push_back(x);
+			}
+
+			if (container.empty())
+				return false; // need to have at least one token
+
+			std::sort(std::begin(container), std::end(container));
+
+			#if 0
+				container.erase(
+					std::unique( std::begin(container), std::end(container) ),
+					std::end(container)
+				);
+			#else
+				// Quick fix for StaticVector et all
+
+				if (auto it = std::unique(std::begin(container), std::end(container)); it != std::end(container))
+					while (container.end() != it)
+						container.pop_back();
+			#endif
+
+			container.push_back(keySort);
+
+			return true;
+		}
+
+#endif
+
 
