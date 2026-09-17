@@ -42,7 +42,7 @@
     (integer) 1
     127.0.0.1:6379> IXMADD news 1004 '' , "TAG:culture,TAG:eu"         , "George,Michael,had,a,concert,with,Kate,Bush,in,EU"
     (integer) 1
-    127.0.0.1:6379> IXMADD news 1005 '' , "TAG:culture"                , "Why,you,should,read,1984,from,George,Orwell"
+    127.0.0.1:6379> IXMADD news 1005 '' , "TAG:culture"                , "Why,you,should,read,1984,by,George,Orwell"
     (integer) 1
 
     127.0.0.1:6379> # search for George Bush. It will "catch" the concert news too

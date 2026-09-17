@@ -107,3 +107,8 @@ Changelog
 -	fix bug in zsetmulti::add, when there is no NRVO.
 	this does not affects production servers.
 
+### 1.4.0
+-	fix in AVLList - when (real) delete happens, the server may segfault.
+	this does not affects 99.99% of the production servers.
+-	fix bug and refactor CBFMCOUNT, CMSMCOUNT, TDMPERCENTILE
+
