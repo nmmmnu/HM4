@@ -265,9 +265,6 @@ namespace net::worker::commands::MultiIndex2{
 
 			FTS fts;
 
-for(auto x : tokenContainer)
-	logger<Logger::DEBUG>() << ">>>>" << x;
-
 			for(auto const &index : tokenContainer){
 				tokenBKContainer.push_back();
 				auto const prefix = shared::rset::makeKeyDataSearch(tokenBKContainer.back(),
