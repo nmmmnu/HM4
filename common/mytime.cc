@@ -37,6 +37,17 @@ namespace mytime{
 		const auto sec_int = (uint32_t) sec.count();
 		const auto mil_int = (uint32_t) mil.count();
 
+		// what is going on here:
+		//
+		// uint64_t with at least 55 bits is casted to uint32_t.
+		// It will be good until year 2106-02-07
+		//
+		// uint65_t with exact    20 bits is casted to uint32_t.
+		// This means there are 12 unused bits.
+		//
+		// So finally we have:
+		// [32 bit seconds][12 bit unused][20 bits microseconds]
+
 		return to64(sec_int, mil_int);
 	}
 
