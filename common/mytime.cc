@@ -14,20 +14,13 @@ namespace mytime{
 		return (uint32_t) sec.count();
 	}
 
-	std::array<uint32_t,2> nowMix() noexcept{
-		// thanks to Howard Hinnant for this
-		const auto now = std::chrono::system_clock::now().time_since_epoch();
+	uint64_t now64() noexcept{
+		auto const [sec_int, mil_int] = nowMix();
 
-		const auto sec = std::chrono::duration_cast<std::chrono::seconds>(now);
-		const auto mil = std::chrono::duration_cast<std::chrono::microseconds>(now - sec);
-
-		return std::array<uint32_t,2>{
-			(uint32_t) sec.count(),
-			(uint32_t)mil.count()
-		};
+		return to64(sec_int, mil_int);
 	}
 
-	uint64_t now64() noexcept{
+	std::array<uint32_t,2> nowMix() noexcept{
 		// thanks to Howard Hinnant for this
 		const auto now = std::chrono::system_clock::now().time_since_epoch();
 
@@ -39,16 +32,19 @@ namespace mytime{
 
 		// what is going on here:
 		//
-		// uint64_t with at least 55 bits is casted to uint32_t.
+		// sec: uint64_t with at least 55 bits is casted to uint32_t.
 		// It will be good until year 2106-02-07
 		//
-		// uint65_t with exact    20 bits is casted to uint32_t.
+		// mil: uint65_t with exact    20 bits is casted to uint32_t.
 		// This means there are 12 unused bits.
 		//
-		// So finally we have:
+		// So finally we have uint64_t
 		// [32 bit seconds][12 bit unused][20 bits microseconds]
 
-		return to64(sec_int, mil_int);
+		return std::array<uint32_t,2>{
+			sec_int,
+			mil_int
+		};
 	}
 
 	std::string_view toString(uint32_t const date2, std::string_view const format, to_string_buffer_t &buffer) noexcept{
