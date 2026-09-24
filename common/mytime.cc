@@ -11,7 +11,14 @@ namespace mytime{
 
 		const auto sec = std::chrono::duration_cast<std::chrono::seconds>(now);
 
-		return (uint32_t) sec.count();
+		const auto sec_int = (uint32_t) sec.count();
+
+		// what is going on here:
+		//
+		// sec: uint64_t with at least 55 bits is casted to uint32_t.
+		// It will be good until year 2106-02-07
+
+		return sec_int;
 	}
 
 	uint64_t now64() noexcept{
