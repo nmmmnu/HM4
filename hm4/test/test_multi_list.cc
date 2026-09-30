@@ -4,6 +4,7 @@
 #include <unistd.h> 	// sleep
 
 #include <iostream>
+#include <string_view>
 
 #include "smallvector.h"
 
@@ -24,6 +25,8 @@ inline void sleep(){
 #include "trackingallocator.h"
 #include "stdallocator.h"
 
+#include "htimerlist.h"
+
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;
 	using v		= type;
@@ -43,7 +46,7 @@ Allocator_::v allocator;
 
 
 template <class Iterator>
-bool iteratorDereference(Iterator const &it, Iterator const &et, const char *value){
+bool iteratorDereference(Iterator const &it, Iterator const &et, std::string_view value){
 	if (false){
 		std::cout
 			<< (it != et ? "*" : "end")	<< ' '
@@ -61,11 +64,11 @@ bool iteratorDereference(Iterator const &it, Iterator const &et, const char *val
 }
 
 template <bool Exact, class List>
-bool getCheck(List const &list, const char *key, const char *value){
+bool getCheck(List const &list, std::string_view key, std::string_view value){
 	if constexpr(Exact){
 		const auto *p = hm4::getPair(list, key);
 
-		if (value)
+		if (!value.empty())
 			return p && p->getVal() == value;
 
 		if (!p)
@@ -76,7 +79,7 @@ bool getCheck(List const &list, const char *key, const char *value){
 		auto const it = list.find(key);
 		auto const et = list.end();
 
-		if (value)
+		if (!value.empty())
 			return iteratorDereference(it, et, value);
 
 		if (it == et)
@@ -87,7 +90,7 @@ bool getCheck(List const &list, const char *key, const char *value){
 }
 
 template <class List>
-bool getCheck(List const &list, const char *key){
+bool getCheck(List const &list, std::string_view key){
 	auto const it = list.find(key);
 	auto const et = list.end();
 
@@ -122,7 +125,7 @@ void iterator_test(List const &list){
 	auto       it = std::begin(list);
 	auto const et = std::end(list);
 
-	auto advance = [&it, &et](const char *value){
+	auto advance = [&it, &et](std::string_view value){
 		mytest("it deref", 	iteratorDereference(it, et, value)	);
 		++it;
 	};
@@ -155,7 +158,7 @@ void list_test(const List &list, typename List::size_type const count, size_t co
 	// GET
 
 	mytest("get",			getCheck<1>(list, "3 city",	"Sofia"		));
-	mytest("get non existent",	getCheck(list, "nonexistent"			));
+	mytest("get non existent",	getCheck   (list, "nonexistent"			));
 
 	//std::cout << list.bytes() << ' ' << bytes << '\n';
 
@@ -178,14 +181,14 @@ void list_test(const List &list, typename List::size_type const count, size_t co
 #include "multi/duallist.h"
 
 template <class List>
-size_t listInsert(List &list, const char *key, const char *value){
+size_t listInsert(List &list, std::string_view key, std::string_view value){
 	size_t const size = Pair::bytes(key, value);
 	insert(list, key, value);
 	return size;
 }
 
 template <class List>
-void test_DualListErase(const char *name, List &&list1, List &&list2){
+void test_DualListErase(std::string_view name, List &&list1, List &&list2){
 	mytest.begin(name);
 
 	{
@@ -274,7 +277,7 @@ void test_DualListErase(const char *name, List &&list1, List &&list2){
 }
 
 template <class List>
-void test_DualList(const char *name, List &&list1, List &&list2){
+void test_DualList(std::string_view name, List &&list1, List &&list2){
 	mytest.begin(name);
 
 	size_t bytes =
@@ -290,15 +293,19 @@ void test_DualList(const char *name, List &&list1, List &&list2){
 		listInsert(list2, "4 os",	"Linux"	) +
 	0;
 
-	using MyMultiList = hm4::multi::DualList<const List, const List, hm4::multi::DualListEraseType::NORMAL>;
+	using MyMultiList   = hm4::multi::DualList<const List, const List, hm4::multi::DualListEraseType::NORMAL>;
+	using MyMultiListHT = hm4::HTimerList<MyMultiList>;
 
-	MyMultiList list{ list1, list2 };
+	MyMultiList	list{ list1, list2 };
+	MyMultiListHT	listH{ list };
 
-	list_test(list, 4, bytes);
+	list_test(listH, 4, bytes);
+
+	listH.logHistogram();
 }
 
 template <class List>
-void test_DualListEmpty(const char *name, List &&list1, List &&list2){
+void test_DualListEmpty(std::string_view name, List &&list1, List &&list2){
 	size_t bytes =
 		listInsert(list2, "1 name",	"Niki"	) +
 		listInsert(list2, "2 age",	"22"	) +
@@ -324,7 +331,7 @@ void test_DualListEmpty(const char *name, List &&list1, List &&list2){
 #include "multi/collectionlist.h"
 
 template <class List>
-void test_CollectionList(const char *name){
+void test_CollectionList(std::string_view name){
 	using Vector = SmallVector<List, 16>;
 	Vector v;
 
@@ -378,11 +385,15 @@ void test_CollectionList(const char *name){
 	{
 		mytest.begin(name);
 
-		using MyMultiTable = hm4::multi::CollectionList<Vector>;
+		using MyMultiTable   = hm4::multi::CollectionList<Vector>;
+		using MyMultiTableHT = hm4::HTimerList<MyMultiTable>;
 
-		MyMultiTable table{ v };
+		MyMultiTable	list{ v };
+		MyMultiTableHT	listH{ list };
 
-		list_test(table, 4, bytes);
+		list_test(listH, 4, bytes);
+
+		listH.logHistogram();
 	}
 }
 

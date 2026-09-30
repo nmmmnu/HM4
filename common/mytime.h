@@ -26,6 +26,9 @@ namespace mytime{
 
 	std::array<uint32_t,2> nowMix() noexcept;
 
+	// microseconds from steady clock
+	uint64_t nowSteadyMicoseconds64() noexcept;
+
 	constexpr uint64_t to64(uint32_t const sec, uint32_t const usec = 0) noexcept{
 		return uint64_t{sec} << 32 | usec;
 	}

@@ -13,6 +13,8 @@ MyTest mytest;
 #include "trackingallocator.h"
 #include "stdallocator.h"
 
+#include "htimerlist.h"
+
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;
 	using v		= type;
@@ -32,7 +34,7 @@ Allocator_::v allocator;
 // ==============================
 
 template <class List>
-size_t listInsert(List &list, const char *key, const char *value){
+size_t listInsert(List &list, std::string_view key, std::string_view value){
 	auto const &[ok, status, pair] = insert(list, key, value);
 
 	// collect size, but via iterator...
@@ -67,7 +69,7 @@ auto listPopulate(List &list){
 // ==============================
 
 template <class Iterator>
-bool iteratorDereference(Iterator const &it, Iterator const &et, const char *value){
+bool iteratorDereference(Iterator const &it, Iterator const &et, std::string_view value){
 	return
 		it != et &&
 		  it->getVal() == value &&
@@ -76,11 +78,11 @@ bool iteratorDereference(Iterator const &it, Iterator const &et, const char *val
 }
 
 template <bool Exact, class List>
-bool getCheck(List const &list, const char *key, const char *value){
+bool getCheck(List const &list, std::string_view key, std::string_view value){
 	if constexpr(Exact){
 		const auto *p = hm4::getPair(list, key);
 
-		if (value)
+		if (!value.empty())
 			return p && p->getVal() == value;
 
 		if (!p)
@@ -91,7 +93,7 @@ bool getCheck(List const &list, const char *key, const char *value){
 		auto const it = list.find(key);
 		auto const et = list.end();
 
-		if (value)
+		if (!value.empty())
 			return iteratorDereference(it, et, value);
 
 		if (it == et)
@@ -113,9 +115,9 @@ void iterator_test_get(const List &list){
 	mytest("it",			getCheck<1>(list, "3 city",		"Sofia"	));
 	mytest("it",			getCheck<0>(list, "4",			"Linux"	));
 	mytest("it",			getCheck<1>(list, "4 os",		"Linux"	));
-	mytest("it",			getCheck<1>(list, "4 osX",		nullptr	));
-	mytest("it",			getCheck<1>(list, "5",			nullptr	));
-	mytest("it",			getCheck<1>(list, "6",			nullptr	));
+	mytest("it",			getCheck<1>(list, "4 osX",		{}	));
+	mytest("it",			getCheck<1>(list, "5",			{}	));
+	mytest("it",			getCheck<1>(list, "6",			{}	));
 
 	// this is no longer supported
 	//mytest("it", 			getCheck(list, "",		"Niki",		std::false_type{}	));
@@ -223,7 +225,7 @@ void list_test(List &list){
 	// GET
 
 	mytest("get",			getCheck<1>(list, "3 city",		"Sofia"	));
-	mytest("get non existent",	getCheck<1>(list, "nonexistent",	nullptr	));
+	mytest("get non existent",	getCheck<1>(list, "nonexistent",	{}	));
 
 
 	// OVERWRITE
@@ -297,7 +299,7 @@ void list_test(List &list){
 }
 
 template <template<class> class List>
-void list_test_hint(const char *name){
+void list_test_hint(std::string_view name){
 	mytest.begin(name);
 
 	Allocator_::v allocator;
@@ -310,15 +312,15 @@ void list_test_hint(const char *name){
 
 	auto const used = allocator.getUsedMemory();
 
-	auto f = [&](const char *val1, const char *val2){
+	auto f = [&](std::string_view val1, std::string_view val2){
 
-		auto chk = [&](const char *val){
+		auto chk = [&](std::string_view val){
 			return
 				getCheck<1>(list, key, val) &&
 				used == allocator.getUsedMemory();
 		};
 
-		erase (list, key	);	mytest("hint test del",		chk(nullptr	));
+		erase (list, key	);	mytest("hint test del",		chk({}		));
 		insert(list, key, val1	);	mytest("hint test set1",	chk(val1	));
 		insert(list, key, val2	);	mytest("hint test set2",	chk(val2	));
 	};
@@ -337,8 +339,10 @@ void list_test_hint(const char *name){
 
 #include "blackholelist.h"
 
-template<>
-void list_test(hm4::BlackHoleList &list){
+template <class List>
+void list_test_blackhole(std::string_view name, List &list){
+	mytest.begin(name);
+
 	listPopulate(list);
 
 	mytest("size estimated",	list.size() == 0						);
@@ -354,18 +358,28 @@ void list_test(hm4::BlackHoleList &list){
 }
 
 template <class List>
-void list_test(const char *name, List &list){
+void list_test(std::string_view name, List &list){
 	mytest.begin(name);
 
 	return list_test(list);
 }
 
 
+
 template <class List, class ...Args>
-void list_test(const char *name, Args &&...args){
+void list_test(std::string_view name, Args &&...args){
 	List list{ std::forward<Args>(args)... };
 
-	return list_test(name, list);
+	hm4::HTimerList<List> listH(list);
+
+	if constexpr(std::is_same_v<List, hm4::BlackHoleList>){
+		list_test_blackhole(name, listH);
+	}else{
+		list_test(name, listH);
+	}
+
+	listH.logHistogram();
+
 }
 
 #include "multi/duallist.h"
@@ -375,7 +389,7 @@ template<class Allocator>
 using MyDualList = hm4::multi::DualList<hm4::VectorList<Allocator>, hm4::BlackHoleList, hm4::multi::DualListEraseType::NORMAL>;
 
 template <>
-void list_test<MyDualList<Allocator> >(const char *name){
+void list_test<MyDualList<Allocator> >(std::string_view name){
 	hm4::VectorList<Allocator>	memtable{ allocator };
 	hm4::BlackHoleList		disktable;
 
@@ -390,7 +404,7 @@ template<class Allocator>
 using MySingleList = hm4::multi::SingleList<hm4::VectorList<Allocator> >;
 
 template <>
-void list_test<MySingleList<Allocator> >(const char *name){
+void list_test<MySingleList<Allocator> >(std::string_view name){
 	hm4::VectorList<Allocator>	memtable{ allocator };
 	MySingleList<Allocator>		list{ memtable };
 

@@ -1,8 +1,10 @@
-#ifndef _MY_TEST_H
-#define _MY_TEST_H
+#ifndef MY_TEST_H_
+#define MY_TEST_H_
 
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
+
+#include <string_view>
 
 #include <cstdlib>	// exit
 
@@ -15,7 +17,7 @@ public:
 	MyTest(bool const show = DEFAULT_SHOW, bool const stop = DEFAULT_STOP ) : show(show), stop(stop){}
 
 public:
-	void operator()(const char *test, bool const result){
+	void operator()(std::string_view test, bool const result){
 		if (show || result == false)
 			fmt::print(" - Testing {:25} {}\n", test, result ? "OK" : "Fail");
 
@@ -24,7 +26,7 @@ public:
 	}
 
 public:
-	void begin(const char *title){
+	void begin(std::string_view title){
 		fmt::print("\nTesting {}...\n", title);
 	}
 

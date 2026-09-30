@@ -27,6 +27,15 @@ namespace mytime{
 		return to64(sec_int, mil_int);
 	}
 
+	// microseconds from steady clock
+	uint64_t nowSteadyMicoseconds64() noexcept{
+		return static_cast<uint64_t>(
+			std::chrono::duration_cast<std::chrono::microseconds>(
+				std::chrono::steady_clock::now().time_since_epoch()
+			).count()
+		);
+	}
+
 	std::array<uint32_t,2> nowMix() noexcept{
 		// thanks to Howard Hinnant for this
 		const auto now = std::chrono::system_clock::now().time_since_epoch();
