@@ -13,7 +13,7 @@ MyTest mytest;
 #include "trackingallocator.h"
 #include "stdallocator.h"
 
-#include "htimerlist.h"
+#include "timerlist.h"
 
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;
@@ -370,7 +370,7 @@ template <class List, class ...Args>
 void list_test(std::string_view name, Args &&...args){
 	List list{ std::forward<Args>(args)... };
 
-	hm4::HTimerList<List> listH(list);
+	hm4::TimerList<List, 0> listH(list);
 
 	if constexpr(std::is_same_v<List, hm4::BlackHoleList>){
 		list_test_blackhole(name, listH);
@@ -378,7 +378,7 @@ void list_test(std::string_view name, Args &&...args){
 		list_test(name, listH);
 	}
 
-	listH.chain(hm4::chain::log_histogram{});
+	listH.chain(hm4::chain::log_histogram<0>{});
 }
 
 #include "multi/duallist.h"

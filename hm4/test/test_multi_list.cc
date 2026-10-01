@@ -25,7 +25,7 @@ inline void sleep(){
 #include "trackingallocator.h"
 #include "stdallocator.h"
 
-#include "htimerlist.h"
+#include "timerlist.h"
 
 struct Allocator_1{
 	using type	= MyAllocator::STDAllocator;
@@ -294,14 +294,14 @@ void test_DualList(std::string_view name, List &&list1, List &&list2){
 	0;
 
 	using MyMultiList   = hm4::multi::DualList<const List, const List, hm4::multi::DualListEraseType::NORMAL>;
-	using MyMultiListHT = hm4::HTimerList<MyMultiList>;
+	using MyMultiListHT = hm4::TimerList<MyMultiList, 0>;
 
 	MyMultiList	list{ list1, list2 };
 	MyMultiListHT	listH{ list };
 
 	list_test(listH, 4, bytes);
 
-	listH.chain(hm4::chain::log_histogram{});
+	listH.chain(hm4::chain::log_histogram<0>{});
 }
 
 template <class List>
@@ -386,14 +386,14 @@ void test_CollectionList(std::string_view name){
 		mytest.begin(name);
 
 		using MyMultiTable   = hm4::multi::CollectionList<Vector>;
-		using MyMultiTableHT = hm4::HTimerList<MyMultiTable>;
+		using MyMultiTableHT = hm4::TimerList<MyMultiTable, 0>;
 
 		MyMultiTable	list{ v };
 		MyMultiTableHT	listH{ list };
 
 		list_test(listH, 4, bytes);
 
-		listH.chain(hm4::chain::log_histogram{});
+		listH.chain(hm4::chain::log_histogram<0>{});
 	}
 }
 
