@@ -7,6 +7,8 @@
 
 #include "flushlistbase.h"
 
+#include "listchain.h"
+
 namespace hm4{
 
 
@@ -51,10 +53,11 @@ public:
 		save_(*list1_);
 	}
 
-	auto mutable_version() const{
+	using ConcurrentFlushListBase<ET, List>::chain;
+
+	constexpr auto chain(chain::mutable_version) const{
 		return version_;
 	}
-
 
 	// Command pattern
 	bool command(){

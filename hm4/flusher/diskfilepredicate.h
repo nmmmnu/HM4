@@ -1,6 +1,8 @@
 #ifndef DISK_FILE_PREDICATE_H_
 #define DISK_FILE_PREDICATE_H_
 
+#include "listchain.h"
+
 namespace hm4::flusher{
 
 
@@ -11,9 +13,9 @@ struct DiskFileAllocatorPredicate{
 	template<class List>
 	bool operator()(List const &list, size_t const bytes) const{
 		auto const minBytes =
-				bytes					+
-				list.mutable_list().INTERNAL_NODE_SIZE	+
-				SAFE_MARGIN				+
+				bytes							+
+				list.chain(chain::mutable_list{})->INTERNAL_NODE_SIZE	+
+				SAFE_MARGIN						+
 				8u // padding correction
 		;
 

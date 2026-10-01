@@ -5,6 +5,8 @@
 
 #include "flushlistbase.h"
 
+#include "listchain.h"
+
 namespace hm4{
 
 
@@ -39,7 +41,7 @@ public:
 		save_();
 	}
 
-	auto mutable_version() const{
+	constexpr auto chain(chain::mutable_version) const{
 		return version_;
 	}
 

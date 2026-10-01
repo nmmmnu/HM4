@@ -2,6 +2,8 @@
 #include "mystring.h"
 #include "logger.h"
 
+#include "listchain.h"
+
 #include <algorithm>	// std::clamp
 
 #include "shared_stoppredicate.h"
@@ -95,11 +97,11 @@ namespace net::worker::commands::MutableX{
 				// update by insert
 
 				for(auto const &x : pcontainer){
-					auto const v1 = list.mutable_version();
+					auto const v1 = list.chain(hm4::chain::mutable_version{});
 
 					p.process(list, x);
 
-					auto const v2 = list.mutable_version();
+					auto const v2 = list.chain(hm4::chain::mutable_version{});
 
 					if (v1 != v2){
 						// The list version is different.

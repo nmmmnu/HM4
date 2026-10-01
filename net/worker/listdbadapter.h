@@ -6,6 +6,8 @@
 #include "pair.h"
 #include "logger.h"
 
+#include "listchain.h"
+
 template<class List_, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
 struct ListDBAdapter{
 	using List = List_;
@@ -78,6 +80,8 @@ public:
 			#pragma GCC diagnostic push
 			#pragma GCC diagnostic ignored "-Wsequence-point"
 
+			using hm4::chain::mutable_list;
+
 			return concatenateBuffer(
 				str,
 
@@ -98,9 +102,9 @@ public:
 				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
 
 			"\n"	"# MemList"											"\n",
-				"MemList          : ", list_.mutable_list().getName()			,			"\n",
-				"MemList Keys     : ", to_string(list_.mutable_list().size()		,	buffer[i++]),	"\n",
-				"MemList Size     : ", to_string(list_.mutable_list().bytes()		,	buffer[i++]),	"\n",
+				"MemList          : ", list_.chain(mutable_list{})->getName()		,			"\n",
+				"MemList Keys     : ", to_string(list_.chain(mutable_list{})->size()	,	buffer[i++]),	"\n",
+				"MemList Size     : ", to_string(list_.chain(mutable_list{})->bytes()	,	buffer[i++]),	"\n",
 
 			"\n"	"# Allocator"											"\n",
 				"Allocator        : ", list_.getAllocator().getName()			,			"\n",
@@ -134,7 +138,7 @@ public:
 		return list_;
 	}
 
-	auto const *operator->() const{
+	const auto *operator->() const{
 		return &list_;
 	}
 

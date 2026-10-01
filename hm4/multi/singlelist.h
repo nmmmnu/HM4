@@ -36,8 +36,14 @@ public:
 		return list_->empty();
 	}
 
-	auto const &mutable_list() const{
-		return list_->mutable_list();
+	template<typename Command>
+	constexpr auto chain(Command const &cmd) const{
+		return list_->chain(cmd);
+	}
+
+	template<typename Command>
+	constexpr auto chainMut(Command const &cmd){
+		return list_->chainMut(cmd);
 	}
 
 	size_t bytes() const{

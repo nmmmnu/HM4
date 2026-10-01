@@ -3,6 +3,7 @@
 
 #include "ilist.h"
 #include "listcounter.h"
+#include "listchain.h"
 
 #include "pointer_iterator.h"
 
@@ -64,15 +65,15 @@ public:
 		return size() == 0;
 	}
 
-	auto const &mutable_list() const{
-		return *this;
+	constexpr const auto *chain(chain::mutable_list) const{
+		return this;
+	}
+
+	constexpr static uint64_t chain(chain::mutable_version){
+		return 0;
 	}
 
 	// some tests uses VectorList without FlushList:
-
-	constexpr static uint64_t mutable_version(){
-		return 0;
-	}
 
 	void mutable_notify(PairFactoryMutableNotifyMessage const &msg){
 		lc_.upd(msg.bytes_old, msg.bytes_new);
