@@ -63,7 +63,7 @@ namespace mysparsearray{
 			return static_cast<size_type>(dense_.size());
 		}
 
-		constexpr auto const *data() const{
+		constexpr const auto *data() const{
 			return dense_.data();
 		}
 

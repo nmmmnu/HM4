@@ -42,7 +42,7 @@ public:
 			flush();
 	}
 
-	void operator()(Pair const *pair){
+	void operator()(const Pair *pair){
 		return operator()(*pair);
 	}
 

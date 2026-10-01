@@ -29,7 +29,7 @@ public:
 		return & operator*();
 	}
 
-	std::thread const *operator->() const{
+	const std::thread *operator->() const{
 		return & operator*();
 	}
 
