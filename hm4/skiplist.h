@@ -3,6 +3,7 @@
 
 #include "ilist.h"
 #include "listcounter.h"
+#include "listchain.h"
 
 #include <array>
 
@@ -46,8 +47,8 @@ public:
 	template<class PFactory>
 	InsertResult insertF(PFactory &factory);
 
-	auto const &mutable_list() const{
-		return *this;
+	constexpr const auto *chain(chain::mutable_list) const{
+		return this;
 	}
 
 	void mutable_notify(PairFactoryMutableNotifyMessage const &msg){

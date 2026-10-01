@@ -2,6 +2,7 @@
 #define _BLACK_HOLE_LIST_LIST_H
 
 #include "ilist.h"
+#include "listchain.h"
 #include "nullallocator.h"
 
 namespace hm4{
@@ -43,8 +44,8 @@ public:
 		return InsertResult::skipInserted();
 	}
 
-	auto const &mutable_list() const{
-		return *this;
+	constexpr const auto *chain(chain::mutable_list) const{
+		return this;
 	}
 
 	constexpr static void mutable_notify(PairFactoryMutableNotifyMessage const &){

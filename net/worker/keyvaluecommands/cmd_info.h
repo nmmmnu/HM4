@@ -1,6 +1,6 @@
 #include "base.h"
 #include "mytime.h"
-
+#include "listchain.h"
 
 
 namespace net::worker::commands::Info{
@@ -56,7 +56,7 @@ namespace net::worker::commands::Info{
 
 		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
 			return result.set(
-				db->mutable_list().size()
+				db->chain(hm4::chain::mutable_list{})->size()
 			);
 		}
 

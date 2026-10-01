@@ -301,7 +301,7 @@ void test_DualList(std::string_view name, List &&list1, List &&list2){
 
 	list_test(listH, 4, bytes);
 
-	listH.logHistogram();
+	listH.chain(hm4::chain::log_histogram{});
 }
 
 template <class List>
@@ -393,7 +393,7 @@ void test_CollectionList(std::string_view name){
 
 		list_test(listH, 4, bytes);
 
-		listH.logHistogram();
+		listH.chain(hm4::chain::log_histogram{});
 	}
 }
 

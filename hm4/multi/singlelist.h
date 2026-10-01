@@ -42,6 +42,16 @@ namespace hm4::multi{
 				return list_->bytes();
 			}
 
+			template<typename Command>
+			constexpr auto chain(Command const &cmd) const{
+				return list_->chain(cmd);
+			}
+
+			template<typename Command>
+			constexpr auto chainMut(Command const &cmd){
+				return list_->chainMut(cmd);
+			}
+
 		public:
 			iterator begin() const{
 				return list_->begin();

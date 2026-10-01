@@ -378,8 +378,7 @@ void list_test(std::string_view name, Args &&...args){
 		list_test(name, listH);
 	}
 
-	listH.logHistogram();
-
+	listH.chain(hm4::chain::log_histogram{});
 }
 
 #include "multi/duallist.h"

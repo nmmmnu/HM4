@@ -5,6 +5,16 @@
 #include "myhistogramtimer.h"
 
 namespace hm4{
+	namespace chain{
+		struct log_histogram{
+			char		mode	= ANY;
+			uint64_t	id	= 0;
+
+			constexpr static char ANY	= 'A';
+			constexpr static char READ	= 'R';
+			constexpr static char WRITE	= 'W';
+		};
+	}
 
 	namespace htimer_list_impl_{
 		constexpr size_t		BAR_MAX_WIDTH	= 14;
@@ -60,23 +70,23 @@ namespace hm4{
 			}
 		}
 
-		inline void logHistogram(	my_histogram_timer::Timer const &hR){
-
-			logHistogram(hR, "Read"		);
-		}
-
-		inline void logHistogram(	my_histogram_timer::Timer const &hR,
-					my_histogram_timer::Timer const &hW){
-
-			logHistogram(hR, "Read"		);
-			logHistogram(hW, "Write"	);
+		template<bool B>
+		void logHistogram(my_histogram_timer::Timer const &h){
+			if constexpr(B)
+				logHistogram(h, "Write"		);
+			else
+				logHistogram(h, "Read"		);
 		}
 
 
 
 		template <class List>
 		struct HTimerListBase : public multi::SingleList<List>{
-			using multi::SingleList<List>::SingleList;
+			using Base = multi::SingleList<List>;
+
+			HTimerListBase(List &list, uint64_t id = 0) :
+								Base(list),
+								id_(id){}
 
 		public:
 			auto begin() const{
@@ -104,27 +114,20 @@ namespace hm4{
 			}
 
 		public:
-			void logHistogram() const{
-				htimer_list_impl_::logHistogram(timerRead_);
+			using Base::chain;
+
+			constexpr void chain(chain::log_histogram const &a) const{
+				if (id_ == a.id){
+					if (a.mode == a.ANY || a.mode == a.READ)
+						htimer_list_impl_::logHistogram<0>(timerRead_);
+				}
 			}
-
-			void crontab() const{
-				logHistogram();
-
-				list_->crontab();
-			}
-
-			void crontab(){
-				logHistogram();
-
-				list_->crontab();
-			}
-
-		protected:
-			using	multi::SingleList<List>::list_;
 
 		protected:
 			mutable my_histogram_timer::Timer	timerRead_;
+			uint64_t				id_;
+
+			using multi::SingleList<List>::list_;
 		};
 	} // htimerlist_impl_
 
@@ -132,14 +135,18 @@ namespace hm4{
 
 	template<class List, class = std::void_t<> >
 	struct HTimerList : public htimer_list_impl_::HTimerListBase<List>{
-		using htimer_list_impl_::HTimerListBase<List>::HTimerListBase;
+		using Base = htimer_list_impl_::HTimerListBase<List>;
+
+		using Base::HTimerListBase;
 	};
 
 
 
 	template<class List>
 	struct HTimerList<List, std::void_t<typename List::Allocator> > : public htimer_list_impl_::HTimerListBase<List>{
-		using htimer_list_impl_::HTimerListBase<List>::HTimerListBase;
+		using Base = htimer_list_impl_::HTimerListBase<List>;
+
+		using Base::HTimerListBase;
 
 		using Allocator = typename List::Allocator;
 
@@ -164,20 +171,16 @@ namespace hm4{
 		}
 
 	public:
-		void logHistogram() const{
-			htimer_list_impl_::logHistogram(timerRead_, timerWrite_);
-		}
+		using Base::chain;
 
-		void crontab() const{
-			logHistogram();
+		constexpr void chain(chain::log_histogram const &a) const{
+			if (id_ == a.id){
+				if (a.mode == a.ANY || a.mode == a.READ)
+					htimer_list_impl_::logHistogram<0>(timerRead_);
 
-			list_->crontab();
-		}
-
-		void crontab(){
-			logHistogram();
-
-			list_->crontab();
+				if (a.mode == a.ANY || a.mode == a.WRITE)
+					htimer_list_impl_::logHistogram<1>(timerWrite_);
+			}
 		}
 
 	private:
@@ -185,10 +188,10 @@ namespace hm4{
 
 		using htimer_list_impl_::HTimerListBase<List>::timerRead_;
 		using htimer_list_impl_::HTimerListBase<List>::list_;
+		using htimer_list_impl_::HTimerListBase<List>::id_;
 	};
 
 } // namespace
-
 
 #endif
 

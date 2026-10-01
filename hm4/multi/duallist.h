@@ -51,12 +51,14 @@ public:
 		return list1_->empty() && list2_->empty();
 	}
 
-	auto const &mutable_list() const{
-		return list1_->mutable_list();
+	template<typename Command>
+	constexpr auto chain(Command const &cmd) const{
+		return list1_->chain(cmd);
 	}
 
-	constexpr uint64_t mutable_version() const{
-		return list1_->mutable_version();
+	template<typename Command>
+	constexpr auto chainMut(Command const &cmd){
+		return list1_->chainMut(cmd);
 	}
 
 	constexpr void mutable_notify( PairFactoryMutableNotifyMessage const &message){
