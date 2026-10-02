@@ -36,12 +36,14 @@ namespace binloglist_impl{
 
 template <class List, class BinLogger, bool UnlinkFile>
 class BinLogList : public multi::SingleList<List>, binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>{
+	using Base	= multi::SingleList<List>;
+
 public:
-	using Allocator = typename multi::SingleList<List>::Allocator;
+	using Allocator = typename Base::Allocator;
 
 	template <class UBinLogger>
 	BinLogList(List &list, UBinLogger &&binlogger) :
-					multi::SingleList<List>(list),
+				Base(list),
 					binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>(std::forward<UBinLogger>(binlogger)){}
 
 	bool clear(){
@@ -92,20 +94,18 @@ public:
 		return list_->mutable_notify(message);
 	}
 
-	constexpr void crontab() const{
-		// no flush while read only
-
-		list_->crontab();
-	}
+	using Base::crontab;
 
 	void crontab(){
+		// no flush in const version
+
 		binlogger_.flush();
 
 		list_->crontab();
 	}
 
 private:
-	using	multi::SingleList<List>::list_;
+	using	Base::list_;
 	using	binloglist_impl::BinLogListBase<BinLogger, UnlinkFile>::binlogger_;
 };
 
