@@ -52,6 +52,10 @@ namespace hm4::multi{
 				return list_->chainMut(cmd);
 			}
 
+			constexpr void crontab() const{
+				list_->crontab();
+			}
+
 		public:
 			iterator begin() const{
 				return list_->begin();
