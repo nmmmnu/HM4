@@ -124,8 +124,6 @@ public:
 	}
 
 	auto save(){
-		// return invokeCommand__(cmdSave_);
-
 		if constexpr(MUTABLE){
 			return list_.chainMut(hm4::chain::flush{});
 		}else{

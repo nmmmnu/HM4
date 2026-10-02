@@ -1,5 +1,5 @@
-#ifndef BIN_LOG_LIST_H_
-#define BIN_LOG_LIST_H_
+#ifndef TIMER_LIST_H_
+#define TIMER_LIST_H_
 
 #include "multi/singlelist.h"
 #include "myhistogramtimer.h"
@@ -22,10 +22,10 @@ namespace hm4{
 		constexpr std::string_view	BAR_EMPTY	= " ";
 		constexpr Logger::Level		LOG_LEVEL	= Logger::DEBUG;
 
-		inline void logHistogram(my_histogram_timer::Timer const &h, std::string_view msg){
+		inline void logHistogram(my_histogram_timer::Timer const &h, uint64_t const id, std::string_view msg){
 			auto const result = h.get(BAR_MAX_WIDTH);
 
-			logger<LOG_LEVEL>() << msg << result.total << "events";
+			logger<LOG_LEVEL>() << "ID" << id << msg << result.total << "events";
 
 			for(size_t i = 0; i < h.size(); ++i){
 				auto const &row = result.events[i];
@@ -71,11 +71,11 @@ namespace hm4{
 		}
 
 		template<bool B>
-		void logHistogram(my_histogram_timer::Timer const &h){
+		void logHistogram(my_histogram_timer::Timer const &h, uint64_t const id){
 			if constexpr(B)
-				logHistogram(h, "Write"		);
+				logHistogram(h, id, "Write"	);
 			else
-				logHistogram(h, "Read"		);
+				logHistogram(h, id, "Read"	);
 		}
 
 
@@ -85,6 +85,8 @@ namespace hm4{
 			using Base = multi::SingleList<List>;
 
 			using Base::SingleList;
+
+			constexpr static bool USE_CRONTAB = false;
 
 		public:
 			auto begin() const{
@@ -116,7 +118,27 @@ namespace hm4{
 
 			constexpr void chain(chain::log_histogram<ID> const &a) const{
 				if (a.mode == a.ANY || a.mode == a.READ)
-					timer_list_impl_::logHistogram<0>(timerRead_);
+					timer_list_impl_::logHistogram<0>(timerRead_, ID);
+			}
+
+			using Base::crontab;
+
+			constexpr void crontab(){
+				crontab_();
+
+				list_->crontab();
+			}
+
+			constexpr void crontab() const{
+				if constexpr(USE_CRONTAB)
+					crontab_();
+
+				list_->crontab();
+			}
+
+		private:
+			constexpr void crontab_(){
+				timer_list_impl_::logHistogram<0>(timerRead_, ID);
 			}
 
 		protected:
@@ -146,6 +168,8 @@ namespace hm4{
 
 		using Allocator = typename Base::Allocator;
 
+		using Base::USE_CRONTAB;
+
 	public:
 		template<class PFactory>
 		auto insertF(PFactory &factory){
@@ -171,11 +195,33 @@ namespace hm4{
 
 		constexpr void chain(chain::log_histogram<ID> const &a) const{
 			if (a.mode == a.ANY || a.mode == a.READ)
-				timer_list_impl_::logHistogram<0>(timerRead_);
+				timer_list_impl_::logHistogram<0>(timerRead_,  ID);
 
 			if (a.mode == a.ANY || a.mode == a.WRITE)
-				timer_list_impl_::logHistogram<1>(timerWrite_);
+				timer_list_impl_::logHistogram<1>(timerWrite_, ID);
 		}
+
+		using Base::crontab;
+
+		constexpr void crontab(){
+			crontab_();
+
+			list_->crontab();
+		}
+
+		constexpr void crontab() const{
+			if constexpr(USE_CRONTAB)
+				crontab_();
+
+			list_->crontab();
+		}
+
+	private:
+		constexpr void crontab_(){
+			timer_list_impl_::logHistogram<0>(timerRead_,  ID);
+			timer_list_impl_::logHistogram<1>(timerWrite_, ID);
+		}
+
 
 	private:
 		mutable my_histogram_timer::Timer	timerWrite_;

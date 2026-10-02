@@ -9,6 +9,8 @@
 #include "flusher/diskfileflush.h"
 #include "flushlist.h"
 
+#include "timerlist.h"
+
 #include "multi/duallist.h"
 
 #include "listdbadapter.h"
@@ -46,17 +48,22 @@ namespace DBAdapterFactory{
 		using MutableFlushList		= MutableFlushListType<ET, MemList, Predicate, Flush, ListLoader>;
 		#endif
 
+		using MutableFlushList_timer	= hm4::TimerList<MutableFlushList, 0>;
+
+		using ImmutableList_timer	= hm4::TimerList<ListLoader::List, 1>;
+
 		using DList			= hm4::multi::DualList<
-							MutableFlushList,
-							ListLoader::List,
+							MutableFlushList_timer,
+							ImmutableList_timer,
 							ET
 						>;
 
-		using CommandSaveObject		= MutableFlushList;
+		using DList_timer		= hm4::TimerList<DList, 2>;
+
 		using CommandReloadObject	= ListLoader;
 
 		using DBAdapter			= ListDBAdapter<
-							DList,
+							DList_timer,
 							CommandReloadObject
 						>;
 
@@ -68,18 +75,27 @@ namespace DBAdapterFactory{
 							std::forward<UStringPathData>(path_data),
 							&slabAllocator
 						},
-						muFlushList_{
+						mutableFlushList_{
 							std::forward<FlushListArgs>(args)...,
 							Predicate{},
 							Flush{ IDGenerator{ serverID }, path_data },
 							loader_
 						},
-						list_{
-							muFlushList_,
+						mutableFlushList_timer_{
+							mutableFlushList_
+						},
+						immutableList_timer_{
 							loader_.getList()
 						},
+						list_{
+							mutableFlushList_timer_,
+							immutableList_timer_
+						},
+						list_timer_{
+							list_
+						},
 						adapter_{
-							list_,
+							list_timer_,
 							/* cmd Reload */ loader_
 						}{}
 
@@ -88,10 +104,13 @@ namespace DBAdapterFactory{
 		}
 
 	private:
-		ListLoader		loader_		;
-		MutableFlushList	muFlushList_	;
-		DList			list_		;
-		DBAdapter		adapter_	;
+		ListLoader		loader_			;
+		MutableFlushList	mutableFlushList_	;
+		MutableFlushList_timer	mutableFlushList_timer_	;
+		ImmutableList_timer	immutableList_timer_	;
+		DList			list_			;
+		DList_timer		list_timer_		;
+		DBAdapter		adapter_		;
 	};
 
 }

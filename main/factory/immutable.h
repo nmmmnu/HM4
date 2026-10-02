@@ -12,7 +12,6 @@ namespace DBAdapterFactory{
 		using CommandObject		= ListLoader;
 		using CommandReloadObject	= CommandObject;
 
-
 		using DBAdapter			= ListDBAdapter<
 							ListLoader::List,
 							CommandReloadObject
