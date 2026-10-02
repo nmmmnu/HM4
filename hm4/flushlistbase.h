@@ -8,6 +8,8 @@
 
 #include <type_traits>
 
+#include "flushlistchain.h"
+
 namespace hm4::flushlist_impl_{
 
 

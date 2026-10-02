@@ -57,7 +57,6 @@ namespace DBAdapterFactory{
 
 		using DBAdapter			= ListDBAdapter<
 							DList,
-							CommandSaveObject,
 							CommandReloadObject
 						>;
 
@@ -81,7 +80,6 @@ namespace DBAdapterFactory{
 						},
 						adapter_{
 							list_,
-							/* cmd Save   */ muFlushList_,
 							/* cmd Reload */ loader_
 						}{}
 

@@ -9,12 +9,10 @@ namespace DBAdapterFactory{
 		using ListLoader		= hm4::listloader::SingleListLoader;
 
 		using CommandObject		= ListLoader;
-		using CommandSaveObject		= CommandObject;
 		using CommandReloadObject	= CommandObject;
 
 		using DBAdapter			= ListDBAdapter<
 							ListLoader::List,
-							CommandSaveObject,
 							CommandReloadObject
 						>;
 
@@ -28,7 +26,6 @@ namespace DBAdapterFactory{
 						},
 						adapter_{
 							loader_.getList(),
-							/* cmd Save   */ loader_,
 							/* cmd Reload */ loader_
 						}{}
 
@@ -40,7 +37,6 @@ namespace DBAdapterFactory{
 						},
 						adapter_{
 							loader_.getList(),
-							/* cmd Save   */ loader_,
 							/* cmd Reload */ loader_
 						}{}
 

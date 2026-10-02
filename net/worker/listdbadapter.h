@@ -7,8 +7,9 @@
 #include "logger.h"
 
 #include "listchain.h"
+#include "flushlistchain.h"
 
-template<class List_, class CommandSave=std::nullptr_t, class CommandReload=std::nullptr_t>
+template<class List_, class CommandReload=std::nullptr_t>
 struct ListDBAdapter{
 	using List = List_;
 
@@ -18,10 +19,9 @@ struct ListDBAdapter{
 	constexpr static inline std::string_view SEPARATOR = "~";
 
 public:
-	ListDBAdapter(List &list, CommandSave &cmdSave, CommandReload &cmdReload) :
+	ListDBAdapter(List &list, CommandReload &cmdReload) :
 				list_(list),
-				cmdSave_	(& cmdSave	),
-				cmdReload_	(& cmdReload	){}
+				cmdReload_	(& cmdReload){}
 
 public:
 	// System Methods
@@ -124,7 +124,13 @@ public:
 	}
 
 	auto save(){
-		return invokeCommand__(cmdSave_);
+		// return invokeCommand__(cmdSave_);
+
+		if constexpr(MUTABLE){
+			return list_.chainMut(hm4::chain::flush{});
+		}else{
+			return reload();
+		}
 	}
 
 	auto reload(){
@@ -161,7 +167,6 @@ private:
 
 private:
 	List		&list_;
-	CommandSave	*cmdSave_		= nullptr;
 	CommandReload	*cmdReload_		= nullptr;
 
 	uint64_t	connections		= 0;

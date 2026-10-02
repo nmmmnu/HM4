@@ -13,12 +13,13 @@ namespace hm4{
 
 template <class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
 class FlushList : public multi::SingleList<List>{
-private:
+	using Base = multi::SingleList<List>;
+
 	using FileBuilderWriteBuffers = hm4::disk::FileBuilder::FileBuilderWriteBuffers;
 
 	template <class UPredicate, class UFlusher>
 	FlushList(List &list, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
-					multi::SingleList<List>(list),
+					Base(list),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
 						loader_		(loader					),
@@ -27,7 +28,7 @@ private:
 						bufferHash_	(bufferHash				){}
 
 public:
-	using Allocator = typename multi::SingleList<List>::Allocator;
+	using Allocator = typename Base::Allocator;
 
 	template <class UPredicate, class UFlusher>
 	FlushList(List &list, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader &loader) :
@@ -41,24 +42,29 @@ public:
 		save_();
 	}
 
-	constexpr auto chain(chain::mutable_version) const{
-		return version_;
-	}
-
-	void flush(){
+	bool flush(){
 		save_();
 
 		flushlist_impl_::clear(*list_, loader_);
 
 		++version_;
-	}
-
-	// Command pattern
-	bool command(){
-		flush();
 
 		return true;
 	}
+
+	using Base::chain;
+
+	constexpr auto chain(chain::mutable_version) const{
+		return version_;
+	}
+
+	using Base::chainMut;
+
+	bool chainMut(chain::flush){
+		return flush();
+	}
+
+
 
 	template<class PFactory>
 	auto insertF(PFactory &factory){

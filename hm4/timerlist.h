@@ -138,12 +138,13 @@ namespace hm4{
 
 
 	template<class List, uint64_t ID>
-	struct TimerList<List, ID, std::void_t<typename List::Allocator> > : public timer_list_impl_::TimerListBase<List, ID>{
+	class TimerList<List, ID, std::void_t<typename List::Allocator> > : public timer_list_impl_::TimerListBase<List, ID>{
 		using Base = timer_list_impl_::TimerListBase<List, ID>;
 
+	public:
 		using Base::TimerListBase;
 
-		using Allocator = typename List::Allocator;
+		using Allocator = typename Base::Allocator;
 
 	public:
 		template<class PFactory>

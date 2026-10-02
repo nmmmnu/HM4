@@ -20,12 +20,13 @@ using ConcurrentFlushListBase = multi::DualList<List, List, ET>;
 
 template <hm4::multi::DualListEraseType ET, class List, class Predicate, class Flusher, class ListLoader = std::nullptr_t>
 class ConcurrentFlushList : public ConcurrentFlushListBase<ET, List>{
-private:
+	using Base = ConcurrentFlushListBase<ET, List>;
+
 	using FileBuilderWriteBuffers = hm4::disk::FileBuilder::FileBuilderWriteBuffers;
 
 	template <class UPredicate, class UFlusher>
 	ConcurrentFlushList(List &list1, List &list2, FileBuilderWriteBuffers &buffersWrite, MyBuffer::ByteBufferView bufferPair, MyBuffer::ByteBufferView bufferHash, UPredicate &&predicate, UFlusher &&flusher, ListLoader *loader) :
-					ConcurrentFlushListBase<ET, List>(list1, list2),
+					Base(list1, list2),
 						predicate_	(std::forward<UPredicate>(predicate)	),
 						flusher_	(std::forward<UFlusher>(flusher)	),
 						loader_		(loader					),
@@ -34,7 +35,6 @@ private:
 						bufferHash_	(bufferHash				){}
 
 public:
-	using Base = ConcurrentFlushListBase<ET, List>;
 	using Allocator = typename Base::Allocator;
 
 	template <class UPredicate, class UFlusher>
@@ -59,11 +59,10 @@ public:
 		return version_;
 	}
 
-	// Command pattern
-	bool command(){
-		flush();
+	using Base::chainMut;
 
-		return true;
+	bool chainMut(chain::flush){
+		return flush();
 	}
 
 	template<class PFactory>
@@ -77,12 +76,12 @@ public:
 		return flushlist_impl_::insertF(*this, *list1_, predicate_, factory, context);
 	}
 
-	void flush(){
+	bool flush(){
 		// this is single thread, no guard needed
 
 		if (empty(*list1_)){
 			logger<Logger::NOTICE>() << "No data for flushing.";
-			return;
+			return true;
 		}
 
 		logger<Logger::NOTICE>() << "Start Flushing data...";
@@ -94,9 +93,11 @@ public:
 		swap(list1_, list2_);
 
 		// we already know the list is not empty.
-		thread_ = ScopedThread{ [this](){
-			 save_(*list2_, false);
-		} };
+		thread_ = ScopedThread{
+			[this](){
+				save_(*list2_, false);
+			}
+		};
 
 		if (!empty(*list1_)){
 			// this also notifiying the loader...
@@ -104,6 +105,8 @@ public:
 		}
 
 		++version_;
+
+		return true;
 	}
 
 private:
