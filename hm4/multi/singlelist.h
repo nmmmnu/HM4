@@ -47,11 +47,6 @@ namespace hm4::multi{
 				return list_->chain(cmd);
 			}
 
-			template<typename Command>
-			constexpr auto chainMut(Command const &cmd){
-				return list_->chainMut(cmd);
-			}
-
 			constexpr void crontab() const{
 				list_->crontab();
 			}
@@ -119,8 +114,11 @@ namespace hm4::multi{
 
 
 	template<class List>
-	struct SingleList<List, std::void_t<typename List::Allocator> > : public single_list_impl_::SingleListBase<List>{
-		using single_list_impl_::SingleListBase<List>::SingleListBase;
+	class SingleList<List, std::void_t<typename List::Allocator> > : public single_list_impl_::SingleListBase<List>{
+		using Base = single_list_impl_::SingleListBase<List>;
+
+	public:
+		using Base::SingleListBase;
 
 		using Allocator = typename List::Allocator;
 
@@ -155,12 +153,17 @@ namespace hm4::multi{
 			return list_->mutable_notify(message);
 		}
 
+		using Base::crontab;
+
 		constexpr void crontab(){
 			list_->crontab();
 		}
 
-		constexpr void crontab() const{
-			list_->crontab();
+		using Base::chain;
+
+		template<typename Command>
+		constexpr auto chainMut(Command const &cmd){
+			return list_->chainMut(cmd);
 		}
 
 	protected:
