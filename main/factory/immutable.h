@@ -2,6 +2,8 @@
 #include "multi/collectionlist.h"
 #include "listdbadapter.h"
 
+#include "timerlist.h"
+
 namespace DBAdapterFactory{
 
 	using hm4::disk::DiskList;
@@ -12,8 +14,10 @@ namespace DBAdapterFactory{
 		using CommandObject		= ListLoader;
 		using CommandReloadObject	= CommandObject;
 
+		using ImmutableList_timer	= hm4::TimerList<ListLoader::List, 0>;
+
 		using DBAdapter			= ListDBAdapter<
-							ListLoader::List,
+							const ImmutableList_timer,
 							CommandReloadObject
 						>;
 
@@ -25,8 +29,11 @@ namespace DBAdapterFactory{
 							std::forward<UStringPathData>(path_data),
 							&allocator
 						},
+						immutableList_timer_{
+							loader_.getList()
+						},
 						adapter_{
-							loader_.getList(),
+							immutableList_timer_,
 							/* cmd Reload */ loader_
 						}{}
 
@@ -35,8 +42,9 @@ namespace DBAdapterFactory{
 		}
 
 	private:
-		ListLoader		loader_;
-		DBAdapter		adapter_;
+		ListLoader		loader_			;
+		ImmutableList_timer	immutableList_timer_	;
+		DBAdapter		adapter_		;
 	};
 
 }

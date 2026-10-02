@@ -86,7 +86,7 @@ namespace hm4{
 
 			using Base::SingleList;
 
-			constexpr static bool USE_CRONTAB = false;
+			constexpr static bool USE_CRONTAB = !false;
 
 		public:
 			auto begin() const{
@@ -137,7 +137,7 @@ namespace hm4{
 			}
 
 		private:
-			constexpr void crontab_(){
+			constexpr void crontab_() const{
 				timer_list_impl_::logHistogram<0>(timerRead_, ID);
 			}
 
