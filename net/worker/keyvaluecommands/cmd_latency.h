@@ -242,8 +242,6 @@ namespace net::worker::commands::Latency{
 	private:
 		constexpr static size_t			BUFFER_SIZE	= 2048; // 1910 when ASCII;
 
-		constexpr static std::string_view	ERROR_MESSAGE	= "INTERNAL ERROR IN LATENCYHUMAN, PLEASE REPORT A BUG!";
-
 		constexpr static size_t			BAR_MAX_WIDTH	= 14;
 		constexpr static std::string_view	BAR_FULL	= "#####" "#####" "#####" "#####";
 	//	constexpr static std::string_view	BAR_FULL	= "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪";
