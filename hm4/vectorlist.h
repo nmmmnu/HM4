@@ -69,8 +69,19 @@ public:
 		return this;
 	}
 
+	// because VectorList is used for tests
 	constexpr static uint64_t chain(chain::mutable_version){
 		return 0;
+	}
+
+	// because VectorList is used for tests
+	template<typename T>
+	constexpr static const void *chain(T const &){
+		return nullptr;
+	}
+
+	template<typename T>
+	constexpr static void chainMut(T const &){
 	}
 
 	// some tests uses VectorList without FlushList:

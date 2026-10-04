@@ -3,6 +3,10 @@
 #include "inifile.h"
 #include "mystring.h"
 
+#define FMT_HEADER_ONLY
+#include "fmt/core.h"
+#include "fmt/compile.h"
+
 namespace impl_{
 	template <typename Def>
 	void put(std::string_view const name, Def const &def, std::string_view const description){

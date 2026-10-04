@@ -44,8 +44,8 @@ namespace net{
 		using WorkerStatus		= worker::WorkerStatus;
 
 
-		constexpr static auto FMT_MASK   = FMT_COMPILE"{:40} | clients: {:5} | spare_pool: {:5}"			);
-		constexpr static auto FMT_MASK_2 = FMT_COMPILE"{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}"	);
+		constexpr static auto FMT_MASK   = FMT_COMPILE("{:40} | clients: {:5} | spare_pool: {:5}"		);
+		constexpr static auto FMT_MASK_2 = FMT_COMPILE("{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}"	);
 
 	public:
 		AsyncCompletionLoop(IOEngine &&ioEngine, Worker &&worker, const std::initializer_list<int> &serverFD,

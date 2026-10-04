@@ -2,6 +2,7 @@
 #define MY_LOGGER_H_
 
 #include <iostream>
+
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
 #include "fmt/format.h"

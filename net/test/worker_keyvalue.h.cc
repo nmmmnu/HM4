@@ -26,7 +26,7 @@ private:
 
 	std::nullptr_t	cmd;
 
-	MyDBAdapter	adapter{ list, cmd, cmd };
+	MyDBAdapter	adapter{ list, cmd };
 };
 
 
