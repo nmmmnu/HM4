@@ -17,8 +17,7 @@
 
 #include "logger.h"
 
-#define FMT_HEADER_ONLY
-#include "fmt/core.h"
+
 
 namespace net{
 //	using MyFDStorage = DynamicArrayFDStorage<Client>;
@@ -44,8 +43,8 @@ namespace net{
 		using WorkerStatus		= worker::WorkerStatus;
 
 
-		constexpr static const char *FMT_MASK   = "{:40} | clients: {:5} | spare_pool: {:5}"		;
-		constexpr static const char *FMT_MASK_2 = "{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}"	;
+		constexpr static auto FMT_MASK   = FMT_COMPILE("{:40} | clients: {:5} | spare_pool: {:5}"			);
+		constexpr static auto FMT_MASK_2 = FMT_COMPILE("{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}"	);
 
 	public:
 		AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,

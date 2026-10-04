@@ -21,7 +21,7 @@ namespace net::worker::commands::TDigest{
 
 		template<size_t N>
 		std::string_view formatLine(double d, std::array<char, N> &buffer){
-			constexpr static std::string_view fmt_mask = "{:+015.15f}";
+			constexpr static auto fmt_mask = FMT_COMPILE("{:+015.15f}");
 
 			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
 

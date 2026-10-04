@@ -80,11 +80,11 @@ namespace net::worker::commands::MortonCurve8D{
 		std::string_view formatLine(MCVector const &vvv, uint32_t id, std::array<char, N> &buffer){
 			static_assert(N > DIM * (3 + 1) + 8);
 
-			constexpr static std::string_view fmt_mask =
+			constexpr static auto fmt_mask = FMT_COMPILE(
 							"{:0>3},{:0>3},{:0>3},{:0>3},"
 							"{:0>3},{:0>3},{:0>3},{:0>3},"
 							"{:08x}"
-			;
+			);
 
 			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask,
 											vvv[ 0], vvv[ 1], vvv[ 2], vvv[ 3],

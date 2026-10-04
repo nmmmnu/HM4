@@ -33,7 +33,7 @@ namespace net::worker::commands::Geo{
 			using buffer_t = std::array<char, buffer_t_size>;
 
 			std::string_view formatLine(double lat, double lon, std::string_view hash, buffer_t &buffer){
-				constexpr static std::string_view fmt_mask = "{:+.10f},{:+.10f},{}";
+				constexpr static auto fmt_mask = FMT_COMPILE("{:+.10f},{:+.10f},{}");
 
 				auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, lat, lon, hash);
 

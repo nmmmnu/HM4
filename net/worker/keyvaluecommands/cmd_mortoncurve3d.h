@@ -78,7 +78,7 @@ namespace net::worker::commands::MortonCurve3D{
 		std::string_view formatLine(MCVector const &vvv, uint32_t id, std::array<char, N> &buffer){
 			static_assert(N > DIM * (10 + 1) + 8);
 
-			constexpr static std::string_view fmt_mask = "{:0>10},{:0>10},{:0>10},{:08x}";
+			constexpr static auto fmt_mask = FMT_COMPILE("{:0>10},{:0>10},{:0>10},{:08x}");
 
 			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, vvv[0], vvv[1], vvv[2], id);
 

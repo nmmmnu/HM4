@@ -50,7 +50,7 @@ namespace net::worker::commands::SummaryStats{
 
 		[[nodiscard]]
 		std::string_view convertData(double const d, OutputBlob::buffer_t &buffer){
-			constexpr static std::string_view fmt_mask = "{:+.10f}";
+			constexpr static auto fmt_mask = FMT_COMPILE("{:+.10f}");
 
 			auto const r = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
 

@@ -468,14 +468,14 @@ namespace net::worker::commands{
 		}
 
 		void infoPrint() const{
-			const char *mask  = "{:25} = {:12}";
+			constexpr static auto mask  = FMT_COMPILE("{:25} = {:12}");
 
 			logger_fmt<Logger::STARTUP>(mask, "Total commands",		storage_.size());
 			logger_fmt<Logger::STARTUP>(mask, "Total CommandAliases",	CommandAliases_);
 
 			#ifndef USE_GPERF
 
-				const char *mask2 = "{:25} = {:12} ({})";
+				constexpr static mask2 = FMT_COMPILE("{:25} = {:12} ({})");
 
 				if (auto const chain = map_.longestChain(); chain > 16)
 					logger_fmt<Logger::STARTUP>(mask2, "Hashtable longest chain",	map_.longestChain(), "(chain too long)");

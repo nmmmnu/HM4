@@ -4,7 +4,8 @@
 #include <iostream>
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
-#include "fmt/ostream.h"
+#include "fmt/format.h"
+#include "fmt/compile.h"
 
 namespace my_logger{
 
@@ -106,8 +107,14 @@ namespace my_logger{
 
 			template<typename ...Args>
 			void fmt(Args &&...args){
-				if (writting_)
-					fmt::print(os_, std::forward<Args>(args)...);
+				if (writting_){
+					// fmt::print(os_, std::forward<Args>(args)...);
+
+					fmt::format_to(
+						std::ostreambuf_iterator<char>(os_),
+						std::forward<Args>(args)...
+					);
+       				}
 			}
 
 			template<typename It>

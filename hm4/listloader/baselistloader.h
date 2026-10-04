@@ -82,7 +82,7 @@ namespace hm4::listloader{
 
 					logger<Logger::DEBUG>() << "Disktables dump:";
 
-					constexpr const char *mask = "{} {:>12}   {}   {}";
+					constexpr static auto const mask = FMT_COMPILE("{} {:>12}   {}   {}");
 
 					mytime::to_string_buffer_t buffer[2];
 

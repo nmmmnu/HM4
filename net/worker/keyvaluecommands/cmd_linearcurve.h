@@ -41,7 +41,7 @@ namespace net::worker::commands::LinearCurve{
 			// largest uint64_t is 20 digits.
 			static_assert(N > 20 + 1 + 8);
 
-			constexpr static std::string_view fmt_mask = "{:0>20},{:08x}";
+			constexpr static auto fmt_mask = FMT_COMPILE("{:0>20},{:08x}");
 
 			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, x, id);
 

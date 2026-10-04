@@ -44,7 +44,7 @@ namespace net::worker::commands::HLL{
 
 		template<size_t N>
 		static std::string_view formatDouble(double n, std::array<char, N> &buffer){
-			constexpr static std::string_view fmt_mask = "{:+.10f}";
+			constexpr static auto fmt_mask = FMT_COMPILE("{:+.10f}");
 
 			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, n);
 
