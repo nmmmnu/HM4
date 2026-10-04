@@ -27,10 +27,6 @@ namespace hm4::multi{
 			}
 
 			constexpr auto empty() const{
-				// unlike CollectionList,
-				// if list_->empty() is constexpr,
-				// the optimizer will remove it
-
 				return list_->empty();
 			}
 
@@ -45,6 +41,11 @@ namespace hm4::multi{
 			template<typename Command>
 			constexpr auto chain(Command const &cmd) const{
 				return list_->chain(cmd);
+			}
+
+			template<typename Command>
+			constexpr auto chainMut(Command const &cmd){
+				return list_->chainMut(cmd);
 			}
 
 			constexpr void crontab() const{
@@ -153,17 +154,11 @@ namespace hm4::multi{
 			return list_->mutable_notify(message);
 		}
 
+	//	using Base::chain;
 		using Base::crontab;
 
 		constexpr void crontab(){
 			list_->crontab();
-		}
-
-		using Base::chain;
-
-		template<typename Command>
-		constexpr auto chainMut(Command const &cmd){
-			return list_->chainMut(cmd);
 		}
 
 	protected:

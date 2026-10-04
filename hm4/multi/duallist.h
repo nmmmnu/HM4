@@ -7,6 +7,8 @@
 #include <cassert>
 #include <type_traits>
 
+#include "timerlistchain.h"
+
 namespace hm4::multi{
 
 enum class DualListEraseType{
@@ -53,7 +55,17 @@ public:
 
 	template<typename Command>
 	constexpr auto chain(Command const &cmd) const{
-		return list1_->chain(cmd);
+		// no easy way to do it...
+
+		bool const IM =	std::is_same_v<Command, chain::reset_histogram	<2> > ||
+				std::is_same_v<Command, chain::get_histogram	<2> >
+		;
+
+		if constexpr(!IM){
+			return list1_->chain(cmd);
+		}else{
+			return list2_->chain(cmd);
+		}
 	}
 
 	template<typename Command>
@@ -120,9 +132,11 @@ struct DualList : public DualListBase<List1, List2>{
 template<class List1, class List2, DualListEraseType EraseType>
 class DualList<List1, List2, EraseType, std::void_t<typename List1::Allocator> > : public DualListBase<List1, List2>{
 	static_assert(EraseType != DualListEraseType::NONE);
+
+	using Base = DualListBase<List1, List2>;
+
 public:
-	using Base_ = DualListBase<List1, List2>;
-	using iterator  = typename Base_::iterator;
+	using iterator  = typename Base::iterator;
 
 	using Allocator = typename List1::Allocator;
 
@@ -134,7 +148,7 @@ public:
 		return list1_->getAllocator();
 	}
 
-	using Base_::DualListBase;
+	using Base::DualListBase;
 
 public:
 	// Mutable Methods
@@ -173,6 +187,9 @@ public:
 		return list1_->insertF(factory);
 	}
 
+	//using Base::chain;
+	//using Base::chainMut;
+
 protected:
 	iterator fixDualIterator_(typename List1::iterator &&it){
 		return {
@@ -182,8 +199,8 @@ protected:
 	}
 
 protected:
-	using Base_::list1_;
-	using Base_::list2_;
+	using Base::list1_;
+	using Base::list2_;
 };
 
 

@@ -63,6 +63,7 @@
 #include "keyvaluecommands/cmd_summary_stats.h"		// SSRESERVE, SSADD, SSMERGE, SSGETALL, SSGET, SSMGET, SSADDGETALL, SSADDGET, SSADDMGET
 
 #include "keyvaluecommands/cmd_info.h"			// INFO, DBSIZE, VERSION, MAXKEYSIZE, MAXVALSIZE, PING, ECHO
+#include "keyvaluecommands/cmd_latency.h"		// LATENCY, LATENCYHUMAN, LATENCYRESET
 
 #include "keyvaluecommands/cmd_compat.h"		// SELECT, TYPE, TOUCH
 
@@ -170,6 +171,7 @@ namespace net::worker{
 				UniqueID	::RegisterModule,
 
 				Info		::RegisterModule,
+				Latency		::RegisterModule,
 				Compat		::RegisterModule,
 
 				Reload		::RegisterModule,

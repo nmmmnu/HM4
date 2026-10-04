@@ -3,19 +3,9 @@
 
 #include "multi/singlelist.h"
 #include "myhistogramtimer.h"
+#include "timerlistchain.h"
 
 namespace hm4{
-	namespace chain{
-		template<uint64_t ID>
-		struct log_histogram{
-			char		mode	= ANY;
-
-			constexpr static char ANY	= 'A';
-			constexpr static char READ	= 'R';
-			constexpr static char WRITE	= 'W';
-		};
-	}
-
 	namespace timer_list_impl_{
 		constexpr size_t		BAR_MAX_WIDTH	= 14;
 		constexpr std::string_view	BAR_FULL	= "#";
@@ -52,7 +42,7 @@ namespace hm4{
 				if (!row.value)
 					continue;
 
-				constexpr const char *FMT_MASK   = "[ {} - {} ) {:10} {:8.4} {:8.4} {}";
+				constexpr static auto const FMT_MASK = FMT_COMPILE("[ {} - {} ) {:10} {:8.2f} {:8.2f} {}");
 
 				logger_fmt<LOG_LEVEL>(FMT_MASK,
 				//	row.id,
@@ -116,9 +106,23 @@ namespace hm4{
 		public:
 			using Base::chain;
 
-			constexpr void chain(chain::log_histogram<ID> const &a) const{
-				if (a.mode == a.ANY || a.mode == a.READ)
-					timer_list_impl_::logHistogram<0>(timerRead_, ID);
+			constexpr void chain(chain::log_histogram<ID> const &) const{
+				// we proceed anyway
+				timer_list_impl_::logHistogram<0>(timerRead_, ID);
+			}
+
+			constexpr void chain(chain::reset_histogram<ID> const &) const{
+				// we proceed anyway
+				timerRead_.clear();
+			}
+
+			constexpr auto chain(chain::get_histogram<ID> const &a) const -> const my_histogram_timer::Timer *{
+				using _ = chain::get_histogram<ID>;
+
+				switch(a.mode){
+				case _::READ	: return & timerRead_;
+				default		: return nullptr;
+				}
 			}
 
 			using Base::crontab;
@@ -130,15 +134,15 @@ namespace hm4{
 			}
 
 			constexpr void crontab() const{
-				if constexpr(USE_CRONTAB)
-					crontab_();
+				crontab_();
 
 				list_->crontab();
 			}
 
 		private:
 			constexpr void crontab_() const{
-				timer_list_impl_::logHistogram<0>(timerRead_, ID);
+				if constexpr(USE_CRONTAB)
+					timer_list_impl_::logHistogram<0>(timerRead_, ID);
 			}
 
 		protected:
@@ -199,6 +203,24 @@ namespace hm4{
 
 			if (a.mode == a.ANY || a.mode == a.WRITE)
 				timer_list_impl_::logHistogram<1>(timerWrite_, ID);
+		}
+
+		constexpr void chain(chain::reset_histogram<ID> const &a) const{
+			if (a.mode == a.ANY || a.mode == a.READ)
+				timerRead_ .clear();
+
+			if (a.mode == a.ANY || a.mode == a.WRITE)
+				timerWrite_.clear();
+		}
+
+		constexpr auto chain(chain::get_histogram<ID> const &a) const -> const my_histogram_timer::Timer *{
+			using _ = chain::get_histogram<ID>;
+
+			switch(a.mode){
+			case _::READ	: return & timerRead_;
+			case _::WRITE	: return & timerWrite_;
+			default		: return nullptr;
+			}
 		}
 
 		using Base::crontab;

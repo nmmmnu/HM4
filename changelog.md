@@ -449,3 +449,7 @@ Changelog
 -	introduce mask _ for IX*RANGE
 -	New module token_bucket: TBCONSUME, TBCOUNT
 
+### 1.4.0
+-	implement MySQL RocksDB-like histograms for latency statistics
+-	New module latency: LATENCYCOUNTERS, LATENCYHUMAN, LATENCYRESET
+
