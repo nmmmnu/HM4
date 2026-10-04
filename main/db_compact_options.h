@@ -1,15 +1,12 @@
 #include <cstdint>
 
-#define FMT_HEADER_ONLY
-#include "fmt/core.h"
-
 #include "inifile.h"
 #include "mystring.h"
 
 namespace impl_{
 	template <typename Def>
 	void put(std::string_view const name, Def const &def, std::string_view const description){
-		fmt::print("\t{0:25} = {1:>14} ; {2}\n", name, def, description);
+		fmt::print(FMT_COMPILE("\t{0:25} = {1:>14} ; {2}\n"), name, def, description);
 	}
 
 	inline void put(std::string_view const name, std::string_view const description){
