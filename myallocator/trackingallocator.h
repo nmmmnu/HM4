@@ -8,6 +8,7 @@
 
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
+#include "fmt/compile.h"
 
 namespace MyAllocator{
 
@@ -37,7 +38,7 @@ namespace MyAllocator{
 			if (!printSummary)
 				return;
 
-			const char *mask = "{} Total {:16} {:8}\n";
+			constexpr static auto const mask = FMT_COMPILE("{} Total {:16} {:8}\n");
 
 			fmt::print(mask, TAG, "Allocated Size",		allocated			);
 			fmt::print(mask, TAG, "Deallocated Size",	deallocated			);
@@ -52,14 +53,14 @@ namespace MyAllocator{
 			void *p = allocator.xallocate(size);
 			allocated += malloc_usable_size__(p);
 
-			fmt::print("{} Allocate {:8} -> {}\n", TAG, size, p);
+			fmt::print(FMT_COMPILE("{} Allocate {:8} -> {}\n"), TAG, size, p);
 			return p;
 		}
 
 		void xdeallocate(void *p) noexcept{
 			++deallocations;
 			deallocated += malloc_usable_size__(p);
-			fmt::print("{} Deallocate {}\n", TAG, p);
+			fmt::print(FMT_COMPILE("{} Deallocate {}\n"), TAG, p);
 			return allocator.xdeallocate(p);
 		}
 
