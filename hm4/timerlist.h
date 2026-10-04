@@ -8,8 +8,11 @@
 namespace hm4{
 	namespace timer_list_impl_{
 		constexpr size_t		BAR_MAX_WIDTH	= 14;
-		constexpr std::string_view	BAR_FULL	= "#";
-		constexpr std::string_view	BAR_EMPTY	= " ";
+
+		constexpr std::string_view	BAR_FULL	= "#####" "#####" "#####" "#####";
+	//	constexpr std::string_view	BAR_FULL	= "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪";
+		constexpr std::string_view	BAR_EMPTY	= "     " "     " "     " "     ";
+
 		constexpr Logger::Level		LOG_LEVEL	= Logger::DEBUG;
 
 		inline void logHistogram(my_histogram_timer::Timer const &h, uint64_t const id, std::string_view msg){
@@ -20,33 +23,11 @@ namespace hm4{
 			for(size_t i = 0; i < h.size(); ++i){
 				auto const &row = result.events[i];
 
-				char barBuffer[BAR_MAX_WIDTH * 4 + 1]; // because of UTF8 * 4
-				char *ptr = barBuffer;
-
-				for (size_t b = 0; b < row.bars; ++b){
-					auto const bar = BAR_FULL;
-
-					memcpy(ptr, bar.data(), bar.size());
-					ptr += bar.size();
-				}
-
-				for (size_t b = row.bars; b < BAR_MAX_WIDTH; ++b){
-					auto const bar = BAR_EMPTY;
-
-					memcpy(ptr, bar.data(), bar.size());
-					ptr += bar.size();
-				}
-
-				*ptr = '\0';
-
 				if (!row.value)
 					continue;
 
-				constexpr static auto const FMT_MASK = FMT_COMPILE("[ {} - {} ) {:10} {:8.2f} {:8.2f} {}");
-
-				logger_fmt<LOG_LEVEL>(FMT_MASK,
-				//	row.id,
-
+				logger_fmt<LOG_LEVEL>(
+					FMT_COMPILE("[ {} - {} ) {:10} {:8.2f} {:8.2f} {:.{}}{:.{}}"),
 					row.labelF.data(),
 					row.labelT.data(),
 
@@ -55,17 +36,10 @@ namespace hm4{
 					row.pct,
 					row.pctCumulative,
 
-					barBuffer
+					BAR_FULL ,	row.bars,
+					BAR_EMPTY,	BAR_MAX_WIDTH - row.bars
 				);
 			}
-		}
-
-		template<bool B>
-		void logHistogram(my_histogram_timer::Timer const &h, uint64_t const id){
-			if constexpr(B)
-				logHistogram(h, id, "Write"	);
-			else
-				logHistogram(h, id, "Read"	);
 		}
 
 
@@ -76,7 +50,7 @@ namespace hm4{
 
 			using Base::SingleList;
 
-			constexpr static bool USE_CRONTAB = !false;
+			constexpr static bool USE_CRONTAB = false;
 
 		public:
 			auto begin() const{
@@ -108,7 +82,7 @@ namespace hm4{
 
 			constexpr void chain(chain::log_histogram<ID> const &) const{
 				// we proceed anyway
-				timer_list_impl_::logHistogram<0>(timerRead_, ID);
+				logHistogram(timerRead_,  ID, "Read");
 			}
 
 			constexpr void chain(chain::reset_histogram<ID> const &) const{
@@ -141,8 +115,9 @@ namespace hm4{
 
 		private:
 			constexpr void crontab_() const{
-				if constexpr(USE_CRONTAB)
-					timer_list_impl_::logHistogram<0>(timerRead_, ID);
+				if constexpr(USE_CRONTAB){
+					logHistogram(timerRead_, ID, "Read");
+				}
 			}
 
 		protected:
@@ -151,6 +126,10 @@ namespace hm4{
 			using multi::SingleList<List>::list_;
 		};
 	} // timerlist_impl_
+
+
+
+	using timer_list_impl_::logHistogram;
 
 
 
@@ -199,10 +178,10 @@ namespace hm4{
 
 		constexpr void chain(chain::log_histogram<ID> const &a) const{
 			if (a.mode == a.ANY || a.mode == a.READ)
-				timer_list_impl_::logHistogram<0>(timerRead_,  ID);
+				logHistogram(timerRead_,  ID, "Read");
 
 			if (a.mode == a.ANY || a.mode == a.WRITE)
-				timer_list_impl_::logHistogram<1>(timerWrite_, ID);
+				logHistogram(timerWrite_, ID, "Write");
 		}
 
 		constexpr void chain(chain::reset_histogram<ID> const &a) const{
@@ -232,18 +211,18 @@ namespace hm4{
 		}
 
 		constexpr void crontab() const{
-			if constexpr(USE_CRONTAB)
-				crontab_();
+			crontab_();
 
 			list_->crontab();
 		}
 
 	private:
 		constexpr void crontab_(){
-			timer_list_impl_::logHistogram<0>(timerRead_,  ID);
-			timer_list_impl_::logHistogram<1>(timerWrite_, ID);
+			if constexpr(USE_CRONTAB){
+				logHistogram(timerRead_,  ID, "Read" );
+				logHistogram(timerWrite_, ID, "Write");
+			}
 		}
-
 
 	private:
 		mutable my_histogram_timer::Timer	timerWrite_;
