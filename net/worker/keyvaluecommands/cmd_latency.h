@@ -130,7 +130,7 @@ namespace net::worker::commands::Latency{
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			if constexpr(!std::is_same_v<decltype(hist), const void *>){
-				auto &buffer  = blob.construct<std::array<char, BUFFER_SIZE> >();
+				auto &buffer  = blob.allocate<std::array<char, BUFFER_SIZE> >();
 
 				      auto *ptr = buffer.data();
 				const auto *end = buffer.data() + buffer.size();
