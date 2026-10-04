@@ -5,8 +5,8 @@ MYCC		= clang++
 STATIC_LINK	= YES
 #STATIC_LINK	= NO
 
-#CF_OPTIM	= -O0 -g
-CF_OPTIM	= -O3 -DNDEBUG -g
+CF_OPTIM	= -O0 -g
+#CF_OPTIM	= -O3 -DNDEBUG -g
 #CF_OPTIM	+= -mavx -msse4.2 -maes -mpclmul
 CF_OPTIM	+= -march=sandybridge
 

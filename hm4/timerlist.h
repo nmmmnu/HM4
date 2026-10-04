@@ -123,7 +123,7 @@ namespace hm4{
 		protected:
 			mutable my_histogram_timer::Timer	timerRead_;
 
-			using multi::SingleList<List>::list_;
+			using Base::list_;
 		};
 	} // timerlist_impl_
 
@@ -227,8 +227,8 @@ namespace hm4{
 	private:
 		mutable my_histogram_timer::Timer	timerWrite_;
 
-		using timer_list_impl_::TimerListBase<List, ID>::timerRead_;
-		using timer_list_impl_::TimerListBase<List, ID>::list_;
+		using Base::timerRead_;
+		using Base::list_;
 	};
 
 } // namespace
