@@ -9,6 +9,20 @@ namespace hm4::chain{
 	}
 
 	template<uint64_t ID>
+	struct get_histogram{
+		char		mode	= ANY;
+
+		constexpr static char ANY	= impl_::ANY	;
+		constexpr static char READ	= impl_::READ	;
+		constexpr static char WRITE	= impl_::WRITE	;
+	};
+}
+
+#endif
+
+
+#if 0
+	template<uint64_t ID>
 	struct log_histogram{
 		char		mode	= ANY;
 
@@ -25,16 +39,4 @@ namespace hm4::chain{
 		constexpr static char READ	= impl_::READ	;
 		constexpr static char WRITE	= impl_::WRITE	;
 	};
-
-	template<uint64_t ID>
-	struct get_histogram{
-		char		mode	= ANY;
-
-		constexpr static char ANY	= impl_::ANY	;
-		constexpr static char READ	= impl_::READ	;
-		constexpr static char WRITE	= impl_::WRITE	;
-	};
-}
-
 #endif
-

@@ -58,8 +58,8 @@ public:
 		// no easy way to do it...
 
 		bool const IM =	std::is_same_v<Command, chain::get_histogram	<2> > ||
-				std::is_same_v<Command, chain::log_histogram	<2> > ||
-				std::is_same_v<Command, chain::reset_histogram	<2> > ||
+			//	std::is_same_v<Command, chain::log_histogram	<2> > ||
+			//	std::is_same_v<Command, chain::reset_histogram	<2> > ||
 				false
 		;
 
