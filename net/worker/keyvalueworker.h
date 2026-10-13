@@ -182,18 +182,22 @@ namespace net::worker{
 
 			pack.storageCommands.infoPrint();
 		}
-	}
 
 
 
-	template<class Protocol, class DBAdapter>
+	} // namespace registration_impl_
+
+
+
+	template<class Protocol, class DBAdapter, bool Profiling = false>
 	struct KeyValueWorker{
 		constexpr static bool LogCommands	= false;
 		constexpr static auto LogCommandsLevel	= Logger::DEBUG;
 
+	public:
 		KeyValueWorker(DBAdapter &db, size_t output_buffer_reserve) :
-							db_(db),
-							output_buffer_(output_buffer_reserve){
+							db_		(db			),
+							output_buffer_	(output_buffer_reserve	){
 
 			using namespace registration_impl_;
 
@@ -206,6 +210,7 @@ namespace net::worker{
 			registerModules<Protocol, DBAdapter>(pack);
 		}
 
+	public:
 		WorkerStatus operator()(IOBuffer &buffer){
 			using Status  = protocol::ProtocolStatus;
 
@@ -250,7 +255,15 @@ namespace net::worker{
 
 			output_.resetAllocator();
 
-			command(protocol_.getParams(), db_, result, output_);
+			if constexpr(!Profiling){
+				command(protocol_.getParams(), db_, result, output_);
+			}else{
+				auto &timer = output_.getTimerCmd();
+
+				auto const guard = timer();
+
+				command(protocol_.getParams(), db_, result, output_);
+			}
 
 			return translate_(result, buffer);
 		}

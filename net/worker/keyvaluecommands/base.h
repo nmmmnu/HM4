@@ -24,6 +24,8 @@
 #include "mmapbuffer.h"
 #include "arenaallocator.h"
 
+#include "myhistogramtimer.h"
+
 
 
 namespace net::worker::commands{
@@ -141,6 +143,10 @@ namespace net::worker::commands{
 			MyAllocator::destruct<T>(allocator_, p);
 		}
 
+		auto &getTimerCmd(){
+			return timerCmd_;
+		}
+
 	private:
 		template<Logger::Level level, typename T>
 		void logAllocatorStatus_(bool construct, std::string_view title = ""){
@@ -163,6 +169,8 @@ namespace net::worker::commands{
 		MyAllocator::ArenaAllocator			allocator_	{ buffer_, MyBuffer::from_bytes{}	};
 
 		size_t						allocations_	= 0;
+
+		my_histogram_timer::Timer			timerCmd_;
 	};
 
 

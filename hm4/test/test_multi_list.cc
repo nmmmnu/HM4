@@ -301,7 +301,10 @@ void test_DualList(std::string_view name, List &&list1, List &&list2){
 
 	list_test(listH, 4, bytes);
 
-	listH.chain(hm4::chain::log_histogram<0>{});
+	const auto *hist = listH.chain(hm4::chain::get_histogram<0>{});
+
+	for(auto const &num : *hist)
+		printf("> %zu\n", size_t{ num });
 }
 
 template <class List>
@@ -393,7 +396,11 @@ void test_CollectionList(std::string_view name){
 
 		list_test(listH, 4, bytes);
 
-		listH.chain(hm4::chain::log_histogram<0>{});
+		const auto *hist = listH.chain(hm4::chain::get_histogram<0>{});
+
+		for(auto const &num : *hist)
+			printf("> %zu\n", size_t{ num });
+
 	}
 }
 

@@ -103,6 +103,10 @@ constexpr uint32_t FD_MIN_RESERVE		= 128; // minimum FD for the disktables
 
 // ----------------------------------
 
+constexpr bool KEY_VALUE_WORKER_PROFILING	= true;
+
+// ----------------------------------
+
 #include "disk/filebuilder.misc.h"
 auto g_buffersWrite = g_fbwb();
 
@@ -436,7 +440,7 @@ namespace{
 
 		using MyAdapterFactory	= Factory;
 		using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
-		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
+		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter, KEY_VALUE_WORKER_PROFILING>;
 		using MySparePool	= net::HeapSparePool;
 		using MyLoop		= AsyncLoop<MyWorker, MySparePool>;
 
