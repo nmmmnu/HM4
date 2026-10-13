@@ -1,29 +1,40 @@
 #include "base.h"
 #include "timerlist.h"
+#include <algorithm>	// accumulate
 
 
 
 namespace net::worker::commands::Latency{
 
 	namespace latency_impl_{
+
+		constexpr size_t		BAR_MAX_WIDTH	= 14;
+		constexpr std::string_view	BAR_FULL	= "#####" "#####" "#####" "#####";
+	//	constexpr std::string_view	BAR_FULL	= "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪";
+		constexpr std::string_view	BAR_EMPTY	= "     " "     " "     " "     ";
+
+		constexpr std::string_view	FMT_MASK	= "[ {} - {} ) {:10} {:8.2f} {:8.2f} {:.{}}{:.{}}"	;
+		constexpr std::string_view	FMT_MASK_LN	= "[ {} - {} ) {:10} {:8.2f} {:8.2f} {:.{}}{:.{}}" "\n"	;
+
+		constexpr char			SUB_DB[2]	= {'D', 'd'};
+
 		template<uint64_t id, class DBAdapter>
-		auto *getHistogramDB_(bool rw, DBAdapter &db){
+		auto *getHistogramDB_(bool rw, DBAdapter const &db){
 			using getH = hm4::chain::get_histogram<id>;
 
 			auto const hrw = rw ? getH::WRITE : getH::READ;
 
 			auto *hist = db->chain(getH{ hrw });
 
-			if constexpr(!std::is_same_v<decltype(hist), const void *>){
+			if constexpr(std::is_same_v<std::remove_cv_t<decltype(hist)>, my_histogram_timer::Timer *>){
 				return hist;
 			}else{
-				// dirty compile test trick :(
 				return nullptr;
 			}
 		}
 
 		template<bool MUTABLE, class DBAdapter>
-		auto getHistogramDB(uint64_t id, bool rw, DBAdapter &db) -> my_histogram_timer::Timer *{
+		auto getHistogramDB(uint64_t id, bool rw, DBAdapter const &db) -> my_histogram_timer::Timer *{
 			if constexpr(MUTABLE){
 				switch(id){
 				case 0:  return getHistogramDB_<0>(rw, db);
@@ -39,6 +50,30 @@ namespace net::worker::commands::Latency{
 			}
 		}
 
+		template<bool MUTABLE, class DBAdapter, typename F>
+		void forEachDB(DBAdapter const &db, F functor){
+			auto f = [&](uint64_t id, bool rw){
+				if (auto *h = getHistogramDB<MUTABLE>(id, rw, db); h)
+					functor(*h, id, rw);
+			};
+
+			bool const R = 0;
+			bool const W = 1;
+
+			if constexpr(!MUTABLE){
+				f(0, R);
+			}else{
+				f(0, R);
+				f(0, W);
+
+				f(1, R);
+				f(1, W);
+
+				f(2, R);
+				f(2, W);
+			}
+		}
+
 	} // namespace latency_impl_
 
 
@@ -48,29 +83,36 @@ namespace net::worker::commands::Latency{
 
 		LATENCYCOUNTERS() : BaseCommandRO<Protocol,DBAdapter>("LATENCYCOUNTERS", std::begin(cmd__), std::end(cmd__)){}
 
-		// LATENCYCOUNTERS object_id R/W
+		// LATENCYCOUNTERS subsystem object_id R/W
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
-			if constexpr(!DBAdapter::MUTABLE){
-				// call 0, read
+			auto const subsystem = p[1];
 
-				auto const id = 0;
-				auto const rw = false;
+			if (subsystem[0] == latency_impl_::SUB_DB[0] || subsystem[0] == latency_impl_::SUB_DB[1]){
+				if constexpr(!DBAdapter::MUTABLE){
+					// call 0, read
 
-				return process__(id, rw, db, result, blob);
-			}else{
-				auto const id  = std::clamp<uint64_t>(from_string<uint64_t>(p[1]), 0, 2);
-				auto const rw  = p[2] == "w" || p[2] == "W";
+					auto const id = 0;
+					auto const rw = false;
 
-				return process__(id, rw, db, result, blob);
+					return process__(id, rw, db, result, blob);
+				}else{
+					auto const id  = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), 0, 2);
+					auto const rw  = p[3] == "w" || p[2] == "W";
+
+					return process__(id, rw, db, result, blob);
+				}
 			}
+
+			// no subsystem selected
+			return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 		}
 
 		static void process__(uint64_t id, bool rw, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
@@ -103,32 +145,99 @@ namespace net::worker::commands::Latency{
 
 
 	template<class Protocol, class DBAdapter>
+	struct LATENCYCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+
+		LATENCYCOUNT() : BaseCommandRO<Protocol,DBAdapter>("LATENCYCOUNT", std::begin(cmd__), std::end(cmd__)){}
+
+		// LATENCYCOUNTERS subsystem object_id R/W
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+
+			auto const subsystem = p[1];
+
+			if (subsystem[0] == latency_impl_::SUB_DB[0] || subsystem[0] == latency_impl_::SUB_DB[1]){
+				if constexpr(!DBAdapter::MUTABLE){
+					// call 0, read
+
+					auto const id = 0;
+					auto const rw = false;
+
+					return process__(id, rw, db, result);
+				}else{
+					auto const id  = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), 0, 2);
+					auto const rw  = p[3] == "w" || p[2] == "W";
+
+					return process__(id, rw, db, result);
+				}
+			}
+
+			// no subsystem selected
+			return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+		}
+
+		static void process__(uint64_t id, bool rw, DBAdapter &db, Result<Protocol> &result){
+			using namespace latency_impl_;
+
+			const auto *hist = getHistogramDB<DBAdapter::MUTABLE>(id, rw, db);
+
+			if (!hist)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			uint64_t const sum = std::accumulate(std::begin(*hist), std::end(*hist), uint64_t{ 0 });
+
+			return result.set(sum);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"latencycount",	"LATENCYCOUNT"
+		};
+
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct LATENCYHUMAN : BaseCommandRO<Protocol,DBAdapter>{
 
 		LATENCYHUMAN() : BaseCommandRO<Protocol,DBAdapter>("LATENCYHUMAN", std::begin(cmd__), std::end(cmd__)){}
 
+		// LATENCYHUMAN subsystem object_id R/W
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
-			if (p.size() != 3)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
-			if constexpr(!DBAdapter::MUTABLE){
-				// call 0, read
+			auto const subsystem = p[1];
 
-				auto const id = 0;
-				auto const rw = false;
+			if (subsystem[0] == latency_impl_::SUB_DB[0] || subsystem[0] == latency_impl_::SUB_DB[1]){
+				if constexpr(!DBAdapter::MUTABLE){
+					// call 0, read
 
-				return process__(id, rw, db, result, blob);
-			}else{
-				auto const id  = std::clamp<uint64_t>(from_string<uint64_t>(p[1]), 0, 2);
-				auto const rw  = p[2] == "w" || p[2] == "W";
+					auto const id = 0;
+					auto const rw = false;
 
-				return process__(id, rw, db, result, blob);
+					return process__(id, rw, db, result, blob);
+				}else{
+					auto const id  = std::clamp<uint64_t>(from_string<uint64_t>(p[2]), 0, 2);
+					auto const rw  = p[3] == "w" || p[3] == "W";
+
+					return process__(id, rw, db, result, blob);
+				}
 			}
+
+			// no subsystem selected
+			return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 		}
 
 		static void process__(uint64_t id, bool rw, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
@@ -157,7 +266,7 @@ namespace net::worker::commands::Latency{
 				auto const res = fmt::format_to_n(
 					ptr,
 					remaining,
-					FMT_COMPILE("[ {} - {} ) {:10} {:8.2f} {:8.2f} {:.{}}{:.{}}\n"),
+					FMT_COMPILE(latency_impl_::FMT_MASK_LN),
 
 					row.labelF,
 					row.labelT,
@@ -190,10 +299,10 @@ namespace net::worker::commands::Latency{
 
 		constexpr static std::string_view	ERROR_MESSAGE	= "INTERNAL ERROR IN LATENCYHUMAN, PLEASE REPORT A BUG!";
 
-		constexpr static size_t			BAR_MAX_WIDTH	= 14;
-		constexpr static std::string_view	BAR_FULL	= "#####" "#####" "#####" "#####";
-	//	constexpr static std::string_view	BAR_FULL	= "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪";
-		constexpr static std::string_view	BAR_EMPTY	= "     " "     " "     " "     ";
+	private:
+		constexpr static size_t			BAR_MAX_WIDTH	= latency_impl_::BAR_MAX_WIDTH	;
+		constexpr static std::string_view	BAR_FULL	= latency_impl_::BAR_FULL	;
+		constexpr static std::string_view	BAR_EMPTY	= latency_impl_::BAR_EMPTY	;
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -215,43 +324,30 @@ namespace net::worker::commands::Latency{
 
 	private:
 		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
-			if (p.size() != 2)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
+			using namespace latency_impl_;
 
-			auto L = [&db](uint64_t id, bool rw){
-				using namespace latency_impl_;
+			if (p.size() != 1)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
-				const auto *hist = getHistogramDB<DBAdapter::MUTABLE>(id, rw, db);
-
-				if (hist){
-					std::string_view const msg = rw ? "Write" : "Read";
-
-					logHistogram__(*hist, id, msg);
-				}
+			auto f = [](auto const &hist, uint64_t id, bool rw){
+				logHistogram__(hist, id, rw);
 			};
 
-			if constexpr(!DBAdapter::MUTABLE){
-				// call 0, read
+			logger<LOG_LEVEL>() << "Dump all latency histograms:";
 
-				auto const id = 0;
+			// proceed for subsystem DB
+			forEachDB<DBAdapter::MUTABLE>(db, f);
 
-				L(id, 0);
-
-				result.set();
-			}else{
-				auto const id  = std::clamp<uint64_t>(from_string<uint64_t>(p[1]), 0, 2);
-
-				L(id, 0);
-				L(id, 1);
-
-				result.set();
-			}
+			return result.set();
 		}
 
-		static void logHistogram__(my_histogram_timer::Timer const &h, uint64_t const id, std::string_view msg){
+		static void logHistogram__(my_histogram_timer::Timer const &h, uint64_t const id, bool rw){
+			std::string_view const msg = rw ? "Write" : "Read";
+
 			auto const result = h.get(BAR_MAX_WIDTH);
 
 			logger<LOG_LEVEL>() << "ID" << id << msg << result.total << "events";
+			logger<LOG_LEVEL>() << "--begin--";
 
 			for(size_t i = 0; i < h.size(); ++i){
 				auto const &row = result.events[i];
@@ -260,7 +356,7 @@ namespace net::worker::commands::Latency{
 					continue;
 
 				logger_fmt<LOG_LEVEL>(
-					FMT_COMPILE("[ {} - {} ) {:10} {:8.2f} {:8.2f} {:.{}}{:.{}}"),
+					FMT_COMPILE(latency_impl_::FMT_MASK),
 					row.labelF.data(),
 					row.labelT.data(),
 
@@ -273,18 +369,19 @@ namespace net::worker::commands::Latency{
 					BAR_EMPTY,	BAR_MAX_WIDTH - row.bars
 				);
 			}
+
+			logger<LOG_LEVEL>() << "---end---";
 		}
 
 	private:
 		constexpr static size_t			BUFFER_SIZE	= 2048; // 1910 when ASCII;
 
-	private:
-		constexpr static size_t			BAR_MAX_WIDTH	= 14;
-		constexpr static std::string_view	BAR_FULL	= "#####" "#####" "#####" "#####";
-	//	constexpr static std::string_view	BAR_FULL	= "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪" "▪▪▪▪▪";
-		constexpr static std::string_view	BAR_EMPTY	= "     " "     " "     " "     ";
-
 		constexpr static Logger::Level		LOG_LEVEL	= Logger::DEBUG;
+
+	private:
+		constexpr static size_t			BAR_MAX_WIDTH	= latency_impl_::BAR_MAX_WIDTH	;
+		constexpr static std::string_view	BAR_FULL	= latency_impl_::BAR_FULL	;
+		constexpr static std::string_view	BAR_EMPTY	= latency_impl_::BAR_EMPTY	;
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -308,30 +405,16 @@ namespace net::worker::commands::Latency{
 			if (p.size() != 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
-			auto R = [&db](uint64_t id, bool rw){
-				using namespace latency_impl_;
+			using namespace latency_impl_;
 
-				auto *hist = getHistogramDB<DBAdapter::MUTABLE>(id, rw, db);
-
-				if ( hist)
-					hist->clear();
+			auto f = [](auto &hist, uint64_t, bool){
+				hist.clear();
 			};
 
-			if constexpr(!DBAdapter::MUTABLE){
-				R(0, 0);
+			// proceed for subsystem DB
+			forEachDB<DBAdapter::MUTABLE>(db, f);
 
-				result.set();
-			}else{
-				R(0, 0);
-				R(1, 0);
-				R(2, 0);
-
-				R(0, 1);
-				R(1, 1);
-				R(2, 1);
-
-				result.set();
-			}
+			return result.set();
 		}
 
 	private:
@@ -350,6 +433,7 @@ namespace net::worker::commands::Latency{
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
 				LATENCYCOUNTERS	,
+				LATENCYCOUNT	,
 				LATENCYHUMAN	,
 				LATENCYLOG	,
 				LATENCYRESET
