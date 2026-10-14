@@ -42,13 +42,8 @@ namespace hm4{
 		public:
 			using Base::chain;
 
-			constexpr auto chain(chain::get_histogram<ID> const &a) const -> my_histogram_timer::Timer *{
-				using _ = chain::get_histogram<ID>;
-
-				switch(a.mode){
-				case _::READ	: return & timerRead_;
-				default		: return nullptr;
-				}
+			constexpr auto chain(chain::get_histogram<ID> const &) const -> my_histogram_timer::Timer *{
+				return & timerRead_;
 			}
 
 		protected:
@@ -103,14 +98,12 @@ namespace hm4{
 	public:
 		using Base::chain;
 
-		constexpr auto chain(chain::get_histogram<ID> const &a) const -> my_histogram_timer::Timer *{
-			using _ = chain::get_histogram<ID>;
+		constexpr auto chain(chain::get_histogram<ID + 0> const &) const -> my_histogram_timer::Timer *{
+			return & timerRead_;
+		}
 
-			switch(a.mode){
-			case _::READ	: return & timerRead_;
-			case _::WRITE	: return & timerWrite_;
-			default		: return nullptr;
-			}
+		constexpr auto chain(chain::get_histogram<ID + 1> const &) const -> my_histogram_timer::Timer *{
+			return & timerWrite_;
 		}
 
 	private:

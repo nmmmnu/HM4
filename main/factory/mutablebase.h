@@ -48,9 +48,9 @@ namespace DBAdapterFactory{
 		using MutableFlushList		= MutableFlushListType<ET, MemList, Predicate, Flush, ListLoader>;
 		#endif
 
-		using MutableFlushList_timer	= hm4::TimerList<MutableFlushList, 1>;
+		using MutableFlushList_timer	= hm4::TimerList<MutableFlushList, 10>;
 
-		using ImmutableList_timer	= hm4::TimerList<ListLoader::List, 2>;
+		using ImmutableList_timer	= hm4::TimerList<ListLoader::List, 20>;
 
 		using DList			= hm4::multi::DualList<
 							MutableFlushList_timer,

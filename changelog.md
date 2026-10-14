@@ -451,5 +451,5 @@ Changelog
 
 ### 1.4.0
 -	implement MySQL RocksDB-like histograms for latency statistics
--	New module latency: LATENCYCOUNTERS, LATENCYCOUN, LATENCYHUMAN, LATENCYLOG, LATENCYRESET
+-	New module latency: LATENCYCOUNTERS, LATENCYCOUN, LATENCYHUMAN, LATENCYLOG, LATENCYRESET, LATENCYLIST
 
