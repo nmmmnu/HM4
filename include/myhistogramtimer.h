@@ -74,6 +74,10 @@ namespace my_histogram_timer{
 			return diff_us;
 		}
 
+		auto getCount() const{
+			return std::accumulate(begin(), end(), uint64_t{ 0 });
+		}
+
 		auto get(size_t barMaxWidth, bool utf8 = false) const{
 			struct Row{
 				size_t			id		;
@@ -93,7 +97,7 @@ namespace my_histogram_timer{
 
 			Result result;
 
-			result.total  = std::accumulate(begin(), end(), uint64_t{ 0 });
+			result.total  = getCount();
 
 			if (result.total == 0){
 				for(size_t i = 0; i < size(); ++i){
@@ -143,6 +147,39 @@ namespace my_histogram_timer{
 			}
 
 			return result;
+		}
+
+
+		double getPercentileUs(double const percentile) const{
+			auto const total = getCount();
+
+			if (total == 0)
+				return 0.0;
+
+			auto const targetCount = static_cast<double>(total) * (percentile / 100.0);
+
+			double cumulative = 0;
+
+			for (uint8_t i = 0; i < size(); ++i){
+				auto const val = static_cast<double>(buckets[i]);
+
+				if (cumulative + double{ val } >= targetCount){
+					auto const lower = (i > 0) ? static_cast<double>(uint64_t{ 1 } << (i - 1)) : 0.0;
+					auto const upper = (i > 0) ? static_cast<double>(uint64_t{ 1 } << (i - 0)) : 1.0;
+
+					if (val == 0)
+						return lower;
+
+					auto const rankInBucket = targetCount  - cumulative;
+					auto const fraction     = rankInBucket / val;
+
+					return lower + fraction * (upper - lower);
+				}
+
+				cumulative += val;
+			}
+
+			return static_cast<double>(uint64_t{ 1 } << (size() - 1));
 		}
 
 	private:

@@ -1,6 +1,5 @@
 #include "base.h"
 #include "timerlist.h"
-#include <algorithm>	// accumulate
 
 
 
@@ -126,6 +125,18 @@ namespace net::worker::commands::Latency{
 			}
 		}
 
+		template<size_t N>
+		std::string_view formatDouble(double d, std::array<char, N> &buffer){
+			constexpr static auto fmt_mask = FMT_COMPILE("{:+015.15f}");
+
+			auto const result = fmt::format_to_n(buffer.data(), buffer.size(), fmt_mask, d);
+
+			if (result.out == std::end(buffer))
+				return {};
+			else
+				return { buffer.data(), result.size };
+		}
+
 	} // namespace latency_impl_
 
 
@@ -135,7 +146,7 @@ namespace net::worker::commands::Latency{
 
 		LATENCYCOUNTERS() : BaseCommandRO<Protocol,DBAdapter>("LATENCYCOUNTERS", std::begin(cmd__), std::end(cmd__)){}
 
-		// LATENCYCOUNTERS subsystem object_id R/W
+		// LATENCYCOUNTERS subsystem object_id
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
@@ -208,7 +219,7 @@ namespace net::worker::commands::Latency{
 
 		LATENCYCOUNT() : BaseCommandRO<Protocol,DBAdapter>("LATENCYCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		// LATENCYCOUNT subsystem object_id R/W
+		// LATENCYCOUNT subsystem object_id
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
@@ -255,7 +266,7 @@ namespace net::worker::commands::Latency{
 		}
 
 		static void process__(uint64_t, const my_histogram_timer::Timer &hist, Result<Protocol> &result){
-			uint64_t const sum = std::accumulate(std::begin(hist), std::end(hist), uint64_t{ 0 });
+			uint64_t const sum = hist.getCount();
 
 			return result.set(sum);
 		}
@@ -269,11 +280,164 @@ namespace net::worker::commands::Latency{
 
 
 	template<class Protocol, class DBAdapter>
+	struct LATENCYPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
+
+		LATENCYPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("LATENCYPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
+
+		// LATENCYPERCENTILE subsystem object_id percentile
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+
+			auto const subsystem = p[1][0];
+
+			using namespace latency_impl_;
+
+			switch(subsystem){
+			case SUB_DB[0]:
+			case SUB_DB[1]:
+				{
+					auto const  id   = from_string<uint64_t>(p[2]);
+					const auto *hist = getHistogramDB(id, db);
+
+					auto const  pp   = std::clamp<uint64_t>(from_string<uint64_t>(p[3]), 0, 100);
+
+					return process__(id, pp, hist, result);
+				}
+
+			case SUB_CMD[0]:
+			case SUB_CMD[1]:
+				{
+					auto const  id   = from_string<uint64_t>(p[2]);
+					const auto  hist = getHistogramCMD(id, blob);
+
+					auto const  pp   = std::clamp<uint64_t>(from_string<uint64_t>(p[3]), 0, 100);
+
+					return process__(id, pp, hist, result);
+				}
+
+			default:
+				// no subsystem selected
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+		}
+
+		static void process__(uint64_t id, uint64_t percentile, const my_histogram_timer::Timer *hist, Result<Protocol> &result){
+			if (!hist)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			else
+				return process__(id, percentile, *hist, result);
+		}
+
+		static void process__(uint64_t, uint64_t percentile, const my_histogram_timer::Timer &hist, Result<Protocol> &result){
+			using namespace latency_impl_;
+
+			auto const pp = hist.getPercentileUs(static_cast<double>(percentile));
+
+			to_string_buffer_t buffer;
+
+			return result.set(formatDouble(pp, buffer));
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"latencypercentile",	"LATENCYPERCENTILE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
+	struct LATENCYMPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
+
+		LATENCYMPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("LATENCYMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
+
+		// LATENCYMPERCENTILE subsystem object_id percentile percentile ...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			if (p.size() < 4)
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
+
+			auto const varg  = 3;
+
+			auto const subsystem = p[1][0];
+
+			using namespace latency_impl_;
+
+			switch(subsystem){
+			case SUB_DB[0]:
+			case SUB_DB[1]:
+				{
+					auto const  id   = from_string<uint64_t>(p[2]);
+					const auto *hist = getHistogramDB(id, db);
+
+					return process__(id, std::begin(p) + varg, std::end(p), hist, result, blob);
+				}
+
+			case SUB_CMD[0]:
+			case SUB_CMD[1]:
+				{
+					auto const  id   = from_string<uint64_t>(p[2]);
+					const auto  hist = getHistogramCMD(id, blob);
+
+					return process__(id, std::begin(p) + varg, std::end(p), hist, result, blob);
+				}
+
+			default:
+				// no subsystem selected
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
+		}
+
+		using IT = ParamContainer::iterator;
+
+		static void process__(uint64_t id, IT first, IT last, const my_histogram_timer::Timer *hist, Result<Protocol> &result, OutputBlob &blob){
+			if (!hist)
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			else
+				return process__(id, first, last, *hist, result, blob);
+		}
+
+		static void process__(uint64_t, IT first, IT last, const my_histogram_timer::Timer &hist, Result<Protocol> &result, OutputBlob &blob){
+			using namespace latency_impl_;
+
+			auto &bcontainer	= blob.construct<OutputBlob::SmallBufferContainer>();
+			auto &container		= blob.construct<OutputBlob::SmallContainer>();
+
+			for(auto it = first; it != last; ++it){
+				auto const percentile	= std::clamp<uint64_t>(from_string<uint64_t>(*it), 0, 100);
+				auto const pp		= hist.getPercentileUs(static_cast<double>(percentile));
+
+				bcontainer.push_back();
+				container.push_back(formatDouble(pp, bcontainer.back()));
+			}
+
+			return result.set_container(container);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"latencympercentile",	"LATENCYMPERCENTILE"
+		};
+	};
+
+
+
+	template<class Protocol, class DBAdapter>
 	struct LATENCYHUMAN : BaseCommandRO<Protocol,DBAdapter>{
 
 		LATENCYHUMAN() : BaseCommandRO<Protocol,DBAdapter>("LATENCYHUMAN", std::begin(cmd__), std::end(cmd__)){}
 
-		// LATENCYHUMAN subsystem object_id R/W
+		// LATENCYHUMAN subsystem object_id
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
@@ -520,11 +684,13 @@ namespace net::worker::commands::Latency{
 
 		static void load(RegisterPack &pack){
 			return registerCommands<Protocol, DBAdapter, RegisterPack,
-				LATENCYCOUNTERS	,
-				LATENCYCOUNT	,
-				LATENCYHUMAN	,
-				LATENCYLOG	,
-				LATENCYRESET	,
+				LATENCYCOUNTERS		,
+				LATENCYCOUNT		,
+				LATENCYPERCENTILE	,
+				LATENCYMPERCENTILE	,
+				LATENCYHUMAN		,
+				LATENCYLOG		,
+				LATENCYRESET		,
 				LATENCYLIST
 			>(pack);
 		}
