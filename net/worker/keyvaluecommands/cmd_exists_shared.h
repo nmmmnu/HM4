@@ -89,14 +89,14 @@ namespace net::worker::commands::ExistsShared{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct EXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct EXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
+		EXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
 
 		// XXXEXISTS key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return cmdProcessExists(p, db, result);
@@ -124,14 +124,14 @@ namespace net::worker::commands::ExistsShared{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct MEXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MEXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MEXISTS() : BaseCommandRO<Protocol,DBAdapter>("MEXISTS", std::begin(cmd__), std::end(cmd__)){}
+		MEXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
 		// XXXEXISTS key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			return cmdProcessMExists(p, db, result, blob);
@@ -155,12 +155,12 @@ namespace net::worker::commands::ExistsShared{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "exists_shared";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				EXISTS	,
 				MEXISTS
 			>(pack);

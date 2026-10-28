@@ -64,8 +64,8 @@ namespace net::worker::commands::SL{
 
 		// SLADD key val val val
 
-		template<class Protocol, class DBAdapter>
-		void processADD(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, bool capacityMultiplier){
+		template<typename Protocol, typename MemoryManager, typename DBAdapter>
+		void processADD(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, bool capacityMultiplier){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_2);
 
@@ -105,14 +105,14 @@ namespace net::worker::commands::SL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SLADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SLADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SLADD() : BaseCommandRW<Protocol,DBAdapter>("SLADD", std::begin(cmd__), std::end(cmd__)){}
+		SLADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SLADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLADD key item item
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return impl_::processADD(p, db, result, true);
 		}
 
@@ -126,14 +126,14 @@ namespace net::worker::commands::SL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SLADDPACK : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SLADDPACK : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SLADDPACK() : BaseCommandRW<Protocol,DBAdapter>("SLADDPACK", std::begin(cmd__), std::end(cmd__)){}
+		SLADDPACK() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SLADDPACK", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLADD key item item
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return impl_::processADD(p, db, result, false);
 		}
 
@@ -149,18 +149,18 @@ namespace net::worker::commands::SL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SLGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SLGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SLGET() : BaseCommandRO<Protocol,DBAdapter>("SLGET", std::begin(cmd__), std::end(cmd__)){}
+		SLGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SLGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLGET key n
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -207,18 +207,18 @@ namespace net::worker::commands::SL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SLMGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SLMGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SLMGET() : BaseCommandRO<Protocol,DBAdapter>("SLMGET", std::begin(cmd__), std::end(cmd__)){}
+		SLMGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SLMGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLMGET key val val val
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -272,7 +272,7 @@ namespace net::worker::commands::SL{
 		using MyStorage	= myhashtable::CompactStorage<T, MaxItems, Size, StaticVector>;
 
 	private:
-		static void processNaive__(Result<Protocol> &result,
+		static void processNaive__(Result<Protocol,MemoryManager> &result,
 					ParamContainer::iterator first, ParamContainer::iterator last,
 						OutputBlob::Container &container, s_list::RawSListConst const &sl){
 
@@ -303,7 +303,7 @@ namespace net::worker::commands::SL{
 			return result.set_container(container);
 		}
 
-		static void processMini__(Result<Protocol> &result, OutputBlob &blob,
+		static void processMini__(Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 					ParamContainer::iterator first, ParamContainer::iterator last,
 						OutputBlob::Container &container, s_list::RawSListConst const &sl){
 
@@ -330,7 +330,7 @@ namespace net::worker::commands::SL{
 			return result.set_container(container);
 		}
 
-		static void processHuge__(Result<Protocol> &result, OutputBlob &blob,
+		static void processHuge__(Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 					ParamContainer::iterator first, ParamContainer::iterator last,
 						OutputBlob::Container &container, s_list::RawSListConst const &sl){
 
@@ -380,18 +380,18 @@ namespace net::worker::commands::SL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SLGETALL : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SLGETALL : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SLGETALL() : BaseCommandRO<Protocol,DBAdapter>("SLGETALL", std::begin(cmd__), std::end(cmd__)){}
+		SLGETALL() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SLGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLGETALL key
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -434,18 +434,18 @@ namespace net::worker::commands::SL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SLCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SLCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SLCOUNT() : BaseCommandRO<Protocol,DBAdapter>("SLCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		SLCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SLCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 		// SLCOUNT key
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -478,12 +478,12 @@ namespace net::worker::commands::SL{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "sl";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				SLADD		,
 				SLADDPACK	,
 				SLGET		,

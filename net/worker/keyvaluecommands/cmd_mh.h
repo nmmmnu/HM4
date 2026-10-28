@@ -150,12 +150,12 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MHADD() : BaseCommandRW<Protocol,DBAdapter>("MHADD", std::begin(cmd__), std::end(cmd__)){}
+		MHADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MHADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -163,7 +163,7 @@ namespace net::worker::commands::MH{
 		// MHADD key bands	keySub delimiter "words,words"
 		//			keySub delimiter "words,words"
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			auto const varg  = 3;
 			auto const vstep = 3;
 
@@ -282,19 +282,19 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MHREM() : BaseCommandRW<Protocol,DBAdapter>("MHREM", std::begin(cmd__), std::end(cmd__)){}
+		MHREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MHREM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// MHREM key bands keySub keySub..
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			auto const varg  = 3;
 
 			if (p.size() < 4)
@@ -343,18 +343,18 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHGETINDEXES : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MHGETINDEXES() : BaseCommandRO<Protocol,DBAdapter>("MHGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
+		MHGETINDEXES() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MHGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// MHGETINDEXES key bands keySub
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -393,12 +393,12 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHSIM : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHSIM : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MHSIM() : BaseCommandRO<Protocol,DBAdapter>("MHSIM", std::begin(cmd__), std::end(cmd__)){}
+		MHSIM() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MHSIM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -413,7 +413,7 @@ namespace net::worker::commands::MH{
 		//	heap
 		//	MHT[MH::size()];
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -426,7 +426,7 @@ namespace net::worker::commands::MH{
 		}
 
 		template<bool inputTypeIsKey>
-		static void process2__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process2__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			auto const keyN		= p[1];
 			auto const bandSize	= from_string<uint32_t>(p[2]);
 
@@ -590,18 +590,18 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHJACCARD : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHJACCARD : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MHJACCARD() : BaseCommandRO<Protocol,DBAdapter>("MHJACCARD", std::begin(cmd__), std::end(cmd__)){}
+		MHJACCARD() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MHJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
 		// MHJACCARD key bands keySub keySub2
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
@@ -649,18 +649,18 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHMJACCARD : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHMJACCARD : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MHMJACCARD() : BaseCommandRO<Protocol,DBAdapter>("MHMJACCARD", std::begin(cmd__), std::end(cmd__)){}
+		MHMJACCARD() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MHMJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// MHMJACCARD key bands keySub keySub2...
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
@@ -730,18 +730,18 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHOVERLAP : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MHOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("MHOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+		MHOVERLAP() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MHOVERLAP", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
 		// MHOVERLAP key bands keySub keySub2
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
@@ -789,18 +789,18 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHMOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHMOVERLAP : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MHMOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("MHMOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+		MHMOVERLAP() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MHMOVERLAP", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// MHMOVERLAP key bands keySub keySub2...
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
@@ -870,12 +870,12 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MHBITS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MHBITS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MHBITS() : BaseCommandRO<Protocol,DBAdapter>("MHBITS", std::begin(cmd__), std::end(cmd__)){}
+		MHBITS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MHBITS", std::begin(cmd__), std::end(cmd__)){}
 
-		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return result.set(uint64_t{ MHBits });
@@ -890,12 +890,12 @@ namespace net::worker::commands::MH{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mh";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				MHADD		,
 				MHREM		,
 				MHGETINDEXES	,

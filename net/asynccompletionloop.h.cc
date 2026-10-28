@@ -7,25 +7,22 @@
 
 namespace net{
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::AsyncCompletionLoop(
-			IOEngine &&ioEngine, Worker &&worker, const std::initializer_list<int> &serverFD,
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::AsyncCompletionLoop(
+			IOEngine &&ioEngine, Worker &&worker, const std::initializer_list<int> &serverFD, MemoryManager &mm,
 			uint32_t const conf_rlimitNoFile	,
 			uint32_t const conf_maxClients		,
-			uint32_t const conf_minSparePoolSize	,
-			uint32_t const conf_maxSparePoolSize	,
-			size_t   const conf_buffer_capacity	,
+		//	size_t   const conf_buffer_capacity	,
 			size_t   const conf_maxRequestSize
 		) :
 					ioEngine_		(std::move(ioEngine)	),
 					worker_			(std::move(worker)	),
+					mm_			(mm			),
 
-					conf_rlimitNoFile_	( 		(conf_rlimitNoFile								) ),
-					conf_maxClients_	( std::max	(conf_maxClients,		MIN_CLIENTS					) ),
-					conf_minSparePoolSize_	( std::clamp	(conf_minSparePoolSize,		MIN_CLIENTS,		conf_maxClients_	) ),
-					conf_maxSparePoolSize_	( std::clamp	(conf_maxSparePoolSize,		conf_minSparePoolSize_,	conf_maxClients_	) ),
-					conf_bufferCapacity_	( std::max	(conf_buffer_capacity,		IO_BUFFER_CAPACITY				) ),
-					conf_maxRequestSize_	( std::max	(conf_maxRequestSize,		conf_bufferCapacity_				) ){
+					conf_rlimitNoFile_	( 		(conf_rlimitNoFile				) ),
+					conf_maxClients_	( std::max	(conf_maxClients,	MIN_CLIENTS		) ),
+				//	conf_bufferCapacity_	( std::max	(conf_buffer_capacity,	IO_BUFFER_CAPACITY	) ),
+					conf_maxRequestSize_	( std::max	(conf_maxRequestSize,	conf_bufferCapacity_	) ){
 
 	assert(conf_maxClients_ < conf_rlimitNoFile_);
 
@@ -35,24 +32,22 @@ AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::AsyncCompletionLoop(
 	}
 }
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::print() const{
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::print() const{
 	auto _ = [](auto k, auto v){
 		logger_fmt<Logger::STARTUP>("{:25} = {:12}", k, v);
 	};
 
 	_("rlimit nofile"	, conf_rlimitNoFile_		);
 	_("max clients"		, conf_maxClients_		);
-	_("min spare pool"	, conf_minSparePoolSize_	);
-	_("max spare pool"	, conf_maxSparePoolSize_	);
 	_("buffer capacity"	, conf_bufferCapacity_		);
 	_("max request size"	, conf_maxRequestSize_		);
 }
 
 // ===========================
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::process(){
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+bool AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::process(){
 	using WaitStatus  = ioengine::WaitStatus;
 	using FDOperation = ioengine::FDOperation;
 
@@ -101,29 +96,27 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::process(){
 	return keepProcessing_;
 }
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::idle_loop(){
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::idle_loop(){
 	expireFD_();
-
-	sparePool_.balance();
 
 	notify_worker_();
 }
 
 // ===========================
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
 template<bool NL>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Close_(int fd){
+void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::done_Close_(int fd){
 	removeFD_(fd);
 
 	if constexpr(NL)
 		notify_worker_();
 }
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
 template<bool NL>
-bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Accept_(int fd){
+bool AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::done_Accept_(int fd){
 	if (fd < 0)
 		return false;
 
@@ -143,9 +136,9 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Accept_(int
 	return true;
 }
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Read_(int fd, int result){
-	Client *it = clients_[fd];
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::done_Read_(int fd, int result){
+	auto *it = clients_[fd];
 
 	if (!it)
 		return req_Close_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
@@ -167,7 +160,7 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Read_(int f
 
 	size_t const size = static_cast<size_t>(result);
 
-	client.buffer.finalizeWriteBuffer(client.offcet, size);
+	client.buffer.finalizeBuffer(client.offcet, size);
 
 	if (client.buffer.size() > conf_maxRequestSize_)
 		return req_Close_(fd, DisconnectStatus::PROBLEM_BUFFER_READ);
@@ -177,9 +170,9 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Read_(int f
 	// req_Read_, req_Write_, req_Close_ is sent from the client_Worker_
 }
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Write_(int fd, int result){
-	Client *it = clients_[fd];
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::done_Write_(int fd, int result){
+	auto *it = clients_[fd];
 
 	if (!it)
 		return req_Close_(fd, DisconnectStatus::PROBLEM_MAP_NOT_FOUND);
@@ -215,8 +208,8 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::done_Write_(int 
 
 // ===========================
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::log_Close_(int const fd, const DisconnectStatus error){
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::log_Close_(int const fd, const DisconnectStatus error){
 	switch(error){
 	case DisconnectStatus::NORMAL			: return log_("Request Normal  Disconnect",				fd);
 	case DisconnectStatus::ERROR			: return log_("Request Error   Disconnect",				fd);
@@ -233,8 +226,8 @@ void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::log_Close_(int c
 
 // ===========================
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::client_Worker_(int const fd, Client &client){
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+bool AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::client_Worker_(int const fd, Client<MemoryManager> &client){
 	const WorkerStatus status = worker_( client.buffer );
 
 	// buffer is cleared unless PASS
@@ -276,14 +269,14 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::client_Worker_(i
 
 // ===========================
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::insertFD_(int const fd){
-	if ( !clients_.insert(fd, sparePool_.pop()) )
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+bool AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::insertFD_(int const fd){
+	if ( !clients_.insert(fd, mm_) )
 		return false;
 
 	// this is guaranteed not null,
 	// because we just inserted it.
-	Client *it = clients_[fd];
+	auto *it = clients_[fd];
 
 	auto &client = *it;
 
@@ -293,21 +286,14 @@ bool AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::insertFD_(int co
 	return true;
 }
 
-template<class IOEngine, class Worker, class SparePool, class Storage>
-void AsyncCompletionLoop<IOEngine, Worker, SparePool, Storage>::removeFD_(int const fd){
-	// Find and steal
-
-	Client *it = clients_[fd];
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
+void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::removeFD_(int const fd){
+	auto *it = clients_[fd];
 
 	if (!it){
 		// do nothing, error is already removed.
 		return;
 	}
-
-	IOBuffer &buffer = it->buffer;
-
-	// steal
-	sparePool_.push(std::move(buffer.getBuffer()));
 
 	clients_.remove(fd);
 }

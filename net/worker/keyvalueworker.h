@@ -88,28 +88,28 @@ namespace net::worker{
 
 	namespace registration_impl_{
 
-		template<template<class, class, class> class Module, class Protocol, class DBAdapter, class RegisterPack>
+		template<template<class, class, class, class> class Module, class Protocol, class MemoryManager, class DBAdapter, class RegisterPack>
 		void registerModule(RegisterPack &pack){
-			using M = Module<Protocol, DBAdapter, RegisterPack>;
+			using M = Module<Protocol, MemoryManager, DBAdapter, RegisterPack>;
 
 			logger<Logger::NOTICE>() << "Loading" << M::name << "module...";
 
 			M::load(pack);
 		}
 
-		template<class Protocol, class DBAdapter, class RegisterPack, template<class, class, class> typename... Modules>
+		template<class Protocol, class MemoryManager, class DBAdapter, class RegisterPack, template<class, class, class, class> typename... Modules>
 		void registerModulesUnwrap(RegisterPack &pack){
 			// this is good idea, but definitely is wrong
 			// pack.commandStorage.reserve(sizeof...(Modules));
 
-			( registerModule<Modules, Protocol, DBAdapter>(pack), ...);
+			( registerModule<Modules, Protocol, MemoryManager, DBAdapter>(pack), ...);
 		}
 
-		template<class Protocol, class DBAdapter, class RegisterPack>
+		template<class Protocol, class MemoryManager, class DBAdapter, class RegisterPack>
 		void registerModules(RegisterPack &pack){
 			using namespace commands;
 
-			registerModulesUnwrap<Protocol, DBAdapter, RegisterPack,
+			registerModulesUnwrap<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				Immutable	::RegisterModule,
 				ImmutableX	::RegisterModule,
 				Accumulators	::RegisterModule,
@@ -189,15 +189,14 @@ namespace net::worker{
 
 
 
-	template<class Protocol, class DBAdapter, bool Profiling = false>
+	template<class Protocol, class MemoryManager, class DBAdapter, bool Profiling = false>
 	struct KeyValueWorker{
 		constexpr static bool LogCommands	= false;
 		constexpr static auto LogCommandsLevel	= Logger::DEBUG;
 
 	public:
-		KeyValueWorker(DBAdapter &db, size_t output_buffer_reserve) :
-							db_		(db			),
-							output_buffer_	(output_buffer_reserve	){
+		KeyValueWorker(DBAdapter &db, MemoryManager &mm) :	db_		(db	),
+									system_buffer_	(mm	){
 
 			using namespace registration_impl_;
 
@@ -207,11 +206,11 @@ namespace net::worker{
 
 			RegisterPack pack{ storageCommands_ };
 
-			registerModules<Protocol, DBAdapter>(pack);
+			registerModules<Protocol, MemoryManager, DBAdapter>(pack);
 		}
 
 	public:
-		WorkerStatus operator()(IOBuffer &buffer){
+		WorkerStatus operator()(IOBuffer<MemoryManager> &buffer){
 			using Status  = protocol::ProtocolStatus;
 
 			// PASS
@@ -224,26 +223,24 @@ namespace net::worker{
 			if (status == Status::BUFFER_NOT_READ)
 				return WorkerStatus::PASS;
 
-			buffer.clear();
-
 			// ERROR
 
 			if (status == Status::ERROR)
-				return emitInternalError(protocol_, buffer);
+				return emitInternalError();
 
 			// FETCH command
 
 			const auto &p = protocol_.getParams();
 
 			if (p.empty())
-				return emitError(protocol_, buffer, ResultErrorMessages::SYS_PROTOCOL_BREAK);
+				return emitError<Protocol>(buffer, ResultErrorMessages::SYS_PROTOCOL_BREAK);
 
 			// FETCH command object
 
 			auto *pcommand = storageCommands_(p.front());
 
 			if (!pcommand)
-				return emitError(protocol_, buffer, ResultErrorMessages::SYS_NOT_IMPLEMENTED);
+				return emitError<Protocol>(buffer, ResultErrorMessages::SYS_NOT_IMPLEMENTED);
 
 			auto &command = *pcommand;
 
@@ -251,18 +248,18 @@ namespace net::worker{
 			if constexpr(LogCommands)
 				logger<LogCommandsLevel>().range(std::begin(p), std::end(p));
 
-			commands::Result<Protocol> result{ protocol_, output_buffer_ };
+			commands::Result<Protocol, MemoryManager> result{ protocol_, system_buffer_ };
 
-			output_.resetAllocator();
+			blob_.resetAllocator();
 
 			if constexpr(!Profiling){
-				command(protocol_.getParams(), db_, result, output_);
+				command(protocol_.getParams(), db_, result, blob_);
 			}else{
-				auto &timer = output_.getTimerCmd();
+				auto &timer = blob_.getTimerCmd();
 
 				auto const guard = timer();
 
-				command(protocol_.getParams(), db_, result, output_);
+				command(protocol_.getParams(), db_, result, blob_);
 			}
 
 			return translate_(result, buffer);
@@ -274,12 +271,14 @@ namespace net::worker{
 		}
 
 	private:
-		WorkerStatus translate_(commands::Result<Protocol> const result, IOBuffer &buffer){
-			using cs = commands::Status;
+		WorkerStatus translate_(commands::Result<Protocol,MemoryManager> const result, IOBuffer<MemoryManager> &buffer){
 
-			if (output_buffer_.size() == 0){
-				return emitError(protocol_, buffer, ResultErrorMessages::SYS_UNHANDLED);
+			if (system_buffer_.size() == 0){
+			//	return emitError<Protocol>(buffer, ResultErrorMessages::SYS_UNHANDLED);
+				return WorkerStatus::DISCONNECT_ERROR;
 			}
+
+			using cs = commands::Status;
 
 			switch(result.getStatus()){
 			case cs::DISCONNECT	: return WorkerStatus::DISCONNECT;
@@ -287,23 +286,26 @@ namespace net::worker{
 			case cs::OK		: break;
 			}
 
+			// don't move, swap,
+			// there may be some input data in system_buffer_
+
 			using std::swap;
-			swap(output_buffer_, buffer);
+			swap(system_buffer_, buffer);
 
 			return WorkerStatus::WRITE;
 		}
 
 	private:
-		using StorageCommands = commands::StorageCommands<Protocol, DBAdapter>;
+		using StorageCommands = commands::StorageCommands<Protocol, MemoryManager, DBAdapter>;
 
 		Protocol		protocol_		;
 		DBAdapter		&db_			;
 
 		StorageCommands		storageCommands_	;
 
-		commands::OutputBlob	output_			;
+		commands::OutputBlob	blob_			;
 
-		IOBuffer		output_buffer_		;
+		IOBuffer<MemoryManager>	system_buffer_		;
 
 	private:
 		static_assert(Protocol::MAX_PARAMS <= commands::OutputBlob::ContainerSize	);

@@ -125,16 +125,16 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("SSRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		SSRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SSRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
@@ -157,17 +157,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SSADD() : BaseCommandRW<Protocol,DBAdapter>("SSADD", std::begin(cmd__), std::end(cmd__)){}
+		SSADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SSADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssadd key value value value...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -225,17 +225,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSMERGE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSMERGE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SSMERGE() : BaseCommandRW<Protocol,DBAdapter>("SSMERGE", std::begin(cmd__), std::end(cmd__)){}
+		SSMERGE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SSMERGE", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssmerge key key_to_merge key_to_merge key_to_merge...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -304,17 +304,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSGETALL : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSGETALL : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SSGETALL() : BaseCommandRO<Protocol,DBAdapter>("SSGETALL", std::begin(cmd__), std::end(cmd__)){}
+		SSGETALL() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SSGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssgetall key key key
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -331,7 +331,7 @@ namespace net::worker::commands::SummaryStats{
 		}
 
 		static void process_1_(std::string_view key,
-						DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+						DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			using namespace impl_;
 
@@ -356,7 +356,7 @@ namespace net::worker::commands::SummaryStats{
 		}
 
 		static void process_N_(ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
-						DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+						DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			auto &pcontainer = blob.construct<OutputBlob::PairContainer>();
 
@@ -385,17 +385,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SSGET() : BaseCommandRO<Protocol,DBAdapter>("SSGET", std::begin(cmd__), std::end(cmd__)){}
+		SSGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SSGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssgetall key subkey
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -434,17 +434,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSMGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSMGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SSMGET() : BaseCommandRO<Protocol,DBAdapter>("SSMGET", std::begin(cmd__), std::end(cmd__)){}
+		SSMGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SSMGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssmget key subkey subkey subkey...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -491,17 +491,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSADDGETALL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSADDGETALL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SSADDGETALL() : BaseCommandRW<Protocol,DBAdapter>("SSADDGETALL", std::begin(cmd__), std::end(cmd__)){}
+		SSADDGETALL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SSADDGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssaddgetall key value value value...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -573,17 +573,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSADDGET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSADDGET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SSADDGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDGET", std::begin(cmd__), std::end(cmd__)){}
+		SSADDGET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SSADDGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssaddget key value sub
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -655,17 +655,17 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SSADDMGET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SSADDMGET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SSADDMGET() : BaseCommandRW<Protocol,DBAdapter>("SSADDMGET", std::begin(cmd__), std::end(cmd__)){}
+		SSADDMGET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SSADDMGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// ssaddget key value sub sub sub...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -744,12 +744,12 @@ namespace net::worker::commands::SummaryStats{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "summary stats";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				SSRESERVE	,
 				SSADD		,
 				SSMERGE		,

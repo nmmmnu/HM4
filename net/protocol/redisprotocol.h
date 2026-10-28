@@ -3,7 +3,6 @@
 
 #include "protocoldefs.h"
 
-#include <string>
 #include <numeric>	// std::accumulate
 #include <utility>	// std::pair
 #include <string_view>
@@ -22,35 +21,6 @@ namespace protocol{
 
 
 
-namespace redis_protocol_impl_{
-	constexpr size_t calc_size(std::string_view s){
-		return s.size();
-	}
-
-	constexpr size_t calc_size(char){
-		return 1;
-	}
-
-	constexpr size_t calc_size_int(uint64_t = 0){
-		return to_string_buffer_t_size;
-	}
-
-	constexpr size_t calc_size_str(std::string_view s){
-		constexpr char			DOLLAR	= '$';
-		constexpr std::string_view	ENDLN	= "\r\n";
-
-		return
-			calc_size(DOLLAR	)	+
-			calc_size_int(s.size()	)	+
-			calc_size(ENDLN		)	+
-			calc_size(s		)	+
-			calc_size(ENDLN		)
-		;
-	}
-}
-
-
-
 class RedisProtocol{
 public:
 	constexpr static inline char			STAR		= '*';
@@ -64,20 +34,6 @@ public:
 	constexpr static inline size_t			MAX_PARAMS	= 0xFF;
 
 	static_assert(MAX_PARAMS >= 7, "7 params is the minimum - pfmerge dest a b c d e");
-
-	// originally was 4
-	// setex name 100 hello
-	// getx  name 100 prefix
-	//
-	// changed to 7
-	// pfmerge dest a b c d e
-	//
-	// changed to 25, because redis on the web, have similar limit.
-	// del a b c...
-	//
-	// changed to 128, because of geoadd.
-	//
-	// changed to 255
 
 public:
 	using Status = ProtocolStatus;
@@ -103,234 +59,408 @@ public:
 	void print() const;
 
 public:
-//	template<class Buffer>
-//	static void response_empty(Buffer &buffer);
-
-	template<class Buffer>
-	static void response_ok(Buffer &buffer);
-
-	template<class Buffer>
-	static void response_bool(Buffer &buffer, bool b);
-
-	template<class Buffer>
-	static void response_error(Buffer &buffer, std::string_view msg);
-
-	template<class Buffer>
-	static void response_string(Buffer &buffer, std::string_view msg);
-
-	template<class Buffer>
-	static void response_simple_string(Buffer &buffer, std::string_view msg);
-
-	template<class Buffer>
-	static void response_number(Buffer &buffer, int64_t n);
-
-	template<class Buffer>
-	static void response_number(Buffer &buffer, uint64_t n);
-
-	template<class Buffer>
-	static void response_number_sv(Buffer &buffer, std::string_view n);
-
-	template<class Buffer>
-	static void response_strings(Buffer &buffer, MySpan<const std::string_view> const &list);
-
-private:
-	template<class Buffer>
-	static void response_string_nr(Buffer &buffer, std::string_view msg);
-
-	template<class Buffer>
-	static void response_string(Buffer &buffer, uint64_t const msg){
-		// if we change uint64_t to template, std::string will come here.
-		return response_string(buffer, std::to_string(msg));
-	}
-
-	static void response_log_(std::string_view const type, size_t const res, size_t const capacity, const void *p){
-		logger<Logger::DEBUG>() << "Responce" << type << "reserve" << res << "capacity" << capacity << "addr" << p;
-	}
+	class Response;
 
 private:
 	StringVector	params_;
 };
 
 
+
 // ==================================
 
 
-// template<class Buffer>
-// void RedisProtocol::response_empty(Buffer &buffer){
-// 	buffer.push("$-1");
-// 	buffer.push(ENDLN);
-// }
 
-template<class Buffer>
-void RedisProtocol::response_ok(Buffer &buffer){
-	using namespace redis_protocol_impl_;
+namespace redis_protocol_impl_{
+	constexpr size_t calc_size(std::string_view s){
+		return s.size();
+	}
 
-	constexpr std::string_view OK = "+OK";
+	constexpr size_t calc_size(char){
+		return 1;
+	}
 
-	constexpr auto res =
-		calc_size(OK		)	+
-		calc_size(ENDLN		)
-	;
+	constexpr size_t calc_size_int(uint64_t){
+		return to_string_buffer_t_size;
+	}
 
-	buffer.reserve(res);
+	constexpr size_t calc_size_int(int64_t){
+		return to_string_buffer_t_size;
+	}
 
-	buffer.push(OK);
-	buffer.push(ENDLN);
+	constexpr size_t calc_size_str(std::string_view s){
+		constexpr char			DOLLAR	= '$';
+		constexpr std::string_view	ENDLN	= "\r\n";
 
-	response_log_("ok", res, buffer.capacity(), buffer.data());
-}
-
-template<class Buffer>
-void RedisProtocol::response_bool(Buffer &buffer, bool const b){
-	using namespace redis_protocol_impl_;
-
-	constexpr std::string_view TRUE  = ":1";
-	constexpr std::string_view FALSE = ":0";
-
-	static_assert(TRUE.size() == FALSE.size());
-
-	constexpr auto res =
-		calc_size(TRUE	)	+
-		calc_size(ENDLN	)
-	;
-
-	buffer.reserve(res);
-
-	buffer.push(b ? TRUE : FALSE);
-	buffer.push(ENDLN);
-
-	response_log_("bool", res, buffer.capacity(), buffer.data());
-}
-
-template<class Buffer>
-void RedisProtocol::response_error(Buffer &buffer, std::string_view const msg){
-	using namespace redis_protocol_impl_;
-
-	constexpr std::string_view ERR = "-ERR ";
-
-	auto const res =
-		calc_size(ERR		)	+
-		calc_size(msg		)	+
-		calc_size(ENDLN		)
-	;
-
-	buffer.reserve(res);
-
-	buffer.push(ERR);
-	buffer.push(msg);
-	buffer.push(ENDLN);
-
-	response_log_("error", res, buffer.capacity(), buffer.data());
-}
-
-template<class Buffer>
-void RedisProtocol::response_string_nr(Buffer &buffer, std::string_view const msg){
-	to_string_buffer_t std_buffer;
-
-	buffer.push(DOLLAR);
-	buffer.push(to_string(msg.size(), std_buffer));
-	buffer.push(ENDLN);
-
-	buffer.push(msg);
-	buffer.push(ENDLN);
-}
-
-template<class Buffer>
-void RedisProtocol::response_number_sv(Buffer &buffer, std::string_view n){
-	using namespace redis_protocol_impl_;
-
-	auto const res =
-			calc_size(COLON	)	+
-			calc_size(n)		+
-			calc_size(ENDLN	)
-	;
-
-	buffer.reserve(res);
-
-	buffer.push(COLON);
-	buffer.push(n);
-	buffer.push(ENDLN);
-
-	response_log_("number", res, buffer.capacity(), buffer.data());
-}
-
-template<class Buffer>
-void RedisProtocol::response_number(Buffer &buffer, int64_t const n){
-	to_string_buffer_t std_buffer;
-
-	return response_number_sv(buffer, to_string(n, std_buffer));
-}
-
-template<class Buffer>
-void RedisProtocol::response_number(Buffer &buffer, uint64_t const n){
-	to_string_buffer_t std_buffer;
-
-	if (n > 0x0FFF'FFFF'FFFF'FFFF)
-		return response_string(buffer, to_string(n, std_buffer));
-	else
-		return response_number_sv(buffer, to_string(n, std_buffer));
-}
-
-template<class Buffer>
-void RedisProtocol::response_string(Buffer &buffer, std::string_view const msg){
-	using namespace redis_protocol_impl_;
-
-	auto const res = calc_size_str(msg);
-
-	buffer.reserve(res);
-
-	response_string_nr(buffer, msg);
-
-	response_log_("string<1>", res, buffer.capacity(), buffer.data());
-}
-
-template<class Buffer>
-void RedisProtocol::response_simple_string(Buffer &buffer, std::string_view const msg){
-	using namespace redis_protocol_impl_;
-
-	auto const res =
-			calc_size(PLUS	)	+
-			msg.size()		+
-			calc_size(ENDLN	)
-	;
-
-	buffer.reserve(res);
-
-	buffer.push(PLUS);
-	buffer.push(msg);
-	buffer.push(ENDLN);
-
-	response_log_("simple string", res, buffer.capacity(), buffer.data());
-}
-
-template<class Buffer>
-void RedisProtocol::response_strings(Buffer &buffer, MySpan<const std::string_view> const &list){
-	using namespace redis_protocol_impl_;
-
-	const size_t res =
-		calc_size(STAR			)	+
-		calc_size_int(list.size()	)	+
-		calc_size(ENDLN			)	+
-
-		std::accumulate(std::begin(list), std::end(list), size_t{ 0 }, [](size_t sum, std::string_view s){
-			return sum + calc_size_str(s);
-		})
-	;
-
-	buffer.reserve(res);
-
-	to_string_buffer_t std_buffer;
-
-	buffer.push(STAR);
-	buffer.push(to_string(list.size(), std_buffer));
-	buffer.push(ENDLN);
-
-	for(const auto &msg : list)
-		response_string_nr(buffer, msg);
+		return
+			calc_size(DOLLAR	)	+
+			calc_size_int(s.size()	)	+
+			calc_size(ENDLN		)	+
+			calc_size(s		)	+
+			calc_size(ENDLN		)
+		;
+	}
 
 
-	response_log_("strings<*>", res, buffer.capacity(), buffer.data());
-}
+
+	#if 0
+	inline void response_log(std::string_view const type, size_t const res, size_t const capacity, const void *p){
+		logger<Logger::DEBUG>() << "Responce" << type << "size" << res << "capacity" << capacity << "addr" << p;
+	}
+
+	template<class Buffer>
+	void response_log(std::string_view const type, Buffer const &buffer){
+		return response_log(type, buffer.size(), buffer.capacity(), buffer.data());
+	}
+	#endif
+
+
+
+	inline void copy(char *&ptr, std::string_view s, size_t &size){
+		memcpy(ptr, s.data(), s.size());
+		ptr  += s.size();
+		size += s.size();
+	}
+
+	inline void copy(char *&ptr, char c, size_t &size){
+		memcpy(ptr, &c, 1);
+		ptr  += 1;
+		size += 1;
+	}
+
+} // namespace redis_protocol_impl_
+
+
+
+class RedisProtocol::Response{
+	static size_t responceNumberSV__(char *&ptr, std::string_view n) noexcept{
+		using namespace redis_protocol_impl_;
+
+		size_t size = 0;
+
+		copy(ptr, COLON	, size);
+		copy(ptr, n	, size);
+		copy(ptr, ENDLN	, size);
+
+		return size;
+	}
+
+	static size_t responceStringNR__(char *&ptr, std::string_view const msg) noexcept{
+		using namespace redis_protocol_impl_;
+
+		size_t size = 0;
+
+		to_string_buffer_t std_buffer;
+
+		auto const n = to_string(msg.size(), std_buffer);
+
+		copy(ptr, DOLLAR	, size);
+		copy(ptr, n		, size);
+		copy(ptr, ENDLN		, size);
+
+		copy(ptr, msg		, size);
+		copy(ptr, ENDLN		, size);
+
+		return size;
+	}
+
+public:
+	class OK{
+		constexpr static std::string_view name	= "ok";
+
+		constexpr static std::string_view OK_	= "+OK";
+
+	public:
+		constexpr OK() = default;
+
+		constexpr static size_t size() noexcept{
+			using namespace redis_protocol_impl_;
+
+			return	calc_size(OK_		) +
+				calc_size(ENDLN		)
+			;
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			size_t size = 0;
+
+			copy(ptr, OK_		, size);
+			copy(ptr, ENDLN		, size);
+
+			return size;
+		}
+	};
+
+
+
+	class Bool{
+		constexpr static std::string_view name	= "bool";
+
+		constexpr static std::string_view TRUE	= ":1";
+		constexpr static std::string_view FALSE	= ":0";
+
+		static_assert(TRUE.size() == FALSE.size());
+
+	public:
+		constexpr Bool(bool bb) noexcept : bb(bb){}
+
+		constexpr static size_t size() noexcept{
+			using namespace redis_protocol_impl_;
+
+			return 	calc_size(TRUE	) +
+				calc_size(ENDLN	)
+			;
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			size_t size = 0;
+
+			copy(ptr, bb ? TRUE : FALSE	, size);
+			copy(ptr, ENDLN			, size);
+
+			return size;
+		}
+
+	private:
+		bool bb;
+	};
+
+
+
+	class Error{
+		constexpr static std::string_view name	= "error";
+
+		constexpr static std::string_view ERR	= "-ERR ";
+
+	public:
+		constexpr Error(std::string_view msg) noexcept : msg(msg){}
+
+		constexpr size_t size() const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return	calc_size(ERR	) +
+				calc_size(msg	) +
+				calc_size(ENDLN	)
+			;
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			size_t size = 0;
+
+			copy(ptr, ERR	, size);
+			copy(ptr, msg	, size);
+			copy(ptr, ENDLN	, size);
+
+			return size;
+		}
+
+	private:
+		std::string_view msg;
+	};
+
+
+
+	class String{
+		constexpr static std::string_view name	= "string<1>";
+
+	public:
+		constexpr String(std::string_view msg) noexcept : msg(msg){}
+
+		constexpr size_t size() const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return calc_size_str(msg);
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return responceStringNR__(ptr, msg);
+		}
+
+	private:
+		std::string_view msg;
+	};
+
+
+
+	class SimpleString{
+		constexpr static std::string_view name	= "simple_string";
+
+	public:
+		constexpr SimpleString(std::string_view msg) noexcept : msg(msg){}
+
+		constexpr size_t size() const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return 	calc_size	(PLUS	) +
+				msg.size	(	) +
+				calc_size	(ENDLN	)
+			;
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			size_t size = 0;
+
+			copy(ptr, PLUS	, size);
+			copy(ptr, msg	, size);
+			copy(ptr, ENDLN	, size);
+
+			return size;
+		}
+
+	private:
+		std::string_view msg;
+	};
+
+
+
+	class Number64{
+		constexpr static std::string_view name	= "number";
+
+	public:
+		constexpr Number64(int64_t n) noexcept : n(n){}
+
+		constexpr size_t size() const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return 	calc_size	(COLON	) +
+				calc_size_int	(n	) +
+				calc_size	(ENDLN	)
+			;
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			to_string_buffer_t std_buffer;
+
+			return responceNumberSV__(ptr, to_string(n, std_buffer));
+		}
+
+	private:
+		int64_t n;
+	};
+
+
+
+	class NumberU64{
+		constexpr static std::string_view name	= "number";
+
+	public:
+		constexpr NumberU64(uint64_t n) noexcept : n(n){}
+
+		constexpr size_t size() const noexcept{
+			using namespace redis_protocol_impl_;
+
+			if (n > 0x0FFF'FFFF'FFFF'FFFF){
+				std::string_view const MAX64 = "18446744073709551615";
+
+				return calc_size_str(MAX64);
+			}else{
+				return 	calc_size	(COLON	) +
+					calc_size_int	(n	) +
+					calc_size	(ENDLN	)
+				;
+			}
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			to_string_buffer_t std_buffer;
+
+			if (n > 0x0FFF'FFFF'FFFF'FFFF)
+				return responceStringNR__(ptr, to_string(n, std_buffer));
+			else
+				return responceNumberSV__(ptr, to_string(n, std_buffer));
+		}
+
+	private:
+		uint64_t n;
+	};
+
+
+
+	class NumberSV{
+		constexpr static std::string_view name	= "number";
+
+	public:
+		constexpr NumberSV(std::string_view n) noexcept : n(n){}
+
+		constexpr size_t size() const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return	calc_size(COLON	) +
+				calc_size(n	) +
+				calc_size(ENDLN	)
+			;
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return responceNumberSV__(ptr, n);
+		}
+
+	private:
+		std::string_view n;
+	};
+
+
+
+	class Strings{
+		constexpr static std::string_view name	= "string<*>";
+
+	public:
+		constexpr Strings(MySpan<const std::string_view> const &list) noexcept : list(list){}
+
+		constexpr size_t size() const noexcept{
+			using namespace redis_protocol_impl_;
+
+			return	calc_size(STAR			)	+
+				calc_size_int(list.size()	)	+
+				calc_size(ENDLN			)	+
+
+				std::accumulate(std::begin(list), std::end(list), size_t{ 0 }, [](size_t sum, std::string_view s){
+					return sum + calc_size_str(s);
+				})
+			;
+		}
+
+		size_t operator()(char *&ptr) const noexcept{
+			using namespace redis_protocol_impl_;
+
+			to_string_buffer_t std_buffer;
+
+			size_t size = 0;
+
+			auto const n = to_string(list.size(), std_buffer);
+
+			copy(ptr, STAR	, size);
+			copy(ptr, n	, size);
+			copy(ptr, ENDLN	, size);
+
+			for(const auto &msg : list)
+				size += responceStringNR__(ptr, msg);
+
+			return size;
+		}
+
+	private:
+		MySpan<const std::string_view>  const &list;
+	};
+
+};
+
 
 
 } // namespace protocol

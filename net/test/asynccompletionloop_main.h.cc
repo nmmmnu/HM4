@@ -3,7 +3,6 @@
 
 #include "sockets.h"
 #include "asynccompletionloop.h"
-#include "heapsparepool.h"
 
 int main(){
 	uint32_t serverFDs = 3;
@@ -14,11 +13,14 @@ int main(){
 	uint32_t const conf_rlimitNoFile = static_cast<uint32_t>(net::socket_get_rlimit_nofile());
 	size_t   const conf_max_clients  = 6;
 
-	using MyWorker = MyWorkerFactory::Worker;
+	using MyWorker		= MyWorkerFactory::Worker;
+	using MyMemoryManager	= memory_manager::SimpleMemoryManager;
 
 	MyWorkerFactory wf;
 
-	net::AsyncCompletionLoop<MySelector, MyWorker, net::HeapSparePool> loop(
+	MyMemoryManager mm;
+
+	net::AsyncCompletionLoop<MySelector, MyWorker, MyMemoryManager> loop(
 					/* selector */	MySelector{
 								conf_rlimitNoFile	,
 								conf_max_clients	,
@@ -26,6 +28,7 @@ int main(){
 								5, 2 * 60, 2 * 60 },
 					/* worker */	wf()			,
 					/* server fd */	{ fd1, fd2, fd3 }	,
+					mm					,
 					conf_rlimitNoFile			,
 					conf_max_clients
 	);

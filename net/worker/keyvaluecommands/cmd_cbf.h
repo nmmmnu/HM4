@@ -98,9 +98,9 @@ namespace net::worker::commands::CBF{
 
 
 
-		template<class Protocol, class DBAdapter, bool Sign>
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, bool Sign>
 		struct CBFMutate{
-			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 				auto const varg = 5;
 
 				if (p.size() < 7 || (p.size() - varg) % 2 != 0)
@@ -137,7 +137,7 @@ namespace net::worker::commands::CBF{
 
 		private:
 			template<typename T>
-			void process_(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			void process_(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result) const{
 				if (cbf.bytes() > MAX_SIZE){
 					// emit an error
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -191,9 +191,9 @@ namespace net::worker::commands::CBF{
 
 
 
-		template<class Protocol, class DBAdapter, bool Sign>
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, bool Sign>
 		struct CBFMutateCount{
-			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 				if (p.size() != 7)
 					return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_6);
 
@@ -228,7 +228,7 @@ namespace net::worker::commands::CBF{
 
 		private:
 			template<typename T>
-			void process_(std::string_view key, std::string_view const item, T const itemCount, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			void process_(std::string_view key, std::string_view const item, T const itemCount, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result) const{
 				using namespace impl_;
 
 				if (cbf.bytes() > MAX_SIZE){
@@ -291,15 +291,15 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CBFADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CBFADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CBFADD() : BaseCommandRW<Protocol,DBAdapter>("CBFADD", std::begin(cmd__), std::end(cmd__)){}
+		CBFADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CBFADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CBFMutate<Protocol, DBAdapter, true> mut;
+			CBFMutate<Protocol, MemoryManager, DBAdapter, true> mut;
 
 			return mut(p, db, result);
 		}
@@ -315,15 +315,15 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CBFREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CBFREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CBFREM() : BaseCommandRW<Protocol,DBAdapter>("CBFREM", std::begin(cmd__), std::end(cmd__)){}
+		CBFREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CBFREM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CBFMutate<Protocol, DBAdapter, false> mut;
+			CBFMutate<Protocol, MemoryManager, DBAdapter, false> mut;
 
 			return mut(p, db, result);
 		}
@@ -339,15 +339,15 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CBFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CBFADDCOUNT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CBFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CBFADDCOUNT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CBFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CBFMutateCount<Protocol, DBAdapter, true> mut;
+			CBFMutateCount<Protocol, MemoryManager, DBAdapter, true> mut;
 
 			return mut(p, db, result);
 		}
@@ -361,15 +361,15 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CBFREMCOUNT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CBFREMCOUNT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CBFREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CBFREMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CBFREMCOUNT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CBFREMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CBFMutateCount<Protocol, DBAdapter, false> mut;
+			CBFMutateCount<Protocol, MemoryManager, DBAdapter, false> mut;
 
 			return mut(p, db, result);
 		}
@@ -383,17 +383,17 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CBFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CBFRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CBFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CBFRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		CBFRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CBFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -425,7 +425,7 @@ namespace net::worker::commands::CBF{
 		}
 
 		template<typename T>
-		static void processT__(std::string_view key, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(std::string_view key, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (cbf.bytes() > MAX_SIZE){
@@ -447,17 +447,17 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CBFCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CBFCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		CBFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CBFCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("CBFCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 6)
@@ -491,7 +491,7 @@ namespace net::worker::commands::CBF{
 		}
 
 		template<typename T>
-		static void processT__(std::string_view key, std::string_view item, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(std::string_view key, std::string_view item, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cbf.bytes());
@@ -513,17 +513,17 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CBFMCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CBFMCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		CBFMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CBFMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CBFMCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("CBFMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -555,7 +555,7 @@ namespace net::worker::commands::CBF{
 		}
 
 		template<typename T>
-		static void processT__(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob){
+		static void processT__(std::string_view key, ParamContainer const &p, impl_::CBF<T> cbf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg = 5;
@@ -600,12 +600,12 @@ namespace net::worker::commands::CBF{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "cbf";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				CBFADD		,
 				CBFREM		,
 				CBFADDCOUNT	,

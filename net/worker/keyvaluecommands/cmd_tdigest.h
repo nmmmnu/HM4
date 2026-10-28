@@ -125,18 +125,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		TDRESERVE() : BaseCommandRW<Protocol,DBAdapter>("TDRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		TDRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("TDRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDRESERVE key capacity
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -170,19 +170,19 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		TDADD() : BaseCommandRW<Protocol,DBAdapter>("TDADD", std::begin(cmd__), std::end(cmd__)){}
+		TDADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("TDADD", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDADD key capacity delta value [value]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -231,18 +231,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDADDWEIGHT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDADDWEIGHT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		TDADDWEIGHT() : BaseCommandRW<Protocol,DBAdapter>("TDADDWEIGHT", std::begin(cmd__), std::end(cmd__)){}
+		TDADDWEIGHT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("TDADDWEIGHT", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDADDWEIGHT key capacity delta value weight [value weight]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg = 4;
@@ -291,19 +291,19 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDMERGE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDMERGE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		TDMERGE() : BaseCommandRW<Protocol,DBAdapter>("TDMERGE", std::begin(cmd__), std::end(cmd__)){}
+		TDMERGE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("TDMERGE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// TDMERGE key capacity delta src_key [src_key]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -369,18 +369,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDMERGECAPACITY : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDMERGECAPACITY : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		TDMERGECAPACITY() : BaseCommandRW<Protocol,DBAdapter>("TDMERGECAPACITY", std::begin(cmd__), std::end(cmd__)){}
+		TDMERGECAPACITY() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("TDMERGECAPACITY", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDMERGE key capacity delta src_key [src_key src_capacity]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -446,18 +446,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDPERCENTILE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
+		TDPERCENTILE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDPERCENTILE key capacity percentile
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -503,18 +503,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDMPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDMPERCENTILE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDMPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("TDMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
+		TDMPERCENTILE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDMPERCENTILE key capacity percentile [percentile]
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 4)
@@ -573,18 +573,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDMEDIAN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDMEDIAN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDMEDIAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEDIAN", std::begin(cmd__), std::end(cmd__)){}
+		TDMEDIAN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDMEDIAN", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDMEDIAN key capacity
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -624,18 +624,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDTRIMMEDMEAN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDTRIMMEDMEAN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDTRIMMEDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDTRIMMEDMEAN", std::begin(cmd__), std::end(cmd__)){}
+		TDTRIMMEDMEAN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDTRIMMEDMEAN", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDTRIMMEDMEAN key capacity from_percentile to_percentile
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -677,18 +677,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDMEAN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDMEAN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDMEAN() : BaseCommandRO<Protocol,DBAdapter>("TDMEAN", std::begin(cmd__), std::end(cmd__)){}
+		TDMEAN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDMEAN", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDMEAN key capacity
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -727,18 +727,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDMIN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDMIN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDMIN() : BaseCommandRO<Protocol,DBAdapter>("TDMIN", std::begin(cmd__), std::end(cmd__)){}
+		TDMIN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDMIN", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDMIN key capacity
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -776,18 +776,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDMAX : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDMAX : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDMAX() : BaseCommandRO<Protocol,DBAdapter>("TDMAX", std::begin(cmd__), std::end(cmd__)){}
+		TDMAX() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDMAX", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDMAX key capacity
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -825,18 +825,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDSIZE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDSIZE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDSIZE() : BaseCommandRO<Protocol,DBAdapter>("TDSIZE", std::begin(cmd__), std::end(cmd__)){}
+		TDSIZE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDSIZE", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDSIZE key capacity
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -869,18 +869,18 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TDINFO : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TDINFO : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TDINFO() : BaseCommandRO<Protocol,DBAdapter>("TDINFO", std::begin(cmd__), std::end(cmd__)){}
+		TDINFO() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TDINFO", std::begin(cmd__), std::end(cmd__)){}
 
 		// TDCENTROIDCOUNT key capacity
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -928,12 +928,12 @@ namespace net::worker::commands::TDigest{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "tdigest";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				TDRESERVE	,
 				TDADD		,
 				TDADDWEIGHT	,

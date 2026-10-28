@@ -328,19 +328,19 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IXMADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IXMADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		IXMADD() : BaseCommandRW<Protocol,DBAdapter>("IXMADD", std::begin(cmd__), std::end(cmd__)){}
+		IXMADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("IXMADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// IXMADD keyN keySub keySort [delimiter "words,words"]...
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg  = 4;
@@ -460,19 +460,19 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IXMREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IXMREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		IXMREM() : BaseCommandRW<Protocol,DBAdapter>("IXMREM", std::begin(cmd__), std::end(cmd__)){}
+		IXMREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("IXMREM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// IXMREM keyN keySub...
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			auto const varg  = 2;
 
 			if (p.size() < 3)
@@ -522,18 +522,18 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IXMGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IXMGETINDEXES : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IXMGETINDEXES() : BaseCommandRO<Protocol,DBAdapter>("IXMGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
+		IXMGETINDEXES() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IXMGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// MHGETINDEXES keyN keySub
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -570,18 +570,18 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IXMSIM1 : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IXMSIM1 : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IXMSIM1() : BaseCommandRO<Protocol,DBAdapter>("IXMSIM1", std::begin(cmd__), std::end(cmd__)){}
+		IXMSIM1() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IXMSIM1", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// IXMSIM1 key word count from
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -618,18 +618,18 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IXMSIM : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IXMSIM : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IXMSIM() : BaseCommandRO<Protocol,DBAdapter>("IXMSIM", std::begin(cmd__), std::end(cmd__)){}
+		IXMSIM() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IXMSIM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
 		// IXMSIM key delimiter "words,words" count from
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -678,12 +678,12 @@ namespace net::worker::commands::MultiIndex2{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mindex2";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				IXMADD		,
 				IXMREM		,
 				IXMGETINDEXES	,

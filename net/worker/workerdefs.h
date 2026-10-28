@@ -2,6 +2,7 @@
 #define _WORKER_DEFS_H
 
 #include <cstdint>
+#include <cassert>
 
 #include <string_view>
 
@@ -129,15 +130,28 @@ namespace net::worker{
 
 
 	template<class Protocol, class Buffer>
-	WorkerStatus emitError(Protocol &protocol, Buffer &buffer, std::string_view const error){
-		protocol.response_error(buffer, error);
+	WorkerStatus emitError(Buffer &buffer, std::string_view errorMessage){
+		typename Protocol::Response::Error resp{ errorMessage };
+
+		buffer.clear();
+
+		auto const size = resp.size();
+
+		char *ptr = buffer.provideBuffer(size);
+
+		if (!ptr)
+			return WorkerStatus::DISCONNECT_ERROR;
+
+		const char *off = ptr;
+
+		auto const size2 = resp(ptr);
+
+		buffer.finalizeBuffer(off, size2);
+
 		return WorkerStatus::WRITE;
 	}
 
-	template<class Protocol, class Buffer>
-	WorkerStatus emitInternalError(Protocol &, Buffer &){
-	//	return error_(protocol, buffer, "Internal Error");
-
+	constexpr WorkerStatus emitInternalError(){
 		// here we should disconnect,
 		// because the client is already broken and
 		// will continue to push data

@@ -22,7 +22,7 @@ UNAME		= $(shell uname -s)
 # ======================================================
 
 CF_DEPS		= -MMD -MP
-CF_INCL		= -Iinclude -Imyallocator $(EXTRA_INCL)
+CF_INCL		= -Iinclude -Imyallocator -Imymemorymanager $(EXTRA_INCL)
 #CF_LTO		= -flto
 CF_WARN		= -Wall -Wextra -Wpedantic -Wdeprecated -Wconversion -Wsuggest-override -Wno-unknown-warning-option -Wno-stringop-truncation \
 					-Wno-pass-failed

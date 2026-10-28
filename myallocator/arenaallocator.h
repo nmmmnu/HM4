@@ -15,7 +15,7 @@ namespace MyAllocator{
 		}
 
 		template<typename... Args>
-		ArenaAllocator(Args&&... args) : buffer(std::forward<Args>(args)...){}
+		ArenaAllocator(Args &&...args) : buffer(std::forward<Args>(args)...){}
 
 		#if USE_MAP_PAGES
 		void mapPages(){

@@ -40,15 +40,15 @@ namespace net::worker::commands::RB{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RBRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RBRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		RBRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RBRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		RBRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("RBRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBRESERVE key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -94,15 +94,15 @@ namespace net::worker::commands::RB{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RBADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RBADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		RBADD() : BaseCommandRW<Protocol,DBAdapter>("RBADD", std::begin(cmd__), std::end(cmd__)){}
+		RBADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("RBADD", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBADD key slots bytes item item
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -139,7 +139,7 @@ namespace net::worker::commands::RB{
 
 
 		template<typename MyRingBuffer>
-		void process_(MyRingBuffer const &rb, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		void process_(MyRingBuffer const &rb, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result) const{
 			auto const varg = 4;
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &item = *itk; !rb.isItemValid(item))
@@ -198,15 +198,15 @@ namespace net::worker::commands::RB{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RBPOP : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RBPOP : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		RBPOP() : BaseCommandRW<Protocol,DBAdapter>("RBPOP", std::begin(cmd__), std::end(cmd__)){}
+		RBPOP() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("RBPOP", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBPOP key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -243,7 +243,7 @@ namespace net::worker::commands::RB{
 
 
 		template<typename MyRingBuffer>
-		void process_(MyRingBuffer const &rb, std::string_view const key, typename DBAdapter::List &list, Result<Protocol> &result) const{
+		void process_(MyRingBuffer const &rb, std::string_view const key, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result) const{
 			const auto *pair = hm4::getPairPtrWithSize(list, key, rb.bytes());
 
 			using MyRBADDFactory = RBPOPFactory<MyRingBuffer>;
@@ -295,15 +295,15 @@ namespace net::worker::commands::RB{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RBGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RBGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		RBGET() : BaseCommandRO<Protocol,DBAdapter>("RBGET", std::begin(cmd__), std::end(cmd__)){}
+		RBGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("RBGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBGET key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -342,7 +342,7 @@ namespace net::worker::commands::RB{
 
 
 		template<class MyRingBuffer>
-		void process_(MyRingBuffer const &rb, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob) const{
+		void process_(MyRingBuffer const &rb, const hm4::Pair *pair, Result<Protocol,MemoryManager> &result, OutputBlob &blob) const{
 			auto &container = blob.construct<OutputBlob::Container>();
 
 			if (pair == nullptr)
@@ -370,15 +370,15 @@ namespace net::worker::commands::RB{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RBCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RBCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		RBCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RBCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		RBCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("RBCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// RBGETCOUNT key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -417,7 +417,7 @@ namespace net::worker::commands::RB{
 
 
 		template<class MyRingBuffer>
-		void process_(MyRingBuffer const &rb, const hm4::Pair *pair, Result<Protocol> &result) const{
+		void process_(MyRingBuffer const &rb, const hm4::Pair *pair, Result<Protocol,MemoryManager> &result) const{
 			if (pair == nullptr)
 				return result.set_0();
 
@@ -438,12 +438,12 @@ namespace net::worker::commands::RB{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "rb";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				RBRESERVE	,
 				RBADD		,
 				RBPOP		,

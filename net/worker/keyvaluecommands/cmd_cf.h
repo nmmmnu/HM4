@@ -36,13 +36,13 @@ namespace net::worker::commands::CF{
 
 
 
-		template<class Protocol, class DBAdapter, bool Add, bool MultiValues>
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, bool Add, bool MultiValues>
 		struct CFMutate{
 
 			// CFADD key width integer_size value
 			// CFREM key width integer_size value
 
-			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 				auto const varg = 4;
 
 				if constexpr(MultiValues){
@@ -84,7 +84,7 @@ namespace net::worker::commands::CF{
 
 		private:
 			template<typename T>
-			static void process__(std::string_view key, ParamContainer const &p, CuckooFilter<T> cf, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob){
+			static void process__(std::string_view key, ParamContainer const &p, CuckooFilter<T> cf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 				if (cf.bytes() > MAX_SIZE){
 					// emit an error
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -159,12 +159,12 @@ namespace net::worker::commands::CF{
 
 
 
-		template<class Protocol, class DBAdapter, bool MultiValues>
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, bool MultiValues>
 		struct CFExists{
 
 			// CFEXISTS key width integer_size value
 
-			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 				auto const varg = 4;
 
 				if constexpr(MultiValues){
@@ -206,7 +206,7 @@ namespace net::worker::commands::CF{
 
 		private:
 			template<typename T>
-			static void process__(std::string_view key, ParamContainer const &p, CuckooFilter<T> cf, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob){
+			static void process__(std::string_view key, ParamContainer const &p, CuckooFilter<T> cf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 				if (cf.bytes() > MAX_SIZE){
 					// emit an error
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -261,17 +261,17 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CFADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CFADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CFADD() : BaseCommandRW<Protocol,DBAdapter>("CFADD", std::begin(cmd__), std::end(cmd__)){}
+		CFADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CFADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// CFADD key width integer_size value
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
-			CFMutate<Protocol, DBAdapter, 1, 0> mut;
+			CFMutate<Protocol, MemoryManager, DBAdapter, 1, 0> mut;
 
 			return mut(p, db, result, blob);
 		}
@@ -285,17 +285,17 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CFMADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CFMADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CFMADD() : BaseCommandRW<Protocol,DBAdapter>("CFMADD", std::begin(cmd__), std::end(cmd__)){}
+		CFMADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CFMADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// CFMADD key width integer_size value value...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
-			CFMutate<Protocol, DBAdapter, 1, 1> mut;
+			CFMutate<Protocol, MemoryManager, DBAdapter, 1, 1> mut;
 
 			return mut(p, db, result, blob);
 		}
@@ -309,17 +309,17 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CFREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CFREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CFREM() : BaseCommandRW<Protocol,DBAdapter>("CFREM", std::begin(cmd__), std::end(cmd__)){}
+		CFREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CFREM", std::begin(cmd__), std::end(cmd__)){}
 
 		// CFREM key width integer_size value
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
-			CFMutate<Protocol, DBAdapter, 0, 0> mut;
+			CFMutate<Protocol, MemoryManager, DBAdapter, 0, 0> mut;
 
 			return mut(p, db, result, blob);
 		}
@@ -333,17 +333,17 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CFMREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CFMREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CFMREM() : BaseCommandRW<Protocol,DBAdapter>("CFMREM", std::begin(cmd__), std::end(cmd__)){}
+		CFMREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CFMREM", std::begin(cmd__), std::end(cmd__)){}
 
 		// CFMREM key width integer_size value value...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
-			CFMutate<Protocol, DBAdapter, 0, 1> mut;
+			CFMutate<Protocol, MemoryManager, DBAdapter, 0, 1> mut;
 
 			return mut(p, db, result, blob);
 		}
@@ -357,17 +357,17 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CFEXISTS : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CFEXISTS : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CFEXISTS() : BaseCommandRW<Protocol,DBAdapter>("CFEXISTS", std::begin(cmd__), std::end(cmd__)){}
+		CFEXISTS() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CFEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
 		// CFEXISTS key width integer_size value
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
-			CFExists<Protocol, DBAdapter, false> mut;
+			CFExists<Protocol, MemoryManager, DBAdapter, false> mut;
 
 			return mut(p, db, result, blob);
 		}
@@ -381,17 +381,17 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CFMEXISTS : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CFMEXISTS : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CFMEXISTS() : BaseCommandRW<Protocol,DBAdapter>("CFMEXISTS", std::begin(cmd__), std::end(cmd__)){}
+		CFMEXISTS() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CFMEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
 		// CFMEXISTS key width integer_size value...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
-			CFExists<Protocol, DBAdapter, true> mut;
+			CFExists<Protocol, MemoryManager, DBAdapter, true> mut;
 
 			return mut(p, db, result, blob);
 		}
@@ -405,19 +405,19 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CFRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CFRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		CFRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// CFRESERVE key width integer_size
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -448,7 +448,7 @@ namespace net::worker::commands::CF{
 		}
 
 		template<typename T>
-		static void processT__(std::string_view key, impl_::CuckooFilter<T> cf, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(std::string_view key, impl_::CuckooFilter<T> cf, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (cf.bytes() > MAX_SIZE){
@@ -470,12 +470,12 @@ namespace net::worker::commands::CF{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "cf";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				CFRESERVE	,
 				CFADD		,	CFMADD		,
 				CFREM		,	CFMREM		,

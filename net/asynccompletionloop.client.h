@@ -2,17 +2,21 @@
 #define _NET_ASYNC_LOOP_CLIENT_H_
 
 #include "iobuffer.h"
-#include "mytime.h"
+//#include "mytime.h"
 
 
 namespace net{
 
+	template<typename MemoryManager>
 	struct Client{
-		IOBuffer	buffer;
-		const char	*offcet = nullptr;
+		IOBuffer<MemoryManager>	buffer;
+		const char		*offcet = nullptr;
 
-		Client(size_t conf_buffer_spare_pool) : buffer(conf_buffer_spare_pool){}
-		Client(IOBuffer::container_type &&b) : buffer(std::move(b)){}
+		using Container = typename IOBuffer<MemoryManager>::container_type;
+
+		Client(MemoryManager &mm) : buffer(mm){}
+
+	//	Client(Container &&b) : buffer(std::move(b)){}
 	};
 
 } // namespace net

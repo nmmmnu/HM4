@@ -6,17 +6,17 @@ namespace net::worker::commands::CAS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CAS : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CAS : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CAS() : BaseCommandRW<Protocol,DBAdapter>("CAS", std::begin(cmd__), std::end(cmd__)){}
+		CAS() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CAS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
@@ -62,17 +62,17 @@ namespace net::worker::commands::CAS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CAD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CAD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CAD() : BaseCommandRW<Protocol,DBAdapter>("CAD", std::begin(cmd__), std::end(cmd__)){}
+		CAD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CAD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -111,12 +111,12 @@ namespace net::worker::commands::CAS{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "cas";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				CAS		,
 				CAD
 			>(pack);

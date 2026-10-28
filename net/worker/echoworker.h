@@ -3,6 +3,7 @@
 
 #include "workerdefs.h"
 #include "iobuffer.h"
+#include "simplememorymanager.h"
 
 #include "mystring.h"
 
@@ -12,8 +13,10 @@ namespace net{
 namespace worker{
 
 class EchoWorker{
+	using MemoryManager = memory_manager::SimpleMemoryManager;
+
 public:
-	WorkerStatus operator()(IOBuffer &buffer);
+	WorkerStatus operator()(IOBuffer<MemoryManager> &buffer);
 
 	constexpr static void connection_notify(...){
 	}
@@ -33,7 +36,7 @@ private:
 				"\r\n";
 
 private:
-	static bool cmp_(IOBuffer const &b, std::string_view const cmd){
+	static bool cmp_(IOBuffer<MemoryManager> const &b, std::string_view const cmd){
 		return equals(b.data(), b.size(), cmd.data(), cmd.size());
 	}
 };

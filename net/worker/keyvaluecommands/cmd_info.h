@@ -7,16 +7,16 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct INFO : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct INFO : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		INFO() : BaseCommandRO<Protocol,DBAdapter>("INFO", std::begin(cmd__), std::end(cmd__)){}
+		INFO() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("INFO", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			std::array<char, 2048> buffer;
 
 			return result.set(
-				db.info(buffer)
+				db. template info<MemoryManager>(buffer)
 			);
 		}
 
@@ -29,12 +29,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DBSIZE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct DBSIZE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		DBSIZE() : BaseCommandRO<Protocol,DBAdapter>("DBSIZE", std::begin(cmd__), std::end(cmd__)){}
+		DBSIZE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("DBSIZE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set(
 				db->size()
 			);
@@ -49,12 +49,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DBSIZEMUTABLE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct DBSIZEMUTABLE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		DBSIZEMUTABLE() : BaseCommandRW<Protocol,DBAdapter>("DBSIZEMUTABLE", std::begin(cmd__), std::end(cmd__)){}
+		DBSIZEMUTABLE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("DBSIZEMUTABLE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set(
 				db->chain(hm4::chain::mutable_list{})->size()
 			);
@@ -68,12 +68,12 @@ namespace net::worker::commands::Info{
 	};
 
 
-	template<class Protocol, class DBAdapter>
-	struct VERSION : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VERSION : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VERSION() : BaseCommandRO<Protocol,DBAdapter>("VERSION", std::begin(cmd__), std::end(cmd__)){}
+		VERSION() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VERSION", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set(
 				db.version()
 			);
@@ -88,12 +88,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MAXKEYSIZE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MAXKEYSIZE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MAXKEYSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXKEYSIZE", std::begin(cmd__), std::end(cmd__)){}
+		MAXKEYSIZE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MAXKEYSIZE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set(uint64_t{ hm4::PairConf::MAX_KEY_SIZE });
 		}
 
@@ -106,13 +106,13 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MAXVALSIZE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MAXVALSIZE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MAXVALSIZE() : BaseCommandRO<Protocol,DBAdapter>("MAXVALSIZE", std::begin(cmd__), std::end(cmd__)){}
+		MAXVALSIZE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MAXVALSIZE", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set(uint64_t{ hm4::PairConf::MAX_VAL_SIZE });
 		}
 
@@ -125,13 +125,13 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PING : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PING : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PING() : BaseCommandRO<Protocol,DBAdapter>("PING", std::begin(cmd__), std::end(cmd__)){}
+		PING() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PING", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set_simple_string("pong");
 		}
 
@@ -144,12 +144,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ECHO : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ECHO : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		ECHO() : BaseCommandRO<Protocol,DBAdapter>("ECHO", std::begin(cmd__), std::end(cmd__)){}
+		ECHO() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("ECHO", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -170,12 +170,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct REM : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct REM : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		REM() : BaseCommandRO<Protocol,DBAdapter>("REM", std::begin(cmd__), std::end(cmd__)){}
+		REM() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("REM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set();
 		}
 
@@ -189,12 +189,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TIME : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TIME : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TIME() : BaseCommandRO<Protocol,DBAdapter>("TIME", std::begin(cmd__), std::end(cmd__)){}
+		TIME() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TIME", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			to_string_buffer_t buffer[2];
 
 			auto const time = mytime::nowMix();
@@ -214,12 +214,12 @@ namespace net::worker::commands::Info{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "info";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				INFO		,
 				DBSIZE		,
 				DBSIZEMUTABLE	,

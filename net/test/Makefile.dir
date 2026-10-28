@@ -5,6 +5,7 @@ EXTRA_INCL += -I$(SRC_DIR)
 include Makefile.sub
 
 MY_TARGETS	=	\
+			$(A)test_tiered_slab_allocator			\
 			$(A)test_iobuffer $(A)test_redisprotocol	\
 			$(A)test_echo_poll $(A)test_redis_poll
 
@@ -63,7 +64,12 @@ LIST_OBJ = $(O)vectorlist.o $(O)pair.o		$(O)myprocess.o $(O)idgenerator.o	$(O)hy
 
 
 
-$(A)test_iobuffer: $(O)test_iobuffer.o
+$(A)test_tiered_slab_allocator: $(O)test_tiered_slab_allocator.o	$(O)mytime.o $(O)logger.o $(O)mmapbuffer.o
+	$(LINK)
+
+
+
+$(A)test_iobuffer: $(O)test_iobuffer.o					$(O)mytime.o $(O)logger.o $(O)mmapbuffer.o
 	$(LINK)
 
 $(A)test_redisprotocol: $(O)test_redisprotocol.o $(O)redisprotocol.o
@@ -71,19 +77,19 @@ $(A)test_redisprotocol: $(O)test_redisprotocol.o $(O)redisprotocol.o
 
 
 
-$(A)test_echo_poll: $(O)test_echo_poll.o	$(O)pollselector.o				$(SOCK_OBJ)
+$(A)test_echo_poll: $(O)test_echo_poll.o	$(O)pollselector.o				$(SOCK_OBJ)	$(O)mmapbuffer.o
 	$(LINK)
 
-$(A)test_echo_epoll: $(O)test_echo_epoll.o	$(O)epollselector.o				$(SOCK_OBJ)
+$(A)test_echo_epoll: $(O)test_echo_epoll.o	$(O)epollselector.o				$(SOCK_OBJ)	$(O)mmapbuffer.o
 	$(LINK)
 
-$(A)test_echo_iouring: $(O)test_echo_iouring.o	$(O)iouringengine.o				$(SOCK_OBJ)
+$(A)test_echo_iouring: $(O)test_echo_iouring.o	$(O)iouringengine.o				$(SOCK_OBJ)	$(O)mmapbuffer.o
 	$(LINK) -luring
 
-$(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o				$(SOCK_OBJ)
+$(A)test_echo_kqueue: $(O)test_echo_kqueue.o	$(O)kqueueselector.o				$(SOCK_OBJ)	$(O)mmapbuffer.o
 	$(LINK)
 
-$(A)test_echo_haiku: $(O)test_echo_haiku.o	$(O)haikuselector.o				$(SOCK_OBJ)
+$(A)test_echo_haiku: $(O)test_echo_haiku.o	$(O)haikuselector.o				$(SOCK_OBJ)	$(O)mmapbuffer.o
 	$(LINK)
 
 

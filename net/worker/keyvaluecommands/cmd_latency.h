@@ -141,18 +141,18 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYCOUNTERS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYCOUNTERS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYCOUNTERS() : BaseCommandRO<Protocol,DBAdapter>("LATENCYCOUNTERS", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYCOUNTERS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYCOUNTERS", std::begin(cmd__), std::end(cmd__)){}
 
 		// LATENCYCOUNTERS subsystem object_id
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -185,14 +185,14 @@ namespace net::worker::commands::Latency{
 			}
 		}
 
-		static void process__(uint64_t id, const my_histogram_timer::Timer *hist, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(uint64_t id, const my_histogram_timer::Timer *hist, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (!hist)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			else
 				return process__(id, *hist, result, blob);
 		}
 
-		static void process__(uint64_t , const my_histogram_timer::Timer &hist, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(uint64_t , const my_histogram_timer::Timer &hist, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			auto &container  = blob.construct<OutputBlob::SmallContainer>();
 			auto &bcontainer = blob.construct<OutputBlob::SmallBufferContainer>();
@@ -214,18 +214,18 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYCOUNT() : BaseCommandRO<Protocol,DBAdapter>("LATENCYCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 		// LATENCYCOUNT subsystem object_id
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -258,14 +258,14 @@ namespace net::worker::commands::Latency{
 			}
 		}
 
-		static void process__(uint64_t id, const my_histogram_timer::Timer *hist, Result<Protocol> &result){
+		static void process__(uint64_t id, const my_histogram_timer::Timer *hist, Result<Protocol,MemoryManager> &result){
 			if (!hist)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			else
 				return process__(id, *hist, result);
 		}
 
-		static void process__(uint64_t, const my_histogram_timer::Timer &hist, Result<Protocol> &result){
+		static void process__(uint64_t, const my_histogram_timer::Timer &hist, Result<Protocol,MemoryManager> &result){
 			uint64_t const sum = hist.getCount();
 
 			return result.set(sum);
@@ -279,18 +279,18 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYPERCENTILE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("LATENCYPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYPERCENTILE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
 		// LATENCYPERCENTILE subsystem object_id percentile
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -327,14 +327,14 @@ namespace net::worker::commands::Latency{
 			}
 		}
 
-		static void process__(uint64_t id, uint64_t percentile, const my_histogram_timer::Timer *hist, Result<Protocol> &result){
+		static void process__(uint64_t id, uint64_t percentile, const my_histogram_timer::Timer *hist, Result<Protocol,MemoryManager> &result){
 			if (!hist)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			else
 				return process__(id, percentile, *hist, result);
 		}
 
-		static void process__(uint64_t, uint64_t percentile, const my_histogram_timer::Timer &hist, Result<Protocol> &result){
+		static void process__(uint64_t, uint64_t percentile, const my_histogram_timer::Timer &hist, Result<Protocol,MemoryManager> &result){
 			using namespace latency_impl_;
 
 			auto const pp = hist.getPercentileUs(static_cast<double>(percentile));
@@ -352,18 +352,18 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYMPERCENTILE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYMPERCENTILE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYMPERCENTILE() : BaseCommandRO<Protocol,DBAdapter>("LATENCYMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYMPERCENTILE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYMPERCENTILE", std::begin(cmd__), std::end(cmd__)){}
 
 		// LATENCYMPERCENTILE subsystem object_id percentile percentile ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
 
@@ -400,14 +400,14 @@ namespace net::worker::commands::Latency{
 
 		using IT = ParamContainer::iterator;
 
-		static void process__(uint64_t id, IT first, IT last, const my_histogram_timer::Timer *hist, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(uint64_t id, IT first, IT last, const my_histogram_timer::Timer *hist, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (!hist)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			else
 				return process__(id, first, last, *hist, result, blob);
 		}
 
-		static void process__(uint64_t, IT first, IT last, const my_histogram_timer::Timer &hist, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(uint64_t, IT first, IT last, const my_histogram_timer::Timer &hist, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace latency_impl_;
 
 			auto &bcontainer	= blob.construct<OutputBlob::SmallBufferContainer>();
@@ -432,18 +432,18 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYHUMAN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYHUMAN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYHUMAN() : BaseCommandRO<Protocol,DBAdapter>("LATENCYHUMAN", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYHUMAN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYHUMAN", std::begin(cmd__), std::end(cmd__)){}
 
 		// LATENCYHUMAN subsystem object_id
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -476,14 +476,14 @@ namespace net::worker::commands::Latency{
 			}
 		}
 
-		static void process__(uint64_t id, const my_histogram_timer::Timer *hist, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(uint64_t id, const my_histogram_timer::Timer *hist, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (!hist)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 			else
 				return process__(id, *hist, result, blob);
 		}
 
-		static void process__(uint64_t, const my_histogram_timer::Timer &hist, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(uint64_t, const my_histogram_timer::Timer &hist, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			auto &buffer  = blob.allocate<std::array<char, BUFFER_SIZE> >();
 
 			      auto *ptr = buffer.data();
@@ -548,17 +548,17 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYLOG : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYLOG : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYLOG() : BaseCommandRO<Protocol,DBAdapter>("LATENCYLOG", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYLOG() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYLOG", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace latency_impl_;
 
 			if (p.size() != 1)
@@ -624,16 +624,16 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYRESET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYRESET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYRESET() : BaseCommandRO<Protocol,DBAdapter>("LATENCYRESET", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYRESET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYRESET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
@@ -657,12 +657,12 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LATENCYLIST : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LATENCYLIST : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LATENCYLIST() : BaseCommandRO<Protocol,DBAdapter>("LATENCYLIST", std::begin(cmd__), std::end(cmd__)){}
+		LATENCYLIST() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LATENCYLIST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return result.set(msg__);
 		}
 
@@ -678,12 +678,12 @@ namespace net::worker::commands::Latency{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "latency";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				LATENCYCOUNTERS		,
 				LATENCYCOUNT		,
 				LATENCYPERCENTILE	,

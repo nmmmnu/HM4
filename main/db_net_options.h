@@ -36,10 +36,19 @@ public:
 
 	uint32_t	rlimit_nofile			= 0;
 	uint32_t	max_clients			= 512;
-	uint32_t	min_spare_pool			= 32;
-	uint32_t	max_spare_pool			= 64;
+//	uint32_t	min_spare_pool			= 32;
+//	uint32_t	max_spare_pool			= 64;
 
-	size_t		buffer_capacity			= 4096;
+	uint32_t	io_buffer_tier_0		= 0;
+	uint32_t	io_buffer_tier_1		= 0;
+	uint32_t	io_buffer_tier_2		= 0;
+	uint32_t	io_buffer_tier_3		= 0;
+	uint32_t	io_buffer_tier_4		= 0;
+	uint32_t	io_buffer_tier_5		= 0;
+	uint32_t	io_buffer_tier_6		= 0;
+	uint32_t	io_buffer_tier_7		= 0;
+
+//	size_t		buffer_capacity			= 4096;
 
 	size_t		max_memlist_arena		= 0;
 	uint16_t	map_memlist_arena		= 1;
@@ -51,6 +60,7 @@ public:
 	uint32_t	crontab_reload			= 90;
 	uint32_t	crontab_table_maintainance	= 90;
 	uint32_t	crontab_server_info		= 90;
+	uint32_t	crontab_io_buffer_info		= 300;
 
 	uint16_t	log_level			= 4;
 
@@ -79,10 +89,19 @@ public:
 
 		case hash("rlimit_nofile"		)	: return assign_(rlimit_nofile,			value);
 		case hash("max_clients"			)	: return assign_(max_clients,			value);
-		case hash("min_spare_pool"		)	: return assign_(min_spare_pool,		value);
-		case hash("max_spare_pool"		)	: return assign_(max_spare_pool,		value);
+	//	case hash("min_spare_pool"		)	: return assign_(min_spare_pool,		value);
+	//	case hash("max_spare_pool"		)	: return assign_(max_spare_pool,		value);
 
-		case hash("buffer_capacity"		)	: return assign_(buffer_capacity,		value);
+		case hash("io_buffer_tier_0"		)	: return assign_(io_buffer_tier_0,		value);
+		case hash("io_buffer_tier_1"		)	: return assign_(io_buffer_tier_1,		value);
+		case hash("io_buffer_tier_2"		)	: return assign_(io_buffer_tier_2,		value);
+		case hash("io_buffer_tier_3"		)	: return assign_(io_buffer_tier_3,		value);
+		case hash("io_buffer_tier_4"		)	: return assign_(io_buffer_tier_4,		value);
+		case hash("io_buffer_tier_5"		)	: return assign_(io_buffer_tier_5,		value);
+		case hash("io_buffer_tier_6"		)	: return assign_(io_buffer_tier_6,		value);
+		case hash("io_buffer_tier_7"		)	: return assign_(io_buffer_tier_7,		value);
+
+	//	case hash("buffer_capacity"		)	: return assign_(buffer_capacity,		value);
 
 		case hash("max_memlist_arena"		)	: return assign_(max_memlist_arena,		value);
 		case hash("map_memlist_arena"		)	: return assign_(map_memlist_arena,		value);
@@ -94,6 +113,7 @@ public:
 		case hash("crontab_reload"		)	: return assign_(crontab_reload,		value);
 		case hash("crontab_table_maintainance"	)	: return assign_(crontab_table_maintainance,	value);
 		case hash("crontab_server_info"		)	: return assign_(crontab_server_info,		value);
+		case hash("crontab_io_buffer_info"	)	: return assign_(crontab_io_buffer_info,	value);
 
 		case hash("log_level"			)	: return assign_(log_level,			value);
 
@@ -127,10 +147,19 @@ public:
 
 		put("rlimit_nofile",			rlimit_nofile,			"Max Open Files (each file   takes  8 bytes of memory)"				);
 		put("max_clients",			max_clients,			"Max Clients    (each client takes 32 bytes of memory)"				);
-		put("min_spare_pool",			min_spare_pool,			"Min Spare Pool Buffers"							);
-		put("max_spare_pool",			max_spare_pool,			"Max Spare Pool Buffers"							);
+	//	put("min_spare_pool",			min_spare_pool,			"Min Spare Pool Buffers"							);
+	//	put("max_spare_pool",			max_spare_pool,			"Max Spare Pool Buffers"							);
 
-		put("buffer_capacity",			buffer_capacity,		"Initial size of Spare Pool Buffers"						);
+		put("io_buffer_tier_0",			io_buffer_tier_0,		"IO Buffers in tier 0 -   16 KB each, 0 for auto"				);
+		put("io_buffer_tier_1",			io_buffer_tier_1,		"IO Buffers in tier 1 -   64 KB each, 0 for auto"				);
+		put("io_buffer_tier_2",			io_buffer_tier_2,		"IO Buffers in tier 2 -  256 KB each, 0 for auto"				);
+		put("io_buffer_tier_3",			io_buffer_tier_3,		"IO Buffers in tier 3 -    1 MB each, 0 for auto"				);
+		put("io_buffer_tier_4",			io_buffer_tier_4,		"IO Buffers in tier 4 -    4 MB each, 0 for auto"				);
+		put("io_buffer_tier_5",			io_buffer_tier_5,		"IO Buffers in tier 5 -   16 MB each, 0 for auto"				);
+		put("io_buffer_tier_6",			io_buffer_tier_6,		"IO Buffers in tier 6 -   64 MB each, 0 for auto"				);
+		put("io_buffer_tier_7",			io_buffer_tier_7,		"IO Buffers in tier 7 - ~257 MB each, 0 for auto"				);
+
+	//	put("buffer_capacity",			buffer_capacity,		"Initial size of Spare Pool Buffers"						);
 
 		put("max_memlist_arena",		max_memlist_arena,		"Max size of memlist AllocatorArena in MB"					);
 		put("map_memlist_arena",		map_memlist_arena,		"Map all virtual memory pages used from AllocatorArena (Linux)"			);
@@ -142,6 +171,7 @@ public:
 		put("crontab_reload",			crontab_reload,			"crontab - reload every XX seconds, 0 disabled, min 15 sec"			);
 		put("crontab_table_maintainance",	crontab_table_maintainance,	"crontab - table maintainance every XX seconds, 0 disabled, min 15 sec"		);
 		put("crontab_server_info",		crontab_server_info,		"crontab - server info every XX seconds, 0 disabled, min 15 sec"		);
+		put("crontab_io_buffer_info",		crontab_io_buffer_info,		"crontab - server IO Buffer info every XX seconds, 0 disabled, min 15 sec"	);
 
 		put("log_level",			log_level,			"server log level start=0, fatal=1, err=2, warn=3, notice=4, debug=5"		);
 	}

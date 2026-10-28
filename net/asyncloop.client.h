@@ -7,13 +7,14 @@
 
 namespace net{
 
+	template <typename MemoryManager>
 	struct Client{
-		IOBuffer	buffer;
-		MyTimer 	timer;
+		IOBuffer<MemoryManager>	buffer;
+		MyTimer 		timer;
 
-		Client(size_t conf_buffer_spare_pool) : buffer(conf_buffer_spare_pool){}
+		Client(MemoryManager &mm) : buffer(mm){}
 
-		Client(IOBuffer::container_type &&b) : buffer(std::move(b)){}
+	//	Client(Client &&b) : buffer(std::move(b)){}
 	};
 
 } // namespace net

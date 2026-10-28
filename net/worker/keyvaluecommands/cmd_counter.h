@@ -5,8 +5,8 @@ namespace net::worker::commands::Counter{
 
 	namespace impl_{
 
-		template<int Sign, class Protocol, class List>
-		void do_incr_decr(ParamContainer const &p, List &list, Result<Protocol> &result){
+		template<int Sign, class Protocol, class MemoryManager, class List>
+		void do_incr_decr(ParamContainer const &p, List &list, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2 && p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_12);
 
@@ -74,8 +74,8 @@ namespace net::worker::commands::Counter{
 			}
 		}
 
-		template<int Sign, class Protocol, class List>
-		void do_incr_decr_limit(ParamContainer const &p, List &list, Result<Protocol> &result){
+		template<int Sign, class Protocol, class MemoryManager, class List>
+		void do_incr_decr_limit(ParamContainer const &p, List &list, Result<Protocol,MemoryManager> &result){
 			static_assert(Sign == -1 || Sign == +1);
 
 			if (p.size() != 4)
@@ -154,8 +154,8 @@ namespace net::worker::commands::Counter{
 
 
 
-		template<class Protocol, class List, class Comp>
-		void do_incr_to(ParamContainer const &p, List &list, Result<Protocol> &result, Comp comp){
+		template<class Protocol, class MemoryManager, class List, class Comp>
+		void do_incr_to(ParamContainer const &p, List &list, Result<Protocol,MemoryManager> &result, Comp comp){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -205,12 +205,12 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct INCR : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct INCR : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		INCR() : BaseCommandRW<Protocol,DBAdapter>("INCR", std::begin(cmd__), std::end(cmd__)){}
+		INCR() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("INCR", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_incr_decr<+1>(params, *db, result);
@@ -226,12 +226,12 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DECR : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct DECR : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		DECR() : BaseCommandRW<Protocol,DBAdapter>("DECR", std::begin(cmd__), std::end(cmd__)){}
+		DECR() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("DECR", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_incr_decr<-1>(params, *db, result);
@@ -247,12 +247,12 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct INCRLIMIT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct INCRLIMIT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		INCRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("INCRLIMIT", std::begin(cmd__), std::end(cmd__)){}
+		INCRLIMIT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("INCRLIMIT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_incr_decr_limit<+1>(params, *db, result);
@@ -267,12 +267,12 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DECRLIMIT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct DECRLIMIT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		DECRLIMIT() : BaseCommandRW<Protocol,DBAdapter>("DECRLIMIT", std::begin(cmd__), std::end(cmd__)){}
+		DECRLIMIT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("DECRLIMIT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_incr_decr_limit<-1>(params, *db, result);
@@ -287,12 +287,12 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct INCRTO : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct INCRTO : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		INCRTO() : BaseCommandRW<Protocol,DBAdapter>("INCRTO", std::begin(cmd__), std::end(cmd__)){}
+		INCRTO() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("INCRTO", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_incr_to(params, *db, result, std::greater{});
@@ -307,12 +307,12 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DECRTO : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct DECRTO : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		DECRTO() : BaseCommandRW<Protocol,DBAdapter>("DECRTO", std::begin(cmd__), std::end(cmd__)){}
+		DECRTO() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("DECRTO", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_incr_to(params, *db, result, std::less{});
@@ -327,12 +327,12 @@ namespace net::worker::commands::Counter{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "counters";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				INCR		,
 				DECR		,
 				INCRLIMIT	,

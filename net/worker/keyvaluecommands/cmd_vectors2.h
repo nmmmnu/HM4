@@ -565,11 +565,11 @@ namespace net::worker::commands::Vectors2{
 		B = bit
 		*/
 
-		template<typename T, bool Norm, typename Protocol, typename DBAdapter>
-		void process__VGET_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix);
+		template<typename T, bool Norm, typename Protocol, typename DBAdapter, class MemoryManager>
+		void process__VGET_(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix);
 
-		template<bool Norm, typename Protocol, typename DBAdapter>
-		void process__VGET(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		template<bool Norm, typename Protocol, typename DBAdapter, class MemoryManager>
+		void process__VGET(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -601,8 +601,8 @@ namespace net::worker::commands::Vectors2{
 			}
 		}
 
-		template<typename T, bool Norm, typename Protocol, typename DBAdapter>
-		void process__VGET_(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix){
+		template<typename T, bool Norm, typename Protocol, typename DBAdapter, class MemoryManager>
+		void process__VGET_(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix){
 			auto const sv = shared::rset::getData(db, keyN, keySub);
 
 			const auto *storedVector = MyVectors::toStoredVector<T>(sv, dim_ix);
@@ -671,12 +671,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		VADD() : BaseCommandRW<Protocol,DBAdapter>("VADD", std::begin(cmd__), std::end(cmd__)){}
+		VADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("VADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -699,7 +699,7 @@ namespace net::worker::commands::Vectors2{
 		h = hex LE
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg  = 6;
@@ -764,7 +764,7 @@ namespace net::worker::commands::Vectors2{
 
 		template<typename T>
 		static void process__(IT first, IT last,
-				DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+				DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 					std::string_view keyN, uint32_t const dim_ve, uint32_t const dim_ix, impl_::VType vtype){
 
 			using namespace impl_;
@@ -859,12 +859,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		VREM() : BaseCommandRW<Protocol,DBAdapter>("VREM", std::begin(cmd__), std::end(cmd__)){}
+		VREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("VREM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -881,7 +881,7 @@ namespace net::worker::commands::Vectors2{
 		B = bit
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg  = 4;
@@ -921,7 +921,7 @@ namespace net::worker::commands::Vectors2{
 		using IT = ParamContainer::iterator;
 
 		template<typename T>
-		static void process__(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, uint32_t const dim_ix){
+		static void process__(IT first, IT last, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob, std::string_view keyN, uint32_t const dim_ix){
 			using namespace impl_;
 
 			using MyDecoder		= Decoder<T>;
@@ -954,12 +954,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VGETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VGETINDEXES : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VGETINDEXES() : BaseCommandRO<Protocol,DBAdapter>("VGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
+		VGETINDEXES() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VGETINDEXES", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -976,7 +976,7 @@ namespace net::worker::commands::Vectors2{
 		B = bit
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -1009,7 +1009,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix){
+		static void process__(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix){
 			using namespace impl_;
 
 			using MyDecoder		= Decoder<T>;
@@ -1037,10 +1037,10 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VGET() : BaseCommandRO<Protocol,DBAdapter>("VGET", std::begin(cmd__), std::end(cmd__)){}
+		VGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// VGET key   DIM_IX QUANTIZE_TYPE name
 		// VGET words 150    F             frog
@@ -1054,7 +1054,7 @@ namespace net::worker::commands::Vectors2{
 		B = bit
 		*/
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			return process__VGET<0>(p, db, result, blob);
@@ -1068,10 +1068,10 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VGETNORMALIZED : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VGETNORMALIZED : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VGETNORMALIZED() : BaseCommandRO<Protocol,DBAdapter>("VGETNORMALIZED", std::begin(cmd__), std::end(cmd__)){}
+		VGETNORMALIZED() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VGETNORMALIZED", std::begin(cmd__), std::end(cmd__)){}
 
 		// VGETNORMALIZED key   DIM_IX QUANTIZE_TYPE name
 		// VGETNORMALIZED words 150    F             frog
@@ -1085,7 +1085,7 @@ namespace net::worker::commands::Vectors2{
 		B = bit
 		*/
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			return process__VGET<1>(p, db, result, blob);
@@ -1100,12 +1100,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VGETRAW : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VGETRAW : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VGETRAW() : BaseCommandRO<Protocol,DBAdapter>("VGETRAW", std::begin(cmd__), std::end(cmd__)){}
+		VGETRAW() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VGETRAW", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -1128,7 +1128,7 @@ namespace net::worker::commands::Vectors2{
 		h = hex LE
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 6)
@@ -1166,7 +1166,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix, impl_::VType vtype){
+		static void process__(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob, std::string_view keyN, std::string_view keySub, uint32_t dim_ix, impl_::VType vtype){
 			using namespace impl_;
 
 			auto const sv = shared::rset::getData(db, keyN, keySub);
@@ -1307,12 +1307,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VDISTANCE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VDISTANCE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VDISTANCE() : BaseCommandRO<Protocol,DBAdapter>("VDISTANCE", std::begin(cmd__), std::end(cmd__)){}
+		VDISTANCE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VDISTANCE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
@@ -1340,7 +1340,7 @@ namespace net::worker::commands::Vectors2{
 		D = Dominate
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 7)
@@ -1383,7 +1383,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static void process__(DBAdapter &db, Result<Protocol> &result,
+		static void process__(DBAdapter &db, Result<Protocol,MemoryManager> &result,
 								std::string_view keyN, std::string_view keySubA, std::string_view keySubB, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
@@ -1436,12 +1436,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VMDISTANCE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VMDISTANCE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VMDISTANCE() : BaseCommandRO<Protocol,DBAdapter>("VMDISTANCE", std::begin(cmd__), std::end(cmd__)){}
+		VMDISTANCE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VMDISTANCE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -1469,7 +1469,7 @@ namespace net::worker::commands::Vectors2{
 		D = Dominate
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg  = 6;
@@ -1519,7 +1519,7 @@ namespace net::worker::commands::Vectors2{
 		using IT = ParamContainer::iterator;
 
 		template<typename T>
-		static void process__(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process__(IT first, IT last, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			if (std::distance(first, last) <= 2)
 				process__naive__<T>
@@ -1532,7 +1532,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static void process__naive__(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process__naive__(IT first, IT last, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
@@ -1581,7 +1581,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static void process__prepared__(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process__prepared__(IT first, IT last, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
@@ -1631,7 +1631,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<>
-		/* static */ void process__<bool>(IT first, IT last, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		/* static */ void process__<bool>(IT first, IT last, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 								std::string_view keyN, std::string_view keySubA, uint32_t const dim_ix, impl_::DType dtype){
 			using namespace impl_;
 
@@ -1692,12 +1692,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VSIMFLAT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VSIMFLAT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VSIMFLAT() : BaseCommandRO<Protocol,DBAdapter>("VSIMFLAT", std::begin(cmd__), std::end(cmd__)){}
+		VSIMFLAT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VSIMFLAT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -1731,7 +1731,7 @@ namespace net::worker::commands::Vectors2{
 		D = Dominate
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 7)
@@ -1775,7 +1775,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process__(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
 								std::string_view startKey){
@@ -1824,7 +1824,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<>
-		/* static */ void process__<bool>(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		/* static */ void process__<bool>(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
 								std::string_view startKey){
@@ -1930,7 +1930,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T, typename VSIM_Heap>
-		static void process_range_finish__(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
+		static void process_range_finish__(DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 						impl_::DType dtype,
 							VSIM_Heap &heap,
 								std::string_view tail){
@@ -2014,7 +2014,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename VSIM_Heap>
-		static void process_rangeBit_finish__(DBAdapter &, Result<Protocol> &result, OutputBlob &blob,
+		static void process_rangeBit_finish__(DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 						impl_::DType dtype, float fix,
 							VSIM_Heap &heap,
 								std::string_view tail){
@@ -2067,12 +2067,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct VSIM : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct VSIM : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		VSIM() : BaseCommandRO<Protocol,DBAdapter>("VSIM", std::begin(cmd__), std::end(cmd__)){}
+		VSIM() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("VSIM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
@@ -2106,7 +2106,7 @@ namespace net::worker::commands::Vectors2{
 		D = Dominate
 		*/
 
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 8)
@@ -2158,7 +2158,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<typename T>
-		static void process__(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		static void process__(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
 								size_t bands, size_t bits){
@@ -2256,7 +2256,7 @@ namespace net::worker::commands::Vectors2{
 		}
 
 		template<>
-		/* static */ void process__<bool>(DBAdapter &db, Result<Protocol> &result, OutputBlob &blob,
+		/* static */ void process__<bool>(DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob,
 						std::string_view keyN, std::string_view keySub,
 							uint32_t const dim_ix, impl_::DType dtype,
 								size_t bands, size_t bits){
@@ -2404,12 +2404,12 @@ namespace net::worker::commands::Vectors2{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "vectors";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				VADD		,
 				VREM		,
 				VGETINDEXES	,

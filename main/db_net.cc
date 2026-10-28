@@ -1,5 +1,8 @@
 #include "asyncloop.h"
 
+#include "tieredmemorymanager.h"
+#include "mmapbuffer.h"
+
 // use POLL-style loop
 
 #if defined SELECTOR_EPOLL
@@ -22,8 +25,10 @@
 	#error "No net::selector selected!"
 #endif
 
-template<typename MyWorker, typename MySparePool>
-using AsyncLoop = net::AsyncLoop<MySelector, MyWorker, MySparePool>;
+using TMM	= memory_manager::TieredMemoryManager<MyBuffer::MMapMemoryResource>;
+
+template<typename MyWorker>
+using AsyncLoop	= net::AsyncLoop<MySelector, MyWorker, TMM>;
 
 #include "db_net_main.cc"
 

@@ -41,19 +41,19 @@ namespace net::worker::commands::MG{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MGADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MGADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MGADD() : BaseCommandRW<Protocol,DBAdapter>("MGADD", std::begin(cmd__), std::end(cmd__)){}
+		MGADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MGADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// MGADD key slots bytes item item
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 		//	auto const varg = 4;
@@ -92,7 +92,7 @@ namespace net::worker::commands::MG{
 
 
 		template<typename MyRawMisraGries>
-		static void processT__(MyRawMisraGries &mg, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(MyRawMisraGries &mg, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			auto const varg = 4;
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &item = *itk; !mg.isItemValid(item))
@@ -166,19 +166,19 @@ namespace net::worker::commands::MG{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MGADDGET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MGADDGET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MGADDGET() : BaseCommandRW<Protocol,DBAdapter>("MGADDGET", std::begin(cmd__), std::end(cmd__)){}
+		MGADDGET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MGADDGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MGADDGET key slots bytes item
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -217,7 +217,7 @@ namespace net::worker::commands::MG{
 
 
 		template<typename MyRawMisraGries>
-		static void processT__(MyRawMisraGries &mg, std::string_view const key, std::string_view const item, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(MyRawMisraGries &mg, std::string_view const key, std::string_view const item, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			if (!mg.isItemValid(item))
 				return result.set_error(ResultErrorMessages::EMPTY_KEY);
 
@@ -277,19 +277,19 @@ namespace net::worker::commands::MG{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MGRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MGRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MGRESERVE() : BaseCommandRW<Protocol,DBAdapter>("MGRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		MGRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MGRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MGRESERVE key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -335,19 +335,19 @@ namespace net::worker::commands::MG{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MGGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MGGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MGGET() : BaseCommandRO<Protocol,DBAdapter>("MGGET", std::begin(cmd__), std::end(cmd__)){}
+		MGGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MGGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MGGET key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -385,7 +385,7 @@ namespace net::worker::commands::MG{
 		}
 
 		template<class MyRawMisraGries>
-		static void processT__(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
+		static void processT__(MyRawMisraGries const &mg, const hm4::Pair *pair, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			if (!pair)
 				return result.set_containerN();
@@ -421,12 +421,12 @@ namespace net::worker::commands::MG{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mg";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				MGADD		,
 				MGADDGET	,
 				MGRESERVE	,

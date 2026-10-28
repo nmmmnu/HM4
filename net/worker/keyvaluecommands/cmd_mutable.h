@@ -7,17 +7,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SET() : BaseCommandRW<Protocol,DBAdapter>("SET", std::begin(cmd__), std::end(cmd__)){}
+		SET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3 && p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
@@ -45,18 +45,18 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MSET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MSET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MSET() : BaseCommandRW<Protocol,DBAdapter>("MSET", std::begin(cmd__), std::end(cmd__)){}
+		MSET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MSET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MSET a 5 b 6
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg = 1;
 
 			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
@@ -93,18 +93,18 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MSETNX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MSETNX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MSETNX() : BaseCommandRW<Protocol,DBAdapter>("MSETNX", std::begin(cmd__), std::end(cmd__)){}
+		MSETNX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MSETNX", std::begin(cmd__), std::end(cmd__)){}
 
 		// MSET a 5 b 6
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg = 1;
 
 			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
@@ -150,18 +150,18 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MSETXX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MSETXX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MSETXX() : BaseCommandRW<Protocol,DBAdapter>("MSETXX", std::begin(cmd__), std::end(cmd__)){}
+		MSETXX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MSETXX", std::begin(cmd__), std::end(cmd__)){}
 
 		// MSETXX a 5 b 6
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using hm4::Pair;
 
 			auto const varg = 1;
@@ -238,17 +238,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SETEX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SETEX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SETEX() : BaseCommandRW<Protocol,DBAdapter>("SETEX", std::begin(cmd__), std::end(cmd__)){}
+		SETEX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SETEX", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -276,17 +276,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HSET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HSET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HSET() : BaseCommandRW<Protocol,DBAdapter>("HSET", std::begin(cmd__), std::end(cmd__)){}
+		HSET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HSET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_34);
 
@@ -319,18 +319,18 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HMSET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HMSET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HMSET() : BaseCommandRW<Protocol,DBAdapter>("HMSET", std::begin(cmd__), std::end(cmd__)){}
+		HMSET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HMSET", std::begin(cmd__), std::end(cmd__)){}
 
 		// HMSET a sub1 5 sub2 6
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg = 2;
 
 			if (p.size() < 3 || (p.size() - varg) % 2 != 0)
@@ -376,17 +376,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SETNX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SETNX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SETNX() : BaseCommandRW<Protocol,DBAdapter>("SETNX", std::begin(cmd__), std::end(cmd__)){}
+		SETNX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SETNX", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3 && p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
@@ -422,17 +422,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SETXX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SETXX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SETXX() : BaseCommandRW<Protocol,DBAdapter>("SETXX", std::begin(cmd__), std::end(cmd__)){}
+		SETXX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SETXX", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3 && p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
@@ -470,17 +470,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DEL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct DEL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		DEL() : BaseCommandRW<Protocol,DBAdapter>("DEL", std::begin(cmd__), std::end(cmd__)){}
+		DEL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("DEL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
@@ -512,17 +512,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HDEL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HDEL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HDEL() : BaseCommandRW<Protocol,DBAdapter>("HDEL", std::begin(cmd__), std::end(cmd__)){}
+		HDEL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HDEL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -564,17 +564,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct APPEND : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct APPEND : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		APPEND() : BaseCommandRW<Protocol,DBAdapter>("APPEND", std::begin(cmd__), std::end(cmd__)){}
+		APPEND() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("APPEND", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -637,17 +637,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct EXPIRE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct EXPIRE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		EXPIRE() : BaseCommandRW<Protocol,DBAdapter>("EXPIRE", std::begin(cmd__), std::end(cmd__)){}
+		EXPIRE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("EXPIRE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -680,17 +680,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct EXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct EXPIREAT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		EXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("EXPIREAT", std::begin(cmd__), std::end(cmd__)){}
+		EXPIREAT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("EXPIREAT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -735,17 +735,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PERSIST : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PERSIST : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		PERSIST() : BaseCommandRW<Protocol,DBAdapter>("PERSIST", std::begin(cmd__), std::end(cmd__)){}
+		PERSIST() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PERSIST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -782,17 +782,17 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PERSISTDELETED : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PERSISTDELETED : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		PERSISTDELETED() : BaseCommandRW<Protocol,DBAdapter>("PERSISTDELETED", std::begin(cmd__), std::end(cmd__)){}
+		PERSISTDELETED() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PERSISTDELETED", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -822,12 +822,12 @@ namespace net::worker::commands::Mutable{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mutable";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				SET		,
 				MSET		,
 				SETEX		,

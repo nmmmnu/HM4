@@ -23,7 +23,7 @@ namespace MyAllocator{
 		}
 
 		template<typename... Args>
-		SlabAllocator(Args&&... args) : buffer_(std::forward<Args>(args)...){
+		SlabAllocator(Args &&...args) : buffer_(std::forward<Args>(args)...){
 			createFreeList_();
 		}
 
@@ -37,10 +37,10 @@ namespace MyAllocator{
 			if (size > BlockSize)
 				return nullptr;
 
-			return allocate();
+			return xallocate();
 		}
 
-		void *allocate(){
+		void *xallocate(){
 			if (!freeList_)
 				return nullptr;
 
@@ -51,7 +51,10 @@ namespace MyAllocator{
 			return block;
 		}
 
-		void xdeallocate(void* p){
+		void xdeallocate(void *p){
+			if (!owns_(p))
+				return;
+
 			*reinterpret_cast<void **>(p) = freeList_;
 			freeList_ = p;
 		}
@@ -81,19 +84,61 @@ namespace MyAllocator{
 			return buffer_.size() / BlockSize;
 		}
 
-	private:
-		void createFreeList_(){
-			for (size_t i = 0; i < getNumBlocks(); ++i){
-				void *block = buffer_.data() + i * BlockSize;
-				*reinterpret_cast<void **>(block) = freeList_;
-				freeList_ = block;
-			}
+		constexpr auto const &getBuffer_() const{
+			return buffer_;
 		}
+
+	private:
+		bool owns_(const void *p) const{
+			const char *pp = static_cast<const char *>(p);
+
+			return pp >= buffer_.data() && pp < buffer_.data() + buffer_.size();
+		}
+
+		void createFreeList_(){
+			if (0){
+				for (size_t i = 0; i < getNumBlocks(); ++i){
+					void *block = buffer_.data() + i * BlockSize;
+					*reinterpret_cast<void **>(block) = freeList_;
+					freeList_ = block;
+				}
+			}else{
+				for (size_t i = getNumBlocks(); i --> 0; ){
+					void *block = buffer_.data() + i * BlockSize;
+					*reinterpret_cast<void **>(block) = freeList_;
+					freeList_ = block;
+				}
+			}
+    		}
 
 	private:
 		MyBuffer::ByteBufferView	buffer_;
 		void				*freeList_	= nullptr;
 	};
+
+
+
+	template<size_t BlockSize>
+	void *allocate(SlabAllocator<BlockSize> &allocator){
+		return allocator.xallocate();
+	}
+
+	template<typename T, size_t BlockSize>
+	T *allocate(SlabAllocator<BlockSize> &allocator){
+		return static_cast<T *>(
+			allocate(allocator)
+		);
+	}
+
+	template<size_t BlockSize>
+	void *allocate(SlabAllocator<BlockSize> *allocator){
+		return allocate(*allocator);
+	}
+
+	template<typename T, size_t BlockSize>
+	T *allocate(SlabAllocator<BlockSize> *allocator){
+		return allocate<T>(*allocator);
+	}
 
 } // namespace MyAllocator
 

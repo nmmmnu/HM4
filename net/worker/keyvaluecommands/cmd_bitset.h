@@ -17,18 +17,18 @@ namespace net::worker::commands::BITSET{
 		constexpr size_type BIT_MAX		= BitOps::max_bits(hm4::PairConf::MAX_VAL_SIZE);
 	}
 
-	template<class Protocol, class DBAdapter>
-	struct BITSET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BITSET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		BITSET() : BaseCommandRW<Protocol,DBAdapter>("BITSET", std::begin(cmd__), std::end(cmd__)){}
+		BITSET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("BITSET", std::begin(cmd__), std::end(cmd__)){}
 
 		// BITSET key 5 1 6 0
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg = 2;
 			if (p.size() < 4 || (p.size() - varg) % 2 != 0)
 				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
@@ -122,17 +122,17 @@ namespace net::worker::commands::BITSET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BITGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BITGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		BITGET() : BaseCommandRO<Protocol,DBAdapter>("BITGET", std::begin(cmd__), std::end(cmd__)){}
+		BITGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("BITGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -173,17 +173,17 @@ namespace net::worker::commands::BITSET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BITMGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BITMGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		BITMGET() : BaseCommandRO<Protocol,DBAdapter>("BITMGET", std::begin(cmd__), std::end(cmd__)){}
+		BITMGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("BITMGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -234,17 +234,17 @@ namespace net::worker::commands::BITSET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BITCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BITCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		BITCOUNT() : BaseCommandRO<Protocol,DBAdapter>("BITCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		BITCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("BITCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -302,12 +302,12 @@ namespace net::worker::commands::BITSET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BITMAX : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BITMAX : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		BITMAX() : BaseCommandRO<Protocol,DBAdapter>("BITMAX", std::begin(cmd__), std::end(cmd__)){}
+		BITMAX() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("BITMAX", std::begin(cmd__), std::end(cmd__)){}
 
-		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return result.set(BIT_MAX);
@@ -322,12 +322,12 @@ namespace net::worker::commands::BITSET{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "bitset";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				BITSET		,
 				BITGET		,
 				BITMGET		,

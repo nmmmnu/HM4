@@ -301,17 +301,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNDEL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNDEL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XNDEL() : BaseCommandRW<Protocol,DBAdapter>("XNDEL", std::begin(cmd__), std::end(cmd__)){}
+		XNDEL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XNDEL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -339,17 +339,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRDEL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRDEL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XRDEL() : BaseCommandRW<Protocol,DBAdapter>("XRDEL", std::begin(cmd__), std::end(cmd__)){}
+		XRDEL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XRDEL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -377,17 +377,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HDELALL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HDELALL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HDELALL() : BaseCommandRW<Protocol,DBAdapter>("HDELALL", std::begin(cmd__), std::end(cmd__)){}
+		HDELALL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HDELALL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -419,17 +419,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNPERSIST : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNPERSIST : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XNPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XNPERSIST", std::begin(cmd__), std::end(cmd__)){}
+		XNPERSIST() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XNPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -456,17 +456,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRPERSIST : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRPERSIST : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XRPERSIST() : BaseCommandRW<Protocol,DBAdapter>("XRPERSIST", std::begin(cmd__), std::end(cmd__)){}
+		XRPERSIST() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XRPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -493,17 +493,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HPERSISTALL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HPERSISTALL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HPERSISTALL() : BaseCommandRW<Protocol,DBAdapter>("HPERSISTALL", std::begin(cmd__), std::end(cmd__)){}
+		HPERSISTALL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HPERSISTALL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -534,17 +534,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNEXPIRE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNEXPIRE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XNEXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIRE", std::begin(cmd__), std::end(cmd__)){}
+		XNEXPIRE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XNEXPIRE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -572,17 +572,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XREXPIRE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XREXPIRE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XREXPIRE() : BaseCommandRW<Protocol,DBAdapter>("XREXPIRE", std::begin(cmd__), std::end(cmd__)){}
+		XREXPIRE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XREXPIRE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -610,17 +610,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HEXPIREALL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HEXPIREALL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HEXPIREALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREALL", std::begin(cmd__), std::end(cmd__)){}
+		HEXPIREALL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HEXPIREALL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -653,17 +653,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNEXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNEXPIREAT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XNEXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XNEXPIREAT", std::begin(cmd__), std::end(cmd__)){}
+		XNEXPIREAT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XNEXPIREAT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -691,17 +691,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XREXPIREAT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XREXPIREAT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		XREXPIREAT() : BaseCommandRW<Protocol,DBAdapter>("XREXPIREAT", std::begin(cmd__), std::end(cmd__)){}
+		XREXPIREAT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("XREXPIREAT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -729,17 +729,17 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HEXPIREATALL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HEXPIREATALL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HEXPIREATALL() : BaseCommandRW<Protocol,DBAdapter>("HEXPIREATALL", std::begin(cmd__), std::end(cmd__)){}
+		HEXPIREATALL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HEXPIREATALL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -772,12 +772,12 @@ namespace net::worker::commands::MutableX{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mutable_x";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				XNDEL		,
 				XRDEL		,
 				HDELALL		,

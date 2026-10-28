@@ -45,17 +45,17 @@ namespace net::worker::commands::BF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BFADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BFADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		BFADD() : BaseCommandRW<Protocol,DBAdapter>("BFADD", std::begin(cmd__), std::end(cmd__)){}
+		BFADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("BFADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
@@ -124,17 +124,17 @@ namespace net::worker::commands::BF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BFRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		BFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("BFRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		BFRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("BFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -163,17 +163,17 @@ namespace net::worker::commands::BF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BFEXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BFEXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		BFEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFEXISTS", std::begin(cmd__), std::end(cmd__)){}
+		BFEXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("BFEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
@@ -211,17 +211,17 @@ namespace net::worker::commands::BF{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct BFMEXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct BFMEXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		BFMEXISTS() : BaseCommandRO<Protocol,DBAdapter>("BFMEXISTS", std::begin(cmd__), std::end(cmd__)){}
+		BFMEXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("BFMEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 5)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_4);
 
@@ -271,12 +271,12 @@ namespace net::worker::commands::BF{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "bf";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				BFRESERVE	,
 				BFADD		,
 				BFEXISTS	,

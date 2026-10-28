@@ -19,17 +19,17 @@ namespace net::worker::commands::Queue{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SADD() : BaseCommandRW<Protocol,DBAdapter>("SADD", std::begin(cmd__), std::end(cmd__)){}
+		SADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3 && p.size() != 4)
@@ -70,17 +70,17 @@ namespace net::worker::commands::Queue{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SPOP : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SPOP : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		SPOP() : BaseCommandRW<Protocol,DBAdapter>("SPOP", std::begin(cmd__), std::end(cmd__)){}
+		SPOP() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("SPOP", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -158,7 +158,7 @@ namespace net::worker::commands::Queue{
 		}
 
 
-		static void collect_(std::string_view keyControl, typename DBAdapter::List::iterator it, typename DBAdapter::List::iterator eit, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void collect_(std::string_view keyControl, typename DBAdapter::List::iterator it, typename DBAdapter::List::iterator eit, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			uint32_t iterations = 0;
@@ -195,7 +195,7 @@ namespace net::worker::commands::Queue{
 			return getScore_(keyControl.size(), key);
 		}
 
-		static void finalizeOK_(std::string_view keyControl, std::string_view key, std::string_view val, typename DBAdapter::List &list, Result<Protocol> &result, uint32_t const iterations){
+		static void finalizeOK_(std::string_view keyControl, std::string_view key, std::string_view val, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result, uint32_t const iterations){
 			using namespace impl_;
 
 			// seamlessly send value to output buffer...
@@ -223,7 +223,7 @@ namespace net::worker::commands::Queue{
 			}
 		}
 
-		static void finalizeTryAgain_(std::string_view keyControl, std::string_view key, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void finalizeTryAgain_(std::string_view keyControl, std::string_view key, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			auto const score = getScore_(keyControl, key);
 
 			// update control key...
@@ -239,7 +239,7 @@ namespace net::worker::commands::Queue{
 			return result.set("");
 		}
 
-		static void finalizeEnd_(std::string_view keyControl, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void finalizeEnd_(std::string_view keyControl, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			// delete control key...
 			// better don't, because else there will be lots of syncs if new data come.
 			if constexpr(0){
@@ -264,12 +264,12 @@ namespace net::worker::commands::Queue{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "queue";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				SADD	,
 				SPOP
 			>(pack);

@@ -7,17 +7,17 @@ namespace net::worker::commands::Murmur{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MURMUR : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MURMUR : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MURMUR() : BaseCommandRO<Protocol,DBAdapter>("MURMUR", std::begin(cmd__), std::end(cmd__)){}
+		MURMUR() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MURMUR", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, Result<Protocol> &result){
+		void process_(ParamContainer const &p, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 2 || p.size() > 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_234);
 
@@ -45,12 +45,12 @@ namespace net::worker::commands::Murmur{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "murmur";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				MURMUR
 			>(pack);
 		}

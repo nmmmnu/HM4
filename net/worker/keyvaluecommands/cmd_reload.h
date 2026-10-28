@@ -6,12 +6,12 @@ namespace net::worker::commands::Reload{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct LISTMAINTAINANCE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct LISTMAINTAINANCE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		LISTMAINTAINANCE() : BaseCommandRO<Protocol,DBAdapter>("LISTMAINTAINANCE", std::begin(cmd__), std::end(cmd__)){}
+		LISTMAINTAINANCE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("LISTMAINTAINANCE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			if (p.size() != 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
@@ -27,12 +27,12 @@ namespace net::worker::commands::Reload{
 
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct SAVE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SAVE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SAVE() : BaseCommandRO<Protocol,DBAdapter>("SAVE", std::begin(cmd__), std::end(cmd__)){}
+		SAVE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SAVE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			if (p.size() != 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
@@ -49,12 +49,12 @@ namespace net::worker::commands::Reload{
 
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct RELOAD : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RELOAD : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		RELOAD() : BaseCommandRO<Protocol,DBAdapter>("RELOAD", std::begin(cmd__), std::end(cmd__)){}
+		RELOAD() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("RELOAD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			if (p.size() != 1)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_0);
 
@@ -72,12 +72,12 @@ namespace net::worker::commands::Reload{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "reload";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				LISTMAINTAINANCE	,
 				SAVE			,
 				RELOAD

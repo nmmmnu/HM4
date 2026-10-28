@@ -88,8 +88,8 @@ namespace net::worker::commands::HH{
 
 
 
-		template<class Protocol, class DBAdapter, bool Up>
-		void do_hh_incr_decr(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, std::bool_constant<Up>){
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, bool Up>
+		void do_hh_incr_decr(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, std::bool_constant<Up>){
 			auto const varg = 4;
 
 			if (p.size() < 6 || (p.size() - varg) % 2 != 0)
@@ -142,14 +142,14 @@ namespace net::worker::commands::HH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HHINCR : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HHINCR : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HHINCR() : BaseCommandRW<Protocol,DBAdapter>("HHINCR", std::begin(cmd__), std::end(cmd__)){}
+		HHINCR() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HHINCR", std::begin(cmd__), std::end(cmd__)){}
 
 		// HHADD key slots bytes item score item score
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_hh_incr_decr(p, db, result, std::true_type{});
@@ -164,14 +164,14 @@ namespace net::worker::commands::HH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HHDECR : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HHDECR : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HHDECR() : BaseCommandRW<Protocol,DBAdapter>("HHDECR", std::begin(cmd__), std::end(cmd__)){}
+		HHDECR() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HHDECR", std::begin(cmd__), std::end(cmd__)){}
 
 		// HHADD key slots bytes item score item score
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_hh_incr_decr(p, db, result, std::false_type{});
@@ -186,19 +186,19 @@ namespace net::worker::commands::HH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HHRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HHRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		HHRESERVE() : BaseCommandRW<Protocol,DBAdapter>("HHRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		HHRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("HHRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// HHRESERVE key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -244,20 +244,20 @@ namespace net::worker::commands::HH{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HHGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HHGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HHGET() : BaseCommandRO<Protocol,DBAdapter>("HHGET", std::begin(cmd__), std::end(cmd__)){}
+		HHGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HHGET", std::begin(cmd__), std::end(cmd__)){}
 
 
 		// HHGET key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -296,7 +296,7 @@ namespace net::worker::commands::HH{
 
 
 		template<class MyRawHeavyHitter>
-		static void processT__(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
+		static void processT__(MyRawHeavyHitter const &hh, const hm4::Pair *pair, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			if (!pair)
 				return result.set_containerN();
@@ -332,12 +332,12 @@ namespace net::worker::commands::HH{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "hh";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				HHINCR		,
 				HHDECR		,
 				HHRESERVE	,

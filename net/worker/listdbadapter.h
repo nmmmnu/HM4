@@ -20,23 +20,23 @@ struct ListDBAdapter{
 
 public:
 	ListDBAdapter(List &list, CommandReload &cmdReload) :
-				list_(list),
-				cmdReload_	(& cmdReload){}
+				list_		(list		),
+				cmdReload_	(& cmdReload	){}
 
 public:
 	// System Methods
 
 	template<class Notification>
 	void connection_notify(Notification const &notification){
-		connections		= notification.clients;
-		connections_spare	= notification.spare;
+		connections = notification.clients;
 	}
 
-	template<size_t N>
+	template<typename MemoryManager, size_t N>
 	std::string_view info(std::array<char, N> &str) const{
-		to_string_buffer_t buffer[11];
 
 		if constexpr(!MUTABLE){
+			to_string_buffer_t buffer[6];
+
 			int i = 0;
 
 			#pragma GCC diagnostic push
@@ -55,11 +55,13 @@ public:
 
 			"\n"	"# Network"											"\n",
 				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
-				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
 
 			"\n"	"# Keys"											"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
 				"Size             : ", to_string(list_.bytes()				,	buffer[i++]),	"\n",
+
+			"\n"	"# I/O Memory Manager"										"\n",
+				"Memory Manager   : ", MemoryManager::getName()				,			"\n",
 
 			"\n"	"# System"											"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[i++]),	"\n"
@@ -74,6 +76,8 @@ public:
 				else
 					return to_string(a, buffer);
 			};
+
+			to_string_buffer_t buffer[10];
 
 			int i = 0;
 
@@ -95,7 +99,6 @@ public:
 
 			"\n"	"# Network"											"\n",
 				"Connections      : ", to_string(connections				,	buffer[i++]),	"\n",
-				"Spare Pool       : ", to_string(connections_spare			,	buffer[i++]),	"\n",
 
 			"\n"	"# Keys"											"\n",
 				"Keys (estimated) : ", to_string(list_.size()				,	buffer[i++]),	"\n",
@@ -110,6 +113,9 @@ public:
 				"Allocator        : ", list_.getAllocator().getName()			,			"\n",
 				"Allocator Free   : ", mem_format(list_.getAllocator().getFreeMemory()	,	buffer[i++]),	"\n",
 				"Allocator Used   : ", mem_format(list_.getAllocator().getUsedMemory()	,	buffer[i++]),	"\n",
+
+			"\n"	"# I/O Memory Manager"										"\n",
+				"Memory Manager   : ", MemoryManager::getName()				,			"\n",
 
 			"\n"	"# System"											"\n",
 				"PID              : ", to_string(getProcessID()				,	buffer[i++]),	"\n"
@@ -168,7 +174,6 @@ private:
 	CommandReload	*cmdReload_		= nullptr;
 
 	uint64_t	connections		= 0;
-	uint64_t	connections_spare	= 0;
 };
 
 #endif

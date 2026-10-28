@@ -42,8 +42,8 @@ namespace net::worker::commands::ISAM_cmd{
 			BOTH
 		};
 
-		template<IGETALLOutput Out, class Protocol, class DBAdapter>
-		void IGETALL_process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		template<IGETALLOutput Out, typename Protocol, typename MemoryManager, typename DBAdapter>
+		void IGETALL_process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -98,13 +98,13 @@ namespace net::worker::commands::ISAM_cmd{
 	} // namespace impl_
 
 
-	template<class Protocol, class DBAdapter>
-	struct IGETALL : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IGETALL : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IGETALL() : BaseCommandRO<Protocol,DBAdapter>("IGETALL", std::begin(cmd__), std::end(cmd__)){}
+		IGETALL() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IGETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// igetall schema key
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			return IGETALL_process<IGETALLOutput::BOTH>(p, db, result, blob);
@@ -119,13 +119,13 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IGETKEYS: BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IGETKEYS: BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("IGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+		IGETKEYS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
 		// igetall schema key
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			return IGETALL_process<IGETALLOutput::KEYS>(p, db, result, blob);
@@ -140,13 +140,13 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IGETVALS: BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IGETVALS: BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IGETVALS() : BaseCommandRO<Protocol,DBAdapter>("IGETVALS", std::begin(cmd__), std::end(cmd__)){}
+		IGETVALS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IGETVALS", std::begin(cmd__), std::end(cmd__)){}
 
 		// igetall schema key
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			return IGETALL_process<IGETALLOutput::VALS>(p, db, result, blob);
@@ -161,18 +161,18 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IGET() : BaseCommandRO<Protocol,DBAdapter>("IGET", std::begin(cmd__), std::end(cmd__)){}
+		IGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// iget schema key subkey
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -210,18 +210,18 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IMGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IMGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		IMGET() : BaseCommandRO<Protocol,DBAdapter>("IMGET", std::begin(cmd__), std::end(cmd__)){}
+		IMGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IMGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// imget schema key subkey subkey...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -249,7 +249,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 		template<typename Container>
-		static void collect_1__(Result<Protocol> &result, Container &container,
+		static void collect_1__(Result<Protocol,MemoryManager> &result, Container &container,
 							std::string_view schema, std::string_view storage,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace impl_;
@@ -265,7 +265,7 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 		template<typename Container>
-		static void collect_N__(Result<Protocol> &result, Container &container,
+		static void collect_N__(Result<Protocol,MemoryManager> &result, Container &container,
 							std::string_view schema, std::string_view storage,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace impl_;
@@ -291,7 +291,7 @@ namespace net::worker::commands::ISAM_cmd{
 
 		template<typename Container, typename Searcher>
 		static void collect__(ISAM const &isam, Searcher const &searcher,
-						Result<Protocol> &result, Container &container,
+						Result<Protocol,MemoryManager> &result, Container &container,
 							std::string_view storage,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			for(auto itk = begin; itk != end; ++itk)
@@ -309,18 +309,18 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ISETALL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ISETALL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		ISETALL() : BaseCommandRW<Protocol,DBAdapter>("ISETALL", std::begin(cmd__), std::end(cmd__)){}
+		ISETALL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("ISETALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// isetall schema key value value ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -381,18 +381,18 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ISET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ISET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		ISET() : BaseCommandRW<Protocol,DBAdapter>("ISET", std::begin(cmd__), std::end(cmd__)){}
+		ISET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("ISET", std::begin(cmd__), std::end(cmd__)){}
 
 		// iset schema key subkey value subkey value ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg = 3;
 
 			if (p.size() < 5 || (p.size() - varg) % 2 != 0)
@@ -415,7 +415,7 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 
-		static void process_1__(DBAdapter &db, Result<Protocol> &result,
+		static void process_1__(DBAdapter &db, Result<Protocol,MemoryManager> &result,
 				std::string_view const schema, std::string_view const key,
 								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace impl_;
@@ -429,7 +429,7 @@ namespace net::worker::commands::ISAM_cmd{
 			return process__(db, result, key, pair, isam, searcher, begin, end);
 		}
 
-		static void process_N__(DBAdapter &db, Result<Protocol> &result,
+		static void process_N__(DBAdapter &db, Result<Protocol,MemoryManager> &result,
 				std::string_view const schema, std::string_view const key,
 								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace impl_;
@@ -453,7 +453,7 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 		template<typename Searcher>
-		static void process__(DBAdapter &db, Result<Protocol> &result,
+		static void process__(DBAdapter &db, Result<Protocol,MemoryManager> &result,
 				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher,
 								ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 
@@ -513,18 +513,18 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IDEL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IDEL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		IDEL() : BaseCommandRW<Protocol,DBAdapter>("IDEL", std::begin(cmd__), std::end(cmd__)){}
+		IDEL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("IDEL", std::begin(cmd__), std::end(cmd__)){}
 
 		// idel schema key subkey subkey...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg = 3;
 
 			if (p.size() < 4)
@@ -547,7 +547,7 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 
-		static void process_1__(DBAdapter &db, Result<Protocol> &result,
+		static void process_1__(DBAdapter &db, Result<Protocol,MemoryManager> &result,
 				std::string_view const schema, std::string_view const key,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace impl_;
@@ -561,7 +561,7 @@ namespace net::worker::commands::ISAM_cmd{
 			return process__(db, result, key, pair, isam, searcher, begin, end);
 		}
 
-		static void process_N__(DBAdapter &db, Result<Protocol> &result,
+		static void process_N__(DBAdapter &db, Result<Protocol,MemoryManager> &result,
 				std::string_view const schema, std::string_view const key,
 							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace impl_;
@@ -585,7 +585,7 @@ namespace net::worker::commands::ISAM_cmd{
 		}
 
 		template<typename Searcher>
-		static void process__(DBAdapter &db, Result<Protocol> &result,
+		static void process__(DBAdapter &db, Result<Protocol,MemoryManager> &result,
 				std::string_view const key, const hm4::Pair *pair, ISAM const &isam, Searcher const &searcher,
 						ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 
@@ -647,17 +647,17 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct IRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		IRESERVE() : BaseCommandRW<Protocol,DBAdapter>("IRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		IRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("IRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -683,12 +683,12 @@ namespace net::worker::commands::ISAM_cmd{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "isam";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				IGETALL		,
 				IGETKEYS	,
 				IGETVALS	,

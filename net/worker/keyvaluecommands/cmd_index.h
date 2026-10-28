@@ -33,42 +33,42 @@ namespace net::worker::commands::Index{
 			return n > 0 && n <= 5;
 		}
 
-		template<template<int, class, class> class Cmd>
+		template<template<int, class, class, class> class Cmd>
 		struct LH{
-			template<class Protocol, class DBAdapter>
-			using cmd1 = Cmd<1, Protocol, DBAdapter>;
+			template<typename Protocol, typename MemoryManager, typename DBAdapter>
+			using cmd1 = Cmd<1, Protocol, MemoryManager, DBAdapter>;
 
-			template<class Protocol, class DBAdapter>
-			using cmd2 = Cmd<2, Protocol, DBAdapter>;
+			template<typename Protocol, typename MemoryManager, typename DBAdapter>
+			using cmd2 = Cmd<2, Protocol, MemoryManager, DBAdapter>;
 
-			template<class Protocol, class DBAdapter>
-			using cmd3 = Cmd<3, Protocol, DBAdapter>;
+			template<typename Protocol, typename MemoryManager, typename DBAdapter>
+			using cmd3 = Cmd<3, Protocol, MemoryManager, DBAdapter>;
 
-			template<class Protocol, class DBAdapter>
-			using cmd4 = Cmd<4, Protocol, DBAdapter>;
+			template<typename Protocol, typename MemoryManager, typename DBAdapter>
+			using cmd4 = Cmd<4, Protocol, MemoryManager, DBAdapter>;
 
-			template<class Protocol, class DBAdapter>
-			using cmd5 = Cmd<5, Protocol, DBAdapter>;
+			template<typename Protocol, typename MemoryManager, typename DBAdapter>
+			using cmd5 = Cmd<5, Protocol, MemoryManager, DBAdapter>;
 
-		//	template<class Protocol, class DBAdapter>
+		//	template<typename Protocol, typename MemoryManager, typename DBAdapter>
 		//	using cmd6 = Cmd<6, Protocol, DBAdapter>;
 		};
 	} // namespace impl_
 
 
 
-	template<int N, class Protocol, class DBAdapter>
-	struct IX_ADD : BaseCommandRW<Protocol,DBAdapter>{
-		IX_ADD() : BaseCommandRW<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
+	template<int N, typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IX_ADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
+		IX_ADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXADD a keySub0 x0 sort0 val0 keySub1 x1 sort1 val1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg  = 2;
 			auto const vstep = 1 + N + 1; // subkey + N + sort
 
@@ -186,18 +186,18 @@ namespace net::worker::commands::Index{
 
 
 
-	template<int N, class Protocol, class DBAdapter>
-	struct IX_REM : BaseCommandRW<Protocol,DBAdapter>{
-		IX_REM() : BaseCommandRW<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
+	template<int N, typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IX_REM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
+		IX_REM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXDEL a subkey0 subkey1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			[[maybe_unused]]
 			hm4::TXGuard guard{ *db };
 
@@ -228,18 +228,18 @@ namespace net::worker::commands::Index{
 
 
 
-	template<int N, class Protocol, class DBAdapter>
-	struct IX_GETINDEXES : BaseCommandRO<Protocol,DBAdapter>{
-		IX_GETINDEXES() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
+	template<int N, typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IX_GETINDEXES : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
+		IX_GETINDEXES() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IXGETIXES key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -278,21 +278,21 @@ namespace net::worker::commands::Index{
 
 
 
-	template<int N, class Protocol, class DBAdapter>
-	struct IX_RANGE : BaseCommandRO<Protocol,DBAdapter>{
-		IX_RANGE() : BaseCommandRO<Protocol,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
+	template<int N, typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IX_RANGE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
+		IX_RANGE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>(name__[N - 1], std::begin(cmd__[N - 1]), std::end(cmd__[N - 1])){}
 
 		// IX_RANGE key ABC a  b  c  count from
 		// IX_RANGE key ABC a  b  '' count from
 		// IX_RANGE key ABC a  '' '' count from
 		// IX_RANGE key ABC '' '' '' count from
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 1 + 2 + N + 2)
@@ -405,14 +405,14 @@ namespace net::worker::commands::Index{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, class RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "index";
 
 		static void load(RegisterPack &pack){
 			using namespace impl_;
 
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				LH<IX_GETINDEXES	>::cmd1	,
 				LH<IX_ADD		>::cmd1	,
 				LH<IX_REM		>::cmd1	,

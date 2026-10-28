@@ -58,17 +58,17 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		PFADD() : BaseCommandRW<Protocol,DBAdapter>("PFADD", std::begin(cmd__), std::end(cmd__)){}
+		PFADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PFADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -145,17 +145,17 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFADDCOUNT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		PFADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("PFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		PFADDCOUNT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PFADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -238,18 +238,18 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFSET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFSET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		PFSET() : BaseCommandRW<Protocol,DBAdapter>("PFSET", std::begin(cmd__), std::end(cmd__)){}
+		PFSET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PFSET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
 		// PFSET key delimiter "words,words"
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 4)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -336,17 +336,17 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		PFRESERVE() : BaseCommandRW<Protocol,DBAdapter>("PFRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		PFRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PFRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
@@ -371,17 +371,17 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFINTERSECT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFINTERSECT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFINTERSECT() : BaseCommandRO<Protocol,DBAdapter>("PFINTERSECT", std::begin(cmd__), std::end(cmd__)){}
+		PFINTERSECT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFINTERSECT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 
 			// we support just "PFINTERSECT" without arguments
 			if (p.size() == 1)
@@ -453,18 +453,18 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFJACCARD : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFJACCARD : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFJACCARD() : BaseCommandRO<Protocol,DBAdapter>("PFJACCARD", std::begin(cmd__), std::end(cmd__)){}
+		PFJACCARD() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
 		// PFJACCARD key otherkey
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
@@ -517,18 +517,18 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFMJACCARD : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFMJACCARD : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFMJACCARD() : BaseCommandRO<Protocol,DBAdapter>("PFMJACCARD", std::begin(cmd__), std::end(cmd__)){}
+		PFMJACCARD() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFMJACCARD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process_(p, db, result, blob);
 		}
 
 	private:
 		// PFJACCARD key otherkey...
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
@@ -599,18 +599,18 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFOVERLAP : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("PFOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+		PFOVERLAP() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFOVERLAP", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
 		// PFOVERLAP key otherkey
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 
 
 			if (p.size() != 3)
@@ -665,18 +665,18 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFMOVERLAP : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFMOVERLAP : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFMOVERLAP() : BaseCommandRO<Protocol,DBAdapter>("PFMOVERLAP", std::begin(cmd__), std::end(cmd__)){}
+		PFMOVERLAP() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFMOVERLAP", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process_(p, db, result, blob);
 		}
 
 	private:
 		// PFOVERLAP key otherkey...
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
@@ -748,17 +748,17 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFCOUNT() : BaseCommandRO<Protocol,DBAdapter>("PFCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		PFCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 
 			// we support just "PFCOUNT" without arguments
 			if (p.size() == 1)
@@ -801,17 +801,17 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFMERGE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFMERGE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		PFMERGE() : BaseCommandRW<Protocol,DBAdapter>("PFMERGE", std::begin(cmd__), std::end(cmd__)){}
+		PFMERGE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PFMERGE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -893,12 +893,12 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFBITS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFBITS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFBITS() : BaseCommandRO<Protocol,DBAdapter>("PFBITS", std::begin(cmd__), std::end(cmd__)){}
+		PFBITS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFBITS", std::begin(cmd__), std::end(cmd__)){}
 
-		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return result.set(uint64_t{HLL_Bits});
@@ -914,12 +914,12 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct PFERROR : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct PFERROR : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		PFERROR() : BaseCommandRO<Protocol,DBAdapter>("PFERROR", std::begin(cmd__), std::end(cmd__)){}
+		PFERROR() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PFERROR", std::begin(cmd__), std::end(cmd__)){}
 
-		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			to_string_buffer_t buffer;
@@ -942,12 +942,12 @@ namespace net::worker::commands::HLL{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "hll";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				PFADD		,
 				PFADDCOUNT	,
 				PFSET		,

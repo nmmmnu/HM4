@@ -101,17 +101,17 @@ namespace net::worker::commands::MutableGET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETSET : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GETSET : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		GETSET() : BaseCommandRW<Protocol,DBAdapter>("GETSET", std::begin(cmd__), std::end(cmd__)){}
+		GETSET() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("GETSET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -139,17 +139,17 @@ namespace net::worker::commands::MutableGET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETDEL : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GETDEL : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		GETDEL() : BaseCommandRW<Protocol,DBAdapter>("GETDEL", std::begin(cmd__), std::end(cmd__)){}
+		GETDEL() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("GETDEL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -173,17 +173,17 @@ namespace net::worker::commands::MutableGET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETEX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GETEX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		GETEX() : BaseCommandRW<Protocol,DBAdapter>("GETEX", std::begin(cmd__), std::end(cmd__)){}
+		GETEX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("GETEX", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -209,17 +209,17 @@ namespace net::worker::commands::MutableGET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETEXAT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GETEXAT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		GETEXAT() : BaseCommandRW<Protocol,DBAdapter>("GETEXAT", std::begin(cmd__), std::end(cmd__)){}
+		GETEXAT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("GETEXAT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -245,17 +245,17 @@ namespace net::worker::commands::MutableGET{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETPERSIST : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GETPERSIST : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		GETPERSIST() : BaseCommandRW<Protocol,DBAdapter>("GETPERSIST", std::begin(cmd__), std::end(cmd__)){}
+		GETPERSIST() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("GETPERSIST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -283,12 +283,12 @@ namespace net::worker::commands::MutableGET{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "mutable";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				GETSET		,
 				GETDEL		,
 				GETEX		,

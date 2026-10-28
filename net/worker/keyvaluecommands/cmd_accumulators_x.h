@@ -44,16 +44,16 @@ namespace net::worker::commands::Accumulators{
 
 
 
-		template<class Protocol>
-		void execCommandSet_(Result<Protocol> &result, std::string_view data, std::string_view lastKey){
+		template<class Protocol, class MemoryManager>
+		void execCommandSet_(Result<Protocol,MemoryManager> &result, std::string_view data, std::string_view lastKey){
 			return result.set_containerN(
 				data,
 				lastKey
 			);
 		}
 
-		template<class Protocol, class Int>
-		void execCommandSet_(Result<Protocol> &result, Int data, std::string_view lastKey){
+		template<class Protocol, class MemoryManager, class Int>
+		void execCommandSet_(Result<Protocol,MemoryManager> &result, Int data, std::string_view lastKey){
 			to_string_buffer_t buffer;
 
 			return result.set_containerN(
@@ -62,8 +62,8 @@ namespace net::worker::commands::Accumulators{
 			);
 		}
 
-		template<class Accumulator, class StopPredicate, class Protocol, class List>
-		void execCommand_(std::string_view key, uint32_t count, std::string_view prefix, List &list, Result<Protocol> &result){
+		template<class Accumulator, class StopPredicate, class Protocol, class MemoryManager, class List>
+		void execCommand_(std::string_view key, uint32_t count, std::string_view prefix, List &list, Result<Protocol,MemoryManager> &result){
 			StopPredicate stop{ prefix };
 
 			auto const [ data, lastKey ] = accumulateResults<Accumulator>(
@@ -76,8 +76,8 @@ namespace net::worker::commands::Accumulators{
 			return execCommandSet_(result, data, lastKey);
 		}
 
-		template<class Accumulator, class StopPredicate, class Protocol, class List>
-		void execCommandLimit(ParamContainer const &p, List &list, Result<Protocol> &result){
+		template<class Accumulator, class StopPredicate, class Protocol, class MemoryManager, class List>
+		void execCommandLimit(ParamContainer const &p, List &list, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -91,8 +91,8 @@ namespace net::worker::commands::Accumulators{
 			return execCommand_<Accumulator, StopPredicate>(key, count, prefix, list, result);
 		}
 
-		template<class Accumulator, class StopPredicate, class Protocol, class List>
-		void execCommand(ParamContainer const &p, List &list, Result<Protocol> &result){
+		template<class Accumulator, class StopPredicate, class Protocol, class MemoryManager, class List>
+		void execCommand(ParamContainer const &p, List &list, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -219,12 +219,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct COUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct COUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		COUNT() : BaseCommandRO<Protocol,DBAdapter>("COUNT", std::begin(cmd__), std::end(cmd__)){}
+		COUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("COUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommandLimit<COUNTPredicate, StopPrefixPredicate>(params, *db, result);
@@ -239,12 +239,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SUM : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SUM : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SUM() : BaseCommandRO<Protocol,DBAdapter>("SUM", std::begin(cmd__), std::end(cmd__)){}
+		SUM() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SUM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommandLimit<SUMPredicate, StopPrefixPredicate>(params, *db, result);
@@ -259,12 +259,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNCOUNT() : BaseCommandRO<Protocol,DBAdapter>("XNCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		XNCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<COUNTPredicate, StopPrefixPredicate>(params, *db, result);
@@ -279,12 +279,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRCOUNT() : BaseCommandRO<Protocol,DBAdapter>("XRCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		XRCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<COUNTPredicate, StopRangePredicate>(params, *db, result);
@@ -299,12 +299,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNSUM : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNSUM : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNSUM() : BaseCommandRO<Protocol,DBAdapter>("XNSUM", std::begin(cmd__), std::end(cmd__)){}
+		XNSUM() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNSUM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<SUMPredicate, StopPrefixPredicate>(params, *db, result);
@@ -319,12 +319,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRSUM : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRSUM : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRSUM() : BaseCommandRO<Protocol,DBAdapter>("XRSUM", std::begin(cmd__), std::end(cmd__)){}
+		XRSUM() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRSUM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<SUMPredicate, StopRangePredicate>(params, *db, result);
@@ -339,12 +339,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNMIN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNMIN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNMIN() : BaseCommandRO<Protocol,DBAdapter>("XNMIN", std::begin(cmd__), std::end(cmd__)){}
+		XNMIN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNMIN", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<MINPredicate, StopPrefixPredicate>(params, *db, result);
@@ -359,12 +359,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRMIN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRMIN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRMIN() : BaseCommandRO<Protocol,DBAdapter>("XRMIN", std::begin(cmd__), std::end(cmd__)){}
+		XRMIN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRMIN", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<MINPredicate, StopRangePredicate>(params, *db, result);
@@ -379,12 +379,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNMAX : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNMAX : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNMAX() : BaseCommandRO<Protocol,DBAdapter>("XNMAX", std::begin(cmd__), std::end(cmd__)){}
+		XNMAX() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNMAX", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<MAXPredicate, StopPrefixPredicate>(params, *db, result);
@@ -398,13 +398,13 @@ namespace net::worker::commands::Accumulators{
 	};
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRMAX : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRMAX : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRMAX() : BaseCommandRO<Protocol,DBAdapter>("XRMAX", std::begin(cmd__), std::end(cmd__)){}
+		XRMAX() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRMAX", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<MAXPredicate, StopRangePredicate>(params, *db, result);
@@ -419,12 +419,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNFIRST : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNFIRST : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNFIRST() : BaseCommandRO<Protocol,DBAdapter>("XNFIRST", std::begin(cmd__), std::end(cmd__)){}
+		XNFIRST() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNFIRST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<FirstPredicate, StopPrefixPredicate>(params, *db, result);
@@ -439,12 +439,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRFIRST : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRFIRST : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRFIRST() : BaseCommandRO<Protocol,DBAdapter>("XRFIRST", std::begin(cmd__), std::end(cmd__)){}
+		XRFIRST() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRFIRST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<FirstPredicate, StopRangePredicate>(params, *db, result);
@@ -459,12 +459,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNLAST : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNLAST : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNLAST() : BaseCommandRO<Protocol,DBAdapter>("XNLAST", std::begin(cmd__), std::end(cmd__)){}
+		XNLAST() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNLAST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<LastPredicate, StopPrefixPredicate>(params, *db, result);
@@ -479,12 +479,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRLAST : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRLAST : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRLAST() : BaseCommandRO<Protocol,DBAdapter>("XRLAST", std::begin(cmd__), std::end(cmd__)){}
+		XRLAST() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRLAST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<LastPredicate, StopRangePredicate>(params, *db, result);
@@ -499,12 +499,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNAVG : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNAVG : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNAVG() : BaseCommandRO<Protocol,DBAdapter>("XNAVG", std::begin(cmd__), std::end(cmd__)){}
+		XNAVG() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNAVG", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<AVGPredicate, StopPrefixPredicate>(params, *db, result);
@@ -519,12 +519,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRAVG : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRAVG : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRAVG() : BaseCommandRO<Protocol,DBAdapter>("XRAVG", std::begin(cmd__), std::end(cmd__)){}
+		XRAVG() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRAVG", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return execCommand<AVGPredicate, StopRangePredicate>(params, *db, result);
@@ -539,12 +539,12 @@ namespace net::worker::commands::Accumulators{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "accumulators";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				COUNT	,
 				SUM	,
 

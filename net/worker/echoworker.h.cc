@@ -3,7 +3,7 @@ namespace net{
 namespace worker{
 
 
-WorkerStatus EchoWorker::operator()(IOBuffer &buffer){
+WorkerStatus EchoWorker::operator()(IOBuffer<MemoryManager> &buffer){
 	if (buffer.size() == 0)
 		return WorkerStatus::PASS;
 
@@ -19,13 +19,15 @@ WorkerStatus EchoWorker::operator()(IOBuffer &buffer){
 
 	if (cmp_(buffer, cmd_hello	)){
 		buffer.clear();
-		buffer.push("Hello, how are you?\r\n");
+		[[maybe_unused]]
+		bool b = buffer.push_("Hello, how are you?\r\n");
 		return WorkerStatus::WRITE;
 	}
 
 	if (cmp_(buffer, cmd_help	)){
 		buffer.clear();
-		buffer.push(msg_help);
+		[[maybe_unused]]
+		bool b = buffer.push_(msg_help);
 		return WorkerStatus::WRITE;
 	}
 

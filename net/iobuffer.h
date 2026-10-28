@@ -1,7 +1,8 @@
 #ifndef _IO_BUFFER_H
 #define _IO_BUFFER_H
 
-#include "myfastbuffer.h"
+
+#include "ambuffer.h"
 
 #include <string_view>
 
@@ -10,22 +11,23 @@
 
 namespace net{
 
+template<typename MemoryManager>
 struct IOBuffer{
-	using container_type	= MyFastBuffer;
-	using size_type		= container_type::size_type;
+	using container_type	= am_buffer::AMBuffer<MemoryManager>;
+	using size_type		= typename container_type::size_type;
 
-	constexpr static size_type INITIAL_RESERVE = 4096;
+private:
+	constexpr static size_type KB			= 1024;
+	constexpr static size_type STANDARD_READ_SIZE	= 4 * KB;
 
 private:
 	size_type		head_	= 0;
 	container_type		buffer_;
 
 public:
-	IOBuffer(size_type const size = INITIAL_RESERVE) : buffer_(size){
-	}
+	IOBuffer(MemoryManager &mm			) noexcept : buffer_(mm){};
 
-	IOBuffer(container_type &&buffer) noexcept : buffer_(std::move(buffer)){
-	}
+	IOBuffer(container_type &&buffer	) noexcept : buffer_(std::move(buffer)){}
 
 	void clear(){
 		buffer_.clear();
@@ -74,86 +76,72 @@ public:
 
 	// ==================================
 
-	void reserve(size_type const size){
-		buffer_.reserve(size);
+	[[nodiscard]]
+	bool reserve(size_type const size){
+		return buffer_.reserve(size);
 	}
 
-	auto capacity() const{
+//	[[nodiscard]]
+//	bool reserve(size_t const size){
+//		return reserve(static_cast<size_type>(size));
+//	}
+
+	[[nodiscard]]
+	size_t capacity() const{
 		return buffer_.capacity();
 	}
 
 	// ==================================
 
-	bool push(const char c){
-		buffer_.push(c);
-		return true;
-	}
-
-	bool push(std::string_view const s){
-		buffer_.push(s.data(), s.size());
-		return true;
-	}
-
-	bool push(size_t const size, const char *ptr){
+//	[[nodiscard]]
+//	bool push(const char c){
+//		return buffer_.push(c);
+//	}
+//
+	[[nodiscard]]
+	bool push_(size_t const size, const char *ptr){
 		if (!size)
 			return false;
 
-		buffer_.push(ptr, size);
-
-		return true;
+		return buffer_.push_(ptr, size);
 	}
 
-#if 0
-	template<class Lazy>
-	bool push(std::false_type, size_t const size, Lazy f){
-		if (!size)
-			return false;
-
-		char *dest = buffer_.push(size);
-
-		f(dest);
-
-		// no need to finalizeWriteBuffer
-
-		return true;
+	[[nodiscard]]
+	bool push_(std::string_view const s){
+		return buffer_.push_(s.data(), s.size());
 	}
-
-	template<class Lazy>
-	bool push(std::true_type, size_t const desiredSize, Lazy f){
-		assert(desiredSize && "Size must be great than zero");
-
-		char *dest = buffer_.push(desiredSize);
-
-		auto const finalSize = f(dest);
-
-		return finalizeWriteBuffer(dest, finalSize);
-	}
-#endif
 
 	// ==================================
 
-	char *provideWriteBuffer(size_t const size){
+	[[nodiscard]]
+	char *provideBuffer(size_t const size){
 		assert(size && "Size must be great than zero");
 
 		auto const oldSize = buffer_.size();
 
-		buffer_.resize(oldSize + size);
+		if (!buffer_.resize(oldSize + size))
+			return nullptr;
 
 		return getIndex_(oldSize);
 	}
 
-	auto provideWriteBufferAtLeast(size_t const size){
+	[[nodiscard]]
+	auto provideBufferAtLeast(size_t const size){
 		assert(size && "Size must be great than zero");
 
 		struct Result{
-			char	*buffer;
-			size_t	size;
+			char	*buffer	= nullptr;
+			size_t	size	= 0;
 		};
 
 		auto const oldSize = buffer_.size();
 
-		buffer_.resize(oldSize + size);
-		buffer_.resize(buffer_.capacity());
+		if (!buffer_.resize(oldSize + size))
+			return Result{};
+
+		// now expand to the capacity
+		if (!buffer_.resize(buffer_.capacity()))
+			return Result{};
 
 		return Result{
 			getIndex_(oldSize),
@@ -161,12 +149,20 @@ public:
 		};
 	}
 
-	bool finalizeWriteBuffer(const char *offset, size_t const actualSize){
+	[[nodiscard]]
+	auto provideBufferAtLeastStandardSize(){
+		return provideBufferAtLeast(STANDARD_READ_SIZE);
+	}
+
+	void finalizeBuffer(const char *offset, size_t const actualSize){
 		auto const size = static_cast<size_t>(offset - buffer_.data()) + actualSize;
 
-		buffer_.resize(size);
+		assert(size <= buffer_.capacity());
 
-		return true;
+		[[maybe_unused]]
+		bool const b = buffer_.resize(size);
+
+		assert(b);
 	}
 
 	// ==================================
@@ -182,6 +178,7 @@ public:
 
 		if (availableSize == size){
 			clear();
+
 			return true;
 		}
 
@@ -193,7 +190,7 @@ public:
 	// ==================================
 
 	void print(bool const body = true) const{
-		printf("h: %10zu | s: %10zu | c: %10zu | %.*s\n",
+		printf("h: %10u | s: %10zu | c: %10zu | %.*s\n",
 			head_		,
 			size()		,
 			capacity()	,
@@ -205,7 +202,8 @@ public:
 
 
 
-void swap(IOBuffer &a, IOBuffer &b){
+template<typename MemoryManager>
+void swap(IOBuffer<MemoryManager> &a, IOBuffer<MemoryManager> &b){
 	a.swap(b);
 }
 

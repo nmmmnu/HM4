@@ -83,9 +83,9 @@ namespace net::worker::commands::CMS{
 		}
 
 
-		template<class Protocol, class DBAdapter, bool Sign>
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, bool Sign>
 		struct CMSMutate{
-			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 				auto const varg = 5;
 
 				if (p.size() < 7 || (p.size() - varg) % 2 != 0)
@@ -118,7 +118,7 @@ namespace net::worker::commands::CMS{
 
 		private:
 			template<typename T>
-			void process_(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			void process_(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result) const{
 				if (cms.bytes() > MAX_SIZE){
 					// emit an error
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -176,9 +176,9 @@ namespace net::worker::commands::CMS{
 
 
 
-		template<class Protocol, class DBAdapter, bool Sign>
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, bool Sign>
 		struct CMSMutateCount{
-			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+			void operator()(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 				if (p.size() != 7)
 					return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_6);
 
@@ -213,7 +213,7 @@ namespace net::worker::commands::CMS{
 
 		private:
 			template<typename T>
-			void process_(std::string_view key, std::string_view const item, T const itemCount, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result) const{
+			void process_(std::string_view key, std::string_view const item, T const itemCount, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result) const{
 				if (cms.bytes() > MAX_SIZE){
 					// emit an error
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
@@ -273,16 +273,16 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CMSADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CMSADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CMSADD() : BaseCommandRW<Protocol,DBAdapter>("CMSADD", std::begin(cmd__), std::end(cmd__)){}
+		CMSADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CMSADD", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CMSMutate<Protocol, DBAdapter, true> mut;
+			CMSMutate<Protocol, MemoryManager, DBAdapter, true> mut;
 
 			return mut(p, db, result);
 		}
@@ -298,16 +298,16 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CMSREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CMSREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CMSREM() : BaseCommandRW<Protocol,DBAdapter>("CMSREM", std::begin(cmd__), std::end(cmd__)){}
+		CMSREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CMSREM", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CMSMutate<Protocol, DBAdapter, false> mut;
+			CMSMutate<Protocol, MemoryManager, DBAdapter, false> mut;
 
 			return mut(p, db, result);
 		}
@@ -323,16 +323,16 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CMSADDCOUNT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CMSADDCOUNT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CMSADDCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CMSADDCOUNT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CMSADDCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CMSMutateCount<Protocol, DBAdapter, true> mut;
+			CMSMutateCount<Protocol, MemoryManager, DBAdapter, true> mut;
 
 			return mut(p, db, result);
 		}
@@ -346,16 +346,16 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CMSREMCOUNT : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CMSREMCOUNT : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CMSREMCOUNT() : BaseCommandRW<Protocol,DBAdapter>("CMSREMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CMSREMCOUNT() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CMSREMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
-			CMSMutateCount<Protocol, DBAdapter, false> mut;
+			CMSMutateCount<Protocol, MemoryManager, DBAdapter, false> mut;
 
 			return mut(p, db, result);
 		}
@@ -369,18 +369,18 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CMSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CMSRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		CMSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("CMSRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		CMSRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("CMSRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -413,7 +413,7 @@ namespace net::worker::commands::CMS{
 
 
 		template<typename T>
-		static void processT__(std::string_view key, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(std::string_view key, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (cms.bytes() > MAX_SIZE){
@@ -435,17 +435,17 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CMSCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CMSCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		CMSCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CMSCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("CMSCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 6)
@@ -480,7 +480,7 @@ namespace net::worker::commands::CMS{
 
 
 		template<typename T>
-		static void processT__(std::string_view key, std::string_view item, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result){
+		static void processT__(std::string_view key, std::string_view item, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			const auto *pair = hm4::getPairPtrWithSize(list, key, cms.bytes());
@@ -502,17 +502,17 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct CMSMCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct CMSMCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		CMSMCOUNT() : BaseCommandRO<Protocol,DBAdapter>("CMSMCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		CMSMCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("CMSMCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 6)
@@ -544,7 +544,7 @@ namespace net::worker::commands::CMS{
 		}
 
 		template<typename T>
-		static void processT__(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol> &result, OutputBlob &blob){
+		static void processT__(std::string_view key, ParamContainer const &p, impl_::CMS<T> const cms, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			auto const varg = 5;
@@ -588,12 +588,12 @@ namespace net::worker::commands::CMS{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "cms";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				CMSADD		,
 				CMSREM		,
 				CMSADDCOUNT	,

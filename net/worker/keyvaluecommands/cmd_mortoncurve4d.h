@@ -326,19 +326,19 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4GET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4GET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4GET() : BaseCommandRO<Protocol,DBAdapter>("MC4GET", std::begin(cmd__), std::end(cmd__)){}
+		MC4GET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4GET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC4GET key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -364,18 +364,18 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4MGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4MGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4MGET() : BaseCommandRO<Protocol,DBAdapter>("MC4MGET", std::begin(cmd__), std::end(cmd__)){}
+		MC4MGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4MGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC4GET key subkey0 subkey1 ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -424,19 +424,19 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4SCORE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4SCORE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC4SCORE", std::begin(cmd__), std::end(cmd__)){}
+		MC4SCORE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4SCORE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC4SCORE key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -490,19 +490,19 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4ADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4ADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MC4ADD() : BaseCommandRW<Protocol,DBAdapter>("MC4ADD", std::begin(cmd__), std::end(cmd__)){}
+		MC4ADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MC4ADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC4ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -568,14 +568,14 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4REM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4REM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MC4REM() : BaseCommandRW<Protocol,DBAdapter>("MC4REM", std::begin(cmd__), std::end(cmd__)){}
+		MC4REM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MC4REM", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC4DEL a subkey0 subkey1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			[[maybe_unused]]
@@ -596,19 +596,19 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4POINT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4POINT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4POINT() : BaseCommandRO<Protocol,DBAdapter>("MC4POINT", std::begin(cmd__), std::end(cmd__)){}
+		MC4POINT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4POINT", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC4POINT morton 10 20 30 40 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
@@ -662,19 +662,19 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4RANGENAIVE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC4RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
+		MC4RANGENAIVE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC4RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -734,19 +734,19 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4RANGE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4RANGE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC4RANGE", std::begin(cmd__), std::end(cmd__)){}
+		MC4RANGE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4RANGE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -804,17 +804,17 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4ENCODE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4ENCODE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC4ENCODE", std::begin(cmd__), std::end(cmd__)){}
+		MC4ENCODE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4ENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 1 + DIM)
@@ -845,17 +845,17 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC4DECODE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC4DECODE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC4DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC4DECODE", std::begin(cmd__), std::end(cmd__)){}
+		MC4DECODE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC4DECODE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -888,12 +888,12 @@ namespace net::worker::commands::MortonCurve4D{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "morton_curve_4d";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				MC4GET			,
 				MC4MGET			,
 				MC4SCORE		,

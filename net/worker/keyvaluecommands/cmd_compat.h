@@ -5,11 +5,11 @@
 namespace net::worker::commands::Compat{
 	namespace impl_{
 
-		template<class Protocol, class DBAdapter>
-		struct OK : BaseCommandRO<Protocol,DBAdapter>{
-			using BaseCommandRO<Protocol,DBAdapter>::BaseCommandRO;
+		template<typename Protocol, typename MemoryManager, typename DBAdapter>
+		struct OK : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
+			using BaseCommandRO<Protocol,MemoryManager,DBAdapter>::BaseCommandRO;
 
-			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 				return result.set();
 			}
 		};
@@ -19,13 +19,13 @@ namespace net::worker::commands::Compat{
 			SIMPLE_STRING
 		};
 
-		template<class Protocol, class DBAdapter, typename T, ResultType RT = ResultType::NORMAL>
-		struct VAL : BaseCommandRO<Protocol,DBAdapter>{
+		template<class Protocol, class MemoryManager, class DBAdapter, typename T, ResultType RT = ResultType::NORMAL>
+		struct VAL : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 			VAL(std::string_view name, const std::string_view *cmd_begin, const std::string_view *cmd_end, T const &n) :
-									BaseCommandRO<Protocol,DBAdapter>(name, cmd_begin, cmd_end),
+									BaseCommandRO<Protocol,MemoryManager,DBAdapter>(name, cmd_begin, cmd_end),
 									n(n){}
 
-			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+			constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 				if constexpr(RT == ResultType::SIMPLE_STRING)
 					return result.set_simple_string(n);
 				else
@@ -39,9 +39,9 @@ namespace net::worker::commands::Compat{
 	} // namespace impl_
 
 
-	template<class Protocol, class DBAdapter>
-	struct SELECT : impl_::OK<Protocol,DBAdapter>{
-		SELECT() : impl_::OK<Protocol,DBAdapter>("SELECT", std::begin(cmd__), std::end(cmd__)){}
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SELECT : impl_::OK<Protocol,MemoryManager,DBAdapter>{
+		SELECT() : impl_::OK<Protocol,MemoryManager,DBAdapter>("SELECT", std::begin(cmd__), std::end(cmd__)){}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -49,9 +49,9 @@ namespace net::worker::commands::Compat{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct RESET : impl_::OK<Protocol,DBAdapter>{
-		RESET() : impl_::OK<Protocol,DBAdapter>("RESET", std::begin(cmd__), std::end(cmd__)){}
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RESET : impl_::OK<Protocol,MemoryManager,DBAdapter>{
+		RESET() : impl_::OK<Protocol,MemoryManager,DBAdapter>("RESET", std::begin(cmd__), std::end(cmd__)){}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -59,9 +59,9 @@ namespace net::worker::commands::Compat{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct TYPE : impl_::VAL<Protocol,DBAdapter,std::string_view, impl_::ResultType::SIMPLE_STRING>{
-		constexpr TYPE() : impl_::VAL<Protocol,DBAdapter,std::string_view, impl_::ResultType::SIMPLE_STRING>(
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TYPE : impl_::VAL<Protocol, MemoryManager, DBAdapter, std::string_view, impl_::ResultType::SIMPLE_STRING>{
+		constexpr TYPE() : impl_::VAL<Protocol, MemoryManager, DBAdapter, std::string_view, impl_::ResultType::SIMPLE_STRING>(
 			"TYPE", std::begin(cmd__), std::end(cmd__), "string"){}
 
 	private:
@@ -70,9 +70,9 @@ namespace net::worker::commands::Compat{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct TOUCH : impl_::VAL<Protocol,DBAdapter,bool>{
-		constexpr TOUCH() : impl_::VAL<Protocol,DBAdapter,bool>("TOUCH", std::begin(cmd__), std::end(cmd__), true){}
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TOUCH : impl_::VAL<Protocol,MemoryManager,DBAdapter,bool>{
+		constexpr TOUCH() : impl_::VAL<Protocol,MemoryManager,DBAdapter,bool>("TOUCH", std::begin(cmd__), std::end(cmd__), true){}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -80,12 +80,12 @@ namespace net::worker::commands::Compat{
 		};
 	};
 
-	template<class Protocol, class DBAdapter>
-	struct COMMAND : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct COMMAND : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		COMMAND() : BaseCommandRO<Protocol,DBAdapter>("COMMAND", std::begin(cmd__), std::end(cmd__)){}
+		COMMAND() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("COMMAND", std::begin(cmd__), std::end(cmd__)){}
 
-		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		constexpr void process(ParamContainer const &, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			// deliberatly send error
 			return result.set_error(ResultErrorMessages::SYS_NOT_IMPLEMENTED);
 		}
@@ -99,12 +99,12 @@ namespace net::worker::commands::Compat{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "compat";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				SELECT	,
 				RESET	,
 				TYPE	,

@@ -66,17 +66,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNGET() : BaseCommandRO<Protocol,DBAdapter>("XNGET", std::begin(cmd__), std::end(cmd__)){}
+		XNGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -116,17 +116,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNNEXT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNNEXT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNNEXT() : BaseCommandRO<Protocol,DBAdapter>("XNNEXT", std::begin(cmd__), std::end(cmd__)){}
+		XNNEXT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNNEXT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -164,17 +164,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRGET() : BaseCommandRO<Protocol,DBAdapter>("XRGET", std::begin(cmd__), std::end(cmd__)){}
+		XRGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -213,17 +213,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRNEXT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRNEXT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRNEXT() : BaseCommandRO<Protocol,DBAdapter>("XRNEXT", std::begin(cmd__), std::end(cmd__)){}
+		XRNEXT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRNEXT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -261,17 +261,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XUGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XUGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XUGET() : BaseCommandRO<Protocol,DBAdapter>("XUGET", std::begin(cmd__), std::end(cmd__)){}
+		XUGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XUGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -306,17 +306,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XUNEXT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XUNEXT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XUNEXT() : BaseCommandRO<Protocol,DBAdapter>("XUNEXT", std::begin(cmd__), std::end(cmd__)){}
+		XUNEXT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XUNEXT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -350,17 +350,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XNGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XNGETKEYS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XNGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XNGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+		XNGETKEYS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XNGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -399,17 +399,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XRGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XRGETKEYS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XRGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XRGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+		XRGETKEYS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XRGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -448,17 +448,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct XUGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct XUGETKEYS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		XUGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("XUGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+		XUGETKEYS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("XUGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -493,17 +493,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HGETALL : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HGETALL : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HGETALL() : BaseCommandRO<Protocol,DBAdapter>("HGETALL", std::begin(cmd__), std::end(cmd__)){}
+		HGETALL() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HGETALL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -544,17 +544,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HGETKEYS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HGETKEYS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HGETKEYS() : BaseCommandRO<Protocol,DBAdapter>("HGETKEYS", std::begin(cmd__), std::end(cmd__)){}
+		HGETKEYS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HGETKEYS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -595,17 +595,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HGETVALS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HGETVALS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HGETVALS() : BaseCommandRO<Protocol,DBAdapter>("HGETVALS", std::begin(cmd__), std::end(cmd__)){}
+		HGETVALS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HGETVALS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -646,17 +646,17 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HLEN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HLEN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HLEN() : BaseCommandRO<Protocol,DBAdapter>("HLEN", std::begin(cmd__), std::end(cmd__)){}
+		HLEN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HLEN", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -692,12 +692,12 @@ namespace net::worker::commands::ImmutableX{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "immutable_x";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				XNGET		,
 				XRGET		,
 				XUGET		,

@@ -109,17 +109,17 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEOADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEOADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		GEOADD() : BaseCommandRW<Protocol,DBAdapter>("GEOADD", std::begin(cmd__), std::end(cmd__)){}
+		GEOADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("GEOADD", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg  = 2;
 			auto const vstep = 3;
 
@@ -169,12 +169,12 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEOREM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEOREM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		GEOREM() : BaseCommandRW<Protocol,DBAdapter>("GEOREM", std::begin(cmd__), std::end(cmd__)){}
+		GEOREM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("GEOREM", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			[[maybe_unused]]
@@ -194,17 +194,17 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEOGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEOGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GEOGET() : BaseCommandRO<Protocol,DBAdapter>("GEOGET", std::begin(cmd__), std::end(cmd__)){}
+		GEOGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GEOGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -235,17 +235,17 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEOMGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEOMGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GEOMGET() : BaseCommandRO<Protocol,DBAdapter>("GEOMGET", std::begin(cmd__), std::end(cmd__)){}
+		GEOMGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GEOMGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_2);
 
@@ -284,17 +284,17 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEORADIUS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEORADIUS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GEORADIUS() : BaseCommandRO<Protocol,DBAdapter>("GEORADIUS", std::begin(cmd__), std::end(cmd__)){}
+		GEORADIUS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GEORADIUS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_4);
 
@@ -392,17 +392,17 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEODIST : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEODIST : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GEODIST() : BaseCommandRO<Protocol,DBAdapter>("GEODIST", std::begin(cmd__), std::end(cmd__)){}
+		GEODIST() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GEODIST", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -459,17 +459,17 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEOENCODE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEOENCODE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GEOENCODE() : BaseCommandRO<Protocol,DBAdapter>("GEOENCODE", std::begin(cmd__), std::end(cmd__)){}
+		GEOENCODE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GEOENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -499,17 +499,17 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GEODECODE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GEODECODE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GEODECODE() : BaseCommandRO<Protocol,DBAdapter>("GEODECODE", std::begin(cmd__), std::end(cmd__)){}
+		GEODECODE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GEODECODE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -540,12 +540,12 @@ namespace net::worker::commands::Geo{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "geo";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				GEOADD		,
 				GEOREM		,
 				GEOGET		,

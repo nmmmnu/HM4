@@ -5,17 +5,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GET() : BaseCommandRO<Protocol,DBAdapter>("GET", std::begin(cmd__), std::end(cmd__)){}
+		GET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -38,17 +38,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MGET() : BaseCommandRO<Protocol,DBAdapter>("MGET", std::begin(cmd__), std::end(cmd__)){}
+		MGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 2)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_1);
 
@@ -76,17 +76,17 @@ namespace net::worker::commands::Immutable{
 	};
 
 
-	template<class Protocol, class DBAdapter>
-	struct EXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct EXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		EXISTS() : BaseCommandRO<Protocol,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
+		EXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("EXISTS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -109,17 +109,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TTL : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TTL : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TTL() : BaseCommandRO<Protocol,DBAdapter>("TTL", std::begin(cmd__), std::end(cmd__)){}
+		TTL() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TTL", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -144,17 +144,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct EXPIRETIME : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct EXPIRETIME : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		EXPIRETIME() : BaseCommandRO<Protocol,DBAdapter>("EXPIRETIME", std::begin(cmd__), std::end(cmd__)){}
+		EXPIRETIME() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("EXPIRETIME", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -179,17 +179,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct DUMP : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct DUMP : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		DUMP() : BaseCommandRO<Protocol,DBAdapter>("DUMP", std::begin(cmd__), std::end(cmd__)){}
+		DUMP() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("DUMP", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -219,17 +219,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct SIZEOF : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct SIZEOF : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		SIZEOF() : BaseCommandRO<Protocol,DBAdapter>("SIZEOF", std::begin(cmd__), std::end(cmd__)){}
+		SIZEOF() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("SIZEOF", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -255,17 +255,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct GETRANGE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct GETRANGE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		GETRANGE() : BaseCommandRO<Protocol,DBAdapter>("GETRANGE", std::begin(cmd__), std::end(cmd__)){}
+		GETRANGE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("GETRANGE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -298,17 +298,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct STRLEN : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct STRLEN : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		STRLEN() : BaseCommandRO<Protocol,DBAdapter>("STRLEN", std::begin(cmd__), std::end(cmd__)){}
+		STRLEN() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("STRLEN", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_1);
 
@@ -334,17 +334,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HGET() : BaseCommandRO<Protocol,DBAdapter>("HGET", std::begin(cmd__), std::end(cmd__)){}
+		HGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -371,17 +371,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HMGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HMGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HMGET() : BaseCommandRO<Protocol,DBAdapter>("HMGET", std::begin(cmd__), std::end(cmd__)){}
+		HMGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HMGET", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -424,17 +424,17 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct HEXISTS : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct HEXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		HEXISTS() : BaseCommandRO<Protocol,DBAdapter>("HEXISTS", std::begin(cmd__), std::end(cmd__)){}
+		HEXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("HEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -461,12 +461,12 @@ namespace net::worker::commands::Immutable{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "immutable";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				GET		,
 				MGET		,
 				EXISTS		,

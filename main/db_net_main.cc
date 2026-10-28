@@ -22,8 +22,6 @@
 
 #include "protocol/redisprotocol.h"
 #include "worker/keyvalueworker.h"
-#include "simplesparepool.h"
-#include "heapsparepool.h"
 
 // ----------------------------------
 
@@ -440,9 +438,8 @@ namespace{
 
 		using MyAdapterFactory	= Factory;
 		using MyDBAdapter	= typename MyAdapterFactory::MyDBAdapter;
-		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, MyDBAdapter, KEY_VALUE_WORKER_PROFILING>;
-		using MySparePool	= net::HeapSparePool;
-		using MyLoop		= AsyncLoop<MyWorker, MySparePool>;
+		using MyWorker		= net::worker::KeyValueWorker<MyProtocol, TMM, MyDBAdapter, KEY_VALUE_WORKER_PROFILING>;
+		using MyLoop		= AsyncLoop<MyWorker>;
 
 		if (opt.log_level >= 2){
 			logger_fmt<Logger::STARTUP>("Server start with log level {}.", opt.log_level);
@@ -472,7 +469,6 @@ namespace{
 			printError("Can not create server socket...");
 
 		auto const max_clients		= std::max(opt.max_clients,	MyLoop::MIN_CLIENTS		);
-		auto const buffer_capacity	= std::max(opt.buffer_capacity, MyLoop::IO_BUFFER_CAPACITY	);
 
 		auto const max_packet_size	= round_up<size_t, 1024>(hm4::Pair::maxBytes() * 2);
 
@@ -511,20 +507,32 @@ namespace{
 			}
 		}();
 
+		TMM tmm{ {
+							opt.io_buffer_tier_0,
+							opt.io_buffer_tier_1,
+							opt.io_buffer_tier_2,
+							opt.io_buffer_tier_3,
+							opt.io_buffer_tier_4,
+							opt.io_buffer_tier_5,
+							opt.io_buffer_tier_6,
+							opt.io_buffer_tier_7
+						}, max_clients };
+
+		tmm. template log<Logger::STARTUP>();
+
 		#ifndef IO_ENGINE
 
 		// standard poll() like rediness loop
 
 		MyLoop loop{
-				/* selector */	MySelector	{ rlimit_nofile, max_clients },
-				/* worker */	MyWorker	{ adapter_factory(), buffer_capacity },
-				/* server fd */	{ fd },
-				rlimit_nofile				,
-				max_clients				,
-				opt.min_spare_pool, opt.max_spare_pool	,
-				opt.timeout				,
-				buffer_capacity				,
-				max_packet_size
+				/* selector		*/ MySelector	{ rlimit_nofile, max_clients }	,
+				/* worker		*/ MyWorker	{ adapter_factory(), tmm }	,
+				/* server fd		*/ { fd }					,
+				/* tiered slab manager	*/ tmm						,
+					rlimit_nofile			,
+					max_clients			,
+					opt.timeout			,
+					max_packet_size
 		};
 
 		#else
@@ -532,19 +540,18 @@ namespace{
 		// linux io_uring completion engne
 
 		MyLoop loop{
-				/* selector */	MyEngine	{ rlimit_nofile, max_clients, /* number of server FD's */ 1,
+				/* selector */	MyEngine		{ rlimit_nofile, max_clients, /* number of server FD's */ 1,
 											static_cast<int32_t>(opt.timeout),
 											static_cast<int32_t>(opt.timeout),
 											static_cast<int32_t>(opt.timeout)
-								},
-				/* worker */	MyWorker	{ adapter_factory(), buffer_capacity },
-				/* server fd */	{ fd },
-				rlimit_nofile				,
-				max_clients				,
-				opt.min_spare_pool, opt.max_spare_pool	,
-			//	opt.timeout				,
-				buffer_capacity				,
-				max_packet_size
+									},
+				/* worker		*/ MyWorker	{ adapter_factory(), tmm }	,
+				/* server fd		*/ { fd }					,
+				/* tiered slab manager	*/ tmm						,
+					rlimit_nofile				,
+					max_clients				,
+				//	opt.timeout				,
+					max_packet_size
 		};
 
 		#endif
@@ -587,6 +594,11 @@ namespace{
 			opt.crontab_min_time
 		};
 
+		auto crontab_io_buffer_info = mytime::CrontabControl{
+			opt.crontab_io_buffer_info,
+			opt.crontab_min_time
+		};
+
 		while( loop.process() && signal_processing(guard()) ){
 			crontab(crontab_reload,	[&adapter_factory](){
 							adapter_factory().reload();
@@ -602,6 +614,12 @@ namespace{
 			crontab(crontab_server_info,
 						[&loop](){
 							loop.printInfo("Server connection info");
+						}
+			);
+
+			crontab(crontab_io_buffer_info,
+						[&tmm](){
+							tmm. template log<Logger::NOTICE>();
 						}
 			);
 		}

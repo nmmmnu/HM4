@@ -40,19 +40,19 @@ namespace net::worker::commands::RS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RSADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RSADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		RSADD() : BaseCommandRW<Protocol,DBAdapter>("RSADD", std::begin(cmd__), std::end(cmd__)){}
+		RSADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("RSADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// RSADD key slots bytes item item
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process_(p, db, result);
 		}
 
 	private:
-		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process_(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() < 5)
@@ -89,7 +89,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<typename MyReservoirSampling>
-		void processT_(MyReservoirSampling const &rs, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol> &result){
+		void processT_(MyReservoirSampling const &rs, std::string_view const key, ParamContainer const &p, typename DBAdapter::List &list, Result<Protocol,MemoryManager> &result){
 			auto const varg = 4;
 			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
 				if (const auto &item = *itk; !rs.isItemValid(item))
@@ -176,19 +176,19 @@ namespace net::worker::commands::RS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RSRESERVE : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RSRESERVE : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		RSRESERVE() : BaseCommandRW<Protocol,DBAdapter>("RSRESERVE", std::begin(cmd__), std::end(cmd__)){}
+		RSRESERVE() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("RSRESERVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// RSRESERVE key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -233,19 +233,19 @@ namespace net::worker::commands::RS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RSGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RSGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		RSGET() : BaseCommandRO<Protocol,DBAdapter>("RSGET", std::begin(cmd__), std::end(cmd__)){}
+		RSGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("RSGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// RSGET key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -284,7 +284,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<class MyReservoirSampling>
-		static void processT__(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol> &result, OutputBlob &blob){
+		static void processT__(MyReservoirSampling const &rs, const hm4::Pair *pair, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (!pair)
 				return result.set_containerN();
 
@@ -309,19 +309,19 @@ namespace net::worker::commands::RS{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RSGETCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RSGETCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		RSGETCOUNT() : BaseCommandRO<Protocol,DBAdapter>("RSGETCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		RSGETCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("RSGETCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
 		// RSGETCOUNT key slots bytes
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -360,7 +360,7 @@ namespace net::worker::commands::RS{
 
 	private:
 		template<class MyReservoirSampling>
-		static void processT__(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol> &result){
+		static void processT__(MyReservoirSampling const &, const hm4::Pair *pair, Result<Protocol,MemoryManager> &result){
 			if (!pair)
 				return result.set_0();
 
@@ -379,12 +379,12 @@ namespace net::worker::commands::RS{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "rs";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				RSADD		,
 				RSRESERVE	,
 				RSGET		,

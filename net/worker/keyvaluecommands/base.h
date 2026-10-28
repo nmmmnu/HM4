@@ -175,17 +175,17 @@ namespace net::worker::commands{
 
 
 
-	template<class Protocol>
+	template<class Protocol, class MemoryManager>
 	class Result{
 		Protocol	&protocol_;
-		IOBuffer	&buffer_;
+		IOBuffer<MemoryManager>	&buffer_;
 
 		Status          status  = Status::OK;
 
 	public:
 		using Container = MySpan<const std::string_view, MySpanConstructor::EXPLICIT>;
 
-		Result(Protocol &protocol, IOBuffer &buffer) :
+		Result(Protocol &protocol, IOBuffer<MemoryManager> &buffer) :
 						protocol_	(protocol	),
 						buffer_		(buffer		){}
 
@@ -198,46 +198,47 @@ namespace net::worker::commands{
 			status = status2;
 		}
 
-	public:
-	//	void error(){
-	//		return set_status(Status::ERROR);
-	//	}
-
-		void set_system(Status status){
+		template<typename Resp>
+		void processSet(Status status, Resp &&resp){
 			set_status_(status);
 
 			buffer_.clear();
-			protocol_.response_ok(buffer_);
+
+			auto const size = resp.size();
+
+			char *ptr = buffer_.provideBuffer(size);
+
+			if (!ptr)
+				return; // return clean buffer
+
+			const char *off = ptr;
+
+			auto const size2 = resp(ptr);
+
+			buffer_.finalizeBuffer(off, size2);
+		}
+
+	public:
+		void set_system(Status status){
+			return processSet(status, typename Protocol::Response::OK{});
 		}
 
 		void set_error(std::string_view errorMessage){
 			assert(!errorMessage.empty());
 
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_error(buffer_, errorMessage);
+			return processSet(Status::OK, typename Protocol::Response::Error{ errorMessage });
 		}
 
 		void set(){
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_ok(buffer_);
+			return processSet(Status::OK, typename Protocol::Response::OK{});
 		}
 
 		void set(bool b){
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_bool(buffer_, b);
+			return processSet(Status::OK, typename Protocol::Response::Bool{ b });
 		}
 
 		void set(std::string_view s){
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_string(buffer_, s);
+			return processSet(Status::OK, typename Protocol::Response::String{ s });
 		}
 
 		// avoid convert const char * to bool
@@ -248,17 +249,11 @@ namespace net::worker::commands{
 		}
 
 		void set_simple_string(std::string_view s){
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_simple_string(buffer_, s);
+			return processSet(Status::OK, typename Protocol::Response::SimpleString{ s });
 		}
 
 		void set_container(MySpan<const std::string_view> const &container){
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_strings(buffer_, container);
+			return processSet(Status::OK, typename Protocol::Response::Strings{ container });
 		}
 
 		template <typename ...Args>
@@ -270,10 +265,7 @@ namespace net::worker::commands{
 				std::string_view(std::forward<Args>(args))...
 			};
 
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_strings(buffer_, container);
+			return set_container(container);
 		}
 
 		void set_0(){
@@ -285,33 +277,21 @@ namespace net::worker::commands{
 		}
 
 		void set(int64_t number){
-			return set_number(number);
+			return processSet(Status::OK, typename Protocol::Response::Number64{ number });
 		}
 
 		void set(uint64_t number){
-			return set_number(number);
+			return processSet(Status::OK, typename Protocol::Response::NumberU64{ number });
 		}
 
 		#ifdef SIZE_T_SEPARATE_FROM_UINT64_T
 		void set(size_t number){
-			return set_number<uint64_t>(number);
+			return set_number(uint64_t{ number });
 		}
 		#endif
 
 		void set_number_sv(std::string_view number){
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_number_sv(buffer_, number);
-		}
-
-	private:
-		template<typename T>
-		void set_number(T number){
-			set_status_(Status::OK);
-
-			buffer_.clear();
-			protocol_.response_number(buffer_, number);
+			return processSet(Status::OK, typename Protocol::Response::NumberSV{ number });
 		}
 	};
 
@@ -322,7 +302,7 @@ namespace net::worker::commands{
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
 	struct BaseCommand{
 		BaseCommand(std::string_view name, const std::string_view *cmd_begin, const std::string_view *cmd_end, bool mut) :
 							name_		{ name		},
@@ -335,7 +315,7 @@ namespace net::worker::commands{
 
 		virtual ~BaseCommand() = default;
 
-		void operator()(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		void operator()(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			return process(params, db, result, blob);
 		}
 
@@ -362,30 +342,30 @@ namespace net::worker::commands{
 		bool			mut_;
 
 	private:
-		virtual void process(ParamContainer const &params, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) = 0;
+		virtual void process(ParamContainer const &params, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) = 0;
 	};
 
 
 
-	template<class Protocol, class DBAdapter, bool B>
-	struct BaseCommandMM : BaseCommand<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, bool B>
+	struct BaseCommandMM : BaseCommand<Protocol,MemoryManager,DBAdapter>{
 		BaseCommandMM(std::string_view name, const std::string_view *cmd_begin, const std::string_view *cmd_end) :
-					BaseCommand<Protocol,DBAdapter>(name, cmd_begin, cmd_end, B){}
+					BaseCommand<Protocol,MemoryManager,DBAdapter>(name, cmd_begin, cmd_end, B){}
 	};
 
-	template<class Protocol, class DBAdapter>
-	using BaseCommandRO = BaseCommandMM<Protocol,DBAdapter, 0>;
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	using BaseCommandRO = BaseCommandMM<Protocol,MemoryManager,DBAdapter,0>;
 
-	template<class Protocol, class DBAdapter>
-	using BaseCommandRW = BaseCommandMM<Protocol,DBAdapter, 1>;
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	using BaseCommandRW = BaseCommandMM<Protocol,MemoryManager,DBAdapter,1>;
 
 
 
-	template<class Protocol, class DBAdapter>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
 	struct StorageCommands{
-		using BaseObject	= BaseCommand<Protocol, DBAdapter>;
+		using BaseObject	= BaseCommand<Protocol,MemoryManager,DBAdapter>;
 		using BasePtr		= std::unique_ptr<BaseObject>;
-		using Storage		= StaticVector<BasePtr, MaxCommands>;
+		using Storage		= StaticVector<BasePtr,MaxCommands>;
 
 		constexpr static bool RegisterDebugPrint = false;
 
@@ -523,19 +503,21 @@ namespace net::worker::commands{
 	namespace registration_impl_{
 
 		template<
-			template<class, class>  class Command,
+			template<class, class, class>  class Command,
 			class Protocol,
+			class MemoryManager,
 			class DBAdapter,
 			class RegisterPack
 		>
 		void registerCommand(RegisterPack &pack){
-			StorageCommands<Protocol, DBAdapter> &storage = pack.storageCommands;
+		//	StorageCommands<Protocol,MemoryManager,DBAdapter>
+			auto &storage = pack.storageCommands;
 
 
-			using MyCommand		= Command	<Protocol, DBAdapter>;
-			using MyCommandBase	= BaseCommand	<Protocol, DBAdapter>;
-			using MyCommandBaseRO	= BaseCommandRO	<Protocol, DBAdapter>;
-			using MyCommandBaseRW	= BaseCommandRW	<Protocol, DBAdapter>;
+			using MyCommand		= Command	<Protocol,MemoryManager,DBAdapter>;
+			using MyCommandBase	= BaseCommand	<Protocol,MemoryManager,DBAdapter>;
+			using MyCommandBaseRO	= BaseCommandRO	<Protocol,MemoryManager,DBAdapter>;
+			using MyCommandBaseRW	= BaseCommandRW	<Protocol,MemoryManager,DBAdapter>;
 
 			static_assert(	std::is_base_of_v<MyCommandBase, MyCommand>,
 								"Command not seems to be a command");
@@ -556,14 +538,15 @@ namespace net::worker::commands{
 
 	template<
 		class Protocol,
+		class MemoryManager,
 		class DBAdapter,
 		class RegisterPack,
-		template<class,class> typename... Commands
+		template<class,class,class> typename... Commands
 	>
 	void registerCommands(RegisterPack &pack){
 		using namespace registration_impl_;
 
-		( registerCommand<Commands, Protocol, DBAdapter>(pack), ... );
+		( registerCommand<Commands, Protocol, MemoryManager, DBAdapter>(pack), ... );
 	}
 }
 

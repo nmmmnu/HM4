@@ -351,19 +351,19 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8GET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8GET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8GET() : BaseCommandRO<Protocol,DBAdapter>("MC8GET", std::begin(cmd__), std::end(cmd__)){}
+		MC8GET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8GET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC8GET key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -389,18 +389,18 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8MGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8MGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8MGET() : BaseCommandRO<Protocol,DBAdapter>("MC8MGET", std::begin(cmd__), std::end(cmd__)){}
+		MC8MGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8MGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC8GET key subkey0 subkey1 ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -449,19 +449,19 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8SCORE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8SCORE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC8SCORE", std::begin(cmd__), std::end(cmd__)){}
+		MC8SCORE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8SCORE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC8SCORE key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -518,19 +518,19 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8ADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8ADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MC8ADD() : BaseCommandRW<Protocol,DBAdapter>("MC8ADD", std::begin(cmd__), std::end(cmd__)){}
+		MC8ADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MC8ADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC8ADD a keySub0 x0 y0 z0 val0 keySub1 x1 y1 z1 val1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -608,14 +608,14 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8REM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8REM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MC8REM() : BaseCommandRW<Protocol,DBAdapter>("MC8REM", std::begin(cmd__), std::end(cmd__)){}
+		MC8REM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MC8REM", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC8DEL a subkey0 subkey1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			[[maybe_unused]]
@@ -636,19 +636,19 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8POINT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8POINT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8POINT() : BaseCommandRO<Protocol,DBAdapter>("MC8POINT", std::begin(cmd__), std::end(cmd__)){}
+		MC8POINT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8POINT", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC8POINT morton 10 20 30 40 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + DIM + 1 && p.size() != 2 + DIM + 1 + 1)
@@ -707,19 +707,19 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8RANGENAIVE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8RANGENAIVE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8RANGENAIVE() : BaseCommandRO<Protocol,DBAdapter>("MC8RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
+		MC8RANGENAIVE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8RANGENAIVE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC8RANGENAIVE morton 10 10 20 20 30 30 40 40 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -789,19 +789,19 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8RANGE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8RANGE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC8RANGE", std::begin(cmd__), std::end(cmd__)){}
+		MC8RANGE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8RANGE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC2RANGE morton 10 10 20 20 30 30 40 40 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 2 + 2 * DIM + 1 && p.size() != 2 + 2 * DIM + 1 + 1)
@@ -869,17 +869,17 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8ENCODE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8ENCODE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8ENCODE() : BaseCommandRO<Protocol,DBAdapter>("MC8ENCODE", std::begin(cmd__), std::end(cmd__)){}
+		MC8ENCODE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8ENCODE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 1 + DIM)
@@ -915,17 +915,17 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC8DECODE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC8DECODE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC8DECODE() : BaseCommandRO<Protocol,DBAdapter>("MC8DECODE", std::begin(cmd__), std::end(cmd__)){}
+		MC8DECODE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC8DECODE", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 2)
@@ -963,12 +963,12 @@ namespace net::worker::commands::MortonCurve8D{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "morton_curve_8D";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				MC8GET			,
 				MC8MGET			,
 				MC8SCORE		,

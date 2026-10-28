@@ -6,6 +6,9 @@
 
 #include "protocol/redisprotocol.h"
 
+#include "simplememorymanager.h"
+
+
 
 struct MyWorkerFactory{
 	using MyProtocol	= net::protocol::RedisProtocol;
@@ -14,10 +17,14 @@ struct MyWorkerFactory{
 	using List		= hm4::VectorList<MyAllocator::STDAllocator>;
 	using MyDBAdapter	= ListDBAdapter<List>;
 
-	using Worker = net::worker::KeyValueWorker<MyProtocol, MyDBAdapter>;
+	using MyMemoryManager	= memory_manager::SimpleMemoryManager;
+
+	using Worker		= net::worker::KeyValueWorker<MyProtocol, MyMemoryManager, MyDBAdapter>;
+
+	MyMemoryManager mm;
 
 	Worker operator()(){
-		return { adapter, net::IOBuffer::INITIAL_RESERVE };
+		return { adapter, mm };
 	}
 
 private:

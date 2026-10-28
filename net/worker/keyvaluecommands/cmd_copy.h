@@ -12,8 +12,8 @@ namespace net::worker::commands::Copy{
 			CP_NX
 		};
 
-		template<CPMVOperation operation, class Protocol, class List>
-		void cpmv(ParamContainer const &p, List &list, Result<Protocol> &result){
+		template<CPMVOperation operation, class Protocol, class MemoryManager, class List>
+		void cpmv(ParamContainer const &p, List &list, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -64,12 +64,12 @@ namespace net::worker::commands::Copy{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RENAME : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RENAME : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		RENAME() : BaseCommandRW<Protocol,DBAdapter>("RENAME", std::begin(cmd__), std::end(cmd__)){}
+		RENAME() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("RENAME", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::MV>(p, *db, result);
 		}
@@ -84,12 +84,12 @@ namespace net::worker::commands::Copy{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct RENAMENX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct RENAMENX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		RENAMENX() : BaseCommandRW<Protocol,DBAdapter>("RENAMENX", std::begin(cmd__), std::end(cmd__)){}
+		RENAMENX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("RENAMENX", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::MV_NX>(p, *db, result);
 		}
@@ -104,12 +104,12 @@ namespace net::worker::commands::Copy{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct COPY : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct COPY : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		COPY() : BaseCommandRW<Protocol,DBAdapter>("COPY", std::begin(cmd__), std::end(cmd__)){}
+		COPY() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("COPY", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::CP>(p, *db, result);
 		}
@@ -123,12 +123,12 @@ namespace net::worker::commands::Copy{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct COPYNX : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct COPYNX : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		COPYNX() : BaseCommandRW<Protocol,DBAdapter>("COPYNX", std::begin(cmd__), std::end(cmd__)){}
+		COPYNX() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("COPYNX", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 			return cpmv<CPMVOperation::CP_NX>(p, *db, result);
 		}
@@ -142,12 +142,12 @@ namespace net::worker::commands::Copy{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "copy";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				COPY		,
 				COPYNX		,
 				RENAME		,

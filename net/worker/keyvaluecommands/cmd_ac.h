@@ -55,8 +55,8 @@ namespace net::worker::commands::AC{
 
 		// ACADD_XXX a text exp
 
-		template<typename Tokenizer, class Protocol, class DBAdapter>
-		void do_processACADD(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		template<typename Tokenizer, typename Protocol, typename MemoryManager, typename DBAdapter>
+		void do_processACADD(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3 && p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
@@ -101,8 +101,8 @@ namespace net::worker::commands::AC{
 
 		// ACREM_XXX a text
 
-		template<typename Tokenizer, class Protocol, class DBAdapter>
-		void do_processACREM(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		template<typename Tokenizer, typename Protocol, typename MemoryManager, typename DBAdapter>
+		void do_processACREM(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_23);
 
@@ -279,14 +279,14 @@ namespace net::worker::commands::AC{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ACADD_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ACADD_UTF8 : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		ACADD_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
+		ACADD_UTF8() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("ACADD_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACADD_UTF8 a text exp
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_processACADD<UTF8Tokenizer>(p, db, result);
@@ -302,14 +302,14 @@ namespace net::worker::commands::AC{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ACADD_BIN : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ACADD_BIN : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		ACADD_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACADD_BIN", std::begin(cmd__), std::end(cmd__)){}
+		ACADD_BIN() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("ACADD_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACADD_BIN a text exp
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_processACADD<ASCIITokenizer>(p, db, result);
@@ -324,14 +324,14 @@ namespace net::worker::commands::AC{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ACREM_UTF8 : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ACREM_UTF8 : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		ACREM_UTF8() : BaseCommandRW<Protocol,DBAdapter>("ACREM_UTF8", std::begin(cmd__), std::end(cmd__)){}
+		ACREM_UTF8() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("ACREM_UTF8", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACADD_UTF8 a text exp
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_processACREM<UTF8Tokenizer>(p, db, result);
@@ -347,14 +347,14 @@ namespace net::worker::commands::AC{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ACREM_BIN : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ACREM_BIN : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		ACREM_BIN() : BaseCommandRW<Protocol,DBAdapter>("ACREM_BIN", std::begin(cmd__), std::end(cmd__)){}
+		ACREM_BIN() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("ACREM_BIN", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACADD_BIN a text exp
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			using namespace impl_;
 
 			return do_processACREM<ASCIITokenizer>(p, db, result);
@@ -369,19 +369,19 @@ namespace net::worker::commands::AC{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ACRANGE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ACRANGE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		ACRANGE() : BaseCommandRO<Protocol,DBAdapter>("ACRANGE", std::begin(cmd__), std::end(cmd__)){}
+		ACRANGE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("ACRANGE", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACRANGE a text count keyStart
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 5)
@@ -418,19 +418,19 @@ namespace net::worker::commands::AC{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct ACRANGEALL : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct ACRANGEALL : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		ACRANGEALL() : BaseCommandRO<Protocol,DBAdapter>("ACRANGEALL", std::begin(cmd__), std::end(cmd__)){}
+		ACRANGEALL() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("ACRANGEALL", std::begin(cmd__), std::end(cmd__)){}
 
 		// ACRANGEALL a count keyStart
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4)
@@ -467,12 +467,12 @@ namespace net::worker::commands::AC{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "autocomplete";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				ACADD_UTF8	,	ACREM_UTF8	,
 				ACADD_BIN	,	ACREM_BIN	,
 				ACRANGE		,

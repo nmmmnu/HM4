@@ -22,19 +22,19 @@ namespace net::worker::commands::TokenBucket{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TBCONSUME : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TBCONSUME : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		TBCONSUME() : BaseCommandRW<Protocol,DBAdapter>("TBCONSUME", std::begin(cmd__), std::end(cmd__)){}
+		TBCONSUME() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("TBCONSUME", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
 		// TBCONSUME key max_tokens max_seconds price=1
 
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4 && p.size() != 5)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -125,19 +125,19 @@ namespace net::worker::commands::TokenBucket{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct TBCOUNT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct TBCOUNT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		TBCOUNT() : BaseCommandRO<Protocol,DBAdapter>("TBCOUNT", std::begin(cmd__), std::end(cmd__)){}
+		TBCOUNT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("TBCOUNT", std::begin(cmd__), std::end(cmd__)){}
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
 		// TBCOUNT key max_tokens max_seconds
 
-		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 4)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -176,12 +176,12 @@ namespace net::worker::commands::TokenBucket{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "cb";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				TBCONSUME,
 				TBCOUNT
 			>(pack);

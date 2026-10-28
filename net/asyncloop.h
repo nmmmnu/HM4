@@ -8,7 +8,6 @@
 
 #include "asyncloop.client.h"
 
-#include "nullsparepool.h"
 //#include "asyncloop.dynamicarrayfdstorage.h"
 //#include "asyncloop.slabfdstorage.h"
 #include "asyncloop.sparsefdstorage.h"
@@ -22,10 +21,13 @@
 namespace net{
 //	using MyFDStorage = DynamicArrayFDStorage<Client>;
 //	using MyFDStorage = SlabFDStorage<Client>;
-	using MyFDStorage = SparseFDStorage<Client>;
+	template<typename MemoryManager>
+	using MyFDStorage = SparseFDStorage<Client<MemoryManager> >;
 
-	template<class Selector, class Worker, class SparePool = NullSparePool, class FDStorage = MyFDStorage>
+	template<class Selector, class Worker, class MemoryManager, class FDStorage = MyFDStorage<MemoryManager> >
 	class AsyncLoop{
+		constexpr static uint32_t	KB			= 1024;
+
 	public:
 		constexpr static uint32_t	MIN_CLIENTS		= 4;
 		constexpr static uint32_t	MAX_CLIENTS		= 32;
@@ -34,27 +36,27 @@ namespace net{
 		constexpr static uint32_t	CONNECTION_TIMEOUT	= 20;
 		constexpr static int		WAIT_TIMEOUT		= 5;
 
-		constexpr static size_t		IO_BUFFER_CAPACITY	= 1024 * 4;
-		constexpr static size_t		MAX_REQUEST_SIZE	= IO_BUFFER_CAPACITY * 4;
+		constexpr static size_t		MAX_REQUEST_SIZE	= 64 * KB;
 
 	private:
 		constexpr static int		WAIT_TIMEOUT_MS		=  WAIT_TIMEOUT * 1000;
 
 		using WorkerStatus		= worker::WorkerStatus;
 
+		using MyClient			= Client<MemoryManager>;
 
-		constexpr static auto FMT_MASK   = FMT_COMPILE("{:40} | clients: {:5} | spare_pool: {:5}"			);
-		constexpr static auto FMT_MASK_2 = FMT_COMPILE("{:40} | clients: {:5} | spare_pool: {:5} | fd: {:5}"	);
+
+		constexpr static auto FMT_MASK   = FMT_COMPILE("{:40} | clients: {:5}"			);
+		constexpr static auto FMT_MASK_2 = FMT_COMPILE("{:40} | clients: {:5} | fd: {:5}"	);
 
 	public:
-		AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD,
-					uint32_t conf_rlimitNoFile	= LIMIT_NO_FILES	,
-					uint32_t conf_maxClients	= MAX_CLIENTS		,
-					uint32_t conf_minSparePoolSize	= MIN_CLIENTS		,
-					uint32_t conf_maxSparePoolSize	= MIN_CLIENTS		,
-					uint32_t conf_connectionTimeout	= CONNECTION_TIMEOUT	,
-					size_t   conf_buffer_capacity	= IO_BUFFER_CAPACITY	,
-					size_t   conf_maxRequestSize	= MAX_REQUEST_SIZE
+		AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD, MemoryManager &mm,
+						uint32_t conf_rlimitNoFile	= LIMIT_NO_FILES	,
+						uint32_t conf_maxClients	= MAX_CLIENTS		,
+						uint32_t conf_minSparePoolSize	= MIN_CLIENTS		,
+						uint32_t conf_maxSparePoolSize	= MIN_CLIENTS		,
+						uint32_t conf_connectionTimeout	= CONNECTION_TIMEOUT	,
+						size_t   conf_maxRequestSize	= MAX_REQUEST_SIZE
 		);
 
 		//~AsyncLoop();
@@ -65,10 +67,6 @@ namespace net{
 
 		auto connectedClients() const{
 			return clients_.size();
-		}
-
-		auto sparePoolSize() const{
-			return sparePool_.size();
 		}
 
 		void print() const;
@@ -106,20 +104,18 @@ namespace net{
 		void client_Write_(int fd, std::true_type);
 		void client_Write_(int,    std::false_type);
 
-		bool client_Worker_(int fd, IOBuffer &buffer);
+		bool client_Worker_(int fd, IOBuffer<MemoryManager> &buffer);
 
 		void client_SocketOps_(int fd, ssize_t size);
 
 		void notify_worker_(){
 			struct ConnectionNotification{
 				uint64_t clients;
-				uint64_t spare;
 			};
 
 			worker_.connection_notify(
 				ConnectionNotification{
-					connectedClients(),
-					sparePoolSize()
+					connectedClients()
 				}
 			);
 		}
@@ -132,12 +128,12 @@ namespace net{
 	private:
 		template<Logger::Level level = Logger::DEBUG>
 		void log_(const char *msg) const{
-			logger_fmt<level>(FMT_MASK,   msg, connectedClients(), sparePoolSize()	);
+			logger_fmt<level>(FMT_MASK,   msg, connectedClients()	);
 		}
 
 		template<Logger::Level level = Logger::NOTICE>
 		void log_(const char *msg, int const fd) const{
-			logger_fmt<level>(FMT_MASK_2, msg, connectedClients(), sparePoolSize(), fd	);
+			logger_fmt<level>(FMT_MASK_2, msg, connectedClients(), fd	);
 		}
 
 	private:
@@ -149,6 +145,8 @@ namespace net{
 		Selector		selector_;
 		Worker			worker_;
 		SmallVector<int, 8>	serverFD_;
+
+		MemoryManager		&mm_;
 
 		bool			keepProcessing_		= true;
 
@@ -162,8 +160,6 @@ namespace net{
 
 		size_t			conf_bufferCapacity_	;
 		size_t			conf_maxRequestSize_	;
-
-		SparePool		sparePool_{ conf_minSparePoolSize_, conf_maxSparePoolSize_, conf_bufferCapacity_ };
 
 		FDStorage		clients_{ conf_rlimitNoFile_, conf_maxClients_ };
 	};

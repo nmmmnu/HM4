@@ -179,19 +179,19 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC1GET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC1GET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC1GET() : BaseCommandRO<Protocol,DBAdapter>("MC1GET", std::begin(cmd__), std::end(cmd__)){}
+		MC1GET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC1GET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC1GET key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -217,18 +217,18 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC1MGET : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC1MGET : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC1MGET() : BaseCommandRO<Protocol,DBAdapter>("MC1MGET", std::begin(cmd__), std::end(cmd__)){}
+		MC1MGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC1MGET", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC1GET key subkey0 subkey1 ...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() < 3)
@@ -277,19 +277,19 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC1SCORE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC1SCORE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC1SCORE() : BaseCommandRO<Protocol,DBAdapter>("MC1SCORE", std::begin(cmd__), std::end(cmd__)){}
+		MC1SCORE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC1SCORE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC1SCORE key subkey
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			if (p.size() != 3)
@@ -318,19 +318,19 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC1ADD : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC1ADD : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MC1ADD() : BaseCommandRW<Protocol,DBAdapter>("MC1ADD", std::begin(cmd__), std::end(cmd__)){}
+		MC1ADD() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MC1ADD", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC1ADD a keySub0 x0 val0 keySub1 x1 val1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
 			return process__(p, db, result);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			using namespace impl_;
 
 			auto const varg  = 2;
@@ -386,14 +386,14 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC1REM : BaseCommandRW<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC1REM : BaseCommandRW<Protocol,MemoryManager,DBAdapter>{
 
-		MC1REM() : BaseCommandRW<Protocol,DBAdapter>("MC1REM", std::begin(cmd__), std::end(cmd__)){}
+		MC1REM() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("MC1REM", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC1DEL a subkey0 subkey1 ...
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			using namespace impl_;
 
 			[[maybe_unused]]
@@ -413,19 +413,19 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC1POINT : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC1POINT : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC1POINT() : BaseCommandRO<Protocol,DBAdapter>("MC1POINT", std::begin(cmd__), std::end(cmd__)){}
+		MC1POINT() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC1POINT", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC1POINT linear 10 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 4 && p.size() != 5)
@@ -468,19 +468,19 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter>
-	struct MC1RANGE : BaseCommandRO<Protocol,DBAdapter>{
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct MC1RANGE : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
 
-		MC1RANGE() : BaseCommandRO<Protocol,DBAdapter>("MC1RANGE", std::begin(cmd__), std::end(cmd__)){}
+		MC1RANGE() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("MC1RANGE", std::begin(cmd__), std::end(cmd__)){}
 
 		// MC1RANGENAIVE linear 10 10 10000 [key]
 
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
 			return process__(p, db, result, blob);
 		}
 
 	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol> &result, OutputBlob &blob){
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			using namespace impl_;
 
 			if (p.size() != 5 && p.size() != 6)
@@ -523,12 +523,12 @@ namespace net::worker::commands::LinearCurve{
 
 
 
-	template<class Protocol, class DBAdapter, class RegisterPack>
+	template<typename Protocol, typename MemoryManager, typename DBAdapter, typename RegisterPack>
 	struct RegisterModule{
 		constexpr inline static std::string_view name	= "linear_curve";
 
 		static void load(RegisterPack &pack){
-			return registerCommands<Protocol, DBAdapter, RegisterPack,
+			return registerCommands<Protocol, MemoryManager, DBAdapter, RegisterPack,
 				MC1GET			,
 				MC1MGET			,
 				MC1SCORE		,
