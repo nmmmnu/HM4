@@ -47,7 +47,16 @@ namespace memory_manager{
 		}
 
 		template<uint8_t tier>
-		constexpr uint32_t calcMinimumCount(uint32_t value, uint32_t maxClients) noexcept{
+		constexpr uint32_t calcMinimumCount(uint32_t value, uint32_t maxClients___) noexcept{
+
+			auto calcMaxClients = [](uint32_t maxClients){
+				auto const MAX = std::numeric_limits<uint32_t>::max() - 1;
+
+				return maxClients >= MAX ? MAX : maxClients + 1;
+			};
+
+			auto const maxClients = calcMaxClients(maxClients___);
+
 			constexpr uint32_t DIVISORS[] = {
 				0b0'1			,	//     1
 				0b0'100			,	//     4
@@ -57,17 +66,6 @@ namespace memory_manager{
 				0b0'1000'0000'000	,	//  1024
 				0b0'1000'0000'0000'0	,	//  4096
 				0b0'1000'0000'0000'000		// 16384
-			};
-
-			constexpr uint32_t ADDITIONS[] = {
-				1,
-				0,
-				0,
-				0,
-				0,
-				0,
-				0,
-				0
 			};
 
 			if (value == std::numeric_limits<uint32_t>::max()){
@@ -80,7 +78,7 @@ namespace memory_manager{
 			}else{
 				// automatic
 				return std::max(
-					(maxClients + ADDITIONS[tier]) / DIVISORS[tier],
+					maxClients / DIVISORS[tier],
 					MIN_COUNT
 				);
 			}

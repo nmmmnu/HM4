@@ -31,6 +31,7 @@ namespace memory_manager{
 		};
 
 
+
 		constexpr static std::string_view getName(){
 			return "SimpleMemoryManager";
 		}
