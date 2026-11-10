@@ -1,173 +1,166 @@
 #ifndef _IO_BUFFER_H
 #define _IO_BUFFER_H
 
-
-#include "ambuffer.h"
-
 #include <string_view>
 
 #include <cstdio>
 #include <cassert>
+#include <cstring>	// memcpy
 
 namespace net{
 
-template<typename MemoryManager>
+template<typename T>
 struct IOBuffer{
-	using container_type	= am_buffer::AMBuffer<MemoryManager>;
-	using size_type		= typename container_type::size_type;
+	using MemoryManager	= T;
+	using MemoryNodePtr	= typename MemoryManager::NodePtr;
+	using size_type		= typename MemoryManager::size_type;
 
 private:
-	constexpr static size_type KB			= 1024;
-	constexpr static size_type STANDARD_READ_SIZE	= 4 * KB;
+	constexpr static size_t STANDARD_READ_SIZE = 4096;
 
 private:
-	size_type		head_	= 0;
-	container_type		buffer_;
+	MemoryNodePtr node = nullptr; // this is a pointer
 
 public:
-	IOBuffer(MemoryManager &mm			) noexcept : buffer_(mm){};
+	constexpr IOBuffer() noexcept = default;
 
-	IOBuffer(container_type &&buffer	) noexcept : buffer_(std::move(buffer)){}
-
-	void clear(){
-		buffer_.clear();
-		head_ = 0;
+	IOBuffer(MemoryNodePtr &&node) noexcept : node(std::move(node)){
+		// just in case
+		node = nullptr;
 	}
 
-	void swap(container_type &buffer) noexcept{
-		buffer_.swap(buffer);
+	IOBuffer(IOBuffer &&other) noexcept : node(std::move(other.node)){
+		other.node = nullptr;
 	}
 
-	void swap(IOBuffer &other){
+	IOBuffer &operator=(IOBuffer &&other) noexcept{
+		assert(node == nullptr && "You can assign only on deallocated IOBuffer!");
+
+		node = std::move(other.node);
+
+		other.node = nullptr;
+
+		return *this;
+	}
+
+	~IOBuffer() noexcept{
+		assert(node == nullptr && "You forgot to deallocate the memory!");
+	}
+
+public:
+	void swap(MemoryNodePtr &node) noexcept{
 		using std::swap;
 
-		swap(head_	, other.head_	);
-		swap(buffer_	, other.buffer_	);
+		swap(this->node, node);
 	}
 
-	container_type const &getBuffer() const{
-		return buffer_;
-	}
+	void swap(IOBuffer &other) noexcept{
+		using std::swap;
 
-	container_type &getBuffer(){
-		return buffer_;
-	}
-
-	// ==================================
-
-	const char *data() const{
-		const char *s = buffer_.data();
-		return & s[head_];
-	}
-
-private:
-	char *getIndex_(size_t index){
-		return buffer_.data() + index;
+		swap(node, other.node);
 	}
 
 public:
-	size_t size() const{
-		return buffer_.size() - head_;
+	[[nodiscard]]
+	const char *data() const noexcept{
+		return node ? node->data + node->head : nullptr;
 	}
 
-	explicit operator std::string_view() const{
+	[[nodiscard]]
+	size_t size() const noexcept{
+		return node ? node->size - node->head: 0;
+	}
+
+	[[nodiscard]]
+	size_t sizeFull() const noexcept{
+		return node ? node->size : 0;
+	}
+
+	[[nodiscard]]
+	size_t capacity() const noexcept{
+		return node ? node->capacity : 0;
+	}
+
+	[[nodiscard]]
+	explicit operator std::string_view() const noexcept{
 		return std::string_view{ data(), size() };
 	}
 
-	// ==================================
-
+public:
 	[[nodiscard]]
-	bool reserve(size_type const size){
-		return buffer_.reserve(size);
+	bool reserve(MemoryManager &mm, size_t const size){
+		return mm.reallocate(node, size);
 	}
 
-//	[[nodiscard]]
-//	bool reserve(size_t const size){
-//		return reserve(static_cast<size_type>(size));
-//	}
-
-	[[nodiscard]]
-	size_t capacity() const{
-		return buffer_.capacity();
+	void deallocate(MemoryManager &mm){
+		return mm.deallocate(node);
 	}
 
-	// ==================================
-
-//	[[nodiscard]]
-//	bool push(const char c){
-//		return buffer_.push(c);
-//	}
-//
-	[[nodiscard]]
-	bool push_(size_t const size, const char *ptr){
-		if (!size)
-			return false;
-
-		return buffer_.push_(ptr, size);
+	void clear(MemoryManager &mm){
+		deallocate(mm);
 	}
 
+public:
 	[[nodiscard]]
-	bool push_(std::string_view const s){
-		return buffer_.push_(s.data(), s.size());
-	}
-
-	// ==================================
-
-	[[nodiscard]]
-	char *provideBuffer(size_t const size){
-		assert(size && "Size must be great than zero");
-
-		auto const oldSize = buffer_.size();
-
-		if (!buffer_.resize(oldSize + size))
-			return nullptr;
-
-		return getIndex_(oldSize);
-	}
-
-	[[nodiscard]]
-	auto provideBufferAtLeast(size_t const size){
+	auto provideBufferAtLeast(MemoryManager &mm, size_t const size = STANDARD_READ_SIZE) noexcept{
 		assert(size && "Size must be great than zero");
 
 		struct Result{
-			char	*buffer	= nullptr;
+			char	*data	= nullptr;
 			size_t	size	= 0;
 		};
 
-		auto const oldSize = buffer_.size();
+		auto const sizeTotal = sizeFull();
 
-		if (!buffer_.resize(oldSize + size))
-			return Result{};
-
-		// now expand to the capacity
-		if (!buffer_.resize(buffer_.capacity()))
+		if (!reserve(mm, sizeTotal + size))
 			return Result{};
 
 		return Result{
-			getIndex_(oldSize),
-			buffer_.size() - oldSize
+			getIndex_(sizeTotal),
+			capacity() - sizeTotal
 		};
 	}
 
 	[[nodiscard]]
-	auto provideBufferAtLeastStandardSize(){
-		return provideBufferAtLeast(STANDARD_READ_SIZE);
+	char *provideBuffer(MemoryManager &mm, size_t const size = STANDARD_READ_SIZE) noexcept{
+		auto r = provideBufferAtLeast(mm, size);
+
+		return r.data;
 	}
 
-	void finalizeBuffer(const char *offset, size_t const actualSize){
-		auto const size = static_cast<size_t>(offset - buffer_.data()) + actualSize;
+	void finalizeBuffer(MemoryManager &, const char *offset, size_t const actualSize){
+		assert(node && "Must be run on allocated memory");
 
-		assert(size <= buffer_.capacity());
+		auto const size = static_cast<size_t>(offset - node->data) + actualSize;
 
-		[[maybe_unused]]
-		bool const b = buffer_.resize(size);
-
-		assert(b);
+		node->size = static_cast<size_type>(size);
 	}
 
-	// ==================================
+public:
+	[[nodiscard]]
+	bool push(MemoryManager &mm, const char *ptr, size_t const size) noexcept{
+		if (!size)
+			return false;
 
-	bool pop(size_t const size){
+		char *p = provideBuffer(mm, size);
+
+		if (!p)
+			return false;
+
+		memcpy(p, ptr, size);
+
+		finalizeBuffer(mm, p, size);
+
+		return true;
+	}
+
+	[[nodiscard]]
+	bool push(MemoryManager &mm, std::string_view const s) noexcept{
+		return push(mm, s.data(), s.size());
+	}
+
+public:
+	bool pop(MemoryManager &mm, size_t const size) noexcept{
 		if (!size)
 			return false;
 
@@ -177,26 +170,35 @@ public:
 			return false;
 
 		if (availableSize == size){
-			clear();
+			deallocate(mm);
 
 			return true;
 		}
 
-		head_ += size;
+		node->head += size;
 
 		return true;
 	}
 
-	// ==================================
-
+public:
 	void print(bool const body = true) const{
-		printf("h: %10u | s: %10zu | c: %10zu | %.*s\n",
-			head_		,
-			size()		,
-			capacity()	,
-			(int) size()	,
+		if (!node)
+			return;
+
+		printf("h: %10zu | s: %10zu | c: %10zu | %.*s\n",
+			(size_t) node->head	,
+			size()			,
+			capacity()		,
+			(int) size()		,
 			body ? data() : "[data]"
 		);
+	}
+
+private:
+	[[nodiscard]]
+	char *getIndex_(size_t index) noexcept{
+		assert(node && "Must be run on allocated memory");
+		return node->data + index;
 	}
 };
 

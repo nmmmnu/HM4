@@ -16,7 +16,10 @@ class EchoWorker{
 	using MemoryManager = memory_manager::SimpleMemoryManager;
 
 public:
-	WorkerStatus operator()(IOBuffer<MemoryManager> &buffer);
+	WorkerStatus operator()(IOBuffer<MemoryManager> &buffer, MemoryManager &mm);
+
+	constexpr static void shutdown(...){
+	}
 
 	constexpr static void connection_notify(...){
 	}

@@ -12,8 +12,6 @@ AsyncLoop<Selector, Worker, MemoryManager, Storage>::AsyncLoop(
 			Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD, MemoryManager &mm,
 				uint32_t const conf_rlimitNoFile	,
 				uint32_t const conf_maxClients		,
-				uint32_t const conf_minSparePoolSize	,
-				uint32_t const conf_maxSparePoolSize	,
 				uint32_t const conf_connectionTimeout	,
 				size_t   const conf_maxRequestSize
 		) :
@@ -22,12 +20,10 @@ AsyncLoop<Selector, Worker, MemoryManager, Storage>::AsyncLoop(
 					serverFD_		(serverFD		),
 					mm_			(mm			),
 
-					conf_rlimitNoFile_	( 		(conf_rlimitNoFile								) ),
+					conf_rlimitNoFile_	(		(conf_rlimitNoFile								) ),
 					conf_maxClients_	( std::max	(conf_maxClients,		MIN_CLIENTS					) ),
-					conf_minSparePoolSize_	( std::clamp	(conf_minSparePoolSize,		MIN_CLIENTS,		conf_maxClients_	) ),
-					conf_maxSparePoolSize_	( std::clamp	(conf_maxSparePoolSize,		conf_minSparePoolSize_,	conf_maxClients_	) ),
 					conf_connectionTimeout_	( 		(conf_connectionTimeout								) ),
-					conf_maxRequestSize_	( std::max	(conf_maxRequestSize,		conf_bufferCapacity_				) ){
+					conf_maxRequestSize_	(		(conf_maxRequestSize								) ){
 
 	assert(conf_maxClients_ < conf_rlimitNoFile_);
 
@@ -40,6 +36,21 @@ AsyncLoop<Selector, Worker, MemoryManager, Storage>::AsyncLoop(
 }
 
 template<class Selector, class Worker, class MemoryManager, class Storage>
+AsyncLoop<Selector, Worker, MemoryManager, Storage>::~AsyncLoop(){
+	clients_.for_each([this](int fd, MyClient &){
+		// call disconnect and release memory
+		client_Disconnect_<0>(fd, DisconnectStatus::SHUTDOWN);
+
+		return false;
+	});
+
+	// call disconnect and release memory
+	worker_.shutdown(mm_);
+}
+
+// ===========================
+
+template<class Selector, class Worker, class MemoryManager, class Storage>
 void AsyncLoop<Selector, Worker, MemoryManager, Storage>::print() const{
 	auto _ = [](auto k, auto v){
 		logger_fmt<Logger::STARTUP>("{:25} = {:12}", k, v);
@@ -47,10 +58,7 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::print() const{
 
 	_("rlimit nofile"	, conf_rlimitNoFile_		);
 	_("max clients"		, conf_maxClients_		);
-	_("min spare pool"	, conf_minSparePoolSize_	);
-	_("max spare pool"	, conf_maxSparePoolSize_	);
 	_("timeout"		, conf_connectionTimeout_	);
-	_("buffer capacity"	, conf_bufferCapacity_		);
 	_("max request size"	, conf_maxRequestSize_		);
 }
 
@@ -167,7 +175,7 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Read_(int const
 		if (client.buffer.size() > conf_maxRequestSize_)
 			return client_Disconnect_(fd, DisconnectStatus::ERROR);
 	#else
-		auto [p, sizeNew] = client.buffer.provideBufferAtLeastStandardSize();
+		auto [p, sizeNew] = client.buffer.provideBufferAtLeast(mm_);
 
 		if (!p)
 			return client_Disconnect_(fd, DisconnectStatus::ERROR);
@@ -176,7 +184,7 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Read_(int const
 
 		size_t  const size  = static_cast<size_t>(ssize);
 
-		client.buffer.finalizeBuffer(p, size);
+		client.buffer.finalizeBuffer(mm_, p, size);
 
 		if (size <= 0)
 			return client_SocketOps_(fd, ssize);
@@ -227,7 +235,7 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Write_(int cons
 			return client_SocketOps_(fd, size);
 
 		// size is checked already
-		client.buffer.pop( static_cast<size_t>(size) );
+		client.buffer.pop(mm_, static_cast<size_t>(size));
 
 		client.timer.restart();
 	}
@@ -242,7 +250,7 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Write_(int cons
 
 template<class Selector, class Worker, class MemoryManager, class Storage>
 bool AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Worker_(int const fd, IOBuffer<MemoryManager> &buffer){
-	auto const status = worker_(buffer);
+	auto const status = worker_(buffer, mm_);
 
 	// buffer is cleared unless PASS
 
@@ -316,16 +324,17 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Disconnect_(int
 		notify_worker_();
 
 	switch(error){
-	case DisconnectStatus::NORMAL			: return log_("Normal  Disconnect",				fd);
-	case DisconnectStatus::ERROR			: return log_("Error   Disconnect",				fd);
-	case DisconnectStatus::TIMEOUT			: return log_("Timeout Disconnect",				fd);
+	case DisconnectStatus::NORMAL			: return log_("Normal   Disconnect",				fd);
+	case DisconnectStatus::ERROR			: return log_("Error    Disconnect",				fd);
+	case DisconnectStatus::TIMEOUT			: return log_("Timeout  Disconnect",				fd);
+	case DisconnectStatus::SHUTDOWN			: return log_("Shutdown Disconnect",				fd);
 
-	case DisconnectStatus::Worker_NORMAL		: return log_("Worker  Disconnect - Normal",			fd);
-	case DisconnectStatus::Worker_ERROR		: return log_("Worker  Disconnect - Error",			fd);
+	case DisconnectStatus::Worker_NORMAL		: return log_("Worker   Disconnect - Normal",			fd);
+	case DisconnectStatus::Worker_ERROR		: return log_("Worker   Disconnect - Error",			fd);
 
-	case DisconnectStatus::PROBLEM_MAP_NOT_FOUND	: return log_("Problem Disconnect - FD not found",		fd);
-	case DisconnectStatus::PROBLEM_BUFFER_READ	: return log_("Problem Disconnect - Read buffer full",		fd);
-	case DisconnectStatus::PROBLEM_BUFFER_WRITE	: return log_("Problem Disconnect - Write buffer problem",	fd);
+	case DisconnectStatus::PROBLEM_MAP_NOT_FOUND	: return log_("Problem  Disconnect - FD not found",		fd);
+	case DisconnectStatus::PROBLEM_BUFFER_READ	: return log_("Problem  Disconnect - Read buffer full",		fd);
+	case DisconnectStatus::PROBLEM_BUFFER_WRITE	: return log_("Problem  Disconnect - Write buffer problem",	fd);
 	};
 }
 
@@ -356,7 +365,7 @@ bool AsyncLoop<Selector, Worker, MemoryManager, Storage>::insertFD_(int const fd
 	if ( ! selector_.insertFD(fd) )
 		return false;
 
-	return clients_.insert(fd, mm_);
+	return clients_.insert(fd);
 }
 
 template<class Selector, class Worker, class MemoryManager, class Storage>
@@ -369,6 +378,9 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::removeFD_(int const fd
 		// do nothing, error is already removed.
 		return;
 	}
+
+	// call d-tor manually
+	it->buffer.deallocate(mm_);
 
 	clients_.remove(fd);
 }

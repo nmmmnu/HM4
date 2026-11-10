@@ -195,8 +195,7 @@ namespace net::worker{
 		constexpr static auto LogCommandsLevel	= Logger::DEBUG;
 
 	public:
-		KeyValueWorker(DBAdapter &db, MemoryManager &mm) :	db_		(db	),
-									system_buffer_	(mm	){
+		KeyValueWorker(DBAdapter &db) : db_(db){
 
 			using namespace registration_impl_;
 
@@ -209,8 +208,19 @@ namespace net::worker{
 			registerModules<Protocol, MemoryManager, DBAdapter>(pack);
 		}
 
+		KeyValueWorker(KeyValueWorker &&other) noexcept = default;
+		KeyValueWorker& operator=(KeyValueWorker &&other) noexcept = default;
+
+		~KeyValueWorker() noexcept{
+			assert(!system_buffer_.data() && "You forgot to shutdown!");
+		}
+
+		void shutdown(MemoryManager &mm){
+			system_buffer_.deallocate(mm);
+		}
+
 	public:
-		WorkerStatus operator()(IOBuffer<MemoryManager> &buffer){
+		WorkerStatus operator()(IOBuffer<MemoryManager> &buffer, MemoryManager &mm){
 			using Status  = protocol::ProtocolStatus;
 
 			// PASS
@@ -233,14 +243,14 @@ namespace net::worker{
 			const auto &p = protocol_.getParams();
 
 			if (p.empty())
-				return emitError<Protocol>(buffer, ResultErrorMessages::SYS_PROTOCOL_BREAK);
+				return emitError<Protocol>(buffer, mm, ResultErrorMessages::SYS_PROTOCOL_BREAK);
 
 			// FETCH command object
 
 			auto *pcommand = storageCommands_(p.front());
 
 			if (!pcommand)
-				return emitError<Protocol>(buffer, ResultErrorMessages::SYS_NOT_IMPLEMENTED);
+				return emitError<Protocol>(buffer, mm, ResultErrorMessages::SYS_NOT_IMPLEMENTED);
 
 			auto &command = *pcommand;
 
@@ -248,7 +258,7 @@ namespace net::worker{
 			if constexpr(LogCommands)
 				logger<LogCommandsLevel>().range(std::begin(p), std::end(p));
 
-			commands::Result<Protocol, MemoryManager> result{ protocol_, system_buffer_ };
+			commands::Result<Protocol, MemoryManager> result{ protocol_, system_buffer_, mm };
 
 			blob_.resetAllocator();
 
@@ -276,7 +286,7 @@ namespace net::worker{
 			if (system_buffer_.size() == 0){
 			//	return emitError<Protocol>(buffer, ResultErrorMessages::SYS_UNHANDLED);
 				return WorkerStatus::DISCONNECT_ERROR;
-			}
+			};
 
 			using cs = commands::Status;
 

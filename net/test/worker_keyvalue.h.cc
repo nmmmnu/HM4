@@ -6,25 +6,20 @@
 
 #include "protocol/redisprotocol.h"
 
-#include "simplememorymanager.h"
 
 
-
-struct MyWorkerFactory{
+template<typename MyMemoryManager>
+struct MyWorkerFactoryT{
 	using MyProtocol	= net::protocol::RedisProtocol;
 
 	using Allocator		= MyAllocator::STDAllocator;
 	using List		= hm4::VectorList<MyAllocator::STDAllocator>;
 	using MyDBAdapter	= ListDBAdapter<List>;
 
-	using MyMemoryManager	= memory_manager::SimpleMemoryManager;
-
 	using Worker		= net::worker::KeyValueWorker<MyProtocol, MyMemoryManager, MyDBAdapter>;
 
-	MyMemoryManager mm;
-
 	Worker operator()(){
-		return { adapter, mm };
+		return { adapter };
 	}
 
 private:

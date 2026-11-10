@@ -12,9 +12,7 @@ namespace net{
 		IOBuffer<MemoryManager>	buffer;
 		MyTimer 		timer;
 
-		Client(MemoryManager &mm) : buffer(mm){}
-
-	//	Client(Client &&b) : buffer(std::move(b)){}
+		constexpr Client() = default;
 	};
 
 } // namespace net

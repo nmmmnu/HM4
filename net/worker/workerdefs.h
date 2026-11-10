@@ -130,14 +130,14 @@ namespace net::worker{
 
 
 	template<class Protocol, class Buffer>
-	WorkerStatus emitError(Buffer &buffer, std::string_view errorMessage){
+	WorkerStatus emitError(Buffer &buffer, typename Buffer::MemoryManager &mm, std::string_view errorMessage){
 		typename Protocol::Response::Error resp{ errorMessage };
 
-		buffer.clear();
+		buffer.clear(mm);
 
 		auto const size = resp.size();
 
-		char *ptr = buffer.provideBuffer(size);
+		char *ptr = buffer.provideBuffer(mm, size);
 
 		if (!ptr)
 			return WorkerStatus::DISCONNECT_ERROR;
@@ -146,7 +146,7 @@ namespace net::worker{
 
 		auto const size2 = resp(ptr);
 
-		buffer.finalizeBuffer(off, size2);
+		buffer.finalizeBuffer(mm, off, size2);
 
 		return WorkerStatus::WRITE;
 	}

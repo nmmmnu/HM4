@@ -13,8 +13,11 @@ int main(){
 	uint32_t const conf_rlimitNoFile = static_cast<uint32_t>(net::socket_get_rlimit_nofile());
 	size_t   const conf_max_clients  = 6;
 
-	using MyWorker		= MyWorkerFactory::Worker;
 	using MyMemoryManager	= memory_manager::SimpleMemoryManager;
+
+	using MyWorkerFactory	= MyWorkerFactoryT<MyMemoryManager>;
+
+	using MyWorker		= typename MyWorkerFactory::Worker;
 
 	MyWorkerFactory wf;
 

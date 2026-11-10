@@ -118,11 +118,6 @@ auto g_buffersWrite = g_fbwb();
 
 // ----------------------------------
 
-//#include "staticbuffer.h"
-
-// not to have 128K on the stack
-// MyBuffer::StaticMemoryResource<64 * 2048> g_vmBuffer;
-
 namespace{
 
 	template<typename T, T factor = 1024>
@@ -508,15 +503,11 @@ namespace{
 		}();
 
 		TMM tmm{ {
-							opt.io_buffer_tier_0,
-							opt.io_buffer_tier_1,
-							opt.io_buffer_tier_2,
-							opt.io_buffer_tier_3,
-							opt.io_buffer_tier_4,
-							opt.io_buffer_tier_5,
-							opt.io_buffer_tier_6,
-							opt.io_buffer_tier_7
-						}, max_clients };
+				opt.io_buffer_tier_0,
+				opt.io_buffer_tier_1,
+				opt.io_buffer_tier_2,
+				opt.io_buffer_tier_3
+			}, max_clients };
 
 		tmm. template log<Logger::STARTUP>();
 
@@ -526,7 +517,7 @@ namespace{
 
 		MyLoop loop{
 				/* selector		*/ MySelector	{ rlimit_nofile, max_clients }	,
-				/* worker		*/ MyWorker	{ adapter_factory(), tmm }	,
+				/* worker		*/ MyWorker	{ adapter_factory() }		,
 				/* server fd		*/ { fd }					,
 				/* tiered slab manager	*/ tmm						,
 					rlimit_nofile			,

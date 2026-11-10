@@ -177,16 +177,18 @@ namespace net::worker::commands{
 
 	template<class Protocol, class MemoryManager>
 	class Result{
-		Protocol	&protocol_;
+		Protocol		&protocol_;
+		MemoryManager		&mm_;
 		IOBuffer<MemoryManager>	&buffer_;
 
-		Status          status  = Status::OK;
+		Status			status  = Status::OK;
 
 	public:
 		using Container = MySpan<const std::string_view, MySpanConstructor::EXPLICIT>;
 
-		Result(Protocol &protocol, IOBuffer<MemoryManager> &buffer) :
+		Result(Protocol &protocol, IOBuffer<MemoryManager> &buffer, MemoryManager &mm) :
 						protocol_	(protocol	),
+						mm_		(mm		),
 						buffer_		(buffer		){}
 
 		auto getStatus() const{
@@ -202,11 +204,11 @@ namespace net::worker::commands{
 		void processSet(Status status, Resp &&resp){
 			set_status_(status);
 
-			buffer_.clear();
+			buffer_.clear(mm_);
 
 			auto const size = resp.size();
 
-			char *ptr = buffer_.provideBuffer(size);
+			char *ptr = buffer_.provideBuffer(mm_, size);
 
 			if (!ptr)
 				return; // return clean buffer
@@ -215,7 +217,7 @@ namespace net::worker::commands{
 
 			auto const size2 = resp(ptr);
 
-			buffer_.finalizeBuffer(off, size2);
+			buffer_.finalizeBuffer(mm_, off, size2);
 		}
 
 	public:

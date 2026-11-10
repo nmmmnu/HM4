@@ -1,72 +1,83 @@
-#ifndef TIERED_MEMORY_MANAGER_H_
-#define TIERED_MEMORY_MANAGER_H_
+#ifndef SIMPLE_MEMORY_MANAGER_H_
+#define SIMPLE_MEMORY_MANAGER_H_
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <cassert>
+#include <cstddef>	// offsetof
+#include <cstdint>
 
 namespace memory_manager{
 
 	struct SimpleMemoryManager{
+		using size_type = uint32_t;
 
-		struct Context{
-			using size_type	= size_t;
+		struct Node{
+			size_type	size		; // 4
+			size_type	capacity	; // 4
+			size_type	head		; // 4
+			char		padding[4]	; // 4
 
-			char		*data		= nullptr;
-			size_type	size		= 0;
-			size_type	capacity	= 0;
-
-		public:
-			constexpr void clear() noexcept{
-				data		= nullptr;
-				size		= 0;
-				capacity	= 0;
-			}
-
-			constexpr void swap(Context &other) noexcept{
-				using std::swap;
-
-				swap(data,	other.data	);
-				swap(size,	other.size	);
-				swap(capacity,	other.capacity	);
-			}
+			char		data[4]		; // 1 + 3 pad
 		};
 
+		using NodePtr = Node *;
 
+		constexpr static size_t NODE_SIZE = offsetof(Node, data);
 
-		constexpr static std::string_view getName(){
+		constexpr static std::string_view getName() noexcept{
 			return "SimpleMemoryManager";
 		}
+		static bool reallocate(NodePtr &node, size_t needed) noexcept{
+			if (!node){
+				// case 1 - new allocation
 
-		static bool allocate(Context &context, size_t needed) noexcept{
-			void *p = realloc(context.data, needed);
+				size_t const size = needed + NODE_SIZE;
 
-			if (!p)
-				return false;
+				void *p = malloc(size);
 
-			context.data     = static_cast<char *>(p);
-			context.capacity = needed;
+				if (!p)
+					return false;
 
-			return true;
+				node		= static_cast<Node *>(p);
+
+				node->size	= 0;
+				node->capacity	= static_cast<uint32_t>(needed);
+				node->head	= 0;
+
+				return true;
+			}if (needed <= node->capacity){
+				// case 2 - no work need.
+
+				return true;
+			}else{
+				// case 3 - realloc
+
+				size_t const size = needed + NODE_SIZE;
+
+				void *p = realloc(node, size);
+
+				if (!p)
+					return false;
+
+				node		= static_cast<Node *>(p);
+				node->capacity	= static_cast<uint32_t>(needed);
+
+				return true;
+			}
 		}
 
-		static void deallocate(Context &context) noexcept{
-			free(context.data);
+		static void deallocate(NodePtr &node) noexcept{
+			free(node);
 
-			context.clear();
+			node = nullptr;
 		}
 
 	public:
-		constexpr static void log() noexcept{}
-
-		constexpr static void printShort() noexcept{}
-
-		constexpr static void print() noexcept{}
+		template<Logger::Level Level>
+		constexpr static void log()		noexcept{}
+		constexpr static void printShort()	noexcept{}
+		constexpr static void print()		noexcept{}
 	};
-
-
-
-	constexpr void swap(SimpleMemoryManager::Context &a, SimpleMemoryManager::Context &b){
-		a.swap(b);
-	}
 
 } // namespace memory_manager
 

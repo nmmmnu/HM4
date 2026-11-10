@@ -53,13 +53,11 @@ namespace net{
 		AsyncLoop(Selector &&selector, Worker &&worker, const std::initializer_list<int> &serverFD, MemoryManager &mm,
 						uint32_t conf_rlimitNoFile	= LIMIT_NO_FILES	,
 						uint32_t conf_maxClients	= MAX_CLIENTS		,
-						uint32_t conf_minSparePoolSize	= MIN_CLIENTS		,
-						uint32_t conf_maxSparePoolSize	= MIN_CLIENTS		,
 						uint32_t conf_connectionTimeout	= CONNECTION_TIMEOUT	,
 						size_t   conf_maxRequestSize	= MAX_REQUEST_SIZE
 		);
 
-		//~AsyncLoop();
+		~AsyncLoop();
 
 		bool process();
 
@@ -80,6 +78,7 @@ namespace net{
 			NORMAL,
 			ERROR,
 			TIMEOUT,
+			SHUTDOWN,
 
 			Worker_NORMAL,
 			Worker_ERROR,
@@ -153,12 +152,8 @@ namespace net{
 		uint32_t		conf_rlimitNoFile_	;
 		uint32_t		conf_maxClients_	;
 
-		uint32_t		conf_minSparePoolSize_	;
-		uint32_t		conf_maxSparePoolSize_	;
-
 		uint32_t		conf_connectionTimeout_	;
 
-		size_t			conf_bufferCapacity_	;
 		size_t			conf_maxRequestSize_	;
 
 		FDStorage		clients_{ conf_rlimitNoFile_, conf_maxClients_ };

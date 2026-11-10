@@ -3,13 +3,14 @@
 #include "selector/pollselector.h"
 
 #include "tieredmemorymanager.h"
+#include "mmapbuffer.h"
 
 using MySelector = net::selector::PollSelector;
 
-using TSM	= memory_manager::TieredMemoryManager;
+using TMM	= memory_manager::TieredMemoryManager<MyBuffer::MMapMemoryResource>;
 
 template<typename MyWorker>
-using AsyncLoop = net::AsyncLoop<MySelector, MyWorker, TSM>;
+using AsyncLoop = net::AsyncLoop<MySelector, MyWorker, TMM>;
 
 #include "db_net_main.cc"
 

@@ -1,6 +1,7 @@
 #include "worker/echoworker.h"
 
-struct MyWorkerFactory{
+template<typename>
+struct MyWorkerFactoryT{
 	using Worker = net::worker::EchoWorker;
 
 	Worker operator()(){

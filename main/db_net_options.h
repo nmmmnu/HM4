@@ -43,10 +43,6 @@ public:
 	uint32_t	io_buffer_tier_1		= 0;
 	uint32_t	io_buffer_tier_2		= 0;
 	uint32_t	io_buffer_tier_3		= 0;
-	uint32_t	io_buffer_tier_4		= 0;
-	uint32_t	io_buffer_tier_5		= 0;
-	uint32_t	io_buffer_tier_6		= 0;
-	uint32_t	io_buffer_tier_7		= 0;
 
 //	size_t		buffer_capacity			= 4096;
 
@@ -96,10 +92,6 @@ public:
 		case hash("io_buffer_tier_1"		)	: return assign_(io_buffer_tier_1,		value);
 		case hash("io_buffer_tier_2"		)	: return assign_(io_buffer_tier_2,		value);
 		case hash("io_buffer_tier_3"		)	: return assign_(io_buffer_tier_3,		value);
-		case hash("io_buffer_tier_4"		)	: return assign_(io_buffer_tier_4,		value);
-		case hash("io_buffer_tier_5"		)	: return assign_(io_buffer_tier_5,		value);
-		case hash("io_buffer_tier_6"		)	: return assign_(io_buffer_tier_6,		value);
-		case hash("io_buffer_tier_7"		)	: return assign_(io_buffer_tier_7,		value);
 
 	//	case hash("buffer_capacity"		)	: return assign_(buffer_capacity,		value);
 
@@ -153,11 +145,7 @@ public:
 		put("io_buffer_tier_0",			io_buffer_tier_0,		"IO Buffers in tier 0 -   16 KB each, 0 for auto"				);
 		put("io_buffer_tier_1",			io_buffer_tier_1,		"IO Buffers in tier 1 -   64 KB each, 0 for auto"				);
 		put("io_buffer_tier_2",			io_buffer_tier_2,		"IO Buffers in tier 2 -  256 KB each, 0 for auto"				);
-		put("io_buffer_tier_3",			io_buffer_tier_3,		"IO Buffers in tier 3 -    1 MB each, 0 for auto"				);
-		put("io_buffer_tier_4",			io_buffer_tier_4,		"IO Buffers in tier 4 -    4 MB each, 0 for auto"				);
-		put("io_buffer_tier_5",			io_buffer_tier_5,		"IO Buffers in tier 5 -   16 MB each, 0 for auto"				);
-		put("io_buffer_tier_6",			io_buffer_tier_6,		"IO Buffers in tier 6 -   64 MB each, 0 for auto"				);
-		put("io_buffer_tier_7",			io_buffer_tier_7,		"IO Buffers in tier 7 - ~257 MB each, 0 for auto"				);
+		put("io_buffer_tier_3",			io_buffer_tier_3,		"IO Buffers in tier 3 - 1024 KB each, 0 for auto"				);
 
 	//	put("buffer_capacity",			buffer_capacity,		"Initial size of Spare Pool Buffers"						);
 
