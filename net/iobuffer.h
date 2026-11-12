@@ -101,6 +101,12 @@ public:
 	}
 
 public:
+	template<typename DataLoader>
+	[[nodiscard]]
+	bool bulkLoad(MemoryManager &mm, DataLoader const &dl) noexcept{
+		return mm.bulkLoad(node, dl);
+	}
+
 	[[nodiscard]]
 	auto provideBufferAtLeast(MemoryManager &mm, size_t const size = STANDARD_READ_SIZE) noexcept{
 		assert(size && "Size must be great than zero");

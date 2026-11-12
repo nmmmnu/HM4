@@ -204,20 +204,8 @@ namespace net::worker::commands{
 		void processSet(Status status, Resp &&resp){
 			set_status_(status);
 
-			buffer_.clear(mm_);
-
-			auto const size = resp.size();
-
-			char *ptr = buffer_.provideBuffer(mm_, size);
-
-			if (!ptr)
-				return; // return clean buffer
-
-			const char *off = ptr;
-
-			auto const size2 = resp(ptr);
-
-			buffer_.finalizeBuffer(mm_, off, size2);
+			[[maybe_unused]]
+			bool b = buffer_.bulkLoad(mm_, resp);
 		}
 
 	public:

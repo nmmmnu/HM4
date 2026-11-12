@@ -39,12 +39,22 @@ namespace {
 
 } // anonymous namespace
 
+size_t const MB = 1024 * 1024;
+
 int main(){
 	mytest.begin("iobuffer");
 
 	std::string b;
 
 	typename IOBuffer::MemoryManager mm;
+
+	typename IOBuffer::MemoryManager::Node *node = 0;
+
+	mm.allocateChain(node, 4 * MB);
+
+	mm.deallocate(node);
+
+	return 0;
 
 	IOBuffer io;
 

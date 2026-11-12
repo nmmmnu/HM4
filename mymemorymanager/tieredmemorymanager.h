@@ -9,6 +9,9 @@
 
 #include "slaballocator.h"
 
+#include "memorymanager_simplebulkloader.h"
+#include "memorymanager_bulkload.h"
+
 #include "logger.h"
 
 namespace memory_manager{
@@ -77,6 +80,7 @@ namespace memory_manager{
 		using Counts	= std::array<size_type, SIZE>;
 
 		struct Node{
+			Node		*next		; // 8
 			size_type	size		; // 4
 			size_type	capacity	; // 4
 			size_type	head		; // 4
@@ -86,7 +90,7 @@ namespace memory_manager{
 			char		data[4]		; // 1 + 3 pad
 		};
 
-		using NodePtr = Node *;
+		using NodePtr		= Node *;
 
 		constexpr static size_t NODE_SIZE = offsetof(Node, data);
 
@@ -115,9 +119,7 @@ namespace memory_manager{
 
 	public:
 		bool reallocate(NodePtr &node, size_t needed) noexcept{
-			using memory_manager_impl_::SIZES;
-
-			if (needed > SIZES.back() - NODE_SIZE)
+			if (needed > slab_back_().BLOCK_SIZE - NODE_SIZE)
 			    return false;
 
 			size_t const size = needed + NODE_SIZE;
@@ -127,12 +129,12 @@ namespace memory_manager{
 			if (node && node->tier >= tier)
 				return true;
 
-			if (tier >= SIZES.size())
+			if (tier >= slab_size__)
 				return false;
 
 			void *p = nullptr;
 
-			for(; tier < SIZES.size(); ++tier)
+			for(; tier < slab_size__; ++tier)
 				if (p = allocate_(tier); p)
 					break;
 
@@ -141,31 +143,46 @@ namespace memory_manager{
 
 			if (!node){
 				// case 1. create new node
-				node		= static_cast<Node *>(p);
-				node->size	= 0;
-				node->capacity	= SIZES[tier] - NODE_SIZE;
-				node->head	= 0;
-				node->tier	= tier;
+				node = createNode__(p, tier);
 			}else{
 				// case 2. copy old node
-				memcpy(p, node, node->size + NODE_SIZE);
+				Node *nodeOld = node;
 
-				deallocate_(node->tier, node);
+				node = copyNode__(p, tier, nodeOld);
 
-				node		= static_cast<Node *>(p);
-				node->capacity	= SIZES[tier] - NODE_SIZE;
-				node->tier	= tier;
+				deallocate_(nodeOld->tier, nodeOld);
 			}
 
-			if constexpr(DEBUG_ALLOCATIONS){
-				logger_fmt<DEBUG_ALLOCATIONS_LEVEL>("{:10} {} {} {:12} {}",
-						"allocate"		,
-						(void *) node		,
-						(void *) node->data	,
-						node->capacity		,
-						node->tier
-				);
+			debugInfo_(node, "allocate");
+
+			return true;
+		}
+
+		bool allocateChain(NodePtr &node, size_t needed) noexcept{
+			assert(!node && "allocateChain() needs new/empty node");
+
+			auto &allocator = slab_back_();
+			auto const tier = slab_size__ - 1;
+
+			auto const block_size = allocator.BLOCK_SIZE - NODE_SIZE;
+			auto const chunks = (needed + block_size - 1) / block_size;
+
+			if (!allocator.getFreeBlocks(chunks))
+				return false;
+
+			Node *lnode = nullptr;
+
+			for(size_t i = 0; i < chunks; ++i){
+				void *p = MyAllocator::allocate(allocator); // guaranteed not nullptr
+
+				assert(p);
+
+				lnode = createNode__(p, tier, lnode);
+
+				debugInfo_(lnode, "allocate chain");
 			}
+
+			node = lnode;
 
 			return true;
 		}
@@ -174,19 +191,17 @@ namespace memory_manager{
 			if (!node)
 				return;
 
-			if constexpr(DEBUG_ALLOCATIONS){
-				logger_fmt<DEBUG_ALLOCATIONS_LEVEL>("{:10} {} {} {:12} {}",
-						"deallocate"		,
-						(void *) node		,
-						(void *) node->data	,
-						node->capacity		,
-						node->tier
-				);
-			}
+			if (node->next)
+				return deallocateChain_(node);
+			else
+				return deallocateSingle_(node);
 
-			deallocate_(node->tier, node);
+		}
 
-			node = nullptr;
+		template<typename DataLoader>
+		[[nodiscard]]
+		bool bulkLoad(NodePtr &node, DataLoader const &dl) noexcept{
+			return memory_manager_impl_::bulkload(*this, node, dl);
 		}
 
 	public:
@@ -196,6 +211,85 @@ namespace memory_manager{
 		void print()		const noexcept;
 
 	private:
+		constexpr void debugInfo_(const Node *node, std::string_view message) noexcept{
+			if constexpr(DEBUG_ALLOCATIONS){
+				logger_fmt<DEBUG_ALLOCATIONS_LEVEL>("{:16} {} {} {:12} {}",
+						message			,
+						(void *) node		,
+						(void *) node->data	,
+						node->capacity		,
+						node->tier
+				);
+			}
+		}
+
+		void deallocateSingle_(NodePtr &node) noexcept{
+			assert(!node->next);
+
+			Node *it = node;
+
+			debugInfo_(it, "deallocate");
+
+			deallocate_(it->tier, it);
+
+			node = nullptr;
+		}
+
+		void deallocateChain_(NodePtr &node) noexcept{
+			assert(node->next);
+
+			for(Node *it = node; it; ){
+				debugInfo_(it, "deallocate chain");
+
+				void *p = it;
+			//	auto const tier = slab_size__ - 1;
+
+				it = it->next;
+
+				MyAllocator::deallocate(slab_back_(), p);
+			}
+
+			node = nullptr;
+		}
+
+	private:
+		template<typename MemoryManager, typename DataLoader>
+		friend bool memory_manager_impl_::bulkload(MemoryManager &mm, typename MemoryManager::NodePtr &node, DataLoader const &dl) noexcept;
+
+    		using BulkLoader = SimpleBulkLoader<NodePtr>;
+
+		bool allocateBulk_(NodePtr &node, size_t size) noexcept{
+			return allocateChain(node, size);
+		}
+
+	private:
+		static Node *createNode__(void *p, uint8_t tier, Node *next = nullptr){
+			using memory_manager_impl_::SIZES;
+
+			Node *node;
+			node		= static_cast<Node *>(p);
+			node->next	= next;
+			node->size	= 0;
+			node->capacity	= SIZES[tier] - NODE_SIZE;
+			node->head	= 0;
+			node->tier	= tier;
+
+			return node;
+		}
+
+		static Node *copyNode__(void *p, uint8_t tier, Node *nodeOld){
+			using memory_manager_impl_::SIZES;
+
+			memcpy(p, nodeOld, nodeOld->size + NODE_SIZE);
+
+			Node *node;
+			node		= static_cast<Node *>(p);
+			node->capacity	= SIZES[tier] - NODE_SIZE;
+			node->tier	= tier;
+
+			return node;
+		}
+
 		constexpr static uint8_t findTier__(size_t needed) noexcept{
 			using memory_manager_impl_::SIZES;
 
@@ -207,9 +301,7 @@ namespace memory_manager{
 		}
 
 		void *allocate_(uint8_t tier){
-			using memory_manager_impl_::SIZES;
-
-			assert(tier < SIZES.size());
+			assert(tier < slab_size__);
 
 			switch(tier){
 			case 0: return MyAllocator::allocate(slab_0_);
@@ -222,9 +314,7 @@ namespace memory_manager{
 		}
 
 		void deallocate_(uint8_t tier, void *p) noexcept{
-			using memory_manager_impl_::SIZES;
-
-			assert(tier < SIZES.size());
+			assert(tier < slab_size__);
 
 			switch(tier){
 			case 0: return MyAllocator::deallocate(slab_0_, p);
@@ -275,6 +365,13 @@ namespace memory_manager{
 		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[1]> slab_1_;
 		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[2]> slab_2_;
 		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[3]> slab_3_;
+
+	private:
+		constexpr auto &slab_back_() noexcept{
+			return slab_3_;
+		}
+
+		constexpr static uint8_t slab_size__ = 4;
 	};
 
 
@@ -376,8 +473,6 @@ namespace memory_manager{
 			);
 		}
 	}
-
-
 
 } // namespace memory_manager
 

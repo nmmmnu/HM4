@@ -4,7 +4,12 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstddef>	// offsetof
-#include <cstdint>
+#include <cstdint>	// uint32_t
+
+#include "memorymanager_simplebulkloader.h"
+#include "memorymanager_bulkload.h"
+
+#include "logger.h"
 
 namespace memory_manager{
 
@@ -12,6 +17,8 @@ namespace memory_manager{
 		using size_type = uint32_t;
 
 		struct Node{
+			constexpr static Node *next = nullptr;
+
 			size_type	size		; // 4
 			size_type	capacity	; // 4
 			size_type	head		; // 4
@@ -20,13 +27,16 @@ namespace memory_manager{
 			char		data[4]		; // 1 + 3 pad
 		};
 
-		using NodePtr = Node *;
+		using NodePtr		= Node *;
 
 		constexpr static size_t NODE_SIZE = offsetof(Node, data);
 
+	public:
 		constexpr static std::string_view getName() noexcept{
 			return "SimpleMemoryManager";
 		}
+
+	public:
 		static bool reallocate(NodePtr &node, size_t needed) noexcept{
 			if (!node){
 				// case 1 - new allocation
@@ -72,11 +82,27 @@ namespace memory_manager{
 			node = nullptr;
 		}
 
+		template<typename DataLoader>
+		[[nodiscard]]
+		bool bulkLoad(NodePtr &node, DataLoader const &dl) noexcept{
+			return memory_manager_impl_::bulkload(*this, node, dl);
+		}
+
 	public:
 		template<Logger::Level Level>
 		constexpr static void log()		noexcept{}
 		constexpr static void printShort()	noexcept{}
 		constexpr static void print()		noexcept{}
+
+	private:
+		template<typename MemoryManager, typename DataLoader>
+		friend bool memory_manager_impl_::bulkload(MemoryManager &mm, typename MemoryManager::NodePtr &node, DataLoader const &dl) noexcept;
+
+    		using BulkLoader = SimpleBulkLoader<NodePtr>;
+
+		static bool allocateBulk_(NodePtr &node, size_t size) noexcept{
+			return reallocate(node, size);
+		}
 	};
 
 } // namespace memory_manager

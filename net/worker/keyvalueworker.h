@@ -216,7 +216,8 @@ namespace net::worker{
 		}
 
 		void shutdown(MemoryManager &mm){
-			system_buffer_.deallocate(mm);
+			// call d-tor manually
+			system_buffer_.clear(mm);
 		}
 
 	public:

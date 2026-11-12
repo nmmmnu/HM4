@@ -4,10 +4,14 @@
 #include "baseallocator.h"
 #include "mybufferview.h"
 
+#include <cassert>
+
 namespace MyAllocator{
 
 	template<size_t BlockSize>
 	struct SlabAllocator{
+		constexpr static size_t BLOCK_SIZE = BlockSize;
+
 		static_assert(BlockSize > sizeof(void *), "No room for the free list");
 
 		constexpr static const char *getName(){
@@ -52,8 +56,7 @@ namespace MyAllocator{
 		}
 
 		void xdeallocate(void *p){
-			if (!owns_(p))
-				return;
+			assert(owns_(p) && "Trying to deallocate memory not own by the allocator");
 
 			*reinterpret_cast<void **>(p) = freeList_;
 			freeList_ = p;
@@ -66,6 +69,17 @@ namespace MyAllocator{
 				++n;
 
 			return n;
+		}
+
+		size_t getFreeBlocks(size_t needed) const noexcept{
+			if (!needed)
+				return true;
+
+			for(const void *block = freeList_; block; block = *reinterpret_cast<const void * const *>(block))
+				if (--needed == 0)
+					return true;
+
+			return false;
 		}
 
 		size_t getUsedBlocks() const noexcept{

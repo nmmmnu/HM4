@@ -20,10 +20,10 @@ AsyncLoop<Selector, Worker, MemoryManager, Storage>::AsyncLoop(
 					serverFD_		(serverFD		),
 					mm_			(mm			),
 
-					conf_rlimitNoFile_	(		(conf_rlimitNoFile								) ),
-					conf_maxClients_	( std::max	(conf_maxClients,		MIN_CLIENTS					) ),
-					conf_connectionTimeout_	( 		(conf_connectionTimeout								) ),
-					conf_maxRequestSize_	(		(conf_maxRequestSize								) ){
+					conf_rlimitNoFile_	(		(conf_rlimitNoFile				) ),
+					conf_maxClients_	( std::max	(conf_maxClients,		MIN_CLIENTS	) ),
+					conf_connectionTimeout_	( 		(conf_connectionTimeout				) ),
+					conf_maxRequestSize_	(		(conf_maxRequestSize				) ){
 
 	assert(conf_maxClients_ < conf_rlimitNoFile_);
 
@@ -380,7 +380,7 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::removeFD_(int const fd
 	}
 
 	// call d-tor manually
-	it->buffer.deallocate(mm_);
+	it->buffer.clear(mm_);
 
 	clients_.remove(fd);
 }

@@ -133,22 +133,9 @@ namespace net::worker{
 	WorkerStatus emitError(Buffer &buffer, typename Buffer::MemoryManager &mm, std::string_view errorMessage){
 		typename Protocol::Response::Error resp{ errorMessage };
 
-		buffer.clear(mm);
+		bool const b = buffer.bulkLoad(mm, resp);
 
-		auto const size = resp.size();
-
-		char *ptr = buffer.provideBuffer(mm, size);
-
-		if (!ptr)
-			return WorkerStatus::DISCONNECT_ERROR;
-
-		const char *off = ptr;
-
-		auto const size2 = resp(ptr);
-
-		buffer.finalizeBuffer(mm, off, size2);
-
-		return WorkerStatus::WRITE;
+		return b ? WorkerStatus::WRITE : WorkerStatus::DISCONNECT_ERROR;
 	}
 
 	constexpr WorkerStatus emitInternalError(){

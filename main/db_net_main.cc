@@ -536,9 +536,9 @@ namespace{
 											static_cast<int32_t>(opt.timeout),
 											static_cast<int32_t>(opt.timeout)
 									},
-				/* worker		*/ MyWorker	{ adapter_factory(), tmm }	,
-				/* server fd		*/ { fd }					,
-				/* tiered slab manager	*/ tmm						,
+				/* worker		*/ MyWorker	{ adapter_factory() }	,
+				/* server fd		*/ { fd }				,
+				/* tiered slab manager	*/ tmm					,
 					rlimit_nofile				,
 					max_clients				,
 				//	opt.timeout				,

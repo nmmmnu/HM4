@@ -53,9 +53,10 @@ namespace net{
 		AsyncCompletionLoop(IOEngine &&ioEngine, Worker &&worker, const std::initializer_list<int> &serverFD, MemoryManager &mm,
 					uint32_t conf_rlimitNoFile	= LIMIT_NO_FILES	,
 					uint32_t conf_maxClients	= MAX_CLIENTS		,
-				//	size_t   conf_buffer_capacity	= IO_BUFFER_CAPACITY	,
 					size_t   conf_maxRequestSize	= MAX_REQUEST_SIZE
 		);
+
+		~AsyncCompletionLoop();
 
 		[[nodiscard]]
 		bool process();
@@ -99,7 +100,7 @@ namespace net{
 
 	private:
 		void req_Read_   (int fd, Client<MemoryManager> &client){
-			auto [p, sizeNew] = client.buffer.provideBufferAtLeastStandardSize();
+			auto [p, sizeNew] = client.buffer.provideBufferAtLeast(mm_);
 
 			client.offcet = p;
 
@@ -156,14 +157,13 @@ namespace net{
 		IOEngine		ioEngine_;
 		Worker			worker_;
 
-		MemoryManager			&mm_;
+		MemoryManager		&mm_;
 
 		bool			keepProcessing_		= true;
 
 		uint32_t		conf_rlimitNoFile_	;
 		uint32_t		conf_maxClients_	;
 
-		size_t			conf_bufferCapacity_	;
 		size_t			conf_maxRequestSize_	;
 
 		FDStorage		clients_{ conf_rlimitNoFile_, conf_maxClients_ };

@@ -114,54 +114,31 @@ namespace redis_protocol_impl_{
 	}
 	#endif
 
-
-
-	inline void copy(char *&ptr, std::string_view s, size_t &size){
-		memcpy(ptr, s.data(), s.size());
-		ptr  += s.size();
-		size += s.size();
-	}
-
-	inline void copy(char *&ptr, char c, size_t &size){
-		memcpy(ptr, &c, 1);
-		ptr  += 1;
-		size += 1;
-	}
-
 } // namespace redis_protocol_impl_
 
 
 
 class RedisProtocol::Response{
-	static size_t responceNumberSV__(char *&ptr, std::string_view n) noexcept{
-		using namespace redis_protocol_impl_;
 
-		size_t size = 0;
-
-		copy(ptr, COLON	, size);
-		copy(ptr, n	, size);
-		copy(ptr, ENDLN	, size);
-
-		return size;
+	template<typename BulkLoader>
+	static void responceNumberSV__(BulkLoader &cc, std::string_view n) noexcept{
+		cc.push(COLON	);
+		cc.push(n	);
+		cc.push(ENDLN	);
 	}
 
-	static size_t responceStringNR__(char *&ptr, std::string_view const msg) noexcept{
-		using namespace redis_protocol_impl_;
-
-		size_t size = 0;
-
+	template<typename BulkLoader>
+	static void responceStringNR__(BulkLoader &cc, std::string_view const msg) noexcept{
 		to_string_buffer_t std_buffer;
 
 		auto const n = to_string(msg.size(), std_buffer);
 
-		copy(ptr, DOLLAR	, size);
-		copy(ptr, n		, size);
-		copy(ptr, ENDLN		, size);
+		cc.push(DOLLAR	);
+		cc.push(n		);
+		cc.push(ENDLN	);
 
-		copy(ptr, msg		, size);
-		copy(ptr, ENDLN		, size);
-
-		return size;
+		cc.push(msg	);
+		cc.push(ENDLN	);
 	}
 
 public:
@@ -169,6 +146,7 @@ public:
 		constexpr static std::string_view name	= "ok";
 
 		constexpr static std::string_view OK_	= "+OK";
+
 
 	public:
 		constexpr OK() = default;
@@ -181,15 +159,10 @@ public:
 			;
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
-			size_t size = 0;
-
-			copy(ptr, OK_		, size);
-			copy(ptr, ENDLN		, size);
-
-			return size;
+		template<typename BulkLoader>
+		static void data(BulkLoader &cc) noexcept{
+			cc.push(OK_	);
+			cc.push(ENDLN	);
 		}
 	};
 
@@ -214,15 +187,10 @@ public:
 			;
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
-			size_t size = 0;
-
-			copy(ptr, bb ? TRUE : FALSE	, size);
-			copy(ptr, ENDLN			, size);
-
-			return size;
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
+			cc.push(bb ? TRUE : FALSE	);
+			cc.push(ENDLN			);
 		}
 
 	private:
@@ -248,16 +216,11 @@ public:
 			;
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
-			size_t size = 0;
-
-			copy(ptr, ERR	, size);
-			copy(ptr, msg	, size);
-			copy(ptr, ENDLN	, size);
-
-			return size;
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
+			cc.push(ERR	);
+			cc.push(msg	);
+			cc.push(ENDLN	);
 		}
 
 	private:
@@ -278,10 +241,9 @@ public:
 			return calc_size_str(msg);
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
-			return responceStringNR__(ptr, msg);
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
+			responceStringNR__(cc, msg);
 		}
 
 	private:
@@ -305,16 +267,11 @@ public:
 			;
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
-			size_t size = 0;
-
-			copy(ptr, PLUS	, size);
-			copy(ptr, msg	, size);
-			copy(ptr, ENDLN	, size);
-
-			return size;
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
+			cc.push(PLUS	);
+			cc.push(msg	);
+			cc.push(ENDLN	);
 		}
 
 	private:
@@ -338,12 +295,11 @@ public:
 			;
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
 			to_string_buffer_t std_buffer;
 
-			return responceNumberSV__(ptr, to_string(n, std_buffer));
+			return responceNumberSV__(cc, to_string(n, std_buffer));
 		}
 
 	private:
@@ -373,15 +329,14 @@ public:
 			}
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
 			to_string_buffer_t std_buffer;
 
 			if (n > 0x0FFF'FFFF'FFFF'FFFF)
-				return responceStringNR__(ptr, to_string(n, std_buffer));
+				return responceStringNR__(cc, to_string(n, std_buffer));
 			else
-				return responceNumberSV__(ptr, to_string(n, std_buffer));
+				return responceNumberSV__(cc, to_string(n, std_buffer));
 		}
 
 	private:
@@ -405,10 +360,9 @@ public:
 			;
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
-			return responceNumberSV__(ptr, n);
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
+			responceNumberSV__(cc, n);
 		}
 
 	private:
@@ -436,23 +390,18 @@ public:
 			;
 		}
 
-		size_t operator()(char *&ptr) const noexcept{
-			using namespace redis_protocol_impl_;
-
+		template<typename BulkLoader>
+		void data(BulkLoader &cc) const noexcept{
 			to_string_buffer_t std_buffer;
-
-			size_t size = 0;
 
 			auto const n = to_string(list.size(), std_buffer);
 
-			copy(ptr, STAR	, size);
-			copy(ptr, n	, size);
-			copy(ptr, ENDLN	, size);
+			cc.push(STAR	);
+			cc.push(n	);
+			cc.push(ENDLN	);
 
 			for(const auto &msg : list)
-				size += responceStringNR__(ptr, msg);
-
-			return size;
+				responceStringNR__(cc, msg);
 		}
 
 	private:

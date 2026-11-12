@@ -19,10 +19,9 @@ AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::AsyncCompletionLo
 					worker_			(std::move(worker)	),
 					mm_			(mm			),
 
-					conf_rlimitNoFile_	( 		(conf_rlimitNoFile				) ),
-					conf_maxClients_	( std::max	(conf_maxClients,	MIN_CLIENTS		) ),
-				//	conf_bufferCapacity_	( std::max	(conf_buffer_capacity,	IO_BUFFER_CAPACITY	) ),
-					conf_maxRequestSize_	( std::max	(conf_maxRequestSize,	conf_bufferCapacity_	) ){
+					conf_rlimitNoFile_	( 		(conf_rlimitNoFile			) ),
+					conf_maxClients_	( std::max	(conf_maxClients,	MIN_CLIENTS	) ),
+					conf_maxRequestSize_	(		(conf_maxRequestSize			) ){
 
 	assert(conf_maxClients_ < conf_rlimitNoFile_);
 
@@ -33,6 +32,21 @@ AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::AsyncCompletionLo
 }
 
 template<class IOEngine, class Worker, class MemoryManager, class Storage>
+AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::~AsyncCompletionLoop(){
+	ioEngine_.shutdown();
+
+	clients_.for_each([this](int, auto &client){
+		// release memory
+		client.buffer.clear(mm_);
+
+		return false;
+	});
+
+	// call disconnect and release memory
+	worker_.shutdown(mm_);
+}
+
+template<class IOEngine, class Worker, class MemoryManager, class Storage>
 void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::print() const{
 	auto _ = [](auto k, auto v){
 		logger_fmt<Logger::STARTUP>("{:25} = {:12}", k, v);
@@ -40,7 +54,6 @@ void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::print() cons
 
 	_("rlimit nofile"	, conf_rlimitNoFile_		);
 	_("max clients"		, conf_maxClients_		);
-	_("buffer capacity"	, conf_bufferCapacity_		);
 	_("max request size"	, conf_maxRequestSize_		);
 }
 
@@ -160,7 +173,7 @@ void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::done_Read_(i
 
 	size_t const size = static_cast<size_t>(result);
 
-	client.buffer.finalizeBuffer(client.offcet, size);
+	client.buffer.finalizeBuffer(mm_, client.offcet, size);
 
 	if (client.buffer.size() > conf_maxRequestSize_)
 		return req_Close_(fd, DisconnectStatus::PROBLEM_BUFFER_READ);
@@ -195,7 +208,7 @@ void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::done_Write_(
 	if (client.buffer.size() > 0){
 		size_t const size = static_cast<size_t>(result);
 
-		client.buffer.pop(size);
+		client.buffer.pop(mm_, size);
 	}
 
 	if (client.buffer.size() == 0){
@@ -228,7 +241,7 @@ void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::log_Close_(i
 
 template<class IOEngine, class Worker, class MemoryManager, class Storage>
 bool AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::client_Worker_(int const fd, Client<MemoryManager> &client){
-	const WorkerStatus status = worker_( client.buffer );
+	auto const status = worker_(client.buffer, mm_);
 
 	// buffer is cleared unless PASS
 
@@ -271,7 +284,7 @@ bool AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::client_Worke
 
 template<class IOEngine, class Worker, class MemoryManager, class Storage>
 bool AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::insertFD_(int const fd){
-	if ( !clients_.insert(fd, mm_) )
+	if ( !clients_.insert(fd) )
 		return false;
 
 	// this is guaranteed not null,
@@ -294,6 +307,9 @@ void AsyncCompletionLoop<IOEngine, Worker, MemoryManager, Storage>::removeFD_(in
 		// do nothing, error is already removed.
 		return;
 	}
+
+	// call d-tor manually
+	it->buffer.clear(mm_);
 
 	clients_.remove(fd);
 }

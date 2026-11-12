@@ -12,11 +12,7 @@ namespace net{
 		IOBuffer<MemoryManager>	buffer;
 		const char		*offcet = nullptr;
 
-		using Container = typename IOBuffer<MemoryManager>::container_type;
-
-		Client(MemoryManager &mm) : buffer(mm){}
-
-	//	Client(Container &&b) : buffer(std::move(b)){}
+		constexpr Client() = default;
 	};
 
 } // namespace net
