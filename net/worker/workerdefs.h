@@ -133,7 +133,7 @@ namespace net::worker{
 	WorkerStatus emitError(Buffer &buffer, typename Buffer::MemoryManager &mm, std::string_view errorMessage){
 		typename Protocol::Response::Error resp{ errorMessage };
 
-		bool const b = buffer.bulkLoad(mm, resp);
+		bool const b = buffer.dataCopy(mm, resp);
 
 		return b ? WorkerStatus::WRITE : WorkerStatus::DISCONNECT_ERROR;
 	}

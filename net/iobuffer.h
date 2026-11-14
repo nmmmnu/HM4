@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cstring>	// memcpy
 
+#include "memorymanager_replacewithnext.h"
+
 namespace net{
 
 template<typename T>
@@ -101,10 +103,10 @@ public:
 	}
 
 public:
-	template<typename DataLoader>
+	template<typename DataSource>
 	[[nodiscard]]
-	bool bulkLoad(MemoryManager &mm, DataLoader const &dl) noexcept{
-		return mm.bulkLoad(node, dl);
+	bool dataCopy(MemoryManager &mm, DataSource const &dataSource) noexcept{
+		return mm.dataCopy(node, dataSource);
 	}
 
 	[[nodiscard]]
@@ -176,7 +178,9 @@ public:
 			return false;
 
 		if (availableSize == size){
-			deallocate(mm);
+			// deallocate and replace with next chunk if any
+
+			memory_manager::replaceWithNext(mm, node);
 
 			return true;
 		}

@@ -235,6 +235,7 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Write_(int cons
 			return client_SocketOps_(fd, size);
 
 		// size is checked already
+		// here pop() might change the buffer from zero to something
 		client.buffer.pop(mm_, static_cast<size_t>(size));
 
 		client.timer.restart();
@@ -243,8 +244,6 @@ void AsyncLoop<Selector, Worker, MemoryManager, Storage>::client_Write_(int cons
 	if (client.buffer.size() == 0){
 		// process with read
 		selector_.updateFD(fd, selector::FDEvent::READ);
-
-		return;
 	}
 }
 

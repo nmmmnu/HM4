@@ -9,8 +9,7 @@
 
 #include "slaballocator.h"
 
-#include "memorymanager_simplebulkloader.h"
-#include "memorymanager_bulkload.h"
+#include "memorymanager_datacopy.h"
 
 #include "logger.h"
 
@@ -118,6 +117,7 @@ namespace memory_manager{
 		~TieredMemoryManager() noexcept = default;
 
 	public:
+		template<bool Log = true>
 		bool reallocate(NodePtr &node, size_t needed) noexcept{
 			if (needed > slab_back_().BLOCK_SIZE - NODE_SIZE)
 			    return false;
@@ -153,7 +153,9 @@ namespace memory_manager{
 				deallocate_(nodeOld->tier, nodeOld);
 			}
 
-			debugInfo_(node, "allocate");
+			if constexpr(Log){
+				debugInfo_(node, "allocate");
+			}
 
 			return true;
 		}
@@ -162,15 +164,33 @@ namespace memory_manager{
 			assert(!node && "allocateChain() needs new/empty node");
 
 			auto &allocator = slab_back_();
-			auto const tier = slab_size__ - 1;
 
 			auto const block_size = allocator.BLOCK_SIZE - NODE_SIZE;
-			auto const chunks = (needed + block_size - 1) / block_size;
 
-			if (!allocator.getFreeBlocks(chunks))
+			auto const chunks     = needed / block_size;
+			auto const remainder  = needed % block_size;
+
+			if (chunks == 0)
+				return reallocate(node, needed);
+
+			if (auto const chunksRem = chunks + (remainder ? 1 : 0); !allocator.getFreeBlocks(chunksRem))
 				return false;
 
+			auto const tier = slab_size__ - 1;
+
 			Node *lnode = nullptr;
+
+			size_t j = 0;
+
+			if (remainder){
+				bool const b = reallocate<0>(lnode, remainder); // guaranteed not nullptr
+
+				assert(b);
+
+				debugInfo_(lnode, "allocate chain", j++);
+
+				++j;
+			}
 
 			for(size_t i = 0; i < chunks; ++i){
 				void *p = MyAllocator::allocate(allocator); // guaranteed not nullptr
@@ -179,7 +199,7 @@ namespace memory_manager{
 
 				lnode = createNode__(p, tier, lnode);
 
-				debugInfo_(lnode, "allocate chain");
+				debugInfo_(lnode, "allocate chain", j++);
 			}
 
 			node = lnode;
@@ -198,10 +218,14 @@ namespace memory_manager{
 
 		}
 
-		template<typename DataLoader>
+		bool allocateBulk(NodePtr &node, size_t size) noexcept{
+			return allocateChain(node, size);
+		}
+
+		template<typename DataSource>
 		[[nodiscard]]
-		bool bulkLoad(NodePtr &node, DataLoader const &dl) noexcept{
-			return memory_manager_impl_::bulkload(*this, node, dl);
+		bool dataCopy(NodePtr &node, DataSource const &dataSource) noexcept{
+			return memory_manager_impl_::dataCopy(*this, node, dataSource);
 		}
 
 	public:
@@ -211,10 +235,11 @@ namespace memory_manager{
 		void print()		const noexcept;
 
 	private:
-		constexpr void debugInfo_(const Node *node, std::string_view message) noexcept{
+		constexpr void debugInfo_(const Node *node, std::string_view message, size_t id = 0) noexcept{
 			if constexpr(DEBUG_ALLOCATIONS){
-				logger_fmt<DEBUG_ALLOCATIONS_LEVEL>("{:16} {} {} {:12} {}",
+				logger_fmt<DEBUG_ALLOCATIONS_LEVEL>("{:16} [id#{:5}] {} {} {:12} {}",
 						message			,
+						id			,
 						(void *) node		,
 						(void *) node->data	,
 						node->capacity		,
@@ -238,28 +263,22 @@ namespace memory_manager{
 		void deallocateChain_(NodePtr &node) noexcept{
 			assert(node->next);
 
+			size_t i = 0;
+
 			for(Node *it = node; it; ){
-				debugInfo_(it, "deallocate chain");
+				debugInfo_(it, "deallocate chain", i);
 
 				void *p = it;
-			//	auto const tier = slab_size__ - 1;
+				auto const tier = it->tier;
 
 				it = it->next;
 
-				MyAllocator::deallocate(slab_back_(), p);
+				deallocate_(tier, p);
+
+				++i;
 			}
 
 			node = nullptr;
-		}
-
-	private:
-		template<typename MemoryManager, typename DataLoader>
-		friend bool memory_manager_impl_::bulkload(MemoryManager &mm, typename MemoryManager::NodePtr &node, DataLoader const &dl) noexcept;
-
-    		using BulkLoader = SimpleBulkLoader<NodePtr>;
-
-		bool allocateBulk_(NodePtr &node, size_t size) noexcept{
-			return allocateChain(node, size);
 		}
 
 	private:

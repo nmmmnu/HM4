@@ -1,5 +1,5 @@
-#ifndef SIMPLE_BULK_LOADER_H_
-#define SIMPLE_BULK_LOADER_H_
+#ifndef MEMORY_MANAGER_SIMPLE_DATA_COPIER_H_
+#define MEMORY_MANAGER_SIMPLE_DATA_COPIER_H_
 
 #include <cstring>
 #include <cassert>
@@ -8,10 +8,15 @@
 
 namespace memory_manager{
 
-	template<typename NodePtr>
-	struct SimpleBulkLoader{
-		SimpleBulkLoader(NodePtr &node) noexcept : node(node){
+	template<typename Node>
+	struct SimpleDataCopier{
+		SimpleDataCopier(Node *node) noexcept : node(node){
 			assert(node);
+			assert(node->next == nullptr && "SimpleDataCopier can no work with chains!");
+		}
+
+		constexpr static std::string_view name(){
+			return "SimpleDataCopier";
 		}
 
 		void push(char c) noexcept{
@@ -31,7 +36,7 @@ namespace memory_manager{
 		}
 
 	private:
-		NodePtr &node;
+		Node *node;
 	};
 
 } // namespace memory_manager

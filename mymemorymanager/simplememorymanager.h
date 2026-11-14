@@ -6,8 +6,7 @@
 #include <cstddef>	// offsetof
 #include <cstdint>	// uint32_t
 
-#include "memorymanager_simplebulkloader.h"
-#include "memorymanager_bulkload.h"
+#include "memorymanager_datacopy.h"
 
 #include "logger.h"
 
@@ -82,10 +81,14 @@ namespace memory_manager{
 			node = nullptr;
 		}
 
-		template<typename DataLoader>
+		static bool allocateBulk(NodePtr &node, size_t size) noexcept{
+			return reallocate(node, size);
+		}
+
+		template<typename DataSource>
 		[[nodiscard]]
-		bool bulkLoad(NodePtr &node, DataLoader const &dl) noexcept{
-			return memory_manager_impl_::bulkload(*this, node, dl);
+		bool dataCopy(NodePtr &node, DataSource const &dataSource) noexcept{
+			return memory_manager_impl_::dataInsert(*this, node, dataSource);
 		}
 
 	public:
@@ -93,16 +96,6 @@ namespace memory_manager{
 		constexpr static void log()		noexcept{}
 		constexpr static void printShort()	noexcept{}
 		constexpr static void print()		noexcept{}
-
-	private:
-		template<typename MemoryManager, typename DataLoader>
-		friend bool memory_manager_impl_::bulkload(MemoryManager &mm, typename MemoryManager::NodePtr &node, DataLoader const &dl) noexcept;
-
-    		using BulkLoader = SimpleBulkLoader<NodePtr>;
-
-		static bool allocateBulk_(NodePtr &node, size_t size) noexcept{
-			return reallocate(node, size);
-		}
 	};
 
 } // namespace memory_manager

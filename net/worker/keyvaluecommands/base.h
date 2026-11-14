@@ -205,7 +205,7 @@ namespace net::worker::commands{
 			set_status_(status);
 
 			[[maybe_unused]]
-			bool b = buffer_.bulkLoad(mm_, resp);
+			bool b = buffer_.dataCopy(mm_, resp);
 		}
 
 	public:

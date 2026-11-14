@@ -453,9 +453,9 @@ Changelog
 -	implement MySQL RocksDB-like histograms for latency statistics
 -	New module latency: LATENCYCOUNTERS, LATENCYCOUNT, LATENCYPERCENTILE, LATENCYMPERCENTILE, LATENCYHUMAN,
 	LATENCYLOG, LATENCYRESET, LATENCYLIST
--	Implement IO buffers using new tiared memory manager add options io_buffer_tier_*
+-	implement IO buffers using new tiared memory manager add options io_buffer_tier_*
 -	remove spare pool and options min_spare_pool, max_spare_pool, buffer_capacity
-
+-	introduce chained IOBuffer and DataCopier
 
 
 
