@@ -37,10 +37,15 @@ namespace memory_manager::memory_manager_impl_{
 
 		using Node = typename MemoryManager::Node;
 
-		if (!node->next)
-			return dataCopy_<SimpleDataCopier<Node>	>(node, dataSource, size);
-		else
-			return dataCopy_<ChainDataCopier<Node>	>(node, dataSource, size);
+		if constexpr(!Node::SUPPORT_CHAIN){
+				return dataCopy_<SimpleDataCopier<Node>	>(node, dataSource, size);
+		}else{
+			if (!node->next)
+				return dataCopy_<SimpleDataCopier<Node>	>(node, dataSource, size);
+			else
+				return dataCopy_<ChainDataCopier<Node>	>(node, dataSource, size);
+		}
+
 	}
 
 } // namespace memory_manager

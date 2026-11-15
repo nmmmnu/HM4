@@ -17,50 +17,40 @@ namespace memory_manager{
 
 	namespace memory_manager_impl_{
 
-		constexpr uint32_t MIN_COUNT = 2;
-
 		constexpr uint32_t KB = 1024;
 
-		constexpr size_t SIZES_MAX = 4;
-
-		constexpr std::array<uint32_t, SIZES_MAX> SIZES = {
+		constexpr std::array<uint32_t, 4> SIZES = {
 			  16 * KB,
 			  64 * KB,
 			 256 * KB,
 			1024 * KB
 		};
 
-		constexpr std::array<uint32_t, SIZES_MAX - 1> DIVISORS = {
-			 1,
-			 4,
-			16
-		};
-
 		template<uint8_t tier>
 		constexpr uint32_t calcMinimumCount(uint32_t value, uint32_t maxClients___) noexcept{
-			constexpr uint32_t MAX = std::numeric_limits<uint32_t>::max() - 1;
+			constexpr uint32_t MAX		= std::numeric_limits<uint32_t>::max();
+			constexpr uint32_t MIN_COUNT	= 2;
 
-			auto const maxClients = std::min(maxClients___ + 1, MAX);
+			auto const maxClients = std::min(maxClients___, MAX - 2);
 
-			if (value == std::numeric_limits<uint32_t>::max()){
+			if (value == MAX){
 				// undocumented, we **REALLY** know what we do :)
 				return 0;
-			}else
+			}
+
 			if (value){
 				// we know what we do
 				return std::min(value, maxClients);
-			}else{
-				if constexpr(tier < DIVISORS.size()){
-					// automatic
-					return std::max(
-						maxClients / DIVISORS[tier],
-						MIN_COUNT
-					);
-				}else{
-					// automatic, see max_packet_size from db_net_main.cc
-					return 512;
-				}
 			}
+
+			switch(tier){
+			case 0: return maxClients + 1;
+			case 1: return std::max(maxClients /  4, MIN_COUNT);
+			case 2: return std::max(maxClients / 16, MIN_COUNT);
+			case 3: return 512 + 1;	// see max_packet_size from db_net_main.cc
+			}
+
+			__builtin_unreachable();
 		}
 
 	} // namespace memory_manager_impl_
@@ -79,6 +69,8 @@ namespace memory_manager{
 		using Counts	= std::array<size_type, SIZE>;
 
 		struct Node{
+			constexpr static bool SUPPORT_CHAIN = true;
+
 			Node		*next		; // 8
 			size_type	size		; // 4
 			size_type	capacity	; // 4
@@ -145,6 +137,8 @@ namespace memory_manager{
 				// case 1. create new node
 				node = createNode__(p, tier);
 			}else{
+				assert(!node->next && "reallocate() can not handle chains");
+
 				// case 2. copy old node
 				Node *nodeOld = node;
 
@@ -188,8 +182,6 @@ namespace memory_manager{
 				assert(b);
 
 				debugInfo_(lnode, "allocate chain", j++);
-
-				++j;
 			}
 
 			for(size_t i = 0; i < chunks; ++i){
@@ -368,7 +360,7 @@ namespace memory_manager{
 
 			using namespace memory_manager_impl_;
 
-			if constexpr(tier < SIZES_MAX - 1){
+			if constexpr(tier < SIZES.size() - 1){
 				assert(off + cSize__<tier>(counts, maxClients) <= buffer.size());
 			}else{
 				assert(off + cSize__<tier>(counts, maxClients) == buffer.size());
@@ -486,7 +478,7 @@ namespace memory_manager{
 					""			,
 					""			,
 					""			,
-					buffer.size()		,
+					buffer.size() / 1024	,
 					(void *) (begin)	,
 					(void *) (begin + buffer.size())
 			);

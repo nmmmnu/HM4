@@ -28,6 +28,8 @@ namespace memory_manager{
 
 			ptr_		+= len;
 			node_->size	+= len;
+
+			size_		+= len;
 		}
 
 		void push(std::string_view s) noexcept{
@@ -46,6 +48,8 @@ namespace memory_manager{
 
 				data		+= len;
 				size		-= len;
+
+				size_		+= len;
 			}
 		}
 

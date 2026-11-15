@@ -1,5 +1,5 @@
-#ifndef _IO_BUFFER_H
-#define _IO_BUFFER_H
+#ifndef IO_BUFFER_H_
+#define IO_BUFFER_H_
 
 #include <string_view>
 
@@ -26,10 +26,7 @@ private:
 public:
 	constexpr IOBuffer() noexcept = default;
 
-	IOBuffer(MemoryNodePtr &&node) noexcept : node(std::move(node)){
-		// just in case
-		node = nullptr;
-	}
+	IOBuffer(MemoryNodePtr &&node) noexcept : node(std::move(node)){}
 
 	IOBuffer(IOBuffer &&other) noexcept : node(std::move(other.node)){
 		other.node = nullptr;
@@ -180,7 +177,11 @@ public:
 		if (availableSize == size){
 			// deallocate and replace with next chunk if any
 
-			memory_manager::replaceWithNext(mm, node);
+			if constexpr(!MemoryManager::Node::SUPPORT_CHAIN){
+				mm.deallocate(node);
+			}else{
+				memory_manager::replaceWithNext(mm, node);
+			}
 
 			return true;
 		}

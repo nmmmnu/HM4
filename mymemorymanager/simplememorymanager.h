@@ -16,7 +16,9 @@ namespace memory_manager{
 		using size_type = uint32_t;
 
 		struct Node{
-			constexpr static Node *next = nullptr;
+			constexpr static bool SUPPORT_CHAIN = false;
+
+		//	constexpr static Node *next = nullptr;
 
 			size_type	size		; // 4
 			size_type	capacity	; // 4
@@ -88,7 +90,7 @@ namespace memory_manager{
 		template<typename DataSource>
 		[[nodiscard]]
 		bool dataCopy(NodePtr &node, DataSource const &dataSource) noexcept{
-			return memory_manager_impl_::dataInsert(*this, node, dataSource);
+			return memory_manager_impl_::dataCopy(*this, node, dataSource);
 		}
 
 	public:

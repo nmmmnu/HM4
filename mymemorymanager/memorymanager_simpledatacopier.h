@@ -12,7 +12,10 @@ namespace memory_manager{
 	struct SimpleDataCopier{
 		SimpleDataCopier(Node *node) noexcept : node(node){
 			assert(node);
-			assert(node->next == nullptr && "SimpleDataCopier can no work with chains!");
+
+			if constexpr(Node::SUPPORT_CHAIN){
+				assert(node->next == nullptr && "SimpleDataCopier can no work with chains!");
+			}
 		}
 
 		constexpr static std::string_view name(){

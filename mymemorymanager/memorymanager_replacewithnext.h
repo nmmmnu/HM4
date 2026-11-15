@@ -5,24 +5,22 @@ namespace memory_manager{
 
 	template<typename MemoryManager>
 	bool replaceWithNext(MemoryManager &mm, typename MemoryManager::NodePtr &node){
-		if (!node->next){
+		static_assert(MemoryManager::Node::SUPPORT_CHAIN);
+
+		if (!node->next || node->next->size == 0){
 			mm.deallocate(node);
-
 			return false;
-		}else{
-			auto *pnode = node;
-
-			node = pnode->next;
-
-			pnode->next = nullptr;
-
-			mm.deallocate(pnode);
-
-			return true;
 		}
+
+		auto *pnode = node;
+		node = pnode->next;
+		pnode->next = nullptr;
+
+		mm.deallocate(pnode);
+		return true;
 	}
 
-}
+}// namespace memory_manager
 
 #endif
 

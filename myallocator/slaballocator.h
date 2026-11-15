@@ -71,7 +71,7 @@ namespace MyAllocator{
 			return n;
 		}
 
-		size_t getFreeBlocks(size_t needed) const noexcept{
+		bool getFreeBlocks(size_t needed) const noexcept{
 			if (!needed)
 				return true;
 
