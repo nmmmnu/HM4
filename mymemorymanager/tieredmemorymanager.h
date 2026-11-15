@@ -372,10 +372,10 @@ namespace memory_manager{
 	private:
 		MemoryResource res_;
 
-		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[0]> slab_0_;
-		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[1]> slab_1_;
-		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[2]> slab_2_;
-		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[3]> slab_3_;
+		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[0], true> slab_0_;
+		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[1], true> slab_1_;
+		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[2], true> slab_2_;
+		MyAllocator::SlabAllocator<memory_manager_impl_::SIZES[3], true> slab_3_;
 
 	private:
 		constexpr auto &slab_back_() noexcept{
