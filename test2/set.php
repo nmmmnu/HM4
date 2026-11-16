@@ -10,7 +10,7 @@ $data16k = $data4k . $data4k . $data4k . $data4k;
 
 $redis->del("a");
 
-while($redis->strlen("a") < 1 * 1024 * 1024 - 0 * 1024)
+while($redis->strlen("a") < 128 * 1024 * 1024 - 0 * 1024)
 	$redis->append("a", $data16k);
 
 echo $redis->strlen("a") . "\n";

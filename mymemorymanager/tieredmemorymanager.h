@@ -75,8 +75,9 @@ namespace memory_manager{
 			size_type	size		; // 4
 			size_type	capacity	; // 4
 			size_type	head		; // 4
+			uint16_t	tag		; // 2
 			uint8_t		tier		; // 1
-			char		padding[3]	; // 3
+			char		padding[1]	; // 1
 
 			char		data[4]		; // 1 + 3 pad
 		};
@@ -110,7 +111,7 @@ namespace memory_manager{
 
 	public:
 		template<bool Log = true>
-		bool reallocate(NodePtr &node, size_t needed) noexcept{
+		bool reallocate(NodePtr &node, size_t needed, uint16_t tag = 0) noexcept{
 			if (needed > slab_back_().BLOCK_SIZE - NODE_SIZE)
 			    return false;
 
@@ -135,7 +136,7 @@ namespace memory_manager{
 
 			if (!node){
 				// case 1. create new node
-				node = createNode__(p, tier);
+				node = createNode__(p, tier, tag);
 			}else{
 				assert(!node->next && "reallocate() can not handle chains");
 
@@ -174,14 +175,14 @@ namespace memory_manager{
 
 			Node *lnode = nullptr;
 
-			size_t j = 0;
+			uint16_t j = 0;
 
 			if (remainder){
-				bool const b = reallocate<0>(lnode, remainder); // guaranteed not nullptr
+				bool const b = reallocate<0>(lnode, remainder,  j++); // guaranteed not nullptr
 
 				assert(b);
 
-				debugInfo_(lnode, "allocate chain", j++);
+				debugInfo_(lnode, "allocate chain");
 			}
 
 			for(size_t i = 0; i < chunks; ++i){
@@ -189,9 +190,9 @@ namespace memory_manager{
 
 				assert(p);
 
-				lnode = createNode__(p, tier, lnode);
+				lnode = createNode__(p, tier, lnode, j++);
 
-				debugInfo_(lnode, "allocate chain", j++);
+				debugInfo_(lnode, "allocate chain");
 			}
 
 			node = lnode;
@@ -227,11 +228,11 @@ namespace memory_manager{
 		void print()		const noexcept;
 
 	private:
-		constexpr void debugInfo_(const Node *node, std::string_view message, size_t id = 0) noexcept{
+		constexpr void debugInfo_(const Node *node, std::string_view message) noexcept{
 			if constexpr(DEBUG_ALLOCATIONS){
-				logger_fmt<DEBUG_ALLOCATIONS_LEVEL>("{:16} [id#{:5}] {} {} {:12} {}",
+				logger_fmt<DEBUG_ALLOCATIONS_LEVEL>("{:16} [tag#{:5}] {} {} {:12} {}",
 						message			,
-						id			,
+						node->tag		,
 						(void *) node		,
 						(void *) node->data	,
 						node->capacity		,
@@ -255,10 +256,8 @@ namespace memory_manager{
 		void deallocateChain_(NodePtr &node) noexcept{
 			assert(node->next);
 
-			size_t i = 0;
-
 			for(Node *it = node; it; ){
-				debugInfo_(it, "deallocate chain", i);
+				debugInfo_(it, "deallocate chain");
 
 				void *p = it;
 				auto const tier = it->tier;
@@ -266,15 +265,13 @@ namespace memory_manager{
 				it = it->next;
 
 				deallocate_(tier, p);
-
-				++i;
 			}
 
 			node = nullptr;
 		}
 
 	private:
-		static Node *createNode__(void *p, uint8_t tier, Node *next = nullptr){
+		static Node *createNode__(void *p, uint8_t tier, Node *next = nullptr, uint16_t tag = 0){
 			using memory_manager_impl_::SIZES;
 
 			Node *node;
@@ -283,9 +280,14 @@ namespace memory_manager{
 			node->size	= 0;
 			node->capacity	= SIZES[tier] - NODE_SIZE;
 			node->head	= 0;
+			node->tag	= tag;
 			node->tier	= tier;
 
 			return node;
+		}
+
+		static Node *createNode__(void *p, uint8_t tier, uint16_t tag){
+			return createNode__(p, tier, nullptr, tag);
 		}
 
 		static Node *copyNode__(void *p, uint8_t tier, Node *nodeOld){
