@@ -456,6 +456,6 @@ Changelog
 -	implement IO buffers using new tiared memory manager add options io_buffer_tier_*
 -	remove spare pool and options min_spare_pool, max_spare_pool, buffer_capacity
 -	introduce chained IOBuffer and DataCopier
-
+-	removing helper module string list, it will be replaced with mumps_pieces module
 
 
