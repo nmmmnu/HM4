@@ -26,12 +26,6 @@ inline namespace version_4_00_00{
 							old_pair	(old_pair	),
 							fill		(fill		){}
 
-			constexpr IFactoryAction(std::string_view const key, size_t const val_size, char fill) :
-							IFactoryAction(key, val_size, nullptr, fill){}
-
-			constexpr IFactoryAction(std::string_view const key, size_t const val_size) :
-							IFactoryAction(key, val_size, nullptr, FILL){}
-
 			constexpr void setKey(std::string_view key){
 				this->key = key;
 			}
@@ -126,7 +120,10 @@ inline namespace version_4_00_00{
 
 
 		struct Reserve : IFactoryAction<true, true, Reserve>{
-			using IFactoryAction<true, true, Reserve>::IFactoryAction;
+			using Base = IFactoryAction<true, true, Reserve>;
+
+			constexpr Reserve(std::string_view const key, size_t const val_size, char fill = Base::FILL) :
+							IFactoryAction(key, val_size, nullptr, fill){}
 
 			constexpr void action(Pair *) const{
 			}

@@ -820,7 +820,7 @@ namespace net::worker::commands::Vectors2{
 								MyDecoder decoder,
 									typename MyDecoder::IContainer &icontainer,
 									typename MyDecoder::BContainer &bcontainer) :
-							Base::IFactoryAction	(/* key */ {}, decoder.bytes() ),
+							Base::IFactoryAction	(/* key */ {}, decoder.bytes(), /* hint */ nullptr ),
 							cfvector		(cfvector	),
 							decoder			(decoder	),
 							icontainer		(icontainer	),

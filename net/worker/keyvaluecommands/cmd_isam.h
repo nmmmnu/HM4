@@ -352,7 +352,7 @@ namespace net::worker::commands::ISAM_cmd{
 			using It   = ParamContainer::const_iterator;
 
 			constexpr ISETALL_Factory(std::string_view const key, ISAM const &isam, It begin, [[maybe_unused]] It end) :
-							Base::IFactoryAction	(key, isam.bytes()),
+							Base::IFactoryAction	(key, isam.bytes(), /* hint */ nullptr),
 							isam			(isam	),
 							it			(begin	){
 
