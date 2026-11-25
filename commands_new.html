@@ -291,6 +291,8 @@
 				<li><a href="#C::IGETVALS">IGETVALS</a></li>
 				<li><a href="#C::IGET">IGET</a></li>
 				<li><a href="#C::IMGET">IMGET</a></li>
+				<li><a href="#C::IEXISTS">IEXISTS</a></li>
+				<li><a href="#C::IMEXISTS">IMEXISTS</a></li>
 				<li><a href="#C::ISETALL">ISETALL</a></li>
 				<li><a href="#C::ISET">ISET</a></li>
 				<li><a href="#C::IDEL">IDEL</a></li>
@@ -12682,7 +12684,10 @@ Sizes are evaluated in <b>bytes</b>. If a value is shorter than the allocated si
   <li><i>igetall</i> - returns an array of all field names and their corresponding values (similar to HGETALL).</li>
   <li><i>igetkeys</i> - returns an array containing only the field names.</li>
   <li><i>igetvals</i> - returns an array containing only the actual data values.</li>
+  <li><i>iget</i> - fetches value for specific requested field and returning an empty string for non-existent fields.</li>
   <li><i>imget</i> - fetches values for specific requested fields in any order, supporting duplicates and returning an empty string for non-existent fields.</li>
+  <li><i>iexists</i> - checking the existance for specific requested field and returning 0 / 1 whatever value is empty or not.</li>
+  <li><i>imexists</i> - checking the existance for specific requested fields in any order, and returning 0 / 1 whatever value is empty or not.</li>
 </ul>
 
 <p><b>4. UTF-8 and Multi-byte Characters</b></p>
@@ -12712,6 +12717,14 @@ It is recommended to place variable-length UTF-8 text fields at the end of the s
 1) &quot;1&quot;
 2) &quot;Niki&quot;
 3) &quot;BG&quot;
+127.0.0.1:6379&gt; iget 3:id,10:name,2:country a name
+&quot;Niki&quot;
+127.0.0.1:6379&gt; iget 3:id,10:name,2:country a non_existent
+&quot;&quot;
+127.0.0.1:6379&gt; iexists 3:id,10:name,2:country a name
+(integer) 1
+127.0.0.1:6379&gt; iexists 3:id,10:name,2:country a non_existent
+(integer) 0
 127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name
 1) &quot;Niki&quot;
 127.0.0.1:6379&gt; imget 3:id,10:name,2:country a name country id
@@ -12724,6 +12737,13 @@ It is recommended to place variable-length UTF-8 text fields at the end of the s
 3) &quot;1&quot;
 4) &quot;1&quot;
 5) &quot;&quot;
+6) &quot;1&quot;
+127.0.0.1:6379&gt; imexists 3:id,10:name,2:country a name country id id non_existent id
+1) &quot;1&quot;
+2) &quot;1&quot;
+3) &quot;1&quot;
+4) &quot;1&quot;
+5) &quot;0&quot;
 6) &quot;1&quot;
 127.0.0.1:6379&gt; iset 3:id,10:name,2:country a name John
 (integer) 1
@@ -12750,6 +12770,8 @@ It is recommended to place variable-length UTF-8 text fields at the end of the s
 			<li><a href="#C::IGETVALS">IGETVALS</a></li>
 			<li><a href="#C::IGET">IGET</a></li>
 			<li><a href="#C::IMGET">IMGET</a></li>
+			<li><a href="#C::IEXISTS">IEXISTS</a></li>
+			<li><a href="#C::IMEXISTS">IMEXISTS</a></li>
 			<li><a href="#C::ISETALL">ISETALL</a></li>
 			<li><a href="#C::ISET">ISET</a></li>
 			<li><a href="#C::IDEL">IDEL</a></li>
@@ -13032,6 +13054,10 @@ The data is parsed using the provided schema. Trailing spaces (padding) are auto
 </pre></blockquote>
 
 
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IMGET">IMGET</a></li>
+			</ul>
 		</div>
 
 		<p><a href="#top">top</a></p>
@@ -13099,6 +13125,144 @@ The data is parsed using the provided schema. Trailing spaces (padding) are auto
 </pre></blockquote>
 
 
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IGET">IGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IEXISTS">
+			<a name="C::IEXISTS"></a>
+			<h4>IEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IEXISTS schema key field</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>field</td>
+					<td>the specific field name to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Checking the existance for the value of the specified *field* from the isam object stored in *key*.<br />
+The data is parsed using the provided schema.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0/1 value corresponding to the requested field</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; iexists 3:id,10:name,2:country a name
+(integer) 1
+127.0.0.1:6379&gt; iexists 3:id,10:name,2:country a nonexistent
+(integer) 0
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IMEXISTS">IMEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="IMEXISTS">
+			<a name="C::IMEXISTS"></a>
+			<h4>IMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>IMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>ISAM	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>IMEXISTS schema key field [field ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>schema</td>
+					<td>field definitions in format size:field_name,size:field_name,...</td>
+				</tr>
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>field</td>
+					<td>one or more field names to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Checking the existance for the value of the specified *field*, *field* from the isam object stored in *key*.<br />
+The data is parsed using the provided schema.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of int (0/1) values corresponding to the requested fields</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; isetall 3:id,10:name,2:country a 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; imexists 3:id,10:name,2:country a name country id id non_existent id
+1) &quot;1&quot;
+2) &quot;1&quot;
+3) &quot;1&quot;
+4) &quot;1&quot;
+5) &quot;0&quot;
+6) &quot;1&quot;
+127.0.0.1:6379&gt; imexists 3:id,10:name,2:country a name
+1) &quot;1&quot;
+127.0.0.1:6379&gt; imexists 3:id,10:name,2:country a name name
+1) &quot;1&quot;
+2) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::IEXISTS">IEXISTS</a></li>
+			</ul>
 		</div>
 
 		<p><a href="#top">top</a></p>

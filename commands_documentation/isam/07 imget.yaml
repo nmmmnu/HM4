@@ -36,3 +36,7 @@
     127.0.0.1:6379> imget 3:id,10:name,2:country a name name
     1) "Niki"
     2) "Niki"
+
+  see_also:
+      items:
+        - IGET

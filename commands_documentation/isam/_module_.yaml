@@ -27,7 +27,10 @@ description: |
     <li><i>igetall</i> - returns an array of all field names and their corresponding values (similar to HGETALL).</li>
     <li><i>igetkeys</i> - returns an array containing only the field names.</li>
     <li><i>igetvals</i> - returns an array containing only the actual data values.</li>
+    <li><i>iget</i> - fetches value for specific requested field and returning an empty string for non-existent fields.</li>
     <li><i>imget</i> - fetches values for specific requested fields in any order, supporting duplicates and returning an empty string for non-existent fields.</li>
+    <li><i>iexists</i> - checking the existance for specific requested field and returning 0 / 1 whatever value is empty or not.</li>
+    <li><i>imexists</i> - checking the existance for specific requested fields in any order, and returning 0 / 1 whatever value is empty or not.</li>
   </ul>
 
   <p><b>4. UTF-8 and Multi-byte Characters</b></p>
@@ -56,6 +59,14 @@ example_module:     |
   1) "1"
   2) "Niki"
   3) "BG"
+  127.0.0.1:6379> iget 3:id,10:name,2:country a name
+  "Niki"
+  127.0.0.1:6379> iget 3:id,10:name,2:country a non_existent
+  ""
+  127.0.0.1:6379> iexists 3:id,10:name,2:country a name
+  (integer) 1
+  127.0.0.1:6379> iexists 3:id,10:name,2:country a non_existent
+  (integer) 0
   127.0.0.1:6379> imget 3:id,10:name,2:country a name
   1) "Niki"
   127.0.0.1:6379> imget 3:id,10:name,2:country a name country id
@@ -68,6 +79,13 @@ example_module:     |
   3) "1"
   4) "1"
   5) ""
+  6) "1"
+  127.0.0.1:6379> imexists 3:id,10:name,2:country a name country id id non_existent id
+  1) "1"
+  2) "1"
+  3) "1"
+  4) "1"
+  5) "0"
   6) "1"
   127.0.0.1:6379> iset 3:id,10:name,2:country a name John
   (integer) 1

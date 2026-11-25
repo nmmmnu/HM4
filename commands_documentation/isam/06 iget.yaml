@@ -26,3 +26,7 @@
     (integer) 1
     127.0.0.1:6379> iget 3:id,10:name,2:country a name
     "Niki"
+
+  see_also:
+      items:
+        - IMGET
