@@ -23,7 +23,8 @@
 #include "keyvaluecommands/cmd_counter.h"		// INCR, DECR
 #include "keyvaluecommands/cmd_tb.h"			// TBCONSUME, TBCOUNT
 
-#include "keyvaluecommands/cmd_isam.h"			// IGETALL
+#include "keyvaluecommands/cmd_isam.h"			// IRESERVE, IGETALL, IGETKEYS, IGETVALS, IGET, IMGET, ISETALL, ISET, IDEL
+#include "keyvaluecommands/cmd_piece.h"			// PIECEGETCOUNT
 
 #include "keyvaluecommands/cmd_queue.h"			// SADD, SPOP
 #include "keyvaluecommands/cmd_bitset.h"		// SETBIT, GETBIT, BITCOUNT, BITMAX
@@ -122,6 +123,7 @@ namespace net::worker{
 				Counter		::RegisterModule,
 				TokenBucket	::RegisterModule,
 				ISAM_cmd	::RegisterModule,
+				Piece		::RegisterModule,
 
 				Queue		::RegisterModule,
 				BITSET		::RegisterModule,

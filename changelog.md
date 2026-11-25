@@ -457,5 +457,6 @@ Changelog
 -	remove spare pool and options min_spare_pool, max_spare_pool, buffer_capacity
 -	introduce chained IOBuffer and DataCopier
 -	removing helper module string list, it will be replaced with mumps_pieces module
-
+-	new module MUMPS piece: PIECECOUNT, PIECEGETALL, PIECEGET, PIECEMGET, PIECEEXISTS, PIECEMEXISTS, PIECESETALL, PIECESET,
+	PIECEDEL, PIECEAPPEND
 
