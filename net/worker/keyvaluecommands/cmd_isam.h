@@ -95,6 +95,122 @@ namespace net::worker::commands::ISAM_cmd{
 			return result.set_container(container);
 		}
 
+
+
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, typename F>
+		void IGET_process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, F f){
+			if (p.size() != 4)
+				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &column = p[3];
+
+			if (!hm4::Pair::isKeyValid(column))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &storage  = hm4::getPairVal(*db, key);
+
+			// similar to IMGET::collect_1__
+
+			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, column);
+
+			if (isam.bytes() != storage.size())
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			return result.set(
+				f(
+					isam.load(storage.data(), searcher)
+				)
+			);
+		}
+
+
+
+		template<typename Protocol, typename MemoryManager, typename F, typename Searcher>
+		static void IMGET_collect__(ISAM const &isam, Searcher const &searcher,
+						Result<Protocol,MemoryManager> &result, OutputBlob::Container &container,
+							std::string_view storage,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
+							F f){
+			for(auto itk = begin; itk != end; ++itk)
+				container.push_back( f( isam.load(storage.data(), searcher, *itk) ) );
+
+			return result.set_container(container);
+		}
+
+		template<typename Protocol, typename MemoryManager, typename F>
+		void IMGET_process_1__(Result<Protocol,MemoryManager> &result, OutputBlob::Container &container,
+							std::string_view schema, std::string_view storage,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
+							F f
+						){
+			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
+
+			if (isam.bytes() != storage.size())
+				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
+
+			logme_("IMGET", "single", isam, 1);
+
+			return IMGET_collect__(isam, searcher, result, container, storage, begin, end, f);
+		}
+
+		template<typename Protocol, typename MemoryManager, typename F>
+		void IMGET_process_N__(Result<Protocol,MemoryManager> &result, OutputBlob::Container &container,
+							std::string_view schema, std::string_view storage,
+							ParamContainer::const_iterator begin, ParamContainer::const_iterator end,
+							F f
+						){
+			ISAM const isam{ schema };
+
+			if (isam.bytes() != storage.size())
+				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			auto const expected = std::distance(begin, end);
+
+			if (!selectFastSearcher(isam.size(), static_cast<size_t>(expected))){
+				logme_("IMGET", "linear", isam, expected);
+				auto searcher = isam.getLinearSearcherByName();
+
+				return IMGET_collect__(isam, searcher, result, container, storage, begin, end, f);
+			}else{
+				auto searcher = getFastSearcher(isam, "IMGET", static_cast<size_t>(expected));
+
+				return IMGET_collect__(isam, searcher, result, container, storage, begin, end, f);
+			}
+		}
+
+		template<typename Protocol, typename MemoryManager, typename DBAdapter, typename F>
+		void IMGET_process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob, F f){
+			if (p.size() < 4)
+				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
+
+			auto const &schema = p[1];
+			auto const &key    = p[2];
+
+			if (!hm4::Pair::isKeyValid(key))
+				return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const varg = 3;
+
+			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
+					return result.set_error(ResultErrorMessages::EMPTY_KEY);
+
+			auto const &storage  = hm4::getPairVal(*db, key);
+
+			auto &container = blob.construct<OutputBlob::Container>();
+
+			if (p.size() - varg == 1)
+				return IMGET_process_1__(result, container, schema, storage, std::begin(p) + varg, std::end(p), f);
+			else
+				return IMGET_process_N__(result, container, schema, storage, std::begin(p) + varg, std::end(p), f);
+		}
+
 	} // namespace impl_
 
 
@@ -168,42 +284,43 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// iget schema key subkey
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
-			return process__(p, db, result);
-		}
+			using namespace impl_;
 
-	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
-			if (p.size() != 4)
-				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
+			auto f = [](std::string_view sv){
+				return sv;
+			};
 
-			auto const &schema = p[1];
-			auto const &key    = p[2];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const &column = p[3];
-
-			if (!hm4::Pair::isKeyValid(column))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const &storage  = hm4::getPairVal(*db, key);
-
-			// similar to IMGET::collect_1__
-
-			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, column);
-
-			if (isam.bytes() != storage.size())
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			return result.set(
-				isam.load(storage.data(), searcher)
-			);
+			return IGET_process(p, db, result, f);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"iget",		"IGET"
+		};
+
+	};
+
+
+
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IEXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
+
+		IEXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IEXISTS", std::begin(cmd__), std::end(cmd__)){}
+
+		// iget schema key subkey
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
+			using namespace impl_;
+
+			auto f = [](std::string_view sv){
+				return !sv.empty();
+			};
+
+			return IGET_process(p, db, result, f);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"iexists",		"IEXISTS"
 		};
 
 	};
@@ -217,92 +334,43 @@ namespace net::worker::commands::ISAM_cmd{
 
 		// imget schema key subkey subkey...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
-			return process__(p, db, result, blob);
-		}
-
-	private:
-		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
-			if (p.size() < 4)
-				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
-
-			auto const &schema = p[1];
-			auto const &key    = p[2];
-
-			if (!hm4::Pair::isKeyValid(key))
-				return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const varg = 3;
-
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (const auto &key = *itk; !hm4::Pair::isKeyValid(key))
-					return result.set_error(ResultErrorMessages::EMPTY_KEY);
-
-			auto const &storage  = hm4::getPairVal(*db, key);
-
-			auto &container = blob.construct<OutputBlob::Container>();
-
-			if (p.size() - varg == 1)
-				return collect_1__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
-			else
-				return collect_N__(result, container, schema, storage, std::begin(p) + varg, std::end(p));
-		}
-
-
-		template<typename Container>
-		static void collect_1__(Result<Protocol,MemoryManager> &result, Container &container,
-							std::string_view schema, std::string_view storage,
-							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
 			using namespace impl_;
 
-			auto const &[isam, searcher] = ISAM::createAndSearchByName(schema, *begin);
+			auto f = [](std::string_view sv){
+				return sv;
+			};
 
-			if (isam.bytes() != storage.size())
-				return result.set_error(ResultErrorMessages::CONTAINER_CAPACITY);
-
-			logme_("IMGET", "single", isam, 1);
-
-			return collect__(isam, searcher, result, container, storage, begin, end);
-		}
-
-		template<typename Container>
-		static void collect_N__(Result<Protocol,MemoryManager> &result, Container &container,
-							std::string_view schema, std::string_view storage,
-							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			using namespace impl_;
-
-			ISAM const isam{ schema };
-
-			if (isam.bytes() != storage.size())
-				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
-
-			auto const expected = std::distance(begin, end);
-
-			if (!selectFastSearcher(isam.size(), static_cast<size_t>(expected))){
-				logme_("IMGET", "linear", isam, expected);
-				auto searcher = isam.getLinearSearcherByName();
-
-				return collect__(isam, searcher, result, container, storage, begin, end);
-			}else{
-				auto searcher = getFastSearcher(isam, "IMGET", static_cast<size_t>(expected));
-
-				return collect__(isam, searcher, result, container, storage, begin, end);
-			}
-		}
-
-		template<typename Container, typename Searcher>
-		static void collect__(ISAM const &isam, Searcher const &searcher,
-						Result<Protocol,MemoryManager> &result, Container &container,
-							std::string_view storage,
-							ParamContainer::const_iterator begin, ParamContainer::const_iterator end){
-			for(auto itk = begin; itk != end; ++itk)
-				container.push_back( isam.load(storage.data(), searcher, *itk) );
-
-			return result.set_container(container);
+			return IMGET_process(p, db, result, blob, f);
 		}
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
 			"imget",		"IMGET"
+		};
+
+	};
+
+
+
+	template<typename Protocol, typename MemoryManager, typename DBAdapter>
+	struct IMEXISTS : BaseCommandRO<Protocol,MemoryManager,DBAdapter>{
+
+		IMEXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("IMEXISTS", std::begin(cmd__), std::end(cmd__)){}
+
+		// imexists schema key subkey subkey...
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			using namespace impl_;
+
+			auto f = [](std::string_view sv){
+				return sv.empty() ? "0" : "1";
+			};
+
+			return IMGET_process(p, db, result, blob, f);
+		}
+
+	private:
+		constexpr inline static std::string_view cmd__[] = {
+			"imexists",		"IMEXISTS"
 		};
 
 	};
@@ -694,6 +762,8 @@ namespace net::worker::commands::ISAM_cmd{
 				IGETVALS	,
 				IGET		,
 				IMGET		,
+				IEXISTS		,
+				IMEXISTS	,
 				ISETALL		,
 				ISET		,
 				IDEL		,

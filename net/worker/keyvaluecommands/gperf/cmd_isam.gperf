@@ -13,6 +13,12 @@ IGET,		"IGET"
 imget,		"IMGET"
 IMGET,		"IMGET"
 # ---
+iexists,	"IEXISTS"
+IEXISTS,	"IEXISTS"
+# ---
+imexists,	"IMEXISTS"
+IMEXISTS,	"IMEXISTS"
+# ---
 isetall,	"ISETALL"
 ISETALL,	"ISETALL"
 # ---

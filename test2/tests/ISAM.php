@@ -22,6 +22,12 @@ function cmd_ISAM($redis){
 	expect("IGETVALS", rawCommand($redis, "igetvals", $mask, "a") == ["1", "Niki", "BG"]);
 	expect("IGETVALS", rawCommand($redis, "igetvals", $mask, "b") == []);
 
+	expect("IGET",     rawCommand($redis, "iget", $mask, "a", "name") == "Niki");
+	expect("IGET",     rawCommand($redis, "iget", $mask, "a", "namZ") == "");
+
+	expect("IEXISTS",  rawCommand($redis, "iexists", $mask, "a", "name") == 1);
+	expect("IEXISTS",  rawCommand($redis, "iexists", $mask, "a", "namZ") == 0);
+
 	expect("IMGET",    rawCommand($redis, "imget", $mask, "a", "name") == ["Niki"]);
 	expect("IMGET",    rawCommand($redis, "imget", $mask, "a", "name", "country", "id") == ["Niki", "BG", "1"]);
 	expect("IMGET",    rawCommand($redis, "imget", $mask, "a", "name", "country", "id", "id", "non_existent", "id") == [
@@ -31,6 +37,15 @@ function cmd_ISAM($redis){
 		"1",
 		"",
 		"1"
+	]);
+
+	expect("IMEXISTS", rawCommand($redis, "imexists", $mask, "a", "name", "country", "id", "id", "non_existent", "id") == [
+		1,
+		1,
+		1,
+		1,
+		0,
+		1
 	]);
 
 	expect("ISET",     rawCommand($redis, "iset", $mask, "a", "name", "John") == 1);
