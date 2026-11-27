@@ -16,6 +16,12 @@ namespace net::worker::commands::Piece{
 			return mumps_piece::trimSV(sv, delimiter);
 		}
 
+		template<typename List>
+		std::string_view getTrimedVal(List &list, std::string_view key, char delimiter){
+			const auto *pair = hm4::getPairPtr(list, key);
+			return pair ? trimSV(pair->getVal(), delimiter) : "";
+		}
+
 		constexpr size_t clampIndex(std::string_view sv){
 			auto const index = from_string<size_t>(sv);
 
@@ -85,7 +91,9 @@ namespace net::worker::commands::Piece{
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			auto const val = hm4::getPairVal(*db, key);
+			using namespace impl_;
+
+			auto const val = getTrimedVal(*db, key, delimiter[0]);
 
 			auto const count = 1 + std::count(std::begin(val), std::end(val), delimiter[0]);
 
@@ -128,7 +136,7 @@ namespace net::worker::commands::Piece{
 
 			using namespace impl_;
 
-			auto const val = hm4::getPairVal(*db, key);
+			auto const val = getTrimedVal(*db, key, delimiter[0]);
 
 			auto const &mpm = blob.construct<MumpsPieceMany>(val, delimiter[0]);
 
@@ -172,7 +180,7 @@ namespace net::worker::commands::Piece{
 
 			auto const index	= clampIndex(p[3]);
 
-			auto const val = hm4::getPairVal(*db, key);
+			auto const val = getTrimedVal(*db, key, delimiter[0]);
 
 			// no need to be allocated, but for consistency
 			auto const &mps = blob.construct<MumpsPieceSingle>(val, delimiter[0]);
@@ -217,7 +225,7 @@ namespace net::worker::commands::Piece{
 
 			auto const index	= clampIndex(p[3]);
 
-			auto const val = hm4::getPairVal(*db, key);
+			auto const val = getTrimedVal(*db, key, delimiter[0]);
 
 			// no need to be allocated, but for consistency
 			auto const &mps = blob.construct<MumpsPieceSingle>(val, delimiter[0]);
@@ -262,7 +270,7 @@ namespace net::worker::commands::Piece{
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			const auto val = hm4::getPairVal(*db, key);
+			auto const val = getTrimedVal(*db, key, delimiter[0]);
 
 			if (std::distance(std::begin(p) + varg, std::end(p)) == 1){
 				// no need to be allocated, but for consistency
@@ -323,7 +331,7 @@ namespace net::worker::commands::Piece{
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			const auto val = hm4::getPairVal(*db, key);
+			auto const val = getTrimedVal(*db, key, delimiter[0]);
 
 			auto toBool = [](std::string_view s) -> std::string_view{
 				return s.empty() ? "0" : "1";
@@ -439,6 +447,8 @@ namespace net::worker::commands::Piece{
 
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+
+			// auto const val = getTrimedVal(*db, key, delimiter[0]);
 
 			const auto pair = hm4::getPairPtr(*db, key);
 			const auto val  = pair ? trimSV(pair->getVal(), delimiter[0]) : "";
@@ -637,9 +647,11 @@ namespace net::worker::commands::Piece{
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
-				if (itk->empty())
-					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			if constexpr(0){
+				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk)
+					if (itk->empty())
+						return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
+			}
 
 			const auto *pair = hm4::getPairPtr(*db, key);
 
