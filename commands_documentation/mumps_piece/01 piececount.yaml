@@ -1,5 +1,8 @@
 - id:          PIECECOUNT
   name:        PIECECOUNT
+  aliases:
+    items:
+      - PIECESIZE
   usage:       PIECECOUNT key delimiter
   params:
     items:
