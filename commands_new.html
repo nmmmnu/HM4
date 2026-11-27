@@ -299,6 +299,21 @@
 			</ul>
 		</div>
 		<div>
+			<a href="#M::MUMPS_PIECE">MUMPS_PIECE</a>
+			<ul>
+				<li><a href="#C::PIECECOUNT">PIECECOUNT</a></li>
+				<li><a href="#C::PIECEGETALL">PIECEGETALL</a></li>
+				<li><a href="#C::PIECEGET">PIECEGET</a></li>
+				<li><a href="#C::PIECEMGET">PIECEMGET</a></li>
+				<li><a href="#C::PIECEEXISTS">PIECEEXISTS</a></li>
+				<li><a href="#C::PIECEMEXISTS">PIECEMEXISTS</a></li>
+				<li><a href="#C::PIECESETALL">PIECESETALL</a></li>
+				<li><a href="#C::PIECESET">PIECESET</a></li>
+				<li><a href="#C::PIECEDEL">PIECEDEL</a></li>
+				<li><a href="#C::PIECEAPPEND">PIECEAPPEND</a></li>
+			</ul>
+		</div>
+		<div>
 			<a href="#M::SS">SUMMARY_STATS</a>
 			<ul>
 				<li><a href="#C::SSRESERVE">SSRESERVE</a></li>
@@ -13445,6 +13460,773 @@ The new empty values are written directly onto their exact byte positions inside
 (integer) 1
 127.0.0.1:6379&gt; get a
 &quot;1              &quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<a name="M::MUMPS_PIECE"></a>
+		<h2>Module MUMPS_PIECE</h2>
+
+		<h3><b>Description:</b></h3>
+		<blockquote><p>This module provides commands for working with <b>structured objects</b> stored as a single, delimited string of variable-width fields.
+It mimics the "piece" functionality of legendary MUMPS (M) hierarhical database, also known as ДИАМС (DIAMS).</p>
+
+<p><b>How It Works:</b></p>
+
+<p><b>1. Delimiter Definition</b></p>
+<p>Every command requires a delimiter passed as its first (second) argument.
+The delimiter is single character and can not be escaped.
+Unlike original MUMPS, field indexes starts from zero and all empty trailing fields are automatically strip.</p>
+
+<p><b>2. Modifying fields</b></p>
+<p>The module allows setting all fields at once or updating specific fields selectively without altering the rest of the string layout.</p>
+<ul>
+  <li><i>piecesetall</i> - overwrites or initializes all fields sequentially based on the schema layout.</li>
+  <li><i>pieceset</i>    - selectively updates only the specified fields at their exact byte offsets.</li>
+  <li><i>piecedel</i>    - "clears" the specified fields by replacing their contents with empty string.</li>
+</ul>
+
+<p><b>3. Retrieving data</b></p>
+<p>Data can be fetched as flat lists of key-value pairs, standalone keys, or standalone values. All returned values are automatically stripped of their trailing space padding.</p>
+<ul>
+  <li><i>piecegetall</i>   - returns an array of all field names and their corresponding values (similar to HGETALL).</li>
+  <li><i>pieceget</i>     - fetches value for specific requested field and returning an empty string for non-existent fields.</li>
+  <li><i>piecemget</i>    - fetches values for specific requested fields in any order, supporting duplicates and returning an empty string for non-existent fields.</li>
+  <li><i>pieceexists</i>  - checking the existance for specific requested field and returning 0 / 1 whatever value is empty or not.</li>
+  <li><i>piecemexists</i> - checking the existance for specific requested fields in any order, and returning 0 / 1 whatever value is empty or not.</li>
+</ul>
+
+<p><b>4. UTF-8 and Multi-byte Characters</b></p>
+<p>Since fields may have any sizes, UTF-8 is supported out of the box.</p>
+
+<p><b>Tip:</b> Use <i>piecegetall</i> when you need a full object dump, and <i>pieceget</i> or <i>piecemget</i> to quickly cherry-pick specific fields in a single network round-trip.</p>
+</blockquote>
+
+		<h3>Example:</h3>
+		<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1,Niki,BG
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1,Niki,BG&quot;
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; pieceget a , 1
+&quot;Niki&quot;
+127.0.0.1:6379&gt; pieceget a , 8
+&quot;&quot;
+127.0.0.1:6379&gt; pieceexists a , 1
+(integer) 1
+127.0.0.1:6379&gt; pieceexists a , 8
+(integer) 0
+127.0.0.1:6379&gt; piecemget a , 1
+1) &quot;Niki&quot;
+127.0.0.1:6379&gt; piecemget a , 1 2 0
+1) &quot;Niki&quot;
+2) &quot;BG&quot;
+3) &quot;1&quot;
+127.0.0.1:6379&gt; piecemget a , 1 2 0 0 8 0
+1) &quot;Niki&quot;
+2) &quot;BG&quot;
+3) &quot;1&quot;
+4) &quot;1&quot;
+5) &quot;&quot;
+6) &quot;1&quot;
+127.0.0.1:6379&gt; piecemexists a , 1 2 0 0 8 0
+1) &quot;1&quot;
+2) &quot;1&quot;
+3) &quot;1&quot;
+4) &quot;1&quot;
+5) &quot;0&quot;
+6) &quot;1&quot;
+127.0.0.1:6379&gt; pieceset a , 1 John
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1,John,BG&quot;
+127.0.0.1:6379&gt; piecedel a , 2 0
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;,John&quot;
+127.0.0.1:6379&gt; del a
+(integer) 1
+</pre></blockquote>
+
+
+		<h3>Commands:</h3>
+		<ul>
+			<li><a href="#C::PIECECOUNT">PIECECOUNT</a></li>
+			<li><a href="#C::PIECEGETALL">PIECEGETALL</a></li>
+			<li><a href="#C::PIECEGET">PIECEGET</a></li>
+			<li><a href="#C::PIECEMGET">PIECEMGET</a></li>
+			<li><a href="#C::PIECEEXISTS">PIECEEXISTS</a></li>
+			<li><a href="#C::PIECEMEXISTS">PIECEMEXISTS</a></li>
+			<li><a href="#C::PIECESETALL">PIECESETALL</a></li>
+			<li><a href="#C::PIECESET">PIECESET</a></li>
+			<li><a href="#C::PIECEDEL">PIECEDEL</a></li>
+			<li><a href="#C::PIECEAPPEND">PIECEAPPEND</a></li>
+		</ul>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+
+		<div class="cmd" id="PIECECOUNT">
+			<a name="C::PIECECOUNT"></a>
+			<h4>PIECECOUNT</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECECOUNT		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECECOUNT key delimiter</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns the count all values from piece object stored in *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>count of all fields</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; piececount a ,
+(integer) 3
+127.0.0.1:6379&gt; set b a,,,
+OK
+127.0.0.1:6379&gt; piececount b ,
+(integer) 1
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECEGETALL">
+			<a name="C::PIECEGETALL"></a>
+			<h4>PIECEGETALL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECEGETALL		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECEGETALL key delimiter</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Returns all values from piece object stored in *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>flat array of field values</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; set b a,,,
+OK
+127.0.0.1:6379&gt; piecegetall b ,
+1) &quot;a&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECEGET">
+			<a name="C::PIECEGET"></a>
+			<h4>PIECEGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECEGET		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECEGET key delimiter field_id</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>field_id</td>
+					<td>the id (number) specific field name to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Retrieves the value of a single specified *field_id* from the piece object stored in *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>string</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>the value of the field, or an empty string if the field does not exist</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; pieceget a , 1
+&quot;Niki&quot;
+127.0.0.1:6379&gt; pieceget a , 8
+&quot;&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::PIECEMGET">PIECEMGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECEMGET">
+			<a name="C::PIECEMGET"></a>
+			<h4>PIECEMGET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECEMGET		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECEMGET key delimiter field_id [field_id ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>field_id</td>
+					<td>the id (number) specific field name to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Retrieves the value of a single specified *field_id*, *field_id* from the piece object stored in *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of values corresponding to the requested field_id's</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecemget a , 1 2 8 0
+1) &quot;Niki&quot;
+2) &quot;BG&quot;
+3) &quot;&quot;
+4) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::PIECEGET">PIECEGET</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECEEXISTS">
+			<a name="C::PIECEEXISTS"></a>
+			<h4>PIECEEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECEEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECEEXISTS key delimiter field_id</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>field_id</td>
+					<td>the id (number) specific field_id to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Checking the existance for the value of the specified *field_id* from the piece object stored in *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>int</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>0/1 value corresponding to the requested field</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; pieceexists a , 1
+(integer) 1
+127.0.0.1:6379&gt; pieceexists a , 18
+(integer) 0
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::PIECEMEXISTS">PIECEMEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECEMEXISTS">
+			<a name="C::PIECEMEXISTS"></a>
+			<h4>PIECEMEXISTS</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECEMEXISTS		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECEMEXISTS key delimiter field_id [field_id ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>field_id</td>
+					<td>the id (number) specific field_id to retrieve</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Checking the existance for the value of the specified *field_id*, *field_id* from the piece object stored in *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>array of int (0/1) values corresponding to the requested fields</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecemexists a , 1 2 8 0
+1) &quot;1&quot;
+2) &quot;1&quot;
+3) &quot;0&quot;
+4) &quot;1&quot;
+</pre></blockquote>
+
+
+			<h4>See Also:</h4>
+			<ul>
+				<li><a href="#C::PIECEEXISTS">PIECEEXISTS</a></li>
+			</ul>
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECESETALL">
+			<a name="C::PIECESETALL"></a>
+			<h4>PIECESETALL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECESETALL		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>WRITE	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECESETALL key delimiter val [val ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>val</td>
+					<td>values for all field_id, provided sequentially in the schema order</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Initializes or completely overwrites the piece object at the specified *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; get a
+&quot;1,Niki,BG&quot;
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECESET">
+			<a name="C::PIECESET"></a>
+			<h4>PIECESET</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECESET		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ + WRITE	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECESET key delimiter field_id val [field_id val ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>field_id</td>
+					<td>the id (number) specific field name to update</td>
+				</tr>
+				<tr>
+					<td>val</td>
+					<td>the new value for the field_id</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Selectively updates one or more *field_id* within the piece object at the specified *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; pieceset a , 1 John
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;John&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; set b ,,,a
+(integer) 1
+127.0.0.1:6379&gt; piecegetall b ,
+1) &quot;&quot;
+2) &quot;&quot;
+3) &quot;&quot;
+4) &quot;a&quot;
+127.0.0.1:6379&gt; pieceset b , 3 &#x27;&#x27;
+(integer) 1
+127.0.0.1:6379&gt; piecegetall b ,
+(empty array)
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECEDEL">
+			<a name="C::PIECEDEL"></a>
+			<h4>PIECEDEL</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECEDEL		</td></tr>
+				<tr><td>Available since		</td><td>1.3.14.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>1.4.1	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>Y				</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECEDEL key delimiter field_id [field_id ...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>field_id</td>
+					<td>the id (number) specific field_id to clear</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Selectively deletes one or more *field_id* within the piece object at the specified *key*.<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>integer</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>1</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; piecedel a , 1
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; set b ,,,a
+(integer) 1
+127.0.0.1:6379&gt; piecegetall b ,
+1) &quot;&quot;
+2) &quot;&quot;
+3) &quot;&quot;
+4) &quot;a&quot;
+127.0.0.1:6379&gt; piecedel b , 3
+(integer) 1
+127.0.0.1:6379&gt; piecegetall b ,
+(empty array)
+</pre></blockquote>
+
+
+		</div>
+
+		<p><a href="#top">top</a></p>
+		<hr />
+		<div class="cmd" id="PIECEAPPEND">
+			<a name="C::PIECEAPPEND"></a>
+			<h4>PIECEAPPEND</h4>
+			<table border="1" class="x">
+				<tr><td>Command			</td><td>PIECEAPPEND		</td></tr>
+				<tr><td>Available since		</td><td>1.4.1	</td></tr>
+				<tr><td>Data lookup complexity	</td><td>READ	</td></tr>
+				<tr><td>Redis compatible	</td><td>	N		</td></tr>
+				<tr><td>Mutable			</td><td>		N		</td></tr>
+				<tr><td>Module			</td><td>MUMPS_PIECE	</td></tr>
+			</table>
+
+			<h4>Usage:</h4>
+			<blockquote>PIECEAPPEND key delimiter val [val s...]</blockquote>
+
+			<h4>Parameters:</h4>
+			<blockquote>
+			<table border="1" class="x">
+				<tr>
+					<td>key</td>
+					<td>the key holding the fixed-width string</td>
+				</tr>
+				<tr>
+					<td>delimiter</td>
+					<td>field delimiter</td>
+				</tr>
+				<tr>
+					<td>val</td>
+					<td>the new value for the field_id to be appended</td>
+				</tr>
+			</table>
+			</blockquote>
+
+			<h4>Description:</h4>
+			<blockquote>Appends one or more values in the piece object at the specified *key*.<br />
+Empty values are permitted, but ignored<br />
+The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+</blockquote>
+
+			<h4>Return type:</h4>
+			<blockquote>array</blockquote>
+
+			<h4>Return value:</h4>
+			<blockquote>flat array of field names and their corresponding values (field1, value1, field2, value2, ...)</blockquote>
+
+
+			<h4>Example:</h4>
+			<blockquote><pre class="x">127.0.0.1:6379&gt; piecesetall a , 1 Niki BG
+(integer) 1
+127.0.0.1:6379&gt; piecegetall a ,
+1) &quot;1&quot;
+2) &quot;Niki&quot;
+3) &quot;BG&quot;
+127.0.0.1:6379&gt; pieceappend a , Sofia
+(integer) 1
+127.0.0.1:6379&gt; get a
+&quot;1,Niki,BG,Sofia&quot;
+127.0.0.1:6379&gt; set b a,,,,,,,
+OK
+127.0.0.1:6379&gt; pieceappend b , &#x27;&#x27; &#x27;&#x27; test1 &#x27;&#x27;
+(integer) 1
+127.0.0.1:6379&gt; piecegetall b ,
+1) &quot;a&quot;
+2) &quot;test1&quot;
 </pre></blockquote>
 
 

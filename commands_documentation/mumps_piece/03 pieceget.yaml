@@ -1,0 +1,33 @@
+- id:          PIECEGET
+  name:        PIECEGET
+  usage:       PIECEGET key delimiter field_id
+  params:
+    items:
+    - k: key
+      v: the key holding the fixed-width string
+    - k: delimiter
+      v: field delimiter
+    - k: field_id
+      v: the id (number) specific field name to retrieve
+
+  description: |
+    Retrieves the value of a single specified *field_id* from the piece object stored in *key*.<br />
+    The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+
+  return_type: string
+  return:      the value of the field, or an empty string if the field does not exist
+  version:     1.4.1
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> piecesetall a , 1 Niki BG
+    (integer) 1
+    127.0.0.1:6379> pieceget a , 1
+    "Niki"
+    127.0.0.1:6379> pieceget a , 8
+    ""
+
+  see_also:
+      items:
+        - PIECEMGET

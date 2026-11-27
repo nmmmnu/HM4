@@ -1,0 +1,89 @@
+id:          MUMPS_PIECE
+name:        MUMPS_PIECE
+
+version:     1.4.1
+
+description: |
+  <p>This module provides commands for working with <b>structured objects</b> stored as a single, delimited string of variable-width fields.
+  It mimics the "piece" functionality of legendary MUMPS (M) hierarhical database, also known as ДИАМС (DIAMS).</p>
+
+  <p><b>How It Works:</b></p>
+
+  <p><b>1. Delimiter Definition</b></p>
+  <p>Every command requires a delimiter passed as its first (second) argument.
+  The delimiter is single character and can not be escaped.
+  Unlike original MUMPS, field indexes starts from zero and all empty trailing fields are automatically strip.</p>
+
+  <p><b>2. Modifying fields</b></p>
+  <p>The module allows setting all fields at once or updating specific fields selectively without altering the rest of the string layout.</p>
+  <ul>
+    <li><i>piecesetall</i> - overwrites or initializes all fields sequentially based on the schema layout.</li>
+    <li><i>pieceset</i>    - selectively updates only the specified fields at their exact byte offsets.</li>
+    <li><i>piecedel</i>    - "clears" the specified fields by replacing their contents with empty string.</li>
+  </ul>
+
+  <p><b>3. Retrieving data</b></p>
+  <p>Data can be fetched as flat lists of key-value pairs, standalone keys, or standalone values. All returned values are automatically stripped of their trailing space padding.</p>
+  <ul>
+    <li><i>piecegetall</i>   - returns an array of all field names and their corresponding values (similar to HGETALL).</li>
+    <li><i>pieceget</i>     - fetches value for specific requested field and returning an empty string for non-existent fields.</li>
+    <li><i>piecemget</i>    - fetches values for specific requested fields in any order, supporting duplicates and returning an empty string for non-existent fields.</li>
+    <li><i>pieceexists</i>  - checking the existance for specific requested field and returning 0 / 1 whatever value is empty or not.</li>
+    <li><i>piecemexists</i> - checking the existance for specific requested fields in any order, and returning 0 / 1 whatever value is empty or not.</li>
+  </ul>
+
+  <p><b>4. UTF-8 and Multi-byte Characters</b></p>
+  <p>Since fields may have any sizes, UTF-8 is supported out of the box.</p>
+
+  <p><b>Tip:</b> Use <i>piecegetall</i> when you need a full object dump, and <i>pieceget</i> or <i>piecemget</i> to quickly cherry-pick specific fields in a single network round-trip.</p>
+
+example_module:     |
+  127.0.0.1:6379> piecesetall a , 1,Niki,BG
+  (integer) 1
+  127.0.0.1:6379> get a
+  "1,Niki,BG"
+  127.0.0.1:6379> piecegetall a ,
+  1) "1"
+  2) "Niki"
+  3) "BG"
+  127.0.0.1:6379> pieceget a , 1
+  "Niki"
+  127.0.0.1:6379> pieceget a , 8
+  ""
+  127.0.0.1:6379> pieceexists a , 1
+  (integer) 1
+  127.0.0.1:6379> pieceexists a , 8
+  (integer) 0
+  127.0.0.1:6379> piecemget a , 1
+  1) "Niki"
+  127.0.0.1:6379> piecemget a , 1 2 0
+  1) "Niki"
+  2) "BG"
+  3) "1"
+  127.0.0.1:6379> piecemget a , 1 2 0 0 8 0
+  1) "Niki"
+  2) "BG"
+  3) "1"
+  4) "1"
+  5) ""
+  6) "1"
+  127.0.0.1:6379> piecemexists a , 1 2 0 0 8 0
+  1) "1"
+  2) "1"
+  3) "1"
+  4) "1"
+  5) "0"
+  6) "1"
+  127.0.0.1:6379> pieceset a , 1 John
+  (integer) 1
+  127.0.0.1:6379> get a
+  "1,John,BG"
+  127.0.0.1:6379> piecedel a , 2 0
+  (integer) 1
+  127.0.0.1:6379> get a
+  ",John"
+  127.0.0.1:6379> del a
+  (integer) 1
+
+
+

@@ -1,0 +1,34 @@
+- id:          PIECEMEXISTS
+  name:        PIECEMEXISTS
+  usage:       PIECEMEXISTS key delimiter field_id [field_id ...]
+  params:
+    items:
+    - k: key
+      v: the key holding the fixed-width string
+    - k: delimiter
+      v: field delimiter
+    - k: field_id
+      v: the id (number) specific field_id to retrieve
+
+  description: |
+    Checking the existance for the value of the specified *field_id*, *field_id* from the piece object stored in *key*.<br />
+    The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+
+  return_type: array
+  return:      array of int (0/1) values corresponding to the requested fields
+  version:     1.4.1
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> piecesetall a , 1 Niki BG
+    (integer) 1
+    127.0.0.1:6379> piecemexists a , 1 2 8 0
+    1) "1"
+    2) "1"
+    3) "0"
+    4) "1"
+
+  see_also:
+      items:
+        - PIECEEXISTS

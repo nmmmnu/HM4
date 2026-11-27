@@ -1,0 +1,34 @@
+- id:          PIECECOUNT
+  name:        PIECECOUNT
+  usage:       PIECECOUNT key delimiter
+  params:
+    items:
+    - k: key
+      v: the key holding the fixed-width string
+    - k: delimiter
+      v: field delimiter
+
+  description: |
+    Returns the count all values from piece object stored in *key*.<br />
+    The data is parsed using the provided delimiter. Trailing empty values are automatically stripped.
+
+  return_type: int
+  return:      count of all fields
+  version:     1.4.1
+  complexity:  READ
+  mutable:     false
+  compatible:  false
+  example:     |
+    127.0.0.1:6379> piecesetall a , 1 Niki BG
+    (integer) 1
+    127.0.0.1:6379> piecegetall a ,
+    1) "1"
+    2) "Niki"
+    3) "BG"
+    127.0.0.1:6379> piececount a ,
+    (integer) 3
+    127.0.0.1:6379> set b a,,,
+    OK
+    127.0.0.1:6379> piececount b ,
+    (integer) 1
+
