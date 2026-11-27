@@ -8,8 +8,13 @@ namespace net::worker::commands::Piece{
 
 	namespace impl_{
 
-		using MumpsPieceMany	= mumps_piece::MumpsPieceMany<OutputBlob::ContainerSize>;
-		using MumpsPieceSingle	= mumps_piece::MumpsPieceSingle;
+		using MumpsPieceMany		= mumps_piece::MumpsPieceMany<OutputBlob::ContainerSize>;
+		using MumpsPieceSingle		= mumps_piece::MumpsPieceSingle;
+		using MumpsPieceAppend		= mumps_piece::MumpsPieceAppend<OutputBlob::ContainerSize>;
+
+		inline std::string_view trimSV(std::string_view sv, char delimiter) noexcept{
+			return mumps_piece::trimSV(sv, delimiter);
+		}
 
 		constexpr size_t clampIndex(std::string_view sv){
 			auto const index = from_string<size_t>(sv);
@@ -18,7 +23,7 @@ namespace net::worker::commands::Piece{
 		}
 
 		template <typename Protocol, typename MemoryManager, typename DBAdapter, typename Mutator, size_t N>
-		void copyPiece(DBAdapter &db, Result<Protocol,MemoryManager> &result, Mutator &mutator, std::string_view key, std::array<char, N> &buffer){
+		void copyPieceInDB(DBAdapter &db, Result<Protocol,MemoryManager> &result, Mutator &mutator, std::string_view key, std::array<char, N> &buffer){
 			auto const bytes = mutator.bytes();
 
 			if (bytes > buffer.size())
@@ -35,20 +40,20 @@ namespace net::worker::commands::Piece{
 			return result.set_1();
 		}
 
-		template<typename MumpsPieceMutator>
-		struct PIECESET_Factory : hm4::PairFactory::IFactoryAction<0,1, PIECESET_Factory<MumpsPieceMutator> >{
+		template<typename MumpsPieceMutator, bool CP>
+		struct PIECESET_Factory : hm4::PairFactory::IFactoryAction<CP,1, PIECESET_Factory<MumpsPieceMutator, CP> >{
 			using Pair = hm4::Pair;
-			using Base = hm4::PairFactory::IFactoryAction<0,1, PIECESET_Factory<MumpsPieceMutator> >;
-			using It   = ParamContainer::const_iterator;
+			using Base = hm4::PairFactory::IFactoryAction<CP,1, PIECESET_Factory<MumpsPieceMutator, CP> >;
 
-			constexpr PIECESET_Factory(std::string_view const key, MumpsPieceMutator &mutator) :
-							Base::IFactoryAction	(key, mutator.bytes(), /* hint */ nullptr),
+			constexpr PIECESET_Factory(std::string_view const key, const Pair *pair, MumpsPieceMutator &mutator) :
+							Base::IFactoryAction	(key, mutator.bytes(), pair),
 							mutator			(mutator	){}
 
 			void action(Pair *pair) const{
 				mutator.copyToBuffer(pair->getValC());
 			}
 
+		private:
 			MumpsPieceMutator &mutator;
 		};
 
@@ -63,6 +68,11 @@ namespace net::worker::commands::Piece{
 
 		// piececount key delimiter
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			if (p.size() != 1 + 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -99,6 +109,11 @@ namespace net::worker::commands::Piece{
 
 		// piecegetall key delimiter
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 1 + 2)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_2);
 
@@ -134,8 +149,13 @@ namespace net::worker::commands::Piece{
 
 		PIECEGET() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PIECEGET", std::begin(cmd__), std::end(cmd__)){}
 
-		// piececount key delimiter ID
+		// pieceget key delimiter ID
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 1 + 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -174,8 +194,13 @@ namespace net::worker::commands::Piece{
 
 		PIECEEXISTS() : BaseCommandRO<Protocol,MemoryManager,DBAdapter>("PIECEEXISTS", std::begin(cmd__), std::end(cmd__)){}
 
-		// piececount key delimiter ID
+		// pieceexists key delimiter ID
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() != 1 + 3)
 				return result.set_error(ResultErrorMessages::NEED_EXACT_PARAMS_3);
 
@@ -216,6 +241,11 @@ namespace net::worker::commands::Piece{
 
 		// piecemget key delimiter ID ID...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 1 + 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -244,7 +274,7 @@ namespace net::worker::commands::Piece{
 			}else{
 				auto const &mpm = blob.construct<MumpsPieceMany>(val, delimiter[0]);
 
-				auto &container = blob.construct<OutputBlob::Container>();
+				auto &container = blob.construct<OutputBlob::SmallContainer>();
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const index = clampIndex(*itk);
@@ -272,6 +302,11 @@ namespace net::worker::commands::Piece{
 
 		// piecemget key delimiter ID ID...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 1 + 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -304,7 +339,7 @@ namespace net::worker::commands::Piece{
 			}else{
 				auto const &mpm = blob.construct<MumpsPieceMany>(val, delimiter[0]);
 
-				auto &container = blob.construct<OutputBlob::Container>();
+				auto &container = blob.construct<OutputBlob::SmallContainer>();
 
 				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
 					auto const index = clampIndex(*itk);
@@ -332,6 +367,11 @@ namespace net::worker::commands::Piece{
 
 		// piecesetall key delimiter val val...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 1 + 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -357,9 +397,9 @@ namespace net::worker::commands::Piece{
 
 			auto &mutator = mpm;
 
-			using Factory = PIECESET_Factory<MumpsPieceMany>;
+			using Factory = PIECESET_Factory<MumpsPieceMany, 0>;
 
-			hm4::insertV<Factory>(*db, key, mutator);
+			hm4::insertV<Factory>(*db, key, nullptr, mutator);
 
 			return result.set_1();
 		}
@@ -379,6 +419,11 @@ namespace net::worker::commands::Piece{
 
 		// pieceset key delimiter id val id val...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			auto const varg = 3;
 
 			if (p.size() < 1 + 4 || (p.size() - varg) % 2 != 0)
@@ -396,7 +441,7 @@ namespace net::worker::commands::Piece{
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
 			const auto pair = hm4::getPairPtr(*db, key);
-			const auto val  = pair ? pair->getVal() : "";
+			const auto val  = pair ? trimSV(pair->getVal(), delimiter[0]) : "";
 
 			if (std::distance(std::begin(p) + varg, std::end(p)) == 2){
 				// no need to be allocated, but for consistency
@@ -410,17 +455,19 @@ namespace net::worker::commands::Piece{
 				if (val.empty()){
 					logger<Logger::DEBUG>() << "PIECESET" << "single, no copy";
 
-					using Factory = PIECESET_Factory<MumpsPieceSingle::Mutator>;
+					using Factory = PIECESET_Factory<MumpsPieceSingle::Mutator, 0>;
 
-					hm4::insertV<Factory>(*db, key, mutator);
+					hm4::insertV<Factory>(*db, key, nullptr, mutator);
 
 					return result.set_1();
 				}else if (mutator.bytes() == val.size()){
 					logger<Logger::DEBUG>() << "PIECESET" << "single, update in place";
 
-					PIECESET_Inplace_Factory factory{ key, pair, mutator };
+					using Factory = PIECESET_Factory<MumpsPieceSingle::Mutator, 1>;
 
-					insertHintVFactory(*db, pair, factory);
+					Factory factory{ key, pair, mutator };
+
+					insertHintVFactory(*db, pair, factory); // has hint
 
 					return result.set_1();
 				}else{
@@ -428,7 +475,7 @@ namespace net::worker::commands::Piece{
 
 					auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
 
-					return copyPiece(db, result, mutator, key, bufferVal);
+					return copyPieceInDB(db, result, mutator, key, bufferVal);
 				}
 
 			}else{
@@ -447,9 +494,9 @@ namespace net::worker::commands::Piece{
 				if (val.empty()){
 					logger<Logger::DEBUG>() << "PIECESET" << "many, no copy";
 
-					using Factory = PIECESET_Factory<MumpsPieceMany>;
+					using Factory = PIECESET_Factory<MumpsPieceMany, 0>;
 
-					hm4::insertV<Factory>(*db, key, mutator);
+					hm4::insertV<Factory>(*db, key, nullptr, mutator);
 
 					return result.set_1();
 				}else{
@@ -457,30 +504,10 @@ namespace net::worker::commands::Piece{
 
 					auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
 
-					return copyPiece(db, result, mutator, key, bufferVal);
+					return copyPieceInDB(db, result, mutator, key, bufferVal);
 				}
 			}
 		}
-
-	private:
-		struct PIECESET_Inplace_Factory : hm4::PairFactory::IFactoryAction<1,1, PIECESET_Inplace_Factory>{
-			using Pair	= hm4::Pair;
-			using Base	= hm4::PairFactory::IFactoryAction<1,1, PIECESET_Inplace_Factory>;
-			using It	= ParamContainer::const_iterator;
-			using Mutator	= impl_::MumpsPieceSingle::Mutator;
-
-			constexpr PIECESET_Inplace_Factory(std::string_view const key, const Pair *pair, Mutator &mutator) :
-							Base::IFactoryAction	(key, mutator.bytes(), pair),
-							mutator			(mutator	){}
-
-			void action(Pair *pair) const{
-				char *data = pair->getValC();
-
-				mutator.updateBufferInPlace(data);
-			}
-
-			Mutator &mutator;
-		};
 
 	private:
 		constexpr inline static std::string_view cmd__[] = {
@@ -497,6 +524,11 @@ namespace net::worker::commands::Piece{
 
 		// piecedel key delimiter id id...
 		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+			return process__(p, db, result, blob);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob){
 			if (p.size() < 1 + 3)
 				return result.set_error(ResultErrorMessages::NEED_MORE_PARAMS_3);
 
@@ -513,7 +545,7 @@ namespace net::worker::commands::Piece{
 			if (delimiter.size() != 1)
 				return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			const auto val = hm4::getPairVal(*db, key);
+			const auto val = trimSV(hm4::getPairVal(*db, key), delimiter[0]);
 
 			if (val.empty()){
 				// done !
@@ -540,7 +572,7 @@ namespace net::worker::commands::Piece{
 
 					auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
 
-					return copyPiece(db, result, mutator, key, bufferVal);
+					return copyPieceInDB(db, result, mutator, key, bufferVal);
 				}
 			}else{
 				auto &mpm = blob.construct<MumpsPieceMany>(val, delimiter[0]);
@@ -555,11 +587,17 @@ namespace net::worker::commands::Piece{
 
 				auto &mutator = mpm;
 
-				logger<Logger::DEBUG>() << "PIECEDEL:" << "many, safe double copy";
+				if (mutator.bytes() == val.size()){
+					logger<Logger::DEBUG>() << "PIECEDEL:" << "many, no op";
 
-				auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
+					return result.set_1();
+				}else{
+					logger<Logger::DEBUG>() << "PIECEDEL:" << "many, safe double copy";
 
-				return copyPiece(db, result, mutator, key, bufferVal);
+					auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
+
+					return copyPieceInDB(db, result, mutator, key, bufferVal);
+				}
 			}
 		}
 
@@ -577,11 +615,16 @@ namespace net::worker::commands::Piece{
 		PIECEAPPEND() : BaseCommandRW<Protocol,MemoryManager,DBAdapter>("PIECEAPPEND", std::begin(cmd__), std::end(cmd__)){}
 
 		// pieceappend key delimiter val val...
-		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &blob) final{
+		void process(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result, OutputBlob &) final{
+			return process__(p, db, result);
+		}
+
+	private:
+		static void process__(ParamContainer const &p, DBAdapter &db, Result<Protocol,MemoryManager> &result){
 			auto const varg = 3;
 
 			if (p.size() < 1 + 3)
-				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_4);
+				return result.set_error(ResultErrorMessages::NEED_GROUP_PARAMS_3);
 
 			using namespace impl_;
 
@@ -598,60 +641,22 @@ namespace net::worker::commands::Piece{
 				if (itk->empty())
 					return result.set_error(ResultErrorMessages::INVALID_PARAMETERS);
 
-			const auto val = hm4::getPairVal(*db, key);
+			const auto *pair = hm4::getPairPtr(*db, key);
 
-			if (std::distance(std::begin(p) + varg, std::end(p)) == 1){
-				// no need to be allocated, but for consistency
-				auto const &mps = blob.construct<MumpsPieceSingle>(val, delimiter[0]);
+			MumpsPieceAppend mutator{
+				pair ? pair->getVal() : ""	,
+				delimiter[0]			,
+				std::begin(p) + varg		,
+				std::end(p)
+			};
 
-				auto const item  = p[3];
+			using Factory = PIECESET_Factory<MumpsPieceAppend, 1>;
 
-				auto mutator = mps.mutate(item);
+			Factory factory{ key, pair, mutator };
 
-				if (val.empty()){
-					logger<Logger::DEBUG>() << "PIECEAPPEND:" << "single, no copy";
+			insertHintVFactory(*db, pair, factory); // has hint
 
-					using Factory = PIECESET_Factory<MumpsPieceSingle::Mutator>;
-
-					hm4::insertV<Factory>(*db, key, mutator);
-
-					return result.set_1();
-				}else{
-					logger<Logger::DEBUG>() << "PIECEAPPEND:" << "single, safe double copy";
-
-					auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
-
-					return copyPiece(db, result, mutator, key, bufferVal);
-				}
-
-			}else{
-				auto &mpm = blob.construct<MumpsPieceMany>(val, delimiter[0]);
-
-				for(auto itk = std::begin(p) + varg; itk != std::end(p); ++itk){
-					auto const item  = *itk;
-
-					if (!mpm.set(item))
-						return result.set_error(ResultErrorMessages::INTERNAL_ERROR);
-				}
-
-				auto &mutator = mpm;
-
-				if (val.empty()){
-					logger<Logger::DEBUG>() << "PIECEAPPEND:" << "many, no copy";
-
-					using Factory = PIECESET_Factory<MumpsPieceMany>;
-
-					hm4::insertV<Factory>(*db, key, mutator);
-
-					return result.set_1();
-				}else{
-					logger<Logger::DEBUG>() << "PIECEAPPEND:" << "many, safe double copy";
-
-					auto &bufferVal  = blob.allocate<hm4::PairBufferVal>();
-
-					return copyPiece(db, result, mutator, key, bufferVal);
-				}
-			}
+			return result.set_1();
 		}
 
 	private:

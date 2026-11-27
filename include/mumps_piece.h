@@ -8,17 +8,60 @@
 #include <cassert>
 
 namespace mumps_piece{
+	namespace impl_{
+
+		template<size_t Size>
+		void copyToBuffer(BufferPusher &buffer, bool first, StaticVector<std::string_view, Size> const &vector, char delimiter, size_t bytes = 0) noexcept{
+			for(auto x : vector){
+				if (first){
+					first = false;
+				}else{
+					buffer.push(delimiter);
+				}
+
+				buffer.push(x);
+			}
+
+			if (bytes){
+				assert(buffer.size() == bytes);
+			}
+		}
+
+		template<size_t Size>
+		void copyToBuffer(StaticVector<std::string_view, Size> const &vector, char delimiter, char *ptr, size_t bytes = 0) noexcept{
+			BufferPusher buffer{ ptr };
+			copyToBuffer(buffer, true, vector, delimiter, bytes);
+		}
+
+		template<size_t Size>
+		void trim(StaticVector<std::string_view, Size> &vector){
+			while(!vector.empty() && vector.back().empty())
+				vector.pop_back();
+		}
+
+	} // namespace impl_
+
+
+
+	inline std::string_view trimSV(std::string_view sv, char delimiter) noexcept{
+		while(!sv.empty() && sv.back() == delimiter)
+			sv.remove_suffix(1);
+
+		return sv;
+	}
+
+
 
 	template<size_t Size>
 	struct MumpsPieceMany{
 		using Vector = StaticVector<std::string_view, Size>;
 
 		constexpr MumpsPieceMany(char delimiter) noexcept :
-						delimiter_	(delimiter			){}
+						delimiter_	(delimiter		){}
 
 		MumpsPieceMany(std::string_view sv, char delimiter) noexcept :
-						vector_		(decompose__(sv, delimiter)	),
-						delimiter_	(delimiter			){}
+						vector_		(load__(sv, delimiter)	),
+						delimiter_	(delimiter		){}
 
 	public:
 		constexpr auto operator[](size_t id) const noexcept{
@@ -69,14 +112,12 @@ namespace mumps_piece{
 
 			vector_[pos] = val;
 
-			trim__();
+			impl_::trim(vector_);
 
 			return true;
 		}
 
 		bool set(std::string_view val) noexcept{
-			trim__();
-
 			if (val.empty())
 				return true;
 
@@ -88,33 +129,12 @@ namespace mumps_piece{
 			return true;
 		}
 
-		auto copyToBuffer(char *data, size_t bytes = 0) const noexcept{
-			BufferPusher buffer{ data };
-
-			bool first = true;
-
-			for(auto x : vector_){
-				if (first){
-					first = false;
-				}else{
-					buffer.push(delimiter_);
-				}
-
-				buffer.push(x);
-			}
-
-			if (bytes){
-				assert(buffer.size() == bytes);
-			}
+		void copyToBuffer(char *data, size_t bytes = 0) const noexcept{
+			impl_::copyToBuffer(vector_, delimiter_, data, bytes);
 		}
 
 	private:
-		void trim__(){
-			while(!vector_.empty() && vector_.back().empty())
-				vector_.pop_back();
-		}
-
-		static Vector decompose__(std::string_view sv, char delimiter) noexcept{
+		static Vector load__(std::string_view sv, char delimiter) noexcept{
 			Vector vector;
 
 			StringTokenizer tok{ sv, delimiter };
@@ -126,6 +146,8 @@ namespace mumps_piece{
 				vector.push_back(x);
 			}
 
+			impl_::trim(vector);
+
 			return vector;
 		}
 
@@ -133,6 +155,61 @@ namespace mumps_piece{
 		Vector	vector_;
 		char	delimiter_;
 	};
+
+
+
+
+
+	template<size_t Size>
+	struct MumpsPieceAppend{
+		using Vector = StaticVector<std::string_view, Size>;
+
+		template<typename It>
+		MumpsPieceAppend(std::string_view data, char delimiter, It begin, It end) noexcept :
+								sizeFront_(calcSizeFront__(data, delimiter)	),
+								delimiter_(delimiter				){
+
+			assert(static_cast<size_t>(std::distance(begin, end)) <= Size);
+
+			for(auto it = begin; it != end; ++it)
+				if (!it->empty())
+					vector_.push_back(*it);
+		}
+
+		constexpr size_t bytes() const noexcept{
+			size_t size = sizeFront_;
+
+			for(auto x : vector_)
+				size += x.size() + 1;
+
+			return sizeFront_ == 0 && size ? size - 1 : size;
+		}
+
+		void copyToBuffer(char *data, size_t bytes = 0) const noexcept{
+			BufferPusher buffer{ data };
+
+			buffer.skip(sizeFront_);
+
+			bool const first = sizeFront_ == 0;
+
+			impl_::copyToBuffer(buffer, first, vector_, delimiter_, bytes);
+		}
+
+	private:
+		static size_t calcSizeFront__(std::string_view data, char delimiter) noexcept{
+			// trim data as a string
+			auto const sv = trimSV(data, delimiter);
+			return sv.size();
+		}
+
+	private:
+		Vector			vector_;
+		size_t			sizeFront_;
+
+		char			delimiter_;
+	};
+
+
 
 
 
@@ -162,14 +239,6 @@ namespace mumps_piece{
 
 		Mutator mutate(size_t pos, std::string_view val) const noexcept;
 		Mutator mutate(std::string_view val) const noexcept;
-
-	private:
-		static std::string_view trim_(std::string_view sv, char delimiter) noexcept{
-			while(!sv.empty() && sv.back() == delimiter)
-				sv.remove_suffix(1);
-
-			return sv;
-		}
 
 	private:
 		std::string_view	data_;
@@ -246,17 +315,17 @@ namespace mumps_piece{
 			auto prefix = data_.substr(0, start);
 			auto suffix = data_.substr(sliceEnd);
 
-			suffix = trim_(suffix, delimiter_);
+			suffix = trimSV(suffix, delimiter_);
 
 			if (val.empty() && suffix.empty())
-				prefix = trim_(prefix, delimiter_);
+				prefix = trimSV(prefix, delimiter_);
 
 			return Mutator{
-				/* val		*/ val				,
-				/* delimiter	*/ delimiter_			,
+				/* val		*/ val					,
+				/* delimiter	*/ delimiter_				,
 
-				/* prefix	*/ prefix			,
-				/* suffix	*/ suffix			,
+				/* prefix	*/ prefix				,
+				/* suffix	*/ suffix				,
 				/* delimiters	*/ 0
 			};
 
@@ -264,22 +333,22 @@ namespace mumps_piece{
 			// case 2a : index is after the string end and val is empty
 
 			return Mutator{
-				/* val		*/ ""				,
-				/* delimiter	*/ delimiter_			,
+				/* val		*/ ""					,
+				/* delimiter	*/ delimiter_				,
 
-				/* prefix	*/ trim_(data_, delimiter_)	,
-				/* suffix	*/ ""				,
+				/* prefix	*/ trimSV(data_, delimiter_)	,
+				/* suffix	*/ ""					,
 				/* delimiters	*/ 0
 			};
 		}else{
 			// case 2b : index is after the string end
 
 			return Mutator{
-				/* val		*/ val				,
-				/* delimiter	*/ delimiter_			,
+				/* val		*/ val					,
+				/* delimiter	*/ delimiter_				,
 
-				/* prefix	*/ data_			,
-				/* suffix	*/ ""				,
+				/* prefix	*/ data_				,
+				/* suffix	*/ ""					,
 				/* delimiters	*/ pos - count
 			};
 		}
@@ -287,7 +356,7 @@ namespace mumps_piece{
 
 	inline auto MumpsPieceSingle::mutate(std::string_view val) const noexcept -> Mutator{
 
-		auto const prefix = trim_(data_, delimiter_);
+		auto const prefix = trimSV(data_, delimiter_);
 
 		return Mutator{
 			/* val		*/ val				,

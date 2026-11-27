@@ -46,5 +46,14 @@ function cmd_PIECE($redis){
 	expect("PIECEDEL",     rawCommand($redis, "piecedel", "a", ",", 8) == 1);
 	expect("GET", $redis->get("a") == "1");
 
+	$redis->set("a", "a,b,"		);	rawCommand($redis, "pieceset",		"a", ",", 0, "xx"		);	expect("GET", $redis->get("a") == "xx,b"	);
+	$redis->set("a", "a,b,,,"	);	rawCommand($redis, "piecedel",		"a", ",", 1			);	expect("GET", $redis->get("a") == "a"		);
+	$redis->set("a", "a,b,,,"	);	rawCommand($redis, "pieceappend",	"a", ",", "c"			);	expect("GET", $redis->get("a") == "a,b,c"	);
+	$redis->set("a", "a,b,c"	);	rawCommand($redis, "pieceset",		"a", ",", 1, "x", 1, "y"	);	expect("GET", $redis->get("a") == "a,y,c"	);
+	$redis->set("a", "a,b,c"	);	rawCommand($redis, "pieceset",		"a", ",", 2, "", 0, "x"		);	expect("GET", $redis->get("a") == "x,b"		);
+	$redis->set("a", "a,b,c"	);	rawCommand($redis, "piecedel",		"a", ",", 1, 1, 2		);	expect("GET", $redis->get("a") == "a"		);
+//	$redis->set("a", "a,b"		);	rawCommand($redis, "pieceset",		"a", ",", 1000000, "x"		);	expect("GET", $redis->get("a") == "a,b"		);
+	$redis->set("a", "a,b"		);	rawCommand($redis, "pieceset",		"a", ",", -5, "x"		);	expect("GET", $redis->get("a") == "x,b"		);
+
 	$redis->del("a");
 }
